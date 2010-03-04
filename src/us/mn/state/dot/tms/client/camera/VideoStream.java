@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.camera.stream;
+package us.mn.state.dot.tms.client.camera;
 
 import java.io.IOException;
 

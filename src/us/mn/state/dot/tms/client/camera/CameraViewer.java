@@ -42,9 +42,6 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.tms.client.camera.stream.VideoRequest;
-import us.mn.state.dot.tms.client.camera.stream.HttpDataSource;
-import us.mn.state.dot.tms.client.camera.stream.StreamPanel;
 
 /**
  * GUI for viewing camera images
