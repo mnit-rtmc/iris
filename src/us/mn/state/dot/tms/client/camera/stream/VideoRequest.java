@@ -1,16 +1,16 @@
 /*
-* Copyright (C) 2003-2010  Minnesota Department of Transportation
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*/
+ * Copyright (C) 2003-2010  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
 package us.mn.state.dot.tms.client.camera.stream;
 
 import java.net.InetAddress;
@@ -28,14 +28,61 @@ import java.util.Properties;
  */
 public class VideoRequest {
 
-	/** Constant for small sized images */
-	static public final int SMALL = 1;
+	/** Stream type servlet enum */
+	static public enum StreamType {
+		STREAM("stream"), STILL("image");
 
-	/** Constant for medium sized images */
-	static public final int MEDIUM = 2;
+		private final String servlet;
+		private StreamType(String srv) {
+			servlet = srv;
+		}
+	}
 
-	/** Constant for large sized images */
-	static public final int LARGE = 3;
+	/** Video stream size enum */
+	static public enum Size {
+		SMALL, MEDIUM, LARGE;
+	}
+
+	/** Video backend host property name */
+	static protected final String VIDEO_BACKEND_HOST =
+		"video.backend.host";
+
+	/** Video backend port property name */
+	static protected final String VIDEO_BACKEND_PORT =
+		"video.backend.port";
+
+	/** Create an array of urls for connecting to the backend servers.
+	 * @param p Properties
+	 * @param st Servlet type */
+	static protected String[] createUrls(Properties p, StreamType st) {
+		LinkedList<String> urls = new LinkedList<String>();
+		for(int id = 0; ; id++) {
+			String url = createUrl(p, id);
+			if(url != null)
+				urls.add(url + st.servlet);
+			else
+				break;
+		}
+		return (String[])urls.toArray(new String[0]);
+	}
+
+	/** Create one backend url */
+	static protected String createUrl(Properties p, int id) {
+		String ip = p.getProperty(VIDEO_BACKEND_HOST + id);
+		if(ip != null) {
+			try {
+				ip = InetAddress.getByName(ip).getHostAddress();
+				String port = p.getProperty(VIDEO_BACKEND_PORT +
+					id,p.getProperty(VIDEO_BACKEND_PORT+0));
+				return "http://" + ip + ":" + port + "/video/";
+			}
+			catch(UnknownHostException uhe) {
+				System.out.println("Invalid backend server " +
+					id + " " + uhe.getMessage());
+			}
+		}
+		return null;
+	}
 
 	/** Sonar session identifier for authenticating to the video system */
 	private long sonarSessionId = -1;
@@ -46,8 +93,8 @@ public class VideoRequest {
 	}
 
 	/** Set the SONAR session ID */
-	public void setSonarSessionId(long sonarSessionId) {
-		this.sonarSessionId = sonarSessionId;
+	public void setSonarSessionId(long ssid) {
+		sonarSessionId = ssid;
 	}
 
 	/** Area number */
@@ -72,76 +119,48 @@ public class VideoRequest {
 	}
 
 	/** Set the frame rate (per second) */
-	public void setRate(int rate) {
-		this.rate = rate;
+	public void setRate(int rt) {
+		rate = rt;
 	}
 
+	/** Number of frames requested */
 	private int frames = 60 * 30;
 
+	/** Get the number of frames */
 	public int getFrames() {
 		return frames;
 	}
 
+	/** Set the number of frames */
 	public void setFrames(int f) {
 		frames = f;
 	}
 
-	private int size = 2;
+	/** Stream size */
+	private Size size = Size.MEDIUM;
 
-	public int getSize() {
+	/** Get the stream size */
+	public Size getSize() {
 		return size;
 	}
 
-	public void setSize(int size) {
-		if(size >= SMALL && size <= LARGE)
-			this.size = size;
+	/** Set the stream size */
+	public void setSize(Size sz) {
+		size = sz;
 	}
 
 	/** The base URLs of the backend video stream servers */
-	private final String[] streamUrls;
+	private final String[] area_urls;
 
 	/** Create a new video request */
 	public VideoRequest(Properties p) {
-		streamUrls = createBackendUrls(p, 1);
-	}
-
-	/** Create an array of urls for connecting to the backend servers.
-	 * @param p
-	 * @param type Stream (1) or Still (2)
-	 * @return */
-	static public String[] createBackendUrls(Properties p, int type) {
-		LinkedList<String> urls = new LinkedList<String>();
-		int id = 0;
-		while(true) {
-			String ip = p.getProperty("video.backend.host" + id);
-			if(ip == null)
-				break;
-			try {
-				ip = InetAddress.getByName(ip).getHostAddress();
-			}
-			catch(UnknownHostException uhe) {
-				System.out.println("Invalid backend server " +
-					id + " " + uhe.getMessage());
-				break;
-			}
-			String port = p.getProperty("video.backend.port" + id,
-				p.getProperty("video.backend.port" + 0));
-			String servletName = "";
-			if(type == 1)
-				servletName = "stream";
-			if(type == 2)
-				servletName = "image";
-			urls.add("http://" + ip + ":" + port +
-				"/video/" + servletName);
-			id++;
-		}
-		return (String[])urls.toArray(new String[0]);
+		area_urls = createUrls(p, StreamType.STREAM);
 	}
 
 	/** Get the URL for the request */
 	public URL getUrl(String cid) {
 		try {
-			if(area >= 0 && area < streamUrls.length)
+			if(area >= 0 && area < area_urls.length)
 				return createURL(cid);
 		}
 		catch(MalformedURLException e) {
@@ -152,7 +171,9 @@ public class VideoRequest {
 
 	/** Create the URL for the request */
 	protected URL createURL(String cid) throws MalformedURLException {
-		return new URL(streamUrls[area] + "?id=" + cid + "&ssid=" +
-			sonarSessionId);
+		return new URL(area_urls[area] +
+			"?id=" + cid +
+			"&size=" + (size.ordinal() + 1) +
+			"&ssid=" + sonarSessionId);
 	}
 }
