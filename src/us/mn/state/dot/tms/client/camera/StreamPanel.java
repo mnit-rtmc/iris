@@ -83,12 +83,14 @@ public class StreamPanel extends JPanel {
 				VideoStream vs = stream;
 				if(vs != null)
 					readStream(vs);
-				synchronized(thread) {
-					try {
-						thread.wait();
-					}
-					catch(InterruptedException e) {
-						// nothing to do
+				else {
+					synchronized(thread) {
+						try {
+							thread.wait();
+						}
+						catch(InterruptedException e) {
+							// nothing to do
+						}
 					}
 				}
 			}
@@ -96,26 +98,32 @@ public class StreamPanel extends JPanel {
 		protected void readStream(VideoStream vs) {
 			try {
 				while(vs == stream) {
-					flush(vs.getImage());
+					byte[] idata = vs.getImage();
+					screen.setIcon(createIcon(idata));
 					progress.setValue(vs.getFrameCount());
 					if(vs.getFrameCount() >= n_frames)
 						break;
 				}
 			}
 			catch(IOException e) {
-				e.printStackTrace();
+				System.err.println("readStream: " +
+					e.getMessage());
 			}
 			finally {
 				vs.close();
-				clear();
+				clearVideoStream(vs);
 			}
 		}
 	};
 
-	/** Clear the stream panel */
-	private void clear() {
-		progress.setValue(0);
-		screen.setIcon(null);
+	/** Clear the specified video stream */
+	protected synchronized void clearVideoStream(VideoStream vs) {
+		if(stream == vs) {
+			stream = null;
+			n_frames = 0;
+			progress.setValue(0);
+			screen.setIcon(null);
+		}
 	}
 
 	/** Set the dimensions of the video stream */
@@ -126,7 +134,7 @@ public class StreamPanel extends JPanel {
 	}
 
 	/** Set the video stream to display */
-	public void setVideoStream(VideoStream vs, int f) {
+	public synchronized void setVideoStream(VideoStream vs, int f) {
 		stream = vs;
 		n_frames = f;
 		progress.setMaximum(n_frames);
@@ -134,11 +142,6 @@ public class StreamPanel extends JPanel {
 		synchronized(thread) {
 			thread.notify();
 		}
-	}
-
-	/** Flush data */
-	protected void flush(byte[] idata) {
-		screen.setIcon(createIcon(idata));
 	}
 
 	/** Create an image icon from image data */
