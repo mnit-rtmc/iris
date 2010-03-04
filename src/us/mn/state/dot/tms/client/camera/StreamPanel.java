@@ -112,6 +112,7 @@ public class StreamPanel extends JPanel {
 			finally {
 				vs.close();
 				clearVideoStream(vs);
+				screen.setIcon(null);
 			}
 		}
 	};
@@ -122,7 +123,6 @@ public class StreamPanel extends JPanel {
 			stream = null;
 			n_frames = 0;
 			progress.setValue(0);
-			screen.setIcon(null);
 		}
 	}
 
