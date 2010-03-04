@@ -34,8 +34,13 @@ import javax.swing.border.BevelBorder;
  */
 public class StreamPanel extends JPanel {
 
+	/** Size of a quarter SIF */
 	static protected final Dimension SIF_QUARTER = new Dimension(176, 120);
+
+	/** Size of a full SIF */
 	static protected final Dimension SIF_FULL = new Dimension(352, 240);
+
+	/** Size of 4 x SIF */
 	static protected final Dimension SIF_4X = new Dimension(704, 480);
 
 	/** Label to display video stream */
