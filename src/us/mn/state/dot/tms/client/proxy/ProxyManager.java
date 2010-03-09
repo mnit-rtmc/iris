@@ -187,7 +187,17 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Called when a proxy has been removed */
-	public void proxyRemoved(T proxy) {
+	public void proxyRemoved(final T proxy) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				proxyRemovedSlow(proxy);
+			}
+		}.addToScheduler();
+	}
+
+	/** Called when a proxy has been removed */
+	protected void proxyRemovedSlow(T proxy) {
 		s_model.removeSelected(proxy);
 		// FIXME: map_proxies will leak when proxy objects are removed.
 		// Not easy to fix, since proxy objects die before we can
