@@ -157,20 +157,8 @@ public class SmartDesktop extends JDesktopPane {
 			selectFrame(frame);
 		else
 			frame = addForm(form);
-		Point wl;
-		if(client.getExtendedState() == JFrame.MAXIMIZED_BOTH) {
-			// locate new form relative to desktop
-			Point p = screen.getCenteredLocation(frame.getSize());
-			Point o = Screen.getLocation(this);
-			wl = new Point(p.x - o.x, p.y - o.y);
-		} else {
-			// locate new form centered within jframe
-			Dimension cfs = client.getSize();
-			Dimension nfs = frame.getSize();
-			wl = new Point(cfs.width / 2 - nfs.width / 2, 
-				cfs.height / 2 - nfs.height / 2);
-		}
-		frame.setLocation(wl);
+		frame.setLocation(screen.getCenteredLocation(this,
+			frame.getSize()));
 		frame.show();
 	}
 

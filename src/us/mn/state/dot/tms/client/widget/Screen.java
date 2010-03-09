@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2009  Minnesota Department of Transportation
+ * Copyright (C) 2003-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,15 @@ public class Screen implements Comparable {
 	/** All available screens */
 	static protected final Screen[] ALL_SCREENS = getAllScreens();
 
+	/** Create a point centered on a rectangle */
+	static protected Point createCenterPoint(Rectangle rect, Dimension sz) {
+		int x = rect.x + rect.width / 2 - sz.width / 2;
+		int y = rect.y + rect.height / 2 - sz.height / 2;
+		x = Math.max(x, rect.x);
+		y = Math.max(y, rect.y);
+		return new Point(x, y);
+	}
+
 	/** Graphics configuration */
 	protected final GraphicsConfiguration config;
 
@@ -61,17 +70,21 @@ public class Screen implements Comparable {
 	}
 
 	/** Get the centered location of a rectangle with the given size */
-	public Point getCenteredLocation(Dimension size) {
-		int x = bounds.x + bounds.width / 2 - size.width / 2;
-		int y = bounds.y + bounds.height / 2 - size.height / 2;
-		x = Math.max(x, bounds.x);
-		y = Math.max(y, bounds.y);
-		return new Point(x, y);
+	public Point getCenteredLocation(Container cont, Dimension sz) {
+		Point loc = getLocation(cont);
+		Rectangle bnd = cont.getBounds();
+		Rectangle rect = new Rectangle(bounds);
+		rect.translate(-loc.x, -loc.y);
+		rect = rect.intersection(bounds);
+		if(bnd.intersects(rect))
+			return createCenterPoint(bnd.intersection(rect), sz);
+		else
+			return createCenterPoint(bnd, sz);
 	}
 
 	/** Center a window on the screen */
 	public void centerWindow(Window w) {
-		w.setLocation(getCenteredLocation(w.getSize()));
+		w.setLocation(createCenterPoint(bounds, w.getSize()));
 	}
 
 	/** Center a given window on its current screen */
