@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public class Message implements AddressedMessage {
 		case OK:
 			return;
 		case BAD_MESSAGE:
-			throw new ControllerException("BAD MESSAGE");
+			throw new ParsingException("BAD MESSAGE");
 		case BAD_POLL_CHECKSUM:
 			throw new ChecksumException(
 				"CONTROLLER I/O CHECKSUM ERROR");
@@ -58,7 +58,7 @@ public class Message implements AddressedMessage {
 		case WRITE_PROTECT:
 			throw new ControllerException("WRITE PROTECT");
 		case MESSAGE_SIZE:
-			throw new ControllerException("MESSAGE SIZE");
+			throw new ParsingException("MESSAGE SIZE");
 		case NO_DATA:
 			throw new ControllerException("NO SAMPLE DATA");
 		case NO_RAM:
