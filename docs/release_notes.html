@@ -11,6 +11,49 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.113.0 (11 March 2010)</dt>
+	<dd><ul>
+		<li>
+			Updated sonar dependency to 3.0.
+			This fixes several serious bugs and greatly improves
+			client login time.
+		</li>
+		<li>
+			Added an incident deploy form, which recommends LCS
+			indications for an incident.
+		</li>
+		<li>
+			Cleaned up incident user interface a bit.
+		</li>
+		<li>
+			Changed LCS sort order to travel direction.
+		</li>
+		<li>
+			Fixed a couple of permission problems in UI.
+		</li>
+		<li>
+			Improved map user interface with respect to tabs
+			and selecting devices.
+		</li>
+		<li>
+			Added "automatic" layer visibility state.
+			This makes visibility dependent on zoom level and
+			currently selected tab.
+		</li>
+		<li>
+			Removed videoclient dependency.
+			Relevant code has been copied into iris, and some
+			video glitches have been fixed.
+		</li>
+		<li>
+			Changed r_node markers to a better icon.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.113.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.112.0 (22 February 2010)</dt>
 	<dd><ul>
 		<li>
