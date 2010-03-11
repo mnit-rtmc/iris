@@ -77,9 +77,7 @@ public class LcsCache {
 		client.populateReadable(lcs_arrays);
 		if(client.canRead(LCSArray.SONAR_TYPE))
 			lcs_arrays.ignoreAttribute("operation");
-		// Wait for LCS to be populated so array locations can be
-		// looked up for layer
-		client.populateReadable(lcss, true);
+		client.populateReadable(lcss);
 		client.populateReadable(lcs_indications);
 		client.populateReadable(lane_use_multis);
 	}

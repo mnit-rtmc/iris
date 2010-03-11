@@ -387,8 +387,8 @@ public class SonarState extends Client {
 		user = users.lookupObject(user_name);
 		populate(system_attributes);
 		populate(map_extents);
-		populate(roads, true);
-		populate(geo_locs, true);
+		populate(roads);
+		populate(geo_locs);
 		con_cache.populate(this);
 		det_cache.populate(this);
 		cam_cache.populate(this);
@@ -397,7 +397,7 @@ public class SonarState extends Client {
 		populateReadable(ramp_meters);
 		if(canRead(RampMeter.SONAR_TYPE))
 			ramp_meters.ignoreAttribute("operation");
-		populateReadable(graphics, true);
+		populateReadable(graphics);
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
 		populateReadable(lane_markings);
