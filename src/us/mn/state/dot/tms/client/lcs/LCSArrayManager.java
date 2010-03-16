@@ -25,6 +25,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.DMS;
@@ -104,6 +105,34 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return cache.getLCSArrays();
 	}
 
+	/** Get the LCS cache */
+	static protected TypeCache<LCS> getLCSCache(Session s) {
+		LcsCache cache = s.getSonarState().getLcsCache();
+		return cache.getLCSs();
+	}
+
+	/** Simple class to wait until all LCS have been enumerated */
+	static protected class LCSWaiter implements ProxyListener<LCS> {
+		protected boolean enumerated = false;
+		public void proxyAdded(LCS proxy) {}
+		public synchronized void enumerationComplete() {
+			enumerated = true;
+			notify();
+		}
+		public void proxyRemoved(LCS proxy) {}
+		public void proxyChanged(LCS proxy, String a) {}
+		protected synchronized void waitForEnumeration() {
+			while(!enumerated) {
+				try {
+					wait();
+				}
+				catch(InterruptedException e) {
+					// uhhh ?
+				}
+			}
+		}
+	}
+
 	/** Test if an LCS array is available */
 	protected boolean isAvailable(LCSArray proxy) {
 		return !isLocked(proxy) &&
@@ -128,6 +157,16 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		super(getCache(s), lm);
 		session = s;
 		cache.addProxyListener(this);
+		waitForLCSEnumeration(s);
+	}
+
+	/** Wait for all LCS to be enumerated */
+	protected void waitForLCSEnumeration(Session s) {
+		TypeCache<LCS> lc = getLCSCache(s);
+		LCSWaiter waiter = new LCSWaiter();
+		lc.addProxyListener(waiter);
+		waiter.waitForEnumeration();
+		lc.removeProxyListener(waiter);
 	}
 
 	/** Get the proxy type name */
