@@ -345,5 +345,6 @@ public class Session {
 		meter_manager.dispose();
 		inc_manager.dispose();
 		loc_manager.dispose();
+		state.quit();
 	}
 }
