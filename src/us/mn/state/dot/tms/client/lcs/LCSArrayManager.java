@@ -206,6 +206,14 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		public int compare(LCSArray l0, LCSArray l1) {
 			GeoLoc g0 = LCSArrayHelper.lookupGeoLoc(l0);
 			GeoLoc g1 = LCSArrayHelper.lookupGeoLoc(l1);
+			if(g0 != null || g1 != null) {
+				Integer c = compare(g0, g1);
+				if(c != null)
+					return c;
+			}
+			return l0.getName().compareTo(l1.getName());
+		}
+		protected Integer compare(GeoLoc g0, GeoLoc g1) {
 			String c0 = GeoLocHelper.getCorridorID(g0);
 			String c1 = GeoLocHelper.getCorridorID(g1);
 			int c = c0.compareTo(c1);
@@ -225,7 +233,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 						return 0;
 				}
 			}
-			return l0.getName().compareTo(l1.getName());
+			return null;
 		}
 	};
 
