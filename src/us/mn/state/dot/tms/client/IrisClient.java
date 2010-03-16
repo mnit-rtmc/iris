@@ -178,15 +178,8 @@ public class IrisClient extends JFrame {
 				}
 			});
 			desktop.add(sp, JLayeredPane.DEFAULT_LAYER);
-			MapModel mm = new MapModel();
-			for(Layer l: baseLayers) {
-				LayerState ls = l.createState();
-				mm.addLayer(ls);
-				mm.setHomeLayer(ls);
-			}
-			mm.home();
-			sp.getMap().setModel(mm);
 		}
+		updateMaps(null);
 	}
 
 	/** Make the frame displayable (called by window toolkit) */
@@ -286,7 +279,7 @@ public class IrisClient extends JFrame {
 			for(int i = 0; i < pwd.length; ++i)
 				pwd[i] = ' ';
 			updateMenus(session);
-			updateMaps();
+			updateMaps(session);
 			arrangeTabs();
 			setTitle(createTitle(session));
 			setCursor(null);
@@ -328,16 +321,26 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Update the maps on all screen panes */
-	protected void updateMaps() {
-		Session s = session;
+	protected void updateMaps(Session s) {
+		for(ScreenPane sp: s_panes)
+			sp.getMap().setModel(createMapModel(s));
+	}
+
+	/** Create a new map model */
+	protected MapModel createMapModel(Session s) {
+		MapModel mm = new MapModel();
 		if(s != null) {
-			for(ScreenPane sp: getVisiblePanes()) {
-				MapModel mm = new MapModel();
-				for(LayerState ls: s.createLayers())
-					mm.addLayer(ls);
-				sp.getMap().setModel(mm);
+			for(LayerState ls: s.createLayers())
+				mm.addLayer(ls);
+		} else {
+			for(Layer l: baseLayers) {
+				LayerState ls = l.createState();
+				mm.addLayer(ls);
+				mm.setHomeLayer(ls);
 			}
+			mm.home();
 		}
+		return mm;
 	}
 
 	/** Logout of the current session */
@@ -354,6 +357,7 @@ public class IrisClient extends JFrame {
 		updateMenus(null);
 		removeTabs();
 		closeSession();
+		updateMaps(null);
 		setTitle(createTitle(TITLE_NOT_LOGGED_IN));
 		validate();
 	}
