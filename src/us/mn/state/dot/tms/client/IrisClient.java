@@ -235,19 +235,23 @@ public class IrisClient extends JFrame {
 	protected void arrangeTabs() {
 		removeTabs();
 		Session s = session;
-		if(s != null) {
-			LinkedList<ScreenPane> visible = getVisiblePanes();
-			if(visible.isEmpty())
-				return;
-			for(MapTab tab: s.getTabs()) {
-				int p = tab.getNumber() % visible.size();
-				ScreenPane sp = visible.get(p);
-				sp.addTab(tab);
-			}
-			for(ScreenPane sp: visible) {
-				sp.createToolPanels(s);
-				sp.setMapLayers();
-			}
+		if(s != null)
+			arrangeTabs(s);
+	}
+
+	/** Arrange the tabs on the visible screen panes */
+	protected void arrangeTabs(Session s) {
+		LinkedList<ScreenPane> visible = getVisiblePanes();
+		if(visible.isEmpty())
+			return;
+		for(MapTab tab: s.getTabs()) {
+			int p = tab.getNumber() % visible.size();
+			ScreenPane sp = visible.get(p);
+			sp.addTab(tab);
+		}
+		for(ScreenPane sp: visible) {
+			sp.createToolPanels(s);
+			sp.setMapLayers();
 		}
 	}
 
