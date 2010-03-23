@@ -13,6 +13,9 @@ DIV.math {
 SPAN.func {
 	float: right;
 }
+SUB {
+	font-size: xx-small;
+}
 BODY {
 	background: #cccccc;
 	text-align: justify;
@@ -60,6 +63,9 @@ DIV.label {
 	text-align: center;
 	font-weight: bold;
 	font-style: oblique;
+}
+OL {
+	padding-left: 100px;
 }
 OL.alpha {
 	list-style-type: lower-alpha;

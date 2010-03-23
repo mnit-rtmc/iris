@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>Variable Speed Advisory Calculation</title>
+</head>
+
+<body>
+<p id="stamp">23 March 2010</p>
+<h2>Variable Speed Advisory Calculation</h2>
+<dl>
+	<dt>Station Parameters</dt>
+	<dd><ul>
+		<li>Speed Limit (L)</li>
+		<li>Mile Point (M)</li>
+	</ul></dd>
+	<dt>Station Data (Average of 2 most recent 30-second samples)</dt>
+	<dd><ul>
+		<li>Flow (Q)</li>
+		<li>Speed (U)</li>
+		<li>Density (K)</li>
+	</ul></dd>
+	<dt>Station Results</dt>
+	<dd><ul>
+		<li>Advisory Speed (A)</li>
+	</ul></dd>
+</dl>
+<p>
+	For each corridor, iterate through all mainline stations using a
+	"section" of four stations at a time.
+	Ordinarilly, consecutive stations are used, but any station which
+	does not have valid flow, speed and density data should be skipped.
+	These stations are labeled S<sub>0</sub> through S<sub>3</sub>
+	(from downstream to upstream).
+</p>
+<ol>
+	<li>
+		Check that M<sub>0</sub> - M<sub>3</sub> &lt; 4 mi.
+		If not, stop processing section.
+	</li>
+	<li>
+		Check that U<sub>0</sub> is lower than U<sub>1</sub>,
+		U<sub>2</sub> and U<sub>3</sub>.
+		If not, stop processing section.
+	</li>
+	<li>
+		Calculate speed drop at last station.
+		<ul><li>
+		U<sub>d</sub> = U<sub>1</sub> - U<sub>0</sub>
+		</li></ul>
+	</li>
+	<li>
+		Check that U<sub>d</sub> &gt; U<sub>2</sub> - U<sub>1</sub> and
+		    U<sub>d</sub> &gt; U<sub>3</sub> - U<sub>2</sub>.
+		If not, stop processing section.
+	</li>
+	<li>
+		Calculate speed drop threshold (D).
+		This is normally 10 mph, but may be up to 40 mph if
+		U<sub>1</sub> &lt; 40 mph.
+	</li>
+	<li>
+		Check that U<sub>d</sub> &gt; D.
+		If not, stop processing section.
+	</li>
+	<li>
+		Calculate shock wave (Sw) speed.
+		<ul>
+		    <li>
+			Q<sub>u</sub> = (Q<sub>2</sub> + Q<sub>3</sub>) / 2
+		    </li>
+		    <li>
+			Q<sub>d</sub> = (Q<sub>0</sub> + Q<sub>1</sub>) / 2
+		    </li>
+		    <li>
+			K<sub>u</sub> = (K<sub>2</sub> + K<sub>3</sub>) / 2
+		    </li>
+		    <li>
+			K<sub>d</sub> = (K<sub>0</sub> + K<sub>1</sub>) / 2
+		    </li>
+		    <li>
+			Sw = (Q<sub>d</sub> - Q<sub>u</sub>) /
+			     (K<sub>d</sub> - K<sub>u</sub>)
+		    </li>
+		</ul>
+	</li>
+	<li>
+		Calculate control distance (C).
+		<ul>
+		    <li>C = U<sub>d</sub> / 30</li>
+		    <li>If Sw &lt; -5, add 0.5 to C.</li>
+		    <li>Limit C to range of [0.5, 1.5] (configurable).</li>
+		</ul>
+	</li>
+	<li>
+		Find station nearest to M<sub>0</sub> - C.
+		This is S<sub>c</sub>.
+	</li>
+	<li>
+		Calculate the control range (M<sub>r</sub>).
+		<ul><li>
+			M<sub>r</sub> = M<sub>0</sub> - M<sub>c</sub>
+		</li></ul>
+	</li>
+	<li>
+		Calculate the speed range (U<sub>r</sub>).
+		<ul><li>
+		    U<sub>r</sub> = U<sub>c</sub> - U<sub>0</sub>
+		</li></ul>
+	</li>
+	<li>
+		For each station n, from S<sub>0</sub> to S<sub>c</sub>, set the
+		advisory speed (A<sub>n</sub>).
+		<ul>
+		    <li>lerp = (M<sub>0</sub> - M<sub>n</sub>) /
+		        M<sub>r</sub></li>
+		    <li>A<sub>n</sub> = U<sub>0</sub> + U<sub>r</sub> * lerp
+		    </li>
+		    <li>
+		        Limit A<sub>n</sub> to range of
+		        [U<sub>n</sub> - 10, L<sub>n</sub>]
+		    </li>
+		</ul>
+	</li>
+</ol>
+
+<h2>Applying Speed Advisory to ILCS</h2>
+<p>
+	For each LCS array with a deployed VSL action plan, determine whether
+	the VSL indication should be displayed or not.
+</p>
+<ol>
+	<li>
+		Find the stations immediately upstream and downstream of the
+		LCS array.
+	</li>
+	<li>
+		If neither station has an advisory less than the speed limit,
+		do not display a VSL indication.
+	</li>
+	<li>
+		Using linear interpolation, find the speed advisory at the
+		location of the LCS array.
+	</li>
+	<li>
+		Quantize the speed advisory to 5 mph granularity.
+		This is done by rounding down to the next lower 5 mph
+		(floor).
+	</li>
+	<li>
+		Limit advisory to no less than 5 mph below previous 30 second
+		advisory.
+	</li>
+	<li>
+		Limit advisory to no less than configurable minimum advisory
+		(30 mph).
+	</li>
+</ol>
+</body>
+</html>
