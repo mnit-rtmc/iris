@@ -15,18 +15,55 @@
 <dl>
 	<dt>Station Parameters</dt>
 	<dd><ul>
-		<li>Speed Limit (L)</li>
-		<li>Mile Point (M)</li>
+		<li>Speed Limit (L) miles per hour</li>
+		<li>Mile Point (M) miles from upstream end of corridor</li>
 	</ul></dd>
-	<dt>Station Data (Average of 2 most recent 30-second samples)</dt>
-	<dd><ul>
-		<li>Flow (Q)</li>
-		<li>Speed (U)</li>
-		<li>Density (K)</li>
-	</ul></dd>
+	<dt>Station Sample Data</dt>
+	<dd>
+	    <ul>
+		<li>Flow (Q) vehicles per hour (average of all lanes)</li>
+		<li>Speed (U) miles per hour (average of all lanes)</li>
+		<li>Density (K) vehicles per mile (average of all lanes)</li>
+	    </ul>
+	    The average of the most recent 30-second samples is used.
+	    The number of samples depends on the lowest sample speed.
+	    <table>
+	        <tr>
+	    	    <th>Lowest Speed</th>
+	            <th>Sample Count</th>
+	            <th>Sample period</th>
+	        </tr>
+	        <tr>
+	            <td>40+ mph</td>
+	            <td>2 samples</td>
+	            <td>1 minute</td>
+	        </tr>
+	        <tr>
+	            <td>25-40 mph</td>
+	            <td>4 samples</td>
+	            <td>2 minutes</td>
+	        </tr>
+	        <tr>
+	            <td>20-25 mph</td>
+	            <td>6 samples</td>
+	            <td>3 minutes</td>
+	        </tr>
+	        <tr>
+	            <td>15-20 mph</td>
+	            <td>8 samples</td>
+	            <td>4 minutes</td>
+	        </tr>
+	        <tr>
+	            <td>0-15 mph</td>
+	            <td>10 samples</td>
+	            <td>5 minutes</td>
+	        </tr>
+	    </table>
+	    <br/>
+	</dd>
 	<dt>Station Results</dt>
 	<dd><ul>
-		<li>Speed Advisory (A)</li>
+		<li>Speed Advisory (A) miles per hour</li>
 	</ul></dd>
 </dl>
 <h3>Corridor Algorithm</h3>
