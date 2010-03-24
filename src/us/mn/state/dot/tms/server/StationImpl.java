@@ -29,11 +29,11 @@ public class StationImpl implements Station {
 
 	/** Speed ranks for extending rolling sample averaging */
 	static protected enum SpeedRank {
-		First(40, 2),	// 40+ mph => 2 samples
-		Second(25, 4),	// 25-40 mph => 4 samples
-		Third(20, 6),	// 20-25 mph => 6 samples
-		Fourth(15, 8),	// 15-20 mph => 8 samples
-		Last(0, 10);	// 0-15 mph => 10 samples
+		First(40, 2),	// 40+ mph => 2 samples (1 minute)
+		Second(25, 4),	// 25-40 mph => 4 samples (2 minutes)
+		Third(20, 6),	// 20-25 mph => 6 samples (3 minutes)
+		Fourth(15, 8),	// 15-20 mph => 8 samples (4 minutes)
+		Last(0, 10);	// 0-15 mph => 10 samples (5 minutes)
 		protected final int speed;
 		protected final int samples;
 		private SpeedRank(int spd, int n_smp) {
