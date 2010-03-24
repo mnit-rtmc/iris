@@ -116,17 +116,10 @@ public class Corridor extends CorridorBase {
 		return null;
 	}
 
-	/** Get a reversed list of nodes in the corridor */
-	protected List<R_NodeImpl> getReversedList() {
-		LinkedList<R_NodeImpl> rev = new LinkedList<R_NodeImpl>();
-		for(R_Node r_node: n_points.values())
-			rev.addFirst((R_NodeImpl)r_node);
-		return rev;
-	}
-
 	/** Find a node using a node finder callback (reverse order) */
 	public R_NodeImpl findNodeReverse(NodeFinder finder) {
-		for(R_NodeImpl r_node: getReversedList()) {
+		for(R_Node n: n_points.descendingMap().values()) {
+			R_NodeImpl r_node = (R_NodeImpl)n;
 			if(finder.check(r_node))
 				return r_node;
 		}
