@@ -63,12 +63,12 @@ public class StationImpl implements Station {
 	}
 
 	/** Calculate the rolling average speed */
-	static protected float calculateRollingSpeed(float[] speeds) {
-		return calculateAverage(speeds, SpeedRank.samples(speeds));
+	static protected float averageSpeed(float[] speeds) {
+		return average(speeds, SpeedRank.samples(speeds));
 	}
 
 	/** Calculate the rolling average of some samples */
-	static protected float calculateAverage(float[] samples, int n_smp) {
+	static protected float average(float[] samples, int n_smp) {
 		float total = 0;
 		int count = 0;
 		for(int i = 0; i < n_smp; i++) {
@@ -78,11 +78,11 @@ public class StationImpl implements Station {
 				count += 1;
 			}
 		}
-		return calculateAverage(total, count);
+		return average(total, count);
 	}
 
 	/** Calculate the average from a total and sample count */
-	static protected float calculateAverage(float total, int count) {
+	static protected float average(float total, int count) {
 		if(count > 0)
 			return total / count;
 		else
@@ -183,7 +183,7 @@ public class StationImpl implements Station {
 	/** Get the average flow smoothed over several samples */
 	public float getSmoothedAverageFlow() {
 		// Use avg_speed to determine how many samples to average
-		return calculateAverage(avg_flow, SpeedRank.samples(avg_speed));
+		return average(avg_flow, SpeedRank.samples(avg_speed));
 	}
 
 	/** Current average station speed */
@@ -206,7 +206,7 @@ public class StationImpl implements Station {
 
 	/** Get the average speed smoothed over several samples */
 	public float getSmoothedAverageSpeed() {
-		return calculateRollingSpeed(avg_speed);
+		return averageSpeed(avg_speed);
 	}
 
 	/** Low station speed for previous ten samples */
@@ -221,7 +221,7 @@ public class StationImpl implements Station {
 
 	/** Get the low speed smoothed over several samples */
 	public float getSmoothedLowSpeed() {
-		return calculateRollingSpeed(low_speed);
+		return averageSpeed(low_speed);
 	}
 
 	/** Calculate the current station data */
@@ -263,11 +263,11 @@ public class StationImpl implements Station {
 					low = Math.min(f, low);
 			}
 		}
-		volume = calculateAverage(t_volume, n_volume);
-		occupancy = calculateAverage(t_occ, n_occ);
-		flow = (int)calculateAverage(t_flow, n_flow);
+		volume = average(t_volume, n_volume);
+		occupancy = average(t_occ, n_occ);
+		flow = (int)average(t_flow, n_flow);
 		updateAvgFlow(flow);
-		speed = (int)calculateAverage(t_speed, n_speed);
+		speed = (int)average(t_speed, n_speed);
 		updateAvgSpeed(speed);
 		updateLowSpeed(low);
 	}
