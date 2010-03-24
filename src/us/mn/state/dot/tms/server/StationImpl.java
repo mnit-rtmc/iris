@@ -67,7 +67,10 @@ public class StationImpl implements Station {
 		return average(speeds, SpeedRank.samples(speeds));
 	}
 
-	/** Calculate the rolling average of some samples */
+	/** Calculate the rolling average of some samples.
+	 * @param samples Array of samples to average.
+	 * @param n_smp Number of samples to average.
+	 * @return Average of samples, or MISSING_DATA. */
 	static protected float average(float[] samples, int n_smp) {
 		float total = 0;
 		int count = 0;
@@ -81,7 +84,10 @@ public class StationImpl implements Station {
 		return average(total, count);
 	}
 
-	/** Calculate the average from a total and sample count */
+	/** Calculate the average from a total and sample count.
+	 * @param total Total of all sample data.
+	 * @param count Count of samples.
+	 * @return Average of samples, or MISSING_DATA. */
 	static protected float average(float total, int count) {
 		if(count > 0)
 			return total / count;
