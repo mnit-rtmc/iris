@@ -161,8 +161,8 @@ public class CorridorTrip {
 			if(checkLinkLength(destination, mile))
 				break;
 			StationImpl s = stations.get(mile);
-			float _avg = s.getTravelSpeed(false);
-			float _low = s.getTravelSpeed(true);
+			float _avg = s.getSmoothedAverageSpeed();
+			float _low = s.getSmoothedLowSpeed();
 			if(_avg <= 0 || _low <= 0)
 				continue;
 			avg = _avg;

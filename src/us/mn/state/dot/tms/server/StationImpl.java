@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,12 +166,9 @@ public class StationImpl implements Station {
 		avg_speed[0] = Math.min(s, r_node.getSpeedLimit());
 	}
 
-	/** Get the average speed for travel time calculation */
-	public float getTravelSpeed(boolean low) {
-		if(low)
-			return calculateRollingSpeed(low_speed);
-		else
-			return calculateRollingSpeed(avg_speed);
+	/** Get the average speed smoothed over several samples */
+	public float getSmoothedAverageSpeed() {
+		return calculateRollingSpeed(avg_speed);
 	}
 
 	/** Low station speed for previous ten samples */
@@ -182,6 +179,11 @@ public class StationImpl implements Station {
 		System.arraycopy(low_speed, 0, low_speed, 1,
 			low_speed.length - 1);
 		low_speed[0] = Math.min(s, r_node.getSpeedLimit());
+	}
+
+	/** Get the low speed smoothed over several samples */
+	public float getSmoothedLowSpeed() {
+		return calculateRollingSpeed(low_speed);
 	}
 
 	/** Calculate the current station data */
