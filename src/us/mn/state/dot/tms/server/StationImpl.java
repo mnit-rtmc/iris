@@ -28,10 +28,57 @@ import us.mn.state.dot.tms.Station;
 public class StationImpl implements Station {
 
 	/** Speed ranks for extending rolling sample averaging */
-	static public final int[] SPEED_RANK = { 25, 20, 15, 0 };
+	static protected enum SpeedRank {
+		First(25, 4),	// 4 samples if 25+ mph
+		Second(20, 6),	// 6 samples if 20-25 mph
+		Third(15, 8),	// 8 samples if 15-20 mph
+		Last(0, 10);	// 10 samples if 0-15 mph
+		protected final int speed;
+		protected final int samples;
+		private SpeedRank(int spd, int n_smp) {
+			speed = spd;
+			samples = n_smp;
+		}
+		/** Get the number of rolling samples for the given speed */
+		static protected int samples(float s) {
+			for(SpeedRank sr: values()) {
+				if(s > sr.speed)
+					return sr.samples;
+			}
+			return Last.samples;
+		}
+		/** Get the number of rolling samples for a set of speeds */
+		static protected int samples(float[] speeds) {
+			int n_smp = First.samples;
+			// NOTE: n_smp might be changed inside loop, extending
+			//       the for loop bounds
+			for(int i = 0; i < n_smp; i++) {
+				float s = speeds[i];
+				if(s > 0)
+					n_smp = Math.max(n_smp, samples(s));
+			}
+			return n_smp;
+		}
+	}
 
-	/** Number of samples to average for each speed rank */
-	static public final int[] SAMPLES = { 4, 6, 8, 10 };
+	/** Calculate the rolling average speed */
+	static protected float calculateRollingSpeed(float[] speeds) {
+		return calculateRollingSpeed(speeds, SpeedRank.samples(speeds));
+	}
+
+	/** Calculate the rolling average speed */
+	static protected float calculateRollingSpeed(float[] speeds, int n_smp){
+		float total = 0;
+		int count = 0;
+		for(int i = 0; i < n_smp; i++) {
+			float s = speeds[i];
+			if(s > 0) {
+				total += s;
+				count += 1;
+			}
+		}
+		return calculateAverage(total, count);
+	}
 
 	/** Calculate the average from a total and sample count */
 	static protected float calculateAverage(float total, int count) {
@@ -39,31 +86,6 @@ public class StationImpl implements Station {
 			return total / count;
 		else
 			return Constants.MISSING_DATA;
-	}
-
-	/** Get the number of rolling samples for the given speed */
-	static protected int speed_samples(float s) {
-		for(int r = 0; r < SPEED_RANK.length; r++) {
-			if(s > SPEED_RANK[r])
-				return SAMPLES[r];
-		}
-		return SAMPLES[SAMPLES.length - 1];
-	}
-
-	/** Calculate the rolling average speed */
-	static protected float calculateRollingSpeed(float[] speeds) {
-		float total = 0;
-		int count = 0;
-		int samples = speed_samples(DEFAULT_SPEED_LIMIT);
-		for(int i = 0; i < samples; i++) {
-			float s = speeds[i];
-			if(s > 0) {
-				total += s;
-				count += 1;
-				samples = Math.max(samples, speed_samples(s));
-			}
-		}
-		return calculateAverage(total, count);
 	}
 
 	/** Staiton name */
@@ -157,7 +179,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Average station speed for previous ten samples */
-	protected float[] avg_speed = new float[SAMPLES[SAMPLES.length - 1]];
+	protected float[] avg_speed = new float[SpeedRank.Last.samples];
 
 	/** Update average station speed with a new sample */
 	protected void updateAvgSpeed(float s) {
@@ -172,7 +194,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Low station speed for previous ten samples */
-	protected float[] low_speed = new float[SAMPLES[SAMPLES.length - 1]];
+	protected float[] low_speed = new float[SpeedRank.Last.samples];
 
 	/** Update low station speed with a new sample */
 	protected void updateLowSpeed(float s) {
