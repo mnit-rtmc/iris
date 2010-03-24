@@ -64,15 +64,15 @@ public class StationImpl implements Station {
 
 	/** Calculate the rolling average speed */
 	static protected float calculateRollingSpeed(float[] speeds) {
-		return calculateRollingSpeed(speeds, SpeedRank.samples(speeds));
+		return calculateAverage(speeds, SpeedRank.samples(speeds));
 	}
 
-	/** Calculate the rolling average speed */
-	static protected float calculateRollingSpeed(float[] speeds, int n_smp){
+	/** Calculate the rolling average of some samples */
+	static protected float calculateAverage(float[] samples, int n_smp) {
 		float total = 0;
 		int count = 0;
 		for(int i = 0; i < n_smp; i++) {
-			float s = speeds[i];
+			float s = samples[i];
 			if(s > 0) {
 				total += s;
 				count += 1;
@@ -171,6 +171,21 @@ public class StationImpl implements Station {
 		return flow;
 	}
 
+	/** Average station flow for previous ten samples */
+	protected float[] avg_flow = new float[SpeedRank.Last.samples];
+
+	/** Update average station flow with a new sample */
+	protected void updateAvgFlow(float f) {
+		System.arraycopy(avg_flow, 0, avg_flow, 1, avg_flow.length - 1);
+		avg_flow[0] = f;
+	}
+
+	/** Get the average flow smoothed over several samples */
+	public float getSmoothedAverageFlow() {
+		// Use avg_speed to determine how many samples to average
+		return calculateAverage(avg_flow, SpeedRank.samples(avg_speed));
+	}
+
 	/** Current average station speed */
 	protected int speed = Constants.MISSING_DATA;
 
@@ -251,6 +266,7 @@ public class StationImpl implements Station {
 		volume = calculateAverage(t_volume, n_volume);
 		occupancy = calculateAverage(t_occ, n_occ);
 		flow = (int)calculateAverage(t_flow, n_flow);
+		updateAvgFlow(flow);
 		speed = (int)calculateAverage(t_speed, n_speed);
 		updateAvgSpeed(speed);
 		updateLowSpeed(low);
