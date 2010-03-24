@@ -10,7 +10,7 @@
 </head>
 
 <body>
-<p id="stamp">23 March 2010</p>
+<p id="stamp">24 March 2010</p>
 <h2>Variable Speed Advisory Calculation</h2>
 <dl>
 	<dt>Station Parameters</dt>
@@ -26,18 +26,34 @@
 	</ul></dd>
 	<dt>Station Results</dt>
 	<dd><ul>
-		<li>Advisory Speed (A)</li>
+		<li>Speed Advisory (A)</li>
 	</ul></dd>
 </dl>
-<p>
-	For each corridor, iterate through all mainline stations using a
-	"section" of four stations at a time.
-	Ordinarilly, consecutive stations are used, but any station which
-	does not have valid flow, speed and density data should be skipped.
-	These stations are labeled S<sub>0</sub> through S<sub>3</sub>
-	(from downstream to upstream).
-</p>
+<h3>Corridor Algorithm</h3>
 <ol>
+	<li>
+		Set speed advisory equal to the speed limit for all stations in
+		the corridor.
+	</li>
+	<li>
+		Iterate through all mainline stations using a "section" of four
+		stations at a time.
+		Ordinarilly, consecutive stations are used, but any station
+		which does not have valid flow, speed and density data should
+		be skipped.
+	</li>
+	<li>
+		For all stations which were skipped in the previous step,
+		set the speed advisory using a linear interpolation from the
+		next upstream and downstream valid stations.
+	</li>
+</ol>
+<h3>Section Algorithm</h3>
+<ol>
+	<li>
+		The section stations are S<sub>0</sub> through S<sub>3</sub>
+		(from downstream to upstream).
+	</li>
 	<li>
 		Check that M<sub>0</sub> - M<sub>3</sub> &lt; 4 mi.
 		If not, stop processing section.
@@ -114,7 +130,7 @@
 	</li>
 	<li>
 		For each station n, from S<sub>0</sub> to S<sub>c</sub>, set the
-		advisory speed (A<sub>n</sub>).
+		speen advisory (A<sub>n</sub>).
 		<ul>
 		    <li>lerp = (M<sub>0</sub> - M<sub>n</sub>) /
 		        M<sub>r</sub></li>
@@ -130,8 +146,8 @@
 
 <h2>Applying Speed Advisory to ILCS</h2>
 <p>
-	For each LCS array with a deployed VSL action plan, determine whether
-	the VSL indication should be displayed or not.
+	For each LCS array with a deployed VSA action plan, determine whether
+	the VSA indication should be displayed or not.
 </p>
 <ol>
 	<li>
@@ -139,8 +155,8 @@
 		LCS array.
 	</li>
 	<li>
-		If neither station has an advisory less than the speed limit,
-		do not display a VSL indication.
+		If neither station has a speed advisory less than the speed
+		limit, do not display a VSA indication.
 	</li>
 	<li>
 		Using linear interpolation, find the speed advisory at the
@@ -152,12 +168,12 @@
 		(floor).
 	</li>
 	<li>
-		Limit advisory to no less than 5 mph below previous 30 second
-		advisory.
+		Limit speed advisory to no less than 5 mph below previous 30
+		second speed advisory.
 	</li>
 	<li>
-		Limit advisory to no less than configurable minimum advisory
-		(30 mph).
+		Limit speed advisory to no less than configurable minimum
+		speed advisory (30 mph).
 	</li>
 </ol>
 </body>
