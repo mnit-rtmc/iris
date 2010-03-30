@@ -206,7 +206,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		public int compare(LCSArray l0, LCSArray l1) {
 			GeoLoc g0 = LCSArrayHelper.lookupGeoLoc(l0);
 			GeoLoc g1 = LCSArrayHelper.lookupGeoLoc(l1);
-			if(g0 != null || g1 != null) {
+			if(g0 != null && g1 != null) {
 				Integer c = compare(g0, g1);
 				if(c != null)
 					return c;
