@@ -77,6 +77,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Action debug log */
 	static protected final DebugLog ACTION_LOG = new DebugLog("action");
 
+	/** Compare two (possibly-null) integers for equality */
+	static protected boolean integerEquals(Integer i0, Integer i1) {
+		if(i0 == null)
+			return i1 == null;
+		else
+			return i0.equals(i1);
+	}
+
 	/** Calculate the maximum trip minute to display on the sign */
 	static protected int maximumTripMinutes(float miles) {
 		float hours = miles /
@@ -430,7 +438,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set height of sign face (mm) */
 	public void setFaceHeight(Integer h) {
-		if(!h.equals(faceHeight)) {
+		if(!integerEquals(h, faceHeight)) {
 			faceHeight = h;
 			notifyAttribute("faceHeight");
 		}
@@ -446,7 +454,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set width of sign face (mm) */
 	public void setFaceWidth(Integer w) {
-		if(!w.equals(faceWidth)) {
+		if(!integerEquals(w, faceWidth)) {
 			faceWidth = w;
 			notifyAttribute("faceWidth");
 		}
@@ -462,7 +470,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set horizontal border (mm) */
 	public void setHorizontalBorder(Integer b) {
-		if(!b.equals(horizontalBorder)) {
+		if(!integerEquals(b, horizontalBorder)) {
 			horizontalBorder = b;
 			notifyAttribute("horizontalBorder");
 		}
@@ -478,7 +486,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set vertical border (mm) */
 	public void setVerticalBorder(Integer b) {
-		if(!b.equals(verticalBorder)) {
+		if(!integerEquals(b, verticalBorder)) {
 			verticalBorder = b;
 			notifyAttribute("verticalBorder");
 		}
@@ -494,7 +502,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set horizontal pitch (mm) */
 	public void setHorizontalPitch(Integer p) {
-		if(!p.equals(horizontalPitch)) {
+		if(!integerEquals(p, horizontalPitch)) {
 			horizontalPitch = p;
 			notifyAttribute("horizontalPitch");
 		}
@@ -510,7 +518,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set vertical pitch (mm) */
 	public void setVerticalPitch(Integer p) {
-		if(!p.equals(verticalPitch)) {
+		if(!integerEquals(p, verticalPitch)) {
 			verticalPitch = p;
 			notifyAttribute("verticalPitch");
 		}
@@ -526,7 +534,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set sign height (pixels) */
 	public void setHeightPixels(Integer h) {
-		if(!h.equals(heightPixels)) {
+		if(!integerEquals(h, heightPixels)) {
 			heightPixels = h;
 			// FIXME: update bitmap graphics plus stuck on/off
 			notifyAttribute("heightPixels");
@@ -543,7 +551,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set sign width (pixels) */
 	public void setWidthPixels(Integer w) {
-		if(!w.equals(widthPixels)) {
+		if(!integerEquals(w, widthPixels)) {
 			widthPixels = w;
 			// FIXME: update bitmap graphics plus stuck on/off
 			notifyAttribute("widthPixels");
@@ -565,7 +573,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		//       mistake here ... uggh
 		if(h == 0 && DMSType.isFixedHeight(dms_type))
 			h = estimateLineHeight();
-		if(!h.equals(charHeightPixels)) {
+		if(!integerEquals(h, charHeightPixels)) {
 			charHeightPixels = h;
 			notifyAttribute("charHeightPixels");
 		}
@@ -594,7 +602,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set character width (pixels) */
 	public void setCharWidthPixels(Integer w) {
-		if(!w.equals(charWidthPixels)) {
+		if(!integerEquals(w, charWidthPixels)) {
 			charWidthPixels = w;
 			notifyAttribute("charWidthPixels");
 		}
@@ -616,7 +624,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the minimum cabinet temperature */
 	public void setMinCabinetTemp(Integer t) {
-		if(!t.equals(minCabinetTemp)) {
+		if(!integerEquals(t, minCabinetTemp)) {
 			minCabinetTemp = t;
 			notifyAttribute("minCabinetTemp");
 		}
@@ -632,7 +640,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the maximum cabinet temperature */
 	public void setMaxCabinetTemp(Integer t) {
-		if(!t.equals(maxCabinetTemp)) {
+		if(!integerEquals(t, maxCabinetTemp)) {
 			maxCabinetTemp = t;
 			notifyAttribute("maxCabinetTemp");
 		}
@@ -648,7 +656,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the minimum ambient temperature */
 	public void setMinAmbientTemp(Integer t) {
-		if(!t.equals(minAmbientTemp)) {
+		if(!integerEquals(t, minAmbientTemp)) {
 			minAmbientTemp = t;
 			notifyAttribute("minAmbientTemp");
 		}
@@ -664,7 +672,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the maximum ambient temperature */
 	public void setMaxAmbientTemp(Integer t) {
-		if(!t.equals(maxAmbientTemp)) {
+		if(!integerEquals(t, maxAmbientTemp)) {
 			maxAmbientTemp = t;
 			notifyAttribute("maxAmbientTemp");
 		}
@@ -680,7 +688,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the minimum housing temperature */
 	public void setMinHousingTemp(Integer t) {
-		if(!t.equals(minHousingTemp)) {
+		if(!integerEquals(t, minHousingTemp)) {
 			minHousingTemp = t;
 			notifyAttribute("minHousingTemp");
 		}
@@ -696,7 +704,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the maximum housing temperature */
 	public void setMaxHousingTemp(Integer t) {
-		if(!t.equals(maxHousingTemp)) {
+		if(!integerEquals(t, maxHousingTemp)) {
 			maxHousingTemp = t;
 			notifyAttribute("maxHousingTemp");
 		}
@@ -712,7 +720,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the light output of the sign (percentage) */
 	public void setLightOutput(Integer l) {
-		if(!l.equals(lightOutput)) {
+		if(!integerEquals(l, lightOutput)) {
 			lightOutput = l;
 			notifyAttribute("lightOutput");
 		}
@@ -1055,7 +1063,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the LDC pot base */
 	public void setLdcPotBase(Integer base) {
-		if(!base.equals(ldcPotBase)) {
+		if(!integerEquals(base, ldcPotBase)) {
 			ldcPotBase = base;
 			notifyAttribute("ldcPotBase");
 		}
@@ -1071,7 +1079,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the pixel low curent threshold */
 	public void setPixelCurrentLow(Integer low) {
-		if(!low.equals(pixelCurrentLow)) {
+		if(!integerEquals(low, pixelCurrentLow)) {
 			pixelCurrentLow = low;
 			notifyAttribute("pixelCurrentLow");
 		}
@@ -1087,7 +1095,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the pixel high curent threshold */
 	public void setPixelCurrentHigh(Integer high) {
-		if(!high.equals(pixelCurrentHigh)) {
+		if(!integerEquals(high, pixelCurrentHigh)) {
 			pixelCurrentHigh = high;
 			notifyAttribute("pixelCurrentHigh");
 		}
