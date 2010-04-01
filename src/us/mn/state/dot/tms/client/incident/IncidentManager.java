@@ -199,10 +199,10 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return STYLE_CRASH;
 		case INCIDENT_STALL:
 			return STYLE_STALL;
-		case INCIDENT_HAZARD:
-			return STYLE_HAZARD;
 		case INCIDENT_ROADWORK:
 			return STYLE_ROADWORK;
+		case INCIDENT_HAZARD:
+			return STYLE_HAZARD;
 		default:
 			return null;
 		}
