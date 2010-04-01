@@ -34,3 +34,6 @@ ALTER TABLE event.incident ADD CONSTRAINT incident_detail_fkey
 
 INSERT INTO iris.privilege (name, role, pattern, priv_r, priv_w, priv_c, priv_d)
 	VALUES('prv_idtl', 'login', 'incident_detail(/.)?', 't', 'f', 'f', 'f');
+
+UPDATE event.event_description SET description = 'Incident HAZARD'
+	WHERE event_desc_id = 23;

@@ -53,11 +53,11 @@ public class IncidentCreator extends JPanel {
 	/** Button to create a "stall" incident */
 	protected final JToggleButton stall_btn;
 
-	/** Button to create a "blockage" incident */
-	protected final JToggleButton block_btn;
-
 	/** Button to create a "road work" incident */
 	protected final JToggleButton work_btn;
+
+	/** Button to create a "hazard" incident */
+	protected final JToggleButton hazard_btn;
 
 	/** Lane type combo box */
 	protected final JComboBox ltype_cbox;
@@ -84,19 +84,19 @@ public class IncidentCreator extends JPanel {
 			EventType.INCIDENT_CRASH, theme);
 		stall_btn = createButton(IncidentManager.STYLE_STALL,
 			EventType.INCIDENT_STALL, theme);
-		block_btn = createButton(IncidentManager.STYLE_DEBRIS,
-			EventType.INCIDENT_DEBRIS, theme);
 		work_btn = createButton(IncidentManager.STYLE_ROADWORK,
 			EventType.INCIDENT_ROADWORK, theme);
+		hazard_btn = createButton(IncidentManager.STYLE_HAZARD,
+			EventType.INCIDENT_HAZARD, theme);
 		ltype_cbox = createLaneTypeCombo();
 		Box box = Box.createHorizontalBox();
 		box.add(crash_btn);
 		box.add(Box.createHorizontalStrut(4));
 		box.add(stall_btn);
 		box.add(Box.createHorizontalStrut(4));
-		box.add(block_btn);
-		box.add(Box.createHorizontalStrut(4));
 		box.add(work_btn);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(hazard_btn);
 		add(box);
 		add(Box.createVerticalStrut(4));
 		box = Box.createHorizontalBox();
@@ -146,10 +146,10 @@ public class IncidentCreator extends JPanel {
 				crash_btn.setSelected(false);
 			if(btn != stall_btn)
 				stall_btn.setSelected(false);
-			if(btn != block_btn)
-				block_btn.setSelected(false);
 			if(btn != work_btn)
 				work_btn.setSelected(false);
+			if(btn != hazard_btn)
+				hazard_btn.setSelected(false);
 			createIncident(btn, et);
 		} else {
 			if(getSelected() == null) {
@@ -166,8 +166,8 @@ public class IncidentCreator extends JPanel {
 	{
 		assert et == EventType.INCIDENT_CRASH ||
 		       et == EventType.INCIDENT_STALL ||
-		       et == EventType.INCIDENT_DEBRIS ||
-		       et == EventType.INCIDENT_ROADWORK;
+		       et == EventType.INCIDENT_ROADWORK ||
+		       et == EventType.INCIDENT_HAZARD;
 		MapBean m = map;
 		if(m == null)
 			return;
@@ -272,10 +272,10 @@ public class IncidentCreator extends JPanel {
 			return crash_btn;
 		if(stall_btn.isSelected())
 			return stall_btn;
-		if(block_btn.isSelected())
-			return block_btn;
 		if(work_btn.isSelected())
 			return work_btn;
+		if(hazard_btn.isSelected())
+			return hazard_btn;
 		return null;
 	}
 
@@ -283,8 +283,8 @@ public class IncidentCreator extends JPanel {
 	public void setEnabled(boolean e) {
 		crash_btn.setEnabled(e);
 		stall_btn.setEnabled(e);
-		block_btn.setEnabled(e);
 		work_btn.setEnabled(e);
+		hazard_btn.setEnabled(e);
 	}
 
 	/** Dispose of the incident creator */
