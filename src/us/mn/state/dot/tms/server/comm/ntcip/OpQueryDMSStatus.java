@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,8 +115,15 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + min_cab);
 			DMS_LOG.log(dms.getName() + ": " + max_cab);
-			dms.setMinCabinetTemp(min_cab.getInteger());
-			dms.setMaxCabinetTemp(max_cab.getInteger());
+			int mn = min_cab.getInteger();
+			int mx = max_cab.getInteger();
+			if(mn <= mx) {
+				dms.setMinCabinetTemp(mn);
+				dms.setMaxCabinetTemp(mx);
+			} else {
+				dms.setMinCabinetTemp(null);
+				dms.setMaxCabinetTemp(null);
+			}
 			return new AmbientTemperature();
 		}
 	}
@@ -134,11 +141,20 @@ public class OpQueryDMSStatus extends OpDMS {
 				mess.getRequest();
 				DMS_LOG.log(dms.getName() + ": " + min_amb);
 				DMS_LOG.log(dms.getName() + ": " + max_amb);
-				dms.setMinAmbientTemp(min_amb.getInteger());
-				dms.setMaxAmbientTemp(max_amb.getInteger());
+				int mn = min_amb.getInteger();
+				int mx = max_amb.getInteger();
+				if(mn <= mx) {
+					dms.setMinAmbientTemp(mn);
+					dms.setMaxAmbientTemp(mx);
+				} else {
+					dms.setMinAmbientTemp(null);
+					dms.setMaxAmbientTemp(null);
+				}
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Ledstar has no ambient temp objects
+				dms.setMinAmbientTemp(null);
+				dms.setMaxAmbientTemp(null);
 			}
 			return new HousingTemperature();
 		}
@@ -156,8 +172,15 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + min_hou);
 			DMS_LOG.log(dms.getName() + ": " + max_hou);
-			dms.setMinHousingTemp(min_hou.getInteger());
-			dms.setMaxHousingTemp(max_hou.getInteger());
+			int mn = min_hou.getInteger();
+			int mx = max_hou.getInteger();
+			if(mn <= mx) {
+				dms.setMinHousingTemp(mn);
+				dms.setMaxHousingTemp(mx);
+			} else {
+				dms.setMinHousingTemp(null);
+				dms.setMaxHousingTemp(null);
+			}
 			return new Failures();
 		}
 	}
@@ -243,6 +266,9 @@ public class OpQueryDMSStatus extends OpDMS {
 				mess.getRequest();
 			}
 			catch(SNMP.Message.NoSuchName e) {
+				dms.setLdcPotBase(null);
+				dms.setPixelCurrentLow(null);
+				dms.setPixelCurrentHigh(null);
 				return new SkylineStatus();
 			}
 			DMS_LOG.log(dms.getName() + ": " + potBase);
