@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -56,7 +57,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading active incidents...");
 		namespace.registerType(SONAR_TYPE, IncidentImpl.class);
-		store.query("SELECT name, event_desc_id, event_date, " +
+		store.query("SELECT name, event_desc_id, event_date, detail, " +
 			"lane_type, road, dir, easting, northing, camera, " +
 			"impact, cleared FROM event." + SONAR_TYPE +
 			" WHERE cleared = 'f';", new ResultFactory()
@@ -66,14 +67,15 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 					row.getString(1),	// name
 					row.getInt(2),		// event_desc_id
 					row.getTimestamp(3),	// event_date
-					row.getShort(4),	// lane_type
-					row.getString(5),	// road
-					row.getShort(6),	// dir
-					row.getInt(7),		// easting
-					row.getInt(8),		// northing
-					row.getString(9),	// camera
-					row.getString(10),	// impact
-					row.getBoolean(11)	// cleared
+					row.getString(4),	// detail
+					row.getShort(5),	// lane_type
+					row.getString(6),	// road
+					row.getShort(7),	// dir
+					row.getInt(8),		// easting
+					row.getInt(9),		// northing
+					row.getString(10),	// camera
+					row.getString(11),	// impact
+					row.getBoolean(12)	// cleared
 				));
 			}
 		});
@@ -85,6 +87,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		map.put("name", name);
 		map.put("event_desc_id", event_desc_id);
 		map.put("event_date", event_date);
+		map.put("detail", detail);
 		map.put("lane_type", lane_type);
 		map.put("road", road);
 		map.put("dir", dir);
@@ -113,21 +116,24 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Create an incident */
 	protected IncidentImpl(Namespace ns, String n, int et, Date ed,
-		short lt, String r, short d, int ue, int un, String cam,
-		String im, boolean c)
+		String dtl, short lt, String r, short d, int ue, int un,
+		String cam, String im, boolean c)
 	{
-		this(n, et, ed, lt, (Road)ns.lookupObject(Road.SONAR_TYPE, r),
-		     d, ue, un, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
-		     im, c);
+		this(n, et, ed, (IncidentDetail)ns.lookupObject(
+		     IncidentDetail.SONAR_TYPE, dtl), lt,
+		     (Road)ns.lookupObject(Road.SONAR_TYPE, r), d, ue, un,
+		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam), im, c);
 	}
 
 	/** Create an incident */
-	protected IncidentImpl(String n, int et, Date ed, short lt, Road r,
-		short d, int ue, int un, Camera cam, String im, boolean c)
+	protected IncidentImpl(String n, int et, Date ed, IncidentDetail dtl,
+		short lt, Road r, short d, int ue, int un, Camera cam,
+		String im, boolean c)
 	{
 		super(n);
 		event_desc_id = et;
 		event_date = new Date(ed.getTime());
+		detail = dtl;
 		lane_type = lt;
 		road = r;
 		dir = d;
@@ -161,6 +167,14 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	/** Get the event date (timestamp) */
 	public long getEventDate() {
 		return event_date.getTime();
+	}
+
+	/** Incident detail */
+	protected IncidentDetail detail;
+
+	/** Get the incident detail */
+	public IncidentDetail getDetail() {
+		return detail;
 	}
 
 	/** Lane type ordinal */
@@ -266,12 +280,15 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Render the incident as xml */
 	public void printXmlElement(PrintWriter out) {
+		String dtl = lookupDetail();
 		String loc = lookupLocation();
 		out.print("<incident");
 		out.print(XmlWriter.createAttribute("id", getName()));
 		out.print(XmlWriter.createAttribute("event_type",
 			EventType.fromId(event_desc_id)));
 		out.print(XmlWriter.createAttribute("event_date", event_date));
+		if(dtl != null)
+			out.print(XmlWriter.createAttribute("detail", dtl));
 		out.print(XmlWriter.createAttribute("lane_type",
 			LaneType.fromOrdinal(lane_type)));
 		out.print(XmlWriter.createAttribute("road", road));
@@ -285,6 +302,15 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		out.print(XmlWriter.createAttribute("impact", impact));
 		out.print(XmlWriter.createAttribute("cleared", cleared));
 		out.println("/>");
+	}
+
+	/** Lookup the detail description */
+	protected String lookupDetail() {
+		IncidentDetail dtl = detail;
+		if(dtl != null)
+			return dtl.getDescription();
+		else
+			return null;
 	}
 
 	/** Lookup the incident location */

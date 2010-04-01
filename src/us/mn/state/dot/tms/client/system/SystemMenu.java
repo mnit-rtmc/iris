@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,9 @@ public class SystemMenu extends JMenu {
 		JMenuItem item = createSystemAttributesItem();
 		if(item != null)
 			add(item);
+		item = createIncidentDetailItem();
+		if(item != null)
+			add(item);
 		item = createUsersAndRolesItem();
 		if(item != null)
 			add(item);
@@ -62,6 +65,20 @@ public class SystemMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new SystemAttributeForm(session));
+			}
+		};
+		return item;
+	}
+
+	/** Create the incident detail menu item */
+	protected JMenuItem createIncidentDetailItem() {
+		if(!IncidentDetailForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Incident Detail");
+		item.setMnemonic('i');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new IncidentDetailForm(session));
 			}
 		};
 		return item;

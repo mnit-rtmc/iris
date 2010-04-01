@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.Road;
 
@@ -60,6 +61,11 @@ public class ClientIncident implements Incident {
 	/** Get the event date (timestamp) */
 	public long getEventDate() {
 		return System.currentTimeMillis();
+	}
+
+	/** Get the incident detail */
+	public IncidentDetail getDetail() {
+		return null;
 	}
 
 	/** Lane type */

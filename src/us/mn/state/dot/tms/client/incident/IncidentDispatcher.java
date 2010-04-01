@@ -44,14 +44,17 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
  * The IncidentDispatcher is a GUI component for creating incidents.
@@ -79,6 +82,12 @@ public class IncidentDispatcher extends JPanel
 
 	/** Type label */
 	protected final JLabel type_lbl = new JLabel();
+
+	/** Incident detail proxy list model */
+	protected final ProxyListModel<IncidentDetail> dtl_model;
+
+	/** Incident detail combo box */
+	protected final JComboBox detail_cbx = new JComboBox();
 
 	/** Location of incident */
 	protected final JTextField location_txt = FormPanel.createTextField();
@@ -110,6 +119,12 @@ public class IncidentDispatcher extends JPanel
 		session = s;
 		SonarState st = session.getSonarState();
 		cache = st.getIncidents();
+		dtl_model = new ProxyListModel<IncidentDetail>(
+			st.getIncidentDetails());
+		dtl_model.initialize();
+		detail_cbx.setRenderer(new IncidentDetailRenderer());
+		detail_cbx.setModel(new WrapperComboBoxModel(dtl_model, true,
+			true));
 		manager = man;
 		selectionModel = manager.getSelectionModel();
 		cache.addProxyListener(this);
@@ -126,6 +141,7 @@ public class IncidentDispatcher extends JPanel
 		panel.setBorder(BorderFactory.createTitledBorder(
 			"Selected Incident"));
 		panel.addRow("Incident Type", type_lbl);
+		panel.addRow("Detail", detail_cbx);
 		panel.addRow("Location", location_txt);
 		panel.addRow("Camera", camera_cbx);
 		panel.addRow(buildImpactBox());
@@ -200,6 +216,7 @@ public class IncidentDispatcher extends JPanel
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("event_desc_id", inc.getEventType());
+			attrs.put("detail", getSelectedDetail());
 			attrs.put("lane_type", inc.getLaneType());
 			attrs.put("road", inc.getRoad());
 			attrs.put("dir", inc.getDir());
@@ -215,6 +232,15 @@ public class IncidentDispatcher extends JPanel
 			else
 				selectionModel.clearSelection();
 		}
+	}
+
+	/** Get the selected incident detail */
+	protected IncidentDetail getSelectedDetail() {
+		Object detail = detail_cbx.getSelectedItem();
+		if(detail instanceof IncidentDetail)
+			return (IncidentDetail)detail;
+		else
+			return null;
 	}
 
 	/** Get the selected camera */
@@ -342,6 +368,8 @@ public class IncidentDispatcher extends JPanel
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
 		clearEventType();
+		detail_cbx.setSelectedItem(null);
+		detail_cbx.setEnabled(false);
 		location_txt.setText("");
 		camera_cbx.setSelectedItem(null);
 		camera_cbx.setEnabled(false);
@@ -370,12 +398,14 @@ public class IncidentDispatcher extends JPanel
 	protected void enableWidgets(Incident inc) {
 		if(inc instanceof ClientIncident) {
 			boolean create = canAdd("oname");
+			detail_cbx.setEnabled(create);
 			camera_cbx.setEnabled(create);
 			log_btn.setEnabled(create);
 			deploy_btn.setEnabled(false);
 			clear_btn.setEnabled(false);
 		} else {
 			boolean update = canUpdate(inc);
+			detail_cbx.setEnabled(false);
 			camera_cbx.setEnabled(false);
 			log_btn.setEnabled(update && isImpactChanged(inc));
 			deploy_btn.setEnabled(update && canDeploy(inc) &&
@@ -393,6 +423,7 @@ public class IncidentDispatcher extends JPanel
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(Incident inc, String a) {
 		if(a == null) {
+			detail_cbx.setSelectedItem(inc.getDetail());
 			type_lbl.setText(manager.getTypeDesc(inc));
 			Symbol sym = manager.getSymbol(inc);
 			if(sym != null)

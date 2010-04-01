@@ -29,6 +29,9 @@ public interface Incident extends SonarObject {
 	/** Get the event type */
 	int getEventType();
 
+	/** Get the incident detail */
+	IncidentDetail getDetail();
+
 	/** Get the event date (timestamp) */
 	long getEventDate();
 

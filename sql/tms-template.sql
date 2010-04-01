@@ -1241,7 +1241,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.113.0
+database_version	3.114.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
@@ -1309,86 +1309,87 @@ PRV_0017	login	glyph(/.*)?	t	f	f	f
 PRV_0018	login	graphic(/.*)?	t	f	f	f
 PRV_0019	login	holiday(/.*)?	t	f	f	f
 PRV_0020	login	incident(/.*)?	t	f	f	f
-PRV_0021	login	lane_action(/.*)?	t	f	f	f
-PRV_0022	login	lane_marking(/.*)?	t	f	f	f
-PRV_0023	login	lane_use_multi(/.*)?	t	f	f	f
-PRV_0024	login	lcs(/.*)?	t	f	f	f
-PRV_0025	login	lcs_array(/.*)?	t	f	f	f
-PRV_0026	login	lcs_indication(/.*)?	t	f	f	f
-PRV_0027	login	map_extent(/.*)?	t	f	f	f
-PRV_0028	login	privilege(/.*)?	t	f	f	f
-PRV_0029	login	quick_message(/.*)?	t	f	f	f
-PRV_0030	login	r_node(/.*)?	t	f	f	f
-PRV_0031	login	ramp_meter(/.*)?	t	f	f	f
-PRV_0032	login	road(/.*)?	t	f	f	f
-PRV_0033	login	role(/.*)?	t	f	f	f
-PRV_0034	login	sign_group(/.*)?	t	f	f	f
-PRV_0035	login	sign_message(/.*)?	t	f	f	f
-PRV_0036	login	sign_text(/.*)?	t	f	f	f
-PRV_0037	login	station(/.*)?	t	f	f	f
-PRV_0038	login	system_attribute(/.*)?	t	f	f	f
-PRV_0039	login	time_action(/.*)?	t	f	f	f
-PRV_0040	login	timing_plan(/.*)?	t	f	f	f
-PRV_0041	login	user(/.*)?	t	f	f	f
-PRV_0042	login	warning_sign(/.*)?	t	f	f	f
-PRV_0043	login	video_monitor(/.*)?	t	f	f	f
-PRV_0044	operate	camera/.*/ptz	f	t	f	f
-PRV_0045	operate	sign_message/.*	f	t	t	t
-PRV_0046	operate	dms/.*/messageNext	f	t	f	f
-PRV_0047	operate	dms/.*/ownerNext	f	t	f	f
-PRV_0048	operate	incident/.*	f	t	t	t
-PRV_0049	operate	ramp_meter/.*/rateNext	f	t	f	f
-PRV_0050	operate	ramp_meter/.*/mLock	f	t	f	f
-PRV_0051	operate	lcs_array/.*/indicationsNext	f	t	f	f
-PRV_0052	operate	lcs_array/.*/ownerNext	f	t	f	f
-PRV_0053	operate	lcs_array/.*/lcsLock	f	t	f	f
-PRV_0054	operate	warning_sign/.*/deployed	f	t	f	f
-PRV_0055	maintenance	controller/.*/active	f	t	f	f
-PRV_0056	maintenance	controller/.*/download	f	t	f	f
-PRV_0057	maintenance	controller/.*/error	f	t	f	f
-PRV_0058	maintenance	dms/.*/deviceRequest	f	t	f	f
-PRV_0059	maintenance	lcs_array/.*/deviceRequest	f	t	f	f
-PRV_0060	maintenance	ramp_meter/.*/deviceRequest	f	t	f	f
-PRV_0061	policy_admin	camera/.*/publish	f	t	f	f
-PRV_0062	policy_admin	day_plan/.*	f	t	t	t
-PRV_0063	policy_admin	detector/.*/forceFail	f	t	f	f
-PRV_0064	policy_admin	detector/.*/fieldLength	f	t	f	f
-PRV_0065	policy_admin	holiday/.*	f	t	t	t
-PRV_0066	policy_admin	dms_sign_group/.*	f	t	t	t
-PRV_0067	policy_admin	map_extent/.*	f	t	t	t
-PRV_0068	policy_admin	sign_group/.*	f	t	t	t
-PRV_0069	policy_admin	sign_text/.*	f	t	t	t
-PRV_0070	policy_admin	quick_message/.*	f	t	t	t
-PRV_0071	policy_admin	timing_plan/.*	f	t	t	t
-PRV_0072	policy_admin	action_plan/.*	f	t	t	t
-PRV_0073	policy_admin	dms_action/.*	f	t	t	t
-PRV_0074	policy_admin	lane_action/.*	f	t	t	t
-PRV_0075	policy_admin	time_action/.*	f	t	t	t
-PRV_0076	device_admin	alarm/.*	f	t	t	t
-PRV_0077	device_admin	cabinet/.*	f	t	t	t
-PRV_0078	device_admin	camera/.*	f	t	t	t
-PRV_0079	device_admin	comm_link/.*	f	t	t	t
-PRV_0080	device_admin	controller/.*	f	t	t	t
-PRV_0081	device_admin	detector/.*	f	t	t	t
-PRV_0082	device_admin	dms/.*	f	t	t	t
-PRV_0083	device_admin	geo_loc/.*	f	t	t	t
-PRV_0084	device_admin	lane_marking/.*	f	t	t	t
-PRV_0085	device_admin	lcs/.*	f	t	t	t
-PRV_0086	device_admin	lcs_array/.*	f	t	t	t
-PRV_0087	device_admin	lcs_indication/.*	f	t	t	t
-PRV_0088	device_admin	r_node/.*	f	t	t	t
-PRV_0089	device_admin	ramp_meter/.*	f	t	t	t
-PRV_0090	device_admin	road/.*	f	t	t	t
-PRV_0091	device_admin	video_monitor/.*	f	t	t	t
-PRV_0092	system_admin	cabinet_style/.*	f	t	t	t
-PRV_0093	system_admin	font/.*	f	t	t	t
-PRV_0094	system_admin	glyph/.*	f	t	t	t
-PRV_0095	system_admin	graphic/.*	f	t	t	t
-PRV_0096	system_admin	lane_use_multi/.*	f	t	t	t
-PRV_0097	system_admin	system_attribute/.*	f	t	t	t
-PRV_0098	user_admin	user/.*	f	t	t	t
-PRV_0099	user_admin	privilege/.*	f	t	t	t
-PRV_0100	user_admin	role/.*	f	t	t	t
+PRV_0021	login	incident_detail(/.*)?	t	f	f	f
+PRV_0022	login	lane_action(/.*)?	t	f	f	f
+PRV_0023	login	lane_marking(/.*)?	t	f	f	f
+PRV_0024	login	lane_use_multi(/.*)?	t	f	f	f
+PRV_0025	login	lcs(/.*)?	t	f	f	f
+PRV_0026	login	lcs_array(/.*)?	t	f	f	f
+PRV_0027	login	lcs_indication(/.*)?	t	f	f	f
+PRV_0028	login	map_extent(/.*)?	t	f	f	f
+PRV_0029	login	privilege(/.*)?	t	f	f	f
+PRV_0030	login	quick_message(/.*)?	t	f	f	f
+PRV_0031	login	r_node(/.*)?	t	f	f	f
+PRV_0032	login	ramp_meter(/.*)?	t	f	f	f
+PRV_0033	login	road(/.*)?	t	f	f	f
+PRV_0034	login	role(/.*)?	t	f	f	f
+PRV_0035	login	sign_group(/.*)?	t	f	f	f
+PRV_0036	login	sign_message(/.*)?	t	f	f	f
+PRV_0037	login	sign_text(/.*)?	t	f	f	f
+PRV_0038	login	station(/.*)?	t	f	f	f
+PRV_0039	login	system_attribute(/.*)?	t	f	f	f
+PRV_0040	login	time_action(/.*)?	t	f	f	f
+PRV_0041	login	timing_plan(/.*)?	t	f	f	f
+PRV_0042	login	user(/.*)?	t	f	f	f
+PRV_0043	login	warning_sign(/.*)?	t	f	f	f
+PRV_0044	login	video_monitor(/.*)?	t	f	f	f
+PRV_0045	operate	camera/.*/ptz	f	t	f	f
+PRV_0046	operate	sign_message/.*	f	t	t	t
+PRV_0047	operate	dms/.*/messageNext	f	t	f	f
+PRV_0048	operate	dms/.*/ownerNext	f	t	f	f
+PRV_0049	operate	incident/.*	f	t	t	t
+PRV_0050	operate	ramp_meter/.*/rateNext	f	t	f	f
+PRV_0051	operate	ramp_meter/.*/mLock	f	t	f	f
+PRV_0052	operate	lcs_array/.*/indicationsNext	f	t	f	f
+PRV_0053	operate	lcs_array/.*/ownerNext	f	t	f	f
+PRV_0054	operate	lcs_array/.*/lcsLock	f	t	f	f
+PRV_0055	operate	warning_sign/.*/deployed	f	t	f	f
+PRV_0056	maintenance	controller/.*/active	f	t	f	f
+PRV_0057	maintenance	controller/.*/download	f	t	f	f
+PRV_0058	maintenance	controller/.*/error	f	t	f	f
+PRV_0059	maintenance	dms/.*/deviceRequest	f	t	f	f
+PRV_0060	maintenance	lcs_array/.*/deviceRequest	f	t	f	f
+PRV_0061	maintenance	ramp_meter/.*/deviceRequest	f	t	f	f
+PRV_0062	policy_admin	camera/.*/publish	f	t	f	f
+PRV_0063	policy_admin	day_plan/.*	f	t	t	t
+PRV_0064	policy_admin	detector/.*/forceFail	f	t	f	f
+PRV_0065	policy_admin	detector/.*/fieldLength	f	t	f	f
+PRV_0066	policy_admin	holiday/.*	f	t	t	t
+PRV_0067	policy_admin	dms_sign_group/.*	f	t	t	t
+PRV_0068	policy_admin	map_extent/.*	f	t	t	t
+PRV_0069	policy_admin	sign_group/.*	f	t	t	t
+PRV_0070	policy_admin	sign_text/.*	f	t	t	t
+PRV_0071	policy_admin	quick_message/.*	f	t	t	t
+PRV_0072	policy_admin	timing_plan/.*	f	t	t	t
+PRV_0073	policy_admin	action_plan/.*	f	t	t	t
+PRV_0074	policy_admin	dms_action/.*	f	t	t	t
+PRV_0075	policy_admin	lane_action/.*	f	t	t	t
+PRV_0076	policy_admin	time_action/.*	f	t	t	t
+PRV_0077	device_admin	alarm/.*	f	t	t	t
+PRV_0078	device_admin	cabinet/.*	f	t	t	t
+PRV_0079	device_admin	camera/.*	f	t	t	t
+PRV_0080	device_admin	comm_link/.*	f	t	t	t
+PRV_0081	device_admin	controller/.*	f	t	t	t
+PRV_0082	device_admin	detector/.*	f	t	t	t
+PRV_0083	device_admin	dms/.*	f	t	t	t
+PRV_0084	device_admin	geo_loc/.*	f	t	t	t
+PRV_0085	device_admin	lane_marking/.*	f	t	t	t
+PRV_0086	device_admin	lcs/.*	f	t	t	t
+PRV_0087	device_admin	lcs_array/.*	f	t	t	t
+PRV_0088	device_admin	lcs_indication/.*	f	t	t	t
+PRV_0089	device_admin	r_node/.*	f	t	t	t
+PRV_0090	device_admin	ramp_meter/.*	f	t	t	t
+PRV_0091	device_admin	road/.*	f	t	t	t
+PRV_0092	device_admin	video_monitor/.*	f	t	t	t
+PRV_0093	system_admin	cabinet_style/.*	f	t	t	t
+PRV_0094	system_admin	font/.*	f	t	t	t
+PRV_0095	system_admin	glyph/.*	f	t	t	t
+PRV_0096	system_admin	graphic/.*	f	t	t	t
+PRV_0097	system_admin	lane_use_multi/.*	f	t	t	t
+PRV_0098	system_admin	system_attribute/.*	f	t	t	t
+PRV_0099	user_admin	user/.*	f	t	t	t
+PRV_0100	user_admin	privilege/.*	f	t	t	t
+PRV_0101	user_admin	role/.*	f	t	t	t
 \.
 
 SET search_path = event, public, pg_catalog;
@@ -1437,12 +1438,18 @@ CREATE TABLE event.sign_event (
 	iris_user VARCHAR(15) REFERENCES iris.i_user(name)
 );
 
+CREATE TABLE event.incident_detail (
+	name VARCHAR(8) PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
 CREATE TABLE event.incident (
 	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	name VARCHAR(16) NOT NULL UNIQUE,
 	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
+	detail VARCHAR(8) REFERENCES event.incident_detail(name),
 	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
 	road VARCHAR(20) NOT NULL,
 	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
@@ -1562,4 +1569,22 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 94	NO HITS
 95	LOCKED ON
 96	CHATTER
+\.
+
+COPY event.incident_detail (name, description) FROM stdin;
+animal	Animal on Road
+debris	Debris
+emrg_veh	Emergency Vehicles
+event	Event Congestion
+flooding	Flash Flooding
+gr_fire	Grass Fire
+ice	Ice
+jacknife	Jacknifed Trailer
+pavement	Pavement Failure
+ped	Pedestrian
+rollover	Rollover
+sgnl_out	Traffic Lights Out
+snow_rmv	Snow Removal
+spill	Spilled Load
+veh_fire	Vehicle Fire
 \.
