@@ -216,7 +216,9 @@ public class IncidentDispatcher extends JPanel
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("event_desc_id", inc.getEventType());
-			attrs.put("detail", getSelectedDetail());
+			IncidentDetail dtl = getSelectedDetail();
+			if(dtl != null)
+				attrs.put("detail", dtl);
 			attrs.put("lane_type", inc.getLaneType());
 			attrs.put("road", inc.getRoad());
 			attrs.put("dir", inc.getDir());
