@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading cabinet styles...");
 		namespace.registerType(SONAR_TYPE, CabinetStyleImpl.class);
-		store.query("SELECT name, dip FROM iris." + SONAR_TYPE  + ";",
+		store.query("SELECT name, dip FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
