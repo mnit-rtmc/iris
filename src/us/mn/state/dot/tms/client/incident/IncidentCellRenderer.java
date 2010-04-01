@@ -53,12 +53,21 @@ public class IncidentCellRenderer extends DefaultListCellRenderer {
 				Incident inc = (Incident)value;
 				String dsc = manager.getDescription(inc);
 				lbl.setText(dsc + getCamera(inc));
-				Symbol sym = manager.getSymbol(inc);
+				Symbol sym = lookupSymbol(inc);
 				if(sym != null)
 					lbl.setIcon(sym.getLegend());
 			}
 		}
 		return c;
+	}
+
+	/** Lookup the symbol to use for an incident */
+	protected Symbol lookupSymbol(Incident inc) {
+		if(inc.getCleared()) {
+			return manager.getTheme().getSymbol(
+				IncidentManager.STYLE_CLEARED);
+		} else
+			return manager.getSymbol(inc);
 	}
 
 	/** Get the incident camera */
