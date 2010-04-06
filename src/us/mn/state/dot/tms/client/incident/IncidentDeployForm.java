@@ -155,7 +155,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		Iterator<LCSArray> it = lcss.iterator();
 		while(it.hasNext()) {
 			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(it.next());
-			if(loc.getFreeway() != cb.getFreeway() ||
+			if(loc == null || loc.getFreeway() != cb.getFreeway() ||
 			   loc.getFreeDir() != cb.getFreeDir())
 				it.remove();
 		}
