@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,7 +133,7 @@ public class PixelMapBuilder {
 			return c_height;
 		Font f = getDefaultFont();
 		if(f != null)
-			return f.getHeight();
+			return f.getHeight() + f.getLineSpacing();
 		else
 			return height;
 	}

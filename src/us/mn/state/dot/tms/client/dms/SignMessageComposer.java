@@ -302,9 +302,9 @@ public class SignMessageComposer extends JPanel {
 	/** Get the number of lines on the selected sign(s) */
 	protected int getLineCount() {
 		int ml = SystemAttrEnum.DMS_MAX_LINES.getInt();
-		int lh = getLineHeightPixels();
 		int h = getHeightPixels();
-		if(h > 0 && lh >= h) {
+		int lh = getLineHeightPixels();
+		if(lh > 0 && h >= lh) {
 			int nl = h / lh;
 			return Math.min(nl, ml);
 		} else
