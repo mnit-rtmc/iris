@@ -11,6 +11,32 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.114.0 (6 April 2010)</dt>
+	<dd><ul>
+		<li>
+			Renamed incident "debris" to "hazard".
+		</li>
+		<li>
+			Added detail field to incidents.
+		</li>
+		<li>
+			Started work on variable speed advisory algorithm.
+		</li>
+		<li>
+			Fixed a couple of minor problems.
+		</li>
+		<li>
+			Fixed a couple of NullPointerExceptions.
+		</li>
+		<li>
+			Fixed leaks when logging out of client.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.114.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.113.0 (11 March 2010)</dt>
 	<dd><ul>
 		<li>
