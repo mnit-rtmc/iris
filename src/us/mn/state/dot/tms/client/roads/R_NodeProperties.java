@@ -188,8 +188,11 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 		new FocusJob(station_id) {
 			public void perform() {
 				if(wasLost()) {
-					String sid = station_id.getText();
-					proxy.setStationID(sid);
+					String s = station_id.getText().trim();
+					if(s.equals(""))
+						proxy.setStationID(null);
+					else
+						proxy.setStationID(s);
 				}
 			}
 		};
