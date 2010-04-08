@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 			return;
 		if(f == null)
 			throw new ChangeVetoException("Font cannot be null");
-		store.update(this, "font", f.getName());
+		store.update(this, "font", f);
 		setFont(f);
 	}
 
@@ -146,7 +146,7 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	public void doSetGraphic(Graphic g) throws TMSException {
 		if(g == graphic)
 			return;
-		store.update(this, "graphic", g.getName());
+		store.update(this, "graphic", g);
 		setGraphic(g);
 	}
 
