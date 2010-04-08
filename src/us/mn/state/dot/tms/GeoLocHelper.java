@@ -15,9 +15,11 @@
 package us.mn.state.dot.tms;
 
 import java.io.PrintWriter;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.UTMPosition;
+import us.mn.state.dot.geokit.UTMZone;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.tms.Point;
-import us.mn.state.dot.tms.utils.Transform;
 
 /**
  * GeoLocHelper has static methods for dealing with geo locations.
@@ -27,13 +29,11 @@ import us.mn.state.dot.tms.utils.Transform;
  */
 public class GeoLocHelper extends BaseHelper {
 
-	/** The system attribute for the UTM zone */
-	static protected final int UTM_ZONE =
-		SystemAttrEnum.MAP_UTM_ZONE.getInt();
-
-	/** The system attribute for nothern hemisphere */
-	static protected final boolean NORTHERN_HEMISPHERE = 
-		SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean();
+	/** Get the UTM zone for the system */
+	static protected UTMZone getZone() {
+		return new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
+			SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean());
+	}
 
 	/** Don't create any instances */
 	private GeoLocHelper() {
@@ -343,16 +343,15 @@ public class GeoLocHelper extends BaseHelper {
 			matchRootName(x0.getName(), x1.getName());
 	}
 
-	/** return GeoLoc as Point in WGS84 */
-	static public Point getWgs84Point(GeoLoc p) {
-		if(p == null)
-			return new Point();
-		if(p.getEasting() == null || p.getNorthing() == null)
+	/** Return GeoLoc as Point in WGS84 */
+	static public Point getWgs84Position(GeoLoc p) {
+		Integer easting = getTrueEasting(p);
+		Integer northing = getTrueNorthing(p);
+		if(easting == null || northing == null)
 			return null;
-		double easting_d = p.getEasting().doubleValue();
-		double northing_d = p.getNorthing().doubleValue();
-		return Transform.toLatLonPoint(easting_d, 
-			northing_d, UTM_ZONE, NORTHERN_HEMISPHERE);
+		UTMPosition utm = new UTMPosition(getZone(), easting, northing);
+		Position pos = utm.getPosition(GeodeticDatum.WGS_84);
+		return new Point(pos.getLongitude(), pos.getLatitude());
 	}
 
 	/** Find geo-locs using a Checker */

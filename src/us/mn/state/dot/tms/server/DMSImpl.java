@@ -1538,7 +1538,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		GeoLoc loc = getGeoLoc();
 		if(loc == null)
 			return null;
-		return GeoLocHelper.getWgs84Point(loc);
+		return GeoLocHelper.getWgs84Position(loc);
 	}
 
 	/** get placemark description (KmlPlacemark interface) */
