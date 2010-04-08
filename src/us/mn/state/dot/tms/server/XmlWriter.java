@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,14 +51,15 @@ abstract public class XmlWriter {
 
 	/** Create an xml attribute */
 	static public String createAttribute(String name, Object value) {
-		if(value == null)
+		if(value != null) {
+			StringBuilder sb = new StringBuilder(" ");
+			sb.append(validateElementName(name));
+			sb.append("='");
+			sb.append(validateElementValue(value.toString()));
+			sb.append("'");
+			return sb.toString();
+		} else
 			return "";
-		StringBuffer sb = new StringBuffer(" ");
-		sb.append(validateElementName(name));
-		sb.append("='");
-		sb.append(validateElementValue(value.toString()));
-		sb.append("'");
-		return sb.toString();
 	}
 
 	/** File to write final XML data */
