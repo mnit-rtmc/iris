@@ -59,11 +59,11 @@ public class GeoLocHelper extends BaseHelper {
 	static private String getDescription(GeoLoc l, String connect) {
 		StringBuilder b = new StringBuilder();
 		if(l != null) {
-			Road f = l.getFreeway();
-			if(f != null) {
-				String free = f.getName() + " " +
-					getDirection(l.getFreeDir());
-				b.append(free.trim());
+			Road r = l.getRoadway();
+			if(r != null) {
+				String road = r.getName() + " " +
+					getDirection(l.getRoadDir());
+				b.append(road.trim());
 			}
 		}
 		String c = getCrossDescription(l, connect);
@@ -157,7 +157,7 @@ public class GeoLocHelper extends BaseHelper {
 		return d;
 	}
 
-	/** Filter the freeway direction which matches the given direction.
+	/** Filter the roadway direction which matches the given direction.
 	 * @param d Direction to be filtered
 	 * @param rd Main road direction (NORTH_SOUTH / EAST_WEST)
 	 * @param ad Alternate road direction
@@ -181,22 +181,22 @@ public class GeoLocHelper extends BaseHelper {
 			return d;
 	}
 
-	/** Get the freeway corridor ID */
+	/** Get the roadway corridor ID */
 	static public String getCorridorID(GeoLoc l) {
-		return getCorridorID(l.getFreeway(), l.getFreeDir());
+		return getCorridorID(l.getRoadway(), l.getRoadDir());
 	}
 
-	/** Get the freeway corridor ID */
-	static public String getCorridorID(Road f, short d) {
-		if(f == null)
+	/** Get the roadway corridor ID */
+	static public String getCorridorID(Road r, short d) {
+		if(r == null)
 			return "null";
 		StringBuilder b = new StringBuilder();
-		String ab = f.getAbbrev();
+		String ab = r.getAbbrev();
 		if(ab != null)
 			b.append(ab);
 		else
 			return "null";
-		b.append(getDirection(filterDirection(d, f)));
+		b.append(getDirection(filterDirection(d, r)));
 		return b.toString();
 	}
 
@@ -209,28 +209,28 @@ public class GeoLocHelper extends BaseHelper {
 		return corridor.trim();
 	}
 
-	/** Get the freeway corridor */
+	/** Get the roadway corridor */
 	static public String getCorridorName(GeoLoc l) {
 		if(l != null)
-			return getCorridorName(l.getFreeway(), l.getFreeDir());
+			return getCorridorName(l.getRoadway(), l.getRoadDir());
 		else
 			return null;
 	}
 
-	/** Get the linked freeway corridor */
+	/** Get the linked roadway corridor */
 	static public String getLinkedCorridor(GeoLoc l) {
 		return getCorridorName(l.getCrossStreet(), l.getCrossDir());
 	}
 
 	/** Check if two locations are on the same corridor */
 	static public boolean isSameCorridor(GeoLoc l0, GeoLoc l1) {
-		Road f0 = l0.getFreeway();
-		Road f1 = l1.getFreeway();
-		if(f0 == null || f1 == null)
+		Road r0 = l0.getRoadway();
+		Road r1 = l1.getRoadway();
+		if(r0 == null || r1 == null)
 			return false;
-		return (f0 == f1) &&
-			(filterDirection(l0.getFreeDir(), f0) ==
-			 filterDirection(l1.getFreeDir(), f1));
+		return (r0 == r1) &&
+			(filterDirection(l0.getRoadDir(), r0) ==
+			 filterDirection(l1.getRoadDir(), r1));
 	}
 
 	/** Get the true easting */
@@ -277,15 +277,15 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Test if another location matches */
 	static public boolean matches(GeoLoc l0, GeoLoc l1) {
-		Road f0 = l0.getFreeway();
+		Road r0 = l0.getRoadway();
 		Road x0 = l0.getCrossStreet();
-		Road f1 = l1.getFreeway();
+		Road r1 = l1.getRoadway();
 		Road x1 = l1.getCrossStreet();
-		if(f0 == null || x0 == null || f1 == null || x1 == null)
+		if(r0 == null || x0 == null || r1 == null || x1 == null)
 			return false;
-		return (f0 == f1) && (x0 == x1) &&
-			(filterDirection(l0.getFreeDir(), f0) ==
-			 filterDirection(l1.getFreeDir(), f1)) &&
+		return (r0 == r1) && (x0 == x1) &&
+			(filterDirection(l0.getRoadDir(), r0) ==
+			 filterDirection(l1.getRoadDir(), r1)) &&
 			(l0.getCrossDir() == l1.getCrossDir()) &&
 			(l0.getCrossMod() == l1.getCrossMod());
 	}
@@ -297,49 +297,49 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Test if another location matches (including CD roads) */
 	static public boolean matchesRoot(GeoLoc l0, GeoLoc l1) {
-		Road f0 = l0.getFreeway();
+		Road r0 = l0.getRoadway();
 		Road x0 = l0.getCrossStreet();
-		Road f1 = l1.getFreeway();
+		Road r1 = l1.getRoadway();
 		Road x1 = l1.getCrossStreet();
-		if(f0 == null || x0 == null || f1 == null || x1 == null)
+		if(r0 == null || x0 == null || r1 == null || x1 == null)
 			return false;
-		return matchRootName(f0.getName(), f1.getName()) &&
+		return matchRootName(r0.getName(), r1.getName()) &&
 			(x0 == x1) &&
-			(filterDirection(l0.getFreeDir(), f0) ==
-			 filterDirection(l1.getFreeDir(), f1)) &&
+			(filterDirection(l0.getRoadDir(), r0) ==
+			 filterDirection(l1.getRoadDir(), r1)) &&
 			(l0.getCrossDir() == l1.getCrossDir()) &&
 			(l0.getCrossMod() == l1.getCrossMod());
 	}
 
-	/** Test if two locations have freeway/cross-street swapped */
+	/** Test if two locations have roadway/cross-street swapped */
 	static protected boolean isSwapped(GeoLoc l0, GeoLoc l1) {
-		Road f0 = l0.getFreeway();
+		Road r0 = l0.getRoadway();
 		Road x0 = l0.getCrossStreet();
-		Road f1 = l1.getFreeway();
+		Road r1 = l1.getRoadway();
 		Road x1 = l1.getCrossStreet();
-		if(f0 == null || x0 == null || f1 == null || x1 == null)
+		if(r0 == null || x0 == null || r1 == null || x1 == null)
 			return false;
 		return (l0.getCrossMod() == l1.getCrossMod()) &&
-			(f0 == x1) && (f1 == x0);
+			(r0 == x1) && (r1 == x0);
 	}
 
 	/** Test if a ramp matches another ramp location */
 	static public boolean rampMatches(GeoLoc l0, GeoLoc l1) {
-		return (l0.getCrossDir() == l1.getFreeDir()) &&
-			(l0.getFreeDir() == l1.getCrossDir()) &&
+		return (l0.getCrossDir() == l1.getRoadDir()) &&
+			(l0.getRoadDir() == l1.getCrossDir()) &&
 			isSwapped(l0, l1);
 	}
 
 	/** Test if an access node matches a ramp location */
 	static public boolean accessMatches(GeoLoc l0, GeoLoc l1) {
-		Road f0 = l0.getFreeway();
+		Road r0 = l0.getRoadway();
 		Road x0 = l0.getCrossStreet();
-		Road f1 = l1.getFreeway();
+		Road r1 = l1.getRoadway();
 		Road x1 = l1.getCrossStreet();
-		if(f0 == null || x0 == null || f1 == null || x1 == null)
+		if(r0 == null || x0 == null || r1 == null || x1 == null)
 			return false;
 		return (l0.getCrossMod() == l1.getCrossMod()) &&
-			matchRootName(f0.getName(), f1.getName()) &&
+			matchRootName(r0.getName(), r1.getName()) &&
 			matchRootName(x0.getName(), x1.getName());
 	}
 

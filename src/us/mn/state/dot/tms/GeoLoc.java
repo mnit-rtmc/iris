@@ -26,17 +26,17 @@ public interface GeoLoc extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "geo_loc";
 
-	/** Set the freeway name */
-	void setFreeway(Road f);
+	/** Set the roadway name */
+	void setRoadway(Road r);
 
-	/** Get the freeway name */
-	Road getFreeway();
+	/** Get the roadway name */
+	Road getRoadway();
 
-	/** Set the freeway direction */
-	void setFreeDir(short d);
+	/** Set the roadway direction */
+	void setRoadDir(short d);
 
-	/** Get the freeway direction */
-	short getFreeDir();
+	/** Get the roadway direction */
+	short getRoadDir();
 
 	/** Set the cross-street name */
 	void setCrossStreet(Road x);

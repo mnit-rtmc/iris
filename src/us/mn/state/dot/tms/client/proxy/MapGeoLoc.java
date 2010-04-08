@@ -64,7 +64,7 @@ public class MapGeoLoc implements MapObject {
 
 	/** Get the default angle (radians) */
 	protected double getDefaultAngle() {
-		switch(loc.getFreeDir()) {
+		switch(loc.getRoadDir()) {
 			case Road.NORTH:
 				return RAD_NORTH;
 			case Road.SOUTH:

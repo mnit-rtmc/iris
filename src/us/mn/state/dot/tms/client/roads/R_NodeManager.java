@@ -90,7 +90,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Currently selected corridor */
 	protected String corridor = "";
 
-	/** Select a new freeway corridor */
+	/** Select a new roadway corridor */
 	public void setCorridor(String c) {
 		corridor = c;
 	}
@@ -214,7 +214,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public SegmentLayer createSegmentLayer() {
 		SegmentLayer seg_layer = new SegmentLayer(this, session);
 		for(CorridorBase c: corridors.values()) {
-			if(c.getFreeDir() > 0)
+			if(c.getRoadDir() > 0)
 				seg_layer.addCorridor(c);
 		}
 		return seg_layer;
@@ -390,7 +390,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		GeoLoc loc = null;
 		double distance = Double.POSITIVE_INFINITY;
 		for(CorridorBase c: corridors.values()) {
-			boolean cd = c.getFreeway().getRClass() == Road.CD_ROAD;
+			boolean cd = c.getRoadway().getRClass() == Road.CD_ROAD;
 			if((cd_road && !cd) || (cd && !cd_road))
 				continue;
 			ClientGeoLoc l = createGeoLoc(c, easting, northing);
@@ -483,7 +483,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		int y1 = GeoLocHelper.getTrueNorthing(l1);
 		LineSegment2D seg = new LineSegment2D(x0, y0, x1, y1);
 		Vector2D pnt = seg.snap(e, n);
-		return new ClientGeoLoc(l0.getFreeway(), l0.getFreeDir(),
+		return new ClientGeoLoc(l0.getRoadway(), l0.getRoadDir(),
 			(int)pnt.x, (int)pnt.y, dist);
 	}
 

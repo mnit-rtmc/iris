@@ -617,8 +617,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	/** Check if a location is on a reversible road */
 	protected boolean isReversibleLocationHack(GeoLoc loc) {
 		// FIXME: this is a Mn/DOT-specific hack
-		Road freeway = loc.getFreeway();
-		if(freeway != null && REV.equals(freeway.getName()))
+		Road roadway = loc.getRoadway();
+		if(roadway != null && REV.equals(roadway.getName()))
 			return true;
 		Road cross = loc.getCrossStreet();
 		if(cross != null && REV.equals(cross.getName()))

@@ -59,23 +59,23 @@ public class IncidentLoc implements GeoLoc {
 		// nothing to do
 	}
 
-	/** Set the freeway name */
-	public void setFreeway(Road f) {
+	/** Set the roadway name */
+	public void setRoadway(Road f) {
 		// part of GeoLoc interface
 	}
 
-	/** Get the freeway name */
-	public Road getFreeway() {
+	/** Get the roadway name */
+	public Road getRoadway() {
 		return incident.getRoad();
 	}
 
-	/** Set the freeway direction */
-	public void setFreeDir(short d) {
+	/** Set the roadway direction */
+	public void setRoadDir(short d) {
 		// part of GeoLoc interface
 	}
 
-	/** Get the freeway direction */
-	public short getFreeDir() {
+	/** Get the roadway direction */
+	public short getRoadDir() {
 		return incident.getDir();
 	}
 

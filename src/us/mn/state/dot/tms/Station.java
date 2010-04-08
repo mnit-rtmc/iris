@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,15 +25,6 @@ public interface Station extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "station";
-
-	/** Default speed limit */
-	int DEFAULT_SPEED_LIMIT = 55;
-
-	/** Minimum freeway speed limit */
-	int MINIMUM_SPEED_LIMIT = 45;
-
-	/** Maximum freeway speed limit */
-	int MAXIMUM_SPEED_LIMIT = 75;
 
 	/** Get the station label */
 	String getLabel();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Create a new r_node */
-	public void create(Road freeway, short free_dir) {
+	public void create(Road roadway, short road_dir) {
 		String name = createUniqueR_NodeName();
 		if(canAdd(name)) {
 			synchronized(in_process) {
@@ -95,9 +95,9 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 			}
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			if(freeway != null)
-				attrs.put("freeway", freeway);
-			attrs.put("free_dir", new Short(free_dir));
+			if(roadway != null)
+				attrs.put("roadway", roadway);
+			attrs.put("road_dir", new Short(road_dir));
 			geo_locs.createObject(name, attrs);
 		}
 	}

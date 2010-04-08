@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,21 +42,21 @@ public class DetectorHelper extends BaseHelper {
 		GeoLoc loc = getGeoLoc(det);
 		if(loc == null)
 			return FUTURE;
-		Road freeway = loc.getFreeway();
+		Road roadway = loc.getRoadway();
 		Road cross = loc.getCrossStreet();
-		if(freeway == null || cross == null)
+		if(roadway == null || cross == null)
 			return FUTURE;
-		short fd = loc.getFreeDir();
+		short rd = loc.getRoadDir();
 		short cd = loc.getCrossDir();
 		short cm = loc.getCrossMod();
 		StringBuilder b = new StringBuilder();
-		b.append(freeway.getAbbrev());
+		b.append(roadway.getAbbrev());
 		b.append("/");
 		if(cd > 0)
 			b.append(Direction.DIRECTION[cd]);
 		b.append(Direction.MOD_SHORT[cm]);
 		b.append(cross.getAbbrev());
-		b.append(Direction.DIR_FREEWAY[fd]);
+		b.append(Direction.DIR_FREEWAY[rd]);
 		return b.toString();
 	}
 

@@ -75,11 +75,11 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	/** Sonar state object */
 	protected final SonarState state;
 
-	/** Freeway combobox */
-	protected final JComboBox freeway = new JComboBox();
+	/** Roadway combobox */
+	protected final JComboBox roadway = new JComboBox();
 
-	/** Freeway direction combo box */
-	protected final JComboBox freeDir = new JComboBox(Direction.DIR_LONG);
+	/** Roadway direction combo box */
+	protected final JComboBox roadDir = new JComboBox(Direction.DIR_LONG);
 
 	/** Cross street modifier combobox */
 	protected final JComboBox crossMod = new JComboBox(Direction.MODIFIER);
@@ -118,13 +118,13 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	/** Initialize the location panel */
 	public void initialize() {
 		cache.addProxyListener(this);
-		freeway.setModel(new WrapperComboBoxModel(
+		roadway.setModel(new WrapperComboBoxModel(
 			state.getRoadModel(), true));
 		cross.setModel(new WrapperComboBoxModel(
 			state.getRoadModel(), true));
-		add("Freeway", freeway);
+		add("Roadway", roadway);
 		setWidth(2);
-		addRow(freeDir);
+		addRow(roadDir);
 		add(crossMod);
 		setWest();
 		setWidth(2);
@@ -144,9 +144,9 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ActionJob(this, freeway) {
+		new ActionJob(this, roadway) {
 			public void perform() {
-				loc.setFreeway((Road)freeway.getSelectedItem());
+				loc.setRoadway((Road)roadway.getSelectedItem());
 			}
 		};
 		new ActionJob(this, cross) {
@@ -155,10 +155,10 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 					(Road)cross.getSelectedItem());
 			}
 		};
-		new ActionJob(this, freeDir) {
+		new ActionJob(this, roadDir) {
 			public void perform() {
-				loc.setFreeDir(
-					(short)freeDir.getSelectedIndex());
+				loc.setRoadDir(
+					(short)roadDir.getSelectedIndex());
 			}
 		};
 		new ActionJob(this, crossMod) {
@@ -242,10 +242,10 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 
 	/** Update one attribute on the form */
 	protected void updateAttribute(String a) {
-		if(a == null || a.equals("freeway"))
-			freeway.setSelectedItem(loc.getFreeway());
-		if(a == null || a.equals("freeDir"))
-			freeDir.setSelectedIndex(loc.getFreeDir());
+		if(a == null || a.equals("roadway"))
+			roadway.setSelectedItem(loc.getRoadway());
+		if(a == null || a.equals("roadDir"))
+			roadDir.setSelectedIndex(loc.getRoadDir());
 		if(a == null || a.equals("crossMod"))
 			crossMod.setSelectedIndex(loc.getCrossMod());
 		if(a == null || a.equals("crossStreet"))

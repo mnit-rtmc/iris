@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 
 /**
- * A corridor is a collection of all R_Node objects for one freeway corridor.
+ * A corridor is a collection of all R_Node objects for one roadway corridor.
  *
  * @author Douglas Lau
  */
@@ -142,8 +142,8 @@ public class Corridor extends CorridorBase {
 
 	/** Print out the corridor to an XML file */
 	public void printXml(PrintWriter out) {
-		out.println("<corridor route='" + freeway + "' dir='" +
-			GeoLocHelper.getDirection(free_dir) + "'>");
+		out.println("<corridor route='" + roadway + "' dir='" +
+			GeoLocHelper.getDirection(road_dir) + "'>");
 		for(R_Node n: r_nodes)
 			((R_NodeImpl)n).printXml(out);
 		out.println("</corridor>");

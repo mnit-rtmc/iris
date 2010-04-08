@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,12 @@ public interface Direction {
 		" ", "NB", "SB", "EB", "WB", "NS", "EW", "IN", "OUT"
 	};
 
-	/** Freeway direction strings to use for detector names */
+	/** Roadway direction strings to use for detector names */
 	public String[] DIR_FREEWAY = {
 		"", "N", "S", "E", "W", "N-S", "E-W", "IN", "OUT"
 	};
 
-	/** Freeway direction strings (long) */
+	/** Roadway direction strings (long) */
 	public String[] DIR_LONG = {
 		" ", "Northbound", "Southbound", "Eastbound", "Westbound",
 		"North-South", "East-West", "Inner Loop", "Outer Loop"

@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.server.event.SignStatusEvent;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes
- * of a freeway corridor.
+ * of a roadway corridor.
  *
  * @author Douglas Lau
  */

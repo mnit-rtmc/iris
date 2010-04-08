@@ -56,15 +56,12 @@ public class GeoLocXmlWriter extends XmlWriter {
 			GeoLocHelper.getTrueNorthing(p)));
 		out.print(createAttribute("easting",
 			GeoLocHelper.getTrueEasting(p)));
-		if(p.getFreeway() != null) {
-			out.print(createAttribute("freeway",
-				p.getFreeway().getName()));
-		}
+		out.print(createAttribute("roadway", p.getRoadway()));
 		if(p.getCrossStreet() != null) {
 			out.print(createAttribute("cross_mod",
 				GeoLocHelper.getModifier(p)));
 			out.print(createAttribute("cross_street",
-				p.getCrossStreet().getName()));
+				p.getCrossStreet()));
 		}
 		out.println("/>");
 	}

@@ -194,8 +194,8 @@ public class IncidentCreator extends JPanel {
 		if(loc == null)
 			return;
 		loc = snapGeoLoc(lt, loc);
-		Road road = loc.getFreeway();
-		short dir = loc.getFreeDir();
+		Road road = loc.getRoadway();
+		short dir = loc.getRoadDir();
 		int east = GeoLocHelper.getTrueEasting(loc);
 		int north = GeoLocHelper.getTrueNorthing(loc);
 		int n_lanes = getLaneCount(lt, loc);

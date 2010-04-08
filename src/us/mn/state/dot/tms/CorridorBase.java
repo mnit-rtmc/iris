@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * A corridor is a collection of all R_Node objects for one freeway corridor.
+ * A corridor is a collection of all R_Node objects for one roadway corridor.
  *
  * @author Douglas Lau
  */
@@ -77,25 +77,25 @@ public class CorridorBase {
 		return name;
 	}
 
-	/** Corridor freeway */
-	protected final Road freeway;
+	/** Corridor roadway */
+	protected final Road roadway;
 
-	/** Get the corridor freeway */
-	public Road getFreeway() {
-		return freeway;
+	/** Get the corridor roadway */
+	public Road getRoadway() {
+		return roadway;
 	}
 
 	/** Corridor direction */
-	protected final short free_dir;
+	protected final short road_dir;
 
 	/** Get the corridor direction */
-	public short getFreeDir() {
-		return free_dir;
+	public short getRoadDir() {
+		return road_dir;
 	}
 
 	/** Get the corridor ID */
 	public String getID() {
-		return GeoLocHelper.getCorridorID(freeway, free_dir);
+		return GeoLocHelper.getCorridorID(roadway, road_dir);
 	}
 
 	/** Flag for downstream-to-upstream (backwards) order */
@@ -114,8 +114,8 @@ public class CorridorBase {
 	/** Create a new corridor */
 	public CorridorBase(GeoLoc loc, boolean order) {
 		name = GeoLocHelper.getCorridorName(loc);
-		freeway = loc.getFreeway();
-		free_dir = loc.getFreeDir();
+		roadway = loc.getRoadway();
+		road_dir = loc.getRoadDir();
 		order_down_up = order;
 	}
 
@@ -202,7 +202,7 @@ public class CorridorBase {
 		Integer el = getTrueEasting(last);
 		if(nf == null || nl == null || ef == null || el == null)
 			return false;
-		switch(free_dir) {
+		switch(road_dir) {
 		case Road.NORTH:
 			return nf < nl;
 		case Road.SOUTH:

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +24,10 @@ import us.mn.state.dot.tms.Road;
  */
 public class ClientGeoLoc implements GeoLoc {
 
-	/** Create an location */
-	public ClientGeoLoc(Road free, short fd, int e, int n, double d) {
-		freeway = free;
-		free_dir = fd;
+	/** Create a client location */
+	public ClientGeoLoc(Road road, short rd, int e, int n, double d) {
+		roadway = road;
+		road_dir = rd;
 		easting = e;
 		northing = n;
 		distance = d;
@@ -48,30 +48,30 @@ public class ClientGeoLoc implements GeoLoc {
 		// nothing to do
 	}
 
-	/** Freeway */
-	protected final Road freeway;
+	/** Roadway */
+	protected final Road roadway;
 
-	/** Set the freeway name */
-	public void setFreeway(Road f) {
+	/** Set the roadway name */
+	public void setRoadway(Road f) {
 		// part of GeoLoc interface
 	}
 
-	/** Get the freeway name */
-	public Road getFreeway() {
-		return freeway;
+	/** Get the roadway name */
+	public Road getRoadway() {
+		return roadway;
 	}
 
-	/** Freeway direction */
-	protected final short free_dir;
+	/** Roadway direction */
+	protected final short road_dir;
 
-	/** Set the freeway direction */
-	public void setFreeDir(short d) {
+	/** Set the roadway direction */
+	public void setRoadDir(short d) {
 		// part of GeoLoc interface
 	}
 
-	/** Get the freeway direction */
-	public short getFreeDir() {
-		return free_dir;
+	/** Get the roadway direction */
+	public short getRoadDir() {
+		return road_dir;
 	}
 
 	/** Set the cross-street name */

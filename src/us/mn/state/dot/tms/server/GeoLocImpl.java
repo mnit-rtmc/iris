@@ -36,15 +36,15 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading geo locations...");
 		namespace.registerType(SONAR_TYPE, GeoLocImpl.class);
-		store.query("SELECT name, freeway, free_dir, cross_street, " +
+		store.query("SELECT name, roadway, road_dir, cross_street, " +
 			" cross_dir, cross_mod, easting, northing FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GeoLocImpl(namespace,
 					row.getString(1),	// name
-					row.getString(2),	// freeway
-					row.getShort(3),	// free_dir
+					row.getString(2),	// roadway
+					row.getShort(3),	// road_dir
 					row.getString(4),	// cross_street
 					row.getShort(5),	// cross_dir
 					row.getShort(6),	// cross_mod
@@ -59,8 +59,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("freeway", freeway);
-		map.put("free_dir", free_dir);
+		map.put("roadway", roadway);
+		map.put("road_dir", road_dir);
 		map.put("cross_street", cross_street);
 		map.put("cross_dir", cross_dir);
 		map.put("cross_mod", cross_mod);
@@ -85,12 +85,12 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Create a new geo location */
-	protected GeoLocImpl(String n, Road f, short fd, Road x, short xd,
+	protected GeoLocImpl(String n, Road r, short rd, Road x, short xd,
 		short xm, Integer e, Integer nr)
 	{
 		this(n);
-		freeway = f;
-		free_dir = fd;
+		roadway = r;
+		road_dir = rd;
 		cross_street = x;
 		cross_dir = xd;
 		cross_mod = xm;
@@ -99,55 +99,55 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Create a new geo location */
-	protected GeoLocImpl(Namespace ns, String n, String f, short fd,
+	protected GeoLocImpl(Namespace ns, String n, String r, short rd,
 		String x, short xd, short xm, Integer e, Integer nr)
 	{
-		this(n, (Road)ns.lookupObject(Road.SONAR_TYPE, f), fd,
+		this(n, (Road)ns.lookupObject(Road.SONAR_TYPE, r), rd,
 		     (Road)ns.lookupObject(Road.SONAR_TYPE, x), xd, xm, e, nr);
 	}
 
-	/** Freeway road */
-	protected Road freeway;
+	/** Roadway road */
+	protected Road roadway;
 
-	/** Set the freeway road */
-	public void setFreeway(Road f) {
-		freeway = f;
+	/** Set the roadway road */
+	public void setRoadway(Road r) {
+		roadway = r;
 	}
 
-	/** Set the freeway road */
-	public void doSetFreeway(Road f) throws TMSException {
-		if(f == freeway)
+	/** Set the roadway road */
+	public void doSetRoadway(Road r) throws TMSException {
+		if(r == roadway)
 			return;
-		store.update(this, "freeway", f);
-		setFreeway(f);
+		store.update(this, "roadway", r);
+		setRoadway(r);
 	}
 
-	/** Get the freeway locaiton */
-	public Road getFreeway() {
-		return freeway;
+	/** Get the roadway locaiton */
+	public Road getRoadway() {
+		return roadway;
 	}
 
-	/** Freeway direction */
-	protected short free_dir;
+	/** Roadway direction */
+	protected short road_dir;
 
-	/** Set the freeway direction */
-	public void setFreeDir(short d) {
-		free_dir = d;
+	/** Set the roadway direction */
+	public void setRoadDir(short d) {
+		road_dir = d;
 	}
 
-	/** Set the freeway direction */
-	public void doSetFreeDir(short d) throws TMSException {
-		if(d == free_dir)
+	/** Set the roadway direction */
+	public void doSetRoadDir(short d) throws TMSException {
+		if(d == road_dir)
 			return;
 		if(d < 0 || d > Direction.DIR_FREEWAY.length)
 			throw new ChangeVetoException("Invalid direction");
-		store.update(this, "free_dir", d);
-		setFreeDir(d);
+		store.update(this, "road_dir", d);
+		setRoadDir(d);
 	}
 
-	/** Get the freeway direction */
-	public short getFreeDir() {
-		return free_dir;
+	/** Get the roadway direction */
+	public short getRoadDir() {
+		return road_dir;
 	}
 
 	/** Nearest cross-street */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,11 +133,6 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 	/** Get the road class */
 	public short getRClass() {
 		return r_class;
-	}
-
-	/** Check if the road is a freeway */
-	public boolean isFreeway() {
-		return r_class == FREEWAY || r_class == CD_ROAD;
 	}
 
 	/** Direction (NORTH_SOUTH or EAST_WEST) */

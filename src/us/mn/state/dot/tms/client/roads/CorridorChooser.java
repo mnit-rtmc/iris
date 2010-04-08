@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
  */
 public class CorridorChooser extends JPanel {
 
-	/** Combo box to select a freeway corridor */
+	/** Combo box to select a roadway corridor */
 	protected final JComboBox corridor_combo = new JComboBox();
 
 	/** Roadway node manager */
@@ -72,7 +72,7 @@ public class CorridorChooser extends JPanel {
 			}
 		};
 		setBorder(BorderFactory.createTitledBorder(
-			"Selected Freeway Corridor"));
+			"Selected Roadway Corridor"));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets = new Insets(2, 4, 2, 4);
 		bag.anchor = GridBagConstraints.EAST;

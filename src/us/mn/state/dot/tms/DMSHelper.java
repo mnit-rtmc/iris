@@ -307,13 +307,13 @@ public class DMSHelper extends BaseHelper {
 		return EMPTY_TXT;
 	}
 
-	/** Get the DMS freeway direction from the geo location as a String */
-	static public String getFreeDir(DMS proxy) {
+	/** Get the DMS roadway direction from the geo location as a String */
+	static public String getRoadDir(DMS proxy) {
 		if(proxy != null) {
 			GeoLoc loc = proxy.getGeoLoc();
 			if(loc != null) {
 				return GeoLocHelper.getDirection(
-					loc.getFreeDir());
+					loc.getRoadDir());
 			}
 		}
 		return "";
