@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +37,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		System.err.println("Loading geo locations...");
 		namespace.registerType(SONAR_TYPE, GeoLocImpl.class);
 		store.query("SELECT name, freeway, free_dir, cross_street, " +
-			" cross_dir, cross_mod, easting, east_off, northing, " +
-			"north_off FROM iris." + SONAR_TYPE  + ";",
-			new ResultFactory()
+			" cross_dir, cross_mod, easting, northing FROM iris." +
+			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GeoLocImpl(namespace,
@@ -50,9 +49,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 					row.getShort(5),	// cross_dir
 					row.getShort(6),	// cross_mod
 					(Integer)row.getObject(7), // easting
-					(Integer)row.getObject(8), // east_off
-					(Integer)row.getObject(9), // northing
-					(Integer)row.getObject(10) // north_off
+					(Integer)row.getObject(8) // northing
 				));
 			}
 		});
@@ -68,9 +65,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		map.put("cross_dir", cross_dir);
 		map.put("cross_mod", cross_mod);
 		map.put("easting", easting);
-		map.put("east_off", east_off);
 		map.put("northing", northing);
-		map.put("north_off", north_off);
 		return map;
 	}
 
@@ -91,7 +86,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Create a new geo location */
 	protected GeoLocImpl(String n, Road f, short fd, Road x, short xd,
-		short xm, Integer e, Integer eo, Integer nr, Integer no)
+		short xm, Integer e, Integer nr)
 	{
 		this(n);
 		freeway = f;
@@ -100,19 +95,15 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		cross_dir = xd;
 		cross_mod = xm;
 		easting = e;
-		east_off = eo;
 		northing = nr;
-		north_off = no;
 	}
 
 	/** Create a new geo location */
 	protected GeoLocImpl(Namespace ns, String n, String f, short fd,
-		String x, short xd, short xm, Integer e, Integer eo,
-		Integer nr, Integer no)
+		String x, short xd, short xm, Integer e, Integer nr)
 	{
 		this(n, (Road)ns.lookupObject(Road.SONAR_TYPE, f), fd,
-			(Road)ns.lookupObject(Road.SONAR_TYPE, x), xd, xm,
-			e, eo, nr, no);
+		     (Road)ns.lookupObject(Road.SONAR_TYPE, x), xd, xm, e, nr);
 	}
 
 	/** Freeway road */
@@ -255,27 +246,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return easting;
 	}
 
-	/** UTM Easting offset */
-	protected Integer east_off;
-
-	/** Set the UTM Easting offset */
-	public void setEastOffset(Integer x) {
-		east_off = x;
-	}
-
-	/** Set the UTM Easting offset */
-	public void doSetEastOffset(Integer x) throws TMSException {
-		if(x == east_off)
-			return;
-		store.update(this, "east_off", x);
-		setEastOffset(x);
-	}
-
-	/** Get the UTM Easting offset */
-	public Integer getEastOffset() {
-		return east_off;
-	}
-
 	/** UTM Northing */
 	protected Integer northing;
 
@@ -297,26 +267,5 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	/** Get the UTM Northing */
 	public Integer getNorthing() {
 		return northing;
-	}
-
-	/** UTM Northing offset */
-	protected Integer north_off;
-
-	/** Set the UTM Northing offset */
-	public void setNorthOffset(Integer y) {
-		north_off = y;
-	}
-
-	/** Set the UTM Northing offset */
-	public void doSetNorthOffset(Integer y) throws TMSException {
-		if(y == north_off)
-			return;
-		store.update(this, "north_off", y);
-		setNorthOffset(y);
-	}
-
-	/** Get the UTM Northing offset */
-	public Integer getNorthOffset() {
-		return north_off;
 	}
 }

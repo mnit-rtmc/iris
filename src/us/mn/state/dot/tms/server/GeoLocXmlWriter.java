@@ -52,12 +52,10 @@ public class GeoLocXmlWriter extends XmlWriter {
 	protected void printXmlElement(GeoLoc p, PrintWriter out) {
 		out.print("<" + p.SONAR_TYPE);
 		out.print(createAttribute("id", p.getName()));
-		if(GeoLocHelper.hasGPS(p)) {
-			out.print(createAttribute("northing",
-				GeoLocHelper.getTrueNorthing(p)));
-			out.print(createAttribute("easting",
-				GeoLocHelper.getTrueEasting(p)));
-		}
+		out.print(createAttribute("northing",
+			GeoLocHelper.getTrueNorthing(p)));
+		out.print(createAttribute("easting",
+			GeoLocHelper.getTrueEasting(p)));
 		if(p.getFreeway() != null) {
 			out.print(createAttribute("freeway",
 				p.getFreeway().getName()));

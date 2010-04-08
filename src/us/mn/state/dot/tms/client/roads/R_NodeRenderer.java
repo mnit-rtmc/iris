@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,9 +42,6 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Background color for nodes with GPS points */
 	static public final Color COLOR_GPS = Color.GREEN;
-
-	/** Background color for nodes with guessed locations */
-	static public final Color COLOR_NO_GPS = Color.ORANGE;
 
 	/** Background color for nodes with bad locations */
 	static public final Color COLOR_NO_LOC = Color.RED;
@@ -116,12 +113,10 @@ public class R_NodeRenderer extends JPanel {
 			setBackground(Color.LIGHT_GRAY);
 		else {
 			GeoLoc loc = proxy.getGeoLoc();
-			if(GeoLocHelper.hasGPS(loc))
-				setBackground(COLOR_GPS);
-			else if(GeoLocHelper.isNull(loc))
+			if(GeoLocHelper.isNull(loc))
 				setBackground(COLOR_NO_LOC);
 			else
-				setBackground(COLOR_NO_GPS);
+				setBackground(COLOR_GPS);
 		}
 	}
 

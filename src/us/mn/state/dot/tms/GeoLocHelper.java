@@ -235,58 +235,24 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Get the true easting */
 	static public Integer getTrueEasting(GeoLoc l) {
-		if(l == null)
-			return null;
-		Integer x = l.getEasting();
-		if(x != null)
-			return x;
+		if(l != null)
+			return l.getEasting();
 		else
-			return l.getEastOffset();
+			return null;
 	}
 
 	/** Get the true northing */
 	static public Integer getTrueNorthing(GeoLoc l) {
-		if(l == null)
-			return null;
-		Integer y = l.getNorthing();
-		if(y != null)
-			return y;
+		if(l != null)
+			return l.getNorthing();
 		else
-			return l.getNorthOffset();
-	}
-
-	/** Get the combined easting */
-	static public Integer getCombinedEasting(GeoLoc l) {
-		if(l.getEasting() != null) {
-			int easting = l.getEasting();
-			if(l.getEastOffset() != null)
-				easting += l.getEastOffset();
-			return easting;
-		} else
-			return l.getEastOffset();
-	}
-
-	/** Get the combined northing */
-	static public Integer getCombinedNorthing(GeoLoc l) {
-		if(l.getNorthing() != null) {
-			int northing = l.getNorthing();
-			if(l.getNorthOffset() != null)
-				northing += l.getNorthOffset();
-			return northing;
-		} else
-			return l.getNorthOffset();
+			return null;
 	}
 
 	/** Check if the UTM coordinates are null */
 	static public boolean isNull(GeoLoc l) {
 		return (getTrueEasting(l) == null) ||
 			(getTrueNorthing(l) == null);
-	}
-
-	/** Check if the coordinates are GPS data */
-	static public boolean hasGPS(GeoLoc l) {
-		return l != null && l.getNorthing() != null &&
-			l.getEasting() != null;
 	}
 
 	/** Calculate the distance between two locations (in meters) */

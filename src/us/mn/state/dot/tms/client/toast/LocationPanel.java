@@ -94,17 +94,9 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	protected final JSpinner easting = new JSpinner(
 		new SpinnerNumberModel(0, 0, 1000000, 1));
 
-	/** UTM Easting offset */
-	protected final JSpinner eastOff = new JSpinner(
-		new SpinnerNumberModel(0, -9999, 1000000, 1));
-
 	/** UTM Northing */
 	protected final JSpinner northing = new JSpinner(
 		new SpinnerNumberModel(0, 0, 10000000, 1));
-
-	/** UTM Northing offset */
-	protected final JSpinner northOff = new JSpinner(
-		new SpinnerNumberModel(0, -9999, 10000000, 1));
 
 	/** Button to select a point from the map */
 	protected final JButton select = new JButton("Select Point");
@@ -140,11 +132,9 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		setWidth(1);
 		addRow(crossDir);
 		add("Easting", easting);
-		setEast();
-		addRow("East Offset", eastOff);
+		finishRow();
 		add("Northing", northing);
-		setEast();
-		addRow("North Offset", northOff);
+		finishRow();
 		setWidth(4);
 		addRow(select);
 		if(enable)
@@ -188,27 +178,15 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 				loc.setEasting(getSpinnerInteger(easting));
 			}
 		};
-		new ChangeJob(this, eastOff) {
-			public void perform() {
-				loc.setEastOffset(getSpinnerInteger(eastOff));
-			}
-		};
 		new ChangeJob(this, northing) {
 			public void perform() {
 				loc.setNorthing(getSpinnerInteger(northing));
 			}
 		};
-		new ChangeJob(this, northOff) {
-			public void perform() {
-				loc.setNorthOffset(getSpinnerInteger(northOff));
-			}
-		};
 		final PointSelector ps = new PointSelector() {
 			public void selectPoint(Point2D p) {
-				int x = (int)p.getX();
-				eastOff.setValue(x - getSpinnerInt(easting));
-				int y = (int)p.getY();
-				northOff.setValue(y - getSpinnerInt(northing));
+				easting.setValue((int)p.getX());
+				northing.setValue((int)p.getY());
 				setPointSelector(null);
 			}
 		};
@@ -276,11 +254,7 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 			crossDir.setSelectedIndex(loc.getCrossDir());
 		if(a == null || a.equals("easting"))
 			easting.setValue(asInt(loc.getEasting()));
-		if(a == null || a.equals("eastOffset"))
-			eastOff.setValue(asInt(loc.getEastOffset()));
 		if(a == null || a.equals("northing"))
 			northing.setValue(asInt(loc.getNorthing()));
-		if(a == null || a.equals("northOffset"))
-			northOff.setValue(asInt(loc.getNorthOffset()));
 	}
 }

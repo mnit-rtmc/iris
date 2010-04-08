@@ -65,9 +65,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Name of "has GPS" style */
 	static public final String STYLE_GPS = "Has GPS";
 
-	/** Name of "no GPS" style */
-	static public final String STYLE_NO_GPS = "No GPS";
-
 	/** Name of "no location" style */
 	static public final String STYLE_NO_LOC = "No Location";
 
@@ -236,9 +233,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, R_Node proxy) {
 		if(STYLE_GPS.equals(s))
-			return GeoLocHelper.hasGPS(getGeoLoc(proxy));
-		else if(STYLE_NO_GPS.equals(s))
-			return !GeoLocHelper.hasGPS(getGeoLoc(proxy));
+			return !GeoLocHelper.isNull(getGeoLoc(proxy));
 		else if(STYLE_NO_LOC.equals(s))
 			return GeoLocHelper.isNull(getGeoLoc(proxy));
 		else if(corridors.containsKey(s)) {
@@ -258,7 +253,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	protected StyledTheme createTheme() {
 		R_NodeMapTheme theme = new R_NodeMapTheme(this);
 		theme.addStyle(STYLE_GPS, R_NodeRenderer.COLOR_GPS);
-		theme.addStyle(STYLE_NO_GPS, R_NodeRenderer.COLOR_NO_GPS);
 		theme.addStyle(STYLE_NO_LOC, R_NodeRenderer.COLOR_NO_LOC);
 		theme.addStyle(STYLE_ALL);
 		return theme;

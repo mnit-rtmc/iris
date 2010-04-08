@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,8 +102,8 @@ public class MapGeoLoc implements MapObject {
 
 	/** Set a point */
 	public boolean setPoint(Point2D p, float distance) {
-		Integer x = GeoLocHelper.getCombinedEasting(loc);
-		Integer y = GeoLocHelper.getCombinedNorthing(loc);
+		Integer x = GeoLocHelper.getTrueEasting(loc);
+		Integer y = GeoLocHelper.getTrueNorthing(loc);
 		if(x != null && y != null) {
 			Double t = tangent;
 			if(t != null) {
@@ -126,12 +126,8 @@ public class MapGeoLoc implements MapObject {
 		int northing = 0;
 		if(loc.getEasting() != null)
 			easting += loc.getEasting();
-		if(loc.getEastOffset() != null)
-			easting += loc.getEastOffset();
 		if(loc.getNorthing() != null)
 			northing += loc.getNorthing();
-		if(loc.getNorthOffset() != null)
-			northing += loc.getNorthOffset();
 		transform.setToTranslation(easting, northing);
 		transform.rotate(getTangent());
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,21 +62,9 @@ public interface GeoLoc extends SonarObject {
 	/** Get the UTM Easting */
 	Integer getEasting();
 
-	/** Set the UTM Easting offset */
-	void setEastOffset(Integer x);
-
-	/** Get the UTM Easting offset */
-	Integer getEastOffset();
-
 	/** Set the UTM Northing */
 	void setNorthing(Integer y);
 
 	/** Get the UTM Northing */
 	Integer getNorthing();
-
-	/** Set the UTM Northing offset */
-	void setNorthOffset(Integer y);
-
-	/** Get the UTM Northing offset */
-	Integer getNorthOffset();
 }

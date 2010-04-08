@@ -226,9 +226,7 @@ CREATE TABLE iris.geo_loc (
 	cross_dir smallint REFERENCES iris.direction(id),
 	cross_mod smallint REFERENCES iris.road_modifier(id),
 	easting integer,
-	east_off integer,
-	northing integer,
-	north_off integer
+	northing integer
 );
 
 CREATE TABLE iris.map_extent (
@@ -862,7 +860,7 @@ CREATE VIEW geo_loc_view AS
 	f_dir.direction AS free_dir, f_dir.dir AS fdir,
 	m.modifier AS cross_mod, m.mod AS xmod, c.abbrev as xst,
 	l.cross_street, c_dir.direction AS cross_dir,
-	l.easting, l.east_off, l.northing, l.north_off
+	l.easting, l.northing
 	FROM iris.geo_loc l
 	LEFT JOIN iris.road f ON l.freeway = f.name
 	LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
@@ -896,34 +894,21 @@ CREATE VIEW controller_loc_view AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
-CREATE VIEW alarm_view AS
-	SELECT a.name, a.description, a.state, a.controller, a.pin, c.comm_link,
-		c.drop_id
-	FROM iris.alarm a LEFT JOIN iris.controller c ON a.controller = c.name;
-GRANT SELECT ON alarm_view TO PUBLIC;
-
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.camera,
 	d.aws_allowed, d.aws_controlled,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.east_off, l.northing, l.north_off
+	l.easting, l.northing
 	FROM iris.dms d
 	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON dms_view TO PUBLIC;
-
-CREATE VIEW sign_text_view AS
-	SELECT dms, local, line, message, priority
-	FROM iris.dms_sign_group dsg
-	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
-	JOIN iris.sign_text st ON sg.name = st.sign_group;
-GRANT SELECT ON sign_text_view TO PUBLIC;
 
 CREATE VIEW ramp_meter_view AS
 	SELECT m.name, geo_loc, controller, pin, notes,
 	mt.description AS meter_type, storage, max_wait, camera,
 	ml.description AS meter_lock,
 	l.fwy, l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing, l.east_off, l.north_off
+	l.easting, l.northing
 	FROM iris.ramp_meter m
 	LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
 	LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
@@ -933,7 +918,7 @@ GRANT SELECT ON ramp_meter_view TO PUBLIC;
 CREATE VIEW camera_view AS
 	SELECT c.name, c.notes, c.encoder, c.encoder_channel, c.nvr, c.publish,
 	c.geo_loc, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
-	l.cross_dir, l.easting, l.northing, l.east_off, l.north_off,
+	l.cross_dir, l.easting, l.northing,
 	c.controller, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.camera c
 	JOIN geo_loc_view l ON c.geo_loc = l.name
@@ -943,7 +928,7 @@ GRANT SELECT ON camera_view TO PUBLIC;
 CREATE VIEW warning_sign_view AS
 	SELECT w.name, w.notes, w.message, w.camera, w.geo_loc,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing, l.east_off, l.north_off,
+	l.easting, l.northing,
 	w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.warning_sign w
 	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
@@ -1026,6 +1011,19 @@ CREATE VIEW detector_view AS
 	LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
 	LEFT JOIN iris.controller c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
+
+CREATE VIEW alarm_view AS
+	SELECT a.name, a.description, a.state, a.controller, a.pin, c.comm_link,
+		c.drop_id
+	FROM iris.alarm a LEFT JOIN iris.controller c ON a.controller = c.name;
+GRANT SELECT ON alarm_view TO PUBLIC;
+
+CREATE VIEW sign_text_view AS
+	SELECT dms, local, line, message, priority
+	FROM iris.dms_sign_group dsg
+	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
+	JOIN iris.sign_text st ON sg.name = st.sign_group;
+GRANT SELECT ON sign_text_view TO PUBLIC;
 
 CREATE VIEW controller_view AS
 	SELECT c.name, drop_id, comm_link, cabinet, active, notes, cab.geo_loc
@@ -1241,7 +1239,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.114.0
+database_version	3.115.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
