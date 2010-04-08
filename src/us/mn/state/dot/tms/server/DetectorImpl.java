@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -189,10 +189,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	public void doSetR_Node(R_Node n) throws TMSException {
 		if(n == r_node)
 			return;
-		if(n != null)
-			store.update(this, "r_node", n.getName());
-		else
-			store.update(this, "r_node", null);
+		store.update(this, "r_node", n);
 		if(r_node != null)
 			r_node.removeDetector(this);
 		if(n instanceof R_NodeImpl)

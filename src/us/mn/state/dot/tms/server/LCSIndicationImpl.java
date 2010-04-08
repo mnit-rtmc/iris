@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,10 +142,7 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 		if(c == controller)
 			return;
 		updateController((ControllerImpl)c, pin);
-		if(c == null)
-			store.update(this, "controller", null);
-		else
-			store.update(this, "controller", c.getName());
+		store.update(this, "controller", c);
 		setController(c);
 	}
 

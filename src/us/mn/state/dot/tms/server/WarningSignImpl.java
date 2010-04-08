@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,10 +137,7 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 	public void doSetCamera(Camera c) throws TMSException {
 		if(c == camera)
 			return;
-		if(c == null)
-			store.update(this, "camera", null);
-		else
-			store.update(this, "camera", c.getName());
+		store.update(this, "camera", c);
 		setCamera(c);
 	}
 

@@ -118,10 +118,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetFreeway(Road f) throws TMSException {
 		if(f == freeway)
 			return;
-		if(f == null)
-			store.update(this, "freeway", null);
-		else
-			store.update(this, "freeway", f.getName());
+		store.update(this, "freeway", f);
 		setFreeway(f);
 	}
 
@@ -165,10 +162,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetCrossStreet(Road x) throws TMSException {
 		if(x == cross_street)
 			return;
-		if(x == null)
-			store.update(this, "cross_street", null);
-		else
-			store.update(this, "cross_street", x);
+		store.update(this, "cross_street", x);
 		setCrossStreet(x);
 	}
 

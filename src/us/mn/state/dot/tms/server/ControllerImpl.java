@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -160,10 +160,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public void doSetCabinet(Cabinet c) throws TMSException {
 		if(c == cabinet)
 			return;
-		if(c != null)
-			store.update(this, "cabinet", c.getName());
-		else
-			store.update(this, "cabinet", null);
+		store.update(this, "cabinet", c);
 		setCabinet(c);
 	}
 
@@ -199,10 +196,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if(c == comm_link)
 			return;
 		putCommLink(drop_id, c);
-		if(c != null)
-			store.update(this, "comm_link", c.getName());
-		else
-			store.update(this, "comm_link", null);
+		store.update(this, "comm_link", c);
 		pullCommLink(comm_link);
 		setCommLink(c);
 	}

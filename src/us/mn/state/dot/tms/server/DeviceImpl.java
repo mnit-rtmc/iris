@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,10 +121,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		if(c != null && !(c instanceof ControllerImpl))
 			throw new ChangeVetoException("Invalid controller");
 		updateController(controller, (ControllerImpl)c, pin);
-		if(c == null)
-			store.update(this, "controller", null);
-		else
-			store.update(this, "controller", c.getName());
+		store.update(this, "controller", c);
 		setController(c);
 	}
 
