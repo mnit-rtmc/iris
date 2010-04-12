@@ -74,7 +74,7 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 		}
 	}
 
-	/** Create a sensor cleint */
+	/** Create a sensor client */
 	protected void createSensorClient(String loc, Logger l)
 		throws IOException, TdxmlException
 	{
