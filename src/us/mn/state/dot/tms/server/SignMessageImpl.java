@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A sign message represents a message which can be displayed on a dynamic
@@ -185,5 +187,25 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	 * @return Duration in minutes; null means indefinite. */
 	public Integer getDuration() {
 		return duration;
+	}
+
+	/** Render the SignMessage object as xml */
+	public void printXmlElement(PrintWriter out) {
+		if(SignMessageHelper.isBlank(this))
+			return;
+		String[] ml = SignMessageHelper.createLines(this);
+		if(ml != null && ml.length > 0) {
+			out.print("<" + SONAR_TYPE);
+			String[] fonts = SignMessageHelper.getFontNames(this,1);
+			if(fonts.length > 0) {
+				String f = SString.toString(fonts);
+				out.print(XmlWriter.createAttribute("font", f));
+			}
+			for(int i = 0; i < ml.length; i++) {
+				String an = "line_" + (i + 1);
+				out.print(XmlWriter.createAttribute(an, ml[i]));
+			}
+			out.println("/>");
+		}
 	}
 }
