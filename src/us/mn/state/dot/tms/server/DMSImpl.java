@@ -1641,7 +1641,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				loc.getName()));
 		}
 		out.println(">");
-		SignMessageHelper.printXmlElement(getMessageCurrent(), out);
+		SignMessage msg = getMessageCurrent();
+		if(msg instanceof SignMessageImpl)
+			((SignMessageImpl)msg).printXmlElement(out);
 		out.println("</" + DMSABBR + ">");
 	}
 }
