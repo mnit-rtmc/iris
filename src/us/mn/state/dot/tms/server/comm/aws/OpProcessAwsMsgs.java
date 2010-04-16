@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.aws;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
-import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
@@ -65,28 +64,11 @@ public class OpProcessAwsMsgs extends OpController
 				"called: " + 
 				STime.getCurDateTimeMSString(true));
 			assert argmess instanceof Message : "wrong message type";
-
-			Message mess = (Message) argmess;
-
-			// send msg
+			AwsRequest request = new AwsRequest();
+			Message mess = (Message)argmess;
+			mess.add(request);
 			mess.getRequest();
-
-			// parse the response
-			byte[] bmsgs = mess.getDmsMsgs();
-
-			// nothing?
-			if((bmsgs == null) || (bmsgs.length <= 0)) {
-				Log.finest(
-					"OpProcessAwsMsgs.poll(): " +
-					" missing or zero length AWS file.");
-				return null;
-			}
-
-			// create and activate messages
-			Log.finest(
-			    "OpProcessAwsMsgs.PhaseReadMsgFile.poll(), received "
-			    + bmsgs.length + " bytes of DMS messages.");
-			new AwsMsgs(bmsgs).activate();
+			request.activate();
 			return null;
 		}
 	}

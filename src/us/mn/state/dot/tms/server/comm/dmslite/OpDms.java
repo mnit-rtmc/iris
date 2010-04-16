@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
-import us.mn.state.dot.tms.server.comm.aws.AwsMsgs;
 import us.mn.state.dot.tms.server.comm.aws.AwsPoller;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
@@ -91,7 +90,7 @@ abstract public class OpDms extends OpDevice {
 		if(DMSMessagePriority.fromOrdinal(sm.getRunTimePriority()) == 
 		   DMSMessagePriority.AWS)
 		{
-			return AwsMsgs.getRetryThreshold();
+			return SystemAttrEnum.DMS_AWS_RETRY_THRESHOLD.getInt();
 		} else
 			return super.getRetryThreshold();
 	}

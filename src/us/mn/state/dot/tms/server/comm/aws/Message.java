@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,56 +16,44 @@ package us.mn.state.dot.tms.server.comm.aws;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.server.comm.Messenger;
-import us.mn.state.dot.tms.utils.Log;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * AWS Message. Normally, a Message represents the bytes sent and
- * received from a device. However, the AWS poller uses the
- * the HttpFileMessenger messenger, which reads a file via HTTP,
- * so there is no real message "sent".
+ * AWS Message.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class Message implements AddressedMessage
-{
-	/** dms messages received from AWS */
-	private byte[] m_msgs = new byte[0];
+public class Message implements AddressedMessage {
 
-	// associated file messenger
-	private HttpFileMessenger m_mess;
+	/** Associated messenger */
+	protected final Messenger messenger;
+
+	/** AWS request to parse */
+	protected AwsRequest req = null;
 
 	/** Create a new message */
 	public Message(Messenger mess) {
-		if(!(mess instanceof HttpFileMessenger)) {
-			throw new IllegalArgumentException(
-			    "wrong type of messenger arg.");
-		}
-		m_mess = (HttpFileMessenger) mess;
+		messenger = mess;
 	}
 
-	/**
-	 * Add an object to this message.
-	 * Defined in AddressedMessage interface.
-	 */
-	public void add(Object mo) {}
+	/** Add a request object to this message */
+	public void add(Object mo) {
+		if(mo instanceof AwsRequest)
+			req = (AwsRequest)mo;
+	}
 
 	/** Send a get request message.
-	 *  Defined in AddressedMessage interface.
-	 *  @throws IOException if received response is malformed. */
+	 * Defined in AddressedMessage interface.
+	 * @throws IOException if received response is malformed. */
 	public void getRequest() throws IOException {
-		Log.finest("aws.Message.getRequest() called.");
-		m_msgs = m_mess.read();
+		if(req == null)
+			throw new ProtocolException("No request");
+		req.doGetRequest(messenger.getInputStream());
 	}
 
 	/** Send an set request message. Defined in the
-	 *  AddressedMessage interface. */
+	 * AddressedMessage interface. */
 	public void setRequest() throws IOException {}
-
-	/** Get the DMS messages received. */
-	public byte[] getDmsMsgs() {
-		return (m_msgs);
-	}
 }
