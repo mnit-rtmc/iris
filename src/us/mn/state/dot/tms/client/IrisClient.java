@@ -156,7 +156,6 @@ public class IrisClient extends JFrame {
 	/** Log out the current session and quit the client */
 	public void quit() {
 		logout();
-		writeUserProperties();
 		new AbstractJob(LOGIN) {
 			public void perform() {
 				System.exit(0);
@@ -386,6 +385,7 @@ public class IrisClient extends JFrame {
 
 	/** Clean up when the user logs out */
 	protected void doLogout() {
+		writeUserProperties();
 		updateMenus(null);
 		removeTabs();
 		closeSession();
