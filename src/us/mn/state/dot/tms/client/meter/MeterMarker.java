@@ -25,7 +25,7 @@ import us.mn.state.dot.map.marker.AbstractMarker;
 public class MeterMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
-	static protected final int MARKER_SIZE_PIX = 22;
+	static protected final int MARKER_SIZE_PIX = 20;
 
 	/** Create a new ramp meter marker */
 	public MeterMarker() {
