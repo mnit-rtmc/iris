@@ -96,7 +96,10 @@ public class ScreenPane extends JPanel {
 		});
 	}
 
-	/** Last selected tab */
+	/** Last selected tab, which stores the index of last user selected
+	 * tab. A field is used to track this, rather than dynamically
+	 * calling tab_pane.getSelectedIndex() because if the method is 
+	 * called during app shutdown, it can erroneously return a -1. */
 	private int sel_tab;
 
 	/** Store the currently selected tab index. If no tab is 
