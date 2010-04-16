@@ -77,6 +77,18 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Name of all style */
 	static public final String STYLE_ALL = "All";
 
+	/** Color to display available meters */
+	static protected final Color COLOR_AVAILABLE = new Color(64, 64, 192);
+
+	/** Color to display warning meters */
+	static protected final Color COLOR_WARNING = new Color(192, 96, 0);
+
+	/** Color to display deployed meters */
+	static protected final Color COLOR_DEPLOYED = new Color(192, 192, 0);
+
+	/** Color to display metering meters */
+	static protected final Color COLOR_METERING = new Color(0, 192, 0);
+
 	/** Test if a meter is active */
 	static protected boolean isActive(RampMeter proxy) {
 		Controller ctr = proxy.getController();
@@ -156,10 +168,10 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	protected StyledTheme createTheme() {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
 			getProxyType(), MARKER);
-		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(STYLE_QUEUE_FULL, Color.ORANGE);
-		theme.addStyle(STYLE_QUEUE_EXISTS, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(STYLE_METERING, Color.GREEN);
+		theme.addStyle(STYLE_AVAILABLE, COLOR_AVAILABLE);
+		theme.addStyle(STYLE_QUEUE_FULL, COLOR_WARNING);
+		theme.addStyle(STYLE_QUEUE_EXISTS, COLOR_DEPLOYED);
+		theme.addStyle(STYLE_METERING, COLOR_METERING);
 		theme.addStyle(STYLE_LOCKED, null, ProxyTheme.OUTLINE_LOCKED);
 		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
@@ -267,6 +279,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Get the layer scale visibility threshold */
 	protected float getScaleThreshold() {
-		return 0.5f;
+		return 0.4f;
 	}
 }
