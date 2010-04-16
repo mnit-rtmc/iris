@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
@@ -42,6 +43,7 @@ public class UserProperties {
 	final String WIN_Y = "win.y";
 	final String WIN_WIDTH = "win.width";
 	final String WIN_HEIGHT = "win.height";
+	final String TAB_SEL = "tab.selected";
 
 	/** Props file name */
 	private String m_fname = "";
@@ -170,8 +172,26 @@ public class UserProperties {
 		return JFrame.NORMAL;
 	}
 
+	/** Return the name of a selected tab prop name */
+	private String getTabPropName(int i) {
+		return TAB_SEL + "." + String.valueOf(i);
+	}
+
+	/** Get array of currently selected tabs (as Integers) in each pane */
+	public Object[] getSelectedTabs() {
+		ArrayList<Integer> sti = new ArrayList<Integer>();
+		final int MAX_SCREEN_PANES = 16;
+		for(int i = 0; i < MAX_SCREEN_PANES; ++i) {
+			String pn = getTabPropName(i);
+			if(!propExists(pn))
+				break;
+			sti.add(getPropInt(pn));
+		}
+		return sti.toArray();
+	}
+
 	/** Update user properties associated with JFrame. */
-	public void setWindowProperties(JFrame frame) {
+	public void setWindowProperties(IrisClient frame) {
 		if(!used() || frame == null)
 			return;
 
@@ -190,6 +210,11 @@ public class UserProperties {
 			setProp(WIN_WIDTH, r.width);
 			setProp(WIN_HEIGHT, r.height);
 		}
+
+		// currently selected tabs in multiple screen panes
+		int[] sti = frame.getSelectedTabIndex();
+		for(int i = 0; i < sti.length; ++i)
+			setProp(getTabPropName(i), sti[i]);
 	}
 
 	/** Write properties file. 

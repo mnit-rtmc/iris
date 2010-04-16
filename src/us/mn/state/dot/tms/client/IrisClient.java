@@ -164,6 +164,24 @@ public class IrisClient extends JFrame {
 		}.addToScheduler();
 	}
 
+	/** Set the currently selected tab in each screen pane, using the
+	 * persistently stored tab index. */
+	private void setSelectedTabViaPersist() {
+		Object[] sti = m_uprops.getSelectedTabs();
+		for(int i = 0; i < s_panes.length && i < sti.length; ++i) {
+			int ti = ((Integer)sti[i]).intValue();
+			s_panes[i].setSelectedTabIndex(ti);
+		}
+	}
+
+	/** Get the currently selected tab in each screen pane */
+	public int[] getSelectedTabIndex() {
+		int[] sti = new int[s_panes.length];
+		for(int i = 0; i < sti.length; ++i)
+			sti[i] = s_panes[i].getSelectedTabIndex();
+		return sti;
+	}
+
 	/** Update and write user properties file */
 	private void writeUserProperties() {
 		m_uprops.setWindowProperties(this);
@@ -255,6 +273,7 @@ public class IrisClient extends JFrame {
 			ScreenPane sp = visible.get(p);
 			sp.addTab(tab);
 		}
+		setSelectedTabViaPersist();
 		for(ScreenPane sp: visible) {
 			sp.createToolPanels(s);
 			sp.setHomeLayer();
