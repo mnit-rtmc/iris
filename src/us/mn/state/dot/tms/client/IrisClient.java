@@ -298,8 +298,12 @@ public class IrisClient extends JFrame {
 	{
 		SonarState state = createSonarState();
 		state.login(user, new String(pwd));
-		state.populateCaches();
-		return new Session(state, desktop, props, logger, baseLayers);
+		if(state.isLoggedIn()) {
+			state.populateCaches();
+			return new Session(state, desktop, props, logger,
+				baseLayers);
+		} else
+			return null;
 	}
 
 	/** Create a new SONAR state */
