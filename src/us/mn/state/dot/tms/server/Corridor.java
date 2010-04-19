@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -143,7 +144,7 @@ public class Corridor extends CorridorBase {
 	/** Print out the corridor to an XML file */
 	public void printXml(PrintWriter out) {
 		out.println("<corridor route='" + roadway + "' dir='" +
-			GeoLocHelper.getDirection(road_dir) + "'>");
+			Direction.fromOrdinal(road_dir).abbrev + "'>");
 		for(R_Node n: r_nodes)
 			((R_NodeImpl)n).printXml(out);
 		out.println("</corridor>");

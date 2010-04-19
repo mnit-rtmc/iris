@@ -202,19 +202,19 @@ public class CorridorBase {
 		Integer el = getTrueEasting(last);
 		if(nf == null || nl == null || ef == null || el == null)
 			return false;
-		switch(road_dir) {
-		case Road.NORTH:
+		switch(Direction.fromOrdinal(road_dir)) {
+		case NORTH:
 			return nf < nl;
-		case Road.SOUTH:
+		case SOUTH:
 			return nf > nl;
-		case Road.EAST:
+		case EAST:
 			return ef < el;
-		case Road.WEST:
+		case WEST:
 			return ef > el;
-		case Road.INNER_LOOP:
+		case INNER_LOOP:
 			// FIXME: this might be tricky
 			return false;
-		case Road.OUTER_LOOP:
+		case OUTER_LOOP:
 			// FIXME: this might be tricky
 			return false;
 		}

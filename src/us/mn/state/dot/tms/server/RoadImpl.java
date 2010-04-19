@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
 
@@ -147,7 +148,10 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 	public void doSetDirection(short d) throws TMSException {
 		if(d == direction)
 			return;
-		if(d != NONE && d != NORTH_SOUTH && d != EAST_WEST)
+		Direction dir = Direction.fromOrdinal(d);
+		if(dir != Direction.UNKNOWN &&
+		   dir != Direction.NORTH_SOUTH &&
+		   dir != Direction.EAST_WEST)
 			throw new ChangeVetoException("Invalid direction");
 		store.update(this, "direction", d);
 		setDirection(d);
@@ -170,8 +174,12 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 	public void doSetAltDir(short ad) throws TMSException {
 		if(ad == alt_dir)
 			return;
-		if(ad != NONE && ad != NORTH && ad != SOUTH && ad != EAST &&
-		   ad != WEST)
+		Direction adir = Direction.fromOrdinal(ad);
+		if(adir != Direction.UNKNOWN &&
+		   adir != Direction.NORTH &&
+		   adir != Direction.SOUTH &&
+		   adir != Direction.EAST &&
+		   adir != Direction.WEST)
 			throw new ChangeVetoException("Invalid direction");
 		store.update(this, "alt_dir", ad);
 		setAltDir(ad);

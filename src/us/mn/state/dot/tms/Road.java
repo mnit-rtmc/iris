@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,30 +55,6 @@ public interface Road extends SonarObject {
 		" ", "Residential", "Business", "Collector", "Arterial",
 		"Expressway", "Freeway", "CD Road"
 	};
-
-	/** North direction */
-	short NORTH = 1;
-
-	/** South direction */
-	short SOUTH = 2;
-
-	/** East direction */
-	short EAST = 3;
-
-	/** West direction */
-	short WEST = 4;
-
-	/** North-South direction */
-	short NORTH_SOUTH = 5;
-
-	/** East-West direction */
-	short EAST_WEST = 6;
-
-	/** Inner Loop direction */
-	short INNER_LOOP = 7;
-
-	/** Outer Loop direction */
-	short OUTER_LOOP = 8;
 
 	/** Set the abbreviated name */
 	void setAbbrev(String a);

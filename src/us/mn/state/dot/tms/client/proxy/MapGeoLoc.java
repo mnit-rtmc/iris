@@ -19,9 +19,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import us.mn.state.dot.map.MapObject;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.Road;
 
 /**
  * Helper for creating location transforms.
@@ -64,17 +64,17 @@ public class MapGeoLoc implements MapObject {
 
 	/** Get the default angle (radians) */
 	protected double getDefaultAngle() {
-		switch(loc.getRoadDir()) {
-			case Road.NORTH:
-				return RAD_NORTH;
-			case Road.SOUTH:
-				return RAD_SOUTH;
-			case Road.EAST:
-				return RAD_EAST;
-			case Road.WEST:
-				return RAD_WEST;
-			default:
-				return RAD_NORTH;
+		switch(Direction.fromOrdinal(loc.getRoadDir())) {
+		case NORTH:
+			return RAD_NORTH;
+		case SOUTH:
+			return RAD_SOUTH;
+		case EAST:
+			return RAD_EAST;
+		case WEST:
+			return RAD_WEST;
+		default:
+			return RAD_NORTH;
 		}
 	}
 

@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -573,7 +574,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Get the label of a ramp meter */
 	protected String getLabel() {
 		StringBuilder b = new StringBuilder();
-		b.append(GeoLocHelper.getDirection(geo_loc.getCrossDir()));
+		b.append(Direction.fromOrdinal(geo_loc.getCrossDir()).abbrev);
 		b.append(' ');
 		Road x = geo_loc.getCrossStreet();
 		if(x != null)

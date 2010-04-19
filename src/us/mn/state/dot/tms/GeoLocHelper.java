@@ -61,8 +61,9 @@ public class GeoLocHelper extends BaseHelper {
 		if(l != null) {
 			Road r = l.getRoadway();
 			if(r != null) {
+				short rd = l.getRoadDir();
 				String road = r.getName() + " " +
-					getDirection(l.getRoadDir());
+					Direction.fromOrdinal(rd).abbrev;
 				b.append(road.trim());
 			}
 		}
@@ -95,7 +96,8 @@ public class GeoLocHelper extends BaseHelper {
 				cross.append(' ');
 				cross.append(x.getName());
 				cross.append(' ');
-				cross.append(getDirection(l.getCrossDir()));
+				cross.append(Direction.fromOrdinal(
+					l.getCrossDir()).abbrev);
 				return cross.toString().trim();
 			}
 		}
@@ -104,18 +106,10 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Get the cross-street modifier */
 	static public String getModifier(GeoLoc l) {
-		int mod = l.getCrossMod();
-		if(mod >= 0 && mod < Direction.MODIFIER.length)
-			return Direction.MODIFIER[mod];
-		else
-			return "";
-	}
-
-	/** Get the direction description */
-	static public String getDirection(short dir) {
-		if(dir > 0 && dir < Direction.DIRECTION.length)
-			return Direction.DIRECTION[dir];
-		else
+		if(l != null) {
+			return LocModifier.fromOrdinal(
+				l.getCrossMod()).description;
+		} else
 			return "";
 	}
 
@@ -123,17 +117,17 @@ public class GeoLocHelper extends BaseHelper {
 	 * @param d Direction to be filtered
 	 * @param ad Alternate road direction
 	 * @return Filtered direction */
-	static protected short filterNorthSouth(short d, short ad) {
-		if(ad == Road.EAST) {
-			if(d == Road.EAST)
-				return Road.NORTH;
-			if(d == Road.WEST)
-				return Road.SOUTH;
-		} else if(ad == Road.WEST) {
-			if(d == Road.WEST)
-				return Road.NORTH;
-			if(d == Road.EAST)
-				return Road.SOUTH;
+	static protected Direction filterNorthSouth(Direction d, Direction ad) {
+		if(ad == Direction.EAST) {
+			if(d == Direction.EAST)
+				return Direction.NORTH;
+			if(d == Direction.WEST)
+				return Direction.SOUTH;
+		} else if(ad == Direction.WEST) {
+			if(d == Direction.WEST)
+				return Direction.NORTH;
+			if(d == Direction.EAST)
+				return Direction.SOUTH;
 		}
 		return d;
 	}
@@ -142,17 +136,17 @@ public class GeoLocHelper extends BaseHelper {
 	 * @param d Direction to be filtered
 	 * @param ad Alternate road direction
 	 * @return Filtered direction */
-	static protected short filterEastWest(short d, short ad) {
-		if(ad == Road.NORTH) {
-			if(d == Road.NORTH)
-				return Road.EAST;
-			if(d == Road.SOUTH)
-				return Road.WEST;
-		} else if(ad == Road.SOUTH) {
-			if(d == Road.SOUTH)
-				return Road.EAST;
-			if(d == Road.NORTH)
-				return Road.WEST;
+	static protected Direction filterEastWest(Direction d, Direction ad) {
+		if(ad == Direction.NORTH) {
+			if(d == Direction.NORTH)
+				return Direction.EAST;
+			if(d == Direction.SOUTH)
+				return Direction.WEST;
+		} else if(ad == Direction.SOUTH) {
+			if(d == Direction.SOUTH)
+				return Direction.EAST;
+			if(d == Direction.NORTH)
+				return Direction.WEST;
 		}
 		return d;
 	}
@@ -162,23 +156,33 @@ public class GeoLocHelper extends BaseHelper {
 	 * @param rd Main road direction (NORTH_SOUTH / EAST_WEST)
 	 * @param ad Alternate road direction
 	 * @return Filtered direction */
-	static protected short filterDirection(short d, short rd, short ad) {
-		if(rd == Road.NORTH_SOUTH)
+	static protected Direction filterDirection(Direction d, Direction rd,
+		Direction ad)
+	{
+		if(rd == Direction.NORTH_SOUTH)
 			return filterNorthSouth(d, ad);
-		else if(rd == Road.EAST_WEST)
+		else if(rd == Direction.EAST_WEST)
 			return filterEastWest(d, ad);
 		else
 			return d;
 	}
 
-	/** Filter the direction for the given road */
-	static public short filterDirection(short d, Road r) {
+	/** Filter the direction for the given road.
+	 * @param d Direction to be filtered
+	 * @param r Road in question
+	 * @return Filtered direction */
+	static protected Direction filterDirection(Direction d, Road r) {
 		if(r != null) {
-			short rd = r.getDirection();
-			short ad = r.getAltDir();
+			Direction rd = Direction.fromOrdinal(r.getDirection());
+			Direction ad = Direction.fromOrdinal(r.getAltDir());
 			return filterDirection(d, rd, ad);
 		} else
 			return d;
+	}
+
+	/** Filter the direction for the given road */
+	static protected Direction filterDirection(short d, Road r) {
+		return filterDirection(Direction.fromOrdinal(d), r);
 	}
 
 	/** Get the roadway corridor ID */
@@ -196,7 +200,7 @@ public class GeoLocHelper extends BaseHelper {
 			b.append(ab);
 		else
 			return "null";
-		b.append(getDirection(filterDirection(d, r)));
+		b.append(filterDirection(d, r).abbrev);
 		return b.toString();
 	}
 
@@ -204,8 +208,8 @@ public class GeoLocHelper extends BaseHelper {
 	static public String getCorridorName(Road r, short d) {
 		if(r == null)
 			return null;
-		String corridor = r.getName() + " " + getDirection(
-			filterDirection(d, r));
+		String corridor = r.getName() + " " +
+			filterDirection(d, r).abbrev;
 		return corridor.trim();
 	}
 

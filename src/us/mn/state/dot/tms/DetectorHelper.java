@@ -46,17 +46,16 @@ public class DetectorHelper extends BaseHelper {
 		Road cross = loc.getCrossStreet();
 		if(roadway == null || cross == null)
 			return FUTURE;
-		short rd = loc.getRoadDir();
-		short cd = loc.getCrossDir();
-		short cm = loc.getCrossMod();
+		Direction rd = Direction.fromOrdinal(loc.getRoadDir());
+		Direction cd = Direction.fromOrdinal(loc.getCrossDir());
+		LocModifier cm = LocModifier.fromOrdinal(loc.getCrossMod());
 		StringBuilder b = new StringBuilder();
 		b.append(roadway.getAbbrev());
 		b.append("/");
-		if(cd > 0)
-			b.append(Direction.DIRECTION[cd]);
-		b.append(Direction.MOD_SHORT[cm]);
+		b.append(cd.abbrev);
+		b.append(cm.abbrev);
 		b.append(cross.getAbbrev());
-		b.append(Direction.DIR_FREEWAY[rd]);
+		b.append(rd.det_dir);
 		return b.toString();
 	}
 

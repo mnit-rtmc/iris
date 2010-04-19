@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -28,7 +29,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.map.PointSelector;
+import us.mn.state.dot.tms.LocModifier;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.ScreenPane;
 import us.mn.state.dot.tms.client.Session;
@@ -79,16 +80,19 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	protected final JComboBox roadway = new JComboBox();
 
 	/** Roadway direction combo box */
-	protected final JComboBox roadDir = new JComboBox(Direction.DIR_LONG);
+	protected final JComboBox roadDir = new JComboBox(
+		Direction.getDescriptions());
 
 	/** Cross street modifier combobox */
-	protected final JComboBox crossMod = new JComboBox(Direction.MODIFIER);
+	protected final JComboBox crossMod = new JComboBox(
+		LocModifier.values());
 
 	/** Cross street combobox */
 	protected final JComboBox cross = new JComboBox();
 
 	/** Cross street direction combobox */
-	protected final JComboBox crossDir = new JComboBox(Direction.DIRECTION);
+	protected final JComboBox crossDir = new JComboBox(
+		Direction.getAbbreviations());
 
 	/** UTM Easting */
 	protected final JSpinner easting = new JSpinner(

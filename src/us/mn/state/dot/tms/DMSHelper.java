@@ -312,8 +312,8 @@ public class DMSHelper extends BaseHelper {
 		if(proxy != null) {
 			GeoLoc loc = proxy.getGeoLoc();
 			if(loc != null) {
-				return GeoLocHelper.getDirection(
-					loc.getRoadDir());
+				short rd = loc.getRoadDir();
+				return Direction.fromOrdinal(rd).abbrev;
 			}
 		}
 		return "";

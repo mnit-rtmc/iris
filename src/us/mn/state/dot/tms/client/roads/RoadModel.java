@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,13 +36,6 @@ public class RoadModel extends ProxyTableModel<Road> {
 	static {
 		for(String r: Road.R_CLASS)
 			R_CLASS.add(r);
-	}
-
-	/** List of all possible direction values */
-	static LinkedList<String> DIRECTION = new LinkedList<String>();
-	static {
-		for(String d: Direction.DIR_LONG)
-			DIRECTION.add(d);
 	}
 
 	/** Create the columns in the model */
@@ -90,33 +83,39 @@ public class RoadModel extends ProxyTableModel<Road> {
 		},
 		new ProxyColumn<Road>("Direction", 120) {
 			public Object getValueAt(Road r) {
-				return DIRECTION.get(r.getDirection());
+				return Direction.fromOrdinal(r.getDirection());
 			}
 			public boolean isEditable(Road r) {
 				return canUpdate(r);
 			}
 			public void setValueAt(Road r, Object value) {
-				r.setDirection((short)DIRECTION.indexOf(value));
+				if(value instanceof Direction) {
+					Direction d = (Direction)value;
+					r.setDirection((short)d.ordinal());
+				}
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox combo = new JComboBox(
-					DIRECTION.toArray());
+					Direction.values());
 				return new DefaultCellEditor(combo);
 			}
 		},
 		new ProxyColumn<Road>("Alt Dir", 120) {
 			public Object getValueAt(Road r) {
-				return DIRECTION.get(r.getAltDir());
+				return Direction.fromOrdinal(r.getAltDir());
 			}
 			public boolean isEditable(Road r) {
 				return canUpdate(r);
 			}
 			public void setValueAt(Road r, Object value) {
-				r.setAltDir((short)DIRECTION.indexOf(value));
+				if(value instanceof Direction) {
+					Direction d = (Direction)value;
+					r.setAltDir((short)d.ordinal());
+				}
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox combo = new JComboBox(
-					DIRECTION.toArray());
+					Direction.values());
 				return new DefaultCellEditor(combo);
 			}
 		}

@@ -22,6 +22,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.LocModifier;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
 
@@ -139,7 +140,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetRoadDir(short d) throws TMSException {
 		if(d == road_dir)
 			return;
-		if(d < 0 || d > Direction.DIR_FREEWAY.length)
+		if(!Direction.isValid(d))
 			throw new ChangeVetoException("Invalid direction");
 		store.update(this, "road_dir", d);
 		setRoadDir(d);
@@ -183,7 +184,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetCrossDir(short d) throws TMSException {
 		if(d == cross_dir)
 			return;
-		if(d < 0 || d > Direction.DIRECTION.length)
+		if(!Direction.isValid(d))
 			throw new ChangeVetoException("Invalid direction");
 		store.update(this, "cross_dir", d);
 		setCrossDir(d);
@@ -206,7 +207,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetCrossMod(short m) throws TMSException {
 		if(m == cross_mod)
 			return;
-		if(m < 0 || m > Direction.MODIFIER.length)
+		if(!LocModifier.isValid(m))
 			throw new ChangeVetoException("Invalid modifier");
 		store.update(this, "cross_mod", m);
 		setCrossMod(m);

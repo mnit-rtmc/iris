@@ -14,38 +14,75 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.LinkedList;
+
 /**
- * Direction constants.
+ * Direction-of-travel enumeration.  The ordinal values correspond to the
+ * records in the iris.direction look-up table.
  *
  * @author Douglas Lau
  */
-public interface Direction {
+public enum Direction {
 
-	/** Cross street direction strings to use for detector names */
-	public String[] DIRECTION = {
-		" ", "NB", "SB", "EB", "WB", "NS", "EW", "IN", "OUT"
-	};
+	/** Enumerated direction values */
+	UNKNOWN(" ", "", ""),				// 0
+	NORTH("Northbound", "NB", "N"),			// 1
+	SOUTH("Southbound", "SB", "S"),			// 2
+	EAST("Eastbound", "EB", "E"),			// 3
+	WEST("Westbound", "WB", "W"),			// 4
+	NORTH_SOUTH("North-South", "NS", "N-S"),	// 5
+	EAST_WEST("East-West", "EW", "E-W"),		// 6
+	INNER_LOOP("Inner Loop", "IN", "IN"),		// 7
+	OUTER_LOOP("Outer Loop", "OUT", "OUT");		// 8
 
-	/** Roadway direction strings to use for detector names */
-	public String[] DIR_FREEWAY = {
-		"", "N", "S", "E", "W", "N-S", "E-W", "IN", "OUT"
-	};
+	/** Direction description */
+	public final String description;
 
-	/** Roadway direction strings (long) */
-	public String[] DIR_LONG = {
-		" ", "Northbound", "Southbound", "Eastbound", "Westbound",
-		"North-South", "East-West", "Inner Loop", "Outer Loop"
-	};
+	/** Direction abbreviation */
+	public final String abbrev;
 
-	/** Short modifiers (for detector names) */
-	public String[] MOD_SHORT = {
-		"", "N", "S", "E", "W", "Nj", "Sj", "Ej", "Wj"
-	};
+	/** Detector abbreviation */
+	public final String det_dir;
 
-	/** Cross street modifier strings to use for locations */
-	public String[] MODIFIER = {
-		"@",
-		"N of", "S of", "E of", "W of",
-		"N Jct", "S Jct", "E Jct", "W Jct"
-	};
+	/** Create a new direction */
+	private Direction(String d, String a, String dt) {
+		description = d;
+		abbrev = a;
+		det_dir = dt;
+	}
+
+	/** Get the string representation of a direction */
+	public String toString() {
+		return description;
+	}
+
+	/** Check if an ordinal value is valid */
+	static public boolean isValid(short o) {
+		return fromOrdinal(o).ordinal() == o;
+	}
+
+	/** Get a direction from an ordinal value */
+	static public Direction fromOrdinal(short o) {
+		for(Direction d: Direction.values()) {
+			if(d.ordinal() == o)
+				return d;
+		}
+		return UNKNOWN;
+	}
+
+	/** Get an array of direction descriptions */
+	static public String[] getDescriptions() {
+		LinkedList<String> a = new LinkedList<String>();
+		for(Direction d: Direction.values())
+			a.add(d.description);
+		return a.toArray(new String[0]);
+	}
+
+	/** Get an array of direction abbreviations */
+	static public String[] getAbbreviations() {
+		LinkedList<String> a = new LinkedList<String>();
+		for(Direction d: Direction.values())
+			a.add(d.abbrev);
+		return a.toArray(new String[0]);
+	}
 }
