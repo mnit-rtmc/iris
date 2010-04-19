@@ -14,11 +14,11 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -30,13 +30,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class RoadModel extends ProxyTableModel<Road> {
-
-	/** List of all possible road class values */
-	static LinkedList<String> R_CLASS = new LinkedList<String>();
-	static {
-		for(String r: Road.R_CLASS)
-			R_CLASS.add(r);
-	}
 
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
@@ -68,16 +61,20 @@ public class RoadModel extends ProxyTableModel<Road> {
 		},
 		new ProxyColumn<Road>("Road Class", 120) {
 			public Object getValueAt(Road r) {
-				return R_CLASS.get(r.getRClass());
+				return RoadClass.fromOrdinal(r.getRClass());
 			}
 			public boolean isEditable(Road r) {
 				return canUpdate(r);
 			}
 			public void setValueAt(Road r, Object value) {
-				r.setRClass((short)R_CLASS.indexOf(value));
+				if(value instanceof RoadClass) {
+					RoadClass c = (RoadClass)value;
+					r.setRClass((short)c.ordinal());
+				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(Road.R_CLASS);
+				JComboBox combo = new JComboBox(
+					RoadClass.values());
 				return new DefaultCellEditor(combo);
 			}
 		},

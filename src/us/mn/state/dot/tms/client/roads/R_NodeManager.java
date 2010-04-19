@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
-import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -390,7 +390,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		GeoLoc loc = null;
 		double distance = Double.POSITIVE_INFINITY;
 		for(CorridorBase c: corridors.values()) {
-			boolean cd = c.getRoadway().getRClass() == Road.CD_ROAD;
+			boolean cd = RoadClass.fromOrdinal(
+				c.getRoadway().getRClass()) ==RoadClass.CD_ROAD;
 			if((cd_road && !cd) || (cd && !cd_road))
 				continue;
 			ClientGeoLoc l = createGeoLoc(c, easting, northing);

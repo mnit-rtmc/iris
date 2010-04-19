@@ -26,36 +26,6 @@ public interface Road extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "road";
 
-	/** Undefined road class / direction */
-	short NONE = 0;
-
-	/** Residential (A) roadway class */
-	short RESIDENTIAL = 1;
-
-	/** Business (B) roadway class */
-	short BUSINESS = 2;
-
-	/** Collector (C) roadway class */
-	short COLLECTOR = 3;
-
-	/** Arterial (D) roadway class */
-	short ARTERIAL = 4;
-
-	/** Expressway (E) roadway class */
-	short EXPRESSWAY = 5;
-
-	/** Freeway (F) roadway class */
-	short FREEWAY = 6;
-
-	/** Collector-Distributor roadway class */
-	short CD_ROAD = 7;
-
-	/** Roadway classes */
-	String[] R_CLASS = {
-		" ", "Residential", "Business", "Collector", "Arterial",
-		"Expressway", "Freeway", "CD Road"
-	};
-
 	/** Set the abbreviated name */
 	void setAbbrev(String a);
 
