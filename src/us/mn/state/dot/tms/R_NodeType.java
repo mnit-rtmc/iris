@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,28 +17,29 @@ package us.mn.state.dot.tms;
 import java.util.LinkedList;
 
 /**
- * An enumeration of all r_node types.
+ * An enumeration of all r_node types.  The ordinal values correspond to the
+ * records in the iris.r_node_type look-up table.
  *
  * @author Douglas Lau
  */
 public enum R_NodeType {
 
-	/** Station r_node type */
+	/** Station r_node type (0) */
 	STATION("Station"),
 
-	/** Entrance r_node type */
+	/** Entrance r_node type (1) */
 	ENTRANCE("Entrance"),
 
-	/** Exit r_node type */
+	/** Exit r_node type (2) */
 	EXIT("Exit"),
 
-	/** Intersection r_node type */
+	/** Intersection r_node type (3) */
 	INTERSECTION("Intersection"),
 
-	/** Access r_node type */
+	/** Access r_node type (4) */
 	ACCESS("Access"),
 
-	/** Interchange r_node type */
+	/** Interchange r_node type (5) */
 	INTERCHANGE("Interchange");
 
 	/** Create a new r_node type */

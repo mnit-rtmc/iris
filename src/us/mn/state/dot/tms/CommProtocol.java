@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,8 @@ package us.mn.state.dot.tms;
 import java.util.LinkedList;
 
 /**
- * Communication protocol enumeration.
+ * Communication protocol enumeration.  The ordinal values correspond to the
+ * records in the iris.comm_protocol look-up table.
  *
  * @author Douglas Lau
  */

@@ -17,7 +17,8 @@ package us.mn.state.dot.tms;
 import java.util.LinkedList;
 
 /**
- * Road lane type enumeration.
+ * Road lane type enumeration.   The ordinal values correspond to the records
+ * in the iris.lane_type look-up table.
  *
  * @author Douglas Lau
  */

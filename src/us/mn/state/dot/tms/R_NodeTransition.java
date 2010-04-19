@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,34 +17,35 @@ package us.mn.state.dot.tms;
 import java.util.LinkedList;
 
 /**
- * An enumeration of all r_node transitions.
+ * An enumeration of all r_node transitions.  The ordinal values correspond to
+ * the records in the iris.r_node_transition look-up table.
  *
  * @author Douglas Lau
  */
 public enum R_NodeTransition {
 
-	/** None transition */
+	/** None transition (0) */
 	NONE("None"),
 
-	/** Loop transition */
+	/** Loop transition (1) */
 	LOOP("Loop"),
 
-	/** Leg transition */
+	/** Leg transition (2) */
 	LEG("Leg"),
 
-	/** Slipramp transition */
+	/** Slipramp transition (3) */
 	SLIPRAMP("Slipramp"),
 
-	/** CD road transition */
+	/** CD road transition (4) */
 	CD("CD"),
 
-	/** HOV transition */
+	/** HOV transition (5) */
 	HOV("HOV"),
 
-	/** Common section transition */
+	/** Common section transition (6) */
 	COMMON("Common"),
 
-	/** Flyover transition */
+	/** Flyover transition (7) */
 	FLYOVER("Flyover");
 
 	/** Create a new r_node transition */

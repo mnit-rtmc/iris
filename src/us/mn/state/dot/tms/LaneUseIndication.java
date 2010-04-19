@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,55 +19,56 @@ import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A lane-use indication is one of a set of possible states for a lane-use
- * control sign.
+ * control sign.  The ordinal values correspond to the records in the
+ * iris.lane_use_indication look-up table.
  *
  * @author Douglas Lau
  */
 public enum LaneUseIndication {
 
-	/** Dark (no indication) */
+	/** Dark (no indication) (0) */
 	DARK(I18N.get("lane.use.dark")),
 
-	/** Lane open (green arrow) */
+	/** Lane open (green arrow) (1) */
 	LANE_OPEN(I18N.get("lane.use.lane.open")),
 
-	/** Use caution (flashing yellow arrow, not in MUTCD) */
+	/** Use caution (flashing yellow arrow, not in MUTCD) (2) */
 	USE_CAUTION(I18N.get("lane.use.use.caution")),
 
-	/** Lane closed ahead (Yellow X) */
+	/** Lane closed ahead (Yellow X) (3) */
 	LANE_CLOSED_AHEAD(I18N.get("lane.use.lane.closed.ahead")),
 
-	/** Lane closed (red X) */
+	/** Lane closed (red X) (4) */
 	LANE_CLOSED(I18N.get("lane.use.lane.closed")),
 
-	/** HOV / HOT vehicles only (white diamond) */
+	/** HOV / HOT vehicles only (white diamond) (5) */
 	HOV(I18N.get("lane.use.hov.hot")),
 
-	/** Merge right (not in MUTCD) */
+	/** Merge right (not in MUTCD) (6) */
 	MERGE_RIGHT(I18N.get("lane.use.merge.right")),
 
-	/** Merge left (not in MUTCD) */
+	/** Merge left (not in MUTCD) (7) */
 	MERGE_LEFT(I18N.get("lane.use.merge.left")),
 
-	/** Merge left or right (not in MUTCD) */
+	/** Merge left or right (not in MUTCD) (8) */
 	MERGE_BOTH(I18N.get("lane.use.merge.both")),
 
-	/** Must exit right (not in MUTCD) */
+	/** Must exit right (not in MUTCD) (9) */
 	MUST_EXIT_RIGHT(I18N.get("lane.use.must.exit.right")),
 
-	/** Must exit left (not in MUTCD) */
+	/** Must exit left (not in MUTCD) (10) */
 	MUST_EXIT_LEFT(I18N.get("lane.use.must.exit.left")),
 
-	/** Advisory variable speed limit (amber on black) */
+	/** Advisory variable speed limit (amber on black) (11) */
 	AVSL(I18N.get("lane.use.avsl")),
 
-	/** Variable speed limit (black on white) */
+	/** Variable speed limit (black on white) (12) */
 	VSL(I18N.get("lane.use.vsl")),
 
-	/** Low visibility (small green arrow) */
+	/** Low visibility (small green arrow) (13) */
 	LOW_VISIBILITY(I18N.get("lane.use.low.visibility")),
 
-	/** HOV / HOT begins (white diamond) */
+	/** HOV / HOT begins (white diamond) (14) */
 	HOV_BEGINS(I18N.get("lane.use.hov.hot.begins"));
 
 	/** Create a new lane use indication */
