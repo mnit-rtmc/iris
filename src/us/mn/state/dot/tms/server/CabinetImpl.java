@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
 
 /**
- * A cabinet is a field cabinet enclosure which contains controllers.
+ * A cabinet is a roadside enclosure containing one or more device controllers.
  *
  * @author Douglas Lau
  */
