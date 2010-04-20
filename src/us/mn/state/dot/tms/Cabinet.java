@@ -33,9 +33,6 @@ public interface Cabinet extends SonarObject {
 	/** Get the cabinet style */
 	CabinetStyle getStyle();
 
-	/** Set the cabinet location */
-	void setGeoLoc(GeoLoc l);
-
 	/** Get the cabinet location */
 	GeoLoc getGeoLoc();
 

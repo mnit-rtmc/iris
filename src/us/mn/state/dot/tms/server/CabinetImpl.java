@@ -117,19 +117,6 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	/** Cabinet location */
 	protected GeoLoc geo_loc;
 
-	/** Set the cabinet location */
-	public void setGeoLoc(GeoLoc l) {
-		geo_loc = l;
-	}
-
-	/** Set the cabinet location */
-	public void doSetGeoLoc(GeoLoc l) throws TMSException {
-		if(l == geo_loc)
-			return;
-		store.update(this, "geo_loc", l);
-		setGeoLoc(l);
-	}
-
 	/** Get the cabinet location */
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
