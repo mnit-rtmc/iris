@@ -79,7 +79,7 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 		throws IOException, TdxmlException
 	{
 		XmlSensorClient sc = new XmlSensorClient(new URL(loc), l);
-		sc.addTdxmlListener(new SensorListener() {
+		sc.addSensorListener(new SensorListener() {
 			public void update(boolean finish) {
 				if(finish) {
 					for(Segment seg: segments)
