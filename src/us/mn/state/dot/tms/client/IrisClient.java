@@ -39,6 +39,7 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.system.LoginForm;
@@ -293,8 +294,8 @@ public class IrisClient extends JFrame {
 
 	/** Create a new session */
 	protected Session createSession(String user, char[] pwd)
-		throws IOException, SonarException, NoSuchFieldException,
-		IllegalAccessException
+		throws IOException, TdxmlException, SonarException,
+		NoSuchFieldException, IllegalAccessException
 	{
 		SonarState state = createSonarState();
 		state.login(user, new String(pwd));

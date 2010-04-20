@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,6 +33,7 @@ import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -211,12 +213,15 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create the segment layer */
-	public SegmentLayer createSegmentLayer() {
+	public SegmentLayer createSegmentLayer() throws IOException,
+		TdxmlException
+	{
 		SegmentLayer seg_layer = new SegmentLayer(this, session);
 		for(CorridorBase c: corridors.values()) {
 			if(c.getRoadDir() > 0)
 				seg_layer.addCorridor(c);
 		}
+		seg_layer.start();
 		return seg_layer;
 	}
 

@@ -55,29 +55,26 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 	/** R_Node manager */
 	protected final R_NodeManager manager;
 
+	/** XML sensor client */
+	protected final XmlSensorClient sensor_client;
+
 	/** Create a new segment layer */
-	public SegmentLayer(R_NodeManager m, Session s) {
+	public SegmentLayer(R_NodeManager m, Session s) throws IOException,
+		TdxmlException
+	{
 		super("Segments");
 		manager = m;
 		Properties p = s.getProperties();
 		String loc = p.getProperty("tdxml.detector.url");
-		if(loc != null) {
-			try {
-				createSensorClient(loc, s.getLogger());
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
-			catch(TdxmlException e) {
-				e.printStackTrace();
-			}
-		}
+		sensor_client = createSensorClient(loc, s.getLogger());
 	}
 
 	/** Create a sensor client */
-	protected void createSensorClient(String loc, Logger l)
+	protected XmlSensorClient createSensorClient(String loc, Logger l)
 		throws IOException, TdxmlException
 	{
+		if(loc == null)
+			return null;
 		XmlSensorClient sc = new XmlSensorClient(new URL(loc), l);
 		sc.addSensorListener(new SensorListener() {
 			public void update(boolean finish) {
@@ -93,7 +90,13 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 					seg.updateSample(s);
 			}
 		});
-		sc.start();
+		return sc;
+	}
+
+	/** Start reading sensor data */
+	public void start() {
+		if(sensor_client != null)
+			sensor_client.start();
 	}
 
 	/** Notify listeners that the layer has changed status */

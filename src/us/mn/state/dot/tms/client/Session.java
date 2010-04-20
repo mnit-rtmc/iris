@@ -26,6 +26,7 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
@@ -195,7 +196,7 @@ public class Session {
 
 	/** Create a new session */
 	public Session(SonarState st, SmartDesktop d, Properties p, Logger l,
-		List<Layer> bl) throws IOException
+		List<Layer> bl) throws IOException, TdxmlException
 	{
 		state = st;
 		user = state.getUser();
