@@ -197,3 +197,6 @@ CREATE VIEW controller_report AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
+
+INSERT INTO iris.direction VALUES (7, 'IN', 'IN');
+INSERT INTO iris.direction VALUES (8, 'OUT', 'OUT');

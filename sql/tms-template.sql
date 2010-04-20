@@ -1106,6 +1106,8 @@ COPY iris.direction (id, direction, dir) FROM stdin;
 4	WB	W
 5	N-S	N-S
 6	E-W	E-W
+7	IN	IN
+8	OUT	OUT
 \.
 
 COPY iris.road_class (id, description, grade) FROM stdin;
