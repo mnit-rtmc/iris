@@ -109,6 +109,7 @@ fi
 %{_serverdir}/iris-server-%{version}.jar
 %{_serverdir}/iris-common-%{version}.jar
 %{_serverdir}/mail.jar
+%{_serverdir}/geokit-@@GEOKIT.VERSION@@.jar
 %{_serverdir}/scheduler-@@SCHEDULER.VERSION@@.jar
 %{_serverdir}/sonar-server-@@SONAR.VERSION@@.jar
 
