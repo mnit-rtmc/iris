@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
- * Controller operation to initialize a Canoga card
+ * Operation to query the configuration of a Canoga card
  *
  * @author Douglas Lau
  */
-public class InitializeCanoga extends OpController {
+public class OpQueryConfig extends OpController {
 
 	/** Canoga card serial number */
 	protected final SerialNumberRequest serial_number =
@@ -33,12 +33,12 @@ public class InitializeCanoga extends OpController {
 	/** Canoga firmware version */
 	protected final VersionRequest version = new VersionRequest();
 
-	/** Create a new initialize Canoga object */
-	public InitializeCanoga(ControllerImpl c) {
+	/** Create an operation to query the Canoga configuration */
+	public OpQueryConfig(ControllerImpl c) {
 		super(DOWNLOAD, c, c.toString());
 	}
 
-	/** Begin the sensor initialization operation */
+	/** Begin the query config operation */
 	public void begin() {
 		phase = new QuerySerialNumber();
 	}
@@ -46,7 +46,7 @@ public class InitializeCanoga extends OpController {
 	/** Phase to query the serial number */
 	protected class QuerySerialNumber extends Phase {
 
-		/** Synchronize the clock */
+		/** Query the serial number */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(serial_number);
 			mess.getRequest();
