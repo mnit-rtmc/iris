@@ -106,9 +106,8 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 				qes = new OpQueryEventSamples(c);
 				collectors.add(qes);
 				qes.start();
-			} else
+			} else if(intvl == 30)
 				qes.cleanup();
 		}
-		// FIXME: put logged data in bin
 	}
 }

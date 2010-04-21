@@ -759,10 +759,32 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		return b.toString();
 	}
 
-	/** Log a vehicle detection event */
+	/** Count of vehicles in current sampling period */
+	protected transient int ev_vehicles = 0;
+
+	/** Total vehicle duration (milliseconds) in current sampling period */
+	protected transient int ev_duration = 0;
+
+	/** Count of sampled speed events in current sampling period */
+	protected transient int ev_n_speed = 0;
+
+	/** Sum of all vehicle speeds (mph) in current sampling period */
+	protected transient int ev_speed = 0;
+
+	/** Log a vehicle detection event.
+	 * @param stamp Timestamp of detection event.
+	 * @param duration Event duration in milliseconds.
+	 * @param headway Headway since last event in milliseconds.
+	 * @param speed Speed in miles per hour. */
 	public void logEvent(final Calendar stamp, int duration, int headway,
 		int speed)
 	{
+		ev_vehicles++;
+		ev_duration += duration;
+		if(speed > 0) {
+			ev_n_speed++;
+			ev_speed += speed;
+		}
 		final String line = formatEvent(stamp, duration, headway,
 			speed);
 		MainServer.FLUSH.addJob(new Job() {
@@ -770,6 +792,30 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 				EventLogger.print(stamp, name, line);
 			}
 		});
+	}
+
+	/** Milliseconds per sample */
+	static protected final int MS_PER_SAMPLE =
+		Constants.SECONDS_PER_SAMPLE * 1000;
+
+	/** Bin 30-second sample data */
+	public void binEventSamples() {
+		last_volume = ev_vehicles;
+		last_scans = Constants.MAX_SCANS *
+			Math.round((float)ev_duration / MS_PER_SAMPLE);
+		last_speed = calculate_speed();
+		ev_vehicles = 0;
+		ev_duration = 0;
+		ev_n_speed = 0;
+		ev_speed = 0;
+	}
+
+	/** Calculate the average vehicle speed */
+	protected int calculate_speed() {
+		if(ev_n_speed > 0 && ev_speed > 0)
+			return ev_speed / ev_n_speed;
+		else
+			return Constants.MISSING_DATA;
 	}
 
 	/** Print a single detector as an XML element */

@@ -63,7 +63,7 @@ public class OpQueryEventSamples extends OpController {
 	/** Phase to query the current detection events */
 	protected class QueryCurrentEvents extends Phase {
 
-		/** Synchronize the clock */
+		/** Query the current detection events */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(detection);
 			mess.getRequest();
@@ -74,5 +74,12 @@ public class OpQueryEventSamples extends OpController {
 			else
 				return null;
 		}
+	}
+
+	/** Cleanup the operation.  For this operation, cleanup gets called
+	 * every 30 seconds even though the operation continues. */
+	public void cleanup() {
+		controller.binEventSamples();
+		super.cleanup();
 	}
 }

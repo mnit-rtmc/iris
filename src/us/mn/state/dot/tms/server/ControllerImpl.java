@@ -463,6 +463,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			det.logEvent(stamp, duration, headway, speed);
 	}
 
+	/** Bin 30-second sample data */
+	public synchronized void binEventSamples() {
+		for(ControllerIO io: io_pins.values()) {
+			if(io instanceof DetectorImpl)
+				((DetectorImpl)io).binEventSamples();
+		}
+	}
+
 	/** Controller firmware version */
 	protected transient String version;
 
