@@ -110,6 +110,10 @@ public class Segment {
 		upstream = u;
 		node_a = a;
 		node_b = b;
+	}
+
+	/** Add detection to the segment */
+	public void addDetection() {
 		final int shift = getRightShift() - getRightShift(upstream);
 		DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector d) {
