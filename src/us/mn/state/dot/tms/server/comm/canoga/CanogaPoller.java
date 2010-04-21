@@ -70,18 +70,18 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 	}
 
 	/** List of all event data collectors on line */
-	protected final LinkedList<CollectEventData> collectors =
-		new LinkedList<CollectEventData>();
+	protected final LinkedList<OpQueryEventSamples> collectors =
+		new LinkedList<OpQueryEventSamples>();
 
 	/** Get a current event collector operation (if any) */
-	protected CollectEventData getEventCollector(final ControllerImpl c) {
-		Iterator<CollectEventData> it = collectors.iterator();
+	protected OpQueryEventSamples getEventCollector(final ControllerImpl c){
+		Iterator<OpQueryEventSamples> it = collectors.iterator();
 		while(it.hasNext()) {
-			CollectEventData ced = it.next();
-			if(ced.isDone())
+			OpQueryEventSamples qes = it.next();
+			if(qes.isDone())
 				it.remove();
-			else if(ced.getController() == c)
-				return ced;
+			else if(qes.getController() == c)
+				return qes;
 		}
 		return null;
 	}
@@ -101,13 +101,13 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 	/** Query sample data */
 	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
 		if(c.hasActiveDetector()) {
-			CollectEventData ced = getEventCollector(c);
-			if(ced == null) {
-				ced = new CollectEventData(c);
-				collectors.add(ced);
-				ced.start();
+			OpQueryEventSamples qes = getEventCollector(c);
+			if(qes == null) {
+				qes = new OpQueryEventSamples(c);
+				collectors.add(qes);
+				qes.start();
 			} else
-				ced.cleanup();
+				qes.cleanup();
 		}
 		// FIXME: put logged data in bin
 	}
