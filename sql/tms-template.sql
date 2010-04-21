@@ -935,6 +935,16 @@ CREATE VIEW warning_sign_view AS
 	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
 GRANT SELECT ON warning_sign_view TO PUBLIC;
 
+CREATE VIEW lane_marking_view AS
+	SELECT m.name, m.notes, m.geo_loc,
+	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	l.easting, l.northing,
+	m.controller, m.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	FROM iris.lane_marking m
+	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
+	LEFT JOIN iris.controller ctr ON m.controller = ctr.name;
+GRANT SELECT ON lane_marking_view TO PUBLIC;
+
 CREATE VIEW lane_type_view AS
 	SELECT id, description, dcode FROM iris.lane_type;
 GRANT SELECT ON lane_type_view TO PUBLIC;
@@ -1241,7 +1251,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.115.0
+database_version	3.116.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
