@@ -173,9 +173,6 @@ public class MultiString implements MultiStringState {
 	/** MULTI string buffer */
 	protected final StringBuilder multi = new StringBuilder();
 
-	/** Flag for trailing message text */
-	protected boolean trailing = false;
-
         /** Test if the MULTI string is equal to another MULTI string.
 	 *  This is a simple string comparison.
 	 *  @see isEquivalent() for a broader functional comparison. */
@@ -255,8 +252,6 @@ public class MultiString implements MultiStringState {
 		if(m == null)
 			throw new NullPointerException();
 		multi.append(m);
-		if(multi.length() > 0)
-			trailing = true;
 	}
 
 	/** Validate message text */
@@ -269,28 +264,20 @@ public class MultiString implements MultiStringState {
 		return true;
 	}
 
-	/** Add a spann of text */
+	/** Add a span of text */
 	public void addSpan(String s) {
-		if(s.length() > 0) {
+		if(s.length() > 0)
 			multi.append(s);
-			trailing = true;
-		}
 	}
 
 	/** Add a new line */
 	public void addLine() {
-		if(trailing ||
-		   SystemAttrEnum.DMS_MESSAGE_BLANK_LINE_ENABLE.getBoolean())
-		{
-			multi.append(NEWLINE);
-			trailing = false;
-		}
+		multi.append(NEWLINE);
 	}
 
 	/** Add a new page */
 	public void addPage() {
 		multi.append(NEWPAGE);
-		trailing = false;
 	}
 
 	/** Set the page justification */
