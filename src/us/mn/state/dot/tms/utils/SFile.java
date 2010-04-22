@@ -14,9 +14,11 @@
  */
 package us.mn.state.dot.tms.utils;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.SecurityException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -115,11 +117,11 @@ public class SFile
 		return ret;
 	}
 
-	/** validate, true returned on success else false. */
-	public static boolean test() {
-		boolean ok = true;
-		byte[] ba = readUrl("http://iris.ahmct.ucdavis.edu/index.html");
-		Log.finest("length="+ba.length);
-		return ok;
+	/** Return an absolute file path.
+	 * @param fn File name, may not be null.
+	 * @throws SecurityException */
+	public static String getAbsolutePath(String fn) {
+		File fh = new File(fn);
+		return fh.getAbsolutePath();
 	}
 }

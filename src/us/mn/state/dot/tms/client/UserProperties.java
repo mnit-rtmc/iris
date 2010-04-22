@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Properties;
 import javax.swing.JFrame;
 import us.mn.state.dot.tms.utils.PropertyLoader;
+import us.mn.state.dot.tms.utils.SFile;
 
 /**
  * Persistent mutable user properties stored in a java 
@@ -46,7 +47,7 @@ public class UserProperties {
 	final String TAB_SEL = "tab.selected";
 
 	/** Props file name */
-	private String m_fname = "";
+	private String file_name = "";
 
 	/** Properties, null indicates not used */
 	private Properties m_props;
@@ -61,7 +62,12 @@ public class UserProperties {
 	 * @param fname Properties file name. If empty or null, 
 	 *	  client props not used. */
 	public UserProperties(String fname) {
-		m_fname = fname;
+		try {
+			file_name = SFile.getAbsolutePath(fname);
+		} catch(SecurityException ex) {
+			System.err.println("User properties: can't read " +
+				"specified file (" + fname + "): " + ex);
+		}
 		m_props = null;
 	}
 
@@ -74,13 +80,14 @@ public class UserProperties {
 	 *  have been specified. After a read, the m_props field is
 	 *  updated, else it is set to null. */
 	public void read() {
-		FileInputStream in = getFileInputStream(m_fname);
+		FileInputStream in = getFileInputStream(file_name);
 		if(in == null)
 			return;
 		try {
 			m_props = new Properties();
 			m_props.load(in);
-			System.err.println("User properties: read " + m_fname);
+			System.err.println("User properties: read " + 
+				file_name);
 			m_changed = false;
 		} catch(IOException ex) {
 			System.err.println("UserProperties: " + ex);
@@ -97,7 +104,7 @@ public class UserProperties {
 	}
 
 	/** Get properties file input stream. */
-	public static FileInputStream getFileInputStream(String fname) {
+	private static FileInputStream getFileInputStream(String fname) {
 		if(fname == null || fname.isEmpty()) {
 			System.err.println("User properties: file " + 
 				"not specifed.");
@@ -117,9 +124,9 @@ public class UserProperties {
 	public void write() {
 		final String comment = "IRIS Client properties file";
 		if(used() && m_changed) {
-			if(!write(m_fname, m_props, comment))
+			if(!write(file_name, m_props, comment))
 				m_changed = false;
-			System.err.println("Wrote properties file: " + m_fname);
+			System.err.println("Wrote props file: " + file_name);
 		}
 	}
 
@@ -166,7 +173,7 @@ public class UserProperties {
 	public int getWindowState() {
 		if(used()) {
 			int s = getPropInt(WIN_EXTSTATE);
-			if( s == JFrame.NORMAL || s == JFrame.MAXIMIZED_BOTH )
+			if(s == JFrame.NORMAL || s == JFrame.MAXIMIZED_BOTH)
 				return s;
 		}
 		return JFrame.NORMAL;
@@ -222,7 +229,7 @@ public class UserProperties {
 	 * @param props Properties to write.
 	 * @param comment Comment inside file. 
 	 * @return False if error else true. */
-	static public boolean write(String fname, Properties props, 
+	static private boolean write(String fname, Properties props, 
 		String comment) 
 	{
 		FileOutputStream o = null;
@@ -230,7 +237,8 @@ public class UserProperties {
 			o = new FileOutputStream(fname);
 			props.store(o, comment);
 		} catch(IOException ex) {
-			System.err.println("PropertyLoader: " + ex);
+			System.err.println("UserProperties, unable to " + 
+				"write file (" + fname + "), ex=" + ex);
 			return false;
 		} finally {
 			try {
@@ -238,7 +246,8 @@ public class UserProperties {
 					o.close();
 				return true;
 			} catch(IOException ex) {
-				System.err.println("PropertyLoader: " + ex);
+				System.err.println("UserProperties: " + 
+					"PropertyLoader: " + ex);
 				return false;
 			}
 		}
