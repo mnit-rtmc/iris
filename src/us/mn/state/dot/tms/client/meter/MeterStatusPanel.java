@@ -15,21 +15,25 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -44,15 +48,6 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 public class MeterStatusPanel extends FormPanel
 	implements ProxyListener<RampMeter>, ProxySelectionListener<RampMeter>
 {
-	/** Get the verification camera name */
-	static protected String getCameraName(RampMeter proxy) {
-		Camera camera = proxy.getCamera();
-		if(camera == null)
-			return " ";
-		else
-			return camera.getName();
-	}
-
 	/** Get the controller status */
 	static protected String getControllerStatus(RampMeter proxy) {
 		Controller c = proxy.getController();
@@ -83,7 +78,7 @@ public class MeterStatusPanel extends FormPanel
 	protected final JTextField nameTxt = createTextField();
 
 	/** Camera component */
-	protected final JTextField cameraTxt = createTextField();
+	protected final JButton cameraBtn = new JButton();
 
 	/** Location component */
 	protected final JTextField locationTxt = createTextField();
@@ -144,7 +139,9 @@ public class MeterStatusPanel extends FormPanel
 		setTitle("Selected Ramp Meter");
 		setEnabled(false);
 		add("Name", nameTxt);
-		addRow("Camera", cameraTxt);
+		addRow("Camera", cameraBtn);
+		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
+			EtchedBorder.LOWERED));
 		addRow("Location", locationTxt);
 		addRow("Operation", operationTxt);
 		add("Release Rate", releaseTxt);
@@ -224,6 +221,7 @@ public class MeterStatusPanel extends FormPanel
 		if(proxy != null)
 			cache.watchObject(proxy);
 		selected = proxy;
+		setCameraAction(proxy);
 		if(proxy != null) {
 			shrinkBtn.setAction(new ShrinkQueueAction(proxy));
 			growBtn.setAction(new GrowQueueAction(proxy));
@@ -233,7 +231,6 @@ public class MeterStatusPanel extends FormPanel
 			updateAttribute(proxy, null);
 		} else {
 			nameTxt.setText("");
-			cameraTxt.setText("");
 			locationTxt.setText("");
 			operationTxt.setText("");
 			operationTxt.setForeground(null);
@@ -255,12 +252,23 @@ public class MeterStatusPanel extends FormPanel
 		meterOffBtn.setEnabled(enabled);
 	}
 
+	/** Set the camera action */
+	protected void setCameraAction(RampMeter meter) {
+		Camera cam = RampMeterHelper.getCamera(meter);
+		if(cam != null) {
+			cameraBtn.setAction(new CameraSelectAction(cam,
+			    session.getCameraManager().getSelectionModel()));
+		} else
+			cameraBtn.setAction(null);
+		cameraBtn.setEnabled(cam != null);
+	}
+
 	/** Update one attribute on the form */
 	protected void updateAttribute(RampMeter meter, String a) {
 		if(a == null || a.equals("name"))
 			nameTxt.setText(meter.getName());
 		if(a == null || a.equals("camera"))
-			cameraTxt.setText(getCameraName(meter));
+			setCameraAction(meter);
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
 			locationTxt.setText(GeoLocHelper.getOnRampDescription(
