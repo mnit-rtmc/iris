@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.IButton;
@@ -214,13 +215,6 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Create the widget jobs */
 	protected void createJobs() {
-		new ActionJob(cameraBtn) {
-			public void perform() {
-				Camera cam = DMSHelper.getCamera(watching);
-				if(cam != null)
-					cam_sel_model.setSelected(cam);
-			}
-		};
 		tab.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
@@ -317,8 +311,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		previewPnl.clear();
 		nameTxt.setText(EMPTY_TXT);
 		brightnessTxt.setText(EMPTY_TXT);
-		cameraBtn.setText(EMPTY_TXT);
-		cameraBtn.setEnabled(false);
+		setCameraAction(null);
 		locationTxt.setText("");
 		awsControlledCbx.setSelected(false);
 		awsControlledCbx.setEnabled(false);
@@ -327,6 +320,17 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		opStatusTxt.setText("");
 		deployTxt.setText("");
 		expiresTxt.setText(EMPTY_TXT);
+	}
+
+	/** Set the camera action */
+	protected void setCameraAction(DMS dms) {
+		Camera cam = DMSHelper.getCamera(dms);
+		if(cam != null) {
+			cameraBtn.setAction(new CameraSelectAction(cam,
+				cam_sel_model));
+		} else
+			cameraBtn.setAction(null);
+		cameraBtn.setEnabled(cam != null);
 	}
 
 	/** Update one (or all) attribute(s) on the form.
@@ -342,14 +346,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			else
 				brightnessTxt.setText("");
 		}
-		if(a == null || a.equals("camera")) {
-			Camera cam = DMSHelper.getCamera(dms);
-			if(cam != null)
-				cameraBtn.setText(cam.getName());
-			else
-				cameraBtn.setText(EMPTY_TXT);
-			cameraBtn.setEnabled(cam != null);
-		}
+		if(a == null || a.equals("camera"))
+			setCameraAction(dms);
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
 			locationTxt.setText(GeoLocHelper.getDescription(
