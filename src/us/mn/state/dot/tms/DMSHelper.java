@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -371,5 +372,20 @@ public class DMSHelper extends BaseHelper {
 				ret.append(" / ");
 		}
 		return ret.toString();
+	}
+
+	/** Filter the specified multi. If certain keywords are present then
+	 * a blank multi is returned. The keywords indicate no text is 
+	 * available for the associated bitmap.
+	 * @return A blank multi if the argument multi flags no text, 
+	 *         else the specified multi. */
+	public static MultiString ignoreFilter(MultiString ms) {
+		final String L1 = "_OTHER_";
+		final String L2 = "_SYSTEM_";
+		final String L3 = "_MESSAGE_";
+		String s = ms.toString();
+		if(s.contains(L1) && s.contains(L2) && s.contains(L3))
+			ms = new MultiString();
+		return ms;
 	}
 }
