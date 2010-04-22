@@ -20,6 +20,7 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -27,6 +28,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ActionJob;
@@ -43,6 +45,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.utils.I18N;
@@ -107,7 +110,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	protected final JTextField brightnessTxt = createTextField();
 
 	/** Displays the verify camera for the DMS */
-	protected final JTextField cameraTxt = createTextField();
+	protected final JButton cameraBtn = new JButton();
 
 	/** Displays the location of the DMS */
 	protected final JTextField locationTxt = createTextField();
@@ -149,6 +152,9 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	/** Cache of DMS proxy objects */
 	protected final TypeCache<DMS> cache;
 
+	/** Camera selection model */
+	protected final ProxySelectionModel<Camera> cam_sel_model;
+
 	/** Currently selected DMS.  This will be null if there are zero or
 	 * multiple DMS selected. */
 	protected DMS watching;
@@ -162,18 +168,21 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	protected int adjusting = 0;
 
 	/** Create a new single sign tab. */
-	public SingleSignTab(DMSDispatcher d, TypeCache<DMS> tc) {
+	public SingleSignTab(DMSDispatcher d, TypeCache<DMS> tc,
+		ProxySelectionModel<Camera> csm)
+	{
 		super(true);
 		dispatcher = d;
 		cache = tc;
 		cache.addProxyListener(this);
+		cam_sel_model = csm;
 		nameTxt.setMinimumSize(new Dimension(36, 20));
 		add("Name", nameTxt);
-		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
+		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
 			add("Brightness", brightnessTxt);
-			addRow("Camera", cameraTxt);
-		} else
-			addRow("Camera", cameraTxt);
+		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
+			EtchedBorder.LOWERED));
+		addRow("Camera", cameraBtn);
 		locationTxt.setMinimumSize(new Dimension(260, 20));
 		addRow("Location", locationTxt);
 		addRow(I18N.get("SingleSignTab.OperationTitle"), operationTxt);
@@ -200,6 +209,18 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		tab.add("Current", currentPnl);
 		tab.add("Preview", previewPnl);
 		addRow(tab);
+		createJobs();
+	}
+
+	/** Create the widget jobs */
+	protected void createJobs() {
+		new ActionJob(cameraBtn) {
+			public void perform() {
+				Camera cam = DMSHelper.getCamera(watching);
+				if(cam != null)
+					cam_sel_model.setSelected(cam);
+			}
+		};
 		tab.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
@@ -296,7 +317,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		previewPnl.clear();
 		nameTxt.setText(EMPTY_TXT);
 		brightnessTxt.setText(EMPTY_TXT);
-		cameraTxt.setText(EMPTY_TXT);
+		cameraBtn.setText(EMPTY_TXT);
+		cameraBtn.setEnabled(false);
 		locationTxt.setText("");
 		awsControlledCbx.setSelected(false);
 		awsControlledCbx.setEnabled(false);
@@ -320,8 +342,14 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			else
 				brightnessTxt.setText("");
 		}
-		if(a == null || a.equals("camera"))
-			cameraTxt.setText(DMSHelper.getCameraName(dms));
+		if(a == null || a.equals("camera")) {
+			Camera cam = DMSHelper.getCamera(dms);
+			if(cam != null)
+				cameraBtn.setText(cam.getName());
+			else
+				cameraBtn.setText(EMPTY_TXT);
+			cameraBtn.setEnabled(cam != null);
+		}
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
 			locationTxt.setText(GeoLocHelper.getDescription(

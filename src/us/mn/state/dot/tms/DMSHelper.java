@@ -307,6 +307,14 @@ public class DMSHelper extends BaseHelper {
 		return EMPTY_TXT;
 	}
 
+	/** Lookup the camera for a DMS */
+	static public Camera getCamera(DMS dms) {
+		if(dms != null)
+			return dms.getCamera();
+		else
+			return null;
+	}
+
 	/** Get the DMS roadway direction from the geo location as a String */
 	static public String getRoadDir(DMS proxy) {
 		if(proxy != null) {

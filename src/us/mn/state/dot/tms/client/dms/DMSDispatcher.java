@@ -152,7 +152,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		blankBtn.setAction(blankAction);
 		manager.setBlankAction(blankAction);
 		composer = new SignMessageComposer(session, this);
-		singleTab = new SingleSignTab(this, dms_cache.getDMSs());
+		singleTab = new SingleSignTab(this, dms_cache.getDMSs(),
+			session.getCameraManager().getSelectionModel());
 		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
 		tabPane.addTab("Single", singleTab);
 		tabPane.addTab("Multiple", multipleTab);
