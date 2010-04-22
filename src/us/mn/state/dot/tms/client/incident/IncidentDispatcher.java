@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.text.SimpleDateFormat;
@@ -32,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.map.Symbol;
@@ -50,6 +52,7 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -70,6 +73,12 @@ public class IncidentDispatcher extends JPanel
 	/** Formatter for incident names */
 	static protected final SimpleDateFormat NAME_FMT =
 		new SimpleDateFormat("yyyyMMddHHmmssSSS");
+
+	/** Card layout name for camera combo box */
+	static protected final String CAMERA_CBOX = "camera_cbox";
+
+	/** Card layout name for camera button */
+	static protected final String CAMERA_BTN = "camera_btn";
 
 	/** User session */
 	protected final Session session;
@@ -92,8 +101,17 @@ public class IncidentDispatcher extends JPanel
 	/** Location of incident */
 	protected final JTextField location_txt = FormPanel.createTextField();
 
+	/** Card layout for camera widgets */
+	protected final CardLayout cam_cards = new CardLayout();
+
+	/** Camera panel */
+	protected final JPanel cam_panel = new JPanel(cam_cards);
+
 	/** Verify camera combo box */
 	protected final JComboBox camera_cbx = new JComboBox();
+
+	/** Verify camera button */
+	protected final JButton camera_btn = new JButton();
 
 	/** Impact panel */
 	protected final ImpactPanel impact_pnl = new ImpactPanel();
@@ -137,13 +155,17 @@ public class IncidentDispatcher extends JPanel
 	/** Create the main panel */
 	protected JPanel createMainPanel() {
 		type_lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
+		cam_panel.add(camera_cbx, CAMERA_CBOX);
+		cam_panel.add(camera_btn, CAMERA_BTN);
+		camera_btn.setBorder(BorderFactory.createEtchedBorder(
+			EtchedBorder.LOWERED));
 		FormPanel panel = new FormPanel(true);
 		panel.setBorder(BorderFactory.createTitledBorder(
 			"Selected Incident"));
 		panel.addRow("Incident Type", type_lbl);
 		panel.addRow("Detail", detail_cbx);
 		panel.addRow("Location", location_txt);
-		panel.addRow("Camera", camera_cbx);
+		panel.addRow("Camera", cam_panel);
 		panel.addRow(buildImpactBox());
 		JPanel btns = new JPanel(new FlowLayout());
 		btns.add(log_btn);
@@ -375,6 +397,8 @@ public class IncidentDispatcher extends JPanel
 		location_txt.setText("");
 		camera_cbx.setSelectedItem(null);
 		camera_cbx.setEnabled(false);
+		setCameraAction(null);
+		cam_cards.show(cam_panel, CAMERA_BTN);
 		log_btn.setEnabled(false);
 		deploy_btn.setEnabled(false);
 		clear_btn.setEnabled(false);
@@ -402,6 +426,7 @@ public class IncidentDispatcher extends JPanel
 			boolean create = canAdd("oname");
 			detail_cbx.setEnabled(create);
 			camera_cbx.setEnabled(create);
+			cam_cards.show(cam_panel, CAMERA_CBOX);
 			log_btn.setEnabled(create);
 			deploy_btn.setEnabled(false);
 			clear_btn.setEnabled(false);
@@ -409,6 +434,7 @@ public class IncidentDispatcher extends JPanel
 			boolean update = canUpdate(inc);
 			detail_cbx.setEnabled(false);
 			camera_cbx.setEnabled(false);
+			cam_cards.show(cam_panel, CAMERA_BTN);
 			log_btn.setEnabled(update && isImpactChanged(inc));
 			deploy_btn.setEnabled(update && canDeploy(inc) &&
 				!inc.getCleared());
@@ -434,7 +460,9 @@ public class IncidentDispatcher extends JPanel
 				type_lbl.setIcon(null);
 			location_txt.setText(
 				manager.getGeoLoc(inc).getDescription());
-			camera_cbx.setModel(createCameraModel(inc));
+			if(inc instanceof ClientIncident)
+				camera_cbx.setModel(createCameraModel(inc));
+			setCameraAction(inc);
 		}
 		if(a == null || a.equals("impact"))
 			impact_pnl.setImpact(inc.getImpact());
@@ -442,6 +470,17 @@ public class IncidentDispatcher extends JPanel
 			clear_btn.setSelected(inc.getCleared());
 		if(a != null && (a.equals("impact") || a.equals("cleared")))
 			enableWidgets(inc);
+	}
+
+	/** Set the camera action */
+	protected void setCameraAction(Incident inc) {
+		Camera cam = IncidentHelper.getCamera(inc);
+		if(cam != null) {
+			camera_btn.setAction(new CameraSelectAction(cam,
+			    session.getCameraManager().getSelectionModel()));
+		} else
+			camera_btn.setAction(null);
+		camera_btn.setEnabled(cam != null);
 	}
 
 	/** Clear the event type */
