@@ -63,6 +63,23 @@ public class LCSArrayHelper extends BaseHelper {
 		});
 	}
 
+	/** Lookup the DMS for the LCS in the specified lane */
+	static public DMS lookupDMS(LCSArray lcs_array, int lane) {
+		LCS lcs = lookupLCS(lcs_array, lane);
+		if(lcs != null)
+			return DMSHelper.lookup(lcs.getName());
+		else
+			return null;
+	}
+
+	/** Lookup the camera for an LCS array */
+	static public Camera getCamera(LCSArray lcs_array) {
+		if(lcs_array != null)
+			return DMSHelper.getCamera(lookupDMS(lcs_array, 1));
+		else
+			return null;
+	}
+
 	/** Lookup the LCS objects for an array */
 	static public LCS lookupLCS(final LCSArray lcs_array,
 		final Checker<LCS> checker)
@@ -86,14 +103,11 @@ public class LCSArrayHelper extends BaseHelper {
 
 	/** Lookup the location of the LCS array */
 	static public GeoLoc lookupGeoLoc(LCSArray lcs_array) {
-		// get the location of the DMS in lane 1
-		LCS lcs = lookupLCS(lcs_array, 1);
-		if(lcs != null) {
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null)
-				return dms.getGeoLoc();
-		}
-		return null;
+		DMS dms = lookupDMS(lcs_array, 1);
+		if(dms != null)
+			return dms.getGeoLoc();
+		else
+			return null;
 	}
 
 	/** Get the controller status */

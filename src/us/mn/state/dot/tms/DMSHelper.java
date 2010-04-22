@@ -294,19 +294,6 @@ public class DMSHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Empty text field */
-	static protected final String EMPTY_TXT = "    ";
-
-	/** Get the verification camera name */
-	static public String getCameraName(DMS proxy) {
-		if(proxy != null) {
-			Camera camera = proxy.getCamera();
-			if(camera != null)
-				return camera.getName();
-		}
-		return EMPTY_TXT;
-	}
-
 	/** Lookup the camera for a DMS */
 	static public Camera getCamera(DMS dms) {
 		if(dms != null)

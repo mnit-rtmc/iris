@@ -27,17 +27,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -54,15 +55,6 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Font for "L" and "R" labels */
 	static protected final Font FONT = new Font(null, Font.BOLD, 24);
 
-	/** Lookup the DMS for the LCS in lane 1 */
-	static protected DMS lookupDMS(LCSArray lcs_array) {
-		LCS lcs = LCSArrayHelper.lookupLCS(lcs_array, 1);
-		if(lcs != null)
-			return DMSHelper.lookup(lcs.getName());
-		else
-			return null;
-	}
-
 	/** Current session */
 	protected final Session session;
 
@@ -75,8 +67,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Name of the selected LCS array */
 	protected final JTextField nameTxt = FormPanel.createTextField();
 
-	/** Verify camera name textfield */
-	protected final JTextField cameraTxt = FormPanel.createTextField();
+	/** Verify camera button */
+	protected final JButton cameraBtn = new JButton();
 
 	/** Location of LCS array */
 	protected final JTextField locationTxt = FormPanel.createTextField();
@@ -144,7 +136,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		panel.setBorder(BorderFactory.createTitledBorder(
 			"Selected Lane-Use Control Signal"));
 		panel.add("Name", nameTxt);
-		panel.addRow("Camera", cameraTxt);
+		panel.addRow("Camera", cameraBtn);
+		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
+			EtchedBorder.LOWERED));
 		panel.addRow("Location", locationTxt);
 		panel.addRow("Operation", operationTxt);
 		panel.add("Lock", lcs_lock);
@@ -274,7 +268,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
 		nameTxt.setText("");
-		cameraTxt.setText("");
+		setCameraAction(null);
 		locationTxt.setText("");
 		operationTxt.setText("");
 		operationTxt.setForeground(null);
@@ -287,14 +281,23 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		lcsPnl.clear();
 	}
 
+	/** Set the camera action */
+	protected void setCameraAction(LCSArray lcs_array) {
+		Camera cam = LCSArrayHelper.getCamera(lcs_array);
+		if(cam != null) {
+			cameraBtn.setAction(new CameraSelectAction(cam,
+			    session.getCameraManager().getSelectionModel()));
+		} else
+			cameraBtn.setAction(null);
+		cameraBtn.setEnabled(cam != null);
+	}
+
 	/** Update one attribute on the form */
 	protected void updateAttribute(LCSArray lcs_array, String a) {
 		if(a == null || a.equals("name"))
 			nameTxt.setText(lcs_array.getName());
-		if(a == null || a.equals("camera")) {
-			cameraTxt.setText(DMSHelper.getCameraName(
-				lookupDMS(lcs_array)));
-		}
+		if(a == null || a.equals("camera"))
+			setCameraAction(lcs_array);
 		// FIXME: this won't update when geoLoc attributes change
 		//        plus, geoLoc is not an LCSArray attribute
 		if(a == null || a.equals("geoLoc")) {
