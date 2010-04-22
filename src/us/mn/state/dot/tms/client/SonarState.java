@@ -413,7 +413,9 @@ public class SonarState extends Client {
 		populate(users);
 		populate(connections, true);
 		user = users.lookupObject(user_name);
-		populate(system_attributes);
+		// We need to wait for all system attributes to be populated
+		// here so that client widgets will be initialized correctly
+		populate(system_attributes, true);
 		populate(map_extents);
 		populate(inc_details);
 		populate(roads);
