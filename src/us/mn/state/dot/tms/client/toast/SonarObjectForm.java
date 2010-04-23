@@ -116,11 +116,11 @@ abstract public class SonarObjectForm<T extends SonarObject>
 
 	/** Check if the user can update an attribute */
 	protected boolean canUpdate() {
-		return session.canUpdate(proxy.getTypeName());
+		return session.canUpdate(proxy);
 	}
 
 	/** Check if the user can update an attribute */
 	protected boolean canUpdate(String aname) {
-		return session.canUpdate(proxy.getTypeName(), aname);
+		return session.canUpdate(proxy, aname);
 	}
 }
