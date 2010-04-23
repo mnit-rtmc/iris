@@ -27,7 +27,7 @@ public class IncidentDetailForm extends ProxyTableForm<IncidentDetail> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canRead(IncidentDetail.SONAR_TYPE);
+		return s.canUpdate(IncidentDetail.SONAR_TYPE);
 	}
 
 	/** Create a new incident detail form */
