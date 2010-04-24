@@ -121,7 +121,7 @@ public class IrisClient extends JFrame {
 	protected Session session;
 
 	/** Mutable user properties stored on client workstation */
-	private UserProperties m_uprops;
+	private UserProperties user_props;
 
 	/** Create a new Iris client */
 	public IrisClient(Properties props, SimpleHandler h) throws IOException{
@@ -131,9 +131,9 @@ public class IrisClient extends JFrame {
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
 		I18N.initialize(props);
-		m_uprops =  new UserProperties(
+		user_props =  new UserProperties(
 			props.getProperty(UserProperties.FNAME_PROP_NAME));
-		m_uprops.read();
+		user_props.read();
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
@@ -166,7 +166,7 @@ public class IrisClient extends JFrame {
 	/** Set the currently selected tab in each screen pane, using the
 	 * persistently stored tab index. */
 	private void setSelectedTabViaPersist() {
-		Object[] sti = m_uprops.getSelectedTabs();
+		Object[] sti = user_props.getSelectedTabs();
 		for(int i = 0; i < s_panes.length && i < sti.length; ++i) {
 			int ti = ((Integer)sti[i]).intValue();
 			s_panes[i].setSelectedTabIndex(ti);
@@ -183,8 +183,8 @@ public class IrisClient extends JFrame {
 
 	/** Update and write user properties file */
 	private void writeUserProperties() {
-		m_uprops.setWindowProperties(this);
-		m_uprops.write();
+		user_props.setWindowProperties(this);
+		user_props.write();
 	}
 
 	/** Initialize the screen panes */
@@ -213,10 +213,9 @@ public class IrisClient extends JFrame {
 
 	/** Set position of frame window using properties values. */
 	private void setPosition() {
-		if(m_uprops.used()) {
-			if(m_uprops.haveWindowPosition())
-				setBounds(m_uprops.getWindowPosition());
-			setExtendedState(m_uprops.getWindowState());
+		if(user_props.getUsed() && user_props.haveWindowPosition()) {
+			setBounds(user_props.getWindowPosition());
+			setExtendedState(user_props.getWindowState());
 		} else {
 			setBounds(Screen.getMaximizedBounds());
 			if(screens.length < 2)
