@@ -297,12 +297,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	protected transient HashMap<Integer, ControllerIO> io_pins =
 		new HashMap<Integer, ControllerIO>();
 
-	/** Get all controller I/O pins */
-	public synchronized ControllerIO[] getIO() {
-		ControllerIO[] io = new ControllerIO[ALL_PINS];
-		for(int i: io_pins.keySet())
-			io[i] = io_pins.get(i);
-		return io;
+	/** Get controller I/O for one pin */
+	public synchronized ControllerIO getIO(int pin) {
+		return io_pins.get(pin);
 	}
 
 	/** Assign an IO to the specified controller I/O pin */

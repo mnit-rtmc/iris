@@ -79,8 +79,7 @@ abstract public class Op170 extends OpController {
 
 	/** Lookup the first ramp meter on a 170 controller */
 	static public RampMeterImpl lookupMeter1(ControllerImpl c) {
-		ControllerIO[] io_pins = c.getIO();
-		ControllerIO io = io_pins[DEVICE_1_PIN];
+		ControllerIO io = c.getIO(DEVICE_1_PIN);
 		if(io instanceof RampMeterImpl)
 			return (RampMeterImpl)io;
 		else
@@ -89,8 +88,7 @@ abstract public class Op170 extends OpController {
 
 	/** Lookup the second ramp meter on a 170 controller */
 	static public RampMeterImpl lookupMeter2(ControllerImpl c) {
-		ControllerIO[] io_pins = c.getIO();
-		ControllerIO io = io_pins[METER_2_PIN];
+		ControllerIO io = c.getIO(METER_2_PIN);
 		if(io instanceof RampMeterImpl)
 			return (RampMeterImpl)io;
 		else
