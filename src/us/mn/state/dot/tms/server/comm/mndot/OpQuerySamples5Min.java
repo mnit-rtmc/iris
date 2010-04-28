@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,7 +142,9 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	protected void updateGreenCount(RampMeterImpl meter, int g)
 		throws IOException
 	{
-		if(meter != null)
-			meter.updateGreenCount5(stamp, g);
+		if(meter != null) {
+			meter.updateGreenCount5(stamp,
+				adjustGreenCount(meter, g));
+		}
 	}
 }

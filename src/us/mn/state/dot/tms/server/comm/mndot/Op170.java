@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
@@ -94,6 +95,16 @@ abstract public class Op170 extends OpController {
 			return (RampMeterImpl)io;
 		else
 			return null;
+	}
+
+	/** Adjust the green count for single release meters */
+	static protected int adjustGreenCount(RampMeterImpl meter, int g) {
+		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal()) {
+			if((g % 2) != 0)
+				g++;
+			return g / 2;
+		} else
+			return g;
 	}
 
 	/** Ramp meter being queried */

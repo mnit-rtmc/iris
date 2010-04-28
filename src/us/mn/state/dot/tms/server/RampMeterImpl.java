@@ -518,7 +518,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public void updateGreenCount(Calendar stamp, int g) throws IOException {
 		DetectorImpl det = green_det;
 		if(det != null) {
-			g = adjustGreenCount(g);
 			if(g == 0 && isMetering())
 				return;
 			det.storeData30Second(stamp, g, Constants.MISSING_DATA);
@@ -526,26 +525,14 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			METER_LOG.log("No green det for " + getName());
 	}
 
-	/** Adjust the green count for single release meters */
-	protected int adjustGreenCount(int g) {
-		// FIXME: this should go into comm/mndot package
-		if(meter_type == RampMeterType.SINGLE) {
-			if((g % 2) != 0)
-				g++;
-			return g / 2;
-		} else
-			return g;
-	}
-
 	/** Update the 5-minute green count */
 	public void updateGreenCount5(Calendar stamp, int g)
 		throws IOException
 	{
 		DetectorImpl det = green_det;
-		if(det != null) {
-			g = adjustGreenCount(g);
+		if(det != null)
 			det.storeData5Minute(stamp, g, Constants.MISSING_DATA);
-		} else
+		else
 			METER_LOG.log("No green det for " + getName());
 	}
 
