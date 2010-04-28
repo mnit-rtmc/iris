@@ -122,6 +122,8 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			throw new ChangeVetoException("Invalid controller");
 		updateController(controller, (ControllerImpl)c, pin);
 		store.update(this, "controller", c);
+		// FIXME: if a SQL exception happens, controller IO pins will
+		//        be messed up
 		setController(c);
 	}
 

@@ -173,6 +173,8 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 			return;
 		updateController((ControllerImpl)c, pin);
 		store.update(this, "controller", c);
+		// FIXME: if a SQL exception happens, controller IO pins will
+		//        be messed up
 		setController(c);
 	}
 
