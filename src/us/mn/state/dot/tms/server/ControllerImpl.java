@@ -306,19 +306,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Assign an IO to the specified controller I/O pin */
-	public synchronized void setIO(int pin, ControllerIO io)
-		throws TMSException
-	{
-		ControllerIO old_io = io_pins.get(pin);
-		if(old_io != null) {
-			if(io != null)
-				throw new ChangeVetoException(
-					"Pin " + pin + " already assigned");
-			else
-				io_pins.remove(pin);
-		}
+	public synchronized void setIO(int pin, ControllerIO io) {
 		if(io != null)
 			io_pins.put(pin, io);
+		else
+			io_pins.remove(pin);
 	}
 
 	/** Determine whether this controller has an active ramp meter */

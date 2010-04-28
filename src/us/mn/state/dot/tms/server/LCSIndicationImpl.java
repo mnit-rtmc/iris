@@ -100,36 +100,24 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 
 	/** Initialize the controller for this LCS indicaiton */
 	public void initTransients() {
-		try {
-			ControllerImpl c = controller;
-			if(c != null)
-				c.setIO(pin, this);
-		}
-		catch(TMSException e) {
-			System.err.println("LCS indication " + getName() +
-				" initialization error");
-			e.printStackTrace();
-		}
+		updateControllerPin(null, 0, controller, pin);
 	}
 
 	/** Controller associated with this LCS indication */
 	protected ControllerImpl controller;
 
-	/** Update the controller and/or pin */
-	protected void updateController(ControllerImpl c, int p)
-		throws TMSException
+	/** Update the controller and/or pin.
+	 * @param oc Old controller.
+	 * @param op Old pin.
+	 * @param nc New controller.
+	 * @param np New pin. */
+	protected void updateControllerPin(ControllerImpl oc, int op,
+		ControllerImpl nc, int np)
 	{
-		if(controller != null)
-			controller.setIO(pin, null);
-		try {
-			if(c != null)
-				c.setIO(p, this);
-		}
-		catch(TMSException e) {
-			if(controller != null)
-				controller.setIO(pin, this);
-			throw e;
-		}
+		if(oc != null)
+			oc.setIO(op, null);
+		if(nc != null)
+			nc.setIO(np, this);
 	}
 
 	/** Set the controller of the LCS indication */
@@ -143,10 +131,8 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 			return;
 		if(pin < 1 || pin > Controller.ALL_PINS)
 			throw new ChangeVetoException("Invalid pin: " + pin);
-		updateController((ControllerImpl)c, pin);
 		store.update(this, "controller", c);
-		// FIXME: if a SQL exception happens, controller IO pins will
-		//        be messed up
+		updateControllerPin(controller, pin, (ControllerImpl)c, pin);
 		setController(c);
 	}
 
@@ -167,8 +153,10 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 	public void doSetPin(int p) throws TMSException {
 		if(p == pin)
 			return;
-		updateController(controller, p);
+		if(p < 1 || p > Controller.ALL_PINS)
+			throw new ChangeVetoException("Invalid pin: " + p);
 		store.update(this, "pin", p);
+		updateControllerPin(controller, pin, controller, p);
 		setPin(p);
 	}
 

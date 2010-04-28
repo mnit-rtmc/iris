@@ -48,16 +48,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 
 	/** Initialize the controller for this device */
 	public void initTransients() {
-		try {
-			ControllerImpl c = controller;
-			if(c != null)
-				c.setIO(pin, this);
-		}
-		catch(TMSException e) {
-			System.err.println("Device " + getName() +
-				" initialization error");
-			e.printStackTrace();
-		}
+		updateControllerPin(null, 0, controller, pin);
 	}
 
 	/** Get the active status */
@@ -90,21 +81,18 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** Controller associated with this traffic device */
 	protected ControllerImpl controller;
 
-	/** Update the controller and/or pin */
-	protected void updateController(ControllerImpl oc, ControllerImpl c,
-		int p) throws TMSException
+	/** Update the controller and/or pin.
+	 * @param oc Old controller.
+	 * @param op Old pin.
+	 * @param nc New controller.
+	 * @param np New pin. */
+	protected void updateControllerPin(ControllerImpl oc, int op,
+		ControllerImpl nc, int np)
 	{
 		if(oc != null)
-			oc.setIO(pin, null);
-		try {
-			if(c != null)
-				c.setIO(p, this);
-		}
-		catch(TMSException e) {
-			if(oc != null)
-				oc.setIO(pin, this);
-			throw e;
-		}
+			oc.setIO(op, null);
+		if(nc != null)
+			nc.setIO(np, this);
 	}
 
 	/** Set the controller of the device */
@@ -122,10 +110,8 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			throw new ChangeVetoException("Invalid controller");
 		if(pin < 1 || pin > Controller.ALL_PINS)
 			throw new ChangeVetoException("Invalid pin: " + pin);
-		updateController(controller, (ControllerImpl)c, pin);
 		store.update(this, "controller", c);
-		// FIXME: if a SQL exception happens, controller IO pins will
-		//        be messed up
+		updateControllerPin(controller, pin, (ControllerImpl)c, pin);
 		setController(c);
 	}
 
@@ -146,7 +132,10 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	public void doSetPin(int p) throws TMSException {
 		if(p == pin)
 			return;
+		if(p < 1 || p > Controller.ALL_PINS)
+			throw new ChangeVetoException("Invalid pin: " + p);
 		store.update(this, "pin", p);
+		updateControllerPin(controller, pin, controller, p);
 		setPin(p);
 	}
 
