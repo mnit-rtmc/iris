@@ -309,8 +309,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public synchronized void setIO(int pin, ControllerIO io)
 		throws TMSException
 	{
-		if(pin < 1 || pin > ALL_PINS)
-			throw new ChangeVetoException("Invalid pin: " + pin);
 		ControllerIO old_io = io_pins.get(pin);
 		if(old_io != null) {
 			if(io != null)

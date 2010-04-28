@@ -141,6 +141,8 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 	public void doSetController(Controller c) throws TMSException {
 		if(c == controller)
 			return;
+		if(pin < 1 || pin > Controller.ALL_PINS)
+			throw new ChangeVetoException("Invalid pin: " + pin);
 		updateController((ControllerImpl)c, pin);
 		store.update(this, "controller", c);
 		// FIXME: if a SQL exception happens, controller IO pins will
