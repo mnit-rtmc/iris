@@ -344,8 +344,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get a detector by its I/O pin number */
-	public synchronized DetectorImpl getDetectorAtPin(int pin) {
-		ControllerIO io = io_pins.get(pin);
+	public DetectorImpl getDetectorAtPin(int pin) {
+		ControllerIO io = getIO(pin);
 		if(io instanceof DetectorImpl)
 			return (DetectorImpl)io;
 		else
@@ -381,8 +381,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get an alarm from the controller */
-	public synchronized AlarmImpl getAlarm(int pin) {
-		ControllerIO io = io_pins.get(pin);
+	public AlarmImpl getAlarm(int pin) {
+		ControllerIO io = getIO(pin);
 		if(io instanceof AlarmImpl)
 			return (AlarmImpl)io;
 		else
