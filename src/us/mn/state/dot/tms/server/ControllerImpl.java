@@ -345,17 +345,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return null;
 	}
 
-	/** Get an active LCS for the controller */
-	public synchronized LCSImpl getActiveLcs() {
-		if(getActive()) {
-			for(ControllerIO io: io_pins.values()) {
-				if(io instanceof LCSImpl)
-					return (LCSImpl)io;
-			}
-		}
-		return null;
-	}
-
 	/** Get an active warning sign for the controller */
 	public synchronized WarningSignImpl getActiveWarningSign() {
 		if(getActive()) {
