@@ -131,12 +131,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Create a string representation of the controller */
-	public String toString() {
-		CommLink l = comm_link;
-		return "(" + l.getName() + ":" + drop_id + ")";
-	}
-
 	/** Get controller label */
 	public String getLabel() {
 		CommLink l = comm_link;
@@ -538,7 +532,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the failed status of the controller */
 	public void setFailed(boolean f) {
-		setFailed(f, toString());
+		setFailed(f, null);
 	}
 
 	/** Get the failure status */

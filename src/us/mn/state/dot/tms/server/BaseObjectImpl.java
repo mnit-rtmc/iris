@@ -105,7 +105,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	}
 
 	/** Get a string representation of the object */
-	public String toString() {
+	public final String toString() {
 		return name;
 	}
 
