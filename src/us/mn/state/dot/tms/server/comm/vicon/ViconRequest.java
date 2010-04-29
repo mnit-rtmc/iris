@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm.vicon;
  *
  * @author Douglas Lau
  */
-abstract public class Request {
+abstract public class ViconRequest {
 
 	/** Value to indicate no selected camera */
 	static protected final int CAMERA_NONE = -1;

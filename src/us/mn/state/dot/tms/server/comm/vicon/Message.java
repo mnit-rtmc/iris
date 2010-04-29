@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,8 +49,8 @@ public class Message implements AddressedMessage {
 	protected final InputStream is;
 
 	/** Chained request buffer */
-	protected final LinkedList<Request> requests =
-		new LinkedList<Request>();
+	protected final LinkedList<ViconRequest> requests =
+		new LinkedList<ViconRequest>();
 
 	/** Create a new Vicon message */
 	public Message(OutputStream o, InputStream i) {
@@ -61,15 +61,15 @@ public class Message implements AddressedMessage {
 	/** Get a string of the message */
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		for(Request req: requests)
+		for(ViconRequest req: requests)
 			b.append(req.toString());
 		return b.toString();
 	}
 
 	/** Add a request object to this message */
 	public void add(Object r) {
-		if(r instanceof Request)
-			requests.add((Request)r);
+		if(r instanceof ViconRequest)
+			requests.add((ViconRequest)r);
 	}
 
 	/** Perform a "get" request */
