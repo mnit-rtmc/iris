@@ -264,15 +264,15 @@ public class BinaryDetectionRequest extends CanogaRequest {
 
 	/** Get the requested value */
 	public String getValue() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < 4; i++) {
 			if(i > 0)
-				b.append("\n");
-			b.append("det:");
-			b.append(i);
-			b.append(',');
-			b.append(c_events[i]);
+				sb.append("\n");
+			sb.append("det:");
+			sb.append(i);
+			sb.append(',');
+			sb.append(c_events[i]);
 		}
-		return b.toString();
+		return sb.toString();
 	}
 }
