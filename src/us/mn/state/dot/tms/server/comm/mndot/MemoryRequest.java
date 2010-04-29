@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  *
  * @author Douglas Lau
  */
-public class MemoryRequest extends Request {
+public class MemoryRequest extends MndotRequest {
 
 	/** Maximum length of a memory request (128 - 5 octet overhead) */
 	static protected final int MAX_LENGTH = 123;

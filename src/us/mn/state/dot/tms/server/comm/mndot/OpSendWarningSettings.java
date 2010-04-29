@@ -64,7 +64,7 @@ public class OpSendWarningSettings extends OpDevice {
 	}
 
 	/** Create a timing table request for the warning sign */
-	protected Request createTimingTableRequest(int address)
+	protected MndotRequest createTimingTableRequest(int address)
 		throws IOException
 	{
 		int[] times = {AM_MID_TIME, PM_MID_TIME};

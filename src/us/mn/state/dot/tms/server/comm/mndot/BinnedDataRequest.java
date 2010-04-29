@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-public class BinnedDataRequest extends Request {
+public class BinnedDataRequest extends MndotRequest {
 
 	/** Number of octets for timestamp */
 	static protected final int STAMP_LENGTH = 5;

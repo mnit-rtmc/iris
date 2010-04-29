@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  *
  * @author Douglas Lau
  */
-public class SynchronizeRequest extends Request {
+public class SynchronizeRequest extends MndotRequest {
 
 	/** Format a basic "GET" request */
 	protected byte[] formatPayloadGet(Message m) throws IOException {

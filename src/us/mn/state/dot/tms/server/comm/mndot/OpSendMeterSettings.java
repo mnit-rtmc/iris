@@ -190,7 +190,7 @@ public class OpSendMeterSettings extends OpDevice {
 	}
 
 	/** Create a timing table request for the meter */
-	protected Request createTimingTableRequest(int address)
+	protected MndotRequest createTimingTableRequest(int address)
 		throws IOException
 	{
 		ByteArrayOutputStream os = new ByteArrayOutputStream();

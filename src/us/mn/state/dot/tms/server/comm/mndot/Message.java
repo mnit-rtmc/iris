@@ -81,7 +81,7 @@ public class Message implements AddressedMessage {
 	protected final CommProtocol protocol;
 
 	/** Request object */
-	protected Request req;
+	protected MndotRequest req;
 
 	/** Create a new Mndot protocol message */
 	public Message(OutputStream o, InputStream i, int d, CommProtocol p) {
@@ -93,8 +93,8 @@ public class Message implements AddressedMessage {
 
 	/** Add a request object to this message */
 	public void add(Object mo) {
-		if(mo instanceof Request)
-			req = (Request)mo;
+		if(mo instanceof MndotRequest)
+			req = (MndotRequest)mo;
 		else
 			req = null;
 	}
@@ -115,7 +115,7 @@ public class Message implements AddressedMessage {
 
 	/** Get the drop from the response drop/status byte */
 	protected int getDrop(byte[] buf) {
-		byte drop_stat = buf[Request.OFF_DROP_CAT];
+		byte drop_stat = buf[MndotRequest.OFF_DROP_CAT];
 		if(protocol == CommProtocol.MNDOT_5)
 			return (drop_stat & 0xFF) >> 3;
 		else
@@ -124,7 +124,7 @@ public class Message implements AddressedMessage {
 
 	/** Get the stat from the response drop/status byte */
 	protected int getStat(byte[] buf) {
-		byte drop_stat = buf[Request.OFF_DROP_CAT];
+		byte drop_stat = buf[MndotRequest.OFF_DROP_CAT];
 		if(protocol == CommProtocol.MNDOT_5)
 			return drop_stat & 0x07;
 		else
@@ -137,7 +137,8 @@ public class Message implements AddressedMessage {
 	{
 		if(getDrop(res) != getDrop(req))
 			throw new ParsingException("DROP ADDRESS MISMATCH");
-		if(res.length < 2 || res.length != res[Request.OFF_LENGTH] + 3)
+		if(res.length < 2 ||
+		   res.length != res[MndotRequest.OFF_LENGTH] + 3)
 			throw new ParsingException("INVALID LENGTH");
 		checkStatus(getStat(res));
 	}

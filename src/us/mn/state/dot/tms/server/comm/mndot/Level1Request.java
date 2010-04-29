@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  *
  * @author Douglas Lau
  */
-public class Level1Request extends Request {
+public class Level1Request extends MndotRequest {
 
 	/** Format a basic "GET" request */
 	protected byte[] formatPayloadGet(Message m) throws IOException {
