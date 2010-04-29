@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,8 @@ package us.mn.state.dot.tms.server.comm.pelcod;
  * a preset state.
  *
  * @author Stephen Donecker
- * @company University of California, Davis
  */
-public class RecallPresetRequest extends Request {
+public class RecallPresetRequest extends PelcoDRequest {
 
 	/** Requested preset to set */
 	private final int m_preset;

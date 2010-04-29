@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm.pelcod;
  *
  * @author Douglas Lau
  */
-public class CommandRequest extends Request {
+public class CommandRequest extends PelcoDRequest {
 
 	/** Bit flag to command a pan right */
 	static protected final byte PAN_RIGHT = 1 << 1;
