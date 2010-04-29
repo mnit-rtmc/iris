@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import java.io.IOException;
  *
  * @author Douglas Lau
  */
-public class CommandRequest extends Request {
+public class CommandRequest extends ManchesterRequest {
 
 	static protected final int EX_TILT_DOWN_FULL = 0;
 	static protected final int EX_IRIS_OPEN = 1;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import java.io.IOException;
  *
  * @author Douglas Lau
  */
-abstract public class Request {
+abstract public class ManchesterRequest {
 
 	/** Format a request for the specified receiver address */
 	abstract public byte[] format(int drop) throws IOException;

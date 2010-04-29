@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,12 +39,12 @@ public class Message implements AddressedMessage {
 	}
 
 	/** Request for the message */
-	protected Request request = null;
+	protected ManchesterRequest request = null;
 
 	/** Add a request object to this message */
 	public void add(Object r) {
-		if(r instanceof Request)
-			request = (Request)r;
+		if(r instanceof ManchesterRequest)
+			request = (ManchesterRequest)r;
 	}
 
 	/** Perform a "get" request */
