@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
  * @author Douglas Lau
  * @author Timothy Johnson
  */
-public class SelectMonitorRequest extends Request {
+public class SelectMonitorRequest extends PelcoRequest {
 
 	/** Command to select a new monitor */
 	static protected final String CODE = "Ma";

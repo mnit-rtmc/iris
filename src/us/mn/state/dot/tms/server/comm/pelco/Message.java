@@ -49,8 +49,8 @@ public class Message implements AddressedMessage {
 	protected final InputStream is;
 
 	/** Chained request buffer */
-	protected final LinkedList<Request> requests =
-		new LinkedList<Request>();
+	protected final LinkedList<PelcoRequest> requests =
+		new LinkedList<PelcoRequest>();
 
 	/** Create a new Pelco message */
 	public Message(OutputStream o, InputStream i) {
@@ -61,15 +61,15 @@ public class Message implements AddressedMessage {
 	/** Get a string of the message */
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		for(Request req: requests)
+		for(PelcoRequest req: requests)
 			b.append(req.toString());
 		return b.toString();
 	}
 
 	/** Add a request object to this message */
 	public void add(Object r) {
-		if(r instanceof Request)
-			requests.add((Request)r);
+		if(r instanceof PelcoRequest)
+			requests.add((PelcoRequest)r);
 	}
 
 	/** Perform a "get" request */
