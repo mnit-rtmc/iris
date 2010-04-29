@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 public class SelectMonitorCamera extends ViconOperation {
 
 	/** Parse the integer ID of a monitor or camera */
-	static protected int parseUID(String name) {
+	static protected int parseUID(String name) throws IOException {
 		String id = name;
 		while(id.length() > 0 && !Character.isDigit(id.charAt(0)))
 			id = id.substring(1);
@@ -35,7 +35,7 @@ public class SelectMonitorCamera extends ViconOperation {
 			return Integer.parseInt(id);
 		}
 		catch(NumberFormatException e) {
-			return 0;
+			throw new IOException("Invalid UID: " + name);
 		}
 	}
 
