@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -199,11 +199,6 @@ abstract public class MessagePoller extends Thread {
 		catch(SocketTimeoutException e) {
 			o.handleCommError(EventType.POLL_TIMEOUT_ERROR,
 				exceptionMessage(e));
-		}
-		catch(NumberFormatException e) {
-			// FIXME: this should be caught at lower levels ...
-			o.handleCommError(EventType.PARSING_ERROR,
-				"NUMBER FORMAT ERROR");
 		}
 		finally {
 			if(o.isDone() || !queueOperation(o))
