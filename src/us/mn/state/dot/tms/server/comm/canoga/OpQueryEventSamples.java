@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.canoga;
 import java.io.IOException;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
@@ -64,7 +64,7 @@ public class OpQueryEventSamples extends OpController {
 	protected class QueryCurrentEvents extends Phase {
 
 		/** Query the current detection events */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(detection);
 			mess.getRequest();
 			success = true;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.viconptz;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
@@ -65,7 +65,7 @@ public class MoveCamera extends OpDevice {
 	protected class Move extends Phase {
 
 		/** Command controller to move the camera */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new CommandRequest(pan, tilt, zoom));
 			mess.setRequest();
 			return null;

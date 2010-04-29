@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Operation to send new indicaitons to a Lane Control Signal array.
@@ -77,7 +77,7 @@ public class OpSendLCSIndications extends OpLCS {
 		protected int lane = 0;
 
 		/** Create a sign message */
-		protected Phase poll(AddressedMessage mess) {
+		protected Phase poll(CommMessage mess) {
 			if(lane < msgs.length) {
 				msgs[lane] = createSignMessage(lane);
 				lane++;
@@ -129,7 +129,7 @@ public class OpSendLCSIndications extends OpLCS {
 	protected class SendMessages extends Phase {
 
 		/** Send sign messages */
-		protected Phase poll(AddressedMessage mess) {
+		protected Phase poll(CommMessage mess) {
 			for(int lane = 0; lane < msgs.length; lane++)
 				sendIndication(lane);
 			return null;

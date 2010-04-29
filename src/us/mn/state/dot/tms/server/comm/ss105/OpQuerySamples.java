@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 
 /**
@@ -77,7 +77,7 @@ public class OpQuerySamples extends OpSS105 {
 	protected class GetCurrentSamples extends Phase {
 
 		/** Get the most recent binned samples */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			BinnedSampleRequest bs = new BinnedSampleRequest();
 			mess.add(bs);
 			mess.getRequest();

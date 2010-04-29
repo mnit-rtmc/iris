@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
@@ -47,7 +47,7 @@ public class OpQueryConfig extends OpController {
 	protected class QuerySerialNumber extends Phase {
 
 		/** Query the serial number */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(serial_number);
 			mess.getRequest();
 			return new QueryVersion();
@@ -58,7 +58,7 @@ public class OpQueryConfig extends OpController {
 	protected class QueryVersion extends Phase {
 
 		/** Query the firmware version */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(version);
 			mess.getRequest();
 			return null;

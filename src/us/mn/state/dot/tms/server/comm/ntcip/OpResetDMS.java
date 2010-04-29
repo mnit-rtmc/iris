@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -44,7 +44,7 @@ public class OpResetDMS extends OpDMS {
 	protected class ExecuteReset extends Phase {
 
 		/** Execute the DMS reset */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new DmsSWReset());
 			mess.setRequest();
 			return new CheckResetCompletion();
@@ -59,7 +59,7 @@ public class OpResetDMS extends OpDMS {
 			RESET_TIMEOUT;
 
 		/** Check for reset completion */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsSWReset reset = new DmsSWReset();
 			mess.add(reset);
 			try {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.io.OutputStream;
 import javax.mail.MessagingException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.utils.SEmail;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class Message implements AddressedMessage
+public class Message implements CommMessage
 {
     	/** Root XML tag name. */
 	public final static String DMSLITEMSGTAG = "DmsLite";

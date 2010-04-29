@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import us.mn.state.dot.tms.server.RampMeterImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
@@ -60,7 +60,7 @@ public class OpSendMeterRedTime extends OpDevice {
 	protected class SetRedTime extends Phase {
 
 		/** Write the new red time to the controller */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			ByteArrayOutputStream bo = new ByteArrayOutputStream(2);
 			BCDOutputStream os = new BCDOutputStream(bo);
 			os.write4(red_time);

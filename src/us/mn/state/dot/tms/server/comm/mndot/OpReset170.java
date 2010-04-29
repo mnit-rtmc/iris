@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Send a level-1 restart request to a 170 controller
@@ -39,7 +39,7 @@ public class OpReset170 extends Op170 {
 	protected class ResetDetectors extends Phase {
 
 		/** Reset the detectors */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			// Enabling the detector-reset pin can cause some
 			// detector cards to have "chattering" volume, along
 			// with "occupancy plateaus".  This can happen if there
@@ -56,7 +56,7 @@ public class OpReset170 extends Op170 {
 	protected class ClearDetectors extends Phase {
 
 		/** Clear the detector reset */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[1];
 			mess.add(new MemoryRequest(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
@@ -69,7 +69,7 @@ public class OpReset170 extends Op170 {
 	protected class Level1Restart extends Phase {
 
 		/** Restart the controller */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new Level1Request());
 			mess.setRequest();
 			return null;

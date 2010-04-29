@@ -20,7 +20,7 @@ import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 
 /**
@@ -74,7 +74,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 		protected byte[] rec;
 
 		/** Try to get and delete the next record */
-		protected int tryNextRecord(AddressedMessage mess)
+		protected int tryNextRecord(CommMessage mess)
 			throws IOException
 		{
 			BinnedDataRequest bin = new BinnedDataRequest();
@@ -100,7 +100,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 		}
 
 		/** Collect 5-minute data from the controller */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			int recs = 0;
 			try {
 				recs = tryNextRecord(mess);

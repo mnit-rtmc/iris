@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,14 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 
 /**
- * AddressedMessage
+ * A comm message encapsulates requests to GET or SET information from a
+ * controller.
  *
  * @author Douglas Lau
  */
-public interface AddressedMessage {
+public interface CommMessage {
 
-	/** Add an object to this message */
+	/** Add a request to this message */
 	public void add(Object mo);
 
 	/** Send a get request message */

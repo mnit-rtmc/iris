@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Operation to send settings to a Lane Control Signal array.
@@ -47,7 +47,7 @@ public class OpSendLCSSettings extends OpLCS {
 	protected class StartOperations extends Phase {
 
 		/** Start all DMS operations */
-		protected Phase poll(AddressedMessage mess) {
+		protected Phase poll(CommMessage mess) {
 			for(OpDMS op: ops)
 				op.start();
 			return new WaitForCompletion();
@@ -62,7 +62,7 @@ public class OpSendLCSSettings extends OpLCS {
 			20 * 1000;
 
 		/** Wait for operations to complete */
-		protected Phase poll(AddressedMessage mess) {
+		protected Phase poll(CommMessage mess) {
 			try {
 				Thread.sleep(200);
 			}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Operation to query 30-second sample data
@@ -46,7 +46,7 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 	protected class QuerySample30Sec extends Phase {
 
 		/** Query 30-second sample data */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] r = new byte[72];
 			mess.add(new MemoryRequest(
 				Address.DATA_BUFFER_30_SECOND, r));

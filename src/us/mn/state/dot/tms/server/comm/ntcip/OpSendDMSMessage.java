@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 
@@ -85,7 +85,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	protected class BlankMessage extends Phase {
 
 		/** Blank the message */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsActivateMessage act = new DmsActivateMessage();
 			act.setDuration(DURATION_INDEFINITE);
 			act.setPriority(MAX_MESSAGE_PRIORITY);
@@ -111,7 +111,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	protected class ActivateMessage extends Phase {
 
 		/** Activate the message */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsActivateMessage act = new DmsActivateMessage();
 			act.setDuration(getDuration());
 			act.setPriority(MAX_MESSAGE_PRIORITY);
@@ -137,7 +137,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	protected class QueryActivateMsgError extends Phase {
 
 		/** Query the activate message error */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsActivateMsgError error = new DmsActivateMsgError();
 			mess.add(error);
 			mess.getRequest();
@@ -172,7 +172,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	protected class QueryMultiSyntaxError extends Phase {
 
 		/** Query the MULTI syntax error */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
 			DmsMultiSyntaxErrorPosition e_pos =
 				new DmsMultiSyntaxErrorPosition();
@@ -190,7 +190,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	protected class LedstarActivateError extends Phase {
 
 		/** Get the Ledstar activate message error */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			LedActivateMsgError error = new LedActivateMsgError();
 			mess.add(error);
 			try {
@@ -210,7 +210,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	protected class SetPostActivationStuff extends Phase {
 
 		/** Set the post-activation objects */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			// NOTE: setting DmsMessageTimeRemaining should not
 			//       be necessary.  I don't really know why it's
 			//       done here -- probably to work around some

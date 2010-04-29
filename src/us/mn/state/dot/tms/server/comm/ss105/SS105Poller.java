@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.io.PrintStream;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -37,9 +37,7 @@ public class SS105Poller extends MessagePoller implements SamplePoller {
 	}
 
 	/** Create a new message for the specified controller */
-	public AddressedMessage createMessage(ControllerImpl c)
-		throws EOFException
-	{
+	public CommMessage createMessage(ControllerImpl c) throws EOFException {
 		return new Message(new PrintStream(
 			messenger.getOutputStream(c)),
 			messenger.getInputStream(c), c);

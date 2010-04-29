@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.aws;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class Message implements AddressedMessage {
+public class Message implements CommMessage {
 
 	/** Associated messenger */
 	protected final Messenger messenger;
@@ -45,7 +45,7 @@ public class Message implements AddressedMessage {
 	}
 
 	/** Send a get request message.
-	 * Defined in AddressedMessage interface.
+	 * Defined in CommMessage interface.
 	 * @throws IOException if received response is malformed. */
 	public void getRequest() throws IOException {
 		if(req == null)
@@ -54,6 +54,6 @@ public class Message implements AddressedMessage {
 	}
 
 	/** Send an set request message. Defined in the
-	 * AddressedMessage interface. */
+	 * CommMessage interface. */
 	public void setRequest() throws IOException {}
 }

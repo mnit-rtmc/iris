@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 import java.io.IOException;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Controller operation to send settings to an SS125.
@@ -61,7 +61,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected class QueryGenConfig extends Phase {
 
 		/** Query the general config */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(gen_config);
 			mess.getRequest();
 			SS125_LOG.log(controller.getName() + ": orientation " +
@@ -93,7 +93,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected class SendGenConfig extends Phase {
 
 		/** Send the general config */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			gen_config.setLocation(ControllerHelper.getLocation(
 				controller));
 			gen_config.setMetric(false);
@@ -112,7 +112,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected class QueryDataConfig extends Phase {
 
 		/** Query the data config */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(data_config);
 			mess.getRequest();
 			if(SS125_LOG.isOpen())
@@ -177,7 +177,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected class SendDataConfig extends Phase {
 
 		/** Send the data config */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			data_config.setInterval(BINNING_INTERVAL);
 			data_config.setMode(
 				DataConfigRequest.StorageMode.CIRCULAR);
@@ -204,7 +204,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected class StoreConfigFlash extends Phase {
 
 		/** Store the config to flash */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FlashConfigRequest flash = new FlashConfigRequest();
 			mess.add(flash);
 			SS125_LOG.log(controller.getName() + ":= flash config");
@@ -217,7 +217,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected class QueryDateTime extends Phase {
 
 		/** Query the date and time */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DateTimeRequest date_time = new DateTimeRequest();
 			mess.add(date_time);
 			mess.getRequest();
@@ -241,7 +241,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected class SendDateTime extends Phase {
 
 		/** Send the date and time */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DateTimeRequest date_time = new DateTimeRequest();
 			mess.add(date_time);
 			mess.setRequest();

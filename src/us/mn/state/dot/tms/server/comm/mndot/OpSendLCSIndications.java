@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Operation to send new indicaitons to a Lane Control Signal array.
@@ -51,7 +51,7 @@ public class OpSendLCSIndications extends OpLCS {
 	protected class TurnOffDevices extends Phase {
 
 		/** Turn off devices */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			int address = Address.RAMP_METER_DATA +
 				Address.OFF_REMOTE_RATE;
 			byte[] data = new byte[Address.OFF_METER_2 + 1];
@@ -67,7 +67,7 @@ public class OpSendLCSIndications extends OpLCS {
 	protected class SetOutputs extends Phase {
 
 		/** Set the special function outputs */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] buffer = createSpecialFunctionBuffer();
 			mess.add(new MemoryRequest(
 				Address.SPECIAL_FUNCTION_OUTPUTS, buffer));
@@ -83,7 +83,7 @@ public class OpSendLCSIndications extends OpLCS {
 	protected class TurnOnDevices extends Phase {
 
 		/** Turn on devices */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			int address = Address.RAMP_METER_DATA +
 				Address.OFF_REMOTE_RATE;
 			byte[] data = new byte[Address.OFF_METER_2 + 1];

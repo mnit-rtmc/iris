@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.util.List;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BrightnessSample;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -69,7 +69,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected class QueryBrightness extends Phase {
 
 		/** Query the DMS brightness status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(max_level);
 			mess.add(p_level);
 			mess.add(light);
@@ -91,7 +91,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected class QueryBrightnessTable extends Phase {
 
 		/** Get the brightness table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(b_levels);
 			mess.add(brightness);
 			DmsIllumControl control = new DmsIllumControl();
@@ -111,7 +111,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected class SetPhotocellControl extends Phase {
 
 		/** Set the photocell control mode */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsIllumControl control = new DmsIllumControl();
 			control.setEnum(DmsIllumControl.Enum.photocell);
 			mess.add(control);
@@ -125,7 +125,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected class SetBrightnessTable extends Phase {
 
 		/** Set the brightness table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			brightness.setTable(calculateTable());
 			mess.add(brightness);
 //			mess.setRequest();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -58,9 +58,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	 * @return A newly created Message.
 	 * @throws EOFException
 	 */
-	public AddressedMessage createMessage(ControllerImpl c)
-		throws EOFException
-	{
+	public CommMessage createMessage(ControllerImpl c) throws EOFException {
 		//Log.finest("DmsLitePoller.createMessage() called.");
 		return new Message(messenger.getOutputStream(c),
 				   messenger.getInputStream(c));

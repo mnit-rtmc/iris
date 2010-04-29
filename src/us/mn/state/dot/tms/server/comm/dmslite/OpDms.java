@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.aws.AwsPoller;
 import us.mn.state.dot.tms.utils.I18N;
@@ -503,7 +503,7 @@ abstract public class OpDms extends OpDevice {
 		 * @see Messenger#handleCommError()
 		 * @see Messenger#shouldReopen()
 		 */
-		protected Phase poll(AddressedMessage argmess)
+		protected Phase poll(CommMessage argmess)
 			throws IOException 
 		{
 			Message mess = (Message) argmess;

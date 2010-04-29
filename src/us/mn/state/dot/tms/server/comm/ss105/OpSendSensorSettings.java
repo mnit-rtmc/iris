@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Controller operation to send settings to an SS105.
@@ -50,7 +50,7 @@ public class OpSendSensorSettings extends OpSS105 {
 	protected class GetTimeInterval extends Phase {
 
 		/** Get the time interval (for binning) */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			TimeIntervalRequest ti = new TimeIntervalRequest();
 			mess.add(ti);
 			mess.getRequest();
@@ -66,7 +66,7 @@ public class OpSendSensorSettings extends OpSS105 {
 	protected class SetTimeInterval extends Phase {
 
 		/** Set the time interval (for binning) */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			TimeIntervalRequest ti = new TimeIntervalRequest(
 				BINNING_INTERVAL);
 			mess.add(ti);
@@ -80,7 +80,7 @@ public class OpSendSensorSettings extends OpSS105 {
 	protected class GetClassification extends Phase {
 
 		/** Get the classification lengths */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			ClassificationRequest cr = new ClassificationRequest();
 			mess.add(cr);
 			mess.getRequest();
@@ -96,7 +96,7 @@ public class OpSendSensorSettings extends OpSS105 {
 	protected class SetClassification extends Phase {
 
 		/** Set the classification lengths */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			ClassificationRequest cr = new ClassificationRequest();
 			mess.add(cr);
 			SS105_LOG.log(controller.getName() + ":= " + cr);
@@ -109,7 +109,7 @@ public class OpSendSensorSettings extends OpSS105 {
 	protected class QueryVersion extends Phase {
 
 		/** Query the firmware version */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			VersionRequest vr = new VersionRequest();
 			mess.add(vr);
 			try {
@@ -128,7 +128,7 @@ public class OpSendSensorSettings extends OpSS105 {
 	protected class SynchronizeClock extends Phase {
 
 		/** Synchronize the clock */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			TimeRequest tr = new TimeRequest();
 			mess.add(tr);
 			SS105_LOG.log(controller.getName() + ":= " + tr);

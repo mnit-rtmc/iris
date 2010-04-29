@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.viconptz;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  *
  * @author Douglas Lau
  */
-public class Message implements AddressedMessage {
+public class Message implements CommMessage {
 
 	/** Serial output stream */
 	protected final OutputStream os;

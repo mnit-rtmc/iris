@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-public class Message implements AddressedMessage {
+public class Message implements CommMessage {
 
 	/** Polynomial for CRC */
 	static protected final int POLYNOMIAL = 0x1c;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 
 /**
@@ -52,7 +52,7 @@ public class OpSendDMSLedstar extends OpDMS {
 	protected class SetPixelConfiguration extends Phase {
 
 		/** Set the LDC pot base */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(potBase);
 			mess.add(currentLow);
 			mess.add(currentHigh);

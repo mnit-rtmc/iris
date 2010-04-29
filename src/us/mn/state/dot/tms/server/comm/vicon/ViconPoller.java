@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.vicon;
 import java.io.EOFException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
@@ -40,9 +40,7 @@ public class ViconPoller extends MessagePoller implements VideoMonitorPoller {
 	}
 
 	/** Create a new message for the specified drop address */
-	public AddressedMessage createMessage(ControllerImpl c)
-		throws EOFException
-	{
+	public CommMessage createMessage(ControllerImpl c) throws EOFException {
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c));
 	}

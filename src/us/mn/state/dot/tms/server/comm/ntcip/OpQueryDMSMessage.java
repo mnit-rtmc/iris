@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -74,7 +74,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	protected class QueryMessageSource extends Phase {
 
 		/** Query the current message source */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(source);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + source);
@@ -86,7 +86,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	protected class QueryCurrentMessage extends Phase {
 
 		/** Query the current message */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
 				DmsMessageMemoryType.Enum.currentBuffer, 1);
 			DmsMessageStatus status = new DmsMessageStatus(

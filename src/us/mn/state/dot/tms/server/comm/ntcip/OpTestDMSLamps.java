@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -43,7 +43,7 @@ public class OpTestDMSLamps extends OpDMS {
 	protected class InitialStatus extends Phase {
 
 		/** Query the initial status of lamp test activation */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			LampTestActivation test = new LampTestActivation();
 			mess.add(test);
 			try {
@@ -68,7 +68,7 @@ public class OpTestDMSLamps extends OpDMS {
 	protected class ActivateLampTest extends Phase {
 
 		/** Activate the lamp test */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new LampTestActivation());
 			mess.setRequest();
 			return new CheckTestCompletion();
@@ -87,7 +87,7 @@ public class OpTestDMSLamps extends OpDMS {
 			SystemAttrEnum.DMS_LAMP_TEST_TIMEOUT_SECS.getInt()*1000;
 
 		/** Check for test completion */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(test);
 			mess.getRequest();
 			if(test.getInteger() ==
@@ -106,7 +106,7 @@ public class OpTestDMSLamps extends OpDMS {
 	protected class QueryLampStatus extends Phase {
 
 		/** Query lamp status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			LampFailureStuckOff l_off = new LampFailureStuckOff();
 			LampFailureStuckOn l_on = new LampFailureStuckOn();
 			mess.add(l_off);

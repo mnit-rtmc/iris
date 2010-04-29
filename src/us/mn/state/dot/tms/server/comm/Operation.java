@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ abstract public class Operation {
 	  * assigned null.
 	  * @see MessagePoller.performOperations
 	  */
-	public void poll(AddressedMessage mess) throws IOException,
+	public void poll(CommMessage mess) throws IOException,
 		DeviceContentionException
 	{
 		final Phase p = phase;
@@ -131,7 +131,7 @@ abstract public class Operation {
 
 		/** Perform a poll.
 		 * @return The next phase of the operation */
-		abstract protected Phase poll(AddressedMessage mess)
+		abstract protected Phase poll(CommMessage mess)
 			throws IOException, DeviceContentionException;
 	}
 

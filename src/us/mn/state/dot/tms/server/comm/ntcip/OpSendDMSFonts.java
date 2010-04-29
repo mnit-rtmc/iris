@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -96,7 +96,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class Query1203Version extends Phase {
 
 		/** Query the maximum character size (v2 only) */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontMaxCharacterSize max_char =
 				new FontMaxCharacterSize();
 			mess.add(max_char);
@@ -118,7 +118,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class QueryNumFonts extends Phase {
 
 		/** Query the number of supported fonts */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(num_fonts);
 			mess.add(max_characters);
 			mess.getRequest();
@@ -135,7 +135,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class QueryFontNumbers extends Phase {
 
 		/** Query the font number for one font */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontNumber number = new FontNumber(row);
 			FontStatus status = new FontStatus(row);
 			mess.add(number);
@@ -197,7 +197,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class VerifyFont extends Phase {
 
 		/** Verify a font */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontVersionID version = new FontVersionID(row);
 			mess.add(version);
 			try {
@@ -240,7 +240,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class QueryInitialStatus extends Phase {
 
 		/** Query the initial font status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.getRequest();
@@ -264,7 +264,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class RequestStatusNotUsed extends Phase {
 
 		/** Request the font status be "notUsed" */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
 			status.setEnum(FontStatus.Enum.notUsedReq);
 			mess.add(status);
@@ -278,7 +278,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class VerifyStatusNotUsed extends Phase {
 
 		/** Verify the font status is "notUsed" */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.getRequest();
@@ -295,7 +295,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class RequestStatusModify extends Phase {
 
 		/** Set the font status to modifying */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
 			status.setEnum(FontStatus.Enum.modifyReq);
 			mess.add(status);
@@ -309,7 +309,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class VerifyStatusModifying extends Phase {
 
 		/** Verify the font status is modifying */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.getRequest();
@@ -326,7 +326,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class InvalidateFont extends Phase {
 
 		/** Invalidate a font entry in the font table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontHeight height = new FontHeight(row);
 			mess.add(height);
 			DMS_LOG.log(dms.getName() + ":= " + height);
@@ -345,7 +345,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class CreateFont extends Phase {
 
 		/** Create a new font in the font table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontNumber number = new FontNumber(row);
 			FontName name = new FontName(row);
 			FontHeight height = new FontHeight(row);
@@ -398,7 +398,7 @@ public class OpSendDMSFonts extends OpDMS {
 		}
 
 		/** Add a character to the font table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			int code_point = glyph.getCodePoint();
 			Graphic graphic = glyph.getGraphic();
 			byte[] pixels = Base64.decode(graphic.getPixels());
@@ -433,7 +433,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class ValidateFontV1 extends Phase {
 
 		/** Validate a font entry in the font table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontHeight height = new FontHeight(row);
 			height.setInteger(font.getHeight());
 			mess.add(height);
@@ -450,7 +450,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class ValidateFontV2 extends Phase {
 
 		/** Validate a font entry in the font table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
 			status.setEnum(FontStatus.Enum.readyForUseReq);
 			mess.add(status);
@@ -468,7 +468,7 @@ public class OpSendDMSFonts extends OpDMS {
 			15 * 1000;
 
 		/** Verify the font status is ready for use */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.getRequest();
@@ -498,7 +498,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class SetDefaultFont extends Phase {
 
 		/** Set the default font numbmer */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DefaultFont dfont = new DefaultFont();
 			dfont.setInteger(font.getNumber());
 			mess.add(dfont);

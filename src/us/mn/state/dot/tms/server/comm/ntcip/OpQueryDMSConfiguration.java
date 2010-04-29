@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
@@ -45,7 +45,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	protected class QueryModuleCount extends Phase {
 
 		/** Query the number of modules */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			GlobalMaxModules modules = new GlobalMaxModules();
 			mess.add(modules);
 			mess.getRequest();
@@ -69,7 +69,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		}
 
 		/** Query the module make, model and version */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			ModuleMake make = new ModuleMake(mod);
 			ModuleModel model = new ModuleModel(mod);
 			ModuleVersion version = new ModuleVersion(mod);
@@ -100,7 +100,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	protected class QueryDmsInfo extends Phase {
 
 		/** Query the DMS information */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsSignAccess access = new DmsSignAccess();
 			DmsSignType type = new DmsSignType();
 			DmsSignHeight height = new DmsSignHeight();
@@ -147,7 +147,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	protected class QueryVmsInfo extends Phase {
 
 		/** Query the VMS information */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			VmsSignHeightPixels s_height =
 				new VmsSignHeightPixels();
 			VmsSignWidthPixels s_width = new VmsSignWidthPixels();

@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -47,9 +47,7 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 	}
 
 	/** Create a new message for the specified controller */
-	public AddressedMessage createMessage(ControllerImpl c)
-		throws EOFException
-	{
+	public CommMessage createMessage(ControllerImpl c) throws EOFException {
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c), c.getDrop());
 	}

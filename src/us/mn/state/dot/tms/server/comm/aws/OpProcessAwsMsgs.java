@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.aws;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.Log;
@@ -50,20 +50,18 @@ public class OpProcessAwsMsgs extends OpController
 	}
 
 	/** Phase to read the aws dms message file */
-	protected class PhaseReadMsgFile extends Phase
-	{
+	protected class PhaseReadMsgFile extends Phase {
+
 		/**
 		 * Execute the phase.
 		 * @throws IOException received from getRequest call.
 		 */
-		protected Phase poll(AddressedMessage argmess)
-			throws IOException 
-		{
+		protected Phase poll(CommMessage argmess) throws IOException {
 			Log.finest(
 				"OpProcessAwsMsgs.PhaseReadMsgFile.poll() " +
 				"called: " + 
 				STime.getCurDateTimeMSString(true));
-			assert argmess instanceof Message : "wrong message type";
+			assert argmess instanceof Message: "wrong message type";
 			AwsRequest request = new AwsRequest();
 			Message mess = (Message)argmess;
 			mess.add(request);

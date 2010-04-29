@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Operation to query the status of a ramp meter
@@ -72,7 +72,7 @@ public class OpQueryMeterStatus extends Op170 {
 	protected class GetStatus extends Phase {
 
 		/** Collect meter data from the controller */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] s = new byte[12];
 			mess.add(new MemoryRequest(Address.RAMP_METER_DATA, s));
 			mess.getRequest();
@@ -100,7 +100,7 @@ public class OpQueryMeterStatus extends Op170 {
 		}
 
 		/** Query the meter red time */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
 			mess.add(new MemoryRequest(address, data));
 			mess.getRequest();

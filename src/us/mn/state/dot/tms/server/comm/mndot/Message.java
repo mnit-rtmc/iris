@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.CommProtocol;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-public class Message implements AddressedMessage {
+public class Message implements CommMessage {
 
 	/** Status codes for 170 communication protocol */
 	static public final int OK = 0;

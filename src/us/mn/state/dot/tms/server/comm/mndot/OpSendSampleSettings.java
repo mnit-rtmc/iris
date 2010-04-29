@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Send sample settings to a 170 controller
@@ -43,7 +43,7 @@ public class OpSendSampleSettings extends Op170 {
 	protected class SynchronizeClock extends Phase {
 
 		/** Synchronize the clock */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new SynchronizeRequest());
 			mess.setRequest();
 			return new CheckCabinetType();
@@ -54,7 +54,7 @@ public class OpSendSampleSettings extends Op170 {
 	protected class CheckCabinetType extends Phase {
 
 		/** Check the cabinet type */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[1];
 			mess.add(new MemoryRequest(Address.CABINET_TYPE, data));
 			mess.getRequest();
@@ -98,7 +98,7 @@ public class OpSendSampleSettings extends Op170 {
 	protected class QueryPromVersion extends Phase {
 
 		/** Query the prom version */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
 			mess.add(new MemoryRequest(Address.PROM_VERSION, data));
 			mess.getRequest();
@@ -111,7 +111,7 @@ public class OpSendSampleSettings extends Op170 {
 	protected class QueueBitmap extends Phase {
 
 		/** Set the queue detector bitmap */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = getQueueBitmap();
 			mess.add(new MemoryRequest(Address.QUEUE_BITMAP, data));
 			mess.setRequest();

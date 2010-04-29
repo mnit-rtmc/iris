@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Operation to query the indications of a Lane Control Signal array.
@@ -49,7 +49,7 @@ public class OpQueryLCSIndications extends OpLCS {
 	protected class QueryStatus extends Phase {
 
 		/** Query the status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new MemoryRequest(Address.RAMP_METER_DATA,
 				status));
 			mess.getRequest();
@@ -64,7 +64,7 @@ public class OpQueryLCSIndications extends OpLCS {
 	protected class QueryOutputs extends Phase {
 
 		/** Query the outputs */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new MemoryRequest(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs));
 			mess.getRequest();

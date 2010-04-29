@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
@@ -52,7 +52,7 @@ abstract public class OpDMSMessage extends OpDMS {
 	protected class ModifyRequest extends Phase {
 
 		/** Set the status to modify request */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.Enum.modifyReq);
@@ -76,7 +76,7 @@ abstract public class OpDMSMessage extends OpDMS {
 	protected class InitialStatus extends Phase {
 
 		/** Get the initial message status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			mess.add(status);
@@ -93,7 +93,7 @@ abstract public class OpDMSMessage extends OpDMS {
 	protected class SetMultiString extends Phase {
 
 		/** Set the message MULTI string */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			DmsMessageBeacon beacon = new DmsMessageBeacon(
@@ -118,7 +118,7 @@ abstract public class OpDMSMessage extends OpDMS {
 	protected class ValidateRequest extends Phase {
 
 		/** Set the status to modify request */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.Enum.validateReq);
@@ -138,7 +138,7 @@ abstract public class OpDMSMessage extends OpDMS {
 	protected class FinalStatus extends Phase {
 
 		/** Get the final message status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			DmsMessageCRC crc = new DmsMessageCRC(
@@ -165,7 +165,7 @@ abstract public class OpDMSMessage extends OpDMS {
 	protected class ValidateMessageError extends Phase {
 
 		/** Get the validate message error */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsValidateMessageError error =
 				new DmsValidateMessageError();
 			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();

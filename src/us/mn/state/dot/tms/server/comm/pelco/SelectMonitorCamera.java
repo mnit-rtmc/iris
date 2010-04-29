@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
 import java.io.IOException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
  * Pelco operation to select the camera for one monitor.
@@ -56,7 +56,7 @@ public class SelectMonitorCamera extends PelcoOperation {
 	protected class Select extends Phase {
 
 		/** Command controller to move the camera */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new SelectMonitorRequest(parseUID(
 				monitor.getName())));
 			mess.add(new SelectCameraRequest(parseUID(camera)));

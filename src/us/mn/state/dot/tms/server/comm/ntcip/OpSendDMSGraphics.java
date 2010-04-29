@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -88,7 +88,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class QueryGraphicsConfiguration extends Phase {
 
 		/** Query the graphics configuration */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(color_scheme);
 			mess.add(max_graphics);
 			mess.add(num_graphics);
@@ -162,7 +162,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class QueryGraphicNumbers extends Phase {
 
 		/** Query the graphic number for one graphic */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicNumber number = new DmsGraphicNumber(row);
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(number);
@@ -216,7 +216,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class VerifyGraphic extends Phase {
 
 		/** Verify a graphic */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicID gid = new DmsGraphicID(row);
 			mess.add(gid);
 			mess.getRequest();
@@ -242,7 +242,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class QueryInitialStatus extends Phase {
 
 		/** Query the initial graphic status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(status);
 			mess.getRequest();
@@ -266,7 +266,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class InvalidateGraphic extends Phase {
 
 		/** Invalidate the graphic entry in the graphic table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			status.setEnum(DmsGraphicStatus.Enum.notUsedReq);
 			mess.add(status);
@@ -280,7 +280,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class RequestModify extends Phase {
 
 		/** Set the graphic status to modifyReq */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			status.setEnum(DmsGraphicStatus.Enum.modifyReq);
 			mess.add(status);
@@ -294,7 +294,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class VerifyStatusModifying extends Phase {
 
 		/** Verify the graphic status is modifying */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(status);
 			mess.getRequest();
@@ -312,7 +312,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class CreateGraphic extends Phase {
 
 		/** Create a new graphic in the graphic table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicNumber number = new DmsGraphicNumber(row);
 			DmsGraphicName name = new DmsGraphicName(row);
 			DmsGraphicHeight height = new DmsGraphicHeight(row);
@@ -369,7 +369,7 @@ public class OpSendDMSGraphics extends OpDMS {
 		}
 
 		/** Send a graphic block */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicBlockBitmap block_bitmap =
 				new DmsGraphicBlockBitmap(row, block);
 			block_bitmap.setOctetString(createBlock());
@@ -400,7 +400,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class ValidateGraphic extends Phase {
 
 		/** Validate a graphic entry in the graphic table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			status.setEnum(DmsGraphicStatus.Enum.readyForUseReq);
 			mess.add(status);
@@ -418,7 +418,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			10 * 1000;
 
 		/** Verify the graphic status is ready for use */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(status);
 			mess.getRequest();

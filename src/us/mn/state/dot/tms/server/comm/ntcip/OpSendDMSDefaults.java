@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
@@ -46,7 +46,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class SetCommPowerLoss extends Phase {
 
 		/** Set the comm loss action */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsShortPowerLossTime power_time =
 				new DmsShortPowerLossTime();
 			DmsTimeCommLoss comm_time = new DmsTimeCommLoss();
@@ -72,7 +72,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class PixelService extends Phase {
 
 		/** Set the pixel service schedule */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			VmsPixelServiceDuration dur =
 				new VmsPixelServiceDuration();
 			VmsPixelServiceFrequency freq =
@@ -96,7 +96,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class MessageDefaults extends Phase {
 
 		/** Set the message defaults */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DefaultJustificationLine line =
 				new DefaultJustificationLine();
 			DefaultJustificationPage page =
@@ -126,7 +126,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class LedstarDefaults extends Phase {
 
 		/** Set Ledstar-specific object defaults */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			LedHighTempCutoff temp = new LedHighTempCutoff();
 			LedSignErrorOverride override = 
 				new LedSignErrorOverride();
@@ -155,7 +155,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class SkylineDefaults extends Phase {
 
 		/** Set Skyline-specific object defaults */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsTempCritical temp = new DmsTempCritical();
 			DynBrightDayNight day_night = new DynBrightDayNight();
 			DynBrightDayRate day_rate = new DynBrightDayRate();
@@ -193,7 +193,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class AddcoDefaults extends Phase {
 
 		/** Set ADDCO-specific object defaults */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			// ADDCO brick signs have these dimensions
 			String make = dms.getMake();
 			// NOTE: setting these objects requires use of the

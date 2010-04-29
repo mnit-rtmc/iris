@@ -241,7 +241,7 @@ abstract public class MessagePoller extends Thread {
 	abstract public boolean isAddressValid(int drop);
 
 	/** Create a message for the specified controller */
-	abstract protected AddressedMessage createMessage(ControllerImpl c)
+	abstract protected CommMessage createMessage(ControllerImpl c)
 		throws EOFException;
 
 	/** Respond to a download request from a controller */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.LaneMarkingImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.WarningSignImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
@@ -102,9 +102,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	}
 
 	/** Create a new message for the specified controller */
-	public AddressedMessage createMessage(ControllerImpl c)
-		throws EOFException
-	{
+	public CommMessage createMessage(ControllerImpl c) throws EOFException {
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c), c.getDrop(), protocol);
 	}

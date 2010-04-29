@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.WarningSignImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
@@ -56,7 +56,7 @@ public class OpSendWarningCommand extends OpDevice {
 	protected class SetRate extends Phase {
 
 		/** Write the meter rate to the controller */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = { rate };
 			mess.add(new MemoryRequest(address, data));
 			mess.setRequest();

@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  * @author Douglas Lau
  * @author Timothy Johnson
  */
-public class Message implements AddressedMessage {
+public class Message implements CommMessage {
 
 	/** Acknowledge response */
 	static protected final String ACK = "AK";

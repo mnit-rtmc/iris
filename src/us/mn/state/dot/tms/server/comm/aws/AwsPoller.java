@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -63,7 +63,7 @@ public class AwsPoller extends MessagePoller
 
 	/** Create a new message for the specified controller, 
 	 *  called by MessagePoller.doPoll(). */
-	public AddressedMessage createMessage(ControllerImpl c) {
+	public CommMessage createMessage(ControllerImpl c) {
 		// Log.finest("AwsPoller.createMessage() called.");
 		return new Message(messenger);
 	}

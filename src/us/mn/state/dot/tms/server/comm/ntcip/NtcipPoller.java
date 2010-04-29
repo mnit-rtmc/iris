@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -71,9 +71,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Create a new message for the specified controller */
-	public AddressedMessage createMessage(ControllerImpl c)
-		throws EOFException
-	{
+	public CommMessage createMessage(ControllerImpl c) throws EOFException {
 		return snmp.new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c), c.getPassword());
 	}

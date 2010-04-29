@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.InputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  *
  * @author Douglas Lau
  */
-public class Message implements AddressedMessage {
+public class Message implements CommMessage {
 
 	/** Multidrop SS105 protocol */
 	static protected final boolean MULTIDROP = true;

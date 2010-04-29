@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 import us.mn.state.dot.tms.server.WarningSignImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
@@ -55,7 +55,7 @@ public class OpSendWarningSettings extends OpDevice {
 	protected class SetTimingTable extends Phase {
 
 		/** Set the timing table for the warning sign */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			int a = Address.METER_1_TIMING_TABLE;
 			mess.add(createTimingTableRequest(a));
 			mess.setRequest();

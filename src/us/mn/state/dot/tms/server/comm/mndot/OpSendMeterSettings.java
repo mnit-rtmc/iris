@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 
@@ -135,7 +135,7 @@ public class OpSendMeterSettings extends OpDevice {
 	protected class ResetWatchdogMonitor extends Phase {
 
 		/** Reset the watchdog monitor */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = {Address.WATCHDOG_BITS};
 			mess.add(new MemoryRequest(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
@@ -148,7 +148,7 @@ public class OpSendMeterSettings extends OpDevice {
 	protected class ClearWatchdogMonitor extends Phase {
 
 		/** Clear the watchdog monitor */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[1];
 			mess.add(new MemoryRequest(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
@@ -161,7 +161,7 @@ public class OpSendMeterSettings extends OpDevice {
 	protected class SetCommFail extends Phase {
 
 		/** Set the comm fail time */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = {MeterPoller.COMM_FAIL_THRESHOLD};
 			mess.add(new MemoryRequest(Address.COMM_FAIL, data));
 			mess.setRequest();
@@ -173,7 +173,7 @@ public class OpSendMeterSettings extends OpDevice {
 	protected class SetTimingTable extends Phase {
 
 		/** Set the timing table for the ramp meter */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			int a = getTableAddress();
 			mess.add(createTimingTableRequest(a));
 			mess.setRequest();
@@ -214,7 +214,7 @@ public class OpSendMeterSettings extends OpDevice {
 	protected class ClearVerifies extends Phase {
 
 		/** Clear the meter verifies for the ramp meter */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			int address = getVerifyAddress();
 			mess.add(new MemoryRequest(address, new byte[1]));
 			mess.setRequest();

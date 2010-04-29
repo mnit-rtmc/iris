@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.LaneMarkingImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
@@ -51,7 +51,7 @@ public class OpDeployLaneMarking extends OpDevice {
 	protected class QueryOutputs extends Phase {
 
 		/** Query the special function outputs */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new MemoryRequest(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs));
 			mess.getRequest();
@@ -63,7 +63,7 @@ public class OpDeployLaneMarking extends OpDevice {
 	protected class SetOutputs extends Phase {
 
 		/** Set the special function outputs */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			updateOutputs();
 			mess.add(new MemoryRequest(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs));

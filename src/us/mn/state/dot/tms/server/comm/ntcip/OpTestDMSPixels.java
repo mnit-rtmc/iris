@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -80,7 +80,7 @@ public class OpTestDMSPixels extends OpDMS {
 	protected class QueryTestStatus extends Phase {
 
 		/** Query the status of pixel test activation */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			PixelTestActivation test = new PixelTestActivation();
 			mess.add(test);
 			mess.getRequest();
@@ -96,7 +96,7 @@ public class OpTestDMSPixels extends OpDMS {
 	protected class ActivatePixelTest extends Phase {
 
 		/** Activate the pixel test */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			PixelTestActivation test = new PixelTestActivation();
 			test.setEnum(PixelTestActivation.Enum.test);
 			mess.add(test);
@@ -118,7 +118,7 @@ public class OpTestDMSPixels extends OpDMS {
 			SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS.getInt();
 
 		/** Check for test completion */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(test);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + test);
@@ -137,7 +137,7 @@ public class OpTestDMSPixels extends OpDMS {
 	protected class QueryRowCount extends Phase {
 
 		/** Query the row count in pixel failure table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(total_rows);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + total_rows);
@@ -152,7 +152,7 @@ public class OpTestDMSPixels extends OpDMS {
 	protected class QueryTestAndMessageRows extends Phase {
 
 		/** Query test/message rows in pixel failure table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(test_rows);
 			mess.add(message_rows);
 			try {
@@ -205,7 +205,7 @@ public class OpTestDMSPixels extends OpDMS {
 		}
 
 		/** Query one row in the pixel failure table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			PixelFailureXLocation x_loc = new PixelFailureXLocation(
 				detectionType, row);
 			PixelFailureYLocation y_loc = new PixelFailureYLocation(

@@ -18,7 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
@@ -48,7 +48,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected class QueryBrightness extends Phase {
 
 		/** Query the DMS brightness status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsIllumPhotocellLevelStatus p_level =
 				new DmsIllumPhotocellLevelStatus();
 			DmsIllumBrightLevelStatus b_level =
@@ -74,7 +74,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected class QueryMessageTable extends Phase {
 
 		/** Query the DMS message table status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			DmsNumPermanentMsg perm_num = new DmsNumPermanentMsg();
 			DmsNumChangeableMsg chg_num = new DmsNumChangeableMsg();
 			DmsMaxChangeableMsg chg_max = new DmsMaxChangeableMsg();
@@ -107,7 +107,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected class ControllerTemperature extends Phase {
 
 		/** Query the DMS controller temperature */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			TempMinCtrlCabinet min_cab = new TempMinCtrlCabinet();
 			TempMaxCtrlCabinet max_cab = new TempMaxCtrlCabinet();
 			mess.add(min_cab);
@@ -132,7 +132,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected class AmbientTemperature extends Phase {
 
 		/** Query the DMS ambient temperature */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			TempMinAmbient min_amb = new TempMinAmbient();
 			TempMaxAmbient max_amb = new TempMaxAmbient();
 			mess.add(min_amb);
@@ -164,7 +164,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected class HousingTemperature extends Phase {
 
 		/** Query the DMS housing temperature */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			TempMinSignHousing min_hou = new TempMinSignHousing();
 			TempMaxSignHousing max_hou = new TempMaxSignHousing();
 			mess.add(min_hou);
@@ -189,7 +189,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected class Failures extends Phase {
 
 		/** Query the DMS failure status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(shortError);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + shortError);
@@ -211,7 +211,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected class MoreFailures extends Phase {
 
 		/** Query more DMS failure status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			LampFailureStuckOff l_off = new LampFailureStuckOff();
 			LampFailureStuckOn l_on = new LampFailureStuckOn();
 			DmsActivateMsgError msg_err = new DmsActivateMsgError();
@@ -257,7 +257,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected final LedBadPixelLimit bad = new LedBadPixelLimit();
 
 		/** Query Ledstar-specific status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(potBase);
 			mess.add(low);
 			mess.add(high);
@@ -286,7 +286,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected class SkylineStatus extends Phase {
 
 		/** Query Skyline-specific status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			SignFaceHeatStatus heat = new SignFaceHeatStatus();
 			IllumPowerStatus power = new IllumPowerStatus();
 			SensorFailures sensor = new SensorFailures();
