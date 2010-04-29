@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.ChecksumException;
  *
  * @author Douglas Lau
  */
-public class BinaryDetectionRequest extends Request {
+public class BinaryDetectionRequest extends CanogaRequest {
 
 	/** Conversion factor from milliseconds to seconds */
 	static protected final int MS_PER_SECOND = 1000;

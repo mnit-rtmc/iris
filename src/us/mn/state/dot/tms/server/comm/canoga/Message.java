@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ public class Message implements AddressedMessage {
 	protected final int drop;
 
 	/** Request object */
-	protected Request req;
+	protected CanogaRequest req;
 
 	/** Create a new Canoga message */
 	public Message(OutputStream o, InputStream i, int d) {
@@ -48,8 +48,8 @@ public class Message implements AddressedMessage {
 
 	/** Add a request object to this message */
 	public void add(Object mo) {
-		if(mo instanceof Request)
-			req = (Request)mo;
+		if(mo instanceof CanogaRequest)
+			req = (CanogaRequest)mo;
 		else
 			req = null;
 	}
