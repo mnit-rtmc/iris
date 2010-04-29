@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,13 +64,8 @@ public class TimeRequest extends Request {
 
 	/** Parse the response to a GET request */
 	protected void parseGetResponse(String r) throws IOException {
-		try {
-			Date date = TimeStamp.parse(r);
-			stamp = date.getTime();
-		}
-		catch(NumberFormatException e) {
-			throw new ParsingException("Invalid time stamp: " + r);
-		}
+		Date date = TimeStamp.parse(r);
+		stamp = date.getTime();
 	}
 
 	/** Get the sensor time */
