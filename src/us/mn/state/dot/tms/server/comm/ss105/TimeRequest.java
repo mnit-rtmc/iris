@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-public class TimeRequest extends Request {
+public class TimeRequest extends SS105Request {
 
 	/** Is this a SET request */
 	protected boolean is_set = false;

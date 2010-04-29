@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-public class BinnedSampleRequest extends Request {
+public class BinnedSampleRequest extends SS105Request {
 
 	/** Sample age (number of intervals old) */
 	protected final int age;
