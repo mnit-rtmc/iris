@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,14 +39,14 @@ public class SynchronizeRequest extends Request {
 	/** Format a basic "SET" request */
 	protected byte[] formatPayloadSet(Message m) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		BCD.OutputStream bcd = new BCD.OutputStream(os);
+		BCDOutputStream bcd = new BCDOutputStream(os);
 		Calendar now = Calendar.getInstance();
-		bcd.write8Bit(now.get(Calendar.MONTH) + 1);
-		bcd.write8Bit(now.get(Calendar.DAY_OF_MONTH));
-		bcd.write8Bit(now.get(Calendar.YEAR) % 100);
-		bcd.write8Bit(now.get(Calendar.HOUR_OF_DAY));
-		bcd.write8Bit(now.get(Calendar.MINUTE));
-		bcd.write8Bit(now.get(Calendar.SECOND));
+		bcd.write2(now.get(Calendar.MONTH) + 1);
+		bcd.write2(now.get(Calendar.DAY_OF_MONTH));
+		bcd.write2(now.get(Calendar.YEAR) % 100);
+		bcd.write2(now.get(Calendar.HOUR_OF_DAY));
+		bcd.write2(now.get(Calendar.MINUTE));
+		bcd.write2(now.get(Calendar.SECOND));
 		byte[] sync = os.toByteArray();
 		byte[] req = new byte[9];
 		req[OFF_DROP_CAT] = m.dropCat(SYNCHRONIZE_CLOCK);

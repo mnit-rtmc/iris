@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,18 +69,18 @@ public class OpSendWarningSettings extends OpDevice {
 	{
 		int[] times = {AM_MID_TIME, PM_MID_TIME};
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		BCD.OutputStream bcd = new BCD.OutputStream(os);
+		BCDOutputStream bcd = new BCDOutputStream(os);
 		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
-			bcd.write16Bit(1);		// Startup GREEN
-			bcd.write16Bit(1);		// Startup YELLOW
-			bcd.write16Bit(3);		// Metering GREEN
-			bcd.write16Bit(1);		// Metering YELLOW
-			bcd.write16Bit(HOV_PREEMPT);
+			bcd.write4(1);			// Startup GREEN
+			bcd.write4(1);			// Startup YELLOW
+			bcd.write4(3);			// Metering GREEN
+			bcd.write4(1);			// Metering YELLOW
+			bcd.write4(HOV_PREEMPT);
 			for(int i = 0; i < 6; i++)
-				bcd.write16Bit(1);	// Metering RED
-			bcd.write8Bit(MeterRate.FLASH);	// TOD rate
-			bcd.write16Bit(times[t]);	// TOD start time
-			bcd.write16Bit(times[t]);	// TOD stop time
+				bcd.write4(1);		// Metering RED
+			bcd.write2(MeterRate.FLASH);	// TOD rate
+			bcd.write4(times[t]);		// TOD start time
+			bcd.write4(times[t]);		// TOD stop time
 		}
 		return new MemoryRequest(address, os.toByteArray());
 	}

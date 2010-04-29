@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,8 +62,8 @@ public class OpSendMeterRedTime extends OpDevice {
 		/** Write the new red time to the controller */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			ByteArrayOutputStream bo = new ByteArrayOutputStream(2);
-			BCD.OutputStream os = new BCD.OutputStream(bo);
-			os.write16Bit(red_time);
+			BCDOutputStream os = new BCDOutputStream(bo);
+			os.write4(red_time);
 			mess.add(new MemoryRequest(address, bo.toByteArray()));
 			mess.setRequest();
 			float red = red_time / 10.0f;

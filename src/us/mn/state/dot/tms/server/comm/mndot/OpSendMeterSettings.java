@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -194,18 +194,18 @@ public class OpSendMeterSettings extends OpDevice {
 		throws IOException
 	{
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		BCD.OutputStream bcd = new BCD.OutputStream(os);
+		BCDOutputStream bcd = new BCDOutputStream(os);
 		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
-			bcd.write16Bit(STARTUP_GREEN);
-			bcd.write16Bit(STARTUP_YELLOW);
-			bcd.write16Bit(getGreenTime());
-			bcd.write16Bit(getYellowTime());
-			bcd.write16Bit(HOV_PREEMPT);
+			bcd.write4(STARTUP_GREEN);
+			bcd.write4(STARTUP_YELLOW);
+			bcd.write4(getGreenTime());
+			bcd.write4(getYellowTime());
+			bcd.write4(HOV_PREEMPT);
 			for(int i = 0; i < 6; i++)
-				bcd.write16Bit(table_red[t]);
-			bcd.write8Bit(table_rate[t]);
-			bcd.write16Bit(table_start[t]);
-			bcd.write16Bit(table_stop[t]);
+				bcd.write4(table_red[t]);
+			bcd.write2(table_rate[t]);
+			bcd.write4(table_start[t]);
+			bcd.write4(table_stop[t]);
 		}
 		return new MemoryRequest(address, os.toByteArray());
 	}
