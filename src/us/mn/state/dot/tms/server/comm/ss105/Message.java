@@ -52,14 +52,14 @@ public class Message implements AddressedMessage {
 
 	/** Format a request header */
 	protected String formatHeader() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if(MULTIDROP) {
-			b.append("Z0");
-			b.append(Integer.toString(drop));
-			while(b.length() < 6)
-				b.insert(2, '0');
+			sb.append("Z0");
+			sb.append(Integer.toString(drop));
+			while(sb.length() < 6)
+				sb.insert(2, '0');
 		}
-		return b.toString();
+		return sb.toString();
 	}
 
 	/** Add a request object to this message */
