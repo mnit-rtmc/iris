@@ -90,15 +90,13 @@ public class Message implements AddressedMessage {
 
 	/** Get a response from the switcher */
 	protected String getResponse() throws IOException {
-		StringBuffer resp = new StringBuffer();
-		while(true) {
+		StringBuilder resp = new StringBuilder();
+		while(resp.length() <= MAX_RESPONSE) {
 			int value = is.read();
 			if(value < 0)
 				throw new EOFException("END OF STREAM");
 			resp.append((char)value);
 			if(value == EOR)
-				break;
-			else if(resp.length() > MAX_RESPONSE)
 				break;
 		}
 		if(resp.indexOf("$") < 0) {
