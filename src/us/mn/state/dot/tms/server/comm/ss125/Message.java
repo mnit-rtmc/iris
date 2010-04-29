@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ public class Message implements AddressedMessage {
 	protected final short dest_id;
 
 	/** Request object */
-	protected Request req;
+	protected SS125Request req;
 
 	/** Create a new SS125 message.
 	 * @param out Output stream to write message data.
@@ -92,8 +92,8 @@ public class Message implements AddressedMessage {
 	/** Add a request object to this message */
 	public void add(Object mo) {
 		assert req == null;
-		assert mo instanceof Request;
-		req = (Request)mo;
+		assert mo instanceof SS125Request;
+		req = (SS125Request)mo;
 	}
 
 	/** Perform a GET request.
