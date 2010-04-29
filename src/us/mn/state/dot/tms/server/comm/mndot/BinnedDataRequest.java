@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,14 +42,14 @@ public class BinnedDataRequest extends Request {
 	/** Get the binned record timestamp */
 	public Calendar getStamp() throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(payload);
-		BCD.InputStream bcd = new BCD.InputStream(bis);
-		int year = 1900 + bcd.read8Bit();
+		BCDInputStream bcd = new BCDInputStream(bis);
+		int year = 1900 + bcd.read2();
 		if(year < 1989)
 			year += 100;
-		int month = bcd.read8Bit() - 1;
-		int day = bcd.read8Bit();
-		int hour = bcd.read8Bit();
-		int minute = bcd.read8Bit();
+		int month = bcd.read2() - 1;
+		int day = bcd.read2();
+		int hour = bcd.read2();
+		int minute = bcd.read2();
 		Calendar stamp = Calendar.getInstance();
 		stamp.set(year, month, day, hour, minute, 0);
 		return stamp;

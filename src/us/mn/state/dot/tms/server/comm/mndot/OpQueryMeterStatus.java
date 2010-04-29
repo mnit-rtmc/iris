@@ -46,8 +46,8 @@ public class OpQueryMeterStatus extends Op170 {
 	/** Parse the red time from a BCD byte array */
 	static protected int parseRedTime(byte[] data) throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
-		BCD.InputStream is = new BCD.InputStream(bis);
-		return is.read16Bit();
+		BCDInputStream is = new BCDInputStream(bis);
+		return is.read4();
 	}
 
 	/** 30-Second completer */
