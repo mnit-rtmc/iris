@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ public class BinnedSampleRequest extends Request {
 		public final int medium;	// 0-1024 (percentage)
 		public final int large;		// 0-1024 (percentage)
 
-		protected LaneSample(String s) {
+		protected LaneSample(String s) throws ParsingException {
 			det = parseInt(s.substring(0, 1));
 			volume = parseInt(s.substring(1, 9));
 			speed = parseInt(s.substring(9, 13));
@@ -88,8 +88,13 @@ public class BinnedSampleRequest extends Request {
 			medium = parseInt(s.substring(21, 25));
 			large = parseInt(s.substring(25, 29));
 		}
-		static int parseInt(String s) {
-			return Integer.parseInt(s, 16);
+		static int parseInt(String s) throws ParsingException {
+			try {
+				return Integer.parseInt(s, 16);
+			}
+			catch(NumberFormatException e) {
+				throw new ParsingException("INVALID SAMPLE");
+			}
 		}
 		public int getScans() {
 			float o = occupancy / (float)MAX_PERCENT;
@@ -107,26 +112,16 @@ public class BinnedSampleRequest extends Request {
 
 	/** Set the response to the request */
 	protected void setResponse(String r) throws IOException {
-		try {
-			timestamp = TimeStamp.parse(r.substring(0, 8));
-		}
-		catch(NumberFormatException e) {
-			throw new ParsingException("INVALID TIME STAMP: " + r);
-		}
+		timestamp = TimeStamp.parse(r.substring(0, 8));
 		String payload = r.substring(8);
 		if(payload.length() % LANE_SAMPLE_BYTES != 0)
 			throw new ParsingException("INVALID SAMPLE SIZE");
-		try {
-			int lanes = payload.length() / LANE_SAMPLE_BYTES;
-			samples = new LaneSample[lanes];
-			for(int i = 0, j = 0; i < lanes; i++) {
-				samples[i] = new LaneSample(payload.substring(
-					j, j + LANE_SAMPLE_BYTES));
-				j += LANE_SAMPLE_BYTES;
-			}
-		}
-		catch(NumberFormatException e) {
-			throw new ParsingException("INVALID SAMPLE DATA: " + r);
+		int lanes = payload.length() / LANE_SAMPLE_BYTES;
+		samples = new LaneSample[lanes];
+		for(int i = 0, j = 0; i < lanes; i++) {
+			samples[i] = new LaneSample(payload.substring(
+				j, j + LANE_SAMPLE_BYTES));
+			j += LANE_SAMPLE_BYTES;
 		}
 	}
 

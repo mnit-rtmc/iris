@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.TimeZone;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * A SS105 time stamp is the number of seconds since the "epoch".  This can be
@@ -37,10 +38,15 @@ public class TimeStamp {
 	}
 
 	/** Parse an SS105 timestamp */
-	static public Date parse(String s) {
-		long seconds = Long.parseLong(s, 16);
-		long ms = EPOCH + seconds * 1000;
-		return new Date(ms);
+	static public Date parse(String s) throws ParsingException {
+		try {
+			long seconds = Long.parseLong(s, 16);
+			long ms = EPOCH + seconds * 1000;
+			return new Date(ms);
+		}
+		catch(NumberFormatException e) {
+			throw new ParsingException("INVALID TIME STAMP: " + s);
+		}
 	}
 
 	/** Format an SS105 timestamp */
