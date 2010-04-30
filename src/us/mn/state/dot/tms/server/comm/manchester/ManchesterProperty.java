@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  *
  * @author Douglas Lau
  */
-abstract public class ManchesterRequest implements ControllerProperty {
+abstract public class ManchesterProperty implements ControllerProperty {
 
 	/** Format a request for the specified receiver address */
 	abstract public byte[] format(int drop) throws IOException;

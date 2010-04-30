@@ -18,11 +18,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * A request to command a camera
+ * A property to command a camera
  *
  * @author Douglas Lau
  */
-public class CommandRequest extends ManchesterRequest {
+public class CommandProperty extends ManchesterProperty {
 
 	static protected final int EX_TILT_DOWN_FULL = 0;
 	static protected final int EX_IRIS_OPEN = 1;
@@ -35,17 +35,17 @@ public class CommandRequest extends ManchesterRequest {
 	static protected final int EX_TILT_UP_FULL = 8;
 	static protected final int EX_PAN_RIGHT_FULL = 9;
 
-	/** Requested pan value (-7 to 7) (8 means turbo) */
+	/** Pan value (-7 to 7) (8 means turbo) */
 	protected final int pan;
 
-	/** Requested tilt value (-7 to 7) (8 means turbo) */
+	/** Tilt value (-7 to 7) (8 means turbo) */
 	protected final int tilt;
 
-	/** Requested zoom value (-1 to 1) */
+	/** Zoom value (-1 to 1) */
 	protected final int zoom;
 
-	/** Create a new command request */
-	public CommandRequest(int p, int t, int z) {
+	/** Create a new command property */
+	public CommandProperty(int p, int t, int z) {
 		pan = p;
 		tilt = t;
 		zoom = z;
