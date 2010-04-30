@@ -22,11 +22,11 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * A request is a specific SS105 message.
+ * SS125 property
  *
  * @author Douglas Lau
  */
-abstract public class SS125Request implements ControllerProperty {
+abstract public class SS125Property implements ControllerProperty {
 
 	/** Charset encoding for character strings in requests */
 	static protected final String CHARSET = "US-ASCII";
@@ -252,6 +252,6 @@ abstract public class SS125Request implements ControllerProperty {
 	/** Delay before checking for response */
 	void delayResponse() {
 		// Only needed if flash is being reprogrammed
-		// see FlashConfigRequest
+		// see FlashConfigProperty
 	}
 }

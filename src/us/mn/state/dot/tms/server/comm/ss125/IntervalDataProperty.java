@@ -20,11 +20,11 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Interval Data Request.
+ * Interval Data Property.
  *
  * @author Douglas Lau
  */
-public class IntervalDataRequest extends SS125Request {
+public class IntervalDataProperty extends SS125Property {
 
 	/** Interval data request ID (from non-volatile memory) */
 	static protected final byte MSG_ID_NV = 0x70;

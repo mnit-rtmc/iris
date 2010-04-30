@@ -36,12 +36,12 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected final boolean restart;
 
 	/** General config request */
-	protected final GeneralConfigRequest gen_config =
-		new GeneralConfigRequest();
+	protected final GeneralConfigProperty gen_config =
+		new GeneralConfigProperty();
 
 	/** General config request */
-	protected final DataConfigRequest data_config =
-		new DataConfigRequest();
+	protected final DataConfigProperty data_config =
+		new DataConfigProperty();
 
 	/** Flag to indicate config has been updated */
 	protected boolean config_updated = false;
@@ -140,7 +140,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Log push config for one data type */
-	protected void logPushConfig(DataConfigRequest.PushConfig pc,
+	protected void logPushConfig(DataConfigProperty.PushConfig pc,
 		String dtype)
 	{
 		SS125_LOG.log(controller.getName() + ": " + dtype +
@@ -162,7 +162,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		if(data_config.getInterval() != BINNING_INTERVAL)
 			return true;
 		if(data_config.getMode() !=
-		   DataConfigRequest.StorageMode.CIRCULAR)
+		   DataConfigProperty.StorageMode.CIRCULAR)
 			return true;
 		if(data_config.getEventPush().enable)
 			return true;
@@ -180,7 +180,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			data_config.setInterval(BINNING_INTERVAL);
 			data_config.setMode(
-				DataConfigRequest.StorageMode.CIRCULAR);
+				DataConfigProperty.StorageMode.CIRCULAR);
 			data_config.getEventPush().enable = false;
 			data_config.getIntervalPush().enable = false;
 			data_config.getPresencePush().enable = false;
@@ -205,7 +205,7 @@ public class OpSendSensorSettings extends OpSS125 {
 
 		/** Store the config to flash */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FlashConfigRequest flash = new FlashConfigRequest();
+			FlashConfigProperty flash = new FlashConfigProperty();
 			mess.add(flash);
 			SS125_LOG.log(controller.getName() + ":= flash config");
 			mess.setRequest();
@@ -218,7 +218,7 @@ public class OpSendSensorSettings extends OpSS125 {
 
 		/** Query the date and time */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DateTimeRequest date_time = new DateTimeRequest();
+			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.getRequest();
 			SS125_LOG.log(controller.getName() + ": date/time " +
@@ -242,7 +242,7 @@ public class OpSendSensorSettings extends OpSS125 {
 
 		/** Send the date and time */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DateTimeRequest date_time = new DateTimeRequest();
+			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.setRequest();
 			SS125_LOG.log(controller.getName() + ":= date/time " +

@@ -18,11 +18,11 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Data Configuration Request.
+ * Data Configuration Property.
  *
  * @author Douglas Lau
  */
-public class DataConfigRequest extends SS125Request {
+public class DataConfigProperty extends SS125Property {
 
 	/** Data config request ID */
 	static protected final byte MSG_ID = 0x03;

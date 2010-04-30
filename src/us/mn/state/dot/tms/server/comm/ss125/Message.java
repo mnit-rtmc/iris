@@ -78,7 +78,7 @@ public class Message implements CommMessage {
 	protected final short dest_id;
 
 	/** Controller property */
-	protected SS125Request req;
+	protected SS125Property prop;
 
 	/** Create a new SS125 message.
 	 * @param out Output stream to write message data.
@@ -92,20 +92,20 @@ public class Message implements CommMessage {
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof SS125Request)
-			req = (SS125Request)cp;
+		if(cp instanceof SS125Property)
+			prop = (SS125Property)cp;
 	}
 
 	/** Perform a GET request.
 	 * @throws IOException On any errors sending message or receiving
 	 *         response */
 	public void getRequest() throws IOException {
-		assert req != null;
-		byte[] body = req.formatBodyGet();
+		assert prop != null;
+		byte[] body = prop.formatBodyGet();
 		byte[] header = formatHeader(body);
 		doPoll(header, body);
-		while(!req.isComplete()) {
-			req.parsePayload(doResponse(header, body));
+		while(!prop.isComplete()) {
+			prop.parsePayload(doResponse(header, body));
 			header[8]++;	// Increment sequence number
 			body[1]++;	// Sub ID is like a packet number
 		}
@@ -115,11 +115,11 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors sending message or receiving
 	 *         response */
 	public void setRequest() throws IOException {
-		assert req != null;
-		byte[] body = req.formatBodySet();
+		assert prop != null;
+		byte[] body = prop.formatBodySet();
 		byte[] header = formatHeader(body);
 		doPoll(header, body);
-		req.parseResult(doResponse(header, body));
+		prop.parseResult(doResponse(header, body));
 	}
 
 	/** Format a request header.
@@ -163,7 +163,7 @@ public class Message implements CommMessage {
 	protected byte[] doResponse(byte[] shead, byte[] sbody)
 		throws IOException
 	{
-		req.delayResponse();
+		prop.delayResponse();
 		byte[] rhead = recvResponse(10);
 		byte h_crc = recvResponse(1)[0];
 		int n_body = parseHead(rhead, h_crc, shead);

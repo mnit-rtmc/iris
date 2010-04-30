@@ -18,11 +18,11 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * General Configuration Request.
+ * General Configuration Property.
  *
  * @author Douglas Lau
  */
-public class GeneralConfigRequest extends SS125Request {
+public class GeneralConfigProperty extends SS125Property {
 
 	/** General config request ID */
 	static protected final byte MSG_ID = 0;

@@ -17,11 +17,11 @@ package us.mn.state.dot.tms.server.comm.ss125;
 import java.io.IOException;
 
 /**
- * Flash Configuration Request.
+ * Flash Configuration Property.
  *
  * @author Douglas Lau
  */
-public class FlashConfigRequest extends SS125Request {
+public class FlashConfigProperty extends SS125Property {
 
 	/** Flash config request ID */
 	static protected final byte MSG_ID = 0x08;

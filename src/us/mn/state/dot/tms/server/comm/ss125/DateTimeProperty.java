@@ -21,11 +21,11 @@ import java.util.TimeZone;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Date / Time Request.
+ * Date / Time Property.
  *
  * @author Douglas Lau
  */
-public class DateTimeRequest extends SS125Request {
+public class DateTimeProperty extends SS125Property {
 
 	/** Date / time request ID */
 	static protected final byte MSG_ID = 0x0E;

@@ -42,8 +42,8 @@ public class OpQuerySamples extends OpSS125 {
 	protected final Calendar newest = Calendar.getInstance();
 
 	/** Interval sample data */
-	protected final IntervalDataRequest sample_data =
-		new IntervalDataRequest();
+	protected final IntervalDataProperty sample_data =
+		new IntervalDataProperty();
 
 	/** Create a new "query binned samples" operation */
 	public OpQuerySamples(ControllerImpl c, Completer comp) {
