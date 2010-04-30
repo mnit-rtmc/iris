@@ -82,7 +82,7 @@ public class Message implements CommMessage {
 	protected final CommProtocol protocol;
 
 	/** Controller property */
-	protected MndotRequest req;
+	protected MndotProperty prop;
 
 	/** Create a new Mndot protocol message */
 	public Message(OutputStream o, InputStream i, int d, CommProtocol p) {
@@ -94,27 +94,27 @@ public class Message implements CommMessage {
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof MndotRequest)
-			req = (MndotRequest)cp;
+		if(cp instanceof MndotProperty)
+			prop = (MndotProperty)cp;
 	}
 
 	/** Perform a "get" request */
 	public void getRequest() throws IOException {
-		if(req == null)
-			throw new IOException("No request");
-		req.doGetRequest(this);
+		if(prop == null)
+			throw new IOException("No property");
+		prop.doGetRequest(this);
 	}
 
 	/** Perform a "set" request */
 	public void setRequest() throws IOException {
-		if(req == null)
-			throw new IOException("No request");
-		req.doSetRequest(this);
+		if(prop == null)
+			throw new IOException("No property");
+		prop.doSetRequest(this);
 	}
 
 	/** Get the drop from the response drop/status byte */
 	protected int getDrop(byte[] buf) {
-		byte drop_stat = buf[MndotRequest.OFF_DROP_CAT];
+		byte drop_stat = buf[MndotProperty.OFF_DROP_CAT];
 		if(protocol == CommProtocol.MNDOT_5)
 			return (drop_stat & 0xFF) >> 3;
 		else
@@ -123,7 +123,7 @@ public class Message implements CommMessage {
 
 	/** Get the stat from the response drop/status byte */
 	protected int getStat(byte[] buf) {
-		byte drop_stat = buf[MndotRequest.OFF_DROP_CAT];
+		byte drop_stat = buf[MndotProperty.OFF_DROP_CAT];
 		if(protocol == CommProtocol.MNDOT_5)
 			return drop_stat & 0x07;
 		else
@@ -137,7 +137,7 @@ public class Message implements CommMessage {
 		if(getDrop(res) != getDrop(req))
 			throw new ParsingException("DROP ADDRESS MISMATCH");
 		if(res.length < 2 ||
-		   res.length != res[MndotRequest.OFF_LENGTH] + 3)
+		   res.length != res[MndotProperty.OFF_LENGTH] + 3)
 			throw new ParsingException("INVALID LENGTH");
 		checkStatus(getStat(res));
 	}

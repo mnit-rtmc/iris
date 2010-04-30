@@ -19,11 +19,11 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * Memory Request to read or write 170 controller memory.
+ * Memory Property to read or write 170 controller memory.
  *
  * @author Douglas Lau
  */
-public class MemoryRequest extends MndotRequest {
+public class MemoryProperty extends MndotProperty {
 
 	/** Maximum length of a memory request (128 - 5 octet overhead) */
 	static protected final int MAX_LENGTH = 123;
@@ -49,8 +49,8 @@ public class MemoryRequest extends MndotRequest {
 			throw new ProtocolException("INVALID PAYLOAD SIZE");
 	}
 
-	/** Create a memory request */
-	public MemoryRequest(int a, byte[] buf) throws ProtocolException {
+	/** Create a memory property */
+	public MemoryProperty(int a, byte[] buf) throws ProtocolException {
 		address = a;
 		payload = buf;
 		checkPayloadLength();

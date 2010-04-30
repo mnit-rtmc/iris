@@ -52,7 +52,7 @@ public class OpDeployLaneMarking extends OpDevice {
 
 		/** Query the special function outputs */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new MemoryRequest(
+			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs));
 			mess.getRequest();
 			return new SetOutputs();
@@ -65,7 +65,7 @@ public class OpDeployLaneMarking extends OpDevice {
 		/** Set the special function outputs */
 		protected Phase poll(CommMessage mess) throws IOException {
 			updateOutputs();
-			mess.add(new MemoryRequest(
+			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs));
 			mess.setRequest();
 			return null;

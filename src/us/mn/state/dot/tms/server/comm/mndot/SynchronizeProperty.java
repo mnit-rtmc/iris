@@ -20,11 +20,11 @@ import java.util.Calendar;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * Synchronize Request
+ * Synchronize Property
  *
  * @author Douglas Lau
  */
-public class SynchronizeRequest extends MndotRequest {
+public class SynchronizeProperty extends MndotProperty {
 
 	/** Format a basic "GET" request */
 	protected byte[] formatPayloadGet(Message m) throws IOException {

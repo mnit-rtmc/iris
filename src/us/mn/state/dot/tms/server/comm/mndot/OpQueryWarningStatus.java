@@ -46,7 +46,7 @@ public class OpQueryWarningStatus extends OpDevice {
 		/** Query the warning sign status */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] b = new byte[1];
-			mess.add(new MemoryRequest(Address.RAMP_METER_DATA, b));
+			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,b));
 			mess.getRequest();
 			warn.setDeployedStatus(b[Address.OFF_STATUS] !=
 				MeterStatus.FLASH);

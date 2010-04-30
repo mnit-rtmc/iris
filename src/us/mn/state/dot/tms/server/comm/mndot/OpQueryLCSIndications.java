@@ -50,7 +50,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 		/** Query the status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new MemoryRequest(Address.RAMP_METER_DATA,
+			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,
 				status));
 			mess.getRequest();
 			if(isTurnedOn())
@@ -65,7 +65,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 		/** Query the outputs */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new MemoryRequest(
+			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs));
 			mess.getRequest();
 			return null;

@@ -64,7 +64,7 @@ public class OpSendMeterRedTime extends OpDevice {
 			ByteArrayOutputStream bo = new ByteArrayOutputStream(2);
 			BCDOutputStream os = new BCDOutputStream(bo);
 			os.write4(red_time);
-			mess.add(new MemoryRequest(address, bo.toByteArray()));
+			mess.add(new MemoryProperty(address, bo.toByteArray()));
 			mess.setRequest();
 			float red = red_time / 10.0f;
 			int rate = MndotPoller.calculateReleaseRate(meter, red);

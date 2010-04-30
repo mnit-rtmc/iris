@@ -57,7 +57,7 @@ public class OpSendLCSIndications extends OpLCS {
 			byte[] data = new byte[Address.OFF_METER_2 + 1];
 			data[Address.OFF_METER_1] = MeterRate.FORCED_FLASH;
 			data[Address.OFF_METER_2] = MeterRate.FORCED_FLASH;
-			mess.add(new MemoryRequest(address, data));
+			mess.add(new MemoryProperty(address, data));
 			mess.setRequest();
 			return new SetOutputs();
 		}
@@ -69,7 +69,7 @@ public class OpSendLCSIndications extends OpLCS {
 		/** Set the special function outputs */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] buffer = createSpecialFunctionBuffer();
-			mess.add(new MemoryRequest(
+			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, buffer));
 			mess.setRequest();
 			if(isDark())
@@ -89,7 +89,7 @@ public class OpSendLCSIndications extends OpLCS {
 			byte[] data = new byte[Address.OFF_METER_2 + 1];
 			data[Address.OFF_METER_1] = MeterRate.CENTRAL;
 			data[Address.OFF_METER_2] = MeterRate.CENTRAL;
-			mess.add(new MemoryRequest(address, data));
+			mess.add(new MemoryProperty(address, data));
 			mess.setRequest();
 			return null;
 		}

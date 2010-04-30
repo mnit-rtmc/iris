@@ -57,14 +57,14 @@ public class OpSendWarningSettings extends OpDevice {
 		/** Set the timing table for the warning sign */
 		protected Phase poll(CommMessage mess) throws IOException {
 			int a = Address.METER_1_TIMING_TABLE;
-			mess.add(createTimingTableRequest(a));
+			mess.add(createTimingTableProperty(a));
 			mess.setRequest();
 			return null;
 		}
 	}
 
-	/** Create a timing table request for the warning sign */
-	protected MndotRequest createTimingTableRequest(int address)
+	/** Create a timing table property for the warning sign */
+	protected MndotProperty createTimingTableProperty(int address)
 		throws IOException
 	{
 		int[] times = {AM_MID_TIME, PM_MID_TIME};
@@ -82,6 +82,6 @@ public class OpSendWarningSettings extends OpDevice {
 			bcd.write4(times[t]);		// TOD start time
 			bcd.write4(times[t]);		// TOD stop time
 		}
-		return new MemoryRequest(address, os.toByteArray());
+		return new MemoryProperty(address, os.toByteArray());
 	}
 }

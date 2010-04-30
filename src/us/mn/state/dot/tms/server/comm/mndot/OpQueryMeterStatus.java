@@ -74,7 +74,7 @@ public class OpQueryMeterStatus extends Op170 {
 		/** Collect meter data from the controller */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] s = new byte[12];
-			mess.add(new MemoryRequest(Address.RAMP_METER_DATA, s));
+			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,s));
 			mess.getRequest();
 			if(meter1 != null)
 				parseMeterData(meter1, 1, s, 0);
@@ -102,7 +102,7 @@ public class OpQueryMeterStatus extends Op170 {
 		/** Query the meter red time */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
-			mess.add(new MemoryRequest(address, data));
+			mess.add(new MemoryProperty(address, data));
 			mess.getRequest();
 			float red = parseRedTime(data) / 10.0f;
 			int rate = MndotPoller.calculateReleaseRate(meter, red);

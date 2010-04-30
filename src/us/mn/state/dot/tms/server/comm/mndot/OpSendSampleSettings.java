@@ -44,7 +44,7 @@ public class OpSendSampleSettings extends Op170 {
 
 		/** Synchronize the clock */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new SynchronizeRequest());
+			mess.add(new SynchronizeProperty());
 			mess.setRequest();
 			return new CheckCabinetType();
 		}
@@ -56,7 +56,7 @@ public class OpSendSampleSettings extends Op170 {
 		/** Check the cabinet type */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[1];
-			mess.add(new MemoryRequest(Address.CABINET_TYPE, data));
+			mess.add(new MemoryProperty(Address.CABINET_TYPE,data));
 			mess.getRequest();
 			checkCabinetStyle(data[0]);
 			return new QueryPromVersion();
@@ -100,7 +100,7 @@ public class OpSendSampleSettings extends Op170 {
 		/** Query the prom version */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
-			mess.add(new MemoryRequest(Address.PROM_VERSION, data));
+			mess.add(new MemoryProperty(Address.PROM_VERSION,data));
 			mess.getRequest();
 			setVersion(data[0], data[1]);
 			return new QueueBitmap();
@@ -113,7 +113,7 @@ public class OpSendSampleSettings extends Op170 {
 		/** Set the queue detector bitmap */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = getQueueBitmap();
-			mess.add(new MemoryRequest(Address.QUEUE_BITMAP, data));
+			mess.add(new MemoryProperty(Address.QUEUE_BITMAP,data));
 			mess.setRequest();
 			return null;
 		}

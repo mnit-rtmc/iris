@@ -45,7 +45,7 @@ public class OpReset170 extends Op170 {
 			// with "occupancy plateaus".  This can happen if there
 			// is a comm error during the ClearDetectors phase.
 			byte[] data = {Address.DETECTOR_RESET};
-			mess.add(new MemoryRequest(
+			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
 			mess.setRequest();
 			return new ClearDetectors();
@@ -58,7 +58,7 @@ public class OpReset170 extends Op170 {
 		/** Clear the detector reset */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[1];
-			mess.add(new MemoryRequest(
+			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
 			mess.setRequest();
 			return new Level1Restart();
@@ -70,7 +70,7 @@ public class OpReset170 extends Op170 {
 
 		/** Restart the controller */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new Level1Request());
+			mess.add(new Level1Property());
 			mess.setRequest();
 			return null;
 		}

@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-abstract public class MndotRequest implements ControllerProperty {
+abstract public class MndotProperty implements ControllerProperty {
 
 	/** "Shut up" command category code */
 	static protected final int SHUT_UP = 0;

@@ -77,7 +77,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 		protected int tryNextRecord(CommMessage mess)
 			throws IOException
 		{
-			BinnedDataRequest bin = new BinnedDataRequest();
+			BinnedDataProperty bin = new BinnedDataProperty();
 			mess.add(bin);
 			mess.getRequest();
 			stamp = bin.getStamp();
@@ -114,7 +114,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			catch(ControllerException e) {
 				setMaintStatus(e.getMessage());
 				rec = new byte[75];
-				mess.add(new MemoryRequest(
+				mess.add(new MemoryProperty(
 					Address.DATA_BUFFER_5_MINUTE, rec));
 				mess.getRequest();
 			}

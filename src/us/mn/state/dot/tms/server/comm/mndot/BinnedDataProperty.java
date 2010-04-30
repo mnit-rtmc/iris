@@ -20,11 +20,11 @@ import java.util.Calendar;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Binned data request to query or clear oldest binned data record.
+ * Binned data property to query or clear oldest binned data record.
  *
  * @author Douglas Lau
  */
-public class BinnedDataRequest extends MndotRequest {
+public class BinnedDataProperty extends MndotProperty {
 
 	/** Number of octets for timestamp */
 	static protected final int STAMP_LENGTH = 5;

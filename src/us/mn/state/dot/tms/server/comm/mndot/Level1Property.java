@@ -18,11 +18,11 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * Level-1 Restart Request
+ * Level-1 Restart Property
  *
  * @author Douglas Lau
  */
-public class Level1Request extends MndotRequest {
+public class Level1Property extends MndotProperty {
 
 	/** Format a basic "GET" request */
 	protected byte[] formatPayloadGet(Message m) throws IOException {

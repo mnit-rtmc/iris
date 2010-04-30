@@ -18,11 +18,11 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * Shut Up Request
+ * Shut Up Property
  *
  * @author Douglas Lau
  */
-public class ShutUpRequest extends MndotRequest {
+public class ShutUpProperty extends MndotProperty {
 
 	/** Format a basic "GET" request */
 	protected byte[] formatPayloadGet(Message m) throws IOException {

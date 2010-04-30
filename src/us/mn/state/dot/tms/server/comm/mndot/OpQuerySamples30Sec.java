@@ -48,7 +48,7 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 		/** Query 30-second sample data */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] r = new byte[72];
-			mess.add(new MemoryRequest(
+			mess.add(new MemoryProperty(
 				Address.DATA_BUFFER_30_SECOND, r));
 			mess.getRequest();
 			processData(r);

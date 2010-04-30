@@ -52,7 +52,7 @@ public class OpQueryAlarms extends Op170 {
 		/** Query the meter red time */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
-			mess.add(new MemoryRequest(Address.ALARM_INPUTS, data));
+			mess.add(new MemoryProperty(Address.ALARM_INPUTS,data));
 			mess.getRequest();
 			boolean[] alarms = parseAlarms(data);
 			for(int i = 0; i < 10; i++) {

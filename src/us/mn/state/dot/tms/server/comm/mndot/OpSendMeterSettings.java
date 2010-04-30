@@ -137,7 +137,7 @@ public class OpSendMeterSettings extends OpDevice {
 		/** Reset the watchdog monitor */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = {Address.WATCHDOG_BITS};
-			mess.add(new MemoryRequest(
+			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
 			mess.setRequest();
 			return new ClearWatchdogMonitor();
@@ -150,7 +150,7 @@ public class OpSendMeterSettings extends OpDevice {
 		/** Clear the watchdog monitor */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[1];
-			mess.add(new MemoryRequest(
+			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
 			mess.setRequest();
 			return new SetCommFail();
@@ -163,7 +163,7 @@ public class OpSendMeterSettings extends OpDevice {
 		/** Set the comm fail time */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = {MeterPoller.COMM_FAIL_THRESHOLD};
-			mess.add(new MemoryRequest(Address.COMM_FAIL, data));
+			mess.add(new MemoryProperty(Address.COMM_FAIL, data));
 			mess.setRequest();
 			return new SetTimingTable();
 		}
@@ -175,7 +175,7 @@ public class OpSendMeterSettings extends OpDevice {
 		/** Set the timing table for the ramp meter */
 		protected Phase poll(CommMessage mess) throws IOException {
 			int a = getTableAddress();
-			mess.add(createTimingTableRequest(a));
+			mess.add(createTimingTableProperty(a));
 			mess.setRequest();
 			return new ClearVerifies();
 		}
@@ -189,8 +189,8 @@ public class OpSendMeterSettings extends OpDevice {
 			return Address.METER_1_TIMING_TABLE;
 	}
 
-	/** Create a timing table request for the meter */
-	protected MndotRequest createTimingTableRequest(int address)
+	/** Create a timing table property for the meter */
+	protected MndotProperty createTimingTableProperty(int address)
 		throws IOException
 	{
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -207,7 +207,7 @@ public class OpSendMeterSettings extends OpDevice {
 			bcd.write4(table_start[t]);
 			bcd.write4(table_stop[t]);
 		}
-		return new MemoryRequest(address, os.toByteArray());
+		return new MemoryProperty(address, os.toByteArray());
 	}
 
 	/** Phase to clear the meter verifies for the ramp meter */
@@ -216,7 +216,7 @@ public class OpSendMeterSettings extends OpDevice {
 		/** Clear the meter verifies for the ramp meter */
 		protected Phase poll(CommMessage mess) throws IOException {
 			int address = getVerifyAddress();
-			mess.add(new MemoryRequest(address, new byte[1]));
+			mess.add(new MemoryProperty(address, new byte[1]));
 			mess.setRequest();
 			return null;
 		}
