@@ -82,11 +82,11 @@ public class Message implements CommMessage {
 			prop.encodeStore(os, 0);
 		os.write(EOM);
 		os.flush();
-		getResponse();
+		decodeResponse();
 	}
 
-	/** Get a response from the switcher */
-	protected String getResponse() throws IOException {
+	/** Decode a response from the switcher */
+	protected void decodeResponse() throws IOException {
 		StringBuilder resp = new StringBuilder();
 		while(resp.length() <= MAX_RESPONSE) {
 			int value = is.read();
@@ -96,10 +96,7 @@ public class Message implements CommMessage {
 			if(value == EOR)
 				break;
 		}
-		if(resp.indexOf("$") < 0) {
-			throw new ParsingException("VICON ERROR: " +
-				resp.toString());
-		}
-		return resp.toString();
+		if(resp.indexOf("$") < 0)
+			throw new ParsingException("VICON ERROR: " + resp);
 	}
 }
