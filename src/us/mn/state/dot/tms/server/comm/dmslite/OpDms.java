@@ -291,7 +291,7 @@ abstract public class OpDms extends OpDevice {
 		mess.add(buildInterStatusElem());
 
 		// send and read response, throws IOException
-		mess.getRequest(getOpDms());
+		mess.queryProps(getOpDms());
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */

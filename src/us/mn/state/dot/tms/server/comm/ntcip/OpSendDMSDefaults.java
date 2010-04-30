@@ -63,7 +63,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			DMS_LOG.log(dms.getName() + ":= " + power_time);
 			DMS_LOG.log(dms.getName() + ":= " + comm_time);
 			DMS_LOG.log(dms.getName() + ":= " + end_msg);
-			mess.setRequest();
+			mess.storeProps();
 			return new PixelService();
 		}
 	}
@@ -87,7 +87,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			DMS_LOG.log(dms.getName() + ":= " + dur);
 			DMS_LOG.log(dms.getName() + ":= " + freq);
 			DMS_LOG.log(dms.getName() + ":= " + time);
-			mess.setRequest();
+			mess.storeProps();
 			return new MessageDefaults();
 		}
 	}
@@ -117,7 +117,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			DMS_LOG.log(dms.getName() + ":= " + page);
 			DMS_LOG.log(dms.getName() + ":= " + on_time);
 			DMS_LOG.log(dms.getName() + ":= " + off_time);
-			mess.setRequest();
+			mess.storeProps();
 			return new LedstarDefaults();
 		}
 	}
@@ -138,7 +138,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.add(override);
 			mess.add(limit);
 			try {
-				mess.setRequest();
+				mess.storeProps();
 				DMS_LOG.log(dms.getName() + ":= " + temp);
 				DMS_LOG.log(dms.getName() + ":= " + override);
 				DMS_LOG.log(dms.getName() + ":= " + limit);
@@ -174,7 +174,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.add(night_rate);
 			mess.add(max_lvl);
 			try {
-				mess.setRequest();
+				mess.storeProps();
 				DMS_LOG.log(dms.getName() + ":= " + temp);
 				DMS_LOG.log(dms.getName() + ":= " + day_night);
 				DMS_LOG.log(dms.getName() + ":= " + day_rate);
@@ -221,7 +221,7 @@ public class OpSendDMSDefaults extends OpDMS {
 				mess.add(v_border);
 				mess.add(h_pitch);
 				mess.add(v_pitch);
-				mess.setRequest();
+				mess.storeProps();
 				DMS_LOG.log(dms.getName() + ":= " + h_border);
 				DMS_LOG.log(dms.getName() + ":= " + v_border);
 				DMS_LOG.log(dms.getName() + ":= " + h_pitch);

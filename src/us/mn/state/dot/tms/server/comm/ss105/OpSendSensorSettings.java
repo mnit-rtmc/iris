@@ -53,7 +53,7 @@ public class OpSendSensorSettings extends OpSS105 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			TimeIntervalProperty ti = new TimeIntervalProperty();
 			mess.add(ti);
-			mess.getRequest();
+			mess.queryProps();
 			SS105_LOG.log(controller.getName() + ": " + ti);
 			if(ti.value == BINNING_INTERVAL)
 				return new GetClassification();
@@ -70,7 +70,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			TimeIntervalProperty ti = new TimeIntervalProperty(
 				BINNING_INTERVAL);
 			mess.add(ti);
-			mess.setRequest();
+			mess.storeProps();
 			SS105_LOG.log(controller.getName() + ":= " + ti);
 			return new GetClassification();
 		}
@@ -83,7 +83,7 @@ public class OpSendSensorSettings extends OpSS105 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			ClassificationProperty c = new ClassificationProperty();
 			mess.add(c);
-			mess.getRequest();
+			mess.queryProps();
 			SS105_LOG.log(controller.getName() + ": " + c);
 			if(c.isDefault())
 				return new QueryVersion();
@@ -100,7 +100,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			ClassificationProperty c = new ClassificationProperty();
 			mess.add(c);
 			SS105_LOG.log(controller.getName() + ":= " + c);
-			mess.setRequest();
+			mess.storeProps();
 			return new QueryVersion();
 		}
 	}
@@ -113,7 +113,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			VersionProperty vr = new VersionProperty();
 			mess.add(vr);
 			try {
-				mess.getRequest();
+				mess.queryProps();
 				SS105_LOG.log(controller.getName() + "= " + vr);
 				controller.setVersion(vr.getVersion());
 			}
@@ -132,7 +132,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			TimeProperty tr = new TimeProperty();
 			mess.add(tr);
 			SS105_LOG.log(controller.getName() + ":= " + tr);
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

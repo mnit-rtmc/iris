@@ -53,17 +53,23 @@ public class Message implements CommMessage {
 			prop = (CanogaProperty)cp;
 	}
 
-	/** Perform a "get" request */
-	public void getRequest() throws IOException {
-		if(prop == null)
+	/** Query the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void queryProps() throws IOException {
+		if(prop != null)
+			prop.doGetRequest(os, is, drop);
+		else
 			throw new ProtocolException("No property");
-		prop.doGetRequest(os, is, drop);
 	}
 
-	/** Perform a "set" request */
-	public void setRequest() throws IOException {
-		if(prop == null)
+	/** Store the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void storeProps() throws IOException {
+		if(prop != null)
+			prop.doSetRequest(os, is, drop);
+		else
 			throw new ProtocolException("No property");
-		prop.doSetRequest(os, is, drop);
 	}
 }

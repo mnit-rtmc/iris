@@ -55,7 +55,7 @@ public class OpUpdateDMSDuration extends OpDMS {
 				new DmsMessageTimeRemaining(getDuration());
 			mess.add(remaining);
 			DMS_LOG.log(dms.getName() + ":= " + remaining);
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

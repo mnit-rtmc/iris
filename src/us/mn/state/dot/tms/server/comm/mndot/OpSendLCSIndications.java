@@ -58,7 +58,7 @@ public class OpSendLCSIndications extends OpLCS {
 			data[Address.OFF_METER_1] = MeterRate.FORCED_FLASH;
 			data[Address.OFF_METER_2] = MeterRate.FORCED_FLASH;
 			mess.add(new MemoryProperty(address, data));
-			mess.setRequest();
+			mess.storeProps();
 			return new SetOutputs();
 		}
 	}
@@ -71,7 +71,7 @@ public class OpSendLCSIndications extends OpLCS {
 			byte[] buffer = createSpecialFunctionBuffer();
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, buffer));
-			mess.setRequest();
+			mess.storeProps();
 			if(isDark())
 				return null;
 			else
@@ -90,7 +90,7 @@ public class OpSendLCSIndications extends OpLCS {
 			data[Address.OFF_METER_1] = MeterRate.CENTRAL;
 			data[Address.OFF_METER_2] = MeterRate.CENTRAL;
 			mess.add(new MemoryProperty(address, data));
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

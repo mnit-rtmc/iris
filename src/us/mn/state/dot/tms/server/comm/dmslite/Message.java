@@ -130,18 +130,18 @@ public class Message implements CommMessage
 			m_opdms.updateInterStatus(m, false);
 	}
 
-	/** Send a get request message.
-	 * @throws IOException if received response is malformed or timed 
-	 *	   out waiting for response. */
-	public void getRequest(OpDms op) throws IOException {
+	/** Query the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void queryProps(OpDms op) throws IOException {
 		m_opdms = op;
-		getRequest();
+		queryProps();
 	}
 
-	/** Send a get request message.
-	 * @throws IOException if received response is malformed or timed 
-	 *	   out waiting for response. */
-	public void getRequest() throws IOException {
+	/** Query the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void queryProps() throws IOException {
 
 		// send request
 		long starttime = sendRequest();
@@ -158,7 +158,7 @@ public class Message implements CommMessage
 		// send message
 		updateInterStatus("Sending request to sensorserver.");
 		long starttime=STime.getCurTimeUTCinMillis();
-		Log.finest("getRequest(): Writing " + array.length + 
+		Log.finest("queryProps(): Writing " + array.length + 
 			" bytes to SensorServer: " + 
 			SString.byteArrayToString(array) + ".");
 		m_is.resetBuffer();
@@ -236,7 +236,7 @@ public class Message implements CommMessage
 			}
 
 			// parse response
-			Log.finest("dmslite.Message.getRequest(): " +
+			Log.finest("dmslite.Message.queryProps(): " +
 				"found complete token:" + token);
 
 			try {
@@ -388,8 +388,10 @@ public class Message implements CommMessage
 		}
 	}
 
-	/** Send an set request message */
-	public void setRequest() throws IOException {}
+	/** Store the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void storeProps() throws IOException {}
 
 	/** Return a request message with this format:
 	 *     <DmsLite><msg name>...etc...</msg name></DmsLite> */

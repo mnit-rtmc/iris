@@ -60,7 +60,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(b_level);
 			mess.add(light);
 			mess.add(control);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + p_level);
 			DMS_LOG.log(dms.getName() + ": " + b_level);
 			DMS_LOG.log(dms.getName() + ": " + light);
@@ -91,7 +91,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(vol_num);
 			mess.add(vol_max);
 			mess.add(vol_mem);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + perm_num);
 			DMS_LOG.log(dms.getName() + ": " + chg_num);
 			DMS_LOG.log(dms.getName() + ": " + chg_max);
@@ -112,7 +112,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			TempMaxCtrlCabinet max_cab = new TempMaxCtrlCabinet();
 			mess.add(min_cab);
 			mess.add(max_cab);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + min_cab);
 			DMS_LOG.log(dms.getName() + ": " + max_cab);
 			int mn = min_cab.getInteger();
@@ -138,7 +138,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(min_amb);
 			mess.add(max_amb);
 			try {
-				mess.getRequest();
+				mess.queryProps();
 				DMS_LOG.log(dms.getName() + ": " + min_amb);
 				DMS_LOG.log(dms.getName() + ": " + max_amb);
 				int mn = min_amb.getInteger();
@@ -169,7 +169,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			TempMaxSignHousing max_hou = new TempMaxSignHousing();
 			mess.add(min_hou);
 			mess.add(max_hou);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + min_hou);
 			DMS_LOG.log(dms.getName() + ": " + max_hou);
 			int mn = min_hou.getInteger();
@@ -191,7 +191,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS failure status */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(shortError);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + shortError);
 			if(shortError.isMaintenance())
 				setMaintStatus(shortError.getValue());
@@ -228,7 +228,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			                         ShortErrorStatus.MESSAGE |
 			                         ShortErrorStatus.CONTROLLER))
 			{
-				mess.getRequest();
+				mess.queryProps();
 			}
 			if(shortError.checkError(ShortErrorStatus.LAMP)) {
 				DMS_LOG.log(dms.getName() + ": " + l_off);
@@ -263,7 +263,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(high);
 			mess.add(bad);
 			try {
-				mess.getRequest();
+				mess.queryProps();
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				dms.setLdcPotBase(null);
@@ -294,7 +294,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(power);
 			mess.add(sensor);
 			try {
-				mess.getRequest();
+				mess.queryProps();
 				DMS_LOG.log(dms.getName() + ": " + heat);
 				DMS_LOG.log(dms.getName() + ": " + power);
 				DMS_LOG.log(dms.getName() + ": " + sensor);

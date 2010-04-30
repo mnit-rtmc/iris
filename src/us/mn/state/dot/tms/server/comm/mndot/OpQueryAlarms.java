@@ -53,7 +53,7 @@ public class OpQueryAlarms extends Op170 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
 			mess.add(new MemoryProperty(Address.ALARM_INPUTS,data));
-			mess.getRequest();
+			mess.queryProps();
 			boolean[] alarms = parseAlarms(data);
 			for(int i = 0; i < 10; i++) {
 				int pin = ALARM_PIN + i;

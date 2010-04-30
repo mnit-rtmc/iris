@@ -161,8 +161,11 @@ public class SNMP extends BER {
 				mos.add((ASN1Object)cp);
 		}
 
-		/** Send an SNMP get request message */
-		public void getRequest() throws IOException {
+		/** Query the controller properties.  This is accomplished with
+		 * an SNMP get-request.
+		 * @throws IOException On any errors sending a request or
+		 *         receiving response */
+		public void queryProps() throws IOException {
 			is.skip(is.available());
 			encodeVarBindList(false);
 			encodeRequestPDU(Tag.GET_REQUEST);
@@ -173,8 +176,11 @@ public class SNMP extends BER {
 			decodeResponse();
 		}
 
-		/** Send an SNMP set request message */
-		public void setRequest() throws IOException {
+		/** Store the controller properties.  This is accomplished with
+		 * an SNMP set-request.
+		 * @throws IOException On any errors sending a request or
+		 *         receiving response */
+		public void storeProps() throws IOException {
 			is.skip(is.available());
 			encodeVarBindList(true);
 			encodeRequestPDU(Tag.SET_REQUEST);

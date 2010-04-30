@@ -69,7 +69,7 @@ public class OpQuerySamples extends OpSS125 {
 		/** Get the most recent sample interval */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(sample_data);
-			mess.getRequest();
+			mess.queryProps();
 			stamp.setTimeInMillis(sample_data.getTime());
 			SS125_LOG.log(controller.getName() + ": " +sample_data);
 			if(stamp.before(oldest) || stamp.after(newest)) {

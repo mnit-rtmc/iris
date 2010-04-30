@@ -76,7 +76,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		/** Query the current message source */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(source);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + source);
 			return processMessageSource();
 		}
@@ -96,7 +96,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			mess.add(multi);
 			mess.add(status);
 			mess.add(time);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + multi);
 			DMS_LOG.log(dms.getName() + ": " + status);
 			DMS_LOG.log(dms.getName() + ": " + time);

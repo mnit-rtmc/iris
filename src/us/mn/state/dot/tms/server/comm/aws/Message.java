@@ -45,16 +45,20 @@ public class Message implements CommMessage {
 			prop = (AwsProperty)cp;
 	}
 
-	/** Send a get request message.
-	 * Defined in CommMessage interface.
-	 * @throws IOException if received response is malformed. */
-	public void getRequest() throws IOException {
-		if(prop == null)
+	/** Query the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void queryProps() throws IOException {
+		if(prop != null)
+			prop.doGetRequest(messenger.getInputStream());
+		else
 			throw new ProtocolException("No property");
-		prop.doGetRequest(messenger.getInputStream());
 	}
 
-	/** Send an set request message. Defined in the
-	 * CommMessage interface. */
-	public void setRequest() throws IOException {}
+	/** Store the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void storeProps() throws IOException {
+		throw new ProtocolException("STORE not supported");
+	}
 }

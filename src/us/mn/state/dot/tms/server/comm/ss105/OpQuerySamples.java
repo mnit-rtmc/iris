@@ -80,7 +80,7 @@ public class OpQuerySamples extends OpSS105 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			BinnedSampleProperty bs = new BinnedSampleProperty();
 			mess.add(bs);
-			mess.getRequest();
+			mess.queryProps();
 			stamp.setTimeInMillis(bs.timestamp.getTime());
 			volume = bs.getVolume();
 			scans = bs.getScans();

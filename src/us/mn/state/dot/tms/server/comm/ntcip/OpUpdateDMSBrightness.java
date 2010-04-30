@@ -73,7 +73,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			mess.add(max_level);
 			mess.add(p_level);
 			mess.add(light);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + max_level);
 			DMS_LOG.log(dms.getName() + ": " + p_level);
 			DMS_LOG.log(dms.getName() + ": " + light);
@@ -96,7 +96,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			mess.add(brightness);
 			DmsIllumControl control = new DmsIllumControl();
 			mess.add(control);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + b_levels);
 			DMS_LOG.log(dms.getName() + ": " + brightness);
 			DMS_LOG.log(dms.getName() + ": " + control);
@@ -115,8 +115,8 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			DmsIllumControl control = new DmsIllumControl();
 			control.setEnum(DmsIllumControl.Enum.photocell);
 			mess.add(control);
-			mess.setRequest();
-			DMS_LOG.log(dms.getName() + ": " + control);
+			mess.storeProps();
+			DMS_LOG.log(dms.getName() + ":= " + control);
 			return new SetBrightnessTable();
 		}
 	}
@@ -128,8 +128,8 @@ public class OpUpdateDMSBrightness extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			brightness.setTable(calculateTable());
 			mess.add(brightness);
-//			mess.setRequest();
-			DMS_LOG.log(dms.getName() + ": " + brightness);
+//			mess.storeProps();
+			DMS_LOG.log(dms.getName() + ":= " + brightness);
 			return null;
 		}
 	}

@@ -59,7 +59,7 @@ public class OpSendWarningCommand extends OpDevice {
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = { rate };
 			mess.add(new MemoryProperty(address, data));
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

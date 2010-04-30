@@ -58,7 +58,7 @@ public class OpSendWarningSettings extends OpDevice {
 		protected Phase poll(CommMessage mess) throws IOException {
 			int a = Address.METER_1_TIMING_TABLE;
 			mess.add(createTimingTableProperty(a));
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

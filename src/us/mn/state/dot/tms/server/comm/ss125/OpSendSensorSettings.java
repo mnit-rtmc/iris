@@ -63,7 +63,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		/** Query the general config */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(gen_config);
-			mess.getRequest();
+			mess.queryProps();
 			SS125_LOG.log(controller.getName() + ": orientation " +
 				gen_config.getOrientation());
 			SS125_LOG.log(controller.getName() + ": location " +
@@ -102,7 +102,7 @@ public class OpSendSensorSettings extends OpSS125 {
 				gen_config.getLocation());
 			SS125_LOG.log(controller.getName() + ":= metric " +
 				gen_config.isMetric());
-			mess.setRequest();
+			mess.storeProps();
 			config_updated = true;
 			return new QueryDataConfig();
 		}
@@ -114,7 +114,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		/** Query the data config */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(data_config);
-			mess.getRequest();
+			mess.queryProps();
 			if(SS125_LOG.isOpen())
 				logDataConfig();
 			if(shouldUpdateDataConfig())
@@ -186,7 +186,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			data_config.getPresencePush().enable = false;
 			mess.add(data_config);
 			SS125_LOG.log(controller.getName() + ":= data config");
-			mess.setRequest();
+			mess.storeProps();
 			config_updated = true;
 			return configDonePhase();
 		}
@@ -208,7 +208,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			FlashConfigProperty flash = new FlashConfigProperty();
 			mess.add(flash);
 			SS125_LOG.log(controller.getName() + ":= flash config");
-			mess.setRequest();
+			mess.storeProps();
 			return new QueryDateTime();
 		}
 	}
@@ -220,7 +220,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
-			mess.getRequest();
+			mess.queryProps();
 			SS125_LOG.log(controller.getName() + ": date/time " +
 				date_time.getStamp());
 			if(shouldUpdateDateTime(date_time.getStamp().getTime()))
@@ -244,7 +244,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
-			mess.setRequest();
+			mess.storeProps();
 			SS125_LOG.log(controller.getName() + ":= date/time " +
 				date_time.getStamp());
 			return null;

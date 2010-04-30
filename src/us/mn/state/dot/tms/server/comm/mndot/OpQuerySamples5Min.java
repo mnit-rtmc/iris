@@ -79,12 +79,12 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 		{
 			BinnedDataProperty bin = new BinnedDataProperty();
 			mess.add(bin);
-			mess.getRequest();
+			mess.queryProps();
 			stamp = bin.getStamp();
 			stamp.add(Calendar.MINUTE, -5);
 			rec = bin.getRecord();
 			// Delete the record from the controller
-			mess.setRequest();
+			mess.storeProps();
 			return bin.getRecordCount();
 		}
 
@@ -116,7 +116,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 				rec = new byte[75];
 				mess.add(new MemoryProperty(
 					Address.DATA_BUFFER_5_MINUTE, rec));
-				mess.getRequest();
+				mess.queryProps();
 			}
 			processData(rec);
 			controller.storeData5Minute(stamp, FIRST_DETECTOR_PIN,

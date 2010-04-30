@@ -47,7 +47,7 @@ public class OpReset170 extends Op170 {
 			byte[] data = {Address.DETECTOR_RESET};
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
-			mess.setRequest();
+			mess.storeProps();
 			return new ClearDetectors();
 		}
 	}
@@ -60,7 +60,7 @@ public class OpReset170 extends Op170 {
 			byte[] data = new byte[1];
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
-			mess.setRequest();
+			mess.storeProps();
 			return new Level1Restart();
 		}
 	}
@@ -71,7 +71,7 @@ public class OpReset170 extends Op170 {
 		/** Restart the controller */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new Level1Property());
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

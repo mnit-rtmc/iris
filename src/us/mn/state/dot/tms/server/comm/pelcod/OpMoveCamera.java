@@ -67,7 +67,7 @@ public class OpMoveCamera extends OpDevice {
 		/** Command controller to move the camera */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new CommandProperty(pan, tilt, zoom));
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

@@ -47,7 +47,7 @@ public class OpRecallPreset extends OpDevice {
 		/** Command controller to set the camera preset */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new RecallPresetProperty(preset));
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

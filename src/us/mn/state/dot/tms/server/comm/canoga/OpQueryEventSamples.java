@@ -66,7 +66,7 @@ public class OpQueryEventSamples extends OpController {
 		/** Query the current detection events */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(detection);
-			mess.getRequest();
+			mess.queryProps();
 			success = true;
 			detection.logEvents(controller);
 			if(controller.hasActiveDetector())

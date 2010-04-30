@@ -69,17 +69,23 @@ public class Message implements CommMessage {
 			prop = (SS105Property)cp;
 	}
 
-	/** Perform a "get" request */
-	public void getRequest() throws IOException {
-		if(prop == null)
+	/** Query the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void queryProps() throws IOException {
+		if(prop != null)
+			prop.doGetRequest(ps, is, formatHeader());
+		else
 			throw new ProtocolException("No property");
-		prop.doGetRequest(ps, is, formatHeader());
 	}
 
-	/** Perform a "set" request */
-	public void setRequest() throws IOException {
-		if(prop == null)
+	/** Store the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void storeProps() throws IOException {
+		if(prop != null)
+			prop.doSetRequest(ps, is, formatHeader());
+		else
 			throw new ProtocolException("No property");
-		prop.doSetRequest(ps, is, formatHeader());
 	}
 }

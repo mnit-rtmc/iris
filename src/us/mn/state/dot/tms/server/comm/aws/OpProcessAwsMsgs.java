@@ -54,7 +54,7 @@ public class OpProcessAwsMsgs extends OpController
 
 		/**
 		 * Execute the phase.
-		 * @throws IOException received from getRequest call.
+		 * @throws IOException received from queryProps call.
 		 */
 		protected Phase poll(CommMessage argmess) throws IOException {
 			Log.finest(
@@ -65,7 +65,7 @@ public class OpProcessAwsMsgs extends OpController
 			AwsProperty prop = new AwsProperty();
 			Message mess = (Message)argmess;
 			mess.add(prop);
-			mess.getRequest();
+			mess.queryProps();
 			prop.activate();
 			return null;
 		}

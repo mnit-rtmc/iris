@@ -50,7 +50,7 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 			byte[] r = new byte[72];
 			mess.add(new MemoryProperty(
 				Address.DATA_BUFFER_30_SECOND, r));
-			mess.getRequest();
+			mess.queryProps();
 			processData(r);
 			return null;
 		}

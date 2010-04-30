@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 
 /**
- * A comm message encapsulates requests to GET or SET information from a
- * controller.
+ * A comm message encapsulates properties which can be queried from or stored
+ * in a controller.
  *
  * @author Douglas Lau
  */
@@ -27,9 +27,13 @@ public interface CommMessage {
 	/** Add a controller property */
 	void add(ControllerProperty cp);
 
-	/** Send a get request message */
-	void getRequest() throws IOException;
+	/** Query the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	void queryProps() throws IOException;
 
-	/** Send a set request message */
-	void setRequest() throws IOException;
+	/** Store the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	void storeProps() throws IOException;
 }

@@ -59,7 +59,7 @@ abstract public class OpDMSMessage extends OpDMS {
 			mess.add(status);
 			try {
 				DMS_LOG.log(dms.getName() + ":= " + status);
-				mess.setRequest();
+				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
 				if(modify) {
@@ -80,7 +80,7 @@ abstract public class OpDMSMessage extends OpDMS {
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			mess.add(status);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.isModifying())
 				return new SetMultiString();
@@ -109,7 +109,7 @@ abstract public class OpDMSMessage extends OpDMS {
 			DMS_LOG.log(dms.getName() + ":= " + multi);
 			DMS_LOG.log(dms.getName() + ":= " + beacon);
 			DMS_LOG.log(dms.getName() + ":= " + srv);
-			mess.setRequest();
+			mess.storeProps();
 			return new ValidateRequest();
 		}
 	}
@@ -125,7 +125,7 @@ abstract public class OpDMSMessage extends OpDMS {
 			mess.add(status);
 			try {
 				DMS_LOG.log(dms.getName() + ":= " + status);
-				mess.setRequest();
+				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
 				return new ValidateMessageError();
@@ -145,7 +145,7 @@ abstract public class OpDMSMessage extends OpDMS {
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			mess.add(status);
 			mess.add(crc);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			DMS_LOG.log(dms.getName() + ": " + crc);
 			if(!status.isValid())
@@ -174,7 +174,7 @@ abstract public class OpDMSMessage extends OpDMS {
 			mess.add(error);
 			mess.add(m_err);
 			mess.add(e_pos);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + error);
 			DMS_LOG.log(dms.getName() + ": " + m_err);
 			DMS_LOG.log(dms.getName() + ": " + e_pos);

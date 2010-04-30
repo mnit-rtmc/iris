@@ -96,7 +96,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(available_memory);
 			mess.add(block_size);
 			try {
-				mess.getRequest();
+				mess.queryProps();
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Must be 1203v1 only (no graphics) ...
@@ -167,7 +167,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(number);
 			mess.add(status);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + number);
 			DMS_LOG.log(dms.getName() + ": " + status);
 			Integer g_num = number.getInteger();
@@ -219,7 +219,7 @@ public class OpSendDMSGraphics extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicID gid = new DmsGraphicID(row);
 			mess.add(gid);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + gid);
 			if(isIDCorrect(gid.getInteger())) {
 				DMS_LOG.log(dms.getName() + ": Graphic valid");
@@ -245,7 +245,7 @@ public class OpSendDMSGraphics extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(status);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			switch(status.getEnum()) {
 			case notUsed:
@@ -271,7 +271,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			status.setEnum(DmsGraphicStatus.Enum.notUsedReq);
 			mess.add(status);
 			DMS_LOG.log(dms.getName() + ":= " + status);
-			mess.setRequest();
+			mess.storeProps();
 			return new RequestModify();
 		}
 	}
@@ -285,7 +285,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			status.setEnum(DmsGraphicStatus.Enum.modifyReq);
 			mess.add(status);
 			DMS_LOG.log(dms.getName() + ":= " + status);
-			mess.setRequest();
+			mess.storeProps();
 			return new VerifyStatusModifying();
 		}
 	}
@@ -297,7 +297,7 @@ public class OpSendDMSGraphics extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(status);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.getEnum() != DmsGraphicStatus.Enum.modifying){
 				DMS_LOG.log(dms.getName() +
@@ -348,7 +348,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			DMS_LOG.log(dms.getName() + ":= " + type);
 			DMS_LOG.log(dms.getName() + ":= " + trans_enabled);
 			DMS_LOG.log(dms.getName() + ":= " + trans_color);
-			mess.setRequest();
+			mess.storeProps();
 			return new SendGraphicBlock();
 		}
 	}
@@ -375,7 +375,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			block_bitmap.setOctetString(createBlock());
 			mess.add(block_bitmap);
 			DMS_LOG.log(dms.getName() + ":= " + block_bitmap);
-			mess.setRequest();
+			mess.storeProps();
 			if(block * block_size.getInteger() < bitmap.length) {
 				block++;
 				if(block % 20 == 0 && !controller.isFailed())
@@ -405,7 +405,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			status.setEnum(DmsGraphicStatus.Enum.readyForUseReq);
 			mess.add(status);
 			DMS_LOG.log(dms.getName() + ":= " + status);
-			mess.setRequest();
+			mess.storeProps();
 			return new VerifyStatusReadyForUse();
 		}
 	}
@@ -421,7 +421,7 @@ public class OpSendDMSGraphics extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(status);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.getEnum() ==
 			   DmsGraphicStatus.Enum.readyForUse)

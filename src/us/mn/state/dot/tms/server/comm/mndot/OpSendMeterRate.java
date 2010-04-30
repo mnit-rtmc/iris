@@ -58,7 +58,7 @@ public class OpSendMeterRate extends OpDevice {
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = { rate };
 			mess.add(new MemoryProperty(address, data));
-			mess.setRequest();
+			mess.storeProps();
 			if(!MeterRate.isMetering(rate))
 				meter.setRateNotify(null);
 			return null;

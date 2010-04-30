@@ -59,7 +59,7 @@ public class OpSendDMSLedstar extends OpDMS {
 			DMS_LOG.log(dms.getName() + ":= " + potBase);
 			DMS_LOG.log(dms.getName() + ":= " + currentLow);
 			DMS_LOG.log(dms.getName() + ":= " + currentHigh);
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

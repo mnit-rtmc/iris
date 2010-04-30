@@ -47,7 +47,7 @@ public class OpTestDMSLamps extends OpDMS {
 			LampTestActivation test = new LampTestActivation();
 			mess.add(test);
 			try {
-				mess.getRequest();
+				mess.queryProps();
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				DMS_LOG.log(dms.getName() + ": " +
@@ -70,7 +70,7 @@ public class OpTestDMSLamps extends OpDMS {
 		/** Activate the lamp test */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new LampTestActivation());
-			mess.setRequest();
+			mess.storeProps();
 			return new CheckTestCompletion();
 		}
 	}
@@ -89,7 +89,7 @@ public class OpTestDMSLamps extends OpDMS {
 		/** Check for test completion */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(test);
-			mess.getRequest();
+			mess.queryProps();
 			if(test.getInteger() ==
 			   LampTestActivation.Enum.noTest.ordinal())
 				return new QueryLampStatus();
@@ -111,7 +111,7 @@ public class OpTestDMSLamps extends OpDMS {
 			LampFailureStuckOn l_on = new LampFailureStuckOn();
 			mess.add(l_off);
 			mess.add(l_on);
-			mess.getRequest();
+			mess.queryProps();
 			dms.setLampStatus(createFailureBitmaps(l_off, l_on));
 			return null;
 		}

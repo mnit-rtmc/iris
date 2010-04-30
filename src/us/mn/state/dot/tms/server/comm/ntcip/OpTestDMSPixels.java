@@ -83,7 +83,7 @@ public class OpTestDMSPixels extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			PixelTestActivation test = new PixelTestActivation();
 			mess.add(test);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + test);
 			if(test.getEnum() == PixelTestActivation.Enum.noTest)
 				return new ActivatePixelTest();
@@ -101,7 +101,7 @@ public class OpTestDMSPixels extends OpDMS {
 			test.setEnum(PixelTestActivation.Enum.test);
 			mess.add(test);
 			DMS_LOG.log(dms.getName() + ":= " + test);
-			mess.setRequest();
+			mess.storeProps();
 			return new CheckTestCompletion();
 		}
 	}
@@ -120,7 +120,7 @@ public class OpTestDMSPixels extends OpDMS {
 		/** Check for test completion */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(test);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + test);
 			if(test.getEnum() == PixelTestActivation.Enum.noTest)
 				return new QueryRowCount();
@@ -139,7 +139,7 @@ public class OpTestDMSPixels extends OpDMS {
 		/** Query the row count in pixel failure table */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(total_rows);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + total_rows);
 			if(total_rows.getInteger() > 0)
 				return new QueryTestAndMessageRows();
@@ -156,7 +156,7 @@ public class OpTestDMSPixels extends OpDMS {
 			mess.add(test_rows);
 			mess.add(message_rows);
 			try {
-				mess.getRequest();
+				mess.queryProps();
 				DMS_LOG.log(dms.getName() + ": " + test_rows);
 				DMS_LOG.log(dms.getName() + ": " +message_rows);
 			}
@@ -215,7 +215,7 @@ public class OpTestDMSPixels extends OpDMS {
 			mess.add(x_loc);
 			mess.add(y_loc);
 			mess.add(status);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + x_loc);
 			DMS_LOG.log(dms.getName() + ": " + y_loc);
 			DMS_LOG.log(dms.getName() + ": " + status);

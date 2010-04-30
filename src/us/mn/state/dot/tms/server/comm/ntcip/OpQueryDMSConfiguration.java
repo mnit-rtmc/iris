@@ -48,7 +48,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			GlobalMaxModules modules = new GlobalMaxModules();
 			mess.add(modules);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + modules);
 			return new QueryModules(modules.getInteger());
 		}
@@ -78,7 +78,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(model);
 			mess.add(version);
 			mess.add(m_type);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + make);
 			DMS_LOG.log(dms.getName() + ": " + model);
 			DMS_LOG.log(dms.getName() + ": " + version);
@@ -120,7 +120,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(legend);
 			mess.add(beacon);
 			mess.add(tech);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + access);
 			DMS_LOG.log(dms.getName() + ": " + type);
 			DMS_LOG.log(dms.getName() + ": " + height);
@@ -163,7 +163,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(v_pitch);
 			mess.add(c_height);
 			mess.add(c_width);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + s_height);
 			DMS_LOG.log(dms.getName() + ": " + s_width);
 			DMS_LOG.log(dms.getName() + ": " + h_pitch);

@@ -98,18 +98,24 @@ public class Message implements CommMessage {
 			prop = (MndotProperty)cp;
 	}
 
-	/** Perform a "get" request */
-	public void getRequest() throws IOException {
-		if(prop == null)
+	/** Query the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void queryProps() throws IOException {
+		if(prop != null)
+			prop.doGetRequest(this);
+		else
 			throw new IOException("No property");
-		prop.doGetRequest(this);
 	}
 
-	/** Perform a "set" request */
-	public void setRequest() throws IOException {
-		if(prop == null)
+	/** Store the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void storeProps() throws IOException {
+		if(prop != null)
+			prop.doSetRequest(this);
+		else
 			throw new IOException("No property");
-		prop.doSetRequest(this);
 	}
 
 	/** Get the drop from the response drop/status byte */

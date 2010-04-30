@@ -96,10 +96,10 @@ public class Message implements CommMessage {
 			prop = (SS125Property)cp;
 	}
 
-	/** Perform a GET request.
+	/** Query the controller properties.
 	 * @throws IOException On any errors sending message or receiving
 	 *         response */
-	public void getRequest() throws IOException {
+	public void queryProps() throws IOException {
 		assert prop != null;
 		byte[] body = prop.formatBodyGet();
 		byte[] header = formatHeader(body);
@@ -111,10 +111,10 @@ public class Message implements CommMessage {
 		}
 	}
 
-	/** Perform a SET request.
-	 * @throws IOException On any errors sending message or receiving
+	/** Store the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
-	public void setRequest() throws IOException {
+	public void storeProps() throws IOException {
 		assert prop != null;
 		byte[] body = prop.formatBodySet();
 		byte[] header = formatHeader(body);

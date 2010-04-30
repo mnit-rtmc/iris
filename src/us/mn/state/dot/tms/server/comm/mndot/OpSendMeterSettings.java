@@ -139,7 +139,7 @@ public class OpSendMeterSettings extends OpDevice {
 			byte[] data = {Address.WATCHDOG_BITS};
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
-			mess.setRequest();
+			mess.storeProps();
 			return new ClearWatchdogMonitor();
 		}
 	}
@@ -152,7 +152,7 @@ public class OpSendMeterSettings extends OpDevice {
 			byte[] data = new byte[1];
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
-			mess.setRequest();
+			mess.storeProps();
 			return new SetCommFail();
 		}
 	}
@@ -164,7 +164,7 @@ public class OpSendMeterSettings extends OpDevice {
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = {MeterPoller.COMM_FAIL_THRESHOLD};
 			mess.add(new MemoryProperty(Address.COMM_FAIL, data));
-			mess.setRequest();
+			mess.storeProps();
 			return new SetTimingTable();
 		}
 	}
@@ -176,7 +176,7 @@ public class OpSendMeterSettings extends OpDevice {
 		protected Phase poll(CommMessage mess) throws IOException {
 			int a = getTableAddress();
 			mess.add(createTimingTableProperty(a));
-			mess.setRequest();
+			mess.storeProps();
 			return new ClearVerifies();
 		}
 	}
@@ -217,7 +217,7 @@ public class OpSendMeterSettings extends OpDevice {
 		protected Phase poll(CommMessage mess) throws IOException {
 			int address = getVerifyAddress();
 			mess.add(new MemoryProperty(address, new byte[1]));
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

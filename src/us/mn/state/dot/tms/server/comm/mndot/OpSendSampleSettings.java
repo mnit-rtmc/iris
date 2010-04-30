@@ -45,7 +45,7 @@ public class OpSendSampleSettings extends Op170 {
 		/** Synchronize the clock */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new SynchronizeProperty());
-			mess.setRequest();
+			mess.storeProps();
 			return new CheckCabinetType();
 		}
 	}
@@ -57,7 +57,7 @@ public class OpSendSampleSettings extends Op170 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[1];
 			mess.add(new MemoryProperty(Address.CABINET_TYPE,data));
-			mess.getRequest();
+			mess.queryProps();
 			checkCabinetStyle(data[0]);
 			return new QueryPromVersion();
 		}
@@ -101,7 +101,7 @@ public class OpSendSampleSettings extends Op170 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
 			mess.add(new MemoryProperty(Address.PROM_VERSION,data));
-			mess.getRequest();
+			mess.queryProps();
 			setVersion(data[0], data[1]);
 			return new QueueBitmap();
 		}
@@ -114,7 +114,7 @@ public class OpSendSampleSettings extends Op170 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = getQueueBitmap();
 			mess.add(new MemoryProperty(Address.QUEUE_BITMAP,data));
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

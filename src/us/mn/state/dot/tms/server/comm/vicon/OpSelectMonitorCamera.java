@@ -59,7 +59,7 @@ public class OpSelectMonitorCamera extends OpVicon {
 			mess.add(new SelectMonitorProperty(parseUID(
 				monitor.getName())));
 			mess.add(new SelectCameraProperty(parseUID(camera)));
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

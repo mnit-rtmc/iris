@@ -65,7 +65,7 @@ public class OpSendMeterRedTime extends OpDevice {
 			BCDOutputStream os = new BCDOutputStream(bo);
 			os.write4(red_time);
 			mess.add(new MemoryProperty(address, bo.toByteArray()));
-			mess.setRequest();
+			mess.storeProps();
 			float red = red_time / 10.0f;
 			int rate = MndotPoller.calculateReleaseRate(meter, red);
 			// FIXME: should happen on SONAR thread

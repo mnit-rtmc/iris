@@ -49,7 +49,7 @@ public class OpQueryConfig extends OpController {
 		/** Query the serial number */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(serial_number);
-			mess.getRequest();
+			mess.queryProps();
 			return new QueryVersion();
 		}
 	}
@@ -60,7 +60,7 @@ public class OpQueryConfig extends OpController {
 		/** Query the firmware version */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(version);
-			mess.getRequest();
+			mess.queryProps();
 			return null;
 		}
 	}

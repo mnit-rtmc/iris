@@ -96,7 +96,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			mess.add(act);
 			try {
 				DMS_LOG.log(dms.getName() + ":= " + act);
-				mess.setRequest();
+				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
 				return new QueryActivateMsgError();
@@ -122,7 +122,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			mess.add(act);
 			try {
 				DMS_LOG.log(dms.getName() + ":= " + act);
-				mess.setRequest();
+				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
 				return new QueryActivateMsgError();
@@ -140,7 +140,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsActivateMsgError error = new DmsActivateMsgError();
 			mess.add(error);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + error);
 			switch(error.getEnum()) {
 			case syntaxMULTI:
@@ -178,7 +178,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 				new DmsMultiSyntaxErrorPosition();
 			mess.add(m_err);
 			mess.add(e_pos);
-			mess.getRequest();
+			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + m_err);
 			DMS_LOG.log(dms.getName() + ": " + e_pos);
 			setErrorStatus(m_err.toString());
@@ -194,7 +194,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			LedActivateMsgError error = new LedActivateMsgError();
 			mess.add(error);
 			try {
-				mess.getRequest();
+				mess.queryProps();
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// must not be a Ledstar sign ...
@@ -228,7 +228,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			DMS_LOG.log(dms.getName() + ":= " + time);
 			DMS_LOG.log(dms.getName() + ":= " + comm_msg);
 			DMS_LOG.log(dms.getName() + ":= " + long_msg);
-			mess.setRequest();
+			mess.storeProps();
 			return null;
 		}
 	}

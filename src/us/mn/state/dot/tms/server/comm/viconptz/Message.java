@@ -48,13 +48,17 @@ public class Message implements CommMessage {
 			prop = (ViconPTZProperty)cp;
 	}
 
-	/** Perform a "get" request */
-	public void getRequest() throws IOException {
-		throw new ProtocolException("GET request not supported");
+	/** Query the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void queryProps() throws IOException {
+		throw new ProtocolException("QUERY not supported");
 	}
 
-	/** Perform a "set" request */
-	public void setRequest() throws IOException {
+	/** Store the controller properties.
+	 * @throws IOException On any errors sending a request or receiving
+	 *         response */
+	public void storeProps() throws IOException {
 		if(prop != null) {
 			os.write(prop.format(drop));
 			os.flush();
