@@ -19,16 +19,16 @@ import java.io.PrintStream;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 
 /**
- * Memory Request
+ * Memory Property
  *
  * @author Douglas Lau
  */
-abstract public class MemoryRequest extends SS105Request {
+abstract public class MemoryProperty extends SS105Property {
 
 	/** Is this a SET request */
 	protected boolean is_set = false;
 
-	/** Check if the request has a checksum */
+	/** Check if the property has a checksum */
 	protected boolean hasChecksum() {
 		return !is_set;
 	}

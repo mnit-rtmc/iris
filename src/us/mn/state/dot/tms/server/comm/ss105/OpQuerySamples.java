@@ -78,7 +78,7 @@ public class OpQuerySamples extends OpSS105 {
 
 		/** Get the most recent binned samples */
 		protected Phase poll(CommMessage mess) throws IOException {
-			BinnedSampleRequest bs = new BinnedSampleRequest();
+			BinnedSampleProperty bs = new BinnedSampleProperty();
 			mess.add(bs);
 			mess.getRequest();
 			stamp.setTimeInMillis(bs.timestamp.getTime());

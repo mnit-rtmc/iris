@@ -19,11 +19,11 @@ import java.util.Date;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Binned Sample Request
+ * Binned Sample Property
  *
  * @author Douglas Lau
  */
-public class BinnedSampleRequest extends SS105Request {
+public class BinnedSampleProperty extends SS105Property {
 
 	/** Sample age (number of intervals old) */
 	protected final int age;
@@ -34,17 +34,17 @@ public class BinnedSampleRequest extends SS105Request {
 	/** Sample data for each lane */
 	protected LaneSample[] samples = new LaneSample[0];
 
-	/** Create a new binned sample request */
-	public BinnedSampleRequest() {
+	/** Create a new binned sample property */
+	public BinnedSampleProperty() {
 		this(0);
 	}
 
-	/** Create a new binned sample request */
-	public BinnedSampleRequest(int a) {
+	/** Create a new binned sample property */
+	public BinnedSampleProperty(int a) {
 		age = a;
 	}
 
-	/** Check if the request has a checksum */
+	/** Check if the property has a checksum */
 	protected boolean hasChecksum() {
 		return true;
 	}

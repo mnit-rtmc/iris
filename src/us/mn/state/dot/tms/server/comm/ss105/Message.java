@@ -42,7 +42,7 @@ public class Message implements CommMessage {
 	protected final int drop;
 
 	/** Controller property */
-	protected SS105Request req;
+	protected SS105Property prop;
 
 	/** Create a new SS105 message */
 	public Message(PrintStream p, InputStream i, ControllerImpl c) {
@@ -65,21 +65,21 @@ public class Message implements CommMessage {
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof SS105Request)
-			req = (SS105Request)cp;
+		if(cp instanceof SS105Property)
+			prop = (SS105Property)cp;
 	}
 
 	/** Perform a "get" request */
 	public void getRequest() throws IOException {
-		if(req == null)
-			throw new ProtocolException("No request");
-		req.doGetRequest(ps, is, formatHeader());
+		if(prop == null)
+			throw new ProtocolException("No property");
+		prop.doGetRequest(ps, is, formatHeader());
 	}
 
 	/** Perform a "set" request */
 	public void setRequest() throws IOException {
-		if(req == null)
-			throw new ProtocolException("No request");
-		req.doSetRequest(ps, is, formatHeader());
+		if(prop == null)
+			throw new ProtocolException("No property");
+		prop.doSetRequest(ps, is, formatHeader());
 	}
 }

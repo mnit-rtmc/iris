@@ -18,11 +18,11 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * A Classification Request contains vehicle classification length thresholds.
+ * A Classification Property contains vehicle classification length thresholds.
  *
  * @author Douglas Lau
  */
-public class ClassificationRequest extends MemoryRequest {
+public class ClassificationProperty extends MemoryProperty {
 
 	/** Default minimum length for SHORT vehicle classification */
 	static protected final int SHORT_MIN = 0;
@@ -107,7 +107,7 @@ public class ClassificationRequest extends MemoryRequest {
 			long_min == LONG_MIN && long_max == LONG_MAX;
 	}
 
-	/** Get a string representation of the request */
+	/** Get a string representation */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Classification: ");

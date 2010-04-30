@@ -18,15 +18,14 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * Firmware Version Request.  This is not a documented message, so it is not
- * supported by HD sensors.
+ * Event Data Property
  *
  * @author Douglas Lau
  */
-public class VersionRequest extends SS105Request {
+public class EventProperty extends SS105Property {
 
-	/** Firmware version */
-	protected String version;
+	/** Event data */
+	protected String events;
 
 	/** Check if the request has a checksum */
 	protected boolean hasChecksum() {
@@ -35,26 +34,21 @@ public class VersionRequest extends SS105Request {
 
 	/** Format a basic "GET" request */
 	protected String formatGetRequest() {
-		return "S5";
+		return "XA";
 	}
 
 	/** Format a basic "SET" request */
 	protected String formatSetRequest() throws IOException {
-		throw new ProtocolException("Firmware version is read-only");
+		throw new ProtocolException("Event data is read-only");
 	}
 
 	/** Set the response to the request */
 	protected void setResponse(String r) {
-		version = r;
+		events = r;
 	}
 
-	/** Get the sensor firmware version */
-	public String getVersion() {
-		return version;
-	}
-
-	/** Get a string representation of the request */
-	public String toString() {
-		return "Version " + version;
+	/** Get the event data */
+	public String getEvents() {
+		return events;
 	}
 }

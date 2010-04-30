@@ -18,19 +18,19 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Time Interval Request
+ * Time Interval Property
  *
  * @author Douglas Lau
  */
-public class TimeIntervalRequest extends MemoryRequest {
+public class TimeIntervalProperty extends MemoryProperty {
 
-	/** Create a new time interval request */
-	public TimeIntervalRequest() {
+	/** Create a new time interval property */
+	public TimeIntervalProperty() {
 		this(0);
 	}
 
-	/** Create a new time interval request */
-	public TimeIntervalRequest(int i) {
+	/** Create a new time interval property */
+	public TimeIntervalProperty(int i) {
 		value = i;
 	}
 

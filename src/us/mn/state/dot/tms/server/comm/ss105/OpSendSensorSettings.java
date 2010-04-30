@@ -51,7 +51,7 @@ public class OpSendSensorSettings extends OpSS105 {
 
 		/** Get the time interval (for binning) */
 		protected Phase poll(CommMessage mess) throws IOException {
-			TimeIntervalRequest ti = new TimeIntervalRequest();
+			TimeIntervalProperty ti = new TimeIntervalProperty();
 			mess.add(ti);
 			mess.getRequest();
 			SS105_LOG.log(controller.getName() + ": " + ti);
@@ -67,7 +67,7 @@ public class OpSendSensorSettings extends OpSS105 {
 
 		/** Set the time interval (for binning) */
 		protected Phase poll(CommMessage mess) throws IOException {
-			TimeIntervalRequest ti = new TimeIntervalRequest(
+			TimeIntervalProperty ti = new TimeIntervalProperty(
 				BINNING_INTERVAL);
 			mess.add(ti);
 			mess.setRequest();
@@ -81,11 +81,11 @@ public class OpSendSensorSettings extends OpSS105 {
 
 		/** Get the classification lengths */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ClassificationRequest cr = new ClassificationRequest();
-			mess.add(cr);
+			ClassificationProperty c = new ClassificationProperty();
+			mess.add(c);
 			mess.getRequest();
-			SS105_LOG.log(controller.getName() + ": " + cr);
-			if(cr.isDefault())
+			SS105_LOG.log(controller.getName() + ": " + c);
+			if(c.isDefault())
 				return new QueryVersion();
 			else
 				return new SetClassification();
@@ -97,9 +97,9 @@ public class OpSendSensorSettings extends OpSS105 {
 
 		/** Set the classification lengths */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ClassificationRequest cr = new ClassificationRequest();
-			mess.add(cr);
-			SS105_LOG.log(controller.getName() + ":= " + cr);
+			ClassificationProperty c = new ClassificationProperty();
+			mess.add(c);
+			SS105_LOG.log(controller.getName() + ":= " + c);
 			mess.setRequest();
 			return new QueryVersion();
 		}
@@ -110,7 +110,7 @@ public class OpSendSensorSettings extends OpSS105 {
 
 		/** Query the firmware version */
 		protected Phase poll(CommMessage mess) throws IOException {
-			VersionRequest vr = new VersionRequest();
+			VersionProperty vr = new VersionProperty();
 			mess.add(vr);
 			try {
 				mess.getRequest();
@@ -129,7 +129,7 @@ public class OpSendSensorSettings extends OpSS105 {
 
 		/** Synchronize the clock */
 		protected Phase poll(CommMessage mess) throws IOException {
-			TimeRequest tr = new TimeRequest();
+			TimeProperty tr = new TimeProperty();
 			mess.add(tr);
 			SS105_LOG.log(controller.getName() + ":= " + tr);
 			mess.setRequest();

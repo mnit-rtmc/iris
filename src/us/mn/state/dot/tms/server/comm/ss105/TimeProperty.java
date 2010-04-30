@@ -20,11 +20,11 @@ import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Time Request
+ * Time Property
  *
  * @author Douglas Lau
  */
-public class TimeRequest extends SS105Request {
+public class TimeProperty extends SS105Property {
 
 	/** Is this a SET request */
 	protected boolean is_set = false;
@@ -73,7 +73,7 @@ public class TimeRequest extends SS105Request {
 		return new Date(stamp);
 	}
 
-	/** Get a string representation of the request */
+	/** Get a string representation */
 	public String toString() {
 		return "Time " + getTime();
 	}

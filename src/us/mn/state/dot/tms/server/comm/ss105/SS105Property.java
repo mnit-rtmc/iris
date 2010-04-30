@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-abstract public class SS105Request implements ControllerProperty {
+abstract public class SS105Property implements ControllerProperty {
 
 	/** Check if the request has a checksum */
 	abstract protected boolean hasChecksum();
