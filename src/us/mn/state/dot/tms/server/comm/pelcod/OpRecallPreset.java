@@ -23,16 +23,17 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  * Pelco operation to recall a camera preset.
  *
  * @author Stephen Donecker
+ * @author Douglas Lau
  */
 public class OpRecallPreset extends OpDevice {
 
 	/** The camera preset to goto */
-	private final int m_preset;
+	private final int preset;
 
 	/** Create a new operation to recall a camera preset */
-	public OpRecallPreset(CameraImpl c, int preset) {
+	public OpRecallPreset(CameraImpl c, int p) {
 		super(COMMAND, c);
-		m_preset = preset;
+		preset = p;
 	}
 
 	/** Begin the operation */
@@ -45,7 +46,7 @@ public class OpRecallPreset extends OpDevice {
 
 		/** Command controller to set the camera preset */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new RecallPresetRequest(m_preset));
+			mess.add(new RecallPresetProperty(preset));
 			mess.setRequest();
 			return null;
 		}

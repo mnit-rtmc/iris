@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.server.comm.pelcod;
 
 /**
- * A request to command a camera
+ * A property to command a camera
  *
  * @author Douglas Lau
  */
-public class CommandRequest extends PelcoDRequest {
+public class CommandProperty extends PelcoDProperty {
 
 	/** Bit flag to command a pan right */
 	static protected final byte PAN_RIGHT = 1 << 1;
@@ -48,8 +48,8 @@ public class CommandRequest extends PelcoDRequest {
 	/** Requested zoom value (-1 to 1) */
 	protected final int zoom;
 
-	/** Create a new command request */
-	public CommandRequest(int p, int t, int z) {
+	/** Create a new command property */
+	public CommandProperty(int p, int t, int z) {
 		pan = p;
 		tilt = t;
 		zoom = z;

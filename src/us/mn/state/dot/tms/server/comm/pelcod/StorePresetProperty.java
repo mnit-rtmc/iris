@@ -15,19 +15,20 @@
 package us.mn.state.dot.tms.server.comm.pelcod;
 
 /**
- * This class creates a Pelco D request to instruct the camera to recall
- * a preset state.
+ * This class creates a Pelco D request to instruct a camera to
+ * store the current state in a preset location.
  *
  * @author Stephen Donecker
+ * @author Douglas Lau
  */
-public class RecallPresetRequest extends PelcoDRequest {
+public class StorePresetProperty extends PelcoDProperty {
 
 	/** Requested preset to set */
-	private final int m_preset;
+	private final int preset;
 
-	/** Create a new recall preset request */
-	public RecallPresetRequest(int preset) {
-		m_preset = preset;
+	/** Create a new store preset property */
+	public StorePresetProperty(int p) {
+		preset = p;
 	}
 
 	/** Format the request for the specified receiver address */
@@ -36,9 +37,9 @@ public class RecallPresetRequest extends PelcoDRequest {
 		message[0] = (byte)0xFF;
 		message[1] = (byte)drop;
 		message[2] = 0x0;
-		message[3] = 0x7; // recall preset
+		message[3] = 0x3; // store preset
 		message[4] = 0x0;
-		message[5] = (byte)m_preset;
+		message[5] = (byte)preset;
 		message[6] = calculateChecksum(message);
 		return message;
 	}

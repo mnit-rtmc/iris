@@ -23,16 +23,17 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  * Pelco operation to store a camera preset.
  *
  * @author Stephen Donecker
+ * @author Douglas Lau
  */
 public class OpStorePreset extends OpDevice {
 
 	/** The camera preset to set */
-	private final int m_preset;
+	private final int preset;
 
 	/** Create a new operation to store a camera preset */
-	public OpStorePreset(CameraImpl c, int preset) {
+	public OpStorePreset(CameraImpl c, int p) {
 		super(COMMAND, c);
-		m_preset = preset;
+		preset = p;
 	}
 
 	/** Begin the operation */
@@ -45,7 +46,7 @@ public class OpStorePreset extends OpDevice {
 
 		/** Command controller to store the camera preset */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new StorePresetRequest(m_preset));
+			mess.add(new StorePresetProperty(preset));
 			mess.setRequest();
 			return null;
 		}

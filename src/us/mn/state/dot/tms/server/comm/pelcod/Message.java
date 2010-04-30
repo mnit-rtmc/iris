@@ -40,12 +40,12 @@ public class Message implements CommMessage {
 	}
 
 	/** Property for the message */
-	protected PelcoDRequest request = null;
+	protected PelcoDProperty prop = null;
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof PelcoDRequest)
-			request = (PelcoDRequest)cp;
+		if(cp instanceof PelcoDProperty)
+			prop = (PelcoDProperty)cp;
 	}
 
 	/** Perform a "get" request */
@@ -55,8 +55,8 @@ public class Message implements CommMessage {
 
 	/** Perform a "set" request */
 	public void setRequest() throws IOException {
-		if(request != null) {
-			os.write(request.format(drop));
+		if(prop != null) {
+			os.write(prop.format(drop));
 			os.flush();
 		}
 	}

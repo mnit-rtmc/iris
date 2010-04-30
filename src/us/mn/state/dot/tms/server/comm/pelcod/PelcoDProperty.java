@@ -21,9 +21,9 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  *
  * @author Douglas Lau
  */
-abstract public class PelcoDRequest implements ControllerProperty {
+abstract public class PelcoDProperty implements ControllerProperty {
 
-	/** Calculate the checksum of a request */
+	/** Calculate the checksum */
 	protected byte calculateChecksum(byte[] message) {
 		int i;
 		byte checksum = 0;
