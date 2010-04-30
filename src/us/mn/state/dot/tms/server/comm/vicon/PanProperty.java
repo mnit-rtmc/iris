@@ -15,33 +15,33 @@
 package us.mn.state.dot.tms.server.comm.vicon;
 
 /**
- * A request to tilt the selected camera
+ * A request to pan the selected camera
  *
  * @author Douglas Lau
  */
-public class TiltRequest extends ViconRequest {
+public class PanProperty extends ViconProperty {
 
-	/** Command for tilting camera up */
-	static protected final String UP = "M";
+	/** Command to pan camera left */
+	static protected final String LEFT = "I";
 
-	/** Command for tilting camera down */
-	static protected final String DOWN = "L";
+	/** Command to pan camera right */
+	static protected final String RIGHT = "J";
 
-	/** Speed (and direction) to tilt camera */
-	protected final int tilt;
+	/** Speed (and direction) to pan camera */
+	protected final int pan;
 
-	/** Create a new tilt request */
-	public TiltRequest(int t) {
-		tilt = clampValue(t);
+	/** Create a new pan request */
+	public PanProperty(int p) {
+		pan = clampValue(p);
 	}
 
 	/** Get the code to send to the switcher */
 	public String toString() {
-		if(tilt == 0)
+		if(pan == 0)
 			return "";
-		else if(tilt > 0)
-			return UP + tilt;
+		else if(pan > 0)
+			return RIGHT + pan;
 		else
-			return DOWN + Math.abs(tilt);
+			return LEFT + Math.abs(pan);
 	}
 }

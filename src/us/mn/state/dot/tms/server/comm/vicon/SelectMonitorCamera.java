@@ -56,9 +56,9 @@ public class SelectMonitorCamera extends ViconOperation {
 
 		/** Command controller to move the camera */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new SelectMonitorRequest(parseUID(
+			mess.add(new SelectMonitorProperty(parseUID(
 				monitor.getName())));
-			mess.add(new SelectCameraRequest(parseUID(camera)));
+			mess.add(new SelectCameraProperty(parseUID(camera)));
 			mess.setRequest();
 			return null;
 		}

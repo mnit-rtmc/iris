@@ -15,25 +15,33 @@
 package us.mn.state.dot.tms.server.comm.vicon;
 
 /**
- * A request to select a new monitor
+ * A request to tilt the selected camera
  *
  * @author Douglas Lau
  */
-public class SelectMonitorRequest extends ViconRequest {
+public class TiltProperty extends ViconProperty {
 
-	/** Command to select a new monitor */
-	static protected final String CODE = "A";
+	/** Command for tilting camera up */
+	static protected final String UP = "M";
 
-	/** Monitor to select */
-	protected final int monitor;
+	/** Command for tilting camera down */
+	static protected final String DOWN = "L";
 
-	/** Create a new select monitor request */
-	public SelectMonitorRequest(int m) {
-		monitor = m;
+	/** Speed (and direction) to tilt camera */
+	protected final int tilt;
+
+	/** Create a new tilt request */
+	public TiltProperty(int t) {
+		tilt = clampValue(t);
 	}
 
 	/** Get the code to send to the switcher */
 	public String toString() {
-		return CODE + monitor;
+		if(tilt == 0)
+			return "";
+		else if(tilt > 0)
+			return UP + tilt;
+		else
+			return DOWN + Math.abs(tilt);
 	}
 }

@@ -15,25 +15,33 @@
 package us.mn.state.dot.tms.server.comm.vicon;
 
 /**
- * A request to select a new camera
+ * A request to zoom the selected camera
  *
  * @author Douglas Lau
  */
-public class SelectCameraRequest extends ViconRequest {
+public class ZoomProperty extends ViconProperty {
 
-	/** Command to select a new camera */
-	static protected final String CODE = "B";
+	/** Command for zooming camera in */
+	static protected final String IN = "O";
 
-	/** Camera to select */
-	protected final int camera;
+	/** Command for zooming camera out */
+	static protected final String OUT = "N";
 
-	/** Create a new select camera request */
-	public SelectCameraRequest(int c) {
-		camera = c;
+	/** Speed (and direction) to zoom camera */
+	protected final int zoom;
+
+	/** Create a new zoom request */
+	public ZoomProperty(int z) {
+		zoom = z;
 	}
 
 	/** Get the code to send to the switcher */
 	public String toString() {
-		return CODE + camera;
+		if(zoom == 0)
+			return "";
+		else if(zoom > 0)
+			return IN;
+		else
+			return OUT;
 	}
 }

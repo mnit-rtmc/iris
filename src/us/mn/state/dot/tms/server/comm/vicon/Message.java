@@ -49,9 +49,9 @@ public class Message implements CommMessage {
 	/** Serial input stream */
 	protected final InputStream is;
 
-	/** Chained request buffer */
-	protected final LinkedList<ViconRequest> requests =
-		new LinkedList<ViconRequest>();
+	/** Chained property buffer */
+	protected final LinkedList<ViconProperty> props =
+		new LinkedList<ViconProperty>();
 
 	/** Create a new Vicon message */
 	public Message(OutputStream o, InputStream i) {
@@ -62,15 +62,15 @@ public class Message implements CommMessage {
 	/** Get a string of the message */
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		for(ViconRequest req: requests)
-			b.append(req.toString());
+		for(ViconProperty prop: props)
+			b.append(prop.toString());
 		return b.toString();
 	}
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof ViconRequest)
-			requests.add((ViconRequest)cp);
+		if(cp instanceof ViconProperty)
+			props.add((ViconProperty)cp);
 	}
 
 	/** Perform a "get" request */

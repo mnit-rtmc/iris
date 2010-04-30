@@ -15,33 +15,25 @@
 package us.mn.state.dot.tms.server.comm.vicon;
 
 /**
- * A request to pan the selected camera
+ * A request to select a new camera
  *
  * @author Douglas Lau
  */
-public class PanRequest extends ViconRequest {
+public class SelectCameraProperty extends ViconProperty {
 
-	/** Command to pan camera left */
-	static protected final String LEFT = "I";
+	/** Command to select a new camera */
+	static protected final String CODE = "B";
 
-	/** Command to pan camera right */
-	static protected final String RIGHT = "J";
+	/** Camera to select */
+	protected final int camera;
 
-	/** Speed (and direction) to pan camera */
-	protected final int pan;
-
-	/** Create a new pan request */
-	public PanRequest(int p) {
-		pan = clampValue(p);
+	/** Create a new select camera request */
+	public SelectCameraProperty(int c) {
+		camera = c;
 	}
 
 	/** Get the code to send to the switcher */
 	public String toString() {
-		if(pan == 0)
-			return "";
-		else if(pan > 0)
-			return RIGHT + pan;
-		else
-			return LEFT + Math.abs(pan);
+		return CODE + camera;
 	}
 }
