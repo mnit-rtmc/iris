@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.vicon;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -46,6 +48,8 @@ abstract public class ViconProperty implements ControllerProperty {
 		return Math.max(Math.min(v, MAX_VALUE), MIN_VALUE);
 	}
 
-	/** Get the request string */
-	abstract public String toString();
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		os.write(toString().getBytes());
+	}
 }

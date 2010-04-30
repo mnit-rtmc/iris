@@ -59,14 +59,6 @@ public class Message implements CommMessage {
 		is = i;
 	}
 
-	/** Get a string of the message */
-	public String toString() {
-		StringBuilder b = new StringBuilder();
-		for(ViconProperty prop: props)
-			b.append(prop.toString());
-		return b.toString();
-	}
-
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
 		if(cp instanceof ViconProperty)
@@ -84,10 +76,10 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void storeProps() throws IOException {
-		String req = toString();
 		is.skip(is.available());
 		os.write(SOH);
-		os.write(req.getBytes());
+		for(ViconProperty prop: props)
+			prop.encodeStore(os, 0);
 		os.write(EOM);
 		os.flush();
 		getResponse();
