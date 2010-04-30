@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  *
  * @author Douglas Lau
  */
-public class SelectMonitorCamera extends ViconOperation {
+public class OpSelectMonitorCamera extends OpVicon {
 
 	/** Parse the integer ID of a monitor or camera */
 	static protected int parseUID(String name) throws IOException {
@@ -40,7 +40,7 @@ public class SelectMonitorCamera extends ViconOperation {
 	}
 
 	/** Create a new select monitor camera operation */
-	public SelectMonitorCamera(ControllerImpl c, VideoMonitor m,
+	public OpSelectMonitorCamera(ControllerImpl c, VideoMonitor m,
 		String cam)
 	{
 		super(COMMAND, c, m, cam);

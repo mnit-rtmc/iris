@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
- * ViconOperation is the base class for the Vicon comm protocol.
+ * OpVicon represents an operation for the vicon protocol.
  *
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  * @author Douglas Lau
  */
-abstract public class ViconOperation extends OpController {
+abstract public class OpVicon extends OpController {
 
 	/** Video monitor to select camera on */
 	protected final VideoMonitor monitor;
@@ -41,7 +41,7 @@ abstract public class ViconOperation extends OpController {
 	abstract protected Phase phaseOne();
 
 	/** Create a new Vicon operation */
-	public ViconOperation(int p, ControllerImpl c, VideoMonitor m,
+	public OpVicon(int p, ControllerImpl c, VideoMonitor m,
 		String cam)
 	{
 		super(p, c);
