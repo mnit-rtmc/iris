@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * A property to command a camera
  *
@@ -84,9 +87,9 @@ public class CommandProperty extends ViconPTZProperty {
 		else
 			return 0;
 	}
-	
-	/** Format for the specified receiver address */
-	public byte[] format(int drop) {
+
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] message = new byte[10];
 		message[0] = (byte)(0x80 | (drop >> 4));
 		message[1] = (byte)((0x0f & drop) | EXTENDED_CMD);
@@ -98,6 +101,6 @@ public class CommandProperty extends ViconPTZProperty {
 		message[7] = (byte)((byte)Math.abs(pan) & 0x7f);
 		message[8] = (byte)((Math.abs(tilt) >> 7) & 0x0f);
 		message[9] = (byte)((byte)Math.abs(tilt) & 0x7f);
-		return message;
+		os.write(message);
 	}
 }

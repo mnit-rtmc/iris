@@ -59,9 +59,8 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void storeProps() throws IOException {
-		if(prop != null) {
-			os.write(prop.format(drop));
-			os.flush();
-		}
+		if(prop != null)
+			prop.encodeStore(os, drop);
+		os.flush();
 	}
 }

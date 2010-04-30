@@ -14,6 +14,10 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * A controller property is one element of a CommMessage.  It represents a
  * property which can be sent to or queried from a controller.
@@ -22,4 +26,15 @@ package us.mn.state.dot.tms.server.comm;
  */
 public interface ControllerProperty {
 
+	/** Encode a QUERY request */
+//	void encodeQuery(OutputStream os, int drop) throws IOException;
+
+	/** Encode a STORE request */
+//	void encodeStore(OutputStream os, int drop) throws IOException;
+
+	/** Decode a QUERY response */
+//	void decodeQuery(InputStream is, int drop) throws IOException;
+
+	/** Decode a STORE response */
+//	void decodeStore(InputStream is, int drop) throws IOException;
 }

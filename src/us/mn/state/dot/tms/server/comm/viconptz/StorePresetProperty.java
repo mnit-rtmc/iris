@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * Vicon property to store the current state in a preset location.
  *
@@ -29,8 +32,8 @@ public class StorePresetProperty extends ViconPTZProperty {
 		preset = p;
 	}
 
-	/** Format for the specified receiver address */
-	public byte[] format(int drop) {
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] message = new byte[6];
 		message[0] = (byte)(0x80 | (drop >> 4));
 		message[1] = (byte)((0x0f & drop) | CMD);
@@ -38,6 +41,6 @@ public class StorePresetProperty extends ViconPTZProperty {
 		message[3] = (byte)0x00; // lens functions
 		message[4] = (byte)0x00; // aux functions
 		message[5] = (byte)(0x40 | (preset & 0x0f));
-		return message;
+		os.write(message);
 	}
 }
