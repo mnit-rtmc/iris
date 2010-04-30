@@ -50,7 +50,7 @@ public class ViconPTZPoller extends MessagePoller implements CameraPoller {
 
 	/** Send a PTZ camera move command */
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		new MoveCamera(c, p, t, z).start();
+		new OpMoveCamera(c, p, t, z).start();
 	}
 
 	/** Send a store camera preset command */

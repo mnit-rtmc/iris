@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  *
  * @author Douglas Lau
  */
-public class MoveCamera extends OpDevice {
+public class OpMoveCamera extends OpDevice {
 
 	/** Range of PTZ values */
 	static protected final int PTZ_RANGE = 1023;
@@ -49,7 +49,7 @@ public class MoveCamera extends OpDevice {
 	protected final int zoom;
 
 	/** Create a new operation to move a camera */
-	public MoveCamera(CameraImpl c, float p, float t, float z) {
+	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
 		super(COMMAND, c);
 		pan = map_float(p, PTZ_RANGE);
 		tilt = map_float(t, PTZ_RANGE);
