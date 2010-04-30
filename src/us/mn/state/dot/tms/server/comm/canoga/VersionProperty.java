@@ -14,22 +14,21 @@
  */
 package us.mn.state.dot.tms.server.comm.canoga;
 
+import java.io.IOException;
+
 /**
- * Serial Number Request
+ * Firmware Version Property
  *
  * @author Douglas Lau
  */
-public class SerialNumberRequest extends CanogaRequest {
+public class VersionProperty extends CanogaProperty {
 
 	/** Message payload for a GET request */
-	static protected final byte[] PAYLOAD_GET = { 'a' };
-
-	/** Message payload for a SET request */
-	static protected final byte[] PAYLOAD_SET = { 'A' };
+	static protected final byte[] PAYLOAD_GET = { 'B' };
 
 	/** Get the expected number of octets in response */
 	protected int expectedResponseOctets() {
-		return 20;
+		return 18;
 	}
 
 	/** Format a basic "GET" request */
@@ -38,20 +37,20 @@ public class SerialNumberRequest extends CanogaRequest {
 	}
 
 	/** Format a basic "SET" request */
-	protected byte[] formatPayloadSet() {
-		return PAYLOAD_SET;
+	protected byte[] formatPayloadSet() throws IOException {
+		throw new CanogaError("Firmware version is read-only");
 	}
 
-	/** Serial number */
-	protected String serial_number;
+	/** Firmware version */
+	protected String version;
 
 	/** Set the requested value */
 	protected void setValue(byte[] v) {
-		serial_number = getPayload(v);
+		version = getPayload(v);
 	}
 
 	/** Get the requested value */
 	public String getValue() {
-		return serial_number;
+		return version;
 	}
 }

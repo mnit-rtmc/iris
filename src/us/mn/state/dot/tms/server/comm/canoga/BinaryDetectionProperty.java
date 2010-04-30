@@ -21,11 +21,11 @@ import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 
 /**
- * Binary Detection Request
+ * Binary Detection Property
  *
  * @author Douglas Lau
  */
-public class BinaryDetectionRequest extends CanogaRequest {
+public class BinaryDetectionProperty extends CanogaProperty {
 
 	/** Conversion factor from milliseconds to seconds */
 	static protected final int MS_PER_SECOND = 1000;

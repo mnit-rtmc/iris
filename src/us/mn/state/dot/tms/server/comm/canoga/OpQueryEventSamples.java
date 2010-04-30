@@ -31,8 +31,8 @@ public class OpQueryEventSamples extends OpController {
 	static protected final int VOL_COUNT_WRAP = 4 * 60 * 1000;
 
 	/** Binary detection request */
-	protected final BinaryDetectionRequest detection =
-		new BinaryDetectionRequest();
+	protected final BinaryDetectionProperty detection =
+		new BinaryDetectionProperty();
 
 	/** Create a new operation to query detector event samples */
 	public OpQueryEventSamples(ControllerImpl c) {

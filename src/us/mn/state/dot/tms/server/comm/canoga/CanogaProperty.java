@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-abstract public class CanogaRequest implements ControllerProperty {
+abstract public class CanogaProperty implements ControllerProperty {
 
 	/** Maximum number of tries when reading a message response */
 	static protected final int MAX_TRIES = 5;

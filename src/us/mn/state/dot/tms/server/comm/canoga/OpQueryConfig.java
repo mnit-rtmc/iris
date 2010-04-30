@@ -27,11 +27,11 @@ import us.mn.state.dot.tms.server.comm.OpController;
 public class OpQueryConfig extends OpController {
 
 	/** Canoga card serial number */
-	protected final SerialNumberRequest serial_number =
-		new SerialNumberRequest();
+	protected final SerialNumberProperty serial_number =
+		new SerialNumberProperty();
 
 	/** Canoga firmware version */
-	protected final VersionRequest version = new VersionRequest();
+	protected final VersionProperty version = new VersionProperty();
 
 	/** Create an operation to query the Canoga configuration */
 	public OpQueryConfig(ControllerImpl c) {

@@ -38,7 +38,7 @@ public class Message implements CommMessage {
 	protected final int drop;
 
 	/** Canoga property */
-	protected CanogaRequest req;
+	protected CanogaProperty prop;
 
 	/** Create a new Canoga message */
 	public Message(OutputStream o, InputStream i, int d) {
@@ -49,21 +49,21 @@ public class Message implements CommMessage {
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof CanogaRequest)
-			req = (CanogaRequest)cp;
+		if(cp instanceof CanogaProperty)
+			prop = (CanogaProperty)cp;
 	}
 
 	/** Perform a "get" request */
 	public void getRequest() throws IOException {
-		if(req == null)
-			throw new ProtocolException("No request");
-		req.doGetRequest(os, is, drop);
+		if(prop == null)
+			throw new ProtocolException("No property");
+		prop.doGetRequest(os, is, drop);
 	}
 
 	/** Perform a "set" request */
 	public void setRequest() throws IOException {
-		if(req == null)
-			throw new ProtocolException("No request");
-		req.doSetRequest(os, is, drop);
+		if(prop == null)
+			throw new ProtocolException("No property");
+		prop.doSetRequest(os, is, drop);
 	}
 }
