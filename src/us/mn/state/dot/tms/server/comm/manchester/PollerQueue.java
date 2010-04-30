@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@ public class PollerQueue extends Thread {
 	protected static final int CMD_INTERVAL = 60;
 
 	/** Mapping of camera names to current PTZ commands */
-	protected final HashMap<String, MoveCamera> commands =
-		new HashMap<String, MoveCamera>();
+	protected final HashMap<String, OpMoveCamera> commands =
+		new HashMap<String, OpMoveCamera>();
 
 	/** Add a PTZ command to the queue.
-	 * cmd The MoveCamera command to be added.
+	 * cmd The OpMoveCamera command to be added.
 	 */
-	public synchronized void addCommand(CameraImpl c, MoveCamera cmd) {
+	public synchronized void addCommand(CameraImpl c, OpMoveCamera cmd) {
 		if(cmd.isStopCmd()) {
 			cmd.start();
 			commands.remove(c.getName());
@@ -58,7 +58,7 @@ public class PollerQueue extends Thread {
 
 	/** Send all current commands to cameras */
 	protected synchronized void sendCommands() {
-		for(MoveCamera cmd: commands.values())
+		for(OpMoveCamera cmd: commands.values())
 			cmd.start();
 	}
 }
