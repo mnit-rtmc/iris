@@ -35,11 +35,11 @@ public class OpSendSensorSettings extends OpSS125 {
 	/** Flag to perform a controller restart */
 	protected final boolean restart;
 
-	/** General config request */
+	/** General config property */
 	protected final GeneralConfigProperty gen_config =
 		new GeneralConfigProperty();
 
-	/** General config request */
+	/** General config property */
 	protected final DataConfigProperty data_config =
 		new DataConfigProperty();
 
@@ -124,15 +124,15 @@ public class OpSendSensorSettings extends OpSS125 {
 		}
 	}
 
-	/** Log data configuration request */
+	/** Log data configuration */
 	protected void logDataConfig() {
 		SS125_LOG.log(controller.getName() + ": interval " +
 			data_config.getInterval());
 		SS125_LOG.log(controller.getName() + ": mode " +
 			data_config.getMode());
 		logPushConfig(data_config.getEventPush(), "event");
-		logPushConfig(data_config.getIntervalPush(),"interval");
-		logPushConfig(data_config.getPresencePush(),"presence");
+		logPushConfig(data_config.getIntervalPush(), "interval");
+		logPushConfig(data_config.getPresencePush(), "presence");
 		SS125_LOG.log(controller.getName() + ": default separation " +
 			data_config.getDefaultSeparation());
 		SS125_LOG.log(controller.getName() + ": default size " +

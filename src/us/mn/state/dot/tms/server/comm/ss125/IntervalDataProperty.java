@@ -173,7 +173,7 @@ public class IntervalDataProperty extends SS125Property {
 		return speeds;
 	}
 
-	/** Get a string representation of the request */
+	/** Get a string representation of the property */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Interval ");

@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 abstract public class SS125Property implements ControllerProperty {
 
-	/** Charset encoding for character strings in requests */
+	/** Charset encoding for character strings */
 	static protected final String CHARSET = "US-ASCII";
 
 	/** Message sub ID "don't care" */
