@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.utils.Log;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class AwsRequest implements ControllerProperty {
+public class AwsProperty implements ControllerProperty {
 
 	/** AWS messages */
 	protected final LinkedList<AwsMsg> messages = new LinkedList<AwsMsg>();

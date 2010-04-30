@@ -62,11 +62,11 @@ public class OpProcessAwsMsgs extends OpController
 				"called: " + 
 				STime.getCurDateTimeMSString(true));
 			assert argmess instanceof Message: "wrong message type";
-			AwsRequest request = new AwsRequest();
+			AwsProperty prop = new AwsProperty();
 			Message mess = (Message)argmess;
-			mess.add(request);
+			mess.add(prop);
 			mess.getRequest();
-			request.activate();
+			prop.activate();
 			return null;
 		}
 	}

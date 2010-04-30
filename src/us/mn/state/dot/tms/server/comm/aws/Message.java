@@ -31,8 +31,8 @@ public class Message implements CommMessage {
 	/** Associated messenger */
 	protected final Messenger messenger;
 
-	/** AWS request to parse */
-	protected AwsRequest req = null;
+	/** AWS property to parse */
+	protected AwsProperty prop = null;
 
 	/** Create a new message */
 	public Message(Messenger mess) {
@@ -41,17 +41,17 @@ public class Message implements CommMessage {
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof AwsRequest)
-			req = (AwsRequest)cp;
+		if(cp instanceof AwsProperty)
+			prop = (AwsProperty)cp;
 	}
 
 	/** Send a get request message.
 	 * Defined in CommMessage interface.
 	 * @throws IOException if received response is malformed. */
 	public void getRequest() throws IOException {
-		if(req == null)
-			throw new ProtocolException("No request");
-		req.doGetRequest(messenger.getInputStream());
+		if(prop == null)
+			throw new ProtocolException("No property");
+		prop.doGetRequest(messenger.getInputStream());
 	}
 
 	/** Send an set request message. Defined in the
