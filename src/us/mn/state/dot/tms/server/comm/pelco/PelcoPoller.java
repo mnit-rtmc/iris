@@ -54,6 +54,6 @@ public class PelcoPoller extends MessagePoller implements VideoMonitorPoller {
 	public void setMonitorCamera(ControllerImpl c, VideoMonitor m,
 		String cam)
 	{
-		new SelectMonitorCamera(c, m, cam).start();
+		new OpSelectMonitorCamera(c, m, cam).start();
 	}
 }

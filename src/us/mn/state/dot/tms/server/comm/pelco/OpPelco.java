@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
- * PelcoOperation is the base class for the Pelco comm protocol.
+ * OpPelco is the base class for the Pelco comm protocol.
  *
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-abstract public class PelcoOperation extends OpController {
+abstract public class OpPelco extends OpController {
 
 	/** Video monitor to select camera on */
 	protected final VideoMonitor monitor;
@@ -41,9 +41,7 @@ abstract public class PelcoOperation extends OpController {
 	abstract protected Phase phaseOne();
 
 	/** Create a new Pelco operation */
-	public PelcoOperation(int p, ControllerImpl c, VideoMonitor m,
-		String cam)
-	{
+	public OpPelco(int p, ControllerImpl c, VideoMonitor m, String cam) {
 		super(p, c);
 		monitor = m;
 		camera = cam;

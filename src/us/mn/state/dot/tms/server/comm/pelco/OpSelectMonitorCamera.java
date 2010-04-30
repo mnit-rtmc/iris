@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  * @author Douglas Lau
  * @author Timothy Johnson
  */
-public class SelectMonitorCamera extends PelcoOperation {
+public class OpSelectMonitorCamera extends OpPelco {
 
 	/** Parse the integer ID of a monitor or camera */
 	static protected int parseUID(String name) throws IOException {
@@ -41,7 +41,7 @@ public class SelectMonitorCamera extends PelcoOperation {
 	}
 
 	/** Create a new select monitor camera operation */
-	public SelectMonitorCamera(ControllerImpl c, VideoMonitor m,
+	public OpSelectMonitorCamera(ControllerImpl c, VideoMonitor m,
 		String cam)
 	{
 		super(COMMAND, c, m, cam);
