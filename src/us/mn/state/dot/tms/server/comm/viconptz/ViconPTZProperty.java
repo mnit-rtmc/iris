@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  *
  * @author Douglas Lau
  */
-abstract public class ViconPTZRequest implements ControllerProperty {
+abstract public class ViconPTZProperty implements ControllerProperty {
 
 	/** Mask for command requests (second byte) */
 	static protected final byte CMD = 0x10;

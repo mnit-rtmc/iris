@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 /**
- * A request to command a camera
+ * A property to command a camera
  *
  * @author Douglas Lau
  */
-public class CommandRequest extends ViconPTZRequest {
+public class CommandProperty extends ViconPTZProperty {
 
 	/** Bit flag to command a pan right */
 	static protected final byte PAN_RIGHT = 1 << 5;
@@ -39,17 +39,17 @@ public class CommandRequest extends ViconPTZRequest {
 	/** Bit flag to command a zoom out */
 	static protected final byte ZOOM_OUT = 1 << 6;
 
-	/** Requested pan value (-63 to 63) (64 means turbo) */
+	/** Pan value (-63 to 63) (64 means turbo) */
 	protected final int pan;
 
-	/** Requested tilt value (-63 to 63) */
+	/** Tilt value (-63 to 63) */
 	protected final int tilt;
 
-	/** Requested zoom value (-1 to 1) */
+	/** Zoom value (-1 to 1) */
 	protected final int zoom;
 
-	/** Create a new command request */
-	public CommandRequest(int p, int t, int z) {
+	/** Create a new command property */
+	public CommandProperty(int p, int t, int z) {
 		pan = p;
 		tilt = t;
 		zoom = z;
@@ -85,7 +85,7 @@ public class CommandRequest extends ViconPTZRequest {
 			return 0;
 	}
 	
-	/** Format the request for the specified receiver address */
+	/** Format for the specified receiver address */
 	public byte[] format(int drop) {
 		byte[] message = new byte[10];
 		message[0] = (byte)(0x80 | (drop >> 4));

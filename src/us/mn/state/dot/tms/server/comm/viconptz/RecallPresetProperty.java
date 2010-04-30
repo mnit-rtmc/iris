@@ -15,21 +15,21 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 /**
- * Vicon request to store the current state in a preset location.
+ * Vicon property to recall a preset.
  *
  * @author Douglas Lau
  */
-public class StorePresetRequest extends ViconPTZRequest {
+public class RecallPresetProperty extends ViconPTZProperty {
 
-	/** Preset to store */
+	/** Preset to recall */
 	protected final int preset;
 
-	/** Create a new store preset request */
-	public StorePresetRequest(int p) {
+	/** Create a new recall preset property */
+	public RecallPresetProperty(int p) {
 		preset = p;
 	}
 
-	/** Format the request for the specified receiver address */
+	/** Format for the specified receiver address */
 	public byte[] format(int drop) {
 		byte[] message = new byte[6];
 		message[0] = (byte)(0x80 | (drop >> 4));
@@ -37,7 +37,7 @@ public class StorePresetRequest extends ViconPTZRequest {
 		message[2] = (byte)0x00; // pan/tilt functions
 		message[3] = (byte)0x00; // lens functions
 		message[4] = (byte)0x00; // aux functions
-		message[5] = (byte)(0x40 | (preset & 0x0f));
+		message[5] = (byte)(0x20 | (preset & 0x0f));
 		return message;
 	}
 }

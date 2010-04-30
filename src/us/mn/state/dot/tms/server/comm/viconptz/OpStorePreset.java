@@ -45,7 +45,7 @@ public class OpStorePreset extends OpDevice {
 
 		/** Command controller to store a camera preset */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new StorePresetRequest(m_preset));
+			mess.add(new StorePresetProperty(m_preset));
 			mess.setRequest();
 			return null;
 		}

@@ -40,12 +40,12 @@ public class Message implements CommMessage {
 	}
 
 	/** Controller property */
-	protected ViconPTZRequest request = null;
+	protected ViconPTZProperty prop;
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof ViconPTZRequest)
-			request = (ViconPTZRequest)cp;
+		if(cp instanceof ViconPTZProperty)
+			prop = (ViconPTZProperty)cp;
 	}
 
 	/** Perform a "get" request */
@@ -55,8 +55,8 @@ public class Message implements CommMessage {
 
 	/** Perform a "set" request */
 	public void setRequest() throws IOException {
-		if(request != null) {
-			os.write(request.format(drop));
+		if(prop != null) {
+			os.write(prop.format(drop));
 			os.flush();
 		}
 	}
