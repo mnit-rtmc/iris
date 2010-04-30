@@ -74,11 +74,6 @@ abstract public class OpDms extends OpDevice {
 		m_user = user;
 	}
 
-	/** Get the OpDms */
-	public OpDms getOpDms() {
-		return this;
-	}
-
 	/** get operation name */
 	public String getOpName() {
 		return getClass().getName();
@@ -289,9 +284,9 @@ abstract public class OpDms extends OpDevice {
 
 		// add intermediate status element as a possible response
 		mess.add(buildInterStatusElem());
-
+		mess.setOperation(this);
 		// send and read response, throws IOException
-		mess.queryProps(getOpDms());
+		mess.queryProps();
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */

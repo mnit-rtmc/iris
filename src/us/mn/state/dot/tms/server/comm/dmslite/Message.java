@@ -130,12 +130,9 @@ public class Message implements CommMessage
 			m_opdms.updateInterStatus(m, false);
 	}
 
-	/** Query the controller properties.
-	 * @throws IOException On any errors sending a request or receiving
-	 *         response */
-	public void queryProps(OpDms op) throws IOException {
+	/** Set the associated operation */
+	public void setOperation(OpDms op) {
 		m_opdms = op;
-		queryProps();
 	}
 
 	/** Query the controller properties.
