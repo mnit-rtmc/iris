@@ -49,9 +49,9 @@ public class Message implements CommMessage {
 	/** Serial input stream */
 	protected final InputStream is;
 
-	/** Chained request buffer */
-	protected final LinkedList<PelcoRequest> requests =
-		new LinkedList<PelcoRequest>();
+	/** Chained property buffer */
+	protected final LinkedList<PelcoProperty> props =
+		new LinkedList<PelcoProperty>();
 
 	/** Create a new Pelco message */
 	public Message(OutputStream o, InputStream i) {
@@ -62,15 +62,15 @@ public class Message implements CommMessage {
 	/** Get a string of the message */
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		for(PelcoRequest req: requests)
-			b.append(req.toString());
+		for(PelcoProperty prop: props)
+			b.append(prop.toString());
 		return b.toString();
 	}
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof PelcoRequest)
-			requests.add((PelcoRequest)cp);
+		if(cp instanceof PelcoProperty)
+			props.add((PelcoProperty)cp);
 	}
 
 	/** Perform a "get" request */
@@ -80,9 +80,9 @@ public class Message implements CommMessage {
 
 	/** Perform a "set" request */
 	public void setRequest() throws IOException {
-		String req = toString();
+		String prop = toString();
 		is.skip(is.available());
-		os.write(req.getBytes());
+		os.write(prop.getBytes());
 		os.flush();
 		getResponse();
 	}

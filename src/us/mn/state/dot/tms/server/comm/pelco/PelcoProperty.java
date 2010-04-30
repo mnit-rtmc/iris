@@ -14,27 +14,30 @@
  */
 package us.mn.state.dot.tms.server.comm.pelco;
 
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
+
 /**
- * A request to select a new camera
+ * Pelco Property
  *
  * @author Douglas Lau
  * @author Timothy Johnson
  */
-public class SelectCameraRequest extends PelcoRequest {
+abstract public class PelcoProperty implements ControllerProperty {
 
-	/** Command to select a new camera */
-	static protected final String CODE = "#a";
+	/** Value to indicate no selected camera */
+	static protected final int CAMERA_NONE = -1;
 
-	/** Camera to select */
-	protected final int camera;
+	/** Minimum value allowed for a request */
+	static protected final int MIN_VALUE = -256;
 
-	/** Create a new select camera request */
-	public SelectCameraRequest(int c) {
-		camera = c;
+	/** Maximum value allowed for a request */
+	static protected final int MAX_VALUE = 256;
+
+	/** Clamp a value to within the allowed range */
+	static protected int clampValue(int v) {
+		return Math.max(Math.min(v, MAX_VALUE), MIN_VALUE);
 	}
 
-	/** Get the code to send to the switcher */
-	public String toString() {
-		return camera + CODE;
-	}
+	/** Get the property as a string */
+	abstract public String toString();
 }

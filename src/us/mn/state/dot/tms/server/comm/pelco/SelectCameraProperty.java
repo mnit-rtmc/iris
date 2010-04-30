@@ -15,26 +15,26 @@
 package us.mn.state.dot.tms.server.comm.pelco;
 
 /**
- * A request to select a new monitor
+ * A property to select a new camera
  *
  * @author Douglas Lau
  * @author Timothy Johnson
  */
-public class SelectMonitorRequest extends PelcoRequest {
+public class SelectCameraProperty extends PelcoProperty {
 
-	/** Command to select a new monitor */
-	static protected final String CODE = "Ma";
+	/** Command to select a new camera */
+	static protected final String CODE = "#a";
 
-	/** Monitor to select */
-	protected final int monitor;
+	/** Camera to select */
+	protected final int camera;
 
-	/** Create a new select monitor request */
-	public SelectMonitorRequest(int m) {
-		monitor = m;
+	/** Create a new select camera property */
+	public SelectCameraProperty(int c) {
+		camera = c;
 	}
 
 	/** Get the code to send to the switcher */
 	public String toString() {
-		return monitor + CODE;
+		return camera + CODE;
 	}
 }
