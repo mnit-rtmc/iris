@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  *
  * @author Douglas Lau
  */
-abstract public class ViconProperty implements ControllerProperty {
+abstract public class ViconProperty extends ControllerProperty {
 
 	/** Value to indicate no selected camera */
 	static protected final int CAMERA_NONE = -1;

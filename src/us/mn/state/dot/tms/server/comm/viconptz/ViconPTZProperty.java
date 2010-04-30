@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -23,15 +21,11 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  *
  * @author Douglas Lau
  */
-abstract public class ViconPTZProperty implements ControllerProperty {
+abstract public class ViconPTZProperty extends ControllerProperty {
 
 	/** Mask for command requests (second byte) */
 	static protected final byte CMD = 0x10;
 
 	/** Mask for extended command requests (second byte) */
 	static protected final byte EXTENDED_CMD = 0x50;
-
-	/** Encode a STORE request */
-	abstract public void encodeStore(OutputStream os, int drop)
-		throws IOException;
 }

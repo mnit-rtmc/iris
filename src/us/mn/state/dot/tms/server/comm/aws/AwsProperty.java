@@ -28,11 +28,12 @@ import us.mn.state.dot.tms.utils.Log;
 
 /**
  * Container for AWS messages.
+ * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class AwsProperty implements ControllerProperty {
+public class AwsProperty extends ControllerProperty {
 
 	/** AWS messages */
 	protected final LinkedList<AwsMsg> messages = new LinkedList<AwsMsg>();

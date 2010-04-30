@@ -29,10 +29,11 @@ import us.mn.state.dot.tms.utils.SString;
  * replies with an XML element containing child elements, also one level 
  * deep. These are child elements are considered 'response' elements and are
  * also stored by this class.
+ * FIXME: convert to use ControllerProperty encode/decode methods.
+ *
  * @author Michael Darter
- * @created 10/09/09
  */
-public class XmlElem implements ControllerProperty {
+public class XmlElem extends ControllerProperty {
 
 	/** Top-level element request tag name */
 	private String m_reqtagname = "";

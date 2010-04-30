@@ -18,11 +18,12 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
  * Pelco Property
+ * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  * @author Timothy Johnson
  */
-abstract public class PelcoProperty implements ControllerProperty {
+abstract public class PelcoProperty extends ControllerProperty {
 
 	/** Value to indicate no selected camera */
 	static protected final int CAMERA_NONE = -1;

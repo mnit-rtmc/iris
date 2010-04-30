@@ -18,10 +18,11 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
  * ASN1 object.  Base class for ASN1 objects.
+ * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
-abstract public class ASN1Object implements ControllerProperty {
+abstract public class ASN1Object extends ControllerProperty {
 
 	/** MIB node */
 	protected final MIBNode node;

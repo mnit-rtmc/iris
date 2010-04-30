@@ -18,10 +18,11 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
  * Pelco D Property
+ * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
-abstract public class PelcoDProperty implements ControllerProperty {
+abstract public class PelcoDProperty extends ControllerProperty {
 
 	/** Calculate the checksum */
 	protected byte calculateChecksum(byte[] message) {

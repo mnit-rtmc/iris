@@ -24,10 +24,11 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * Mndot Property
+ * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
-abstract public class MndotProperty implements ControllerProperty {
+abstract public class MndotProperty extends ControllerProperty {
 
 	/** "Shut up" command category code */
 	static protected final int SHUT_UP = 0;

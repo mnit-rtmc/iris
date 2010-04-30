@@ -25,10 +25,11 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * SS105 Property
+ * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
-abstract public class SS105Property implements ControllerProperty {
+abstract public class SS105Property extends ControllerProperty {
 
 	/** Check if the request has a checksum */
 	abstract protected boolean hasChecksum();

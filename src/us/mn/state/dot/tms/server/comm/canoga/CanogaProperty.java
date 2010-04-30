@@ -23,11 +23,12 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Canoga property
+ * Canoga property.
+ * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
-abstract public class CanogaProperty implements ControllerProperty {
+abstract public class CanogaProperty extends ControllerProperty {
 
 	/** Maximum number of tries when reading a message response */
 	static protected final int MAX_TRIES = 5;

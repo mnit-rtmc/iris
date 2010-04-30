@@ -23,10 +23,11 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * SS125 property
+ * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
-abstract public class SS125Property implements ControllerProperty {
+abstract public class SS125Property extends ControllerProperty {
 
 	/** Charset encoding for character strings */
 	static protected final String CHARSET = "US-ASCII";

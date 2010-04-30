@@ -19,10 +19,11 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
  * Manchester Property
+ * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
-abstract public class ManchesterProperty implements ControllerProperty {
+abstract public class ManchesterProperty extends ControllerProperty {
 
 	/** Format a request for the specified receiver address */
 	abstract public byte[] format(int drop) throws IOException;

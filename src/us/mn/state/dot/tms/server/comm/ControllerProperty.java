@@ -20,21 +20,29 @@ import java.io.OutputStream;
 
 /**
  * A controller property is one element of a CommMessage.  It represents a
- * property which can be sent to or queried from a controller.
+ * property which can be queried from or stored to a controller.
  *
  * @author Douglas Lau
  */
-public interface ControllerProperty {
+abstract public class ControllerProperty {
 
 	/** Encode a QUERY request */
-//	void encodeQuery(OutputStream os, int drop) throws IOException;
-
-	/** Encode a STORE request */
-//	void encodeStore(OutputStream os, int drop) throws IOException;
+	public void encodeQuery(OutputStream os, int drop) throws IOException {
+		throw new ProtocolException("QUERY not supported");
+	}
 
 	/** Decode a QUERY response */
-//	void decodeQuery(InputStream is, int drop) throws IOException;
+	public void decodeQuery(InputStream is, int drop) throws IOException {
+		throw new ProtocolException("QUERY not supported");
+	}
+
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		throw new ProtocolException("STORE not supported");
+	}
 
 	/** Decode a STORE response */
-//	void decodeStore(InputStream is, int drop) throws IOException;
+	public void decodeStore(InputStream is, int drop) throws IOException {
+		throw new ProtocolException("STORE not supported");
+	}
 }
