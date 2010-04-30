@@ -18,9 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.CommProtocol;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -80,7 +81,7 @@ public class Message implements CommMessage {
 	/** Protocol version */
 	protected final CommProtocol protocol;
 
-	/** Request object */
+	/** Controller property */
 	protected MndotRequest req;
 
 	/** Create a new Mndot protocol message */
@@ -91,12 +92,10 @@ public class Message implements CommMessage {
 		protocol = p;
 	}
 
-	/** Add a request object to this message */
-	public void add(Object mo) {
-		if(mo instanceof MndotRequest)
-			req = (MndotRequest)mo;
-		else
-			req = null;
+	/** Add a controller property */
+	public void add(ControllerProperty cp) {
+		if(cp instanceof MndotRequest)
+			req = (MndotRequest)cp;
 	}
 
 	/** Perform a "get" request */

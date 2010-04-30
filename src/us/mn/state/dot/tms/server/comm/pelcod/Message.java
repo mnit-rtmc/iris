@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.pelcod;
 import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -38,13 +39,13 @@ public class Message implements CommMessage {
 		drop = d;
 	}
 
-	/** Request for the message */
+	/** Property for the message */
 	protected PelcoDRequest request = null;
 
-	/** Add a request object to this message */
-	public void add(Object r) {
-		if(r instanceof PelcoDRequest)
-			request = (PelcoDRequest)r;
+	/** Add a controller property */
+	public void add(ControllerProperty cp) {
+		if(cp instanceof PelcoDRequest)
+			request = (PelcoDRequest)cp;
 	}
 
 	/** Perform a "get" request */

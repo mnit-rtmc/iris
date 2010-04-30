@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -154,10 +155,10 @@ public class SNMP extends BER {
 				last_request = 0;
 		}
 
-		/** Add an object to this message */
-		public void add(Object mo) {
-			if(mo instanceof ASN1Object)
-				mos.add((ASN1Object)mo);
+		/** Add a controller property */
+		public void add(ControllerProperty cp) {
+			if(cp instanceof ASN1Object)
+				mos.add((ASN1Object)cp);
 		}
 
 		/** Send an SNMP get request message */

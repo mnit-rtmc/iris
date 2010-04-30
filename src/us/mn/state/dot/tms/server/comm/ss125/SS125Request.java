@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -25,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-abstract public class SS125Request {
+abstract public class SS125Request implements ControllerProperty {
 
 	/** Charset encoding for character strings in requests */
 	static protected final String CHARSET = "US-ASCII";

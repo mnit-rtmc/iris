@@ -14,12 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.vicon;
 
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
+
 /**
- * Vicon Request
+ * Vicon Property
  *
  * @author Douglas Lau
  */
-abstract public class ViconRequest {
+abstract public class ViconRequest implements ControllerProperty {
 
 	/** Value to indicate no selected camera */
 	static protected final int CAMERA_NONE = -1;

@@ -20,14 +20,15 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * SS105 Request
+ * SS105 Property
  *
  * @author Douglas Lau
  */
-abstract public class SS105Request {
+abstract public class SS105Request implements ControllerProperty {
 
 	/** Check if the request has a checksum */
 	abstract protected boolean hasChecksum();

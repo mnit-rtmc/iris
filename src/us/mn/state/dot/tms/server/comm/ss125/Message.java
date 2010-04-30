@@ -20,8 +20,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -76,7 +77,7 @@ public class Message implements CommMessage {
 	/** SS125 destination ID (drop address) */
 	protected final short dest_id;
 
-	/** Request object */
+	/** Controller property */
 	protected SS125Request req;
 
 	/** Create a new SS125 message.
@@ -89,11 +90,10 @@ public class Message implements CommMessage {
 		dest_id = c.getDrop();
 	}
 
-	/** Add a request object to this message */
-	public void add(Object mo) {
-		assert req == null;
-		assert mo instanceof SS125Request;
-		req = (SS125Request)mo;
+	/** Add a controller property */
+	public void add(ControllerProperty cp) {
+		if(cp instanceof SS125Request)
+			req = (SS125Request)cp;
 	}
 
 	/** Perform a GET request.

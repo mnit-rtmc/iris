@@ -19,6 +19,7 @@ import java.io.PrintStream;
 import java.io.InputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -40,7 +41,7 @@ public class Message implements CommMessage {
 	/** SS105 drop address */
 	protected final int drop;
 
-	/** Request object */
+	/** Controller property */
 	protected SS105Request req;
 
 	/** Create a new SS105 message */
@@ -62,12 +63,10 @@ public class Message implements CommMessage {
 		return sb.toString();
 	}
 
-	/** Add a request object to this message */
-	public void add(Object mo) {
-		if(mo instanceof SS105Request)
-			req = (SS105Request)mo;
-		else
-			req = null;
+	/** Add a controller property */
+	public void add(ControllerProperty cp) {
+		if(cp instanceof SS105Request)
+			req = (SS105Request)cp;
 	}
 
 	/** Perform a "get" request */

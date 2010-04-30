@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.aws;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -38,10 +39,10 @@ public class Message implements CommMessage {
 		messenger = mess;
 	}
 
-	/** Add a request object to this message */
-	public void add(Object mo) {
-		if(mo instanceof AwsRequest)
-			req = (AwsRequest)mo;
+	/** Add a controller property */
+	public void add(ControllerProperty cp) {
+		if(cp instanceof AwsRequest)
+			req = (AwsRequest)cp;
 	}
 
 	/** Send a get request message.

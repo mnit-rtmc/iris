@@ -14,12 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
+
 /**
- * Vicon Request
+ * Vicon Property
  *
  * @author Douglas Lau
  */
-abstract public class ViconPTZRequest {
+abstract public class ViconPTZRequest implements ControllerProperty {
 
 	/** Mask for command requests (second byte) */
 	static protected final byte CMD = 0x10;

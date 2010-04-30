@@ -19,14 +19,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Mndot Request
+ * Mndot Property
  *
  * @author Douglas Lau
  */
-abstract public class MndotRequest {
+abstract public class MndotRequest implements ControllerProperty {
 
 	/** "Shut up" command category code */
 	static protected final int SHUT_UP = 0;

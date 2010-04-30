@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -36,7 +37,7 @@ public class Message implements CommMessage {
 	/** Canoga drop address */
 	protected final int drop;
 
-	/** Request object */
+	/** Canoga property */
 	protected CanogaRequest req;
 
 	/** Create a new Canoga message */
@@ -46,12 +47,10 @@ public class Message implements CommMessage {
 		drop = d;
 	}
 
-	/** Add a request object to this message */
-	public void add(Object mo) {
-		if(mo instanceof CanogaRequest)
-			req = (CanogaRequest)mo;
-		else
-			req = null;
+	/** Add a controller property */
+	public void add(ControllerProperty cp) {
+		if(cp instanceof CanogaRequest)
+			req = (CanogaRequest)cp;
 	}
 
 	/** Perform a "get" request */

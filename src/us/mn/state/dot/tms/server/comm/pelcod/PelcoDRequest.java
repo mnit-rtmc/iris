@@ -14,12 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcod;
 
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
+
 /**
- * Pelco D Request
+ * Pelco D Property
  *
  * @author Douglas Lau
  */
-abstract public class PelcoDRequest {
+abstract public class PelcoDRequest implements ControllerProperty {
 
 	/** Calculate the checksum of a request */
 	protected byte calculateChecksum(byte[] message) {

@@ -19,14 +19,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Canoga Request
+ * Canoga property
  *
  * @author Douglas Lau
  */
-abstract public class CanogaRequest {
+abstract public class CanogaRequest implements ControllerProperty {
 
 	/** Maximum number of tries when reading a message response */
 	static protected final int MAX_TRIES = 5;

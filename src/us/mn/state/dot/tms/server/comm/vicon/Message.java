@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -66,10 +67,10 @@ public class Message implements CommMessage {
 		return b.toString();
 	}
 
-	/** Add a request object to this message */
-	public void add(Object r) {
-		if(r instanceof ViconRequest)
-			requests.add((ViconRequest)r);
+	/** Add a controller property */
+	public void add(ControllerProperty cp) {
+		if(cp instanceof ViconRequest)
+			requests.add((ViconRequest)cp);
 	}
 
 	/** Perform a "get" request */

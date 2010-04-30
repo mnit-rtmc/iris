@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,18 +12,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.manchester;
-
-import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
+package us.mn.state.dot.tms.server.comm;
 
 /**
- * Manchester Property
+ * A controller property is one element of a CommMessage.  It represents a
+ * property which can be sent to or queried from a controller.
  *
  * @author Douglas Lau
  */
-abstract public class ManchesterRequest implements ControllerProperty {
+public interface ControllerProperty {
 
-	/** Format a request for the specified receiver address */
-	abstract public byte[] format(int drop) throws IOException;
 }

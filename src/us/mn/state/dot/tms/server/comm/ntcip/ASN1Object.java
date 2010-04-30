@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip;
 
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
+
 /**
  * ASN1 object.  Base class for ASN1 objects.
  *
  * @author Douglas Lau
  */
-abstract public class ASN1Object {
+abstract public class ASN1Object implements ControllerProperty {
 
 	/** MIB node */
 	protected final MIBNode node;

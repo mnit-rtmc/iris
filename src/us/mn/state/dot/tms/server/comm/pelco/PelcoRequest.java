@@ -14,13 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.pelco;
 
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
+
 /**
- * Pelco Request
+ * Pelco Property
  *
  * @author Douglas Lau
  * @author Timothy Johnson
  */
-abstract public class PelcoRequest {
+abstract public class PelcoRequest implements ControllerProperty {
 
 	/** Value to indicate no selected camera */
 	static protected final int CAMERA_NONE = -1;

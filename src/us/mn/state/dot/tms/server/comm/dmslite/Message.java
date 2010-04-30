@@ -21,6 +21,7 @@ import javax.mail.MessagingException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
@@ -109,8 +110,8 @@ public class Message implements CommMessage
 		return(m_completiontimeMS);
 	}
 
-	/** Add an XmlElem to this message. */
-	public void add(Object xmlrr) {
+	/** Add an XmlElem to this message */
+	public void add(ControllerProperty xmlrr) {
 		if(!(xmlrr instanceof XmlElem))
 			throw new IllegalArgumentException(
 			    "dmslite.Message.add() wrong arg type.");

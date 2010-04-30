@@ -24,12 +24,12 @@ import java.io.IOException;
  */
 public interface CommMessage {
 
-	/** Add a request to this message */
-	public void add(Object mo);
+	/** Add a controller property */
+	void add(ControllerProperty cp);
 
 	/** Send a get request message */
-	public void getRequest() throws IOException;
+	void getRequest() throws IOException;
 
 	/** Send a set request message */
-	public void setRequest() throws IOException;
+	void setRequest() throws IOException;
 }

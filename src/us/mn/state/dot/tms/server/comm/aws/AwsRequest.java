@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.utils.Log;
 
 /**
@@ -31,7 +32,7 @@ import us.mn.state.dot.tms.utils.Log;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class AwsRequest {
+public class AwsRequest implements ControllerProperty {
 
 	/** AWS messages */
 	protected final LinkedList<AwsMsg> messages = new LinkedList<AwsMsg>();

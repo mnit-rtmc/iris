@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.manchester;
 import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -38,13 +39,13 @@ public class Message implements CommMessage {
 		drop = d;
 	}
 
-	/** Request for the message */
+	/** Controller property */
 	protected ManchesterRequest request = null;
 
-	/** Add a request object to this message */
-	public void add(Object r) {
-		if(r instanceof ManchesterRequest)
-			request = (ManchesterRequest)r;
+	/** Add a controller property */
+	public void add(ControllerProperty cp) {
+		if(cp instanceof ManchesterRequest)
+			request = (ManchesterRequest)cp;
 	}
 
 	/** Perform a "get" request */
