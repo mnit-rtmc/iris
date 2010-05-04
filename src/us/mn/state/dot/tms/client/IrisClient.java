@@ -104,6 +104,9 @@ public class IrisClient extends JFrame {
 	/** Client properties */
 	protected final Properties props;
 
+	/** Exception handler */
+	protected final SimpleHandler handler;
+
 	/** Session menu */
 	protected final SessionMenu session_menu;
 
@@ -120,9 +123,10 @@ public class IrisClient extends JFrame {
 	private UserProperties m_uprops;
 
 	/** Create a new Iris client */
-	public IrisClient(Properties props) throws IOException {
+	public IrisClient(Properties props, SimpleHandler h) throws IOException{
 		super(createTitle(TITLE_NOT_LOGGED_IN));
 		this.props = props;
+		handler = h;
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
 		I18N.initialize(props);
@@ -311,7 +315,7 @@ public class IrisClient extends JFrame {
 	protected SonarState createSonarState() throws IOException,
 		SonarException, NoSuchFieldException, IllegalAccessException
 	{
-		return new SonarState(props, new DialogHandler());
+		return new SonarState(props, handler);
 	}
 
 	/** Update the menus for a session */

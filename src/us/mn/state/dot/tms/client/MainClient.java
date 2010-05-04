@@ -57,23 +57,23 @@ public class MainClient {
 	}
 
 	/** Create the IRIS client */
-	static protected IrisClient createClient(String[] args)
-		throws IOException
+	static protected IrisClient createClient(String[] args,
+		SimpleHandler handler) throws IOException
 	{
 		String loc = getPropertyFile(args);
 		Properties props = PropertyLoader.load(loc);
 		updateSystemProperties(props);
-		return new IrisClient(props);
+		return new IrisClient(props, handler);
 	}
 
 	/** Create the IRIS client with a splash screen */
-	static protected IrisClient createClientSplash(String[] args)
-		throws IOException
+	static protected IrisClient createClientSplash(String[] args,
+		SimpleHandler handler) throws IOException
 	{
 		SplashScreen splash = new SplashScreen();
 		splash.setVisible(true);
 		try {
-			return createClient(args);
+			return createClient(args, handler);
 		}
 		finally {
 			splash.setVisible(false);
@@ -93,7 +93,7 @@ public class MainClient {
 		checkAssert();
 		tweakLookAndFeel();
 		try {
-			IrisClient c = createClientSplash(args);
+			IrisClient c = createClientSplash(args, handler);
 			handler.setOwner(c);
 			c.setVisible(true);
 		}
