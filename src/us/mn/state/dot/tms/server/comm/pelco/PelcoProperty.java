@@ -18,7 +18,6 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
  * Pelco Property
- * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  * @author Timothy Johnson
@@ -38,7 +37,4 @@ abstract public class PelcoProperty extends ControllerProperty {
 	static protected int clampValue(int v) {
 		return Math.max(Math.min(v, MAX_VALUE), MIN_VALUE);
 	}
-
-	/** Get the property as a string */
-	abstract public String toString();
 }

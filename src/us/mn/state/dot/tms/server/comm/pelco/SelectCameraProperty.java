@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.pelco;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * A property to select a new camera
  *
@@ -33,8 +36,8 @@ public class SelectCameraProperty extends PelcoProperty {
 		camera = c;
 	}
 
-	/** Get the code to send to the switcher */
-	public String toString() {
-		return camera + CODE;
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		os.write(new String(camera + CODE).getBytes());
 	}
 }

@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.pelco;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * A property to select a new monitor
  *
@@ -33,8 +36,8 @@ public class SelectMonitorProperty extends PelcoProperty {
 		monitor = m;
 	}
 
-	/** Get the code to send to the switcher */
-	public String toString() {
-		return monitor + CODE;
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		os.write(new String(monitor + CODE).getBytes());
 	}
 }

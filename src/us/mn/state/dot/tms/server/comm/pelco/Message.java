@@ -59,14 +59,6 @@ public class Message implements CommMessage {
 		is = i;
 	}
 
-	/** Get a string of the message */
-	public String toString() {
-		StringBuilder b = new StringBuilder();
-		for(PelcoProperty prop: props)
-			b.append(prop.toString());
-		return b.toString();
-	}
-
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
 		if(cp instanceof PelcoProperty)
@@ -84,9 +76,9 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void storeProps() throws IOException {
-		String prop = toString();
 		is.skip(is.available());
-		os.write(prop.getBytes());
+		for(PelcoProperty prop: props)
+			prop.encodeStore(os, 0);
 		os.flush();
 		getResponse();
 	}
@@ -98,9 +90,9 @@ public class Message implements CommMessage {
 			int value = is.read();
 			if(value < 0)
 				throw new EOFException("END OF STREAM");
-			resp.append((char)value);
 			if(value == EOR)
 				break;
+			resp.append((char)value);
 		}
 		return resp.toString();
 	}
