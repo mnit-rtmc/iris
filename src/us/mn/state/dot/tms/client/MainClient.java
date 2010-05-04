@@ -87,7 +87,7 @@ public class MainClient {
 	 * @param args Arguments passed to the application.
 	 */
 	static public void main(String[] args) {
-		SimpleHandler handler = new SimpleHandler();
+		DialogHandler handler = new DialogHandler();
 		Scheduler.setHandler(handler);
 		checkTimeZone();
 		checkAssert();

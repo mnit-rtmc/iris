@@ -311,7 +311,7 @@ public class IrisClient extends JFrame {
 	protected SonarState createSonarState() throws IOException,
 		SonarException, NoSuchFieldException, IllegalAccessException
 	{
-		return new SonarState(props, new SimpleHandler());
+		return new SonarState(props, new DialogHandler());
 	}
 
 	/** Update the menus for a session */

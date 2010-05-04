@@ -14,28 +14,34 @@
  */
 package us.mn.state.dot.tms.client;
 
-import javax.naming.AuthenticationException;
-import us.mn.state.dot.sched.ExceptionHandler;
+import java.awt.Frame;
+import javax.swing.SwingUtilities;
+import us.mn.state.dot.tms.client.widget.ExceptionDialog;
 
 /**
- * A simple exception handler.
+ * An exception handler which displays a dialog.
  *
  * @author Douglas Lau
  */
-public class SimpleHandler implements ExceptionHandler {
+public class DialogHandler extends SimpleHandler {
 
-	/** Number of failed login attempts */
-	protected int n_failed_login = 0;
-
-	/** Get a count of failed login attempts */
-	public int getFailedLoginCount() {
-		return n_failed_login;
-	}
+	/** Exception dialog */
+	protected ExceptionDialog dialog = new ExceptionDialog();
 
 	/** Handle an exception */
 	public boolean handle(final Exception e) {
-		if(e instanceof AuthenticationException)
-			n_failed_login++;
-		return true;
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				dialog.show(e);
+			}
+		});
+		return super.handle(e);
+	}
+
+	/** Set the owner frame */
+	public void setOwner(Frame f) {
+		dialog.setVisible(false);
+		dialog.dispose();
+		dialog = new ExceptionDialog(f);
 	}
 }
