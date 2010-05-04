@@ -14,15 +14,16 @@
  */
 package us.mn.state.dot.tms.server.comm.manchester;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
  * A property to command a camera
  *
  * @author Douglas Lau
  */
-public class CommandProperty extends ManchesterProperty {
+public class CommandProperty extends ControllerProperty {
 
 	static protected final int EX_TILT_DOWN_FULL = 0;
 	static protected final int EX_IRIS_OPEN = 1;
@@ -63,6 +64,17 @@ public class CommandProperty extends ManchesterProperty {
 	/** Encode a speed value for pan/tilt command */
 	static byte encodeSpeed(int v) {
 		return (byte)((Math.abs(v) - 1) << 1);
+	}
+
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		drop--;		// receiver address is zero-relative
+		if(pan != 0)
+			os.write(encodePanPacket(drop));
+		if(tilt != 0)
+			os.write(encodeTiltPacket(drop));
+		if(zoom != 0)
+			os.write(encodeZoomPacket(drop));
 	}
 
 	/** Encode a pan command packet */
@@ -109,18 +121,5 @@ public class CommandProperty extends ManchesterProperty {
 		else
 			packet[1] |= EX_ZOOM_IN << 1;
 		return packet;
-	}
-
-	/** Format the request for the specified receiver address */
-	public byte[] format(int drop) throws IOException {
-		drop--;		// receiver address is zero-relative
-		ByteArrayOutputStream bo = new ByteArrayOutputStream();
-		if(pan != 0)
-			bo.write(encodePanPacket(drop));
-		if(tilt != 0)
-			bo.write(encodeTiltPacket(drop));
-		if(zoom != 0)
-			bo.write(encodeZoomPacket(drop));
-		return bo.toByteArray();
 	}
 }

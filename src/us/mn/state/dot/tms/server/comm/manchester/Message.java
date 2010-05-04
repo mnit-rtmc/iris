@@ -40,12 +40,11 @@ public class Message implements CommMessage {
 	}
 
 	/** Controller property */
-	protected ManchesterProperty prop;
+	protected ControllerProperty prop;
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof ManchesterProperty)
-			prop = (ManchesterProperty)cp;
+		prop = cp;
 	}
 
 	/** Query the controller properties.
@@ -59,9 +58,8 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void storeProps() throws IOException {
-		if(prop != null) {
-			os.write(prop.format(drop));
-			os.flush();
-		}
+		if(prop != null)
+			prop.encodeStore(os, drop);
+		os.flush();
 	}
 }
