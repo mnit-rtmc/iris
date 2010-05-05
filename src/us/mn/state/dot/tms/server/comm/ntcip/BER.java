@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -254,8 +254,7 @@ abstract public class BER extends ASN1 {
 			if(blen != length)
 				throw new ParsingException("READ OID FAIL");
 		}
-		// FIXME: this is obviously bogus
-		return new int[0];
+		throw new ParsingException("INVALID OID");
 	}
 
 	/** Decode a sequence (or sequence-of)
