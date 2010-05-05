@@ -18,7 +18,6 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
  * Pelco D Property
- * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
@@ -32,7 +31,4 @@ abstract public class PelcoDProperty extends ControllerProperty {
 			checksum += message[i];
 		return checksum;
 	}
-
-	/** Format a request for the specified receiver address */
-	abstract public byte[] format(int drop);
 }

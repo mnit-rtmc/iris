@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcod;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * This class creates a Pelco D request to instruct a camera to
  * store the current state in a preset location.
@@ -31,8 +34,8 @@ public class StorePresetProperty extends PelcoDProperty {
 		preset = p;
 	}
 
-	/** Format the request for the specified receiver address */
-	public byte[] format(int drop) {
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] message = new byte[7];
 		message[0] = (byte)0xFF;
 		message[1] = (byte)drop;
@@ -41,6 +44,6 @@ public class StorePresetProperty extends PelcoDProperty {
 		message[4] = 0x0;
 		message[5] = (byte)preset;
 		message[6] = calculateChecksum(message);
-		return message;
+		os.write(message);
 	}
 }

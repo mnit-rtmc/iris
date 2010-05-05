@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcod;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * A property to command a camera
  *
@@ -90,8 +93,8 @@ public class CommandProperty extends PelcoDProperty {
 		return (byte)(getPanFlags() | getTiltFlags() | getZoomFlags());
 	}
 
-	/** Format the request for the specified receiver address */
-	public byte[] format(int drop) {
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] message = new byte[7];
 		message[0] = (byte)0xFF;
 		message[1] = (byte)drop;
@@ -100,6 +103,6 @@ public class CommandProperty extends PelcoDProperty {
 		message[4] = (byte)Math.abs(pan);
 		message[5] = (byte)Math.abs(tilt);
 		message[6] = calculateChecksum(message);
-		return message;
+		os.write(message);
 	}
 }
