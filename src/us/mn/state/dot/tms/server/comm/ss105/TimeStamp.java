@@ -50,11 +50,11 @@ public class TimeStamp {
 	}
 
 	/** Format an SS105 timestamp */
-	static public int seconds(Date d) {
+	static public int secondsSinceEpoch(Date d) {
 		long ms = d.getTime() - EPOCH;
-		if(ms < 0)
-			ms = 0;
-		// FIXME: check for overflow?
-		return (int)(ms / 1000);
+		if(ms > 0 && ms < Integer.MAX_VALUE * 1000)
+			return (int)(ms / 1000);
+		else
+			return 0;
 	}
 }

@@ -47,7 +47,7 @@ public class TimeProperty extends SS105Property {
 	protected String formatSetRequest() {
 		is_set = true;
 		stamp = System.currentTimeMillis();
-		int seconds = TimeStamp.seconds(new Date(stamp));
+		int seconds = TimeStamp.secondsSinceEpoch(new Date(stamp));
 		return "S4" + hex(seconds, 8);
 	}
 
