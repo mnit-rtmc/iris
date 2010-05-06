@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -31,7 +32,7 @@ public class OpTestDMSLamps extends OpDMS {
 
 	/** Create a new DMS lamp test object */
 	public OpTestDMSLamps(DMSImpl d) {
-		super(COMMAND, d);
+		super(PriorityLevel.COMMAND, d);
 	}
 
 	/** Create the first real phase of the operation */

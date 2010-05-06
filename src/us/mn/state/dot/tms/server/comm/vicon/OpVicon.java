@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.vicon;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * OpVicon represents an operation for the vicon protocol.
@@ -41,7 +42,7 @@ abstract public class OpVicon extends OpController {
 	abstract protected Phase phaseOne();
 
 	/** Create a new Vicon operation */
-	public OpVicon(int p, ControllerImpl c, VideoMonitor m,
+	public OpVicon(PriorityLevel p, ControllerImpl c, VideoMonitor m,
 		String cam)
 	{
 		super(p, c);

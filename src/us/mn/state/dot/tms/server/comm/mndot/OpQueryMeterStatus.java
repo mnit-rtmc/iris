@@ -21,6 +21,7 @@ import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to query the status of a ramp meter
@@ -58,7 +59,7 @@ public class OpQueryMeterStatus extends Op170 {
 
 	/** Create a new query meter status operatoin */
 	public OpQueryMeterStatus(ControllerImpl c, Completer comp) {
-		super(DATA_30_SEC, c);
+		super(PriorityLevel.DATA_30_SEC, c);
 		completer = comp;
 	}
 

@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
@@ -36,7 +37,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Create a new DMS query status object */
 	public OpQueryDMSStatus(DMSImpl d) {
-		super(DEVICE_DATA, d);
+		super(PriorityLevel.DEVICE_DATA, d);
 	}
 
 	/** Create the first real phase of the operation */

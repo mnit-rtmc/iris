@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to query the controller alarms.
@@ -38,7 +39,7 @@ public class OpQueryAlarms extends Op170 {
 
 	/** Create a query alarm operation */
 	public OpQueryAlarms(ControllerImpl c) {
-		super(DEVICE_DATA, c);
+		super(PriorityLevel.DEVICE_DATA, c);
 	}
 
 	/** Begin the operation */

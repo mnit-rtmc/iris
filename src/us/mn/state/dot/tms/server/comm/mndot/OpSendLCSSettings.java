@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to send settings to a Lane Control Signal array.
@@ -26,7 +27,7 @@ public class OpSendLCSSettings extends OpLCS {
 
 	/** Create a new operation to send LCS settings */
 	public OpSendLCSSettings(LCSArrayImpl l) {
-		super(DEVICE_DATA, l);
+		super(PriorityLevel.DEVICE_DATA, l);
 	}
 
 	/** Create the first real phase of the operation */

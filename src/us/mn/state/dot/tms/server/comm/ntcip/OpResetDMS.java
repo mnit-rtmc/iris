@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -32,7 +33,7 @@ public class OpResetDMS extends OpDMS {
 
 	/** Create a new DMS reset object */
 	public OpResetDMS(DMSImpl d) {
-		super(COMMAND, d);
+		super(PriorityLevel.COMMAND, d);
 	}
 
 	/** Create the first real phase of the operation */

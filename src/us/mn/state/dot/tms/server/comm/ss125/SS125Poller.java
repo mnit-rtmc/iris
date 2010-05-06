@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
@@ -49,7 +50,7 @@ public class SS125Poller extends MessagePoller implements SamplePoller {
 	}
 
 	/** Perform a controller download */
-	protected void download(ControllerImpl c, int p) {
+	protected void download(ControllerImpl c, PriorityLevel p) {
 		if(c.getActive()) {
 			OpSendSensorSettings o =
 				new OpSendSensorSettings(c, true);

@@ -20,6 +20,7 @@ import java.util.Calendar;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * OpSendWarningSettings configuration data to a 170 controller
@@ -42,7 +43,7 @@ public class OpSendWarningSettings extends OpDevice {
 
 	/** Create a new send warning settings operation */
 	public OpSendWarningSettings(WarningSignImpl w) {
-		super(DOWNLOAD, w);
+		super(PriorityLevel.DOWNLOAD, w);
 		warning_sign = w;
 	}
 

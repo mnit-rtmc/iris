@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * 170 Controller operation
@@ -112,7 +113,7 @@ abstract public class Op170 extends OpController {
 	protected final RampMeterImpl meter2;
 
 	/** Create a new query meter status operatoin */
-	public Op170(int p, ControllerImpl c) {
+	public Op170(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
 		meter1 = lookupMeter1(controller);
 		meter2 = lookupMeter2(controller);

@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Pelco operation to store a camera preset.
@@ -32,7 +33,7 @@ public class OpStorePreset extends OpDevice {
 
 	/** Create a new operation to store a camera preset */
 	public OpStorePreset(CameraImpl c, int p) {
-		super(COMMAND, c);
+		super(PriorityLevel.COMMAND, c);
 		preset = p;
 	}
 

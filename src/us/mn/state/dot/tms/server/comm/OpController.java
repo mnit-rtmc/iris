@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ abstract public class OpController extends Operation {
 	protected int errorCounter = 0;
 
 	/** Create a new controller operation */
-	protected OpController(int p, ControllerImpl c, String i) {
+	protected OpController(PriorityLevel p, ControllerImpl c, String i) {
 		super(p);
 		assert c != null;
 		controller = c;
@@ -82,7 +82,7 @@ abstract public class OpController extends Operation {
 	}
 
 	/** Create a new controller operation */
-	protected OpController(int p, ControllerImpl c) {
+	protected OpController(PriorityLevel p, ControllerImpl c) {
 		this(p, c, c.toString());
 	}
 

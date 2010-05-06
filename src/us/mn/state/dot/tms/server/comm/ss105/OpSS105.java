@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.comm.OpController;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation for SS105 device
@@ -29,7 +30,7 @@ abstract public class OpSS105 extends OpController {
 	static protected final DebugLog SS105_LOG = new DebugLog("ss105");
 
 	/** Create a new SS105 operation */
-	protected OpSS105(int p, ControllerImpl c) {
+	protected OpSS105(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
 	}
 }

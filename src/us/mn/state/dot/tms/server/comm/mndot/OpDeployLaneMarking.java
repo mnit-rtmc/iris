@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.LaneMarkingImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to deploy a 170 controller lane marking
@@ -37,7 +38,7 @@ public class OpDeployLaneMarking extends OpDevice {
 
 	/** Create a new deploy lane marking operation */
 	public OpDeployLaneMarking(LaneMarkingImpl m, boolean d) {
-		super(COMMAND, m);
+		super(PriorityLevel.COMMAND, m);
 		lane_marking = m;
 		deploy = d;
 	}

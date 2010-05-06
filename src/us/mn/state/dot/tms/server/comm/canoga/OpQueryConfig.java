@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to query the configuration of a Canoga card
@@ -35,7 +36,7 @@ public class OpQueryConfig extends OpController {
 
 	/** Create an operation to query the Canoga configuration */
 	public OpQueryConfig(ControllerImpl c) {
-		super(DOWNLOAD, c, c.toString());
+		super(PriorityLevel.DOWNLOAD, c, c.toString());
 	}
 
 	/** Begin the query config operation */

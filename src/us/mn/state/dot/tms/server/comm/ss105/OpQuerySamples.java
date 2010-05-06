@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to get binned samples from a SS105 device
@@ -52,7 +53,7 @@ public class OpQuerySamples extends OpSS105 {
 
 	/** Create a new "query binned samples" operation */
 	public OpQuerySamples(ControllerImpl c, Completer comp) {
-		super(DATA_30_SEC, c);
+		super(PriorityLevel.DATA_30_SEC, c);
 		completer = comp;
 		long s = comp.getStamp().getTimeInMillis();
 		stamp.setTimeInMillis(s);

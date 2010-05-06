@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Send meter settings to a 170 controller
@@ -94,7 +95,7 @@ public class OpSendMeterSettings extends OpDevice {
 
 	/** Create a new meter settings operation */
 	public OpSendMeterSettings(RampMeterImpl m) {
-		super(DOWNLOAD, m);
+		super(PriorityLevel.DOWNLOAD, m);
 		meter = m;
 		updateTimingTable();
 	}

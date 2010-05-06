@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.WarningSignPoller;
 
@@ -117,7 +118,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	}
 
 	/** Respond to a download request from a controller */
-	protected void download(ControllerImpl c, int p) {
+	protected void download(ControllerImpl c, PriorityLevel p) {
 		OpSendSampleSettings ss = new OpSendSampleSettings(c);
 		ss.setPriority(p);
 		ss.start();

@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to query 5-minute sample data + meter green counts
@@ -50,7 +51,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 
 	/** Create a new 5-minute data operation */
 	public OpQuerySamples5Min(ControllerImpl c, Completer comp) {
-		super(DATA_5_MIN, c);
+		super(PriorityLevel.DATA_5_MIN, c);
 		completer = comp;
 		long s = System.currentTimeMillis();
 		stamp.setTimeInMillis(s);

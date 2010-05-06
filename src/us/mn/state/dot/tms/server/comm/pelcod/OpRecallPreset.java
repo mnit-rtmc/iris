@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Pelco operation to recall a camera preset.
@@ -32,7 +33,7 @@ public class OpRecallPreset extends OpDevice {
 
 	/** Create a new operation to recall a camera preset */
 	public OpRecallPreset(CameraImpl c, int p) {
-		super(COMMAND, c);
+		super(PriorityLevel.COMMAND, c);
 		preset = p;
 	}
 

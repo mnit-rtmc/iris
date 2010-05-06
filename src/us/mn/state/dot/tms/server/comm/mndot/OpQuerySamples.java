@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Query sample operations are for collecting 30-second or 5-minute binned
@@ -35,7 +36,7 @@ abstract public class OpQuerySamples extends Op170 {
 	protected final int[] scans = new int[DETECTOR_INPUTS];
 
 	/** Create a new OpQuerySamples poll */
-	protected OpQuerySamples(int p, ControllerImpl c) {
+	protected OpQuerySamples(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
 		for(int i = 0; i < DETECTOR_INPUTS; i++) {
 			volume[i] = Constants.MISSING_DATA;

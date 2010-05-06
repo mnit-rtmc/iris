@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -56,7 +57,7 @@ public class OpTestDMSPixels extends OpDMS {
 
 	/** Create a new test DMS pixel operation */
 	public OpTestDMSPixels(DMSImpl d, boolean p) {
-		super(DEVICE_DATA, d);
+		super(PriorityLevel.DEVICE_DATA, d);
 		perform_test = p;
 		Integer w = d.getWidthPixels();
 		Integer h = d.getHeightPixels();

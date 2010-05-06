@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to set the red time for a ramp meter
@@ -38,7 +39,7 @@ public class OpSendMeterRedTime extends OpDevice {
 
 	/** Create a set red time packet */
 	public OpSendMeterRedTime(RampMeterImpl r, int m, int red) {
-		super(COMMAND, r);
+		super(PriorityLevel.COMMAND, r);
 		meter = r;
 		int a = Address.METER_1_TIMING_TABLE;
 		if(m == 2)

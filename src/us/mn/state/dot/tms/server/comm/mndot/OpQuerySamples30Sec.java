@@ -19,6 +19,7 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to query 30-second sample data
@@ -32,7 +33,7 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 
 	/** Create a new 30-second data operation */
 	public OpQuerySamples30Sec(ControllerImpl c, Completer comp) {
-		super(DATA_30_SEC, c);
+		super(PriorityLevel.DATA_30_SEC, c);
 		completer = comp;
 	}
 

@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -42,7 +43,7 @@ abstract public class OpDMSMessage extends OpDMS {
 
 	/** Create a new DMS command message object */
 	public OpDMSMessage(DMSImpl d, SignMessage m, int n) {
-		super(COMMAND, d);
+		super(PriorityLevel.COMMAND, d);
 		message = m;
 		msg_num = n;
 		message_crc = DmsMessageCRC.calculate(m.getMulti(), 0, 0);

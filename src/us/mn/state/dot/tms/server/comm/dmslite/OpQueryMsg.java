@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
@@ -58,7 +59,7 @@ public class OpQueryMsg extends OpDms {
 	public OpQueryMsg(DMSImpl d, User u, DeviceRequest req, 
 		boolean startup) 
 	{
-		super(DEVICE_DATA, d, "Retrieving message", u);
+		super(PriorityLevel.DEVICE_DATA, d, "Retrieving message", u);
 		m_req = req;
 		m_startup = startup;
 	}

@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Pelco operation to move a camera.
@@ -50,7 +51,7 @@ public class OpMoveCamera extends OpDevice {
 
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
-		super(COMMAND, c);
+		super(PriorityLevel.COMMAND, c);
 		pan = map_float(p, PTZ_RANGE);
 		tilt = map_float(t, PTZ_RANGE);
 		zoom = map_float(z, PTZ_RANGE);

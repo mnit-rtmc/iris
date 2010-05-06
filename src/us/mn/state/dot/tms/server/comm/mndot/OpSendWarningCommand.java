@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to command a 170 controller warning sign
@@ -42,7 +43,7 @@ public class OpSendWarningCommand extends OpDevice {
 
 	/** Create a new warning sign command operation */
 	public OpSendWarningCommand(WarningSignImpl s, boolean d) {
-		super(COMMAND, s);
+		super(PriorityLevel.COMMAND, s);
 		address = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
 		rate = getDeployedRate(d);
 	}

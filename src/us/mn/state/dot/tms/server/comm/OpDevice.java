@@ -31,7 +31,7 @@ abstract public class OpDevice extends OpController {
 	protected final DeviceImpl device;
 
 	/** Create a new device operation */
-	protected OpDevice(int p, DeviceImpl d) {
+	protected OpDevice(PriorityLevel p, DeviceImpl d) {
 		super(p, (ControllerImpl)d.getController(), d.getName());
 		operation = this;
 		device = d;

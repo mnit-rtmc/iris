@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * OpPelco is the base class for the Pelco comm protocol.
@@ -41,7 +42,9 @@ abstract public class OpPelco extends OpController {
 	abstract protected Phase phaseOne();
 
 	/** Create a new Pelco operation */
-	public OpPelco(int p, ControllerImpl c, VideoMonitor m, String cam) {
+	public OpPelco(PriorityLevel p, ControllerImpl c, VideoMonitor m,
+		String cam)
+	{
 		super(p, c);
 		monitor = m;
 		camera = cam;

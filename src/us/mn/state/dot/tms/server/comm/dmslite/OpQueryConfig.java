@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -29,7 +30,8 @@ public class OpQueryConfig extends OpDms
 {
 	/** constructor */
 	public OpQueryConfig(DMSImpl d, User u) {
-		super(DOWNLOAD, d, "Retrieving sign configuration", u);
+		super(PriorityLevel.DOWNLOAD, d,
+			"Retrieving sign configuration", u);
 	}
 
 	/** Create the first phase of the operation */

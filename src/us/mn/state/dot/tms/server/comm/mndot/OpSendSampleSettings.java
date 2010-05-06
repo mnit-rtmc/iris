@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Send sample settings to a 170 controller
@@ -31,7 +32,7 @@ public class OpSendSampleSettings extends Op170 {
 
 	/** Create a new send sample settings operation */
 	public OpSendSampleSettings(ControllerImpl c) {
-		super(DOWNLOAD, c);
+		super(PriorityLevel.DOWNLOAD, c);
 	}
 
 	/** Begin the send sample settings operation */

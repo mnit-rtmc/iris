@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to query indicaitons on a Lane Control Signal array.
@@ -32,7 +33,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Create a new operation to send LCS indications */
 	public OpQueryLCSIndications(LCSArrayImpl l) {
-		super(DEVICE_DATA, l);
+		super(PriorityLevel.DEVICE_DATA, l);
 		if(l.isQueryAllowed())
 			lookupIndications();
 	}

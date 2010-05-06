@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to be performed on a dynamic message sign
@@ -55,7 +56,7 @@ abstract public class OpDMS extends OpDevice {
 	protected final DMSImpl dms;
 
 	/** Create a new DMS operation */
-	public OpDMS(int p, DMSImpl d) {
+	public OpDMS(PriorityLevel p, DMSImpl d) {
 		super(p, d);
 		dms = d;
 	}

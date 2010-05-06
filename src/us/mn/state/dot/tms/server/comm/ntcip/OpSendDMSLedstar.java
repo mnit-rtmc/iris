@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 
 /**
@@ -37,7 +38,7 @@ public class OpSendDMSLedstar extends OpDMS {
 
 	/** Create a new DMS set pixel threshold operation */
 	public OpSendDMSLedstar(DMSImpl d) {
-		super(COMMAND, d);
+		super(PriorityLevel.COMMAND, d);
 		potBase.setInteger(d.getLdcPotBase());
 		currentLow.setInteger(d.getPixelCurrentLow());
 		currentHigh.setInteger(d.getPixelCurrentHigh());

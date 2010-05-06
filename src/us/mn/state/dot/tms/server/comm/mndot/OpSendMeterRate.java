@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to update a 170 controller metering rate
@@ -37,7 +38,7 @@ public class OpSendMeterRate extends OpDevice {
 
 	/** Create a new meter rate command operation */
 	public OpSendMeterRate(RampMeterImpl m, int i, int r) {
-		super(COMMAND, m);
+		super(PriorityLevel.COMMAND, m);
 		meter = m;
 		int a = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
 		if(i == 2)

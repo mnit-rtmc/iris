@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -36,7 +37,7 @@ public class OpReset extends OpDms
 	 *  @param d Current DMS.
 	 *  @param u User performing the action, may be null. */
 	public OpReset(DMSImpl d, User u) {
-		super(DEVICE_DATA, d, "Reinitializing the CMS", u);
+		super(PriorityLevel.DEVICE_DATA, d, "Reinitializing the CMS",u);
 	}
 
 	/** Create the first real phase of the operation */

@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
@@ -34,7 +35,7 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Create a new operation to send DMS default parameters */
 	public OpSendDMSDefaults(DMSImpl d) {
-		super(DOWNLOAD, d);
+		super(PriorityLevel.DOWNLOAD, d);
 	}
 
 	/** Create the first real phase of the operation */

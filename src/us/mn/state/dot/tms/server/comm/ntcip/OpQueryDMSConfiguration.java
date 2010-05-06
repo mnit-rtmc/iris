@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
@@ -32,7 +33,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
-		super(DOWNLOAD, d);
+		super(PriorityLevel.DOWNLOAD, d);
 		dms = d;
 	}
 

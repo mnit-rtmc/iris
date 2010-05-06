@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to query the indications of a Lane Control Signal array.
@@ -37,7 +38,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Create a new operation to query the LCS */
 	public OpQueryLCSIndications(LCSArrayImpl l) {
-		super(DATA_30_SEC, l);
+		super(PriorityLevel.DATA_30_SEC, l);
 	}
 
 	/** Create the first real phase of the operation */

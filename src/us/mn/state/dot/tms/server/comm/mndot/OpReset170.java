@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Send a level-1 restart request to a 170 controller
@@ -27,7 +28,7 @@ public class OpReset170 extends Op170 {
 
 	/** Create a new send level-1 restart operation */
 	public OpReset170(ControllerImpl c) {
-		super(DOWNLOAD, c);
+		super(PriorityLevel.DOWNLOAD, c);
 	}
 
 	/** Begin the operation */

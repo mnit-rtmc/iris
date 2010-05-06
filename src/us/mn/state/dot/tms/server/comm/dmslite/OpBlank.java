@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -36,7 +37,7 @@ public class OpBlank extends OpDms
 
 	/** Create a new DMS query configuration object */
 	public OpBlank(DMSImpl d, SignMessage mess, User u) {
-		super(DOWNLOAD, d, "Blanking the CMS", u);
+		super(PriorityLevel.DOWNLOAD, d, "Blanking the CMS", u);
 		m_sm = mess;
 	}
 

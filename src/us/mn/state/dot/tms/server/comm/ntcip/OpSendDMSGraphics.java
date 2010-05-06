@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -76,7 +77,7 @@ public class OpSendDMSGraphics extends OpDMS {
 
 	/** Create a new operation to send graphics to a DMS */
 	public OpSendDMSGraphics(DMSImpl d) {
-		super(DOWNLOAD, d);
+		super(PriorityLevel.DOWNLOAD, d);
 	}
 
 	/** Create the first real phase of the operation */

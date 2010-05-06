@@ -27,39 +27,18 @@ import us.mn.state.dot.tms.EventType;
  */
 abstract public class Operation {
 
-	/** Constant definition for urgent priority (system shut-down) */
-	static public final int URGENT = 0;
-
-	/** Constant definition for command priority (overrides, etc.) */
-	static public final int COMMAND = 1;
-
-	/** Constant definition for 30-second data priority */
-	static public final int DATA_30_SEC = 2;
-
-	/** Constant definition for download priority */
-	static public final int DOWNLOAD = 3;
-
-	/** Constant definition for 5-minute data priority */
-	static public final int DATA_5_MIN = 4;
-
-	/** Constant definition for device data priority */
-	static public final int DEVICE_DATA = 5;
-
-	/** Constant definition for diagnostic priority */
-	static public final int DIAGNOSTIC = 6;
-
 	/** Priority of the operation */
-	protected int priority;
+	protected PriorityLevel priority;
 
 	/** Get the priority of the operation.
-	 * @return Priority of the operation (0 is highest priority) */
-	public int getPriority() {
+	 * @return Priority of the operation (@see PriorityLevel) */
+	public PriorityLevel getPriority() {
 		return priority;
 	}
 
 	/** Set the priority of the operation */
-	public void setPriority(int p) {
-		if(p < priority)
+	public void setPriority(PriorityLevel p) {
+		if(p.ordinal() < priority.ordinal())
 			priority = p;
 	}
 
@@ -67,7 +46,7 @@ abstract public class Operation {
 	protected Phase phase;
 
 	/** Create a new I/O operation */
-	public Operation(int prio) {
+	public Operation(PriorityLevel prio) {
 		priority = prio;
 		phase = null;
 	}

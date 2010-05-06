@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Vicon operation to select the camera for one monitor.
@@ -43,7 +44,7 @@ public class OpSelectMonitorCamera extends OpVicon {
 	public OpSelectMonitorCamera(ControllerImpl c, VideoMonitor m,
 		String cam)
 	{
-		super(COMMAND, c, m, cam);
+		super(PriorityLevel.COMMAND, c, m, cam);
 	}
 
 	/** Begin the operation */

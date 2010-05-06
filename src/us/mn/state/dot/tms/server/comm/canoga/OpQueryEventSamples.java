@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Controller operation to query vehicle event samples
@@ -36,7 +37,7 @@ public class OpQueryEventSamples extends OpController {
 
 	/** Create a new operation to query detector event samples */
 	public OpQueryEventSamples(ControllerImpl c) {
-		super(DATA_5_MIN, c, c.toString());
+		super(PriorityLevel.DATA_5_MIN, c, c.toString());
 	}
 
 	/** Handle a communication error */

@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to send settings to a Lane Control Signal array.
@@ -31,7 +32,7 @@ public class OpSendLCSSettings extends OpLCS {
 
 	/** Create a new operation to send LCS settings */
 	public OpSendLCSSettings(LCSArrayImpl l) {
-		super(DEVICE_DATA, l);
+		super(PriorityLevel.DEVICE_DATA, l);
 		createOperations();
 	}
 

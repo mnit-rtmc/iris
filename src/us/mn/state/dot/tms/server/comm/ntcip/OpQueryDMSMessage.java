@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -33,7 +34,7 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Create a new DMS query status object */
 	public OpQueryDMSMessage(DMSImpl d) {
-		super(DEVICE_DATA, d);
+		super(PriorityLevel.DEVICE_DATA, d);
 	}
 
 	/** Create the first real phase of the operation */

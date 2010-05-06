@@ -15,9 +15,10 @@
 package us.mn.state.dot.tms.server.comm.aws;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
-import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
 
@@ -35,7 +36,7 @@ public class OpProcessAwsMsgs extends OpController
 
 	/** Create a new device operation */
 	protected OpProcessAwsMsgs(ControllerImpl c) {
-		super(DATA_30_SEC, c);
+		super(PriorityLevel.DATA_30_SEC, c);
 		operation = this;
 	}
 

@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -71,7 +72,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Create a new operation to send fonts to a DMS */
 	public OpSendDMSFonts(DMSImpl d) {
-		super(DOWNLOAD, d);
+		super(PriorityLevel.DOWNLOAD, d);
 		final LinkedList<Font> fonts = new LinkedList<Font>();
 		PixelMapBuilder builder = DMSHelper.createPixelMapBuilder(d);
 		if(builder != null) {

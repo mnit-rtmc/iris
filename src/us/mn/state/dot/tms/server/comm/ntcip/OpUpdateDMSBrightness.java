@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BrightnessSample;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -56,7 +57,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 
 	/** Create a new DMS brightness feedback operation */
 	public OpUpdateDMSBrightness(DMSImpl d, DeviceRequest r) {
-		super(COMMAND, d);
+		super(PriorityLevel.COMMAND, d);
 		request = r;
 	}
 

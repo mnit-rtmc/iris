@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,9 +43,8 @@ public final class PollQueue {
 	protected boolean shouldAdd(Operation o) {
 		if(closing)
 			return false;
-		if(isClogged() && o.getPriority() >= Operation.DEVICE_DATA)
-			return false;
-		return true;
+		return o.getPriority().ordinal() <
+		       PriorityLevel.DEVICE_DATA.ordinal() || !isClogged();
 	}
 
 	/** Check if the queue is clogged. This is true if the queue contains
@@ -65,11 +64,11 @@ public final class PollQueue {
 	public synchronized boolean add(Operation o) {
 		if(!shouldAdd(o))
 			return false;
-		int priority = o.getPriority();
+		PriorityLevel priority = o.getPriority();
 		Node prev = null;
 		Node node = front;
 		while(node != null) {
-			if(priority < node.priority)
+			if(priority.ordinal() < node.priority.ordinal())
 				break;
 			prev = node;
 			node = node.next;
@@ -120,7 +119,7 @@ public final class PollQueue {
 	/** Inner class for nodes in the queue */
 	static protected final class Node {
 		final Operation operation;
-		final int priority;
+		final PriorityLevel priority;
 		Node next;
 		Node(Operation o, Node n) {
 			operation = o;
@@ -141,8 +140,8 @@ public final class PollQueue {
 	/** Print the contents of the queue to the given stream */
 	public void print(final PrintStream ps) {
 		forEach(new OperationHandler() {
-			public void handle(int priority, Operation o) {
-				ps.println("\t" + priority + "\t" + o);
+			public void handle(PriorityLevel prio, Operation o) {
+				ps.println("\t" + prio + "\t" + o);
 			}
 		});
 	}

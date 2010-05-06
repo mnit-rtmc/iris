@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Query the status of a warning sign
@@ -31,7 +32,7 @@ public class OpQueryWarningStatus extends OpDevice {
 
 	/** Create a new warning status poll */
 	public OpQueryWarningStatus(WarningSignImpl w) {
-		super(DATA_30_SEC, w);
+		super(PriorityLevel.DATA_30_SEC, w);
 		warn = w;
 	}
 

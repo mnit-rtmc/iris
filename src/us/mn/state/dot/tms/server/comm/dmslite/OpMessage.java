@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
@@ -53,7 +54,7 @@ public class OpMessage extends OpDms {
 
 	/** Create a new DMS command message object */
 	public OpMessage(DMSImpl d, SignMessage m, User u) {
-		super(COMMAND, d, "Sending new message", u);
+		super(PriorityLevel.COMMAND, d, "Sending new message", u);
 		m_sm = m;
 	}
 

@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.aws.AwsPoller;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
@@ -66,8 +67,7 @@ abstract public class OpDms extends OpDevice {
 	protected int m_retry = 0;
 
 	/** Create a new DMS operation */
-	public OpDms(int p, DMSImpl d, String opDesc, User user) 
-	{
+	public OpDms(PriorityLevel p, DMSImpl d, String opDesc, User user) {
 		super(p, d);
 		m_dms = d;
 		m_opDesc = opDesc;

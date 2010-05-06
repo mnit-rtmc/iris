@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to send new indicaitons to a Lane Control Signal array.
@@ -37,7 +38,7 @@ public class OpSendLCSIndications extends OpLCS {
 
 	/** Create a new operation to send LCS indications */
 	public OpSendLCSIndications(LCSArrayImpl l, Integer[] ind, User u) {
-		super(COMMAND, l);
+		super(PriorityLevel.COMMAND, l);
 		indications = ind;
 		user = u;
 	}

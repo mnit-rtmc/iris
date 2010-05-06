@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ public class KillThread extends Operation {
 
 	/** Create a new operation to kill the message poller thread */
 	public KillThread() {
-		super(URGENT);
+		super(PriorityLevel.URGENT);
 	}
 
 	/** Begin operation */

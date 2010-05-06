@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Controller operation to send settings to an SS125.
@@ -48,7 +49,7 @@ public class OpSendSensorSettings extends OpSS125 {
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
-		super(DOWNLOAD, c);
+		super(PriorityLevel.DOWNLOAD, c);
 		restart = r;
 	}
 

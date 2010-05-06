@@ -170,7 +170,9 @@ abstract public class MessagePoller extends Thread {
 			// Another operation has the device lock. Raise its
 			// priority to that of the current operation.
 			Operation oc = e.operation;
-			if(oc.getPriority() > o.getPriority()) {
+			if(oc.getPriority().ordinal() >
+			   o.getPriority().ordinal())
+			{
 				queue.remove(oc);
 				oc.setPriority(o.getPriority());
 				if(!queueOperation(oc))
@@ -245,7 +247,7 @@ abstract public class MessagePoller extends Thread {
 		throws EOFException;
 
 	/** Respond to a download request from a controller */
-	protected void download(ControllerImpl c, int p) {
+	protected void download(ControllerImpl c, PriorityLevel p) {
 		// Subclasses should override this if necessary
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,17 @@
 package us.mn.state.dot.tms.server.comm;
 
 /**
- * An interface to handle operations in the poll queue.
+ * Priority level for communication operations.  Levels are sorted from high
+ * to low.
  *
  * @author Douglas Lau
  */
-public interface OperationHandler {
-
-	/** Do something with one of the operations */
-	public void handle(PriorityLevel prio, Operation o);
+public enum PriorityLevel {
+	URGENT,		/* 0 */
+	COMMAND,	/* 1 */
+	DATA_30_SEC,	/* 2 */
+	DOWNLOAD,	/* 3 */
+	DATA_5_MIN,	/* 4 */
+	DEVICE_DATA,	/* 5 */
+	DIAGNOSTIC;	/* 6 */
 }

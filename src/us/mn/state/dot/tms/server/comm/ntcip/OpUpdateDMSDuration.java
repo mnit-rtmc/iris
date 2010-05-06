@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -32,7 +33,7 @@ public class OpUpdateDMSDuration extends OpDMS {
 
 	/** Create a new DMS update duration operation */
 	public OpUpdateDMSDuration(DMSImpl d, SignMessage m) {
-		super(COMMAND, d);
+		super(PriorityLevel.COMMAND, d);
 		message = m;
 	}
 
