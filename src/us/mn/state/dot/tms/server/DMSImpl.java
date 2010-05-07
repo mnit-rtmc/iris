@@ -764,13 +764,13 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return lampStatus;
 	}
 
-	/** Power supply status.  This is an array of three Base64-encoded
-	 * bitmaps. */
-	protected transient String[] powerStatus;
+	/** Power supply status.  This is an array of status for each power
+	 * supply.
+	 * @see DMS.getPowerStatus */
+	protected transient String[] powerStatus = new String[0];
 
 	/** Set the power supply status table */
 	public void setPowerStatus(String[] t) {
-		assert t.length == 3;
 		powerStatus = t;
 		notifyAttribute("powerStatus");
 	}

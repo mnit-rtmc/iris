@@ -300,7 +300,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				DMS_LOG.log(dms.getName() + ": " + power);
 				DMS_LOG.log(dms.getName() + ": " + sensor);
 				dms.setHeatTapeStatus(heat.getValue());
-				dms.setPowerStatus(power.getBitmaps());
+				dms.setPowerStatus(power.getPowerStatus());
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Ignore; only Skyline has these objects

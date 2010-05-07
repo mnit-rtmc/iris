@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,10 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.io.IOException;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.tms.Base64;
-import us.mn.state.dot.tms.DMS;
 
 /**
  * PowerTableModel is a table model for power supply status.
@@ -32,17 +29,17 @@ public class PowerTableModel extends AbstractTableModel {
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 4;
 
-	/** Power supply column number */
-	static protected final int COL_SUPPLY = 0;
+	/** Power supply description column number */
+	static protected final int COL_DESCRIPTION = 0;
 
-	/** Power fail column number */
-	static protected final int COL_FAIL = 1;
+	/** Power supply type column number */
+	static protected final int COL_TYPE = 1;
 
-	/** Voltage out-of-spec column number */
-	static protected final int COL_VOLTAGE = 2;
+	/** Power supply status column number */
+	static protected final int COL_STATUS = 2;
 
-	/** Current out-of-spec column number */
-	static protected final int COL_CURRENT = 3;
+	/** Power supply detail column number */
+	static protected final int COL_DETAIL = 3;
 
 	/** Create a new table column */
 	static protected TableColumn createColumn(int column, int width,
@@ -53,33 +50,12 @@ public class PowerTableModel extends AbstractTableModel {
 		return c;
 	}
 
-	/** Lookup a bit in a bitmap */
-	static protected boolean lookupBit(byte[] bmap, int bit) {
-		int pos = bit / 8;
-		if(pos > bmap.length)
-			return false;
-		else {
-			int val = bmap[pos];
-			int mask = 1 << (bit % 8);
-			return (val & mask) == mask;
-		}
-	}
-
-	/** Fail bitmap */
-	protected final byte[] fail;
-
-	/** Voltage bitmap */
-	protected final byte[] voltage;
-
-	/** Current bitmap */
-	protected final byte[] current;
+	/** Power supply status array */
+	protected final String[] status;
 
 	/** Create a new power table model */
-	public PowerTableModel(String[] bmaps) throws IOException {
-		assert bmaps.length == 3;
-		fail = Base64.decode(bmaps[DMS.FAIL_BITMAP]);
-		voltage = Base64.decode(bmaps[DMS.VOLTAGE_BITMAP]);
-		current = Base64.decode(bmaps[DMS.CURRENT_BITMAP]);
+	public PowerTableModel(String[] s) {
+		status = s;
 	}
 
 	/** Get the column count */
@@ -89,40 +65,38 @@ public class PowerTableModel extends AbstractTableModel {
 
 	/** Get the column class */
 	public Class getColumnClass(int column) {
-		if(column == COL_SUPPLY)
-			return Integer.class;
-		else
-			return Boolean.class;
+		return String.class;
 	}
 
 	/** Get the row count */
 	public int getRowCount() {
-		return fail.length * 8;
+		return status.length;
 	}
 
 	/** Get the value at a specific cell */
 	public Object getValueAt(int row, int column) {
-		switch(column) {
-		case COL_SUPPLY:
-			return row + 1;
-		case COL_FAIL:
-			return lookupBit(fail, row);
-		case COL_VOLTAGE:
-			return lookupBit(voltage, row);
-		case COL_CURRENT:
-			return lookupBit(current, row);
-		default:
+		if(row > 0 && row < status.length)
+			return parseValue(status[row], column);
+		else
 			return null;
-		}
+	}
+
+	/** Parse one status value */
+	static protected String parseValue(String s, int column) {
+		String[] cols = s.split(",");
+		if(column > 0 && column < cols.length)
+			return cols[column];
+		else
+			return null;
 	}
 
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_SUPPLY, 64, "Supply"));
-		m.addColumn(createColumn(COL_FAIL, 64, "Fail"));
-		m.addColumn(createColumn(COL_VOLTAGE, 64, "Voltage"));
-		m.addColumn(createColumn(COL_CURRENT, 64, "Current"));
+		m.addColumn(createColumn(COL_DESCRIPTION, 64, "Description"));
+		m.addColumn(createColumn(COL_TYPE, 64, "Type"));
+		m.addColumn(createColumn(COL_STATUS, 64, "Status"));
+		m.addColumn(createColumn(COL_DETAIL, 64, "Detail"));
 		return m;
 	}
 }

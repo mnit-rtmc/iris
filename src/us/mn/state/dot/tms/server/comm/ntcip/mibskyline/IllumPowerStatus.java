@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mibskyline;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import us.mn.state.dot.tms.Base64;
-import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
@@ -49,72 +44,52 @@ public class IllumPowerStatus extends ASN1OctetString {
 
 	/** Get the object value */
 	public String getValue() {
-		StringBuilder b = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < value.length; i++) {
-			if(b.length() > 0)
-				b.append(", ");
-			b.append("#");
-			b.append(i + 1);
-			b.append(": ");
-			b.append(Enum.fromOrdinal(value[i]));
+			sb.append(", #");
+			sb.append(i + 1);
+			sb.append(": ");
+			sb.append(Enum.fromOrdinal(value[i]));
 		}
-		if(b.length() == 0)
-			b.append("None");
-		return b.toString();
+		if(sb.length() < 2)
+			return "None";
+		else
+			return sb.substring(2);
 	}
 
-	/** Simple interface to test a power supply for something */
-	static public interface PowerTester {
-		boolean check(Enum p);
+	/** Get power status for all power supplies.
+	 * @see DMS.getPowerStatus */
+	public String[] getPowerStatus() {
+		String[] supplies = new String[value.length];
+		for(int i = 0; i < value.length; i++)
+			supplies[i] = getPowerStatus(i);
+		return supplies;
 	}
 
-	/** Get power status bitmaps */
-	public String[] getBitmaps() throws IOException {
-		String[] rows = new String[3];
-		rows[DMS.FAIL_BITMAP] = createBase64(new PowerTester() {
-			public boolean check(Enum p) {
-				return p == Enum.low || p == Enum.high;
-			}
-		});
-		rows[DMS.VOLTAGE_BITMAP] = createBase64(new PowerTester() {
-			public boolean check(Enum p) {
-				return p != Enum.ok && p != Enum.unavailable;
-			}
-		});
-		rows[DMS.CURRENT_BITMAP] = createBase64(new PowerTester() {
-			public boolean check(Enum p) {
-				return false;
-			}
-		});
-		return rows;
-	}
-
-	/** Create a power status bitmap encoded in Base64 */
-	protected String createBase64(PowerTester tester) throws IOException {
-		return Base64.encode(createBitmap(tester));
-	}
-
-	/** Create a power status bitmap */
-	protected byte[] createBitmap(PowerTester tester) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(bos);
-		try {
-			for(int i = 0; i < value.length; ) {
-				int v = 0;
-				for(int b = 0; b < 8; b++) {
-					Enum p = Enum.fromOrdinal(value[i]);
-					if(tester.check(p))
-						v |= 1 << b;
-					i++;
-					if(i >= value.length)
-						break;
-				}
-				dos.writeByte(v);
-			}
-			return bos.toByteArray();
+	/** Get the power status for one power supply */
+	protected String getPowerStatus(int num) {
+		byte v = value[num];
+		StringBuilder sb = new StringBuilder();
+		sb.append('#');
+		sb.append(num + 1);
+		sb.append(",ledSupply,");	// 1203v2 dmsPowerType
+		Enum e = Enum.fromOrdinal(v);
+		switch(e) {
+		case low:
+		case high:
+			sb.append("powerFail,");
+			sb.append(e);
+			break;
+		case marginallyLow:
+		case marginallyHigh:
+			sb.append("voltageOutOfSpec,");
+			sb.append(e);
+			break;
+		default:
+			sb.append(',');
+			break;
 		}
-		finally {
-			bos.close();
-		}
+		return sb.toString();
+
 	}
 }

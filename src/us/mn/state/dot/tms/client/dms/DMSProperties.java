@@ -726,16 +726,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Update the power status */
 	protected void updatePowerStatus() {
 		String[] s = proxy.getPowerStatus();
-		if(s != null && s.length == 3) {
-			try {
-				PowerTableModel m = new PowerTableModel(s);
-				powerTable.setColumnModel(
-					m.createColumnModel());
-				powerTable.setModel(m);
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
+		if(s != null) {
+			PowerTableModel m = new PowerTableModel(s);
+			powerTable.setColumnModel(m.createColumnModel());
+			powerTable.setModel(m);
 		}
 	}
 

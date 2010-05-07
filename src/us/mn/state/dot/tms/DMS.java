@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,20 +142,12 @@ public interface DMS extends Device {
 	 *         If the lamp status is not known, null is returned. */
 	String[] getLampStatus();
 
-	/** Index of power fail bitmap in power status array */
-	int FAIL_BITMAP = 0;
-
-	/** Index of voltage out-of-spec bitmap in power status array */
-	int VOLTAGE_BITMAP = 1;
-
-	/** Index of current out-of-spec bitmap in power status array */
-	int CURRENT_BITMAP = 2;
-
 	/** Get power supply status.
-	 * @return Power status as an array of three Base64-encoded bitmaps.
-	 *         The first is "power fail", the second is "voltage out of
-	 *         spec", and the third is "current out of spec".  If the
-	 *         power status is not known, null is returned. */
+	 * @return Power supply status as an array of strings, one for each
+	 *         supply.  Each string in the array has 4 fields, seperated by
+	 *         commas.  The fields are: description, supply type, status,
+	 *         and detail.  If power supply has no errors, the status field
+	 *         will be empty.  */
 	String[] getPowerStatus();
 
 	/** Set the next message owner */
