@@ -245,8 +245,81 @@ public class OpQueryDMSStatus extends OpDMS {
 				DMS_LOG.log(dms.getName() + ": " + msg_err);
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
 				DMS_LOG.log(dms.getName() + ": " + con);
-			return new LedstarStatus();
+			return new PowerSupplyCount();
 		}
+	}
+
+	/** Phase to query 1203v2 power supplies */
+	protected class PowerSupplyCount extends Phase {
+
+		/** Query number of power supplies */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsPowerNumRows n_pwr = new DmsPowerNumRows();
+			mess.add(n_pwr);
+			try {
+				mess.queryProps();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// 1203v2 not supported ...
+				dms.setPowerStatus(new String[0]);
+				return new LedstarStatus();
+			}
+			DMS_LOG.log(dms.getName() + ": " + n_pwr);
+			if(n_pwr.getInteger() > 0)
+				return new QueryPowerStatus(n_pwr.getInteger());
+			else {
+				dms.setPowerStatus(new String[0]);
+				return null;
+			}
+		}
+	}
+
+	/** Phase to query power supply status */
+	protected class QueryPowerStatus extends Phase {
+		protected final String[] supplies;
+		protected int row = 1;		// row in DmsPowerStatusTable
+		protected QueryPowerStatus(int n_pwr) {
+			supplies = new String[n_pwr];
+		}
+
+		/** Query status of one power supply */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsPowerDescription desc = new DmsPowerDescription(row);
+			DmsPowerType p_type = new DmsPowerType(row);
+			DmsPowerStatus status = new DmsPowerStatus(row);
+			DmsPowerMfrStatus mfr_status = new DmsPowerMfrStatus(
+				row);
+			DmsPowerVoltage voltage = new DmsPowerVoltage(row);
+			mess.add(desc);
+			mess.add(p_type);
+			mess.add(status);
+			mess.add(mfr_status);
+			mess.add(voltage);
+			mess.queryProps();
+			DMS_LOG.log(dms.getName() + ": " + desc);
+			DMS_LOG.log(dms.getName() + ": " + p_type);
+			DMS_LOG.log(dms.getName() + ": " + status);
+			DMS_LOG.log(dms.getName() + ": " + mfr_status);
+			DMS_LOG.log(dms.getName() + ": " + voltage);
+			supplies[row - 1] = join("#" + row + ' ' +
+				desc.getValue(), p_type.getValue(),
+				status.getValue(), mfr_status.getValue() + ' ' +
+				(voltage.getInteger() / 100f) + " volts");
+			row++;
+			if(row < supplies.length)
+				return this;
+			else {
+				dms.setPowerStatus(supplies);
+				return null;
+			}
+		}
+	}
+
+	/** Trim and join four strings */
+	static protected String join(String s0, String s1, String s2, String s3)
+	{
+		return s0.trim() + ',' + s1.trim() + ',' + s2.trim() + ',' +
+		       s3.trim();
 	}
 
 	/** Phase to query Ledstar-specific status */
