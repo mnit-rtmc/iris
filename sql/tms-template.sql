@@ -903,6 +903,12 @@ CREATE VIEW dms_view AS
 	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
+CREATE VIEW lcs_indication_view AS
+	SELECT name, controller, pin, lcs, description AS indication
+	FROM iris.lcs_indication
+	JOIN iris.lane_use_indication ON indication = id;
+GRANT SELECT ON lcs_indication_view TO PUBLIC;
+
 CREATE VIEW ramp_meter_view AS
 	SELECT m.name, geo_loc, controller, pin, notes,
 	mt.description AS meter_type, storage, max_wait, camera,

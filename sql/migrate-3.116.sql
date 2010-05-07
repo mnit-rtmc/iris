@@ -15,3 +15,8 @@ CREATE VIEW lane_marking_view AS
 	LEFT JOIN iris.controller ctr ON m.controller = ctr.name;
 GRANT SELECT ON lane_marking_view TO PUBLIC;
 
+CREATE VIEW lcs_indication_view AS
+	SELECT name, controller, pin, lcs, description AS indication
+	FROM iris.lcs_indication
+	JOIN iris.lane_use_indication ON indication = id;
+GRANT SELECT ON lcs_indication_view TO PUBLIC;
