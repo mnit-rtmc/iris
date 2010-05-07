@@ -182,6 +182,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Housing temperature label */
 	protected final JLabel housingTemp = new JLabel();
 
+	/** Power supply status table */
+	protected final ZTable powerTable = new ZTable();
+
 	/** Operation description label */
 	protected final JLabel operation = new JLabel();
 
@@ -260,9 +263,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Pixel current high threshold spinner */
 	protected final JSpinner currentHighSpn = new JSpinner(
 		new SpinnerNumberModel(40, 0, 100, 1));
-
-	/** Power supply status table */
-	protected final ZTable powerTable = new ZTable();
 
 	/** Heat tape status label */
 	protected final JLabel heatTapeStatus = new JLabel();
@@ -497,6 +497,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create status panel */
 	protected JPanel createStatusPanel() {
+		powerTable.setAutoCreateColumnsFromModel(false);
+		powerTable.setVisibleRowCount(6);
 		cabinetTemp.setForeground(OK);
 		ambientTemp.setForeground(OK);
 		housingTemp.setForeground(OK);
@@ -505,6 +507,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.addRow("Cabinet temp", cabinetTemp);
 		panel.addRow("Ambient temp", ambientTemp);
 		panel.addRow("Housing temp", housingTemp);
+		panel.addRow("Power supplies", powerTable);
 		panel.add("Operation", operation);
 		if(queryMsgBtn.getIEnabled())
 			panel.add(queryMsgBtn);
@@ -589,12 +592,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create Skyline-specific panel */
 	protected JPanel createSkylinePanel() {
-		powerTable.setAutoCreateColumnsFromModel(false);
-		powerTable.setVisibleRowCount(8);
 		heatTapeStatus.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.setTitle(MAKE_SKYLINE);
-		panel.addRow(powerTable);
 		panel.addRow("Heat tape", heatTapeStatus);
 		return panel;
 	}
