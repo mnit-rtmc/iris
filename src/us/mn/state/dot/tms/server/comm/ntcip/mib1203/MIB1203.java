@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,9 @@ class MIB1203 extends MIBNode {
 	static public final MIBNode pixelFailureEntry =
 		pixelFailureTable.create(1);
 	static public final MIBNode statTemp = dmsStatus.create(9);
+	static public final MIBNode dmsPowerStatusTable = statError.create(13);
+	static public final MIBNode dmsPowerStatusEntry =
+		dmsPowerStatusTable.create(1);
 	static public final MIBNode graphicDefinition = dms.create(10);
 	static public final MIBNode dmsGraphicTable =
 		graphicDefinition.create(6);
