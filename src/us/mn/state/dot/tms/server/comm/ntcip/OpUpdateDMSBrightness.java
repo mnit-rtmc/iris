@@ -156,8 +156,14 @@ public class OpUpdateDMSBrightness extends OpDMS {
 		for(int i = 0; i < table.length; i++) {
 			int light = table[i][0];
 			tbl[i][0] = light;
-			tbl[i][1] = down.getPhotocell(light);
-			tbl[i][2] = up.getPhotocell(light);
+			if(i > 0)
+				tbl[i][1] = down.getPhotocell(light);
+			else
+				tbl[i][1] = 0;
+			if(i < table.length - 1)
+				tbl[i][2] = up.getPhotocell(light);
+			else
+				tbl[i][2] = max_level.getInteger();
 		}
 		return tbl;
 	}
