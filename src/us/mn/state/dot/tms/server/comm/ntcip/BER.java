@@ -254,7 +254,8 @@ abstract public class BER extends ASN1 {
 			if(blen != length)
 				throw new ParsingException("READ OID FAIL");
 		}
-		throw new ParsingException("INVALID OID");
+		// NOTE: when the length is zero, there is no OID
+		return new int[0];
 	}
 
 	/** Decode a sequence (or sequence-of)
