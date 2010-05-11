@@ -75,7 +75,7 @@ public class PowerTableModel extends AbstractTableModel {
 
 	/** Get the value at a specific cell */
 	public Object getValueAt(int row, int column) {
-		if(row > 0 && row < status.length)
+		if(row >= 0 && row < status.length)
 			return parseValue(status[row], column);
 		else
 			return null;
@@ -84,7 +84,7 @@ public class PowerTableModel extends AbstractTableModel {
 	/** Parse one status value */
 	static protected String parseValue(String s, int column) {
 		String[] cols = s.split(",");
-		if(column > 0 && column < cols.length)
+		if(column >= 0 && column < cols.length)
 			return cols[column];
 		else
 			return null;
@@ -93,10 +93,10 @@ public class PowerTableModel extends AbstractTableModel {
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_DESCRIPTION, 64, "Description"));
-		m.addColumn(createColumn(COL_TYPE, 64, "Type"));
-		m.addColumn(createColumn(COL_STATUS, 64, "Status"));
-		m.addColumn(createColumn(COL_DETAIL, 64, "Detail"));
+		m.addColumn(createColumn(COL_DESCRIPTION, 120, "Description"));
+		m.addColumn(createColumn(COL_TYPE, 80, "Type"));
+		m.addColumn(createColumn(COL_STATUS, 80, "Status"));
+		m.addColumn(createColumn(COL_DETAIL, 120, "Detail"));
 		return m;
 	}
 }
