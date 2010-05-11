@@ -11,6 +11,30 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.116.0 (11 May 2010)</dt>
+	<dd><ul>
+		<li>
+			Cleaned up comm package classes and interfaces.
+		</li>
+		<li>
+			Added a couple of missing database views.
+		</li>
+		<li>
+			Added support for querying NTCIP 1203v2 power status.
+		</li>
+		<li>
+			Fixed exception dialog bug which allowed it to get
+			hidden behind main client window.
+		</li>
+		<li>
+			Cleaned up a few FIXMEs in the code.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.116.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.115.0 (20 April 2010)</dt>
 	<dd><ul>
 		<li>
