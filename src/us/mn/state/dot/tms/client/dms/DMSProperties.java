@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
@@ -224,15 +225,17 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Light output label */
 	protected final JLabel lightOutput = new JLabel();
 
-	/** Brightness feedback combo box */
-	protected final JComboBox feedback = new JComboBox(
-		new DeviceRequest[] {
-			DeviceRequest.NO_REQUEST,
-			DeviceRequest.BRIGHTNESS_GOOD,
-			DeviceRequest.BRIGHTNESS_TOO_DIM,
-			DeviceRequest.BRIGHTNESS_TOO_BRIGHT
-		}
-	);
+	/** Current brightness low feedback button */
+	protected final JButton brightLowBtn = new JButton(
+		"Brightness Low");
+
+	/** Current brightness good feedback button */
+	protected final JButton brightGoodBtn = new JButton(
+		"Brightness Good");
+
+	/** Current brightness high feedback button */
+	protected final JButton brightHighBtn = new JButton(
+		"Brightness High");
 
 	/** Button to test lamps */
 	protected final JButton testLampsBtn = new JButton("Test Lamps");
@@ -406,12 +409,22 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 					DeviceRequest.TEST_PIXELS.ordinal());
 			}
 		};
-		new ActionJob(this, feedback) {
+		new ActionJob(this, brightLowBtn) {
 			public void perform() {
-				DeviceRequest sr = (DeviceRequest)
-					feedback.getSelectedItem();
-				proxy.setDeviceRequest(sr.ordinal());
-				feedback.setEnabled(false);
+				proxy.setDeviceRequest(DeviceRequest.
+					BRIGHTNESS_TOO_DIM.ordinal());
+			}
+		};
+		new ActionJob(this, brightGoodBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					BRIGHTNESS_GOOD.ordinal());
+			}
+		};
+		new ActionJob(this, brightHighBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					BRIGHTNESS_TOO_BRIGHT.ordinal());
 			}
 		};
 		new ActionJob(this, testLampsBtn) {
@@ -431,7 +444,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		settingsBtn.setEnabled(false);
 		queryPixelsBtn.setEnabled(false);
 		testPixelsBtn.setEnabled(false);
-		feedback.setEnabled(false);
+		brightLowBtn.setEnabled(false);
+		brightGoodBtn.setEnabled(false);
+		brightHighBtn.setEnabled(false);
 		testLampsBtn.setEnabled(false);
 	}
 
@@ -547,6 +562,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Create brightness panel */
 	protected JPanel createBrightnessPanel() {
 		lightOutput.setForeground(OK);
+		JPanel feedback = new JPanel();
+		feedback.add(brightLowBtn);
+		feedback.add(brightGoodBtn);
+		feedback.add(brightHighBtn);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Lamp status", lampTable);
 		panel.addRow("Light output", lightOutput);
@@ -655,8 +674,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			vPitch.setText(formatMM(proxy.getVerticalPitch()));
 		// NOTE: messageCurrent attribute changes after all sign
 		//       dimension attributes are updated.
-		if(a == null || a.equals("messageCurrent"))
+		if(a == null || a.equals("messageCurrent")) {
 			updatePixelStatus();
+			updateFeedback();
+		}
 		if(a == null || a.equals("ldcPotBase")) {
 			Integer b = proxy.getLdcPotBase();
 			if(b != null)
@@ -686,7 +707,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				lightOutput.setText("" + o + "%");
 			else
 				lightOutput.setText(UNKNOWN);
-			feedback.setEnabled(canRequest());
+			updateFeedback();
 		}
 		if(a == null || a.equals("minCabinetTemp") ||
 		   a.equals("maxCabinetTemp"))
@@ -828,6 +849,15 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	/** Update the feedback buttons */
+	protected void updateFeedback() {
+		boolean enable = canRequest() && !SignMessageHelper.isBlank(
+			proxy.getMessageCurrent());
+		brightLowBtn.setEnabled(enable);
+		brightGoodBtn.setEnabled(enable);
+		brightHighBtn.setEnabled(enable);
 	}
 
 	/** Check if the user can make device requests */
