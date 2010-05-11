@@ -301,9 +301,9 @@ public class OpQueryDMSStatus extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			DMS_LOG.log(dms.getName() + ": " + mfr_status);
 			DMS_LOG.log(dms.getName() + ": " + voltage);
-			supplies[row - 1] = join("#" + row + ' ' +
-				desc.getValue(), p_type.getValue(),
-				status.getValue(), mfr_status.getValue() + ' ' +
+			supplies[row - 1] = join(desc.getValue(),
+				p_type.getValue(), status.getValue(),
+				mfr_status.getValue() + ' ' +
 				formatVoltage(voltage.getInteger()));
 			row++;
 			if(row < supplies.length)
