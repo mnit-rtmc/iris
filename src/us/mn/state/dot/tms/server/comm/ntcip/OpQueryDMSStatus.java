@@ -304,7 +304,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			supplies[row - 1] = join("#" + row + ' ' +
 				desc.getValue(), p_type.getValue(),
 				status.getValue(), mfr_status.getValue() + ' ' +
-				(voltage.getInteger() / 100f) + " volts");
+				formatVoltage(voltage.getInteger()));
 			row++;
 			if(row < supplies.length)
 				return this;
@@ -313,6 +313,14 @@ public class OpQueryDMSStatus extends OpDMS {
 				return null;
 			}
 		}
+	}
+
+	/** Format power supply voltage */
+	static protected String formatVoltage(int volts) {
+		if(volts >= 0 && volts < 65535)
+			return "" + (volts / 100f) + " volts";
+		else
+			return "";
 	}
 
 	/** Trim and join four strings */
