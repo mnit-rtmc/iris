@@ -146,7 +146,10 @@ public class FormPanel extends JPanel {
 
 	/** Add a component with a label on the left side */
 	public void addRow(String name, JComponent comp) {
-		addRow(new JLabel(name), comp);
+		setEast();
+		add(new JLabel(name));
+		setWest();
+		addRow(comp);
 	}
 
 	/** Add a component with a label on the left side and a button */
@@ -165,13 +168,25 @@ public class FormPanel extends JPanel {
 	public void addRow(String name, JTextArea area) {
 		setEast();
 		add(new JLabel(name));
+		addRow(area);
+	}
+
+	/** Add a text area component with a label on the left side */
+	public void addRow(JTextArea area) {
+		setFill();
 		area.setWrapStyleWord(true);
 		area.setLineWrap(true);
-		setFill();
 		area.setEnabled(enable);
 		addRow(new JScrollPane(area,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+	}
+
+	/** Add a list component with a label on the left side */
+	public void addRow(String name, JList list) {
+		setEast();
+		add(new JLabel(name));
+		addRow(list);
 	}
 
 	/** Add a list component */
@@ -181,6 +196,13 @@ public class FormPanel extends JPanel {
 		addRow(new JScrollPane(list,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+	}
+
+	/** Add a table component with a label on the left side */
+	public void addRow(String name, JTable table) {
+		setEast();
+		add(new JLabel(name));
+		addRow(table);
 	}
 
 	/** Add a table component */
