@@ -17,8 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.server.BrightnessSample;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -31,9 +30,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  */
 public class OpUpdateDMSBrightness extends OpDMS {
 
-	/** Device request (BRIGHTNESS_GOOD, BRIGHTNESS_TOO_DIM or
-	 * BRIGHTNESS_TOO_BRIGHT) */
-	protected final DeviceRequest request;
+	/** Event type (DMS_BRIGHT_GOOD, DMS_BRIGHT_LOW or DMS_BRIGHT_HIGH) */
+	protected final EventType event_type;
 
 	/** Maximum photocell level */
 	protected final DmsIllumMaxPhotocellLevel max_level =
@@ -56,9 +54,9 @@ public class OpUpdateDMSBrightness extends OpDMS {
 		new DmsIllumBrightnessValues();
 
 	/** Create a new DMS brightness feedback operation */
-	public OpUpdateDMSBrightness(DMSImpl d, DeviceRequest r) {
+	public OpUpdateDMSBrightness(DMSImpl d, EventType et) {
 		super(PriorityLevel.COMMAND, d);
-		request = r;
+		event_type = et;
 	}
 
 	/** Create the first real phase of the operation */
@@ -78,10 +76,10 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + max_level);
 			DMS_LOG.log(dms.getName() + ": " + p_level);
 			DMS_LOG.log(dms.getName() + ": " + light);
-			dms.feedbackBrightness(new BrightnessSample(request,
-				p_level.getInteger(), light.getInteger()));
-			if(request == DeviceRequest.BRIGHTNESS_TOO_DIM ||
-			   request == DeviceRequest.BRIGHTNESS_TOO_BRIGHT)
+			dms.feedbackBrightness(event_type,
+				p_level.getInteger(), light.getInteger());
+			if(event_type == EventType.DMS_BRIGHT_LOW ||
+			   event_type == EventType.DMS_BRIGHT_HIGH)
 				return new QueryBrightnessTable();
 			else
 				return null;
@@ -144,12 +142,14 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			down.put(level[1], level[0], false);
 			up.put(level[2], level[0], false);
 		}
-		dms.queryBrightnessFeedback(new BrightnessSample.Handler() {
-			public void handle(BrightnessSample s) {
-				down.put(s.photocell, s.output, s.feedback ==
-					DeviceRequest.BRIGHTNESS_TOO_DIM);
-				up.put(s.photocell, s.output, s.feedback ==
-					DeviceRequest.BRIGHTNESS_TOO_BRIGHT);
+		dms.queryBrightnessFeedback(new DMSImpl.BrightnessHandler() {
+			public void feedback(EventType et, int photo,
+				int output)
+			{
+				down.put(photo, output,
+					et == EventType.DMS_BRIGHT_LOW);
+				up.put(photo, output,
+					et == EventType.DMS_BRIGHT_HIGH);
 			}
 		});
 		int[][] tbl = new int[table.length][3];

@@ -50,6 +50,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.event.BrightnessSample;
 import us.mn.state.dot.tms.server.event.SignStatusEvent;
 import us.mn.state.dot.tms.kml.Kml;
 import us.mn.state.dot.tms.kml.KmlColor;
@@ -1120,13 +1121,30 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Feedback brightness sample data */
-	public void feedbackBrightness(BrightnessSample s) {
-		// FIXME: store brightness sample in database
+	public void feedbackBrightness(EventType et, int photo, int output) {
+		BrightnessSample bs = new BrightnessSample(et, this, photo,
+			output);
+		try {
+			bs.doStore();
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** Lookup recent brightness feedback sample data */
-	public void queryBrightnessFeedback(BrightnessSample.Handler h) {
-		// FIXME: lookup samples in database
+	public void queryBrightnessFeedback(BrightnessHandler bh) {
+		try {
+			BrightnessSample.lookup(this, bh);
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Interface for handling brightness samples */
+	static public interface BrightnessHandler {
+		void feedback(EventType et, int photo, int output);
 	}
 
 	/** Create a message for the sign.

@@ -1257,7 +1257,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.116.0
+database_version	3.117.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
@@ -1426,6 +1426,17 @@ CREATE TABLE event.alarm_event (
 		ON DELETE CASCADE
 );
 
+CREATE TABLE event.brightness_sample (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	dms VARCHAR(10) NOT NULL REFERENCES iris._dms(name)
+		ON DELETE CASCADE,
+	photocell integer NOT NULL,
+	output integer NOT NULL
+);
+
 CREATE TABLE event.comm_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	event_date timestamp with time zone NOT NULL,
@@ -1585,6 +1596,9 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 94	NO HITS
 95	LOCKED ON
 96	CHATTER
+101	Sign BRIGHTNESS LOW
+102	Sign BRIGHTNESS GOOD
+103	Sign BRIGHTNESS HIGH
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;

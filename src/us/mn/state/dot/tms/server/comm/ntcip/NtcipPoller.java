@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.EOFException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
@@ -111,10 +112,17 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		case TEST_LAMPS:
 			new OpTestDMSLamps(dms).start();
 			break;
-		case BRIGHTNESS_GOOD:
 		case BRIGHTNESS_TOO_DIM:
+			new OpUpdateDMSBrightness(dms,
+				EventType.DMS_BRIGHT_LOW).start();
+			break;
+		case BRIGHTNESS_GOOD:
+			new OpUpdateDMSBrightness(dms,
+				EventType.DMS_BRIGHT_GOOD).start();
+			break;
 		case BRIGHTNESS_TOO_BRIGHT:
-			new OpUpdateDMSBrightness(dms, r).start();
+			new OpUpdateDMSBrightness(dms,
+				EventType.DMS_BRIGHT_HIGH).start();
 			break;
 		case SEND_LEDSTAR_SETTINGS:
 			new OpSendDMSLedstar(dms).start();
