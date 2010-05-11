@@ -93,4 +93,24 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 		}
 		return b.toString();
 	}
+
+	/** Check if the brightness table is valid */
+	public boolean isValid() throws IOException {
+		int[][] table = getTable();
+		int output = 0;
+		int down = 0;
+		int up = 0;
+		for(int[] level: table) {
+			if(level[0] < output)
+				return false;
+			if(level[1] < down)
+				return false;
+			if(level[2] < up)
+				return false;
+			output = level[0];
+			down = level[1];
+			up = level[2];
+		}
+		return true;
+	}
 }

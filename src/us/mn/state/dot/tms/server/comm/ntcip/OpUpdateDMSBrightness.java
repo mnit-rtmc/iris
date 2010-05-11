@@ -125,15 +125,23 @@ public class OpUpdateDMSBrightness extends OpDMS {
 
 		/** Set the brightness table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			brightness.setTable(calculateTable());
-			mess.add(brightness);
-//			mess.storeProps();
-			DMS_LOG.log(dms.getName() + ":= " + brightness);
+			// NOTE: if the existing table is not valid, don't mess
+			//       with it.  This check is needed for a certain
+			//       vendor, which has a wacky brightness table.
+			if(brightness.isValid()) {
+				brightness.setTable(calculateTable());
+				mess.add(brightness);
+//				mess.storeProps();
+				DMS_LOG.log(dms.getName() + ":= " + brightness);
+			}
 			return null;
 		}
 	}
 
-	/** Get the brightness table as a list of samples */
+	/** Get the brightness table as a list of samples.  This is done by
+	 * adjusting the current brightness table photocell level thresholds.
+	 * FIXME: this method is unable to cope with a situation where the
+	 * first level is too bright or the last level is too dim. */
 	protected int[][] calculateTable() throws IOException {
 		final BrightnessMapping down = new BrightnessMapping(true);
 		final BrightnessMapping up = new BrightnessMapping(false);
