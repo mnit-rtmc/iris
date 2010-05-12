@@ -144,10 +144,9 @@ public class OpUpdateDMSBrightness extends OpDMS {
 		final LightCurve curve = new LightCurve();
 		int[][] table = brightness.getTable();
 		for(int[] level: table) {
-			int photo = level[2] - level[1];
+			int photo = (level[1] + level[2]) / 2;
 			curve.put(photo, level[0]);
 		}
-System.err.println(curve.toString());
 		dms.queryBrightnessFeedback(new DMSImpl.BrightnessHandler() {
 			public void feedback(EventType et, int photo,
 				int output)
@@ -170,9 +169,8 @@ System.err.println(curve.toString());
 				}
 			}
 		});
-System.err.println(curve.toString());
 		for(int[] level: table) {
-			int photo = level[2] - level[1];
+			int photo = (level[1] + level[2]) / 2;
 			Integer light = curve.getLightOutput(photo);
 			if(light != null) {
 				light = Math.max(light, 0);
