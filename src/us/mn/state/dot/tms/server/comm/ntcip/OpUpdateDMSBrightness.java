@@ -131,7 +131,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			if(brightness.isValid()) {
 				brightness.setTable(calculateTable());
 				mess.add(brightness);
-				mess.storeProps();
+//				mess.storeProps();
 				DMS_LOG.log(dms.getName() + ":= " + brightness);
 			}
 			return null;
@@ -143,21 +143,39 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	 * FIXME: this method is unable to cope with a situation where the
 	 * first level is too bright or the last level is too dim. */
 	protected int[][] calculateTable() throws IOException {
-		final BrightnessMapping down = new BrightnessMapping(true);
-		final BrightnessMapping up = new BrightnessMapping(false);
+		final LightCurve down = new LightCurve();
+		final LightCurve up = new LightCurve();
 		int[][] table = brightness.getTable();
 		for(int[] level: table) {
-			down.put(level[1], level[0], false);
-			up.put(level[2], level[0], false);
+			down.put(level[1], level[0]);
+			up.put(level[2], level[0]);
 		}
 		dms.queryBrightnessFeedback(new DMSImpl.BrightnessHandler() {
 			public void feedback(EventType et, int photo,
 				int output)
 			{
-				down.put(photo, output,
-					et == EventType.DMS_BRIGHT_LOW);
-				up.put(photo, output,
-					et == EventType.DMS_BRIGHT_HIGH);
+				switch(et) {
+				case DMS_BRIGHT_LOW:
+					if(up.getPhotocell(output) >= photo)
+						up.put(output, photo - 1);
+					if(down.getPhotocell(output) > photo)
+						down.put(output, photo);
+					break;
+				case DMS_BRIGHT_GOOD:
+					if(up.getPhotocell(output) < photo)
+						up.put(output, photo);
+					if(down.getPhotocell(output) > photo)
+						down.put(output, photo);
+					break;
+				case DMS_BRIGHT_HIGH:
+					if(down.getPhotocell(output) <= photo)
+						down.put(output, photo + 1);
+					if(up.getPhotocell(output) < photo)
+						up.put(output, photo);
+					break;
+				default:
+					break;
+				}
 			}
 		});
 		int[][] tbl = new int[table.length][3];
