@@ -155,14 +155,14 @@ public class OpUpdateDMSBrightness extends OpDMS {
 				switch(et) {
 				case DMS_BRIGHT_LOW:
 					if(o == null || o < output)
-						curve.put(photo, output + 16);
+						curve.put(photo, output + 256);
 					break;
 				case DMS_BRIGHT_GOOD:
 					curve.put(photo, output);
 					break;
 				case DMS_BRIGHT_HIGH:
 					if(o == null || o > output)
-						curve.put(photo, output - 16);
+						curve.put(photo, output - 256);
 					break;
 				default:
 					break;
