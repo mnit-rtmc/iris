@@ -78,11 +78,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + light);
 			dms.feedbackBrightness(event_type,
 				p_level.getInteger(), light.getInteger());
-			if(event_type == EventType.DMS_BRIGHT_LOW ||
-			   event_type == EventType.DMS_BRIGHT_HIGH)
-				return new QueryBrightnessTable();
-			else
-				return null;
+			return new QueryBrightnessTable();
 		}
 	}
 
