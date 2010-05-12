@@ -139,58 +139,45 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	}
 
 	/** Get the brightness table as a list of samples.  This is done by
-	 * adjusting the current brightness table photocell level thresholds.
-	 * FIXME: this method is unable to cope with a situation where the
-	 * first level is too bright or the last level is too dim. */
+	 * adjusting the current brightness table light output values. */
 	protected int[][] calculateTable() throws IOException {
-		final LightCurve down = new LightCurve();
-		final LightCurve up = new LightCurve();
+		final LightCurve curve = new LightCurve();
 		int[][] table = brightness.getTable();
 		for(int[] level: table) {
-			down.put(level[1], level[0]);
-			up.put(level[2], level[0]);
+			int photo = level[2] - level[1];
+			curve.put(photo, level[0]);
 		}
 		dms.queryBrightnessFeedback(new DMSImpl.BrightnessHandler() {
 			public void feedback(EventType et, int photo,
 				int output)
 			{
+				Integer o = curve.getLightOutput(photo);
 				switch(et) {
 				case DMS_BRIGHT_LOW:
-					if(up.getPhotocell(output) >= photo)
-						up.put(output, photo - 1);
-					if(down.getPhotocell(output) > photo)
-						down.put(output, photo);
+					if(o == null || o < output)
+						curve.put(photo, output + 16);
 					break;
 				case DMS_BRIGHT_GOOD:
-					if(up.getPhotocell(output) < photo)
-						up.put(output, photo);
-					if(down.getPhotocell(output) > photo)
-						down.put(output, photo);
+					curve.put(photo, output);
 					break;
 				case DMS_BRIGHT_HIGH:
-					if(down.getPhotocell(output) <= photo)
-						down.put(output, photo + 1);
-					if(up.getPhotocell(output) < photo)
-						up.put(output, photo);
+					if(o == null || o > output)
+						curve.put(photo, output - 16);
 					break;
 				default:
 					break;
 				}
 			}
 		});
-		int[][] tbl = new int[table.length][3];
-		for(int i = 0; i < table.length; i++) {
-			int light = table[i][0];
-			tbl[i][0] = light;
-			if(i > 0)
-				tbl[i][1] = down.getPhotocell(light);
-			else
-				tbl[i][1] = 0;
-			if(i < table.length - 1)
-				tbl[i][2] = up.getPhotocell(light);
-			else
-				tbl[i][2] = max_level.getInteger();
+		for(int[] level: table) {
+			int photo = level[2] - level[1];
+			Integer light = curve.getLightOutput(photo);
+			if(light != null) {
+				light = Math.max(light, 0);
+				light = Math.min(light, 65535);
+				level[0] = light;
+			}
 		}
-		return tbl;
+		return table;
 	}
 }

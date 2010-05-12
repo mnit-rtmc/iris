@@ -24,43 +24,43 @@ import java.util.TreeMap;
  */
 public class LightCurve {
 
-	/** Mapping of light output to photocell values */
+	/** Mapping of photocell to light output values */
 	protected final TreeMap<Integer, Integer> mapping =
 		new TreeMap<Integer, Integer>();
 
 	/** Put an entry into the mapping */
-	public void put(int l, int p) {
-		updateLower(l, p);
-		updateHigher(l, p);
-		mapping.put(l, p);
+	public void put(int p, int l) {
+		updateLower(p, l);
+		updateHigher(p, l);
+		mapping.put(p, l);
 	}
 
 	/** Update lower entries if necessary.  This prevents the curve from
 	 * having a negative slope. */
-	protected void updateLower(int l, int p) {
+	protected void updateLower(int p, int l) {
 		Map.Entry<Integer, Integer> floor = mapping.floorEntry(l);
-		while(floor != null && floor.getValue() > p) {
+		while(floor != null && floor.getValue() > l) {
 			Integer k = floor.getKey();
-			mapping.put(k, p);
+			mapping.put(k, l);
 			floor = mapping.lowerEntry(k);
 		}
 	}
 
 	/** Update higher entries if necessary.  This prevents the curve from
 	 * having a negative slope. */
-	protected void updateHigher(int l, int p) {
+	protected void updateHigher(int p, int l) {
 		Map.Entry<Integer, Integer> ceil = mapping.ceilingEntry(l);
-		while(ceil != null && ceil.getValue() < p) {
+		while(ceil != null && ceil.getValue() < l) {
 			Integer k = ceil.getKey();
-			mapping.put(k, p);
+			mapping.put(k, l);
 			ceil = mapping.higherEntry(k);
 		}
 	}
 
-	/** Get the photocell value for the given light output */
-	public Integer getPhotocell(int light) {
-		Map.Entry<Integer, Integer> floor = mapping.floorEntry(light);
-		Map.Entry<Integer, Integer> ceil = mapping.ceilingEntry(light);
+	/** Get the light output for the given photocell value */
+	public Integer getLightOutput(int photo) {
+		Map.Entry<Integer, Integer> floor = mapping.floorEntry(photo);
+		Map.Entry<Integer, Integer> ceil = mapping.ceilingEntry(photo);
 		if(floor == null || ceil == null)
 			return null;
 		float x0 = floor.getKey();
@@ -75,6 +75,6 @@ public class LightCurve {
 			m = 0;
 		/* b => y-intercept of line segment */
 		float b = y0 - x0 * m;
-		return Math.round(m * light + b);
+		return Math.round(m * photo + b);
 	}
 }
