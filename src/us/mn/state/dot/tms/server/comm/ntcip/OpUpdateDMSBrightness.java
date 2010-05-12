@@ -141,43 +141,78 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	/** Get the brightness table as a list of samples.  This is done by
 	 * adjusting the current brightness table light output values. */
 	protected int[][] calculateTable() throws IOException {
-		final LightCurve curve = new LightCurve();
-		int[][] table = brightness.getTable();
-		for(int[] level: table) {
-			int photo = (level[1] + level[2]) / 2;
-			curve.put(photo, level[0]);
-		}
+		final int[][] table = brightness.getTable();
 		dms.queryBrightnessFeedback(new DMSImpl.BrightnessHandler() {
 			public void feedback(EventType et, int photo,
 				int output)
 			{
-				Integer o = curve.getLightOutput(photo);
 				switch(et) {
 				case DMS_BRIGHT_LOW:
-					if(o == null || o < output)
-						curve.put(photo, output + 256);
+					feedbackLow(table, photo, output);
 					break;
 				case DMS_BRIGHT_GOOD:
-					curve.put(photo, output);
+					feedbackGood(table, photo, output);
 					break;
 				case DMS_BRIGHT_HIGH:
-					if(o == null || o > output)
-						curve.put(photo, output - 256);
+					feedbackHigh(table, photo, output);
 					break;
 				default:
 					break;
 				}
 			}
 		});
-		for(int[] level: table) {
-			int photo = (level[1] + level[2]) / 2;
-			Integer light = curve.getLightOutput(photo);
-			if(light != null) {
-				light = Math.max(light, 0);
-				light = Math.min(light, 65535);
-				level[0] = light;
+		return table;
+	}
+
+	/** Adjust a brightness table with DMS_BRIGHT_LOW feedback */
+	static protected void feedbackLow(int[][] table, int photo, int output){
+		int light = 0;		// highest light output so far
+		for(int[] lvl: table) {
+			light = Math.max(lvl[0], light);
+			if(lvl[1] <= photo && photo <= lvl[2])
+				light = Math.max(light, output) + 256;
+			lvl[0] = Math.min(light, 65535);
+		}
+	}
+
+	/** Adjust a brightness table with DMS_BRIGHT_GOOD feedback */
+	static protected void feedbackGood(int[][] table, int photo,
+		int output)
+	{
+		final int max_photo = table[table.length - 1][2];
+		for(int i = 0; i < table.length; i++) {
+			int prev = 0;
+			int next = max_photo;
+			if(i > 0)
+				prev = table[i - 1][2];
+			if(i < table.length - 1)
+				next = table[i + 1][1];
+			if(prev < photo && photo < next) {
+				int[] lvl = table[i];
+				if(lvl[1] <= photo && photo <= lvl[2]) {
+					lvl[0] = output;
+					// Fix any negative slope problems
+					for(int j = 0; j < table.length; j++) {
+						int[] ol = table[j];
+						if(j < i && ol[0] > output)
+							ol[0] = output;
+						if(j > i && ol[0] < output)
+							ol[0] = output;
+					}
+				}
 			}
 		}
-		return table;
+	}
+
+	/** Adjust a brightness table with DMS_BRIGHT_HIGH feedback */
+	static protected void feedbackHigh(int[][] table, int photo,int output){
+		int light = 65535;	// lowest light output so far
+		for(int i = table.length - 1; i >= 0; i--) {
+			int[] lvl = table[i];
+			light = Math.min(lvl[0], light);
+			if(lvl[1] <= photo && photo <= lvl[2])
+				light = Math.min(light, output) - 256;
+			lvl[0] = Math.max(light, 0);
+		}
 	}
 }
