@@ -86,7 +86,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 			sb.append(e);
 			break;
 		default:
-			sb.append(',');
+			sb.append("noError,");
 			break;
 		}
 		return sb.toString();
