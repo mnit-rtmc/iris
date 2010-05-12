@@ -94,7 +94,9 @@ public class BrightnessSample extends BaseEvent {
 			dms.getName() + "' AND " + where + ";");
 	}
 
-	/** Get SQL WHERE clause for conflicting samples */
+	/** Get SQL WHERE clause for conflicting samples.  This ensures that
+	 * none of the samples will cause the brightness table to have a
+	 * negative slope. */
 	protected String whereClause() {
 		switch(event_type) {
 		case DMS_BRIGHT_LOW:
