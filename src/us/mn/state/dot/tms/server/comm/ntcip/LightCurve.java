@@ -32,13 +32,13 @@ public class LightCurve {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for(Map.Entry<Integer, Integer> entry: mapping.entrySet()) {
-			sb.append(",(");
+			sb.append('(');
 			sb.append(entry.getKey());
 			sb.append(',');
 			sb.append(entry.getValue());
-			sb.append(')');
+			sb.append("),");
 		}
-		return sb.substring(1);
+		return sb.toString();
 	}
 
 	/** Put an entry into the mapping */
@@ -51,7 +51,7 @@ public class LightCurve {
 	/** Update lower entries if necessary.  This prevents the curve from
 	 * having a negative slope. */
 	protected void updateLower(int p, int l) {
-		Map.Entry<Integer, Integer> floor = mapping.floorEntry(l);
+		Map.Entry<Integer, Integer> floor = mapping.floorEntry(p);
 		while(floor != null && floor.getValue() > l) {
 			Integer k = floor.getKey();
 			mapping.put(k, l);
@@ -62,7 +62,7 @@ public class LightCurve {
 	/** Update higher entries if necessary.  This prevents the curve from
 	 * having a negative slope. */
 	protected void updateHigher(int p, int l) {
-		Map.Entry<Integer, Integer> ceil = mapping.ceilingEntry(l);
+		Map.Entry<Integer, Integer> ceil = mapping.ceilingEntry(p);
 		while(ceil != null && ceil.getValue() < l) {
 			Integer k = ceil.getKey();
 			mapping.put(k, l);
