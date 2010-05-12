@@ -91,27 +91,59 @@ public class BrightnessSample extends BaseEvent {
 		if(where == null)
 			return;
 		store.update("DELETE FROM " + getTable() + " WHERE dms = '" +
-			dms.getName() + "' AND output = " + output +
-			" AND " + where + ";");
+			dms.getName() + "' AND " + where + ";");
 	}
 
 	/** Get SQL WHERE clause for conflicting samples */
 	protected String whereClause() {
 		switch(event_type) {
 		case DMS_BRIGHT_LOW:
-			return geClause();
+			return "(" + pgeOleClause() + " OR " +
+			       lowPleOgeClause() + ")";
 		case DMS_BRIGHT_GOOD:
-			return lowGeClause() + " OR " + highLeClause();
+			return "(" + lowPgeClause() + " OR " + highPleClause() +
+			       ") AND " + oeqClause();
 		case DMS_BRIGHT_HIGH:
-			return leClause();
+			return "(" + pleOgeClause() + " OR " +
+			       highPgeOleClause() + ")";
 		default:
 			return null;
 		}
 	}
 
-	/** Get SQL clause for _LOW samples greater than this */
-	protected String lowGeClause() {
-		return "(" + lowClause() + " AND " + geClause() + ")";
+	/** Get SQL clause for photocell less than or equal */
+	protected String pleClause() {
+		return "photocell <= " + photocell;
+	}
+
+	/** Get SQL clause for photocell greater than or equal */
+	protected String pgeClause() {
+		return "photocell >= " + photocell;
+	}
+
+	/** Get SQL clause for output equal */
+	protected String oeqClause() {
+		return "output = " + output;
+	}
+
+	/** Get SQL clause for output less than or equal */
+	protected String oleClause() {
+		return "output <= " + output;
+	}
+
+	/** Get SQL clause for output greater than or equal */
+	protected String ogeClause() {
+		return "output >= " + output;
+	}
+
+	/** Get SQL clause for photocell greater and output less */
+	protected String pgeOleClause() {
+		return "(" + pgeClause() + " AND " + oleClause() + ")";
+	}
+
+	/** Get SQL clause for photocell less and output greater */
+	protected String pleOgeClause() {
+		return "(" + pleClause() + " AND " + ogeClause() + ")";
 	}
 
 	/** Get SQL clause for _LOW samples */
@@ -119,23 +151,30 @@ public class BrightnessSample extends BaseEvent {
 		return "event_desc_id = " + EventType.DMS_BRIGHT_LOW.id;
 	}
 
-	/** Get SQL clause for samples greater than or equal to this */
-	protected String geClause() {
-		return "photocell >= " + photocell;
-	}
-
-	/** Get SQL clause for _HIGH samples lower than this */
-	protected String highLeClause() {
-		return "(" + highClause() + " AND " + leClause() + ")";
-	}
-
 	/** Get SQL clause for _HIGH samples */
 	protected String highClause() {
 		return "event_desc_id = " + EventType.DMS_BRIGHT_HIGH.id;
 	}
 
-	/** Get SQL clause for samples less than or equal to this */
-	protected String leClause() {
-		return "photocell <= " + photocell;
+	/** Get SQL clause for _LOW photocell greater than or equal */
+	protected String lowPgeClause() {
+		return "(" + lowClause() + " AND " + pgeClause() + ")";
+	}
+
+	/** Get SQL clause for _HIGH photocell less than or equal */
+	protected String highPleClause() {
+		return "(" + highClause() + " AND " + pleClause() + ")";
+	}
+
+	/** Get SQL clause for _LOW photocell less and output greater */
+	protected String lowPleOgeClause() {
+		return "(" + lowClause() + " AND " + pleClause() + " AND " +
+		       ogeClause() + ")";
+	}
+
+	/** Get SQL clause for _HIGH photocell greater and output less */
+	protected String highPgeOleClause() {
+		return "(" + highClause() + " AND " + pgeClause() + " AND " +
+		       oleClause() + ")";
 	}
 }
