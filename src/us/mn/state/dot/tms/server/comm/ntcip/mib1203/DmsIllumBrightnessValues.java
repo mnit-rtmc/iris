@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,6 +101,8 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 		int down = 0;
 		int up = 0;
 		for(int[] level: table) {
+			if(level[2] < level[1])
+				return false;
 			if(level[0] < output)
 				return false;
 			if(level[1] < down)
