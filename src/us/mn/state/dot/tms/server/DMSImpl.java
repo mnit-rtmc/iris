@@ -1125,6 +1125,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		BrightnessSample bs = new BrightnessSample(et, this, photo,
 			output);
 		try {
+			bs.purgeConflicting();
 			bs.doStore();
 		}
 		catch(TMSException e) {

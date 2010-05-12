@@ -84,4 +84,58 @@ public class BrightnessSample extends BaseEvent {
 		map.put("output", output);
 		return map;
 	}
+
+	/** Purge all conflicting samples */
+	public void purgeConflicting() throws TMSException {
+		String where = whereClause();
+		if(where == null)
+			return;
+		store.update("DELETE FROM " + getTable() + " WHERE dms = '" +
+			dms.getName() + "' AND output = " + output +
+			" AND " + where + ";");
+	}
+
+	/** Get SQL WHERE clause for conflicting samples */
+	protected String whereClause() {
+		switch(event_type) {
+		case DMS_BRIGHT_LOW:
+			return geClause();
+		case DMS_BRIGHT_GOOD:
+			return lowGeClause() + " OR " + highLeClause();
+		case DMS_BRIGHT_HIGH:
+			return leClause();
+		default:
+			return null;
+		}
+	}
+
+	/** Get SQL clause for _LOW samples greater than this */
+	protected String lowGeClause() {
+		return "(" + lowClause() + " AND " + geClause() + ")";
+	}
+
+	/** Get SQL clause for _LOW samples */
+	protected String lowClause() {
+		return "event_desc_id = " + EventType.DMS_BRIGHT_LOW.id;
+	}
+
+	/** Get SQL clause for samples greater than or equal to this */
+	protected String geClause() {
+		return "photocell >= " + photocell;
+	}
+
+	/** Get SQL clause for _HIGH samples lower than this */
+	protected String highLeClause() {
+		return "(" + highClause() + " AND " + leClause() + ")";
+	}
+
+	/** Get SQL clause for _HIGH samples */
+	protected String highClause() {
+		return "event_desc_id = " + EventType.DMS_BRIGHT_HIGH.id;
+	}
+
+	/** Get SQL clause for samples less than or equal to this */
+	protected String leClause() {
+		return "photocell <= " + photocell;
+	}
 }
