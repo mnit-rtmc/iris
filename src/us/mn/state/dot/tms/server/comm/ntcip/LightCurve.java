@@ -28,6 +28,19 @@ public class LightCurve {
 	protected final TreeMap<Integer, Integer> mapping =
 		new TreeMap<Integer, Integer>();
 
+	/** Get a string of the light curve */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for(Map.Entry<Integer, Integer> entry: mapping.entrySet()) {
+			sb.append(",(");
+			sb.append(entry.getKey());
+			sb.append(',');
+			sb.append(entry.getValue());
+			sb.append(')');
+		}
+		return sb.substring(1);
+	}
+
 	/** Put an entry into the mapping */
 	public void put(int p, int l) {
 		updateLower(p, l);
