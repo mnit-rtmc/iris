@@ -75,7 +75,7 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 		for(int[] lvl: table) {
 			light = Math.max(lvl[LEVEL_OUT], light);
 			if(lvl[LEVEL_DOWN] <= photo && photo <= lvl[LEVEL_UP])
-				light = Math.max(light, output) + ADJ_OUTPUT;
+				light = Math.max(light, output + ADJ_OUTPUT);
 			lvl[LEVEL_OUT] = Math.min(light, MAX_OUTPUT);
 		}
 	}
@@ -119,7 +119,7 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 			int[] lvl = table[i];
 			light = Math.min(lvl[LEVEL_OUT], light);
 			if(lvl[LEVEL_DOWN] <= photo && photo <= lvl[LEVEL_UP])
-				light = Math.min(light, output) - ADJ_OUTPUT;
+				light = Math.min(light, output - ADJ_OUTPUT);
 			lvl[LEVEL_OUT] = Math.max(light, 0);
 		}
 	}
