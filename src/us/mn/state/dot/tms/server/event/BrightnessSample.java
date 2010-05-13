@@ -104,13 +104,18 @@ public class BrightnessSample extends BaseEvent {
 			       lowPleOgeClause() + ")";
 		case DMS_BRIGHT_GOOD:
 			return "(" + lowPgeClause() + " OR " + highPleClause() +
-			       ") AND " + oeqClause();
+			       " OR " + peqClause() + ") AND " + oeqClause();
 		case DMS_BRIGHT_HIGH:
 			return "(" + pleOgeClause() + " OR " +
 			       highPgeOleClause() + ")";
 		default:
 			return null;
 		}
+	}
+
+	/** Get SQL clause for photocell equal */
+	protected String peqClause() {
+		return "photocell = " + photocell;
 	}
 
 	/** Get SQL clause for photocell less than or equal */
