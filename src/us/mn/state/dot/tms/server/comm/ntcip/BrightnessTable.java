@@ -18,8 +18,11 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
- * Brightness table encapsulates a DMS brightness table and allows it to be
- * adjusted with feedbask samples from DMSImpl.BrightnessHandler.
+ * This encapsulates a DMS brightness table and allows it to be adjusted with
+ * feedbask samples from DMSImpl.BrightnessHandler.  A brightness table has a
+ * fixed set of rows, each representing a brightness level.  Each level has
+ * three values: light output, photocell down threshold and photocell up
+ * threshold.
  *
  * @author Douglas Lau
  */
