@@ -127,7 +127,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			if(brightness.isValid()) {
 				brightness.setTable(calculateTable());
 				mess.add(brightness);
-//				mess.storeProps();
+				mess.storeProps();
 				DMS_LOG.log(dms.getName() + ":= " + brightness);
 			}
 			return null;
