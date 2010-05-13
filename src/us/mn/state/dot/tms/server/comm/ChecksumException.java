@@ -28,7 +28,10 @@ public class ChecksumException extends ParsingException {
 			sb.append(':');
 			sb.append(Integer.toHexString(d & 0xFF));
 		}
-		return sb.substring(1).toUpperCase();
+		if(sb.length() > 0)
+			return sb.substring(1).toUpperCase();
+		else
+			return "";
 	}
 
 	/** Create a new checksum exception */
