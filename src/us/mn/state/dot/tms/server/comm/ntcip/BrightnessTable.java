@@ -31,6 +31,15 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 	/** Amount to adjust light output on feedback */
 	static protected final int ADJ_OUTPUT = 256;
 
+	/** Index into table level for light output */
+	static protected final int LEVEL_OUT = 0;
+
+	/** Index into table level for photocell down threshold */
+	static protected final int LEVEL_DOWN = 1;
+
+	/** Index into table level for photocell up threshold */
+	static protected final int LEVEL_UP = 2;
+
 	/** Brightness table values */
 	protected final int[][] table;
 
@@ -61,37 +70,42 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 	protected void feedbackLow(int photo, int output) {
 		int light = 0;		// highest light output so far
 		for(int[] lvl: table) {
-			light = Math.max(lvl[0], light);
-			if(lvl[1] <= photo && photo <= lvl[2])
+			light = Math.max(lvl[LEVEL_OUT], light);
+			if(lvl[LEVEL_DOWN] <= photo && photo <= lvl[LEVEL_UP])
 				light = Math.max(light, output) + ADJ_OUTPUT;
-			lvl[0] = Math.min(light, MAX_OUTPUT);
+			lvl[LEVEL_OUT] = Math.min(light, MAX_OUTPUT);
 		}
 	}
 
 	/** Adjust a brightness table with DMS_BRIGHT_GOOD feedback */
 	protected void feedbackGood(int photo, int output) {
-		final int max_photo = table[table.length - 1][2];
+		final int max_photo = table[table.length - 1][LEVEL_UP];
 		for(int i = 0; i < table.length; i++) {
-			int prev = 0;
-			int next = max_photo;
-			if(i > 0)
-				prev = table[i - 1][2];
-			if(i < table.length - 1)
-				next = table[i + 1][1];
-			if(prev < photo && photo < next) {
-				int[] lvl = table[i];
-				if(lvl[1] <= photo && photo <= lvl[2]) {
-					lvl[0] = output;
-					// Fix any negative slope problems
-					for(int j = 0; j < table.length; j++) {
-						int[] ol = table[j];
-						if(j < i && ol[0] > output)
-							ol[0] = output;
-						if(j > i && ol[0] < output)
-							ol[0] = output;
-					}
+			int[] lvl = table[i];
+			if(lvl[LEVEL_DOWN] <= photo && photo <= lvl[LEVEL_UP]) {
+				int prev = 0;
+				int next = max_photo;
+				if(i > 0)
+					prev = table[i - 1][LEVEL_UP];
+				if(i < table.length - 1)
+					next = table[i + 1][LEVEL_DOWN];
+				if(prev < photo && photo < next) {
+					lvl[LEVEL_OUT] = output;
+					fixNegativeSlopes(i);
 				}
 			}
+		}
+	}
+
+	/** Fix negative slopes by adjusting light output around a level */
+	protected void fixNegativeSlopes(int n_lvl) {
+		int output = table[n_lvl][LEVEL_OUT];
+		for(int i = 0; i < table.length; i++) {
+			int[] lvl = table[i];
+			if(i < n_lvl && lvl[LEVEL_OUT] > output)
+				lvl[LEVEL_OUT] = output;
+			if(i > n_lvl && lvl[LEVEL_OUT] < output)
+				lvl[LEVEL_OUT] = output;
 		}
 	}
 
@@ -100,10 +114,10 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 		int light = MAX_OUTPUT;	// lowest light output so far
 		for(int i = table.length - 1; i >= 0; i--) {
 			int[] lvl = table[i];
-			light = Math.min(lvl[0], light);
-			if(lvl[1] <= photo && photo <= lvl[2])
+			light = Math.min(lvl[LEVEL_OUT], light);
+			if(lvl[LEVEL_DOWN] <= photo && photo <= lvl[LEVEL_UP])
 				light = Math.min(light, output) - ADJ_OUTPUT;
-			lvl[0] = Math.max(light, 0);
+			lvl[LEVEL_OUT] = Math.max(light, 0);
 		}
 	}
 }
