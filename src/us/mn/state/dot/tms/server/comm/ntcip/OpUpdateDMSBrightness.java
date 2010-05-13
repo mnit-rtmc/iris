@@ -95,20 +95,20 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + b_levels);
 			DMS_LOG.log(dms.getName() + ": " + brightness);
 			DMS_LOG.log(dms.getName() + ": " + control);
-			if(!control.isPhotocell())
-				return new SetPhotocellControl();
+			if(control.isPhotocell())
+				return new SetManualControl();
 			else
 				return new SetBrightnessTable();
 		}
 	}
 
-	/** Phase to set photocell control mode */
-	protected class SetPhotocellControl extends Phase {
+	/** Phase to set manual control mode */
+	protected class SetManualControl extends Phase {
 
-		/** Set the photocell control mode */
+		/** Set the manual control mode */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsIllumControl control = new DmsIllumControl();
-			control.setEnum(DmsIllumControl.Enum.photocell);
+			control.setEnum(DmsIllumControl.Enum.manual);
 			mess.add(control);
 			mess.storeProps();
 			DMS_LOG.log(dms.getName() + ":= " + control);
@@ -130,7 +130,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 				mess.storeProps();
 				DMS_LOG.log(dms.getName() + ":= " + brightness);
 			}
-			return null;
+			return new SetPhotocellControl();
 		}
 	}
 
@@ -139,5 +139,19 @@ public class OpUpdateDMSBrightness extends OpDMS {
 		int[][] table = brightness.getTable();
 		dms.queryBrightnessFeedback(new BrightnessTable(table));
 		return table;
+	}
+
+	/** Phase to set photocell control mode */
+	protected class SetPhotocellControl extends Phase {
+
+		/** Set the photocell control mode */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsIllumControl control = new DmsIllumControl();
+			control.setEnum(DmsIllumControl.Enum.photocell);
+			mess.add(control);
+			mess.storeProps();
+			DMS_LOG.log(dms.getName() + ":= " + control);
+			return null;
+		}
 	}
 }
