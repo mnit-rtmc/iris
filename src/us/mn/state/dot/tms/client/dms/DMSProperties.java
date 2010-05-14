@@ -559,7 +559,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		feedback.add(brightGoodBtn);
 		feedback.add(brightHighBtn);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Photocell Status", photocellTable);
+		panel.addRow("Photocells", photocellTable);
 		panel.addRow("Light output", lightOutput);
 		panel.addRow("Feedback", feedback);
 		return panel;
