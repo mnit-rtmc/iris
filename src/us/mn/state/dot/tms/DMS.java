@@ -140,8 +140,7 @@ public interface DMS extends Device {
 	 * @return Power supply status as an array of strings, one for each
 	 *         supply.  Each string in the array has 4 fields, seperated by
 	 *         commas.  The fields are: description, supply type, status,
-	 *         and detail.  If power supply has no errors, the status field
-	 *         will be empty.  */
+	 *         and detail. */
 	String[] getPowerStatus();
 
 	/** Set the next message owner */
