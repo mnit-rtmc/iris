@@ -54,6 +54,10 @@ class MIB1203 extends MIBNode {
 	static public final MIBNode dmsLampStatusTable = statError.create(24);
 	static public final MIBNode dmsLampStatusEntry =
 		dmsLampStatusTable.create(1);
+	static public final MIBNode dmsLightSensorStatusTable =
+		statError.create(30);
+	static public final MIBNode dmsLightSensorStatusEntry =
+		dmsLightSensorStatusTable.create(1);
 	static public final MIBNode statTemp = dmsStatus.create(9);
 	static public final MIBNode graphicDefinition = dms.create(10);
 	static public final MIBNode dmsGraphicTable =
