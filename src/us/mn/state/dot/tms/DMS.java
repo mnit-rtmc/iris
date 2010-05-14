@@ -143,6 +143,13 @@ public interface DMS extends Device {
 	 *         and detail. */
 	String[] getPowerStatus();
 
+	/** Get photocell status.
+	 * @return Photocell status as an array of strings, one for each light
+	 *         sensor (plus one for the composite of all sensors).  Each
+	 *         string in the array has 3 fields, seperated by commas.  The
+	 *         fields are: description, status, and current reading. */
+	String[] getPhotocellStatus();
+
 	/** Set the next message owner */
 	void setOwnerNext(User o);
 

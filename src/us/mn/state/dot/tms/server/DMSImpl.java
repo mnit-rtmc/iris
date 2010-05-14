@@ -763,6 +763,21 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return powerStatus;
 	}
 
+	/** Photocell status.  This is an array of status for each photocell.
+	 * @see DMS.getPhotocellStatus */
+	protected transient String[] photocellStatus = new String[0];
+
+	/** Set the photocell status table */
+	public void setPhotocellStatus(String[] t) {
+		photocellStatus = t;
+		notifyAttribute("photocellStatus");
+	}
+
+	/** Get the photocell status table */
+	public String[] getPhotocellStatus() {
+		return photocellStatus;
+	}
+
 	/** Request a device operation (query message, test pixels, etc.) */
 	public void setDeviceRequest(int r) {
 		DMSPoller p = getDMSPoller();

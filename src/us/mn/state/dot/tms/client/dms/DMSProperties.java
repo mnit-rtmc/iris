@@ -219,6 +219,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Button to test pixel failures */
 	protected final JButton testPixelsBtn = new JButton("Test Pixels");
 
+	/** Photocell status table */
+	protected final ZTable photocellTable = new ZTable();
+
 	/** Light output label */
 	protected final JLabel lightOutput = new JLabel();
 
@@ -548,12 +551,15 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create brightness panel */
 	protected JPanel createBrightnessPanel() {
+		photocellTable.setAutoCreateColumnsFromModel(false);
+		photocellTable.setVisibleRowCount(6);
 		lightOutput.setForeground(OK);
 		JPanel feedback = new JPanel();
 		feedback.add(brightLowBtn);
 		feedback.add(brightGoodBtn);
 		feedback.add(brightHighBtn);
 		FormPanel panel = new FormPanel(true);
+		panel.addRow("Photocell Status", photocellTable);
 		panel.addRow("Light output", lightOutput);
 		panel.addRow("Feedback", feedback);
 		return panel;
@@ -683,6 +689,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			heatTapeStatus.setText(proxy.getHeatTapeStatus());
 		if(a == null || a.equals("pixelStatus"))
 			updatePixelStatus();
+		if(a == null || a.equals("photocellStatus"))
+			updatePhotocellStatus();
 		if(a == null || a.equals("lightOutput")) {
 			Integer o = proxy.getLightOutput();
 			if(o != null)
@@ -814,6 +822,16 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		Integer ch = proxy.getCharHeightPixels();
 		if(wp != null && hp != null && cw != null && ch != null)
 			p.setLogicalDimensions(wp, hp, cw, ch);
+	}
+
+	/** Update the photocell status */
+	protected void updatePhotocellStatus() {
+		String[] s = proxy.getPhotocellStatus();
+		if(s != null) {
+			PhotocellTableModel m = new PhotocellTableModel(s);
+			photocellTable.setColumnModel(m.createColumnModel());
+			photocellTable.setModel(m);
+		}
 	}
 
 	/** Update the feedback buttons */

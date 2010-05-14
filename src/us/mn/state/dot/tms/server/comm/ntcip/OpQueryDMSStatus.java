@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -31,6 +32,14 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
  * @author Douglas Lau
  */
 public class OpQueryDMSStatus extends OpDMS {
+
+	/** Photocell level */
+	protected final DmsIllumPhotocellLevelStatus p_level =
+		new DmsIllumPhotocellLevelStatus();
+
+	/** List of light sensor status */
+	protected final LinkedList<String> light_sensors =
+		new LinkedList<String>();
 
 	/** Short Error status */
 	protected final ShortErrorStatus shortError = new ShortErrorStatus();
@@ -50,8 +59,6 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query the DMS brightness status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsIllumPhotocellLevelStatus p_level =
-				new DmsIllumPhotocellLevelStatus();
 			DmsIllumBrightLevelStatus b_level =
 				new DmsIllumBrightLevelStatus();
 			DmsIllumLightOutputStatus light =
@@ -252,7 +259,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				return new QueryPowerStatus(n_pwr.getInteger());
 			else {
 				dms.setPowerStatus(new String[0]);
-				return null;
+				return new LightSensorCount();
 			}
 		}
 	}
@@ -293,7 +300,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				return this;
 			else {
 				dms.setPowerStatus(supplies);
-				return null;
+				return new LightSensorCount();
 			}
 		}
 	}
@@ -311,6 +318,63 @@ public class OpQueryDMSStatus extends OpDMS {
 	{
 		return s0.trim() + ',' + s1.trim() + ',' + s2.trim() + ',' +
 		       s3.trim();
+	}
+
+	/** Phase to query 1203v2 light sensors */
+	protected class LightSensorCount extends Phase {
+
+		/** Query number of light sensors */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsLightSensorNumRows n_snsr =
+				new DmsLightSensorNumRows();
+			mess.add(n_snsr);
+			try {
+				mess.queryProps();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// 1203v2 not supported ...
+				return null;
+			}
+			DMS_LOG.log(dms.getName() + ": " + n_snsr);
+			if(n_snsr.getInteger() > 0) {
+				return new QueryLightSensorStatus(
+					n_snsr.getInteger());
+			} else
+				return null;
+		}
+	}
+
+	/** Phase to query light sensor status */
+	protected class QueryLightSensorStatus extends Phase {
+		protected final int n_sensors;
+		protected int row = 1;	// row in DmsLightSensorStatusTable
+		protected QueryLightSensorStatus(int n_snsr) {
+			n_sensors = n_snsr;
+		}
+
+		/** Query status of one light sensor */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsLightSensorDescription desc =
+				new DmsLightSensorDescription(row);
+			DmsLightSensorStatus status =
+				new DmsLightSensorStatus(row);
+			DmsLightSensorCurrentReading reading =
+				new DmsLightSensorCurrentReading(row);
+			mess.add(desc);
+			mess.add(status);
+			mess.add(reading);
+			mess.queryProps();
+			DMS_LOG.log(dms.getName() + ": " + desc);
+			DMS_LOG.log(dms.getName() + ": " + status);
+			DMS_LOG.log(dms.getName() + ": " + reading);
+			light_sensors.add(desc.getValue() + "," +
+				status.getValue() + "," + reading.getInteger());
+			row++;
+			if(row < n_sensors)
+				return this;
+			else
+				return null;
+		}
 	}
 
 	/** Phase to query Ledstar-specific status */
@@ -371,5 +435,27 @@ public class OpQueryDMSStatus extends OpDMS {
 			}
 			return null;
 		}
+	}
+
+	/** Cleanup the operation */
+	public void cleanup() {
+		if(success)
+			dms.setPhotocellStatus(formatPhotocellStatus());
+		super.cleanup();
+	}
+
+	/** Format the photocell status table */
+	protected String[] formatPhotocellStatus() {
+		light_sensors.add("composite," + photocellStatus() + "," +
+			p_level.getInteger());
+		return light_sensors.toArray(new String[0]);
+	}
+
+	/** Get the composite photocell status */
+	protected String photocellStatus() {
+		if(shortError.checkError(ShortErrorStatus.PHOTOCELL))
+			return "fail";
+		else
+			return "noError";
 	}
 }
