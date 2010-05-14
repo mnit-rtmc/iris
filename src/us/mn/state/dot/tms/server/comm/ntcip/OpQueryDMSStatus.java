@@ -296,7 +296,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				mfr_status.getValue() + ' ' +
 				formatVoltage(voltage.getInteger()));
 			row++;
-			if(row < supplies.length)
+			if(row <= supplies.length)
 				return this;
 			else {
 				dms.setPowerStatus(supplies);
