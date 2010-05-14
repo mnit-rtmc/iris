@@ -570,7 +570,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 			try {
 				return b.createPixmaps(multi);
 			}
-			catch(ArrayIndexOutOfBoundsException e) {
+			catch(IndexOutOfBoundsException e) {
 				// oh well, no graphic to display
 			}
 		}

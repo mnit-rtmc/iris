@@ -168,7 +168,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			catch(InvalidMessageException e) {
 				syntax_err = SyntaxError.characterNotDefined;
 			}
-			catch(ArrayIndexOutOfBoundsException e) {
+			catch(IndexOutOfBoundsException e) {
 				syntax_err = SyntaxError.textTooBig;
 			}
 		}
