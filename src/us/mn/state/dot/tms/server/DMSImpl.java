@@ -747,21 +747,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return pixelStatus;
 	}
 
-	/** Lamp status.  This is an array of two Base64-encoded bitmaps.
-	 * The first indicates stuck-off lamps, the second stuck-on lamps. */
-	protected transient String[] lampStatus;
-
-	/** Set the lamp status */
-	public void setLampStatus(String[] l) {
-		lampStatus = l;
-		notifyAttribute("lampStatus");
-	}
-
-	/** Get the lamp status */
-	public String[] getLampStatus() {
-		return lampStatus;
-	}
-
 	/** Power supply status.  This is an array of status for each power
 	 * supply.
 	 * @see DMS.getPowerStatus */

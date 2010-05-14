@@ -219,9 +219,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Button to test pixel failures */
 	protected final JButton testPixelsBtn = new JButton("Test Pixels");
 
-	/** Lamp status table */
-	protected final ZTable lampTable = new ZTable();
-
 	/** Light output label */
 	protected final JLabel lightOutput = new JLabel();
 
@@ -236,9 +233,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Current brightness high feedback button */
 	protected final JButton brightHighBtn = new JButton(
 		"Brightness High");
-
-	/** Button to test lamps */
-	protected final JButton testLampsBtn = new JButton("Test Lamps");
 
 	/** Card layout for manufacturer panels */
 	protected final CardLayout cards = new CardLayout();
@@ -427,12 +421,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 					BRIGHTNESS_TOO_BRIGHT.ordinal());
 			}
 		};
-		new ActionJob(this, testLampsBtn) {
-			public void perform() {
-				proxy.setDeviceRequest(
-					DeviceRequest.TEST_LAMPS.ordinal());
-			}
-		};
 	}
 
 	/** Disable the device request widgets */
@@ -447,7 +435,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		brightLowBtn.setEnabled(false);
 		brightGoodBtn.setEnabled(false);
 		brightHighBtn.setEnabled(false);
-		testLampsBtn.setEnabled(false);
 	}
 
 	/** Controller lookup button pressed */
@@ -567,11 +554,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		feedback.add(brightGoodBtn);
 		feedback.add(brightHighBtn);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Lamp status", lampTable);
 		panel.addRow("Light output", lightOutput);
 		panel.addRow("Feedback", feedback);
-		panel.setCenter();
-		panel.addRow(testLampsBtn);
 		return panel;
 	}
 
@@ -699,8 +683,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			heatTapeStatus.setText(proxy.getHeatTapeStatus());
 		if(a == null || a.equals("pixelStatus"))
 			updatePixelStatus();
-		if(a == null || a.equals("lampStatus"))
-			updateLampStatus();
 		if(a == null || a.equals("lightOutput")) {
 			Integer o = proxy.getLightOutput();
 			if(o != null)
@@ -832,23 +814,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		Integer ch = proxy.getCharHeightPixels();
 		if(wp != null && hp != null && cw != null && ch != null)
 			p.setLogicalDimensions(wp, hp, cw, ch);
-	}
-
-	/** Update the lamp status */
-	protected void updateLampStatus() {
-		String[] s = proxy.getLampStatus();
-		if(s != null && s.length == 2) {
-			try {
-				LampTableModel m = new LampTableModel(s);
-				lampTable.setAutoCreateColumnsFromModel(false);
-				lampTable.setColumnModel(m.createColumnModel());
-				lampTable.setModel(m);
-				lampTable.setVisibleRowCount(8);
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	/** Update the feedback buttons */

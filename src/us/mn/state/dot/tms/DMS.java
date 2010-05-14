@@ -136,12 +136,6 @@ public interface DMS extends Device {
 	 *         If the pixel status is not known, null is returned. */
 	String[] getPixelStatus();
 
-	/** Get the lamp status.
-	 * @return Lamp status as an array of two Base64-encoded bitmaps.  The
-	 *         first bitmap is "stuck off", and the second is "stuck on".
-	 *         If the lamp status is not known, null is returned. */
-	String[] getLampStatus();
-
 	/** Get power supply status.
 	 * @return Power supply status as an array of strings, one for each
 	 *         supply.  Each string in the array has 4 fields, seperated by

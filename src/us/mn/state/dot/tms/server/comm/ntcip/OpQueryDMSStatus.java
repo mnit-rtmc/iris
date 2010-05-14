@@ -213,33 +213,16 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query more DMS failure status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			LampFailureStuckOff l_off = new LampFailureStuckOff();
-			LampFailureStuckOn l_on = new LampFailureStuckOn();
 			DmsActivateMsgError msg_err = new DmsActivateMsgError();
 			ControllerErrorStatus con = new ControllerErrorStatus();
-			if(shortError.checkError(ShortErrorStatus.LAMP)) {
-				mess.add(l_off);
-				mess.add(l_on);
-			}
 			if(shortError.checkError(ShortErrorStatus.MESSAGE))
 				mess.add(msg_err);
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
 				mess.add(con);
-			if(shortError.checkError(ShortErrorStatus.LAMP |
-			                         ShortErrorStatus.MESSAGE |
+			if(shortError.checkError(ShortErrorStatus.MESSAGE |
 			                         ShortErrorStatus.CONTROLLER))
 			{
 				mess.queryProps();
-			}
-			if(shortError.checkError(ShortErrorStatus.LAMP)) {
-				DMS_LOG.log(dms.getName() + ": " + l_off);
-				DMS_LOG.log(dms.getName() + ": " + l_on);
-		 		String[] lamp = new String[2];
-				lamp[DMS.STUCK_OFF_BITMAP] =
-					Base64.encode(l_off.getOctetString());
-				lamp[DMS.STUCK_ON_BITMAP] =
-					Base64.encode(l_on.getOctetString());
-				dms.setLampStatus(lamp);
 			}
 			if(shortError.checkError(ShortErrorStatus.MESSAGE))
 				DMS_LOG.log(dms.getName() + ": " + msg_err);

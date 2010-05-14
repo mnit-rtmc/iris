@@ -109,9 +109,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		case TEST_PIXELS:
 			new OpTestDMSPixels(dms, true).start();
 			break;
-		case TEST_LAMPS:
-			new OpTestDMSLamps(dms).start();
-			break;
 		case BRIGHTNESS_TOO_DIM:
 			new OpUpdateDMSBrightness(dms,
 				EventType.DMS_BRIGHT_LOW).start();
