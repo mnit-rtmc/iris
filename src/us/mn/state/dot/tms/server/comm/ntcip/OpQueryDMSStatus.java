@@ -370,7 +370,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			light_sensors.add(desc.getValue() + "," +
 				status.getValue() + "," + reading.getInteger());
 			row++;
-			if(row < n_sensors)
+			if(row <= n_sensors)
 				return this;
 			else
 				return null;
