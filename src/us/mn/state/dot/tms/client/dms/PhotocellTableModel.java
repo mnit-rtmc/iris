@@ -33,10 +33,10 @@ public class PhotocellTableModel extends AbstractTableModel {
 	static protected final int COL_DESCRIPTION = 0;
 
 	/** Photocell status column number */
-	static protected final int COL_STATUS = 2;
+	static protected final int COL_STATUS = 1;
 
 	/** Photocell reading detail column number */
-	static protected final int COL_READING = 3;
+	static protected final int COL_READING = 2;
 
 	/** Create a new table column */
 	static protected TableColumn createColumn(int column, int width,
