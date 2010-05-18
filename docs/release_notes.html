@@ -11,6 +11,27 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.117.0 (18 May 2010)</dt>
+	<dd><ul>
+		<li>
+			Added DMS brightness feedback logging and brightness
+			table update.
+		</li>
+		<li>
+			Added DMS photocell status table.
+		</li>
+		<li>
+			Removed unused DMS lamp status stuff.
+		</li>
+		<li>
+			Fixed a couple of ...IndexOutOfBoundsExceptions.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.117.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.116.0 (11 May 2010)</dt>
 	<dd><ul>
 		<li>
