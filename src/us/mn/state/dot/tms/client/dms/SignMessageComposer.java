@@ -126,7 +126,7 @@ public class SignMessageComposer extends JPanel {
 	/** Pixel map builder for the selected sign */
 	protected PixelMapBuilder builder;
 
-	/** Sign text model */
+	/** Sign text model for the selected sign */
 	protected SignTextModel st_model;
 
 	/** Line combo box widgets */
@@ -246,11 +246,7 @@ public class SignMessageComposer extends JPanel {
 		disposeLines();
 		timeSpin.removeChangeListener(spin_listener);
 		disposeEtcWidgets();
-		SignTextModel stm = st_model;
-		if(stm != null) {
-			stm.dispose();
-			st_model = null;
-		}
+		setSignTextModel(null);
 	}
 
 	/** Dispose of the existing line widgets */
@@ -292,11 +288,16 @@ public class SignMessageComposer extends JPanel {
 	protected SignTextModel createSignTextModel(DMS proxy) {
 		SignTextModel stm = new SignTextModel(session, proxy);
 		stm.initialize();
+		setSignTextModel(stm);
+		return stm;
+	}
+
+	/** Set a new sign text model */
+	protected void setSignTextModel(SignTextModel stm) {
 		SignTextModel om = st_model;
 		st_model = stm;
 		if(om != null)
 			om.dispose();
-		return stm;
 	}
 
 	/** Get the number of lines on the selected sign(s) */
@@ -589,10 +590,12 @@ public class SignMessageComposer extends JPanel {
 
 	/** Set the selected message for a message line combo box */
 	protected void setLineSelection(int i, String m) {
-		assert st_model != null;
-		SignTextComboBoxModel model = st_model.getLineModel(
-			(short)(i + 1));
-		model.setSelectedItem(m);
+		SignTextModel stm = st_model;
+		if(stm != null) {
+			SignTextComboBoxModel model = stm.getLineModel(
+				(short)(i + 1));
+			model.setSelectedItem(m);
+		}
 	}
 
 	/** Clear the combobox selections */
@@ -612,7 +615,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Update the message library with the currently selected messages */
 	public void updateMessageLibrary() {
-		if(st_model != null)
-			st_model.updateMessageLibrary();
+		SignTextModel stm = st_model;
+		if(stm != null)
+			stm.updateMessageLibrary();
 	}
 }
