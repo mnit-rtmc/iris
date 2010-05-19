@@ -16,24 +16,14 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import us.mn.state.dot.sched.ActionJob;
@@ -59,52 +49,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class SignMessageComposer extends JPanel {
 
-	/** Combobox edit mode */
-	public enum EditMode {
-		NOT(0), ALWAYS(1), AFTERKEY(2);
-
-		/** The id must correspond with the system attribute value */
-		private final int m_id;
-
-		/** constructor */
-	 	EditMode(int id) {
-			m_id = id;
-		}
-
-		/** Convert an int to enum */
-		public static EditMode fromId(final int id) {
-			for(EditMode e : EditMode.values())
-				if (e.m_id == id)
-					return e;
-			return EditMode.NOT;
-		}
-
-		/** Get the edit mode */
-		public static EditMode getEditMode(SignTextModel stm) {
-			EditMode m = EditMode.fromId(SystemAttrEnum.
-				DMS_COMPOSER_EDIT_MODE.getInt());
-			return rules(m, stm);
-		}
-
-		/** Apply rules */
-		private static EditMode rules(EditMode m, SignTextModel stm) {
-			// AFTERKEY is only active if a sign group with the
-			// same name as the DMS (e.g. 'V2') exists.
-			if(m == EditMode.AFTERKEY)
-				if(stm == null || !stm.canAddLocalSignText())
-					m = EditMode.NOT;
-			return m;
-		}
-	}
-
-	/** Prototype sign text */
-	static protected final SignText PROTOTYPE_SIGN_TEXT =
-		new ClientSignText("12345678901234567890");
-
-	/** Cell renderer for sign text in combo boxes */
-	protected final SignTextCellRenderer renderer =
-		new SignTextCellRenderer();
-
 	/** User session */
 	protected final Session session;
 
@@ -129,8 +73,8 @@ public class SignMessageComposer extends JPanel {
 	/** Sign text model for the selected sign */
 	protected SignTextModel st_model;
 
-	/** Line combo box widgets */
-	protected JComboBox[] cmbLine = new JComboBox[0];
+	/** Message combo box widgets */
+	protected MsgComboBox[] cmbLine = new MsgComboBox[0];
 
 	/** Font combo box widgets */
 	protected FontComboBox[] fontCmb = new FontComboBox[0];
@@ -145,13 +89,6 @@ public class SignMessageComposer extends JPanel {
 	 * incremented before calling dispatcher methods which might cause
 	 * callbacks to this class.  This prevents infinite loops. */
 	protected int adjusting = 0;
-
-	/** Listener for combo box events */
-	protected final ActionListener comboListener = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			updateMessage();
-		}
-	};
 
 	/** Listener for spinner change events */
 	protected final ChangeListener spin_listener = new ChangeListener() {
@@ -233,7 +170,7 @@ public class SignMessageComposer extends JPanel {
 	protected void clearWidgets() {
 		clearFonts();
 		adjusting++;
-		for(JComboBox cbox: cmbLine)
+		for(MsgComboBox cbox: cmbLine)
 			cbox.setSelectedIndex(-1);
 		dispatcher.setMessage("");
 		timeSpin.setValue("");
@@ -251,13 +188,9 @@ public class SignMessageComposer extends JPanel {
 
 	/** Dispose of the existing line widgets */
 	protected void disposeLines() {
-		for(JComboBox cbox: cmbLine) {
-			cbox.removeActionListener(comboListener);
-			Component c = cbox.getEditor().getEditorComponent();
-			for(FocusListener fl: c.getFocusListeners())
-				c.removeFocusListener(fl);
-		}
-		cmbLine = new JComboBox[0];
+		for(MsgComboBox cbox: cmbLine)
+			cbox.dispose();
+		cmbLine = new MsgComboBox[0];
 	}
 
 	/** Dispose of the existing combobox widgets */
@@ -274,7 +207,7 @@ public class SignMessageComposer extends JPanel {
 		setSignTextModel(stm);
 		initializeWidgets();
 		if(stm != null) {
-			final JComboBox[] cl = cmbLine;		// Avoid races
+			final MsgComboBox[] cl = cmbLine;	// Avoid races
 			for(short i = 1; i <= cl.length; i++)
 				cl[i - 1].setModel(stm.getLineModel(i));
 		}
@@ -379,9 +312,12 @@ public class SignMessageComposer extends JPanel {
 	/** Initialize the page tabs and message combo boxes */
 	protected void initializeWidgets(int nl, int np) {
 		disposeLines();
-		JComboBox[] cl = new JComboBox[nl * np];
-		for(int i = 0; i < cl.length; i++)
-			cl[i] = createLineCombo();
+		boolean cam = canAddMessages();
+		MsgComboBox[] cl = new MsgComboBox[nl * np];
+		for(int i = 0; i < cl.length; i++) {
+			cl[i] = new MsgComboBox(this, cam);
+			cl[i].initialize();
+		}
 		cmbLine = cl;
 		for(int i = 0; i < np; i++)
 			setPage(i, createPage(i, nl));
@@ -389,19 +325,13 @@ public class SignMessageComposer extends JPanel {
 			pages.removeTabAt(np);
 	}
 
-	/** Create a line combo box */
-	protected JComboBox createLineCombo() {
-		JComboBox cbox = new JComboBox();
-		createEditor(cbox);
-		cbox.setMaximumRowCount(21);
-		// NOTE: We use a prototype display value so that combo boxes
-		//       are always the same size.  This prevents all the
-		//       widgets from being rearranged whenever a new sign is
-		//       selected.
-		cbox.setPrototypeDisplayValue(PROTOTYPE_SIGN_TEXT);
-		cbox.setRenderer(renderer);
-		cbox.addActionListener(comboListener);
-		return cbox;
+	/** Check if the user can add messages */
+	protected boolean canAddMessages() {
+		SignTextModel stm = st_model;
+		if(stm != null)
+			return stm.canAddLocalSignText();
+		else
+			return false;
 	}
 
 	/** Create a new page panel */
@@ -451,51 +381,6 @@ public class SignMessageComposer extends JPanel {
 			pages.addTab(title, page);
 	}
 
-	/** Key event saved when making combobox editable */
-	protected KeyEvent first_key_event;
-
-	/** Create an editor for a combo box */
-	protected void createEditor(final JComboBox cbox) {
-		final EditMode editmode = EditMode.getEditMode(st_model);
-		if(editmode == EditMode.NOT)
-			return;
-		final MsgComboBoxEditor cbe = new MsgComboBoxEditor();
-		final java.awt.Component editor = cbe.getEditorComponent();
-		cbox.setEditor(cbe);
-		if(editmode == EditMode.ALWAYS) {
-			if(!cbox.isEditable())
-				cbox.setEditable(true);
-		}
-		cbox.addKeyListener(new KeyAdapter() {
-			public void keyTyped(KeyEvent e) {
-				if(!cbox.isEditable()) {
-					if(editmode == EditMode.AFTERKEY)
-						cbox.setEditable(true);
-					first_key_event = e;
-				}
-			}
-		});
-		cbe.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(editmode == EditMode.AFTERKEY)
-					cbox.setEditable(false);
-			}
-		});
-		editor.addFocusListener(new FocusAdapter() {
-			public void focusGained(FocusEvent e) {
-				if(first_key_event != null) {
-					editor.dispatchEvent(first_key_event);
-					first_key_event = null;
-				}
-			}
-			public void focusLost(FocusEvent e) {
-				if(editmode == EditMode.AFTERKEY)
-					cbox.setEditable(false);
-				updateMessage();
-			}
-		});
-	}
-
 	/** Enable or Disable the message selector */
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
@@ -503,7 +388,7 @@ public class SignMessageComposer extends JPanel {
 			pages.setSelectedIndex(0);
 		clearBtn.setEnabled(b);
 		timeSpin.setEnabled(b);
-		for(JComboBox cbox: cmbLine)
+		for(MsgComboBox cbox: cmbLine)
 			cbox.setEnabled(b);
 		for(FontComboBox f: fontCmb)
 			f.setEnabled(b);
@@ -511,11 +396,11 @@ public class SignMessageComposer extends JPanel {
 
 	/** Return a MULTI string using the contents of the widgets */
 	public String getMessage() {
-		final JComboBox[] cl = cmbLine;		// Avoid races
+		final MsgComboBox[] cl = cmbLine;	// Avoid races
 		String[] mess = new String[cl.length];
 		int m = 0;
 		for(int i = 0; i < cl.length; i++) {
-			mess[i] = getMessageFromCB(cl[i]);
+			mess[i] = cl[i].getMessage();
 			if(mess[i].length() > 0)
 				m = i + 1;
 		}
@@ -523,17 +408,6 @@ public class SignMessageComposer extends JPanel {
 			return buildMulti(mess, m).toString();
 		else
 			return "";
-	}
-
-	/** Get text from combobox line */
-	protected String getMessageFromCB(JComboBox cb) {
-		Object o = cb.getSelectedItem();
-		if(o == null)
-			return "";
-		if(o instanceof SignText)
-			return ((SignText)o).getMessage();
-		assert false: "unknown type in getMessageFromCB()";
-		return "";
 	}
 
 	/** Build a MULTI string from an array of line strings */
@@ -577,9 +451,9 @@ public class SignMessageComposer extends JPanel {
 		setFontComboBoxes(multi);
 		int nl = getLineCount();
 		String[] lines = multi.getText(nl);
-		final JComboBox[] cl = cmbLine;		// Avoid races
+		final MsgComboBox[] cl = cmbLine;	// Avoid races
 		for(int i = 0; i < cl.length; i++) {
-			JComboBox cbox = cl[i];
+			MsgComboBox cbox = cl[i];
 			if(i < lines.length)
 				setLineSelection(i, lines[i]);
 			else if(cbox.getItemCount() > 0)
