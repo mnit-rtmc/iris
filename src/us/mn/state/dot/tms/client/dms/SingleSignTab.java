@@ -315,6 +315,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		locationTxt.setText("");
 		awsControlledCbx.setSelected(false);
 		awsControlledCbx.setEnabled(false);
+		operationTxt.setForeground(null);
+		operationTxt.setBackground(null);
 		operationTxt.setText("");
 		statusTxt.setText("");
 		opStatusTxt.setText("");
