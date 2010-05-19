@@ -63,10 +63,6 @@ public class MsgComboBox extends JComboBox {
 	static protected final SignText PROTOTYPE_SIGN_TEXT =
 		new ClientSignText("12345678901234567890");
 
-	/** Cell renderer for sign text in combo boxes */
-	static protected final SignTextCellRenderer RENDERER =
-		new SignTextCellRenderer();
-
 	/** Format an item as a string */
 	static protected String formatItem(Object o) {
 		String txt = "";
@@ -114,7 +110,7 @@ public class MsgComboBox extends JComboBox {
 		//       widgets from being rearranged whenever a new sign is
 		//       selected.
 		setPrototypeDisplayValue(PROTOTYPE_SIGN_TEXT);
-		setRenderer(RENDERER);
+		setRenderer(new SignTextCellRenderer());
 		editor = createEditor();
 		keyListener = createKeyListener();
 		focusListener = createFocusListener();
