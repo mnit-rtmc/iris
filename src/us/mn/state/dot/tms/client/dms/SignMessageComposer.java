@@ -123,7 +123,7 @@ public class SignMessageComposer extends JPanel {
 	/** Tab pane to hold pages */
 	protected final JTabbedPane pages = new JTabbedPane(JTabbedPane.RIGHT);
 
-	/** Pixel map builder */
+	/** Pixel map builder for the selected sign */
 	protected PixelMapBuilder builder;
 
 	/** Sign text model */
@@ -301,14 +301,18 @@ public class SignMessageComposer extends JPanel {
 
 	/** Get the number of lines on the selected sign(s) */
 	protected int getLineCount() {
-		int ml = SystemAttrEnum.DMS_MAX_LINES.getInt();
+		return Math.min(getLineCountSign(),
+			SystemAttrEnum.DMS_MAX_LINES.getInt());
+	}
+
+	/** Get the number of lines on the selected sign(s) */
+	protected int getLineCountSign() {
 		int h = getHeightPixels();
 		int lh = getLineHeightPixels();
-		if(lh > 0 && h >= lh) {
-			int nl = h / lh;
-			return Math.min(nl, ml);
-		} else
-			return ml;
+		if(lh > 0 && h >= lh)
+			return h / lh;
+		else
+			return 3;
 	}
 
 	/** Get the line height */
@@ -317,7 +321,7 @@ public class SignMessageComposer extends JPanel {
 		if(b != null)
 			return b.getLineHeightPixels();
 		else
-			return 7;
+			return 0;
 	}
 
 	/** Get the pixel height */
