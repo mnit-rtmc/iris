@@ -508,8 +508,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
-		composer.setEnabled(false);
 		composer.setSign(null, null);
+		composer.setEnabled(false);
 		durationCmb.setEnabled(false);
 		durationCmb.setSelectedItem(null);
 		alert_layout.show(alert_panel, CARD_HIDDEN);
