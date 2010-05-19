@@ -231,9 +231,10 @@ public class SignMessageComposer extends JPanel {
 
 	/** Clear the widgets */
 	protected void clearWidgets() {
-		clearSelections();
 		clearFonts();
 		adjusting++;
+		for(JComboBox cbox: cmbLine)
+			cbox.setSelectedIndex(-1);
 		dispatcher.setMessage("");
 		timeSpin.setValue("");
 		adjusting--;
@@ -270,6 +271,7 @@ public class SignMessageComposer extends JPanel {
 	public void setSign(DMS proxy, PixelMapBuilder b) {
 		builder = b;
 		SignTextModel stm = createSignTextModel(proxy);
+		setSignTextModel(stm);
 		initializeWidgets();
 		if(stm != null) {
 			final JComboBox[] cl = cmbLine;		// Avoid races
@@ -280,15 +282,17 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a new sign text model */
 	protected SignTextModel createSignTextModel(DMS proxy) {
-		SignTextModel stm = new SignTextModel(session, proxy);
-		stm.initialize();
-		setSignTextModel(stm);
-		return stm;
+		if(proxy != null)
+			return new SignTextModel(session, proxy);
+		else
+			return null;
 	}
 
 	/** Set a new sign text model */
 	protected void setSignTextModel(SignTextModel stm) {
 		SignTextModel om = st_model;
+		if(stm != null)
+			stm.initialize();
 		st_model = stm;
 		if(om != null)
 			om.dispose();
@@ -614,14 +618,6 @@ public class SignMessageComposer extends JPanel {
 				(short)(i + 1));
 			model.setSelectedItem(m);
 		}
-	}
-
-	/** Clear the combobox selections */
-	public void clearSelections() {
-		adjusting++;
-		for(JComboBox cbox: cmbLine)
-			cbox.setSelectedIndex(-1);
-		adjusting--;
 	}
 
 	/** Clear the font comboboxes */
