@@ -180,8 +180,7 @@ public class SignMessageComposer extends JPanel {
 		fonts = dc.getFonts();
 		timeSpin = new PgTimeSpinner();
 		add(createAllWidgets());
-		initializeEtcWidgets(1);
-		initializeWidgets(SystemAttrEnum.DMS_MAX_LINES.getInt(), 1);
+		initializeWidgets();
 		timeSpin.addChangeListener(spin_listener);
 	}
 
@@ -271,16 +270,11 @@ public class SignMessageComposer extends JPanel {
 	public void setSign(DMS proxy, PixelMapBuilder b) {
 		builder = b;
 		SignTextModel stm = createSignTextModel(proxy);
-		int nl = getLineCount();
-		int ml = stm.getMaxLine();
-		int np = Math.max(calculateSignPages(ml, nl),
-			SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt());
-		initializeEtcWidgets(np);
-		initializeWidgets(nl, np);
+		initializeWidgets();
 		if(stm != null) {
 			final JComboBox[] cl = cmbLine;		// Avoid races
 			for(short i = 1; i <= cl.length; i++)
-				cl[i-1].setModel(stm.getLineModel(i));
+				cl[i - 1].setModel(stm.getLineModel(i));
 		}
 	}
 
@@ -330,6 +324,30 @@ public class SignMessageComposer extends JPanel {
 		PixelMapBuilder b = builder;
 		if(b != null)
 			return b.height;
+		else
+			return 0;
+	}
+
+	/** Initialize the widgets */
+	protected void initializeWidgets() {
+		int np = calculateSignPages();
+		initializeEtcWidgets(np);
+		initializeWidgets(getLineCount(), np);
+	}
+
+	/** Calculate the number of pages for the selected sign */
+	protected int calculateSignPages() {
+		int ml = getLibraryLines();
+		int nl = getLineCount();
+		return Math.max(calculateSignPages(ml, nl),
+			SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt());
+	}
+
+	/** Get the number of lines in the message library */
+	protected int getLibraryLines() {
+		SignTextModel stm = st_model;
+		if(stm != null)
+			return stm.getMaxLine();
 		else
 			return 0;
 	}
