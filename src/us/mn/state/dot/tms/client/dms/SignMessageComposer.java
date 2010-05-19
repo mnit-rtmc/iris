@@ -83,7 +83,7 @@ public class SignMessageComposer extends JPanel {
 	protected final PgTimeSpinner timeSpin;
 
 	/** Clear button */
-	protected IButton clearBtn = new IButton("dms.clear");
+	protected final IButton clearBtn = new IButton("dms.clear");
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
@@ -168,8 +168,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Clear the widgets */
 	protected void clearWidgets() {
-		clearFonts();
 		adjusting++;
+		clearFonts();
 		for(MsgComboBox cbox: cmbLine)
 			cbox.setSelectedIndex(-1);
 		dispatcher.setMessage("");
