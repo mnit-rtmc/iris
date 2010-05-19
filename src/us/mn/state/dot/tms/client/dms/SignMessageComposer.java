@@ -387,11 +387,13 @@ public class SignMessageComposer extends JPanel {
 		if(pages.getTabCount() > 0)
 			pages.setSelectedIndex(0);
 		clearBtn.setEnabled(b);
+		adjusting++;
 		timeSpin.setEnabled(b);
 		for(MsgComboBox cbox: cmbLine)
 			cbox.setEnabled(b);
 		for(FontComboBox f: fontCmb)
 			f.setEnabled(b);
+		adjusting--;
 	}
 
 	/** Return a MULTI string using the contents of the widgets */
