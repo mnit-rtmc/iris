@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,9 @@ public class MultiString implements MultiStringState {
 				return UNDEFINED;
 			}
 		}
+
+		static public final JustificationPage DEFAULT = fromOrdinal(
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
 	}
 
 	/** Line Justification enumeration */
@@ -92,6 +95,9 @@ public class MultiString implements MultiStringState {
 				return UNDEFINED;
 			}
 		}
+
+		static public final JustificationLine DEFAULT = fromOrdinal(
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
 	}
 
 	/** Parse a color foreground tag */

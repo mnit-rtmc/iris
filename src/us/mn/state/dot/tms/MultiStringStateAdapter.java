@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,11 +95,9 @@ public class MultiStringStateAdapter implements MultiStringState {
 	/** Create a new MULTI string adapter */
 	public MultiStringStateAdapter() {
 		ms_page = 0;
-		ms_justp = MultiString.JustificationPage.fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
+		ms_justp = MultiString.JustificationPage.DEFAULT;
 		ms_line = 0;
-		ms_justl = MultiString.JustificationLine.fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
+		ms_justl = MultiString.JustificationLine.DEFAULT;
 		ms_fnum = 1;
 	}
 
