@@ -176,7 +176,6 @@ public class AwsStatusPanel extends ToolPanel implements
 	public void proxyAdded(DMS d) {
 		if(isDmsDeact(d))
 			deact_dms.put(d.getName(), d);
-		updateAWSText();
 	}
 
 	/** All proxies have been enumerated */
@@ -186,23 +185,27 @@ public class AwsStatusPanel extends ToolPanel implements
 	public void proxyRemoved(DMS d) {
 		if(d != null)
 			deact_dms.remove(d.getName());
-		updateAWSText();
 	}
 
-	/** A proxy has been changed */
+	/** A proxy has changed */
 	public void proxyChanged(DMS d, String a) {
-		if(d != null) {
+		if(d == null || a == null)
+			return;
+		if(a.equals("awsControlled") || a.equals("awsAllowed")) {
 			proxyRemoved(d);
 			proxyAdded(d);
 			updateAWSText();
 		}
 	}
 
-	/** internal class to listen for changes to system attributes */
+	/** Internal class to listen for changes to system attributes. On 
+	 * client start-up, the dms_aws_enabled attribute is added, which
+	 * triggers the initial (and only) call to updateAWSText(). */
 	private class saListener implements ProxyListener<SystemAttribute> {
 		/** A new proxy has been added */
 		public void proxyAdded(SystemAttribute proxy) {
-			updateAWSText();
+			if(isAwsEnableAttribute(proxy))
+				updateAWSText();
 		}
 
 		/** All proxy have been enumerated */
@@ -210,13 +213,21 @@ public class AwsStatusPanel extends ToolPanel implements
 
 		/** A proxy has been removed */
 		public void proxyRemoved(SystemAttribute proxy) {
-			updateAWSText();
+			if(isAwsEnableAttribute(proxy))
+				updateAWSText();
 		}
 
 		/** A proxy has been changed */
 		public void proxyChanged(SystemAttribute proxy, String a) {
-			updateAWSText();
+			if(isAwsEnableAttribute(proxy))
+				updateAWSText();
 		}
+	}
+
+	/** Is the specified system attribute the AWS enable attribute? */
+	private boolean isAwsEnableAttribute(SystemAttribute p) {
+		return SystemAttributeHelper.same(p, 
+			SystemAttrEnum.DMS_AWS_ENABLE);
 	}
 
 	/** cleanup */

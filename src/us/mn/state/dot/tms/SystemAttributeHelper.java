@@ -81,4 +81,14 @@ public class SystemAttributeHelper extends BaseHelper {
 		float cycle = green + yellow + red;
 		return (int)(Interval.HOUR / cycle);
 	}
+
+	/** Is the specified attribute and enum the same? */
+	static public boolean same(SystemAttribute p, SystemAttrEnum e) {
+		if(p ==  null || e == null)
+			return false;
+		else {
+			SystemAttrEnum l = SystemAttrEnum.lookup(p.getName());
+			return (l == null ? false : l.equals(e));
+		}
+	}
 }
