@@ -25,6 +25,7 @@ import java.util.ResourceBundle;
  *
  * @author P.W. Wong, AHMCT
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class I18N {
 
@@ -36,6 +37,12 @@ public class I18N {
 
 	/** Value returned for error reading message */
 	static protected final String NOT_READ = "Message bundle not read";
+
+	/** Key code to use for lookup failure */
+	static protected final int FAILURE_CODE = 0;
+
+	/** Char to use for lookup failure */
+	static protected final char FAILURE_CHAR = '\0';
 
 	/** The resource bundle */
 	static private ResourceBundle m_bundle = null;
@@ -117,11 +124,11 @@ public class I18N {
 	 *  @return The KeyEvent code else 0 on failure.
 	 *  @see java.awt.event.KeyEvent */
 	static public int getKeyEvent(String id) {
-		final int FAILURE_CODE = 0;
 		char c = getKeyEventChar(id);
 		if(c == '\0')
 			return FAILURE_CODE;
-		return charToKeyCode(c, FAILURE_CODE);
+		else
+			return charToKeyCode(c);
 	}
 
 	/** Return the implied key mnemonic in the specified I18N
@@ -130,7 +137,6 @@ public class I18N {
 	 *  @param id Name of I18N string in the bundle.
 	 *  @return The 1st underlined char else '\0' on failure. */
 	static public char getKeyEventChar(String id) {
-		final char FAILURE_CHAR = '\0';
 		String s = getSilent(id);
 		if(s == null)
 			return FAILURE_CHAR;
@@ -141,7 +147,7 @@ public class I18N {
 	}
 
 	/** Return KeyEvent representation of specified character */
-	static private int charToKeyCode(char c, int failure) {
+	static private int charToKeyCode(char c) {
 		// FIXME: is there a java method that already does this? 
 		c = Character.toUpperCase(c);
 		switch(c) {
@@ -181,7 +187,7 @@ public class I18N {
 			case '7': return KeyEvent.VK_7;
 			case '8': return KeyEvent.VK_8;
 			case '9': return KeyEvent.VK_9;
-			default: return failure;
+			default: return FAILURE_CODE;
 		}
 	}
 }
