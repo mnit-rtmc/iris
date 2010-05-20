@@ -148,7 +148,6 @@ public class I18N {
 
 	/** Return KeyEvent representation of specified character */
 	static private int charToKeyCode(char c) {
-		// FIXME: is there a java method that already does this? 
 		c = Character.toUpperCase(c);
 		switch(c) {
 			case 'A': return KeyEvent.VK_A;
