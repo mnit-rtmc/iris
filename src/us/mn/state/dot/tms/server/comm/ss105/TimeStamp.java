@@ -52,7 +52,7 @@ public class TimeStamp {
 	/** Format an SS105 timestamp */
 	static public int secondsSinceEpoch(Date d) {
 		long ms = d.getTime() - EPOCH;
-		if(ms > 0 && ms < Integer.MAX_VALUE * 1000)
+		if(ms > 0 && ms < Integer.MAX_VALUE * 1000L)
 			return (int)(ms / 1000);
 		else
 			return 0;
