@@ -129,7 +129,7 @@ public class Message implements CommMessage {
 		assert body.length <= MAX_BODY_OCTETS;
 		byte[] header = new byte[10];
 		header[0] = 'Z';			// Sentinel
-		header[1] = '1';			// Protozol version
+		header[1] = '1';			// Protocol version
 		header[2] = SUB_ID;			// Dest Sub ID
 		header[3] = (byte)((dest_id >> 8) & 0xFF); // Dest ID (hi)
 		header[4] = (byte)(dest_id & 0xFF);	// Dest ID (low)
