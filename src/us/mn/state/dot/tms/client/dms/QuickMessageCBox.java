@@ -129,22 +129,20 @@ public class QuickMessageCBox extends JComboBox {
 	/** Update the dispatcher with the specified quick message */
 	protected void updateDispatcher(QuickMessage qm) {
 		String ms = qm.getMulti();
-		if(!ms.isEmpty()) {
-			adjusting++;
+		if(adjusting == 0 && !ms.isEmpty()) {
 			dispatcher.setMessage(ms);
 			dispatcher.selectPreview(true);
-			adjusting--;
 		}
 	}
 
 	/** Set the current message MULTI string */
 	public void setMessage(String ms) {
-		if(adjusting == 0) {
-			if(ms.isEmpty())
-				setSelectedItem(null);
-			else
-				setSelectedItem(QuickMessageHelper.find(ms));
-		}
+		adjusting++;
+		if(ms.isEmpty())
+			setSelectedItem(null);
+		else
+			setSelectedItem(QuickMessageHelper.find(ms));
+		adjusting--;
 	}
 
 	/** Set selected item, but only if it is different from the 
@@ -185,8 +183,10 @@ public class QuickMessageCBox extends JComboBox {
 			});
 		}
 		// This cannot be done inside a Checker because of deadlocks
+		adjusting++;
 		for(QuickMessage qm: msgs)
 			model.addElement(qm);
+		adjusting--;
 	}
 
 	/** Dispose */
