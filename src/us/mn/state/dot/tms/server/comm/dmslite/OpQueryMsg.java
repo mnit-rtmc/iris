@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,23 +122,16 @@ public class OpQueryMsg extends OpDms {
 		// default text if no bitmap, see comments in 
 		// method for why this is a hack.
 		for(int i = 0; i < pages.length; i++) {
-			multi.addSpan(flagIgnoredSignLineHack("OTHER"));
+			multi.addSpan(DMSHelper.NOTXT_L1);
 			multi.addLine();
-			multi.addSpan(flagIgnoredSignLineHack("SYSTEM"));
+			multi.addSpan(DMSHelper.NOTXT_L2);
 			multi.addLine();
-			multi.addSpan(flagIgnoredSignLineHack("MESSAGE"));
+			multi.addSpan(DMSHelper.NOTXT_L3);
 			multi.addLine();
 			if(i + 1 < pages.length)
 				multi.addPage();
 		}
 		return multi.toString();
-	}
-
-	/** This is a hack.
-	 * @see SignTextComboBoxModel.ignoreLineHack
-	 */
-	static protected String flagIgnoredSignLineHack(String line) {
-		return "_" + line + "_";
 	}
 
 	/** Check if an array of bitmaps is blank */
