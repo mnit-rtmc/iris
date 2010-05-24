@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +59,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * Holds the state of the SONAR client
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class SonarState extends Client {
 
@@ -435,7 +437,7 @@ public class SonarState extends Client {
 		populate(users);
 		populate(connections, true);
 		user = users.lookupObject(user_name);
-		populate(system_attributes);
+		populate(system_attributes, true);
 		populate(map_extents);
 		populate(inc_details);
 		populate(roads);
