@@ -196,8 +196,12 @@
 		limit, do not display a VSA indication.
 	</li>
 	<li>
-		Using linear interpolation, find the speed advisory at the
-		location of the LCS array.
+		Calculate the speed advisory at the location of the LCS array.
+		If the LCS array is within 1000 feet (configurable) of either
+		station, use the speed advisory at that station.
+		If not, and the downstream advisory is less than the upstream
+		advisory, use linear linterpolation between the two.
+		Otherwise, use the downstream speed.
 	</li>
 	<li>
 		Quantize the speed advisory to 5 mph granularity.
