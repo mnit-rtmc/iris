@@ -166,10 +166,6 @@
 		LCS array.
 	</li>
 	<li>
-		If neither station has a speed advisory less than the speed
-		limit, do not display a VSA indication.
-	</li>
-	<li>
 		Calculate the speed advisory at the location of the LCS array.
 		If the LCS array is within 1000 feet (configurable) of either
 		station, use the speed advisory at that station.
@@ -180,6 +176,11 @@
 	<li>
 		Quantize the speed advisory to 5 mph granularity.
 		This is done by rounding up to the next higher 5 mph.
+	</li>
+	<li>
+		If the advisory is not less than the speed limit at both
+		upstream and downstream stations, do not display a VSA
+		indication.
 	</li>
 	<li>
 		Limit speed advisory to no less than 5 mph below previous 30
