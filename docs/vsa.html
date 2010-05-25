@@ -25,8 +25,8 @@
 <dl>
 	<dt>Deceleration Threshold</dt>
 	<dd><p>
-		This is a uniform rate of deceleration which is assumed to be
-		safe for all vehicles (a<sub>p</sub>).
+		This is a uniform rate of deceleration <b>a<sub>p</sub></b>
+		which is assumed to be safe for all vehicles.
 		It is based on the pavement conditions, which are measured
 		using a precipitation sensor.
 		There are seperate thresholds for dry, light rain, moderate
@@ -89,12 +89,12 @@
 <ol>
 	<li>
 		Sort stations in corridor from upstream to downstream.
-		The stations are S<sub>0</sub>…S<sub>n</sub>.
+		The stations are <b>S<sub>0</sub>…S<sub>n</sub></b>.
 	</li>
 	<li>
 		Iterate through all mainline stations.
-		For each station S<sub>i</sub> with valid speed data, perform
-		the station algorithm below.
+		For each station <b>S<sub>i</sub></b> with valid speed data,
+		perform the station algorithm below.
 	</li>
 	<li>
 		For all stations with invalid speed data, set the speed
@@ -105,11 +105,12 @@
 <h3>Station Algorithm</h3>
 <ol>
 	<li>
-		Set initial control range <sub>r</sub> to 1 upstream station.
+		Set initial control range <b><sub>r</sub></b> to 1 upstream
+		station.
 	</li>
 	<li>
-		Set speed advisory A<sub>i</sub> equal to the speed limit
-		L<sub>i</sub>.
+		Set speed advisory <b>A<sub>i</sub></b> equal to the speed limit
+		<b>L<sub>i</sub></b>.
 	</li>
 	<li>
 		Calculate uniform acceleration approaching station:
@@ -118,22 +119,24 @@
 		(U<sub>i</sub>&sup2; - U<sub>i-r</sub>&sup2;) /
 		(2 * (M<sub>i</sub> - M<sub>i-r</sub>) * 3600)
 		</div>
-		The units for <i>a</i> are mph/s.
+		The units for <b>a</b> are mph/s.
 		The result will be positive for acceleration, and negative for
 		deceleration.
 	</li>
 	<li>
-		Check that a<sub>i-r…i</sub> is greater than a<sub>p</sub>
-		(deceleration threshold for current pavement condition).
+		Check that <b>a<sub>i-r…i</sub></b> is greater than
+		<b>a<sub>p</sub></b> (deceleration threshold for current
+		pavement condition).
 		If not, stop processing.
 	</li>
 	<li>
-		Increment control range <sub>r</sub> by 1 station.
-		If <sub>i-r</sub> &lt; 0, stop processing.
+		Increment control range <b><sub>r</sub></b> by 1 station.
+		If <b><sub>i-r</sub></b> &lt; 0, stop processing.
 	</li>
 	<li>
-		For each station S<sub>j</sub>, from S<sub>i-r</sub> to
-		S<sub>i</sub>, reduce the speed advisory A<sub>j</sub>.
+		For each station <b>S<sub>j</sub></b>, from
+		<b>S<sub>i-r</sub></b> to <b>S<sub>i</sub></b>, reduce the
+		speed advisory <b>A<sub>j</sub></b>.
 		<ul>
 		    <li>lerp = (M<sub>i</sub> - M<sub>j</sub>) /
 		        (M<sub>i</sub> - M<sub>i-r</sub>)
