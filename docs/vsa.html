@@ -10,9 +10,30 @@
 </head>
 
 <body>
-<p id="stamp">24 May 2010</p>
+<p id="stamp">25 May 2010</p>
 <h2>Variable Speed Advisory Calculation</h2>
+<div class="right">
+	<img src="uniform_acc.svg" width="512" height="512" />
+	<div class="label">Uniform Acceleration</div>
+</div>
+<p>
+	The goal is to promote a safe, <b>uniform deceleration</b> for vehicles
+	approaching congestion.
+	The standard equation for uniform acceleration is used to determine
+	when variable speed advisories must be deployed.
+</p>
 <dl>
+	<dt>Deceleration Threshold</dt>
+	<dd><p>
+		This is a uniform rate of deceleration which is assumed to be
+		safe for all vehicles (a<sub>p</sub>).
+		It is based on the pavement conditions, which are measured
+		using a precipitation sensor.
+		There are seperate thresholds for dry, light rain, moderate
+		rain, heavy rain, and ice.
+		The units are in mph/s, and negative values indicate
+		deceleration instead of acceleration.
+	</p></dd>
 	<dt>Station Parameters</dt>
 	<dd><ul>
 		<li>Speed Limit (L) miles per hour</li>
@@ -21,9 +42,7 @@
 	<dt>Station Sample Data</dt>
 	<dd>
 	    <ul>
-		<li>Flow (Q) vehicles per hour (average of all lanes)</li>
 		<li>Speed (U) miles per hour (average of all lanes)</li>
-		<li>Density (K) vehicles per mile (average of all lanes)</li>
 	    </ul>
 	    The average of the most recent 30-second samples is used.
 	    The number of samples depends on the lowest sample speed.
@@ -69,115 +88,70 @@
 <h3>Corridor Algorithm</h3>
 <ol>
 	<li>
-		Set speed advisory equal to the speed limit for all stations in
-		the corridor.
+		Sort stations in corridor from upstream to downstream.
+		The stations are S<sub>0</sub>…S<sub>n</sub>.
 	</li>
 	<li>
-		Iterate through all mainline stations using a "section" of four
-		stations at a time.
-		Ordinarilly, consecutive stations are used, but any station
-		which does not have valid flow, speed and density data should
-		be skipped.
+		Iterate through all mainline stations.
+		For each station S<sub>i</sub> with valid speed data, perform
+		the station algorithm below.
 	</li>
 	<li>
-		For all stations which were skipped in the previous step,
-		set the speed advisory using a linear interpolation from the
-		next upstream and downstream valid stations.
+		For all stations with invalid speed data, set the speed
+		advisory using a linear interpolation from the next upstream
+		and downstream valid stations.
 	</li>
 </ol>
-<h3>Section Algorithm</h3>
+<h3>Station Algorithm</h3>
 <ol>
 	<li>
-		The section stations are S<sub>0</sub> through S<sub>3</sub>
-		(from downstream to upstream).
+		Set initial control range <sub>r</sub> to 1 upstream station.
 	</li>
 	<li>
-		Check that M<sub>0</sub> - M<sub>3</sub> &lt; 4 mi.
-		If not, stop processing section.
+		Set speed advisory A<sub>i</sub> equal to the speed limit
+		L<sub>i</sub>.
 	</li>
 	<li>
-		Check that U<sub>0</sub> is lower than U<sub>1</sub>,
-		U<sub>2</sub> and U<sub>3</sub>.
-		If not, stop processing section.
+		Calculate uniform acceleration approaching station:
+		<div class="math">
+		a<sub>i-r…i</sub> =
+		(U<sub>i-r</sub>&sup2; - U<sub>i</sub>&sup2;) /
+		(2 * (M<sub>i-r</sub> - M<sub>i</sub>) * 3600)
+		</div>
+		The units for <i>a</i> are mph/s.
+		The result will be positive for acceleration, and negative for
+		deceleration.
 	</li>
 	<li>
-		Calculate speed drop at last station.
-		<ul><li>
-		U<sub>d</sub> = U<sub>1</sub> - U<sub>0</sub>
-		</li></ul>
+		Check that a<sub>i-r…i</sub> is lower than a<sub>p</sub>
+		(deceleration threshold for current pavement condition).
+		If not, stop processing.
 	</li>
 	<li>
-		Check that U<sub>d</sub> &gt; U<sub>2</sub> - U<sub>1</sub> and
-		    U<sub>d</sub> &gt; U<sub>3</sub> - U<sub>2</sub>.
-		If not, stop processing section.
+		Increment control range <sub>r</sub> by 1 station.
+		If <sub>i-r</sub> &lt; 0, stop processing.
 	</li>
 	<li>
-		Calculate speed drop threshold (D).
-		This is normally 10 mph, but may be up to 40 mph if
-		U<sub>1</sub> &lt; 40 mph.
-	</li>
-	<li>
-		Check that U<sub>d</sub> &gt; D.
-		If not, stop processing section.
-	</li>
-	<li>
-		Calculate shock wave (Sw) speed.
+		For each station S<sub>j</sub>, from S<sub>i-r</sub> to
+		S<sub>i</sub>, reduce the speed advisory A<sub>j</sub>.
 		<ul>
-		    <li>
-			Q<sub>u</sub> = (Q<sub>2</sub> + Q<sub>3</sub>) / 2
+		    <li>lerp = (M<sub>i</sub> - M<sub>j</sub>) /
+		        (M<sub>i</sub> - M<sub>i-r</sub>)
+		    </li>
+		    <li>A = U<sub>i</sub> +
+		        (U<sub>i-r</sub> - U<sub>i</sub>) * lerp
 		    </li>
 		    <li>
-			Q<sub>d</sub> = (Q<sub>0</sub> + Q<sub>1</sub>) / 2
+		        Limit A to range of
+		        [U<sub>j</sub> - 15, A<sub>j</sub>]
 		    </li>
 		    <li>
-			K<sub>u</sub> = (K<sub>2</sub> + K<sub>3</sub>) / 2
-		    </li>
-		    <li>
-			K<sub>d</sub> = (K<sub>0</sub> + K<sub>1</sub>) / 2
-		    </li>
-		    <li>
-			Sw = (Q<sub>d</sub> - Q<sub>u</sub>) /
-			     (K<sub>d</sub> - K<sub>u</sub>)
+		    	Set A<sub>j</sub> = A
 		    </li>
 		</ul>
 	</li>
 	<li>
-		Calculate control distance (C).
-		<ul>
-		    <li>C = U<sub>d</sub> / 30</li>
-		    <li>If Sw &lt; -5, add 0.5 to C.</li>
-		    <li>Limit C to range of [0.5, 1.5] (configurable).</li>
-		</ul>
-	</li>
-	<li>
-		Find station nearest to M<sub>0</sub> - C.
-		This is S<sub>c</sub>.
-	</li>
-	<li>
-		Calculate the control range (M<sub>r</sub>).
-		<ul><li>
-			M<sub>r</sub> = M<sub>0</sub> - M<sub>c</sub>
-		</li></ul>
-	</li>
-	<li>
-		Calculate the speed range (U<sub>r</sub>).
-		<ul><li>
-		    U<sub>r</sub> = U<sub>c</sub> - U<sub>0</sub>
-		</li></ul>
-	</li>
-	<li>
-		For each station n, from S<sub>0</sub> to S<sub>c</sub>, set the
-		speed advisory (A<sub>n</sub>).
-		<ul>
-		    <li>lerp = (M<sub>0</sub> - M<sub>n</sub>) /
-		        M<sub>r</sub></li>
-		    <li>A<sub>n</sub> = U<sub>0</sub> + U<sub>r</sub> * lerp
-		    </li>
-		    <li>
-		        Limit A<sub>n</sub> to range of
-		        [U<sub>n</sub> - 10, L<sub>n</sub>]
-		    </li>
-		</ul>
+		Continue at step 3.
 	</li>
 </ol>
 
