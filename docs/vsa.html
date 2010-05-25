@@ -115,15 +115,15 @@
 		Calculate uniform acceleration approaching station:
 		<div class="math">
 		a<sub>i-r…i</sub> =
-		(U<sub>i-r</sub>&sup2; - U<sub>i</sub>&sup2;) /
-		(2 * (M<sub>i-r</sub> - M<sub>i</sub>) * 3600)
+		(U<sub>i</sub>&sup2; - U<sub>i-r</sub>&sup2;) /
+		(2 * (M<sub>i</sub> - M<sub>i-r</sub>) * 3600)
 		</div>
 		The units for <i>a</i> are mph/s.
 		The result will be positive for acceleration, and negative for
 		deceleration.
 	</li>
 	<li>
-		Check that a<sub>i-r…i</sub> is lower than a<sub>p</sub>
+		Check that a<sub>i-r…i</sub> is greater than a<sub>p</sub>
 		(deceleration threshold for current pavement condition).
 		If not, stop processing.
 	</li>
