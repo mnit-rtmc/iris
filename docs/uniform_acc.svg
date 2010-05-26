@@ -36,11 +36,11 @@
     <circle cx="80" cy="52" r="4" style="fill:blue" />
     <path style="stroke:#000000" d="m 44,52 24,0" />
     <text style="font-size:16px;font-family:Liberation Sans" x="32" y="56">
-       <tspan x="32" y="56">v</tspan></text>
+       <tspan x="32" y="56">u</tspan></text>
     <circle cx="168" cy="124" r="4" style="fill:blue" />
     <path style="stroke:#000000" d="m 180,124 24,0" />
     <text style="font-size:16px;font-family:Liberation Sans" x="214" y="128">
-       <tspan x="214" y="128">u</tspan></text>
+       <tspan x="214" y="128">v</tspan></text>
     <path style="stroke:#000000" d="m 80,72 0,32" />
     <path style="stroke:#000000" d="m 168,72 0,32" />
     <path style="stroke:#000000;marker-end:url(#Arrow1Mend)"
