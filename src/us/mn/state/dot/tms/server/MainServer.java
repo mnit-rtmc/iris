@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,19 +53,6 @@ public class MainServer {
 	/** File to log standard error stream */
 	static protected final String STD_ERR = LOG_FILE_DIR + "iris.stderr";
 
-	/** Redirect the standard output and error streams to log files */
-	static protected void redirectStdStreams() throws IOException {
-		FileOutputStream fos = new FileOutputStream(STD_OUT, true);
-		BufferedOutputStream bos = new BufferedOutputStream(fos);
-		System.setOut(new PrintStream(bos, true));
-		fos = new FileOutputStream(STD_ERR, true);
-		bos = new BufferedOutputStream(fos);
-		System.setErr(new PrintStream(bos, true));
-		String msg = "IRIS @@VERSION@@ restarted @ " + new Date();
-		System.out.println(msg);
-		System.err.println(msg);
-	}
-
 	/** Timer thread for repeating jobs */
 	static protected final Scheduler TIMER =
 		new Scheduler("Scheduler: TIMER");
@@ -83,22 +70,14 @@ public class MainServer {
 	/** Main server entry point */
 	static public void main(String[] args) {
 		try {
-			redirectStdStreams();
-			checkAssert();
-			sanityChecks();
+			initialize();
 			Properties props = PropertyLoader.load(PROP_FILE);
 			store = createStore(props);
 			I18N.initialize(props);
-			ServerNamespace ns = new ServerNamespace();
-			// FIXME: static namespace hacks
-			DMSList.namespace = ns;
-			BaseHelper.namespace = ns;
+			ServerNamespace ns = createNamespace();
 			IrisRoleImpl.lookup(store, ns);
 			IrisPrivilegeImpl.lookup(store, ns);
 			IrisUserImpl.lookup(store, ns);
-			ns.registerType(Station.SONAR_TYPE, StationImpl.class);
-			ns.registerType(SignMessage.SONAR_TYPE,
-				SignMessageImpl.class);
 			BaseObjectImpl.loadAll(store, ns);
 			BaseEvent.store = store;
 			scheduleTimerJobs();
@@ -112,12 +91,42 @@ public class MainServer {
 		}
 	}
 
+	/** Initialize the server process */
+	static protected void initialize() throws IOException {
+		redirectStdStreams();
+		checkAssert();
+		sanityChecks();
+	}
+
+	/** Redirect the standard output and error streams to log files */
+	static protected void redirectStdStreams() throws IOException {
+		FileOutputStream fos = new FileOutputStream(STD_OUT, true);
+		BufferedOutputStream bos = new BufferedOutputStream(fos);
+		System.setOut(new PrintStream(bos, true));
+		fos = new FileOutputStream(STD_ERR, true);
+		bos = new BufferedOutputStream(fos);
+		System.setErr(new PrintStream(bos, true));
+		String msg = "IRIS @@VERSION@@ restarted @ " + new Date();
+		System.out.println(msg);
+		System.err.println(msg);
+	}
+
+	/** Check assertion status */
+	static protected void checkAssert() {
+		boolean assertsEnabled = false;
+		// Intentional assignment side-effect
+		assert assertsEnabled = true;
+		System.err.println("Assertions are turned " +
+			(assertsEnabled ? "on" : "off") + ".");
+	}
+
 	/** Perform sanity and debug checks */
 	static protected void sanityChecks() {
 		if(!TimeZone.getDefault().useDaylightTime()) {
 			System.err.println("Warning: the default time zone ("+
 			TimeZone.getDefault().getDisplayName() +
-			") doesn't support DST. Specify the time zone via the command line.");
+			") doesn't support DST. " +
+			"Specify the time zone via the command line.");
 		}
 	}
 
@@ -130,6 +139,17 @@ public class MainServer {
 			props.getProperty("db.user"),
 			props.getProperty("db.password")
 		);
+	}
+
+	/** Create the server namespace */
+	static protected ServerNamespace createNamespace() {
+		ServerNamespace ns = new ServerNamespace();
+		// FIXME: static namespace hacks
+		DMSList.namespace = ns;
+		BaseHelper.namespace = ns;
+		ns.registerType(Station.SONAR_TYPE, StationImpl.class);
+		ns.registerType(SignMessage.SONAR_TYPE, SignMessageImpl.class);
+		return ns;
 	}
 
 	/** Schedule jobs on TIMER thread */
@@ -159,14 +179,5 @@ public class MainServer {
 		FLUSH.addJob(new XmlConfigJob(1000));
 		FLUSH.addJob(new DmsXmlJob());
 		FLUSH.addJob(new IncidentXmlJob());
-	}
-
-	/** Check assertion status */
-	static protected void checkAssert() {
-		boolean assertsEnabled = false;
-		// Intentional assignment side-effect
-		assert assertsEnabled = true;
-		System.err.println("Assertions are turned " +
-			(assertsEnabled ? "on" : "off") + ".");
 	}
 }
