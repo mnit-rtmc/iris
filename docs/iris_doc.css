@@ -12,6 +12,15 @@ DIV.math {
 SPAN.func {
 	float: right;
 }
+SPAN.inblock {
+	display: inline-block;
+}
+.middle {
+	vertical-align: 50%;
+}
+.over {
+	text-decoration: overline;
+}
 SUB {
 	font-size: xx-small;
 }

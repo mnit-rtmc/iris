@@ -10,7 +10,7 @@
 </head>
 
 <body>
-<p id="stamp">25 May 2010</p>
+<p id="stamp">26 May 2010</p>
 <h2>Variable Speed Advisory Calculation</h2>
 <div class="right">
 	<img src="uniform_acc.svg" width="512" height="512" />
@@ -113,36 +113,26 @@
 		<b>L<sub>i</sub></b>.
 	</li>
 	<li>
-		Calculate uniform acceleration approaching station:
-		<div class="math">
-		a<sub>i-r…i</sub> =
-		(U<sub>i</sub>&sup2; - U<sub>i-r</sub>&sup2;) /
-		(2 * (M<sub>i</sub> - M<sub>i-r</sub>) * 3600)
+		Calculate uniform acceleration in control range:
+		<div>
+		<span class="middle">a = </span>
+		<span class="inblock">U<sub>i</sub>² - U<sub>i-r</sub>²<br/>
+		<span class="over">2 * (M<sub>i</sub> - M<sub>i-r</sub>) * 3600
+		</span></span>
 		</div>
 		The units for <b>a</b> are mph/s.
 		The result will be positive for acceleration, and negative for
 		deceleration.
 	</li>
 	<li>
-		Check that <b>a<sub>i-r…i</sub></b> is greater than
-		<b>a<sub>p</sub></b> (deceleration threshold for current
-		pavement condition).
-		If not, stop processing.
-	</li>
-	<li>
-		Increment control range <b><sub>r</sub></b> by 1 station.
-		If <b><sub>i-r</sub></b> &lt; 0, stop processing.
-	</li>
-	<li>
 		For each station <b>S<sub>j</sub></b>, from
-		<b>S<sub>i-r</sub></b> to <b>S<sub>i</sub></b>, reduce the
-		speed advisory <b>A<sub>j</sub></b>.
+		<b>S<sub>i-r</sub></b> to <b>S<sub>i</sub></b> (non-inclusive),
+		reduce the speed advisory <b>A<sub>j</sub></b>.
 		<ul>
-		    <li>lerp = (M<sub>i</sub> - M<sub>j</sub>) /
-		        (M<sub>i</sub> - M<sub>i-r</sub>)
-		    </li>
-		    <li>A = U<sub>i</sub> +
-		        (U<sub>i-r</sub> - U<sub>i</sub>) * lerp
+		    <li>
+		    	A = √<span class="over">
+		    	U<sub>i</sub>² + 2 a
+		    	(M<sub>i</sub> - M<sub>j</sub>)</span>
 		    </li>
 		    <li>
 		        Limit A to range of
@@ -154,7 +144,16 @@
 		</ul>
 	</li>
 	<li>
-		Continue at step 3.
+		Check that <b>a</b> is greater than <b>a<sub>p</sub></b>
+		(deceleration threshold for current pavement condition).
+		If not, stop processing.
+	</li>
+	<li>
+		Increment control range <b><sub>r</sub></b> by 1 station.
+	</li>
+	<li>
+		If <b><sub>i-r</sub></b> ≥ 0, continue from step 3.
+		Otherwise, stop processing.
 	</li>
 </ol>
 
