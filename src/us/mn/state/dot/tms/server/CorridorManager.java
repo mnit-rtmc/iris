@@ -20,10 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeHelper;
 
 /**
  * This is a class to manage roadway network corridors.
@@ -32,36 +30,38 @@ import us.mn.state.dot.tms.R_Node;
  */
 public class CorridorManager {
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
 	/** Map to hold all corridors */
 	protected final Map<String, Corridor> corridors =
 		new TreeMap<String, Corridor>();
 
 	/** Create all corridors from the existing r_nodes */
-	public CorridorManager(Namespace ns) {
-		namespace = ns;
-		namespace.findObject(R_Node.SONAR_TYPE,
-			new Checker<R_NodeImpl>()
-		{
-			public boolean check(R_NodeImpl r_node) {
-				findDownstreamLinks(r_node);
-				GeoLoc loc = r_node.getGeoLoc();
-				String cid = GeoLocHelper.getCorridorName(loc);
-				if(cid != null) {
-					Corridor c = corridors.get(cid);
-					if(c == null) {
-						c = new Corridor(loc);
-						corridors.put(cid, c);
-					}
-					c.addNode(r_node);
-				}
+	public CorridorManager() {
+		R_NodeHelper.find(new Checker<R_Node>() {
+			public boolean check(R_Node r_node) {
+				findDownstreamLinks((R_NodeImpl)r_node);
+				addCorridorNode(r_node);
 				return false;
 			}
 		});
 		for(Corridor c: corridors.values())
 			c.arrangeNodes();
+	}
+
+	/** Add an r_node to the proper corridor */
+	protected void addCorridorNode(R_Node r_node) {
+		String cid = R_NodeHelper.getCorridorName(r_node);
+		if(cid != null)
+			addCorridorNode(cid, r_node);
+	}
+
+	/** Add an r_node to the specified corridor */
+	protected void addCorridorNode(String cid, R_Node r_node) {
+		Corridor c = corridors.get(cid);
+		if(c == null) {
+			c = new Corridor(r_node.getGeoLoc());
+			corridors.put(cid, c);
+		}
+		c.addNode(r_node);
 	}
 
 	/** Find downstream links (not in corridor) for the given node */
@@ -78,12 +78,10 @@ public class CorridorManager {
 	protected void linkExitToEntrance(final R_NodeImpl r_node) {
 		final LinkedList<R_NodeImpl> links =
 			new LinkedList<R_NodeImpl>();
-		namespace.findObject(R_Node.SONAR_TYPE,
-			new Checker<R_NodeImpl>()
-		{
-			public boolean check(R_NodeImpl other) {
-				if(r_node.isExitLink(other))
-					links.add(other);
+		R_NodeHelper.find(new Checker<R_Node>() {
+			public boolean check(R_Node other) {
+				if(R_NodeHelper.isExitLink(r_node, other))
+					links.add((R_NodeImpl)other);
 				return false;
 			}
 		});
@@ -110,12 +108,10 @@ public class CorridorManager {
 
 	/** Link an access node with all corresponding entrance nodes */
 	protected void linkAccessToEntrance(final R_NodeImpl r_node) {
-		namespace.findObject(R_Node.SONAR_TYPE,
-			new Checker<R_NodeImpl>()
-		{
-			public boolean check(R_NodeImpl other) {
-				if(r_node.isAccessLink(other))
-					r_node.addDownstream(other);
+		R_NodeHelper.find(new Checker<R_Node>() {
+			public boolean check(R_Node n) {
+				if(R_NodeHelper.isAccessLink(r_node, n))
+					r_node.addDownstream((R_NodeImpl)n);
 				return false;
 			}
 		});

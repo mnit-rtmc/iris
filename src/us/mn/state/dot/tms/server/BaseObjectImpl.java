@@ -83,7 +83,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** Create a new corridor manager */
 	static void createCorridorManager() {
-		corridors = new CorridorManager(namespace);
+		corridors = new CorridorManager();
 	}
 
 	/** Get the primary key name */

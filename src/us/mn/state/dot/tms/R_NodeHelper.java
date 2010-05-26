@@ -53,6 +53,12 @@ public class R_NodeHelper extends BaseHelper {
 		return r_node.getNodeType() == R_NodeTransition.CD.ordinal();
 	}
 
+	/** Test if an r_node (acc) is linked by another r_node (ot) */
+	static public boolean isAccessLink(R_Node acc, R_Node ot) {
+		return isEntrance(ot) && GeoLocHelper.accessMatches(
+		       acc.getGeoLoc(), ot.getGeoLoc());
+	}
+
 	/** Check if the r_node is an access node */
 	static public boolean isAccess(R_Node r_node) {
 		return r_node.getNodeType() == R_NodeType.ACCESS.ordinal();
@@ -94,5 +100,11 @@ public class R_NodeHelper extends BaseHelper {
 	static public boolean isJoined(R_Node r_node) {
 		return r_node.getTransition() != R_NodeTransition.COMMON.ordinal() ||
 		       r_node.getNodeType() != R_NodeType.ENTRANCE.ordinal();
+	}
+
+	/** Get the roadway corridor name */
+	static public String getCorridorName(R_Node r_node) {
+		GeoLoc loc = r_node.getGeoLoc();
+		return GeoLocHelper.getCorridorName(loc);
 	}
 }

@@ -505,29 +505,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return GeoLocHelper.getTrueEasting(geo_loc);
 	}
 
-	/** Test if an other r_node is a matching entrance */
-	protected boolean isMatchingEntrance(R_NodeImpl other) {
-		return other.isEntrance() &&
-			GeoLocHelper.rampMatches(geo_loc, other.getGeoLoc());
-	}
-
-	/** Test if an other r_node is a matching access */
-	protected boolean isMatchingAccess(R_NodeImpl other) {
-		return other.isAccess() &&
-			GeoLocHelper.accessMatches(geo_loc, other.getGeoLoc());
-	}
-
-	/** Test if an other r_node links with this (exit) r_node */
-	public boolean isExitLink(R_NodeImpl other) {
-		return isMatchingEntrance(other) || isMatchingAccess(other);
-	}
-
-	/** Test if an other r_node links with this (access) r_node */
-	public boolean isAccessLink(R_NodeImpl other) {
-		return other.isEntrance() &&
-			GeoLocHelper.accessMatches(geo_loc, other.getGeoLoc());
-	}
-
 	/** Downstream roadway nodes */
 	protected transient final List<R_NodeImpl> downstream =
 		new LinkedList<R_NodeImpl>();
