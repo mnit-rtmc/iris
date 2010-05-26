@@ -40,8 +40,8 @@ public class CorridorManager {
 		new TreeMap<String, Corridor>();
 
 	/** Create all corridors from the existing r_nodes */
-	public CorridorManager() {
-		namespace = BaseObjectImpl.namespace;
+	public CorridorManager(Namespace ns) {
+		namespace = ns;
 		namespace.findObject(R_Node.SONAR_TYPE,
 			new Checker<R_NodeImpl>()
 		{

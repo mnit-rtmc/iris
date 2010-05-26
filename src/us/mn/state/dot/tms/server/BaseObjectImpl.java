@@ -78,6 +78,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		DmsActionImpl.loadAll();
 		LaneActionImpl.loadAll();
 		TimingPlanImpl.loadAll();
+		createCorridorManager();
+	}
+
+	/** Create a new corridor manager */
+	static void createCorridorManager() {
+		corridors = new CorridorManager(namespace);
 	}
 
 	/** Get the primary key name */
