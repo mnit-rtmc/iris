@@ -95,7 +95,7 @@ public class MainServer {
 	static protected void initialize() throws IOException {
 		redirectStdStreams();
 		checkAssert();
-		sanityChecks();
+		checkDst();
 	}
 
 	/** Redirect the standard output and error streams to log files */
@@ -125,8 +125,8 @@ public class MainServer {
 			(assertsEnabled ? "on" : "off") + ".");
 	}
 
-	/** Perform sanity and debug checks */
-	static protected void sanityChecks() {
+	/** Check DST for default time zone */
+	static protected void checkDst() {
 		if(!TimeZone.getDefault().useDaylightTime()) {
 			System.err.println("Warning: the default time zone ("+
 			TimeZone.getDefault().getDisplayName() +
