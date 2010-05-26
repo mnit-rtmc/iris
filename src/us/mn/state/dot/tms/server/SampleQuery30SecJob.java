@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ public class SampleQuery30SecJob extends Job {
 		public void perform() throws IOException {
 			try {
 				writeSampleXml();
-				station_manager.calculateData(stamp);
+				station_manager.calculateData();
 				station_manager.writeSampleXml();
 				station_manager.writeStationXml();
 			}

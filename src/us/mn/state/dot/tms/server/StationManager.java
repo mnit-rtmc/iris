@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Station;
@@ -35,22 +34,8 @@ class StationManager {
 	/** Location of station XML file */
 	static protected final String STATION_XML = "station.xml";
 
-	/** Most recent time stamp of calculated data */
-	protected transient Calendar stamp;
-
-	/** Create a new station manager */
-	public StationManager() {
-		stamp = Calendar.getInstance();
-	}
-
 	/** Calculate the current data for all stations */
-	public void calculateData(Calendar st) {
-		if(stamp.after(st)) {
-			System.err.println("StationData OUT OF ORDER: " +
-				stamp.getTime() + " > " + st.getTime());
-			return;
-		}
-		stamp = st;
+	public void calculateData() {
 		StationHelper.find(new Checker<Station>() {
 			public boolean check(Station s) {
 				if(s instanceof StationImpl) {
