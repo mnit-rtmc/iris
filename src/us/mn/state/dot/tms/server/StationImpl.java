@@ -292,7 +292,8 @@ public class StationImpl implements Station {
 		out.println("'/>");
 	}
 
-	/** Print the current sample as an XML element */
+	/** Print the current sample as an XML element.  This is used for the
+	 * old station.xml file, which should be removed at some point.  */
 	public void printStationXmlElement(PrintWriter out) {
 		if(!getActive())
 			return;

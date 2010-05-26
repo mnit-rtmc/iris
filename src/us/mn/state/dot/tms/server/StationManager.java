@@ -31,7 +31,7 @@ class StationManager {
 	/** Location of station sample XML file */
 	static protected final String SAMPLE_XML = "stat_sample.xml";
 
-	/** Location of station XML file */
+	/** Location of old, deprecated station XML file */
 	static protected final String STATION_XML = "station.xml";
 
 	/** Calculate the current data for all stations */
@@ -93,7 +93,9 @@ class StationManager {
 		out.println("</traffic_sample>");
 	}
 
-	/** Write the station data out as XML */
+	/** Write the station data out as XML.  This is retained for backwards
+	 * compatibility.  It is not recommended to use this XML file for new
+	 * software, since it may be removed in the future. */
 	public void writeStationXml() {
 		XmlWriter w = new XmlWriter(STATION_XML, false) {
 			public void print(PrintWriter out) {
