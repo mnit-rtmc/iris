@@ -35,7 +35,8 @@ public class CorridorManager {
 		new TreeMap<String, Corridor>();
 
 	/** Create all corridors from the existing r_nodes */
-	public CorridorManager() {
+	public synchronized void createCorridors() {
+		corridors.clear();
 		R_NodeHelper.find(new Checker<R_Node>() {
 			public boolean check(R_Node r_node) {
 				findDownstreamLinks((R_NodeImpl)r_node);

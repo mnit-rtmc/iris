@@ -526,11 +526,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Get the linked corridor for an entrance or exit */
 	public Corridor getLinkedCorridor() {
-		if(corridors != null) {
-			String c = GeoLocHelper.getLinkedCorridor(geo_loc);
-			return corridors.getCorridor(c);
-		} else
-			return null;
+		String c = GeoLocHelper.getLinkedCorridor(geo_loc);
+		return corridors.getCorridor(c);
 	}
 
 	/** Print the r_node as an XML element */

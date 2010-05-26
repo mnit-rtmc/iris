@@ -316,8 +316,6 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Lookup the incident location */
 	protected String lookupLocation() {
-		if(corridors == null)
-			return null;
 		Corridor cor = corridors.getCorridor(
 			GeoLocHelper.getCorridorName(road, dir));
 		if(cor == null)

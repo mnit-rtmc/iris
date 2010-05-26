@@ -1518,10 +1518,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Create one route to a travel time destination */
 	protected Route createRoute(StationImpl s) {
 		GeoLoc dest = s.getR_Node().getGeoLoc();
-		if(corridors != null)
-			return createRoute(dest);
-		else
-			return null;
+		return createRoute(dest);
 	}
 
 	/** Create one route to a travel time destination */

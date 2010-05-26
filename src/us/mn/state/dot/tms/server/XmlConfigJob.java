@@ -61,7 +61,7 @@ public class XmlConfigJob extends Job {
 	/** Write the TMS xml configuration files */
 	protected void writeXmlConfiguration() throws IOException {
 		det_writer.write();
-		BaseObjectImpl.createCorridorManager();
+		BaseObjectImpl.corridors.createCorridors();
 		new R_NodeXmlWriter(BaseObjectImpl.corridors).write();
 		meter_writer.write();
 		cam_writer.write();

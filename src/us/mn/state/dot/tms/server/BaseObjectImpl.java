@@ -32,7 +32,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	static protected SQLConnection store;
 
 	/** Corridor manager */
-	static CorridorManager corridors;
+	static public final CorridorManager corridors = new CorridorManager();
 
 	/** Load all objects from the database into the SONAR Namespace */
 	static void loadAll(SQLConnection s, ServerNamespace ns)
@@ -78,12 +78,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		DmsActionImpl.loadAll();
 		LaneActionImpl.loadAll();
 		TimingPlanImpl.loadAll();
-		createCorridorManager();
-	}
-
-	/** Create a new corridor manager */
-	static void createCorridorManager() {
-		corridors = new CorridorManager();
 	}
 
 	/** Get the primary key name */
