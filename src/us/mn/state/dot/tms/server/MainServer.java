@@ -100,15 +100,20 @@ public class MainServer {
 
 	/** Redirect the standard output and error streams to log files */
 	static protected void redirectStdStreams() throws IOException {
-		FileOutputStream fos = new FileOutputStream(STD_OUT, true);
-		BufferedOutputStream bos = new BufferedOutputStream(fos);
-		System.setOut(new PrintStream(bos, true));
-		fos = new FileOutputStream(STD_ERR, true);
-		bos = new BufferedOutputStream(fos);
-		System.setErr(new PrintStream(bos, true));
+		System.setOut(createPrintStream(STD_OUT));
+		System.setErr(createPrintStream(STD_ERR));
 		String msg = "IRIS @@VERSION@@ restarted @ " + new Date();
 		System.out.println(msg);
 		System.err.println(msg);
+	}
+
+	/** Create a buffered print stream to a log file */
+	static protected PrintStream createPrintStream(String fname)
+		throws IOException
+	{
+		FileOutputStream fos = new FileOutputStream(fname, true);
+		BufferedOutputStream bos = new BufferedOutputStream(fos);
+		return new PrintStream(bos, true);
 	}
 
 	/** Check assertion status */
