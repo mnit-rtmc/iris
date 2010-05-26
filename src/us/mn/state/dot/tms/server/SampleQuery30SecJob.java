@@ -60,10 +60,10 @@ public class SampleQuery30SecJob extends Job {
 	protected final Job complete_job = new Job() {
 		public void perform() throws IOException {
 			try {
-				writeSampleXml();
 				station_manager.calculateData();
 				station_manager.writeSampleXml();
 				station_manager.writeStationXml();
+				writeSampleXml();
 			}
 			finally {
 				if(!HolidayHelper.isHoliday(stamp))

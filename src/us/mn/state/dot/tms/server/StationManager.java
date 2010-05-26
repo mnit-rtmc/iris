@@ -48,7 +48,7 @@ class StationManager {
 	}
 
 	/** Write the station sample data out as XML */
-	public void writeSampleXml() {
+	public void writeSampleXml() throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			public void print(PrintWriter out) {
 				printSampleXmlHead(out);
@@ -56,12 +56,7 @@ class StationManager {
 				printSampleXmlTail(out);
 			}
 		};
-		try {
-			w.write();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
+		w.write();
 	}
 
 	/** Print the header of the station sample XML file */
@@ -96,7 +91,7 @@ class StationManager {
 	/** Write the station data out as XML.  This is retained for backwards
 	 * compatibility.  It is not recommended to use this XML file for new
 	 * software, since it may be removed in the future. */
-	public void writeStationXml() {
+	public void writeStationXml() throws IOException {
 		XmlWriter w = new XmlWriter(STATION_XML, false) {
 			public void print(PrintWriter out) {
 				printStationXmlHead(out);
@@ -104,12 +99,7 @@ class StationManager {
 				printStationXmlTail(out);
 			}
 		};
-		try {
-			w.write();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
+		w.write();
 	}
 
 	/** Print the header of the station sample XML file */
