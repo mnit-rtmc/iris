@@ -153,7 +153,6 @@ public class MainServer {
 		DMSList.namespace = ns;
 		BaseHelper.namespace = ns;
 		ns.registerType(Station.SONAR_TYPE, StationImpl.class);
-		ns.registerType(SignMessage.SONAR_TYPE, SignMessageImpl.class);
 		return ns;
 	}
 
