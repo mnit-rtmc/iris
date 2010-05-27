@@ -10,7 +10,7 @@
 </head>
 
 <body>
-<p id="stamp">26 May 2010</p>
+<p id="stamp">27 May 2010</p>
 <h2>Variable Speed Advisory Calculation</h2>
 <div class="right">
 	<img src="uniform_acc.svg" width="512" height="512" />
@@ -31,7 +31,7 @@
 		using a precipitation sensor.
 		There are seperate thresholds for dry, light rain, moderate
 		rain, heavy rain, and ice.
-		The units are in mph/s, and negative values indicate
+		The units are in mi/hr², and negative values indicate
 		deceleration instead of acceleration.
 	</p></dd>
 	<dt>Station Parameters</dt>
@@ -117,16 +117,16 @@
 		<div>
 		<span class="middle">a = </span>
 		<span class="inblock">U<sub>i</sub>² - U<sub>i-r</sub>²<br/>
-		<span class="over">2 * (M<sub>i</sub> - M<sub>i-r</sub>) * 3600
+		<span class="over">2 * (M<sub>i</sub> - M<sub>i-r</sub>)
 		</span></span>
 		</div>
-		The units for <b>a</b> are mph/s.
+		The units for <b>a</b> are mi/hr².
 		The result will be positive for acceleration, and negative for
 		deceleration.
 	</li>
 	<li>
 		For each station <b>S<sub>j</sub></b>, from
-		<b>S<sub>i-r</sub></b> to <b>S<sub>i</sub></b> (non-inclusive),
+		<b>S<sub>i-r</sub></b> to <b>S<sub>i</sub></b>,
 		reduce the speed advisory <b>A<sub>j</sub></b>.
 		<ul>
 		    <li>
