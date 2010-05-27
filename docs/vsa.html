@@ -115,21 +115,16 @@
 		Otherwise, repeat this step.
 	</li>
 	<li>
-		Calculate uniform acceleration in control range:
+		Calculate uniform acceleration (mi/hr²) in control range:
 		<div>
 		<span class="middle">a = </span>
 		<span class="inblock">U<sub>i</sub>² - U<sub>i-r</sub>²<br/>
 		<span class="over">2 (M<sub>i</sub> - M<sub>i-r</sub>)
 		</span></span>
 		</div>
-		The units for <b>a</b> are mi/hr².
-		The result will be positive for acceleration, and negative for
-		deceleration.
 	</li>
 	<li>
-		Check that <b>a</b> is less than <b>a<sub>p</sub></b>
-		(deceleration threshold for current pavement condition).
-		If not, stop processing.
+		If <b>a</b> &gt; <b>a<sub>p</sub></b>, stop processing.
 	</li>
 	<li>
 		Increment control range <b><sub>r</sub></b> by 1 station.
