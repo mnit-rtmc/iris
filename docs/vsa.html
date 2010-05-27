@@ -93,13 +93,8 @@
 	</li>
 	<li>
 		Iterate through all mainline stations.
-		For each station <b>S<sub>i</sub></b> with valid speed data,
-		perform the station algorithm below.
-	</li>
-	<li>
-		For all stations with invalid speed data, set the speed
-		advisory using a linear interpolation from the next upstream
-		and downstream valid stations.
+		For each station <b>S<sub>i</sub></b>, perform the station
+		algorithm below.
 	</li>
 </ol>
 <h3>Station Algorithm</h3>
@@ -113,11 +108,15 @@
 		<b>L<sub>i</sub></b>.
 	</li>
 	<li>
+		Check that U<sub>i</sub> and U<sub>i-r</sub> have valid speeds.
+		If not, skip next 3 steps.
+	</li>
+	<li>
 		Calculate uniform acceleration in control range:
 		<div>
 		<span class="middle">a = </span>
 		<span class="inblock">U<sub>i</sub>² - U<sub>i-r</sub>²<br/>
-		<span class="over">2 * (M<sub>i</sub> - M<sub>i-r</sub>)
+		<span class="over">2 (M<sub>i</sub> - M<sub>i-r</sub>)
 		</span></span>
 		</div>
 		The units for <b>a</b> are mi/hr².
@@ -136,7 +135,7 @@
 		    </li>
 		    <li>
 		        Limit A to range of
-		        [U<sub>j</sub> - 15, A<sub>j</sub>]
+		        [U<sub>j</sub> - 10, A<sub>j</sub>]
 		    </li>
 		    <li>
 		    	Set A<sub>j</sub> = A
