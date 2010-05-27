@@ -50,5 +50,5 @@
     <text style="font-size:16px;font-family:Liberation Sans" x="120" y="92">
        <tspan x="120" y="92">s</tspan></text>
     <text style="font-size:20px;font-family:Liberation Sans" x="8" y="240">
-       <tspan x="8" y="240">v² = u² + 2as</tspan></text>
+       <tspan x="64" y="240">v² = u² + 2as</tspan></text>
 </svg>
