@@ -109,7 +109,10 @@
 	</li>
 	<li>
 		Check that U<sub>i</sub> and U<sub>i-r</sub> have valid speeds.
-		If not, skip next 3 steps.
+		If not, increment control range <b><sub>r</sub></b> by 1
+		station.
+		If <b><sub>i-r</sub></b> &lt; 0, stop processing.
+		Otherwise, repeat this step.
 	</li>
 	<li>
 		Calculate uniform acceleration in control range:
@@ -122,6 +125,15 @@
 		The units for <b>a</b> are mi/hr².
 		The result will be positive for acceleration, and negative for
 		deceleration.
+	</li>
+	<li>
+		Check that <b>a</b> is less than <b>a<sub>p</sub></b>
+		(deceleration threshold for current pavement condition).
+		If not, stop processing.
+	</li>
+	<li>
+		Increment control range <b><sub>r</sub></b> by 1 station.
+		If <b><sub>i-r</sub></b> &lt; 0, stop processing.
 	</li>
 	<li>
 		For each station <b>S<sub>j</sub></b>, from
@@ -143,16 +155,7 @@
 		</ul>
 	</li>
 	<li>
-		Check that <b>a</b> is greater than <b>a<sub>p</sub></b>
-		(deceleration threshold for current pavement condition).
-		If not, stop processing.
-	</li>
-	<li>
-		Increment control range <b><sub>r</sub></b> by 1 station.
-	</li>
-	<li>
-		If <b><sub>i-r</sub></b> ≥ 0, continue from step 3.
-		Otherwise, stop processing.
+		Continue from step 3.
 	</li>
 </ol>
 
