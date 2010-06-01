@@ -69,6 +69,15 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			return c.isFailed();
 	}
 
+	/** Check if the controller has an error */
+	public boolean hasError() {
+		ControllerImpl c = controller;	// Avoid race
+		if(c == null)
+			return true;
+		else
+			return !"".equals(c.getError());
+	}
+
 	/** Get the message poller */
 	public MessagePoller getPoller() {
 		ControllerImpl c = controller;	// Avoid race

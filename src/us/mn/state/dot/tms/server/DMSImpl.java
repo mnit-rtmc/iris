@@ -1293,7 +1293,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Check if a DMS action is deployable */
 	public boolean isDeployable(DmsAction da) {
-		if(isFailed())
+		if(hasError())
 			return false;
 		SignMessage sm = createMessage(da);
 		try {
