@@ -6,12 +6,12 @@
 <head>
 	<meta name="Author" content="Douglas Lau"/>
 	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
-	<title>Variable Speed Advisory Calculation</title>
+	<title>Variable Speed Advisory</title>
 </head>
 
 <body>
 <p id="stamp">2 June 2010</p>
-<h2>Variable Speed Advisory Calculation</h2>
+<h2>Variable Speed Advisory</h2>
 <div class="right">
 	<img src="uniform_acc.svg" width="512" height="512" />
 	<div class="label">Uniform Acceleration</div>
@@ -19,15 +19,18 @@
 <p>
     The goal is to promote a safe, <b>uniform deceleration</b> for vehicles
     approaching congestion.
+    Speed advisory signs are activated to warn motorists of slow traffic ahead.
+</p>
+<p>
+    A <i>bottleneck</i> is activated when the uniform rate of deceleration is
+    found to be unsafe.
     The standard equation for uniform acceleration is used to determine when
     variable speed advisories must be deployed.
 </p>
+<h3>Policy Parameters</h3>
 <dl>
-    <dt>Deceleration Threshold</dt>
+    <dt>Deceleration Thresholds</dt>
     <dd>
-	<p>
-	    A <i>bottleneck</i> is activated when the uniform rate of
-	    deceleration is found to be unsafe.
 	    There are two thresholds for determining a bottleneck.
 	    They are the start <b>a<sub>s</sub></b> and stop
 	    <b>a<sub>p</sub></b> thresholds.
@@ -37,7 +40,6 @@
 	    heavy rain, and ice.
 	    The units are in mi/hr², and negative values indicate deceleration
 	    instead of acceleration.
-	</p>
 	<table>
 	    <tr>
 		<th>Precipitation</th>
@@ -71,51 +73,67 @@
 	    </tr>
 	</table>
     </dd>
-	<dt>Station Parameters</dt>
-	<dd><ul>
-		<li>Speed Limit (L) miles per hour</li>
-		<li>Mile Point (M) miles from upstream end of corridor</li>
-	</ul></dd>
-	<dt>Station Sample Data</dt>
-	<dd>
-	    <ul>
-		<li>Speed (U) miles per hour (average of all lanes)</li>
-	    </ul>
-	    The average of the most recent 30-second samples is used.
-	    The number of samples depends on the lowest sample speed.
-	    <table>
-	        <tr>
-	    	    <th>Lowest Speed</th>
-	            <th>Sample Count</th>
-	            <th>Sample period</th>
-	        </tr>
-	        <tr>
-	            <td>40+ mph</td>
-	            <td>2 samples</td>
-	            <td>1 minute</td>
-	        </tr>
-	        <tr>
-	            <td>25-40 mph</td>
-	            <td>4 samples</td>
-	            <td>2 minutes</td>
-	        </tr>
-	        <tr>
-	            <td>20-25 mph</td>
-	            <td>6 samples</td>
-	            <td>3 minutes</td>
-	        </tr>
-	        <tr>
-	            <td>15-20 mph</td>
-	            <td>8 samples</td>
-	            <td>4 minutes</td>
-	        </tr>
-	        <tr>
-	            <td>0-15 mph</td>
-	            <td>10 samples</td>
-	            <td>5 minutes</td>
-	        </tr>
-	    </table>
-	</dd>
+    <dt>Minimum Distance</dt>
+    <dd>
+	The minimum distance <b>M<sub>min</sub></b> between stations.
+	The default value is 0.1 mi.
+    </dd>
+    <dt>Minimum Advisory Speed</dt>
+    <dd>
+	The minimum advisory speed <b>U<sub>min</sub></b> to display.
+	The default value is 30 mph.
+    </dd>
+    <dt>Downstream bottleneck distance</dt>
+    <dd>
+	The largest distance downstream of a bottleneck <b>M<sub>down</sub></b>
+	to activate signs.
+	The default value is 0.2 mi.
+    </dd>
+    <dt>Station Parameters</dt>
+    <dd><ul>
+	<li>Speed Limit (L) miles per hour</li>
+	<li>Mile Point (M) miles from upstream end of corridor</li>
+    </ul></dd>
+    <dt>Station Sample Data</dt>
+    <dd>
+	<ul>
+	    <li>Speed (U) miles per hour (average of all lanes)</li>
+	</ul>
+	The average of the most recent 30-second samples is used.
+	The number of samples depends on the lowest sample speed.
+	<table>
+	    <tr>
+		<th>Lowest Speed</th>
+		<th>Sample Count</th>
+		<th>Sample period</th>
+	    </tr>
+	    <tr>
+		<td>40+ mph</td>
+		<td>2 samples</td>
+		<td>1 minute</td>
+	    </tr>
+	    <tr>
+		<td>25-40 mph</td>
+		<td>4 samples</td>
+		<td>2 minutes</td>
+	    </tr>
+	    <tr>
+		<td>20-25 mph</td>
+		<td>6 samples</td>
+		<td>3 minutes</td>
+	    </tr>
+	    <tr>
+		<td>15-20 mph</td>
+		<td>8 samples</td>
+		<td>4 minutes</td>
+	    </tr>
+	    <tr>
+		<td>0-15 mph</td>
+		<td>10 samples</td>
+		<td>5 minutes</td>
+	    </tr>
+	</table>
+    </dd>
 </dl>
 <h3>Corridor Algorithm</h3>
 <ol>
@@ -128,6 +146,10 @@
 	bottleneck interval count <b>B<sub>i</sub></b>.
     </li>
     <ul>
+	<li>
+	    If <b>M<sub>i</sub</b> - <b>M<sub>i-1</sub></b> &lt;
+	    <b>M<sub>min</sub></b>, <b>B<sub>i</sub></b> = 0.
+	</li>
         <li>
 	    If <b>U<sub>i</sub></b> or <b>U<sub>i-1</sub></b> are invalid,
 	    <b>B<sub>i</sub></b> = 0.
@@ -179,29 +201,29 @@
     </ul>
 </ol>
 
-<h3>Assigning Speed Advisory to ILCS</h3>
+<h3>Assigning Speed Advisory to Signs</h3>
 <p>
-	For each LCS array with a deployed VSA action plan, determine whether
-	the VSA indication should be displayed or not.
+	For each sign with a deployed VSA action plan, determine whether the
+	VSA indication should be displayed or not.
 </p>
 <ol>
     <li>
-	Find any bottlenecks which are in range of ILCS.
+	Find any bottlenecks which are in range of sign.
     </li>
     <li>
     	Set L<sub>lcs</sub> to minimum of speed limits at stations immediately
-    	upstream and downstream of the ILCS.
+    	upstream and downstream of the sign.
     </li>
     <li>
     	Set U<sub>lcs</sub> to minimum of speeds at stations immediately
-    	upstream and downstream of the ILCS.
+    	upstream and downstream of the sign.
     </li>
     <li>
-    	Set U<sub>min</sub> to maximum of:
+    	Set U<sub>low</sub> to maximum of:
     	<ul>
     		<li>U<sub>lcs</sub> - 10 mph</li>
     		<li>previous interval A<sub>lcs</sub> - 5 mph</li>
-    		<li>30 mph (configurable)</li>
+    		<li>U<sub>min</sub></li>
     	</ul>
     </li>
     <li>
@@ -210,12 +232,12 @@
     	(M<sub>i</sub> - M<sub>lcs</sub>)</span>
     </li>
     <li>
-	If the LCS array is within 1000 feet (configurable) downstream of
-	bottleneck, set A<sub>lcs</sub> = U<sub>i</sub>.
+	If M<sub>down</sub> &gt; M<sub>lcs</sub> - M<sub>i</sub> &gt; 0,
+	set A<sub>lcs</sub> = U<sub>i</sub>.
     </li>
     <li>
-	If A<sub>lcs</sub> &lt; U<sub>min</sub>, set A<sub>lcs</sub> =
-	U<sub>min</sub>.
+	If A<sub>lcs</sub> &lt; U<sub>low</sub>, set A<sub>lcs</sub> =
+	U<sub>low</sub>.
     </li>
     <li>
 	Quantize the speed advisory to 5 mph granularity.
