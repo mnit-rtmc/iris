@@ -345,7 +345,7 @@ public class DMSHelper extends BaseHelper {
 		//        in this manner.  We should really lookup the comm
 		//        link and figure it out from there. This is presently
 		//	  agency specific code (Caltrans).
-		return !SString.containsIgnoreCase(d.getSignAccess(), "modem");
+		return !SString.containsIgnoreCase(d.getSignAccess(), "dialup");
 	}
 
 	/** Get current sign message text as an array of strings. */
