@@ -111,117 +111,115 @@
 	            <td>5 minutes</td>
 	        </tr>
 	    </table>
-	    <br/>
 	</dd>
-	<dt>Station Results</dt>
-	<dd><ul>
-		<li>Speed Advisory (A) miles per hour</li>
-	</ul></dd>
 </dl>
 <h3>Corridor Algorithm</h3>
 <ol>
-	<li>
-		Sort stations in corridor from upstream to downstream.
-		The stations are <b>S<sub>0</sub>…S<sub>n</sub></b>.
+    <li>
+	Sort stations in corridor from upstream to downstream.
+	The stations are <b>S<sub>0</sub>…S<sub>n</sub></b>.
+    </li>
+    <li>
+	For each station <b>S<sub>1</sub>…S<sub>n</sub></b>, calculate the
+	bottleneck interval count <b>B<sub>i</sub></b>.
+    </li>
+    <ul>
+        <li>
+	    If <b>U<sub>i</sub></b> or <b>U<sub>i-1</sub></b> are invalid,
+	    <b>B<sub>i</sub></b> = 0.
 	</li>
 	<li>
-		Iterate through all mainline stations.
-		For each station <b>S<sub>i</sub></b>, perform the station
-		algorithm below.
-	</li>
-</ol>
-<h3>Station Algorithm</h3>
-<ol>
-	<li>
-		Set initial control range <b><sub>r</sub></b> to 1 upstream
-		station.
+	    If <b>U<sub>i</sub></b> + 10 &gt; <b>L<sub>i</sub></b>,
+	    <b>B<sub>i</sub></b> = 0.
 	</li>
 	<li>
-		Set speed advisory <b>A<sub>i</sub></b> equal to the speed limit
-		<b>L<sub>i</sub></b>.
+	    Calculate uniform acceleration (mi/hr²) approaching station:
+	    <div>
+	    <span class="middle">a<sub>i</sub> = </span>
+	    <span class="inblock">U<sub>i</sub>² - U<sub>i-1</sub>²<br/>
+	    <span class="over">2 (M<sub>i</sub> - M<sub>i-1</sub>)
+	    </span></span>
+	    </div>
 	</li>
 	<li>
-		Check that U<sub>i</sub> and U<sub>i-r</sub> have valid speeds.
-		If not, increment control range <b><sub>r</sub></b> by 1
-		station.
-		If <b><sub>i-r</sub></b> &lt; 0, stop processing.
-		Otherwise, repeat this step.
+	    If <b>B<sub>i</sub></b> &lt; 3, <b>a<sub>p</sub></b> = -1500 else
+	    <b>a<sub>p</sub></b> = -1000.
 	</li>
 	<li>
-		Calculate uniform acceleration (mi/hr²) in control range:
-		<div>
-		<span class="middle">a = </span>
-		<span class="inblock">U<sub>i</sub>² - U<sub>i-r</sub>²<br/>
-		<span class="over">2 (M<sub>i</sub> - M<sub>i-r</sub>)
-		</span></span>
-		</div>
+	    If <b>a<sub>i</sub></b> &gt; <b>a<sub>p</sub></b>,
+	    <b>B<sub>i</sub></b> = 0.
 	</li>
 	<li>
-		If <b>a</b> &gt; <b>a<sub>p</sub></b>, stop processing.
+	    Increment <b>B<sub>i</sub></b> by 1 interval.
 	</li>
+    </ul>
+    <li>
+	For each station <b>S<sub>1</sub>…S<sub>n</sub></b>, calculate the
+	bottleneck flag <b>b<sub>i</sub></b>.
+    </li>
+    <ul>
 	<li>
-		Increment control range <b><sub>r</sub></b> by 1 station.
-		If <b><sub>i-r</sub></b> &lt; 0, stop processing.
+	    If <b>B<sub>i</sub></b> &lt; 3, clear <b>b<sub>i</sub></b> flag;
+	    otherwise:
 	</li>
-	<li>
-		For each station <b>S<sub>j</sub></b>, from
-		<b>S<sub>i-r</sub></b> to <b>S<sub>i</sub></b>,
-		reduce the speed advisory <b>A<sub>j</sub></b>.
-		<ul>
-		    <li>
-		    	A = √<span class="over">
-		    	U<sub>i</sub>² + 2 a
-		    	(M<sub>i</sub> - M<sub>j</sub>)</span>
-		    </li>
-		    <li>
-		        Limit A to range of
-		        [U<sub>j</sub> - 10, A<sub>j</sub>]
-		    </li>
-		    <li>
-		    	Set A<sub>j</sub> = A
-		    </li>
-		</ul>
-	</li>
-	<li>
-		Continue from step 3.
-	</li>
+	<ul>
+	    <li>
+		If <b>a<sub>i</sub></b> &gt; <b>a<sub>i-1</sub></b>, set
+		<b>b<sub>i-1</sub></b> flag and clear <b>b<sub>i</sub></b> flag.
+	    </li>
+	    <li>
+		Else set <b>b<sub>i</sub></b> flag and clear
+		<b>b<sub>i-1</sub></b> flag.
+	    </li>
+	</ul>
+    </ul>
 </ol>
 
-<h2>Applying Speed Advisory to ILCS</h2>
+<h3>Assigning Speed Advisory to ILCS</h3>
 <p>
 	For each LCS array with a deployed VSA action plan, determine whether
 	the VSA indication should be displayed or not.
 </p>
 <ol>
-	<li>
-		Find the stations immediately upstream and downstream of the
-		LCS array.
-	</li>
-	<li>
-		Calculate the speed advisory at the location of the LCS array.
-		If the LCS array is within 1000 feet (configurable) of either
-		station, use the speed advisory at that station.
-		If not, and the downstream advisory is less than the upstream
-		advisory, use linear linterpolation between the two.
-		Otherwise, use the downstream speed.
-	</li>
-	<li>
-		Quantize the speed advisory to 5 mph granularity.
-		This is done by rounding up to the next higher 5 mph.
-	</li>
-	<li>
-		If the advisory is not less than the speed limit at both
-		upstream and downstream stations, do not display a VSA
-		indication.
-	</li>
-	<li>
-		Limit speed advisory to no less than 5 mph below previous 30
-		second speed advisory.
-	</li>
-	<li>
-		Limit speed advisory to no less than configurable minimum
-		speed advisory (30 mph).
-	</li>
+    <li>
+	Find any bottlenecks which are in range of ILCS.
+    </li>
+    <li>
+    	Set L<sub>lcs</sub> to minimum of speed limits at stations immediately
+    	upstream and downstream of the ILCS.
+    </li>
+    <li>
+    	Set U<sub>lcs</sub> to minimum of speeds at stations immediately
+    	upstream and downstream of the ILCS.
+    </li>
+    <li>
+    	Set U<sub>min</sub> to maximum of:
+    	<ul>
+    		<li>U<sub>lcs</sub> - 10 mph</li>
+    		<li>previous interval A<sub>lcs</sub> - 5 mph</li>
+    		<li>30 mph (configurable)</li>
+    	</ul>
+    </li>
+    <li>
+    	A<sub>lcs</sub> = √<span class="over">
+    	U<sub>i</sub>² + 2 a<sub>i</sub>
+    	(M<sub>i</sub> - M<sub>lcs</sub>)</span>
+    </li>
+    <li>
+	If the LCS array is within 1000 feet (configurable) downstream of
+	bottleneck, set A<sub>lcs</sub> = U<sub>i</sub>.
+    </li>
+    <li>
+	If A<sub>lcs</sub> &lt; U<sub>min</sub>, set A<sub>lcs</sub> =
+	U<sub>min</sub>.
+    </li>
+    <li>
+	Quantize the speed advisory to 5 mph granularity.
+	This is done by rounding up to the next higher 5 mph.
+    </li>
+    <li>
+	If A<sub>lcs</sub> &lt; L<sub>lcs</sub> display VSA indication.
+    </li>
 </ol>
 </body>
 </html>
