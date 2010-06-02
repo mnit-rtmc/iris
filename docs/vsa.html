@@ -29,17 +29,25 @@
 </p>
 <h3>Policy Parameters</h3>
 <dl>
+    <dt>Minimum Distance</dt>
+    <dd>
+	The minimum distance <b>M<sub>min</sub></b> between stations.
+	The default value is 0.1 mi.
+    </dd>
+    <dt>Minimum Advisory Speed</dt>
+    <dd>
+	The minimum advisory speed <b>U<sub>min</sub></b> to display.
+	The default value is 30 mph.
+    </dd>
+    <dt>Downstream bottleneck distance</dt>
+    <dd>
+	The largest distance downstream of a bottleneck <b>M<sub>down</sub></b>
+	to activate signs.
+	The default value is 0.2 mi.
+    </dd>
     <dt>Deceleration Thresholds</dt>
     <dd>
-	    There are two thresholds for determining a bottleneck.
-	    They are the start <b>a<sub>s</sub></b> and stop
-	    <b>a<sub>p</sub></b> thresholds.
-	    The thresholds are based on the pavement conditions, measured using
-	    a precipitation sensor.
-	    There are seperate thresholds for dry, light rain, moderate rain,
-	    heavy rain, and ice.
-	    The units are in mi/hr², and negative values indicate deceleration
-	    instead of acceleration.
+	<div class="right">
 	<table>
 	    <tr>
 		<th>Precipitation</th>
@@ -72,35 +80,25 @@
 		<td>-500</td>
 	    </tr>
 	</table>
-    </dd>
-    <dt>Minimum Distance</dt>
-    <dd>
-	The minimum distance <b>M<sub>min</sub></b> between stations.
-	The default value is 0.1 mi.
-    </dd>
-    <dt>Minimum Advisory Speed</dt>
-    <dd>
-	The minimum advisory speed <b>U<sub>min</sub></b> to display.
-	The default value is 30 mph.
-    </dd>
-    <dt>Downstream bottleneck distance</dt>
-    <dd>
-	The largest distance downstream of a bottleneck <b>M<sub>down</sub></b>
-	to activate signs.
-	The default value is 0.2 mi.
+	</div>
+	There are two thresholds for determining a bottleneck.
+	They are the start <b>a<sub>s</sub></b> and stop <b>a<sub>p</sub></b>
+	thresholds.
+	The thresholds are based on the pavement conditions, measured using a
+	precipitation sensor.
+	There are seperate thresholds for dry, light rain, moderate rain, heavy
+	rain, and ice.
+	The units are in mi/hr², and negative values indicate deceleration
+	instead of acceleration.
     </dd>
     <dt>Station Parameters</dt>
     <dd><ul>
 	<li>Speed Limit (L) miles per hour</li>
 	<li>Mile Point (M) miles from upstream end of corridor</li>
     </ul></dd>
-    <dt>Station Sample Data</dt>
+    <dt>Station Sample Speeds</dt>
     <dd>
-	<ul>
-	    <li>Speed (U) miles per hour (average of all lanes)</li>
-	</ul>
-	The average of the most recent 30-second samples is used.
-	The number of samples depends on the lowest sample speed.
+	<div class="right">
 	<table>
 	    <tr>
 		<th>Lowest Speed</th>
@@ -133,8 +131,13 @@
 		<td>5 minutes</td>
 	    </tr>
 	</table>
+	</div>
+	Speed <b>U</b> mph, average of lanes in station.
+	A rolling average is used, with the number of sample intervals
+	depending on the lowest station speed.
     </dd>
 </dl>
+<br class="clear"/>
 <h3>Corridor Algorithm</h3>
 <ol>
     <li>
