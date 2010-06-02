@@ -39,6 +39,10 @@ TABLE {
 	border: 3px solid black;
 	background: #f0f0f0;
 }
+TH {
+	padding-left: 8px;
+	padding-right: 8px;
+}
 TD {
 	border-left: 1px solid gray;
 	border-right: 1px solid gray;
