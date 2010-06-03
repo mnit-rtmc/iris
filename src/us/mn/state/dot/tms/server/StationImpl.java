@@ -342,9 +342,7 @@ public class StationImpl implements Station {
 	 * @param sp Previous station.
 	 * @param d Distance to previous station (miles). */
 	public void calculateBottleneck(StationImpl sp, float d) {
-		if(d < SystemAttrEnum.VSA_MIN_STATION_MILES.getFloat() ||
-		   isSpeedNearLimit())
-		{
+		if(isTooClose(d) || isSpeedNearLimit()) {
 			clearBottleneck();
 			debug(sp, d);
 			return;
@@ -355,8 +353,7 @@ public class StationImpl implements Station {
 		else
 			n_bottleneck = 0;
 		Float ap = sp.getAcceleration();
-		if(ap == null ||
-		   n_bottleneck < SystemAttrEnum.VSA_START_INTERVALS.getInt())
+		if(ap == null || isBeforeStartCount())
 			setBottleneck(false);
 		else {
 			boolean b = acceleration < ap;
@@ -364,6 +361,11 @@ public class StationImpl implements Station {
 			sp.setBottleneck(!b);
 		}
 		debug(sp, d);
+	}
+
+	/** Test if previous station is too close for bottleneck calculation */
+	protected boolean isTooClose(float d) {
+		return d < SystemAttrEnum.VSA_MIN_STATION_MILES.getFloat();
 	}
 
 	/** Test if station speed is near the speed limit */
@@ -383,9 +385,15 @@ public class StationImpl implements Station {
 		return (u * u - up * up) / (2 * d);
 	}
 
+	/** Test if the number of intervals is lower than start count */
+	protected boolean isBeforeStartCount() {
+		return n_bottleneck <
+			SystemAttrEnum.VSA_START_INTERVALS.getInt();
+	}
+
 	/** Get the current deceleration threshold */
 	protected int getThreshold() {
-		if(n_bottleneck < SystemAttrEnum.VSA_START_INTERVALS.getInt())
+		if(isBeforeStartCount())
 			return getStartThreshold();
 		else
 			return getStopThreshold();
