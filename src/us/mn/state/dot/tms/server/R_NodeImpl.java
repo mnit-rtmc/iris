@@ -203,11 +203,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		setNodeType(t);
 	}
 
-	/** Check if the r_node is a station */
-	public boolean isStation() {
-		return node_type == R_NodeType.STATION;
-	}
-
 	/** Check if the r_node is an entrance */
 	public boolean isEntrance() {
 		return node_type == R_NodeType.ENTRANCE;

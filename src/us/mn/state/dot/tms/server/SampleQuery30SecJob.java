@@ -64,6 +64,7 @@ public class SampleQuery30SecJob extends Job {
 				station_manager.writeSampleXml();
 				station_manager.writeStationXml();
 				writeSampleXml();
+				BaseObjectImpl.corridors.findBottlenecks();
 			}
 			finally {
 				if(!HolidayHelper.isHoliday(stamp))

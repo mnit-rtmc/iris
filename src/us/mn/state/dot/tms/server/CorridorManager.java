@@ -136,4 +136,10 @@ public class CorridorManager {
 		for(Corridor c: corridors.values())
 			c.printXml(out);
 	}
+
+	/** Find the current bottlenecks for all corridors */
+	public synchronized void findBottlenecks() {
+		for(Corridor c: corridors.values())
+			c.findBottlenecks();
+	}
 }

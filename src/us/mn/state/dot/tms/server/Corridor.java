@@ -66,8 +66,8 @@ public class Corridor extends CorridorBase {
 			new TreeMap<Float, StationImpl>();
 		for(Float m: n_points.keySet()) {
 			R_NodeImpl n = (R_NodeImpl)n_points.get(m);
-			if(n.isStation()) {
-				StationImpl s = (StationImpl)n.getStation();
+			if(R_NodeHelper.isStation(n)) {
+				StationImpl s = n.getStation();
 				if(s != null)
 					stations.put(m, s);
 			}
@@ -148,5 +148,31 @@ public class Corridor extends CorridorBase {
 		for(R_Node n: r_nodes)
 			((R_NodeImpl)n).printXml(out);
 		out.println("</corridor>");
+	}
+
+	/** Find the current bottlenecks on the corridor */
+	public void findBottlenecks() {
+		StationImpl sp = null;	// previous station
+		Float mp = null;	// mile point at previous station
+		for(Float mc: n_points.keySet()) {
+			assert mc != null;
+			R_NodeImpl nc = (R_NodeImpl)n_points.get(mc);
+			if(R_NodeHelper.isStation(nc)) {
+				StationImpl sc = nc.getStation();
+				if(sc != null) {
+					if(sc.getSmoothedAverageSpeed() > 0) {
+						if(mp != null) {
+							assert sp != null;
+							sc.calculateBottleneck(
+								sp, mc - mp);
+						} else
+							sc.clearBottleneck();
+						sp = sc;
+						mp = mc;
+					} else
+						sc.clearBottleneck();
+				}
+			}
+		}
 	}
 }

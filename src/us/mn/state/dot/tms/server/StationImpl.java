@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A station is a group of related detectors.
@@ -26,6 +27,10 @@ import us.mn.state.dot.tms.Station;
  * @author Douglas Lau
  */
 public class StationImpl implements Station {
+
+	/** Bottleneck debug log */
+	static protected final DebugLog BOTTLENECK_LOG =
+		new DebugLog("bottleneck");
 
 	/** Speed ranks for extending rolling sample averaging */
 	static protected enum SpeedRank {
@@ -311,6 +316,107 @@ public class StationImpl implements Station {
 			out.println("\t\t<flow>" + flow + "</flow>");
 			out.println("\t\t<speed>" + speed + "</speed>");
 			out.println("\t</station>");
+		}
+	}
+
+	/** Acceleration from previous station */
+	protected Float acceleration = null;
+
+	/** Get the acceleration from the previous station */
+	protected Float getAcceleration() {
+		return acceleration;
+	}
+
+	/** Count of iterations where station was a bottleneck */
+	protected int n_bottleneck = 0;
+
+	/** Bottleneck exists flag */
+	protected boolean bottleneck = false;
+
+	/** Set the bottleneck flag */
+	protected void setBottleneck(boolean b) {
+		bottleneck = b;
+	}
+
+	/** Calculate whether the station is a bottleneck.
+	 * @param sp Previous station.
+	 * @param d Distance to previous station (miles). */
+	public void calculateBottleneck(StationImpl sp, float d) {
+		if(d < SystemAttrEnum.VSA_MIN_STATION_MILES.getFloat() ||
+		   isSpeedNearLimit())
+		{
+			clearBottleneck();
+			debug(sp, d);
+			return;
+		}
+		acceleration = calculateAcceleration(sp, d);
+		if(acceleration < getThreshold())
+			n_bottleneck++;
+		else
+			n_bottleneck = 0;
+		Float ap = sp.getAcceleration();
+		if(ap == null ||
+		   n_bottleneck < SystemAttrEnum.VSA_START_INTERVALS.getInt())
+			setBottleneck(false);
+		else {
+			boolean b = acceleration < ap;
+			setBottleneck(b);
+			sp.setBottleneck(!b);
+		}
+		debug(sp, d);
+	}
+
+	/** Test if station speed is near the speed limit */
+	protected boolean isSpeedNearLimit() {
+		return r_node.getSpeedLimit() < getSmoothedAverageSpeed() +
+			SystemAttrEnum.VSA_NEAR_LIMIT_MPH.getInt();
+	}
+
+	/** Calculate the acceleration from previous station.
+	 * @param sp Previous station.
+	 * @param d Distance to previous station (miles).
+	 * @return acceleration in mphph */
+	protected float calculateAcceleration(StationImpl sp, float d) {
+		assert d > 0;
+		float u = getSmoothedAverageSpeed();
+		float up = sp.getSmoothedAverageSpeed();
+		return (u * u - up * up) / (2 * d);
+	}
+
+	/** Get the current deceleration threshold */
+	protected int getThreshold() {
+		if(n_bottleneck < SystemAttrEnum.VSA_START_INTERVALS.getInt())
+			return getStartThreshold();
+		else
+			return getStopThreshold();
+	}
+
+	/** Get the starting deceleration threshold */
+	protected int getStartThreshold() {
+		return SystemAttrEnum.VSA_START_THRESHOLD.getInt();
+	}
+
+	/** Get the stopping deceleration threshold */
+	protected int getStopThreshold() {
+		return SystemAttrEnum.VSA_STOP_THRESHOLD.getInt();
+	}
+
+	/** Clear the station as a bottleneck */
+	public void clearBottleneck() {
+		n_bottleneck = 0;
+		setBottleneck(false);
+		acceleration = null;
+	}
+
+	/** Debug the bottleneck calculation */
+	protected void debug(StationImpl sp, float d) {
+		if(BOTTLENECK_LOG.isOpen()) {
+			BOTTLENECK_LOG.log(name +
+				", prev: " + sp.name +
+				", d: " + d +
+				", acceleration: " + acceleration +
+				", n_bottleneck: " + n_bottleneck +
+				", bottleneck: " + bottleneck);
 		}
 	}
 }
