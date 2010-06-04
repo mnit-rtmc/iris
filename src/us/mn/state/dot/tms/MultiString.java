@@ -36,7 +36,7 @@ public class MultiString implements MultiStringState {
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAGS = Pattern.compile(
-		"(nl|np|jl|jp|fo|g|cf|pt|tr|tt)(.*)");
+		"(nl|np|jl|jp|fo|g|cf|pt|tr|tt|vsa)(.*)");
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
@@ -376,6 +376,11 @@ public class MultiString implements MultiStringState {
 		multi.append("]");
 	}
 
+	/** Add a speed advisory */
+	public void addSpeedAdvisory() {
+		multi.append("[vsa]");
+	}
+
 	/** Get the value of the MULTI string */
 	public String toString() {
 		return multi.toString();
@@ -430,6 +435,8 @@ public class MultiString implements MultiStringState {
 				parseTextRectangle(tparam, cb);
 			else if(tid.equals("tt"))
 				cb.addTravelTime(tparam);
+			else if(tid.equals("vsa"))
+				cb.addSpeedAdvisory();
 		}
 	}
 

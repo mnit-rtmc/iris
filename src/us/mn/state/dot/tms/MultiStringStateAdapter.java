@@ -115,4 +115,9 @@ public class MultiStringStateAdapter implements MultiStringState {
 	public void addTravelTime(String sid) {
 		// subclass must handle
 	}
+
+	/** Add a speed advisory */
+	public void addSpeedAdvisory() {
+		// subclass must handle
+	}
 }
