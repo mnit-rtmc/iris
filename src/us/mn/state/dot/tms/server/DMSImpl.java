@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
@@ -45,7 +44,6 @@ import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
@@ -84,24 +82,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			return i1 == null;
 		else
 			return i0.equals(i1);
-	}
-
-	/** Calculate the maximum trip minute to display on the sign */
-	static protected int maximumTripMinutes(float miles) {
-		float hours = miles /
-			SystemAttrEnum.TRAVEL_TIME_MIN_MPH.getInt();
-		return Math.round(hours * 60);
-	}
-
-	/** Round up to the next 5 minutes */
-	static protected int roundUp5Min(int min) {
-		return ((min - 1) / 5 + 1) * 5;
-	}
-
-	/** Lookup a station */
-	static protected StationImpl lookupStation(String sid) {
-		return (StationImpl)namespace.lookupObject(Station.SONAR_TYPE,
-			sid);
 	}
 
 	/** Load all the DMS */
@@ -151,12 +131,16 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return SONAR_TYPE;
 	}
 
+	/** Travel time estimator */
+	protected final TravelTimeEstimator travel_est;
+
 	/** Create a new DMS with a string name */
 	public DMSImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
 		MainServer.server.createObject(g);
 		geo_loc = g;
+		travel_est = new TravelTimeEstimator(g);
 	}
 
 	/** Create a dynamic message sign */
@@ -168,6 +152,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		camera = cam;
 		awsAllowed = aa;
 		awsControlled = ac;
+		travel_est = new TravelTimeEstimator(loc);
 		initTransients();
 	}
 
@@ -853,7 +838,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			o = null;
 		int ap = smn.getActivationPriority();
 		if(ap == DMSMessagePriority.OVERRIDE.ordinal())
-			s_routes.clear();
+			travel_est.clear();
 		p.sendMessage(this, smn, o);
 	}
 
@@ -1360,173 +1345,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Create a MULTI string for a quick message */
 	protected String createMulti(QuickMessage qm) {
 		if(qm != null)
-			return replaceTravelTimes(qm.getMulti());
-		else
-			return null;
-	}
-
-	/** MultiString for replacing travel time tags */
-	protected class TravelCallback extends MultiString {
-
-		/* If all routes are on the same corridor, when the
-		 * "OVER X" form is used, it must be used for all
-		 * destinations. So, first we must calculate the times
-		 * for each destination. Then, determine if the "OVER"
-		 * form should be used. After that, replace the travel
-		 * time tags with the selected values. */
-		protected boolean any_over = false;
-		protected boolean all_over = false;
-
-		protected boolean valid = true;
-
-		/** Add a travel time destination */
-		public void addTravelTime(String sid) {
-			Route r = lookupRoute(sid);
-			if(r != null)
-				addTravelTime(r);
-			else {
-				logTravel("NO ROUTE TO " + sid);
-				valid = false;
-			}
-		}
-
-		/** Add a travel time for a route */
-		protected void addTravelTime(Route r) {
-			boolean final_dest = isFinalDest(r);
-			try {
-				int mn = calculateTravelTime(r, final_dest);
-				int slow = maximumTripMinutes(r.getLength());
-				addTravelTime(mn, slow);
-			}
-			catch(BadRouteException e) {
-				logTravel("BAD ROUTE, " + e.getMessage());
-				valid = false;
-			}
-		}
-
-		/** Add a travel time */
-		protected void addTravelTime(int mn, int slow) {
-			boolean over = mn > slow;
-			if(over) {
-				any_over = true;
-				mn = slow;
-			}
-			if(over || all_over) {
-				mn = roundUp5Min(mn);
-				addSpan("OVER " + String.valueOf(mn));
-			} else
-				addSpan(String.valueOf(mn));
-		}
-
-		/** Check if the callback has changed formatting mode */
-		protected boolean isChanged() {
-			all_over = any_over && isSingleCorridor();
-			return all_over;
-		}
-	}
-
-	/** Log a travel time error */
-	protected void logTravel(String m) {
-		if(RouteBuilder.TRAVEL_LOG.isOpen())
-			RouteBuilder.TRAVEL_LOG.log(name + ": " + m);
-	}
-
-	/** Replace travel time tags in a MULTI string */
-	protected String replaceTravelTimes(String trav) {
-		MultiString m = new MultiString(trav);
-		TravelCallback cb = new TravelCallback();
-		m.parse(cb);
-		if(cb.isChanged()) {
-			cb.clear();
-			m.parse(cb);
-		}
-		if(cb.valid)
-			return cb.toString();
-		else
-			return null;
-	}
-
-	/** Mapping of station IDs to routes */
-	protected transient final HashMap<String, Route> s_routes =
-		new HashMap<String, Route>();
-
-	/** Lookup a route by station ID */
-	protected Route lookupRoute(String sid) {
-		if(!s_routes.containsKey(sid)) {
-			Route r = createRoute(sid);
-			if(r != null)
-				s_routes.put(sid, r);
-		}
-		return s_routes.get(sid);
-	}
-
-	/** Check if the given route is a final destination */
-	protected boolean isFinalDest(Route r) {
-		for(Route ro: s_routes.values()) {
-			if(ro != r && isSameCorridor(r, ro) &&
-				r.getLength() < ro.getLength())
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/** Are two routes confined to the same single corridor */
-	protected boolean isSameCorridor(Route r1, Route r2) {
-		if(r1 != null && r2 != null) {
-			Corridor c1 = r1.getOnlyCorridor();
-			Corridor c2 = r2.getOnlyCorridor();
-			if(c1 != null && c2 != null)
-				return c1 == c2;
-		}
-		return false;
-	}
-
-	/** Calculate the travel time for the given route */
-	protected int calculateTravelTime(Route route, boolean final_dest)
-		throws BadRouteException
-	{
-		float hours = route.getTravelTime(final_dest);
-		return (int)(hours * 60) + 1;
-	}
-
-	/** Are all the routes confined to the same single corridor */
-	protected boolean isSingleCorridor() {
-		Corridor cor = null;
-		for(Route r: s_routes.values()) {
-			Corridor c = r.getOnlyCorridor();
-			if(c == null)
-				return false;
-			if(cor == null)
-				cor = c;
-			else if(c != cor)
-				return false;
-		}
-		return cor != null;
-	}
-
-	/** Create one route to a travel time destination */
-	protected Route createRoute(String sid) {
-		StationImpl s = lookupStation(sid);
-		if(s != null)
-			return createRoute(s);
-		else
-			return null;
-	}
-
-	/** Create one route to a travel time destination */
-	protected Route createRoute(StationImpl s) {
-		GeoLoc dest = s.getR_Node().getGeoLoc();
-		return createRoute(dest);
-	}
-
-	/** Create one route to a travel time destination */
-	protected Route createRoute(GeoLoc dest) {
-		RouteBuilder builder = new RouteBuilder(getName(), corridors);
-		SortedSet<Route> routes = builder.findRoutes(geo_loc, dest);
-		if(routes.size() > 0)
-			return routes.first();
+			return travel_est.replaceTravelTimes(qm.getMulti());
 		else
 			return null;
 	}
