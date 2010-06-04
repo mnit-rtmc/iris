@@ -435,11 +435,12 @@ public class StationImpl implements Station {
 	protected void debug(StationImpl sp, float d) {
 		if(BOTTLENECK_LOG.isOpen()) {
 			BOTTLENECK_LOG.log(name +
-				", prev: " + sp.name +
+				", bneck: " + bottleneck +
+				", n_bneck: " + n_bottleneck +
+				", acc: " + acceleration +
 				", d: " + d +
-				", acceleration: " + acceleration +
-				", n_bottleneck: " + n_bottleneck +
-				", bottleneck: " + bottleneck);
+				", prev: " + sp.name +
+				", prev.acc: " + sp.acceleration);
 		}
 	}
 }
