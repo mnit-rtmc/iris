@@ -322,11 +322,6 @@ public class StationImpl implements Station {
 	/** Acceleration from previous station */
 	protected Float acceleration = null;
 
-	/** Get the acceleration from the previous station */
-	protected Float getAcceleration() {
-		return acceleration;
-	}
-
 	/** Count of iterations where station was a bottleneck */
 	protected int n_bottleneck = 0;
 
@@ -342,17 +337,20 @@ public class StationImpl implements Station {
 	 * @param sp Previous station.
 	 * @param d Distance to previous station (miles). */
 	public void calculateBottleneck(StationImpl sp, float d) {
-		if(isTooClose(d) || isSpeedNearLimit()) {
-			clearBottleneck();
+		acceleration = calculateAcceleration(sp, d);
+		if(isTooClose(d) || isSpeedNearLimit() ||
+		   !isAccelerationValid())
+		{
+			n_bottleneck = 0;
+			setBottleneck(false);
 			debug(sp, d);
 			return;
 		}
-		acceleration = calculateAcceleration(sp, d);
 		if(acceleration < getThreshold())
 			n_bottleneck++;
 		else
 			n_bottleneck = 0;
-		Float ap = sp.getAcceleration();
+		Float ap = sp.acceleration;
 		if(ap == null || isBeforeStartCount())
 			setBottleneck(false);
 		else {
@@ -361,6 +359,34 @@ public class StationImpl implements Station {
 			sp.setBottleneck(!b);
 		}
 		debug(sp, d);
+	}
+
+	/** Calculate the acceleration from previous station.
+	 * @param sp Previous station.
+	 * @param d Distance to previous station (miles).
+	 * @return acceleration in mphph */
+	protected Float calculateAcceleration(StationImpl sp, float d) {
+		Float u = getSmoothedAverageSpeed();
+		Float up = sp.getSmoothedAverageSpeed();
+		return calculateAcceleration(u, up, d);
+	}
+
+	/** Calculate the acceleration between two stations.
+	 * @param u Downstream speed (mph).
+	 * @param up Upstream speed (mph).
+	 * @param d Distance between stations (miles).
+	 * @return acceleration in mphph */
+	protected Float calculateAcceleration(Float u, Float up, float d) {
+		assert d > 0;
+		if(u != null && up != null)
+			return (u * u - up * up) / (2 * d);
+		else
+			return null;
+	}
+
+	/** Check if acceleration is valid */
+	protected boolean isAccelerationValid() {
+		return acceleration != null;
 	}
 
 	/** Test if previous station is too close for bottleneck calculation */
@@ -372,17 +398,6 @@ public class StationImpl implements Station {
 	protected boolean isSpeedNearLimit() {
 		return r_node.getSpeedLimit() < getSmoothedAverageSpeed() +
 			SystemAttrEnum.VSA_NEAR_LIMIT_MPH.getInt();
-	}
-
-	/** Calculate the acceleration from previous station.
-	 * @param sp Previous station.
-	 * @param d Distance to previous station (miles).
-	 * @return acceleration in mphph */
-	protected float calculateAcceleration(StationImpl sp, float d) {
-		assert d > 0;
-		float u = getSmoothedAverageSpeed();
-		float up = sp.getSmoothedAverageSpeed();
-		return (u * u - up * up) / (2 * d);
 	}
 
 	/** Test if the number of intervals is lower than start count */

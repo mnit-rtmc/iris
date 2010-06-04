@@ -160,13 +160,10 @@ public class Corridor extends CorridorBase {
 			if(R_NodeHelper.isStation(nc)) {
 				StationImpl sc = nc.getStation();
 				if(sc != null) {
-					if(sc.getSmoothedAverageSpeed() > 0) {
-						if(mp != null) {
-							assert sp != null;
-							sc.calculateBottleneck(
-								sp, mc - mp);
-						} else
-							sc.clearBottleneck();
+					if(mp != null) {
+						assert sp != null;
+						sc.calculateBottleneck(sp,
+							mc - mp);
 						sp = sc;
 						mp = mc;
 					} else
