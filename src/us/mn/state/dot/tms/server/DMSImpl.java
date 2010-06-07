@@ -1351,9 +1351,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	protected String createMulti(QuickMessage qm) {
 		if(qm != null) {
 			String m = travel_est.replaceTravelTimes(qm.getMulti());
-			return advisory.replaceSpeedAdvisory(m);
-		} else
-			return null;
+			if(m != null)
+				return advisory.replaceSpeedAdvisory(m);
+		}
+		return null;
 	}
 
 	/** render to kml (KmlPlacemark interface) */
