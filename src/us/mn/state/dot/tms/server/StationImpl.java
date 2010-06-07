@@ -205,6 +205,11 @@ public class StationImpl implements Station {
 		return speed;
 	}
 
+	/** Get the station speed limit */
+	public int getSpeedLimit() {
+		return r_node.getSpeedLimit();
+	}
+
 	/** Average station speed for previous ten samples */
 	protected float[] avg_speed = new float[SpeedRank.Last.samples];
 
@@ -212,7 +217,7 @@ public class StationImpl implements Station {
 	protected void updateAvgSpeed(float s) {
 		System.arraycopy(avg_speed, 0, avg_speed, 1,
 			avg_speed.length - 1);
-		avg_speed[0] = Math.min(s, r_node.getSpeedLimit());
+		avg_speed[0] = Math.min(s, getSpeedLimit());
 	}
 
 	/** Get the average speed smoothed over several samples */
@@ -227,7 +232,7 @@ public class StationImpl implements Station {
 	protected void updateLowSpeed(float s) {
 		System.arraycopy(low_speed, 0, low_speed, 1,
 			low_speed.length - 1);
-		low_speed[0] = Math.min(s, r_node.getSpeedLimit());
+		low_speed[0] = Math.min(s, getSpeedLimit());
 	}
 
 	/** Get the low speed smoothed over several samples */
@@ -396,7 +401,7 @@ public class StationImpl implements Station {
 
 	/** Test if station speed is near the speed limit */
 	protected boolean isSpeedNearLimit() {
-		return r_node.getSpeedLimit() < getSmoothedAverageSpeed() +
+		return getSpeedLimit() < getSmoothedAverageSpeed() +
 			SystemAttrEnum.VSA_NEAR_LIMIT_MPH.getInt();
 	}
 
@@ -442,5 +447,46 @@ public class StationImpl implements Station {
 				", prev: " + sp.name +
 				", prev.acc: " + sp.acceleration);
 		}
+	}
+
+	/** Check if the station is a bottleneck for the given distance */
+	public boolean isBottleneckFor(float d) {
+		if(d > 0)
+			return d < getUpstreamDistance();
+		else
+			return -d < getDownstreamDistance();
+	}
+
+	/** Get the upstream bottleneck distance */
+	protected float getUpstreamDistance() {
+		float lim = getSpeedLimit();
+		float sp = getSmoothedAverageSpeed();
+		if(sp > 0 && sp < lim) {
+			int acc = -getStopThreshold();
+			return (lim * lim - sp * sp) / (2 * acc);
+		} else
+			return 0;
+	}
+
+	/** Get the downstream bottleneck distance */
+	protected float getDownstreamDistance() {
+		return SystemAttrEnum.VSA_DOWNSTREAM_MILES.getFloat();
+	}
+
+	/** Calculate a speed advisory.
+	 * @param d Distance upstream of station.
+	 * @return Speed advisory. */
+	public Float calculateSpeedAdvisory(float d) {
+		float speed = getSmoothedAverageSpeed();
+		if(speed > 0) {
+			if(d > 0) {
+				int acc = -getStopThreshold();
+				double s2 = speed * speed + 2.0 * acc * d;
+				assert s2 > 0;
+				return (float)Math.sqrt(s2);
+			} else
+				return speed;
+		} else
+			return null;
 	}
 }

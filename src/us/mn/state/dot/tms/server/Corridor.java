@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A corridor is a collection of all R_Node objects for one roadway corridor.
@@ -32,6 +33,11 @@ import us.mn.state.dot.tms.R_NodeHelper;
  * @author Douglas Lau
  */
 public class Corridor extends CorridorBase {
+
+	/** Round up to the nearest 5 mph */
+	static protected int round5Mph(float mph) {
+		return Math.round(mph / 5) * 5;
+	}
 
 	/** Create a new corridor */
 	public Corridor(GeoLoc loc) {
@@ -60,18 +66,50 @@ public class Corridor extends CorridorBase {
 		}
 	}
 
-	/** Create a mapping from mile points to stations */
-	public TreeMap<Float, StationImpl> createStationMap() {
-		TreeMap<Float, StationImpl> stations =
-			new TreeMap<Float, StationImpl>();
+	/** Interface to find a node on the corridor */
+	static public interface NodeFinder {
+		public boolean check(R_NodeImpl r_node);
+	}
+
+	/** Find a node using a node finder callback interface */
+	public R_NodeImpl findNode(NodeFinder finder) {
+		for(R_Node n: n_points.values()) {
+			R_NodeImpl r_node = (R_NodeImpl)n;
+			if(finder.check(r_node))
+				return r_node;
+		}
+		return null;
+	}
+
+	/** Interface to find a station on the corridor */
+	static public interface StationFinder {
+		public boolean check(Float m, StationImpl s);
+	}
+
+	/** Find a station using a station finder callback interface */
+	public StationImpl findStation(StationFinder finder) {
 		for(Float m: n_points.keySet()) {
+			assert m != null;
 			R_NodeImpl n = (R_NodeImpl)n_points.get(m);
 			if(R_NodeHelper.isStation(n)) {
 				StationImpl s = n.getStation();
-				if(s != null)
-					stations.put(m, s);
+				if(s != null && finder.check(m, s))
+					return s;
 			}
 		}
+		return null;
+	}
+
+	/** Create a mapping from mile points to stations */
+	public TreeMap<Float, StationImpl> createStationMap() {
+		final TreeMap<Float, StationImpl> stations =
+			new TreeMap<Float, StationImpl>();
+		findStation(new StationFinder() {
+			public boolean check(Float m, StationImpl s) {
+				stations.put(m, s);
+				return false;
+			}
+		});
 		return stations;
 	}
 
@@ -100,21 +138,6 @@ public class Corridor extends CorridorBase {
 				return (R_NodeImpl)n_points.get(mile);
 		}
 		throw new BadRouteException("No downstream nodes");
-	}
-
-	/** Interface to find a node on the corridor */
-	static public interface NodeFinder {
-		public boolean check(R_NodeImpl r_node);
-	}
-
-	/** Find a node using a node finder callback interface */
-	public R_NodeImpl findNode(NodeFinder finder) {
-		for(R_Node n: n_points.values()) {
-			R_NodeImpl r_node = (R_NodeImpl)n;
-			if(finder.check(r_node))
-				return r_node;
-		}
-		return null;
 	}
 
 	/** Find a node using a node finder callback (reverse order) */
@@ -152,24 +175,121 @@ public class Corridor extends CorridorBase {
 
 	/** Find the current bottlenecks on the corridor */
 	public void findBottlenecks() {
-		StationImpl sp = null;	// previous station
-		Float mp = null;	// mile point at previous station
-		for(Float mc: n_points.keySet()) {
-			assert mc != null;
-			R_NodeImpl nc = (R_NodeImpl)n_points.get(mc);
-			if(R_NodeHelper.isStation(nc)) {
-				StationImpl sc = nc.getStation();
-				if(sc != null) {
-					if(mp != null) {
-						assert sp != null;
-						sc.calculateBottleneck(sp,
-							mc - mp);
-						sp = sc;
-						mp = mc;
-					} else
-						sc.clearBottleneck();
+		findStation(new StationFinder() {
+			protected StationImpl sp;	// previous station
+			protected Float mp;		// previous mile pt
+			public boolean check(Float m, StationImpl s) {
+				if(mp != null) {
+					assert sp != null;
+					s.calculateBottleneck(sp, m - mp);
+					sp = s;
+					mp = m;
+				} else
+					s.clearBottleneck();
+				return false;
+			}
+		});
+	}
+
+	/** Calculate the speed advisory */
+	public Integer calculateSpeedAdvisory(GeoLoc loc) {
+		Float m = calculateMilePoint(loc);
+		if(m != null)
+			return calculateSpeedAdvisory(m);
+		else
+			return null;
+	}
+
+	/** Calculate the speed advisory */
+	protected Integer calculateSpeedAdvisory(float m) {
+		BottleneckFinder bf = new BottleneckFinder(m);
+		findStation(bf);
+		if(bf.foundBottleneck()) {
+			Float speed = bf.getSpeed();
+			Integer lim = bf.getSpeedLimit();
+			if(speed != null && lim != null) {
+				Float a = bf.calculateSpeedAdvisory();
+				if(a != null) {
+					a = Math.max(a, speed - getMaxDrop());
+					a = Math.max(a, getMinDisplay());
+					int sa = round5Mph(a);
+					if(sa < lim)
+						return sa;
+					else
+						return null;
 				}
 			}
+		}
+		return null;
+	}
+
+	/** Get the maximum speed to drop for advisory */
+	protected int getMaxDrop() {
+		return SystemAttrEnum.VSA_MAX_DROP_MPH.getInt();
+	}
+
+	/** Get the minimum speed to display for advisory */
+	protected int getMinDisplay() {
+		return SystemAttrEnum.VSA_MIN_DISPLAY_MPH.getInt();
+	}
+
+	/** Class to find a bottleneck near a point */
+	static protected class BottleneckFinder implements StationFinder {
+		protected final float ma;	// mile point
+		protected StationImpl su;	// upstream station
+		protected Float mu;		// upstream mile pt
+		protected StationImpl sd;	// downstream station
+		protected Float md;		// downstream mile pt
+		protected StationImpl sb;	// bottleneck station
+		protected Float mb;		// bottleneck mile pt
+		protected BottleneckFinder(float m) {
+			ma = m;
+		}
+		public boolean check(Float m, StationImpl s) {
+			if(m < ma) {
+				su = s;
+				mu = m;
+			} else if(md == null || md > m) {
+				sd = s;
+				md = m;
+			}
+			if((mb == null || mb > m) && s.isBottleneckFor(m - ma)){
+				sb = s;
+				mb = m;
+			}
+			return false;
+		}
+		protected boolean foundBottleneck() {
+			return sb != null;
+		}
+		protected Float getSpeed() {
+			if(su != null && sd != null) {
+				float u0 = su.getSmoothedAverageSpeed();
+				float u1 = sd.getSmoothedAverageSpeed();
+				if(u0 > 0 && u1 > 0)
+					return Math.min(u0, u1);
+				if(u0 > 0)
+					return u0;
+				if(u1 > 0)
+					return u1;
+			}
+			return null;
+		}
+		protected Integer getSpeedLimit() {
+			if(su != null && sd != null) {
+				return Math.min(su.getSpeedLimit(),
+					sd.getSpeedLimit());
+			} else if(su != null)
+				return su.getSpeedLimit();
+			else if(sd != null)
+				return sd.getSpeedLimit();
+			else
+				return null;
+		}
+		protected Float calculateSpeedAdvisory() {
+			assert sb != null;
+			assert mb != null;
+			return sb.calculateSpeedAdvisory(mb - ma);
 		}
 	}
 }

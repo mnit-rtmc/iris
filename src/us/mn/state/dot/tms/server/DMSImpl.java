@@ -134,6 +134,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Travel time estimator */
 	protected final TravelTimeEstimator travel_est;
 
+	/** Speed advisory calculator */
+	protected final SpeedAdvisoryCalculator advisory;
+
 	/** Create a new DMS with a string name */
 	public DMSImpl(String n) throws TMSException, SonarException {
 		super(n);
@@ -141,6 +144,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		MainServer.server.createObject(g);
 		geo_loc = g;
 		travel_est = new TravelTimeEstimator(g);
+		advisory = new SpeedAdvisoryCalculator(g);
 	}
 
 	/** Create a dynamic message sign */
@@ -153,6 +157,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		awsAllowed = aa;
 		awsControlled = ac;
 		travel_est = new TravelTimeEstimator(loc);
+		advisory = new SpeedAdvisoryCalculator(loc);
 		initTransients();
 	}
 
@@ -1344,9 +1349,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a MULTI string for a quick message */
 	protected String createMulti(QuickMessage qm) {
-		if(qm != null)
-			return travel_est.replaceTravelTimes(qm.getMulti());
-		else
+		if(qm != null) {
+			String m = travel_est.replaceTravelTimes(qm.getMulti());
+			return advisory.replaceSpeedAdvisory(m);
+		} else
 			return null;
 	}
 
