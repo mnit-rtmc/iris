@@ -59,8 +59,8 @@ public enum LaneUseIndication {
 	/** Must exit left (not in MUTCD) (10) */
 	MUST_EXIT_LEFT(I18N.get("lane.use.must.exit.left")),
 
-	/** Advisory variable speed limit (amber on black) (11) */
-	AVSL(I18N.get("lane.use.avsl")),
+	/** Variable speed advisory (amber on black) (11) */
+	VSA(I18N.get("lane.use.vsa")),
 
 	/** Variable speed limit (black on white) (12) */
 	VSL(I18N.get("lane.use.vsl")),
