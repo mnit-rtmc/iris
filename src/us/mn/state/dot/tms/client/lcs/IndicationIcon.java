@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,24 +47,34 @@ abstract public class IndicationIcon implements Icon {
 	/** Margin on top and bottom of chevron */
 	static protected final float CHEVRON_MARGIN = 0.25f;
 
-	/** String to display for error status */
-	static protected final String ERROR_STRING = "?";
+	/** Shape to use for VSA indication */
+	static protected final Shape VSA_SHAPE_1 =
+		createTextShape("xx", 0.6f, 0.1f, 0.4f, 0);
+
+	/** Shape to use for VSA indication */
+	static protected final Shape VSA_SHAPE_2 =
+		createTextShape("MPH", 1, 0, 0.5f, 0.4f);
 
 	/** Shape to use for representing an error condition */
-	static protected final Shape ERROR_SHAPE;
-	static {
+	static protected final Shape ERROR_SHAPE =
+		createTextShape("?", 1, 0, 1, 0);
+
+	/** Create a text shape */
+	static protected Shape createTextShape(String text, float hspan,
+		float hshift, float vspan, float vshift)
+	{
 		Font font = new Font("Serif", Font.PLAIN, 24);
 		FontRenderContext frc = new FontRenderContext(
 			new AffineTransform(), false, false);
-		GlyphVector vec = font.createGlyphVector(frc, ERROR_STRING);
+		GlyphVector vec = font.createGlyphVector(frc, text);
 		Shape s = vec.getGlyphOutline(0);
 		Rectangle2D rect = s.getBounds2D();
 		AffineTransform a = new AffineTransform();
-		a.translate(SHAPE_BORDER, SHAPE_BORDER);
-		a.scale((1 - 2 * SHAPE_BORDER) / rect.getWidth(),
-			(1 - 2 * SHAPE_BORDER) / rect.getHeight());
+		a.translate(SHAPE_BORDER + hshift, SHAPE_BORDER + vshift);
+		a.scale((hspan - 2 * SHAPE_BORDER) / rect.getWidth(),
+			(vspan - 2 * SHAPE_BORDER) / rect.getHeight());
 		a.translate(-rect.getX(), -rect.getY());
-		ERROR_SHAPE = a.createTransformedShape(s);
+		return a.createTransformedShape(s);
 	}
 
 	/** Shape to draw an arrow */
@@ -149,6 +159,8 @@ abstract public class IndicationIcon implements Icon {
 			return new MergeLeftIndicationIcon(p);
 		case MERGE_BOTH:
 			return new MergeBothIndicationIcon(p);
+		case VSA:
+			return new VariableSpeedIndicationIcon(p);
 		case LOW_VISIBILITY:
 			return new LowVisibilityIndicationIcon(p);
 		default:
@@ -370,6 +382,20 @@ abstract public class IndicationIcon implements Icon {
 				g2.draw(CHEVRON_SHAPE);
 				g2.translate(0.15f, 0);
 			}
+		}
+	}
+
+	/** Icon for VSA lane-use indication */
+	static protected class VariableSpeedIndicationIcon
+		extends IndicationIcon
+	{
+		protected VariableSpeedIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			g2.setColor(Color.YELLOW);
+			g2.fill(VSA_SHAPE_1);
+			g2.fill(VSA_SHAPE_2);
 		}
 	}
 
