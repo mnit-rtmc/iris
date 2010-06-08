@@ -33,6 +33,8 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
@@ -293,7 +295,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	}
 
 	/** Update one attribute on the form */
-	protected void updateAttribute(LCSArray lcs_array, String a) {
+	protected void updateAttribute(final LCSArray lcs_array, String a) {
 		if(a == null || a.equals("name"))
 			nameTxt.setText(lcs_array.getName());
 		if(a == null || a.equals("camera"))
@@ -331,7 +333,24 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		if(a == null || a.equals("indicationsCurrent")) {
 			Integer[] ind = lcs_array.getIndicationsCurrent();
 			lcsPnl.setIndications(ind, lcs_array.getShift());
+			lcsPnl.setClickHandler(new LCSArrayPanel.ClickHandler(){
+				public void handleClick(int lane) {
+					selectDMS(lcs_array, lane);
+				}
+			});
 			indicationSelector.setIndications(ind);
+		}
+	}
+
+	/** Select the DMS for the specified lane */
+	protected void selectDMS(LCSArray lcs_array, int lane) {
+		LCS lcs = LCSArrayHelper.lookupLCS(lcs_array, lane);
+		if(lcs != null) {
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null) {
+				session.getDMSManager().getSelectionModel().
+					setSelected(dms);
+			}
 		}
 	}
 
