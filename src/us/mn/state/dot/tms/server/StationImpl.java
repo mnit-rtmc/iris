@@ -375,8 +375,8 @@ public class StationImpl implements Station {
 	 * @param d Distance to previous station (miles).
 	 * @return acceleration in mphph */
 	protected Float calculateAcceleration(StationImpl sp, float d) {
-		Float u = getSmoothedAverageSpeed();
-		Float up = sp.getSmoothedAverageSpeed();
+		float u = getSmoothedAverageSpeed();
+		float up = sp.getSmoothedAverageSpeed();
 		return calculateAcceleration(u, up, d);
 	}
 
@@ -385,9 +385,9 @@ public class StationImpl implements Station {
 	 * @param up Upstream speed (mph).
 	 * @param d Distance between stations (miles).
 	 * @return acceleration in mphph */
-	protected Float calculateAcceleration(Float u, Float up, float d) {
+	protected Float calculateAcceleration(float u, float up, float d) {
 		assert d > 0;
-		if(u != null && up != null)
+		if(u > 0 && up > 0)
 			return (u * u - up * up) / (2 * d);
 		else
 			return null;
@@ -446,6 +446,7 @@ public class StationImpl implements Station {
 			BOTTLENECK_LOG.log(name +
 				", bneck: " + bottleneck +
 				", n_bneck: " + n_bottleneck +
+				", spd: " + getSmoothedAverageSpeed() +
 				", acc: " + acceleration +
 				", d: " + d +
 				", prev: " + sp.name +
