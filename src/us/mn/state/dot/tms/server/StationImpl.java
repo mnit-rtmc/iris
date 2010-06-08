@@ -165,7 +165,11 @@ public class StationImpl implements Station {
 
 	/** Is this station active? */
 	public boolean getActive() {
-		return r_node.getDetectors().length > 0;
+		for(DetectorImpl det: r_node.getDetectors()) {
+			if(!det.getAbandoned())
+				return true;
+		}
+		return false;
 	}
 
 	/** Current average station volume */
