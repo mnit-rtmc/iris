@@ -34,6 +34,9 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class Corridor extends CorridorBase {
 
+	/** VSA debug log */
+	static protected final DebugLog VSA_LOG = new DebugLog("vsa");
+
 	/** Round up to the nearest 5 mph */
 	static protected int round5Mph(float mph) {
 		return Math.round(mph / 5) * 5;
@@ -195,6 +198,8 @@ public class Corridor extends CorridorBase {
 	/** Calculate the speed advisory */
 	public Integer calculateSpeedAdvisory(GeoLoc loc) {
 		Float m = calculateMilePoint(loc);
+		if(VSA_LOG.isOpen())
+			VSA_LOG.log(loc.getName() + ", mp: " + m);
 		if(m != null)
 			return calculateSpeedAdvisory(m);
 		else
@@ -205,6 +210,7 @@ public class Corridor extends CorridorBase {
 	protected Integer calculateSpeedAdvisory(float m) {
 		BottleneckFinder bf = new BottleneckFinder(m);
 		findStation(bf);
+		bf.debug();
 		if(bf.foundBottleneck()) {
 			Float speed = bf.getSpeed();
 			Integer lim = bf.getSpeedLimit();
@@ -291,6 +297,15 @@ public class Corridor extends CorridorBase {
 			assert sb != null;
 			assert mb != null;
 			return sb.calculateSpeedAdvisory(mb - ma);
+		}
+		protected void debug() {
+			if(VSA_LOG.isOpen()) {
+				VSA_LOG.log("upstream: " + su +
+				            ", downstream: " + sd +
+				            ", bottleneck: " + sb +
+				            ", speed: " + getSpeed() +
+				            ", limit: " + getSpeedLimit());
+			}
 		}
 	}
 }
