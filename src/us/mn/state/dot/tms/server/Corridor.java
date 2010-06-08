@@ -179,13 +179,14 @@ public class Corridor extends CorridorBase {
 			protected StationImpl sp;	// previous station
 			protected Float mp;		// previous mile pt
 			public boolean check(Float m, StationImpl s) {
-				if(mp != null) {
-					assert sp != null;
+				if(mp != null)
 					s.calculateBottleneck(sp, m - mp);
+				else
+					s.clearBottleneck();
+				if(s.getSmoothedAverageSpeed() > 0) {
 					sp = s;
 					mp = m;
-				} else
-					s.clearBottleneck();
+				}
 				return false;
 			}
 		});
