@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -253,6 +254,14 @@ public class DMSManager extends ProxyManager<DMS> {
 			}
 		});
 		return p;
+	}
+
+	/** Find the map geo location for a DMS */
+	public MapGeoLoc findGeoLoc(DMS proxy) {
+		if(checkStyle(DMSHelper.STYLE_ALL, proxy))
+			return super.findGeoLoc(proxy);
+		else
+			return null;
 	}
 
 	/** Find the map geo location for a proxy */
