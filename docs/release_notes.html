@@ -11,6 +11,30 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.118.0 (8 June 2010)</dt>
+	<dd><ul>
+		<li>
+			Implemented variable speed advisory (VSA) algorithm.
+		</li>
+		<li>
+			Fixed a bug with sync_action plans for certain
+			controller errors.
+		</li>
+		<li>
+			Fixed a client deadlock for AWS.
+		</li>
+		<li>
+			Cleaned up several interface quirks with DMS tab.
+		</li>
+		<li>
+			Fixed a bug in SS105 protocol.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.118.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.117.0 (18 May 2010)</dt>
 	<dd><ul>
 		<li>
