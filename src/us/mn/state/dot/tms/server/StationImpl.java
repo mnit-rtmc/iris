@@ -256,7 +256,7 @@ public class StationImpl implements Station {
 		float t_speed = 0;
 		int n_speed = 0;
 		for(DetectorImpl det: r_node.getDetectors()) {
-			if(!det.isStationOrCD())
+			if(det.getAbandoned() || !det.isStationOrCD())
 				continue;
 			float f = det.getVolume();
 			if(f != Constants.MISSING_DATA) {
