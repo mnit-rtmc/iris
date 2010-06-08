@@ -393,7 +393,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			if(bmaps != null) {
 				pnlPager = new DMSPanelPager(currentPnl, dms,
 					bmaps, getPgOnTime(dms));
-			}
+			} else
+				currentPnl.clear();
 		}
 	}
 
