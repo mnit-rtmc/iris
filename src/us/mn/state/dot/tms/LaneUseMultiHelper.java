@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.regex.Pattern;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -63,8 +64,30 @@ public class LaneUseMultiHelper extends BaseHelper {
 			public boolean check(LaneUseMulti lum) {
 				QuickMessage qm = lum.getQuickMessage();
 				return qm != null &&
-				       multi.equals(qm.getMulti());
+				       match(qm.getMulti(), multi);
 			}
 		});
+	}
+
+	/** Test if a quick message matches a multi string */
+	static protected boolean match(String qm, String multi) {
+		return Pattern.matches(createRegex(qm), multi);
+	}
+
+	/** Create a regex which matches any speed advisory values */
+	static protected String createRegex(String qm) {
+		MultiString re = new MultiString() {
+			public void addSpeedAdvisory() {
+				// Add unquoted regex to match 2 digits
+				addSpan("\\E[0-9].\\Q");
+			}
+		};
+		// Start quoting for regex
+		re.addSpan("\\Q");
+		MultiString m = new MultiString(qm);
+		m.parse(re);
+		// End quoting for regex
+		re.addSpan("\\E");
+		return re.toString();
 	}
 }
