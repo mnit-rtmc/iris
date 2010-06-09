@@ -53,7 +53,7 @@ abstract public class IndicationIcon implements Icon {
 
 	/** Shape to use for VSA indication */
 	static protected final Shape VSA_SHAPE_2 =
-		createTextShape("MPH", 1, 0, 0.5f, 0.4f);
+		createTextShape("MPH", 0.5f, 0, 0.5f, 0.4f);
 
 	/** Shape to use for representing an error condition */
 	static protected final Shape ERROR_SHAPE =
@@ -393,6 +393,10 @@ abstract public class IndicationIcon implements Icon {
 			super(p);
 		}
 		protected void paintIcon(Graphics2D g2) {
+			g2.setColor(Color.BLACK);
+			g2.setStroke(thin);
+			g2.draw(VSA_SHAPE_1);
+			g2.draw(VSA_SHAPE_2);
 			g2.setColor(Color.YELLOW);
 			g2.fill(VSA_SHAPE_1);
 			g2.fill(VSA_SHAPE_2);
