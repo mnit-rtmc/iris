@@ -294,13 +294,16 @@ public class Corridor extends CorridorBase {
 				return null;
 		}
 		protected Float calculateSpeedAdvisory() {
-			assert sb != null;
-			assert mb != null;
-			return sb.calculateSpeedAdvisory(mb - ma);
+			if(sb != null && mb != null)
+				return sb.calculateSpeedAdvisory(mb - ma);
+			else
+				return null;
 		}
 		protected void debug() {
 			if(VSA_LOG.isOpen()) {
-				VSA_LOG.log("upstream: " + su +
+				Float a = calculateSpeedAdvisory();
+				VSA_LOG.log("adv: " + a +
+				            ", upstream: " + su +
 				            ", downstream: " + sd +
 				            ", bottleneck: " + sb +
 				            ", speed: " + getSpeed() +
