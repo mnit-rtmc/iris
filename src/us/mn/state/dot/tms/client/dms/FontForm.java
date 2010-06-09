@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -271,9 +271,9 @@ public class FontForm extends AbstractForm {
 		Collection<Glyph> gs = FontHelper.lookupGlyphs(font);
 		synchronized(gmap) {
 			gmap.clear();
-			for(Glyph g: gs)
-				addGlyph(g);
 		}
+		for(Glyph g: gs)
+			addGlyph(g);
 	}
 
 	/** Check if the currently selected font is deletable */
@@ -290,8 +290,8 @@ public class FontForm extends AbstractForm {
 		synchronized(gmap) {
 			String c = String.valueOf((char)g.getCodePoint());
 			gmap.put(c, new GlyphData(g));
-			del_font.setEnabled(isFontDeletable());
 		}
+		del_font.setEnabled(isFontDeletable());
 		selectGlyph();
 	}
 
@@ -300,21 +300,28 @@ public class FontForm extends AbstractForm {
 		synchronized(gmap) {
 			String c = String.valueOf((char)g.getCodePoint());
 			gmap.remove(c);
-			del_font.setEnabled(isFontDeletable());
 		}
+		del_font.setEnabled(isFontDeletable());
 	}
 
 	/** Update a Graphic in the GlyphData map */
 	protected void updateGraphic(Graphic g) {
+		GlyphData gd = findGlyph(g);
+		if(gd != null) {
+			gd.updateBitmap();
+			repaint();
+		}
+	}
+
+	/** Find glyph data for a graphic */
+	protected GlyphData findGlyph(Graphic g) {
 		synchronized(gmap) {
 			for(GlyphData gd: gmap.values()) {
-				if(gd.graphic == g) {
-					gd.updateBitmap();
-					repaint();
-					break;
-				}
+				if(gd.graphic == g)
+					return gd;
 			}
 		}
+		return null;
 	}
 
 	/** Change the selected font */
