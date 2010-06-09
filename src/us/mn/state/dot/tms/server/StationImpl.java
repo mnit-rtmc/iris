@@ -457,6 +457,11 @@ public class StationImpl implements Station {
 
 	/** Check if the station is a bottleneck for the given distance */
 	public boolean isBottleneckFor(float d) {
+		return bottleneck && isBottleneckInRange(d);
+	}
+
+	/** Check if the (bottleneck) station is in range */
+	protected boolean isBottleneckInRange(float d) {
 		if(d > 0)
 			return d < getUpstreamDistance();
 		else
