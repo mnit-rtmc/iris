@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,11 +46,8 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 			}
 			public void setValueAt(LCS lcs, Object value) {
 				String v = value.toString().trim();
-				if(v.length() > 0) {
-					int row = getRow(lcs);
-					if(row >= 0)
-						createLCS(v, row + 1);
-				}
+				if(v.length() > 0)
+					createLCS(v, getRowCount());
 			}
 		}
 	    };
