@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import javax.swing.Icon;
 public class PixelIcon implements Icon {
 
 	/** Diameter of pixel */
-	static protected final int SIZE = 20;
+	static protected final int SIZE = 18;
 
 	/** On/off state of the pixel */
 	protected final boolean state;
