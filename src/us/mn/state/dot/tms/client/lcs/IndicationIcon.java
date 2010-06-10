@@ -47,22 +47,17 @@ abstract public class IndicationIcon implements Icon {
 	/** Margin on top and bottom of chevron */
 	static protected final float CHEVRON_MARGIN = 0.25f;
 
-	/** Shape to use for VSA indication */
-	static protected final Shape VSA_SHAPE_1 =
-		createTextShape("xx", 0.6f, 0.1f, 0.4f, 0);
+	/** Margin on top and bottom of V */
+	static protected final float V_MARGIN = 0.30f;
 
-	/** Shape to use for VSA indication */
-	static protected final Shape VSA_SHAPE_2 =
-		createTextShape("MPH", 0.5f, 0, 0.5f, 0.4f);
+	/** Amber color */
+	static protected Color AMBER = new Color(255, 208, 0);
 
 	/** Shape to use for representing an error condition */
-	static protected final Shape ERROR_SHAPE =
-		createTextShape("?", 1, 0, 1, 0);
+	static protected final Shape ERROR_SHAPE = createTextShape("?");
 
 	/** Create a text shape */
-	static protected Shape createTextShape(String text, float hspan,
-		float hshift, float vspan, float vshift)
-	{
+	static protected Shape createTextShape(String text) {
 		Font font = new Font("Serif", Font.PLAIN, 24);
 		FontRenderContext frc = new FontRenderContext(
 			new AffineTransform(), false, false);
@@ -70,9 +65,9 @@ abstract public class IndicationIcon implements Icon {
 		Shape s = vec.getGlyphOutline(0);
 		Rectangle2D rect = s.getBounds2D();
 		AffineTransform a = new AffineTransform();
-		a.translate(SHAPE_BORDER + hshift, SHAPE_BORDER + vshift);
-		a.scale((hspan - 2 * SHAPE_BORDER) / rect.getWidth(),
-			(vspan - 2 * SHAPE_BORDER) / rect.getHeight());
+		a.translate(SHAPE_BORDER, SHAPE_BORDER);
+		a.scale((1 - 2 * SHAPE_BORDER) / rect.getWidth(),
+			(1 - 2 * SHAPE_BORDER) / rect.getHeight());
 		a.translate(-rect.getX(), -rect.getY());
 		return a.createTransformedShape(s);
 	}
@@ -132,6 +127,16 @@ abstract public class IndicationIcon implements Icon {
 		path.lineTo(SHAPE_BORDER + CHEVRON_MARGIN, 0.5f);
 		path.lineTo(SHAPE_BORDER, 1 - CHEVRON_MARGIN);
 		CHEVRON_SHAPE = path;
+	}
+
+	/** Shape to draw a "V" */
+	static protected final Shape V_SHAPE;
+	static {
+		GeneralPath path = new GeneralPath();
+		path.moveTo(V_MARGIN, V_MARGIN);
+		path.lineTo(0.5f, 1 - V_MARGIN);
+		path.lineTo(1 - V_MARGIN, V_MARGIN);
+		V_SHAPE = path;
 	}
 
 	/** Create a new indication icon */
@@ -394,12 +399,11 @@ abstract public class IndicationIcon implements Icon {
 		}
 		protected void paintIcon(Graphics2D g2) {
 			g2.setColor(Color.BLACK);
-			g2.setStroke(thin);
-			g2.draw(VSA_SHAPE_1);
-			g2.draw(VSA_SHAPE_2);
-			g2.setColor(Color.YELLOW);
-			g2.fill(VSA_SHAPE_1);
-			g2.fill(VSA_SHAPE_2);
+			g2.setStroke(shadow);
+			g2.draw(V_SHAPE);
+			g2.setColor(AMBER);
+			g2.setStroke(stroke);
+			g2.draw(V_SHAPE);
 		}
 	}
 
