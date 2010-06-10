@@ -53,7 +53,9 @@ public class MainClient {
 
 	/** Update the system properties with the given property set */
 	static protected void updateSystemProperties(Properties props) {
-		ProxySelector.setDefault(new HTTPProxySelector(props));
+		HTTPProxySelector ps = new HTTPProxySelector(props);
+		if(ps.hasProxies())
+			ProxySelector.setDefault(ps);
 	}
 
 	/** Create the IRIS client */
