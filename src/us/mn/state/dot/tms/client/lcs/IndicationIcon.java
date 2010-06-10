@@ -264,7 +264,7 @@ abstract public class IndicationIcon implements Icon {
 			g2.setColor(Color.BLACK);
 			g2.setStroke(shadow);
 			g2.draw(ARROW_SHAPE);
-			g2.setColor(Color.YELLOW);
+			g2.setColor(AMBER);
 			g2.setStroke(stroke);
 			g2.draw(ARROW_SHAPE);
 		}
@@ -281,7 +281,7 @@ abstract public class IndicationIcon implements Icon {
 			g2.setColor(Color.BLACK);
 			g2.setStroke(shadow);
 			g2.draw(CROSS_SHAPE);
-			g2.setColor(Color.YELLOW);
+			g2.setColor(AMBER);
 			g2.setStroke(stroke);
 			g2.draw(CROSS_SHAPE);
 		}
@@ -329,7 +329,7 @@ abstract public class IndicationIcon implements Icon {
 				g2.setColor(Color.BLACK);
 				g2.setStroke(shadow);
 				g2.draw(CHEVRON_SHAPE);
-				g2.setColor(Color.YELLOW);
+				g2.setColor(AMBER);
 				g2.setStroke(stroke);
 				g2.draw(CHEVRON_SHAPE);
 				g2.translate(0.25f, 0);
@@ -349,7 +349,7 @@ abstract public class IndicationIcon implements Icon {
 				g2.setColor(Color.BLACK);
 				g2.setStroke(shadow);
 				g2.draw(CHEVRON_SHAPE);
-				g2.setColor(Color.YELLOW);
+				g2.setColor(AMBER);
 				g2.setStroke(stroke);
 				g2.draw(CHEVRON_SHAPE);
 				g2.translate(0.25f, 0);
@@ -369,7 +369,7 @@ abstract public class IndicationIcon implements Icon {
 				g2.setColor(Color.BLACK);
 				g2.setStroke(stroke);
 				g2.draw(CHEVRON_SHAPE);
-				g2.setColor(Color.YELLOW);
+				g2.setColor(AMBER);
 				g2.setStroke(thin);
 				g2.draw(CHEVRON_SHAPE);
 				g2.translate(0.15f, 0);
@@ -382,7 +382,7 @@ abstract public class IndicationIcon implements Icon {
 				g2.setColor(Color.BLACK);
 				g2.setStroke(stroke);
 				g2.draw(CHEVRON_SHAPE);
-				g2.setColor(Color.YELLOW);
+				g2.setColor(AMBER);
 				g2.setStroke(thin);
 				g2.draw(CHEVRON_SHAPE);
 				g2.translate(0.15f, 0);
