@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.client.system;
 
 import java.util.HashMap;
+import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
-import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -98,18 +98,18 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	    };
 	}
 
-	/** Role associated with privileges */
-	protected final Role role;
+	/** Capability associated with privileges */
+	protected final Capability capability;
 
 	/** Create a new privilege table model */
-	public PrivilegeModel(Session s, Role r) {
+	public PrivilegeModel(Session s, Capability c) {
 		super(s, s.getSonarState().getPrivileges());
-		role = r;
+		capability = c;
 	}
 
 	/** Add a new proxy to the table model */
 	protected int doProxyAdded(Privilege proxy) {
-		if(proxy.getRole() == role)
+		if(proxy.getCapability() == capability)
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
@@ -121,7 +121,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 		if(name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			attrs.put("role", role);
+			attrs.put("capability", capability);
 			attrs.put("pattern", p);
 			cache.createObject(name, attrs);
 		}

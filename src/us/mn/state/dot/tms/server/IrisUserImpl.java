@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,11 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
-import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
 
@@ -37,23 +33,21 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	/** SQL connection to database */
 	static protected SQLConnection store;
 
-	/** User/Role table mapping */
-	static protected TableMapping mapping;
-
 	/** Lookup all the users */
 	static public void lookup(SQLConnection c, final ServerNamespace ns)
 		throws TMSException
 	{
 		store = c;
-		mapping = new TableMapping(store, "iris", "i_user", "role");
-		store.query("SELECT name, dn, full_name FROM iris.i_user;",
-			new ResultFactory()
+		store.query("SELECT name, full_name, dn, role, enabled FROM " +
+			"iris.i_user;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				ns.addObject(new IrisUserImpl(ns,
 					row.getString(1),	// name
-					row.getString(2),	// dn
-					row.getString(3)	// full_name
+					row.getString(2),	// full_name
+					row.getString(3),	// dn
+					row.getString(4),	// role
+					row.getBoolean(5)	// enabled
 				));
 			}
 		});
@@ -63,8 +57,10 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("dn", dn);
 		map.put("full_name", fullName);
+		map.put("dn", dn);
+		map.put("rolw", role);
+		map.put("enabled", enabled);
 		return map;
 	}
 
@@ -82,21 +78,29 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	public IrisUserImpl(String n) {
 		super(n);
 		// FIXME: validate for SQL injections
-		dn = "";
 		fullName = "";
+		dn = "";
+		role = null;
+		enabled = false;
 	}
 
 	/** Create an IRIS user from database lookup */
-	protected IrisUserImpl(ServerNamespace ns, String n, String d,
-		String fn) throws TMSException
+	protected IrisUserImpl(ServerNamespace ns, String n, String fn,
+		String d, String r, boolean e) throws TMSException
 	{
-		this(n);
-		dn = d;
+		this(n, fn, d, (IrisRoleImpl)ns.lookupObject(Role.SONAR_TYPE,r),
+		     e);
+	}
+
+	/** Create an IRIS user from database lookup */
+	protected IrisUserImpl(String n, String fn, String d, IrisRoleImpl r,
+		boolean e)
+	{
+		super(n);
 		fullName = fn;
-		TreeSet<IrisRoleImpl> r = new TreeSet<IrisRoleImpl>();
-		for(Object o: mapping.lookup("i_user", this))
-			r.add((IrisRoleImpl)ns.lookupObject("role", (String)o));
-		roles = r.toArray(new IrisRoleImpl[0]);
+		dn = d;
+		role = r;
+		enabled = e;
 	}
 
 	/** Get the primary key name */
@@ -119,17 +123,12 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		store.destroy(this);
 	}
 
-	/** Set the roles assigned to the user */
-	public void doSetRoles(Role[] r) throws TMSException {
-		TreeSet<Storable> rset = new TreeSet<Storable>();
-		for(Role rl: r) {
-			if(rl instanceof IrisRoleImpl)
-				rset.add((IrisRoleImpl)rl);
-			else
-				throw new ChangeVetoException("Invalid role");
-		}
-		mapping.update("i_user", this, rset);
-		super.setRoles(r);
+	/** Set the full (display) name */
+	public void doSetFullName(String n) throws TMSException {
+		if(n.equals(fullName))
+			return;
+		store.update(this, "full_name", n);
+		super.setFullName(n);
 	}
 
 	/** Set the LDAP distinguished name */
@@ -140,11 +139,19 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		super.setDn(d);
 	}
 
-	/** Set the full (display) name */
-	public void doSetFullName(String n) throws TMSException {
-		if(n.equals(fullName))
+	/** Set the role assigned to the user */
+	public void doSetRole(Role r) throws TMSException {
+		if(r == role)
 			return;
-		store.update(this, "full_name", n);
-		super.setFullName(n);
+		store.update(this, "role", r);
+		super.setRole(r);
+	}
+
+	/** Set the enabled flag */
+	public void doSetEnabled(boolean e) throws TMSException {
+		if(e == enabled)
+			return;
+		store.update(this, "enabled", e);
+		super.setEnabled(e);
 	}
 }

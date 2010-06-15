@@ -17,38 +17,31 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
-import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.server.ServerNamespace;
-import us.mn.state.dot.sonar.server.RoleImpl;
+import us.mn.state.dot.sonar.server.CapabilityImpl;
 
 /**
- * IRIS role
+ * IRIS capability
  *
  * @author Douglas lau
  */
-public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
-	Storable
+public class IrisCapabilityImpl extends CapabilityImpl
+	implements Comparable<IrisCapabilityImpl>, Storable
 {
 	/** SQL connection to database */
 	static protected SQLConnection store;
 
-	/** Role/Capability table mapping */
-	static protected TableMapping mapping;
-
-	/** Lookup all the roles */
+	/** Lookup all the capabilities */
 	static public void lookup(SQLConnection c, final ServerNamespace ns)
 		throws TMSException
 	{
 		store = c;
-		mapping = new TableMapping(store, "iris", "role", "capability");
-		store.query("SELECT name, enabled FROM iris.role;",
+		store.query("SELECT name, enabled FROM iris.capability;",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.addObject(new IrisRoleImpl(ns,
+				ns.addObject(new IrisCapabilityImpl(
 					row.getString(1),	// name
 					row.getBoolean(2)	// enabled
 				));
@@ -71,38 +64,29 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 
 	/** Get the database table name */
 	public String getTable() {
-		return "iris.role";
+		return "iris.capability";
 	}
 
-	/** Create a new IRIS role */
-	public IrisRoleImpl(String n) {
+	/** Create a new IRIS capability */
+	public IrisCapabilityImpl(String n) {
 		super(n);
 	}
 
-	/** Create an IRIS role from database lookup */
-	protected IrisRoleImpl(ServerNamespace ns, String n, boolean e)
-		throws TMSException
-	{
+	/** Create an IRIS capability from database lookup */
+	protected IrisCapabilityImpl(String n, boolean e) {
 		this(n);
 		enabled = e;
-		TreeSet<IrisCapabilityImpl> caps =
-			new TreeSet<IrisCapabilityImpl>();
-		for(Object o: mapping.lookup("role", this)) {
-			caps.add((IrisCapabilityImpl)ns.lookupObject(
-				"capability", (String)o));
-		}
-		capabilities = caps.toArray(new IrisCapabilityImpl[0]);
 	}
 
-	/** Compare to another role */
-	public int compareTo(IrisRoleImpl o) {
+	/** Compare to another capability */
+	public int compareTo(IrisCapabilityImpl o) {
 		return name.compareTo(o.name);
 	}
 
-	/** Test if the role equals another role */
+	/** Test if the capability equals another capability */
 	public boolean equals(Object o) {
-		if(o instanceof IrisRoleImpl)
-			return name.equals(((IrisRoleImpl)o).name);
+		if(o instanceof IrisCapabilityImpl)
+			return name.equals(((IrisCapabilityImpl)o).name);
 		else
 			return false;
 	}
@@ -127,22 +111,9 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		return name;
 	}
 
-	/** Destroy an IRIS role */
+	/** Destroy an IRIS capability */
 	public void doDestroy() throws TMSException {
 		store.destroy(this);
-	}
-
-	/** Set the capabilities assigned to the role */
-	public void doSetCapabilities(Capability[] caps) throws TMSException {
-		TreeSet<Storable> cset = new TreeSet<Storable>();
-		for(Capability c: caps) {
-			if(c instanceof IrisCapabilityImpl)
-				cset.add((IrisCapabilityImpl)c);
-			else
-				throw new ChangeVetoException("Bad capability");
-		}
-		mapping.update("role", this, cset);
-		super.setCapabilities(caps);
 	}
 
 	/** Set the enabled flag */

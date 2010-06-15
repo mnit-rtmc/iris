@@ -75,8 +75,9 @@ public class MainServer {
 			store = createStore(props);
 			I18N.initialize(props);
 			ServerNamespace ns = createNamespace();
-			IrisRoleImpl.lookup(store, ns);
+			IrisCapabilityImpl.lookup(store, ns);
 			IrisPrivilegeImpl.lookup(store, ns);
+			IrisRoleImpl.lookup(store, ns);
 			IrisUserImpl.lookup(store, ns);
 			BaseObjectImpl.loadAll(store, ns);
 			BaseEvent.store = store;

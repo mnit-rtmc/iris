@@ -14,68 +14,57 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for IRIS roles
+ * Table model for IRIS capabilities
  *
  * @author Douglas Lau
  */
-public class RoleModel extends ProxyTableModel<Role> {
+public class CapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Role>("Name", 160) {
-			public Object getValueAt(Role r) {
-				return r.getName();
+		new ProxyColumn<Capability>("Name", 160) {
+			public Object getValueAt(Capability c) {
+				return c.getName();
 			}
-			public boolean isEditable(Role r) {
-				return r == null && canAdd();
+			public boolean isEditable(Capability c) {
+				return c == null && canAdd();
 			}
-			public void setValueAt(Role r, Object value) {
+			public void setValueAt(Capability c, Object value) {
 				String v = value.toString().trim();
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Role>("Enabled", 60, Boolean.class) {
-			public Object getValueAt(Role r) {
-				return r.getEnabled();
+		new ProxyColumn<Capability>("Enabled", 60, Boolean.class) {
+			public Object getValueAt(Capability c) {
+				return c.getEnabled();
 			}
-			public boolean isEditable(Role r) {
-				return canUpdate(r);
+			public boolean isEditable(Capability c) {
+				return canUpdate(c);
 			}
-			public void setValueAt(Role r, Object value) {
+			public void setValueAt(Capability c, Object value) {
 				if(value instanceof Boolean)
-					r.setEnabled((Boolean)value);
+					c.setEnabled((Boolean)value);
 			}
 		}
 	    };
 	}
 
-	/** Role capability model */
-	protected final RoleCapabilityModel rc_model;
-
-	/** Create a new role table model */
-	public RoleModel(Session s, RoleCapabilityModel rc) {
-		super(s, s.getSonarState().getRoles());
-		rc_model = rc;
+	/** Create a new capability table model */
+	public CapabilityModel(Session s) {
+		super(s, s.getSonarState().getCapabilities());
 	}
 
 	/** Get the SONAR type name */
 	protected String getSonarType() {
-		return Role.SONAR_TYPE;
-	}
-
-	/** Change a role in the table model */
-	protected void proxyChangedSlow(Role proxy, String attrib) {
-		super.proxyChangedSlow(proxy, attrib);
-		if(attrib.equals("capabilities"))
-			rc_model.updateRoleCapabilities(proxy);
+		return Capability.SONAR_TYPE;
 	}
 }

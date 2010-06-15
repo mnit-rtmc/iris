@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Name;
@@ -62,12 +63,12 @@ public class SonarState extends Client {
 	/** Exception handler */
 	protected final SimpleHandler handler;
 
-	/** Cache of role proxies */
-	protected final TypeCache<Role> roles;
+	/** Cache of capability proxies */
+	protected final TypeCache<Capability> capabilities;
 
-	/** Get the role type cache */
-	public TypeCache<Role> getRoles() {
-		return roles;
+	/** Get the capability type cache */
+	public TypeCache<Capability> getCapabilities() {
+		return capabilities;
 	}
 
 	/** Cache of privilege proxies */
@@ -76,6 +77,14 @@ public class SonarState extends Client {
 	/** Get the privilege type cache */
 	public TypeCache<Privilege> getPrivileges() {
 		return privileges;
+	}
+
+	/** Cache of role proxies */
+	protected final TypeCache<Role> roles;
+
+	/** Get the role type cache */
+	public TypeCache<Role> getRoles() {
+		return roles;
 	}
 
 	/** Cache of user proxies */
@@ -309,8 +318,9 @@ public class SonarState extends Client {
 	{
 		super(props, h);
 		handler = h;
-		roles = new TypeCache<Role>(Role.class, this);
+		capabilities = new TypeCache<Capability>(Capability.class,this);
 		privileges = new TypeCache<Privilege>(Privilege.class, this);
+		roles = new TypeCache<Role>(Role.class, this);
 		users = new TypeCache<User>(User.class, this);
 		connections = new TypeCache<Connection>(Connection.class, this);
 		system_attributes = new TypeCache<SystemAttribute>(
@@ -408,8 +418,9 @@ public class SonarState extends Client {
 
 	/** Populate the type caches */
 	public void populateCaches() {
-		populate(roles);
+		populate(capabilities);
 		populate(privileges);
+		populate(roles);
 		populate(users);
 		populate(connections, true);
 		user = users.lookupObject(user_name);

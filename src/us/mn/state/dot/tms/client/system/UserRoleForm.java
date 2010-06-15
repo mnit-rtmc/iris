@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -45,6 +47,7 @@ public class UserRoleForm extends AbstractForm {
 	static public boolean isPermitted(Session s) {
 		return s.canUpdate(User.SONAR_TYPE) ||
 		       s.canUpdate(Role.SONAR_TYPE) ||
+		       s.canUpdate(Capability.SONAR_TYPE) ||
 		       s.canUpdate(Privilege.SONAR_TYPE);
 	}
 
@@ -60,29 +63,39 @@ public class UserRoleForm extends AbstractForm {
 	/** Table to hold the user list */
 	protected final ZTable u_table = new ZTable();
 
-	/** Table model for user roles */
-	protected final UserRoleModel ur_model;
-
-	/** Table to hold the user role list */
-	protected final ZTable ur_table = new ZTable();
-
 	/** Button to delete the selected user */
 	protected final JButton del_user = new JButton("Delete User");
 
 	/** Table model for roles */
 	protected final RoleModel r_model;
 
+	/** Table to hold the role list */
+	protected final ZTable r_table = new ZTable();
+
+	/** Table model for role capabilities */
+	protected final RoleCapabilityModel rc_model;
+
+	/** Table to hold the role capability list */
+	protected final ZTable rc_table = new ZTable();
+
+	/** Button to delete the selected role */
+	protected final JButton del_role = new JButton("Delete Role");
+
+	/** Table model for capabilities */
+	protected final CapabilityModel cap_model;
+
 	/** Table model for privileges */
 	protected PrivilegeModel p_model;
 
-	/** Table to hold the role list */
-	protected final ZTable r_table = new ZTable();
+	/** Table to hold the capability list */
+	protected final ZTable cap_table = new ZTable();
 
 	/** Table to hold the privilege list */
 	protected final ZTable p_table = new ZTable();
 
-	/** Button to delete the selected role */
-	protected final JButton del_role = new JButton("Delete Role");
+	/** Button to delete the selected capability */
+	protected final JButton del_capability =
+		new JButton("Delete Capability");
 
 	/** Button to delete the selected privilege */
 	protected final JButton del_privilege = new JButton("Delete Privilege");
@@ -104,22 +117,25 @@ public class UserRoleForm extends AbstractForm {
 		super(TITLE);
 		session = s;
 		setHelpPageName("Help.UserRoleForm");
-		ur_model = new UserRoleModel(s);
-		u_model = new UserModel(s, ur_model);
-		r_model = new RoleModel(s);
+		u_model = new UserModel(s);
+		rc_model = new RoleCapabilityModel(s);
+		r_model = new RoleModel(s, rc_model);
+		cap_model = new CapabilityModel(s);
 		p_model = new PrivilegeModel(session, null);
 		c_model = new ConnectionModel(session);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		ur_model.initialize();
 		u_model.initialize();
+		rc_model.initialize();
 		r_model.initialize();
+		cap_model.initialize();
 		p_model.initialize();
 		c_model.initialize();
 		tab.add("Users", createUserPanel());
 		tab.add("Roles", createRolePanel());
+		tab.add("Capabilities", createCapabilityPanel());
 		tab.add("Connections", createConnectionPanel());
 		add(tab);
 	}
@@ -128,52 +144,32 @@ public class UserRoleForm extends AbstractForm {
 	protected void close() {
 		super.close();
 		u_model.dispose();
-		ur_model.dispose();
+		rc_model.dispose();
 		r_model.dispose();
+		cap_model.dispose();
 		p_model.dispose();
 		c_model.dispose();
 	}
 
 	/** Create user panel */
 	protected JPanel createUserPanel() {
-		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BORDER);
-		GridBagConstraints bag = new GridBagConstraints();
+		FormPanel panel = new FormPanel(true);
 		final ListSelectionModel s = u_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				if(e.getValueIsAdjusting())
-					return;
-				selectUser();
+				if(!e.getValueIsAdjusting())
+					selectUser();
 			}
 		});
 		u_table.setModel(u_model);
 		u_table.setAutoCreateColumnsFromModel(false);
 		u_table.setColumnModel(u_model.createColumnModel());
 		u_table.setVisibleRowCount(16);
-		JScrollPane upane = new JScrollPane(u_table);
-		bag.gridheight = 2;
-		panel.add(upane, bag);
-		ur_table.setModel(ur_model);
-		ur_table.setAutoCreateColumnsFromModel(false);
-		ur_table.setColumnModel(ur_model.createColumnModel());
-		ur_table.setRowSelectionAllowed(false);
-		ur_table.setVisibleRowCount(12);
-		bag.gridheight = 1;
-		bag.insets.left = 6;
-		JScrollPane spane = new JScrollPane(ur_table);
-		panel.add(spane, bag);
+		panel.addRow(u_table);
 		del_user.setEnabled(false);
-		del_user.setToolTipText("Delete the selected user, which " +
-			"is active only if all roles are deactivated.");
-		Box box = Box.createHorizontalBox();
-		box.add(Box.createHorizontalGlue());
-		box.add(del_user);
-		box.add(Box.createHorizontalGlue());
-		bag.gridx = 1;
-		bag.gridy = 1;
-		panel.add(box, bag);
+		del_user.setToolTipText("Delete the selected user");
+		panel.addRow(del_user);
 		new ActionJob(this, del_user) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -189,7 +185,6 @@ public class UserRoleForm extends AbstractForm {
 		ListSelectionModel s = u_table.getSelectionModel();
 		User u = u_model.getProxy(s.getMinSelectionIndex());
 		del_user.setEnabled(u_model.canRemove(u));
-		ur_model.setSelectedUser(u);
 	}
 
 	/** Create role panel */
@@ -197,24 +192,79 @@ public class UserRoleForm extends AbstractForm {
 		JPanel panel = new JPanel(new GridBagLayout());
 		panel.setBorder(BORDER);
 		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = 4;
-		bag.insets.right = 4;
-		bag.insets.top = 4;
-		bag.insets.bottom = 4;
 		final ListSelectionModel s = r_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				if(e.getValueIsAdjusting())
-					return;
-				selectRole();
+				if(!e.getValueIsAdjusting())
+					selectRole();
 			}
 		});
 		r_table.setModel(r_model);
 		r_table.setAutoCreateColumnsFromModel(false);
 		r_table.setColumnModel(r_model.createColumnModel());
 		r_table.setVisibleRowCount(16);
-		JScrollPane pane = new JScrollPane(r_table);
+		JScrollPane rpane = new JScrollPane(r_table);
+		bag.gridheight = 2;
+		panel.add(rpane, bag);
+		rc_table.setModel(rc_model);
+		rc_table.setAutoCreateColumnsFromModel(false);
+		rc_table.setColumnModel(rc_model.createColumnModel());
+		rc_table.setRowSelectionAllowed(false);
+		rc_table.setVisibleRowCount(12);
+		bag.gridheight = 1;
+		bag.insets.left = 6;
+		JScrollPane spane = new JScrollPane(rc_table);
+		panel.add(spane, bag);
+		del_role.setEnabled(false);
+		del_role.setToolTipText("Delete the selected role");
+		Box box = Box.createHorizontalBox();
+		box.add(Box.createHorizontalGlue());
+		box.add(del_role);
+		box.add(Box.createHorizontalGlue());
+		bag.gridx = 1;
+		bag.gridy = 1;
+		panel.add(box, bag);
+		new ActionJob(this, del_role) {
+			public void perform() throws Exception {
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					r_model.deleteRow(row);
+			}
+		};
+		return panel;
+	}
+
+	/** Change the selected role */
+	protected void selectRole() {
+		ListSelectionModel s = r_table.getSelectionModel();
+		Role r = r_model.getProxy(s.getMinSelectionIndex());
+		del_role.setEnabled(r_model.canRemove(r));
+		rc_model.setSelectedRole(r);
+	}
+
+	/** Create capability panel */
+	protected JPanel createCapabilityPanel() {
+		JPanel panel = new JPanel(new GridBagLayout());
+		panel.setBorder(BORDER);
+		GridBagConstraints bag = new GridBagConstraints();
+		bag.insets.left = 4;
+		bag.insets.right = 4;
+		bag.insets.top = 4;
+		bag.insets.bottom = 4;
+		final ListSelectionModel s = cap_table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		s.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				if(!e.getValueIsAdjusting())
+					selectCapability();
+			}
+		});
+		cap_table.setModel(cap_model);
+		cap_table.setAutoCreateColumnsFromModel(false);
+		cap_table.setColumnModel(cap_model.createColumnModel());
+		cap_table.setVisibleRowCount(16);
+		JScrollPane pane = new JScrollPane(cap_table);
 		panel.add(pane, bag);
 		final ListSelectionModel sp = p_table.getSelectionModel();
 		sp.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -231,15 +281,15 @@ public class UserRoleForm extends AbstractForm {
 		p_table.setVisibleRowCount(16);
 		pane = new JScrollPane(p_table);
 		panel.add(pane, bag);
-		del_role.setEnabled(false);
+		del_capability.setEnabled(false);
 		bag.gridx = 0;
 		bag.gridy = 1;
-		panel.add(del_role, bag);
-		new ActionJob(this, del_role) {
+		panel.add(del_capability, bag);
+		new ActionJob(this, del_capability) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
 				if(row >= 0)
-					r_model.deleteRow(row);
+					cap_model.deleteRow(row);
 			}
 		};
 		del_privilege.setEnabled(false);
@@ -255,14 +305,14 @@ public class UserRoleForm extends AbstractForm {
 		return panel;
 	}
 
-	/** Change the selected role */
-	protected void selectRole() {
-		ListSelectionModel s = r_table.getSelectionModel();
-		Role r = r_model.getProxy(s.getMinSelectionIndex());
-		del_role.setEnabled(r_model.canRemove(r));
+	/** Change the selected capability */
+	protected void selectCapability() {
+		ListSelectionModel s = cap_table.getSelectionModel();
+		Capability c = cap_model.getProxy(s.getMinSelectionIndex());
+		del_capability.setEnabled(cap_model.canRemove(c));
 		p_table.clearSelection();
 		final PrivilegeModel pm = p_model;
-		p_model = new PrivilegeModel(session, r);
+		p_model = new PrivilegeModel(session, c);
 		p_model.initialize();
 		p_table.setModel(p_model);
 		pm.dispose();

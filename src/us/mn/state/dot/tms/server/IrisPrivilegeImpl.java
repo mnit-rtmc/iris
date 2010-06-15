@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.util.Map;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.PrivilegeImpl;
 
@@ -40,14 +40,14 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 		throws TMSException
 	{
 		store = c;
-		store.query("SELECT name, role, pattern, priv_r, priv_w, " +
-			"priv_c, priv_d FROM iris.privilege;",
+		store.query("SELECT name, capability, pattern, priv_r, " +
+			"priv_w, priv_c, priv_d FROM iris.privilege;",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				ns.addObject(new IrisPrivilegeImpl(ns,
 					row.getString(1),  // name
-					row.getString(2),  // role
+					row.getString(2),  // capability
 					row.getString(3),  // pattern
 					row.getBoolean(4), // priv_r
 					row.getBoolean(5), // priv_w
@@ -62,7 +62,7 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("role", role);
+		map.put("capability", capability);
 		map.put("pattern", pattern);
 		map.put("priv_r", priv_r);
 		map.put("priv_w", priv_w);
@@ -88,19 +88,19 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 	}
 
 	/** Create an IRIS privilege from database lookup */
-	protected IrisPrivilegeImpl(Namespace ns, String n, String rl, String p,
-		boolean r, boolean w, boolean c, boolean d)
+	protected IrisPrivilegeImpl(Namespace ns, String n, String cap,
+		String p, boolean r, boolean w, boolean c, boolean d)
 	{
-		this(n, (Role)ns.lookupObject(Role.SONAR_TYPE, rl), p, r, w,
-			c, d);
+		this(n, (Capability)ns.lookupObject(Capability.SONAR_TYPE, cap),
+		     p, r, w, c, d);
 	}
 
 	/** Create an IRIS privilege from database lookup */
-	protected IrisPrivilegeImpl(String n, Role rl, String p, boolean r,
-		boolean w, boolean c, boolean d)
+	protected IrisPrivilegeImpl(String n, Capability cap, String p,
+		boolean r, boolean w, boolean c, boolean d)
 	{
 		this(n);
-		role = rl;
+		capability = cap;
 		pattern = p;
 		priv_r = r;
 		priv_w = w;

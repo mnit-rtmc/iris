@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -54,7 +55,7 @@ public class UserModel extends ProxyTableModel<User> {
 				u.setFullName(value.toString().trim());
 			}
 		},
-		new ProxyColumn<User>("Dn", 400) {
+		new ProxyColumn<User>("Dn", 320) {
 			public Object getValueAt(User u) {
 				return u.getDn();
 			}
@@ -64,34 +65,41 @@ public class UserModel extends ProxyTableModel<User> {
 			public void setValueAt(User u, Object value) {
 				u.setDn(value.toString().trim());
 			}
+		},
+		new ProxyColumn<User>("Role", 160) {
+			public Object getValueAt(User u) {
+				return u.getRole();
+			}
+			public boolean isEditable(User u) {
+				return canUpdate(u);
+			}
+			public void setValueAt(User u, Object value) {
+				if(value instanceof Role)
+					u.setRole((Role)value);
+			}
+		},
+		new ProxyColumn<User>("Enabled", 60, Boolean.class) {
+			public Object getValueAt(User u) {
+				return u.getEnabled();
+			}
+			public boolean isEditable(User u) {
+				return canUpdate(u);
+			}
+			public void setValueAt(User u, Object value) {
+				if(value instanceof Boolean)
+					u.setEnabled((Boolean)value);
+			}
 		}
 	    };
 	}
 
-	/** User role model */
-	protected final UserRoleModel rmodel;
-
 	/** Create a new user table model */
-	public UserModel(Session s, UserRoleModel r) {
+	public UserModel(Session s) {
 		super(s, s.getSonarState().getUsers());
-		rmodel = r;
-	}
-
-	/** Change a user in the table model */
-	protected void proxyChangedSlow(User proxy, String attrib) {
-		super.proxyChangedSlow(proxy, attrib);
-		if(attrib.equals("roles"))
-			rmodel.updateUserRoles(proxy);
 	}
 
 	/** Get the SONAR type name */
 	protected String getSonarType() {
 		return User.SONAR_TYPE;
-	}
-
-	/** Check if the user can remove a user */
-	public boolean canRemove(User u) {
-		return u != null && u.getRoles().length == 0 &&
-		       super.canRemove(u);
 	}
 }
