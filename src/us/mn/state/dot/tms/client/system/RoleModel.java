@@ -78,4 +78,10 @@ public class RoleModel extends ProxyTableModel<Role> {
 		if(attrib.equals("capabilities"))
 			rc_model.updateRoleCapabilities(proxy);
 	}
+
+	/** Check if the user can remove a role */
+	public boolean canRemove(Role r) {
+		return r != null && r.getCapabilities().length == 0 &&
+		       super.canRemove(r);
+	}
 }
