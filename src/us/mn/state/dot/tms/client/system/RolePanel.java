@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
- * A form for displaying and editing the users and roles
+ * A panel for editing roles.
  *
  * @author Douglas Lau
  */
@@ -85,7 +85,7 @@ public class RolePanel extends JPanel {
 		add(box, bag);
 	}
 
-	/** Initializze the widgets on the panel */
+	/** Initializze the panel */
 	protected void initialize() {
 		rc_model.initialize();
 		r_model.initialize();
