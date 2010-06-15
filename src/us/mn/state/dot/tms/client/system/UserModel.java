@@ -14,11 +14,18 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.awt.Component;
+import javax.swing.AbstractCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.JTable;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
  * Table model for IRIS users
@@ -26,6 +33,15 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class UserModel extends ProxyTableModel<User> {
+
+	/** Role list model */
+	protected final ProxyListModel<Role> r_list;
+
+	/** Role combo model */
+	protected final WrapperComboBoxModel r_model;
+
+	/** Role combo box */
+	protected final JComboBox r_combo;
 
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
@@ -77,6 +93,9 @@ public class UserModel extends ProxyTableModel<User> {
 				if(value instanceof Role)
 					u.setRole((Role)value);
 			}
+			protected TableCellEditor createCellEditor() {
+				return new RoleCellEditor();
+			}
 		},
 		new ProxyColumn<User>("Enabled", 60, Boolean.class) {
 			public Object getValueAt(User u) {
@@ -93,9 +112,34 @@ public class UserModel extends ProxyTableModel<User> {
 	    };
 	}
 
+	/** Editor for roles in a table cell */
+	protected class RoleCellEditor extends AbstractCellEditor
+		implements TableCellEditor
+	{
+		public Component getTableCellEditorComponent(JTable table,
+			Object value, boolean isSelected, int row, int column)
+		{
+			r_combo.setSelectedItem(value);
+			return r_combo;
+		}
+		public Object getCellEditorValue() {
+			return r_combo.getSelectedItem();
+		}
+	}
+
 	/** Create a new user table model */
 	public UserModel(Session s) {
 		super(s, s.getSonarState().getUsers());
+		r_list = new ProxyListModel<Role>(s.getSonarState().getRoles());
+		r_list.initialize();
+		r_model = new WrapperComboBoxModel(r_list, false, true);
+		r_combo = new JComboBox(r_model);
+	}
+
+	/** Dispose of the user model */
+	public void dispose() {
+		r_list.dispose();
+		super.dispose();
 	}
 
 	/** Get the SONAR type name */
