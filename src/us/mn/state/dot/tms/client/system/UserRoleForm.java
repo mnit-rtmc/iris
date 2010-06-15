@@ -33,7 +33,6 @@ import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -57,14 +56,8 @@ public class UserRoleForm extends AbstractForm {
 	/** Tabbed pane */
 	protected final JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 
-	/** Table model for users */
-	protected final UserModel u_model;
-
-	/** Table to hold the user list */
-	protected final ZTable u_table = new ZTable();
-
-	/** Button to delete the selected user */
-	protected final JButton del_user = new JButton("Delete User");
+	/** User panel */
+	protected final UserPanel u_panel;
 
 	/** Table model for roles */
 	protected final RoleModel r_model;
@@ -117,7 +110,7 @@ public class UserRoleForm extends AbstractForm {
 		super(TITLE);
 		session = s;
 		setHelpPageName("Help.UserRoleForm");
-		u_model = new UserModel(s);
+		u_panel = new UserPanel(s);
 		rc_model = new RoleCapabilityModel(s);
 		r_model = new RoleModel(s, rc_model);
 		cap_model = new CapabilityModel(s);
@@ -127,13 +120,13 @@ public class UserRoleForm extends AbstractForm {
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		u_model.initialize();
+		u_panel.initialize();
 		rc_model.initialize();
 		r_model.initialize();
 		cap_model.initialize();
 		p_model.initialize();
 		c_model.initialize();
-		tab.add("Users", createUserPanel());
+		tab.add("Users", u_panel);
 		tab.add("Roles", createRolePanel());
 		tab.add("Capabilities", createCapabilityPanel());
 		tab.add("Connections", createConnectionPanel());
@@ -143,48 +136,12 @@ public class UserRoleForm extends AbstractForm {
 	/** Close the form */
 	protected void close() {
 		super.close();
-		u_model.dispose();
+		u_panel.dispose();
 		rc_model.dispose();
 		r_model.dispose();
 		cap_model.dispose();
 		p_model.dispose();
 		c_model.dispose();
-	}
-
-	/** Create user panel */
-	protected JPanel createUserPanel() {
-		FormPanel panel = new FormPanel(true);
-		final ListSelectionModel s = u_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if(!e.getValueIsAdjusting())
-					selectUser();
-			}
-		});
-		u_table.setModel(u_model);
-		u_table.setAutoCreateColumnsFromModel(false);
-		u_table.setColumnModel(u_model.createColumnModel());
-		u_table.setVisibleRowCount(16);
-		panel.addRow(u_table);
-		del_user.setEnabled(false);
-		del_user.setToolTipText("Delete the selected user");
-		panel.addRow(del_user);
-		new ActionJob(this, del_user) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					u_model.deleteRow(row);
-			}
-		};
-		return panel;
-	}
-
-	/** Change the selected user */
-	protected void selectUser() {
-		ListSelectionModel s = u_table.getSelectionModel();
-		User u = u_model.getProxy(s.getMinSelectionIndex());
-		del_user.setEnabled(u_model.canRemove(u));
 	}
 
 	/** Create role panel */
