@@ -11,6 +11,42 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.119.0 (16 June 2010)</dt>
+	<dd><ul>
+		<li>
+			Added capability abstraction for easier managing of
+			user permissions in the "Users and Roles" form.
+		</li>
+		<li>
+			Fixed various problems with the variable speed advisory
+			(VSA) algorithm.
+		</li>
+		<li>
+			Don't replace proxy selector provided by Java Web Start
+			if a proxy server is not specified in
+			iris-client.properties.
+		</li>
+		<li>
+			Fixed a couple of quirks in the DMS and LCS interfaces.
+		</li>
+		<li>
+			Fixed a bug which prevented LCS from being assigned
+			to an LCS array.
+		</li>
+		<li>
+			Fixed a client deadlock in the font editing form.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.119.sql</code>.
+			NOTE: The script will replace existing roles with
+			capabilities and create a new role for each active
+			user.
+			Appropriate adjustments should be made after migrating
+			the database.
+		</li>
+	</ul></dd>
 	<dt>3.118.0 (8 June 2010)</dt>
 	<dd><ul>
 		<li>
