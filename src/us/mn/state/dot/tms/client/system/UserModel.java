@@ -92,6 +92,8 @@ public class UserModel extends ProxyTableModel<User> {
 			public void setValueAt(User u, Object value) {
 				if(value instanceof Role)
 					u.setRole((Role)value);
+				else
+					u.setRole(null);
 			}
 			protected TableCellEditor createCellEditor() {
 				return new RoleCellEditor();
@@ -132,7 +134,7 @@ public class UserModel extends ProxyTableModel<User> {
 		super(s, s.getSonarState().getUsers());
 		r_list = new ProxyListModel<Role>(s.getSonarState().getRoles());
 		r_list.initialize();
-		r_model = new WrapperComboBoxModel(r_list, false, true);
+		r_model = new WrapperComboBoxModel(r_list, true);
 		r_combo = new JComboBox(r_model);
 	}
 
