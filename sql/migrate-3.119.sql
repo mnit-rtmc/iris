@@ -48,3 +48,5 @@ DELETE FROM iris.role_capability WHERE role NOT IN (SELECT name FROM iris.role);
 
 ALTER TABLE iris.role_capability ADD CONSTRAINT role_capability_role_fkey
 	FOREIGN KEY (role) REFERENCES iris.role;
+
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c, priv_d) VALUES ('prv_cap', 'login', 'capability(/.*)?', true, false, false, false);
