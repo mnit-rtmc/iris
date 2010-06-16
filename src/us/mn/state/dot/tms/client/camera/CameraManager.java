@@ -220,6 +220,6 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Get the layer scale visibility threshold */
 	protected float getScaleThreshold() {
-		return 3.0f;
+		return 1.2f;
 	}
 }

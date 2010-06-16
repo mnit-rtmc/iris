@@ -164,6 +164,6 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 
 	/** Get the layer scale visibility threshold */
 	protected float getScaleThreshold() {
-		return 3.0f;
+		return 1.6f;
 	}
 }
