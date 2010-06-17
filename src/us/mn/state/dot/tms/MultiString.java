@@ -183,6 +183,8 @@ public class MultiString implements MultiStringState {
 	 *  This is a simple string comparison.
 	 *  @see isEquivalent() for a broader functional comparison. */
         public boolean equals(Object o) {
+		if(this == o)
+			return true;
                 if(o instanceof MultiString)
                         return normalize().equals(
                                 ((MultiString)o).normalize());

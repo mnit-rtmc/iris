@@ -312,6 +312,17 @@ public class MultiStringTest extends TestCase {
 
 	/** equals */
 	private void equals() {
+		MultiString t1 = new MultiString("x");
+		MultiString t2 = new MultiString("x");
+		MultiString t3 = new MultiString("x");
+		// equals null contract
+		assertFalse(t1.equals(null));
+		// reflexive
+		assertTrue(t1.equals(t1));
+		// symmetric
+		assertTrue(t1.equals(t2) && t2.equals(t1));
+		// transitive
+		assertTrue(t1.equals(t2) && t2.equals(t3) && t1.equals(t3));
 		// simple cases
 		assertTrue(new MultiString("").equals(new MultiString("")));
 		assertTrue(new MultiString("").equals(""));
