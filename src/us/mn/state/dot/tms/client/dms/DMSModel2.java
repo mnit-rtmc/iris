@@ -34,10 +34,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class DMSModel2 extends ProxyTableModel<DMS> {
 
 	/** DMS abbreviation */
-	protected final String dms_abr = I18N.get("dms.abbreviation");
+	private static final String dms_abr = I18N.get("dms.abbreviation");
 
 	/** AWS abbreviation */
-	protected final String aws_abbr = I18N.get("dms.aws.abbreviation");
+	private static final String aws_abr = I18N.get("dms.aws.abbreviation");
 
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
@@ -67,12 +67,12 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 				return DMSHelper.getRoadDir(d);
 			}
 		},
-		new ProxyColumn<DMS>(aws_abbr +" Allowed", 80, Boolean.class) {
+		new ProxyColumn<DMS>(aws_abr + " Allowed", 80, Boolean.class) {
 			public Object getValueAt(DMS d) {
 				return d.getAwsAllowed();
 			}
 		},
-		new ProxyColumn<DMS>(aws_abbr + " Controlled",80,Boolean.class){
+		new ProxyColumn<DMS>(aws_abr + " Controlled",80,Boolean.class){
 			public Object getValueAt(DMS d) {
 				return d.getAwsControlled();
 			}

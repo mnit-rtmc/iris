@@ -92,7 +92,8 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		cache.removeProxyListener(this);
 	}
 
-	/** Create the columns in the model */
+	/** Create the columns in the model via method, which is called
+	 * prior to subclass init blocks and constructors. */
 	abstract protected ProxyColumn<T>[] createColumns();
 
 	/** Get the count of columns in the table */
