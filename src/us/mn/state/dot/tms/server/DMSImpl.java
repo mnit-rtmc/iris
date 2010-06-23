@@ -77,6 +77,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Action debug log */
 	static protected final IDebugLog ACTION_LOG = new IDebugLog("action");
 
+	/** DMS name, e.g. CMS or DMS */
+	static private final String DMSABBR = I18N.get("dms.abbreviation");
+
 	/** Compare two (possibly-null) integers for equality */
 	static protected boolean integerEquals(Integer i0, Integer i1) {
 		if(i0 == null)
@@ -1383,9 +1386,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** get placemark description (KmlPlacemark interface) */
 	public String getPlacemarkDesc() {
-		// DMS name, e.g. CMS or DMS
-		final String DMSABBR = I18N.get("dms.abbreviation");
-
 		StringBuilder desc = new StringBuilder();
 
 		desc.append(Kml.descItem("Location", 
@@ -1458,8 +1458,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Render the DMS object as xml */
 	public void printXmlElement(PrintWriter out) {
-		// DMS name, e.g. CMS or DMS
-		final String DMSABBR = I18N.get("dms.abbreviation");
 		final User owner = getOwnerCurrent();	// Avoid race
 		final String op_status = getOpStatus();	// Avoid race
 		final GeoLoc loc = getGeoLoc();		// Avoid race

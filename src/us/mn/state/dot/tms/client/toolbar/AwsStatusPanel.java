@@ -40,10 +40,11 @@ public class AwsStatusPanel extends ToolPanel implements
 	ProxyListener<DMS>
 {
 	/** AWS abbreviation */
-	protected final String m_awsName = I18N.get("dms.aws.abbreviation");
+	private static final String m_awsName = 
+		I18N.get("dms.aws.abbreviation");
 
 	/** DMS abbreviation */
-	protected final String m_dmsAbbr = I18N.get("dms.abbreviation");
+	private static final String m_dmsAbbr = I18N.get("dms.abbreviation");
 
 	/** DMS cache */
 	protected final DmsCache m_dms;

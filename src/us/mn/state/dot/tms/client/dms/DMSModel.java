@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class DMSModel extends ProxyTableModel<DMS> {
 
 	/** DMS abbreviation */
-	protected final String dms_abr = I18N.get("dms.abbreviation");
+	private static final String dms_abr = I18N.get("dms.abbreviation");
 
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
