@@ -268,6 +268,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected class QueryPowerStatus extends Phase {
 		protected final String[] supplies;
 		protected int row = 1;		// row in DmsPowerStatusTable
+		protected int n_failed = 0;
 		protected QueryPowerStatus(int n_pwr) {
 			supplies = new String[n_pwr];
 		}
@@ -295,10 +296,14 @@ public class OpQueryDMSStatus extends OpDMS {
 				p_type.getValue(), status.getValue(),
 				mfr_status.getValue() + ' ' +
 				formatVoltage(voltage.getInteger()));
+			if(status.getEnum() == DmsPowerStatus.Enum.powerFail)
+				n_failed++;
 			row++;
 			if(row <= supplies.length)
 				return this;
 			else {
+				if(2 * n_failed > supplies.length)
+					setErrorStatus("POWER");
 				dms.setPowerStatus(supplies);
 				return new LightSensorCount();
 			}
@@ -429,6 +434,8 @@ public class OpQueryDMSStatus extends OpDMS {
 				DMS_LOG.log(dms.getName() + ": " + sensor);
 				dms.setHeatTapeStatus(heat.getValue());
 				dms.setPowerStatus(power.getPowerStatus());
+				if(power.isCritical())
+					setErrorStatus("POWER");
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Ignore; only Skyline has these objects

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,12 +79,12 @@ public class ShortErrorStatus extends ASN1Integer {
 	/** Mask of maintenance errors */
 	static protected final int MAINT_MASK =
 		LAMP | PHOTOCELL | TEMPERATURE | CLIMATE_CONTROL | DOOR_OPEN |
-		DRUM_ROTOR | HUMIDITY;
+		DRUM_ROTOR | HUMIDITY | POWER;
 
 	/** Mask of critical errors */
 	static protected final int CRITICAL_MASK =
-		OTHER | COMMUNICATIONS | POWER | ATTACHED_DEVICE |
-		CONTROLLER | CRITICAL_TEMPERATURE;
+		OTHER | COMMUNICATIONS | ATTACHED_DEVICE | CONTROLLER |
+		CRITICAL_TEMPERATURE;
 
 	/** Create a new ShortErrorStatus object */
 	public ShortErrorStatus() {

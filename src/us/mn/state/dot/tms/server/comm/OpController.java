@@ -66,7 +66,16 @@ abstract public class OpController extends Operation {
 	/** Set the error status message.  If non-null, the controller "error"
 	 * attribute is set to this message when the operation completes. */
 	public void setErrorStatus(String s) {
-		errorStatus = s;
+		assert s != null;
+		if(errorStatus != null) {
+			if(s.length() > 0) {
+				if(errorStatus.length() > 0)
+					errorStatus = errorStatus + ", " + s;
+				else
+					errorStatus = s;
+			}
+		} else
+			errorStatus = s;
 	}
 
 	/** Operation error counter */

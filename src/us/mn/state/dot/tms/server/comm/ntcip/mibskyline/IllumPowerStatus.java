@@ -90,6 +90,20 @@ public class IllumPowerStatus extends ASN1OctetString {
 			break;
 		}
 		return sb.toString();
+	}
 
+	/** Check if the power status is critical */
+	public boolean isCritical() {
+		int n_failed = 0;
+		for(byte v: value) {
+			switch(Enum.fromOrdinal(v)) {
+			case low:
+			case high:
+				n_failed++;
+			default:
+				break;
+			}
+		}
+		return 2 * n_failed > value.length;
 	}
 }
