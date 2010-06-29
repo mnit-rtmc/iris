@@ -38,6 +38,8 @@ abstract public class XmlWriter {
 		e = e.replace("&", "");
 		e = e.replace("<", "");
 		e = e.replace(">", "");
+		e = e.replace("\"", "");
+		e = e.replace("\'", "");
 		return e;
 	}
 
@@ -46,6 +48,8 @@ abstract public class XmlWriter {
 		v = v.replace("&", "&amp;");
 		v = v.replace("<", "&lt;");
 		v = v.replace(">", "&gt;");
+		v = v.replace("\"", "&quot;");
+		v = v.replace("\'", "&apos;");
 		return v;
 	}
 
