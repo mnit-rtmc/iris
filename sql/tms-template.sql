@@ -1375,7 +1375,7 @@ PRV_0049	camera_control	camera/.*/recallPreset	f	t	f	f
 PRV_0050	publish	camera/.*/publish	f	t	f	f
 PRV_0051	dms_control	dms/.*/messageNext	f	t	f	f
 PRV_0052	dms_control	dms/.*/ownerNext	f	t	f	f
-PRV_0053	dms_control	sign_message/.*	f	t	t	t
+PRV_0053	dms_control	sign_message/.*	f	t	t	f
 PRV_0054	dms_control	warning_sign/.*/deployed	f	t	f	f
 PRV_0055	incident_control	incident/.*	f	t	t	t
 PRV_0056	lcs_control	lcs_array/.*/indicationsNext	f	t	f	f
@@ -1436,7 +1436,7 @@ PRV_0110	user_admin	user/.*	f	t	t	t
 PRV_0111	user_admin	role/.*	f	t	t	t
 PRV_0112	user_admin	privilege/.*	f	t	t	t
 PRV_0113	user_admin	capability/.*	f	t	t	t
-PRV_0114	user_admin	connection/.*	f	t	t	t
+PRV_0114	user_admin	connection/.*	f	f	f	t
 \.
 
 SET search_path = event, public, pg_catalog;
