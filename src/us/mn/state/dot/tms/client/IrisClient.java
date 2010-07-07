@@ -349,11 +349,11 @@ public class IrisClient extends JFrame {
 			mm.addLayer(ls);
 			mm.setHomeLayer(ls);
 		}
-		mm.home();
 		if(s != null) {
 			for(LayerState ls: s.createLayers(mb))
 				mm.addLayer(ls);
-		}
+		} else
+			mm.home();
 		return mm;
 	}
 
