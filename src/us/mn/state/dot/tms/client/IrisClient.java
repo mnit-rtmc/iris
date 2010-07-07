@@ -305,8 +305,7 @@ public class IrisClient extends JFrame {
 		state.login(user, new String(pwd));
 		if(state.isLoggedIn()) {
 			state.populateCaches();
-			return new Session(state, desktop, props, logger,
-				baseLayers);
+			return new Session(state, desktop, props, logger);
 		} else
 			return null;
 	}
@@ -342,16 +341,15 @@ public class IrisClient extends JFrame {
 	/** Create a new map model */
 	protected MapModel createMapModel(Session s) {
 		MapModel mm = new MapModel();
+		for(Layer l: baseLayers) {
+			LayerState ls = l.createState();
+			mm.addLayer(ls);
+			mm.setHomeLayer(ls);
+		}
+		mm.home();
 		if(s != null) {
 			for(LayerState ls: s.createLayers())
 				mm.addLayer(ls);
-		} else {
-			for(Layer l: baseLayers) {
-				LayerState ls = l.createState();
-				mm.addLayer(ls);
-				mm.setHomeLayer(ls);
-			}
-			mm.home();
 		}
 		return mm;
 	}

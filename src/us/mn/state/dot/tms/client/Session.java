@@ -19,9 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
-import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.map.Theme;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
@@ -106,9 +104,6 @@ public class Session {
 	public Logger getLogger() {
 		return logger;
 	}
-
-	/** Base layers */
-	protected final List<Layer> baseLayers;
 
 	/** Segment layer */
 	protected final SegmentLayer seg_layer;
@@ -195,8 +190,8 @@ public class Session {
 	}
 
 	/** Create a new session */
-	public Session(SonarState st, SmartDesktop d, Properties p, Logger l,
-		List<Layer> bl) throws IOException, TdxmlException
+	public Session(SonarState st, SmartDesktop d, Properties p, Logger l)
+		throws IOException, TdxmlException
 	{
 		state = st;
 		user = state.getUser();
@@ -204,7 +199,6 @@ public class Session {
 		desktop = d;
 		props = p;
 		logger = l;
-		baseLayers = bl;
 		loc_manager = new GeoLocManager(state.getGeoLocs());
 		r_node_manager = new R_NodeManager(this,
 			state.getDetCache().getR_Nodes(), loc_manager);
@@ -260,7 +254,7 @@ public class Session {
 
 	/** Create the layer states */
 	public List<LayerState> createLayers() {
-		List<LayerState> lstates = createBaseLayers();
+		LinkedList<LayerState> lstates = new LinkedList<LayerState>();
 		if(seg_layer != null)
 			lstates.add(seg_layer.createState());
 		if(canRead(Camera.SONAR_TYPE))
@@ -280,14 +274,6 @@ public class Session {
 			ls.setVisible(false);
 			lstates.add(ls);
 		}
-		return lstates;
-	}
-
-	/** Create the base layer states */
-	protected List<LayerState> createBaseLayers() {
-		LinkedList<LayerState> lstates = new LinkedList<LayerState>();
-		for(Layer l: baseLayers)
-			lstates.add(l.createState());
 		return lstates;
 	}
 
