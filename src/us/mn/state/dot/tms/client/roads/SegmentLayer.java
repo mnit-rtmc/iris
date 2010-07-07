@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.event.LayerChange;
 import us.mn.state.dot.map.event.LayerChangedEvent;
 import us.mn.state.dot.tdxml.SensorListener;
@@ -142,7 +143,7 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 	}
 
 	/** Create a new layer state */
-	public LayerState createState() {
-		return new SegmentLayerState(this);
+	public LayerState createState(MapBean mb) {
+		return new SegmentLayerState(this, mb);
 	}
 }

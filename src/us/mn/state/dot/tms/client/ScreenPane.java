@@ -97,7 +97,7 @@ public class ScreenPane extends JPanel {
 	protected ProxyLayerState home_layer;
 
 	/** Set the home layer for the screen pane */
-	protected void setHomeLayer() {
+	public void setHomeLayer() {
 		if(home_layer != null) {
 			home_layer.setTabSelected(false);
 			home_layer = null;
@@ -152,21 +152,6 @@ public class ScreenPane extends JPanel {
 		switchers.clear();
 		tab_pane.removeAll();
 		tool_bar.clear();
-	}
-
-	/** Set the map layers */
-	public void setMapLayers() {
-		for(LayerState ls: map.getLayers()) {
-			if(ls instanceof ProxyLayerState) {
-				ProxyLayerState pls = (ProxyLayerState)ls;
-				pls.setMap(map);
-			}
-			if(ls instanceof SegmentLayerState) {
-				SegmentLayerState sls = (SegmentLayerState)ls;
-				sls.setMap(map);
-			}
-		}
-		setHomeLayer();
 	}
 
 	/** Create the map panel */

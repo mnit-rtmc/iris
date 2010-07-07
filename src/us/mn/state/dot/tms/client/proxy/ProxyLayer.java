@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import javax.swing.SwingUtilities;
 import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.event.LayerChange;
@@ -163,8 +164,8 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Create a new layer state */
-	public LayerState createState() {
-		LayerState s = new ProxyLayerState(this);
+	public LayerState createState(MapBean mb) {
+		LayerState s = new ProxyLayerState(this, mb);
 		s.addTheme(manager.getTheme());
 		s.setTheme(manager.getTheme());
 		return s;

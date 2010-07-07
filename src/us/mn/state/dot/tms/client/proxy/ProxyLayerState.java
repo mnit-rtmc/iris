@@ -48,12 +48,9 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	/** Listener for proxy selection events */
 	protected final ProxySelectionListener<T> listener;
 
-	/** Map for scaling */
-	protected MapBean map;
-
 	/** Create a new sonar proxy layer state */
-	public ProxyLayerState(ProxyLayer<T> layer) {
-		super(layer);
+	public ProxyLayerState(ProxyLayer<T> layer, MapBean mb) {
+		super(layer, mb);
 		manager = layer.getManager();
 		model = manager.getSelectionModel();
 		listener = new ProxySelectionListener<T>() {
@@ -65,11 +62,6 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 			}
 		};
 		model.addProxySelectionListener(listener);
-	}
-
-	/** Set the map for scaling */
-	public void setMap(MapBean m) {
-		map = m;
 	}
 
 	/** Set the selection */
@@ -106,11 +98,6 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 			return tab_selected || manager.isVisible(getScale());
 		else
 			return visible;
-	}
-
-	/** Get the current map scale */
-	protected float getScale() {
-		return (map == null) ? 150f : (float)map.getPixelWorld();
 	}
 
 	/** Iterate through all shapes in the layer */

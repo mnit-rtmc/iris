@@ -31,12 +31,9 @@ public class SegmentLayerState extends LayerState {
 	/** List of segments in the layer */
 	protected final List<Segment> segments;
 
-	/** Map for scaling */
-	protected MapBean map;
-
 	/** Create a new segment layer */
-	public SegmentLayerState(SegmentLayer sl) {
-		super(sl, new DensityTheme());
+	public SegmentLayerState(SegmentLayer sl, MapBean mb) {
+		super(sl, mb, new DensityTheme());
 		addTheme(new DensityTheme());
 		addTheme(new SpeedTheme());
 		addTheme(new FlowTheme());
@@ -44,14 +41,9 @@ public class SegmentLayerState extends LayerState {
 		segments = sl.getSegments();
 	}
 
-	/** Set the map for scaling */
-	public void setMap(MapBean m) {
-		map = m;
-	}
-
 	/** Iterate through the segments in the layer */
 	public MapObject forEach(MapSearcher s) {
-		float scale = (map == null) ? 150f : (float)map.getPixelWorld();
+		float scale = (float)map.getPixelWorld();
 		if(scale > 20)
 			return forEachStation(s, scale);
 		else

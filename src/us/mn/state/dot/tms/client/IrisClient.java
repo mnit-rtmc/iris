@@ -34,6 +34,7 @@ import javax.swing.JPopupMenu;
 import us.mn.state.dot.log.TmsLogFactory;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.Scheduler;
@@ -256,7 +257,7 @@ public class IrisClient extends JFrame {
 		}
 		for(ScreenPane sp: visible) {
 			sp.createToolPanels(s);
-			sp.setMapLayers();
+			sp.setHomeLayer();
 		}
 	}
 
@@ -334,21 +335,23 @@ public class IrisClient extends JFrame {
 
 	/** Update the maps on all screen panes */
 	protected void updateMaps(Session s) {
-		for(ScreenPane sp: s_panes)
-			sp.getMap().setModel(createMapModel(s));
+		for(ScreenPane sp: s_panes) {
+			MapBean mb = sp.getMap();
+			mb.setModel(createMapModel(mb, s));
+		}
 	}
 
 	/** Create a new map model */
-	protected MapModel createMapModel(Session s) {
+	protected MapModel createMapModel(MapBean mb, Session s) {
 		MapModel mm = new MapModel();
 		for(Layer l: baseLayers) {
-			LayerState ls = l.createState();
+			LayerState ls = l.createState(mb);
 			mm.addLayer(ls);
 			mm.setHomeLayer(ls);
 		}
 		mm.home();
 		if(s != null) {
-			for(LayerState ls: s.createLayers())
+			for(LayerState ls: s.createLayers(mb))
 				mm.addLayer(ls);
 		}
 		return mm;
