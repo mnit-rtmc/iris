@@ -21,6 +21,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
+import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
@@ -253,32 +254,32 @@ public class Session {
 			tabs.add(new RoadwayTab(this, r_node_manager));
 	}
 
-	/** Create the layer states */
-	public List<LayerState> createLayers(MapBean mb) {
-		LinkedList<LayerState> lstates = new LinkedList<LayerState>();
+	/** Create the layer states.
+	 * @param mb Map bean to render the layer states.
+	 * @param mm Map model to contain layer states. */
+	public void createLayers(MapBean mb, MapModel mm) {
 		if(seg_layer != null)
-			lstates.add(seg_layer.createState(mb));
+			mm.addLayer(seg_layer.createState(mb));
 		if(canRead(Camera.SONAR_TYPE))
-			lstates.add(cam_manager.getLayer().createState(mb));
+			mm.addLayer(cam_manager.getLayer().createState(mb));
 		if(canRead(RampMeter.SONAR_TYPE))
-			lstates.add(meter_manager.getLayer().createState(mb));
+			mm.addLayer(meter_manager.getLayer().createState(mb));
 		if(canRead(DMS.SONAR_TYPE))
-			lstates.add(dms_manager.getLayer().createState(mb));
+			mm.addLayer(dms_manager.getLayer().createState(mb));
 		if(canRead(LCSArray.SONAR_TYPE)) {
-			lstates.add(lcs_array_manager.getLayer().createState(
+			mm.addLayer(lcs_array_manager.getLayer().createState(
 				mb));
 		}
 		if(canRead(WarningSign.SONAR_TYPE))
-			lstates.add(warn_manager.getLayer().createState(mb));
+			mm.addLayer(warn_manager.getLayer().createState(mb));
 		if(canRead(Incident.SONAR_TYPE))
-			lstates.add(inc_manager.getLayer().createState(mb));
+			mm.addLayer(inc_manager.getLayer().createState(mb));
 		if(canAdd(R_Node.SONAR_TYPE)) {
 			LayerState ls = r_node_manager.getLayer().createState(
 				mb);
 			ls.setVisible(false);
-			lstates.add(ls);
+			mm.addLayer(ls);
 		}
-		return lstates;
 	}
 
 	/** Check if the user can add an object */
