@@ -254,7 +254,9 @@ public class Session {
 			tabs.add(new RoadwayTab(this, r_node_manager));
 	}
 
-	/** Create the layer states.
+	/** Create the layer states.  The map bean and model must be seperate
+	 * parameters so that the model can be built before calling setModel
+	 * on the map bean.
 	 * @param mb Map bean to render the layer states.
 	 * @param mm Map model to contain layer states. */
 	public void createLayers(MapBean mb, MapModel mm) {
