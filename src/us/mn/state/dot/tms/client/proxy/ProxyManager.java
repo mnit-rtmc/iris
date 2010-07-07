@@ -367,7 +367,9 @@ abstract public class ProxyManager<T extends SonarObject>
 			GeoLocHelper.getDescription(getGeoLoc(proxy));
 	}
 
-	/** Check if the corresponding layer is visible */
+	/** Check if the corresponding layer is visible.
+	 * @param scale Size of a pixel in world coordinates.
+	 * @return True if the layer should be visible. */
 	public boolean isVisible(float scale) {
 		float rel = scale / getIconSizeScaleMax();
 		return rel < getScaleThreshold();
