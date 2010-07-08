@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
 public class I18N {
 
 	/** Base name for resource bundles */
-	static private final String BASENAME = "MessagesBundle.MessagesBundle";
+	static private final String BASENAME = "messages";
 
 	/** Value returned for an undefined string */
 	static protected final String UNDEFINED = "Undefined I18N string";

@@ -20,7 +20,7 @@
 	<property name="images.dir" value="images"/>
 	<property name="bin.dir" value="bin"/>
 	<property name="lib.dir" value="lib"/>
- 	<property name="MessagesBundle.dir" value="etc/MessagesBundle"/>
+ 	<property name="i18n.dir" value="etc/i18n"/>
 	<property name="docs.dir" value="docs"/>
 	<property name="sql.dir" value="sql"/>
 
@@ -41,8 +41,7 @@
 	<property name="build.bin" value="${build.dir}/bin"/>
 	<property name="build.src" value="${build.dir}/src"/>
 	<property name="build.lib" value="${build.dir}/lib"/>
-	<property name="build.MessagesBundle"
-	          value="${build.dir}/MessagesBundle"/>
+	<property name="build.i18n" value="${build.dir}/i18n"/>
 	<property name="build.images" value="${build.dir}/images"/>
 	<property name="build.classes" value="${build.dir}/classes"/>
 	<property name="build.javadocs" value="${build.dir}/javadocs"/>
@@ -256,9 +255,9 @@
 
 		<mkdir dir="${build.classes}"/>
 		<mkdir dir="${build.lib}"/>
-		<mkdir dir="${build.MessagesBundle}"/>
-		<copy todir="${build.MessagesBundle}">
-			<fileset dir="${MessagesBundle.dir}">
+		<mkdir dir="${build.i18n}"/>
+		<copy todir="${build.i18n}">
+			<fileset dir="${i18n.dir}">
 				<include name="*.properties"/>
 			</fileset>
 		</copy>
@@ -320,8 +319,7 @@
 				 includes="us/mn/state/dot/tms/*.class"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/utils/*.class"/>
-			<fileset dir="${build.dir}"
-				 includes="MessagesBundle/*"/>
+			<fileset dir="${build.i18n}"/>
 		</jar>
 	</target>
 
