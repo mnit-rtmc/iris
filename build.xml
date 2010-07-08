@@ -194,7 +194,7 @@
 	        description="Prepare the build/etc directory">
 
 		<copy todir="${build.etc}">
-			<fileset dir="${etc.dir}" />
+			<fileset dir="${etc.dir}"/>
 			<filterset begintoken="@@" endtoken="@@">
 				<filter token="NAME" value="${name}"/>
 				<filter token="VERSION" value="${version}"/>
@@ -343,13 +343,11 @@
 		<copy todir="${dist.client}">
 			<fileset dir="${build.etc}">
 				<include name="*.jnlp"/>
+				<include name="index.html"/>
 			</fileset>
 			<fileset dir="${build.bin}">
 				<include name="iris.sh"/>
 				<include name="iris.bat"/>
-			</fileset>
-			<fileset dir="${docs.dir}">
-				<include name="index.html"/>
 			</fileset>
 		</copy>
 		<chmod file="${dist.client}/iris.sh" perm="ugo+x"/>
