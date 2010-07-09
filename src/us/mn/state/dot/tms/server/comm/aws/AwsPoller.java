@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.aws;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
@@ -47,14 +46,10 @@ public class AwsPoller extends MessagePoller {
 	/** the only valid drop address */
 	static public final int VALID_DROP_ADDRESS = 1;
 
-	/** server namespace */
-	final ServerNamespace m_namespace;
-
 	/** Create a new poller */
-	public AwsPoller(String n, Messenger m, ServerNamespace namespace) {
+	public AwsPoller(String n, Messenger m) {
 		super(n, m);
 		assert m instanceof HttpFileMessenger;
-		m_namespace = namespace;
 
 		// add 30 second timer to aws scheduler
 		m_scheduler.addJob(new AwsTimerJob());

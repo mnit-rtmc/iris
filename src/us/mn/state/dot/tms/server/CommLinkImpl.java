@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -340,8 +340,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Create a AWS poller */
 	protected MessagePoller createAwsPoller() throws IOException {
-		return new AwsPoller(name, createHttpFileMessenger(), 
-			namespace);
+		return new AwsPoller(name, createHttpFileMessenger());
 	}
 
 	/** Create a Pelco video switch poller */
