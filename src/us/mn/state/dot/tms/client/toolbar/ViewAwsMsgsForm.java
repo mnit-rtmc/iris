@@ -52,14 +52,15 @@ import us.mn.state.dot.tms.utils.STime;
  */
 public class ViewAwsMsgsForm extends AbstractForm {
 
+	/** Number of columns in table */
+	static private final int NUM_COLS = 12;
+
 	/** Scheduler that runs refresh job */
-	private Scheduler m_scheduler;
+	static private final Scheduler m_scheduler = new Scheduler(
+		"Scheduler: AWS form refresh");
 
 	/** Scheduler refresh job */
-	private Job m_rjob;
-
-	/** Number of columns in table */
-	private static final int NUM_COLS = 12;
+	private final Job m_rjob = new RefreshTimerJob();
 
 	/** Create a new form */
 	public ViewAwsMsgsForm() {
@@ -71,8 +72,6 @@ public class ViewAwsMsgsForm extends AbstractForm {
 	/** Initialize form. Called from SmartDesktop.addForm() */
 	protected void initialize() {
 		add(createFormPanel());
-		m_scheduler = new Scheduler("Scheduler: AWS form refresh");
-		m_rjob = new RefreshTimerJob();
 		m_scheduler.addJob(m_rjob);
 	}
 
@@ -265,7 +264,6 @@ public class ViewAwsMsgsForm extends AbstractForm {
 	/** Form closed */
 	protected void dispose() {
 		m_scheduler.removeJob(m_rjob);
-		m_scheduler = null;
 		super.dispose();
 	}
 }
