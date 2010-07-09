@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.Constants;
 abstract public class TrafficDataBuffer {
 
 	/** Traffic data debug log */
-	static protected final DebugLog TRAFFIC_LOG = new DebugLog("traffic");
+	static protected final IDebugLog TRAFFIC_LOG = new IDebugLog("traffic");
 
 	/** Path where traffic data files are stored */
 	static protected final String DATA_PATH = "/var/lib/iris/traffic";

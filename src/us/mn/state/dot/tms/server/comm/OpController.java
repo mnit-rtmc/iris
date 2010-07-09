@@ -18,7 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.DebugLog;
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.utils.SString;
 abstract public class OpController extends Operation {
 
 	/** Comm error log */
-	static protected final DebugLog COMM_LOG = new DebugLog("comm");
+	static protected final IDebugLog COMM_LOG = new IDebugLog("comm");
 
 	/** Filter a message */
 	static protected String filterMessage(String m) {

@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
-import us.mn.state.dot.tms.server.DebugLog;
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class SNMP extends BER {
 
 	/** SNMP debug log */
-	static protected final DebugLog SNMP_LOG = new DebugLog("snmp");
+	static protected final IDebugLog SNMP_LOG = new IDebugLog("snmp");
 
  	/** SNMP error status codes */
 	static protected final int NO_ERROR = 0;

@@ -52,7 +52,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	Comparable<DetectorImpl>
 {
 	/** Detector debug log */
-	static protected final DebugLog DET_LOG = new DebugLog("detector");
+	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
 
 	/** Load all the detectors */
 	static protected void loadAll() throws TMSException {

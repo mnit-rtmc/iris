@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 public class Corridor extends CorridorBase {
 
 	/** VSA debug log */
-	static protected final DebugLog VSA_LOG = new DebugLog("vsa");
+	static protected final IDebugLog VSA_LOG = new IDebugLog("vsa");
 
 	/** Round up to the nearest 5 mph */
 	static protected int round5Mph(float mph) {

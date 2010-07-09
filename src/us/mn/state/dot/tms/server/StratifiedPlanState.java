@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2009  Minnesota Department of Transportation
+ * Copyright (C) 2001-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
 public class StratifiedPlanState extends TimingPlanState {
 
 	/** Zone debug log */
-	static protected final DebugLog SZM_LOG = new DebugLog("szm");
+	static protected final IDebugLog SZM_LOG = new IDebugLog("szm");
 
 	/** Path where meter data files are stored */
 	static protected final String DATA_PATH = "/var/lib/iris/meter";

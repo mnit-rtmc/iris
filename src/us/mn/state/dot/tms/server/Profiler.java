@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class Profiler {
 	static protected final float MIB = 1024.0f * 1024.0f;
 
 	/** Profile debug log */
-	protected final DebugLog PROFILE_LOG = new DebugLog("profile");
+	protected final IDebugLog PROFILE_LOG = new IDebugLog("profile");
 
 	/** Runtime used to get memory information */
 	protected final Runtime jvm = Runtime.getRuntime();

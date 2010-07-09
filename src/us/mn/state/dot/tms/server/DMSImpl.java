@@ -74,7 +74,7 @@ import us.mn.state.dot.tms.utils.SString;
 public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Action debug log */
-	static protected final DebugLog ACTION_LOG = new DebugLog("action");
+	static protected final IDebugLog ACTION_LOG = new IDebugLog("action");
 
 	/** Compare two (possibly-null) integers for equality */
 	static protected boolean integerEquals(Integer i0, Integer i1) {

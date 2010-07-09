@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ss125;
 
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.DebugLog;
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpSS125 extends OpController {
 
 	/** SS 125 debug log */
-	static protected final DebugLog SS125_LOG = new DebugLog("ss125");
+	static protected final IDebugLog SS125_LOG = new IDebugLog("ss125");
 
 	/** Create a new SS125 operation */
 	protected OpSS125(PriorityLevel p, ControllerImpl c) {

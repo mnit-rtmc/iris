@@ -59,7 +59,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	static protected final int DEFAULT_MAX_WAIT = 240;
 
 	/** Meter debug log */
-	static protected final DebugLog METER_LOG = new DebugLog("meter");
+	static protected final IDebugLog METER_LOG = new IDebugLog("meter");
 
 	/** Filter a releae rate for valid range */
 	static protected int filterRate(int r) {

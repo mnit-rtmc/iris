@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 public class RouteBuilder {
 
 	/** Travel time debug log */
-	static protected final DebugLog TRAVEL_LOG = new DebugLog("travel");
+	static protected final IDebugLog TRAVEL_LOG = new IDebugLog("travel");
 
 	/** Maximum distance from origin to a corridor node (in meters) */
 	static protected final float MAX_ORIGIN_DISTANCE = 1000;

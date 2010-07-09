@@ -29,8 +29,8 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 public class StationImpl implements Station {
 
 	/** Bottleneck debug log */
-	static protected final DebugLog BOTTLENECK_LOG =
-		new DebugLog("bottleneck");
+	static protected final IDebugLog BOTTLENECK_LOG =
+		new IDebugLog("bottleneck");
 
 	/** Speed ranks for extending rolling sample averaging */
 	static protected enum SpeedRank {

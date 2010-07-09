@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.DebugLog;
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpDMS extends OpDevice {
 
 	/** DMS debug log */
-	static protected final DebugLog DMS_LOG = new DebugLog("dms");
+	static protected final IDebugLog DMS_LOG = new IDebugLog("dms");
 
 	/** Special duration value for indefinite duration */
 	static protected final int DURATION_INDEFINITE = 65535;

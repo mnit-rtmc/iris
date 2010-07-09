@@ -20,7 +20,7 @@ import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.DebugLog;
+import us.mn.state.dot.tms.server.IDebugLog;
 
 /**
  * MessagePoller is an abstract class which represents a communication channel 
@@ -43,7 +43,7 @@ abstract public class MessagePoller extends Thread {
 	static protected final long INTERVAL_TIME = 30000;
 
 	/** Message polling log */
-	static protected final DebugLog POLL_LOG = new DebugLog("polling");
+	static protected final IDebugLog POLL_LOG = new IDebugLog("polling");
 
 	/** Thread group for all message poller threads */
 	static protected final ThreadGroup GROUP = new ThreadGroup("Poller");
