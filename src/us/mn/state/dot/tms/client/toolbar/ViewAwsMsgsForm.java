@@ -31,7 +31,6 @@ import java.util.Calendar;
 import java.util.StringTokenizer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
@@ -56,9 +55,6 @@ public class ViewAwsMsgsForm extends AbstractForm {
 	/** Scheduler that runs refresh job */
 	private Scheduler m_scheduler;
 
-	/** Sonar state */
-	private final SonarState m_st;
-
 	/** Scheduler refresh job */
 	private Job m_rjob;
 
@@ -66,10 +62,9 @@ public class ViewAwsMsgsForm extends AbstractForm {
 	private static final int NUM_COLS = 12;
 
 	/** Create a new form */
-	public ViewAwsMsgsForm(SonarState st) {
+	public ViewAwsMsgsForm() {
 		super("Current " + I18N.get("dms.aws.abbreviation") +
 			" Messages");
- 		m_st = st;
 		setPreferredSize(new Dimension(880, 480));
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -68,16 +68,11 @@ public class AwsStatusPanel extends ToolPanel implements
 	/** desktop */
 	final SmartDesktop m_desktop;
 
-	/** Sonar state */
-	final private SonarState m_st;
-
 	/** List of deactivated DMS, can never be null */
 	private String[] m_deactivated_dms = new String[0];
 
 	/** Constructor */
 	public AwsStatusPanel(SonarState st, final SmartDesktop desktop) {
-		assert st !=  null;
-		m_st = st;
 		m_dms = st.getDmsCache();
 		m_sysattribs = st.getSystemAttributes();
 		m_desktop = desktop;
@@ -105,7 +100,7 @@ public class AwsStatusPanel extends ToolPanel implements
 		// add action for view button click
 		new ActionJob(this, m_btnView) {
 			public void perform() throws Exception {
-				m_desktop.show(new ViewAwsMsgsForm(m_st));
+				m_desktop.show(new ViewAwsMsgsForm());
 			}
 		};
 	}
