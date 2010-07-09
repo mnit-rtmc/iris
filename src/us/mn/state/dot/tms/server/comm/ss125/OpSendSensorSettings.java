@@ -54,8 +54,9 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Begin the sensor initialization operation */
-	public void begin() {
+	public boolean begin() {
 		phase = new QueryGenConfig();
+		return true;
 	}
 
 	/** Phase to query the general config  */

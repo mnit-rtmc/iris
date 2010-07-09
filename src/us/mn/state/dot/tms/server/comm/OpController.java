@@ -105,6 +105,11 @@ abstract public class OpController extends Operation {
 		return super.toString() + " (" + id + ")";
 	}
 
+	/** Get the operation key name */
+	protected String getKey() {
+		return getOpName() + ":" + controller.getName();
+	}
+
 	/** Handle a communication error */
 	public void handleCommError(EventType et, String msg) {
 		COMM_LOG.log(id + " " + et + ", " + msg);

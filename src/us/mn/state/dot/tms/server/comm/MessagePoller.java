@@ -93,19 +93,10 @@ abstract public class MessagePoller extends Thread {
 		// NOTE: we must synchronize on the queue here so that begin()
 		// gets called before the poll queue thread get access to it
 		synchronized(queue) {
-			if(queueOperation(o))
-				o.begin();
-		}
-	}
-
-	/** Queue an operation to be processed */
-	protected boolean queueOperation(Operation o) {
-		if(queue.add(o))
-			return true;
-		else {
-			if(POLL_LOG.isOpen())
+			if(queue.shouldAdd(o) && o.begin())
+				queue.add(o);
+			else if(POLL_LOG.isOpen())
 				POLL_LOG.log(getName() + ", DROPPING: " + o);
-			return false;
 		}
 	}
 
@@ -175,7 +166,7 @@ abstract public class MessagePoller extends Thread {
 			{
 				queue.remove(oc);
 				oc.setPriority(o.getPriority());
-				if(!queueOperation(oc))
+				if(!requeueOperation(oc))
 					oc.cleanup();
 			}
 		}
@@ -203,13 +194,25 @@ abstract public class MessagePoller extends Thread {
 				exceptionMessage(e));
 		}
 		finally {
-			if(o.isDone() || !queueOperation(o))
+			if(o.isDone() || !requeueOperation(o))
 				o.cleanup();
 			if(POLL_LOG.isOpen()) {
 				long el = sample_load(start);
 				POLL_LOG.log(getName() + ", " + oname +
 					" elapsed: " + el);
 			}
+		}
+	}
+
+	/** Requeue an operation already in progress */
+	protected boolean requeueOperation(Operation o) {
+		synchronized(queue) {
+			boolean a = queue.shouldAdd(o);
+			if(a)
+				queue.add(o);
+			else if(POLL_LOG.isOpen())
+				POLL_LOG.log(getName() + ", DROPPING: " + o);
+			return a;
 		}
 	}
 

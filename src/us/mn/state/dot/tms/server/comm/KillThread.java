@@ -27,5 +27,7 @@ public class KillThread extends Operation {
 	}
 
 	/** Begin operation */
-	public void begin() {}
+	public boolean begin() {
+		return true;
+	}
 }

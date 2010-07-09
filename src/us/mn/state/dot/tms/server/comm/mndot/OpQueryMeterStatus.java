@@ -64,9 +64,9 @@ public class OpQueryMeterStatus extends Op170 {
 	}
 
 	/** Begin the operation */
-	public void begin() {
-		completer.up();
+	public boolean begin() {
 		phase = new GetStatus();
+		return completer.beginTask(getKey());
 	}
 
 	/** Phase to get the status of the ramp meters */
@@ -114,7 +114,7 @@ public class OpQueryMeterStatus extends Op170 {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		completer.down();
+		completer.completeTask(getKey());
 		super.cleanup();
 	}
 

@@ -32,8 +32,9 @@ public class OpReset170 extends Op170 {
 	}
 
 	/** Begin the operation */
-	public void begin() {
+	public boolean begin() {
 		phase = new ResetDetectors();
+		return true;
 	}
 
 	/** Phase to reset the detectors */

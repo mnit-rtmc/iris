@@ -43,8 +43,9 @@ public class OpQueryAlarms extends Op170 {
 	}
 
 	/** Begin the operation */
-	public void begin() {
+	public boolean begin() {
 		phase = new GetAlarms();
+		return true;
 	}
 
 	/** Phase to query the alarm states */

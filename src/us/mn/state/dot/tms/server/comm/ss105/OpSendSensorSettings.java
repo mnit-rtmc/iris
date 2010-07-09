@@ -40,11 +40,12 @@ public class OpSendSensorSettings extends OpSS105 {
 	}
 
 	/** Begin the sensor initialization operation */
-	public void begin() {
+	public boolean begin() {
 		if(restart)
 			phase = new GetTimeInterval();
 		else
 			phase = new QueryVersion();
+		return true;
 	}
 
 	/** Phase to get the time interval (for binning) */

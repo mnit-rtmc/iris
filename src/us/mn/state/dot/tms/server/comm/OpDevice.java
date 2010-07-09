@@ -55,8 +55,9 @@ abstract public class OpDevice extends OpController {
 	abstract protected Phase phaseOne();
 
 	/** Begin the operation */
-	public final void begin() {
+	public final boolean begin() {
 		phase = new AcquireDevice();
+		return true;
 	}
 
 	/** Cleanup the operation */

@@ -66,11 +66,21 @@ abstract public class Operation {
 			return name;
 	}
 
+	/** Get the operation name */
+	protected String getOpName() {
+		String name = getClass().getName();
+		int i = name.lastIndexOf('.');
+		if(i >= 0)
+			return name.substring(i + 1);
+		else
+			return name;
+	}
+
 	/** Success or failure of operation */
 	protected boolean success = true;
 
 	/** Begin the operation */
-	abstract public void begin();
+	abstract public boolean begin();
 
 	/** Cleanup the operation */
 	public void cleanup() {}

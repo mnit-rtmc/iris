@@ -40,8 +40,9 @@ public class OpQueryConfig extends OpController {
 	}
 
 	/** Begin the query config operation */
-	public void begin() {
+	public boolean begin() {
 		phase = new QuerySerialNumber();
+		return true;
 	}
 
 	/** Phase to query the serial number */

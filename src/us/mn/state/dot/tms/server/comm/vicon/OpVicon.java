@@ -34,8 +34,9 @@ abstract public class OpVicon extends OpController {
 	protected final String camera;
 
 	/** Begin the operation */
-	public final void begin() {
+	public final boolean begin() {
 		phase = phaseOne();
+		return true;
 	}
 
 	/** Create the first real phase of the operation */

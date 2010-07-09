@@ -36,8 +36,9 @@ public class OpSendSampleSettings extends Op170 {
 	}
 
 	/** Begin the send sample settings operation */
-	public void begin() {
+	public boolean begin() {
 		phase = new SynchronizeClock();
+		return true;
 	}
 
 	/** Phase to synchronize the clock */

@@ -38,9 +38,9 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 	}
 
 	/** Begin the operation */
-	public void begin() {
-		completer.up();
+	public boolean begin() {
 		phase = new QuerySample30Sec();
+		return completer.beginTask(getKey());
 	}
 
 	/** Phase to query the 30-second sample data */
@@ -62,7 +62,7 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 		Calendar stamp = completer.getStamp();
 		controller.storeData30Second(stamp, FIRST_DETECTOR_PIN, volume,
 			scans, null);
-		completer.down();
+		completer.completeTask(getKey());
 		super.cleanup();
 	}
 }

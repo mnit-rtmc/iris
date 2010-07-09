@@ -58,10 +58,6 @@ public class SampleQuery5MinJob extends Job {
 
 	/** Perform the 5-minute timer job */
 	public void perform() {
-		if(!comp.checkComplete()) {
-			// FIXME: print some error msg
-			return;
-		}
 		stamp = Calendar.getInstance();
 		Calendar s = (Calendar)stamp.clone();
 		s.add(Calendar.MINUTE, -5);

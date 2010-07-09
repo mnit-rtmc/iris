@@ -41,8 +41,9 @@ public class OpProcessAwsMsgs extends OpController
 	}
 
 	/** Begin the operation */
-	public final void begin() {
+	public final boolean begin() {
 		phase = new PhaseReadMsgFile();
+		return true;
 	}
 
 	/** Cleanup the operation */

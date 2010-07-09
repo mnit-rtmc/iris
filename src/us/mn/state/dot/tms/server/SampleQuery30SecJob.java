@@ -82,8 +82,6 @@ public class SampleQuery30SecJob extends Job {
 
 	/** Perform the 30-second timer job */
 	public void perform() {
-		if(!comp.checkComplete())
-			return;
 		Calendar s = Calendar.getInstance();
 		s.add(Calendar.SECOND, -30);
 		stamp = s;

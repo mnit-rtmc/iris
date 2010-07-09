@@ -57,8 +57,9 @@ public class OpQueryEventSamples extends OpController {
 	}
 
 	/** Begin the sensor initialization operation */
-	public void begin() {
+	public boolean begin() {
 		phase = new QueryCurrentEvents();
+		return true;
 	}
 
 	/** Phase to query the current detection events */

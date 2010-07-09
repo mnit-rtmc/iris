@@ -59,9 +59,9 @@ public class OpQuerySamples extends OpSS125 {
 	}
 
 	/** Begin the operation */
-	public void begin() {
-		completer.up();
+	public boolean begin() {
 		phase = new GetCurrentSamples();
+		return completer.beginTask(getKey());
 	}
 
 	/** Phase to get the most recent sample interval */
@@ -91,7 +91,7 @@ public class OpQuerySamples extends OpSS125 {
 				sample_data.getVolume(), sample_data.getScans(),
 				sample_data.getSpeed());
 		}
-		completer.down();
+		completer.completeTask(getKey());
 		super.cleanup();
 	}
 }

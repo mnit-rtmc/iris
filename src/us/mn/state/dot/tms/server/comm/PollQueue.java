@@ -40,7 +40,7 @@ public final class PollQueue {
 	}
 
 	/** Check if an operation should be added to the queue */
-	protected boolean shouldAdd(Operation o) {
+	public synchronized boolean shouldAdd(Operation o) {
 		if(closing)
 			return false;
 		return o.getPriority().ordinal() <
@@ -61,9 +61,7 @@ public final class PollQueue {
 	}
 
 	/** Add an operation to the queue */
-	public synchronized boolean add(Operation o) {
-		if(!shouldAdd(o))
-			return false;
+	public synchronized void add(Operation o) {
 		PriorityLevel priority = o.getPriority();
 		Node prev = null;
 		Node node = front;
@@ -79,7 +77,6 @@ public final class PollQueue {
 		else
 			prev.next = node;
 		notify();
-		return true;
 	}
 
 	/** Remove an operation from the queue */

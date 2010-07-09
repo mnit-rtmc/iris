@@ -63,9 +63,9 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	}
 
 	/** Begin the operation */
-	public void begin() {
-		completer.up();
+	public boolean begin() {
 		phase = new GetNextRecord();
+		return completer.beginTask(getKey());
 	}
 
 	/** Phase to get the next sample data record */
@@ -135,7 +135,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		completer.down();
+		completer.completeTask(getKey());
 		super.cleanup();
 	}
 

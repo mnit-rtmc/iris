@@ -69,9 +69,9 @@ public class OpQuerySamples extends OpSS105 {
 	}
 
 	/** Begin the operation */
-	public void begin() {
-		completer.up();
+	public boolean begin() {
 		phase = new GetCurrentSamples();
+		return completer.beginTask(getKey());
 	}
 
 	/** Phase to get the most recent binned samples */
@@ -104,7 +104,7 @@ public class OpQuerySamples extends OpSS105 {
 			controller.storeData30Second(stamp, 1, volume, scans,
 				speed);
 		}
-		completer.down();
+		completer.completeTask(getKey());
 		super.cleanup();
 	}
 }
