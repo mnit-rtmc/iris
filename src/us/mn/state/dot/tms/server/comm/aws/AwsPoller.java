@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.aws;
 
 import java.util.Calendar;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
@@ -39,8 +38,8 @@ import us.mn.state.dot.tms.utils.Log;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class AwsPoller extends MessagePoller
-{
+public class AwsPoller extends MessagePoller {
+
 	/** Create scheduler that runs AWS activation job */
 	static protected final Scheduler m_scheduler =
 		new Scheduler("Scheduler: AWS Activation");
@@ -110,43 +109,14 @@ public class AwsPoller extends MessagePoller
 	/** AWS timer job */
 	protected class AwsTimerJob extends Job {
 
-		/** Job completer */
-		protected final Completer m_comp;
-
-		/** Current time stamp */
-		protected Calendar stamp;
-
-		/** Job to be performed on completion */
-		protected final Job job = new Job() {
-			public void perform() {
-				// nothing
-			}
-		};
-
 		/** Create a new 30-second timer job */
 		protected AwsTimerJob() {
 			super(Calendar.SECOND, 30, Calendar.SECOND, 
 				getAwsReadTimeSecs());
-			m_comp = new Completer("30-Second", m_scheduler, job);
 		}
 
 		/** Perform the 30-second timer job */
 		public void perform() throws Exception {
-			if(!m_comp.checkComplete())
-				return;
-			Calendar s = Calendar.getInstance();
-			s.add(Calendar.SECOND, -30);
-			stamp = s;
-			m_comp.reset(stamp);
-			try {
-				doWork();
-			} finally {
-				m_comp.makeReady();
-			}
-		}
-
-		/** do the job work */
-		private void doWork() {
 			ControllerImpl c = getController();
 			if(c == null) {
 				Log.config("AWS controller not defined, " +
