@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009 Minnesota Department of Transportation
+ * Copyright (C) 2008-2010 Minnesota Department of Transportation
  * Copyright (C) 2009-2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,6 @@ import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.StringTokenizer;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.client.SonarState;
@@ -133,43 +132,14 @@ public class ViewAwsMsgsForm extends AbstractForm {
 	/** Refresh timer job */
 	protected class RefreshTimerJob extends Job {
 
-		/** Job completer */
-		protected final Completer m_comp;
-
-		/** Current time stamp */
-		protected Calendar stamp;
-
-		/** Job to be performed on completion */
-		protected final Job job = new Job() {
-			public void perform() {
-				// nothing
-			}
-		};
-
 		/** Create a new 30-second timer job */
 		protected RefreshTimerJob() {
 			super(Calendar.SECOND, 30, Calendar.SECOND, 
 				getAwsReadTimeSecs());
-			m_comp = new Completer("30-Second", m_scheduler, job);
 		}
 
 		/** Perform the 30-second timer job */
 		public void perform() throws Exception {
-			if(!m_comp.checkComplete())
-				return;
-			Calendar s = Calendar.getInstance();
-			s.add(Calendar.SECOND, -30);
-			stamp = s;
-			m_comp.reset(stamp);
-			try {
-				doWork();
-			} finally {
-				m_comp.makeReady();
-			}
-		}
-
-		/** do the job work */
-		private void doWork() {
 			JPanel jp = createFormPanel();
 			removeAll();
 			add(jp);
@@ -179,7 +149,6 @@ public class ViewAwsMsgsForm extends AbstractForm {
 
 	/** Get the AWS message URL, which is specified in the CommLink URL. */
 	private String getAwsUrl() {
-
 		CommLink cl = CommLinkHelper.getCommLink(CommProtocol.AWS);
 		if(cl != null)
 			return cl.getUrl();
