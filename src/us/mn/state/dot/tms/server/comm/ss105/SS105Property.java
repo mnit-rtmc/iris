@@ -31,6 +31,9 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 abstract public class SS105Property extends ControllerProperty {
 
+	/** Maximum number of bytes in a response */
+	static protected final int MAX_RESP = 256;
+
 	/** Check if the request has a checksum */
 	abstract protected boolean hasChecksum();
 
@@ -88,15 +91,17 @@ abstract public class SS105Property extends ControllerProperty {
 
 	/** Read a line of text from an input stream */
 	protected String readLine(InputStream is) throws IOException {
-		StringBuilder buf = new StringBuilder();
-		for(int i = 0; i < 256; i++) {
-			int b = is.read();
-			if(b < 0)
+		byte[] resp = new byte[MAX_RESP];
+		int n_rcv = 0;
+		while(n_rcv < MAX_RESP) {
+			int r = is.read(resp, n_rcv, MAX_RESP - n_rcv);
+			if(r <= 0)
 				throw new EOFException("END OF STREAM");
-			if(b == 13)
-				return buf.toString();
-			else
-				buf.append((char)b);
+			for(int i = 0; i < r; i++) {
+				if(resp[n_rcv + i] == 13)
+					return new String(resp, 0, n_rcv + i);
+			}
+			n_rcv += r;
 		}
 		throw new ParsingException("RANDOM NOISE");
 	}
