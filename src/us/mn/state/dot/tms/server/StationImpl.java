@@ -32,6 +32,30 @@ public class StationImpl implements Station {
 	static protected final IDebugLog BOTTLENECK_LOG =
 		new IDebugLog("bottleneck");
 
+	/** Density ranks for calculating rolling sample count */
+	static protected enum DensityRank {
+		First(55, 6),	// 55+ vpm => 6 samples (3 minutes)
+		Second(40, 4),	// 40-55 vpm => 4 samples (2 minutes)
+		Third(25, 3),	// 25-40 vpm => 3 samples (1.5 minutes)
+		Fourth(15, 4),	// 15-25 vpm => 4 samples (2 minutes)
+		Fifth(10, 6),	// 10-15 vpm => 6 samples (3 minutes)
+		Last(0, 0);	// less than 10 vpm => 0 samples
+		protected final int density;
+		protected final int samples;
+		private DensityRank(int k, int n_smp) {
+			density = k;
+			samples = n_smp;
+		}
+		/** Get the number of rolling samples for the given density */
+		static protected int samples(float k) {
+			for(DensityRank dr: values()) {
+				if(k > dr.density)
+					return dr.samples;
+			}
+			return Last.samples;
+		}
+	}
+
 	/** Speed ranks for extending rolling sample averaging */
 	static protected enum SpeedRank {
 		First(40, 2),	// 40+ mph => 2 samples (1 minute)
@@ -201,6 +225,14 @@ public class StationImpl implements Station {
 		return average(avg_flow, SpeedRank.samples(avg_speed));
 	}
 
+	/** Current average station density */
+	protected int density = Constants.MISSING_DATA;
+
+	/** Get the average station density */
+	public int getDensity() {
+		return density;
+	}
+
 	/** Current average station speed */
 	protected int speed = Constants.MISSING_DATA;
 
@@ -229,6 +261,59 @@ public class StationImpl implements Station {
 		return averageSpeed(avg_speed);
 	}
 
+	/** Get the average speed using a rolling average of samples */
+	public float getRollingAverageSpeed() {
+		int n_samples = calculateRollingSamples();
+		if(n_samples > 0)
+			return average(avg_speed, n_samples);
+		else
+			return getSpeedLimit();
+	}
+
+	/** Samples used in previous time step */
+	protected int rolling_samples = 0;
+
+	/** Update the rolling samples for previous time step */
+	protected void updateRollingSamples() {
+		rolling_samples = calculateRollingSamples();
+	}
+
+	/** Calculate the number of samples for rolling average */
+	protected int calculateRollingSamples() {
+		return Math.min(calculateMaxSamples(), rolling_samples + 1);
+	}
+
+	/** Calculate the maximum number of samples for rolling average */
+	protected int calculateMaxSamples() {
+		if(isSpeedTrending())
+			return 2;
+		else
+			return DensityRank.samples(getDensity());
+	}
+
+	/** Is the speed trending over the last few time steps? */
+	protected boolean isSpeedTrending() {
+		return isSpeedTrendValid() &&
+		      (isSpeedTrendingDownward() || isSpeedTrendingUpward());
+	}
+
+	/** Is speed trend data valid? */
+	protected boolean isSpeedTrendValid() {
+		return avg_speed[0] > 0 && avg_speed[1] > 0 && avg_speed[2] > 0;
+	}
+
+	/** Is the speed trending downward? */
+	protected boolean isSpeedTrendingDownward() {
+		return avg_speed[0] < avg_speed[1] &&
+		       avg_speed[1] < avg_speed[2];
+	}
+
+	/** Is the speed trending upward? */
+	protected boolean isSpeedTrendingUpward() {
+		return avg_speed[0] > avg_speed[1] &&
+		       avg_speed[1] > avg_speed[2];
+	}
+
 	/** Low station speed for previous ten samples */
 	protected float[] low_speed = new float[SpeedRank.Last.samples];
 
@@ -246,6 +331,7 @@ public class StationImpl implements Station {
 
 	/** Calculate the current station data */
 	public void calculateData() {
+		updateRollingSamples();
 		float low = Constants.MISSING_DATA;
 		float t_volume = 0;
 		int n_volume = 0;
@@ -253,6 +339,8 @@ public class StationImpl implements Station {
 		int n_occ = 0;
 		float t_flow = 0;
 		int n_flow = 0;
+		float t_density = 0;
+		int n_density = 0;
 		float t_speed = 0;
 		int n_speed = 0;
 		for(DetectorImpl det: r_node.getDetectors()) {
@@ -274,6 +362,11 @@ public class StationImpl implements Station {
 				t_flow += f;
 				n_flow++;
 			}
+			f = det.getDensity();
+			if(f != Constants.MISSING_DATA) {
+				t_density += f;
+				n_density++;
+			}
 			f = det.getSpeed();
 			if(f > 0) {
 				t_speed += f;
@@ -288,6 +381,7 @@ public class StationImpl implements Station {
 		occupancy = average(t_occ, n_occ);
 		flow = (int)average(t_flow, n_flow);
 		updateAvgFlow(flow);
+		density = (int)average(t_density, n_density);
 		speed = (int)average(t_speed, n_speed);
 		updateAvgSpeed(speed);
 		updateLowSpeed(low);
@@ -376,8 +470,8 @@ public class StationImpl implements Station {
 	 * @param d Distance to previous station (miles).
 	 * @return acceleration in mphph */
 	protected Float calculateAcceleration(StationImpl sp, float d) {
-		float u = getSmoothedAverageSpeed();
-		float up = sp.getSmoothedAverageSpeed();
+		float u = getRollingAverageSpeed();
+		float up = sp.getRollingAverageSpeed();
 		return calculateAcceleration(u, up, d);
 	}
 
@@ -406,7 +500,7 @@ public class StationImpl implements Station {
 
 	/** Test if station speed is near the speed limit */
 	protected boolean isSpeedNearLimit() {
-		return getSpeedLimit() < getSmoothedAverageSpeed() +
+		return getSpeedLimit() < getRollingAverageSpeed() +
 			SystemAttrEnum.VSA_NEAR_LIMIT_MPH.getInt();
 	}
 
@@ -452,7 +546,7 @@ public class StationImpl implements Station {
 			BOTTLENECK_LOG.log(name +
 				", bneck: " + bottleneck +
 				", n_bneck: " + n_bottleneck +
-				", spd: " + getSmoothedAverageSpeed() +
+				", spd: " + getRollingAverageSpeed() +
 				", acc: " + acceleration +
 				", d: " + d +
 				", prev: " + sp.name +
@@ -476,7 +570,7 @@ public class StationImpl implements Station {
 	/** Get the upstream bottleneck distance */
 	protected float getUpstreamDistance() {
 		float lim = getSpeedLimit();
-		float sp = getSmoothedAverageSpeed();
+		float sp = getRollingAverageSpeed();
 		if(sp > 0 && sp < lim) {
 			int acc = -getControlThreshold();
 			return (lim * lim - sp * sp) / (2 * acc);
@@ -493,7 +587,7 @@ public class StationImpl implements Station {
 	 * @param d Distance upstream of station.
 	 * @return Speed advisory. */
 	public Float calculateSpeedAdvisory(float d) {
-		float speed = getSmoothedAverageSpeed();
+		float speed = getRollingAverageSpeed();
 		if(speed > 0) {
 			if(d > 0) {
 				int acc = -getControlThreshold();

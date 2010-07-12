@@ -186,7 +186,7 @@ public class Corridor extends CorridorBase {
 					s.calculateBottleneck(sp, m - mp);
 				else
 					s.clearBottleneck();
-				if(s.getSmoothedAverageSpeed() > 0) {
+				if(s.getRollingAverageSpeed() > 0) {
 					sp = s;
 					mp = m;
 				}
@@ -271,8 +271,8 @@ public class Corridor extends CorridorBase {
 		}
 		protected Float getSpeed() {
 			if(su != null && sd != null) {
-				float u0 = su.getSmoothedAverageSpeed();
-				float u1 = sd.getSmoothedAverageSpeed();
+				float u0 = su.getRollingAverageSpeed();
+				float u1 = sd.getRollingAverageSpeed();
 				if(u0 > 0 && u1 > 0)
 					return Math.min(u0, u1);
 				if(u0 > 0)
