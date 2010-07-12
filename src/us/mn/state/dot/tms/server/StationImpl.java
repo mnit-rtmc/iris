@@ -429,6 +429,11 @@ public class StationImpl implements Station {
 		return SystemAttrEnum.VSA_START_THRESHOLD.getInt();
 	}
 
+	/** Get the control deceleration threshold */
+	protected int getControlThreshold() {
+		return SystemAttrEnum.VSA_CONTROL_THRESHOLD.getInt();
+	}
+
 	/** Get the stopping deceleration threshold */
 	protected int getStopThreshold() {
 		return SystemAttrEnum.VSA_STOP_THRESHOLD.getInt();
@@ -473,7 +478,7 @@ public class StationImpl implements Station {
 		float lim = getSpeedLimit();
 		float sp = getSmoothedAverageSpeed();
 		if(sp > 0 && sp < lim) {
-			int acc = -getStopThreshold();
+			int acc = -getControlThreshold();
 			return (lim * lim - sp * sp) / (2 * acc);
 		} else
 			return 0;
@@ -491,7 +496,7 @@ public class StationImpl implements Station {
 		float speed = getSmoothedAverageSpeed();
 		if(speed > 0) {
 			if(d > 0) {
-				int acc = -getStopThreshold();
+				int acc = -getControlThreshold();
 				double s2 = speed * speed + 2.0 * acc * d;
 				assert s2 > 0;
 				return (float)Math.sqrt(s2);
