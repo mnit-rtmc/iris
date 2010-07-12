@@ -442,7 +442,7 @@ public class StationImpl implements Station {
 	 * @param d Distance to previous station (miles). */
 	public void calculateBottleneck(StationImpl sp, float d) {
 		acceleration = calculateAcceleration(sp, d);
-		if(isTooClose(d) || isSpeedNearLimit() ||
+		if(isTooClose(d) || isAboveBottleneckSpeed() ||
 		   !isAccelerationValid())
 		{
 			n_bottleneck = 0;
@@ -498,10 +498,10 @@ public class StationImpl implements Station {
 		return d < SystemAttrEnum.VSA_MIN_STATION_MILES.getFloat();
 	}
 
-	/** Test if station speed is near the speed limit */
-	protected boolean isSpeedNearLimit() {
-		return getSpeedLimit() < getRollingAverageSpeed() +
-			SystemAttrEnum.VSA_NEAR_LIMIT_MPH.getInt();
+	/** Test if station speed is above the bottleneck id speed */
+	protected boolean isAboveBottleneckSpeed() {
+		return getRollingAverageSpeed() >
+			SystemAttrEnum.VSA_BOTTLENECK_ID_MPH.getInt();
 	}
 
 	/** Test if the number of intervals is lower than start count */
