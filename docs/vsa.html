@@ -10,7 +10,7 @@
 </head>
 
 <body>
-<p id="stamp">4 June 2010</p>
+<p id="stamp">12 July 2010</p>
 <h2>Variable Speed Advisory</h2>
 <div class="right">
 	<img src="uniform_acc.svg" width="512" height="512" />
@@ -52,38 +52,44 @@
 	    <tr>
 		<th>Precipitation</th>
 		<th>Start <b>a<sub>s</sub></b></th>
+		<th>Control <b>a<sub>c</sub></b></th>
 		<th>Stop <b>a<sub>p</sub></b></th>
 	    </tr>
 	    <tr>
 		<td>Dry</td>
 		<td>-1500</td>
 		<td>-1000</td>
+		<td>-750</td>
 	    </tr>
 	    <tr>
 		<td>Light</td>
 		<td>-1200</td>
 		<td>-800</td>
+		<td>-600</td>
 	    </tr>
 	    <tr>
 		<td>Moderate</td>
 		<td>-1050</td>
 		<td>-700</td>
+		<td>-525</td>
 	    </tr>
 	    <tr>
 		<td>Heavy</td>
 		<td>-900</td>
 		<td>-600</td>
+		<td>-450</td>
 	    </tr>
 	    <tr>
 		<td>Icy</td>
 		<td>-750</td>
 		<td>-500</td>
+		<td>-375</td>
 	    </tr>
 	</table>
 	</div>
-	There are two thresholds for determining a bottleneck.
-	They are the start <b>a<sub>s</sub></b> and stop <b>a<sub>p</sub></b>
-	thresholds.
+	There are three thresholds for determining a bottleneck.
+	They are the start <b>a<sub>s</sub></b>, control <b>a<sub>c</sub></b>,
+	and stop <b>a<sub>p</sub></b> thresholds.
 	The thresholds are based on the pavement conditions, measured using a
 	precipitation sensor.
 	There are seperate thresholds for dry, light rain, moderate rain, heavy
@@ -229,7 +235,7 @@
     </li>
     <li>
     	A<sub>lcs</sub> = √<span class="over">
-    	U<sub>i</sub>² + 2 a<sub>p</sub>
+    	U<sub>i</sub>² + 2 a<sub>c</sub>
     	(M<sub>i</sub> - M<sub>lcs</sub>)</span>
     </li>
     <li>
