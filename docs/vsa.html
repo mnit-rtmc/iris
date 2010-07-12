@@ -39,6 +39,12 @@
 	The minimum advisory speed <b>U<sub>min</sub></b> to display.
 	The default value is 30 mph.
     </dd>
+    <dt>Bottleneck Identification Speed</dt>
+    <dd>
+	The bottleneck identification speed <b>U<sub>b</sub></b> is the maximum
+	speed at a station to be identified as a bottleneck.
+	The default value is 55 mph.
+    </dd>
     <dt>Downstream bottleneck distance</dt>
     <dd>
 	The largest distance downstream of a bottleneck <b>M<sub>down</sub></b>
@@ -172,10 +178,6 @@
 	    <b>B<sub>i</sub></b> = 0.
 	</li>
 	<li>
-	    If <b>U<sub>i</sub></b> + 10 &gt; <b>L<sub>i</sub></b>,
-	    <b>B<sub>i</sub></b> = 0.
-	</li>
-	<li>
 	    Calculate uniform acceleration (mi/hr²) approaching station:
 	    <div>
 	    <span class="middle">a<sub>i</sub> = </span>
@@ -202,7 +204,8 @@
     </li>
     <ul>
 	<li>
-	    If <b>B<sub>i</sub></b> &lt; 3, clear <b>b<sub>i</sub></b> flag;
+	    If <b>U<sub>i</sub></b> &gt; U<sub>b</sub> or
+	    <b>B<sub>i</sub></b> &lt; 3, clear <b>b<sub>i</sub></b> flag;
 	    otherwise:
 	</li>
 	<ul>
