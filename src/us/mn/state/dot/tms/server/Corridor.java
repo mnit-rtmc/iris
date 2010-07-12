@@ -212,12 +212,10 @@ public class Corridor extends CorridorBase {
 		findStation(bf);
 		bf.debug();
 		if(bf.foundBottleneck()) {
-			Float speed = bf.getSpeed();
 			Integer lim = bf.getSpeedLimit();
-			if(speed != null && lim != null) {
+			if(lim != null) {
 				Float a = bf.calculateSpeedAdvisory();
 				if(a != null) {
-					a = Math.max(a, speed - getMaxDrop());
 					a = Math.max(a, getMinDisplay());
 					int sa = round5Mph(a);
 					if(sa < lim)
@@ -228,11 +226,6 @@ public class Corridor extends CorridorBase {
 			}
 		}
 		return null;
-	}
-
-	/** Get the maximum speed to drop for advisory */
-	protected int getMaxDrop() {
-		return SystemAttrEnum.VSA_MAX_DROP_MPH.getInt();
 	}
 
 	/** Get the minimum speed to display for advisory */
