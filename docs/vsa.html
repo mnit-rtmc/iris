@@ -106,40 +106,49 @@
 	<div class="right">
 	<table>
 	    <tr>
-		<th>Lowest Speed</th>
+		<th>Current Density</th>
 		<th>Sample Count</th>
 		<th>Sample period</th>
 	    </tr>
 	    <tr>
-		<td>40+ mph</td>
-		<td>2 samples</td>
-		<td>1 minute</td>
+		<td>below 10 vpm</td>
+		<td>N/A</td>
+		<td>Posted Speed Limit</td>
 	    </tr>
 	    <tr>
-		<td>25-40 mph</td>
-		<td>4 samples</td>
-		<td>2 minutes</td>
-	    </tr>
-	    <tr>
-		<td>20-25 mph</td>
+		<td>10-15 vpm</td>
 		<td>6 samples</td>
 		<td>3 minutes</td>
 	    </tr>
 	    <tr>
-		<td>15-20 mph</td>
-		<td>8 samples</td>
-		<td>4 minutes</td>
+		<td>15-25 vpm</td>
+		<td>4 samples</td>
+		<td>2 minutes</td>
 	    </tr>
 	    <tr>
-		<td>0-15 mph</td>
-		<td>10 samples</td>
-		<td>5 minutes</td>
+		<td>25-40 vpm</td>
+		<td>3 samples</td>
+		<td>1.5 minutes</td>
+	    </tr>
+	    <tr>
+		<td>40-55 vpm</td>
+		<td>4 samples</td>
+		<td>2 minutes</td>
+	    </tr>
+	    <tr>
+		<td>above 55 vpm</td>
+		<td>6 samples</td>
+		<td>3 minutes</td>
 	    </tr>
 	</table>
 	</div>
 	Speed <b>U</b> mph, average of lanes in station.
 	A rolling average is used, with the number of sample intervals
-	depending on the lowest station speed.
+	depending on the current average station density.
+	Samples older than the oldest sample used in the previous time step
+	are not used.
+	Also, the sample count is reduced to 2 whenever there is a clear upward
+	or downward trend in the last 3 density samples.
     </dd>
 </dl>
 <br class="clear"/>
