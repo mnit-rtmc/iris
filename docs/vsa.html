@@ -204,18 +204,22 @@
     </li>
     <ul>
 	<li>
-	    If <b>U<sub>i</sub></b> &gt; U<sub>b</sub> or
+	    If <b>U<sub>i</sub></b> &gt; <b>U<sub>b</sub></b> or
 	    <b>B<sub>i</sub></b> &lt; 3, clear <b>b<sub>i</sub></b> flag;
 	    otherwise:
 	</li>
 	<ul>
 	    <li>
-		If <b>a<sub>i</sub></b> &gt; <b>a<sub>i-1</sub></b>, set
+		If <b>a<sub>i</sub></b> &gt; <b>a<sub>i-1</sub></b> &gt;
+		<b>a<sub>i-2</sub</b>, set <b>b<sub>i-2</sub></b> flag and
+		clear <b>b<sub>i-1</sub></b> and <b>b<sub>i</sub></b> flags.
+	    </li>
+	    <li>
+		Else if <b>a<sub>i</sub></b> &gt; <b>a<sub>i-1</sub></b>, set
 		<b>b<sub>i-1</sub></b> flag and clear <b>b<sub>i</sub></b> flag.
 	    </li>
 	    <li>
-		Else set <b>b<sub>i</sub></b> flag and clear
-		<b>b<sub>i-1</sub></b> flag.
+		Else set <b>b<sub>i</sub></b> flag.
 	    </li>
 	</ul>
     </ul>
