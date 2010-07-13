@@ -178,18 +178,16 @@ public class Corridor extends CorridorBase {
 
 	/** Find the current bottlenecks on the corridor */
 	public void findBottlenecks() {
+		final TreeMap<Float, StationImpl> upstream =
+			new TreeMap<Float, StationImpl>();
 		findStation(new StationFinder() {
-			protected StationImpl sp;	// previous station
-			protected Float mp;		// previous mile pt
 			public boolean check(Float m, StationImpl s) {
-				if(mp != null)
-					s.calculateBottleneck(sp, m - mp);
-				else
-					s.clearBottleneck();
 				if(s.getRollingAverageSpeed() > 0) {
-					sp = s;
-					mp = m;
-				}
+					s.calculateBottleneck(m, upstream);
+					upstream.put(m, s);
+				} else
+					s.clearBottleneck();
+				s.debug();
 				return false;
 			}
 		});

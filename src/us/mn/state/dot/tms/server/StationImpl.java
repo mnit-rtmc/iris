@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
+import java.util.Map;
+import java.util.NavigableMap;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -438,31 +440,32 @@ public class StationImpl implements Station {
 	}
 
 	/** Calculate whether the station is a bottleneck.
-	 * @param sp Previous station.
-	 * @param d Distance to previous station (miles). */
-	public void calculateBottleneck(StationImpl sp, float d) {
-		acceleration = calculateAcceleration(sp, d);
-		if(isTooClose(d) || isAboveBottleneckSpeed() ||
-		   !isAccelerationValid())
-		{
-			n_bottleneck = 0;
-			setBottleneck(false);
-			debug(sp, d);
-			return;
-		}
-		if(acceleration < getThreshold())
-			n_bottleneck++;
-		else
-			n_bottleneck = 0;
-		Float ap = sp.acceleration;
-		if(ap == null || isBeforeStartCount())
-			setBottleneck(false);
-		else {
-			boolean b = acceleration < ap;
-			setBottleneck(b);
-			sp.setBottleneck(!b);
-		}
-		debug(sp, d);
+	 * @param m Mile point of this station.
+	 * @param upstream Mapping of mile points to upstream stations. */
+	public void calculateBottleneck(float m,
+		NavigableMap<Float, StationImpl> upstream)
+	{
+		Float mp = upstream.lowerKey(m);
+		while(mp != null && isTooClose(m - mp))
+			mp = upstream.lowerKey(mp);
+		if(mp != null) {
+			StationImpl sp = upstream.get(mp);
+			float d = m - mp;
+			acceleration = calculateAcceleration(sp, d);
+			checkThresholds();
+			if(isBeforeStartCount() || isAboveBottleneckSpeed())
+				setBottleneck(false);
+			else {
+				setBottleneck(true);
+				adjustBottleneck(upstream);
+			}
+		} else
+			clearBottleneck();
+	}
+
+	/** Test if upstream station is too close for bottleneck calculation */
+	protected boolean isTooClose(float d) {
+		return d < SystemAttrEnum.VSA_MIN_STATION_MILES.getFloat();
 	}
 
 	/** Calculate the acceleration from previous station.
@@ -488,14 +491,42 @@ public class StationImpl implements Station {
 			return null;
 	}
 
+	/** Check the bottleneck thresholds */
+	protected void checkThresholds() {
+		if(isAccelerationValid() && acceleration < getThreshold())
+			n_bottleneck++;
+		else
+			n_bottleneck = 0;
+	}
+
+	/** Adjust the bottleneck upstream if necessary */
+	protected void adjustBottleneck(
+		NavigableMap<Float, StationImpl> upstream)
+	{
+		StationImpl s = this;
+		Map.Entry<Float, StationImpl> entry = upstream.lastEntry();
+		while(entry != null) {
+			StationImpl sp = entry.getValue();
+			Float ap = sp.acceleration;
+			Float a = s.acceleration;
+			if(a != null && ap != null && a > ap) {
+				// Move bottleneck upstream
+				s.setBottleneck(false);
+				sp.setBottleneck(true);
+				// Bump the bottleneck count so it won't just
+				// shut off at the next time step
+				while(sp.isBeforeStartCount())
+					sp.n_bottleneck++;
+			} else
+				break;
+			s = sp;
+			entry = upstream.lowerEntry(entry.getKey());
+		}
+	}
+
 	/** Check if acceleration is valid */
 	protected boolean isAccelerationValid() {
 		return acceleration != null;
-	}
-
-	/** Test if previous station is too close for bottleneck calculation */
-	protected boolean isTooClose(float d) {
-		return d < SystemAttrEnum.VSA_MIN_STATION_MILES.getFloat();
 	}
 
 	/** Test if station speed is above the bottleneck id speed */
@@ -541,16 +572,13 @@ public class StationImpl implements Station {
 	}
 
 	/** Debug the bottleneck calculation */
-	protected void debug(StationImpl sp, float d) {
+	public void debug() {
 		if(BOTTLENECK_LOG.isOpen()) {
 			BOTTLENECK_LOG.log(name +
-				", bneck: " + bottleneck +
-				", n_bneck: " + n_bottleneck +
 				", spd: " + getRollingAverageSpeed() +
 				", acc: " + acceleration +
-				", d: " + d +
-				", prev: " + sp.name +
-				", prev.acc: " + sp.acceleration);
+				", n_bneck: " + n_bottleneck +
+				", bneck: " + bottleneck);
 		}
 	}
 
