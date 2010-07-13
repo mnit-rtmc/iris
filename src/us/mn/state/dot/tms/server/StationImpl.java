@@ -499,6 +499,41 @@ public class StationImpl implements Station {
 			n_bottleneck = 0;
 	}
 
+	/** Check if acceleration is valid */
+	protected boolean isAccelerationValid() {
+		return acceleration != null;
+	}
+
+	/** Get the current deceleration threshold */
+	protected int getThreshold() {
+		if(isBeforeStartCount())
+			return getStartThreshold();
+		else
+			return getStopThreshold();
+	}
+
+	/** Get the starting deceleration threshold */
+	protected int getStartThreshold() {
+		return SystemAttrEnum.VSA_START_THRESHOLD.getInt();
+	}
+
+	/** Get the stopping deceleration threshold */
+	protected int getStopThreshold() {
+		return SystemAttrEnum.VSA_STOP_THRESHOLD.getInt();
+	}
+
+	/** Test if the number of intervals is lower than start count */
+	protected boolean isBeforeStartCount() {
+		return n_bottleneck <
+			SystemAttrEnum.VSA_START_INTERVALS.getInt();
+	}
+
+	/** Test if station speed is above the bottleneck id speed */
+	protected boolean isAboveBottleneckSpeed() {
+		return getRollingAverageSpeed() >
+			SystemAttrEnum.VSA_BOTTLENECK_ID_MPH.getInt();
+	}
+
 	/** Adjust the bottleneck upstream if necessary */
 	protected void adjustBottleneck(
 		NavigableMap<Float, StationImpl> upstream)
@@ -522,46 +557,6 @@ public class StationImpl implements Station {
 			s = sp;
 			entry = upstream.lowerEntry(entry.getKey());
 		}
-	}
-
-	/** Check if acceleration is valid */
-	protected boolean isAccelerationValid() {
-		return acceleration != null;
-	}
-
-	/** Test if station speed is above the bottleneck id speed */
-	protected boolean isAboveBottleneckSpeed() {
-		return getRollingAverageSpeed() >
-			SystemAttrEnum.VSA_BOTTLENECK_ID_MPH.getInt();
-	}
-
-	/** Test if the number of intervals is lower than start count */
-	protected boolean isBeforeStartCount() {
-		return n_bottleneck <
-			SystemAttrEnum.VSA_START_INTERVALS.getInt();
-	}
-
-	/** Get the current deceleration threshold */
-	protected int getThreshold() {
-		if(isBeforeStartCount())
-			return getStartThreshold();
-		else
-			return getStopThreshold();
-	}
-
-	/** Get the starting deceleration threshold */
-	protected int getStartThreshold() {
-		return SystemAttrEnum.VSA_START_THRESHOLD.getInt();
-	}
-
-	/** Get the control deceleration threshold */
-	protected int getControlThreshold() {
-		return SystemAttrEnum.VSA_CONTROL_THRESHOLD.getInt();
-	}
-
-	/** Get the stopping deceleration threshold */
-	protected int getStopThreshold() {
-		return SystemAttrEnum.VSA_STOP_THRESHOLD.getInt();
 	}
 
 	/** Clear the station as a bottleneck */
@@ -604,6 +599,11 @@ public class StationImpl implements Station {
 			return (lim * lim - sp * sp) / (2 * acc);
 		} else
 			return 0;
+	}
+
+	/** Get the control deceleration threshold */
+	protected int getControlThreshold() {
+		return SystemAttrEnum.VSA_CONTROL_THRESHOLD.getInt();
 	}
 
 	/** Get the downstream bottleneck distance */
