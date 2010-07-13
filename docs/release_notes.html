@@ -11,6 +11,40 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.120.0 (13 July 2010)</dt>
+	<dd><ul>
+		<li>
+			Made updates to variable speed advisory (VSA) algorithm.
+		</li>
+		<li>
+			Fixed design problem with Completers and data polling.
+			Now, one unresponsive operation won't freeze the rest
+			of the data collection.
+		</li>
+		<li>
+			Fixed a rare problem with smart sensor 105 protocol.
+		</li>
+		<li>
+			Fixed bug in XML output with unescaped quotes and
+			apostrophes.
+		</li>
+		<li>
+			Cleaned up map layer scaling code.
+		</li>
+		<li>
+			Allow DMS to be used if less than half of the power
+			supplies are failed.
+		</li>
+		<li>
+			Updated scheduler, mapbean, trafmap and sonar
+			dependencies.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.120.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.119.0 (16 June 2010)</dt>
 	<dd><ul>
 		<li>
