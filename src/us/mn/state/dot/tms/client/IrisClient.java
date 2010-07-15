@@ -20,6 +20,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +43,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
+import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.system.LoginForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -356,7 +358,16 @@ public class IrisClient extends JFrame {
 			MapBean mb = sp.getMap();
 			mb.setModel(createMapModel(mb, s));
 		}
+		setInitExtent();
 	}
+
+	/** Set initial map extent */
+	public void setInitExtent() {
+		Rectangle2D e = MapExtentHelper.getHomeExtent();
+		if(e != null)
+			for(ScreenPane sp: s_panes)
+				sp.getMap().setExtent(e);
+ 	}
 
 	/** Create a new map model */
 	protected MapModel createMapModel(MapBean mb, Session s) {
