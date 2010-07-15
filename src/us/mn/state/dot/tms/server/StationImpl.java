@@ -268,8 +268,10 @@ public class StationImpl implements Station {
 		int n_samples = calculateRollingSamples();
 		if(n_samples > 0)
 			return average(avg_speed, n_samples);
-		else
+		else if(isSpeedValid())
 			return getSpeedLimit();
+		else
+			return Constants.MISSING_DATA;
 	}
 
 	/** Samples used in previous time step */
@@ -295,12 +297,12 @@ public class StationImpl implements Station {
 
 	/** Is the speed trending over the last few time steps? */
 	protected boolean isSpeedTrending() {
-		return isSpeedTrendValid() &&
+		return isSpeedValid() &&
 		      (isSpeedTrendingDownward() || isSpeedTrendingUpward());
 	}
 
-	/** Is speed trend data valid? */
-	protected boolean isSpeedTrendValid() {
+	/** Is recent speed data valid? */
+	protected boolean isSpeedValid() {
 		return avg_speed[0] > 0 && avg_speed[1] > 0 && avg_speed[2] > 0;
 	}
 
