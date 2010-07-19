@@ -122,16 +122,25 @@
 </svg>
 
 <p>
-	The software consists of a single server and multiple clients.
-	The server handles communication with various traffic control devices,
-	while the clients present a user interface to system operators.
-	The user interface is map-based and intuitive.
+	The software has a client/server architecture.
+	The server handles communication with all traffic control devices.
+	Configuration data is stored in a PostgreSQL database.
+	The client software is distributed by an Apache web server, using
+	Java Web Start.
+	All communication between the server and clients is encrypted using
+	SSL.
+	The server passes authentication requests off to an external LDAP
+	server, which allows IRIS to integrate into an existing system, such
+	as Active Directory.
+	The client presents an intuitive map-based user interface to system
+	operators.
 </p>
 
-<h3>Features</h3>
+<h3>Devices</h3>
 <p>
-	IRIS is able to communicate with the following types of traffic control
-	devices:
+	IRIS is able to manage several different types of traffic monitoring and
+	control devices.
+	These include:
 </p>
 <ul>
 	<li>DMS (dynamic message signs) or CMS</li>
@@ -144,14 +153,30 @@
 	<li>Warning Beacons</li>
 	<li>Future: Precipitation Sensors</li>
 </ul>
+<h3>Protocols</h3>
 <p>
-	For some types of devices, there are multiple communication protocols
-	supported.
-	For example, VDS data collection is supported by 4 different protocols.
-	New protocols can be added easily if documentation exists.
+	Many different protocols are supported for communicating with the
+	various device types.
+	Additional protocols can be added for any existing device type by
+	programming a simple driver interface.
+	These are some existing protocols:
 </p>
+<ul>
+	<li>NTCIP class A, B and C (DMS)</li>
+	<li>DMS-XML (DMS)</li>
+	<li>MnDOT 4- and 5-bit (VDS, ramp meters, LCS, beacons, IRL)</li>
+	<li>Wavetronix SS105 and SS125 (VDS)</li>
+	<li>3M Canoga (VDS)</li>
+	<li>Pelco D (pan/tilt/zoom)</li>
+	<li>A/D "manchester" (pan/tilt/zoom)</li>
+	<li>Vicon (pan/tilt/zoom)</li>
+	<li>AWS (automated warning system)</li>
+	<li>Pelco Video Switcher</li>
+	<li>Vicon Video Switcher</li>
+</ul>
+<h3>Featuers</h3>
 <p>
-	These are some higher-level features built on top of this base:
+	IRIS also contains some higher-level traffic management features:
 </p>
 <ul>
 	<li>Continuously updated density, speed and flow maps</li>
