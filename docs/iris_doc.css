@@ -1,18 +1,47 @@
-H1 {
-	text-align: center;
-}
-H2 {
+h1 {
 	page-break-after: avoid;
+	counter-reset: h2cnt h3cnt h4cnt h5cnt;
 }
-DIV.math {
+h2 {
+	page-break-after: avoid;
+	counter-increment: h2cnt;
+	counter-reset: h3cnt h4cnt h5cnt;
+}
+h2:before {
+	content: ' ' counter(h2cnt) ' ';
+}
+h3 {
+	page-break-after: avoid;
+	counter-increment: h3cnt;
+	counter-reset: h4cnt h5cnt;
+}
+h3:before {
+	content: ' ' counter(h2cnt) '.' counter(h3cnt) ' ';
+}
+h4 {
+	page-break-after: avoid;
+	counter-increment: h4cnt;
+	counter-reset: h5cnt;
+}
+h4:before {
+	content: ' ' counter(h2cnt) '.' counter(h3cnt) '.' counter(h4cnt) ' ';
+}
+h5 {
+	page-break-after: avoid;
+	counter-increment: h5cnt;
+}
+h5:before {
+	content: ' ' counter(h2cnt) '.' counter(h3cnt) '.' counter(h4cnt) '.' counter(h5cnt) ' ';
+}
+div.math {
 	font-family: sans-serif;
 	font-weight: bold;
 	font-size: larger;
 }
-SPAN.func {
+span.func {
 	float: right;
 }
-SPAN.inblock {
+span.inblock {
 	display: inline-block;
 }
 .middle {
@@ -21,44 +50,42 @@ SPAN.inblock {
 .over {
 	text-decoration: overline;
 }
-SUB {
+sub {
 	font-size: xx-small;
 }
-BODY {
+body {
 	background: #cccccc;
-	text-align: justify;
 	orphans: 3;
-	windows: 4;
 }
-P {
+p {
 	page-break-inside: avoid;
 }
-TABLE {
+table {
 	page-break-inside: avoid;
 	border-collapse: collapse;
 	border: 3px solid black;
 	background: #f0f0f0;
 }
-TH {
+th {
 	padding-left: 8px;
 	padding-right: 8px;
 }
-TD {
+td {
 	border-left: 1px solid gray;
 	border-right: 1px solid gray;
 	background: white;
 	vertical-align: middle;
 }
-TD.top {
+td.top {
 	border-top: 1px solid gray;
 }
-TD.bottom {
+td.bottom {
 	border-bottom: 1px solid gray;
 }
-DT {
+dt {
 	font-weight: bold;
 }
-DD {
+dd {
 	page-break-inside: avoid;
 }
 .left {
@@ -74,18 +101,25 @@ DD {
 .clear {
 	clear: both;
 }
-DIV.label {
+.contents {
+	font-size: small;
+}
+.show {
+	font-size: x-small;
+	color: blue;
+}
+div.label {
 	text-align: center;
 	font-weight: bold;
 	font-style: oblique;
 }
-OL {
+ol {
 	padding-left: 100px;
 }
-OL.alpha {
+ol.alpha {
 	list-style-type: lower-alpha;
 }
-OL.roman {
+ol.roman {
 	list-style-type: upper-roman;
 }
 #stamp {

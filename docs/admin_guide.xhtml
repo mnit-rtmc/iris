@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>IRIS Administrator Guide</title>
+	<script type="text/javascript" src="admin_guide.js"></script>
+</head>
+
+<body>
+<div style="position: fixed; left: 1%; right: 76%; top: 1%; bottom: 1%; overflow: hidden; background: #9bb">
+<h1 class="contents">Contents</h1>
+<h2 class="contents"><a id="overview_link" href="#overview">Overview</a></h2>
+<h2 class="contents"><a id="installation_link" href="#installation">Installation</a></h2>
+<h2 class="contents"><a id="configuration_link" href="#configuration">Configuration</a></h2>
+<h2 class="contents"><a id="troubleshooting_link" href="#troubleshooting">Troubleshooting</a></h2>
+<h2 class="contents"><a id="maintenance_link" href="#maintenance">Maintenance</a></h2>
+<h2 class="contents"><a id="development_link" href="#development">Development</a></h2>
+</div>
+
+<div style="margin-left: 25%; margin-right: 5%">
+<div id="stamp">19 July 2010</div>
+<h1>IRIS Administrator Guide</h1>
+
+<h2 id="overview">Overview
+<span class="show">[<span id="overview_show">show</span><span id="overview_hide">hide</span>]</span></h2>
+<div id="overview_div">
+<p>
+	IRIS is an <a href="http://www.opensource.org/docs/osd">open source</a>
+	advanced traffic management system.
+	It provides an integrated platform for transportation agencies to
+	manage traffic monitoring and control devices.
+	The software is written in <a href="http://www.java.com">Java</a> and
+	licensed for anyone to use under the
+	<a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPL</a>.
+	IRIS stands for Intelligent Roadway Information System.
+</p>
+
+<svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
+     width="640" height="480">
+  <title>System Architecture</title>
+  <defs>
+    <marker id="Arrow1Mend" orient="auto" style="overflow:visible">
+      <path d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+            transform="matrix(-0.4,0,0,-0.4,-4,0)"
+            style="stroke:#000;stroke-width:1pt;marker-start:none"/>
+    </marker>
+  </defs>
+  <g style="font-size:20px;font-family:Liberation Sans">
+    <text style="font-size:28px">
+      <tspan x="384" y="64">IRIS System</tspan>
+      <tspan x="384" y="94">Architecture</tspan>
+    </text>
+    <g transform="translate(112,24)">
+      <g style="fill:#c4f9ff;stroke:#000;stroke-width:2">
+        <g style="opacity:0.5">
+          <rect x="16" y="16" width="200" height="88" ry="8"
+                style="opacity:0.5"/>
+          <rect x="8" y="8" width="200" height="88" ry="8"/>
+        </g>
+        <rect x="0" y="0" width="200" height="88" ry="8"/>
+      </g>
+      <text>
+        <tspan x="48" y="48">IRIS Clients</tspan>
+      </text>
+    </g>
+    <g transform="translate(16,176)">
+      <rect x="0" y="0" width="176" height="104" ry="8"
+        style="fill:#ffe6c4;stroke:#000;stroke-width:2"/>
+      <text>
+        <tspan x="16" y="40">Apache Server</tspan>
+        <tspan x="24" y="60">- Client JARs</tspan>
+        <tspan x="24" y="80">- Map Tiles</tspan>
+      </text>
+    </g>
+    <g transform="translate(232,176)">
+      <rect x="0" y="0" width="192" height="120" ry="8"
+            style="fill:#e2c4ff;stroke:#000;stroke-width:2"/>
+      <text>
+        <tspan x="40" y="60">IRIS Server</tspan>
+      </text>
+    </g>
+    <g transform="translate(464,208)">
+      <rect x="0" y="0" width="160" height="88" ry="8"
+        style="fill:#d0ffc4;stroke:#000;stroke-width:2"/>
+      <text>
+        <tspan x="16" y="40">Authentication</tspan>
+        <tspan x="16" y="60">Server (LDAP)</tspan>
+      </text>
+    </g>
+    <g transform="translate(96,360)">
+      <g style="fill:#f6ffc4;stroke:#000;stroke-width:2">
+        <g style="opacity:0.5">
+          <rect x="16" y="16" width="208" height="88" ry="8"
+                style="opacity:0.5"/>
+          <rect x="8" y="8" width="208" height="88" ry="8"/>
+        </g>
+        <rect x="0" y="0" width="208" height="88" ry="8"/>
+      </g>
+      <text>
+        <tspan x="16" y="40">Traffic Monitoring</tspan>
+        <tspan x="16" y="60">and Control Devices</tspan>
+      </text>
+    </g>
+    <g transform="translate(368,360)">
+      <rect x="0" y="0" width="152" height="88" ry="8"
+        style="fill:#c4d1ff;stroke:#000;stroke-width:2" />
+      <text>
+        <tspan x="16" y="40">Database</tspan>
+        <tspan x="16" y="60">(PostgreSQL)</tspan>
+      </text>
+    </g>
+    <g style="stroke:#000;stroke-width:2;marker-end:url(#Arrow1Mend)">
+      <path d="m 176,112 -32,64"/>
+      <path d="m 256,112 32,64"/>
+      <path d="m 424,240 40,8"/>
+      <path d="m 272,296 -32,64"/>
+      <path d="m 368,296 32,64"/>
+    </g>
+  </g>
+</svg>
+
+<p>
+	The software consists of a single server and multiple clients.
+	The server handles communication with various traffic control devices,
+	while the clients present a user interface to system operators.
+	The user interface is map-based and intuitive.
+</p>
+
+<h3>Features</h3>
+<p>
+	IRIS is able to communicate with the following types of traffic control
+	devices:
+</p>
+<ul>
+	<li>DMS (dynamic message signs) or CMS</li>
+	<li>Ramp meters</li>
+	<li>VDS (vehicle detection sensors)</li>
+	<li>LCS (lane-use control signals)</li>
+	<li>CCTV cameras (pan/tilt/zoom)</li>
+	<li>Video switchers</li>
+	<li>In-road lighting (dynamic striping)</li>
+	<li>Warning Beacons</li>
+	<li>Future: Precipitation Sensors</li>
+</ul>
+<p>
+	For some types of devices, there are multiple communication protocols
+	supported.
+	For example, VDS data collection is supported by 4 different protocols.
+	New protocols can be added easily if documentation exists.
+</p>
+<p>
+	These are some higher-level features built on top of this base:
+</p>
+<ul>
+	<li>Continuously updated density, speed and flow maps</li>
+	<li>Travel time estimation for traveller information</li>
+	<li>Incident management</li>
+	<li>Variable speed advisories</li>
+	<li>Coordinated ramp metering strategies</li>
+	<li>Scheduled deployment of control devices</li>
+</ul>
+</div>
+
+<h2 id="installation">Installation
+<span class="show">[<span id="installation_show">show</span><span id="installation_hide">hide</span>]</span></h2>
+<div id="installation_div">
+FIXME
+</div>
+
+<h2 id="configuration">Configuration
+<span class="show">[<span id="configuration_show">show</span><span id="configuration_hide">hide</span>]</span></h2>
+<div id="configuration_div">
+
+<h3>System Attributes</h3>
+FIXME
+
+<h3>Users and Roles</h3>
+FIXME
+
+<h3>Mapping</h3>
+FIXME
+
+<h3>Roads and Nodes</h3>
+FIXME
+
+<h3>Comm Links</h3>
+FIXME
+
+<h3>Vehicle Detection</h3>
+FIXME
+
+<h3>Cameras and Video</h3>
+FIXME
+
+<h3>Dynamic Message Signs</h3>
+FIXME
+
+<h3>Lane-Use Control Signs</h3>
+FIXME
+
+<h3>Ramp Meters</h3>
+FIXME
+
+<h3>Plans and Schedules</h3>
+FIXME
+
+</div>
+
+<h2 id="troubleshooting">Troubleshooting
+<span class="show">[<span id="troubleshooting_show">show</span><span id="troubleshooting_hide">hide</span>]</span></h2>
+<div id="troubleshooting_div">
+
+<h3>Error Logs</h3>
+FIXME
+
+<h3>Realtime XML Output</h3>
+FIXME
+
+<h3>Database Event Tables</h3>
+FIXME
+
+<h3>Debug Trace Logs</h3>
+FIXME
+
+</div>
+
+<h2 id="maintenance">Maintenance
+<span class="show">[<span id="maintenance_show">show</span><span id="maintenance_hide">hide</span>]</span></h2>
+<div id="maintenance_div">
+<p>
+	Once an IRIS system is set up, there are a few maintenance tasks which
+	need to be done to ensure reliable operation.
+</p>
+<h3>Database Backups</h3>
+FIXME
+
+<h3>System Software Updates</h3>
+FIXME
+
+<h3>Monitoring Logs</h3>
+FIXME
+
+</div>
+
+<h2 id="development">Development
+<span class="show">[<span id="development_show">show</span><span id="development_hide">hide</span>]</span></h2>
+<div id="development_div">
+
+<h3>Building</h3>
+FIXME
+
+<h3>History</h3>
+FIXME
+
+<h3>Future Plans</h3>
+FIXME
+
+<h3>Contributing</h3>
+FIXME
+
+<h3>Coding Style</h3>
+FIXME
+
+</div>
+
+</div>
+
+</body>
+</html>
