@@ -617,15 +617,15 @@ public class StationImpl implements Station {
 	 * @param d Distance upstream of station.
 	 * @return Speed advisory. */
 	public Float calculateSpeedAdvisory(float d) {
-		float speed = getRollingAverageSpeed();
-		if(speed > 0) {
+		float spd = getRollingAverageSpeed();
+		if(spd > 0) {
 			if(d > 0) {
 				int acc = -getControlThreshold();
-				double s2 = speed * speed + 2.0 * acc * d;
+				double s2 = spd * spd + 2.0 * acc * d;
 				assert s2 > 0;
 				return (float)Math.sqrt(s2);
 			} else
-				return speed;
+				return spd;
 		} else
 			return null;
 	}
