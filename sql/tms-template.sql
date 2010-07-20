@@ -1439,6 +1439,43 @@ PRV_0113	user_admin	capability/.*	f	t	t	t
 PRV_0114	user_admin	connection/.*	f	f	f	t
 \.
 
+COPY iris.role (name, enabled) FROM stdin;
+administrator	t
+operator	t
+\.
+
+COPY iris.role_capability (role, capability) FROM stdin;
+administrator	login
+administrator	incident_tab
+administrator	camera_tab
+administrator	camera_control
+administrator	dms_tab
+administrator	dms_control
+administrator	lcs_tab
+administrator	lcs_control
+administrator	meter_tab
+administrator	meter_control
+administrator	detection
+administrator	policy_admin
+administrator	device_admin
+administrator	maintenance
+administrator	det_control
+administrator	plan_control
+administrator	system_admin
+administrator	user_admin
+operator	login
+operator	incident_tab
+operator	camera_tab
+operator	camera_control
+operator	dms_tab
+operator	dms_control
+operator	lcs_tab
+operator	lcs_control
+operator	meter_tab
+operator	meter_control
+operator	detection
+\.
+
 SET search_path = event, public, pg_catalog;
 
 CREATE SEQUENCE event.event_id_seq;
