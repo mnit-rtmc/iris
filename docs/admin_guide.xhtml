@@ -194,7 +194,7 @@
 <span class="show">[<span id="installation_show">show</span><span id="installation_hide">hide</span>]</span></h2>
 <div id="installation_div">
 
-<h3>Operating System Setup</h3>
+<h3>Operating System</h3>
 <p>
 	Install <a href="http://fedoraproject.org">Fedora</a> onto the server
 	computer.
@@ -335,17 +335,13 @@ INSERT INTO iris.i_user (name, full_name, dn, role, enabled)
 exit
 </pre>
 
-<h3>Web Server Setup</h3>
+<h3>Start Services</h3>
 <p>
-	The Apache web server can be started with the following command:
+	The Apache web server and the IRIS server can now be started with the
+	following commands:
 </p>
-<pre class="code">service httpd start</pre>
-
-<h3>IRIS Server Setup</h3>
-<p>
-	Now, the IRIS server can be started with the following command:
-</p>
-<pre class="code">service iris start</pre>
+<pre class="code">service httpd start
+service iris start</pre>
 <p>
 	Check that everything started OK:
 </p>
