@@ -265,12 +265,13 @@ public class StationImpl implements Station {
 
 	/** Get the average speed using a rolling average of samples */
 	public float getRollingAverageSpeed() {
-		int n_samples = calculateRollingSamples();
-		if(n_samples > 0)
-			return average(avg_speed, n_samples);
-		else if(isSpeedValid())
-			return getSpeedLimit();
-		else
+		if(isSpeedValid()) {
+			int n_samples = calculateRollingSamples();
+			if(n_samples > 0)
+				return average(avg_speed, n_samples);
+			else
+				return getSpeedLimit();
+		} else
 			return Constants.MISSING_DATA;
 	}
 
