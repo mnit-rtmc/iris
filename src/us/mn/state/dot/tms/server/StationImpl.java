@@ -56,6 +56,13 @@ public class StationImpl implements Station {
 			}
 			return Last.samples;
 		}
+		/** Get the maximum number of samples in any density rank */
+		static protected int getMaxSamples() {
+			int s = 0;
+			for(DensityRank dr: values())
+				s = Math.max(s, dr.samples);
+			return s;
+		}
 	}
 
 	/** Speed ranks for extending rolling sample averaging */
@@ -154,6 +161,8 @@ public class StationImpl implements Station {
 	public StationImpl(String station_id, R_NodeImpl n) {
 		name = station_id;
 		r_node = n;
+		for(int i = 0; i < rlg_speed.length; i++)
+			rlg_speed[i] = Constants.MISSING_DATA;
 		for(int i = 0; i < avg_speed.length; i++)
 			avg_speed[i] = Constants.MISSING_DATA;
 		for(int i = 0; i < low_speed.length; i++)
@@ -248,6 +257,17 @@ public class StationImpl implements Station {
 		return r_node.getSpeedLimit();
 	}
 
+	/** Averate station speed for rolling speed calculation */
+	protected float[] rlg_speed = new float[DensityRank.getMaxSamples()];
+
+	/** Update rolling speed array with a new sample */
+	protected void updateRollingSpeed(float s) {
+		System.arraycopy(rlg_speed, 0, rlg_speed, 1,
+			rlg_speed.length - 1);
+		// Clamp the speed to 10 mph above the speed limit
+		rlg_speed[0] = Math.min(s, getSpeedLimit() + 10);
+	}
+
 	/** Average station speed for previous ten samples */
 	protected float[] avg_speed = new float[SpeedRank.Last.samples];
 
@@ -268,7 +288,7 @@ public class StationImpl implements Station {
 		if(isSpeedValid()) {
 			int n_samples = calculateRollingSamples();
 			if(n_samples > 0)
-				return average(avg_speed, n_samples);
+				return average(rlg_speed, n_samples);
 			else
 				return getSpeedLimit();
 		} else
@@ -302,21 +322,21 @@ public class StationImpl implements Station {
 		      (isSpeedTrendingDownward() || isSpeedTrendingUpward());
 	}
 
-	/** Is recent speed data valid? */
+	/** Is recent rolling speed data valid? */
 	protected boolean isSpeedValid() {
-		return avg_speed[0] > 0 && avg_speed[1] > 0 && avg_speed[2] > 0;
+		return rlg_speed[0] > 0 && rlg_speed[1] > 0 && rlg_speed[2] > 0;
 	}
 
 	/** Is the speed trending downward? */
 	protected boolean isSpeedTrendingDownward() {
-		return avg_speed[0] < avg_speed[1] &&
-		       avg_speed[1] < avg_speed[2];
+		return rlg_speed[0] < rlg_speed[1] &&
+		       rlg_speed[1] < rlg_speed[2];
 	}
 
 	/** Is the speed trending upward? */
 	protected boolean isSpeedTrendingUpward() {
-		return avg_speed[0] > avg_speed[1] &&
-		       avg_speed[1] > avg_speed[2];
+		return rlg_speed[0] > rlg_speed[1] &&
+		       rlg_speed[1] > rlg_speed[2];
 	}
 
 	/** Low station speed for previous ten samples */
@@ -388,6 +408,7 @@ public class StationImpl implements Station {
 		updateAvgFlow(flow);
 		density = (int)average(t_density, n_density);
 		speed = (int)average(t_speed, n_speed);
+		updateRollingSpeed(speed);
 		updateAvgSpeed(speed);
 		updateLowSpeed(low);
 	}
