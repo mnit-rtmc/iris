@@ -32,9 +32,8 @@ function bindShowHide(sec) {
 	}
 }
 function bindClicks() {
-	var sections = ['overview', 'installation', 'conf_basic',
-		'conf_advanced', 'troubleshooting', 'maintenance',
-		'development'];
+	var sections = ['overview', 'installation', 'basic_setup', 'devices',
+		'features', 'troubleshooting', 'maintenance', 'development'];
 	for(var i = 0; i < sections.length; i++) {
 		hide(sections[i] + '_div');
 		hide(sections[i] + '_hide');
