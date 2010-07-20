@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div style="position: fixed; left: 1%; right: 76%; top: 1%; bottom: 1%; overflow: hidden; background: #9bb">
+<div class="sidebar">
 <h1 class="contents">Contents</h1>
 <h2 class="contents"><a id="overview_link" href="#overview">Overview</a></h2>
 <h2 class="contents"><a id="installation_link" href="#installation">Installation</a></h2>
@@ -19,8 +19,8 @@
 <h2 class="contents"><a id="development_link" href="#development">Development</a></h2>
 </div>
 
-<div style="margin-left: 25%; margin-right: 5%">
-<div id="stamp">19 July 2010</div>
+<div class="mainbar">
+<div id="stamp">20 July 2010</div>
 <h1>IRIS Administrator Guide</h1>
 
 <h2 id="overview">Overview
@@ -191,7 +191,180 @@
 <h2 id="installation">Installation
 <span class="show">[<span id="installation_show">show</span><span id="installation_hide">hide</span>]</span></h2>
 <div id="installation_div">
-FIXME
+
+<h3>Operating System Setup</h3>
+<p>
+	Install <a href="http://fedoraproject.org">Fedora</a> onto the server
+	computer.
+	Other operating systems, such as Red Hat Enterprise Linux, can also be
+	used, but the procedures may vary slightly.
+	This machine should have a minimum of 2 GB of RAM and 200 GB hard drive
+	storage space.
+	The IRIS server does not have a GUI interface, so this computer can be
+	set up headless in a server room.
+</p>
+
+<h3>Install Dependencies</h3>
+<p>
+	Install package dependencies, including
+	<a href="http://openjdk.java.net">OpenJDK</a>,
+	<a href="http://www.postgresql.org">PostgreSQL</a> and
+	<a href="http://www.apache.org">Apache</a>.
+	This can be performed with yum by running the following command (as
+	root):
+</p>
+<pre class="code">yum install java-1.6.0-openjdk postgresql-server postgresql-jdbc httpd</pre>
+
+<h3>Install IRIS</h3>
+<p>
+	<a href="http://iris.dot.state.mn.us/rpms/">Download</a> and install
+	the IRIS package.
+	This should be a file called <i>iris-xx.yy.zz-bb.i386.rpm</i>, with
+	<i>xx</i> indicating the major version, <i>yy</i> minor, <i>zz</i>
+	micro, and <i>bb</i> the build version.
+	It can be installed with the following command (as root):
+</p>
+<pre class="code">rpm -i iris-xx.yy.zz-bb.i386.rpm</pre>
+<p>
+	Next, you must initialize the IRIS server installation.
+	This will create a SSL key pair for encrypted communication between the
+	server and clients.
+	You will be prompted for a Distinguished Name to use while
+	creating a new self-signed certificate.
+	Run the following command (as root):
+</p>
+<pre class="code">service iris init</pre>
+
+<h3>Authentication Setup</h3>
+<p>
+	Setup an LDAP server for user authentication.
+	If your organization already has an LDAP server, such as Active
+	Directory, you should use that.
+	This will allow operators to log into IRIS without requiring them to
+	remember an additional user name and password.
+	Otherwise, you can install and configure
+	<a href="http://www.openldap.org">OpenLDAP</a>.
+</p>
+<p>
+	IRIS can also be configured to use multiple LDAP servers at once.
+	When a user attempts to log in, each defined LDAP server will be
+	checked, in order, until authentication succeeds.
+	If authentication fails on all LDAP servers, then login will fail.
+</p>
+<p>
+	Using a text editor, open the <i>/etc/iris/iris-server.properties</i>
+	file.
+	Locate the line which starts with <i>sonar.ldap.urls</i>.
+	Change the value of this property to the URL(s) of your LDAP server(s).
+	Multiple URLs must be separated by a space.
+	The URL protocol is normally <i>ldap:</i>, but must be <i>ldaps:</i>
+	for encrypted communication over SSL.
+</p>
+<p>
+	(Optional)
+	If your LDAP server is configured to use SSL for authentication, then
+	you must import the certificate into the IRIS keystore.
+	Once you have obtained the SSL certificate, save it as <i>ldap.cert</i>.
+	Now you can import it with the following command (as root):
+</p>
+<pre class="code">keytool -import -alias ldap-cert -keystore /etc/iris/iris-server.keystore -file ldap.cert</pre>
+
+<h3>Database Setup</h3>
+<p>
+	The PostgreSQL database must be initialized before use.
+	This can be accomplished with the following command (as root):
+</p>
+<pre class="code">service postgresql initdb</pre>
+<p>
+	Now, the database must be configured to allow the IRIS server to
+	connect using a local TCP socket.
+	Edit the <i>/var/lib/pgsql/data/pg_hba.conf</i> file so that it includes
+	the following line:
+</p>
+<pre class="code">host    all         all         127.0.0.1/32          password</pre>
+<p>
+	The PostgreSQL server can now be started:
+</p>
+<pre class="code">service postgresql start</pre>
+<p>
+	IRIS uses the PostgreSQL JDBC driver to access the database.
+	This driver needs to be added to the java classpath.
+	Run the following command (as root):
+</p>
+<pre class="code">ln -snf /usr/share/java/postgresql-jdbc.jar /usr/lib/jvm/jre/lib/ext/</pre>
+<p>
+	The <i>tms</i> user account is used by IRIS to connect to the PostgreSQL
+	database.
+	Run the following commands to configure this account:
+</p>
+<pre class="code">su postgres
+createuser -S -D -R -W tms
+exit</pre>
+<p>
+	You will be prompted for a password when running createuser.
+	This same password must also be entered in the
+	<i>/etc/iris/iris-server.properties</i> file.
+	Open the file in a text editor and locate the line starting with
+	#db.password.
+	Remove the <i>#</i> and change the password to match.
+</p>
+<p>
+	A database template must now be loaded with all the table definitions
+	that IRIS needs.
+	The following commands will create the <i>tms</i> database and
+	populate it with the template:
+</p>
+<pre class="code">su postgres
+createdb tms
+psql tms -f /var/lib/iris/sql/tms-template.sql
+exit</pre>
+<p>
+	A valid LDAP user must be added to the database to allow an initial
+	administrator login.
+	Run the following commands, replacing the bold values with the user's
+	information:
+</p>
+<pre class="code">su tms
+psql tms
+INSERT INTO iris.i_user (name, full_name, dn, role, enabled)
+	VALUES('<b>name</b>', '<b>full_name</b>', '<b>dn</b>',
+	'administrator', true);
+\q
+exit
+</pre>
+
+<h3>Web Server Setup</h3>
+<p>
+	The Apache web server can be started with the following command:
+</p>
+<pre class="code">service httpd start</pre>
+
+<h3>IRIS Server Setup</h3>
+<p>
+	Now, the IRIS server can be started with the following command:
+</p>
+<pre class="code">service iris start</pre>
+<p>
+	Check that everything started OK:
+</p>
+<pre class="code">tail -f -n 40 /var/log/iris/iris.stderr</pre>
+<p>
+	From a client computer with Java installed, point your web browser at
+	http://YOUR_SERVER_NAME/iris-client/.
+	From there, you should be able to launch the IRIS client Web Start
+	application and log in.
+</p>
+
+<h3>Service Configuration</h3>
+<p>
+	Finally, PostgreSQL, Apache and IRIS should be configured to start when
+	the operating system is rebooted.
+	To do this, run following commands (as root):
+</p>
+<pre class="code">chkconfig postgresql on
+chkconfig httpd on
+chkconfig iris on</pre>
+
 </div>
 
 <h2 id="configuration">Configuration
@@ -259,6 +432,9 @@ FIXME
 	need to be done to ensure reliable operation.
 </p>
 <h3>Database Backups</h3>
+FIXME
+
+<h3>IRIS Upgrades</h3>
 FIXME
 
 <h3>System Software Updates</h3>

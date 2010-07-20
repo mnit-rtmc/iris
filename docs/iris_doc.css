@@ -33,6 +33,19 @@ h5 {
 h5:before {
 	content: ' ' counter(h2cnt) '.' counter(h3cnt) '.' counter(h4cnt) '.' counter(h5cnt) ' ';
 }
+.sidebar {
+	position: fixed;
+	left: 1%;
+	right: 76%;
+	top: 1%;
+	bottom: 1%;
+	overflow: hidden;
+	background: #9bb;
+}
+.mainbar {
+	margin-left: 25%;
+	margin-right: 5%;
+}
 div.math {
 	font-family: sans-serif;
 	font-weight: bold;
@@ -40,6 +53,11 @@ div.math {
 }
 span.func {
 	float: right;
+}
+.code {
+	background: #222222;
+	color: white;
+	overflow: auto;
 }
 span.inblock {
 	display: inline-block;
