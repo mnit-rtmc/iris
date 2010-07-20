@@ -221,21 +221,6 @@ public class StationImpl implements Station {
 		return flow;
 	}
 
-	/** Average station flow for previous ten samples */
-	protected float[] avg_flow = new float[SpeedRank.Last.samples];
-
-	/** Update average station flow with a new sample */
-	protected void updateAvgFlow(float f) {
-		System.arraycopy(avg_flow, 0, avg_flow, 1, avg_flow.length - 1);
-		avg_flow[0] = f;
-	}
-
-	/** Get the average flow smoothed over several samples */
-	public float getSmoothedAverageFlow() {
-		// Use avg_speed to determine how many samples to average
-		return average(avg_flow, SpeedRank.samples(avg_speed));
-	}
-
 	/** Current average station density */
 	protected int density = Constants.MISSING_DATA;
 
@@ -405,7 +390,6 @@ public class StationImpl implements Station {
 		volume = average(t_volume, n_volume);
 		occupancy = average(t_occ, n_occ);
 		flow = (int)average(t_flow, n_flow);
-		updateAvgFlow(flow);
 		density = (int)average(t_density, n_density);
 		speed = (int)average(t_speed, n_speed);
 		updateRollingSpeed(speed);
