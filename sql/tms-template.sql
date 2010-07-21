@@ -1172,6 +1172,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 12	Pelco Switcher
 13	Vicon PTZ
 14	SmartSensor 125 HD
+15	OSi ORG-815
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
@@ -1267,7 +1268,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_num_preset_btns	3
 camera_num_video_frames	900
 camera_ptz_panel_enable	false
-database_version	3.120.0
+database_version	3.121.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_log_enable	false

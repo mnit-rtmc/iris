@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.server.comm.ntcip.HDLCMessenger;
 import us.mn.state.dot.tms.server.comm.ntcip.NtcipPoller;
+import us.mn.state.dot.tms.server.comm.org815.Org815Poller;
 import us.mn.state.dot.tms.server.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
@@ -347,6 +348,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return new PelcoPoller(name, createSocketMessenger());
 	}
 
+	/** Create a ORG-815 precipitation sensor poller */
+	protected MessagePoller createOrg815Poller() throws IOException {
+		return new Org815Poller(name, createSocketMessenger());
+	}
+
 	/** Try to open the communication link */
 	protected MessagePoller createPoller() throws IOException {
 		switch(protocol) {
@@ -379,6 +385,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return createPelcoPoller();
 		case VICON_PTZ:
 			return createViconPTZPoller();
+		case ORG_815:
+			return createOrg815Poller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}

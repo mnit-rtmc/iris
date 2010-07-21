@@ -67,7 +67,10 @@ public enum CommProtocol {
 	VICON_PTZ("Vicon PTZ"),
 
 	/** Wavetronix SmartSensor 125 HD (14) */
-	SS_125("SmartSensor 125 HD");
+	SS_125("SmartSensor 125 HD"),
+
+	/** Optical Scientific ORG-815 Precipitation Sensor (15) */
+	ORG_815("OSi ORG-815");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
