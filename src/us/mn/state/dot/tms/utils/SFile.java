@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009 - 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,26 +31,30 @@ import java.util.ArrayList;
  */
 public class SFile 
 {
-	/** write a string to a file */
+	/** Write a string to a file, terminated w/ \r\n. */
 	public static boolean writeLineToFile(String fname, String s,
 		boolean append)
 	{
 		return(SFile.writeStringToFile(fname, s + "\r\n", append));
 	}
 
-	/** write a string to a file */
+	/** Write a string to a file.
+	 * @param fname File name, may be null.
+	 * @param s String to write, may be null.
+	 * @param append False to overwrite existing file else true. */
 	public static boolean writeStringToFile(String fname, 
 		String s, boolean append)
 	{
+		s = (s == null ? "" : s);
 		FileWriter f = null;
 		boolean ok = true;
-		try
-		{
+		try {
 			f = new FileWriter(fname, append);
 			f.write(s);
-		} catch (Exception ex) {
+		} catch(Exception ex) {
 			Log.warning(
-				"Warning: writeStringToFile(): " + ex);
+				"Warning: writeStringToFile(): fname=" + 
+					fname + ", ex=" + ex);
 			ok = false;
 		} finally {
 			try {
@@ -60,7 +64,8 @@ public class SFile
 		return ok;
 	}
 
-	/** Read the specified URL and return a byte array or null on error */
+	/** Read the specified URL and return a byte array or null on error.
+	 * @param surl URL which may be null */
 	public static byte[] readUrl(String surl) {
 		if(surl == null)
 			return null;
@@ -118,10 +123,42 @@ public class SFile
 	}
 
 	/** Return an absolute file path.
-	 * @param fn File name, may not be null.
+	 * @param fn File name. Can be null. If "", then "" is returned.
 	 * @throws SecurityException */
 	public static String getAbsolutePath(String fn) {
+		// on Windows, getAbsolutePath("") returns "C:\"
+		if(fn == null || fn.isEmpty())
+			return "";
 		File fh = new File(fn);
 		return fh.getAbsolutePath();
+	}
+
+	/** Return true if specified file exists else false.
+	 * @param fn File name, may be null. */
+	public static boolean fileExists(String fn) {
+		if(fn == null)
+			return false;
+		boolean exists = true;
+		try {
+			exists = new File(fn).exists();
+		} catch(Exception ex) {
+			exists = false;
+		}
+		return exists;
+	}
+
+	/** Delete file */
+	public static boolean delete(String fn) {
+		if(!fileExists(fn))
+			return true;
+		boolean ok = false;
+		try {
+			File fd = new File(fn);
+			ok = fd.delete();
+		} catch(Exception ex) {
+			ok = false;
+			Log.fine("SFile.delete() ex=" + ex);
+		}
+		return ok;
 	}
 }
