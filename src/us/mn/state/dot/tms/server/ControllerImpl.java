@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
+import us.mn.state.dot.tms.server.comm.WeatherPoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
 
 /**
@@ -722,6 +723,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 				sp.resetController(this);
 			else
 				sp.sendSettings(this);
+		}
+		if(p instanceof WeatherPoller) {
+			WeatherPoller wp = (WeatherPoller)p;
+			wp.sendSettings(this);
 		}
 	}
 
