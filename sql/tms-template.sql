@@ -1264,18 +1264,80 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
+camera_num_preset_btns	3
+camera_num_video_frames	900
+camera_ptz_panel_enable	false
 database_version	3.120.0
+detector_auto_fail_enable	true
+dms_aws_enable	false
+dms_aws_log_enable	false
+dms_aws_log_filename	/var/www/html/awsreport.txt
+dms_aws_read_time	0
+dms_aws_retry_threshold	6
+dms_brightness_enable	true
 dms_default_justification_line	3
 dms_default_justification_page	2
+dms_duration_enable	true
+dms_font_selection_enable	false
+dms_composer_edit_mode	1
+dms_form	1
+dms_high_temp_cutoff	60
+dms_lamp_test_timeout_secs	30
+dms_manufacturer_enable	true
 dms_max_lines	3
-dms_page_on_default_secs	2.0
+dms_message_min_pages	1
+dms_op_status_enable	false
 dms_page_off_default_secs	0.0
+dms_page_on_default_secs	2.0
+dms_page_on_max_secs	10.0
+dms_page_on_min_secs	0.5
+dms_page_on_selection_enable	false
+dms_pixel_off_limit	2
+dms_pixel_on_limit	1
+dms_pixel_status_enable	true
+dms_pixel_test_timeout_secs	30
 dms_poll_period_secs	30
-meter_green_secs	1.3
-meter_yellow_secs	0.7
-meter_min_red_secs	0.1
+dms_querymsg_enable	false
+dms_reset_enable	false
+dms_send_confirmation_enable	false
+dmslite_modem_op_timeout_secs	305
+dmslite_op_timeout_secs	65
+email_sender_client	
+email_sender_server	
+email_smtp_host	
+email_recipient_aws	
+email_recipient_bugs	
+help_trouble_ticket_enable	false
+help_trouble_ticket_url	
+incident_clear_secs	600
 kml_file_enable	false
+kml_filename	/var/www/html/iris-client/iris.kmz
+map_icon_size_scale_max	30
+map_northern_hemisphere	true
+map_utm_zone	15
+map_segment_max_meters	2000
+map_toolbar_coords	WGS84
+meter_green_secs	1.3
+meter_max_red_secs	13.0
+meter_min_red_secs	0.1
+meter_yellow_secs	0.7
+operation_retry_threshold	3
+temp_fahrenheit_enable	true
+tesla_host	
+travel_time_max_legs	8
+travel_time_max_miles	16
+travel_time_min_mph	15
 uptime_log_enable	false
+uptime_log_filename	/var/www/html/irisuptimelog.csv
+vsa_bottleneck_id_mph	55
+vsa_control_threshold	-1000
+vsa_downstream_miles	0.2
+vsa_min_display_mph	30
+vsa_min_station_miles	0.1
+vsa_start_intervals	3
+vsa_start_threshold	-1500
+vsa_stop_threshold	-750
+window_title	IRIS:
 xml_output_directory	/var/www/html/dds/
 \.
 
