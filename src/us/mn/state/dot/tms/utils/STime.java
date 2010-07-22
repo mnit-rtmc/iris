@@ -148,12 +148,7 @@ public final class STime {
 	 *                   01234567890123456789
 	 */
 	static public String CalendarToXML(Calendar c) {
-		String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		sdf.setTimeZone(getTimeZone(false));
-		String dt = sdf.format(c.getTime());
-		String x = dt.substring(0, 10) + "T" + dt.substring(11) + "Z";
-		assert x.length() == 20 : "STime.CalendarToXML";
-		return x;
+		return formatDate("yyyy-MM-dd'T'HH:mm:ss'Z'", false,
+			c.getTime());
 	}
 }
