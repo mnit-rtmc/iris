@@ -344,6 +344,17 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return null;
 	}
 
+	/** Get an active weather sensor for the controller */
+	public synchronized WeatherSensorImpl getActiveWeatherSensor() {
+		if(getActive()) {
+			for(ControllerIO io: io_pins.values()) {
+				if(io instanceof WeatherSensorImpl)
+					return (WeatherSensorImpl)io;
+			}
+		}
+		return null;
+	}
+
 	/** Get a detector by its I/O pin number */
 	public DetectorImpl getDetectorAtPin(int pin) {
 		ControllerIO io = getIO(pin);

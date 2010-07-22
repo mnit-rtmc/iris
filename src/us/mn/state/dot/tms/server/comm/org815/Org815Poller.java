@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.EOFException;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -48,15 +49,15 @@ public class Org815Poller extends MessagePoller implements WeatherPoller {
 
 	/** Send settings to a controller */
 	public void sendSettings(ControllerImpl c) {
-		// FIXME: hasActiveWeatherSensor ?
-		if(c.getActive())
-			new OpQuerySettings(c).start();
+		WeatherSensorImpl ws = c.getActiveWeatherSensor();
+		if(ws != null)
+			new OpQuerySettings(ws).start();
 	}
 
 	/** Query current weather conditions */
 	public void queryConditions(ControllerImpl c) {
-		// FIXME: hasActiveWeatherSensor ?
-		if(c.getActive())
-			new OpQueryConditions(c).start();
+		WeatherSensorImpl ws = c.getActiveWeatherSensor();
+		if(ws != null)
+			new OpQueryConditions(ws).start();
 	}
 }

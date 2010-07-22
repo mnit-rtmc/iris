@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -27,14 +27,13 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpQueryConditions extends OpOrg815 {
 
 	/** Create a new operation to query conditions */
-	public OpQueryConditions(ControllerImpl c) {
-		super(PriorityLevel.DATA_30_SEC, c);
+	public OpQueryConditions(WeatherSensorImpl ws) {
+		super(PriorityLevel.DATA_30_SEC, ws);
 	}
 
-	/** Begin the query conditions operation */
-	public boolean begin() {
-		phase = new QueryConditions();
-		return true;
+	/** Create the first real phase of the operation */
+	protected Phase phaseOne() {
+		return new QueryConditions();
 	}
 
 	/** Phase to query the conditions */
@@ -45,7 +44,7 @@ public class OpQueryConditions extends OpOrg815 {
 			ConditionsProperty cond = new ConditionsProperty();
 			mess.add(cond);
 			mess.queryProps();
-			ORG815_LOG.log(controller.getName() + ": " + cond);
+			ORG815_LOG.log(device.getName() + ": " + cond);
 			if(cond.shouldReset())
 				return new ResetAccumulator();
 			else
@@ -60,7 +59,7 @@ public class OpQueryConditions extends OpOrg815 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			ResetProperty reset = new ResetProperty();
 			mess.add(reset);
-			ORG815_LOG.log(controller.getName() + ": " + reset);
+			ORG815_LOG.log(device.getName() + ": " + reset);
 			mess.storeProps();
 			return null;
 		}

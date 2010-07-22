@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -27,14 +27,13 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpQuerySettings extends OpOrg815 {
 
 	/** Create a new operation to query settings */
-	public OpQuerySettings(ControllerImpl c) {
-		super(PriorityLevel.DOWNLOAD, c);
+	public OpQuerySettings(WeatherSensorImpl ws) {
+		super(PriorityLevel.DOWNLOAD, ws);
 	}
 
-	/** Begin the query settings operation */
-	public boolean begin() {
-		phase = new QueryVersion();
-		return true;
+	/** Create the first real phase of the operation */
+	protected Phase phaseOne() {
+		return new QueryVersion();
 	}
 
 	/** Phase to query the version */
@@ -45,7 +44,7 @@ public class OpQuerySettings extends OpOrg815 {
 			VersionProperty version = new VersionProperty();
 			mess.add(version);
 			mess.queryProps();
-			ORG815_LOG.log(controller.getName() + ": " + version);
+			ORG815_LOG.log(device.getName() + ": " + version);
 			controller.setVersion(version.toString());
 			return null;
 		}
