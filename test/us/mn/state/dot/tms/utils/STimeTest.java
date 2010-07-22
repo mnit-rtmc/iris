@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import junit.framework.TestCase;
 /** 
  * Test cases
  * @author Michael Darter
- * @created 04/09/09
  */
 public class STimeTest extends TestCase {
 
@@ -37,37 +36,10 @@ public class STimeTest extends TestCase {
 	/** test cases */
 	public void test() {
 
-		// testing DST methods requires that the zone be set 
-		// to support DST
+		// FIXME: these tests should be rewritten to test the STime
+		//        functionality instead of testing if time zone has
+		//        been set to PDT
 		boolean run_dst_tests = false;
-
-		// does default TZ support DST?
-		System.err.println("The default time zone supports DST: " + 
-			STime.verifyTimeZoneSupportsDST());
-
-		// verify default time zone is specified correctly 
-		// via command line arg.
-		// note: for the ant test cases, use the jvmarg statement to 
-		//       specify the time zone for the jvm that runs the junit
-		//       tests.
-		if(run_dst_tests) {
-			if(!STime.verifyDefaultTimeZone("Pacific Standard Time")) {
-				System.err.println(
-					"Specify the correct time zone using the " +
-					"command line switch: -Duser.timezone=" +
-					"America/Los_Angeles");
-				assertTrue(false);
-			}
-		}
-
-		// STime.subtract and STime.add
-		{
-			Date d1 = STime.getCurTime();
-			Date d2 = STime.subtract(d1, 5 * 1000);
-			assertTrue(d2.before(d1));
-			long delta = d1.getTime() - d2.getTime();
-			assertTrue(delta == 5 * 1000);
-		}
 
 		// STime.XMLtoDate
 		if(run_dst_tests) {
@@ -75,26 +47,6 @@ public class STimeTest extends TestCase {
 			Date d1 = STime.XMLtoDate("2008-04-29T15:37:22Z");
 			assertTrue(d1.toString().equals(
 				"Tue Apr 29 08:37:22 PDT 2008"));
-		}
-
-		// STime.toXMLDateTime
-		if(run_dst_tests) {
-			// note, this time is within DST so is GMT-7
-			Date d = new Date(2008 - 1900, 4 - 1, 29, 8, 53, 31);
-			String xml = STime.toXMLDateTime(d);
-			assertTrue(xml, xml.equals("2008-04-29T15:53:31Z"));
-		}
-
-		// STime.XMLtoCalendar
-		{
-			Calendar c1 =
-				STime.XMLtoCalendar("2008-04-29T15:37:22Z");
-			assertTrue(c1.get(Calendar.DAY_OF_MONTH) == 29);
-			assertTrue(c1.get(Calendar.HOUR_OF_DAY) == 15);
-			assertTrue(c1.get(Calendar.MINUTE) == 37);
-			assertTrue(c1.get(Calendar.YEAR) == 2008);
-			assertTrue(c1.get(Calendar.MONTH) == 4 - 1);
-			assertTrue(c1.get(Calendar.SECOND) == 22);
 		}
 
 		// STime.CalendarToXML
@@ -138,52 +90,6 @@ public class STimeTest extends TestCase {
 			System.err.println("As Date to UTC:" + local.toGMTString());
 			assertTrue(local.toGMTString().toString().equals(
 				"29 Apr 2008 15:53:31 GMT"));
-		}
-
-		// STime.dateToString
-		{
-			String s = STime.dateToString(STime.getCurTime(), true);
-			assertTrue(s, s.length() == 19);
-		}
-
-		// STime.stringToDate
-		{
-			Date d = STime.stringToDate("2009-03-07 15:51:08", true);
-			assertTrue(d.getYear()==2009 - 1900);
-			assertTrue(d.getMonth()==3-1);
-			assertTrue(d.getDate()==7);
-			assertTrue(d.getHours()==15);
-			assertTrue(d.getMinutes()==51);
-			assertTrue(d.getSeconds()==8);
-		}
-
-		// STime.secondsDiff
-		{
-			Date d1 = new Date();
-			STime.sleep(1600);
-			Date d2 = new Date();
-			assertTrue(STime.secondsDiff(d1, d2) == 2);
-			assertTrue(STime.secondsDiff(d2, d1) == 2);
-			assertTrue(STime.secondsDiff(d2, d2) == 0);
-		}
-
-		// STime.secondsDiffMin
-		{
-			Date d1 = new Date();
-			STime.sleep(1600);
-			Date d2 = new Date();
-			assertTrue(STime.secondsDiffMin(d1, d2) == 1);
-			assertTrue(STime.secondsDiffMin(d2, d1) == 1);
-			assertTrue(STime.secondsDiffMin(d1, d1) == 0);
-		}
-
-		// STime.secondsDiffMax
-		{
-			Date d1 = new Date();
-			STime.sleep(1100);
-			Date d2 = new Date();
-			assertTrue(STime.secondsDiffMax(d1, d2) == 2);
-			assertTrue(STime.secondsDiffMax(d1, d1) == 0);
 		}
 	}
 }
