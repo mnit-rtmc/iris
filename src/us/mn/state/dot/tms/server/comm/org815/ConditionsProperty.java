@@ -75,6 +75,7 @@ public class ConditionsProperty extends Org815Property {
 		if(cc == ConditionCode.unknown)
 			throw new ParsingException("Bad condition: " + line);
 		parseRate(line.substring(3, 7));
+		parseAccumulation(line.substring(8, 15));
 		value = line;
 	}
 
@@ -89,6 +90,20 @@ public class ConditionsProperty extends Org815Property {
 		}
 		catch(NumberFormatException e) {
 			throw new ParsingException("Invalid rate: " + r);
+		}
+	}
+
+	/** Parse the accumulated precipitation since last reset.
+	 * @param a 7-character accumulation to parse.
+	 * @return Accumulation since last reset in milimeters. */
+	protected float parseAccumulation(String a) throws IOException {
+		if("---.---".equals(a))
+			return Constants.MISSING_DATA;
+		try {
+			return Float.parseFloat(a);
+		}
+		catch(NumberFormatException e) {
+			throw new ParsingException("Invalid accum: " + a);
 		}
 	}
 }
