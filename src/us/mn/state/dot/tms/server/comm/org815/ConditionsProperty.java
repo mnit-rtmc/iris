@@ -41,6 +41,6 @@ public class ConditionsProperty extends Org815Property {
 	protected void parseQuery(String line) throws IOException {
 		if(line.length() > 16)
 			throw new ParsingException("Invalid response: " + line);
-		value = line.trim();
+		value = line;
 	}
 }
