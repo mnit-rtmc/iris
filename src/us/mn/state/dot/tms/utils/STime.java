@@ -48,7 +48,7 @@ public final class STime {
 	 * e.g.: '23:98:74'
 	 */
 	static public String getCurTimeShortString(boolean local) {
-		return formatCalendar("HH:mm:ss", getCalendar(local));
+		return formatDate("HH:mm:ss", local);
 	}
 
 	/**
@@ -56,8 +56,7 @@ public final class STime {
 	 * e.g. '2007-02-13 17:11:25.338'
 	 */
 	static public String getCurDateTimeMSString(boolean local) {
-		return formatCalendar("yyyy-MM-dd HH:mm:ss.SSS",
-			getCalendar(local));
+		return formatDate("yyyy-MM-dd HH:mm:ss.SSS", local);
 	}
 
 	/**
@@ -65,8 +64,7 @@ public final class STime {
 	 * e.g. '2006-10-09 19:48:48'
 	 */
 	static public String getCurDateTimeString(boolean local) {
-		return formatCalendar("yyyy-MM-dd HH:mm:ss",
-			getCalendar(local));
+		return formatDate("yyyy-MM-dd HH:mm:ss", local);
 	}
 
 	/** Get a calendar */
@@ -82,10 +80,25 @@ public final class STime {
 			return TimeZone.getTimeZone("UTC");
 	}
 
-	/** Format a calendar according to a format specifier */
-	static private String formatCalendar(String format, Calendar cal) {
+	/** Format a date to a string.
+	 * @param format Format specifier.
+	 * @param local Use local time or UTC.
+	 * @param date Date to format.
+	 * @return Formatted string. */
+	static private String formatDate(String format, boolean local,
+		Date date)
+	{
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
-		return sdf.format(cal.getTime());
+		sdf.setTimeZone(getTimeZone(local));
+		return sdf.format(date);
+	}
+
+	/** Format the current date/time.
+	 * @param format Format specifier.
+	 * @param local Use local time or UTC.
+	 * @return Formatted string. */
+	static private String formatDate(String format, boolean local) {
+		return formatDate(format, local, new Date());
 	}
 
 	/**
