@@ -46,6 +46,7 @@ import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.camera.CamCache;
 import us.mn.state.dot.tms.client.detector.DetCache;
 import us.mn.state.dot.tms.client.dms.DmsCache;
@@ -231,6 +232,14 @@ public class SonarState extends Client {
 		return lane_markings;
 	}
 
+	/** Cache of weather sensors */
+	protected final TypeCache<WeatherSensor> weather_sensors;
+
+	/** Get the weather sensor cache */
+	public TypeCache<WeatherSensor> getWeatherSensors() {
+		return weather_sensors;
+	}
+
 	/** Cache of incident details */
 	protected final TypeCache<IncidentDetail> inc_details;
 
@@ -353,6 +362,8 @@ public class SonarState extends Client {
 		lcs_cache = new LcsCache(this);
 		lane_markings = new TypeCache<LaneMarking>(LaneMarking.class,
 			this);
+		weather_sensors = new TypeCache<WeatherSensor>(
+			WeatherSensor.class, this);
 		incidents = new TypeCache<Incident>(Incident.class, this);
 		holidays = new TypeCache<Holiday>(Holiday.class, this);
 		day_plans = new TypeCache<DayPlan>(DayPlan.class, this);
@@ -441,6 +452,7 @@ public class SonarState extends Client {
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
 		populateReadable(lane_markings);
+		populateReadable(weather_sensors);
 		populateReadable(incidents);
 		populateReadable(holidays);
 		populateReadable(day_plans);

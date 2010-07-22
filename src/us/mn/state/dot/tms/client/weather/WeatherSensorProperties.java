@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.marking;
+package us.mn.state.dot.tms.client.weather;
 
 import java.awt.Color;
 import javax.swing.JButton;
@@ -23,18 +23,18 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.LaneMarking;
+import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
 /**
- * LaneMarkingProperties is a dialog for entering and editing lane markings
+ * WeatherSensorProperties is a dialog for entering and editing weather sensors
  *
  * @author Douglas Lau
  */
-public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
+public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 
 	/** Frame title */
 	static private final String TITLE = "Lane Marking: ";
@@ -48,14 +48,14 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	/** Controller button */
 	protected final JButton controllerBtn = new JButton("Controller");
 
-	/** Create a new lane marking properties form */
-	public LaneMarkingProperties(Session s, LaneMarking lm) {
-		super(TITLE, s, lm);
+	/** Create a new weather sensor properties form */
+	public WeatherSensorProperties(Session s, WeatherSensor ws) {
+		super(TITLE, s, ws);
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<LaneMarking> getTypeCache() {
-		return state.getLaneMarkings();
+	protected TypeCache<WeatherSensor> getTypeCache() {
+		return state.getWeatherSensors();
 	}
 
 	/** Initialize the widgets on the form */

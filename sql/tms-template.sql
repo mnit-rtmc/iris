@@ -623,6 +623,41 @@ CREATE RULE lane_marking_update AS ON UPDATE TO iris.lane_marking DO INSTEAD
 CREATE RULE lane_marking_delete AS ON DELETE TO iris.lane_marking DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
+CREATE TABLE iris._weather_sensor (
+	name VARCHAR(10) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+	notes VARCHAR(64) NOT NULL
+);
+
+ALTER TABLE iris._weather_sensor ADD CONSTRAINT _weather_sensor_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.weather_sensor AS SELECT
+	m.name, geo_loc, controller, pin, notes
+	FROM iris._weather_sensor m JOIN iris._device_io d ON m.name = d.name;
+
+CREATE RULE weather_sensor_insert AS ON INSERT TO iris.weather_sensor DO INSTEAD
+(
+	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._weather_sensor VALUES (NEW.name, NEW.geo_loc,
+		NEW.notes);
+);
+
+CREATE RULE weather_sensor_update AS ON UPDATE TO iris.weather_sensor DO INSTEAD
+(
+	UPDATE iris._device_io SET
+		controller = NEW.controller,
+		pin = NEW.pin
+	WHERE name = OLD.name;
+	UPDATE iris._weather_sensor SET
+		geo_loc = NEW.geo_loc,
+		notes = NEW.notes
+	WHERE name = OLD.name;
+);
+
+CREATE RULE weather_sensor_delete AS ON DELETE TO iris.weather_sensor DO INSTEAD
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+
 CREATE TABLE iris.lcs_lock (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL
@@ -958,6 +993,16 @@ CREATE VIEW lane_marking_view AS
 	LEFT JOIN iris.controller ctr ON m.controller = ctr.name;
 GRANT SELECT ON lane_marking_view TO PUBLIC;
 
+CREATE VIEW weather_sensor_view AS
+	SELECT w.name, w.notes, w.geo_loc,
+	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	l.easting, l.northing,
+	w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	FROM iris.weather_sensor w
+	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
+	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
+GRANT SELECT ON weather_sensor_view TO PUBLIC;
+
 CREATE VIEW lane_type_view AS
 	SELECT id, description, dcode FROM iris.lane_type;
 GRANT SELECT ON lane_type_view TO PUBLIC;
@@ -1064,6 +1109,11 @@ CREATE VIEW iris.controller_lane_marking AS
 	FROM iris._device_io dio
 	JOIN iris.lane_marking m ON dio.name = m.name;
 
+CREATE VIEW iris.controller_weather_sensor AS
+	SELECT dio.name, dio.controller, dio.pin, m.geo_loc
+	FROM iris._device_io dio
+	JOIN iris.weather_sensor m ON dio.name = m.name;
+
 CREATE VIEW iris.controller_lcs AS
 	SELECT dio.name, dio.controller, dio.pin, d.geo_loc
 	FROM iris._device_io dio
@@ -1087,6 +1137,7 @@ CREATE VIEW iris.controller_camera AS
 CREATE VIEW iris.controller_device AS
 	SELECT * FROM iris.controller_dms UNION ALL
 	SELECT * FROM iris.controller_lane_marking UNION ALL
+	SELECT * FROM iris.controller_weather_sensor UNION ALL
 	SELECT * FROM iris.controller_lcs UNION ALL
 	SELECT * FROM iris.controller_meter UNION ALL
 	SELECT * FROM iris.controller_warning_sign UNION ALL
@@ -1489,17 +1540,19 @@ PRV_0100	device_admin	ramp_meter/.*	f	t	t	t
 PRV_0101	device_admin	road/.*	f	t	t	t
 PRV_0102	device_admin	video_monitor/.*	f	t	t	t
 PRV_0103	device_admin	warning_sign/.*	f	t	t	t
-PRV_0104	system_admin	cabinet_style/.*	f	t	t	t
-PRV_0105	system_admin	font/.*	f	t	t	t
-PRV_0106	system_admin	glyph/.*	f	t	t	t
-PRV_0107	system_admin	graphic/.*	f	t	t	t
-PRV_0108	system_admin	lane_use_multi/.*	f	t	t	t
-PRV_0109	system_admin	system_attribute/.*	f	t	t	t
-PRV_0110	user_admin	user/.*	f	t	t	t
-PRV_0111	user_admin	role/.*	f	t	t	t
-PRV_0112	user_admin	privilege/.*	f	t	t	t
-PRV_0113	user_admin	capability/.*	f	t	t	t
-PRV_0114	user_admin	connection/.*	f	f	f	t
+PRV_0104	device_admin	weather_sensor(/.*)?	t	f	f	f
+PRV_0105	device_admin	weather_sensor/.*	f	t	t	t
+PRV_0106	system_admin	cabinet_style/.*	f	t	t	t
+PRV_0107	system_admin	font/.*	f	t	t	t
+PRV_0108	system_admin	glyph/.*	f	t	t	t
+PRV_0109	system_admin	graphic/.*	f	t	t	t
+PRV_0110	system_admin	lane_use_multi/.*	f	t	t	t
+PRV_0111	system_admin	system_attribute/.*	f	t	t	t
+PRV_0112	user_admin	user/.*	f	t	t	t
+PRV_0113	user_admin	role/.*	f	t	t	t
+PRV_0114	user_admin	privilege/.*	f	t	t	t
+PRV_0115	user_admin	capability/.*	f	t	t	t
+PRV_0116	user_admin	connection/.*	f	f	f	t
 \.
 
 COPY iris.role (name, enabled) FROM stdin;

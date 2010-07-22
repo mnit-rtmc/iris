@@ -56,6 +56,7 @@ import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
+import us.mn.state.dot.tms.client.weather.WeatherSensorManager;
 
 /**
  * A session is one IRIS login session.
@@ -172,6 +173,14 @@ public class Session {
 		return warn_manager;
 	}
 
+	/** Weather sensor manager */
+	protected final WeatherSensorManager weather_sensor_manager;
+
+	/** Get the weather sensor manager */
+	public WeatherSensorManager getWeatherSensorManager() {
+		return weather_sensor_manager;
+	}
+
 	/** Ramp meter manager */
 	protected final MeterManager meter_manager;
 
@@ -216,6 +225,8 @@ public class Session {
 			state.getDetCache().getDetectors(), loc_manager);
 		warn_manager = new WarningSignManager(this,
 			state.getWarningSigns(), loc_manager);
+		weather_sensor_manager = new WeatherSensorManager(this,
+			state.getWeatherSensors(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
@@ -234,6 +245,7 @@ public class Session {
 		lane_marking_manager.initialize();
 		det_manager.initialize();
 		warn_manager.initialize();
+		weather_sensor_manager.initialize();
 		meter_manager.initialize();
 		inc_manager.initialize();
 	}
@@ -335,6 +347,7 @@ public class Session {
 		lane_marking_manager.dispose();
 		det_manager.dispose();
 		warn_manager.dispose();
+		weather_sensor_manager.dispose();
 		meter_manager.dispose();
 		inc_manager.dispose();
 		loc_manager.dispose();

@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraManager;
@@ -54,6 +55,7 @@ import us.mn.state.dot.tms.client.lcs.LCSIManager;
 import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
+import us.mn.state.dot.tms.client.weather.WeatherSensorManager;
 
 /**
  * Special table model for Controller I/O pins.
@@ -77,7 +79,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Device types which can be associated with controller IO */
 	protected enum DeviceType {
 		Alarm, Camera, Detector, DMS, Lane_Marking, LCSIndication,
-		Ramp_Meter, Warning_Sign
+		Ramp_Meter, Warning_Sign, Weather_Sensor
 	}
 
 	/** Types of IO devices */
@@ -93,6 +95,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.LCSIndication);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
 		IO_TYPE.add(DeviceType.Warning_Sign);
+		IO_TYPE.add(DeviceType.Weather_Sensor);
 	}
 
 	/** Get the type of the specified ControllerIO device */
@@ -113,6 +116,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.Ramp_Meter;
 		else if(cio instanceof WarningSign)
 			return DeviceType.Warning_Sign;
+		else if(cio instanceof WeatherSensor)
+			return DeviceType.Weather_Sensor;
 		else
 			return null;
 	}
@@ -188,6 +193,12 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO watcher for warning signs */
 	protected final ControllerIOWatcher<WarningSign> w_watcher;
 
+	/** Available weather sensors model */
+	protected final WrapperComboBoxModel wsensor_model;
+
+	/** Controller IO watcher for weather sensors */
+	protected final ControllerIOWatcher<WeatherSensor> wsensor_watcher;
+
 	/** Model for null device type */
 	protected final ComboBoxModel no_model = new DefaultComboBoxModel();
 
@@ -225,6 +236,9 @@ public class ControllerIOModel extends AbstractTableModel {
 		w_model = new WrapperComboBoxModel(
 			s.getWarnManager().getStyleModel(
 			WarningSignManager.STYLE_NO_CONTROLLER), true);
+		wsensor_model = new WrapperComboBoxModel(
+			s.getWeatherSensorManager().getStyleModel(
+			WeatherSensorManager.STYLE_NO_CONTROLLER), true);
 		a_watcher = new ControllerIOWatcher<Alarm>();
 		c_watcher = new ControllerIOWatcher<Camera>();
 		det_watcher = new ControllerIOWatcher<Detector>();
@@ -233,6 +247,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		lcsi_watcher = new ControllerIOWatcher<LCSIndication>();
 		m_watcher = new ControllerIOWatcher<RampMeter>();
 		w_watcher = new ControllerIOWatcher<WarningSign>();
+		wsensor_watcher = new ControllerIOWatcher<WeatherSensor>();
 	}
 
 	/** Initialize the model */
@@ -247,6 +262,7 @@ public class ControllerIOModel extends AbstractTableModel {
 			lcsi_watcher);
 		state.getRampMeters().addProxyListener(m_watcher);
 		state.getWarningSigns().addProxyListener(w_watcher);
+		state.getWeatherSensors().addProxyListener(wsensor_watcher);
 	}
 
 	/** Dispose of the model */
@@ -261,6 +277,7 @@ public class ControllerIOModel extends AbstractTableModel {
 			lcsi_watcher);
 		state.getRampMeters().removeProxyListener(m_watcher);
 		state.getWarningSigns().removeProxyListener(w_watcher);
+		state.getWeatherSensors().removeProxyListener(wsensor_watcher);
 	}
 
 	/** Get the count of columns in the table */
@@ -399,6 +416,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return m_model;
 		case Warning_Sign:
 			return w_model;
+		case Weather_Sensor:
+			return wsensor_model;
 		default:
 			return no_model;
 		}

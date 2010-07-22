@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.toast.MaintenanceMenu;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.client.weather.WeatherSensorForm;
 
 /**
  * ViewMenu is a JMenu which contains items to view various TMS object types.
@@ -71,6 +72,9 @@ public class ViewMenu extends JMenu {
 		item = createScheduleItem();
 		if(item != null)
 			add(item);
+		item = createWeatherItem();
+		if(item != null)
+			add(item);
 	}
 
 	/** Create the detector menu item */
@@ -110,6 +114,20 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new ScheduleForm(session));
+			}
+		};
+		return item;
+	}
+
+	/** Create the weather sensor menu item */
+	protected JMenuItem createWeatherItem() {
+		if(!WeatherSensorForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Weather Sensors");
+		item.setMnemonic('W');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new WeatherSensorForm(session));
 			}
 		};
 		return item;
