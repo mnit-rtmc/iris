@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class ConditionsProperty extends Org815Property {
 
 	/** Code indicating weather condition */
-	static protected enum ConditionCode {
+	static public enum ConditionCode {
 		unknown(""),
 		sensor_init("**"),
 		sensor_error("ER"),
@@ -54,17 +54,38 @@ public class ConditionsProperty extends Org815Property {
 		}
 	}
 
-	/** Property value */
-	protected String value = "";
-
 	/** Get a string value of the property */
 	public String toString() {
-		return value;
+		return code + " rate: " + rate + " accum: " + accumulation;
 	}
 
 	/** Get the QUERY request byte code */
 	protected byte requestQueryByte() {
 		return (char)'A';
+	}
+
+	/** Current weather condition */
+	protected ConditionCode code = ConditionCode.unknown;
+
+	/** Get the current weather condition code */
+	public ConditionCode getConditionCode() {
+		return code;
+	}
+
+	/** Current one-minute block average precipitation rate */
+	protected float rate = Constants.MISSING_DATA;
+
+	/** Get the current one-minute block average precipitation rate */
+	public float getRate() {
+		return rate;
+	}
+
+	/** Accumulation since last reset */
+	protected float accumulation = Constants.MISSING_DATA;
+
+	/** Get the accumulated precipitation since last reset */
+	public float getAccumulation() {
+		return accumulation;
 	}
 
 	/** Parse a QUERY response */
@@ -74,9 +95,11 @@ public class ConditionsProperty extends Org815Property {
 		ConditionCode cc = ConditionCode.fromCode(line.substring(0, 2));
 		if(cc == ConditionCode.unknown)
 			throw new ParsingException("Bad condition: " + line);
-		parseRate(line.substring(3, 7));
-		parseAccumulation(line.substring(8, 15));
-		value = line;
+		float rt = parseRate(line.substring(3, 7));
+		float acc = parseAccumulation(line.substring(8, 15));
+		code = cc;
+		rate = rt;
+		accumulation = acc;
 	}
 
 	/** Parse the one-minute block average precipitation rate.
