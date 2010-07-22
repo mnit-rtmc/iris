@@ -31,8 +31,8 @@ public final class STime {
 	private STime() {}
 
 	/**
-	 *  Calc time difference between now (UTC since 1970)
-	 *  and given start time in MS.
+	 * Calc time difference between now (UTC since 1970)
+	 * and given start time in MS.
 	 */
 	static public long calcTimeDeltaMS(long startInUTC) {
 		return System.currentTimeMillis() - startInUTC;
@@ -48,10 +48,7 @@ public final class STime {
 	 * e.g.: '23:98:74'
 	 */
 	static public String getCurTimeShortString(boolean local) {
-		String DATE_FORMAT = "HH:mm:ss";
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		Calendar cal = getCalendar(local);
-		return sdf.format(cal.getTime());
+		return formatCalendar("HH:mm:ss", getCalendar(local));
 	}
 
 	/**
@@ -59,10 +56,8 @@ public final class STime {
 	 * e.g. '2007-02-13 17:11:25.338'
 	 */
 	static public String getCurDateTimeMSString(boolean local) {
-		String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		Calendar cal = getCalendar(local);
-		return sdf.format(cal.getTime());
+		return formatCalendar("yyyy-MM-dd HH:mm:ss.SSS",
+			getCalendar(local));
 	}
 
 	/**
@@ -70,10 +65,8 @@ public final class STime {
 	 * e.g. '2006-10-09 19:48:48'
 	 */
 	static public String getCurDateTimeString(boolean local) {
-		String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		Calendar cal = getCalendar(local);
-		return sdf.format(cal.getTime());
+		return formatCalendar("yyyy-MM-dd HH:mm:ss",
+			getCalendar(local));
 	}
 
 	/** Get a calendar */
@@ -87,6 +80,12 @@ public final class STime {
 			return TimeZone.getDefault();
 		else
 			return TimeZone.getTimeZone("UTC");
+	}
+
+	/** Format a calendar according to a format specifier */
+	static private String formatCalendar(String format, Calendar cal) {
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		return sdf.format(cal.getTime());
 	}
 
 	/**
