@@ -18,6 +18,7 @@ import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -63,4 +64,18 @@ abstract public class Org815Property extends ControllerProperty {
 
 	/** Parse a QUERY response */
 	abstract protected void parseQuery(String line) throws IOException;
+
+	/** Parse the accumulated precipitation since last reset.
+	 * @param a 7-character accumulation to parse.
+	 * @return Accumulation since last reset in milimeters. */
+	protected float parseAccumulation(String a) throws IOException {
+		if("---.---".equals(a))
+			return Constants.MISSING_DATA;
+		try {
+			return Float.parseFloat(a);
+		}
+		catch(NumberFormatException e) {
+			throw new ParsingException("Invalid accum: " + a);
+		}
+	}
 }

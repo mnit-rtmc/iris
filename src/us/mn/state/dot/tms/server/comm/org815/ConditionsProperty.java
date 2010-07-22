@@ -61,7 +61,7 @@ public class ConditionsProperty extends Org815Property {
 
 	/** Get the QUERY request byte code */
 	protected byte requestQueryByte() {
-		return (char)'A';
+		return (byte)'A';
 	}
 
 	/** Current weather condition */
@@ -86,6 +86,12 @@ public class ConditionsProperty extends Org815Property {
 	/** Get the accumulated precipitation since last reset */
 	public float getAccumulation() {
 		return accumulation;
+	}
+
+	/** Test if the accumulator should be reset */
+	public boolean shouldReset() {
+		return code == ConditionCode.no_precip && rate == 0 &&
+		       accumulation > 0;
 	}
 
 	/** Parse a QUERY response */
@@ -113,20 +119,6 @@ public class ConditionsProperty extends Org815Property {
 		}
 		catch(NumberFormatException e) {
 			throw new ParsingException("Invalid rate: " + r);
-		}
-	}
-
-	/** Parse the accumulated precipitation since last reset.
-	 * @param a 7-character accumulation to parse.
-	 * @return Accumulation since last reset in milimeters. */
-	protected float parseAccumulation(String a) throws IOException {
-		if("---.---".equals(a))
-			return Constants.MISSING_DATA;
-		try {
-			return Float.parseFloat(a);
-		}
-		catch(NumberFormatException e) {
-			throw new ParsingException("Invalid accum: " + a);
 		}
 	}
 }

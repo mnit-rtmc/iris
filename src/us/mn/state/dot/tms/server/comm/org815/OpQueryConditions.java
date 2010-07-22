@@ -46,6 +46,22 @@ public class OpQueryConditions extends OpOrg815 {
 			mess.add(cond);
 			mess.queryProps();
 			ORG815_LOG.log(controller.getName() + ": " + cond);
+			if(cond.shouldReset())
+				return new ResetAccumulator();
+			else
+				return null;
+		}
+	}
+
+	/** Phase to reset the precipitation accumulator */
+	protected class ResetAccumulator extends Phase {
+
+		/** Reset the accumulator */
+		protected Phase poll(CommMessage mess) throws IOException {
+			ResetProperty reset = new ResetProperty();
+			mess.add(reset);
+			ORG815_LOG.log(controller.getName() + ": " + reset);
+			mess.storeProps();
 			return null;
 		}
 	}
