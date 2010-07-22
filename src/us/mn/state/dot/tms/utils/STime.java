@@ -48,26 +48,10 @@ public final class STime {
 	 * e.g.: '23:98:74'
 	 */
 	static public String getCurTimeShortString(boolean local) {
+		String DATE_FORMAT = "HH:mm:ss";
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		Calendar cal = getCalendar(local);
-		int hour24 = cal.get(Calendar.HOUR_OF_DAY);    // 0..23
-		int min = cal.get(Calendar.MINUTE);            // 0..59
-		int sec = cal.get(Calendar.SECOND);            // 0..59
-		return SString.intToString(hour24, 2) + ":" +
-		       SString.intToString(min, 2) + ":" +
-		       SString.intToString(sec, 2);
-	}
-
-	/** Get a calendar */
-	static private Calendar getCalendar(boolean local) {
-		return Calendar.getInstance(getTimeZone(local));
-	}
-
-	/** Get a time zone */
-	static private TimeZone getTimeZone(boolean local) {
-		if(local)
-			return TimeZone.getDefault();
-		else
-			return TimeZone.getTimeZone("UTC");
+		return sdf.format(cal.getTime());
 	}
 
 	/**
@@ -90,6 +74,19 @@ public final class STime {
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		Calendar cal = getCalendar(local);
 		return sdf.format(cal.getTime());
+	}
+
+	/** Get a calendar */
+	static private Calendar getCalendar(boolean local) {
+		return Calendar.getInstance(getTimeZone(local));
+	}
+
+	/** Get a time zone */
+	static private TimeZone getTimeZone(boolean local) {
+		if(local)
+			return TimeZone.getDefault();
+		else
+			return TimeZone.getTimeZone("UTC");
 	}
 
 	/**
