@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -73,6 +74,21 @@ public class ConditionsProperty extends Org815Property {
 		ConditionCode cc = ConditionCode.fromCode(line.substring(0, 2));
 		if(cc == ConditionCode.unknown)
 			throw new ParsingException("Bad condition: " + line);
+		parseRate(line.substring(3, 7));
 		value = line;
+	}
+
+	/** Parse the one-minute block average precipitation rate.
+	 * @param r 4-character rate to parse.
+	 * @return Precipitation rate in milimeters per hour. */
+	protected float parseRate(String r) throws IOException {
+		if("----".equals(r))
+			return Constants.MISSING_DATA;
+		try {
+			return Float.parseFloat(r);
+		}
+		catch(NumberFormatException e) {
+			throw new ParsingException("Invalid rate: " + r);
+		}
 	}
 }
