@@ -31,25 +31,11 @@ public final class STime {
 	private STime() {}
 
 	/**
-	 * given a java.util.Date, return the number of
-	 * milliseconds UTC since Jan 1st 1970 00:00:00.
-	 */
-	static public long getUTCinMillis(java.util.Date d) {
-		return d.getTime();
-	}
-
-	/** get current time in MS (UTC) since Jan 1st 1970 00:00:00. */
-	static public long getCurTimeUTCinMillis() {
-		Date d = new Date();
-		return STime.getUTCinMillis(d);
-	}
-
-	/**
 	 *  Calc time difference between now (UTC since 1970)
 	 *  and given start time in MS.
 	 */
 	static public long calcTimeDeltaMS(long startInUTC) {
-		return STime.getCurTimeUTCinMillis() - startInUTC;
+		return System.currentTimeMillis() - startInUTC;
 	}
 
 	/** Get current time as short string in local time. */

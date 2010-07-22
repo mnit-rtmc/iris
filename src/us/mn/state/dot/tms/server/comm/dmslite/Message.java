@@ -154,7 +154,7 @@ public class Message implements CommMessage
 
 		// send message
 		updateInterStatus("Sending request to sensorserver.");
-		long starttime=STime.getCurTimeUTCinMillis();
+		long starttime = System.currentTimeMillis();
 		Log.finest("queryProps(): Writing " + array.length + 
 			" bytes to SensorServer: " + 
 			SString.byteArrayToString(array) + ".");
@@ -175,7 +175,7 @@ public class Message implements CommMessage
 	private void readElements(long starttime) throws IOException {
 		/** The intermediate status is updated in finally block. */
 		String[] istatus = new String[0];
-		long startms = STime.getCurTimeUTCinMillis();
+		long startms = System.currentTimeMillis();
 		updateInterStatus("Waiting for sensorserver.");
 		do {
 			String token = null;
