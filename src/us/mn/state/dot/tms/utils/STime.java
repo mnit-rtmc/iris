@@ -48,7 +48,7 @@ public final class STime {
 	 * e.g.: '23:98:74'
 	 */
 	static public String getCurTimeShortString(boolean local) {
-		Calendar cal = Calendar.getInstance(getTimeZone(local));
+		Calendar cal = getCalendar(local);
 		int hour24 = cal.get(Calendar.HOUR_OF_DAY);    // 0..23
 		int min = cal.get(Calendar.MINUTE);            // 0..59
 		int sec = cal.get(Calendar.SECOND);            // 0..59
@@ -57,8 +57,13 @@ public final class STime {
 		       SString.intToString(sec, 2);
 	}
 
+	/** Get a calendar */
+	static private Calendar getCalendar(boolean local) {
+		return Calendar.getInstance(getTimeZone(local));
+	}
+
 	/** Get a time zone */
-	static public TimeZone getTimeZone(boolean local) {
+	static private TimeZone getTimeZone(boolean local) {
 		if(local)
 			return TimeZone.getDefault();
 		else
@@ -72,18 +77,18 @@ public final class STime {
 	static public String getCurDateTimeMSString(boolean local) {
 		String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		Calendar cal = Calendar.getInstance(getTimeZone(local));
+		Calendar cal = getCalendar(local);
 		return sdf.format(cal.getTime());
 	}
 
 	/**
-	 *  Get current date and time as string in either UTC or local STime.
-	 *  e.g. '2006-10-09 19:48:48'
+	 * Get current date and time as string in either UTC or local STime.
+	 * e.g. '2006-10-09 19:48:48'
 	 */
 	static public String getCurDateTimeString(boolean local) {
 		String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		Calendar cal = Calendar.getInstance(getTimeZone(local));
+		Calendar cal = getCalendar(local);
 		return sdf.format(cal.getTime());
 	}
 
@@ -119,7 +124,7 @@ public final class STime {
 		int h = SString.stringToInt(xml.substring(11, 13));
 		int mi = SString.stringToInt(xml.substring(14, 16));
 		int s = SString.stringToInt(xml.substring(17, 19));
-		Calendar cal = Calendar.getInstance(getTimeZone(false));
+		Calendar cal = getCalendar(false);
 		cal.set(y, m, d, h, mi, s);
 		return cal.getTime();
 	}
@@ -136,7 +141,7 @@ public final class STime {
 	static public String CalendarToXML(Calendar c) {
 		String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		sdf.setTimeZone(getTimeZone(false));
 		String dt = sdf.format(c.getTime());
 		String x = dt.substring(0, 10) + "T" + dt.substring(11) + "Z";
 		assert x.length() == 20 : "STime.CalendarToXML";
