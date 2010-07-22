@@ -24,6 +24,35 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class ConditionsProperty extends Org815Property {
 
+	/** Code indicating weather condition */
+	static protected enum ConditionCode {
+		unknown(""),
+		sensor_init("**"),
+		sensor_error("ER"),
+		no_precip("  "),
+		light_rain("R-"),
+		moderate_rain("R "),
+		heavy_rain("R+"),
+		light_snow("S-"),
+		moderate_snow("S "),
+		heavy_snow("S+"),
+		light_precip("P-"),
+		moderate_precip("P "),
+		heavy_precip("P+");
+
+		protected final String code;
+		private ConditionCode(String c) {
+			code = c;
+		}
+		static public ConditionCode fromCode(String c) {
+			for(ConditionCode cc: ConditionCode.values()) {
+				if(cc.code.equals(c))
+					return cc;
+			}
+			return unknown;
+		}
+	}
+
 	/** Property value */
 	protected String value = "";
 
@@ -39,8 +68,11 @@ public class ConditionsProperty extends Org815Property {
 
 	/** Parse a QUERY response */
 	protected void parseQuery(String line) throws IOException {
-		if(line.length() > 16)
+		if(line.length() != 15)
 			throw new ParsingException("Invalid response: " + line);
+		ConditionCode cc = ConditionCode.fromCode(line.substring(0, 2));
+		if(cc == ConditionCode.unknown)
+			throw new ParsingException("Bad condition: " + line);
 		value = line;
 	}
 }
