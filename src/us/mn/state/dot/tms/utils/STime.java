@@ -45,7 +45,7 @@ public final class STime {
 	}
 
 	/**
-	 * Get current time as short string in either UTC or local STime.
+	 * Get current time as short string in either UTC or local time.
 	 * e.g.: '23:98:74'
 	 */
 	static public String getCurTimeShortString(boolean local) {
@@ -53,7 +53,7 @@ public final class STime {
 	}
 
 	/**
-	 * Get current date as string in either UTC or local STime.
+	 * Get current date as string in either UTC or local time.
 	 * e.g. '2007-02-13 17:11:25.338'
 	 */
 	static public String getCurDateTimeMSString(boolean local) {
@@ -61,7 +61,7 @@ public final class STime {
 	}
 
 	/**
-	 * Get current date and time as string in either UTC or local STime.
+	 * Get current date and time as string in either UTC or local time.
 	 * e.g. '2006-10-09 19:48:48'
 	 */
 	static public String getCurDateTimeString(boolean local) {
