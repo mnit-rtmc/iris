@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.utils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,19 +68,6 @@ public final class STime {
 		return formatDate("yyyy-MM-dd HH:mm:ss", local);
 	}
 
-	/** Get a calendar */
-	static private Calendar getCalendar(boolean local) {
-		return Calendar.getInstance(getTimeZone(local));
-	}
-
-	/** Get a time zone */
-	static private TimeZone getTimeZone(boolean local) {
-		if(local)
-			return TimeZone.getDefault();
-		else
-			return TimeZone.getTimeZone("UTC");
-	}
-
 	/** Format a date to a string.
 	 * @param format Format specifier.
 	 * @param local Use local time or UTC.
@@ -93,12 +81,33 @@ public final class STime {
 		return sdf.format(date);
 	}
 
+	/** Get a time zone */
+	static private TimeZone getTimeZone(boolean local) {
+		if(local)
+			return TimeZone.getDefault();
+		else
+			return TimeZone.getTimeZone("UTC");
+	}
+
 	/** Format the current date/time.
 	 * @param format Format specifier.
 	 * @param local Use local time or UTC.
 	 * @return Formatted string. */
 	static private String formatDate(String format, boolean local) {
 		return formatDate(format, local, new Date());
+	}
+
+	/**
+	 * Convert from a Calendar to XML in UTC format.
+	 * @param c Calendar
+	 * @return XML date string in UTC:
+	 *           format 'YYYY-MM-DDThh:mm:ssZ'.
+	 *              e.g. 2008-03-22T02:04:21Z
+	 *                   01234567890123456789
+	 */
+	static public String CalendarToXML(Calendar c) {
+		return formatDate("yyyy-MM-dd'T'HH:mm:ss'Z'", false,
+			c.getTime());
 	}
 
 	/**
@@ -115,40 +124,30 @@ public final class STime {
 	static public Date XMLtoDate(String xml)
 		throws IllegalArgumentException
 	{
-		if(xml == null ||
-		   xml.length() != 20 ||
-		   xml.charAt(4) != '-' &&
-		   xml.charAt(7) != '-' &&
-		   xml.charAt(13) != ':' &&
-		   xml.charAt(16) != ':' &&
-		   xml.charAt(19) != 'Z')
-		{
-			throw new IllegalArgumentException(
-			    "Bogus XML date string received: " + xml);
+		if(xml != null) {
+			try {
+				return parseDate("yyyy-MM-dd'T'HH:mm:ss'Z'",
+					false, xml);
+			}
+			catch(ParseException e) {
+				// throw illegal arg exception below
+			}
 		}
-		int y = SString.stringToInt(xml.substring(0, 4));
-		int m = SString.stringToInt(xml.substring(5, 7))
-			- 1;    // month is zero based
-		int d = SString.stringToInt(xml.substring(8, 10));
-		int h = SString.stringToInt(xml.substring(11, 13));
-		int mi = SString.stringToInt(xml.substring(14, 16));
-		int s = SString.stringToInt(xml.substring(17, 19));
-		Calendar cal = getCalendar(false);
-		cal.setTimeInMillis(0);
-		cal.set(y, m, d, h, mi, s);
-		return cal.getTime();
+		throw new IllegalArgumentException(
+		    "Bogus XML date string received: " + xml);
 	}
 
-	/**
-	 * Convert from a Calendar to XML in UTC format.
-	 * @param c Calendar
-	 * @return XML date string in UTC:
-	 *           format 'YYYY-MM-DDThh:mm:ssZ'.
-	 *              e.g. 2008-03-22T02:04:21Z
-	 *                   01234567890123456789
-	 */
-	static public String CalendarToXML(Calendar c) {
-		return formatDate("yyyy-MM-dd'T'HH:mm:ss'Z'", false,
-			c.getTime());
+	/** Parse a date from a string.
+	 * @param format Format specifier.
+	 * @param local Use local time or UTC.
+	 * @param date Date to format.
+	 * @return Parsed date. */
+	static private Date parseDate(String format, boolean local,
+		String date) throws ParseException
+	{
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		sdf.setLenient(false);
+		sdf.setTimeZone(getTimeZone(local));
+		return sdf.parse(date);
 	}
 }
