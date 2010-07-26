@@ -134,15 +134,15 @@ public final class STime {
 		int mi = SString.stringToInt(xml.substring(14, 16));
 		int s = SString.stringToInt(xml.substring(17, 19));
 		Calendar cal = getCalendar(false);
+		cal.setTimeInMillis(0);
 		cal.set(y, m, d, h, mi, s);
 		return cal.getTime();
 	}
 
 	/**
-	 * Convert from a Calendar to XML in UTC format. Note that this
-	 * method does not perform DST conversions.
+	 * Convert from a Calendar to XML in UTC format.
 	 * @param c Calendar
-	 * @returns XML date string in UTC:
+	 * @return XML date string in UTC:
 	 *           format 'YYYY-MM-DDThh:mm:ssZ'.
 	 *              e.g. 2008-03-22T02:04:21Z
 	 *                   01234567890123456789
