@@ -18,7 +18,6 @@ import java.awt.Color;
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.util.Properties;
-import java.util.TimeZone;
 import javax.swing.UIManager;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.util.HTTPProxySelector;
@@ -91,7 +90,6 @@ public class MainClient {
 	static public void main(String[] args) {
 		DialogHandler handler = new DialogHandler();
 		Scheduler.setHandler(handler);
-		checkTimeZone();
 		checkAssert();
 		tweakLookAndFeel();
 		try {
@@ -101,17 +99,6 @@ public class MainClient {
 		}
 		catch(IOException e) {
 			handler.handle(e);
-		}
-	}
-
-	/** Check time zone */
-	static protected void checkTimeZone() {
-		// does the default time zone support DST?
-		if(!TimeZone.getDefault().useDaylightTime()) {
-			System.err.println("Warning: the default time zone (" +
-				TimeZone.getDefault().getDisplayName() +
-				") doesn't support DST.  Specify the time " +
-				"zone via the command line.");
 		}
 	}
 

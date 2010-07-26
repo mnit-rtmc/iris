@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.Properties;
-import java.util.TimeZone;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
@@ -96,7 +95,6 @@ public class MainServer {
 	static protected void initialize() throws IOException {
 		redirectStdStreams();
 		checkAssert();
-		checkDst();
 	}
 
 	/** Redirect the standard output and error streams to log files */
@@ -124,16 +122,6 @@ public class MainServer {
 		assert assertsEnabled = true;
 		System.err.println("Assertions are turned " +
 			(assertsEnabled ? "on" : "off") + ".");
-	}
-
-	/** Check DST for default time zone */
-	static protected void checkDst() {
-		if(!TimeZone.getDefault().useDaylightTime()) {
-			System.err.println("Warning: the default time zone ("+
-			TimeZone.getDefault().getDisplayName() +
-			") doesn't support DST. " +
-			"Specify the time zone via the command line.");
-		}
 	}
 
 	/** Create the database connection */
