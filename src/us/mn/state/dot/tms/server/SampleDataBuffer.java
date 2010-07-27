@@ -170,12 +170,12 @@ abstract public class SampleDataBuffer {
 
 	/** Read a group of samples (for merging 5-minute data).
 	 * @param stamp Time stamp of first sample.
-	 * @param len Number of samples to read.
+	 * @param n_samples Number of samples to read.
 	 * @return Array of sample data. */
-	public int[] read(long stamp, int len) {
+	public int[] read(long stamp, int n_samples) {
 		int offset = sampleOffset(stamp);
-		int[] values = new int[len];
-		for(int i = 0; i < len; i++)
+		int[] values = new int[n_samples];
+		for(int i = 0; i < n_samples; i++)
 			values[i] = read(offset + i);
 		return values;
 	}
@@ -198,22 +198,22 @@ abstract public class SampleDataBuffer {
 			start = stamp;
 		long time = start;
 		int offset = sampleOffset(stamp);
-		int len = Math.max(count, offset + values.length);
+		int n_samples = Math.max(count, offset + values.length);
 		if(offset < 0) {
 			if(offset + values.length <= 0)
 				throw new IndexOutOfBoundsException();
 			time = stamp;
-			len = Math.max(count - offset, values.length);
+			n_samples = Math.max(count - offset, values.length);
 			offset = 0;
 		}
-		if(len > BUFFERED_SAMPLES)
+		if(n_samples > BUFFERED_SAMPLES)
 			throw new IndexOutOfBoundsException();
-		int[] vals = read(time, len);
+		int[] vals = read(time, n_samples);
 		for(int i = 0; i < values.length; i++)
 			vals[i + offset] = values[i];
 		start = time;
 		count = 0;
-		for(int i = 0; i < len; i++)
+		for(int i = 0; i < n_samples; i++)
 			write(vals[i]);
 	}
 
