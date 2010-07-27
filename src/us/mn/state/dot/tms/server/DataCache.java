@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,19 +28,19 @@ import us.mn.state.dot.tms.Constants;
 public class DataCache {
 
 	/** Volume traffic data buffer */
-	protected final TrafficDataBuffer.Volume vol_buf;
+	protected final SampleDataBuffer.Volume vol_buf;
 
 	/** Scan traffic data buffer */
-	protected final TrafficDataBuffer.Scan scan_buf;
+	protected final SampleDataBuffer.Scan scan_buf;
 
 	/** Speed traffic data buffer */
-	protected final TrafficDataBuffer.Speed speed_buf;
+	protected final SampleDataBuffer.Speed speed_buf;
 
 	/** Create a new data cache */
 	public DataCache(String det) {
-		vol_buf = new TrafficDataBuffer.Volume(det);
-		scan_buf = new TrafficDataBuffer.Scan(det);
-		speed_buf = new TrafficDataBuffer.Speed(det);
+		vol_buf = new SampleDataBuffer.Volume(det);
+		scan_buf = new SampleDataBuffer.Scan(det);
+		speed_buf = new SampleDataBuffer.Speed(det);
 	}
 
 	/** Write one 30-second record of volume/scan data to the cache */

@@ -25,12 +25,12 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Constants;
 
 /**
- * A buffer for traffic detector data. This is needed for performance, so that
- * each data file (10,000+) does not need to be updated every 30 seconds.
+ * A buffer for periodic sample data. This is needed for performance, so that
+ * each data file (10,000+) does not need to be written every 30 seconds.
  *
  * @author Douglas Lau
  */
-abstract public class TrafficDataBuffer {
+abstract public class SampleDataBuffer {
 
 	/** Traffic data debug log */
 	static protected final IDebugLog TRAFFIC_LOG = new IDebugLog("traffic");
@@ -85,7 +85,7 @@ abstract public class TrafficDataBuffer {
 	protected final short[] buf = new short[BUFFERED_RECORDS];
 
 	/** Create a new traffic data buffer */
-	protected TrafficDataBuffer(String det) {
+	protected SampleDataBuffer(String det) {
 		det_id = det;
 	}
 
@@ -247,7 +247,7 @@ abstract public class TrafficDataBuffer {
 	}
 
 	/** Detector volume data buffer */
-	static public final class Volume extends TrafficDataBuffer {
+	static public final class Volume extends SampleDataBuffer {
 
 		/** Volume data record size */
 		static protected final int RECORD_SIZE = 1;
@@ -274,7 +274,7 @@ abstract public class TrafficDataBuffer {
 	}
 
 	/** Detector scan data buffer */
-	static public final class Scan extends TrafficDataBuffer {
+	static public final class Scan extends SampleDataBuffer {
 
 		/** Scan data record size */
 		static protected final int RECORD_SIZE = 2;
@@ -301,7 +301,7 @@ abstract public class TrafficDataBuffer {
 	}
 
 	/** Detector speed data buffer */
-	static public final class Speed extends TrafficDataBuffer {
+	static public final class Speed extends SampleDataBuffer {
 
 		/** Speed data record size */
 		static protected final int RECORD_SIZE = 1;
