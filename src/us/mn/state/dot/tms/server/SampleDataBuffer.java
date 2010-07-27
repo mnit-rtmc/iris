@@ -70,7 +70,7 @@ public class SampleDataBuffer {
 	 * @return File to store sample data. */
 	protected File sampleFile(long stamp) throws IOException {
 		return new File(directory(stamp).getCanonicalPath() +
-			File.separator + sensor + extension);
+			File.separator + file_name);
 	}
 
 	/** Get the sampling period in milliseconds. */
@@ -78,11 +78,8 @@ public class SampleDataBuffer {
 		return period * 1000;
 	}
 
-	/** Sensor ID */
-	protected final String sensor;
-
-	/** File extension */
-	protected final String extension;
+	/** File name */
+	protected final String file_name;
 
 	/** Sample period in seconds */
 	protected final int period;
@@ -100,10 +97,12 @@ public class SampleDataBuffer {
 	protected int count;
 
 	/** Create a new sample data buffer.
-	 * @param s Sensor ID */
+	 * @param s Sensor ID.
+	 * @param e File extension.
+	 * @param p Sample period in seconds.
+	 * @param sb Bytes per sample. */
 	protected SampleDataBuffer(String s, String e, int p, int sb) {
-		sensor = s;
-		extension = e;
+		file_name = s + e;
 		period = p;
 		assert sb == 1 || sb == 2;
 		sample_bytes = sb;
