@@ -42,9 +42,6 @@ abstract public class SampleDataBuffer {
 	/** Number of samples to buffer */
 	static protected final int BUFFERED_SAMPLES = 20;
 
-	/** Offset between samples in milliseconds */
-	static protected final int SAMPLE_OFFSET = 30000;
-
 	/** Get a valid directory for a given date stamp.
 	 * @param stamp Time stamp
 	 * @return Directory to store sample data.
@@ -64,8 +61,8 @@ abstract public class SampleDataBuffer {
 	/** Compute the file sample number for a given time stamp.
 	 * @param stamp Time stamp of sample.
 	 * @return Sample number in file (0 is first sample). */
-	static protected int sampleNumber(long stamp) {
-		return TimeSteward.secondOfDayInt(stamp) / 30;
+	protected int sampleNumber(long stamp) {
+		return TimeSteward.secondOfDayInt(stamp) / period;
 	}
 
 	/** Create a file (path) for the given time stamp.
@@ -76,8 +73,16 @@ abstract public class SampleDataBuffer {
 			File.separator + sensor + extension());
 	}
 
+	/** Get the sampling period in milliseconds. */
+	protected int periodMillis() {
+		return period * 1000;
+	}
+
 	/** Sensor ID */
 	protected final String sensor;
+
+	/** Sample period in seconds */
+	protected final int period;
 
 	/** Data buffer */
 	protected final short[] buf = new short[BUFFERED_SAMPLES];
@@ -90,8 +95,9 @@ abstract public class SampleDataBuffer {
 
 	/** Create a new sample data buffer.
 	 * @param s Sensor ID */
-	protected SampleDataBuffer(String s) {
+	protected SampleDataBuffer(String s, int p) {
 		sensor = s;
+		period = p;
 	}
 
 	/** Get a string representation of the sample data buffer */
@@ -127,7 +133,8 @@ abstract public class SampleDataBuffer {
 	protected int sampleOffset(long stamp) {
 		// NOTE: this cannot use sampleNumber because the samples might
 		//       be in different days
-		return (int)((stamp / SAMPLE_OFFSET) - (start / SAMPLE_OFFSET));
+		int p = periodMillis();
+		return (int)((stamp / p) - (start / p));
 	}
 
 	/** Write a data sample to the buffer.
@@ -143,8 +150,8 @@ abstract public class SampleDataBuffer {
 			write(value);
 		} else {
 			/* Timestamps duplicated or out of order */
-			TRAFFIC_LOG.log("stamp out of order: " + start +
-				" vs " + stamp + " value: " + value);
+			TRAFFIC_LOG.log("out of order: " + start + " vs " +
+				stamp + " value: " + value);
 		}
 	}
 
@@ -223,7 +230,7 @@ abstract public class SampleDataBuffer {
 			int n_samples = flush(mark - n);
 			count -= n_samples;
 			if(count > 0) {
-				start += SAMPLE_OFFSET * n_samples;
+				start += periodMillis() * n_samples;
 				System.arraycopy(buf, n_samples, buf, 0, count);
 			}
 		}
@@ -288,7 +295,7 @@ abstract public class SampleDataBuffer {
 
 		/** Create a new volume data buffer */
 		public Volume(String s) {
-			super(s);
+			super(s, 30);
 		}
 
 		/** Get the file extension for a volume data file */
@@ -315,7 +322,7 @@ abstract public class SampleDataBuffer {
 
 		/** Create a new scan data buffer */
 		public Scan(String s) {
-			super(s);
+			super(s, 30);
 		}
 
 		/** Get the file extension for a scan data file */
@@ -342,7 +349,7 @@ abstract public class SampleDataBuffer {
 
 		/** Create a new speed data buffer */
 		public Speed(String s) {
-			super(s);
+			super(s, 30);
 		}
 
 		/** Get the file extension for a speed data file */
