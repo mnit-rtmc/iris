@@ -32,10 +32,10 @@ import us.mn.state.dot.tms.Constants;
  */
 abstract public class SampleDataBuffer {
 
-	/** Traffic data debug log */
+	/** Sample data debug log */
 	static protected final IDebugLog TRAFFIC_LOG = new IDebugLog("traffic");
 
-	/** Path where traffic data files are stored */
+	/** Path where sample data files are stored */
 	static protected final String DATA_PATH = "/var/lib/iris/traffic";
 
 	/** Buffer size is 10 minutes (one record every 30 seconds) */
@@ -49,15 +49,11 @@ abstract public class SampleDataBuffer {
 		String d = TimeSteward.dateShortString(stamp);
 		File year = new File(DATA_PATH + File.separator +
 			d.substring(0, 4));
-		if(!year.exists()) {
-			if(!year.mkdir())
-				throw new IOException("mkdir failed: " + year);
-		}
+		if(!year.exists() && !year.mkdir())
+			throw new IOException("mkdir failed: " + year);
 		File dir = new File(year.getPath() + File.separator + d);
-		if(!dir.exists()) {
-			if(!dir.mkdir())
-				throw new IOException("mkdir failed: " + dir);
-		}
+		if(!dir.exists() && !dir.mkdir())
+			throw new IOException("mkdir failed: " + dir);
 		return dir;
 	}
 
@@ -84,14 +80,14 @@ abstract public class SampleDataBuffer {
 	/** Data buffer */
 	protected final short[] buf = new short[BUFFERED_RECORDS];
 
-	/** Create a new traffic data buffer */
+	/** Create a new sample data buffer */
 	protected SampleDataBuffer(String det) {
 		det_id = det;
 	}
 
 	/** Get a string representation of the buffer */
 	public String toString() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		b.append(new Date(start));
 		b.append(" (");
 		for(int i = 0; i < count; i++) {
@@ -242,8 +238,12 @@ abstract public class SampleDataBuffer {
 		TRAFFIC_LOG.log("Truncating " + f + " @ record: " + r +
 			" offset: " + o);
 		RandomAccessFile raf = new RandomAccessFile(f, "rw");
-		try { raf.setLength(r * recordSize()); }
-		finally { raf.close(); }
+		try {
+			raf.setLength(r * recordSize());
+		}
+		finally {
+			raf.close();
+		}
 	}
 
 	/** Detector volume data buffer */
