@@ -68,8 +68,10 @@ abstract public class SampleDataBuffer {
 		return TimeSteward.secondOfDayInt(stamp) / 30;
 	}
 
-	/** Create a file (path) for the given time stamp */
-	protected File file(long stamp) throws IOException {
+	/** Create a file (path) for the given time stamp.
+	 * @param stamp Time stamp of sample.
+	 * @return File to store sample data. */
+	protected File sampleFile(long stamp) throws IOException {
 		return new File(directory(stamp).getCanonicalPath() +
 			File.separator + sensor + extension());
 	}
@@ -80,18 +82,19 @@ abstract public class SampleDataBuffer {
 	/** Data buffer */
 	protected final short[] buf = new short[BUFFERED_SAMPLES];
 
-	/** Time stamp of first sample stored in the buffer */
+	/** Time stamp of first sample in the buffer */
 	protected long start;
 
 	/** Count of valid samples in the buffer */
 	protected int count;
 
-	/** Create a new sample data buffer */
+	/** Create a new sample data buffer.
+	 * @param s Sensor ID */
 	protected SampleDataBuffer(String s) {
 		sensor = s;
 	}
 
-	/** Get a string representation of the buffer */
+	/** Get a string representation of the sample data buffer */
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append(new Date(start));
@@ -118,12 +121,18 @@ abstract public class SampleDataBuffer {
 		return (int)(f.length() / sampleSize());
 	}
 
-	/** Get the sample offset from the start of the buffer */
+	/** Get the sample offset from the start of the buffer.
+	 * @param stamp Time stamp of sample.
+	 * @return Number of samples from start of buffer. */
 	protected int sampleOffset(long stamp) {
+		// NOTE: this cannot use sampleNumber because the samples might
+		//       be in different days
 		return (int)((stamp / SAMPLE_OFFSET) - (start / SAMPLE_OFFSET));
 	}
 
-	/** Write a data sample to the buffer */
+	/** Write a data sample to the buffer.
+	 * @param stamp Time stamp of sample.
+	 * @param value Sample value. */
 	public void write(long stamp, int value) {
 		if(count == 0)
 			start = stamp;
@@ -134,21 +143,28 @@ abstract public class SampleDataBuffer {
 			write(value);
 		} else {
 			/* Timestamps duplicated or out of order */
-			/* What can we do? */
+			TRAFFIC_LOG.log("stamp out of order: " + start +
+				" vs " + stamp + " value: " + value);
 		}
 	}
 
-	/** Write a single sample to the end of the buffer */
+	/** Write a single sample to the end of the buffer.
+	 * @param value Sample value. */
 	protected void write(int value) {
 		buf[count] = (short)value;
 		count++;
 	}
 
-	/** Write a value to a data output stream */
+	/** Write a value to a data output stream.
+	 * @param dos DataOutputStream to write to.
+	 * @param value Sample value. */
 	abstract protected void writeTo(DataOutputStream dos, int value)
 		throws IOException;
 
-	/** Read a group of samples (for merging 5-minute data) */
+	/** Read a group of samples (for merging 5-minute data).
+	 * @param stamp Time stamp of first sample.
+	 * @param len Number of samples to read.
+	 * @return Array of sample data. */
 	public int[] read(long stamp, int len) {
 		int offset = sampleOffset(stamp);
 		int[] values = new int[len];
@@ -157,7 +173,9 @@ abstract public class SampleDataBuffer {
 		return values;
 	}
 
-	/** Read a single sample out of the buffer */
+	/** Read a single sample out of the buffer.
+	 * @param offset Sample offset.
+	 * @return Sample value. */
 	protected int read(int offset) {
 		if(offset < 0 || offset >= count)
 			return Constants.MISSING_DATA;
@@ -165,7 +183,9 @@ abstract public class SampleDataBuffer {
 			return buf[offset];
 	}
 
-	/** Merge a group of samples (for 5-minute data) */
+	/** Merge a group of samples (for 5-minute data).
+	 * @param stamp Time stamp of first sample.
+	 * @param values Array of sample data. */
 	public void merge(long stamp, int[] values) {
 		if(count == 0)
 			start = stamp;
@@ -190,7 +210,8 @@ abstract public class SampleDataBuffer {
 			write(vals[i]);
 	}
 
-	/** Flush all buffered data from before the given time */
+	/** Flush all buffered data from before the given time.
+	 * @param stamp Time stamp. */
 	public void flush(long stamp) throws IOException {
 		while(count > 0) {
 			int offset = sampleOffset(stamp);
@@ -208,7 +229,9 @@ abstract public class SampleDataBuffer {
 		}
 	}
 
-	/** Flush the given number of samples to the file system */
+	/** Flush the given number of samples to the file system.
+	 * @param n_sample Number of samples to flush.
+	 * @return Number of samples actually flushed. */
 	protected int flush(int n_samples) throws IOException {
 		if(n_samples > count)
 			n_samples = count;
@@ -219,11 +242,14 @@ abstract public class SampleDataBuffer {
 		}
 		if(missing)
 			return n_samples;
-		File f = file(start);
+		File f = sampleFile(start);
 		int n = sampleNumber(start);
 		int offset = n - sampleCount(f);
-		if(offset < 0)
-			truncateFile(f, n, offset);
+		if(offset < 0) {
+			TRAFFIC_LOG.log("Truncating " + f + " @ sample: " + n +
+				" offset: " + offset);
+			truncateFile(f, n);
+		}
 		FileOutputStream fos = new FileOutputStream(f.getPath(), true);
 		try {
 			BufferedOutputStream bos =
@@ -241,13 +267,13 @@ abstract public class SampleDataBuffer {
 		return n_samples;
 	}
 
-	/** Truncate the file before the specified sample stamp */
-	protected void truncateFile(File f, int r, int o) throws IOException {
-		TRAFFIC_LOG.log("Truncating " + f + " @ sample: " + r +
-			" offset: " + o);
+	/** Truncate the file before the specified sample stamp.
+	 * @param f File to truncate.
+	 * @param n Sample number to truncate to. */
+	protected void truncateFile(File f, int n) throws IOException {
 		RandomAccessFile raf = new RandomAccessFile(f, "rw");
 		try {
-			raf.setLength(r * sampleSize());
+			raf.setLength(n * sampleSize());
 		}
 		finally {
 			raf.close();

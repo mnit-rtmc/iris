@@ -144,8 +144,8 @@ public class DataCache {
 		long stamp = cal.getTime().getTime();
 		int r = cal.get(Calendar.HOUR_OF_DAY) * 12 +
 			cal.get(Calendar.MINUTE) / 5;
-		File v30 = vol_buf.file(stamp);
-		File c30 = scan_buf.file(stamp);
+		File v30 = vol_buf.sampleFile(stamp);
+		File c30 = scan_buf.sampleFile(stamp);
 		RandomAccessFile vFile = new RandomAccessFile(v30, "rw");
 		RandomAccessFile cFile = new RandomAccessFile(c30, "rw");
 		try {
