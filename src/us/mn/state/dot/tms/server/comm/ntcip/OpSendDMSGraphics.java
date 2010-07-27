@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.Graphic;
@@ -415,7 +416,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected class VerifyStatusReadyForUse extends Phase {
 
 		/** Time to stop checking if the graphic is ready for use */
-		protected final long expire = System.currentTimeMillis() +
+		protected final long expire = TimeSteward.currentTimeMillis() +
 			10 * 1000;
 
 		/** Verify the graphic status is ready for use */
@@ -427,7 +428,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			if(status.getEnum() ==
 			   DmsGraphicStatus.Enum.readyForUse)
 				return nextGraphicPhase();
-			if(System.currentTimeMillis() > expire) {
+			if(TimeSteward.currentTimeMillis() > expire) {
 				DMS_LOG.log(dms.getName() + ": graphic status" +
 					" timeout expired -- aborted");
 				return nextGraphicPhase();

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -67,7 +68,7 @@ public class DateTimeProperty extends SS125Property {
 
 	/** Format a date / time stamp */
 	protected void formatDate(byte[] body, int pos) {
-		stamp.setTime(System.currentTimeMillis());
+		stamp.setTime(TimeSteward.currentTimeMillis());
 		TimeZone utc = TimeZone.getTimeZone("GMT");
 		Calendar cal = Calendar.getInstance(utc);
 		cal.setTime(stamp);

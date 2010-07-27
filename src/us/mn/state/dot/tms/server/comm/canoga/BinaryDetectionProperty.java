@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.io.IOException;
 import java.util.Calendar;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
@@ -253,7 +254,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 
 	/** Log new vehicle detection events */
 	public void logEvents(ControllerImpl controller) {
-		Calendar stamp = Calendar.getInstance();
+		Calendar stamp = TimeSteward.getCalendarInstance();
 		for(int i = 0; i < 4; i++) {
 			if(!c_events[i].has_errors(p_events[i])) {
 				logEvents(controller, stamp, i);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
@@ -41,18 +42,6 @@ public class ActionPlanJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
 	static protected final int OFFSET_SECS = 29;
-
-	/** Calendar instance for calculating the minute of day */
-	static protected final Calendar STAMP = Calendar.getInstance();
-
-	/** Get the current minute of the day */
-	static protected int minute_of_day() {
-		synchronized(STAMP) {
-			STAMP.setTimeInMillis(System.currentTimeMillis());
-			return STAMP.get(Calendar.HOUR_OF_DAY) * 60 +
-				STAMP.get(Calendar.MINUTE);
-		}
-	}
 
 	/** Timer scheduler */
 	protected final Scheduler timer;
@@ -84,8 +73,8 @@ public class ActionPlanJob extends Job {
 
 	/** Perform time actions */
 	protected void performTimeActions() {
-		final Calendar cal = Calendar.getInstance();
-		final int min = minute_of_day();
+		final Calendar cal = TimeSteward.getCalendarInstance();
+		final int min = TimeSteward.currentMinuteOfDayInt();
 		TimeActionHelper.find(new Checker<TimeAction>() {
 			public boolean check(TimeAction ta) {
 				if(ta instanceof TimeActionImpl)

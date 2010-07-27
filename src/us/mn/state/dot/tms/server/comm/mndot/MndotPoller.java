@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.EOFException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -50,7 +51,8 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 {
 	/** Test if it is afternoon */
 	static protected boolean isAfternoon() {
-		return Calendar.getInstance().get(Calendar.AM_PM)== Calendar.PM;
+		return TimeSteward.getCalendarInstance().get(Calendar.AM_PM) ==
+		       Calendar.PM;
 	}
 
 	/** Get the meter number on the controller. This does not belong in the

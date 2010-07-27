@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -260,7 +261,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	/** Set the cleared status */
 	public void setCleared(boolean c) {
 		cleared = c;
-		clear_time = System.currentTimeMillis();
+		clear_time = TimeSteward.currentTimeMillis();
 	}
 
 	/** Set the cleared status */
@@ -272,7 +273,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Time the incident was cleared */
-	protected long clear_time = System.currentTimeMillis();
+	protected long clear_time = TimeSteward.currentTimeMillis();
 
 	/** Get the time the incident was cleared */
 	public long getClearTime() {

@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import us.mn.state.dot.sched.TimeSteward;
 
 /**
  * Time convenience methods.
@@ -36,7 +37,7 @@ public final class STime {
 	 * and given start time in MS.
 	 */
 	static public long calcTimeDeltaMS(long startInUTC) {
-		return System.currentTimeMillis() - startInUTC;
+		return TimeSteward.currentTimeMillis() - startInUTC;
 	}
 
 	/** Get current time as short string in local time. */

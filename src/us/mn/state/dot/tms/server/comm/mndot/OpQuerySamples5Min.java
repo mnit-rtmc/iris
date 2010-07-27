@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -38,13 +39,13 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	protected final Completer completer;
 
 	/** Time stamp */
-	protected Calendar stamp = Calendar.getInstance();
+	protected Calendar stamp = TimeSteward.getCalendarInstance();
 
 	/** Oldest time stamp to accept from controller */
-	protected final Calendar oldest = Calendar.getInstance();
+	protected final Calendar oldest = TimeSteward.getCalendarInstance();
 
 	/** Newest timestamp to accept from controller */
-	protected final Calendar newest = Calendar.getInstance();
+	protected final Calendar newest = TimeSteward.getCalendarInstance();
 
 	/** Count of records with "BAD TIMESTAMP" errors */
 	protected int n_bad = 0;
@@ -53,7 +54,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	public OpQuerySamples5Min(ControllerImpl c, Completer comp) {
 		super(PriorityLevel.DATA_5_MIN, c);
 		completer = comp;
-		long s = System.currentTimeMillis();
+		long s = TimeSteward.currentTimeMillis();
 		stamp.setTimeInMillis(s);
 		oldest.setTimeInMillis(s);
 		oldest.add(Calendar.DATE, -1);
@@ -126,7 +127,8 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 				rec[Address.OFF_GREEN_METER_1] & 0xFF);
 			updateGreenCount(meter2,
 				rec[Address.OFF_GREEN_METER_2] & 0xFF);
-			if(recs > 0 && Calendar.getInstance().before(newest))
+			if(recs > 0 &&
+			   TimeSteward.getCalendarInstance().before(newest))
 				return this;
 			else
 				return null;

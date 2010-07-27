@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -40,7 +41,7 @@ public class SynchronizeProperty extends MndotProperty {
 	protected byte[] formatPayloadSet(Message m) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		BCDOutputStream bcd = new BCDOutputStream(os);
-		Calendar now = Calendar.getInstance();
+		Calendar now = TimeSteward.getCalendarInstance();
 		bcd.write2(now.get(Calendar.MONTH) + 1);
 		bcd.write2(now.get(Calendar.DAY_OF_MONTH));
 		bcd.write2(now.get(Calendar.YEAR) % 100);

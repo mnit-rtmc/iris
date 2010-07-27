@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
@@ -248,16 +249,16 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		// FIXME: check the priority of each sign
 		p.sendIndications(this, ind, o);
 		// wait 15 seconds before allowing indications to be queried
-		allow_query_time = System.currentTimeMillis() + 15 * 1000;
+		allow_query_time = TimeSteward.currentTimeMillis() + 15 * 1000;
 		setIndicationsNext(ind);
 	}
 
 	/** Time after which indications are allowed to be queried */
-	protected long allow_query_time = System.currentTimeMillis();
+	protected long allow_query_time = TimeSteward.currentTimeMillis();
 
 	/** Is indication query allowed? */
 	public boolean isQueryAllowed() {
-		return System.currentTimeMillis() >= allow_query_time;
+		return TimeSteward.currentTimeMillis() >= allow_query_time;
 	}
 
 	/** Owner of current indications */

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
@@ -115,8 +116,8 @@ public class OpTestDMSPixels extends OpDMS {
 			new PixelTestActivation();
 
 		/** Time to stop checking if the test has completed */
-		protected final long expire = System.currentTimeMillis() + 1000*
-			SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS.getInt();
+		protected final long expire = TimeSteward.currentTimeMillis() +
+		       1000*SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS.getInt();
 
 		/** Check for test completion */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -125,7 +126,7 @@ public class OpTestDMSPixels extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + test);
 			if(test.getEnum() == PixelTestActivation.Enum.noTest)
 				return new QueryRowCount();
-			if(System.currentTimeMillis() > expire) {
+			if(TimeSteward.currentTimeMillis() > expire) {
 				DMS_LOG.log(dms.getName() + ": pixel test " +
 					"timeout expired -- giving up");
 				return new QueryRowCount();

@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
@@ -1025,7 +1026,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the message deploy time */
 	protected void setDeployTime() {
-		deployTime = System.currentTimeMillis();
+		deployTime = TimeSteward.currentTimeMillis();
 		notifyAttribute("deployTime");
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
+import us.mn.state.dot.sched.TimeSteward;
 
 /**
  * The event logger logs vehicle detection events
@@ -29,24 +30,9 @@ public class EventLogger {
 	/** Path where traffic data files are stored */
 	static protected final String DATA_PATH = "/var/lib/iris/traffic";
 
-	/** Create a date string (eg YYYYMMDD) from the given date stamp */
-	static public String date(Calendar stamp) {
-		StringBuffer b = new StringBuffer(13);
-		b.append(stamp.get(Calendar.YEAR));
-		while(b.length() < 4)
-			b.insert(0, '0');
-		b.append(stamp.get(Calendar.MONTH) + 1);
-		while(b.length() < 6)
-			b.insert(4, '0');
-		b.append(stamp.get(Calendar.DAY_OF_MONTH));
-		while(b.length() < 8)
-			b.insert(6, '0');
-		return b.toString();
-	}
-
 	/** Get a valid directory for a given date stamp */
 	static protected File directory(Calendar stamp) throws IOException {
-		String d = date(stamp);
+		String d = TimeSteward.dateShortString(stamp.getTimeInMillis());
 		File year = new File(DATA_PATH + File.separator +
 			d.substring(0, 4));
 		if(!year.exists()) {
@@ -66,7 +52,7 @@ public class EventLogger {
 		throws IOException
 	{
 		if(stamp == null)
-			stamp = Calendar.getInstance();
+			stamp = TimeSteward.getCalendarInstance();
 		return new File(directory(stamp).getCanonicalPath() +
 			File.separator + det_id + ".vlog");
 	}

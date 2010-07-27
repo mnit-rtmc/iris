@@ -18,6 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.SocketTimeoutException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
@@ -153,7 +154,7 @@ abstract public class MessagePoller extends Thread {
 	/** Perform one poll for an operation */
 	protected void doPoll(final OpController o) throws IOException {
 		final String oname = o.toString();
-		long start = System.currentTimeMillis();
+		long start = TimeSteward.currentTimeMillis();
 		try {
 			o.poll(createMessage(o.getController()));
 		}
@@ -218,7 +219,7 @@ abstract public class MessagePoller extends Thread {
 
 	/** Sample the current line load */
 	protected long sample_load(long start) {
-		long now = System.currentTimeMillis();
+		long now = TimeSteward.currentTimeMillis();
 		long e = now - start;
 		long past = now % INTERVAL_TIME;
 		long i = now - past;

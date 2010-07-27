@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -67,7 +68,7 @@ public class ReaperJob extends Job {
 	protected void reapIncident(IncidentImpl inc) {
 		if(inc.getCleared()) {
 			if(inc.getClearTime() + getIncidentClearThreshold() <
-			   System.currentTimeMillis())
+			   TimeSteward.currentTimeMillis())
 				MainServer.server.removeObject(inc);
 		}
 	}

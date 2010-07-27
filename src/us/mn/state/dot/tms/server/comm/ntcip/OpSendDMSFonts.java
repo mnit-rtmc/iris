@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMSHelper;
@@ -465,7 +466,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class VerifyStatusReadyForUse extends Phase {
 
 		/** Time to stop checking if the font is ready for use */
-		protected final long expire = System.currentTimeMillis() + 
+		protected final long expire = TimeSteward.currentTimeMillis() + 
 			15 * 1000;
 
 		/** Verify the font status is ready for use */
@@ -481,7 +482,7 @@ public class OpSendDMSFonts extends OpDMS {
 				else
 					return nextFontPhase();
 			case calculatingID:
-				if(System.currentTimeMillis() > expire) {
+				if(TimeSteward.currentTimeMillis() > expire) {
 					DMS_LOG.log(dms.getName() + ": font " +
 					"status timeout expired -- aborted");
 					return nextFontPhase();

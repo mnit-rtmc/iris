@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
 import java.util.Date;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -30,7 +31,7 @@ public class TimeProperty extends SS105Property {
 	protected boolean is_set = false;
 
 	/** Time stamp */
-	protected long stamp = System.currentTimeMillis();
+	protected long stamp = TimeSteward.currentTimeMillis();
 
 	/** Check if the request has a checksum */
 	protected boolean hasChecksum() {
@@ -46,7 +47,7 @@ public class TimeProperty extends SS105Property {
 	/** Format a basic "SET" request */
 	protected String formatSetRequest() {
 		is_set = true;
-		stamp = System.currentTimeMillis();
+		stamp = TimeSteward.currentTimeMillis();
 		int seconds = TimeStamp.secondsSinceEpoch(new Date(stamp));
 		return "S4" + hex(seconds, 8);
 	}

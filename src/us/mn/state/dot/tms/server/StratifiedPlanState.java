@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeSet;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLoc;
@@ -338,7 +339,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Check if we're in the flushing window */
 		protected boolean isFlushing() {
-			int min = TimingPlanImpl.minute_of_day();
+			int min = TimeSteward.currentMinuteOfDayInt();
 			int stop_min = plan.getStopMin();
 			return min >= stop_min - FLUSH_MINUTES &&
 			       min <= stop_min;
@@ -346,7 +347,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Check if we're in the first half of the plan window */
 		protected boolean isFirstHalf() {
-			int min = TimingPlanImpl.minute_of_day();
+			int min = TimeSteward.currentMinuteOfDayInt();
 			return min * 2 < plan.getStartMin() + plan.getStopMin();
 		}
 
@@ -1238,8 +1239,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			return;
 		String name = cid + '.' + state.plan.getStamp();
 		try {
-			String date = TrafficDataBuffer.date(
-				System.currentTimeMillis());
+			String date = TimeSteward.currentDateShortString();
 			PrintStream stream = createLogFile(date, name);
 			stream.println("<?xml version=\"1.0\"?>");
 			stream.println("<stratified_plan_log corridor='" + cid +

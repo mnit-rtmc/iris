@@ -20,8 +20,8 @@ import java.io.BufferedOutputStream;
 import java.io.RandomAccessFile;
 import java.io.IOException;
 import java.io.DataOutputStream;
-import java.util.Calendar;
 import java.util.Date;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Constants;
 
 /**
@@ -44,26 +44,9 @@ abstract public class TrafficDataBuffer {
 	/** Offset between records in milliseconds */
 	static protected final int RECORD_OFFSET = 30000;
 
-	/** Create a date string (eg YYYYMMDD) from the given date stamp */
-	static public String date(long stamp) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date(stamp));
-		StringBuffer b = new StringBuffer(13);
-		b.append(cal.get(Calendar.YEAR));
-		while(b.length() < 4)
-			b.insert(0, '0');
-		b.append(cal.get(Calendar.MONTH) + 1);
-		while(b.length() < 6)
-			b.insert(4, '0');
-		b.append(cal.get(Calendar.DAY_OF_MONTH));
-		while(b.length() < 8)
-			b.insert(6, '0');
-		return b.toString();
-	}
-
 	/** Get a valid directory for a given date stamp */
 	static protected File directory(long stamp) throws IOException {
-		String d = date(stamp);
+		String d = TimeSteward.dateShortString(stamp);
 		File year = new File(DATA_PATH + File.separator +
 			d.substring(0, 4));
 		if(!year.exists()) {
@@ -80,11 +63,7 @@ abstract public class TrafficDataBuffer {
 
 	/** Compute the file record number for a given time stamp */
 	static protected int record(long stamp) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date(stamp));
-		return cal.get(Calendar.HOUR_OF_DAY) * 120 +
-			cal.get(Calendar.MINUTE) * 2 +
-			cal.get(Calendar.SECOND) / 30;
+		return TimeSteward.secondOfDayInt(stamp) / 30;
 	}
 
 	/** Create a file (path) for the given time stamp */

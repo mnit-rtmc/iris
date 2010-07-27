@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.util.LinkedList;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -59,7 +60,7 @@ public class OpSendLCSSettings extends OpLCS {
 	protected class WaitForCompletion extends Phase {
 
 		/** Time to stop waiting for completion (20 seconds) */
-		protected final long expire = System.currentTimeMillis() + 
+		protected final long expire = TimeSteward.currentTimeMillis() + 
 			20 * 1000;
 
 		/** Wait for operations to complete */
@@ -76,7 +77,7 @@ public class OpSendLCSSettings extends OpLCS {
 			if(op.isDone())
 				ops.removeFirst();
 			else {
-				if(System.currentTimeMillis() > expire) {
+				if(TimeSteward.currentTimeMillis() > expire) {
 					System.err.println(lcs_array.getName() +
 						": LCS timeout expired -- " +
 						"giving up");

@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Cabinet;
@@ -509,7 +510,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if(f == failed)
 			return;
 		if(f) {
-			failTime = new Date();
+			failTime = TimeSteward.currentTimeMillis();
 			logCommEvent(EventType.COMM_FAILED, id);
 		} else
 			logCommEvent(EventType.COMM_RESTORED, id);
@@ -546,7 +547,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Time stamp of most recent comm failure */
-	protected transient Date failTime = new Date();
+	protected transient long failTime = TimeSteward.currentTimeMillis();
 
 	/** Controller error detail */
 	protected transient String error = "";
@@ -563,7 +564,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the controller error detail */
 	public String getError() {
 		if(isFailed())
-			return "FAIL @ " + failTime.toString();
+			return "FAIL @ " + new Date(failTime);
 		else
 			return error;
 	}
@@ -571,7 +572,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the number of milliseconds the controller has been failed */
 	public long getFailMillis() {
 		if(isFailed())
-			return System.currentTimeMillis() - failTime.getTime();
+			return TimeSteward.currentTimeMillis() - failTime;
 		else
 			return 0;
 	}

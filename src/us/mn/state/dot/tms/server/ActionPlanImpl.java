@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanState;
@@ -210,7 +211,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	protected int state;
 
 	/** Time stamp for last state change */
-	protected long state_time = System.currentTimeMillis();
+	protected long state_time = TimeSteward.currentTimeMillis();
 
 	/** Set the deployed state (ActionPlanState) */
 	protected void setStateNotify(ActionPlanState s) throws TMSException {
@@ -221,7 +222,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	protected void setStateNotify(int s) throws TMSException {
 		store.update(this, "state", s);
 		state = s;
-		state_time = System.currentTimeMillis();
+		state_time = TimeSteward.currentTimeMillis();
 		notifyAttribute("state");
 	}
 
@@ -342,7 +343,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Get the number of seconds in the current state */
 	protected int stateSecs() {
-		long elapsed = System.currentTimeMillis() - state_time;
+		long elapsed = TimeSteward.currentTimeMillis() - state_time;
 		return (int)(elapsed / 1000);
 	}
 }

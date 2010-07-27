@@ -21,6 +21,7 @@ import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -82,7 +83,7 @@ public class SampleQuery30SecJob extends Job {
 
 	/** Perform the 30-second timer job */
 	public void perform() {
-		Calendar s = Calendar.getInstance();
+		Calendar s = TimeSteward.getCalendarInstance();
 		s.add(Calendar.SECOND, -30);
 		stamp = s;
 		comp.reset(stamp);

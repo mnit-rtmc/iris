@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -34,13 +35,13 @@ public class OpQuerySamples extends OpSS125 {
 	protected final Completer completer;
 
 	/** Time stamp of sample data */
-	protected final Calendar stamp = Calendar.getInstance();
+	protected final Calendar stamp = TimeSteward.getCalendarInstance();
 
 	/** Oldest time stamp to accept from controller */
-	protected final Calendar oldest = Calendar.getInstance();
+	protected final Calendar oldest = TimeSteward.getCalendarInstance();
 
 	/** Newest timestamp to accept from controller */
-	protected final Calendar newest = Calendar.getInstance();
+	protected final Calendar newest = TimeSteward.getCalendarInstance();
 
 	/** Interval sample data */
 	protected final IntervalDataProperty sample_data =

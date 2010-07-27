@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -58,7 +59,7 @@ public class SampleQuery5MinJob extends Job {
 
 	/** Perform the 5-minute timer job */
 	public void perform() {
-		stamp = Calendar.getInstance();
+		stamp = TimeSteward.getCalendarInstance();
 		Calendar s = (Calendar)stamp.clone();
 		s.add(Calendar.MINUTE, -5);
 		comp.reset(s);

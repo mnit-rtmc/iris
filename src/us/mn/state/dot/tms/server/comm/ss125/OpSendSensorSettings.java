@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -234,7 +235,7 @@ public class OpSendSensorSettings extends OpSS125 {
 
 	/** Check if the date / time should be updated */
 	protected boolean shouldUpdateDateTime(long stamp) {
-		long now = System.currentTimeMillis();
+		long now = TimeSteward.currentTimeMillis();
 		return stamp < (now - TIME_THRESHOLD) ||
 		       stamp > (now + TIME_THRESHOLD);
 	}

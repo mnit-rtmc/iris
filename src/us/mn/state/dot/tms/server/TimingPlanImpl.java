@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Device;
@@ -38,28 +39,6 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	/** Number of minutes in a day */
 	static protected final int MINUTES_PER_DAY = 24 * 60;
 
-	/** Calendar instance for calculating the minute of day */
-	static protected final Calendar STAMP = Calendar.getInstance();
-
-	/** Get the current minute of the day */
-	static protected int minute_of_day() {
-		synchronized(STAMP) {
-			STAMP.setTimeInMillis(System.currentTimeMillis());
-			return STAMP.get(Calendar.HOUR_OF_DAY) * 60 +
-				STAMP.get(Calendar.MINUTE);
-		}
-	}
-
-	/** Get the current second of the day */
-	static protected int second_of_day() {
-		synchronized(STAMP) {
-			STAMP.setTimeInMillis(System.currentTimeMillis());
-			return STAMP.get(Calendar.HOUR_OF_DAY) * Interval.HOUR +
-			       STAMP.get(Calendar.MINUTE) * Interval.MINUTE +
-			       STAMP.get(Calendar.SECOND);
-		}
-	}
-
 	/** Create a 4 character time stamp.
 	 * @param min Minute of the day (0-1440)
 	 * @return 4 character time stamp (1330 for 1:30 PM) */
@@ -76,7 +55,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 
 	/** Get a stamp of the current 30 second interval */
 	static public String stamp_30() {
-		int i30 = second_of_day() / 30 + 1;
+		int i30 = TimeSteward.currentSecondOfDayInt() / 30 + 1;
 		StringBuilder b = new StringBuilder();
 		b.append(i30 / 120);
 		while(b.length() < 2)
@@ -335,7 +314,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 
 	/** Check if the current time is within the timing plan window */
 	public boolean isWithin() {
-		int m = minute_of_day();
+		int m = TimeSteward.currentMinuteOfDayInt();
 		return m >= getStartMin() && m < getStopMin();
 	}
 

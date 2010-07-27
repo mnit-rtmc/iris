@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -56,7 +57,7 @@ public class OpResetDMS extends OpDMS {
 	protected class CheckResetCompletion extends Phase {
 
 		/** Time to stop checking if the test has completed */
-		protected final long expire = System.currentTimeMillis() + 
+		protected final long expire = TimeSteward.currentTimeMillis() + 
 			RESET_TIMEOUT;
 
 		/** Check for reset completion */
@@ -71,7 +72,7 @@ public class OpResetDMS extends OpDMS {
 			catch(SocketTimeoutException e) {
 				// Controller must still be offline
 			}
-			if(System.currentTimeMillis() > expire) {
+			if(TimeSteward.currentTimeMillis() > expire) {
 				DMS_LOG.log(dms.getName() + ": reset " +
 					"timeout expired -- giving up");
 				return null;
