@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.Constants;
  *
  * @author Douglas Lau
  */
-abstract public class SampleDataBuffer {
+public class SampleDataBuffer {
 
 	/** Sample data debug log */
 	static protected final IDebugLog TRAFFIC_LOG = new IDebugLog("traffic");
@@ -70,7 +70,7 @@ abstract public class SampleDataBuffer {
 	 * @return File to store sample data. */
 	protected File sampleFile(long stamp) throws IOException {
 		return new File(directory(stamp).getCanonicalPath() +
-			File.separator + sensor + extension());
+			File.separator + sensor + extension);
 	}
 
 	/** Get the sampling period in milliseconds. */
@@ -81,8 +81,14 @@ abstract public class SampleDataBuffer {
 	/** Sensor ID */
 	protected final String sensor;
 
+	/** File extension */
+	protected final String extension;
+
 	/** Sample period in seconds */
 	protected final int period;
+
+	/** Number of bytes per sample */
+	protected final int sample_bytes;
 
 	/** Data buffer */
 	protected final short[] buf = new short[BUFFERED_SAMPLES];
@@ -95,9 +101,12 @@ abstract public class SampleDataBuffer {
 
 	/** Create a new sample data buffer.
 	 * @param s Sensor ID */
-	protected SampleDataBuffer(String s, int p) {
+	protected SampleDataBuffer(String s, String e, int p, int sb) {
 		sensor = s;
+		extension = e;
 		period = p;
+		assert sb == 1 || sb == 2;
+		sample_bytes = sb;
 	}
 
 	/** Get a string representation of the sample data buffer */
@@ -114,17 +123,11 @@ abstract public class SampleDataBuffer {
 		return b.toString();
 	}
 
-	/** Get the file extension */
-	abstract protected String extension();
-
-	/** Get the number of bytes per sample */
-	abstract protected int sampleSize();
-
 	/** Get the count of samples in a file.
 	 * @param f File to check.
 	 * @return Count of samples in the file. */
 	protected int sampleCount(File f) {
-		return (int)(f.length() / sampleSize());
+		return (int)(f.length() / sample_bytes);
 	}
 
 	/** Get the sample offset from the start of the buffer.
@@ -135,6 +138,18 @@ abstract public class SampleDataBuffer {
 		//       be in different days
 		int p = periodMillis();
 		return (int)((stamp / p) - (start / p));
+	}
+
+	/** Get the maximum sample value allowed */
+	protected short maxValue() {
+		switch(sample_bytes) {
+		case 1:
+			return Byte.MAX_VALUE;
+		case 2:
+			return Short.MAX_VALUE;
+		default:
+			return Constants.MISSING_DATA;
+		}
 	}
 
 	/** Write a data sample to the buffer.
@@ -162,12 +177,6 @@ abstract public class SampleDataBuffer {
 		count++;
 	}
 
-	/** Write a value to a data output stream.
-	 * @param dos DataOutputStream to write to.
-	 * @param value Sample value. */
-	abstract protected void writeTo(DataOutputStream dos, int value)
-		throws IOException;
-
 	/** Read a group of samples (for merging 5-minute data).
 	 * @param stamp Time stamp of first sample.
 	 * @param n_samples Number of samples to read.
@@ -186,8 +195,13 @@ abstract public class SampleDataBuffer {
 	protected int read(int offset) {
 		if(offset < 0 || offset >= count)
 			return Constants.MISSING_DATA;
-		else
-			return buf[offset];
+		else {
+			int val = buf[offset];
+			if(val > Constants.MISSING_DATA && val <= maxValue())
+				return val;
+			else
+				return Constants.MISSING_DATA;
+		}
 	}
 
 	/** Merge a group of samples (for 5-minute data).
@@ -280,92 +294,26 @@ abstract public class SampleDataBuffer {
 	protected void truncateFile(File f, int n) throws IOException {
 		RandomAccessFile raf = new RandomAccessFile(f, "rw");
 		try {
-			raf.setLength(n * sampleSize());
+			raf.setLength(n * sample_bytes);
 		}
 		finally {
 			raf.close();
 		}
 	}
 
-	/** Detector volume data buffer */
-	static public final class Volume extends SampleDataBuffer {
-
-		/** Volume data sample size */
-		static protected final int SAMPLE_SIZE = 1;
-
-		/** Create a new volume data buffer */
-		public Volume(String s) {
-			super(s, 30);
-		}
-
-		/** Get the file extension for a volume data file */
-		protected String extension() { return ".v30"; }
-
-		/** Get the number of bytes per sample */
-		protected int sampleSize() { return SAMPLE_SIZE; }
-
-		/** Write a value to a data output stream */
-		protected void writeTo(DataOutputStream dos, int vol)
-			throws IOException
-		{
-			if(vol < Constants.MISSING_DATA || vol > Byte.MAX_VALUE)
-				vol = Constants.MISSING_DATA;
-			dos.writeByte(vol);
-		}
-	}
-
-	/** Detector scan data buffer */
-	static public final class Scan extends SampleDataBuffer {
-
-		/** Scan data sample size */
-		static protected final int SAMPLE_SIZE = 2;
-
-		/** Create a new scan data buffer */
-		public Scan(String s) {
-			super(s, 30);
-		}
-
-		/** Get the file extension for a scan data file */
-		protected String extension() { return ".c30"; }
-
-		/** Get the number of bytes per sample */
-		protected int sampleSize() { return SAMPLE_SIZE; }
-
-		/** Write a value to a data output stream */
-		protected void writeTo(DataOutputStream dos, int scan)
-			throws IOException
-		{
-			if(scan < Constants.MISSING_DATA)
-				scan = Constants.MISSING_DATA;
-			dos.writeShort(scan);
-		}
-	}
-
-	/** Detector speed data buffer */
-	static public final class Speed extends SampleDataBuffer {
-
-		/** Speed data sample size */
-		static protected final int SAMPLE_SIZE = 1;
-
-		/** Create a new speed data buffer */
-		public Speed(String s) {
-			super(s, 30);
-		}
-
-		/** Get the file extension for a speed data file */
-		protected String extension() { return ".s30"; }
-
-		/** Get the number of bytes per sample */
-		protected int sampleSize() { return SAMPLE_SIZE; }
-
-		/** Write a value to a data output stream */
-		protected void writeTo(DataOutputStream dos, int speed)
-			throws IOException
-		{
-			if(speed < Constants.MISSING_DATA ||
-			   speed > Byte.MAX_VALUE)
-				speed = Constants.MISSING_DATA;
-			dos.writeByte(speed);
+	/** Write a value to a data output stream.
+	 * @param dos DataOutputStream to write to.
+	 * @param value Sample value. */
+	protected void writeTo(DataOutputStream dos, int value)
+		throws IOException
+	{
+		switch(sample_bytes) {
+		case 1:
+			dos.writeByte(value);
+		case 2:
+			dos.writeShort(value);
+		default:
+			throw new IOException("Invalid size: " + sample_bytes);
 		}
 	}
 }

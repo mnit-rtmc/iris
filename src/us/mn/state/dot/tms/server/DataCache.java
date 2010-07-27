@@ -27,20 +27,20 @@ import us.mn.state.dot.tms.Constants;
  */
 public class DataCache {
 
-	/** Volume traffic data buffer */
-	protected final SampleDataBuffer.Volume vol_buf;
+	/** Volume sample data buffer */
+	protected final SampleDataBuffer vol_buf;
 
-	/** Scan traffic data buffer */
-	protected final SampleDataBuffer.Scan scan_buf;
+	/** Scan sample data buffer */
+	protected final SampleDataBuffer scan_buf;
 
-	/** Speed traffic data buffer */
-	protected final SampleDataBuffer.Speed speed_buf;
+	/** Speed sample data buffer */
+	protected final SampleDataBuffer speed_buf;
 
 	/** Create a new data cache */
 	public DataCache(String det) {
-		vol_buf = new SampleDataBuffer.Volume(det);
-		scan_buf = new SampleDataBuffer.Scan(det);
-		speed_buf = new SampleDataBuffer.Speed(det);
+		vol_buf = new SampleDataBuffer(det, ".v30", 30, 1);
+		scan_buf = new SampleDataBuffer(det, ".c30", 30, 2);
+		speed_buf = new SampleDataBuffer(det, ".s30", 30, 1);
 	}
 
 	/** Write one 30-second record of volume/scan data to the cache */
