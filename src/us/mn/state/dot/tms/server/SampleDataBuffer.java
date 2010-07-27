@@ -25,8 +25,9 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Constants;
 
 /**
- * A buffer for periodic sample data. This is needed for performance, so that
- * each data file (10,000+) does not need to be written every 30 seconds.
+ * A buffer for periodic sample data.  Sample files are binary with a fixed
+ * number of bytes per sample.  Each file contains one day of sample data.  For
+ * example, a volume file with a 30-second period would have 2880 bytes.
  *
  * @author Douglas Lau
  */
@@ -38,13 +39,16 @@ abstract public class SampleDataBuffer {
 	/** Path where sample data files are stored */
 	static protected final String DATA_PATH = "/var/lib/iris/traffic";
 
-	/** Buffer size is 10 minutes (one record every 30 seconds) */
-	static protected final int BUFFERED_RECORDS = 20;
+	/** Number of samples to buffer */
+	static protected final int BUFFERED_SAMPLES = 20;
 
-	/** Offset between records in milliseconds */
-	static protected final int RECORD_OFFSET = 30000;
+	/** Offset between samples in milliseconds */
+	static protected final int SAMPLE_OFFSET = 30000;
 
-	/** Get a valid directory for a given date stamp */
+	/** Get a valid directory for a given date stamp.
+	 * @param stamp Time stamp
+	 * @return Directory to store sample data.
+	 * @throws IOException If directory cannot be created. */
 	static protected File directory(long stamp) throws IOException {
 		String d = TimeSteward.dateShortString(stamp);
 		File year = new File(DATA_PATH + File.separator +
@@ -57,8 +61,8 @@ abstract public class SampleDataBuffer {
 		return dir;
 	}
 
-	/** Compute the file record number for a given time stamp */
-	static protected int record(long stamp) {
+	/** Compute the file sample number for a given time stamp */
+	static protected int sample(long stamp) {
 		return TimeSteward.secondOfDayInt(stamp) / 30;
 	}
 
@@ -68,17 +72,17 @@ abstract public class SampleDataBuffer {
 			File.separator + det_id + extension());
 	}
 
-	/** Time stamp of first record stored in the buffer */
+	/** Time stamp of first sample stored in the buffer */
 	protected long start;
 
 	/** Detector ID */
 	protected final String det_id;
 
-	/** Count of valid records in the buffer */
+	/** Count of valid samples in the buffer */
 	protected int count;
 
 	/** Data buffer */
-	protected final short[] buf = new short[BUFFERED_RECORDS];
+	protected final short[] buf = new short[BUFFERED_SAMPLES];
 
 	/** Create a new sample data buffer */
 	protected SampleDataBuffer(String det) {
@@ -102,24 +106,24 @@ abstract public class SampleDataBuffer {
 	/** Get the file extension */
 	abstract protected String extension();
 
-	/** Get the number of bytes per record */
-	abstract protected int recordSize();
+	/** Get the number of bytes per sample */
+	abstract protected int sampleSize();
 
-	/** Get the number of records in the file */
+	/** Get the number of samples in the file */
 	protected int fileRecords(File f) {
-		return (int)(f.length() / recordSize());
+		return (int)(f.length() / sampleSize());
 	}
 
-	/** Get the record offset from the start of the buffer */
-	protected int recordOffset(long stamp) {
-		return (int)((stamp / RECORD_OFFSET) - (start / RECORD_OFFSET));
+	/** Get the sample offset from the start of the buffer */
+	protected int sampleOffset(long stamp) {
+		return (int)((stamp / SAMPLE_OFFSET) - (start / SAMPLE_OFFSET));
 	}
 
-	/** Write a data record to the buffer */
+	/** Write a data sample to the buffer */
 	public void write(long stamp, int value) {
 		if(count == 0)
 			start = stamp;
-		int offset = recordOffset(stamp) - count;
+		int offset = sampleOffset(stamp) - count;
 		if(offset >= 0) {
 			while(offset-- > 0)
 				write(Constants.MISSING_DATA);
@@ -130,7 +134,7 @@ abstract public class SampleDataBuffer {
 		}
 	}
 
-	/** Write a single record to the end of the buffer */
+	/** Write a single sample to the end of the buffer */
 	protected void write(int value) {
 		buf[count] = (short)value;
 		count++;
@@ -140,16 +144,16 @@ abstract public class SampleDataBuffer {
 	abstract protected void writeTo(DataOutputStream dos, int value)
 		throws IOException;
 
-	/** Read a group of records (for merging 5-minute data) */
+	/** Read a group of samples (for merging 5-minute data) */
 	public int[] read(long stamp, int len) {
-		int offset = recordOffset(stamp);
+		int offset = sampleOffset(stamp);
 		int[] values = new int[len];
 		for(int i = 0; i < len; i++)
 			values[i] = read(offset + i);
 		return values;
 	}
 
-	/** Read a single record out of the buffer */
+	/** Read a single sample out of the buffer */
 	protected int read(int offset) {
 		if(offset < 0 || offset >= count)
 			return Constants.MISSING_DATA;
@@ -157,12 +161,12 @@ abstract public class SampleDataBuffer {
 			return buf[offset];
 	}
 
-	/** Merge a group of records (for 5-minute data) */
+	/** Merge a group of samples (for 5-minute data) */
 	public void merge(long stamp, int[] values) {
 		if(count == 0)
 			start = stamp;
 		long time = start;
-		int offset = recordOffset(stamp);
+		int offset = sampleOffset(stamp);
 		int len = Math.max(count, offset + values.length);
 		if(offset < 0) {
 			if(offset + values.length <= 0)
@@ -171,7 +175,7 @@ abstract public class SampleDataBuffer {
 			len = Math.max(count - offset, values.length);
 			offset = 0;
 		}
-		if(len > BUFFERED_RECORDS)
+		if(len > BUFFERED_SAMPLES)
 			throw new IndexOutOfBoundsException();
 		int[] vals = read(time, len);
 		for(int i = 0; i < values.length; i++)
@@ -185,34 +189,34 @@ abstract public class SampleDataBuffer {
 	/** Flush all buffered data from before the given time */
 	public void flush(long stamp) throws IOException {
 		while(count > 0) {
-			int offset = recordOffset(stamp);
+			int offset = sampleOffset(stamp);
 			if(offset <= 0)
 				return;
-			int r = record(start);
+			int r = sample(start);
 			int mark = Math.min(r + offset,
 				Constants.SAMPLES_PER_DAY);
-			int records = flush(mark - r);
-			count -= records;
+			int n_samples = flush(mark - r);
+			count -= n_samples;
 			if(count > 0) {
-				start += RECORD_OFFSET * records;
-				System.arraycopy(buf, records, buf, 0, count);
+				start += SAMPLE_OFFSET * n_samples;
+				System.arraycopy(buf, n_samples, buf, 0, count);
 			}
 		}
 	}
 
-	/** Flush the given number of records to the file system */
-	protected int flush(int records) throws IOException {
-		if(records > count)
-			records = count;
+	/** Flush the given number of samples to the file system */
+	protected int flush(int n_samples) throws IOException {
+		if(n_samples > count)
+			n_samples = count;
 		boolean missing = true;
-		for(int i = 0; i < records; i++) {
+		for(int i = 0; i < n_samples; i++) {
 			if(read(i) != Constants.MISSING_DATA)
 				missing = false;
 		}
 		if(missing)
-			return records;
+			return n_samples;
 		File f = file(start);
-		int r = record(start);
+		int r = sample(start);
 		int offset = r - fileRecords(f);
 		if(offset < 0)
 			truncateFile(f, r, offset);
@@ -223,23 +227,23 @@ abstract public class SampleDataBuffer {
 			DataOutputStream dos = new DataOutputStream(bos);
 			while(offset-- > 0)
 				writeTo(dos, Constants.MISSING_DATA);
-			for(int i = 0; i < records; i++)
+			for(int i = 0; i < n_samples; i++)
 				writeTo(dos, read(i));
 			dos.flush();
 		}
 		finally {
 			fos.close();
 		}
-		return records;
+		return n_samples;
 	}
 
-	/** Truncate the file before the specified record stamp */
+	/** Truncate the file before the specified sample stamp */
 	protected void truncateFile(File f, int r, int o) throws IOException {
-		TRAFFIC_LOG.log("Truncating " + f + " @ record: " + r +
+		TRAFFIC_LOG.log("Truncating " + f + " @ sample: " + r +
 			" offset: " + o);
 		RandomAccessFile raf = new RandomAccessFile(f, "rw");
 		try {
-			raf.setLength(r * recordSize());
+			raf.setLength(r * sampleSize());
 		}
 		finally {
 			raf.close();
@@ -249,8 +253,8 @@ abstract public class SampleDataBuffer {
 	/** Detector volume data buffer */
 	static public final class Volume extends SampleDataBuffer {
 
-		/** Volume data record size */
-		static protected final int RECORD_SIZE = 1;
+		/** Volume data sample size */
+		static protected final int SAMPLE_SIZE = 1;
 
 		/** Create a new volume data buffer */
 		public Volume(String det) {
@@ -260,8 +264,8 @@ abstract public class SampleDataBuffer {
 		/** Get the file extension for a volume data file */
 		protected String extension() { return ".v30"; }
 
-		/** Get the number of bytes per record */
-		protected int recordSize() { return RECORD_SIZE; }
+		/** Get the number of bytes per sample */
+		protected int sampleSize() { return SAMPLE_SIZE; }
 
 		/** Write a value to a data output stream */
 		protected void writeTo(DataOutputStream dos, int vol)
@@ -276,8 +280,8 @@ abstract public class SampleDataBuffer {
 	/** Detector scan data buffer */
 	static public final class Scan extends SampleDataBuffer {
 
-		/** Scan data record size */
-		static protected final int RECORD_SIZE = 2;
+		/** Scan data sample size */
+		static protected final int SAMPLE_SIZE = 2;
 
 		/** Create a new scan data buffer */
 		public Scan(String det) {
@@ -287,8 +291,8 @@ abstract public class SampleDataBuffer {
 		/** Get the file extension for a scan data file */
 		protected String extension() { return ".c30"; }
 
-		/** Get the number of bytes per record */
-		protected int recordSize() { return RECORD_SIZE; }
+		/** Get the number of bytes per sample */
+		protected int sampleSize() { return SAMPLE_SIZE; }
 
 		/** Write a value to a data output stream */
 		protected void writeTo(DataOutputStream dos, int scan)
@@ -303,8 +307,8 @@ abstract public class SampleDataBuffer {
 	/** Detector speed data buffer */
 	static public final class Speed extends SampleDataBuffer {
 
-		/** Speed data record size */
-		static protected final int RECORD_SIZE = 1;
+		/** Speed data sample size */
+		static protected final int SAMPLE_SIZE = 1;
 
 		/** Create a new speed data buffer */
 		public Speed(String det) {
@@ -314,8 +318,8 @@ abstract public class SampleDataBuffer {
 		/** Get the file extension for a speed data file */
 		protected String extension() { return ".s30"; }
 
-		/** Get the number of bytes per record */
-		protected int recordSize() { return RECORD_SIZE; }
+		/** Get the number of bytes per sample */
+		protected int sampleSize() { return SAMPLE_SIZE; }
 
 		/** Write a value to a data output stream */
 		protected void writeTo(DataOutputStream dos, int speed)
