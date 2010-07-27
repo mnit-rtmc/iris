@@ -23,7 +23,6 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanType;

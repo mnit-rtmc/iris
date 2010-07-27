@@ -23,6 +23,7 @@ import java.io.DataOutputStream;
 import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Constants;
+import us.mn.state.dot.tms.Interval;
 
 /**
  * A buffer for periodic sample data.  Sample files are binary with a fixed
@@ -87,7 +88,7 @@ public class SampleDataBuffer {
 	/** Number of bytes per sample */
 	protected final int sample_bytes;
 
-	/** Data buffer */
+	/** Sample buffer */
 	protected final short[] buf = new short[BUFFERED_SAMPLES];
 
 	/** Time stamp of first sample in the buffer */
@@ -137,6 +138,11 @@ public class SampleDataBuffer {
 		//       be in different days
 		int p = periodMillis();
 		return (int)((stamp / p) - (start / p));
+	}
+
+	/** Get the number of samples per day */
+	protected int samplesPerDay() {
+		return Interval.DAY / period;
 	}
 
 	/** Get the maximum sample value allowed */
@@ -238,8 +244,7 @@ public class SampleDataBuffer {
 			if(offset <= 0)
 				return;
 			int n = sampleNumber(start);
-			int mark = Math.min(n + offset,
-				Constants.SAMPLES_PER_DAY);
+			int mark = Math.min(n + offset, samplesPerDay());
 			int n_samples = flush(mark - n);
 			count -= n_samples;
 			if(count > 0) {
@@ -265,7 +270,7 @@ public class SampleDataBuffer {
 				" offset: " + offset);
 			truncateFile(f, n);
 		}
-		FileOutputStream fos = new FileOutputStream(f.getPath(), true);
+		FileOutputStream fos = new FileOutputStream(f, true);
 		try {
 			BufferedOutputStream bos =
 				new BufferedOutputStream(fos);
