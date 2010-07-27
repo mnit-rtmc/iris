@@ -61,32 +61,34 @@ abstract public class SampleDataBuffer {
 		return dir;
 	}
 
-	/** Compute the file sample number for a given time stamp */
-	static protected int sample(long stamp) {
+	/** Compute the file sample number for a given time stamp.
+	 * @param stamp Time stamp of sample.
+	 * @return Sample number in file (0 is first sample). */
+	static protected int sampleNumber(long stamp) {
 		return TimeSteward.secondOfDayInt(stamp) / 30;
 	}
 
 	/** Create a file (path) for the given time stamp */
-	public File file(long stamp) throws IOException {
+	protected File file(long stamp) throws IOException {
 		return new File(directory(stamp).getCanonicalPath() +
-			File.separator + det_id + extension());
+			File.separator + sensor + extension());
 	}
 
-	/** Time stamp of first sample stored in the buffer */
-	protected long start;
-
-	/** Detector ID */
-	protected final String det_id;
-
-	/** Count of valid samples in the buffer */
-	protected int count;
+	/** Sensor ID */
+	protected final String sensor;
 
 	/** Data buffer */
 	protected final short[] buf = new short[BUFFERED_SAMPLES];
 
+	/** Time stamp of first sample stored in the buffer */
+	protected long start;
+
+	/** Count of valid samples in the buffer */
+	protected int count;
+
 	/** Create a new sample data buffer */
-	protected SampleDataBuffer(String det) {
-		det_id = det;
+	protected SampleDataBuffer(String s) {
+		sensor = s;
 	}
 
 	/** Get a string representation of the buffer */
@@ -109,8 +111,10 @@ abstract public class SampleDataBuffer {
 	/** Get the number of bytes per sample */
 	abstract protected int sampleSize();
 
-	/** Get the number of samples in the file */
-	protected int fileRecords(File f) {
+	/** Get the count of samples in a file.
+	 * @param f File to check.
+	 * @return Count of samples in the file. */
+	protected int sampleCount(File f) {
 		return (int)(f.length() / sampleSize());
 	}
 
@@ -192,10 +196,10 @@ abstract public class SampleDataBuffer {
 			int offset = sampleOffset(stamp);
 			if(offset <= 0)
 				return;
-			int r = sample(start);
-			int mark = Math.min(r + offset,
+			int n = sampleNumber(start);
+			int mark = Math.min(n + offset,
 				Constants.SAMPLES_PER_DAY);
-			int n_samples = flush(mark - r);
+			int n_samples = flush(mark - n);
 			count -= n_samples;
 			if(count > 0) {
 				start += SAMPLE_OFFSET * n_samples;
@@ -216,10 +220,10 @@ abstract public class SampleDataBuffer {
 		if(missing)
 			return n_samples;
 		File f = file(start);
-		int r = sample(start);
-		int offset = r - fileRecords(f);
+		int n = sampleNumber(start);
+		int offset = n - sampleCount(f);
 		if(offset < 0)
-			truncateFile(f, r, offset);
+			truncateFile(f, n, offset);
 		FileOutputStream fos = new FileOutputStream(f.getPath(), true);
 		try {
 			BufferedOutputStream bos =
@@ -257,8 +261,8 @@ abstract public class SampleDataBuffer {
 		static protected final int SAMPLE_SIZE = 1;
 
 		/** Create a new volume data buffer */
-		public Volume(String det) {
-			super(det);
+		public Volume(String s) {
+			super(s);
 		}
 
 		/** Get the file extension for a volume data file */
@@ -284,8 +288,8 @@ abstract public class SampleDataBuffer {
 		static protected final int SAMPLE_SIZE = 2;
 
 		/** Create a new scan data buffer */
-		public Scan(String det) {
-			super(det);
+		public Scan(String s) {
+			super(s);
 		}
 
 		/** Get the file extension for a scan data file */
@@ -311,8 +315,8 @@ abstract public class SampleDataBuffer {
 		static protected final int SAMPLE_SIZE = 1;
 
 		/** Create a new speed data buffer */
-		public Speed(String det) {
-			super(det);
+		public Speed(String s) {
+			super(s);
 		}
 
 		/** Get the file extension for a speed data file */
