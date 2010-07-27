@@ -189,7 +189,7 @@ public class SampleDataBuffer {
 	}
 
 	/** Read a single sample out of the buffer.
-	 * @param offset Sample offset.
+	 * @param offset Sample offset from start of buffer.
 	 * @return Sample value. */
 	protected int read(int offset) {
 		if(offset < 0 || offset >= count)
@@ -255,12 +255,7 @@ public class SampleDataBuffer {
 	protected int flush(int n_samples) throws IOException {
 		if(n_samples > count)
 			n_samples = count;
-		boolean missing = true;
-		for(int i = 0; i < n_samples; i++) {
-			if(read(i) != Constants.MISSING_DATA)
-				missing = false;
-		}
-		if(missing)
+		if(isDataMissing(n_samples))
 			return n_samples;
 		File f = sampleFile(start);
 		int n = sampleNumber(start);
@@ -285,6 +280,17 @@ public class SampleDataBuffer {
 			fos.close();
 		}
 		return n_samples;
+	}
+
+	/** Check if a number of samples are missing.
+	 * @param n_samples Number of samples to check.
+	 * @return True if all samples are missing. */
+	protected boolean isDataMissing(int n_samples) {
+		for(int i = 0; i < n_samples; i++) {
+			if(read(i) > Constants.MISSING_DATA)
+				return false;
+		}
+		return true;
 	}
 
 	/** Truncate the file before the specified sample stamp.
