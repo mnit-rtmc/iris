@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Interval;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A cache for periodic sample data.  This is needed so that threads which are
@@ -98,9 +99,20 @@ abstract public class PeriodicSampleCache {
 	/** Add a periodic sample to the cache.
 	 * @param ps Sample to add to the cache. */
 	public void addSample(PeriodicSample ps) {
-		if(ps.period % period == 0 &&
-		   ps.value > Constants.MISSING_DATA && ps.value <= maxValue())
+		if(isArchiveEnabled() && shouldArchive(ps))
 			samples.add(ps);
+	}
+
+	/** Is archiving enabled? */
+	private boolean isArchiveEnabled() {
+		return SystemAttrEnum.SAMPLE_ARCHIVE_ENABLE.getBoolean();
+	}
+
+	/** Check if a periodic sample should be archived */
+	private boolean shouldArchive(PeriodicSample ps) {
+		return ps.period % period == 0 &&
+		       ps.value > Constants.MISSING_DATA &&
+		       ps.value <= maxValue();
 	}
 
 	/** Flush all buffered samples to archive files.  This method locks on

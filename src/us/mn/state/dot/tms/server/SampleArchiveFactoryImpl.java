@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.File;
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Factory for creating sample archive files.
@@ -25,20 +26,18 @@ import us.mn.state.dot.sched.TimeSteward;
  */
 public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 
-	/** Path where sample data files are stored */
-	static protected final String DATA_PATH = "/var/lib/iris/traffic";
-
 	/** Get a valid directory for a given date stamp.
 	 * @param stamp Time stamp
 	 * @return Directory to store sample data.
 	 * @throws IOException If directory cannot be created. */
 	static protected File directory(long stamp) throws IOException {
 		String d = TimeSteward.dateShortString(stamp);
-		File year = new File(DATA_PATH + File.separator +
+		File year = new File(
+			SystemAttrEnum.SAMPLE_ARCHIVE_DIRECTORY.getString(),
 			d.substring(0, 4));
 		if(!year.exists() && !year.mkdir())
 			throw new IOException("mkdir failed: " + year);
-		File dir = new File(year.getPath() + File.separator + d);
+		File dir = new File(year.getPath(), d);
 		if(!dir.exists() && !dir.mkdir())
 			throw new IOException("mkdir failed: " + dir);
 		return dir;

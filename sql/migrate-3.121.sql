@@ -90,3 +90,6 @@ CREATE VIEW weather_sensor_view AS
 	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
 	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
+
+INSERT INTO system_attribute VALUES('sample_archive_enable', 'true');
+INSERT INTO system_attribute VALUES('sample_archive_directory', '/var/lib/iris/traffic');
