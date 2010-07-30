@@ -37,24 +37,24 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  */
 public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
-	/** Polling period for weather sensors (seconds) */
-	static protected final int POLLING_PERIOD_SEC = 60;
+	/** Sample period for weather sensors (seconds) */
+	static protected final int SAMPLE_PERIOD_SEC = 60;
 
-	/** Polling period for weather sensors (ms) */
-	static protected final int POLLING_PERIOD_MS = POLLING_PERIOD_SEC *1000;
+	/** Sample period for weather sensors (ms) */
+	static protected final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
 
 	/** Create a cache for periodic sample data */
 	static protected PeriodicSampleCache createCache(String n) {
 		return new PeriodicSampleCache.EightBit(
 			new SampleArchiveFactoryImpl(n, ".pr60"),
-			POLLING_PERIOD_SEC);
+			SAMPLE_PERIOD_SEC);
 	}
 
 	/** Create a cache for precipitation type sample data */
 	static protected PeriodicSampleCache createPtCache(String n) {
 		return new PeriodicSampleCache.EightBit(
 			new SampleArchiveFactoryImpl(n, ".pt60"),
-			POLLING_PERIOD_SEC);
+			SAMPLE_PERIOD_SEC);
 	}
 
 	/** Load all the weather sensors */
@@ -184,17 +184,19 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		}
 	}
 
-	/** Calculate the period since the last poll */
+	/** Calculate the period since the last recorded sample.  If
+	 * communication is interrupted, this will allow accumulated
+	 * precipitation to be spread out over the appropriate samples. */
 	protected int calculatePeriod(long now) {
-		int n = (int)(now / POLLING_PERIOD_MS);
-		int s = (int)(stamp / POLLING_PERIOD_MS);
-		return (n - s) * POLLING_PERIOD_SEC;
+		int n = (int)(now / SAMPLE_PERIOD_MS);
+		int s = (int)(stamp / SAMPLE_PERIOD_MS);
+		return (n - s) * SAMPLE_PERIOD_SEC;
 	}
 
 	/** Set the type of precipitation */
 	public void setPrecipitationType(PrecipitationType pt) {
 		long now = TimeSteward.currentTimeMillis();
-		pt_cache.addSample(new PeriodicSample(now, POLLING_PERIOD_SEC,
+		pt_cache.addSample(new PeriodicSample(now, SAMPLE_PERIOD_SEC,
 			pt.ordinal()));
 	}
 
