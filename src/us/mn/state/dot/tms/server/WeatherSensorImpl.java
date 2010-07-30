@@ -172,16 +172,16 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Set the accumulation of precipitation */
 	public void setAccumulation(int a) {
 		long now = TimeSteward.currentTimeMillis();
-		int acc = a - accumulation;
-		if(accumulation > Constants.MISSING_DATA && acc >= 0) {
-			int period = calculatePeriod(now);
-			if(period > 0) {
+		int period = calculatePeriod(now);
+		if(period > 0) {
+			int val = a - accumulation;	// periodic sample value
+			if(accumulation > Constants.MISSING_DATA && val >= 0) {
 				cache.addSample(new PeriodicSample(now, period,
-					acc));
+					val));
 			}
+			accumulation = a;
+			stamp = now;
 		}
-		accumulation = a;
-		stamp = now;
 	}
 
 	/** Calculate the period since the last poll */
