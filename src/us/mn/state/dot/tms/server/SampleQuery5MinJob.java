@@ -25,6 +25,8 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
@@ -99,6 +101,13 @@ public class SampleQuery5MinJob extends Job {
 			public boolean check(Detector det) {
 				if(det instanceof DetectorImpl)
 					((DetectorImpl)det).flush(stamp);
+				return false;
+			}
+		});
+		WeatherSensorHelper.find(new Checker<WeatherSensor>() {
+			public boolean check(WeatherSensor ws) {
+				if(ws instanceof WeatherSensorImpl)
+					((WeatherSensorImpl)ws).flush();
 				return false;
 			}
 		});

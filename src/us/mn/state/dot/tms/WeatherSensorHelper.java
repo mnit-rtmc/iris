@@ -12,20 +12,31 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server;
+package us.mn.state.dot.tms;
 
-import java.io.File;
-import java.io.IOException;
+import us.mn.state.dot.sonar.Checker;
 
 /**
- * Interface for creating sample archive files.
+ * Helper class for weather sensors.
  *
  * @author Douglas Lau
  */
-public interface SampleArchiveFactory {
+public class WeatherSensorHelper extends BaseHelper {
 
-	/** Create an archive file.
-	 * @param stamp Time stamp at beginning of sample period.
-	 * @return File to archive sample data from that time stamp. */
-	File createFile(long stamp) throws IOException;
+	/** Don't allow instances to be created */
+	private WeatherSensorHelper() {
+		assert false;
+	}
+
+	/** Find weather sensors using a Checker */
+	static public WeatherSensor find(Checker<WeatherSensor> checker) {
+		return (WeatherSensor)namespace.findObject(
+			WeatherSensor.SONAR_TYPE, checker);
+	}
+
+	/** Lookup the weather sensor with the specified name */
+	static public WeatherSensor lookup(String name) {
+		return (WeatherSensor)namespace.lookupObject(
+			WeatherSensor.SONAR_TYPE, name);
+	}
 }

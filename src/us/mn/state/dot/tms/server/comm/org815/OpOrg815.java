@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.org815;
 
-import us.mn.state.dot.tms.server.DeviceImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
+import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -29,8 +29,12 @@ abstract public class OpOrg815 extends OpDevice {
 	/** ORG-815 debug log */
 	static protected final IDebugLog ORG815_LOG = new IDebugLog("org815");
 
+	/** Weather sensor device */
+	protected final WeatherSensorImpl sensor;
+
 	/** Create a new ORG-815 operation */
-	protected OpOrg815(PriorityLevel p, DeviceImpl d) {
-		super(p, d);
+	protected OpOrg815(PriorityLevel p, WeatherSensorImpl ws) {
+		super(p, ws);
+		sensor = ws;
 	}
 }

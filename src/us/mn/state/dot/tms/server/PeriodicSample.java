@@ -21,7 +21,7 @@ package us.mn.state.dot.tms.server;
  */
 public class PeriodicSample implements Comparable<PeriodicSample> {
 
-	/** Time stamp at end of sample period */
+	/** Time stamp after end of sample period */
 	public final long stamp;
 
 	/** Sample period in seconds */
@@ -31,7 +31,7 @@ public class PeriodicSample implements Comparable<PeriodicSample> {
 	public final int value;
 
 	/** Create a new periodic sample.
-	 * @param s Time stamp at end of sample period.
+	 * @param s Time stamp after end of sample period.
 	 * @param p Sample period in seconds.
 	 * @param v Sample data value. */
 	public PeriodicSample(long s, int p, int v) {
@@ -45,10 +45,16 @@ public class PeriodicSample implements Comparable<PeriodicSample> {
 		return (int)((stamp + period) - (other.stamp + other.period));
 	}
 
-	/** Get a time stamp between the start and end of the sampling period.
+	/** Get a time stamp at the start of the sampling period.
 	 * This time stamp can be used to calculate the sample number. */
 	public long start() {
-		return stamp - periodMillis();
+		return end() - periodMillis();
+	}
+
+	/** Get a time stamp at the end of the sampling period. */
+	public long end() {
+		int pms = periodMillis();
+		return stamp / pms * pms;
 	}
 
 	/** Get the sampling period in milliseconds */

@@ -14,11 +14,14 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
@@ -33,6 +36,19 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  * @author Douglas Lau
  */
 public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
+
+	/** Polling period for weather sensors (seconds) */
+	static protected final int POLLING_PERIOD_SEC = 60;
+
+	/** Polling period for weather sensors (ms) */
+	static protected final int POLLING_PERIOD_MS = POLLING_PERIOD_SEC *1000;
+
+	/** Create a cache for periodic sample data */
+	static protected PeriodicSampleCache createCache(String n) {
+		return new PeriodicSampleCache.EightBit(
+			new SampleArchiveFactoryImpl(n, ".prcp60"),
+			POLLING_PERIOD_SEC);
+	}
 
 	/** Load all the weather sensors */
 	static protected void loadAll() throws TMSException {
@@ -81,6 +97,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		GeoLocImpl g = new GeoLocImpl(name);
 		MainServer.server.createObject(g);
 		geo_loc = g;
+		cache = createCache(n);
 	}
 
 	/** Create a weather sensor */
@@ -89,6 +106,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
+		cache = createCache(n);
 		initTransients();
 	}
 
@@ -128,5 +146,46 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Request a device operation */
 	public void setDeviceRequest(int r) {
 		// no device requests are currently supported
+	}
+
+	/** Cache for precipitation samples */
+	protected transient final PeriodicSampleCache cache;
+
+	/** Accumulation of precipitation (micrometers) */
+	protected transient long accumulation = Constants.MISSING_DATA;
+
+	/** Time stamp of last sample */
+	protected transient long stamp = TimeSteward.currentTimeMillis();
+
+	/** Set the accumulation of precipitation */
+	public void setAccumulation(long a) {
+		long now = TimeSteward.currentTimeMillis();
+		int acc = (int)(a - accumulation);
+		if(accumulation > Constants.MISSING_DATA && acc >= 0) {
+			int period = calculatePeriod(now);
+			if(period > 0) {
+				cache.addSample(new PeriodicSample(now, period,
+					acc));
+			}
+		}
+		accumulation = a;
+		stamp = now;
+	}
+
+	/** Calculate the period since the last poll */
+	protected int calculatePeriod(long now) {
+		int n = (int)(now / POLLING_PERIOD_MS);
+		int s = (int)(stamp / POLLING_PERIOD_MS);
+		return (n - s) * POLLING_PERIOD_SEC;
+	}
+
+	/** Flush buffered sample data to disk */
+	public void flush() {
+		try {
+			cache.flush();
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
