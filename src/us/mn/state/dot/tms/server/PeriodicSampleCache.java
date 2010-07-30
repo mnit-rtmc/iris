@@ -86,6 +86,10 @@ abstract public class PeriodicSampleCache {
 	 * @param value Sample value. */
 	abstract protected void putValue(int value);
 
+	/** Get a sample value from the buffer.
+	 * @return Sample value. */
+	abstract protected int getValue();
+
 	/** Get the number of samples per day */
 	private int samplesPerDay() {
 		return samplesPerDay(period);
@@ -128,10 +132,8 @@ abstract public class PeriodicSampleCache {
 				if(ps.period == period) {
 					buffer.position(samplePosition(ps));
 					putValue(ps.value);
-				}
-				else { // ps.period > period
-					// FIXME: interpolate samples
-				}
+				} else if(ps.period > period)
+					interpolate(ps);
 				ps = samples.pollFirst();
 			}
 			if(channel != null)
@@ -174,6 +176,64 @@ abstract public class PeriodicSampleCache {
 		       sampleBytes() / period;
 	}
 
+	/** Interpolate sample data from a sample with a larger period.
+	 * @param ps Periodic sample (with a larger period). */
+	private void interpolate(PeriodicSample ps) {
+		assert ps.period > period;
+		buffer.position(samplePosition(ps));
+		int[] values = getValues(ps.period / period);
+		interpolate(values, ps.value);
+		buffer.position(samplePosition(ps));
+		putValues(values);
+	}
+
+	/** Interpolate sample data into an array of values.
+	 * @param values Array of existing sample values.
+	 * @param total Total of all sample values. */
+	static private void interpolate(int[] values, int total) {
+		int e_total = 0;	// existing values total
+		int n_missing = 0;
+		for(int value: values) {
+			if(value < 0)
+				n_missing++;
+			else
+				e_total += value;
+		}
+		if(n_missing > 0) {
+			int v_miss = total - e_total;
+			if(v_miss > 0) {
+				int t_miss = v_miss / n_missing;
+				int m_miss = v_miss % n_missing;
+				for(int i = 0; i < values.length; i++) {
+					if(values[i] < 0) {
+						values[i] = t_miss;
+						if(m_miss > 0) {
+							values[i]++;
+							m_miss--;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/** Get an array of sample values from the buffer.
+	 * @param n_samples Number of sample values.
+	 * @return Array of samples values. */
+	private int[] getValues(int n_samples) {
+		int[] values = new int[n_samples];
+		for(int i = 0; i < values.length; i++)
+			values[i] = getValue();
+		return values;
+	}
+
+	/** Put an array of sample values into the buffer.
+	 * @param values Sample values to put. */
+	private void putValues(int[] values) {
+		for(int v: values)
+			putValue(v);
+	}
+
 	/** Periodic sample cache for eight-bit samples */
 	static public final class EightBit extends PeriodicSampleCache {
 
@@ -196,6 +256,12 @@ abstract public class PeriodicSampleCache {
 		 * @param value Sample value. */
 		protected void putValue(int value) {
 			buffer.put((byte)value);
+		}
+
+		/** Get a sample value from the buffer.
+		 * @return Sample value. */
+		protected int getValue() {
+			return buffer.get();
 		}
 	}
 
@@ -221,6 +287,12 @@ abstract public class PeriodicSampleCache {
 		 * @param value Sample value. */
 		protected void putValue(int value) {
 			buffer.putShort((short)value);
+		}
+
+		/** Get a sample value from the buffer.
+		 * @return Sample value. */
+		protected int getValue() {
+			return buffer.getShort();
 		}
 	}
 }
