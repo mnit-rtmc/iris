@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.server.PrecipitationType;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -47,6 +48,9 @@ public class OpQueryConditions extends OpOrg815 {
 			ORG815_LOG.log(device.getName() + ": " + cond);
 			sensor.setAccumulation(
 				(int)(cond.getAccumulation() * 1000));
+			PrecipitationType pt = cond.getPrecipitationType();
+			if(pt != null)
+				sensor.setPrecipitationType(pt);
 			if(cond.shouldReset())
 				return new ResetAccumulator();
 			else

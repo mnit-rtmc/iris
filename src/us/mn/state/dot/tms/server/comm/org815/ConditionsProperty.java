@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.Constants;
+import us.mn.state.dot.tms.server.PrecipitationType;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -27,23 +28,25 @@ public class ConditionsProperty extends Org815Property {
 
 	/** Code indicating weather condition */
 	static public enum ConditionCode {
-		unknown(""),
-		sensor_init("**"),
-		sensor_error("ER"),
-		no_precip("  "),
-		light_rain("R-"),
-		moderate_rain("R "),
-		heavy_rain("R+"),
-		light_snow("S-"),
-		moderate_snow("S "),
-		heavy_snow("S+"),
-		light_precip("P-"),
-		moderate_precip("P "),
-		heavy_precip("P+");
+		unknown("", null),
+		sensor_init("**", null),
+		sensor_error("ER", null),
+		no_precip("  ", PrecipitationType.none),
+		light_rain("R-", PrecipitationType.rain),
+		moderate_rain("R ", PrecipitationType.rain),
+		heavy_rain("R+", PrecipitationType.rain),
+		light_snow("S-", PrecipitationType.snow),
+		moderate_snow("S ", PrecipitationType.snow),
+		heavy_snow("S+", PrecipitationType.snow),
+		light_precip("P-", PrecipitationType.mix),
+		moderate_precip("P ", PrecipitationType.mix),
+		heavy_precip("P+", PrecipitationType.mix);
 
 		protected final String code;
-		private ConditionCode(String c) {
+		protected final PrecipitationType p_type;
+		private ConditionCode(String c, PrecipitationType pt) {
 			code = c;
+			p_type = pt;
 		}
 		static public ConditionCode fromCode(String c) {
 			for(ConditionCode cc: ConditionCode.values()) {
@@ -70,6 +73,11 @@ public class ConditionsProperty extends Org815Property {
 	/** Get the current weather condition code */
 	public ConditionCode getConditionCode() {
 		return code;
+	}
+
+	/** Get the current precipitation type */
+	public PrecipitationType getPrecipitationType() {
+		return code.p_type;
 	}
 
 	/** Current one-minute block average precipitation rate */

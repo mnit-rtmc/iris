@@ -50,6 +50,13 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 			POLLING_PERIOD_SEC);
 	}
 
+	/** Create a cache for precipitation type sample data */
+	static protected PeriodicSampleCache createPtCache(String n) {
+		return new PeriodicSampleCache.EightBit(
+			new SampleArchiveFactoryImpl(n, ".pt60"),
+			POLLING_PERIOD_SEC);
+	}
+
 	/** Load all the weather sensors */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading weather sensors...");
@@ -98,6 +105,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		MainServer.server.createObject(g);
 		geo_loc = g;
 		cache = createCache(n);
+		pt_cache = createPtCache(n);
 	}
 
 	/** Create a weather sensor */
@@ -107,6 +115,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		super(n, c, p, nt);
 		geo_loc = l;
 		cache = createCache(n);
+		pt_cache = createPtCache(n);
 		initTransients();
 	}
 
@@ -151,6 +160,9 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Cache for precipitation samples */
 	protected transient final PeriodicSampleCache cache;
 
+	/** Cache for precipitation type samples */
+	protected transient final PeriodicSampleCache pt_cache;
+
 	/** Accumulation of precipitation (micrometers) */
 	protected transient int accumulation = Constants.MISSING_DATA;
 
@@ -179,10 +191,18 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		return (n - s) * POLLING_PERIOD_SEC;
 	}
 
+	/** Set the type of precipitation */
+	public void setPrecipitationType(PrecipitationType pt) {
+		long now = TimeSteward.currentTimeMillis();
+		pt_cache.addSample(new PeriodicSample(now, POLLING_PERIOD_SEC,
+			pt.ordinal()));
+	}
+
 	/** Flush buffered sample data to disk */
 	public void flush() {
 		try {
 			cache.flush();
+			pt_cache.flush();
 		}
 		catch(IOException e) {
 			e.printStackTrace();
