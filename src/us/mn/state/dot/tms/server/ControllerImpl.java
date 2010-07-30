@@ -428,7 +428,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Store 5-minute detector data */
 	public void storeData5Minute(Calendar stamp, int start_pin,
-		int[] volume, int[] scan) throws IOException
+		int[] volume, int[] scan)
 	{
 		for(int i = 0; i < volume.length; i++) {
 			DetectorImpl det = getDetectorAtPin(start_pin + i);

@@ -515,7 +515,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Update the 30-second green count */
-	public void updateGreenCount(Calendar stamp, int g) throws IOException {
+	public void updateGreenCount(Calendar stamp, int g) {
 		DetectorImpl det = green_det;
 		if(det != null) {
 			if(g == 0 && isMetering())
@@ -526,9 +526,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Update the 5-minute green count */
-	public void updateGreenCount5(Calendar stamp, int g)
-		throws IOException
-	{
+	public void updateGreenCount5(Calendar stamp, int g) {
 		DetectorImpl det = green_det;
 		if(det != null)
 			det.storeData5Minute(stamp, g, Constants.MISSING_DATA);

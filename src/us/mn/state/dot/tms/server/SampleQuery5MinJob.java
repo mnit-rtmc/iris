@@ -100,7 +100,7 @@ public class SampleQuery5MinJob extends Job {
 		DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector det) {
 				if(det instanceof DetectorImpl)
-					((DetectorImpl)det).flush(stamp);
+					((DetectorImpl)det).flush();
 				return false;
 			}
 		});

@@ -142,9 +142,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	}
 
 	/** Update meter with the most recent 5-minute green count */
-	protected void updateGreenCount(RampMeterImpl meter, int g)
-		throws IOException
-	{
+	protected void updateGreenCount(RampMeterImpl meter, int g) {
 		if(meter != null) {
 			meter.updateGreenCount5(stamp,
 				adjustGreenCount(meter, g));

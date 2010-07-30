@@ -54,6 +54,30 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	/** Detector debug log */
 	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
 
+	/** Sample period for detectors (seconds) */
+	static protected final int SAMPLE_PERIOD_SEC = 30;
+
+	/** Create a cache for periodic volume data */
+	static protected PeriodicSampleCache createVolumeCache(String n) {
+		return new PeriodicSampleCache.EightBit(
+			new SampleArchiveFactoryImpl(n, ".v30"),
+			SAMPLE_PERIOD_SEC);
+	}
+
+	/** Create a cache for periodic scan data */
+	static protected PeriodicSampleCache createScanCache(String n) {
+		return new PeriodicSampleCache.SixteenBit(
+			new SampleArchiveFactoryImpl(n, ".c30"),
+			SAMPLE_PERIOD_SEC);
+	}
+
+	/** Create a cache for periodic speed data */
+	static protected PeriodicSampleCache createSpeedCache(String n) {
+		return new PeriodicSampleCache.EightBit(
+			new SampleArchiveFactoryImpl(n, ".s30"),
+			SAMPLE_PERIOD_SEC);
+	}
+
 	/** Load all the detectors */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading detectors...");
@@ -121,6 +145,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	/** Create a new detector */
 	public DetectorImpl(String n) throws TMSException, SonarException {
 		super(n);
+		vol_cache = createVolumeCache(n);
+		scn_cache = createScanCache(n);
+		spd_cache = createSpeedCache(n);
 		initTransients();
 	}
 
@@ -137,6 +164,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		force_fail = ff;
 		field_length = fl;
 		fake = f;
+		vol_cache = createVolumeCache(n);
+		scn_cache = createScanCache(n);
+		spd_cache = createSpeedCache(n);
 	}
 
 	/** Create a detector */
@@ -152,7 +182,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	/** Initialize the transient state */
 	public void initTransients() {
 		super.initTransients();
-		data_cache = new DataCache(name);
 		if(r_node != null)
 			r_node.addDetector(this);
 		try {
@@ -663,45 +692,58 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		}
 	}
 
-	/** Data cache */
-	protected transient DataCache data_cache;
-
 	/** Store 30-second data for this detector */
 	public void storeData30Second(Calendar stamp, int volume, int scans) {
 		testData(volume, scans);
-		try {
-			data_cache.write(stamp, volume, scans);
-		}
-		catch(IndexOutOfBoundsException e) {
-			DET_LOG.log("CACHE OVERFLOW for detector " + name);
-		}
+		vol_cache.addSample(new PeriodicSample(
+			stamp.getTimeInMillis()
+			+ (SAMPLE_PERIOD_SEC * 1000), // FIXME
+			SAMPLE_PERIOD_SEC, volume));
+		scn_cache.addSample(new PeriodicSample(
+			stamp.getTimeInMillis()
+			+ (SAMPLE_PERIOD_SEC * 1000), // FIXME
+			SAMPLE_PERIOD_SEC, scans));
 		last_volume = volume;
 		last_scans = scans;
 		last_speed = Constants.MISSING_DATA;
 	}
 
-	/** Store 30-second speed for this detector */
+	/** Periodic volume sample cache */
+	protected transient final PeriodicSampleCache vol_cache;
+
+	/** Periodic scan sample cache */
+	protected transient final PeriodicSampleCache scn_cache;
+
+	/** Periodic speed sample cache */
+	protected transient final PeriodicSampleCache spd_cache;
+
+	/** Store 30-second speed sample for this detector */
 	public void storeSpeed30Second(Calendar stamp, int speed) {
-		try {
-			data_cache.writeSpeed(stamp, speed);
-		}
-		catch(IndexOutOfBoundsException e) {
-			DET_LOG.log("CACHE OVERFLOW for detector " + name);
-		}
+		spd_cache.addSample(new PeriodicSample(
+			stamp.getTimeInMillis()
+			+ (SAMPLE_PERIOD_SEC * 1000), // FIXME
+			SAMPLE_PERIOD_SEC, speed));
 		last_speed = speed;
 	}
 
 	/** Store 5-minute data for this detector */
-	public void storeData5Minute(Calendar stamp, int volume, int scans)
-		throws IOException
-	{
-		data_cache.merge(stamp, volume, scans);
+	public void storeData5Minute(Calendar stamp, int volume, int scans) {
+		vol_cache.addSample(new PeriodicSample(
+			stamp.getTimeInMillis()
+			+ (SAMPLE_PERIOD_SEC * 10000), // FIXME
+			SAMPLE_PERIOD_SEC * 10, volume));
+		scn_cache.addSample(new PeriodicSample(
+			stamp.getTimeInMillis()
+			+ (SAMPLE_PERIOD_SEC * 10000), // FIXME
+			SAMPLE_PERIOD_SEC * 10, scans));
 	}
 
-	/** Flush buffered data from before the given time stamp to disk */
-	public void flush(Calendar stamp) {
+	/** Flush buffered data to disk */
+	public void flush() {
 		try {
-			data_cache.flush(stamp);
+			vol_cache.flush();
+			scn_cache.flush();
+			spd_cache.flush();
 		}
 		catch(IOException e) {
 			e.printStackTrace();
