@@ -152,15 +152,15 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	protected transient final PeriodicSampleCache cache;
 
 	/** Accumulation of precipitation (micrometers) */
-	protected transient long accumulation = Constants.MISSING_DATA;
+	protected transient int accumulation = Constants.MISSING_DATA;
 
 	/** Time stamp of last sample */
 	protected transient long stamp = TimeSteward.currentTimeMillis();
 
 	/** Set the accumulation of precipitation */
-	public void setAccumulation(long a) {
+	public void setAccumulation(int a) {
 		long now = TimeSteward.currentTimeMillis();
-		int acc = (int)(a - accumulation);
+		int acc = a - accumulation;
 		if(accumulation > Constants.MISSING_DATA && acc >= 0) {
 			int period = calculatePeriod(now);
 			if(period > 0) {

@@ -46,7 +46,7 @@ public class OpQueryConditions extends OpOrg815 {
 			mess.queryProps();
 			ORG815_LOG.log(device.getName() + ": " + cond);
 			sensor.setAccumulation(
-				(long)(cond.getAccumulation() * 1000));
+				(int)(cond.getAccumulation() * 1000));
 			if(cond.shouldReset())
 				return new ResetAccumulator();
 			else
