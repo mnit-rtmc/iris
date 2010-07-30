@@ -84,7 +84,7 @@ public class SampleQuery30SecJob extends Job {
 	/** Perform the 30-second timer job */
 	public void perform() {
 		Calendar s = TimeSteward.getCalendarInstance();
-		s.add(Calendar.SECOND, -30);
+		s.add(Calendar.SECOND, -30);	// FIXME
 		stamp = s;
 		comp.reset(stamp);
 		try {

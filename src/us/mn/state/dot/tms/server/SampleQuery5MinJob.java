@@ -63,7 +63,7 @@ public class SampleQuery5MinJob extends Job {
 	public void perform() {
 		stamp = TimeSteward.getCalendarInstance();
 		Calendar s = (Calendar)stamp.clone();
-		s.add(Calendar.MINUTE, -5);
+		s.add(Calendar.MINUTE, -5);	// FIXME
 		comp.reset(s);
 		try {
 			querySample5Min();

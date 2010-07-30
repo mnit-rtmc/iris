@@ -720,8 +720,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	/** Store 30-second speed sample for this detector */
 	public void storeSpeed30Second(Calendar stamp, int speed) {
 		spd_cache.addSample(new PeriodicSample(
-			stamp.getTimeInMillis()
-			+ (SAMPLE_PERIOD_SEC * 1000), // FIXME
+			(SAMPLE_PERIOD_SEC * 1000) + // FIXME
+			stamp.getTimeInMillis(),
 			SAMPLE_PERIOD_SEC, speed));
 		last_speed = speed;
 	}
@@ -729,12 +729,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	/** Store 5-minute data for this detector */
 	public void storeData5Minute(Calendar stamp, int volume, int scans) {
 		vol_cache.addSample(new PeriodicSample(
-			stamp.getTimeInMillis()
-			+ (SAMPLE_PERIOD_SEC * 10000), // FIXME
+			(SAMPLE_PERIOD_SEC * 10000) + // FIXME
+			stamp.getTimeInMillis(),
 			SAMPLE_PERIOD_SEC * 10, volume));
 		scn_cache.addSample(new PeriodicSample(
-			stamp.getTimeInMillis()
-			+ (SAMPLE_PERIOD_SEC * 10000), // FIXME
+			(SAMPLE_PERIOD_SEC * 10000) + // FIXME
+			stamp.getTimeInMillis(),
 			SAMPLE_PERIOD_SEC * 10, scans));
 	}
 
