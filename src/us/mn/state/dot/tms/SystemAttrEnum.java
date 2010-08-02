@@ -414,7 +414,8 @@ public enum SystemAttrEnum {
 	/** Create a parsing warning message */
 	protected String warningParse() {
 		return "Warning: " + toString() + " system attribute could " +
-		       "be parsed; using a default value (" + def_value + ").";
+		       "not be parsed; using a default value (" + 
+			def_value + ").";
 	}
 
 	/** Create a minimum value warning message */
