@@ -42,9 +42,11 @@ public class ArchiveSamplesJob extends Job {
 	/** Buffer for reading sample data files */
 	protected final byte[] buffer = new byte[8192];
 
-	/** Create a new job to archive sample data */
+	/** Create a new job to archive sample data.  This needs to happen
+	 * after 6 PM to allow for buffered data to be read in case of
+	 * communication errors (MnDOT protocol). */
 	public ArchiveSamplesJob() {
-		super(Calendar.DATE, 1, Calendar.HOUR, 20);
+		super(Calendar.DATE, 1, Calendar.HOUR, 22);
 	}
 
 	/** Perform the archive samples job */
