@@ -27,41 +27,23 @@ import us.mn.state.dot.sched.TimeSteward;
  */
 public class EventLogger {
 
-	/** Path where traffic data files are stored */
-	static protected final String DATA_PATH = "/var/lib/iris/traffic";
+	/** Maximum logged headway is 90 seconds */
+	static protected final int MAX_HEADWAY = 90 * 1000;
 
-	/** Get a valid directory for a given date stamp */
-	static protected File directory(Calendar stamp) throws IOException {
-		String d = TimeSteward.dateShortString(stamp.getTimeInMillis());
-		File year = new File(DATA_PATH + File.separator +
-			d.substring(0, 4));
-		if(!year.exists()) {
-			if(!year.mkdir())
-				throw new IOException("mkdir failed: " + year);
-		}
-		File dir = new File(year.getPath() + File.separator + d);
-		if(!dir.exists()) {
-			if(!dir.mkdir())
-				throw new IOException("mkdir failed: " + dir);
-		}
-		return dir;
+	/** Sample archive factory */
+	private final SampleArchiveFactory factory;
+
+	/** Create a new vehicle event logger */
+	public EventLogger(SampleArchiveFactory f) {
+		factory = f;
 	}
 
-	/** Create a file (path) for the given time stamp */
-	static protected File file(Calendar stamp, String det_id)
-		throws IOException
+	/** Log a vehicle detection event */
+	public void logVehicle(Calendar stamp, int duration, int headway,
+		int speed) throws IOException
 	{
-		if(stamp == null)
-			stamp = TimeSteward.getCalendarInstance();
-		return new File(directory(stamp).getCanonicalPath() +
-			File.separator + det_id + ".vlog");
-	}
-
-	/** Print a line to the event log file */
-	static public void print(Calendar stamp, String det_id, String line)
-		throws IOException
-	{
-		File f = file(stamp, det_id);
+		String line = formatEvent(stamp, duration, headway, speed);
+		File f = factory.createFile(stamp.getTimeInMillis());
 		FileWriter fw = new FileWriter(f, true);
 		try {
 			fw.write(line);
@@ -69,5 +51,52 @@ public class EventLogger {
 		finally {
 			fw.close();
 		}
+	}
+
+	/** Time stamp of most recent vehicle event */
+	protected transient Calendar p_stamp;
+
+	/** Format a vehicle detection event */
+	protected String formatEvent(Calendar stamp, int duration, int headway,
+		int speed)
+	{
+		if(stamp == null) {
+			p_stamp = null;
+			return "*\n";
+		}
+		boolean log_stamp = false;
+		StringBuilder b = new StringBuilder();
+		if(duration > 0)
+			b.append(duration);
+		else
+			b.append('?');
+		b.append(',');
+		if(headway > 0 && headway <= MAX_HEADWAY)
+			b.append(headway);
+		else {
+			b.append('?');
+			log_stamp = true;
+		}
+		if(p_stamp == null || (stamp.get(Calendar.HOUR) !=
+			p_stamp.get(Calendar.HOUR)))
+		{
+			log_stamp = true;
+		}
+		b.append(',');
+		p_stamp = stamp;
+		if(log_stamp) {
+			if(headway > 0) {
+				long st = stamp.getTimeInMillis();
+				b.append(TimeSteward.timeShortString(st));
+			} else
+				p_stamp = null;
+		}
+		b.append(',');
+		if(speed > 0)
+			b.append(speed);
+		while(b.charAt(b.length() - 1) == ',')
+			b.setLength(b.length() - 1);
+		b.append('\n');
+		return b.toString();
 	}
 }

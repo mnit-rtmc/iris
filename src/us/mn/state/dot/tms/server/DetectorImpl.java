@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,6 +74,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		return new PeriodicSampleCache.EightBit(
 			new SampleArchiveFactoryImpl(n, ".s30"),
 			SAMPLE_PERIOD_SEC);
+	}
+
+	/** Create a vehicle event logger */
+	static protected EventLogger createVehicleLogger(String n) {
+		return new EventLogger(new SampleArchiveFactoryImpl(n,
+			".vlog"));
 	}
 
 	/** Load all the detectors */
@@ -148,6 +152,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		vol_cache = createVolumeCache(n);
 		scn_cache = createScanCache(n);
 		spd_cache = createSpeedCache(n);
+		v_log = createVehicleLogger(n);
 		initTransients();
 	}
 
@@ -167,6 +172,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		vol_cache = createVolumeCache(n);
 		scn_cache = createScanCache(n);
 		spd_cache = createSpeedCache(n);
+		v_log = createVehicleLogger(n);
 	}
 
 	/** Create a detector */
@@ -750,56 +756,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		}
 	}
 
-	/** Maximum logged headway is 90 seconds */
-	static protected final int MAX_HEADWAY = 90 * 1000;
-
-	static protected final DateFormat F_STAMP =
-		new SimpleDateFormat("HH:mm:ss");
-
-	protected transient Calendar p_stamp;
-
-	/** Format a vehicle detection event */
-	protected String formatEvent(Calendar stamp, int duration, int headway,
-		int speed)
-	{
-		if(stamp == null) {
-			p_stamp = null;
-			return "*\n";
-		}
-		boolean log_stamp = false;
-		StringBuffer b = new StringBuffer();
-		if(duration > 0)
-			b.append(duration);
-		else
-			b.append('?');
-		b.append(',');
-		if(headway > 0 && headway <= MAX_HEADWAY)
-			b.append(headway);
-		else {
-			b.append('?');
-			log_stamp = true;
-		}
-		if(p_stamp == null || (stamp.get(Calendar.HOUR) !=
-			p_stamp.get(Calendar.HOUR)))
-		{
-			log_stamp = true;
-		}
-		b.append(',');
-		p_stamp = stamp;
-		if(log_stamp) {
-			if(headway > 0)
-				b.append(F_STAMP.format(stamp.getTime()));
-			else
-				p_stamp = null;
-		}
-		b.append(',');
-		if(speed > 0)
-			b.append(speed);
-		while(b.charAt(b.length() - 1) == ',')
-			b.setLength(b.length() - 1);
-		b.append('\n');
-		return b.toString();
-	}
+	/** Vehicle event logger */
+	protected transient final EventLogger v_log;
 
 	/** Count of vehicles in current sampling period */
 	protected transient int ev_vehicles = 0;
@@ -818,8 +776,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	 * @param duration Event duration in milliseconds.
 	 * @param headway Headway since last event in milliseconds.
 	 * @param speed Speed in miles per hour. */
-	public void logEvent(final Calendar stamp, int duration, int headway,
-		int speed)
+	public void logEvent(final Calendar stamp, final int duration,
+		final int headway, final int speed)
 	{
 		ev_vehicles++;
 		ev_duration += duration;
@@ -827,11 +785,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 			ev_n_speed++;
 			ev_speed += speed;
 		}
-		final String line = formatEvent(stamp, duration, headway,
-			speed);
 		MainServer.FLUSH.addJob(new Job() {
 			public void perform() throws IOException {
-				EventLogger.print(stamp, name, line);
+				v_log.logVehicle(stamp, duration, headway,
+					speed);
 			}
 		});
 	}
