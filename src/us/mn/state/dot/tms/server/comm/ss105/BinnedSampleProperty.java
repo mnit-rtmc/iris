@@ -28,7 +28,7 @@ public class BinnedSampleProperty extends SS105Property {
 	/** Sample age (number of intervals old) */
 	protected final int age;
 
-	/** Sample timestamp */
+	/** Timestamp at end of sample interval */
 	Date timestamp = null;
 
 	/** Sample data for each lane */

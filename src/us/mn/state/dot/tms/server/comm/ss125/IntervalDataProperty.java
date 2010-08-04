@@ -88,10 +88,10 @@ public class IntervalDataProperty extends SS125Property {
 	/** Interval number */
 	protected int interval;
 
-	/** Date / time stamp */
+	/** Timestamp at end of sample interval */
 	protected long stamp;
 
-	/** Get the date / time stamp */
+	/** Get timestamp at end of sample interval */
 	public long getTime() {
 		return stamp;
 	}

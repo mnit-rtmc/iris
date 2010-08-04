@@ -39,7 +39,7 @@ public class BinnedDataProperty extends MndotProperty {
 	/** Binned data buffer payload */
 	protected final byte[] payload = new byte[BINNED_DATA_LENGTH];
 
-	/** Get the binned record timestamp */
+	/** Get timestamp at the end of sample interval */
 	public Calendar getStamp() throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(payload);
 		BCDInputStream bcd = new BCDInputStream(bis);
