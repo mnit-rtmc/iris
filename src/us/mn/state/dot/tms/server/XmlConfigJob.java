@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.TimeSteward;
 
 /**
  * Job to write out XML configuration files.
@@ -51,11 +51,11 @@ public class XmlConfigJob extends Job {
 
 	/** Perform the XML config job */
 	public void perform() throws IOException {
-		System.err.println(new Date().toString() +
-			": Writing TMS XML files");
+		System.err.println("Starting XMLDUMP @ " +
+			TimeSteward.getDateInstance());
 		writeXmlConfiguration();
-		System.err.println(new Date().toString() +
-			": Completed TMS XML dump");
+		System.err.println("Finished XMLDUMP @ " +
+			TimeSteward.getDateInstance());
 	}
 
 	/** Write the TMS xml configuration files */
