@@ -167,6 +167,7 @@ public class MainServer {
 
 	/** Schedule jobs on FLUSH thread */
 	static protected void scheduleFlushJobs() {
+		FLUSH.addJob(new FlushSamplesJob());
 		FLUSH.addJob(new ArchiveSamplesJob());
 		FLUSH.addJob(new ProfilingJob());
 		FLUSH.addJob(new KmlWriterJob());
