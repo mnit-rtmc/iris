@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -59,9 +58,8 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		Calendar stamp = completer.getStamp();
-		controller.storeData30Second(stamp, FIRST_DETECTOR_PIN, volume,
-			scans, null);
+		controller.storeData30Second(completer.getStamp(),
+			FIRST_DETECTOR_PIN, volume, scans, null);
 		completer.completeTask(getKey());
 		super.cleanup();
 	}

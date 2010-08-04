@@ -699,15 +699,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	}
 
 	/** Store 30-second data for this detector */
-	public void storeData30Second(Calendar stamp, int volume, int scans) {
+	public void storeData30Second(long stamp, int volume, int scans) {
 		testData(volume, scans);
-		vol_cache.addSample(new PeriodicSample(
-			stamp.getTimeInMillis()
-			+ (SAMPLE_PERIOD_SEC * 1000), // FIXME
+		vol_cache.addSample(new PeriodicSample(stamp,
 			SAMPLE_PERIOD_SEC, volume));
-		scn_cache.addSample(new PeriodicSample(
-			stamp.getTimeInMillis()
-			+ (SAMPLE_PERIOD_SEC * 1000), // FIXME
+		scn_cache.addSample(new PeriodicSample(stamp,
 			SAMPLE_PERIOD_SEC, scans));
 		last_volume = volume;
 		last_scans = scans;
@@ -724,23 +720,17 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	protected transient final PeriodicSampleCache spd_cache;
 
 	/** Store 30-second speed sample for this detector */
-	public void storeSpeed30Second(Calendar stamp, int speed) {
-		spd_cache.addSample(new PeriodicSample(
-			(SAMPLE_PERIOD_SEC * 1000) + // FIXME
-			stamp.getTimeInMillis(),
+	public void storeSpeed30Second(long stamp, int speed) {
+		spd_cache.addSample(new PeriodicSample(stamp,
 			SAMPLE_PERIOD_SEC, speed));
 		last_speed = speed;
 	}
 
 	/** Store 5-minute data for this detector */
-	public void storeData5Minute(Calendar stamp, int volume, int scans) {
-		vol_cache.addSample(new PeriodicSample(
-			(SAMPLE_PERIOD_SEC * 10000) + // FIXME
-			stamp.getTimeInMillis(),
+	public void storeData5Minute(long stamp, int volume, int scans) {
+		vol_cache.addSample(new PeriodicSample(stamp,
 			SAMPLE_PERIOD_SEC * 10, volume));
-		scn_cache.addSample(new PeriodicSample(
-			(SAMPLE_PERIOD_SEC * 10000) + // FIXME
-			stamp.getTimeInMillis(),
+		scn_cache.addSample(new PeriodicSample(stamp,
 			SAMPLE_PERIOD_SEC * 10, scans));
 	}
 

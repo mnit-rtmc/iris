@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Constants;
@@ -35,13 +36,13 @@ public class OpQuerySamples extends OpSS125 {
 	protected final Completer completer;
 
 	/** Time stamp of sample data */
-	protected final Calendar stamp = TimeSteward.getCalendarInstance();
+	protected long stamp;
 
 	/** Oldest time stamp to accept from controller */
-	protected final Calendar oldest = TimeSteward.getCalendarInstance();
+	protected final long oldest;
 
 	/** Newest timestamp to accept from controller */
-	protected final Calendar newest = TimeSteward.getCalendarInstance();
+	protected final long newest;
 
 	/** Interval sample data */
 	protected final IntervalDataProperty sample_data =
@@ -51,12 +52,14 @@ public class OpQuerySamples extends OpSS125 {
 	public OpQuerySamples(ControllerImpl c, Completer comp) {
 		super(PriorityLevel.DATA_30_SEC, c);
 		completer = comp;
-		long s = comp.getStamp().getTimeInMillis();
-		stamp.setTimeInMillis(s);
-		oldest.setTimeInMillis(s);
-		oldest.add(Calendar.HOUR, -4);
-		newest.setTimeInMillis(s);
-		newest.add(Calendar.MINUTE, 5);
+		stamp = comp.getStamp();
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(stamp);
+		cal.add(Calendar.HOUR, -4);
+		oldest = cal.getTimeInMillis();
+		cal.setTimeInMillis(stamp);
+		cal.add(Calendar.MINUTE, 5);
+		newest = cal.getTimeInMillis();
 	}
 
 	/** Begin the operation */
@@ -72,11 +75,11 @@ public class OpQuerySamples extends OpSS125 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(sample_data);
 			mess.queryProps();
-			stamp.setTimeInMillis(sample_data.getTime());
+			stamp = sample_data.getTime();
 			SS125_LOG.log(controller.getName() + ": " +sample_data);
-			if(stamp.before(oldest) || stamp.after(newest)) {
+			if(stamp < oldest || stamp > newest) {
 				SS125_LOG.log("BAD TIMESTAMP: " +
-					stamp.getTime() + " for " + controller);
+					new Date(stamp) + " for " + controller);
 				setFailed();
 				throw new DownloadRequestException(
 					controller.toString());

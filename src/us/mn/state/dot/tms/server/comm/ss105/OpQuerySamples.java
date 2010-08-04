@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Constants;
@@ -35,13 +36,13 @@ public class OpQuerySamples extends OpSS105 {
 	protected final Completer completer;
 
 	/** Time stamp of sample data */
-	protected final Calendar stamp = TimeSteward.getCalendarInstance();
+	protected long stamp;
 
 	/** Oldest time stamp to accept from controller */
-	protected final Calendar oldest = TimeSteward.getCalendarInstance();
+	protected final long oldest;
 
 	/** Newest timestamp to accept from controller */
-	protected final Calendar newest = TimeSteward.getCalendarInstance();
+	protected final long newest;
 
 	/** Volume data for each detector */
 	protected int[] volume = new int[8];
@@ -56,12 +57,14 @@ public class OpQuerySamples extends OpSS105 {
 	public OpQuerySamples(ControllerImpl c, Completer comp) {
 		super(PriorityLevel.DATA_30_SEC, c);
 		completer = comp;
-		long s = comp.getStamp().getTimeInMillis();
-		stamp.setTimeInMillis(s);
-		oldest.setTimeInMillis(s);
-		oldest.add(Calendar.HOUR, -4);
-		newest.setTimeInMillis(s);
-		newest.add(Calendar.MINUTE, 5);
+		stamp = comp.getStamp();
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(stamp);
+		cal.add(Calendar.HOUR, -4);
+		oldest = cal.getTimeInMillis();
+		cal.setTimeInMillis(stamp);
+		cal.add(Calendar.MINUTE, 5);
+		newest = cal.getTimeInMillis();
 		for(int i = 0; i < 8; i++) {
 			volume[i] = Constants.MISSING_DATA;
 			scans[i] = Constants.MISSING_DATA;
@@ -83,14 +86,14 @@ public class OpQuerySamples extends OpSS105 {
 			BinnedSampleProperty bs = new BinnedSampleProperty();
 			mess.add(bs);
 			mess.queryProps();
-			stamp.setTimeInMillis(bs.timestamp.getTime());
+			stamp = bs.timestamp.getTime();
 			volume = bs.getVolume();
 			scans = bs.getScans();
 			speed = bs.getSpeed();
 			SS105_LOG.log(controller.getName() + ": " + bs);
-			if(stamp.before(oldest) || stamp.after(newest)) {
+			if(stamp < oldest || stamp > newest) {
 				SS105_LOG.log("BAD TIMESTAMP: " +
-					stamp.getTime() + " for " + controller);
+					new Date(stamp) + " for " + controller);
 				setFailed();
 				throw new DownloadRequestException(
 					controller.toString());

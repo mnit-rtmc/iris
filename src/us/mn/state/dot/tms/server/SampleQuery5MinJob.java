@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
-import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
@@ -43,9 +42,6 @@ public class SampleQuery5MinJob extends Job {
 	/** Job completer */
 	protected final Completer comp;
 
-	/** Current time stamp */
-	protected Calendar stamp;
-
 	/** Job to be performed on completion */
 	protected final Job flush_job = new Job(500) {
 		public void perform() {
@@ -61,10 +57,7 @@ public class SampleQuery5MinJob extends Job {
 
 	/** Perform the 5-minute timer job */
 	public void perform() {
-		stamp = TimeSteward.getCalendarInstance();
-		Calendar s = (Calendar)stamp.clone();
-		s.add(Calendar.MINUTE, -5);	// FIXME
-		comp.reset(s);
+		comp.reset();
 		try {
 			querySample5Min();
 		}

@@ -40,7 +40,7 @@ public class BinnedDataProperty extends MndotProperty {
 	protected final byte[] payload = new byte[BINNED_DATA_LENGTH];
 
 	/** Get timestamp at the end of sample interval */
-	public Calendar getStamp() throws IOException {
+	public long getStamp() throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(payload);
 		BCDInputStream bcd = new BCDInputStream(bis);
 		int year = 1900 + bcd.read2();
@@ -52,7 +52,7 @@ public class BinnedDataProperty extends MndotProperty {
 		int minute = bcd.read2();
 		Calendar stamp = Calendar.getInstance();
 		stamp.set(year, month, day, hour, minute, 0);
-		return stamp;
+		return stamp.getTimeInMillis();
 	}
 
 	/** Get the binned data record */

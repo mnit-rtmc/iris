@@ -412,7 +412,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Store 30-second detector data */
-	public void storeData30Second(Calendar stamp, int start_pin,
+	public void storeData30Second(long stamp, int start_pin,
 		int[] volume, int[] scans, int[] speed)
 	{
 		for(int i = 0; i < volume.length; i++) {
@@ -427,8 +427,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Store 5-minute detector data */
-	public void storeData5Minute(Calendar stamp, int start_pin,
-		int[] volume, int[] scan)
+	public void storeData5Minute(long stamp, int start_pin, int[] volume,
+		int[] scan)
 	{
 		for(int i = 0; i < volume.length; i++) {
 			DetectorImpl det = getDetectorAtPin(start_pin + i);

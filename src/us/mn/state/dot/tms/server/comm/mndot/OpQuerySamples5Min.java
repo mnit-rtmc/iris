@@ -39,13 +39,13 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	protected final Completer completer;
 
 	/** Time stamp */
-	protected Calendar stamp = TimeSteward.getCalendarInstance();
+	protected long stamp;
 
 	/** Oldest time stamp to accept from controller */
-	protected final Calendar oldest = TimeSteward.getCalendarInstance();
+	protected final long oldest;
 
 	/** Newest timestamp to accept from controller */
-	protected final Calendar newest = TimeSteward.getCalendarInstance();
+	protected final long newest;
 
 	/** Count of records with "BAD TIMESTAMP" errors */
 	protected int n_bad = 0;
@@ -54,13 +54,15 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	public OpQuerySamples5Min(ControllerImpl c, Completer comp) {
 		super(PriorityLevel.DATA_5_MIN, c);
 		completer = comp;
-		long s = TimeSteward.currentTimeMillis();
-		stamp.setTimeInMillis(s);
-		oldest.setTimeInMillis(s);
-		oldest.add(Calendar.DATE, -1);
-		newest.setTimeInMillis(s);
-		newest.add(Calendar.MINUTE, 4);
-		newest.add(Calendar.SECOND, 20);
+		stamp = comp.getStamp();
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(stamp);
+		cal.add(Calendar.DATE, -1);
+		oldest = cal.getTimeInMillis();
+		cal.setTimeInMillis(stamp);
+		cal.add(Calendar.MINUTE, 4);
+		cal.add(Calendar.SECOND, 20);
+		newest = cal.getTimeInMillis();
 	}
 
 	/** Begin the operation */
@@ -83,7 +85,6 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			mess.add(bin);
 			mess.queryProps();
 			stamp = bin.getStamp();
-			stamp.add(Calendar.MINUTE, -5);
 			rec = bin.getRecord();
 			// Delete the record from the controller
 			mess.storeProps();
@@ -92,9 +93,9 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 
 		/** Test if the timestamp is out of the valid range */
 		protected boolean isStampBad() {
-			if(stamp.before(oldest) || stamp.after(newest)) {
+			if(stamp < oldest || stamp > newest) {
 				System.err.println("BAD TIMESTAMP: " +
-					stamp.getTime() + " for " + controller +
+					new Date(stamp) + " for " + controller +
 					" @ " + new Date());
 				return true;
 			} else
@@ -127,8 +128,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 				rec[Address.OFF_GREEN_METER_1] & 0xFF);
 			updateGreenCount(meter2,
 				rec[Address.OFF_GREEN_METER_2] & 0xFF);
-			if(recs > 0 &&
-			   TimeSteward.getCalendarInstance().before(newest))
+			if(recs > 0 && TimeSteward.currentTimeMillis() < newest)
 				return this;
 			else
 				return null;

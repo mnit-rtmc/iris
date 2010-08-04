@@ -54,9 +54,6 @@ public class SampleQuery30SecJob extends Job {
 	/** Job completer */
 	protected final Completer comp;
 
-	/** Current time stamp */
-	protected Calendar stamp;
-
 	/** Job to be performed on completion */
 	protected final Job complete_job = new Job() {
 		public void perform() throws IOException {
@@ -68,7 +65,9 @@ public class SampleQuery30SecJob extends Job {
 				BaseObjectImpl.corridors.findBottlenecks();
 			}
 			finally {
-				if(!HolidayHelper.isHoliday(stamp))
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(comp.getStamp());
+				if(!HolidayHelper.isHoliday(cal))
 					validateTimingPlans();
 			}
 		}
@@ -83,10 +82,7 @@ public class SampleQuery30SecJob extends Job {
 
 	/** Perform the 30-second timer job */
 	public void perform() {
-		Calendar s = TimeSteward.getCalendarInstance();
-		s.add(Calendar.SECOND, -30);	// FIXME
-		stamp = s;
-		comp.reset(stamp);
+		comp.reset();
 		try {
 			querySample30Sec();
 		}

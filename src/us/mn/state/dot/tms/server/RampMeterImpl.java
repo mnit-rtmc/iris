@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
@@ -515,7 +514,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Update the 30-second green count */
-	public void updateGreenCount(Calendar stamp, int g) {
+	public void updateGreenCount(long stamp, int g) {
 		DetectorImpl det = green_det;
 		if(det != null) {
 			if(g == 0 && isMetering())
@@ -526,7 +525,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Update the 5-minute green count */
-	public void updateGreenCount5(Calendar stamp, int g) {
+	public void updateGreenCount5(long stamp, int g) {
 		DetectorImpl det = green_det;
 		if(det != null)
 			det.storeData5Minute(stamp, g, Constants.MISSING_DATA);
