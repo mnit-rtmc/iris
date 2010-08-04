@@ -95,8 +95,8 @@ public class SampleQuery5MinJob extends Job {
 
 	/** Flush the sample data to disk */
 	protected void flushSampleData() {
-		System.err.println("Starting FLUSH @ " + new Date() + " for " +
-			stamp.getTime());
+		System.err.println("Starting FLUSH @ " +
+			TimeSteward.getDateInstance());
 		DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector det) {
 				if(det instanceof DetectorImpl)
@@ -111,6 +111,7 @@ public class SampleQuery5MinJob extends Job {
 				return false;
 			}
 		});
-		System.err.println("Finished FLUSH @ " + new Date());
+		System.err.println("Finished FLUSH @ " +
+			TimeSteward.getDateInstance());
 	}
 }
