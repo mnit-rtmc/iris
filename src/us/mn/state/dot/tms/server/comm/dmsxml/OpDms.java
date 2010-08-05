@@ -41,34 +41,34 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Michael Darter
  * @author Douglas Lau
  */
-abstract public class OpDms extends OpDevice {
+abstract class OpDms extends OpDevice {
 
 	/** failure message for unknown reasons */
 	final static String FAILURE_UNKNOWN = "Failure, unknown reason";
 
 	/** Bitmap width for dmsxml protocol */
-	static protected final int BM_WIDTH = 96;
+	static final int BM_WIDTH = 96;
 
 	/** Bitmap height for dmsxml protocol */
-	static protected final int BM_HEIGHT = 25;
+	static final int BM_HEIGHT = 25;
 
 	/** Bitmap page length for dmsxml protocol */
-	static protected final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
+	static final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
 
 	/** User who deployed the message */
-	protected final User m_user;
+	final User m_user;
 
 	/** DMS to operate */
-	protected final DMSImpl m_dms;
+	final DMSImpl m_dms;
 
 	/** operation description */
 	private String m_opDesc = "";
 
 	/** Number of times this operation has been previously attempted */
-	protected int m_retry = 0;
+	private int m_retry = 0;
 
 	/** Create a new DMS operation */
-	public OpDms(PriorityLevel p, DMSImpl d, String opDesc, User user) {
+	OpDms(PriorityLevel p, DMSImpl d, String opDesc, User user) {
 		super(p, d);
 		m_dms = d;
 		m_opDesc = opDesc;
@@ -76,12 +76,12 @@ abstract public class OpDms extends OpDevice {
 	}
 
 	/** get operation name */
-	public String getOpName() {
+	protected String getOpName() {
 		return getClass().getName();
 	}
 
 	/** Get the error retry threshold for a given SignMessage. */
-	public int getRetryThreshold(SignMessage sm) {
+	private int getRetryThreshold(SignMessage sm) {
 		// if message is from AWS, use different retry threshold
 		if(DMSMessagePriority.fromOrdinal(sm.getRunTimePriority()) == 
 		   DMSMessagePriority.AWS)
@@ -105,7 +105,7 @@ abstract public class OpDms extends OpDevice {
 
 	/** Sign access enumerated type, which is based on the sign 
 	 * access field specified in the DMS. */
-	public enum SignAccess {
+	enum SignAccess {
 		DIALUP_MODEM("dialup", SystemAttrEnum.
 			DMSXML_MODEM_OP_TIMEOUT_SECS),
 		IP("ip", SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS), 
@@ -124,7 +124,7 @@ abstract public class OpDms extends OpDevice {
 		}
 
 		/** Return a sign access type given a string description */
-		public static SignAccess parse(String d) {
+		static SignAccess parse(String d) {
 			if(d == null)
 				return UNKNOWN;
 			d = d.toLowerCase();
@@ -139,7 +139,7 @@ abstract public class OpDms extends OpDevice {
 		}
 
 		/** Get the timeout (seconds) */
-		protected int timeoutSecs() {
+		int timeoutSecs() {
 			if(timeout_sa == null)
 				return UNKNOWN.timeout_sa.getInt();
 			else
@@ -147,7 +147,7 @@ abstract public class OpDms extends OpDevice {
 		}
 
 		/** Return DMS sign access */
-		public static SignAccess get(DMSImpl d) {
+		static SignAccess get(DMSImpl d) {
 			assert d != null;
 			if(d == null)
 				return UNKNOWN;
@@ -157,7 +157,7 @@ abstract public class OpDms extends OpDevice {
 	};
 
 	/** Return true if the message is owned by the AWS */
-	public static boolean ownerIsAws(final String msg_owner) {
+	static boolean ownerIsAws(final String msg_owner) {
 		if(msg_owner == null)
 			return false;
 		final String awsName = AwsPoller.awsName();
@@ -166,7 +166,7 @@ abstract public class OpDms extends OpDevice {
 
 	/** set message attributes which are a function of the 
 	 * operation, sign, etc. */
-	public void setMsgAttributes(Message m) {
+	void setMsgAttributes(Message m) {
 		m.setTimeoutMS(calcTimeoutMS());
 	}
 
@@ -182,7 +182,7 @@ abstract public class OpDms extends OpDevice {
 	/** Handle a failed operation.
 	  * @param errmsg Error message
 	  * @return true if the operation should be retried else false. */
-	protected boolean flagFailureShouldRetry(String errmsg) {
+	boolean flagFailureShouldRetry(String errmsg) {
 	 	String msg = m_dms.getName();
 		if(errmsg == null || errmsg.isEmpty())
 			msg += " unknown error.";
@@ -199,22 +199,22 @@ abstract public class OpDms extends OpDevice {
 	}
 
 	/** random number generator */
-	static private Random m_rand = new Random(System.currentTimeMillis());
+	private static Random m_rand = new Random(System.currentTimeMillis());
 
 	/** generate a unique operation id, which is a long, 
 	 *  returned as a string. */
-	public static String generateId() {
+	static String generateId() {
 		return new Long(System.currentTimeMillis() + 
 			m_rand.nextInt()).toString();
 	}
 
 	/** update iris status, called after operation complete */
-	public void complete(Message m) {
+	void complete(Message m) {
 		updateInterStatus(buildOpStatusCompletionNote(m), true);
 	}
 
 	/** Build operation status completion note. */
-	public String buildOpStatusCompletionNote(Message m) {
+	private String buildOpStatusCompletionNote(Message m) {
 		StringBuilder note = new StringBuilder();
 		note.append("Last message at " +
 			STime.getCurTimeShortString());
@@ -239,13 +239,13 @@ abstract public class OpDms extends OpDevice {
 	}
 
 	/** return true if dms has been configured */
-	public boolean dmsConfigured() {
+	boolean dmsConfigured() {
 		return m_dms.getConfigure();
 	}
 
 	/** Return the page on-time. If a value is not found in the MULTI
 	 *  string, the system default value is returned. */
-	protected DmsPgTime determinePageOnTime(String multi) {
+	DmsPgTime determinePageOnTime(String multi) {
 		MultiString ms = new MultiString(multi);
 		boolean singlepg = (ms.getNumPages() <= 1);
 		// extract from 1st page of MULTI
@@ -261,7 +261,7 @@ abstract public class OpDms extends OpDevice {
 
 	/** Update operation intermediate status in the client.
 	 *  @param is Strings to display, may be null. */
-	protected void updateInterStatus(String[] is) {
+	void updateInterStatus(String[] is) {
 		if(is == null || is.length <= 0)
 			return;
 		for(int i = 0; i < is.length; ++i)
@@ -271,7 +271,7 @@ abstract public class OpDms extends OpDevice {
 	/** Update operation intermediate status in the client.
 	 *  @param is String to display, may be null.
 	 *  @param last True for completion message else false. */
-	protected void updateInterStatus(String is, boolean last) {
+	void updateInterStatus(String is, boolean last) {
 		if(is == null || is.isEmpty())
 			return;
 		// prepend attempt number so user knows this is a retry
@@ -292,7 +292,7 @@ abstract public class OpDms extends OpDevice {
 	}
 
 	/** Sends a request to the field controller and reads the response. */
-	protected void sendRead(Message mess) throws IOException {
+	void sendRead(Message mess) throws IOException {
 
 		// add intermediate status element as a possible response
 		mess.add(buildInterStatusElem());
@@ -302,17 +302,17 @@ abstract public class OpDms extends OpDevice {
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */
-	protected class PhaseGetConfig extends Phase
+	class PhaseGetConfig extends Phase
 	{
 		/** next phase to execute or null */
 		private Phase m_next = null;
 
 		/** constructor */
-		protected PhaseGetConfig() {}
+		private PhaseGetConfig() {}
 
 		/** Constructor
 		 *  @param next Phase to execute next else null. */
-		protected PhaseGetConfig(Phase next) {
+		PhaseGetConfig(Phase next) {
 			m_next = next;
 		}
 

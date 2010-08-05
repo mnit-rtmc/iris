@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.Log;
  * @author      Michael Darter
  * @created     10/09/09
  */
-public class XmlElems
+class XmlElems
 {
 	/** Container for XmlElem objects */
 	private final LinkedList<XmlElem> m_xelems = 
@@ -38,7 +38,7 @@ public class XmlElems
 		new LinkedList<String>();
 
 	/** Constructor */
-	public XmlElems() {}
+	XmlElems() {}
 
 	/** toString */
 	public String toString() {
@@ -59,7 +59,7 @@ public class XmlElems
 	 *  @param levelonetagname Xml string level one tag name.
 	 *  @param istag Intermediate status tag name.
 	 *  @param xml XML response string, may be null. */
-	public void parseResponse(String levelonetagname, String istag, 
+	void parseResponse(String levelonetagname, String istag, 
 		String xml) throws IOException
 	{
 		String childTag = Xml.readSecondTagName(
@@ -91,7 +91,7 @@ public class XmlElems
 	/** Dequeue all intermediate status messages. Earlier messages
 	 *  have lower indexes.
 	 *  @return An array of String messages. */
-	public String[] getInterStatusMsgs() {
+	String[] getInterStatusMsgs() {
 		String[] ret = new String[m_istatusqueue.size()];
 		for(int i = 0; i < ret.length; ++i)
 			ret[i] = m_istatusqueue.removeFirst();
@@ -100,7 +100,7 @@ public class XmlElems
 
 	/** Get response value for the specified request tag name.
 	  * @return null if not found else the value. */
-	protected String getResString(String reqname) {
+	String getResString(String reqname) {
  		for(XmlElem xe : m_xelems) {
 			String value = xe.getResString(reqname);
 			if(value != null)
@@ -110,7 +110,7 @@ public class XmlElems
 	}
 
 	/** Add an element. */
-	public void add(XmlElem xe) {
+	void add(XmlElem xe) {
 		m_xelems.add(xe);
 	}
 
@@ -125,7 +125,7 @@ public class XmlElems
 	 *		</msg 2 name>
 	 * 	</levelonetagname>
 	 */
-	public byte[] buildReqMsg(String levelonetagname) {
+	byte[] buildReqMsg(String levelonetagname) {
 		StringBuilder children = new StringBuilder();
  		for(XmlElem xe : m_xelems)
 			if(xe.containsRequest())
@@ -139,7 +139,7 @@ public class XmlElems
 
 	/** Is element reading done? Element reading is done when a request 
 	 *  element exists and its 'has been read' flag is true. */
-	public boolean readDone() {
+	boolean readDone() {
 		boolean done = false;
  		for(XmlElem xe : m_xelems) {
 			if(xe.containsRequest() && xe.wasResRead()) {

@@ -43,7 +43,7 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class OpQueryMsg extends OpDms {
+class OpQueryMsg extends OpDms {
 
 	/** device request */
 	private DeviceRequest m_req;
@@ -57,7 +57,7 @@ public class OpQueryMsg extends OpDms {
 	 *  @param req Device request.
 	 *  @param startup True to indicate this is the device startup 
 	 *	   request, which is ignored for DMS on dial-up lines. */
-	public OpQueryMsg(DMSImpl d, User u, DeviceRequest req, 
+	OpQueryMsg(DMSImpl d, User u, DeviceRequest req, 
 		boolean startup) 
 	{
 		super(PriorityLevel.DEVICE_DATA, d, "Retrieving message", u);
@@ -74,7 +74,7 @@ public class OpQueryMsg extends OpDms {
 	 * @return Duration in minutes; null indicates no expiration.
 	 * @throws IllegalArgumentException if invalid args.
 	 */
-	static private Integer calcMsgDuration(boolean useont, 
+	private static Integer calcMsgDuration(boolean useont, 
 		boolean useofft, Calendar ontime, Calendar offtime)
 	{
 		if(!useont) {
@@ -108,7 +108,7 @@ public class OpQueryMsg extends OpDms {
 	 * @return If bitmap is not blank, a MULTI indicating it is an 
 	 *         other system message. If bitmap is blank, then an
 	 *         empty MULTI is returned. */
-	static protected String createMultiUsingBitmap(
+	private static String createMultiUsingBitmap(
 		BitmapGraphic[] pages, DmsPgTime pgOnTime)
 	{
 		if(areBitmapsBlank(pages))
@@ -135,7 +135,7 @@ public class OpQueryMsg extends OpDms {
 	}
 
 	/** Check if an array of bitmaps is blank */
-	static protected boolean areBitmapsBlank(BitmapGraphic[] pages) {
+	private static boolean areBitmapsBlank(BitmapGraphic[] pages) {
 		for(int i = 0; i < pages.length; i++)
 			if(pages[i].getLitCount() > 0)
 				return false;
@@ -143,7 +143,7 @@ public class OpQueryMsg extends OpDms {
 	}
 
 	/** Calculate the number of pages in a bitmap */
-	static protected int calcNumPages(byte[] bm) {
+	private static int calcNumPages(byte[] bm) {
 		return bm.length / BM_PGLEN_BYTES;
 	}
 
@@ -151,7 +151,7 @@ public class OpQueryMsg extends OpDms {
 	 * @param argbitmap Bitmap of all pages
 	 * @param pg Page number to extract
 	 * @return BitmapGraphic of requested page */
-	static protected BitmapGraphic extractBitmap(byte[] argbitmap, 
+	private static BitmapGraphic extractBitmap(byte[] argbitmap, 
 		int pg) 
 	{
 		byte[] pix = extractPage(argbitmap, pg);
@@ -164,7 +164,7 @@ public class OpQueryMsg extends OpDms {
 	 * @param argbitmap Bitmap of all pages
 	 * @param pg Page number to extract
 	 * @return Bitmap of requested page only */
-	static protected byte[] extractPage(byte[] argbitmap, int pg) {
+	private static byte[] extractPage(byte[] argbitmap, int pg) {
 		byte[] pix = new byte[BM_PGLEN_BYTES];
 		System.arraycopy(argbitmap, pg * BM_PGLEN_BYTES, pix, 0,
 			BM_PGLEN_BYTES);
@@ -480,7 +480,7 @@ public class OpQueryMsg extends OpDms {
 	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */
-	protected class PhaseQueryMsg extends Phase
+	private class PhaseQueryMsg extends Phase
 	{
 		/** Query current message */
 		protected Phase poll(CommMessage argmess)

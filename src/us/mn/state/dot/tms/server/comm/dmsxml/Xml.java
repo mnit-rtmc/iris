@@ -37,13 +37,13 @@ import us.mn.state.dot.tms.utils.Pair;
  * @since       1.0
  * @see
  */
-final public class Xml {
+final class Xml {
 
     /** Constructor */
     private Xml() {}
 
     /** test */
-    public static boolean test() {
+    static boolean test() {
         boolean ok = true;
 
 	//FIXME: move test cases to junit
@@ -140,30 +140,30 @@ final public class Xml {
     }
 
     /** append the Xml doc start tag */
-    public static StringBuilder addXmlDocHeader(StringBuilder doc) {
+    static StringBuilder addXmlDocHeader(StringBuilder doc) {
         doc.append("<?xml version=\"1.0\"?>");
         return doc;
     }
 
     /** append the xml tag containing a value */
-    public static StringBuilder addXmlTag(StringBuilder doc, String argname, String argvalue) {
+    static StringBuilder addXmlTag(StringBuilder doc, String argname, String argvalue) {
 	String name=Xml.validateElementName(argname);
 	String value=Xml.validateElementValue(argvalue);
         return Xml.addXmlTag(doc, name, new StringBuilder(value));
     }
 
     /** append the xml tag containing a value */
-    public static StringBuilder addXmlTag(StringBuilder doc, String name, int value) {
+    static StringBuilder addXmlTag(StringBuilder doc, String name, int value) {
         return Xml.addXmlTag(doc, name, new StringBuilder(Integer.toString(value)));
     }
 
     /** append the xml tag containing a value */
-    public static StringBuilder addXmlTag(StringBuilder doc, String name, boolean value) {
+    static StringBuilder addXmlTag(StringBuilder doc, String name, boolean value) {
         return Xml.addXmlTag(doc, name, new StringBuilder(Boolean.toString(value)));
     }
 
     /** given an xml element name return it validated */
-    public static String validateElementName(String e) {
+    static String validateElementName(String e) {
 	if (e==null || e.length()<=0)
 		return "";
 	e=e.replace("&","");
@@ -175,7 +175,7 @@ final public class Xml {
     /** 
      *  given an xml element value, return it validated.
      */
-    public static String validateElementValue(String v) {
+    static String validateElementValue(String v) {
 	if (v==null || v.length()<=0)
 		return "";
 	v=v.replace("&","&amp;");
@@ -191,7 +191,7 @@ final public class Xml {
      *
      * @returns String in the form: <name>value</name>
      */
-    public static StringBuilder addXmlTag(StringBuilder doc, String name, StringBuilder value) {
+    static StringBuilder addXmlTag(StringBuilder doc, String name, StringBuilder value) {
 
         // sanity check
         assert name != null : "Argument name is null in Xml.addXmlTag()";
@@ -212,7 +212,7 @@ final public class Xml {
     }
 
     /** append an xml comment tag */
-    public static StringBuilder addXmlComment(StringBuilder doc, String comment) {
+    static StringBuilder addXmlComment(StringBuilder doc, String comment) {
         if (comment.length() > 0) {
             doc.append("<!-- ").append(comment).append(" -->");
         }
@@ -221,28 +221,28 @@ final public class Xml {
     }
 
     /** append the Xml tag open */
-    public static StringBuilder addXmlTagOpen(StringBuilder doc, String tagname) {
+    static StringBuilder addXmlTagOpen(StringBuilder doc, String tagname) {
         doc.append("<").append(tagname).append(">");
 
         return (doc);
     }
 
     /** append the Xml tag close */
-    public static StringBuilder addXmlTagClose(StringBuilder doc, String tagname) {
+    static StringBuilder addXmlTagClose(StringBuilder doc, String tagname) {
         doc.append("</").append(tagname).append(">");
 
         return (doc);
     }
 
     /** append an empty Xml tag */
-    public static StringBuilder addXmlEmptyTag(StringBuilder doc, String tagname) {
+    static StringBuilder addXmlEmptyTag(StringBuilder doc, String tagname) {
         doc.append("<").append(tagname).append("/>");
 
         return (doc);
     }
 
     /** return a child with the specified name */
-    public static Element getChild(Element e, String tagname) {
+    static Element getChild(Element e, String tagname) {
         NodeList children = e.getChildNodes();
 
         for (int i = 0; i < children.getLength(); i++) {
@@ -257,7 +257,7 @@ final public class Xml {
     }
 
     /** return the first child */
-    public static Element getChild(Element e) {
+    static Element getChild(Element e) {
         NodeList children = e.getChildNodes();
         Node     c        = children.item(0);
 
@@ -269,7 +269,7 @@ final public class Xml {
      *  @throws IOException if xml is malformed.
      *  @returns An array of Pair objects containing (String,String) which are the name and value.
      */
-    static public Pair[] parseTagsAndChildren(String lev1name, String lev2name, String xml) throws IOException {
+    static Pair[] parseTagsAndChildren(String lev1name, String lev2name, String xml) throws IOException {
 
         // check args
         if ((xml == null) || (lev1name == null) || (lev2name == null)) {
@@ -349,7 +349,7 @@ final public class Xml {
      *  @throws IOException if xml is malformed.
      *  @returns An array of Pair objects containing (String,String) which are the name and value.
      */
-    static public Pair[] parseTagAndChildren(String tagname, String xml) throws IOException {
+    static Pair[] parseTagAndChildren(String tagname, String xml) throws IOException {
 
         // check args
         if ((xml == null) || (tagname == null)) {
@@ -425,7 +425,7 @@ final public class Xml {
      * 
      *  @returns the second tag name otherwise null if a syntax error occures.
      */
-    static public String readSecondTagName(String lev1name, String xml) throws IOException {
+    static String readSecondTagName(String lev1name, String xml) throws IOException {
 
         // check args
         if (xml == null) {

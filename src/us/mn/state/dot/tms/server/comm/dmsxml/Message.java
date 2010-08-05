@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.utils.SEmail;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class Message implements CommMessage
+class Message implements CommMessage
 {
     	/** Root XML tag name. */
 	public final static String DMSXMLMSGTAG = "DmsXml";
@@ -47,10 +47,10 @@ public class Message implements CommMessage
 	public final static String ISTATUSTAG = "InterStatus";
 
     	/** Default max wait time for DMS response. */
-	static final int DEFAULT_TIMEOUT_DMS_MS = 1000 * 30;
+	public final static int DEFAULT_TIMEOUT_DMS_MS = 1000 * 30;
 
 	/** Associated operation. */
-	OpDms m_opdms = null;
+	private OpDms m_opdms = null;
 
 	/** Container of XML elements. */
 	XmlElems m_xelems = new XmlElems();

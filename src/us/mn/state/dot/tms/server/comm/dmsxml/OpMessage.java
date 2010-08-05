@@ -39,16 +39,16 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class OpMessage extends OpDms {
+class OpMessage extends OpDms {
 
 	/** Maximum message priority */
-	static protected final int MAX_MESSAGE_PRIORITY = 255;
+	private static final int MAX_MESSAGE_PRIORITY = 255;
 
 	/** Flag to avoid phase loops */
-	protected boolean modify = true;
+	private boolean modify = true;
 
 	/** Sign message */
-	protected final SignMessage m_sm;
+	private final SignMessage m_sm;
 
 	/** Number of pages in message */
 	private int m_npages;

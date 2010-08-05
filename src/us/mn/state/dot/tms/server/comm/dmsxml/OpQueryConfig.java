@@ -27,10 +27,10 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class OpQueryConfig extends OpDms
+class OpQueryConfig extends OpDms
 {
 	/** constructor */
-	public OpQueryConfig(DMSImpl d, User u) {
+	OpQueryConfig(DMSImpl d, User u) {
 		super(PriorityLevel.DOWNLOAD, d,
 			"Retrieving sign configuration", u);
 	}

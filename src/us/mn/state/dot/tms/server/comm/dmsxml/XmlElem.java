@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.utils.SString;
  *
  * @author Michael Darter
  */
-public class XmlElem extends ControllerProperty {
+class XmlElem extends ControllerProperty {
 
 	/** Top-level element request tag name */
 	private String m_reqtagname = "";
@@ -57,7 +57,7 @@ public class XmlElem extends ControllerProperty {
 	/** Constructor.
 	 * @param reqtagname XML tag name for request root element.
 	 * @param restagname XML tag name for response root element. */
-	public XmlElem(String reqtagname, String restagname) {
+	XmlElem(String reqtagname, String restagname) {
 		m_reqtagname = (reqtagname == null ? "" : reqtagname);
 		m_restagname = (restagname == null ? "" : restagname);
 	}
@@ -76,7 +76,7 @@ public class XmlElem extends ControllerProperty {
 	}
 
 	/** Parse response using XML string and fill in response fields. */
-	public void parseResponse(String levelonetagname, String xml) 
+	void parseResponse(String levelonetagname, String xml) 
 		throws IOException
 	{
 		// generate array of pairs
@@ -98,7 +98,7 @@ public class XmlElem extends ControllerProperty {
 
 	/** Return a request XML message with this format:
 	 *  <msg name>...child elements...</msg name> */
-	public String buildReqMsg() {
+	String buildReqMsg() {
 		// build child tags
 		StringBuilder children = new StringBuilder(256);
 		Iterator it = m_reqlist.keySet().iterator();
@@ -116,7 +116,7 @@ public class XmlElem extends ControllerProperty {
 
 	/** Get response value for the specified response name.
 	  * @return null if not found else the value. */
-	public Object getResValue(String resname) {
+	Object getResValue(String resname) {
 		if(resname == null)
 			return null;
 		return m_reslist.get(resname);
@@ -124,7 +124,7 @@ public class XmlElem extends ControllerProperty {
 
 	/** Get response value for the specified request tag name.
 	  * @return null if not found else the value. */
-	public String getResString(String resname) {
+	String getResString(String resname) {
 		Object ret = getResValue(resname);
 		if(ret == null)
 			return null;
@@ -133,7 +133,7 @@ public class XmlElem extends ControllerProperty {
 
 	/** Get response value for the specified request tag name.
 	  * @return null if not found else the value. */
-	protected long getResLong(String resname) {
+	long getResLong(String resname) {
 		String ret = getResString(resname);
 		if(ret == null)
 			return 0;
@@ -142,7 +142,7 @@ public class XmlElem extends ControllerProperty {
 
 	/** Get response value for the specified request tag name.
 	  * @return null if not found else the value. */
-	protected int getResInt(String resname) {
+	int getResInt(String resname) {
 		String ret = getResString(resname);
 		if(ret == null)
 			return 0;
@@ -151,7 +151,7 @@ public class XmlElem extends ControllerProperty {
 
 	/** Get response value for the specified request tag name.
 	  * @return null if not found else the value. */
-	protected boolean getResBoolean(String resname) {
+	boolean getResBoolean(String resname) {
 		String ret = getResString(resname);
 		if(ret == null)
 			return false;
@@ -160,7 +160,7 @@ public class XmlElem extends ControllerProperty {
 
 	/** Get response value for the specified request tag name.
 	  * @return null if not found else the value. */
-	protected Date getResDate(String resname) {
+	Date getResDate(String resname) {
 		String ret = getResString(resname);
 		if(ret == null)
 			return null;
@@ -168,17 +168,17 @@ public class XmlElem extends ControllerProperty {
 	}
 
 	/** Add a request. */
-	public void addReq(String name, Object value) {
+	void addReq(String name, Object value) {
 		m_reqlist.put(name, value);
 	}
 
 	/** Add a response. */
-	public void addRes(String name) {
+	void addRes(String name) {
 		m_reslist.put(name, "");
 	}
 
 	/** Add a response. */
-	public void addRes(String name, Object value) {
+	void addRes(String name, Object value) {
 		m_reslist.put(name, value);
 	}
 
@@ -196,27 +196,27 @@ public class XmlElem extends ControllerProperty {
 
 	/** Does the specified tag name match the name of the expected
 	 *  response tag? */
-	public boolean resTagMatches(String restagname) {
+	boolean resTagMatches(String restagname) {
 		return m_restagname.equals(restagname);
 	}
 
 	/** Return the response name */
-	public String getResTagName() {
+	String getResTagName() {
 		return m_restagname;
 	}
 
 	/** Does the element contain any requests? */
-	public boolean containsRequest() {
+	boolean containsRequest() {
 		return m_reqlist.size() > 0;
 	}
 
 	/** Flag response has been read */
-	public void flagResRead() {
+	void flagResRead() {
 		m_resread = true;
 	}
 
 	/** Has response been read? */
-	public boolean wasResRead() {
+	boolean wasResRead() {
 		return m_resread;
 	}
 }

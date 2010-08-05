@@ -29,19 +29,19 @@ import us.mn.state.dot.tms.utils.Log;
  * @author Michael Darter
  * @company AHMCT, UCD
  */
-public class TokenStreamReader
+class TokenStreamReader
 {
 	// fields
-	final private BufferedReader m_inps;
+	private final BufferedReader m_inps;
 	private ParseBuffer m_pb;
-	final private int m_sleeptime;
+	private final int m_sleeptime;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param inps input stream to wrap.
 	 */
-	public TokenStreamReader(InputStream inps, int initsize,
+	TokenStreamReader(InputStream inps, int initsize,
 				 int maxcapacity, int sleeptime) {
 		if((inps == null) || (initsize <= 0) || (maxcapacity <= 0) || (sleeptime <= 0))
 			throw new IllegalArgumentException("Illegal argument in TokenStreamReader constructor.");
@@ -52,17 +52,17 @@ public class TokenStreamReader
 	}
 
 	/** Close the stream */
-	public void close() throws IOException {
+	void close() throws IOException {
 		m_inps.close();
 	}
 
 	/** return the buffer */
-	public String getBuffer() {
+	String getBuffer() {
 		return new String(m_pb.toString());
 	}
 
 	/** reset buffer */
-	public void resetBuffer() {
+	void resetBuffer() {
 		m_pb.init();
 	}
 
@@ -82,7 +82,7 @@ public class TokenStreamReader
 	 * @throws IllegalStateException if maximum capacity is exceeded.
 	 * @throws IOException if endpoint disconnects.
 	 */
-	public String readToken(int timeout, String tokenstart, String tokenend)
+	String readToken(int timeout, String tokenstart, String tokenend)
 		throws IllegalStateException, IOException {
 
 		// check args
@@ -219,14 +219,5 @@ public class TokenStreamReader
 	private static long getCurTimeUTCinMillis() {
 		java.util.Date d = new GregorianCalendar().getTime();
 		return (d.getTime());
-	}
-
-	/**
-	 *  test methods.
-	 */
-	static public boolean test() {
-		boolean ok = true;
-		System.err.println("TokenStreamReader:Test done, return=" + ok);
-		return (ok);
 	}
 }

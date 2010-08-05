@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.utils.HexString;
  * @author Michael Darter
  * @company AHMCT, UCD
  */
-final public class ParseBuffer
+final class ParseBuffer
 {
 	// fields
 	private char[] m_buffer = new char[0];	// buffer
@@ -34,7 +34,7 @@ final public class ParseBuffer
 	private final int m_maxsize;		// maximum size allowed
 
 	// types
-	public enum ExtractType {
+	enum ExtractType {
 		KDK,    // keep left most chunk, delete middle, keep right most chunk
 		DDK,    // delete left most chunk, delete middle, keep right most chunk
 		KKK,    // keep left, middle, right
@@ -46,7 +46,7 @@ final public class ParseBuffer
 	 * @param allocsize Size of the allocated buffer in bytes.
 	 * @param maxsize The maximum allowed size the buffer grows to.
 	 */
-	public ParseBuffer(int allocsize, int maxsize) {
+	ParseBuffer(int allocsize, int maxsize) {
 		if((allocsize < 0) || (allocsize > maxsize) || (maxsize < 0)) {
 			throw new IllegalArgumentException();
 		}
@@ -60,7 +60,7 @@ final public class ParseBuffer
 	}
 
 	/** initialize the buffer */
-	public void init() {
+	void init() {
 		m_buffer = new char[m_allocsize];
 		m_emptySpot = 0;
 	}
@@ -70,7 +70,7 @@ final public class ParseBuffer
 	 *
 	 *  @params a Byte array to append to the buffer.
 	 */
-	public void append(byte[] ba) throws IllegalArgumentException {
+	void append(byte[] ba) throws IllegalArgumentException {
 		if(ba == null) {
 			throw new IllegalArgumentException("arg is invalid");
 		}
@@ -86,7 +86,7 @@ final public class ParseBuffer
 	 *  @params numbytes Number of bytes to append from array.
 	 *  @params a Byte array to append to the buffer.
 	 */
-	public void append(int numbytes, byte[] ba)
+	void append(int numbytes, byte[] ba)
 		throws IllegalArgumentException {
 		if((ba == null) || (numbytes < 0)) {
 			throw new IllegalArgumentException("arg is invalid");
@@ -100,7 +100,7 @@ final public class ParseBuffer
 
 	/** Convert byte[] to char[] using assumed encoding.
 	 *  @returns May return null. */
-	public static char[] byteArrayToCharArray(int len, byte[] ba) {
+	static char[] byteArrayToCharArray(int len, byte[] ba) {
 		char[] ca;
 		try {
 			ca = new String(ba, 0, len, "ISO-8859-1").
@@ -116,7 +116,7 @@ final public class ParseBuffer
 	 *
 	 *  @params a char array to append to the buffer.
 	 */
-	public void append(char[] a) throws IllegalStateException {
+	void append(char[] a) throws IllegalStateException {
 		if(a == null)
 			throw new IllegalArgumentException("arg is invalid");
 
@@ -131,7 +131,7 @@ final public class ParseBuffer
 	 *  @params numchars Number of chars to append from array.
 	 *  @params a char array to append to the buffer.
 	 */
-	public void append(int numchars, char[] a)
+	void append(int numchars, char[] a)
 		throws IllegalStateException {
 		if((a == null) || (numchars < 0) || (numchars > a.length)) {
 			throw new IllegalArgumentException("arg is invalid");
@@ -155,9 +155,9 @@ final public class ParseBuffer
 	}
 
 	/**
-	 *  test methods.
+	 *  test methods. //FIXME: move to junit
 	 */
-	static public boolean test() {
+	static boolean test() {
 		boolean ok = true;
 
 		{
@@ -439,7 +439,7 @@ final public class ParseBuffer
 	 *  @params s String to search for in the buffer.
 	 *  @params fromIndex Index to start searching from
 	 */
-	public int search(String s, int fromIndex) {
+	int search(String s, int fromIndex) {
 		if((s == null) || (s.length() <= 0) || (fromIndex < 0)) {
 			throw new IllegalArgumentException();
 		}
@@ -458,7 +458,7 @@ final public class ParseBuffer
 	 *  @params start Start of token to extract.
 	 *  @params end End of token to extract.
 	 */
-	public String getToken(ParseBuffer.ExtractType et, String start,
+	String getToken(ParseBuffer.ExtractType et, String start,
 			       String end) {
 		if((start == null) || (end == null)) {
 			throw new IllegalArgumentException();
@@ -510,7 +510,7 @@ final public class ParseBuffer
 	 * @params start Start of location (inclusive).
 	 * @params end End of location (exclusive).
 	 */
-	public void removeChunk(ParseBuffer.ExtractType et, int start,	int end) {
+	void removeChunk(ParseBuffer.ExtractType et, int start,	int end) {
 
 		// Log.finest("before remove: m_buffer="+this.toString()+", len="+this.length()+",cap="+this.capacity());
 		if(et == ExtractType.KKK) {
@@ -591,25 +591,25 @@ final public class ParseBuffer
 	}
 
 	/** return the length of buffer */
-	public int length() {
+	int length() {
 		assert(m_emptySpot >= 0) && (m_emptySpot <= m_buffer.length);
 		return (m_emptySpot);
 	}
 
 	/** return the capacity of the buffer */
-	public int capacity() {
+	int capacity() {
 		return (m_buffer.length);
 	}
 
 	/** return the maximum size of the buffer */
-	public int maxSize() {
+	int maxSize() {
 		return (m_maxsize);
 	}
 
 	/**
 	 * return buffer as an array.
 	 */
-	public char[] toArray() {
+	char[] toArray() {
 		char[] b = new char[this.length()];
 
 		System.arraycopy(m_buffer, 0, b, 0, m_emptySpot);

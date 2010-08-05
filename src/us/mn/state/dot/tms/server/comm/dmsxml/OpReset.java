@@ -32,12 +32,12 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class OpReset extends OpDms
+class OpReset extends OpDms
 {
 	/** Create a new DMS query status object.
 	 *  @param d Current DMS.
 	 *  @param u User performing the action, may be null. */
-	public OpReset(DMSImpl d, User u) {
+	OpReset(DMSImpl d, User u) {
 		super(PriorityLevel.DEVICE_DATA, d, "Reinitializing the CMS",u);
 	}
 
@@ -152,7 +152,7 @@ public class OpReset extends OpDms
 	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */
-	protected class PhaseResetDms extends Phase
+	private class PhaseResetDms extends Phase
 	{
 		/** Query current message */
 		protected Phase poll(CommMessage argmess) 

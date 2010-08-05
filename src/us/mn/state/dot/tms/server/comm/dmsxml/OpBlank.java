@@ -31,13 +31,13 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class OpBlank extends OpDms
+class OpBlank extends OpDms
 {
 	/** blank message, which contains owner, duration, priority */
 	private final SignMessage m_sm;
 
 	/** Create a new DMS query configuration object */
-	public OpBlank(DMSImpl d, SignMessage mess, User u) {
+	OpBlank(DMSImpl d, SignMessage mess, User u) {
 		super(PriorityLevel.DOWNLOAD, d, "Blanking the CMS", u);
 		m_sm = mess;
 	}
@@ -157,7 +157,7 @@ public class OpBlank extends OpDms
 	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */
-	protected class PhaseSetBlank extends Phase
+	private class PhaseSetBlank extends Phase
 	{
 		/** Query the number of modules */
 		protected Phase poll(CommMessage argmess)
