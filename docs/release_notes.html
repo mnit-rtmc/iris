@@ -11,6 +11,44 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.121.0 (5 August 2010)</dt>
+	<dd><ul>
+		<li>
+			Added a weather sensor device abstraction.
+		</li>
+		<li>
+			Added protocol to communicate with Optical Scientific
+			ORG-815 precipitation sensor.
+		</li>
+		<li>
+			Refactored sample data archiving code to allow sample
+			periods other than 30 seconds.
+		</li>
+		<li>
+			Added sample_archive_enable and sample_archive_directory
+			system attributes.
+		</li>
+		<li>
+			Added daily job which moves sample data into zip
+			archives.
+		</li>
+		<li>
+			Fixed a couple of minor problems with variable speed
+			advisory algorithm.
+		</li>
+		<li>
+			Added time abstraction to allow IRIS to be run in
+			conjunction with a simulator.
+		</li>
+		<li>
+			Started a new IRIS Administrator Guide.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.121.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.120.0 (13 July 2010)</dt>
 	<dd><ul>
 		<li>
