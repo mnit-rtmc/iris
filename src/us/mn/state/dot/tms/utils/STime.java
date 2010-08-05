@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,12 +33,17 @@ public final class STime {
 	/** constructor */
 	private STime() {}
 
-	/**
-	 * Calc time difference between now (UTC since 1970)
-	 * and given start time in MS.
-	 */
+	/** Calc time difference between now (UTC since 1970)
+	 * and given start time in MS. */
 	static public long calcTimeDeltaMS(long startInUTC) {
 		return TimeSteward.currentTimeMillis() - startInUTC;
+	}
+
+	/** Calc time difference between now (UTC since 1970)
+	 *  and given start time, in seconds. */
+	static public long calcTimeDeltaS(long startInUTC) {
+		double d = calcTimeDeltaMS(startInUTC);
+		return Math.round(d / 1000L);
 	}
 
 	/** Get current time as short string in local time. */
