@@ -442,8 +442,13 @@ public class StationImpl implements Station {
 	/** Bottleneck exists flag */
 	protected boolean bottleneck = false;
 
+	/** Bottleneck flag from previous time step.  This is needed when
+	 * checking if a bottleneck should be adjusted downstream. */
+	protected boolean p_bottle = false;
+
 	/** Set the bottleneck flag */
 	protected void setBottleneck(boolean b) {
+		p_bottle = bottleneck;
 		bottleneck = b;
 	}
 
@@ -461,9 +466,12 @@ public class StationImpl implements Station {
 			float d = m - mp;
 			acceleration = calculateAcceleration(sp, d);
 			checkThresholds();
-			if(isBeforeStartCount() || isAboveBottleneckSpeed())
+			if(isAboveBottleneckSpeed())
 				setBottleneck(false);
-			else {
+			else if(isBeforeStartCount()) {
+				setBottleneck(false);
+				adjustDownstream(upstream);
+			} else {
 				setBottleneck(true);
 				adjustBottleneck(upstream);
 			}
@@ -542,6 +550,33 @@ public class StationImpl implements Station {
 			SystemAttrEnum.VSA_BOTTLENECK_ID_MPH.getInt();
 	}
 
+	/** Adjust the bottleneck downstream if necessary */
+	protected void adjustDownstream(
+		NavigableMap<Float, StationImpl> upstream)
+	{
+		Map.Entry<Float, StationImpl> entry = upstream.lastEntry();
+		if(entry != null)
+			adjustDownstream(entry.getValue());
+	}
+
+	/** Adjust the bottleneck downstream if necessary.
+	 * @param sp Immediately upstream station */
+	protected void adjustDownstream(StationImpl sp) {
+		Float ap = sp.acceleration;
+		Float a = acceleration;
+		if(a != null && ap != null && a < ap && sp.p_bottle) {
+			// Move bottleneck downstream
+			// Don't use setBottleneck, because we don't want
+			// p_bottle to be updated
+			sp.bottleneck = false;
+			bottleneck = true;
+			// Bump the bottleneck count so it won't just
+			// shut off at the next time step
+			while(isBeforeStartCount())
+				n_bottleneck++;
+		}
+	}
+
 	/** Adjust the bottleneck upstream if necessary */
 	protected void adjustBottleneck(
 		NavigableMap<Float, StationImpl> upstream)
@@ -554,9 +589,11 @@ public class StationImpl implements Station {
 			Float a = s.acceleration;
 			if(a != null && ap != null && a > ap) {
 				// Move bottleneck upstream
-				s.setBottleneck(false);
+				// Don't use setBottleneck, because we don't
+				// want p_bottle to be updated
+				s.bottleneck = false;
 				s = sp;
-				s.setBottleneck(true);
+				s.bottleneck = true;
 			} else
 				break;
 			entry = upstream.lowerEntry(entry.getKey());
