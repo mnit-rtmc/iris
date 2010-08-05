@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +13,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
-package us.mn.state.dot.tms.server.comm.dmslite;
+package us.mn.state.dot.tms.utils;
 
 import java.io.IOException;
 
 /**
  * Pair class. A Pair is a LISP like pair, with a car and cdr.
- * @author      Michael Darter
- * @company     AHMCT, University of California, Davis
- * @created     03/12/08
+ * @author Michael Darter
+ * @created 03/12/08
  */
 public class Pair
 {
@@ -30,7 +29,7 @@ public class Pair
 	private final Comparable m_cdr;
 
 	/** Constructor */
-	Pair(Comparable car, Comparable cdr) {
+	public Pair(Comparable car, Comparable cdr) {
 		m_car = car;
 		m_cdr = cdr;
 	}

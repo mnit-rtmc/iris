@@ -1,22 +1,18 @@
-//
-// /***************************
-// This module was developed by the Advanced Highway Maintenance &
-// Construction Technology (AHMCT) Research Center at the University of
-// California - Davis (UCD), in partnership with the California Department
-// of Transportation (Caltrans) by Michael Darter, 03/13/08 and
-// is provided as open-source software.
-// ***************************/
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-// 
-package us.mn.state.dot.tms.server.comm.dmslite;
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2008-2010  AHMCT, University of California
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import us.mn.state.dot.tms.utils.HexString;
 

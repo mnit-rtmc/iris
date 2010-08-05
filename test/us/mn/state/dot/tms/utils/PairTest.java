@@ -1,6 +1,6 @@
 /*
- * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.dmslite;
+package us.mn.state.dot.tms.utils;
 
 import junit.framework.TestCase;
 import java.io.IOException;

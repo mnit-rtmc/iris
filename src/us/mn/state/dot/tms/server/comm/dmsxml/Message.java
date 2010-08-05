@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,12 +13,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.dmslite;
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.mail.MessagingException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -28,10 +30,10 @@ import us.mn.state.dot.tms.utils.STime;
 import us.mn.state.dot.tms.utils.SEmail;
 
 /**
- * DMS Lite Message. A Message represents the bytes sent and
+ * DMS XML message. A Message represents the bytes sent and
  * received from a device. The interface is intended to be
  * flexible enough so that a single class can be used for
- * all message types. The DMSLite Message syntax uses XML.
+ * all message types. The DmsXml Message syntax uses XML.
  *
  * @author Michael Darter
  * @author Douglas Lau
@@ -39,7 +41,7 @@ import us.mn.state.dot.tms.utils.SEmail;
 public class Message implements CommMessage
 {
     	/** Root XML tag name. */
-	public final static String DMSLITEMSGTAG = "DmsLite";
+	public final static String DMSXMLMSGTAG = "DmsXml";
 
 	/** Intermediate status update XML tag name */
 	public final static String ISTATUSTAG = "InterStatus";
@@ -54,7 +56,7 @@ public class Message implements CommMessage
 	XmlElems m_xelems = new XmlElems();
 
 	/** Name for this message. */
-	private String m_name = "DmsLiteMsg";
+	private String m_name = "DmsXmlMsg";
 
 	/** Default timeout in ms. */
 	private int m_dmsTimeoutMS = DEFAULT_TIMEOUT_DMS_MS;
@@ -86,7 +88,7 @@ public class Message implements CommMessage
 	/** set timeout value in MS */
 	public void setTimeoutMS(int ms) {
 		m_dmsTimeoutMS = (ms <= 0 ? DEFAULT_TIMEOUT_DMS_MS : ms);
-		Log.finest("DmsLite.Message.setTimeoutMS(" + ms + 
+		Log.finest("DmsXml.Message.setTimeoutMS(" + ms + 
 			") called.");
 	}
 
@@ -114,7 +116,7 @@ public class Message implements CommMessage
 	public void add(ControllerProperty xmlrr) {
 		if(!(xmlrr instanceof XmlElem))
 			throw new IllegalArgumentException(
-			    "dmslite.Message.add() wrong arg type.");
+			    "dmsxml.Message.add() wrong arg type.");
 		m_xelems.add((XmlElem)xmlrr);
 	}
 
@@ -154,7 +156,7 @@ public class Message implements CommMessage
 
 		// send message
 		updateInterStatus("Sending request to sensorserver.");
-		long starttime = System.currentTimeMillis();
+		long starttime=TimeSteward.currentTimeMillis();
 		Log.finest("queryProps(): Writing " + array.length + 
 			" bytes to SensorServer: " + 
 			SString.byteArrayToString(array) + ".");
@@ -175,7 +177,7 @@ public class Message implements CommMessage
 	private void readElements(long starttime) throws IOException {
 		/** The intermediate status is updated in finally block. */
 		String[] istatus = new String[0];
-		long startms = System.currentTimeMillis();
+		long startms = TimeSteward.currentTimeMillis();
 		updateInterStatus("Waiting for sensorserver.");
 		do {
 			String token = null;
@@ -184,8 +186,8 @@ public class Message implements CommMessage
 				int leftms = (int)(m_dmsTimeoutMS - elapsed);
 				if(leftms > 0) {
 					token = m_is.readToken(leftms,
-					       	"<" + DMSLITEMSGTAG + ">", 
-						"</" + DMSLITEMSGTAG + ">");
+					       	"<" + DMSXMLMSGTAG + ">", 
+						"</" + DMSXMLMSGTAG + ">");
 					setCompletionTimeMS((int)STime.
 						calcTimeDeltaMS(starttime));
 					Log.finer("Response received in " + 
@@ -218,7 +220,7 @@ public class Message implements CommMessage
 			if(token == null) {
 				String dmsid = getDmsId();
 				String err = "";
-				err += "dmslite.Message.readElements(): " +
+				err += "dmsxml.Message.readElements(): " +
 					"timed out waiting for " + dmsid + "("
 					+ (getCompletionTimeMS() / 1000) + 
 					" seconds). Timeout is " + 
@@ -233,14 +235,14 @@ public class Message implements CommMessage
 			}
 
 			// parse response
-			Log.finest("dmslite.Message.queryProps(): " +
+			Log.finest("dmsxml.Message.queryProps(): " +
 				"found complete token:" + token);
 
 			try {
 				// can throw IOException
 				istatus = new String[] {"Parse error"};
 				// sets 'was read' flag for each XML element
-				m_xelems.parseResponse(Message.DMSLITEMSGTAG, 
+				m_xelems.parseResponse(Message.DMSXMLMSGTAG, 
 					Message.ISTATUSTAG, token);
 
 				// Either a completed response element or an
@@ -391,11 +393,11 @@ public class Message implements CommMessage
 	public void storeProps() throws IOException {}
 
 	/** Return a request message with this format:
-	 *     <DmsLite><msg name>...etc...</msg name></DmsLite> */
+	 *     <DmsXml><msg name>...etc...</msg name></DmsXml> */
 	public byte[] buildReqMsg() {
 		if(m_xelems == null)
 			return new byte[0];
-		return m_xelems.buildReqMsg(DMSLITEMSGTAG);
+		return m_xelems.buildReqMsg(DMSXMLMSGTAG);
 	}
 
 	/** Get pending intermediate status messages */

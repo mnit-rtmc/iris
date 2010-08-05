@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.dmslite;
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.EOFException;
 import us.mn.state.dot.sonar.User;
@@ -32,20 +33,23 @@ import us.mn.state.dot.tms.server.comm.SocketMessenger;
 import us.mn.state.dot.tms.utils.Log;
 
 /**
- * DmsLitePoller. This class provides a DMS Poller developed
- * to support the Caltrans D10 IRIS implementation.
+ * This class provides a DMS Poller that communicates with
+ * a standalone server via XML that provides DMS functionality.
+ * It was developed for the Caltrans IRIS implementation. It 
+ * maybe use useful for any application that needs to interface
+ * IRIS DMS functionality with an external application.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DmsLitePoller extends MessagePoller implements DMSPoller {
+public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 
 	/** valid address range (inclusive) */
 	static public final int MAX_ADDRESS = 255;
 	static public final int MIN_ADDRESS = 1;
 
-	/** Create a new dmslite poller */
-	public DmsLitePoller(String n, Messenger m) {
+	/** Create a new dmsxml poller */
+	public DmsXmlPoller(String n, Messenger m) {
 		super(n, m);
 		assert m instanceof SocketMessenger;
 	}
@@ -59,7 +63,6 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	 * @throws EOFException
 	 */
 	public CommMessage createMessage(ControllerImpl c) throws EOFException {
-		//Log.finest("DmsLitePoller.createMessage() called.");
 		return new Message(messenger.getOutputStream(c),
 				   messenger.getInputStream(c));
 	}
@@ -78,7 +81,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
-		Log.finest("DmsLitePoller.sendMessage(" + dms + ", " + 
+		Log.finest("DmsXmlPoller.sendMessage(" + dms + ", " + 
 			m + ", " + o+ ") called.");
 		if(dms == null || m == null)
 			return;
@@ -140,7 +143,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			// ignore
 		} else {
 			// ignore other requests
-			Log.finest("DmsLitePoller.sendRequest(" + 
+			Log.finest("DmsXmlPoller.sendRequest(" + 
 				dms.getName() +	"): ignored request r=" + 
 				r + ", desc=" + r.description);
 		}

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.dmslite;
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -197,7 +198,7 @@ public class OpMessage extends OpDms {
 	}
 
 	/** Build request message in this format:
-	 *	<DmsLite><elemname>
+	 *	<dmsxml><elemname>
 	 *		<Id>...</Id>
 	 *		<Address>...</Address>
 	 *		<MsgText>...</MsgText>
@@ -210,7 +211,7 @@ public class OpMessage extends OpDms {
 	 *		<RunPriority>...</RunPriority>
 	 *		<Owner>...</Owner>
 	 *		<Msg>...</Msg>
-	 *	</elemname></DmsLite>
+	 *	</elemname></dmsxml>
 	 */
 	private XmlElem buildReqRes(String elemReqName, String elemResName) {
 		XmlElem xrr = new XmlElem(elemReqName, elemResName);

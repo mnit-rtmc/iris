@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.dmslite;
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.util.Random;
@@ -45,13 +46,13 @@ abstract public class OpDms extends OpDevice {
 	/** failure message for unknown reasons */
 	final static String FAILURE_UNKNOWN = "Failure, unknown reason";
 
-	/** Bitmap width for dmslite protocol */
+	/** Bitmap width for dmsxml protocol */
 	static protected final int BM_WIDTH = 96;
 
-	/** Bitmap height for dmslite protocol */
+	/** Bitmap height for dmsxml protocol */
 	static protected final int BM_HEIGHT = 25;
 
-	/** Bitmap page length for dmslite protocol */
+	/** Bitmap page length for dmsxml protocol */
 	static protected final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
 
 	/** User who deployed the message */
@@ -106,9 +107,9 @@ abstract public class OpDms extends OpDevice {
 	 * access field specified in the DMS. */
 	public enum SignAccess {
 		DIALUP_MODEM("dialup", SystemAttrEnum.
-			DMSLITE_MODEM_OP_TIMEOUT_SECS),
-		IP("ip", SystemAttrEnum.DMSLITE_OP_TIMEOUT_SECS), 
-		UNKNOWN("", SystemAttrEnum.DMSLITE_OP_TIMEOUT_SECS);
+			DMSXML_MODEM_OP_TIMEOUT_SECS),
+		IP("ip", SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS), 
+		UNKNOWN("", SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS);
 
 		/** Parse string for id of type. Assumed to be lowercase. */
 		private final String id_desc;
@@ -282,7 +283,7 @@ abstract public class OpDms extends OpDevice {
 
 	/** Return an intermediate status XML element */
 	private static XmlElem buildInterStatusElem() {
-		XmlElem is = new XmlElem(Message.DMSLITEMSGTAG, 
+		XmlElem is = new XmlElem(Message.DMSXMLMSGTAG, 
 			Message.ISTATUSTAG);
 		// response (there is no request)
 		is.addRes("Id");
@@ -316,7 +317,7 @@ abstract public class OpDms extends OpDevice {
 		}
 
 		/** Build XML element:
-		 *	<DmsLite><elemname>
+		 *	<DmsXml><elemname>
 		 *		<Id>...</Id>
 		 *		<Address>...</Address>
 		 *		<MsgText>...</MsgText>
@@ -329,7 +330,7 @@ abstract public class OpDms extends OpDevice {
 		 *		<RunPriority>...</RunPriority>
 		 *		<Owner>...</Owner>
 		 *		<Msg>...</Msg>
-		 *	</elemname></DmsLite>
+		 *	</elemname></DmsXml>
 		 */
 		private XmlElem buildXmlElem(String elemReqName, 
 			String elemResName) 

@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.dmslite;
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -188,7 +188,7 @@ public class OpQueryMsg extends OpDms {
 	 * Create a SignMessage using a bitmap and no message text.
 	 * @param sbitmap Bitmap as hexstring associated with message
 	 *	  text. This bitmap is required to be a 96x25 bitmap
-	 *        which dmslite will always return.
+	 *        which dmsxml will always return.
 	 * @param duration Message duration (in minutes).
 	 * @param pgOnTime DMS page on time.
 	 * @param apri DMS message activation priority.
@@ -252,10 +252,10 @@ public class OpQueryMsg extends OpDms {
 	}
 
 	/** Build XML element:
-	 *	<DmsLite><SetBlankMsgReqMsg>
+	 *	<DmsXml><SetBlankMsgReqMsg>
 	 *		<Id></Id>
 	 *		<Address>1</Address>
-	 *	</SetBlankMsgReqMsg></DmsLite>
+	 *	</SetBlankMsgReqMsg></DmsXml>
 	 */
 	private XmlElem buildXmlElem(String elemReqName, String elemResName) {
 		XmlElem xrr = new XmlElem(elemReqName, elemResName);

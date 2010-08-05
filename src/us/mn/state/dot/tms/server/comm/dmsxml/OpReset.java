@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +13,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.dmslite;
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -25,42 +27,39 @@ import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
- * Operation to blank the DMS.
+ * Operation to reset the DMS.
  *
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class OpBlank extends OpDms
+public class OpReset extends OpDms
 {
-	/** blank message, which contains owner, duration, priority */
-	private final SignMessage m_sm;
-
-	/** Create a new DMS query configuration object */
-	public OpBlank(DMSImpl d, SignMessage mess, User u) {
-		super(PriorityLevel.DOWNLOAD, d, "Blanking the CMS", u);
-		m_sm = mess;
+	/** Create a new DMS query status object.
+	 *  @param d Current DMS.
+	 *  @param u User performing the action, may be null. */
+	public OpReset(DMSImpl d, User u) {
+		super(PriorityLevel.DEVICE_DATA, d, "Reinitializing the CMS",u);
 	}
 
-	/** Create the first phase of the operation */
+	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
 		if(dmsConfigured())
-			return new PhaseSetBlank();
+			return new PhaseResetDms();
 
 		// dms not configured
-		Phase phase2 = new PhaseSetBlank();
+		Phase phase2 = new PhaseResetDms();
 		Phase phase1 = new PhaseGetConfig(phase2);
 		return phase1;
 	}
 
 	/** Build request message in this format:
-	 *	<DmsLite><SetBlankMsgReqMsg>
+	 *	<DmsXml><SetBlankMsgReqMsg>
 	 *		<Id></Id>
 	 *		<Address>1</Address>
-	 *		<ActPriority>3</ActPriority>
-	 *		<RunPriority>3</RunPriority>
-	 *		<Owner>bob</Owner>
-	 *	</SetBlankMsgReqMsg></DmsLite>
-	 */
+	 *		<ActPriority>...</ActPriority>
+	 *		<RunPriority>...</RunPriority>
+	 *		<Owner>...</Owner>
+	 *	</SetBlankMsgReqMsg></DmsXml> */
 	private XmlElem buildReqRes(String elemReqName, String elemResName) {
 		XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
@@ -68,13 +67,13 @@ public class OpBlank extends OpDms
 		xrr.addReq("Id", generateId());
 		xrr.addReq("Address", controller.getDrop());
 		xrr.addReq("ActPriority", 
-			m_sm.getActivationPriority());
+			DMSMessagePriority.OVERRIDE.ordinal());
 		xrr.addReq("RunPriority", 
-			m_sm.getRunTimePriority());
+			DMSMessagePriority.BLANK.ordinal());
 		xrr.addReq("Owner", 
 			m_user != null ? m_user.getName() : "");
 
-		// response
+		// responses
 		xrr.addRes("Id");
 		xrr.addRes("IsValid");
 		xrr.addRes("ErrMsg");
@@ -83,22 +82,23 @@ public class OpBlank extends OpDms
 	}
 
 	/** Parse response.
-	 *	<DmsLite><SetBlankMsgRespMsg>
+	 *	<DmsXml><SetInitRespMsg>
 	 *		<Id></Id>
 	 *		<IsValid>true</IsValid>
 	 *		<ErrMsg></ErrMsg>
-	 *	</SetBlankMsgRespMsg></DmsLite>
+	 *	</SetInitRespMsg></DmsXml>
 	 *  @return True to retry the operation else false if done. */
 	private boolean parseResponse(Message mess, XmlElem xrr) {
 		long id = 0;
 		boolean valid = false;
 		String errmsg = "";
 
+		// parse response
 		try {
 			// id
 			id = xrr.getResLong("Id");
 
-			// isvalid
+			// valid flag
 			valid = xrr.getResBoolean("IsValid");
 
 			// error message text
@@ -106,68 +106,63 @@ public class OpBlank extends OpDms
 			if(!valid && errmsg.length() <= 0)
 				errmsg = FAILURE_UNKNOWN;
 
-			// valid resp received?
-			Log.finest("OpBlank: isvalid =" + valid);
 		} catch (IllegalArgumentException ex) {
-			Log.severe("Malformed XML received in OpBlank(msg):" +
-				ex + ",id=" + id);
-			valid = false;
-			errmsg = ex.getMessage();
+			Log.severe("OpReset.PhaseResetDms: " +
+				"Malformed XML received:" + ex +
+				", id=" + id);
+			valid=false;
+			errmsg=ex.getMessage();
 			handleCommError(EventType.PARSING_ERROR,errmsg);
 		}
 
 		// update 
 		complete(mess);
 
-		// update dms
+		// process response
 		if(valid) {
-			m_dms.setMessageCurrent(m_sm, m_user);
+			setErrorStatus("");
+
+			// set blank message
+			SignMessage sm = m_dms.createBlankMessage();
+			if(sm != null)
+                		m_dms.setMessageCurrent(sm, null);
+
+		// valid flag is false
 		} else {
-			Log.finest(
-				"OpBlank: response from SensorServer " +
-				"received, ignored because Xml valid " +
-				"field is false, errmsg=" + errmsg);
+			Log.finest("OpReset: isvalid is false, " +
+				"errmsg=" + errmsg);
 			setErrorStatus(errmsg);
 
 			// try again
-			if(flagFailureShouldRetry(errmsg)) {
-				Log.finest("OpBlank: will retry failed op.");
+			if (flagFailureShouldRetry(errmsg)) {
+				Log.finest("OpReset: will retry " +
+					"failed operation.");
 				return true;
-
-			// give up
-			} else {
-				// if aws failure, handle it
-				if(mess.checkAwsFailure())
-					mess.handleAwsFailure(
-						"was blanking a msg.");						
 			}
 		}
-
-		// done
 		return false;
 	}
 
 	/**
-	 * Phase to query the dms config
-	 * Note, the type of exception throw here determines
+	 * Phase to reset dms.
+	 * Note, the type of exception thrown here determines
 	 * if the messenger reopens the connection on failure.
 	 *
 	 * @see MessagePoller#doPoll()
 	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */
-	protected class PhaseSetBlank extends Phase
+	protected class PhaseResetDms extends Phase
 	{
-		/** Query the number of modules */
-		protected Phase poll(CommMessage argmess)
+		/** Query current message */
+		protected Phase poll(CommMessage argmess) 
 			throws IOException 
 		{
 			updateInterStatus("Starting operation", false);
 
-			if(m_sm == null)
-				return null;
-			assert argmess instanceof Message :
-			       "wrong message type";
+			Log.finest(
+			    "OpReset.PhaseResetDms.poll(msg) called.");
+
 			Message mess = (Message) argmess;
 
 			// set message attributes as a function of the op
@@ -175,8 +170,8 @@ public class OpBlank extends OpDms
 
 			// build xml request and expected response			
 			mess.setName(getOpName());
-			XmlElem xrr = buildReqRes("SetBlankMsgReqMsg", 
-				"SetBlankMsgRespMsg");
+			XmlElem xrr = buildReqRes("SetInitReqMsg", 
+				"SetInitRespMsg");
 
 			// send request and read response
 			mess.add(xrr);

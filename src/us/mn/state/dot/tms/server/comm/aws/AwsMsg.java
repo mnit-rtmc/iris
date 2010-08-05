@@ -532,11 +532,11 @@ public class AwsMsg {
 
 	/** Return the SignMessage duration. A null indicates an
 	 *  indefinite duration.
-	 *  @see DmsLitePoller.sendMessage() */
+	 *  @see DmsXmlPoller.sendMessage() */
 	protected Integer getSignMessageDuration() {
 		if(m_type == AwsMsgType.BLANK)
 			return 0;
-		// all dmslite messages have an indefinite duration
+		// all dmsxml messages have an indefinite duration
 		return null;
 	}
 

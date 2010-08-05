@@ -51,8 +51,8 @@ public enum CommProtocol {
 	/** Manchester camera control (8) */
 	MANCHESTER_PTZ("Manchester PTZ"),
 
-	/** DMS Lite (9) */
-	DMSLITE("DMS Lite"),
+	/** DMS XML (9) */
+	DMSXML("DMS XML"),
 
 	/** AWS (10) */
 	AWS("AWS"),

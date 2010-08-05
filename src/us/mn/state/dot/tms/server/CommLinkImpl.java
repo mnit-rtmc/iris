@@ -34,9 +34,9 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 import us.mn.state.dot.tms.server.comm.SocketMessenger;
-import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.aws.AwsPoller;
-import us.mn.state.dot.tms.server.comm.dmslite.DmsLitePoller;
+import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
+import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.server.comm.ntcip.HDLCMessenger;
@@ -333,9 +333,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return new ManchesterPoller(name, createDatagramMessenger());
 	}
 
-	/** Create a DMS Lite poller */
-	protected MessagePoller createDmsLitePoller() throws IOException {
-		return new DmsLitePoller(name, createSocketMessenger());
+	/** Create a DMS XML poller */
+	protected MessagePoller createDmsXmlPoller() throws IOException {
+		return new DmsXmlPoller(name, createSocketMessenger());
 	}
 
 	/** Create a AWS poller */
@@ -377,8 +377,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return createPelcoDPoller();
 		case MANCHESTER_PTZ:
 			return createManchesterPoller();
-		case DMSLITE:
-			return createDmsLitePoller();
+		case DMSXML:
+			return createDmsXmlPoller();
 		case AWS:
 			return createAwsPoller();
 		case PELCO_SWITCHER:

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,24 +13,21 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.dmslite;
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import org.xml.sax.SAXException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
 import java.nio.charset.Charset;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import us.mn.state.dot.tms.utils.Log;
+import us.mn.state.dot.tms.utils.Pair;
 
 /**
  * Convenience class for writing Xml.
@@ -115,7 +113,7 @@ final public class Xml {
         System.err.println("Test case 5: bogus level 2 name");
         {
             try {
-                Pair[] p = Xml.parseTagsAndChildren("DmsLite", "SetInitRespMsg","<DmsLite><SetTimeRespMsg><IsValid>false</IsValid><ErrMsg>SignView response invalid code (0x0D)</ErrMsg></SetTimeRespMsg></DmsLite>");
+                Pair[] p = Xml.parseTagsAndChildren("DmsXml", "SetInitRespMsg","<DmsXml><SetTimeRespMsg><IsValid>false</IsValid><ErrMsg>SignView response invalid code (0x0D)</ErrMsg></SetTimeRespMsg></DmsXml>");
                 ok = false;
             } catch (IOException ex) {
                 ok = ok && true;
