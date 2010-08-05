@@ -75,11 +75,6 @@ abstract class OpDms extends OpDevice {
 		m_user = user;
 	}
 
-	/** get operation name */
-	protected String getOpName() {
-		return getClass().getName();
-	}
-
 	/** Get the error retry threshold for a given SignMessage. */
 	private int getRetryThreshold(SignMessage sm) {
 		// if message is from AWS, use different retry threshold
