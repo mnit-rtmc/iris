@@ -33,6 +33,9 @@ public class EventLogger {
 	/** Sample archive factory */
 	private final SampleArchiveFactory factory;
 
+	/** Previous file location */
+	private File file;
+
 	/** Create a new vehicle event logger */
 	public EventLogger(SampleArchiveFactory f) {
 		factory = f;
@@ -43,13 +46,15 @@ public class EventLogger {
 		int speed) throws IOException
 	{
 		String line = formatEvent(stamp, duration, headway, speed);
-		File f = factory.createFile(stamp.getTimeInMillis());
-		FileWriter fw = new FileWriter(f, true);
-		try {
-			fw.write(line);
-		}
-		finally {
-			fw.close();
+		file = getFile(stamp);
+		if(file != null) {
+			FileWriter fw = new FileWriter(file, true);
+			try {
+				fw.write(line);
+			}
+			finally {
+				fw.close();
+			}
 		}
 	}
 
@@ -98,5 +103,13 @@ public class EventLogger {
 			b.setLength(b.length() - 1);
 		b.append('\n');
 		return b.toString();
+	}
+
+	/** Get a file for the given timestamp */
+	protected File getFile(Calendar stamp) throws IOException {
+		if(stamp != null)
+			return factory.createFile(stamp.getTimeInMillis());
+		else
+			return file;
 	}
 }
