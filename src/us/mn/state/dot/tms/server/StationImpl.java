@@ -473,7 +473,7 @@ public class StationImpl implements Station {
 				adjustDownstream(upstream);
 			} else {
 				setBottleneck(true);
-				adjustBottleneck(upstream);
+				adjustUpstream(upstream);
 			}
 		} else
 			clearBottleneck();
@@ -578,7 +578,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Adjust the bottleneck upstream if necessary */
-	protected void adjustBottleneck(
+	protected void adjustUpstream(
 		NavigableMap<Float, StationImpl> upstream)
 	{
 		StationImpl s = this;
