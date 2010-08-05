@@ -45,7 +45,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Create a cache for periodic sample data */
 	static protected PeriodicSampleCache createCache(String n) {
-		return new PeriodicSampleCache.EightBit(
+		return new PeriodicSampleCache.SixteenBit(
 			new SampleArchiveFactoryImpl(n, ".pr60"),
 			SAMPLE_PERIOD_SEC);
 	}
