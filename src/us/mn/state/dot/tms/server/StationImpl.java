@@ -555,16 +555,16 @@ public class StationImpl implements Station {
 			if(a != null && ap != null && a > ap) {
 				// Move bottleneck upstream
 				s.setBottleneck(false);
-				sp.setBottleneck(true);
-				// Bump the bottleneck count so it won't just
-				// shut off at the next time step
-				while(sp.isBeforeStartCount())
-					sp.n_bottleneck++;
+				s = sp;
+				s.setBottleneck(true);
 			} else
 				break;
-			s = sp;
 			entry = upstream.lowerEntry(entry.getKey());
 		}
+		// Bump the bottleneck count so it won't just
+		// shut off at the next time step
+		while(s.isBeforeStartCount())
+			s.n_bottleneck++;
 	}
 
 	/** Clear the station as a bottleneck */
