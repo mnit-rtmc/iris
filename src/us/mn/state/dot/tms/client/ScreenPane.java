@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +48,7 @@ import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
  * the IRIS client.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class ScreenPane extends JPanel {
 
@@ -89,8 +91,34 @@ public class ScreenPane extends JPanel {
 		tab_pane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setHomeLayer();
+				storeSelectedTabIndex();
 			}
 		});
+	}
+
+	/** Last selected tab, which stores the index of last user selected
+	 * tab. A field is used to track this, rather than dynamically
+	 * calling tab_pane.getSelectedIndex() because if the method is 
+	 * called during app shutdown, it can erroneously return a -1. */
+	private int sel_tab;
+
+	/** Store the currently selected tab index. If no tab is 
+	 *  selected (e.g. during tear down), the change is ignored. */
+	private void storeSelectedTabIndex() {
+		int sel = tab_pane.getSelectedIndex();
+		if(sel >= 0)
+			sel_tab = sel;
+	}
+
+	/** Get the index of the currently selected tab */
+	public int getSelectedTabIndex() {
+		return sel_tab;
+	}
+
+	/** Set the currently selected tab */
+	public void setSelectedTabIndex(int i) {
+		if(i >= 0 && i < tab_pane.getTabCount())
+			tab_pane.setSelectedIndex(i);
 	}
 
 	/** Most recently selected home layer */

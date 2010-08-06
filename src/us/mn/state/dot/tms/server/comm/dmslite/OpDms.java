@@ -102,25 +102,58 @@ abstract public class OpDms extends OpDevice {
 		super.cleanup();
 	}
 
-	/** sign access type */
-	public enum SignAccessType {DIALUPMODEM, WIZARD, UNKNOWN};
+	/** Sign access enumerated type, which is based on the sign 
+	 * access field specified in the DMS. */
+	public enum SignAccess {
+		DIALUP_MODEM("dialup", SystemAttrEnum.
+			DMSLITE_MODEM_OP_TIMEOUT_SECS),
+		IP("ip", SystemAttrEnum.DMSLITE_OP_TIMEOUT_SECS), 
+		UNKNOWN("", SystemAttrEnum.DMSLITE_OP_TIMEOUT_SECS);
 
-	/** return DMS sign access type */
-	public static SignAccessType getSignAccessType(DMSImpl dms) {
-		assert dms != null;
-		if(dms == null)
-			return SignAccessType.UNKNOWN;
-		String a = dms.getSignAccess();
-		if(a == null)
-			return SignAccessType.UNKNOWN;
-		else if(a.toLowerCase().contains("modem"))
-			return SignAccessType.DIALUPMODEM;
-		else if(a.toLowerCase().contains("wizard"))
-			return SignAccessType.WIZARD;
-		// unknown sign type, this happens when the first 
-		// OpQueryConfig message is being sent.
-		return SignAccessType.UNKNOWN;
-	}
+		/** Parse string for id of type. Assumed to be lowercase. */
+		private final String id_desc;
+
+		/** Timeout system attribute, never null. */
+		private SystemAttrEnum timeout_sa;
+
+		/** Constructor */
+		SignAccess(String d, SystemAttrEnum to) {
+			id_desc = d.toLowerCase();
+			timeout_sa = to;
+		}
+
+		/** Return a sign access type given a string description */
+		public static SignAccess parse(String d) {
+			if(d == null)
+				return UNKNOWN;
+			d = d.toLowerCase();
+			if(d.contains(DIALUP_MODEM.id_desc))
+				return DIALUP_MODEM;
+			else if(d.contains(IP.id_desc))
+				return IP;
+			// unknown sign type, this happens when the first 
+			// OpQueryConfig message is being sent.
+			else
+				return UNKNOWN;
+		}
+
+		/** Get the timeout (seconds) */
+		protected int timeoutSecs() {
+			if(timeout_sa == null)
+				return UNKNOWN.timeout_sa.getInt();
+			else
+				return timeout_sa.getInt();
+		}
+
+		/** Return DMS sign access */
+		public static SignAccess get(DMSImpl d) {
+			assert d != null;
+			if(d == null)
+				return UNKNOWN;
+			else
+				return parse(d.getSignAccess());
+		}
+	};
 
 	/** Return true if the message is owned by the AWS */
 	public static boolean ownerIsAws(final String msg_owner) {
@@ -130,41 +163,19 @@ abstract public class OpDms extends OpDevice {
 		return msg_owner.toLowerCase().equals(awsName.toLowerCase());
 	}
 
-	/** return the timeout for this operation */
-	public int calcTimeoutMS() {
-		return getTimeoutSecs() * 1000;
-	}
-
-	/** Get the timeout for this operation (seconds) */
-	protected int getTimeoutSecs() {
-		assert m_dms != null;
-		SignAccessType at = getSignAccessType(m_dms);
-		if(at == SignAccessType.DIALUPMODEM) {
-			int secs = SystemAttrEnum.
-				DMSLITE_MODEM_OP_TIMEOUT_SECS.getInt();
-			Log.finest("connection type is modem" +
-				", dms=" + m_dms.toString() +
-				", timeout secs=" + secs);
-			return secs;
-		} else if(at == SignAccessType.WIZARD) {
-			int secs = SystemAttrEnum.DMSLITE_OP_TIMEOUT_SECS.
-				getInt();
-			Log.finest("connection type is wizard" +
-				", dms=" + m_dms.toString() +
-				", timeout secs=" + secs);
-			return secs;
-		} else {
-			// if unknown access type, this happens when the first 
-			// OpQueryConfig message is being sent, so a default 
-			// timeout should be used.
-			return SystemAttrEnum.DMSLITE_OP_TIMEOUT_SECS.getInt();
-		}
-	}
-
 	/** set message attributes which are a function of the 
-	 *  operation, sign, etc. */
+	 * operation, sign, etc. */
 	public void setMsgAttributes(Message m) {
-		m.setTimeoutMS(this.calcTimeoutMS());
+		m.setTimeoutMS(calcTimeoutMS());
+	}
+
+	/** Get the timeout for this operation. */
+	private int calcTimeoutMS() {
+		SignAccess a = SignAccess.get(m_dms);
+		int s = a.get(m_dms).timeoutSecs();
+		Log.finest("Op timeout is " + s + " secs, SignAccess=" + a + 
+			", dms=" + m_dms);
+		return s * 1000;
 	}
 
 	/** Handle a failed operation.
@@ -443,7 +454,7 @@ abstract public class OpDms extends OpDevice {
 			if(valid) {
 				setErrorStatus("");
 				m_dms.setModel(model);
-				m_dms.setSignAccess(signAccess); // wizard, modem
+				m_dms.setSignAccess(signAccess); // ip or dialup
 				m_dms.setMake(make);
 				m_dms.setVersion(version);
 				m_dms.setDmsType(type);

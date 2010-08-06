@@ -20,6 +20,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +43,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
+import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.system.LoginForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -121,7 +123,7 @@ public class IrisClient extends JFrame {
 	protected Session session;
 
 	/** Mutable user properties stored on client workstation */
-	private UserProperties m_uprops;
+	private UserProperties user_props;
 
 	/** Create a new Iris client */
 	public IrisClient(Properties props, SimpleHandler h) throws IOException{
@@ -131,9 +133,9 @@ public class IrisClient extends JFrame {
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
 		I18N.initialize(props);
-		m_uprops =  new UserProperties(
+		user_props =  new UserProperties(
 			props.getProperty(UserProperties.FNAME_PROP_NAME));
-		m_uprops.read();
+		user_props.read();
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
@@ -156,7 +158,6 @@ public class IrisClient extends JFrame {
 	/** Log out the current session and quit the client */
 	public void quit() {
 		logout();
-		writeUserProperties();
 		new AbstractJob(LOGIN) {
 			public void perform() {
 				System.exit(0);
@@ -164,10 +165,28 @@ public class IrisClient extends JFrame {
 		}.addToScheduler();
 	}
 
+	/** Set the currently selected tab in each screen pane, using the
+	 * persistently stored tab index. */
+	private void setSelectedTabViaPersist() {
+		Object[] sti = user_props.getSelectedTabs();
+		for(int i = 0; i < s_panes.length && i < sti.length; ++i) {
+			int ti = ((Integer)sti[i]).intValue();
+			s_panes[i].setSelectedTabIndex(ti);
+		}
+	}
+
+	/** Get the currently selected tab in each screen pane */
+	public int[] getSelectedTabIndex() {
+		int[] sti = new int[s_panes.length];
+		for(int i = 0; i < sti.length; ++i)
+			sti[i] = s_panes[i].getSelectedTabIndex();
+		return sti;
+	}
+
 	/** Update and write user properties file */
 	private void writeUserProperties() {
-		m_uprops.setWindowProperties(this);
-		m_uprops.write();
+		user_props.setWindowProperties(this);
+		user_props.write();
 	}
 
 	/** Initialize the screen panes */
@@ -196,10 +215,9 @@ public class IrisClient extends JFrame {
 
 	/** Set position of frame window using properties values. */
 	private void setPosition() {
-		if(m_uprops.used()) {
-			if(m_uprops.haveWindowPosition())
-				setBounds(m_uprops.getWindowPosition());
-			setExtendedState(m_uprops.getWindowState());
+		if(user_props.getUsed() && user_props.haveWindowPosition()) {
+			setBounds(user_props.getWindowPosition());
+			setExtendedState(user_props.getWindowState());
 		} else {
 			setBounds(Screen.getMaximizedBounds());
 			if(screens.length < 2)
@@ -255,6 +273,7 @@ public class IrisClient extends JFrame {
 			ScreenPane sp = visible.get(p);
 			sp.addTab(tab);
 		}
+		setSelectedTabViaPersist();
 		for(ScreenPane sp: visible) {
 			sp.createToolPanels(s);
 			sp.setHomeLayer();
@@ -339,7 +358,16 @@ public class IrisClient extends JFrame {
 			MapBean mb = sp.getMap();
 			mb.setModel(createMapModel(mb, s));
 		}
+		setInitExtent();
 	}
+
+	/** Set initial map extent */
+	public void setInitExtent() {
+		Rectangle2D e = MapExtentHelper.getHomeExtent();
+		if(e != null)
+			for(ScreenPane sp: s_panes)
+				sp.getMap().setExtent(e);
+ 	}
 
 	/** Create a new map model */
 	protected MapModel createMapModel(MapBean mb, Session s) {
@@ -367,6 +395,7 @@ public class IrisClient extends JFrame {
 
 	/** Clean up when the user logs out */
 	protected void doLogout() {
+		writeUserProperties();
 		updateMenus(null);
 		removeTabs();
 		closeSession();

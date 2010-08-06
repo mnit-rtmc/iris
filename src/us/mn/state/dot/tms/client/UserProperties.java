@@ -15,17 +15,20 @@
 package us.mn.state.dot.tms.client;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import javax.swing.JFrame;
-import us.mn.state.dot.tms.utils.PropertyLoader;
+import us.mn.state.dot.tms.utils.SFile;
 
 /**
- * Persistent mutable user properties stored in a java 
- * properties file on the client workstation.
+ * Persistent mutable user properties stored in a java properties file
+ * on the client workstation. If the properties file name is not specified
+ * or is null, properties are not used, and the user properties file is not
+ * written.
  *
  * @author Michael Darter
  */
@@ -42,60 +45,60 @@ public class UserProperties {
 	final String WIN_Y = "win.y";
 	final String WIN_WIDTH = "win.width";
 	final String WIN_HEIGHT = "win.height";
+	final String TAB_SEL = "tab.selected";
 
-	/** Props file name */
-	private String m_fname = "";
+	/** Props file name. Null or empty flags user props not used. */
+	private String file_name = "";
 
-	/** Properties, null indicates not used */
-	private Properties m_props;
+	/** User properties, never null */
+	private Properties user_props = new Properties();
 
 	/** Flag if properties have changed */
-	private boolean m_changed = false;
-
-	/** Main window size and position */
-	public Rectangle m_wpos;
+	private boolean props_changed = false;
 
 	/** Constructor
-	 * @param fname Properties file name. If empty or null, 
-	 *	  client props not used. */
-	public UserProperties(String fname) {
-		m_fname = fname;
-		m_props = null;
-	}
-
-	/** Properties file used? */
-	public boolean used() {
-		return m_props != null;
-	}
-
-	/** Read properties. The properties file name must already 
-	 *  have been specified. After a read, the m_props field is
-	 *  updated, else it is set to null. */
-	public void read() {
-		FileInputStream in = getFileInputStream(m_fname);
-		if(in == null)
-			return;
+	 * @param fn Properties file name. If empty or null, client
+	 *	  props not used, which means they are not written. */
+	public UserProperties(String fn) {
 		try {
-			m_props = new Properties();
-			m_props.load(in);
-			System.err.println("User properties: read " + m_fname);
-			m_changed = false;
-		} catch(IOException ex) {
-			System.err.println("UserProperties: " + ex);
-			m_props = null;
-			return;
-		} finally {
-			try {
-				if(in != null)
-					in.close();
-			} catch(IOException ex) {
-				m_props = null;
-			}
+			file_name = SFile.getAbsolutePath(fn);
+		} catch(SecurityException ex) {
+			System.err.println("User properties: can't read " +
+				"specified file (" + fn + "): " + ex);
 		}
 	}
 
-	/** Get properties file input stream. */
-	public static FileInputStream getFileInputStream(String fname) {
+	/** Are properties used? */
+	public boolean getUsed() {
+		return file_name == null || !file_name.isEmpty();
+	}
+
+	/** Read properties. The properties file name must already 
+	 *  have been specified. */
+	public void read() {
+		FileInputStream in = getFileInputStream(file_name);
+		if(in == null)
+			return;
+		try {
+			user_props = new Properties();
+			user_props.load(in);
+			System.err.println("User properties: read " + 
+				file_name);
+			props_changed = false;
+		} catch(IOException ex) {
+			System.err.println("UserProperties: " + ex);
+			return;
+		} finally {
+			try {
+				in.close();
+			} catch(Exception ex) {}
+		}
+	}
+
+	/** Get properties file input stream. 
+	 * @param fname File name, may be null.
+	 * @return File input stream, else null if the file doesn't exist. */
+	private static FileInputStream getFileInputStream(String fname) {
 		if(fname == null || fname.isEmpty()) {
 			System.err.println("User properties: file " + 
 				"not specifed.");
@@ -114,31 +117,28 @@ public class UserProperties {
 	/** Write properties */
 	public void write() {
 		final String comment = "IRIS Client properties file";
-		if(used() && m_changed) {
-			if(!write(m_fname, m_props, comment))
-				m_changed = false;
-			System.err.println("Wrote properties file: " + m_fname);
+		if(getUsed() && props_changed) {
+			if(!write(file_name, user_props, comment))
+				props_changed = false;
+			System.err.println("Wrote props file: " + file_name);
 		}
 	}
 
-	/** Property exists? */
+	/** Does the specified property exist? */
 	private boolean propExists(String name) {
-		if(used())
-			return m_props.getProperty(name) != null;
-		else
-			return false;
+		return user_props.getProperty(name) != null;
 	}
 
 	/** Set a property */
 	private void setProp(String name, int i) {
-		if(used())
-			m_props.setProperty(name, new Integer(i).toString());
+		user_props.setProperty(name, 
+			new Integer(i).toString());
 	}
 
 	/** Get a property */
 	private int getPropInt(String name) {
 		if(propExists(name)) {
-			String p = m_props.getProperty(name).trim();
+			String p = user_props.getProperty(name).trim();
 			return Integer.parseInt(p);
 		} else
 			return 0;
@@ -146,8 +146,11 @@ public class UserProperties {
 
 	/** Is the window position avaiable? */
 	public boolean haveWindowPosition() {
-		return used() && propExists(WIN_X) && propExists(WIN_Y) &&
-			propExists(WIN_WIDTH) && propExists(WIN_HEIGHT);
+		boolean hwp = getUsed() && 
+			propExists(WIN_X) && propExists(WIN_Y) && 
+			propExists(WIN_WIDTH) && propExists(WIN_HEIGHT) && 
+			propExists(WIN_EXTSTATE);
+		return hwp;
 	}
 
 	/** Get window position from properties.
@@ -162,20 +165,37 @@ public class UserProperties {
 	/** Get window state from properties.
 	 * @return Window extended state. */
 	public int getWindowState() {
-		if(used()) {
+		if(getUsed()) {
 			int s = getPropInt(WIN_EXTSTATE);
-			if( s == JFrame.NORMAL || s == JFrame.MAXIMIZED_BOTH )
+			if(s == JFrame.NORMAL || s == JFrame.MAXIMIZED_BOTH)
 				return s;
 		}
 		return JFrame.NORMAL;
 	}
 
-	/** Update user properties associated with JFrame. */
-	public void setWindowProperties(JFrame frame) {
-		if(!used() || frame == null)
-			return;
+	/** Return the name of a selected tab prop name */
+	private String getTabPropName(int i) {
+		return TAB_SEL + "." + String.valueOf(i);
+	}
 
-		m_changed = true;
+	/** Get array of currently selected tabs (as Integers) in each pane */
+	public Object[] getSelectedTabs() {
+		ArrayList<Integer> sti = new ArrayList<Integer>();
+		final int MAX_SCREEN_PANES = 16;
+		for(int i = 0; i < MAX_SCREEN_PANES; ++i) {
+			String pn = getTabPropName(i);
+			if(!propExists(pn))
+				break;
+			sti.add(getPropInt(pn));
+		}
+		return sti.toArray();
+	}
+
+	/** Update user properties associated with JFrame. */
+	public void setWindowProperties(IrisClient frame) {
+		if(frame == null)
+			return;
+		props_changed = true;
 
 		// window extended state
 		int es = frame.getExtendedState();
@@ -190,6 +210,11 @@ public class UserProperties {
 			setProp(WIN_WIDTH, r.width);
 			setProp(WIN_HEIGHT, r.height);
 		}
+
+		// currently selected tabs in multiple screen panes
+		int[] sti = frame.getSelectedTabIndex();
+		for(int i = 0; i < sti.length; ++i)
+			setProp(getTabPropName(i), sti[i]);
 	}
 
 	/** Write properties file. 
@@ -197,7 +222,7 @@ public class UserProperties {
 	 * @param props Properties to write.
 	 * @param comment Comment inside file. 
 	 * @return False if error else true. */
-	static public boolean write(String fname, Properties props, 
+	static private boolean write(String fname, Properties props, 
 		String comment) 
 	{
 		FileOutputStream o = null;
@@ -205,7 +230,8 @@ public class UserProperties {
 			o = new FileOutputStream(fname);
 			props.store(o, comment);
 		} catch(IOException ex) {
-			System.err.println("PropertyLoader: " + ex);
+			System.err.println("UserProperties, unable to " + 
+				"write file (" + fname + "), ex=" + ex);
 			return false;
 		} finally {
 			try {
@@ -213,7 +239,8 @@ public class UserProperties {
 					o.close();
 				return true;
 			} catch(IOException ex) {
-				System.err.println("PropertyLoader: " + ex);
+				System.err.println("UserProperties: " + 
+					"PropertyLoader: " + ex);
 				return false;
 			}
 		}

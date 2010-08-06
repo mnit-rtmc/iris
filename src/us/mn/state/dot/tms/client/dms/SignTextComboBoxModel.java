@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +19,10 @@ import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.SwingUtilities;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Model for a sign text line combo box
@@ -83,27 +84,12 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** Get the selected item */
 	public Object getSelectedItem() {
 		SignText st = m_selected;
-		// this is a hack, see the note in ignoreLineHack
+		// filter lines that should be ignored
 		if(st != null && st instanceof ClientSignText) {
-			if(ignoreLineHack(st.getMessage()))
+			if(DMSHelper.ignoreLineFilter(st.getMessage()))
 				return BLANK_SIGN_TEXT;
 		}
 		return st;
-	}
-
-	/** 
-	 * This is a hack. It is used by the ComboBoxEditor and 
-	 * SignMessageModel to recognize when a sign message line
-	 * should be ignored. By convention, a line begining and
-	 * ending with an underscore is to be ignored. IRIS assumes
-	 * that non-blank DMS messages have both a bitmap and multistring,
-	 * which is not the case for D10, so a bogus multistring is created
-	 * in comm/dmslite (with a prepended and appended underscore). 
-	 */
-	static public boolean ignoreLineHack(String line) {
-		if(line == null)
-			return false;
-		return SString.enclosedBy(line, "_");
 	}
 
 	/** 

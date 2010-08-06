@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -338,17 +339,17 @@ public class DMSHelper extends BaseHelper {
 	}
 
 	/** Determine if the DMS is periodically queriable. */
-	public static boolean isPeriodicallyQueriable(DMS d) {
+	static public boolean isPeriodicallyQueriable(DMS d) {
 		// FIXME: signAccess is supposed to indicate the *physical*
 		//        access of the DMS.  It was never intended to be used
 		//        in this manner.  We should really lookup the comm
 		//        link and figure it out from there. This is presently
 		//	  agency specific code (Caltrans).
-		return !SString.containsIgnoreCase(d.getSignAccess(), "modem");
+		return !SString.containsIgnoreCase(d.getSignAccess(), "dialup");
 	}
 
 	/** Get current sign message text as an array of strings. */
-	public static String[] getText(DMS proxy) {
+	static public String[] getText(DMS proxy) {
 		SignMessage sm = proxy.getMessageCurrent();
 		if(sm != null) {
 			String multi = sm.getMulti();
@@ -361,7 +362,7 @@ public class DMSHelper extends BaseHelper {
 	/** Return a single string which is formated to be readable 
 	 *  by the user and contains all sign message lines on the 
 	 *  specified DMS. */
-	public static String buildMsgLine(DMS proxy) {
+	static public String buildMsgLine(DMS proxy) {
 		String[] lines = getText(proxy);
 		StringBuilder ret = new StringBuilder();
 		for(int i = 0; i < lines.length; ++i) {
@@ -371,5 +372,37 @@ public class DMSHelper extends BaseHelper {
 				ret.append(" / ");
 		}
 		return ret.toString();
+	}
+
+	/** Messages lines that flag no DMS message text available */
+	public final static String NOTXT_L1 = "_OTHER_";
+	public final static String NOTXT_L2 = "_SYSTEM_";
+	public final static String NOTXT_L3 = "_MESSAGE_";
+
+	/** Filter the specified multi. If certain keywords are present then
+	 * a blank multi is returned. The keywords indicate no text is 
+	 * available for the associated bitmap.
+	 * @return A blank multi if the argument multi flags no text, 
+	 *         else the specified multi. */
+	static public MultiString ignoreFilter(MultiString ms) {
+		String s = ms.toString();
+		boolean ignore = s.contains(NOTXT_L1) && s.contains(NOTXT_L2) 
+			&& s.contains(NOTXT_L3);
+		if(ignore)
+			ms = new MultiString();
+		return ms;
+	}
+
+	/** 
+	 * Return true if the specified message line should be ignored. 
+	 * By convention, a line begining and ending with an underscore 
+	 * is to be ignored. IRIS assumes non-blank DMS messages have 
+	 * both a bitmap and multistring, which is not the case for all
+	 * DMS protocols.
+	 */
+	static public boolean ignoreLineFilter(String line) {
+		if(line == null)
+			return false;
+		return SString.enclosedBy(line, "_");
 	}
 }

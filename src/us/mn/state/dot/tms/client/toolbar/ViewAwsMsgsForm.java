@@ -255,7 +255,7 @@ public class ViewAwsMsgsForm extends AbstractForm {
 	/** Get the AWS read time in seconds. This is the number of seconds
 	 *  to wait after :00 and :30 to read the AWS messages. */
 	public static int getAwsReadTimeSecs() {
-		int secs = SystemAttrEnum.DMS_AWS_READ_TIME.getInt();
+		int secs = SystemAttrEnum.DMS_AWS_READ_OFFSET.getInt();
 		secs = (secs < 0 ? 0 : secs);
 		secs = (secs > 29 ? 29 : secs);
 		return secs;

@@ -383,6 +383,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		}
 		if(a == null || a.equals("awsControlled"))
 			awsControlledCbx.setSelected(dms.getAwsControlled());
+		if(a == null || a.equals("opStatus"))
+			opStatusTxt.setText(dms.getOpStatus());
 	}
 
 	/** Update the current panel */

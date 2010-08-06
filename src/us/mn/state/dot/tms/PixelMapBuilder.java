@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -168,6 +169,7 @@ public class PixelMapBuilder {
 		BitmapGraphic bg = new BitmapGraphic(width, height);
 		MultiRenderer mr = new MultiRenderer(bg, p, c_width, c_height,
 			getDefaultFontNumber());
+		ms = DMSHelper.ignoreFilter(ms);
 		ms.parse(mr);
 		mr.complete();
 		// FIXME: check MultiRenderer.syntax_err
