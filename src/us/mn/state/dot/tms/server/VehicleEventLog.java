@@ -21,11 +21,11 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.TimeSteward;
 
 /**
- * The event logger logs vehicle detection events
+ * The vehicle event log records vehicle detection events.
  *
  * @author Douglas Lau
  */
-public class EventLogger {
+public class VehicleEventLog {
 
 	/** Maximum logged headway is 90 seconds */
 	static protected final int MAX_HEADWAY = 90 * 1000;
@@ -36,8 +36,8 @@ public class EventLogger {
 	/** Previous file location */
 	private File file;
 
-	/** Create a new vehicle event logger */
-	public EventLogger(SampleArchiveFactory f) {
+	/** Create a new vehicle event log */
+	public VehicleEventLog(SampleArchiveFactory f) {
 		factory = f;
 	}
 

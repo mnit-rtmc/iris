@@ -76,9 +76,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 			SAMPLE_PERIOD_SEC);
 	}
 
-	/** Create a vehicle event logger */
-	static protected EventLogger createVehicleLogger(String n) {
-		return new EventLogger(new SampleArchiveFactoryImpl(n,
+	/** Create a vehicle event log */
+	static protected VehicleEventLog createVehicleEventLog(String n) {
+		return new VehicleEventLog(new SampleArchiveFactoryImpl(n,
 			".vlog"));
 	}
 
@@ -152,7 +152,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		vol_cache = createVolumeCache(n);
 		scn_cache = createScanCache(n);
 		spd_cache = createSpeedCache(n);
-		v_log = createVehicleLogger(n);
+		v_log = createVehicleEventLog(n);
 		initTransients();
 	}
 
@@ -172,7 +172,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		vol_cache = createVolumeCache(n);
 		scn_cache = createScanCache(n);
 		spd_cache = createSpeedCache(n);
-		v_log = createVehicleLogger(n);
+		v_log = createVehicleEventLog(n);
 	}
 
 	/** Create a detector */
@@ -746,8 +746,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		}
 	}
 
-	/** Vehicle event logger */
-	protected transient final EventLogger v_log;
+	/** Vehicle event log */
+	protected transient final VehicleEventLog v_log;
 
 	/** Count of vehicles in current sampling period */
 	protected transient int ev_vehicles = 0;
