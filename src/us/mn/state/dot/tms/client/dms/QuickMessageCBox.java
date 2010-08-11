@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,8 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.util.LinkedList;
+import java.util.Iterator;
+import java.util.TreeSet;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.sonar.Checker;
@@ -28,6 +31,7 @@ import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * The quick message combobox is a widget which allows the user to select
@@ -167,9 +171,11 @@ public class QuickMessageCBox extends JComboBox {
 		return getQuickLibMsgName(getSelectedItem());
 	}
 
-	/** Populate the quick message model */
+	/** Populate the quick message model, with sorted quick messages */
 	public void populateModel(DMS dms) {
 		model.removeAllElements();
+
+		// Build list
 		final LinkedList<QuickMessage> msgs =
 			new LinkedList<QuickMessage>();
 		for(SignGroup sg: SignGroupHelper.find(dms)) {
@@ -182,10 +188,23 @@ public class QuickMessageCBox extends JComboBox {
 				}
 			});
 		}
-		// This cannot be done inside a Checker because of deadlocks
+
+		// Add to tree
+		NumericAlphaComparator comp = new NumericAlphaComparator();
+		final TreeSet<QuickMessageC> sorted =
+			new TreeSet<QuickMessageC>(comp);
 		adjusting++;
-		for(QuickMessage qm: msgs)
-			model.addElement(qm);
+ 		for(QuickMessage qm: msgs)
+			sorted.add(new QuickMessageC(qm));
+		adjusting--;
+
+		// Add to model: can't be done inside Checker due to deadlocks.
+		Iterator<QuickMessageC> iter = sorted.iterator();
+		adjusting++;
+		while(iter.hasNext()) {
+			QuickMessageC qmc = iter.next();
+			model.addElement(qmc.get());
+		}
 		adjusting--;
 	}
 
@@ -194,5 +213,27 @@ public class QuickMessageCBox extends JComboBox {
 		removeActionListener(action_listener);
 		getEditor().getEditorComponent().
 			removeFocusListener(focus_listener);
+	}
+
+	/** A comparable QuickMessage which is used for sorting. */
+	private class QuickMessageC implements Comparable<QuickMessageC> {
+		private QuickMessage quick_msg;
+		public QuickMessageC(QuickMessage qm) {
+			quick_msg = qm;
+		}
+		public QuickMessage get() {
+			return quick_msg;
+		}
+		public String getName() {
+			return quick_msg.getName();
+		}
+		public String toString() {
+			return getName();
+		}
+		public int compareTo(QuickMessageC qm) {
+			String a = quick_msg.getName();
+			String b = qm.getName();
+			return NumericAlphaComparator.compareStrings(a, b);
+		}
 	}
 }
