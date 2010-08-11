@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return cl.getDescription();
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl);
+				return canUpdate(cl, "description");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				cl.setDescription(value.toString().trim());
@@ -82,7 +82,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return cl.getUrl();
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl);
+				return canUpdate(cl, "url");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				cl.setUrl(value.toString().trim());
@@ -101,7 +101,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return PROTOCOLS.get(cl.getProtocol());
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl);
+				return canUpdate(cl, "protocol");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				cl.setProtocol(Short.valueOf(
@@ -118,7 +118,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return cl.getTimeout();
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl);
+				return canUpdate(cl, "timeout");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				if(value instanceof Integer)
