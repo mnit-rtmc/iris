@@ -374,6 +374,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Set the station ID */
 	public void doSetStationID(String s) throws TMSException {
+		if("".equals(s))
+			s = null;
 		if(s == station_id || (s != null && s.equals(station_id)))
 			return;
 		store.update(this, "station_id", s);

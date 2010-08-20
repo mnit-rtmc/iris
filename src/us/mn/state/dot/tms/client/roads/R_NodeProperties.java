@@ -189,10 +189,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 			public void perform() {
 				if(wasLost()) {
 					String s = station_id.getText().trim();
-					if(s.equals(""))
-						proxy.setStationID(null);
-					else
-						proxy.setStationID(s);
+					proxy.setStationID(s);
 				}
 			}
 		};
