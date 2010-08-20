@@ -9,7 +9,10 @@
 	<homepage href="index.html"/>
 	<description>Intelligent Roadway Information System</description>
 	<icon href="images/iris_icon.png"/>
-	<offline/>
+	<shortcut>
+		<desktop/>
+		<menu/>
+	</shortcut>
     </information>
     <resources>
 	<j2se version="1.6+" max-heap-size="256m"/>
