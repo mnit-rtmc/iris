@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  Minnesota Department of Transportation
- * Copyright (C) 2009 - 2010  AHMCT, University of California
+ * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -216,14 +216,13 @@ public class MsgComboBox extends JComboBox {
 	/** Get message text */
 	public String getMessage() {
 		Object o = getSelectedItem();
-		String ret = "";
 		if(o instanceof SignText) {
 			if(edit_mode == EditMode.ALWAYS)
-				ret = formatItem(editor.getItem());
+				return formatItem(editor.getItem());
 			else
-				ret = ((SignText)o).getMessage();
-		}
-		return ret;
+				return ((SignText)o).getMessage();
+		} else
+			return "";
 	}
 
 	/** Editor for message combo box */
