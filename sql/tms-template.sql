@@ -1319,12 +1319,12 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_num_preset_btns	3
 camera_num_video_frames	900
 camera_ptz_panel_enable	false
-database_version	3.121.0
+database_version	3.122.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_log_enable	false
 dms_aws_log_filename	/var/www/html/awsreport.txt
-dms_aws_read_time	0
+dms_aws_read_offset	0
 dms_aws_retry_threshold	6
 dms_brightness_enable	true
 dms_default_justification_line	3

@@ -11,6 +11,40 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.122.0 (24 August 2010)</dt>
+	<dd><ul>
+		<li>
+			Fixed a couple of minor problems with the variable
+			speed advisory code.
+		</li>
+		<li>
+			Fixed a problem with precipitation sample data files.
+		</li>
+		<li>
+			Refactored AwsStatusPanel widget.
+		</li>
+		<li>
+			Added a couple of features to user properties file.
+		</li>
+		<li>
+			Fixed a number of client bugs.
+		</li>
+		<li>
+			Renamed dms_aws_read_time system attribute to
+			dms_aws_read_offset.
+		</li>
+		<li>
+			Fixed a rare SQL exception related to r_nodes.
+		</li>
+		<li>
+			Fixed an exception with vehicle event logging.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.122.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.121.0 (5 August 2010)</dt>
 	<dd><ul>
 		<li>
