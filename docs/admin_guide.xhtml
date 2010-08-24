@@ -22,7 +22,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">5 August 2010</div>
+<div id="stamp">24 August 2010</div>
 <h1>IRIS Administrator Guide</h1>
 
 <h2 id="overview">Overview
@@ -497,7 +497,57 @@ FIXME
 FIXME
 
 <h3>Coding Style</h3>
-FIXME
+<p>
+	The coding style for IRIS is focused on making code more readable.
+	Readability is the most important factor for software maintenance,
+	and it also helps new developers who are unfamiliar with the codebase.
+</p>
+<p>
+	First and foremost, it is recommended that each method fit in one page
+	of text (30 lines by 80 columns).
+	Whenever possible, longer methods should be decomposed to abide by this
+	recommendation.
+	This allows a developer to quickly read and understand the method's
+	logic.
+	It is much easier to spot and correct bugs in shorter methods.
+	There should be no blank lines within a method.
+</p>
+<p>
+	With methods longer than one page, it can be beneficial to have a
+	single exit point (return).
+	But for shorter methods (always the goal), this is not so important,
+	and can reduce readability.
+	It doesn't make sense to add a local "ret" variable with a single
+	return statement at the end when the whole method can be read at a
+	glance.
+</p>
+<p>
+	Each block indent should be 8 columns (using tabs instead of spaces).
+	This makes the blocks more obvious, and is easier to read than the 4
+	spaces commonly used in other Java projects.
+	Always use an indented block with if, for, while, etc. statements.
+	This makes it much easier to follow the control flow than when it is
+	combined onto the same line as the statement.
+	Don't put an opening curly brace on a line by itself unless the method
+	declaration or loop statement spans multiple lines.
+	For single line blocks (if, for, while), do not use curly braces.
+</p>
+<p>
+	Each method should have a javadoc comment describing its purpose.
+	All parameters and return values should be documented as well.
+	Comments within a method should be used sparingly &mdash; never
+	describe what the code is doing, but instead <b>why</b> it was written
+	in a certain way.
+	Code which is "commented out" should <b>never</b> be committed to a
+	repository.
+</p>
+<p>
+	Unary operators, such as ++ -- ! ~ should be adjacent to their operand
+	with no space.
+	Binary operators, such as + - / * % &amp; | &amp;&amp; || &gt; = &lt;
+	&gt;&gt; == != &lt;&lt; &gt;&gt;&gt; &gt;= &lt;= ^ should be separated
+	from their operands by a space.
+</p>
 
 </div>
 
