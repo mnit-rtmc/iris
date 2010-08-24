@@ -20,8 +20,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.util.LinkedList;
-import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -174,10 +172,8 @@ public class QuickMessageCBox extends JComboBox {
 	/** Populate the quick message model, with sorted quick messages */
 	public void populateModel(DMS dms) {
 		model.removeAllElements();
-
-		// Build list
-		final LinkedList<QuickMessage> msgs =
-			new LinkedList<QuickMessage>();
+		final TreeSet<QuickMessage> msgs = new TreeSet<QuickMessage>(
+			new NumericAlphaComparator<QuickMessage>());
 		for(SignGroup sg: SignGroupHelper.find(dms)) {
 			final SignGroup group = sg;
 			QuickMessageHelper.find(new Checker<QuickMessage>() {
@@ -189,22 +185,10 @@ public class QuickMessageCBox extends JComboBox {
 			});
 		}
 
-		// Add to tree
-		NumericAlphaComparator comp = new NumericAlphaComparator();
-		final TreeSet<QuickMessageC> sorted =
-			new TreeSet<QuickMessageC>(comp);
-		adjusting++;
- 		for(QuickMessage qm: msgs)
-			sorted.add(new QuickMessageC(qm));
-		adjusting--;
-
 		// Add to model: can't be done inside Checker due to deadlocks.
-		Iterator<QuickMessageC> iter = sorted.iterator();
 		adjusting++;
-		while(iter.hasNext()) {
-			QuickMessageC qmc = iter.next();
-			model.addElement(qmc.get());
-		}
+		for(QuickMessage qm: msgs)
+			model.addElement(qm);
 		adjusting--;
 	}
 
@@ -213,27 +197,5 @@ public class QuickMessageCBox extends JComboBox {
 		removeActionListener(action_listener);
 		getEditor().getEditorComponent().
 			removeFocusListener(focus_listener);
-	}
-
-	/** A comparable QuickMessage which is used for sorting. */
-	private class QuickMessageC implements Comparable<QuickMessageC> {
-		private QuickMessage quick_msg;
-		public QuickMessageC(QuickMessage qm) {
-			quick_msg = qm;
-		}
-		public QuickMessage get() {
-			return quick_msg;
-		}
-		public String getName() {
-			return quick_msg.getName();
-		}
-		public String toString() {
-			return getName();
-		}
-		public int compareTo(QuickMessageC qm) {
-			String a = quick_msg.getName();
-			String b = qm.getName();
-			return NumericAlphaComparator.compareStrings(a, b);
-		}
 	}
 }
