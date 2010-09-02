@@ -61,7 +61,7 @@ public class GraphicForm extends AbstractForm {
 	static protected final int MAX_GRAPHIC_HEIGHT = 144;
 
 	/** Maximum allowed graphic width */
-	static protected final int MAX_GRAPHIC_WIDTH = 144;
+	static protected final int MAX_GRAPHIC_WIDTH = 200;
 
 	/** Table model for graphics */
 	protected final GraphicModel model;
