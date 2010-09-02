@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>Mapping Requirements</title>
+</head>
+
+<body>
+<p id="stamp">27 August 2010</p>
+<h2>Projection: UTM vs Spherical Mercator</h2>
+<p>
+	IRIS has previously only used a UTM projection for displaying maps.
+	UTM has a couple of advantages over a traditional mercator projection.
+	With UTM, there is much less distortion.
+	With mercator, distortion is least at the equator, and gets worse as
+	you approach the poles.
+	With UTM, the planet is divided into 60 zones, and distortion is least
+	near the meridian of the zone.
+	Also, since UTM coordinates are in meters, it is easy to calculate
+	distance between two points.
+</p>
+<p>
+	Unfortunately, UTM also has a couple of disadvantages.
+	If a map needs to cover more than one zone, then a single zone needs
+	to be selected.
+	Coordinates from other zones must then be projected onto the selected
+	zone.
+	Also, all the major web-based mapping tools have standardized on a
+	spherical mercator projection.
+	This makes it difficult to use external maps directly in a UTM map.
+</p>
+<p>
+	In order to leverage other resources for IRIS mapping, we must
+	transition to a spherical mercator projection.
+	Existing vector layers will also need to use this projection, otherwise
+	they won't line up with the basemap.
+	So all GeoLoc objects in IRIS will have to be converted from UTM
+	Easting/Northing to lat/lon coordinates.
+</p>
+<h2>Mapping Data</h2>
+<div class='right'>
+<img src='osm_sample.png'/>
+</div>
+<p>
+	Since IRIS is an Open Source project, we don't want to rely on a
+	proprietary data set for mapping.
+	Luckily, there is a non-proprietary source of high-quality mapping data.
+	<a href="http://openstreetmap.org">OpenStreetMap</a> currently has all
+	mapping data available in a <a
+	href="http://creativecommons.org/licenses/by-sa/2.0/">CC-By-SA
+	license</a>. 
+	This allows IRIS to embed maps, while only requiring attribution.
+</p>
+<p>
+	We have built a tile rendering server using the OpenStreetMap data.
+	Because of the high quality of the tools, we were able to create a set
+	of tiles for the state of Minnesota in about a week.
+	The mapnik rendering process allows us to tweak the colors and other
+	style of the map so it will integrate well within IRIS.
+	This is one of the key benifits of using OpenStreetMap.
+</p>
+<h2>Tiling Layout</h2>
+<p>
+	There are a few different ways to make map tiles available.
+	Web map service (WMS), Tile map service (TMS) and the simple
+	OpenStreetMap tile layout.
+	To display tiles within IRIS, a new Layer class must be developed
+	for each map service.
+	We will start with a Layer for the OpenStreetMap layout, since it is
+	the simplest.
+	WMS and TMS are more complicated, but it is possible to add support at
+	a later date.
+</p>
+<h2>External Vector Layers</h2>
+<p>
+	It would be useful to allow external vector layers to be displayed in
+	IRIS.
+	These layers are commonly published in KML files.
+	To support this, a new KmlLayer class must be developed.
+</p>
+<h2>Trafdat VDS Service</h2>
+<p>
+	Vehicle detection sample data is served by the Trafdat server.
+	Currently, this data is accessed using the Datatools program.
+	There is also a web-based client in development which may someday
+	replace the Datatools program.
+	This web client could utilize the OpenLayers JavaScript library to
+	display an interactive map.
+	IRIS would then publish the VDS locations as a KML file.
+	This would allow users to select VDS directly from the map to create
+	plots and spreadsheets.
+</p>
+</body>
+</html>
