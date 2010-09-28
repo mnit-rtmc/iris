@@ -317,11 +317,12 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the default font number for a DMS */
 	static public int getDefaultFontNumber(DMS dms) {
-		Font f = dms.getDefaultFont();
-		if(f != null)
-			return f.getNumber();
-		else
-			return FontHelper.DEFAULT_FONT_NUM;
+		if(dms != null) {
+			Font f = dms.getDefaultFont();
+			if(f != null)
+				return f.getNumber();
+		}
+		return FontHelper.DEFAULT_FONT_NUM;
 	}
 
 	/** Create a pixel map builder for a DMS.
