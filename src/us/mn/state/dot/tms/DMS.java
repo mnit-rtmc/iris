@@ -47,6 +47,12 @@ public interface DMS extends Device {
 	/** Is sign controlled by Automated Warning System? */
 	boolean getAwsControlled();
 
+	/** Set the default font */
+	void setDefaultFont(Font f);
+
+	/** Get the default font */
+	Font getDefaultFont();
+
 	/* Transient attributes (not stored in database) */
 
 	/** Get the make */

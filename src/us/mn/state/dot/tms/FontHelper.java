@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import us.mn.state.dot.sonar.Checker;
 public class FontHelper extends BaseHelper {
 
 	/** Fixed default font number */
-	public static final int DEFAULT_FONT_NUM = 1;
+	static public final int DEFAULT_FONT_NUM = 1;
 
 	/** Disallow instantiation */
 	private FontHelper() {

@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
  * Cache for DMS proxy objects.
@@ -38,6 +39,14 @@ public class DmsCache {
 	/** Get the font type cache */
 	public TypeCache<Font> getFonts() {
 		return fonts;
+	}
+
+	/** Font proxy list model */
+	protected final ProxyListModel<Font> font_model;
+
+	/** Get the font list model */
+	public ProxyListModel<Font> getFontModel() {
+		return font_model;
 	}
 
 	/** Cache of glyph proxies */
@@ -101,6 +110,8 @@ public class DmsCache {
 		NoSuchFieldException
 	{
 		fonts = new TypeCache<Font>(Font.class, client);
+		font_model = new ProxyListModel<Font>(fonts);
+		font_model.initialize();
 		glyphs = new TypeCache<Glyph>(Glyph.class, client);
 		sign_messages = new TypeCache<SignMessage>(SignMessage.class,
 			client);

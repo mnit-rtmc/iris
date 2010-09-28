@@ -31,6 +31,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
@@ -67,6 +68,9 @@ public class SignMessageComposer extends JPanel {
 
 	/** Tab pane to hold pages */
 	protected final JTabbedPane pages = new JTabbedPane(JTabbedPane.RIGHT);
+
+	/** Default font number */
+	protected int default_font = FontHelper.DEFAULT_FONT_NUM;
 
 	/** Pixel map builder for the selected sign */
 	protected PixelMapBuilder builder;
@@ -211,6 +215,7 @@ public class SignMessageComposer extends JPanel {
 	/** Update the message combo box models */
 	public void setSign(DMS proxy, PixelMapBuilder b) {
 		builder = b;
+		default_font = DMSHelper.getDefaultFontNumber(proxy);
 		SignTextModel stm = createSignTextModel(proxy);
 		setSignTextModel(stm);
 		initializeWidgets();
@@ -474,23 +479,13 @@ public class SignMessageComposer extends JPanel {
 	/** Set all font comboboxes using the specified MultiString */
 	protected void setFontComboBoxes(MultiString ms) {
 		final FontComboBox[] fc = fontCmb;	// Avoid races
-		final int dfnum = getDefaultFontNumber();
-		int[] fnum = ms.getFonts(dfnum);
+		int[] fnum = ms.getFonts(default_font);
 		for(int i = 0; i < fc.length; i++) {
 			if(i < fnum.length)
 				fc[i].setSelectedFontNumber(fnum[i]);
 			else
-				fc[i].setSelectedFontNumber(dfnum);
+				fc[i].setSelectedFontNumber(default_font);
 		}
-	}
-
-	/** Get default font number for the selected DMS */
-	protected int getDefaultFontNumber() {
-		PixelMapBuilder b = builder;	// Avoid race
-		if(b != null)
-			return b.getDefaultFontNumber();
-		else
-			return FontHelper.DEFAULT_FONT_NUM;
 	}
 
 	/** Set the selected message for a message line combo box */
@@ -505,9 +500,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Clear the font comboboxes */
 	public void clearFonts() {
-		final int dfnum = getDefaultFontNumber();
 		for(FontComboBox f: fontCmb)
-			f.setSelectedFontNumber(dfnum);
+			f.setSelectedFontNumber(default_font);
 	}
 
 	/** Update the message library with the currently selected messages */

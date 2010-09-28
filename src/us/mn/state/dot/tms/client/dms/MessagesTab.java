@@ -22,6 +22,8 @@ import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -34,6 +36,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignGroup;
@@ -41,6 +44,7 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.TmsForm;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -74,6 +78,9 @@ public class MessagesTab extends JPanel {
 	protected final SignPixelPanel pixel_panel = new SignPixelPanel(true,
 		new Color(0, 0, 0.4f));
 
+	/** Default font combo box */
+	protected final JComboBox font_cmb = new JComboBox();
+
 	/** AWS allowed component */
 	protected final JCheckBox awsAllowed = new JCheckBox(
 		I18N.get("dms.aws.allowed"));
@@ -102,6 +109,8 @@ public class MessagesTab extends JPanel {
 		initGroupTable();
 		initSignTextTable();
 		createActions();
+		font_cmb.setModel(new WrapperComboBoxModel(
+			dms_cache.getFontModel()));
 		initWidgets();
 	}
 
@@ -148,12 +157,21 @@ public class MessagesTab extends JPanel {
 		bag.weightx = 0.1f;
 		bag.weighty = 0.1f;
 		add(createPreviewPanel(), bag);
+		bag.gridx = 0;
+		bag.gridy = 3;
+		bag.gridwidth = 1;
+		bag.fill = GridBagConstraints.NONE;
+		bag.weightx = 0;
+		bag.weighty = 0;
+		bag.anchor = GridBagConstraints.EAST;
+		add(new JLabel("Default Font"), bag);
+		bag.gridx = 1;
+		bag.anchor = GridBagConstraints.WEST;
+		add(font_cmb, bag);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			bag.gridy = 3;
-			bag.gridwidth = 1;
-			bag.fill = GridBagConstraints.NONE;
-			bag.weightx = 0;
-			bag.weighty = 0;
+			bag.anchor = GridBagConstraints.NONE;
+			bag.gridy = 4;
+			bag.gridx = 0;
 			add(awsAllowed, bag);
 			bag.gridx = 1;
 			add(awsControlled, bag);
@@ -184,6 +202,12 @@ public class MessagesTab extends JPanel {
 				SignText sign_text = getSelectedSignText();
 				if(sign_text != null)
 					sign_text.destroy();
+			}
+		};
+		new ActionJob(this, font_cmb) {
+			public void perform() {
+				proxy.setDefaultFont(
+					(Font)font_cmb.getSelectedItem());
 			}
 		};
 		new ActionJob(this, awsAllowed) {
@@ -353,7 +377,8 @@ public class MessagesTab extends JPanel {
 		Integer ch = proxy.getCharHeightPixels();
 		if(w == null || h == null || cw == null || ch == null)
 			return new BitmapGraphic[0];
-		PixelMapBuilder b = new PixelMapBuilder(w, h, cw, ch);
+		int df = DMSHelper.getDefaultFontNumber(proxy);
+		PixelMapBuilder b = new PixelMapBuilder(w, h, cw, ch, df);
 		return b.createPixmaps(ms);
 	}
 
@@ -368,6 +393,8 @@ public class MessagesTab extends JPanel {
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
+		if(a == null || a.equals("defaultFont"))
+			font_cmb.setSelectedItem(proxy.getDefaultFont());
 		if(a == null || a.equals("awsAllowed"))
 			awsAllowed.setSelected(proxy.getAwsAllowed());
 		if(a == null || a.equals("awsControlled"))

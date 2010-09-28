@@ -553,7 +553,8 @@ CREATE TABLE iris._dms (
 	notes text NOT NULL,
 	camera VARCHAR(10) REFERENCES iris._camera,
 	aws_allowed BOOLEAN NOT NULL,
-	aws_controlled BOOLEAN NOT NULL
+	aws_controlled BOOLEAN NOT NULL,
+	default_font VARCHAR(16) REFERENCES iris.font
 );
 
 ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
@@ -561,14 +562,15 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 
 CREATE VIEW iris.dms AS SELECT
 	d.name, geo_loc, controller, pin, notes, camera, aws_allowed,
-	aws_controlled
+	aws_controlled, default_font
 	FROM iris._dms dms JOIN iris._device_io d ON dms.name = d.name;
 
 CREATE RULE dms_insert AS ON INSERT TO iris.dms DO INSTEAD
 (
 	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._dms VALUES (NEW.name, NEW.geo_loc, NEW.notes,
-		NEW.camera, NEW.aws_allowed, NEW.aws_controlled);
+		NEW.camera, NEW.aws_allowed, NEW.aws_controlled,
+		NEW.default_font);
 );
 
 CREATE RULE dms_update AS ON UPDATE TO iris.dms DO INSTEAD
@@ -582,7 +584,8 @@ CREATE RULE dms_update AS ON UPDATE TO iris.dms DO INSTEAD
 		notes = NEW.notes,
 		camera = NEW.camera,
 		aws_allowed = NEW.aws_allowed,
-		aws_controlled = NEW.aws_controlled
+		aws_controlled = NEW.aws_controlled,
+		default_font = NEW.default_font
 	WHERE name = OLD.name;
 );
 
@@ -938,7 +941,7 @@ GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.camera,
-	d.aws_allowed, d.aws_controlled,
+	d.aws_allowed, d.aws_controlled, d.default_font,
 	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing
 	FROM iris.dms d
@@ -1319,7 +1322,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_num_preset_btns	3
 camera_num_video_frames	900
 camera_ptz_panel_enable	false
-database_version	3.122.0
+database_version	3.123.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_log_enable	false

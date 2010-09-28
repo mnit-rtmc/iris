@@ -41,6 +41,9 @@ public class PixelMapBuilder {
 	 * Use 0 for full-matrix signs. */
 	protected final int c_height;
 
+	/** Default font number */
+	protected final int default_font;
+
 	/**
 	 * Create a new pixel map builder.
 	 * @param w Sign width in pixels.
@@ -49,12 +52,14 @@ public class PixelMapBuilder {
 	 *           Use 0 for line-matrix or full-matrix signs.
 	 * @param ch Character height (pixels) for character- or line-matrix
 	 *           signs.  Use 0 for full-matrix signs.
+	 * @param df Default font number.
 	 */
-	public PixelMapBuilder(int w, int h, int cw, int ch) {
+	public PixelMapBuilder(int w, int h, int cw, int ch, int df) {
 		width = w;
 		height = h;
 		c_width = cw;
 		c_height = ch;
+		default_font = df;
 	}
 
 	/** Find all matching fonts */
@@ -132,27 +137,11 @@ public class PixelMapBuilder {
 	public int getLineHeightPixels() {
 		if(c_height > 0)
 			return c_height;
-		Font f = getDefaultFont();
+		Font f = FontHelper.find(default_font);
 		if(f != null)
 			return f.getHeight() + f.getLineSpacing();
 		else
 			return height;
-	}
-
-	/** Get the default font */
-	protected Font getDefaultFont() {
-		FontFinder ff = new FontFinder();
-		FontHelper.find(ff);
-		return ff.getFirstFont();
-	}
-
-	/** Get the default font number */
-	public int getDefaultFontNumber() {
-		Font f = getDefaultFont();
-		if(f != null)
-			return f.getNumber();
-		else
-			return 1;
 	}
 
 	/** Render a BitmapGraphic for each page */
@@ -168,7 +157,7 @@ public class PixelMapBuilder {
 	protected BitmapGraphic createBitmap(MultiString ms, int p) {
 		BitmapGraphic bg = new BitmapGraphic(width, height);
 		MultiRenderer mr = new MultiRenderer(bg, p, c_width, c_height,
-			getDefaultFontNumber());
+			default_font);
 		ms = DMSHelper.ignoreFilter(ms);
 		ms.parse(mr);
 		mr.complete();

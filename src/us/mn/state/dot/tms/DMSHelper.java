@@ -317,9 +317,9 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the default font number for a DMS */
 	static public int getDefaultFontNumber(DMS dms) {
-		PixelMapBuilder b = createPixelMapBuilder(dms);
-		if(b != null)
-			return b.getDefaultFontNumber();
+		Font f = dms.getDefaultFont();
+		if(f != null)
+			return f.getNumber();
 		else
 			return FontHelper.DEFAULT_FONT_NUM;
 	}
@@ -332,8 +332,9 @@ public class DMSHelper extends BaseHelper {
 		Integer h = dms.getHeightPixels();
 		Integer cw = dms.getCharWidthPixels();
 		Integer ch = dms.getCharHeightPixels();
+		int df = getDefaultFontNumber(dms);
 		if(w != null && h != null && cw != null && ch != null)
-			return new PixelMapBuilder(w, h, cw, ch);
+			return new PixelMapBuilder(w, h, cw, ch, df);
 		else
 			return null;
 	}

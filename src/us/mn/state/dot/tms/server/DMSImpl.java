@@ -37,6 +37,8 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
@@ -93,8 +95,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		System.err.println("Loading DMS...");
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"camera, aws_allowed, aws_controlled FROM iris." +
-			SONAR_TYPE  + ";", new ResultFactory()
+			"camera, aws_allowed, aws_controlled, default_font " +
+			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(namespace,
@@ -105,7 +107,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 					row.getString(5),	// notes
 					row.getString(6),	// camera
 					row.getBoolean(7),	// aws_allowed
-					row.getBoolean(8)      // aws_controlled
+					row.getBoolean(8),     // aws_controlled
+					row.getString(9)	// default_font
 				));
 			}
 		});
@@ -122,6 +125,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		map.put("camera", camera);
 		map.put("aws_allowed", awsAllowed);
 		map.put("aws_controlled", awsControlled);
+		map.put("default_font", default_font);
 		return map;
 	}
 
@@ -153,13 +157,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a dynamic message sign */
 	protected DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, Camera cam, boolean aa, boolean ac)
+		int p, String nt, Camera cam, boolean aa, boolean ac, Font df)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
 		camera = cam;
 		awsAllowed = aa;
 		awsControlled = ac;
+		default_font = df;
 		travel_est = new TravelTimeEstimator(loc);
 		advisory = new SpeedAdvisoryCalculator(loc);
 		initTransients();
@@ -167,12 +172,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a dynamic message sign */
 	protected DMSImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, String cam, boolean aa, boolean ac)
+		int p, String nt, String cam, boolean aa, boolean ac, String df)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
 		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
 		     p, nt, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
-		     aa, ac);
+		     aa, ac, FontHelper.lookup(df));
 	}
 
 	/** Create a blank message for the sign */
@@ -295,6 +300,27 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Is sign controlled by Automated Warning System? */
 	public boolean getAwsControlled() {
 		return awsControlled;
+	}
+
+	/** Default font */
+	protected Font default_font;
+
+	/** Set the default font */
+	public void setDefaultFont(Font f) {
+		default_font = f;
+	}
+
+	/** Set the default font */
+	public void doSetDefaultFont(Font f) throws TMSException {
+		if(f == default_font)
+			return;
+		store.update(this, "default_font", f);
+		setDefaultFont(f);
+	}
+
+	/** Get the default font */
+	public Font getDefaultFont() {
+		return default_font;
 	}
 
 	/** Make (manufacturer) */
