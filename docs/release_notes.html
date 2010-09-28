@@ -11,6 +11,17 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.123.0 (28 September 2010)</dt>
+	<dd><ul>
+		<li>
+			Added default font to DMS objects.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.123.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.122.0 (24 August 2010)</dt>
 	<dd><ul>
 		<li>
