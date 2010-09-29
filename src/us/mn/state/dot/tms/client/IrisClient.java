@@ -312,7 +312,7 @@ public class IrisClient extends JFrame {
 			arrangeTabs();
 			setTitle(createTitle(session));
 			setCursor(null);
-			validate();
+			invalidate();
 		}
 	}
 
@@ -401,7 +401,7 @@ public class IrisClient extends JFrame {
 		closeSession();
 		updateMaps(null);
 		setTitle(createTitle(TITLE_NOT_LOGGED_IN));
-		validate();
+		invalidate();
 	}
 
 	/** Close the session */
