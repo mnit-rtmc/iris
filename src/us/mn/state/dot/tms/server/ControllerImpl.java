@@ -356,6 +356,18 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return null;
 	}
 
+	/** Get a map of pins to detectors */
+	protected synchronized HashMap<Integer, DetectorImpl> getDetectors() {
+		HashMap<Integer, DetectorImpl> dets =
+			new HashMap<Integer, DetectorImpl>();
+		for(Integer pin: dets.keySet()) {
+			ControllerIO io = io_pins.get(pin);
+			if(io instanceof DetectorImpl)
+				dets.put(pin, (DetectorImpl)io);
+		}
+		return dets;
+	}
+
 	/** Get a detector by its I/O pin number */
 	public DetectorImpl getDetectorAtPin(int pin) {
 		ControllerIO io = getIO(pin);
@@ -411,29 +423,38 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return false;
 	}
 
+	/** Get a sample value from an array */
+	static protected int sampleValue(int[] values, int i) {
+		if(i >= 0 && i < values.length)
+			return values[i];
+		else
+			return Constants.MISSING_DATA;
+	}
+
 	/** Store 30-second detector data */
 	public void storeData30Second(long stamp, int start_pin,
 		int[] volume, int[] scans, int[] speed)
 	{
-		for(int i = 0; i < volume.length; i++) {
-			DetectorImpl det = getDetectorAtPin(start_pin + i);
-			if(det != null) {
-				det.storeData30Second(stamp, volume[i],
-					scans[i]);
-				if(speed != null)
-					det.storeSpeed30Second(stamp, speed[i]);
-			}
+		HashMap<Integer, DetectorImpl> dets = getDetectors();
+		for(Integer pin: dets.keySet()) {
+			DetectorImpl det = dets.get(pin);
+			int i = pin - start_pin;
+			det.storeData30Second(stamp, sampleValue(volume, i),
+				sampleValue(scans, i));
+			det.storeSpeed30Second(stamp, sampleValue(speed, i));
 		}
 	}
 
 	/** Store 5-minute detector data */
 	public void storeData5Minute(long stamp, int start_pin, int[] volume,
-		int[] scan)
+		int[] scans)
 	{
-		for(int i = 0; i < volume.length; i++) {
-			DetectorImpl det = getDetectorAtPin(start_pin + i);
-			if(det != null)
-				det.storeData5Minute(stamp, volume[i], scan[i]);
+		HashMap<Integer, DetectorImpl> dets = getDetectors();
+		for(Integer pin: dets.keySet()) {
+			DetectorImpl det = dets.get(pin);
+			int i = pin - start_pin;
+			det.storeData5Minute(stamp, sampleValue(volume, i),
+				sampleValue(scans, i));
 		}
 	}
 
