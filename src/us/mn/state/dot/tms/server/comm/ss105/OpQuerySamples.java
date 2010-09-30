@@ -104,10 +104,7 @@ public class OpQuerySamples extends OpSS105 {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success) {
-			controller.storeData30Second(stamp, 1, volume, scans,
-				speed);
-		}
+		controller.storeData30Second(stamp, 1, volume, scans, speed);
 		completer.completeTask(getKey());
 		super.cleanup();
 	}
