@@ -65,9 +65,6 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Current row in font table */
 	protected int row;
 
-	/** Flag for determining the default font */
-	protected boolean first = true;
-
 	/** Flag for version 2 controller (with support for fontStatus) */
 	protected boolean version2;
 
@@ -214,7 +211,7 @@ public class OpSendDMSFonts extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + version);
 			if(isVersionIDCorrect(v)) {
 				DMS_LOG.log(dms.getName() + ": Font is valid");
-				if(first)
+				if(font == dms.getDefaultFont())
 					return new SetDefaultFont();
 				else
 					return nextFontPhase();
@@ -441,7 +438,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(height);
 			DMS_LOG.log(dms.getName() + ":= " + height);
 			mess.storeProps();
-			if(first)
+			if(font == dms.getDefaultFont())
 				return new SetDefaultFont();
 			else
 				return nextFontPhase();
@@ -477,7 +474,7 @@ public class OpSendDMSFonts extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			switch(status.getEnum()) {
 			case readyForUse:
-				if(first)
+				if(font == dms.getDefaultFont())
 					return new SetDefaultFont();
 				else
 					return nextFontPhase();
@@ -506,7 +503,6 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(dfont);
 			DMS_LOG.log(dms.getName() + ":= " + dfont);
 			mess.storeProps();
-			first = false;
 			return nextFontPhase();
 		}
 	}
