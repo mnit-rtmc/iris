@@ -425,7 +425,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get a sample value from an array */
 	static protected int sampleValue(int[] values, int i) {
-		if(i >= 0 && i < values.length)
+		if(values != null && i >= 0 && i < values.length)
 			return values[i];
 		else
 			return Constants.MISSING_DATA;
