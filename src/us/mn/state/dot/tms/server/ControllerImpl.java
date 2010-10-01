@@ -360,7 +360,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	protected synchronized HashMap<Integer, DetectorImpl> getDetectors() {
 		HashMap<Integer, DetectorImpl> dets =
 			new HashMap<Integer, DetectorImpl>();
-		for(Integer pin: dets.keySet()) {
+		for(Integer pin: io_pins.keySet()) {
 			ControllerIO io = io_pins.get(pin);
 			if(io instanceof DetectorImpl)
 				dets.put(pin, (DetectorImpl)io);
