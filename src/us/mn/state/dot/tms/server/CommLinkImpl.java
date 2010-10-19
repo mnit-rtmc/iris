@@ -325,7 +325,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Create a PelcoD poller */
 	protected MessagePoller createPelcoDPoller() throws IOException {
-		return new PelcoDPoller(name, createSocketMessenger());
+		return new PelcoDPoller(name, createDatagramMessenger());
 	}
 
 	/** Create a Manchester poller */
