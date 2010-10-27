@@ -698,7 +698,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		}
 	}
 
-	/** Store 30-second data for this detector */
+	/** Store 30-second data for this detector.
+	 * @param stamp Time stamp after end of sample period.
+	 * @param volume Vehicle count.
+	 * @param scans Scan count (occupancy), 0-1800 */
 	public void storeData30Second(long stamp, int volume, int scans) {
 		testData(volume, scans);
 		vol_cache.addSample(new PeriodicSample(stamp,
@@ -726,7 +729,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		last_speed = speed;
 	}
 
-	/** Store 5-minute data for this detector */
+	/** Store 5-minute data for this detector.
+	 * @param stamp Time stamp after end of sample period.
+	 * @param volume Vehicle count.
+	 * @param scans Scan count (occupancy), 0-18000 */
 	public void storeData5Minute(long stamp, int volume, int scans) {
 		vol_cache.addSample(new PeriodicSample(stamp,
 			SAMPLE_PERIOD_SEC * 10, volume));
