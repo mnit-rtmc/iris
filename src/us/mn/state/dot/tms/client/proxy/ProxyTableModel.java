@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
@@ -308,7 +309,24 @@ abstract public class ProxyTableModel<T extends SonarObject>
 			proxy.destroy();
 	}
 
-	/** Show the properties form for a camera */
+	/** Show the controller form for a proxy */
+	public void showControllerForm(T proxy) {
+		SonarObjectForm<Controller> form = createControllerForm(proxy);
+		if(form != null)
+			session.getDesktop().show(form);
+	}
+
+	/** Create a controller form for one proxy */
+	protected SonarObjectForm<Controller> createControllerForm(T proxy) {
+		return null;
+	}
+
+	/** Determine if a controller form is available */
+	public boolean hasController() {
+		return false;
+	}
+
+	/** Show the properties form for a proxy */
 	public void showPropertiesForm(T proxy) {
 		SonarObjectForm<T> prop = createPropertiesForm(proxy);
 		if(prop != null)

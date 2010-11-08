@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -39,6 +40,9 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 
 	/** Proxy table */
 	protected final ZTable table;
+
+	/** Button to display the controller properties */
+	protected final JButton ctrl_btn = new JButton("Controller");
 
 	/** Button to display the proxy properties */
 	protected final JButton prop_btn = new JButton("Properties");
@@ -86,9 +90,24 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 					proxy.destroy();
 			}
 		};
+		if(model.hasController()) {
+			new ActionJob(this, ctrl_btn) {
+				public void perform() {
+					T proxy = getSelectedProxy();
+					if(proxy != null)
+						model.showControllerForm(proxy);
+				}
+			};
+			table.addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					if(e.getClickCount() == 2)
+						ctrl_btn.doClick();
+				}
+			});
+		}
 		if(model.hasProperties()) {
 			new ActionJob(this, prop_btn) {
-				public void perform() throws Exception {
+				public void perform() {
 					T proxy = getSelectedProxy();
 					if(proxy != null)
 						model.showPropertiesForm(proxy);
@@ -112,9 +131,12 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 		table.setVisibleRowCount(getVisibleRowCount());
 		FormPanel panel = new FormPanel(true);
 		panel.addRow(table);
+		if(model.hasController())
+			panel.add(ctrl_btn);
 		if(model.hasProperties())
 			panel.add(prop_btn);
 		panel.addRow(del_btn);
+		ctrl_btn.setEnabled(false);
 		prop_btn.setEnabled(false);
 		del_btn.setEnabled(false);
 		return panel;
@@ -138,7 +160,14 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	/** Select a new proxy */
 	protected void selectProxy() {
 		T proxy = getSelectedProxy();
+		ctrl_btn.setEnabled(hasController(proxy));
 		prop_btn.setEnabled(proxy != null);
 		del_btn.setEnabled(model.canRemove(proxy));
+	}
+
+	/** Check if a proxy has a controller */
+	protected boolean hasController(T proxy) {
+		return proxy != null && model.hasController() &&
+		       ((ControllerIO)proxy).getController() != null;
 	}
 }
