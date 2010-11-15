@@ -22,7 +22,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">24 August 2010</div>
+<div id="stamp">15 November 2010</div>
 <h1>IRIS Administrator Guide</h1>
 
 <h2 id="overview">Overview
@@ -485,7 +485,60 @@ FIXME
 <div id="development_div">
 
 <h3>Building</h3>
-FIXME
+<p>
+	Install <a href="http://fedoraproject.org">Fedora</a> onto the
+	development system.
+	Some additional development packages must be installed.
+</p>
+<pre class="code">yum install java-1.6.0-openjdk-devel ant-junit mercurial rpm-build gcc</pre>
+<p>
+	In a suitable development directory, clone the iris mercurial
+	repository.
+</p>
+<pre class="code">hg clone http://iris.dot.state.mn.us/hg/index.cgi/iris</pre>
+<p>
+	Create lib/ directory in iris development repository.
+</p>
+<pre class="code">mkdir iris/lib/</pre>
+<p>
+	Download the <a href="http://www.oracle.com/technetwork/java/index-138643.html">JavaMail API</a> from Oracle.
+	Unzip the JavaMail archive and locate the mail.jar file.
+	Copy the mail.jar file to the lib/ directory in the iris repository.
+</p>
+<p>
+	Copy iris-build.properties from etc/ to lib/.
+	Edit lib/iris-build.properties file as necessary for your organization.
+</p>
+<p>
+	Create the key for signing jar packages.
+	This is required for Java Web Start, which is used by the IRIS client.
+	The key should go into your default keystore (~/.keystore).
+</p>
+<pre class="code">keytool -genkeypair -alias signing-key</pre>
+<p>
+	Put the following lines into your ~/.ant.properties file.
+</p>
+<pre class="code">debug=off
+sign.store=${user.home}/.keystore
+sign.store.pass=password
+sign.alias=signing-key
+sign.alias.pass=signing-password
+hgbase.url=http://iris.dot.state.mn.us/hg/index/cgi/
+video.backend.host=video.example.com
+video.backend.port=80
+video.repeater.host=repeater.example.com
+video.repeater.port=80
+shapes.maps.dir=/path/to/shapefile/maps
+</pre>
+<p>
+	Now, the IRIS rpm file can be build with the following commands.
+	(The current directory should be the root of the iris repository.
+</p>
+<pre class="code">ant rpm</pre>
+<p>
+	If there are no errors, the new rpm file should be in the
+	build/rpm/RPMS/i386/ directory.
+</p>
 
 <h3>History</h3>
 FIXME
