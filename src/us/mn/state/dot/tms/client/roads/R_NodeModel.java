@@ -97,4 +97,25 @@ public class R_NodeModel {
 		} else
 			return line;
 	}
+
+	/** Get the shift from an upstream node to this model node */
+	public int getShift(R_Node up) {
+		R_NodeModel other = getUpstreamModel(up);
+		if(other != null) {
+			return getDownstreamLane(false) -
+			       other.getDownstreamLane(false);
+		} else
+			return 0;
+	}
+
+	/** Get a model for an upstream r_node */
+	protected R_NodeModel getUpstreamModel(R_Node up) {
+		R_NodeModel other = upstream;
+		while(other != null) {
+			if(other.r_node == up)
+				return other;
+			other = other.upstream;
+		}
+		return null;
+	}
 }

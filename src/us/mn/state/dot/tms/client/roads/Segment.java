@@ -77,8 +77,7 @@ public class Segment {
 
 	/** Add detection to the segment */
 	public void addDetection() {
-		final int shift = model.getDownstreamLane(false) -
-			model.getUpstreamLane(false);
+		final int shift = model.getShift(upstream);
 		DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector d) {
 				if(d.getR_Node() == upstream) {
