@@ -268,14 +268,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	protected List<R_NodeRenderer> createRendererList(Set<R_Node> node_s) {
 		LinkedList<R_NodeRenderer> ren_l =
 			new LinkedList<R_NodeRenderer>();
-		Iterator<R_Node> it = node_s.iterator();
-		while(it.hasNext()) {
-			R_Node proxy = it.next();
-			if(GeoLocHelper.isNull(proxy.getGeoLoc())) {
-				ren_l.add(new R_NodeRenderer(proxy));
-				it.remove();
-			}
-		}
+		List<R_NodeRenderer> no_loc = createNullLocList(node_s);
 		corridor = createCorridor(node_s);
 		List<R_Node> node_t = getSortedList();
 		R_NodeRenderer prev = null;
@@ -286,7 +279,26 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 				prev.setUpstream(r);
 			prev = r;
 		}
+		ren_l.addAll(0, no_loc);
 		return ren_l;
+	}
+
+	/** Create a list of r_node renderers with null locations.  The r_nodes
+	 * are then removed from the set passed in.
+	 * @param node_s Set of nodes on the corridor.
+	 * @return List of renderers with null location. */
+	protected List<R_NodeRenderer> createNullLocList(Set<R_Node> node_s) {
+		LinkedList<R_NodeRenderer> no_loc =
+			new LinkedList<R_NodeRenderer>();
+		Iterator<R_Node> it = node_s.iterator();
+		while(it.hasNext()) {
+			R_Node proxy = it.next();
+			if(GeoLocHelper.isNull(proxy.getGeoLoc())) {
+				no_loc.add(new R_NodeRenderer(proxy));
+				it.remove();
+			}
+		}
+		return no_loc;
 	}
 
 	/** Get a sorted list of roadway nodes for the selected corridor */
