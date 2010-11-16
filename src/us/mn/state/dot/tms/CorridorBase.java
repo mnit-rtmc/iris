@@ -98,9 +98,6 @@ public class CorridorBase {
 		return GeoLocHelper.getCorridorID(roadway, road_dir);
 	}
 
-	/** Flag for downstream-to-upstream (backwards) order */
-	protected final boolean order_down_up;
-
 	/** Set of unsorted roadway nodes */
 	protected final Set<R_Node> unsorted = new HashSet<R_Node>();
 
@@ -112,16 +109,10 @@ public class CorridorBase {
 		new TreeMap<Float, R_Node>();
 
 	/** Create a new corridor */
-	public CorridorBase(GeoLoc loc, boolean order) {
+	public CorridorBase(GeoLoc loc) {
 		name = GeoLocHelper.getCorridorName(loc);
 		roadway = loc.getRoadway();
 		road_dir = loc.getRoadDir();
-		order_down_up = order;
-	}
-
-	/** Create a new corridor */
-	protected CorridorBase(GeoLoc loc) {
-		this(loc, false);
 	}
 
 	/** Add a roadway node to the corridor */
@@ -188,8 +179,7 @@ public class CorridorBase {
 
 	/** Check if the roadway nodes are in reverse order */
 	protected boolean isReversed() {
-		return r_nodes.size() > 1 &&
-			(order_down_up == isUpstreamToDownstream());
+		return r_nodes.size() > 1 && !isUpstreamToDownstream();
 	}
 
 	/** Check if the nodes are in upstream-to-downstream order */

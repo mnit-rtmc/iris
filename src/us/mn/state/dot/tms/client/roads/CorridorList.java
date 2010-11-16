@@ -235,7 +235,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	static protected CorridorBase createCorridor(Set<R_Node> node_s) {
 		GeoLoc loc = getCorridorLoc(node_s);
 		if(loc != null) {
-			CorridorBase c = new CorridorBase(loc, true);
+			CorridorBase c = new CorridorBase(loc);
 			for(R_Node n: node_s)
 				c.addNode(n);
 			c.arrangeNodes();
@@ -274,9 +274,8 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		R_NodeRenderer prev = null;
 		for(R_Node proxy: node_t) {
 			R_NodeRenderer r = new R_NodeRenderer(proxy);
-			ren_l.add(r);
-			if(prev != null)
-				prev.setUpstream(r);
+			r.setUpstream(prev);
+			ren_l.add(0, r);
 			prev = r;
 		}
 		ren_l.addAll(0, no_loc);

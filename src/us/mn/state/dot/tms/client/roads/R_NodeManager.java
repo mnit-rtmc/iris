@@ -278,7 +278,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		String cid = GeoLocHelper.getCorridorName(loc);
 		if(cid != null) {
 			if(!corridors.containsKey(cid))
-				addCorridor(new CorridorBase(loc, false));
+				addCorridor(new CorridorBase(loc));
 			CorridorBase c = corridors.get(cid);
 			if(c != null)
 				c.addNode(r_node);
