@@ -95,16 +95,17 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Upstream node renderer on corridor */
-	protected R_NodeRenderer upstream;
+	protected final R_NodeRenderer upstream;
 
-	/** Set the upstream node renderer */
-	public void setUpstream(R_NodeRenderer u) {
+	/** Create a new roadway node renderer */
+	public R_NodeRenderer(R_Node p, R_NodeRenderer u) {
+		proxy = p;
 		upstream = u;
 	}
 
 	/** Create a new roadway node renderer */
 	public R_NodeRenderer(R_Node p) {
-		proxy = p;
+		this(p, null);
 	}
 
 	/** Set the selected status of the component */

@@ -273,8 +273,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		List<R_Node> node_t = getSortedList();
 		R_NodeRenderer prev = null;
 		for(R_Node proxy: node_t) {
-			R_NodeRenderer r = new R_NodeRenderer(proxy);
-			r.setUpstream(prev);
+			R_NodeRenderer r = new R_NodeRenderer(proxy, prev);
 			ren_l.add(0, r);
 			prev = r;
 		}
