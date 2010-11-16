@@ -32,14 +32,11 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
  */
 public class Segment {
 
+	/** R_Node model */
+	protected final R_NodeModel model;
+
 	/** Upstream mainline node */
 	protected final R_Node upstream;
-
-	/** Upstream node */
-	protected final R_Node node_a;
-
-	/** Downstream node */
-	protected final R_Node node_b;
 
 	/** Get the station ID */
 	public String getStationID() {
@@ -68,53 +65,20 @@ public class Segment {
 
 	/** Get the count of lanes through the segment */
 	public int getLaneCount() {
-		return getRightShift() - getLeftShift();
-	}
-
-	/** Get the left side shift */
-	protected int getLeftShift() {
-		return Math.max(getLeftShift(node_a), getLeftShift(node_b));
-	}
-
-	/** Get the left shift for the specified node */
-	protected int getLeftShift(R_Node n) {
-		if(n.getAttachSide())
-			return n.getShift();
-		else if(R_NodeHelper.isStation(n))
-			return n.getShift() - n.getLanes();
-		else {
-			return upstream.getAttachSide() ? upstream.getShift() :
-			       upstream.getShift() - upstream.getLanes();
-		}
-	}
-
-	/** Get the right side shift */
-	protected int getRightShift() {
-		return Math.min(getRightShift(node_a), getRightShift(node_b));
-	}
-
-	/** Get the right shift for the specified node */
-	protected int getRightShift(R_Node n) {
-		if(!n.getAttachSide())
-			return n.getShift();
-		else if(R_NodeHelper.isStation(n))
-			return n.getShift() + n.getLanes();
-		else {
-			return upstream.getAttachSide() ? upstream.getShift() +
-			       upstream.getLanes() : upstream.getShift();
-		}
+		return model.getDownstreamLane(false) -
+		       model.getDownstreamLane(true);
 	}
 
 	/** Create a new segment */
-	public Segment(R_Node u, R_Node a, R_Node b) {
+	public Segment(R_NodeModel m, R_Node u) {
+		model = m;
 		upstream = u;
-		node_a = a;
-		node_b = b;
 	}
 
 	/** Add detection to the segment */
 	public void addDetection() {
-		final int shift = getRightShift() - getRightShift(upstream);
+		final int shift = model.getDownstreamLane(false) -
+			model.getUpstreamLane(false);
 		DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector d) {
 				if(d.getR_Node() == upstream) {

@@ -111,24 +111,26 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 	public void addCorridor(CorridorBase c) {
 		R_Node un = null;	// upstream node
 		MapGeoLoc uloc = null;	// upstream node location
-		R_Node pn = null;	// previous node
 		MapGeoLoc ploc = null;	// previous node location
+		R_NodeModel mdl = null;	// node model
 		for(R_Node n: c.getNodes()) {
 			MapGeoLoc loc = manager.findGeoLoc(n);
 			if(un != null) {
 				if(R_NodeHelper.isJoined(n) &&
 				   !isTooDistant(ploc, loc))
 				{
-					Segment seg = new Segment(un, pn, n);
+					mdl = new R_NodeModel(n, mdl);
+					Segment seg = new Segment(mdl, un);
 					seg.addNode(ploc);
 					seg.addNode(loc);
 					if(!isTooDistant(uloc, loc))
 						seg.addDetection();
 					segments.add(seg);
-				}
-			}
+				} else
+					mdl = null;
+			} else
+				mdl = null;
 			ploc = loc;
-			pn = n;
 			if(un == null || R_NodeHelper.isStationBreak(n)) {
 				un = n;
 				uloc = loc;
