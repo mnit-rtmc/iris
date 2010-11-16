@@ -120,9 +120,8 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 				   !isTooDistant(ploc, loc))
 				{
 					mdl = new R_NodeModel(n, mdl);
-					Segment seg = new Segment(mdl, un);
-					seg.addNode(ploc);
-					seg.addNode(loc);
+					Segment seg = new Segment(mdl, un,
+						ploc, loc);
 					if(!isTooDistant(uloc, loc))
 						seg.addDetection();
 					segments.add(seg);

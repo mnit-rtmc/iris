@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tdxml.SensorSample;
 import us.mn.state.dot.tms.Detector;
@@ -43,13 +41,11 @@ public class Segment {
 		return upstream.getStationID();
 	}
 
-	/** List of map geo locations */
-	protected final List<MapGeoLoc> locs = new LinkedList<MapGeoLoc>();
+	/** Location at upstream end of segment */
+	public final MapGeoLoc loc_up;
 
-	/** Get the list of map geo locations */
-	public List<MapGeoLoc> getLocations() {
-		return locs;
-	}
+	/** Location at downstream end of segment */
+	public final MapGeoLoc loc_dn;
 
 	/** Mapping of sensor ID to lane number */
 	protected final HashMap<String, Integer> lane_sensors =
@@ -70,9 +66,11 @@ public class Segment {
 	}
 
 	/** Create a new segment */
-	public Segment(R_NodeModel m, R_Node u) {
+	public Segment(R_NodeModel m, R_Node u, MapGeoLoc lu, MapGeoLoc ld) {
 		model = m;
 		upstream = u;
+		loc_up = lu;
+		loc_dn = ld;
 	}
 
 	/** Add detection to the segment */
@@ -88,12 +86,6 @@ public class Segment {
 				return false;
 			}
 		});
-	}
-
-	/** Add a point to the segment */
-	public void addNode(MapGeoLoc loc) {
-		if(loc != null)
-			locs.add(loc);
 	}
 
 	/** Update one sample */
