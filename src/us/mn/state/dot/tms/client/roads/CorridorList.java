@@ -292,8 +292,8 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		Iterator<R_Node> it = node_s.iterator();
 		while(it.hasNext()) {
 			R_Node proxy = it.next();
-			R_NodeModel model = new R_NodeModel(proxy, null);
 			if(GeoLocHelper.isNull(proxy.getGeoLoc())) {
+				R_NodeModel model = new R_NodeModel(proxy,null);
 				no_loc.add(new R_NodeRenderer(model));
 				it.remove();
 			}
