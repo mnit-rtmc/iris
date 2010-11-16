@@ -86,26 +86,17 @@ public class R_NodeRenderer extends JPanel {
 	/** Renderer component height */
 	protected int height = 0;
 
-	/** Proxy to roadway node */
-	protected final R_Node proxy;
+	/** R_node model */
+	protected final R_NodeModel model;
 
 	/** Get the roadway node proxy */
 	public R_Node getProxy() {
-		return proxy;
-	}
-
-	/** Upstream node renderer on corridor */
-	protected final R_NodeRenderer upstream;
-
-	/** Create a new roadway node renderer */
-	public R_NodeRenderer(R_Node p, R_NodeRenderer u) {
-		proxy = p;
-		upstream = u;
+		return model.r_node;
 	}
 
 	/** Create a new roadway node renderer */
-	public R_NodeRenderer(R_Node p) {
-		this(p, null);
+	public R_NodeRenderer(R_NodeModel m) {
+		model = m;
 	}
 
 	/** Set the selected status of the component */
@@ -113,7 +104,7 @@ public class R_NodeRenderer extends JPanel {
 		if(sel)
 			setBackground(Color.LIGHT_GRAY);
 		else {
-			GeoLoc loc = proxy.getGeoLoc();
+			GeoLoc loc = getProxy().getGeoLoc();
 			if(GeoLocHelper.isNull(loc))
 				setBackground(COLOR_NO_LOC);
 			else
@@ -121,67 +112,19 @@ public class R_NodeRenderer extends JPanel {
 		}
 	}
 
-	/** Test if the given side is defined by the r_node */
-	protected boolean isSideDefined(boolean side) {
-		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
-		return (nt == R_NodeType.STATION) ||
-			(nt == R_NodeType.INTERSECTION) ||
-			(side == proxy.getAttachSide()) ||
-			(!hasMainline());
-	}
-
-	/** Get the fog lane for the given side of the road */
-	protected int getFogLane(boolean side) {
-		int line = proxy.getShift();
-		if(side != proxy.getAttachSide()) {
-			if(side)
-				return line - proxy.getLanes();
-			else
-				return line + proxy.getLanes();
-		} else
-			return line;
-	}
-
 	/** Get the fog line for the given lane */
 	static protected int getFogLine(int lane) {
 		return LANE_WIDTH * (2 + lane);
 	}
 
-	/** Get the upstream fog lane on the given side of the road */
-	protected int getUpstreamLane(boolean side) {
-		R_NodeRenderer up = upstream;
-		while(up != null) {
-			if(up.isSideDefined(side))
-				return up.getFogLane(side);
-			else
-				up = up.upstream;
-		}
-		return getFogLane(side);
-	}
-
 	/** Get the upstream fog line on the given side of the road */
 	protected int getUpstreamLine(boolean side) {
-		return getFogLine(getUpstreamLane(side));
-	}
-
-	/** Get the downstream fog lane on the given side of the road */
-	protected int getDownstreamLane(boolean side) {
-		if(isSideDefined(side))
-			return getFogLane(side);
-		else
-			return getUpstreamLane(side);
+		return getFogLine(model.getUpstreamLane(side));
 	}
 
 	/** Get the downstream fog line on the given side of the road */
 	protected int getDownstreamLine(boolean side) {
-		return getFogLine(getDownstreamLane(side));
-	}
-
-	/** Check if this r_node has mainline lanes (vs ramp only) */
-	protected boolean hasMainline() {
-		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
-			proxy.getTransition());
-		return nt != R_NodeTransition.COMMON;
+		return getFogLine(model.getDownstreamLane(side));
 	}
 
 	/** Allow for subclasses to modify cross-street label */
@@ -205,7 +148,7 @@ public class R_NodeRenderer extends JPanel {
 		drawSkipStripes(g2);
 		drawDetectors(g2);
 		String xStreet = GeoLocHelper.getCrossDescription(
-			proxy.getGeoLoc());
+			getProxy().getGeoLoc());
 		if(xStreet != null)
 			drawCrossStreet(g2, xStreet);
 	}
@@ -220,9 +163,9 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw the yellow lines */
 	protected void drawYellowLines(Graphics2D g) {
-		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
+		R_NodeType nt =R_NodeType.fromOrdinal(getProxy().getNodeType());
 		g.setColor(Color.YELLOW);
-		if(hasMainline())
+		if(model.hasMainline())
 			g.draw(createYellowMainLine());
 		if(nt == R_NodeType.ENTRANCE)
 			g.draw(createEntranceYellow());
@@ -239,9 +182,9 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw the white lines */
 	protected void drawWhiteLines(Graphics2D g) {
-		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
+		R_NodeType nt =R_NodeType.fromOrdinal(getProxy().getNodeType());
 		g.setColor(Color.WHITE);
-		if(hasMainline())
+		if(model.hasMainline())
 			g.draw(createWhiteMainLine());
 		if(nt == R_NodeType.ENTRANCE)
 			g.draw(createEntranceWhite());
@@ -258,9 +201,9 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Fill the roadway area */
 	protected void fillRoadway(Graphics2D g) {
-		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
+		R_NodeType nt =R_NodeType.fromOrdinal(getProxy().getNodeType());
 		g.setColor(Color.BLACK);
-		if(hasMainline())
+		if(model.hasMainline())
 			g.fill(createMainRoadway());
 		if(nt == R_NodeType.ENTRANCE)
 			g.fill(createEntranceRoadway());
@@ -278,17 +221,17 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw the skip stripes */
 	protected void drawSkipStripes(Graphics2D g) {
-		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
+		R_NodeType nt =R_NodeType.fromOrdinal(getProxy().getNodeType());
 		g.setColor(Color.WHITE);
 		g.setStroke(LINE_DASHED);
-		if(hasMainline())
+		if(model.hasMainline())
 			drawMainlineSkipStripes(g);
 		if(nt == R_NodeType.ENTRANCE) {
-			for(int lane = 1; lane < proxy.getLanes(); lane++)
+			for(int lane = 1; lane < getProxy().getLanes(); lane++)
 				g.draw(createEntranceRamp(lane, true));
 		}
 		if(nt == R_NodeType.EXIT) {
-			for(int lane = 1; lane < proxy.getLanes(); lane++)
+			for(int lane = 1; lane < getProxy().getLanes(); lane++)
 				g.draw(createExitRamp(lane, true));
 		}
 	}
@@ -315,7 +258,7 @@ public class R_NodeRenderer extends JPanel {
 		int y1, int y2, int y3)
 	{
 		int x1, x2, x3;
-		if(proxy.getAttachSide()) {
+		if(getProxy().getAttachSide()) {
 			x1 = x - LANE_WIDTH * 3;
 			x2 = x - LANE_WIDTH;
 			x3 = x + LANE_WIDTH * lane;
@@ -325,7 +268,7 @@ public class R_NodeRenderer extends JPanel {
 			x3 = x - LANE_WIDTH * lane;
 		}
 		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
-			proxy.getTransition());
+			getProxy().getTransition());
 		GeneralPath path = new GeneralPath();
 		if(reverse) {
 			if(nt == R_NodeTransition.LOOP) {
@@ -349,13 +292,14 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Get the y-position of the specified ramp lane */
 	protected int getRampLaneY(int lane) {
-		return LANE_HEIGHT / 2 + LANE_HEIGHT * (proxy.getLanes()-lane);
+		return LANE_HEIGHT / 2 + LANE_HEIGHT * (getProxy().getLanes()
+			- lane);
 	}
 
 	/** Create a ramp curve for the specified lane
 	 * @param lane Number of lanes from the outside lane */
 	protected Shape createEntranceRamp(int lane, boolean reverse) {
-		int x = getDownstreamLine(proxy.getAttachSide());
+		int x = getDownstreamLine(getProxy().getAttachSide());
 		int y = getPreferredHeight() - getRampLaneY(lane);
 		int y0 = y + LANE_HEIGHT;
 		int y1 = y;
@@ -366,16 +310,16 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Create the yellow (left side) fog line for an entrance ramp */
 	protected Shape createEntranceYellow() {
-		if(proxy.getAttachSide())
+		if(getProxy().getAttachSide())
 			return createEntranceRamp(0, false);
 		else
-			return createEntranceRamp(proxy.getLanes(), false);
+			return createEntranceRamp(getProxy().getLanes(), false);
 	}
 
 	/** Create the white (right side) fog line for an entrance ramp */
 	protected Shape createEntranceWhite() {
-		if(proxy.getAttachSide())
-			return createEntranceRamp(proxy.getLanes(), true);
+		if(getProxy().getAttachSide())
+			return createEntranceRamp(getProxy().getLanes(), true);
 		else
 			return createEntranceRamp(0, true);
 	}
@@ -391,7 +335,7 @@ public class R_NodeRenderer extends JPanel {
 	/** Create a ramp curve for the specified lane
 	 * @param lane Number of lanes from the outside lane */
 	protected Shape createExitRamp(int lane, boolean reverse) {
-		int x = getUpstreamLine(proxy.getAttachSide());
+		int x = getUpstreamLine(getProxy().getAttachSide());
 		int y = getRampLaneY(lane);
 		int y0 = y - LANE_HEIGHT;
 		int y1 = y;
@@ -402,16 +346,16 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Create the yellow (left side) fog line for an exit ramp */
 	protected Shape createExitYellow() {
-		if(proxy.getAttachSide())
+		if(getProxy().getAttachSide())
 			return createExitRamp(0, false);
 		else
-			return createExitRamp(proxy.getLanes(), false);
+			return createExitRamp(getProxy().getLanes(), false);
 	}
 
 	/** Create the white (right side) fog line for an exit ramp */
 	protected Shape createExitWhite() {
-		if(proxy.getAttachSide())
-			return createExitRamp(proxy.getLanes(), true);
+		if(getProxy().getAttachSide())
+			return createExitRamp(getProxy().getLanes(), true);
 		else
 			return createExitRamp(0, true);
 	}
@@ -419,7 +363,7 @@ public class R_NodeRenderer extends JPanel {
 	/** Create an exit roadway area */
 	protected Shape createExitRoadway() {
 		GeneralPath path = new GeneralPath(createExitRamp(0, false));
-		path.append(createExitRamp(proxy.getLanes(), true), true);
+		path.append(createExitRamp(getProxy().getLanes(), true), true);
 		path.closePath();
 		return path;
 	}
@@ -427,7 +371,7 @@ public class R_NodeRenderer extends JPanel {
 	/** Draw the detector locations */
 	protected void drawDetectors(Graphics2D g) {
 		g.setStroke(LINE_BASIC);
-		switch(R_NodeType.fromOrdinal(proxy.getNodeType())) {
+		switch(R_NodeType.fromOrdinal(getProxy().getNodeType())) {
 			case STATION:
 				drawStationDetectors(g);
 				break;
@@ -441,7 +385,7 @@ public class R_NodeRenderer extends JPanel {
 	protected void drawStationDetectors(Graphics2D g) {
 		final int y = 2;
 		int r = getDownstreamLine(false) - LANE_WIDTH + 4;
-		for(int i = 0; i < proxy.getLanes(); i++) {
+		for(int i = 0; i < getProxy().getLanes(); i++) {
 			int x = r - LANE_WIDTH * i;
 			drawDetector(g, x, y, Integer.toString(i + 1));
 		}
@@ -449,7 +393,7 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Get X position to draw an HOV diamond */
 	protected int getHovDiamondX() {
-		boolean side = proxy.getAttachSide();
+		boolean side = getProxy().getAttachSide();
 		int x = getDownstreamLine(side);
 		if(side)
 			return x - LANE_WIDTH * 2;
@@ -460,7 +404,7 @@ public class R_NodeRenderer extends JPanel {
 	/** Draw entrance detectors stuff */
 	protected void drawEntranceDetectors(Graphics2D g) {
 		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
-			proxy.getTransition());
+			getProxy().getTransition());
 		if(nt == R_NodeTransition.HOV) {
 			int x = getHovDiamondX();
 			int y = height - LANE_HEIGHT - 1;
@@ -504,8 +448,8 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Get the absolute change in the fog line lane for the given side */
 	protected int getFogLaneDelta(boolean side) {
-		int up = getUpstreamLane(side);
-		int down = getDownstreamLane(side);
+		int up = model.getUpstreamLane(side);
+		int down = model.getDownstreamLane(side);
 		return Math.abs(up - down);
 	}
 
@@ -518,10 +462,10 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Get the preferred height */
 	protected int getPreferredHeight() {
-		switch(R_NodeType.fromOrdinal(proxy.getNodeType())) {
+		switch(R_NodeType.fromOrdinal(getProxy().getNodeType())) {
 			case ENTRANCE:
 			case EXIT:
-				return LANE_HEIGHT * (proxy.getLanes() + 2);
+				return LANE_HEIGHT * (getProxy().getLanes() +2);
 			case STATION:
 				return getPreferredStationHeight();
 		}
