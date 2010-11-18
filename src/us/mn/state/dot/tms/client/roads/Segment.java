@@ -33,8 +33,16 @@ public class Segment {
 	/** R_Node model */
 	protected final R_NodeModel model;
 
+	/** Get the r_node model */
+	public R_NodeModel getModel() {
+		return model;
+	}
+
 	/** Upstream mainline node */
 	protected final R_Node upstream;
+
+	/** Shift from upstream node to end of segment */
+	protected final int shift;
 
 	/** Get the station ID */
 	public String getStationID() {
@@ -59,29 +67,23 @@ public class Segment {
 	protected final HashMap<String, SensorSample> next_samples =
 		new HashMap<String, SensorSample>();
 
-	/** Get the count of lanes through the segment */
-	public int getLaneCount() {
-		return model.getDownstreamLane(false) -
-		       model.getDownstreamLane(true);
-	}
-
 	/** Create a new segment */
 	public Segment(R_NodeModel m, R_Node u, MapGeoLoc lu, MapGeoLoc ld) {
 		model = m;
 		upstream = u;
 		loc_up = lu;
 		loc_dn = ld;
+		shift = model.getShift(upstream);
 	}
 
 	/** Add detection to the segment */
 	public void addDetection() {
-		final int shift = model.getShift(upstream);
 		DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector d) {
 				if(d.getR_Node() == upstream) {
 					String id = "D" + d.getName();
-					int n = d.getLaneNumber() + shift;
-					lane_sensors.put(id, n);
+					int ln = d.getLaneNumber();
+					lane_sensors.put(id, ln);
 				}
 				return false;
 			}
@@ -173,5 +175,22 @@ public class Segment {
 			return total / count;
 		else
 			return null;
+	}
+
+	/** Get the left line for the segment */
+	public int getLeftLine() {
+		return Math.min(model.getUpstreamLane(true),
+				model.getDownstreamLane(true));
+	}
+
+	/** Get the right side line for the segment */
+	public int getRightLine() {
+		return Math.max(model.getUpstreamLane(false),
+				model.getDownstreamLane(false));
+	}
+
+	/** Get the lane shift */
+	public int getLaneShift() {
+		return model.getDownstreamLane(false) - shift;
 	}
 }

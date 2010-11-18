@@ -118,4 +118,26 @@ public class R_NodeModel {
 		}
 		return null;
 	}
+
+	/** Get the lane offset for an upstream shift */
+	public int getUpstream(int sh) {
+		return clampUpstream(sh) - getUpstreamLane(true) - 1;
+	}
+
+	/** Clamp an upstream lane */
+	protected int clampUpstream(int sh) {
+		return Math.min(getUpstreamLane(false),
+		       Math.max(getUpstreamLane(true), sh));
+	}
+
+	/** Get the lane offset for a downstream shift */
+	public int getDownstream(int sh) {
+		return clampDownstream(sh) - getDownstreamLane(true) - 1;
+	}
+
+	/** Clamp a downstream lane */
+	protected int clampDownstream(int sh) {
+		return Math.min(getDownstreamLane(false),
+		       Math.max(getDownstreamLane(true), sh));
+	}
 }

@@ -57,25 +57,34 @@ public class MapSegment implements MapObject {
 	}
 
 	/** Create a new segment */
-	public MapSegment(Segment s, Integer l, float inner, float outer) {
+	public MapSegment(Segment s, Integer l, float inner_a, float outer_a,
+		float inner_b, float outer_b)
+	{
 		segment = s;
 		lane = l;
-		shape = createShape(inner, outer);
+		shape = createShape(inner_a, outer_a, inner_b, outer_b);
+	}
+
+	/** Create a new segment */
+	public MapSegment(Segment s, float inner, float outer) {
+		this(s, null, inner, outer, inner, outer);
 	}
 
 	/** Create the shape to draw this object */
-	protected Shape createShape(float inner, float outer) {
+	protected Shape createShape(float inner_a, float outer_a, float inner_b,
+		float outer_b)
+	{
 		Point2D.Float p = new Point2D.Float();
 		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
 		MapGeoLoc loc_a = segment.loc_up;
 		MapGeoLoc loc_b = segment.loc_dn;
-		loc_a.setPoint(p, outer);
+		loc_a.setPoint(p, outer_a);
 		path.moveTo(p.getX(), p.getY());
-		loc_b.setPoint(p, outer);
+		loc_b.setPoint(p, outer_b);
 		path.lineTo(p.getX(), p.getY());
-		loc_b.setPoint(p, inner);
+		loc_b.setPoint(p, inner_b);
 		path.lineTo(p.getX(), p.getY());
-		loc_a.setPoint(p, inner);
+		loc_a.setPoint(p, inner_a);
 		path.lineTo(p.getX(), p.getY());
 		path.closePath();
 		return path;
@@ -83,7 +92,10 @@ public class MapSegment implements MapObject {
 
 	/** Get the station ID */
 	public String getStationID() {
-		return segment.getStationID();
+		if(lane != null)
+			return segment.getStationID() + ' ' + lane;
+		else
+			return segment.getStationID();
 	}
 
 	/** Get the segment flow */
