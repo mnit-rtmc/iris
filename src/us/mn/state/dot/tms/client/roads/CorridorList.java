@@ -76,7 +76,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	protected final JList n_list = new JList();
 
 	/** Roadway node list model */
-	protected R_NodeListModel nr_list = new R_NodeListModel();
+	protected R_NodeListModel n_model = new R_NodeListModel();
 
 	/** Button to add a new roadway node */
 	protected JButton abutton = new JButton("Add");
@@ -203,7 +203,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Called when a proxy attribute has changed */
 	public void proxyChanged(R_Node proxy, String a) {
 		if(manager.checkCorridor(proxy))
-			nr_list.updateItem(proxy);
+			n_model.updateItem(proxy);
 	}
 
 	/** Called when a GeoLoc proxy attribute has changed */
@@ -268,8 +268,8 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Update the corridor list model */
 	public void updateListModel() {
 		Set<R_Node> node_s = manager.createSet();
-		nr_list = createNodeList(node_s);
-		n_list.setModel(nr_list);
+		n_model = createNodeList(node_s);
+		n_list.setModel(n_model);
 	}
 
 	/** Create a list model of roadway node models for one corridor */
