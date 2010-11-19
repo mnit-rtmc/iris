@@ -37,11 +37,11 @@ import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 
 /**
- * Renderer for roadway nodes
+ * Renderer for roadway node cells in a list.
  *
  * @author Douglas Lau
  */
-public class R_NodeRenderer extends JPanel implements ListCellRenderer {
+public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Width of one lane */
 	static protected final int LANE_WIDTH = 20;
