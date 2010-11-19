@@ -98,33 +98,6 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 			"Corridor Node List"));
 		jlist.setCellRenderer(renderer);
 		jlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, jlist) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					updateNodeSelection();
-			}
-		};
-		jlist.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent ev) {
-				if(ev.getClickCount() == 2)
-					ebutton.doClick();
-			}
-		});
-		new ActionJob(this, abutton) {
-			public void perform() throws Exception {
-				doAddButton();
-			}
-		};
-		new ActionJob(this, ebutton) {
-			public void perform() {
-				manager.showPropertiesForm();
-			}
-		};
-		new ActionJob(this, rbutton) {
-			public void perform() throws Exception {
-				doRemoveButton();
-			}
-		};
 		JScrollPane scroll = new JScrollPane(jlist);
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
@@ -154,6 +127,38 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 				geoLocChanged(proxy, a);
 			}
 		});
+		createJobs();
+	}
+
+	/** Create the jobs */
+	protected void createJobs() {
+		new ListSelectionJob(this, jlist) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					updateNodeSelection();
+			}
+		};
+		jlist.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent ev) {
+				if(ev.getClickCount() == 2)
+					ebutton.doClick();
+			}
+		});
+		new ActionJob(this, abutton) {
+			public void perform() throws Exception {
+				doAddButton();
+			}
+		};
+		new ActionJob(this, ebutton) {
+			public void perform() {
+				manager.showPropertiesForm();
+			}
+		};
+		new ActionJob(this, rbutton) {
+			public void perform() throws Exception {
+				doRemoveButton();
+			}
+		};
 	}
 
 	/** Enumeration complete flag */
