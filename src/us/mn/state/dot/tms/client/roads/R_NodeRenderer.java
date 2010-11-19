@@ -80,12 +80,6 @@ public class R_NodeRenderer extends JPanel {
 	static protected final Font FONT_XSTREET =
 		new Font("Arial", Font.BOLD, 12);
 
-	/** Renderer component width */
-	protected int width = 0;
-
-	/** Renderer component height */
-	protected int height = 0;
-
 	/** R_node model */
 	protected final R_NodeModel model;
 
@@ -135,22 +129,22 @@ public class R_NodeRenderer extends JPanel {
 	/** Paint the renderer */
 	public void paintComponent(Graphics g) {
 		Dimension d = (Dimension)getSize();
-		width = (int)d.getWidth();
-		height = (int)d.getHeight();
+		int width = (int)d.getWidth();
+		int height = (int)d.getHeight();
 		Graphics2D g2 = (Graphics2D)g;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
 		fillBackground(width, height, g2);
 		g2.setStroke(LINE_SOLID);
-		drawYellowLines(g2);
-		drawWhiteLines(g2);
-		fillRoadway(g2);
-		drawSkipStripes(g2);
-		drawDetectors(g2);
+		drawYellowLines(g2, height);
+		drawWhiteLines(g2, height);
+		fillRoadway(g2, height);
+		drawSkipStripes(g2, height);
+		drawDetectors(g2, height);
 		String xStreet = GeoLocHelper.getCrossDescription(
 			getProxy().getGeoLoc());
 		if(xStreet != null)
-			drawCrossStreet(g2, xStreet);
+			drawCrossStreet(g2, xStreet, height);
 	}
 
 	/** Fill the background */
@@ -162,11 +156,11 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Draw the yellow lines */
-	protected void drawYellowLines(Graphics2D g) {
+	protected void drawYellowLines(Graphics2D g, int height) {
 		R_NodeType nt =R_NodeType.fromOrdinal(getProxy().getNodeType());
 		g.setColor(Color.YELLOW);
 		if(model.hasMainline())
-			g.draw(createYellowMainLine());
+			g.draw(createYellowMainLine(height));
 		if(nt == R_NodeType.ENTRANCE)
 			g.draw(createEntranceYellow());
 		else if(nt == R_NodeType.EXIT)
@@ -174,18 +168,18 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Create the yellow main line */
-	protected Shape createYellowMainLine() {
+	protected Shape createYellowMainLine(int height) {
 		int y0 = getDownstreamLine(true);
 		int y1 = getUpstreamLine(true);
 		return new Line2D.Double(y0, 0, y1, height);
 	}
 
 	/** Draw the white lines */
-	protected void drawWhiteLines(Graphics2D g) {
+	protected void drawWhiteLines(Graphics2D g, int height) {
 		R_NodeType nt =R_NodeType.fromOrdinal(getProxy().getNodeType());
 		g.setColor(Color.WHITE);
 		if(model.hasMainline())
-			g.draw(createWhiteMainLine());
+			g.draw(createWhiteMainLine(height));
 		if(nt == R_NodeType.ENTRANCE)
 			g.draw(createEntranceWhite());
 		else if(nt == R_NodeType.EXIT)
@@ -193,18 +187,18 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Create the white main line */
-	protected Shape createWhiteMainLine() {
+	protected Shape createWhiteMainLine(int height) {
 		int w0 = getDownstreamLine(false);
 		int w1 = getUpstreamLine(false);
 		return new Line2D.Double(w1, height, w0, 0);
 	}
 
 	/** Fill the roadway area */
-	protected void fillRoadway(Graphics2D g) {
+	protected void fillRoadway(Graphics2D g, int height) {
 		R_NodeType nt =R_NodeType.fromOrdinal(getProxy().getNodeType());
 		g.setColor(Color.BLACK);
 		if(model.hasMainline())
-			g.fill(createMainRoadway());
+			g.fill(createMainRoadway(height));
 		if(nt == R_NodeType.ENTRANCE)
 			g.fill(createEntranceRoadway());
 		else if(nt == R_NodeType.EXIT)
@@ -212,20 +206,20 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Create the mainline roadway area */
-	protected Shape createMainRoadway() {
-		GeneralPath path = new GeneralPath(createYellowMainLine());
-		path.append(createWhiteMainLine(), true);
+	protected Shape createMainRoadway(int height) {
+		GeneralPath path =new GeneralPath(createYellowMainLine(height));
+		path.append(createWhiteMainLine(height), true);
 		path.closePath();
 		return path;
 	}
 
 	/** Draw the skip stripes */
-	protected void drawSkipStripes(Graphics2D g) {
+	protected void drawSkipStripes(Graphics2D g, int height) {
 		R_NodeType nt =R_NodeType.fromOrdinal(getProxy().getNodeType());
 		g.setColor(Color.WHITE);
 		g.setStroke(LINE_DASHED);
 		if(model.hasMainline())
-			drawMainlineSkipStripes(g);
+			drawMainlineSkipStripes(g, height);
 		if(nt == R_NodeType.ENTRANCE) {
 			for(int lane = 1; lane < getProxy().getLanes(); lane++)
 				g.draw(createEntranceRamp(lane, true));
@@ -237,7 +231,7 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Draw the mainline skip stripes */
-	protected void drawMainlineSkipStripes(Graphics2D g) {
+	protected void drawMainlineSkipStripes(Graphics2D g, int height) {
 		int left0 = getDownstreamLine(true);
 		int left1 = getUpstreamLine(true);
 		int right0 = getDownstreamLine(false);
@@ -369,14 +363,14 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Draw the detector locations */
-	protected void drawDetectors(Graphics2D g) {
+	protected void drawDetectors(Graphics2D g, int height) {
 		g.setStroke(LINE_BASIC);
 		switch(R_NodeType.fromOrdinal(getProxy().getNodeType())) {
 			case STATION:
 				drawStationDetectors(g);
 				break;
 			case ENTRANCE:
-				drawEntranceDetectors(g);
+				drawEntranceDetectors(g, height);
 				break;
 		}
 	}
@@ -402,7 +396,7 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Draw entrance detectors stuff */
-	protected void drawEntranceDetectors(Graphics2D g) {
+	protected void drawEntranceDetectors(Graphics2D g, int height) {
 		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
 			getProxy().getTransition());
 		if(nt == R_NodeTransition.HOV) {
@@ -436,7 +430,9 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Draw the cross-street label */
-	protected void drawCrossStreet(Graphics2D g, String xStreet) {
+	protected void drawCrossStreet(Graphics2D g, String xStreet,
+		int height)
+	{
 		GlyphVector gv = FONT_XSTREET.createGlyphVector(
 			g.getFontRenderContext(), xStreet);
 		Rectangle2D rect = gv.getVisualBounds();
