@@ -50,7 +50,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	static protected final int LANE_HEIGHT = 18;
 
 	/** Total width of roadway node renderers */
-	static protected final int WIDTH = LANE_WIDTH * 19;
+	static protected final int WIDTH = LANE_WIDTH * 22;
 
 	/** Width of a detector */
 	static protected final int DET_WIDTH = LANE_WIDTH - 9;
@@ -105,8 +105,12 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 			return null;
 	}
 
+	/** Selected status */
+	protected boolean selected;
+
 	/** Set the selected status of the component */
 	protected void setSelected(boolean sel) {
+		selected = sel;
 		if(sel)
 			setBackground(Color.LIGHT_GRAY);
 		else {
@@ -118,19 +122,21 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 		}
 	}
 
-	/** Get the fog line for the given lane */
-	static protected int getFogLine(int lane) {
-		return LANE_WIDTH * (2 + lane);
+	/** Get the X-coordinate for the given shift.
+	 * @param shift Shift index (0-12).
+	 * @return X-coordinate to draw line. */
+	static protected int getShiftX(int shift) {
+		return LANE_WIDTH * (2 + shift);
 	}
 
-	/** Get the upstream fog line on the given side of the road */
+	/** Get the upstream line on the given side of the road */
 	protected int getUpstreamLine(boolean side) {
-		return getFogLine(model.getUpstreamLane(side));
+		return getShiftX(model.getUpstreamLane(side));
 	}
 
-	/** Get the downstream fog line on the given side of the road */
+	/** Get the downstream line on the given side of the road */
 	protected int getDownstreamLine(boolean side) {
-		return getFogLine(model.getDownstreamLane(side));
+		return getShiftX(model.getDownstreamLane(side));
 	}
 
 	/** Allow for subclasses to modify cross-street label */
@@ -153,10 +159,13 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 		fillRoadway(g2, height);
 		drawSkipStripes(g2, height);
 		drawDetectors(g2, height);
+		drawSpeedLimit(g2, height);
 		String xStreet = GeoLocHelper.getCrossDescription(
 			r_node.getGeoLoc());
 		if(xStreet != null)
 			drawCrossStreet(g2, xStreet, height);
+		if(selected)
+			drawShiftHandle(g2, height);
 	}
 
 	/** Fill the background */
@@ -442,13 +451,28 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 		g.setColor(Color.DARK_GRAY);
 		g.fill(detector);
 		g.setColor(Color.WHITE);
-		g.draw(detector);
 		GlyphVector gv = FONT_XSTREET.createGlyphVector(
 			g.getFontRenderContext(), label);
 		Rectangle2D rect = gv.getVisualBounds();
 		int tx = (DET_WIDTH - (int)rect.getWidth()) / 2;
 		int ty = 1 + (DET_HEIGHT + (int)rect.getHeight()) / 2;
 		g.drawGlyphVector(gv, x + tx, y + ty);
+	}
+
+	/** Draw the speed limit */
+	protected void drawSpeedLimit(Graphics2D g, int height) {
+		switch(node_type) {
+		case STATION:
+			String slim = "" + r_node.getSpeedLimit() + " mph";
+			GlyphVector gv = FONT_XSTREET.createGlyphVector(
+				g.getFontRenderContext(), slim);
+			Rectangle2D rect = gv.getVisualBounds();
+			int x = getDownstreamLine(false) + LANE_WIDTH;
+			int y = (height + (int)rect.getHeight()) / 2;
+			g.setColor(Color.BLACK);
+			g.drawGlyphVector(gv, x, y);
+			break;
+		}
 	}
 
 	/** Draw the cross-street label */
@@ -464,11 +488,27 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 		g.drawGlyphVector(gv, x, y);
 	}
 
-	/** Get the absolute change in the fog line lane for the given side */
-	protected int getFogLaneDelta(boolean side) {
-		int up = model.getUpstreamLane(side);
-		int down = model.getDownstreamLane(side);
-		return Math.abs(up - down);
+	/** Draw the shift handle */
+	protected void drawShiftHandle(Graphics2D g, int height) {
+		g.setColor(Color.GRAY);
+		Shape path = createShiftHandle(height);
+		g.fill(path);
+		g.setColor(Color.WHITE);
+		g.setStroke(LINE_BASIC2);
+		g.draw(path);
+	}
+
+	/** Create an exit roadway area */
+	protected Shape createShiftHandle(int height) {
+		int x = getShiftX(r_node.getShift());
+		int w = LANE_WIDTH / 3;
+		int h = LANE_HEIGHT / 2;
+		GeneralPath path = new GeneralPath();
+		path.moveTo(x + w, 1);
+		path.lineTo(x, h);
+		path.lineTo(x - w, 1);
+		path.closePath();
+		return path;
 	}
 
 	/** Get the preferred height of a station node */
@@ -476,6 +516,13 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 		int delta = Math.max(getFogLaneDelta(false),
 			getFogLaneDelta(true));
 		return LANE_HEIGHT * (delta + 1);
+	}
+
+	/** Get the absolute change in the fog line lane for the given side */
+	protected int getFogLaneDelta(boolean side) {
+		int up = model.getUpstreamLane(side);
+		int down = model.getDownstreamLane(side);
+		return Math.abs(up - down);
 	}
 
 	/** Get the preferred height */
