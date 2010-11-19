@@ -86,10 +86,14 @@ public class R_NodeRenderer extends JPanel {
 	/** R_Node */
 	protected final R_Node r_node;
 
+	/** R_Node type */
+	protected final R_NodeType node_type;
+
 	/** Create a new roadway node renderer */
 	public R_NodeRenderer(R_NodeModel m) {
 		model = m;
 		r_node = model.r_node;
+		node_type = R_NodeType.fromOrdinal(r_node.getNodeType());
 	}
 
 	/** Set the selected status of the component */
@@ -156,13 +160,12 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw the yellow lines */
 	protected void drawYellowLines(Graphics2D g, int height) {
-		R_NodeType nt =R_NodeType.fromOrdinal(r_node.getNodeType());
 		g.setColor(Color.YELLOW);
 		if(model.hasMainline())
 			g.draw(createYellowMainLine(height));
-		if(nt == R_NodeType.ENTRANCE)
+		if(node_type == R_NodeType.ENTRANCE)
 			g.draw(createEntranceYellow());
-		else if(nt == R_NodeType.EXIT)
+		else if(node_type == R_NodeType.EXIT)
 			g.draw(createExitYellow());
 	}
 
@@ -175,13 +178,12 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw the white lines */
 	protected void drawWhiteLines(Graphics2D g, int height) {
-		R_NodeType nt =R_NodeType.fromOrdinal(r_node.getNodeType());
 		g.setColor(Color.WHITE);
 		if(model.hasMainline())
 			g.draw(createWhiteMainLine(height));
-		if(nt == R_NodeType.ENTRANCE)
+		if(node_type == R_NodeType.ENTRANCE)
 			g.draw(createEntranceWhite());
-		else if(nt == R_NodeType.EXIT)
+		else if(node_type == R_NodeType.EXIT)
 			g.draw(createExitWhite());
 	}
 
@@ -194,13 +196,12 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Fill the roadway area */
 	protected void fillRoadway(Graphics2D g, int height) {
-		R_NodeType nt =R_NodeType.fromOrdinal(r_node.getNodeType());
 		g.setColor(Color.BLACK);
 		if(model.hasMainline())
 			g.fill(createMainRoadway(height));
-		if(nt == R_NodeType.ENTRANCE)
+		if(node_type == R_NodeType.ENTRANCE)
 			g.fill(createEntranceRoadway());
-		else if(nt == R_NodeType.EXIT)
+		else if(node_type == R_NodeType.EXIT)
 			g.fill(createExitRoadway());
 	}
 
@@ -214,16 +215,15 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw the skip stripes */
 	protected void drawSkipStripes(Graphics2D g, int height) {
-		R_NodeType nt =R_NodeType.fromOrdinal(r_node.getNodeType());
 		g.setColor(Color.WHITE);
 		g.setStroke(LINE_DASHED);
 		if(model.hasMainline())
 			drawMainlineSkipStripes(g, height);
-		if(nt == R_NodeType.ENTRANCE) {
+		if(node_type == R_NodeType.ENTRANCE) {
 			for(int lane = 1; lane < r_node.getLanes(); lane++)
 				g.draw(createEntranceRamp(lane, true));
 		}
-		if(nt == R_NodeType.EXIT) {
+		if(node_type == R_NodeType.EXIT) {
 			for(int lane = 1; lane < r_node.getLanes(); lane++)
 				g.draw(createExitRamp(lane, true));
 		}
@@ -364,13 +364,13 @@ public class R_NodeRenderer extends JPanel {
 	/** Draw the detector locations */
 	protected void drawDetectors(Graphics2D g, int height) {
 		g.setStroke(LINE_BASIC);
-		switch(R_NodeType.fromOrdinal(r_node.getNodeType())) {
-			case STATION:
-				drawStationDetectors(g);
-				break;
-			case ENTRANCE:
-				drawEntranceDetectors(g, height);
-				break;
+		switch(node_type) {
+		case STATION:
+			drawStationDetectors(g);
+			break;
+		case ENTRANCE:
+			drawEntranceDetectors(g, height);
+			break;
 		}
 	}
 
@@ -457,12 +457,12 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Get the preferred height */
 	protected int getPreferredHeight() {
-		switch(R_NodeType.fromOrdinal(r_node.getNodeType())) {
-			case ENTRANCE:
-			case EXIT:
-				return LANE_HEIGHT * (r_node.getLanes() +2);
-			case STATION:
-				return getPreferredStationHeight();
+		switch(node_type) {
+		case ENTRANCE:
+		case EXIT:
+			return LANE_HEIGHT * (r_node.getLanes() + 2);
+		case STATION:
+			return getPreferredStationHeight();
 		}
 		return LANE_HEIGHT;
 	}
