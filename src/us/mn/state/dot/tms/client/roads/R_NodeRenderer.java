@@ -134,7 +134,7 @@ public class R_NodeRenderer extends JPanel {
 		Graphics2D g2 = (Graphics2D)g;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
-		fillBackground(width, height, g2);
+		fillBackground(g2, width, height);
 		g2.setStroke(LINE_SOLID);
 		drawYellowLines(g2, height);
 		drawWhiteLines(g2, height);
@@ -148,7 +148,7 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Fill the background */
-	protected void fillBackground(int width, int height, Graphics2D g) {
+	protected void fillBackground(Graphics2D g, int width, int height) {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, width, height);
 		g.setColor(Color.BLACK);
