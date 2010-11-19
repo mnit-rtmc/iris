@@ -101,7 +101,7 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 				return d.getAbandoned();
 			}
 			public boolean isEditable(Detector d) {
-				return canUpdate(d);
+				return canUpdate(d, "abandoned");
 			}
 			public void setValueAt(Detector d, Object value) {
 				if(value instanceof Boolean)
