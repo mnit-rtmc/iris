@@ -277,12 +277,14 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		LinkedList<R_NodeModel> nodes = new LinkedList<R_NodeModel>();
 		List<R_NodeModel> no_loc = createNullLocList(node_s);
 		corridor = createCorridor(node_s);
-		List<R_Node> node_t = getSortedList();
-		R_NodeModel prev = null;
-		for(R_Node proxy: node_t) {
-			R_NodeModel model = new R_NodeModel(proxy, prev);
-			nodes.add(0, model);
-			prev = model;
+		if(corridor != null) {
+			List<R_Node> node_t = corridor.getNodes();
+			R_NodeModel prev = null;
+			for(R_Node proxy: node_t) {
+				R_NodeModel mdl = new R_NodeModel(proxy, prev);
+				nodes.add(0, mdl);
+				prev = mdl;
+			}
 		}
 		nodes.addAll(0, no_loc);
 		return new R_NodeListModel(nodes);
@@ -304,14 +306,6 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 			}
 		}
 		return no_loc;
-	}
-
-	/** Get a sorted list of roadway nodes for the selected corridor */
-	protected List<R_Node> getSortedList() {
-		if(corridor != null)
-			return corridor.getNodes();
-		else
-			return new LinkedList<R_Node>();
 	}
 
 	/** Get the selected roadway node */
