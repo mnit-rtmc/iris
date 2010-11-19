@@ -163,10 +163,14 @@ public class R_NodeRenderer extends JPanel {
 		g.setColor(Color.YELLOW);
 		if(model.hasMainline())
 			g.draw(createYellowMainLine(height));
-		if(node_type == R_NodeType.ENTRANCE)
+		switch(node_type) {
+		case ENTRANCE:
 			g.draw(createEntranceYellow());
-		else if(node_type == R_NodeType.EXIT)
+			break;
+		case EXIT:
 			g.draw(createExitYellow());
+			break;
+		}
 	}
 
 	/** Create the yellow main line */
@@ -181,10 +185,14 @@ public class R_NodeRenderer extends JPanel {
 		g.setColor(Color.WHITE);
 		if(model.hasMainline())
 			g.draw(createWhiteMainLine(height));
-		if(node_type == R_NodeType.ENTRANCE)
+		switch(node_type) {
+		case ENTRANCE:
 			g.draw(createEntranceWhite());
-		else if(node_type == R_NodeType.EXIT)
+			break;
+		case EXIT:
 			g.draw(createExitWhite());
+			break;
+		}
 	}
 
 	/** Create the white main line */
@@ -199,10 +207,14 @@ public class R_NodeRenderer extends JPanel {
 		g.setColor(Color.BLACK);
 		if(model.hasMainline())
 			g.fill(createMainRoadway(height));
-		if(node_type == R_NodeType.ENTRANCE)
+		switch(node_type) {
+		case ENTRANCE:
 			g.fill(createEntranceRoadway());
-		else if(node_type == R_NodeType.EXIT)
+			break;
+		case EXIT:
 			g.fill(createExitRoadway());
+			break;
+		}
 	}
 
 	/** Create the mainline roadway area */
@@ -219,13 +231,15 @@ public class R_NodeRenderer extends JPanel {
 		g.setStroke(LINE_DASHED);
 		if(model.hasMainline())
 			drawMainlineSkipStripes(g, height);
-		if(node_type == R_NodeType.ENTRANCE) {
+		switch(node_type) {
+		case ENTRANCE:
 			for(int lane = 1; lane < r_node.getLanes(); lane++)
 				g.draw(createEntranceRamp(lane, true));
-		}
-		if(node_type == R_NodeType.EXIT) {
+			break;
+		case EXIT:
 			for(int lane = 1; lane < r_node.getLanes(); lane++)
 				g.draw(createExitRamp(lane, true));
+			break;
 		}
 	}
 
