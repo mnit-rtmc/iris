@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -26,7 +27,9 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -38,7 +41,7 @@ import us.mn.state.dot.tms.R_NodeType;
  *
  * @author Douglas Lau
  */
-public class R_NodeRenderer extends JPanel {
+public class R_NodeRenderer extends JPanel implements ListCellRenderer {
 
 	/** Background color for nodes with GPS points */
 	static public final Color COLOR_GPS = Color.GREEN;
@@ -81,23 +84,35 @@ public class R_NodeRenderer extends JPanel {
 		new Font("Arial", Font.BOLD, 12);
 
 	/** R_node model */
-	protected final R_NodeModel model;
+	protected R_NodeModel model;
 
 	/** R_Node */
-	protected final R_Node r_node;
+	protected R_Node r_node;
 
 	/** R_Node type */
-	protected final R_NodeType node_type;
+	protected R_NodeType node_type;
 
-	/** Create a new roadway node renderer */
-	public R_NodeRenderer(R_NodeModel m) {
+	/** Set the r_node model */
+	protected void setModel(R_NodeModel m) {
 		model = m;
 		r_node = model.r_node;
 		node_type = R_NodeType.fromOrdinal(r_node.getNodeType());
 	}
 
+	/** Configure the renderer component */
+	public Component getListCellRendererComponent(JList list, Object value,
+		int index, boolean isSelected, boolean cellHasFocus)
+	{
+		if(value instanceof R_NodeModel) {
+			setModel((R_NodeModel)value);
+			setSelected(isSelected);
+			return this;
+		} else
+			return null;
+	}
+
 	/** Set the selected status of the component */
-	public void setSelected(boolean sel) {
+	protected void setSelected(boolean sel) {
 		if(sel)
 			setBackground(Color.LIGHT_GRAY);
 		else {

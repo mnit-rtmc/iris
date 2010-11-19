@@ -97,7 +97,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		geo_locs = creator.getGeoLocs();
 		setBorder(BorderFactory.createTitledBorder(
 			"Corridor Node List"));
-		n_list.setCellRenderer(new R_NodeCellRenderer());
+		n_list.setCellRenderer(new R_NodeRenderer());
 		n_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JScrollPane scroll = new JScrollPane(n_list);
 		GridBagConstraints bag = new GridBagConstraints();
