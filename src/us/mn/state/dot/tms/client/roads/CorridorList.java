@@ -145,7 +145,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 			}
 		});
 		new ActionJob(this, abutton) {
-			public void perform() throws Exception {
+			public void perform() {
 				doAddButton();
 			}
 		};
@@ -155,7 +155,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 			}
 		};
 		new ActionJob(this, rbutton) {
-			public void perform() throws Exception {
+			public void perform() {
 				doRemoveButton();
 			}
 		};
