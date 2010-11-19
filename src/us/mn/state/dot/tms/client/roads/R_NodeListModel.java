@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.util.List;
 import javax.swing.DefaultListModel;
 import us.mn.state.dot.tms.R_Node;
 
@@ -23,6 +24,17 @@ import us.mn.state.dot.tms.R_Node;
  * @author Douglas Lau
  */
 public class R_NodeListModel extends DefaultListModel {
+
+	/** Create a new r_node list model */
+	public R_NodeListModel() {
+		// nothing to do
+	}
+
+	/** Create a new r_node list model */
+	public R_NodeListModel(List<R_NodeModel> n_list) {
+		for(R_NodeModel r: n_list)
+			addElement(r);
+	}
 
 	/** Update the list item for the specified proxy */
 	public void updateItem(R_Node proxy) {

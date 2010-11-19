@@ -69,15 +69,11 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Location type cache */
 	protected final TypeCache<GeoLoc> geo_locs;
 
-	/** Renderer for painting roadway nodes */
-	protected final R_NodeCellRenderer renderer =
-		new R_NodeCellRenderer();
-
-	/** List component */
-	protected final JList jlist = new JList();
-
 	/** Roadway corridor */
 	protected CorridorBase corridor;
+
+	/** List component for nodes */
+	protected final JList n_list = new JList();
 
 	/** Roadway node list model */
 	protected R_NodeListModel nr_list = new R_NodeListModel();
@@ -101,9 +97,9 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		geo_locs = creator.getGeoLocs();
 		setBorder(BorderFactory.createTitledBorder(
 			"Corridor Node List"));
-		jlist.setCellRenderer(renderer);
-		jlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		JScrollPane scroll = new JScrollPane(jlist);
+		n_list.setCellRenderer(new R_NodeCellRenderer());
+		n_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		JScrollPane scroll = new JScrollPane(n_list);
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
 		bag.gridy = 0;
@@ -137,13 +133,13 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ListSelectionJob(this, jlist) {
+		new ListSelectionJob(this, n_list) {
 			public void perform() {
 				if(!event.getValueIsAdjusting())
 					updateNodeSelection();
 			}
 		};
-		jlist.addMouseListener(new MouseAdapter() {
+		n_list.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent ev) {
 				if(ev.getClickCount() == 2)
 					ebutton.doClick();
@@ -234,7 +230,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Check the node list for a geo location. This is needed in case
 	 * the geo location has changed to a different corridor. */
 	protected boolean checkNodeList(GeoLoc loc) {
-		ListModel lm = jlist.getModel();
+		ListModel lm = n_list.getModel();
 		for(int i = 0; i < lm.getSize(); i++) {
 			Object obj = lm.getElementAt(i);
 			if(obj instanceof R_NodeModel) {
@@ -272,28 +268,24 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Update the corridor list model */
 	public void updateListModel() {
 		Set<R_Node> node_s = manager.createSet();
-		List<R_NodeModel> n_list = createNodeList(node_s);
-		nr_list = new R_NodeListModel();
-		for(R_NodeModel r: n_list)
-			nr_list.addElement(r);
-		jlist.setModel(nr_list);
+		nr_list = createNodeList(node_s);
+		n_list.setModel(nr_list);
 	}
 
-	/** Create a list of roadway node models for one corridor */
-	protected List<R_NodeModel> createNodeList(Set<R_Node> node_s) {
-		LinkedList<R_NodeModel> n_list =
-			new LinkedList<R_NodeModel>();
+	/** Create a list model of roadway node models for one corridor */
+	protected R_NodeListModel createNodeList(Set<R_Node> node_s) {
+		LinkedList<R_NodeModel> nodes = new LinkedList<R_NodeModel>();
 		List<R_NodeModel> no_loc = createNullLocList(node_s);
 		corridor = createCorridor(node_s);
 		List<R_Node> node_t = getSortedList();
 		R_NodeModel prev = null;
 		for(R_Node proxy: node_t) {
 			R_NodeModel model = new R_NodeModel(proxy, prev);
-			n_list.add(0, model);
+			nodes.add(0, model);
 			prev = model;
 		}
-		n_list.addAll(0, no_loc);
-		return n_list;
+		nodes.addAll(0, no_loc);
+		return new R_NodeListModel(nodes);
 	}
 
 	/** Create a list of r_node models with null locations.  The r_nodes
@@ -324,7 +316,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 
 	/** Get the selected roadway node */
 	protected R_Node getSelectedNode() {
-		Object sel = jlist.getSelectedValue();
+		Object sel = n_list.getSelectedValue();
 		if(sel instanceof R_NodeModel)
 			return ((R_NodeModel)sel).r_node;
 		else
