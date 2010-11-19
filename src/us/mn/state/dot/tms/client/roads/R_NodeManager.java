@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
@@ -56,6 +57,12 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  * @author Douglas Lau
  */
 public class R_NodeManager extends ProxyManager<R_Node> {
+
+	/** Background color for nodes with GPS points */
+	static public final Color COLOR_GPS = Color.GREEN;
+
+	/** Background color for nodes with bad locations */
+	static public final Color COLOR_NO_LOC = Color.RED;
 
 	/** Marker to draw r_nodes */
 	static protected final R_NodeMarker MARKER =
@@ -257,8 +264,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create a styled theme for r_nodes */
 	protected StyledTheme createTheme() {
 		R_NodeMapTheme theme = new R_NodeMapTheme(this);
-		theme.addStyle(STYLE_GPS, R_NodeRenderer.COLOR_GPS);
-		theme.addStyle(STYLE_NO_LOC, R_NodeRenderer.COLOR_NO_LOC);
+		theme.addStyle(STYLE_GPS, COLOR_GPS);
+		theme.addStyle(STYLE_NO_LOC, COLOR_NO_LOC);
 		theme.addStyle(STYLE_ALL);
 		return theme;
 	}

@@ -43,12 +43,6 @@ import us.mn.state.dot.tms.R_NodeType;
  */
 public class R_NodeRenderer extends JPanel implements ListCellRenderer {
 
-	/** Background color for nodes with GPS points */
-	static public final Color COLOR_GPS = Color.GREEN;
-
-	/** Background color for nodes with bad locations */
-	static public final Color COLOR_NO_LOC = Color.RED;
-
 	/** Width of one lane */
 	static protected final int LANE_WIDTH = 20;
 
@@ -118,9 +112,9 @@ public class R_NodeRenderer extends JPanel implements ListCellRenderer {
 		else {
 			GeoLoc loc = r_node.getGeoLoc();
 			if(GeoLocHelper.isNull(loc))
-				setBackground(COLOR_NO_LOC);
+				setBackground(R_NodeManager.COLOR_NO_LOC);
 			else
-				setBackground(COLOR_GPS);
+				setBackground(R_NodeManager.COLOR_GPS);
 		}
 	}
 
