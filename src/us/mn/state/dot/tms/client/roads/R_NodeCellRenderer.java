@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,12 @@ public class R_NodeCellRenderer implements ListCellRenderer {
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		R_NodeRenderer r = (R_NodeRenderer)value;
-		r.setSelected(isSelected);
-		return r;
+		if(value instanceof R_NodeModel) {
+			R_NodeModel m = (R_NodeModel)value;
+			R_NodeRenderer r = new R_NodeRenderer(m);
+			r.setSelected(isSelected);
+			return r;
+		} else
+			return null;
 	}
 }

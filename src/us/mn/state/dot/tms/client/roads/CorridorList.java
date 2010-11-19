@@ -30,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
@@ -78,10 +79,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Roadway corridor */
 	protected CorridorBase corridor;
 
-	/** Roadway node renderer list */
-	protected List<R_NodeRenderer> r_list =new LinkedList<R_NodeRenderer>();
-
-	/** Roadway node renderer list model */
+	/** Roadway node list model */
 	protected R_NodeListModel nr_list = new R_NodeListModel();
 
 	/** Button to add a new roadway node */
@@ -227,18 +225,23 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	protected boolean checkCorridor(GeoLoc loc) {
 		// NOTE: The fast path assumes that GeoLoc name matches R_Node
 		//       name.  If that is not the case, the GeoLoc should
-		//       still be found by checkRenderers(GeoLoc).
+		//       still be found by checkNodeList(GeoLoc).
 		R_Node proxy = r_nodes.lookupObject(loc.getName());
 		return (proxy != null && manager.checkCorridor(proxy)) ||
-			checkRenderers(loc);
+			checkNodeList(loc);
 	}
 
-	/** Check the renderer list for a geo location. This is needed in case
+	/** Check the node list for a geo location. This is needed in case
 	 * the geo location has changed to a different corridor. */
-	protected boolean checkRenderers(GeoLoc loc) {
-		for(R_NodeRenderer r: r_list) {
-			if(r.getProxy().getGeoLoc() == loc)
-				return true;
+	protected boolean checkNodeList(GeoLoc loc) {
+		ListModel lm = jlist.getModel();
+		for(int i = 0; i < lm.getSize(); i++) {
+			Object obj = lm.getElementAt(i);
+			if(obj instanceof R_NodeModel) {
+				R_NodeModel m = (R_NodeModel)obj;
+				if(m.r_node.getGeoLoc() == loc)
+					return true;
+			}
 		}
 		return false;
 	}
@@ -269,44 +272,42 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Update the corridor list model */
 	public void updateListModel() {
 		Set<R_Node> node_s = manager.createSet();
-		r_list = createRendererList(node_s);
+		List<R_NodeModel> n_list = createNodeList(node_s);
 		nr_list = new R_NodeListModel();
-		for(R_NodeRenderer r: r_list)
+		for(R_NodeModel r: n_list)
 			nr_list.addElement(r);
 		jlist.setModel(nr_list);
 	}
 
-	/** Create a list of roadway node renderers for one corridor */
-	protected List<R_NodeRenderer> createRendererList(Set<R_Node> node_s) {
-		LinkedList<R_NodeRenderer> ren_l =
-			new LinkedList<R_NodeRenderer>();
-		List<R_NodeRenderer> no_loc = createNullLocList(node_s);
+	/** Create a list of roadway node models for one corridor */
+	protected List<R_NodeModel> createNodeList(Set<R_Node> node_s) {
+		LinkedList<R_NodeModel> n_list =
+			new LinkedList<R_NodeModel>();
+		List<R_NodeModel> no_loc = createNullLocList(node_s);
 		corridor = createCorridor(node_s);
 		List<R_Node> node_t = getSortedList();
 		R_NodeModel prev = null;
 		for(R_Node proxy: node_t) {
 			R_NodeModel model = new R_NodeModel(proxy, prev);
-			R_NodeRenderer r = new R_NodeRenderer(model);
-			ren_l.add(0, r);
+			n_list.add(0, model);
 			prev = model;
 		}
-		ren_l.addAll(0, no_loc);
-		return ren_l;
+		n_list.addAll(0, no_loc);
+		return n_list;
 	}
 
-	/** Create a list of r_node renderers with null locations.  The r_nodes
+	/** Create a list of r_node models with null locations.  The r_nodes
 	 * are then removed from the set passed in.
 	 * @param node_s Set of nodes on the corridor.
-	 * @return List of renderers with null location. */
-	protected List<R_NodeRenderer> createNullLocList(Set<R_Node> node_s) {
-		LinkedList<R_NodeRenderer> no_loc =
-			new LinkedList<R_NodeRenderer>();
+	 * @return List of r_node models with null location. */
+	protected List<R_NodeModel> createNullLocList(Set<R_Node> node_s) {
+		LinkedList<R_NodeModel> no_loc =
+			new LinkedList<R_NodeModel>();
 		Iterator<R_Node> it = node_s.iterator();
 		while(it.hasNext()) {
 			R_Node proxy = it.next();
 			if(GeoLocHelper.isNull(proxy.getGeoLoc())) {
-				R_NodeModel model = new R_NodeModel(proxy,null);
-				no_loc.add(new R_NodeRenderer(model));
+				no_loc.add(new R_NodeModel(proxy, null));
 				it.remove();
 			}
 		}
@@ -323,13 +324,11 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 
 	/** Get the selected roadway node */
 	protected R_Node getSelectedNode() {
-		int index = jlist.getSelectedIndex();
-		try {
-			return r_list.get(index).getProxy();
-		}
-		catch(IndexOutOfBoundsException e) {
+		Object sel = jlist.getSelectedValue();
+		if(sel instanceof R_NodeModel)
+			return ((R_NodeModel)sel).r_node;
+		else
 			return null;
-		}
 	}
 
 	/** Update the roadway node selection */
