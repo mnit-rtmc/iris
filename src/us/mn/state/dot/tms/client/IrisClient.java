@@ -37,6 +37,7 @@ import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
+import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.SonarException;
@@ -416,5 +417,11 @@ public class IrisClient extends JFrame {
 	protected void removeTabs() {
 		for(ScreenPane sp: s_panes)
 			sp.removeTabs();
+	}
+
+	/** Set the point selector for all map beans */
+	public void setPointSelector(PointSelector ps) {
+		for(ScreenPane sp: getVisiblePanes())
+			sp.getMap().addPointSelector(ps);
 	}
 }

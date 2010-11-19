@@ -19,6 +19,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +31,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -39,6 +41,7 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.client.IrisClient;
 
 /**
  * CorridorList is a graphical roadway corridor list.
@@ -55,6 +58,9 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 
 	/** Roadway node creator */
 	protected final R_NodeCreator creator;
+
+	/** Client frame */
+	protected final IrisClient client;
 
 	/** Roadway node type cache */
 	protected final TypeCache<R_Node> r_nodes;
@@ -88,10 +94,11 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	protected JButton rbutton = new JButton("Remove");
 
 	/** Create a corridor list */
-	public CorridorList(R_NodeManager m, R_NodeCreator c) {
+	public CorridorList(R_NodeManager m, R_NodeCreator c, IrisClient ic) {
 		super(new GridBagLayout());
 		manager = m;
 		creator = c;
+		client = ic;
 		r_nodes = creator.getR_Nodes();
 		geo_locs = creator.getGeoLocs();
 		setBorder(BorderFactory.createTitledBorder(
@@ -336,11 +343,23 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 
 	/** Do the add button action */
 	protected void doAddButton() {
-		CorridorBase c = corridor;
+		client.setPointSelector(new PointSelector() {
+			public void selectPoint(Point2D p) {
+				createNode(corridor, p);
+			}
+		});
+	}
+
+	/** Create a new node at a specified point */
+	protected void createNode(CorridorBase c, Point2D p) {
+		int e = (int)p.getX();
+		int n = (int)p.getY();
 		if(c != null)
-			creator.create(c.getRoadway(), c.getRoadDir());
+			creator.create(c.getRoadway(), c.getRoadDir(), e, n);
 		else
-			creator.create();
+			creator.create(e, n);
+		client.setPointSelector(null);
+		abutton.setEnabled(true);
 	}
 
 	/** Do the remove button action */

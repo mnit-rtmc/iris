@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LocModifier;
 import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.client.ScreenPane;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 
@@ -191,20 +190,14 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 			public void selectPoint(Point2D p) {
 				easting.setValue((int)p.getX());
 				northing.setValue((int)p.getY());
-				setPointSelector(null);
+				desktop.client.setPointSelector(null);
 			}
 		};
 		new ActionJob(this, select) {
-			public void perform() throws Exception {
-				setPointSelector(ps);
+			public void perform() {
+				desktop.client.setPointSelector(ps);
 			}
 		};
-	}
-
-	/** Set the point selector for all map beans */
-	protected void setPointSelector(PointSelector ps) {
-		for(ScreenPane sp: desktop.client.getVisiblePanes())
-			sp.getMap().addPointSelector(ps);
 	}
 
 	/** Dispose of the location panel */

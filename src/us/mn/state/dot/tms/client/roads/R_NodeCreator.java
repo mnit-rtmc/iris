@@ -87,7 +87,9 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Create a new r_node */
-	public void create(Road roadway, short road_dir) {
+	public void create(Road roadway, short road_dir, int easting,
+		int northing)
+	{
 		String name = createUniqueR_NodeName();
 		if(canAdd(name)) {
 			synchronized(in_process) {
@@ -98,13 +100,15 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 			if(roadway != null)
 				attrs.put("roadway", roadway);
 			attrs.put("road_dir", new Short(road_dir));
+			attrs.put("easting", new Integer(easting));
+			attrs.put("northing", new Integer(northing));
 			geo_locs.createObject(name, attrs);
 		}
 	}
 
 	/** Create a new r_node (with no default corridor) */
-	public void create() {
-		create(null, (short)0);
+	public void create(int easting, int northing) {
+		create(null, (short)0, easting, northing);
 	}
 
 	/** Create a unique R_Node name */
