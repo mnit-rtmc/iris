@@ -334,7 +334,7 @@ public class CorridorBase {
 	}
 
 	/** Fint the last node before the given location */
-	protected R_Node findLastBefore(int easting, int northing) {
+	public R_Node findLastBefore(int easting, int northing) {
 		R_Node nearest = null;
 		R_Node n_before = null;
 		R_Node n_after = null;
@@ -347,6 +347,10 @@ public class CorridorBase {
 				nearest = n;
 				n_after = n;
 				n_meters = m;
+			} else if(m == n_meters) {
+				// coincident points
+				nearest = n;
+				n_after = n;
 			} else if(n_after == nearest)
 				n_after = n;
 		}
