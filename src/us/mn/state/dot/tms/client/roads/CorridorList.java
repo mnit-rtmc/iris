@@ -84,6 +84,12 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Button to edit the currently selected roadway node */
 	protected JButton ebutton = new JButton("Edit");
 
+	/** Button the shift the selected node left */
+	protected JButton lf_btn = new JButton("<-");
+
+	/** Button the shift the selected node right */
+	protected JButton rt_btn = new JButton("->");
+
 	/** Button to remove the currently selected roadway node */
 	protected JButton rbutton = new JButton("Remove");
 
@@ -103,7 +109,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
 		bag.gridy = 0;
-		bag.gridwidth = 3;
+		bag.gridwidth = 5;
 		bag.insets = new Insets(2, 4, 2, 4);
 		bag.fill = GridBagConstraints.BOTH;
 		bag.weightx = 1;
@@ -115,9 +121,10 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		bag.weightx = 0.1f;
 		bag.weighty = 0;
 		add(abutton, bag);
-		bag.gridx = 1;
+		bag.gridx = GridBagConstraints.RELATIVE;
 		add(ebutton, bag);
-		bag.gridx = 2;
+		add(lf_btn, bag);
+		add(rt_btn, bag);
 		add(rbutton, bag);
 		r_nodes.addProxyListener(this);
 		geo_locs.addProxyListener(new ProxyListener<GeoLoc>() {
@@ -155,11 +162,37 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 				manager.showPropertiesForm();
 			}
 		};
+		new ActionJob(this, lf_btn) {
+			public void perform() {
+				doShiftLeft();
+			}
+		};
+		new ActionJob(this, rt_btn) {
+			public void perform() {
+				doShiftRight();
+			}
+		};
 		new ActionJob(this, rbutton) {
 			public void perform() {
 				doRemoveButton();
 			}
 		};
+	}
+
+	/** Shift the selected r_node to the left */
+	protected void doShiftLeft() {
+		R_Node proxy = getSelectedNode();
+		int shift = proxy.getShift();
+		if(shift > 0)
+			proxy.setShift(shift - 1);
+	}
+
+	/** Shift the selected r_node to the right */
+	protected void doShiftRight() {
+		R_Node proxy = getSelectedNode();
+		int shift = proxy.getShift();
+		if(shift < 12)
+			proxy.setShift(shift + 1);
 	}
 
 	/** Enumeration complete flag */
@@ -323,6 +356,8 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		if(proxy != null)
 			manager.getSelectionModel().setSelected(proxy);
 		ebutton.setEnabled(proxy != null);
+		lf_btn.setEnabled(proxy != null);
+		rt_btn.setEnabled(proxy != null);
 		rbutton.setEnabled(proxy != null);
 	}
 
