@@ -111,7 +111,10 @@ public class MapSegment implements MapObject {
 			sb.append("\n Speed = ");
 			sb.append(speed);
 		}
-		return sb.toString();
+		if(sb.length() > 0)
+			return sb.toString();
+		else
+			return null;
 	}
 
 	/** Get the segment flow */
