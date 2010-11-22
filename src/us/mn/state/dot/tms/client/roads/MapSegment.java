@@ -90,12 +90,28 @@ public class MapSegment implements MapObject {
 		return path;
 	}
 
-	/** Get the station ID */
-	public String getStationID() {
-		if(lane != null)
-			return segment.getStationID() + ' ' + lane;
-		else
-			return segment.getStationID();
+	/** Get the map segment tool tip */
+	public String getTip() {
+		StringBuilder sb = new StringBuilder();
+		String label = segment.getLabel(lane);
+		if(label != null)
+			sb.append(label);
+		Integer flow = getFlow();
+		if(flow != null) {
+			sb.append("\n Flow = ");
+			sb.append(flow);
+		}
+		Integer density = getDensity();
+		if(density != null) {
+			sb.append("\n Density = ");
+			sb.append(density);
+		}
+		Integer speed = getSpeed();
+		if(speed != null) {
+			sb.append("\n Speed = ");
+			sb.append(speed);
+		}
+		return sb.toString();
 	}
 
 	/** Get the segment flow */

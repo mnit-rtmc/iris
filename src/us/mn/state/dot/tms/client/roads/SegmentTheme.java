@@ -22,8 +22,6 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
-import us.mn.state.dot.tms.Station;
-import us.mn.state.dot.tms.StationHelper;
 
 /**
  * A simple theme which uses one symbol to draw all segment objects.
@@ -93,31 +91,9 @@ abstract public class SegmentTheme extends StyledTheme {
 
 	/** Get the tooltip text for a given segment */
 	public String getTip(MapObject mo) {
-		MapSegment ms = (MapSegment)mo;
-		StringBuilder b = new StringBuilder("Station ");
-		String sid = ms.getStationID();
-		if(sid == null || sid.length() < 1)
+		if(mo instanceof MapSegment)
+			return ((MapSegment)mo).getTip();
+		else
 			return null;
-		b.append(sid);
-		b.append(": ");
-		Station sta = StationHelper.lookup(sid);
-		if(sta != null)
-			b.append(sta.getLabel());
-		Integer flow = ms.getFlow();
-		if(flow != null) {
-			b.append("\n Flow = ");
-			b.append(flow);
-		}
-		Integer density = ms.getDensity();
-		if(density != null) {
-			b.append("\n Density = ");
-			b.append(density);
-		}
-		Integer speed = ms.getSpeed();
-		if(speed != null) {
-			b.append("\n Speed = ");
-			b.append(speed);
-		}
-		return b.toString();
 	}
 }

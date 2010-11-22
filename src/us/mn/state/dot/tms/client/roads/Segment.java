@@ -21,6 +21,8 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
+import us.mn.state.dot.tms.Station;
+import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
 /**
@@ -44,9 +46,9 @@ public class Segment {
 	/** Shift from upstream node to end of segment */
 	protected final int shift;
 
-	/** Get the station ID */
-	public String getStationID() {
-		return upstream.getStationID();
+	/** Get the segment label */
+	public String getLabel(Integer lane) {
+		return labels.get(lane);
 	}
 
 	/** Location at upstream end of segment */
@@ -54,6 +56,10 @@ public class Segment {
 
 	/** Location at downstream end of segment */
 	public final MapGeoLoc loc_dn;
+
+	/** Mapping of lane numbers to labels */
+	protected final HashMap<Integer, String> labels =
+		new HashMap<Integer, String>();
 
 	/** Mapping of sensor ID to lane number */
 	protected final HashMap<String, Integer> lane_sensors =
@@ -74,6 +80,22 @@ public class Segment {
 		loc_up = lu;
 		loc_dn = ld;
 		shift = model.getShift(upstream);
+		labels.put(null, getStationLabel());
+	}
+
+	/** Get label for a station segment */
+	protected String getStationLabel() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Station ");
+		String sid = upstream.getStationID();
+		if(sid != null && sid.length() > 0) {
+			sb.append(sid);
+			sb.append(": ");
+			Station sta = StationHelper.lookup(sid);
+			if(sta != null)
+				sb.append(sta.getLabel());
+		}
+		return sb.toString().trim();
 	}
 
 	/** Add detection to the segment */
@@ -84,10 +106,34 @@ public class Segment {
 					String id = "D" + d.getName();
 					int ln = d.getLaneNumber();
 					lane_sensors.put(id, ln);
+					addDetectorLabel(d);
 				}
 				return false;
 			}
 		});
+	}
+
+	/** Add a detector label */
+	protected void addDetectorLabel(Detector det) {
+		int ln = det.getLaneNumber();
+		StringBuilder sb = new StringBuilder();
+		String lbl = labels.get(ln);
+		if(lbl != null) {
+			sb.append(lbl);
+			sb.append('\n');
+		}
+		sb.append(getDetectorLabel(det));
+		labels.put(ln, sb.toString());
+	}
+
+	/** Get label for a detector segment */
+	protected String getDetectorLabel(Detector det) {
+		StringBuilder sb = new StringBuilder();
+		sb.append('D');
+		sb.append(det.getName());
+		sb.append(' ');
+		sb.append(DetectorHelper.getLabel(det));
+		return sb.toString().trim();
 	}
 
 	/** Update one sample */
