@@ -463,13 +463,19 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	protected void drawSpeedLimit(Graphics2D g, int height) {
 		switch(node_type) {
 		case STATION:
-			String slim = "" + r_node.getSpeedLimit() + " mph";
+			String slim = String.valueOf(r_node.getSpeedLimit());
 			GlyphVector gv = FONT_XSTREET.createGlyphVector(
 				g.getFontRenderContext(), slim);
 			Rectangle2D rect = gv.getVisualBounds();
 			int x = getDownstreamLine(false) + LANE_WIDTH;
 			int y = (height + (int)rect.getHeight()) / 2;
+			Rectangle2D face = new Rectangle2D.Double(x - 4, y - 11,
+				rect.getWidth() + 10, rect.getHeight() + 5);
+			g.setColor(Color.WHITE);
+			g.fill(face);
 			g.setColor(Color.BLACK);
+			g.setStroke(LINE_BASIC);
+			g.draw(face);
 			g.drawGlyphVector(gv, x, y);
 			break;
 		}
