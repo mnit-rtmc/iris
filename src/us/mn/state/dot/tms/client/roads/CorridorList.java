@@ -374,12 +374,34 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	protected void createNode(CorridorBase c, Point2D p) {
 		int e = (int)p.getX();
 		int n = (int)p.getY();
-		if(c != null)
-			creator.create(c.getRoadway(), c.getRoadDir(), e, n);
-		else
+		if(c != null) {
+			int lanes = 2;
+			int shift = 4;
+			R_NodeModel mdl = findModel(c, e, n);
+			if(mdl != null) {
+				shift = mdl.getDownstreamLane(false);
+				lanes = shift - mdl.getDownstreamLane(true);
+			}
+			creator.create(c.getRoadway(), c.getRoadDir(), e, n,
+				lanes, shift);
+		} else
 			creator.create(e, n);
 		client.setPointSelector(null);
 		abutton.setEnabled(true);
+	}
+
+	/** Find an r_node model near a point */
+	protected R_NodeModel findModel(CorridorBase c, int e, int n) {
+		R_Node found = c.findLastBefore(e, n);
+		for(int i = 0; i < n_model.getSize(); i++) {
+			Object elem = n_model.get(i);
+			if(elem instanceof R_NodeModel) {
+				R_NodeModel mdl = (R_NodeModel)elem;
+				if(mdl.r_node == found)
+					return mdl;
+			}
+		}
+		return null;
 	}
 
 	/** Do the remove button action */

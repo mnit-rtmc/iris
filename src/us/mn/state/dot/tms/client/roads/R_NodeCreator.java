@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
@@ -74,8 +73,9 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	/** Unique ID for r_node naming */
 	protected int uid = 0;
 
-	/** Set of names which are in process of being created */
-	protected HashSet<String> in_process = new HashSet<String>();
+	/** Mapping of names which are in process of being created */
+	protected HashMap<String, HashMap<String, Object>> in_process =
+		new HashMap<String, HashMap<String, Object>>();
 
 	/** Create a new r_node creator */
 	public R_NodeCreator(SonarState st, User u) {
@@ -88,13 +88,11 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 
 	/** Create a new r_node */
 	public void create(Road roadway, short road_dir, int easting,
-		int northing)
+		int northing, int lanes, int shift)
 	{
 		String name = createUniqueR_NodeName();
 		if(canAdd(name)) {
-			synchronized(in_process) {
-				in_process.add(name);
-			}
+			putAttrs(name, lanes, shift);
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			if(roadway != null)
@@ -106,9 +104,20 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 		}
 	}
 
+	/** Put a set of attributes for an in-process name */
+	protected void putAttrs(String name, int lanes, int shift) {
+		HashMap<String, Object> attrs =
+			new HashMap<String, Object>();
+		attrs.put("lanes", lanes);
+		attrs.put("shift", shift);
+		synchronized(in_process) {
+			in_process.put(name, attrs);
+		}
+	}
+
 	/** Create a new r_node (with no default corridor) */
 	public void create(int easting, int northing) {
-		create(null, (short)0, easting, northing);
+		create(null, (short)0, easting, northing, 2, 4);
 	}
 
 	/** Create a unique R_Node name */
@@ -138,14 +147,17 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	/** Called when a new GeoLoc is added */
 	public void proxyAdded(GeoLoc loc) {
 		String name = loc.getName();
+		HashMap<String, Object> attrs = getAttrs(name);
+		if(attrs != null) {
+			attrs.put("geo_loc", loc);
+			r_nodes.createObject(name, attrs);
+		}
+	}
+
+	/** Get a set of attributes for an in-process name */
+	protected HashMap<String, Object> getAttrs(String name) {
 		synchronized(in_process) {
-			if(in_process.contains(name)) {
-				HashMap<String, Object> attrs =
-					new HashMap<String, Object>();
-				attrs.put("geo_loc", loc);
-				r_nodes.createObject(name, attrs);
-				in_process.remove(name);
-			}
+			return in_process.remove(name);
 		}
 	}
 
