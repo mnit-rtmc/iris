@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,8 @@ public class JoyScript {
 		"/usr/bin/python",
 		"C:\\Python24\\python.exe",
 		"C:\\Python25\\python.exe",
-		"C:\\Python26\\python.exe"
+		"C:\\Python26\\python.exe",
+		"C:\\Python27\\python.exe"
 	};
 
 	/** Locate a Python interpreter */
