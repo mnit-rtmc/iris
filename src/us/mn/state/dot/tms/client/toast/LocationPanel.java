@@ -102,7 +102,7 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		new SpinnerNumberModel(0, 0, 10000000, 1));
 
 	/** Button to select a point from the map */
-	protected final JButton select = new JButton("Select Point");
+	protected final JButton select_btn = new JButton("Select Point");
 
 	/** Create a new location panel */
 	public LocationPanel(Session s, GeoLoc l) {
@@ -140,7 +140,7 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		finishRow();
 		setWidth(4);
 		updateSelectBag();
-		addRow(select);
+		addRow(select_btn);
 		if(enable)
 			createJobs();
 		updateAttribute(null);
@@ -202,7 +202,7 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 				desktop.client.setPointSelector(null);
 			}
 		};
-		new ActionJob(this, select) {
+		new ActionJob(this, select_btn) {
 			public void perform() {
 				desktop.client.setPointSelector(ps);
 			}
