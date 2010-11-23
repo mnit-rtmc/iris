@@ -128,16 +128,6 @@ public class IncidentLoc implements GeoLoc {
 		return incident.getEasting();
 	}
 
-	/** Set the UTM Easting offset */
-	public void setEastOffset(Integer x) {
-		// part of GeoLoc interface
-	}
-
-	/** Get the UTM Easting offset */
-	public Integer getEastOffset() {
-		return null;
-	}
-
 	/** Set the UTM Northing */
 	public void setNorthing(Integer y) {
 		// part of GeoLoc interface
@@ -146,16 +136,6 @@ public class IncidentLoc implements GeoLoc {
 	/** Get the UTM Northing */
 	public Integer getNorthing() {
 		return incident.getNorthing();
-	}
-
-	/** Set the UTM Northing offset */
-	public void setNorthOffset(Integer y) {
-		// part of GeoLoc interface
-	}
-
-	/** Get the UTM Northing offset */
-	public Integer getNorthOffset() {
-		return null;
 	}
 
 	/** Get a description of an incident location */

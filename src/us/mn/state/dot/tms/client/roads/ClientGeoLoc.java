@@ -117,16 +117,6 @@ public class ClientGeoLoc implements GeoLoc {
 		return easting;
 	}
 
-	/** Set the UTM Easting offset */
-	public void setEastOffset(Integer x) {
-		// part of GeoLoc interface
-	}
-
-	/** Get the UTM Easting offset */
-	public Integer getEastOffset() {
-		return null;
-	}
-
 	/** UTM Northing */
 	protected final int northing;
 
@@ -138,16 +128,6 @@ public class ClientGeoLoc implements GeoLoc {
 	/** Get the UTM Northing */
 	public Integer getNorthing() {
 		return northing;
-	}
-
-	/** Set the UTM Northing offset */
-	public void setNorthOffset(Integer y) {
-		// part of GeoLoc interface
-	}
-
-	/** Get the UTM Northing offset */
-	public Integer getNorthOffset() {
-		return null;
 	}
 
 	/** Distance from selected point */
