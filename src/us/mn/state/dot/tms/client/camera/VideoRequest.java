@@ -159,15 +159,11 @@ public class VideoRequest {
 	}
 
 	/** Get the URL for the request */
-	public URL getUrl(String cid) {
-		try {
-			if(area >= 0 && area < area_urls.length)
-				return createURL(cid);
-		}
-		catch(MalformedURLException e) {
-			e.printStackTrace();
-		}
-		return null;
+	public URL getUrl(String cid) throws MalformedURLException {
+		if(area >= 0 && area < area_urls.length)
+			return createURL(cid);
+		else
+			return null;
 	}
 
 	/** Create the URL for the request */
