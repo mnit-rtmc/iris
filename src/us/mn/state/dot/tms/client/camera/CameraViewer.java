@@ -26,6 +26,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Connection;
@@ -176,7 +177,7 @@ public class CameraViewer extends JPanel
 		cmbOutput = createOutputCombo();
 		add(cmbOutput, bag);
 		new ActionJob(this, cmbOutput) {
-			public void perform() throws Exception {
+			public void perform() {
 				monitorSelected();
 			}
 		};
@@ -202,7 +203,7 @@ public class CameraViewer extends JPanel
 		if(SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean())
 			add(ptz_panel, bag);
 		new ActionJob(NETWORKER, play) {
-			public void perform() throws Exception {
+			public void perform() throws IOException {
 				playPressed(selected);
 			}
 		};
@@ -323,7 +324,9 @@ public class CameraViewer extends JPanel
 	}
 
 	/** Set the selected camera */
-	public void setSelected(Camera camera) {
+	public void setSelected(final Camera camera) {
+		if(camera == selected)
+			return;
 		selected = camera;
 		pan = 0;
 		tilt = 0;
@@ -332,12 +335,11 @@ public class CameraViewer extends JPanel
 			txtId.setText(camera.getName());
 			txtLocation.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
-			try {
-				playPressed(camera);
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
+			new AbstractJob(NETWORKER) {
+				public void perform() throws IOException {
+					playPressed(camera);
+				}
+			}.addToScheduler();
 			if(video_monitor != null)
 				video_monitor.setCamera(camera);
 		}
@@ -378,7 +380,11 @@ public class CameraViewer extends JPanel
 
 	/** Disable the monitor panel */
 	protected void disableMonitorPanel() {
-		stopPressed();
+		new AbstractJob(NETWORKER) {
+			public void perform() {
+				stopPressed();
+			}
+		}.addToScheduler();
 		play.setEnabled(false);
 		stop.setEnabled(false);
 		ptz_panel.setEnabled(false);
