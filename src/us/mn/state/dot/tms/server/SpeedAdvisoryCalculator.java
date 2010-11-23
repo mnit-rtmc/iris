@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.server;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.Station;
-import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
