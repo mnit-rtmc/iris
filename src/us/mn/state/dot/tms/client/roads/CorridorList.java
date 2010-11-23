@@ -79,10 +79,10 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	protected R_NodeListModel n_model = new R_NodeListModel();
 
 	/** Button to add a new roadway node */
-	protected JButton abutton = new JButton("Add");
+	protected JButton add_btn = new JButton("Add");
 
 	/** Button to edit the currently selected roadway node */
-	protected JButton ebutton = new JButton("Edit");
+	protected JButton edit_btn = new JButton("Edit");
 
 	/** Button the shift the selected node left */
 	protected JButton lf_btn = new JButton("<-");
@@ -91,7 +91,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	protected JButton rt_btn = new JButton("->");
 
 	/** Button to remove the currently selected roadway node */
-	protected JButton rbutton = new JButton("Remove");
+	protected JButton remove_btn = new JButton("Remove");
 
 	/** Create a corridor list */
 	public CorridorList(R_NodeManager m, R_NodeCreator c, IrisClient ic) {
@@ -120,12 +120,12 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		bag.fill = GridBagConstraints.NONE;
 		bag.weightx = 0.1f;
 		bag.weighty = 0;
-		add(abutton, bag);
+		add(add_btn, bag);
 		bag.gridx = GridBagConstraints.RELATIVE;
-		add(ebutton, bag);
+		add(edit_btn, bag);
 		add(lf_btn, bag);
 		add(rt_btn, bag);
-		add(rbutton, bag);
+		add(remove_btn, bag);
 		r_nodes.addProxyListener(this);
 		geo_locs.addProxyListener(new ProxyListener<GeoLoc>() {
 			public void proxyAdded(GeoLoc proxy) { }
@@ -149,15 +149,15 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		n_list.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent ev) {
 				if(ev.getClickCount() == 2)
-					ebutton.doClick();
+					edit_btn.doClick();
 			}
 		});
-		new ActionJob(this, abutton) {
+		new ActionJob(this, add_btn) {
 			public void perform() {
 				doAddButton();
 			}
 		};
-		new ActionJob(this, ebutton) {
+		new ActionJob(this, edit_btn) {
 			public void perform() {
 				manager.showPropertiesForm();
 			}
@@ -172,7 +172,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 				doShiftRight();
 			}
 		};
-		new ActionJob(this, rbutton) {
+		new ActionJob(this, remove_btn) {
 			public void perform() {
 				doRemoveButton();
 			}
@@ -355,10 +355,10 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		R_Node proxy = getSelectedNode();
 		if(proxy != null)
 			manager.getSelectionModel().setSelected(proxy);
-		ebutton.setEnabled(proxy != null);
+		edit_btn.setEnabled(proxy != null);
 		lf_btn.setEnabled(proxy != null);
 		rt_btn.setEnabled(proxy != null);
-		rbutton.setEnabled(proxy != null);
+		remove_btn.setEnabled(proxy != null);
 	}
 
 	/** Do the add button action */
@@ -387,7 +387,7 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		} else
 			creator.create(e, n);
 		client.setPointSelector(null);
-		abutton.setEnabled(true);
+		add_btn.setEnabled(true);
 	}
 
 	/** Find an r_node model near a point */
