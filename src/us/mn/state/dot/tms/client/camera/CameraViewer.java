@@ -219,14 +219,8 @@ public class CameraViewer extends JPanel
 		ptz_poller.start();
 		joystick.addJoystickListener(new JoystickListener() {
 			public void buttonChanged(JoystickButtonEvent ev) {
-				if(ev.pressed) {
-					if(ev.button == BUTTON_NEXT)
-						selectNextCamera();
-					else if(ev.button == BUTTON_PREVIOUS)
-						selectPreviousCamera();
-					else if((ev.button >= 0) && (ev.button < NUMBER_BUTTON_PRESETS))
-						selectCameraPreset(ev.button + 1);
-				}
+				if(ev.pressed)
+					doJoyButton(ev);
 			}
 		});
 	}
@@ -273,6 +267,16 @@ public class CameraViewer extends JPanel
 				zoom = z;
 			}
 		}
+	}
+
+	/** Process a joystick button event */
+	protected void doJoyButton(JoystickButtonEvent ev) {
+		if(ev.button == BUTTON_NEXT)
+			selectNextCamera();
+		else if(ev.button == BUTTON_PREVIOUS)
+			selectPreviousCamera();
+		else if(ev.button >= 0 && ev.button < NUMBER_BUTTON_PRESETS)
+			selectCameraPreset(ev.button + 1);
 	}
 
 	/** Select the next camera */
