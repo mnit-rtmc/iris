@@ -51,7 +51,7 @@ public class StreamPanel extends JPanel {
 	private VideoStream stream = null;
 
 	/** Progress bar for duration */
-	private JProgressBar progress = new JProgressBar(0, 100);
+	private final JProgressBar progress = new JProgressBar(0, 100);
 
 	/** Total number of frames requested */
 	private int n_frames = 0;
@@ -95,27 +95,36 @@ public class StreamPanel extends JPanel {
 				}
 			}
 		}
-		protected void readStream(VideoStream vs) {
-			try {
-				while(vs == stream) {
-					byte[] idata = vs.getImage();
-					screen.setIcon(createIcon(idata));
-					progress.setValue(vs.getFrameCount());
-					if(vs.getFrameCount() >= n_frames)
-						break;
-				}
-			}
-			catch(IOException e) {
-				System.err.println("readStream: " +
-					e.getMessage());
-			}
-			finally {
-				vs.close();
-				clearVideoStream(vs);
-				screen.setIcon(null);
+	};
+
+	/** Read a video stream */
+	protected void readStream(final VideoStream vs) {
+		progress.setStringPainted(false);
+		try {
+			while(vs == stream) {
+				byte[] idata = vs.getImage();
+				screen.setIcon(createIcon(idata));
+				progress.setValue(vs.getFrameCount());
+				if(vs.getFrameCount() >= n_frames)
+					break;
 			}
 		}
-	};
+		catch(IOException e) {
+			progress.setString(e.getMessage());
+			progress.setStringPainted(true);
+		}
+		finally {
+			try {
+				vs.close();
+			}
+			catch(IOException e) {
+				progress.setString(e.getMessage());
+				progress.setStringPainted(true);
+			}
+			clearVideoStream(vs);
+			screen.setIcon(null);
+		}
+	}
 
 	/** Clear the specified video stream */
 	protected synchronized void clearVideoStream(VideoStream vs) {

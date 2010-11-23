@@ -97,13 +97,8 @@ public class MJPEGStream implements VideoStream {
 	}
 
 	/** Close the video stream */
-	public void close() {
-		try {
-			stream.close();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
+	public void close() throws IOException {
+		stream.close();
 	}
 
 	/** Get the number of frames rendered */

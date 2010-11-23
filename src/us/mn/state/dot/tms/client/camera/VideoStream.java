@@ -31,5 +31,5 @@ public interface VideoStream {
 	int getFrameCount();
 
 	/** Close the video stream */
-	void close();
+	void close() throws IOException;
 }
