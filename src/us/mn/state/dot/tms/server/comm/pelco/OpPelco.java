@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
 
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -26,6 +27,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpPelco extends OpController {
+
+	/** Pelco debug log */
+	static protected final IDebugLog PELCO_LOG = new IDebugLog("pelco");
 
 	/** Video monitor to select camera on */
 	protected final VideoMonitor monitor;

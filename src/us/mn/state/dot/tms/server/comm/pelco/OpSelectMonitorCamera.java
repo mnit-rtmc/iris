@@ -46,6 +46,7 @@ public class OpSelectMonitorCamera extends OpPelco {
 		String cam)
 	{
 		super(PriorityLevel.COMMAND, c, m, cam);
+		debug("BEGIN monitor");
 	}
 
 	/** Begin the operation */
@@ -62,7 +63,16 @@ public class OpSelectMonitorCamera extends OpPelco {
 				monitor.getName())));
 			mess.add(new SelectCameraProperty(parseUID(camera)));
 			mess.storeProps();
+			debug("END monitor");
 			return null;
+		}
+	}
+
+	/** Debug switch requests */
+	protected void debug(String desc) {
+		if(PELCO_LOG.isOpen()) {
+			PELCO_LOG.log(desc + " " + monitor.getName() + " -> " +
+				camera);
 		}
 	}
 }
