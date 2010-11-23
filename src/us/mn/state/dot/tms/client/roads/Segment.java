@@ -75,6 +75,10 @@ public class Segment {
 
 	/** Create a new segment */
 	public Segment(R_NodeModel m, R_Node u, MapGeoLoc lu, MapGeoLoc ld) {
+		assert m != null;
+		assert u != null;
+		assert lu != null;
+		assert ld != null;
 		model = m;
 		upstream = u;
 		loc_up = lu;
