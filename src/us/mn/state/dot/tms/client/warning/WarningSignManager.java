@@ -112,13 +112,8 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		if(s_model.getSelectedCount() == 1) {
 			SmartDesktop desktop = session.getDesktop();
 			for(WarningSign ws: s_model.getSelected()) {
-				try {
-					desktop.show(new WarningSignProperties(
-						session, ws));
-				}
-				catch(Exception e) {
-					e.printStackTrace();
-				}
+				desktop.show(new WarningSignProperties(
+					session, ws));
 			}
 		}
 	}

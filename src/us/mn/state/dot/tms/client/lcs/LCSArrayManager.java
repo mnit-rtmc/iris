@@ -283,12 +283,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Show the properteis form for the given proxy */
 	protected void showPropertiesForm(LCSArray la) {
 		SmartDesktop desktop = session.getDesktop();
-		try {
-			desktop.show(new LCSArrayProperties(session, la));
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+		desktop.show(new LCSArrayProperties(session, la));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */

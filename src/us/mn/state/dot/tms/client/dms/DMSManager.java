@@ -214,12 +214,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Show the properteis form for the given proxy */
 	public void showPropertiesForm(DMS dms) {
 		SmartDesktop desktop = session.getDesktop();
-		try {
-			desktop.show(new DMSProperties(session, dms));
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+		desktop.show(new DMSProperties(session, dms));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */

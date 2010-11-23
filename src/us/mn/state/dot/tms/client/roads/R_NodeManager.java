@@ -300,12 +300,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Show the properties form for the given proxy */
 	protected void showPropertiesForm(R_Node n) {
 		SmartDesktop desktop = session.getDesktop();
-		try {
-			desktop.show(new R_NodeProperties(session, n));
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+		desktop.show(new R_NodeProperties(session, n));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
