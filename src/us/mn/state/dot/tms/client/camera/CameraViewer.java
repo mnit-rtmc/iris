@@ -342,8 +342,9 @@ public class CameraViewer extends JPanel
 			}.addToScheduler();
 			if(video_monitor != null)
 				video_monitor.setCamera(camera);
-		}
-		updateMonitorPanel(camera);
+			updateMonitorPanel(camera);
+		} else
+			clear();
 	}
 
 	/** Called whenever a camera is added to the selection */
@@ -420,6 +421,7 @@ public class CameraViewer extends JPanel
 		txtId.setText("");
 		txtLocation.setText("");
 		disableMonitorPanel();
+		s_panel.setVideoStream(null, 0);
 	}
 
 	/** Create the video output selection combo box */

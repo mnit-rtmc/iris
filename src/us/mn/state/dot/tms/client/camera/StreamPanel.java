@@ -99,7 +99,6 @@ public class StreamPanel extends JPanel {
 
 	/** Read a video stream */
 	protected void readStream(final VideoStream vs) {
-		progress.setStringPainted(false);
 		try {
 			while(vs == stream) {
 				byte[] idata = vs.getImage();
@@ -148,6 +147,7 @@ public class StreamPanel extends JPanel {
 		n_frames = f;
 		progress.setMaximum(n_frames);
 		progress.setValue(0);
+		progress.setStringPainted(false);
 		synchronized(thread) {
 			thread.notify();
 		}
