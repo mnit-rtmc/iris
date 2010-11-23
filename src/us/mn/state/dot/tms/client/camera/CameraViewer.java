@@ -130,6 +130,21 @@ public class CameraViewer extends JPanel
 	/** Joystick polling thread */
 	protected final JoystickThread joystick = new JoystickThread();
 
+	/** Joystick PTZ polling thread */
+	protected final Thread ptz_poller = new Thread() {
+		public void run() {
+			while(true) {
+				try {
+					pollJoystick();
+					sleep(200);
+				}
+				catch(InterruptedException e) {
+					break;
+				}
+			}
+		}
+	};
+
 	/** Create a new camera viewer */
 	public CameraViewer(Session session, CameraManager man) {
 		super(new GridBagLayout());
@@ -197,25 +212,11 @@ public class CameraViewer extends JPanel
 			}
 		};
 		clear();
-		Thread t = new Thread() {
-			public void run() {
-				while(true) {
-					try {
-						pollJoystick();
-						sleep(200);
-					}
-					catch(Exception e) {
-						e.printStackTrace();
-						break;
-					}
-				}
-			}
-		};
 		Connection c = state.lookupConnection(state.getConnection());
 		request.setSonarSessionId(c.getSessionId());
 		request.setRate(30);
-		t.setDaemon(true);
-		t.start();
+		ptz_poller.setDaemon(true);
+		ptz_poller.start();
 		joystick.addJoystickListener(new JoystickListener() {
 			public void buttonChanged(JoystickButtonEvent ev) {
 				if(ev.pressed) {
