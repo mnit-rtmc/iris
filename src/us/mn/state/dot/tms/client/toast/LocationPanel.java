@@ -139,10 +139,19 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		add("Northing", northing);
 		finishRow();
 		setWidth(4);
+		updateSelectBag();
 		addRow(select);
 		if(enable)
 			createJobs();
 		updateAttribute(null);
+	}
+
+	/** Select position grid bag constraints */
+	protected void updateSelectBag() {
+		bag.gridx = 2;
+		bag.gridy = 2;
+		bag.gridwidth = 1;
+		bag.gridheight = 2;
 	}
 
 	/** Create the jobs */
