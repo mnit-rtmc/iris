@@ -18,7 +18,6 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -39,7 +38,6 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RoadClass;
@@ -80,10 +78,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Map to of corridor names to corridors */
 	protected final Map<String, CorridorBase> corridors =
 		new TreeMap<String, CorridorBase>();
-
-	/** Map to hold exit/entrance links */
-	protected final Map<String, R_Node> e_links =
-		new HashMap<String, R_Node>();
 
 	/** List model of all corridors */
 	protected final DefaultListModel model = new DefaultListModel();
@@ -138,12 +132,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Arrange the corridor mapping */
 	protected void arrangeCorridors() {
-		R_NodeHelper.find(new Checker<R_Node>() {
-			public boolean check(R_Node r_node) {
-				findDownstreamLinks(r_node);
-				return false;
-			}
-		});
 		for(CorridorBase c: corridors.values()) {
 			c.arrangeNodes();
 			setTangentAngles(c);
@@ -180,43 +168,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			loc_a = loc;
 			loc = loc_b;
 		}
-	}
-
-	/** Find downstream links (not in corridor) for the given node */
-	protected void findDownstreamLinks(R_Node r_node) {
-		if(R_NodeHelper.isExit(r_node))
-			linkExitToEntrance(r_node);
-	}
-
-	/** Link an exit node with a corresponding entrance node */
-	protected void linkExitToEntrance(final R_Node r_node) {
-		final LinkedList<R_Node> nl = new LinkedList<R_Node>();
-		R_NodeHelper.find(new Checker<R_Node>() {
-			public boolean check(R_Node other) {
-				if(R_NodeHelper.isExitLink(r_node, other))
-					nl.add(other);
-				return false;
-			}
-		});
-		R_Node link = findNearest(r_node, nl);
-		if(link != null) {
-			e_links.put(r_node.getName(), link);
-			e_links.put(link.getName(), r_node);
-		}
-	}
-
-	/** Find the nearest r_node in a list */
-	static protected R_Node findNearest(R_Node r_node, List<R_Node> others){
-		R_Node nearest = null;
-		double distance = 0;
-		for(R_Node other: others) {
-			double m = CorridorBase.metersTo(r_node, other);
-			if(nearest == null || m < distance) {
-				nearest = other;
-				distance = m;
-			}
-		}
-		return nearest;
 	}
 
 	/** Create the segment layer */
