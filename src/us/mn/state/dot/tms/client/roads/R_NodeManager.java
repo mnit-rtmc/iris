@@ -138,6 +138,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		for(CorridorBase c: corridors.values()) {
 			c.arrangeNodes();
 			setTangentAngles(c);
+			if(c.getRoadDir() > 0)
+				seg_layer.updateCorridor(c);
 		}
 	}
 
@@ -175,10 +177,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Get the segment layer */
 	public SegmentLayer getSegmentLayer() {
-		for(CorridorBase c: corridors.values()) {
-			if(c.getRoadDir() > 0)
-				seg_layer.updateCorridor(c);
-		}
 		return seg_layer;
 	}
 
