@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -43,15 +44,11 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
  *
  * @author Douglas Lau
   */
-public class SegmentLayer extends Layer implements DynamicLayer {
-
+public class SegmentLayer extends Layer implements DynamicLayer,
+	Iterable<Segment>
+{
 	/** List of segments in the layer */
 	protected final List<Segment> segments = new LinkedList<Segment>();
-
-	/** Get the list of segments */
-	public List<Segment> getSegments() {
-		return segments;
-	}
 
 	/** R_Node manager */
 	protected final R_NodeManager manager;
@@ -76,18 +73,19 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 	{
 		if(loc == null)
 			return null;
+		final Iterable<Segment> segs = this;
 		XmlSensorClient sc = new XmlSensorClient(new URL(loc), l);
 		sc.addSensorListener(new SensorListener() {
 			public void update(boolean finish) {
 				if(finish) {
-					for(Segment seg: segments)
+					for(Segment seg: segs)
 						seg.swapSamples();
 					notifyLayerChanged();
 					return;
 				}
 			}
 			public void update(SensorSample s) {
-				for(Segment seg: segments)
+				for(Segment seg: segs)
 					seg.updateSample(s);
 			}
 		});
@@ -146,5 +144,10 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 	/** Create a new layer state */
 	public LayerState createState(MapBean mb) {
 		return new SegmentLayerState(this, mb);
+	}
+
+	/** Create a segment iterator */
+	public Iterator<Segment> iterator() {
+		return segments.iterator();
 	}
 }

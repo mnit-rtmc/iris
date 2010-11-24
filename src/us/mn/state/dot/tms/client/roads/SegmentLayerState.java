@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.geom.Point2D;
-import java.util.List;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
@@ -28,8 +27,8 @@ import us.mn.state.dot.map.MapSearcher;
  */
 public class SegmentLayerState extends LayerState {
 
-	/** List of segments in the layer */
-	protected final List<Segment> segments;
+	/** Segment layer */
+	protected final SegmentLayer seg_layer;
 
 	/** Create a new segment layer */
 	public SegmentLayerState(SegmentLayer sl, MapBean mb) {
@@ -38,7 +37,7 @@ public class SegmentLayerState extends LayerState {
 		addTheme(new SpeedTheme());
 		addTheme(new FlowTheme());
 		addTheme(new FreewayTheme());
-		segments = sl.getSegments();
+		seg_layer = sl;
 	}
 
 	/** Iterate through the segments in the layer */
@@ -54,7 +53,7 @@ public class SegmentLayerState extends LayerState {
 	protected MapObject forEachStation(MapSearcher s, float scale) {
 		float inner = scale / 2;		// inner scale
 		float outer = 6 * scale;		// outer scale
-		for(Segment seg: segments) {
+		for(Segment seg: seg_layer) {
 			MapSegment ms = new MapSegment(seg, inner, outer);
 			if(s.next(ms))
 				return ms;
@@ -68,7 +67,7 @@ public class SegmentLayerState extends LayerState {
 	 * @return Map object found, if any. */
 	protected MapObject forEachLane(MapSearcher s, float scale) {
 		final float lane_width = 3 * scale + 5 * (20 - scale) / 20;
-		for(Segment seg: segments) {
+		for(Segment seg: seg_layer) {
 			R_NodeModel mdl = seg.getModel();
 			int left = seg.getLeftLine();
 			int right = seg.getRightLine();
