@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -26,7 +25,7 @@ import java.util.TreeMap;
  *
  * @author Douglas Lau
  */
-public class CorridorBase {
+public class CorridorBase implements Iterable<R_Node> {
 
 	/** Conversion value from meter to mile length units */
 	static protected final float METERS_PER_MILE = 1609.344f;
@@ -262,9 +261,9 @@ public class CorridorBase {
 			return n_mile - mi;
 	}
 
-	/** Get the list of r_nodes */
-	public List<R_Node> getNodes() {
-		return r_nodes;
+	/** Create a r_node iterator */
+	public Iterator<R_Node> iterator() {
+		return r_nodes.iterator();
 	}
 
 	/** Find the nearest node to the given location */

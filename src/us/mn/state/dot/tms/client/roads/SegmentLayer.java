@@ -111,7 +111,7 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 		MapGeoLoc uloc = null;	// upstream node location
 		MapGeoLoc ploc = null;	// previous node location
 		R_NodeModel mdl = null;	// node model
-		for(R_Node n: c.getNodes()) {
+		for(R_Node n: c) {
 			MapGeoLoc loc = manager.findGeoLoc(n);
 			if(un != null) {
 				if(R_NodeHelper.isJoined(n) &&

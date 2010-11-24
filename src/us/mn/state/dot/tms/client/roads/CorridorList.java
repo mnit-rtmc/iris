@@ -311,9 +311,8 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		List<R_NodeModel> no_loc = createNullLocList(node_s);
 		corridor = createCorridor(node_s);
 		if(corridor != null) {
-			List<R_Node> node_t = corridor.getNodes();
 			R_NodeModel prev = null;
-			for(R_Node proxy: node_t) {
+			for(R_Node proxy: corridor) {
 				R_NodeModel mdl = new R_NodeModel(proxy, prev);
 				nodes.add(0, mdl);
 				prev = mdl;

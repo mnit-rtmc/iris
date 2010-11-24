@@ -141,7 +141,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Set the tangent angles for all the nodes in a corridor */
 	protected void setTangentAngles(CorridorBase c) {
 		LinkedList<MapGeoLoc> locs = new LinkedList<MapGeoLoc>();
-		for(R_Node n: c.getNodes()) {
+		for(R_Node n: c) {
 			MapGeoLoc loc = super.findGeoLoc(n);
 			if(loc != null)
 				locs.add(loc);
@@ -373,7 +373,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		R_Node n1 = null;
 		R_Node n_prev = null;
 		double n_meters = Double.POSITIVE_INFINITY;
-		for(R_Node n: c.getNodes()) {
+		for(R_Node n: c) {
 			if(isContinuityBreak(n)) {
 				n_prev = null;
 				continue;
