@@ -59,6 +59,9 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 	/** XML sensor client */
 	protected final XmlSensorClient sensor_client;
 
+	/** Sample data set */
+	protected final SampleDataSet samples = new SampleDataSet();
+
 	/** Create a new segment layer */
 	public SegmentLayer(R_NodeManager m, Session s) throws IOException,
 		TdxmlException
@@ -76,20 +79,17 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 	{
 		if(loc == null)
 			return null;
-		final Iterable<Segment> segs = this;
 		XmlSensorClient sc = new XmlSensorClient(new URL(loc), l);
 		sc.addSensorListener(new SensorListener() {
 			public void update(boolean finish) {
 				if(finish) {
-					for(Segment seg: segs)
-						seg.swapSamples();
+					samples.swapSamples();
 					notifyLayerChanged();
 					return;
 				}
 			}
 			public void update(SensorSample s) {
-				for(Segment seg: segs)
-					seg.updateSample(s);
+				samples.updateSample(s);
 			}
 		});
 		return sc;
@@ -123,7 +123,7 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 				{
 					mdl = new R_NodeModel(n, mdl);
 					Segment seg = new Segment(mdl, un,
-						ploc, loc);
+						ploc, loc, samples);
 					if(!isTooDistant(uloc, loc))
 						seg.addDetection();
 					segments.add(seg);
