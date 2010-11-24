@@ -16,9 +16,11 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.logging.Logger;
 import us.mn.state.dot.map.DynamicLayer;
@@ -47,8 +49,9 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 public class SegmentLayer extends Layer implements DynamicLayer,
 	Iterable<Segment>
 {
-	/** List of segments in the layer */
-	protected final List<Segment> segments = new LinkedList<Segment>();
+	/** Mapping of corridor names to segment lists */
+	protected final HashMap<String, List<Segment>> cor_segs =
+		new HashMap<String, List<Segment>>();
 
 	/** R_Node manager */
 	protected final R_NodeManager manager;
@@ -107,6 +110,7 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 
 	/** Add a corridor to the segment layer */
 	public void addCorridor(CorridorBase corridor) {
+		List<Segment> segments = new LinkedList<Segment>();
 		R_Node un = null;	// upstream node
 		MapGeoLoc uloc = null;	// upstream node location
 		MapGeoLoc ploc = null;	// previous node location
@@ -133,6 +137,7 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 				uloc = loc;
 			}
 		}
+		cor_segs.put(corridor.getName(), segments);
 	}
 
 	/** Check if two locations are too distant */
@@ -146,8 +151,32 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 		return new SegmentLayerState(this, mb);
 	}
 
-	/** Create a segment iterator */
+	/** Create a segment iterator.  This uses the cor_segs mapping, which
+	 * allows a corridor to be updated without regenerating all segments. */
 	public Iterator<Segment> iterator() {
-		return segments.iterator();
+		final Iterator<List<Segment>> cors =
+			cor_segs.values().iterator();
+		return new Iterator<Segment>() {
+			Iterator<Segment> segs;
+			public boolean hasNext() {
+				if(segs != null && segs.hasNext())
+					return true;
+				while(cors.hasNext()) {
+					segs = cors.next().iterator();
+					if(segs.hasNext())
+						return true;
+				}
+				return false;
+			}
+			public Segment next() {
+				if(segs != null)
+					return segs.next();
+				else
+					throw new NoSuchElementException();
+			}
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 }
