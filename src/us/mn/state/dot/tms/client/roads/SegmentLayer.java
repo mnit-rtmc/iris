@@ -106,12 +106,12 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 	}
 
 	/** Add a corridor to the segment layer */
-	public void addCorridor(CorridorBase c) {
+	public void addCorridor(CorridorBase corridor) {
 		R_Node un = null;	// upstream node
 		MapGeoLoc uloc = null;	// upstream node location
 		MapGeoLoc ploc = null;	// previous node location
 		R_NodeModel mdl = null;	// node model
-		for(R_Node n: c) {
+		for(R_Node n: corridor) {
 			MapGeoLoc loc = manager.findGeoLoc(n);
 			if(un != null) {
 				if(R_NodeHelper.isJoined(n) &&
