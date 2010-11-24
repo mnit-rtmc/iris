@@ -38,7 +38,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
 /**
@@ -56,21 +55,23 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 	/** R_Node manager */
 	protected final R_NodeManager manager;
 
-	/** XML sensor client */
-	protected final XmlSensorClient sensor_client;
-
 	/** Sample data set */
 	protected final SampleDataSet samples = new SampleDataSet();
 
 	/** Create a new segment layer */
-	public SegmentLayer(R_NodeManager m, Session s) throws IOException,
-		TdxmlException
-	{
+	public SegmentLayer(R_NodeManager m) {
 		super("Segments");
 		manager = m;
-		Properties p = s.getProperties();
-		String loc = p.getProperty("tdxml.detector.url");
-		sensor_client = createSensorClient(loc, s.getLogger());
+	}
+
+	/** Start reading sensor data */
+	public void start(Properties props, Logger logger) throws IOException,
+		TdxmlException
+	{
+		String loc = props.getProperty("tdxml.detector.url");
+		XmlSensorClient sc = createSensorClient(loc, logger);
+		if(sc != null)
+			sc.start();
 	}
 
 	/** Create a sensor client */
@@ -95,12 +96,6 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 		return sc;
 	}
 
-	/** Start reading sensor data */
-	public void start() {
-		if(sensor_client != null)
-			sensor_client.start();
-	}
-
 	/** Notify listeners that the layer has changed status */
 	protected void notifyLayerChanged() {
 		LayerChangedEvent ev = new LayerChangedEvent(this,
@@ -108,8 +103,8 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 		notifyLayerChangedListeners(ev);
 	}
 
-	/** Add a corridor to the segment layer */
-	public void addCorridor(CorridorBase corridor) {
+	/** Update a corridor on the segment layer */
+	public void updateCorridor(CorridorBase corridor) {
 		List<Segment> segments = new LinkedList<Segment>();
 		R_Node un = null;	// upstream node
 		MapGeoLoc uloc = null;	// upstream node location

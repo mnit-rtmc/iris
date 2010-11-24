@@ -90,6 +90,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** User session */
 	protected final Session session;
 
+	/** Segment layer */
+	protected final SegmentLayer seg_layer = new SegmentLayer(this);
+
 	/** Currently selected corridor */
 	protected String corridor = "";
 
@@ -111,7 +114,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Add a new proxy to the r_node manager */
 	protected void proxyAddedSlow(R_Node n) {
 		super.proxyAddedSlow(n);
-		addCorridor(n);
+		updateCorridor(n);
 	}
 
 	/** Called when proxy enumeration is complete */
@@ -170,16 +173,12 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		}
 	}
 
-	/** Create the segment layer */
-	public SegmentLayer createSegmentLayer() throws IOException,
-		TdxmlException
-	{
-		SegmentLayer seg_layer = new SegmentLayer(this, session);
+	/** Get the segment layer */
+	public SegmentLayer getSegmentLayer() {
 		for(CorridorBase c: corridors.values()) {
 			if(c.getRoadDir() > 0)
-				seg_layer.addCorridor(c);
+				seg_layer.updateCorridor(c);
 		}
-		seg_layer.start();
 		return seg_layer;
 	}
 
@@ -231,7 +230,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Add a corridor for the specified r_node */
-	protected void addCorridor(R_Node r_node) {
+	protected void updateCorridor(R_Node r_node) {
 		GeoLoc loc = r_node.getGeoLoc();
 		String cid = GeoLocHelper.getCorridorName(loc);
 		if(cid != null) {
