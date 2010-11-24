@@ -94,10 +94,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	protected final SegmentLayer seg_layer = new SegmentLayer(this);
 
 	/** Currently selected corridor */
-	protected String corridor = "";
+	protected CorridorBase corridor;
 
 	/** Select a new roadway corridor */
-	public void setCorridor(String c) {
+	public void setCorridor(CorridorBase c) {
 		corridor = c;
 	}
 
@@ -247,7 +247,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		Iterator<String> it = corridors.keySet().iterator();
 		for(int i = 0; it.hasNext(); i++) {
 			if(cid.equals(it.next())) {
-				model.add(i, cid);
+				model.add(i, c);
 				return;
 			}
 		}
@@ -279,11 +279,18 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Check the corridor of an r_node */
 	public boolean checkCorridor(R_Node n) {
-		String c = GeoLocHelper.getCorridorName(n.getGeoLoc());
-		if(c != null)
-			return c.equals(corridor);
-		else
-			return "".equals(corridor);
+		return checkCorridor(corridor, n.getGeoLoc());
+	}
+
+	/** Check if an r_node is on the specified corridor */
+	protected boolean checkCorridor(CorridorBase cb, GeoLoc loc) {
+		if(cb == null)
+			return loc != null && loc.getRoadway() == null;
+		else {
+			return loc != null &&
+			       cb.getRoadway() == loc.getRoadway() &&
+			       cb.getRoadDir() == loc.getRoadDir();
+		}
 	}
 
 	/** Show the properties form for the selected proxy */
@@ -329,7 +336,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Find the map geo location for a proxy */
 	public MapGeoLoc findGeoLoc(R_Node proxy) {
-		if("".equals(corridor) || checkCorridor(proxy))
+		if(corridor == null || checkCorridor(proxy))
 			return super.findGeoLoc(proxy);
 		else
 			return null;

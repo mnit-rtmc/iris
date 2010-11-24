@@ -76,6 +76,11 @@ public class CorridorBase implements Iterable<R_Node> {
 		return name;
 	}
 
+	/** Get a string representation of the corridor */
+	public String toString() {
+		return name;
+	}
+
 	/** Corridor roadway */
 	protected final Road roadway;
 

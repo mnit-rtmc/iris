@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
@@ -65,10 +66,10 @@ public class CorridorChooser extends JPanel {
 		new ActionJob(this, corridor_combo) {
 			public void perform() {
 				Object s = corridor_combo.getSelectedItem();
-				if(s instanceof String)
-					setCorridor((String)s);
+				if(s instanceof CorridorBase)
+					setCorridor((CorridorBase)s);
 				else
-					setCorridor("");
+					setCorridor(null);
 			}
 		};
 		setBorder(BorderFactory.createTitledBorder(
@@ -84,7 +85,7 @@ public class CorridorChooser extends JPanel {
 	}
 
 	/** Set a new selected corridor */
-	protected void setCorridor(String c) {
+	protected void setCorridor(CorridorBase c) {
 		manager.setCorridor(c);
 		clist.updateListModel();
 		layer.updateExtent();
