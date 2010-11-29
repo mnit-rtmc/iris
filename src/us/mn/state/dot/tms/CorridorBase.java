@@ -121,9 +121,20 @@ public class CorridorBase implements Iterable<R_Node> {
 
 	/** Add a roadway node to the corridor */
 	public void addNode(R_Node r_node) {
-		assert r_nodes.isEmpty();
-		if(hasLocation(r_node))
+		if(hasLocation(r_node)) {
 			unsorted.add(r_node);
+			unsorted.addAll(r_nodes);
+			r_nodes.clear();
+			n_points.clear();
+		}
+	}
+
+	/** Remove a roadway node from the corridor */
+	public void removeNode(R_Node r_node) {
+		unsorted.addAll(r_nodes);
+		unsorted.remove(r_node);
+		r_nodes.clear();
+		n_points.clear();
 	}
 
 	/** Arrange the nodes in the corridor */

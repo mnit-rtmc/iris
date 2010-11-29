@@ -114,7 +114,51 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Add a new proxy to the r_node manager */
 	protected void proxyAddedSlow(R_Node n) {
 		super.proxyAddedSlow(n);
-		updateCorridor(n);
+		CorridorBase c = getCorridor(n);
+		if(c != null) {
+			c.addNode(n);
+			if(enumerated)
+				arrangeCorridor(c);
+		}
+	}
+
+	/** Get a corridor for the specified r_node */
+	protected CorridorBase getCorridor(R_Node r_node) {
+		GeoLoc loc = r_node.getGeoLoc();
+		String cid = GeoLocHelper.getCorridorName(loc);
+		if(cid != null) {
+			if(corridors.containsKey(cid))
+				return corridors.get(cid);
+			else {
+				CorridorBase c = new CorridorBase(loc);
+				addCorridor(c);
+				return c;
+			}
+		} else
+			return null;
+	}
+
+	/** Add a corridor to the corridor model */
+	protected void addCorridor(CorridorBase c) {
+		String cid = c.getName();
+		corridors.put(cid, c);
+		Iterator<String> it = corridors.keySet().iterator();
+		for(int i = 0; it.hasNext(); i++) {
+			if(cid.equals(it.next())) {
+				model.add(i, c);
+				return;
+			}
+		}
+	}
+
+	/** Called when an r_node has been removed */
+	protected void proxyRemovedSlow(R_Node n) {
+		super.proxyRemovedSlow(n);
+		CorridorBase c = getCorridor(n);
+		if(c != null) {
+			c.removeNode(n);
+			arrangeCorridor(c);
+		}
 	}
 
 	/** Called when proxy enumeration is complete */
@@ -135,12 +179,16 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Arrange the corridor mapping */
 	protected void arrangeCorridors() {
-		for(CorridorBase c: corridors.values()) {
-			c.arrangeNodes();
-			setTangentAngles(c);
-			if(c.getRoadDir() > 0)
-				seg_layer.updateCorridor(c);
-		}
+		for(CorridorBase c: corridors.values())
+			arrangeCorridor(c);
+	}
+
+	/** Arrange a single corridor */
+	protected void arrangeCorridor(CorridorBase c) {
+		c.arrangeNodes();
+		setTangentAngles(c);
+		if(c.getRoadDir() > 0)
+			seg_layer.updateCorridor(c);
 	}
 
 	/** Set the tangent angles for all the nodes in a corridor */
@@ -225,32 +273,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			return corridors.get(cid);
 		else
 			return null;
-	}
-
-	/** Add a corridor for the specified r_node */
-	protected void updateCorridor(R_Node r_node) {
-		GeoLoc loc = r_node.getGeoLoc();
-		String cid = GeoLocHelper.getCorridorName(loc);
-		if(cid != null) {
-			if(!corridors.containsKey(cid))
-				addCorridor(new CorridorBase(loc));
-			CorridorBase c = corridors.get(cid);
-			if(c != null)
-				c.addNode(r_node);
-		}
-	}
-
-	/** Add a corridor to the corridor model */
-	protected void addCorridor(CorridorBase c) {
-		String cid = c.getName();
-		corridors.put(cid, c);
-		Iterator<String> it = corridors.keySet().iterator();
-		for(int i = 0; it.hasNext(); i++) {
-			if(cid.equals(it.next())) {
-				model.add(i, c);
-				return;
-			}
-		}
 	}
 
 	/** Create a set of roadway nodes for the current corridor */
