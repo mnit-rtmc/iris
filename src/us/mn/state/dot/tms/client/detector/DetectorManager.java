@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.detector;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.util.HashMap;
+import java.util.HashSet;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
@@ -24,6 +26,7 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -129,5 +132,42 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Get the layer scale visibility threshold */
 	protected float getScaleThreshold() {
 		return 1.0f;
+	}
+
+	/** Mapping of r_node names to detector sets */
+	protected final HashMap<String, HashSet<Detector>> nodes =
+		new HashMap<String, HashSet<Detector>>();
+
+	/** Add a detector to the manager */
+	protected void proxyAddedSlow(Detector proxy) {
+		super.proxyAddedSlow(proxy);
+		R_Node n = proxy.getR_Node();
+		if(n != null)
+			getDetectors(n).add(proxy);
+	}
+
+	/** Get the detectors for a specific r_node */
+	public HashSet<Detector> getDetectors(R_Node n) {
+		return getDetectorList(n.getName());
+	}
+
+	/** Get a detector set for a node ID */
+	protected HashSet<Detector> getDetectorList(String nid) {
+		synchronized(nodes) {
+			HashSet<Detector> dets = nodes.get(nid);
+			if(dets == null) {
+				dets = new HashSet<Detector>();
+				nodes.put(nid, dets);
+			}
+			return dets;
+		}
+	}
+
+	/** Called when a detector has been removed */
+	protected void proxyRemovedSlow(Detector proxy) {
+		super.proxyRemovedSlow(proxy);
+		R_Node n = proxy.getR_Node();
+		if(n != null)
+			getDetectors(n).remove(proxy);
 	}
 }

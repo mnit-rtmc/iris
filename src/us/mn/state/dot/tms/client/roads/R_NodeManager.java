@@ -91,7 +91,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	protected final Session session;
 
 	/** Segment layer */
-	protected final SegmentLayer seg_layer = new SegmentLayer(this);
+	protected final SegmentLayer seg_layer;
 
 	/** Currently selected corridor */
 	protected CorridorBase corridor;
@@ -107,6 +107,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	{
 		super(c, lm);
 		session = s;
+		seg_layer = new SegmentLayer(this, session);
 		lm.setR_NodeManager(this);
 		cache.addProxyListener(this);
 	}

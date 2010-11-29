@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Logger;
 import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
@@ -34,10 +35,12 @@ import us.mn.state.dot.tdxml.SensorSample;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tdxml.XmlSensorClient;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
 /**
@@ -55,13 +58,17 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 	/** R_Node manager */
 	protected final R_NodeManager manager;
 
+	/** Client session */
+	protected final Session session;
+
 	/** Sample data set */
 	protected final SampleDataSet samples = new SampleDataSet();
 
 	/** Create a new segment layer */
-	public SegmentLayer(R_NodeManager m) {
+	public SegmentLayer(R_NodeManager m, Session s) {
 		super("Segments");
 		manager = m;
+		session = s;
 	}
 
 	/** Start reading sensor data */
@@ -120,7 +127,7 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 					Segment seg = new Segment(mdl, un,
 						ploc, loc, samples);
 					if(!isTooDistant(uloc, loc))
-						seg.addDetection();
+					   seg.addDetection(getDetectors(un));
 					segments.add(seg);
 				} else
 					mdl = null;
@@ -133,6 +140,11 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 			}
 		}
 		cor_segs.put(corridor.getName(), segments);
+	}
+
+	/** Get a set of detectors for an r_node */
+	protected Set<Detector> getDetectors(R_Node n) {
+		return session.getDetectorManager().getDetectors(n);
 	}
 
 	/** Check if two locations are too distant */

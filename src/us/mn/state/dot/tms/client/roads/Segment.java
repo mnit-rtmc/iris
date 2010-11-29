@@ -16,12 +16,11 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.Checker;
+import java.util.Set;
 import us.mn.state.dot.tdxml.SensorSample;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -102,18 +101,13 @@ public class Segment {
 	}
 
 	/** Add detection to the segment */
-	public void addDetection() {
-		DetectorHelper.find(new Checker<Detector>() {
-			public boolean check(Detector d) {
-				if(d.getR_Node() == upstream) {
-					String sid = "D" + d.getName();
-					int ln = d.getLaneNumber();
-					lane_sensors.put(sid, ln);
-					addDetectorLabel(d);
-				}
-				return false;
-			}
-		});
+	public void addDetection(Set<Detector> dets) {
+		for(Detector d: dets) {
+			String sid = "D" + d.getName();
+			int ln = d.getLaneNumber();
+			lane_sensors.put(sid, ln);
+			addDetectorLabel(d);
+		}
 	}
 
 	/** Add a detector label */
