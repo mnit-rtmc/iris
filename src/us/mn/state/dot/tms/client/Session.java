@@ -201,9 +201,7 @@ public class Session {
 	}
 
 	/** Create a new session */
-	public Session(SonarState st, SmartDesktop d, Properties p, Logger l)
-		throws IOException, TdxmlException
-	{
+	public Session(SonarState st, SmartDesktop d, Properties p, Logger l) {
 		state = st;
 		user = state.getUser();
 		namespace = state.getNamespace();
@@ -231,10 +229,14 @@ public class Session {
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
-		initializeManagers();
 		seg_layer = r_node_manager.getSegmentLayer();
-		seg_layer.start(props, logger);
+	}
+
+	/** Initialize the session */
+	public void initialize() throws IOException, TdxmlException {
+		initializeManagers();
 		addTabs();
+		seg_layer.start(props, logger);
 	}
 
 	/** Initialize all the proxy managers */

@@ -326,7 +326,9 @@ public class IrisClient extends JFrame {
 		state.login(user, new String(pwd));
 		if(state.isLoggedIn()) {
 			state.populateCaches();
-			return new Session(state, desktop, props, logger);
+			Session s = new Session(state, desktop, props, logger);
+			s.initialize();
+			return s;
 		} else
 			return null;
 	}
