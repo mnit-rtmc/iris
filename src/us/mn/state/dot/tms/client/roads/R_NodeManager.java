@@ -164,7 +164,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Called when proxy enumeration is complete */
 	public void enumerationComplete() {
-		// Don't hog the SONAR TaskProcessor thread
+		// This needs to happen on the WORKER thread so it happens
+		// after all proxyAddedSlow calls on login
 		new AbstractJob() {
 			public void perform() {
 				superComplete();
