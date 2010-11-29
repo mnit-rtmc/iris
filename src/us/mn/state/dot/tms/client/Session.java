@@ -231,6 +231,7 @@ public class Session {
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
 		initializeManagers();
+		r_node_manager.arrangeCorridors();
 		seg_layer = r_node_manager.getSegmentLayer();
 		seg_layer.start(props, logger);
 		addTabs();

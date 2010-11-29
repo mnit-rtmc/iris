@@ -166,7 +166,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
-				arrangeCorridors();
 				superComplete();
 			}
 		}.addToScheduler();
@@ -178,7 +177,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Arrange the corridor mapping */
-	protected void arrangeCorridors() {
+	public void arrangeCorridors() {
 		for(CorridorBase c: corridors.values())
 			arrangeCorridor(c);
 	}
