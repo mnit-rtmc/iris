@@ -21,6 +21,7 @@ import java.util.HashSet;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
@@ -33,6 +34,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
+import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
  * A detector manager is a container for SONAR detector objects.
@@ -56,10 +58,16 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Name of "no r_node" style */
 	static public final String STYLE_NO_R_NODE = "No R_Node";
 
+	/** R_Node manager */
+	protected final R_NodeManager r_node_manager;
+
 	/** Create a new detector manager */
-	public DetectorManager(TypeCache<Detector> c, GeoLocManager lm) {
+	public DetectorManager(TypeCache<Detector> c, GeoLocManager lm,
+		R_NodeManager r_man)
+	{
 		super(c, lm);
 		cache.addProxyListener(this);
+		r_node_manager = r_man;
 	}
 
 	/** Create a style list model for the given symbol */
@@ -169,5 +177,16 @@ public class DetectorManager extends ProxyManager<Detector> {
 		R_Node n = proxy.getR_Node();
 		if(n != null)
 			getDetectors(n).remove(proxy);
+	}
+
+	/** Called when proxy enumeration is complete */
+	public void enumerationComplete() {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				r_node_manager.arrangeCorridors();
+			}
+		}.addToScheduler();
+		super.enumerationComplete();
 	}
 }

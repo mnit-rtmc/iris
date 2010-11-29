@@ -213,6 +213,9 @@ public class Session {
 		loc_manager = new GeoLocManager(state.getGeoLocs());
 		r_node_manager = new R_NodeManager(this,
 			state.getDetCache().getR_Nodes(), loc_manager);
+		det_manager = new DetectorManager(
+			state.getDetCache().getDetectors(), loc_manager,
+			r_node_manager);
 		cam_manager = new CameraManager(this,
 			state.getCamCache().getCameras(), loc_manager);
 		dms_manager = new DMSManager(this,state.getDmsCache().getDMSs(),
@@ -221,8 +224,6 @@ public class Session {
 		lcsi_manager = new LCSIManager(this, loc_manager);
 		lane_marking_manager = new LaneMarkingManager(this,
 			state.getLaneMarkings(), loc_manager);
-		det_manager = new DetectorManager(
-			state.getDetCache().getDetectors(), loc_manager);
 		warn_manager = new WarningSignManager(this,
 			state.getWarningSigns(), loc_manager);
 		weather_sensor_manager = new WeatherSensorManager(this,
@@ -231,7 +232,6 @@ public class Session {
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
 		initializeManagers();
-		r_node_manager.arrangeCorridors();
 		seg_layer = r_node_manager.getSegmentLayer();
 		seg_layer.start(props, logger);
 		addTabs();
@@ -240,12 +240,12 @@ public class Session {
 	/** Initialize all the proxy managers */
 	protected void initializeManagers() {
 		r_node_manager.initialize();
+		det_manager.initialize();
 		cam_manager.initialize();
 		dms_manager.initialize();
 		lcs_array_manager.initialize();
 		lcsi_manager.initialize();
 		lane_marking_manager.initialize();
-		det_manager.initialize();
 		warn_manager.initialize();
 		weather_sensor_manager.initialize();
 		meter_manager.initialize();
@@ -342,12 +342,12 @@ public class Session {
 		for(MapTab tab: tabs)
 			tab.dispose();
 		r_node_manager.dispose();
+		det_manager.dispose();
 		cam_manager.dispose();
 		dms_manager.dispose();
 		lcs_array_manager.dispose();
 		lcsi_manager.dispose();
 		lane_marking_manager.dispose();
-		det_manager.dispose();
 		warn_manager.dispose();
 		weather_sensor_manager.dispose();
 		meter_manager.dispose();
