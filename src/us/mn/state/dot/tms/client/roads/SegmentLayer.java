@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.concurrent.ConcurrentHashMap;
 import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
@@ -52,8 +52,8 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 	Iterable<Segment>
 {
 	/** Mapping of corridor names to segment lists */
-	protected final HashMap<String, List<Segment>> cor_segs =
-		new HashMap<String, List<Segment>>();
+	protected final ConcurrentHashMap<String, List<Segment>> cor_segs =
+		new ConcurrentHashMap<String, List<Segment>>();
 
 	/** R_Node manager */
 	protected final R_NodeManager manager;
