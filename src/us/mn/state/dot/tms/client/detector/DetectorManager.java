@@ -148,11 +148,11 @@ public class DetectorManager extends ProxyManager<Detector> {
 
 	/** Get the detectors for a specific r_node */
 	public HashSet<Detector> getDetectors(R_Node n) {
-		return getDetectorList(n.getName());
+		return getDetectors(n.getName());
 	}
 
 	/** Get a detector set for a node ID */
-	protected HashSet<Detector> getDetectorList(String nid) {
+	protected HashSet<Detector> getDetectors(String nid) {
 		synchronized(nodes) {
 			HashSet<Detector> dets = nodes.get(nid);
 			if(dets == null) {
