@@ -59,6 +59,11 @@ public class FormPanel extends JPanel {
 		finishRow();
 	}
 
+	/** Dispose of the form panel */
+	public void dispose() {
+		removeAll();
+	}
+
 	/** Set the form title */
 	public void setTitle(String t) {
 		setBorder(BorderFactory.createTitledBorder(t));

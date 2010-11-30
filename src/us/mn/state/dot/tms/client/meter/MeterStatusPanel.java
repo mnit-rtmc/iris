@@ -164,7 +164,7 @@ public class MeterStatusPanel extends FormPanel
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
 		setSelected(null);
-		removeAll();
+		super.dispose();
 	}
 
 	/** A new proxy has been added */

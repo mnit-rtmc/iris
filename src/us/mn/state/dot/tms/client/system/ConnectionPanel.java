@@ -76,8 +76,9 @@ public class ConnectionPanel extends FormPanel {
 	}
 
 	/** Dispose of the panel */
-	protected void dispose() {
+	public void dispose() {
 		c_model.dispose();
+		super.dispose();
 	}
 
 	/** Change the selected connection */

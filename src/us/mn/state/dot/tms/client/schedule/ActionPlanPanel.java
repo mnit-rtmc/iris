@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -224,7 +224,7 @@ public class ActionPlanPanel extends FormPanel {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
+	public void dispose() {
 		p_model.dispose();
 		if(t_model != null) {
 			t_model.dispose();
@@ -238,6 +238,7 @@ public class ActionPlanPanel extends FormPanel {
 			l_model.dispose();
 			l_model = null;
 		}
+		super.dispose();
 	}
 
 	/** Change the selected action plan */

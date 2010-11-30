@@ -212,6 +212,7 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	/** Dispose of the location panel */
 	public void dispose() {
 		cache.removeProxyListener(this);
+		super.dispose();
 	}
 
 	/** A new proxy has been added */

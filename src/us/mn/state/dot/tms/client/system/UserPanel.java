@@ -75,8 +75,9 @@ public class UserPanel extends FormPanel {
 	}
 
 	/** Dispose of the panel */
-	protected void dispose() {
+	public void dispose() {
 		u_model.dispose();
+		super.dispose();
 	}
 
 	/** Change the selected user */

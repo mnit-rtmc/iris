@@ -57,7 +57,8 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Dispose of the panel */
-	protected void dispose() {
+	public void dispose() {
 		det_model.dispose();
+		removeAll();
 	}
 }

@@ -77,8 +77,9 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 
 	/** Dispose of the form */
 	protected void dispose() {
-		location.dispose();
 		det_pnl.dispose();
+		setup_pnl.dispose();
+		location.dispose();
 		super.dispose();
 	}
 

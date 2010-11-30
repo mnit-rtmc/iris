@@ -241,6 +241,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		setSelected(null);
 		cache.removeProxyListener(this);
 		clearPager();
+		super.dispose();
 	}
 
 	/** A new proxy has been added */
