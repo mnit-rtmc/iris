@@ -16,26 +16,16 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeTransition;
-import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
@@ -55,37 +45,8 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	/** Component for editing notes */
 	protected final JTextArea notes = new JTextArea(3, 20);
 
-	/** Node type combobox */
-	protected final JComboBox node_type =
-		new JComboBox(R_NodeType.getDescriptions());
-
-	/** Pickable check box */
-	protected final JCheckBox pickable = new JCheckBox();
-
-	/** Above check box */
-	protected final JCheckBox above = new JCheckBox();
-
-	/** Transition type combobox */
-	protected final JComboBox transition =
-		new JComboBox(R_NodeTransition.getDescriptions());
-
-	/** Component for number of lanes */
-	protected final JSpinner lanes = new JSpinner(
-		new SpinnerNumberModel(2, 0, 6, 1));
-
-	/** Attach side check box */
-	protected final JCheckBox attach_side = new JCheckBox();
-
-	/** Component for lane shift */
-	protected final JSpinner shift = new JSpinner(
-		new SpinnerNumberModel(0, 0, 12, 1));
-
-	/** Station ID text field */
-	protected final JTextField station_id = new JTextField(8);
-
-	/** Component for speed limit */
-	protected final JSpinner slimit = new JSpinner(
-		new SpinnerNumberModel(55, 25, 120, 5));
+	/** Setup panel */
+	protected final R_NodeSetupPanel setup_pnl;
 
 	/** Detector table */
 	protected final JTable det_table = new JTable();
@@ -97,6 +58,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	public R_NodeProperties(Session s, R_Node n) {
 		super(TITLE, s, n);
 		det_model = new R_NodeDetectorModel(session, proxy);
+		setup_pnl = new R_NodeSetupPanel(n);
 	}
 
 	/** Get the SONAR type cache */
@@ -120,7 +82,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 		location.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Location", createLocationPanel());
-		tab.add("Setup", createSetupPanel());
+		tab.add("Setup", setup_pnl);
 		tab.add("Detectors", createDetectorPanel());
 		add(tab);
 		updateAttribute(null);
@@ -140,21 +102,6 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 		return location;
 	}
 
-	/** Create the roadway node setup panel */
-	protected FormPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(true);
-		panel.addRow("Node type", node_type);
-		panel.addRow("Pickable", pickable);
-		panel.addRow("Above", above);
-		panel.addRow("Transition", transition);
-		panel.addRow("Lanes", lanes);
-		panel.addRow("Attach side", attach_side);
-		panel.addRow("Shift", shift);
-		panel.addRow("Station ID", station_id);
-		panel.addRow("Speed Limit", slimit);
-		return panel;
-	}
-
 	/** Create the jobs */
 	protected void createJobs() {
 		new FocusJob(notes) {
@@ -163,58 +110,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 					proxy.setNotes(notes.getText());
 			}
 		};
-		new ActionJob(this, node_type) {
-			public void perform() {
-				proxy.setNodeType(node_type.getSelectedIndex());
-			}
-		};
-		new ActionJob(this, pickable) {
-			public void perform() {
-				proxy.setPickable(pickable.isSelected());
-			}
-		};
-		new ActionJob(this, above) {
-			public void perform() {
-				proxy.setAbove(above.isSelected());
-			}
-		};
-		new ActionJob(this, transition) {
-			public void perform() {
-				proxy.setTransition(
-					transition.getSelectedIndex());
-			}
-		};
-		new ChangeJob(this, lanes) {
-			public void perform() {
-				Number n = (Number)lanes.getValue();
-				proxy.setLanes(n.intValue());
-			}
-		};
-		new ActionJob(this, attach_side) {
-			public void perform() {
-				proxy.setAttachSide(attach_side.isSelected());
-			}
-		};
-		new ChangeJob(this, shift) {
-			public void perform() {
-				Number n = (Number)shift.getValue();
-				proxy.setShift(n.intValue());
-			}
-		};
-		new FocusJob(station_id) {
-			public void perform() {
-				if(wasLost()) {
-					String s = station_id.getText().trim();
-					proxy.setStationID(s);
-				}
-			}
-		};
-		new ChangeJob(this, slimit) {
-			public void perform() {
-				Number n = (Number)slimit.getValue();
-				proxy.setSpeedLimit(n.intValue());
-			}
-		};
+		setup_pnl.createJobs();
 	}
 
 	/** Create the detector panel */
@@ -229,23 +125,6 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
-		if(a == null || a.equals("nodeType"))
-			node_type.setSelectedIndex(proxy.getNodeType());
-		if(a == null || a.equals("pickable"))
-			pickable.setSelected(proxy.getPickable());
-		if(a == null || a.equals("above"))
-			above.setSelected(proxy.getAbove());
-		if(a == null || a.equals("transition"))
-			transition.setSelectedIndex(proxy.getTransition());
-		if(a == null || a.equals("lanes"))
-			lanes.setValue(proxy.getLanes());
-		if(a == null || a.equals("attachSide"))
-			attach_side.setSelected(proxy.getAttachSide());
-		if(a == null || a.equals("shift"))
-			shift.setValue(proxy.getShift());
-		if(a == null || a.equals("stationID"))
-			station_id.setText(proxy.getStationID());
-		if(a == null || a.equals("speedLimit"))
-			slimit.setValue(proxy.getSpeedLimit());
+		setup_pnl.doUpdateAttribute(a);
 	}
 }
