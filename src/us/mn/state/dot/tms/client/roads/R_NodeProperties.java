@@ -15,13 +15,9 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.R_Node;
@@ -48,17 +44,14 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	/** Setup panel */
 	protected final R_NodeSetupPanel setup_pnl;
 
-	/** Detector table */
-	protected final JTable det_table = new JTable();
-
-	/** R_Node detector modell */
-	protected final R_NodeDetectorModel det_model;
+	/** Detector panel */
+	protected final R_NodeDetectorPanel det_pnl;
 
 	/** Create a new roadway node properties form */
 	public R_NodeProperties(Session s, R_Node n) {
 		super(TITLE, s, n);
-		det_model = new R_NodeDetectorModel(session, proxy);
 		setup_pnl = new R_NodeSetupPanel(n);
+		det_pnl = new R_NodeDetectorPanel(s, n);
 	}
 
 	/** Get the SONAR type cache */
@@ -69,21 +62,13 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		location = new LocationPanel(session, proxy.getGeoLoc());
-		det_model.initialize();
-		det_table.setAutoCreateColumnsFromModel(false);
-		det_table.setModel(det_model);
-		det_table.setColumnModel(det_model.createColumnModel());
-		det_table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		det_table.setRowHeight(20);
-		det_table.setPreferredScrollableViewportSize(new Dimension(
-			det_table.getPreferredSize().width,
-			det_table.getRowHeight() * 8));
 		super.initialize();
 		location.initialize();
+		det_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Location", createLocationPanel());
 		tab.add("Setup", setup_pnl);
-		tab.add("Detectors", createDetectorPanel());
+		tab.add("Detectors", det_pnl);
 		add(tab);
 		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
@@ -93,6 +78,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	/** Dispose of the form */
 	protected void dispose() {
 		location.dispose();
+		det_pnl.dispose();
 		super.dispose();
 	}
 
@@ -111,14 +97,6 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 			}
 		};
 		setup_pnl.createJobs();
-	}
-
-	/** Create the detector panel */
-	protected JPanel createDetectorPanel() {
-		JPanel dpanel = new JPanel();
-		dpanel.setBorder(BORDER);
-		dpanel.add(new JScrollPane(det_table));
-		return dpanel;
 	}
 
 	/** Update one attribute on the form */
