@@ -15,14 +15,10 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Color;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
 /**
@@ -36,10 +32,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	static protected final String TITLE = "R_Node: ";
 
 	/** Location panel */
-	protected LocationPanel location;
-
-	/** Component for editing notes */
-	protected final JTextArea notes = new JTextArea(3, 20);
+	protected final R_NodeLocationPanel loc_pnl;
 
 	/** Setup panel */
 	protected final R_NodeSetupPanel setup_pnl;
@@ -50,6 +43,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	/** Create a new roadway node properties form */
 	public R_NodeProperties(Session s, R_Node n) {
 		super(TITLE, s, n);
+		loc_pnl = new R_NodeLocationPanel(s, n);
 		setup_pnl = new R_NodeSetupPanel(n);
 		det_pnl = new R_NodeDetectorPanel(s, n);
 	}
@@ -61,49 +55,30 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
-		location = new LocationPanel(session, proxy.getGeoLoc());
 		super.initialize();
-		location.initialize();
+		loc_pnl.initialize();
+		setup_pnl.initialize();
 		det_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Location", createLocationPanel());
+		tab.add("Location", loc_pnl);
 		tab.add("Setup", setup_pnl);
 		tab.add("Detectors", det_pnl);
 		add(tab);
 		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
-		createJobs();
 	}
 
 	/** Dispose of the form */
 	protected void dispose() {
 		det_pnl.dispose();
 		setup_pnl.dispose();
-		location.dispose();
+		loc_pnl.dispose();
 		super.dispose();
-	}
-
-	/** Create the location panel */
-	protected JPanel createLocationPanel() {
-		location.addRow("Notes", notes);
-		return location;
-	}
-
-	/** Create the jobs */
-	protected void createJobs() {
-		new FocusJob(notes) {
-			public void perform() {
-				if(wasLost())
-					proxy.setNotes(notes.getText());
-			}
-		};
-		setup_pnl.createJobs();
 	}
 
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
-		if(a == null || a.equals("notes"))
-			notes.setText(proxy.getNotes());
+		loc_pnl.doUpdateAttribute(a);
 		setup_pnl.doUpdateAttribute(a);
 	}
 }

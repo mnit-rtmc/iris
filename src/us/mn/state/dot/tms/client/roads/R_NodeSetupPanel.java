@@ -73,6 +73,10 @@ public class R_NodeSetupPanel extends FormPanel {
 	public R_NodeSetupPanel(R_Node n) {
 		super(true);
 		node = n;
+	}
+
+	/** Initialize the panel */
+	public void initialize() {
 		addRow("Node type", type_cmb);
 		addRow("Pickable", pick_cbx);
 		addRow("Above", above_cbx);
@@ -82,10 +86,11 @@ public class R_NodeSetupPanel extends FormPanel {
 		addRow("Shift", shift_spn);
 		addRow("Station ID", station_txt);
 		addRow("Speed Limit", speed_spn);
+		createJobs();
 	}
 
 	/** Create the jobs */
-	public void createJobs() {
+	protected void createJobs() {
 		new ActionJob(this, type_cmb) {
 			public void perform() {
 				node.setNodeType(type_cmb.getSelectedIndex());
