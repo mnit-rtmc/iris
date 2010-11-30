@@ -265,6 +265,7 @@ CREATE TABLE iris.r_node (
 	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
 	node_type integer NOT NULL REFERENCES iris.r_node_type(n_type),
 	pickable boolean NOT NULL,
+	above boolean NOT NULL,
 	transition integer NOT NULL REFERENCES iris.r_node_transition(n_transition),
 	lanes integer NOT NULL,
 	attach_side boolean NOT NULL,
@@ -916,8 +917,9 @@ GRANT SELECT ON geo_loc_view TO PUBLIC;
 
 CREATE VIEW r_node_view AS
 	SELECT n.name, roadway, road_dir, cross_mod, cross_street,
-	cross_dir, nt.name AS node_type, n.pickable, tr.name AS transition,
-	n.lanes, n.attach_side, n.shift, n.station_id, n.speed_limit, n.notes
+	cross_dir, nt.name AS node_type, n.pickable, n.above,
+	tr.name AS transition, n.lanes, n.attach_side, n.shift, n.station_id,
+	n.speed_limit, n.notes
 	FROM iris.r_node n
 	JOIN geo_loc_view l ON n.geo_loc = l.name
 	JOIN iris.r_node_type nt ON n.node_type = nt.n_type
@@ -1332,7 +1334,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_num_preset_btns	3
 camera_num_video_frames	900
 camera_ptz_panel_enable	false
-database_version	3.123.0
+database_version	3.124.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_log_enable	false

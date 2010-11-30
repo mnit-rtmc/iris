@@ -63,9 +63,9 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		System.err.println("Loading r_nodes...");
 		namespace.registerType(SONAR_TYPE, R_NodeImpl.class);
 		store.query("SELECT name, geo_loc, node_type, pickable, " +
-			"transition, lanes, attach_side, shift, station_id, " +
-			"speed_limit, notes FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"above, transition, lanes, attach_side, shift, " +
+			"station_id, speed_limit, notes FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new R_NodeImpl(namespace,
@@ -73,13 +73,14 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 					row.getString(2),	// geo_loc
 					row.getInt(3),		// node_type
 					row.getBoolean(4),	// pickable
-					row.getInt(5),		// transition
-					row.getInt(6),		// lanes
-					row.getBoolean(7),	// attach_side
-					row.getInt(8),		// shift
-					row.getString(9),	// station_id
-					row.getInt(10),		// speed_limit
-					row.getString(11)	// notes
+					row.getBoolean(5),	// above
+					row.getInt(6),		// transition
+					row.getInt(7),		// lanes
+					row.getBoolean(8),	// attach_side
+					row.getInt(9),		// shift
+					row.getString(10),	// station_id
+					row.getInt(11),		// speed_limit
+					row.getString(12)	// notes
 				));
 			}
 		});
@@ -92,6 +93,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		map.put("geo_loc", geo_loc);
 		map.put("node_type", node_type.ordinal());
 		map.put("pickable", pickable);
+		map.put("above", above);
 		map.put("transition", transition.ordinal());
 		map.put("lanes", lanes);
 		map.put("attach_side", attach_side);
@@ -120,12 +122,14 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Create an r_node */
 	protected R_NodeImpl(String n, GeoLocImpl loc, int typ, boolean p,
-		int trn, int l, boolean as, int s, String st, int sl, String nt)
+		boolean a, int trn, int l, boolean as, int s, String st, int sl,
+		String nt)
 	{
 		super(n);
 		geo_loc = loc;
 		node_type = R_NodeType.fromOrdinal(typ);
 		pickable = p;
+		above = a;
 		transition = R_NodeTransition.fromOrdinal(trn);
 		lanes = l;
 		attach_side = as;
@@ -138,11 +142,11 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Create an r_node */
 	protected R_NodeImpl(Namespace ns, String n, String loc, int typ,
-		boolean p, int trn, int l, boolean as, int s, String st, int sl,
-		String nt)
+		boolean p, boolean a, int trn, int l, boolean as, int s,
+		String st, int sl, String nt)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-			typ, p, trn, l, as, s, st, sl, nt);
+			typ, p, a, trn, l, as, s, st, sl, nt);
 	}
 
 	/** Initialize transient fields */
@@ -250,6 +254,27 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Is this node pickable? */
 	public boolean getPickable() {
 		return pickable;
+	}
+
+	/** Above flag */
+	protected boolean above;
+
+	/** Set the above flag */
+	public void setAbove(boolean a) {
+		above = a;
+	}
+
+	/** Set the above flag */
+	public void doSetAbove(boolean a) throws TMSException {
+		if(a == above)
+			return;
+		store.update(this, "above", a);
+		setAbove(a);
+	}
+
+	/** Is this node above? */
+	public boolean getAbove() {
+		return above;
 	}
 
 	/** Transition type */
@@ -534,6 +559,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		out.print("n_type='" + node_type.description + "' ");
 		if(pickable)
 			out.print("pickable='t' ");
+		if(above)
+			out.print("above='t' ");
 		out.print("transition='" + transition.description + "' ");
 		String sid = station_id;
 		if(sid != null)

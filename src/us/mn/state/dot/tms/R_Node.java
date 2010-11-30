@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,12 @@ public interface R_Node extends SonarObject {
 
 	/** Is this node pickable? */
 	boolean getPickable();
+
+	/** Set the above flag */
+	void setAbove(boolean t);
+
+	/** Is the node above others? */
+	boolean getAbove();
 
 	/** Set the transition type */
 	void setTransition(int t);
