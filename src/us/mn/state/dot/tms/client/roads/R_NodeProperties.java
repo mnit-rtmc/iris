@@ -62,6 +62,9 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	/** Pickable check box */
 	protected final JCheckBox pickable = new JCheckBox();
 
+	/** Above check box */
+	protected final JCheckBox above = new JCheckBox();
+
 	/** Transition type combobox */
 	protected final JComboBox transition =
 		new JComboBox(R_NodeTransition.getDescriptions());
@@ -142,6 +145,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Node type", node_type);
 		panel.addRow("Pickable", pickable);
+		panel.addRow("Above", above);
 		panel.addRow("Transition", transition);
 		panel.addRow("Lanes", lanes);
 		panel.addRow("Attach side", attach_side);
@@ -167,6 +171,11 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 		new ActionJob(this, pickable) {
 			public void perform() {
 				proxy.setPickable(pickable.isSelected());
+			}
+		};
+		new ActionJob(this, above) {
+			public void perform() {
+				proxy.setAbove(above.isSelected());
 			}
 		};
 		new ActionJob(this, transition) {
@@ -224,6 +233,8 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 			node_type.setSelectedIndex(proxy.getNodeType());
 		if(a == null || a.equals("pickable"))
 			pickable.setSelected(proxy.getPickable());
+		if(a == null || a.equals("above"))
+			above.setSelected(proxy.getAbove());
 		if(a == null || a.equals("transition"))
 			transition.setSelectedIndex(proxy.getTransition());
 		if(a == null || a.equals("lanes"))
