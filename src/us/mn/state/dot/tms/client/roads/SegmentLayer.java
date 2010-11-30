@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
@@ -52,8 +52,8 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 	Iterable<Segment>
 {
 	/** Mapping of corridor names to segment lists */
-	protected final ConcurrentHashMap<String, List<Segment>> cor_segs =
-		new ConcurrentHashMap<String, List<Segment>>();
+	protected final ConcurrentSkipListMap<String, List<Segment>> cor_segs =
+		new ConcurrentSkipListMap<String, List<Segment>>();
 
 	/** R_Node manager */
 	protected final R_NodeManager manager;
@@ -112,7 +112,8 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 
 	/** Update a corridor on the segment layer */
 	public void updateCorridor(CorridorBase corridor) {
-		List<Segment> segments = new LinkedList<Segment>();
+		List<Segment> below = new LinkedList<Segment>();
+		List<Segment> above = new LinkedList<Segment>();
 		R_Node un = null;	// upstream node
 		MapGeoLoc uloc = null;	// upstream node location
 		MapGeoLoc ploc = null;	// previous node location
@@ -128,7 +129,10 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 						ploc, loc, samples);
 					if(!isTooDistant(uloc, loc))
 					   seg.addDetection(getDetectors(un));
-					segments.add(seg);
+					if(n.getAbove())
+						above.add(seg);
+					else
+						below.add(seg);
 				} else
 					mdl = null;
 			} else
@@ -139,7 +143,9 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 				uloc = loc;
 			}
 		}
-		cor_segs.put(corridor.getName(), segments);
+		cor_segs.put(corridor.getName(), below);
+		// Prepend lowercase z, for sorting purposes
+		cor_segs.put('z' + corridor.getName(), above);
 	}
 
 	/** Get a set of detectors for an r_node */
