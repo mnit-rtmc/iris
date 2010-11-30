@@ -11,6 +11,29 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.124.0 (30 November 2010)</dt>
+	<dd><ul>
+		<li>
+			Fixed lots of problems with segment map.
+		</li>
+		<li>
+			Improved client log-in time.
+		</li>
+		<li>
+			Fixed a data collection bug in SmartSensor drivers.
+		</li>
+		<li>
+			Fixed default font handling for NTCIP.
+		</li>
+		<li>
+			Cleaned up some exception handling.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.124.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.123.0 (28 September 2010)</dt>
 	<dd><ul>
 		<li>
