@@ -127,6 +127,14 @@ public class FormPanel extends JPanel {
 		add(c2);
 	}
 
+	/** Add a table component */
+	public void add(JTable table) {
+		table.setEnabled(enable);
+		add(new JScrollPane(table,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+	}
+
 	/** Add a component with a label on the left side */
 	public void add(String name, JComponent comp) {
 		add(new JLabel(name), comp);
@@ -213,9 +221,7 @@ public class FormPanel extends JPanel {
 	/** Add a table component */
 	public void addRow(JTable table) {
 		setFill();
-		table.setEnabled(enable);
-		addRow(new JScrollPane(table,
-			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+		add(table);
+		finishRow();
 	}
 }

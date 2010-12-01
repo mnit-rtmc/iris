@@ -15,15 +15,10 @@
 package us.mn.state.dot.tms.client.detector;
 
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.TreeSet;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
-import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -36,14 +31,6 @@ import us.mn.state.dot.tms.client.toast.ControllerForm;
  */
 public class DetectorModel extends ProxyTableModel<Detector> {
 
-	/** List of all lane types */
-	static protected final LinkedList<String> LANE_TYPES =
-		new LinkedList<String>();
-	static {
-		for(String lt: LaneType.getDescriptions())
-			LANE_TYPES.add(lt);
-	}
-
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
@@ -52,113 +39,10 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 			public Object getValueAt(Detector d) {
 				return d.getName();
 			}
-			public boolean isEditable(Detector d) {
-				return (d == null) && canAdd();
-			}
-			public void setValueAt(Detector d, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
-			}
 		},
-		new ProxyColumn<Detector>("Label", 140) {
+		new ProxyColumn<Detector>("Label", 150) {
 			public Object getValueAt(Detector d) {
 				return DetectorHelper.getLabel(d);
-			}
-		},
-		new ProxyColumn<Detector>("Lane Type", 80) {
-			public Object getValueAt(Detector d) {
-				return LANE_TYPES.get(d.getLaneType());
-			}
-			public boolean isEditable(Detector d) {
-				return canUpdate(d);
-			}
-			public void setValueAt(Detector d, Object value) {
-				d.setLaneType((short)LANE_TYPES.indexOf(value));
-			}
-			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					LaneType.getDescriptions());
-				return new DefaultCellEditor(combo);
-			}
-		},
-		new ProxyColumn<Detector>("Lane #", 60, Short.class) {
-			public Object getValueAt(Detector d) {
-				return d.getLaneNumber();
-			}
-			public boolean isEditable(Detector d) {
-				return canUpdate(d);
-			}
-			public void setValueAt(Detector d, Object value) {
-				if(value instanceof Number) {
-					d.setLaneNumber(
-						((Number)value).shortValue());
-				}
-			}
-		},
-		new ProxyColumn<Detector>("Abandoned", 60, Boolean.class) {
-			public Object getValueAt(Detector d) {
-				return d.getAbandoned();
-			}
-			public boolean isEditable(Detector d) {
-				return canUpdate(d, "abandoned");
-			}
-			public void setValueAt(Detector d, Object value) {
-				if(value instanceof Boolean)
-					d.setAbandoned((Boolean)value);
-			}
-		},
-		new ProxyColumn<Detector>("Force Fail", 60, Boolean.class) {
-			public Object getValueAt(Detector d) {
-				return d.getForceFail();
-			}
-			public boolean isEditable(Detector d) {
-				return canUpdate(d, "forceFail");
-			}
-			public void setValueAt(Detector d, Object value) {
-				if(value instanceof Boolean)
-					d.setForceFail((Boolean)value);
-			}
-		},
-		new ProxyColumn<Detector>("Field Len", 60, Float.class) {
-			public Object getValueAt(Detector d) {
-				return d.getFieldLength();
-			}
-			public boolean isEditable(Detector d) {
-				return canUpdate(d, "fieldLength");
-			}
-			public void setValueAt(Detector d, Object value) {
-				if(value instanceof Number) {
-					d.setFieldLength(
-						((Number)value).floatValue());
-				}
-			}
-		},
-		new ProxyColumn<Detector>("Fake", 180) {
-			public Object getValueAt(Detector d) {
-				return d.getFake();
-			}
-			public boolean isEditable(Detector d) {
-				return canUpdate(d);
-			}
-			public void setValueAt(Detector d, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					d.setFake(v);
-				else
-					d.setFake(null);
-			}
-		},
-		new ProxyColumn<Detector>("Notes", 180) {
-			public Object getValueAt(Detector d) {
-				return d.getNotes();
-			}
-			public boolean isEditable(Detector d) {
-				return canUpdate(d);
-			}
-			public void setValueAt(Detector d, Object value) {
-				String v = value.toString().trim();
-				d.setNotes(v);
 			}
 		}
 	    };

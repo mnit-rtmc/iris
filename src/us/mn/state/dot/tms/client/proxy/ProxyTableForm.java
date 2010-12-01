@@ -130,7 +130,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 		table.setRowHeight(getRowHeight());
 		table.setVisibleRowCount(getVisibleRowCount());
 		FormPanel panel = new FormPanel(true);
-		panel.addRow(table);
+		addTable(panel);
 		if(model.hasController())
 			panel.add(ctrl_btn);
 		if(model.hasProperties())
@@ -140,6 +140,11 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 		prop_btn.setEnabled(false);
 		del_btn.setEnabled(false);
 		return panel;
+	}
+
+	/** Add the table to the panel */
+	protected void addTable(FormPanel panel) {
+		panel.addRow(table);
 	}
 
 	/** Get the row height */
