@@ -19,6 +19,7 @@ import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
@@ -193,7 +194,16 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	}
 
 	/** Update one attribute */
-	public void update(Detector d, String a) {
+	public final void update(final Detector d, final String a) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				doUpdate(d, a);
+			}
+		});
+	}
+
+	/** Update one attribute */
+	protected void doUpdate(Detector d, String a) {
 		if(a == null || a.equals("laneType")) {
 			type_cmb.setSelectedIndex(d.getLaneType());
 			type_cmb.setEnabled(watcher.canUpdate(d, "laneType"));
@@ -226,7 +236,16 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	}
 
 	/** Clear all attributes */
-	public void clear() {
+	public final void clear() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				doClear();
+			}
+		});
+	}
+
+	/** Clear all attributes */
+	protected void doClear() {
 		type_cmb.setSelectedIndex(0);
 		type_cmb.setEnabled(false);
 		lane_spn.setValue(0);
