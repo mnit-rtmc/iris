@@ -22,12 +22,12 @@ import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
  *
  * @author Douglas Lau
  */
-public class DetectorPanel extends FormPanel {
+public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Lane type combobox */
 	protected final JComboBox type_cmb =
@@ -61,11 +61,8 @@ public class DetectorPanel extends FormPanel {
 	/** Note text field */
 	protected final JTextField note_txt = new JTextField(12);
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
+	/** Proxy watcher */
+	protected final ProxyWatcher<Detector> watcher;
 
 	/** Detector being edited */
 	protected Detector detector;
@@ -73,14 +70,15 @@ public class DetectorPanel extends FormPanel {
 	/** Set the detector */
 	public void setDetector(Detector det) {
 		detector = det;
-		doUpdateAttribute(null);
+		watcher.setProxy(det);
 	}
 
 	/** Create the detector panel */
 	public DetectorPanel(Session s) {
 		super(false);
-		namespace = s.getSonarState().getNamespace();
-		user = s.getUser();
+		TypeCache<Detector> cache =
+			s.getSonarState().getDetCache().getDetectors();
+		watcher = new ProxyWatcher<Detector>(s, this, cache, false);
 	}
 
 	/** Initialize the panel */
@@ -93,6 +91,7 @@ public class DetectorPanel extends FormPanel {
 		addRow("Fake", fake_txt);
 		addRow("Notes", note_txt);
 		createJobs();
+		watcher.initialize();
 	}
 
 	/** Create the jobs */
@@ -187,107 +186,60 @@ public class DetectorPanel extends FormPanel {
 			det.setNotes(n);
 	}
 
-	/** Update one attribute on the form */
-	protected void doUpdateAttribute(String a) {
+	/** Dispose of the panel */
+	public void dispose() {
+		watcher.dispose();
+		super.dispose();
+	}
+
+	/** Update one attribute */
+	public void update(Detector d, String a) {
 		if(a == null || a.equals("laneType")) {
-			type_cmb.setSelectedIndex(getLaneType());
-			type_cmb.setEnabled(canUpdate("laneType"));
+			type_cmb.setSelectedIndex(d.getLaneType());
+			type_cmb.setEnabled(watcher.canUpdate(d, "laneType"));
 		}
 		if(a == null || a.equals("laneNumber")) {
-			lane_spn.setValue(getLaneNumber());
-			lane_spn.setEnabled(canUpdate("laneNumber"));
+			lane_spn.setValue(d.getLaneNumber());
+			lane_spn.setEnabled(watcher.canUpdate(d, "laneNumber"));
 		}
 		if(a == null || a.equals("abandoned")) {
-			aband_cbx.setSelected(getAbandoned());
-			aband_cbx.setEnabled(canUpdate("abandoned"));
+			aband_cbx.setSelected(d.getAbandoned());
+			aband_cbx.setEnabled(watcher.canUpdate(d, "abandoned"));
 		}
 		if(a == null || a.equals("forceFail")) {
-			fail_cbx.setSelected(getForceFail());
-			fail_cbx.setEnabled(canUpdate("forceFail"));
+			fail_cbx.setSelected(d.getForceFail());
+			fail_cbx.setEnabled(watcher.canUpdate(d, "forceFail"));
 		}
 		if(a == null || a.equals("fieldLength")) {
-			field_spn.setValue(getFieldLength());
-			field_spn.setEnabled(canUpdate("fieldLength"));
+			field_spn.setValue(d.getFieldLength());
+			field_spn.setEnabled(watcher.canUpdate(d,
+				"fieldLength"));
 		}
 		if(a == null || a.equals("fake")) {
-			fake_txt.setText(getFake());
-			fake_txt.setEnabled(canUpdate("fake"));
+			fake_txt.setText(d.getFake());
+			fake_txt.setEnabled(watcher.canUpdate(d, "fake"));
 		}
 		if(a == null || a.equals("notes")) {
-			note_txt.setText(getNotes());
-			note_txt.setEnabled(canUpdate("notes"));
+			note_txt.setText(d.getNotes());
+			note_txt.setEnabled(watcher.canUpdate(d, "notes"));
 		}
 	}
 
-	/** Get the detector lane type */
-	protected short getLaneType() {
-		Detector det = detector;
-		if(det != null)
-			return det.getLaneType();
-		else
-			return 0;
-	}
-
-	/** Get the detector lane number */
-	protected short getLaneNumber() {
-		Detector det = detector;
-		if(det != null)
-			return det.getLaneNumber();
-		else
-			return 0;
-	}
-
-	/** Get the detector abandoned flag */
-	protected boolean getAbandoned() {
-		Detector det = detector;
-		if(det != null)
-			return det.getAbandoned();
-		else
-			return false;
-	}
-
-	/** Get the detector force fail flag */
-	protected boolean getForceFail() {
-		Detector det = detector;
-		if(det != null)
-			return det.getForceFail();
-		else
-			return false;
-	}
-
-	/** Get the detector field length */
-	protected float getFieldLength() {
-		Detector det = detector;
-		if(det != null)
-			return det.getFieldLength();
-		else
-			return 22f;
-	}
-
-	/** Get the detector fake expression */
-	protected String getFake() {
-		Detector det = detector;
-		if(det != null)
-			return det.getFake();
-		else
-			return "";
-	}
-
-	/** Get the detector notes */
-	protected String getNotes() {
-		Detector det = detector;
-		if(det != null)
-			return det.getNotes();
-		else
-			return "";
-	}
-
-	/** Check if the user can update an attribute */
-	protected boolean canUpdate(String aname) {
-		Detector det = detector;
-		if(det != null)
-			return namespace.canUpdate(user, new Name(det, aname));
-		else
-			return false;
+	/** Clear all attributes */
+	public void clear() {
+		type_cmb.setSelectedIndex(0);
+		type_cmb.setEnabled(false);
+		lane_spn.setValue(0);
+		lane_spn.setEnabled(false);
+		aband_cbx.setSelected(false);
+		aband_cbx.setEnabled(false);
+		fail_cbx.setSelected(false);
+		fail_cbx.setEnabled(false);
+		field_spn.setValue(22);
+		field_spn.setEnabled(false);
+		fake_txt.setText("");
+		fake_txt.setEnabled(false);
+		note_txt.setText("");
+		note_txt.setEnabled(false);
 	}
 }
