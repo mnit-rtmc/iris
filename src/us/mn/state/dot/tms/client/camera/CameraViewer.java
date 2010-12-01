@@ -18,7 +18,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.io.IOException;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -203,7 +202,7 @@ public class CameraViewer extends JPanel
 		if(SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean())
 			add(ptz_panel, bag);
 		new ActionJob(NETWORKER, play) {
-			public void perform() throws IOException {
+			public void perform() {
 				playPressed(selected);
 			}
 		};
@@ -336,7 +335,7 @@ public class CameraViewer extends JPanel
 			txtLocation.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
 			new AbstractJob(NETWORKER) {
-				public void perform() throws IOException {
+				public void perform() {
 					playPressed(camera);
 				}
 			}.addToScheduler();
@@ -404,16 +403,13 @@ public class CameraViewer extends JPanel
 	}
 
 	/** Start video streaming */
-	protected void playPressed(Camera c) throws IOException {
-		HttpDataSource source = new HttpDataSource(request.getUrl(
-			c.getName()));
-		s_panel.setVideoStream(source.createStream(),
-			request.getFrames());
+	protected void playPressed(Camera c) {
+		s_panel.requestStream(request, c.getName());
 	}
 
 	/** Stop video streaming */
 	protected void stopPressed() {
-		s_panel.setVideoStream(null, 0);
+		s_panel.clearStream();
 	}
 
 	/** Clear all of the fields */
@@ -421,7 +417,7 @@ public class CameraViewer extends JPanel
 		txtId.setText("");
 		txtLocation.setText("");
 		disableMonitorPanel();
-		s_panel.setVideoStream(null, 0);
+		s_panel.clearStream();
 	}
 
 	/** Create the video output selection combo box */

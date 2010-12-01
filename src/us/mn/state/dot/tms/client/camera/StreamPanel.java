@@ -141,8 +141,22 @@ public class StreamPanel extends JPanel {
 		screen.setMinimumSize(d);
 	}
 
+	/** Request a new video stream */
+	public void requestStream(VideoRequest request, String cid) {
+		try {
+			HttpDataSource source = new HttpDataSource(
+				request.getUrl(cid));
+			setVideoStream(source.createStream(),
+				request.getFrames());
+		}
+		catch(IOException e) {
+			progress.setString(e.getMessage());
+			progress.setStringPainted(true);
+		}
+	}
+
 	/** Set the video stream to display */
-	public synchronized void setVideoStream(VideoStream vs, int f) {
+	protected synchronized void setVideoStream(VideoStream vs, int f) {
 		stream = vs;
 		n_frames = f;
 		progress.setMaximum(n_frames);
@@ -151,6 +165,11 @@ public class StreamPanel extends JPanel {
 		synchronized(thread) {
 			thread.notify();
 		}
+	}
+
+	/** Clear the video stream */
+	public void clearStream() {
+		setVideoStream(null, 0);
 	}
 
 	/** Create an image icon from image data */
