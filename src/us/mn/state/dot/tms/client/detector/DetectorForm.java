@@ -31,16 +31,13 @@ public class DetectorForm extends ProxyTableForm<Detector> {
 		return s.canRead(Detector.SONAR_TYPE);
 	}
 
-	/** Detector redirector */
-	protected final DetectorRedirector detector = new DetectorRedirector();
-
 	/** Detector panel */
 	protected final DetectorPanel det_pnl;
 
 	/** Create a new detector form */
 	public DetectorForm(Session s) {
 		super("Detectors", new DetectorModel(s));
-		det_pnl = new DetectorPanel(s, detector);
+		det_pnl = new DetectorPanel(s);
 		det_pnl.initialize();
 	}
 
@@ -67,7 +64,6 @@ public class DetectorForm extends ProxyTableForm<Detector> {
 	/** Select a new proxy */
 	protected void selectProxy() {
 		super.selectProxy();
-		detector.setDetector(getSelectedProxy());
-		det_pnl.doUpdateAttribute(null);
+		det_pnl.setDetector(getSelectedProxy());
 	}
 }

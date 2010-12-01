@@ -68,14 +68,19 @@ public class DetectorPanel extends FormPanel {
 	protected final User user;
 
 	/** Detector being edited */
-	protected final Detector detector;
+	protected Detector detector;
+
+	/** Set the detector */
+	public void setDetector(Detector det) {
+		detector = det;
+		doUpdateAttribute(null);
+	}
 
 	/** Create the detector panel */
-	public DetectorPanel(Session s, Detector d) {
+	public DetectorPanel(Session s) {
 		super(false);
 		namespace = s.getSonarState().getNamespace();
 		user = s.getUser();
-		detector = d;
 	}
 
 	/** Initialize the panel */
@@ -94,84 +99,195 @@ public class DetectorPanel extends FormPanel {
 	protected void createJobs() {
 		new ActionJob(this, type_cmb) {
 			public void perform() {
-				detector.setLaneType(
-					(short)type_cmb.getSelectedIndex());
+				setLaneType((short)type_cmb.getSelectedIndex());
 			}
 		};
 		new ChangeJob(this, lane_spn) {
 			public void perform() {
 				Number n = (Number)lane_spn.getValue();
-				detector.setLaneNumber(n.shortValue());
+				setLaneNumber(n.shortValue());
 			}
 		};
 		new ActionJob(this, aband_cbx) {
 			public void perform() {
-				detector.setAbandoned(aband_cbx.isSelected());
+				setAbandoned(aband_cbx.isSelected());
 			}
 		};
 		new ActionJob(this, fail_cbx) {
 			public void perform() {
-				detector.setForceFail(fail_cbx.isSelected());
+				setForceFail(fail_cbx.isSelected());
 			}
 		};
 		new ChangeJob(this, field_spn) {
 			public void perform() {
 				Number n = (Number)field_spn.getValue();
-				detector.setFieldLength(n.floatValue());
+				setFieldLength(n.floatValue());
 			}
 		};
 		new FocusJob(fake_txt) {
 			public void perform() {
-				if(wasLost()) {
-					String s = fake_txt.getText().trim();
-					detector.setFake(s);
-				}
+				if(wasLost())
+					setFake(fake_txt.getText().trim());
 			}
 		};
 		new FocusJob(note_txt) {
 			public void perform() {
-				if(wasLost()) {
-					String s = note_txt.getText().trim();
-					detector.setNotes(s);
-				}
+				if(wasLost())
+					setNotes(note_txt.getText().trim());
 			}
 		};
 	}
 
+	/** Set the detector lane type */
+	protected void setLaneType(short lt) {
+		Detector det = detector;
+		if(det != null)
+			det.setLaneType(lt);
+	}
+
+	/** Set the detector lane number */
+	protected void setLaneNumber(short n) {
+		Detector det = detector;
+		if(det != null)
+			det.setLaneNumber(n);
+	}
+
+	/** Set the detector abandoned flag */
+	protected void setAbandoned(boolean a) {
+		Detector det = detector;
+		if(det != null)
+			det.setAbandoned(a);
+	}
+
+	/** Set the detector force fail flag */
+	protected void setForceFail(boolean f) {
+		Detector det = detector;
+		if(det != null)
+			det.setForceFail(f);
+	}
+
+	/** Set the detector field length */
+	protected void setFieldLength(float f) {
+		Detector det = detector;
+		if(det != null)
+			det.setFieldLength(f);
+	}
+
+	/** Set the detector fake expression */
+	protected void setFake(String f) {
+		Detector det = detector;
+		if(det != null)
+			det.setFake(f);
+	}
+
+	/** Set the detector notes */
+	protected void setNotes(String n) {
+		Detector det = detector;
+		if(det != null)
+			det.setNotes(n);
+	}
+
 	/** Update one attribute on the form */
-	public void doUpdateAttribute(String a) {
+	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("laneType")) {
-			type_cmb.setSelectedIndex(detector.getLaneType());
+			type_cmb.setSelectedIndex(getLaneType());
 			type_cmb.setEnabled(canUpdate("laneType"));
 		}
 		if(a == null || a.equals("laneNumber")) {
-			lane_spn.setValue(detector.getLaneNumber());
+			lane_spn.setValue(getLaneNumber());
 			lane_spn.setEnabled(canUpdate("laneNumber"));
 		}
 		if(a == null || a.equals("abandoned")) {
-			aband_cbx.setSelected(detector.getAbandoned());
+			aband_cbx.setSelected(getAbandoned());
 			aband_cbx.setEnabled(canUpdate("abandoned"));
 		}
 		if(a == null || a.equals("forceFail")) {
-			fail_cbx.setSelected(detector.getForceFail());
+			fail_cbx.setSelected(getForceFail());
 			fail_cbx.setEnabled(canUpdate("forceFail"));
 		}
 		if(a == null || a.equals("fieldLength")) {
-			field_spn.setValue(detector.getFieldLength());
+			field_spn.setValue(getFieldLength());
 			field_spn.setEnabled(canUpdate("fieldLength"));
 		}
 		if(a == null || a.equals("fake")) {
-			fake_txt.setText(detector.getFake());
+			fake_txt.setText(getFake());
 			fake_txt.setEnabled(canUpdate("fake"));
 		}
 		if(a == null || a.equals("notes")) {
-			note_txt.setText(detector.getNotes());
+			note_txt.setText(getNotes());
 			note_txt.setEnabled(canUpdate("notes"));
 		}
 	}
 
+	/** Get the detector lane type */
+	protected short getLaneType() {
+		Detector det = detector;
+		if(det != null)
+			return det.getLaneType();
+		else
+			return 0;
+	}
+
+	/** Get the detector lane number */
+	protected short getLaneNumber() {
+		Detector det = detector;
+		if(det != null)
+			return det.getLaneNumber();
+		else
+			return 0;
+	}
+
+	/** Get the detector abandoned flag */
+	protected boolean getAbandoned() {
+		Detector det = detector;
+		if(det != null)
+			return det.getAbandoned();
+		else
+			return false;
+	}
+
+	/** Get the detector force fail flag */
+	protected boolean getForceFail() {
+		Detector det = detector;
+		if(det != null)
+			return det.getForceFail();
+		else
+			return false;
+	}
+
+	/** Get the detector field length */
+	protected float getFieldLength() {
+		Detector det = detector;
+		if(det != null)
+			return det.getFieldLength();
+		else
+			return 22f;
+	}
+
+	/** Get the detector fake expression */
+	protected String getFake() {
+		Detector det = detector;
+		if(det != null)
+			return det.getFake();
+		else
+			return "";
+	}
+
+	/** Get the detector notes */
+	protected String getNotes() {
+		Detector det = detector;
+		if(det != null)
+			return det.getNotes();
+		else
+			return "";
+	}
+
 	/** Check if the user can update an attribute */
 	protected boolean canUpdate(String aname) {
-		return namespace.canUpdate(user, new Name(detector, aname));
+		Detector det = detector;
+		if(det != null)
+			return namespace.canUpdate(user, new Name(det, aname));
+		else
+			return false;
 	}
 }
