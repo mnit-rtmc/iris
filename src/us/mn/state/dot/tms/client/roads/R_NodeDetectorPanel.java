@@ -14,11 +14,15 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.detector.DetectorPanel;
 import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -35,11 +39,17 @@ public class R_NodeDetectorPanel extends JPanel {
 	/** R_Node detector model */
 	protected final R_NodeDetectorModel det_model;
 
+	/** Detector panel */
+	protected final DetectorPanel det_pnl;
+
 	/** Create a new roadway node detector panel */
 	public R_NodeDetectorPanel(Session s, R_Node n) {
+		super(new BorderLayout());
 		det_model = new R_NodeDetectorModel(s, n);
+		det_pnl = new DetectorPanel(s);
 		setBorder(TmsForm.BORDER);
-		add(new JScrollPane(det_table));
+		add(new JScrollPane(det_table), BorderLayout.WEST);
+		add(det_pnl, BorderLayout.CENTER);
 	}
 
 	/** Initialize the widgets on the form */
@@ -48,13 +58,36 @@ public class R_NodeDetectorPanel extends JPanel {
 		det_table.setAutoCreateColumnsFromModel(false);
 		det_table.setModel(det_model);
 		det_table.setColumnModel(det_model.createColumnModel());
-		det_table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		det_table.setRowHeight(20);
-		det_table.setVisibleRowCount(8);
+		det_table.setVisibleRowCount(6);
+		createJobs();
+		det_pnl.initialize();
+	}
+
+	/** Create Gui jobs */
+	protected void createJobs() {
+		ListSelectionModel s = det_table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, s) {
+			public void perform() {
+				selectDetector();
+			}
+		};
+	}
+
+	/** Select a detector */
+	protected void selectDetector() {
+		det_pnl.setDetector(getSelectedDetector());
+	}
+
+	/** Get the currently selected detector */
+	protected Detector getSelectedDetector() {
+		return det_model.getProxy(det_table.getSelectedRow());
 	}
 
 	/** Dispose of the panel */
 	public void dispose() {
+		det_pnl.dispose();
 		det_model.dispose();
 		removeAll();
 	}
