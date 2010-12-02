@@ -14,14 +14,13 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.Dimension;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.TmsForm;
+import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * A panel for editing the detectors of an r_node.
@@ -31,7 +30,7 @@ import us.mn.state.dot.tms.client.toast.TmsForm;
 public class R_NodeDetectorPanel extends JPanel {
 
 	/** Detector table */
-	protected final JTable det_table = new JTable();
+	protected final ZTable det_table = new ZTable();
 
 	/** R_Node detector model */
 	protected final R_NodeDetectorModel det_model;
@@ -51,9 +50,7 @@ public class R_NodeDetectorPanel extends JPanel {
 		det_table.setColumnModel(det_model.createColumnModel());
 		det_table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		det_table.setRowHeight(20);
-		det_table.setPreferredScrollableViewportSize(new Dimension(
-			det_table.getPreferredSize().width,
-			det_table.getRowHeight() * 8));
+		det_table.setVisibleRowCount(8);
 	}
 
 	/** Dispose of the panel */
