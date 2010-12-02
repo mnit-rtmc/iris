@@ -151,11 +151,12 @@ public class CorridorList extends JPanel {
 		add(corridor_combo, bag);
 		bag.weightx = 0;
 		bag.fill = GridBagConstraints.NONE;
+		add(new JLabel("Node"), bag);
 		add(add_btn, bag);
 		add(remove_btn, bag);
 		bag.gridx = 0;
 		bag.gridy = 1;
-		bag.gridwidth = 4;
+		bag.gridwidth = 5;
 		bag.fill = GridBagConstraints.BOTH;
 		bag.weightx = 1;
 		bag.weighty = 1;
@@ -164,6 +165,7 @@ public class CorridorList extends JPanel {
 		r_nodes.addProxyListener(listener);
 		geo_locs.addProxyListener(loc_listener);
 		createJobs();
+		updateNodeSelection();
 	}
 
 	/** Create the jobs */
