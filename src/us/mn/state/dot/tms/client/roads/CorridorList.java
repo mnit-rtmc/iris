@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,21 +17,21 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
@@ -43,16 +43,15 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.IrisClient;
+import us.mn.state.dot.tms.client.proxy.ProxyLayer;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
- * CorridorList is a graphical roadway corridor list.
+ * This component allows a corridor to be chosen from a list
  *
  * @author Douglas Lau
  */
-public class CorridorList extends JPanel implements ProxyListener<R_Node> {
-
-	/** Offset angle for default North map markers */
-	static protected final double NORTH_ANGLE = Math.PI / 2;
+public class CorridorList extends JPanel {
 
 	/** Roadway node manager */
 	protected final R_NodeManager manager;
@@ -69,8 +68,20 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Location type cache */
 	protected final TypeCache<GeoLoc> geo_locs;
 
-	/** Roadway corridor */
+	/** Roadway node layer */
+	protected final ProxyLayer<R_Node> layer;
+
+	/** Selected roadway corridor */
 	protected CorridorBase corridor;
+
+	/** Combo box to select a roadway corridor */
+	protected final JComboBox corridor_combo = new JComboBox();
+
+	/** Button to add a new roadway node */
+	protected JButton add_btn = new JButton("Add");
+
+	/** Button to remove the currently selected roadway node */
+	protected JButton remove_btn = new JButton("Remove");
 
 	/** List component for nodes */
 	protected final JList n_list = new JList();
@@ -78,98 +89,97 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	/** Roadway node list model */
 	protected R_NodeListModel n_model = new R_NodeListModel();
 
-	/** Button to add a new roadway node */
-	protected JButton add_btn = new JButton("Add");
+	/** Listener for r_node changes */
+	protected final ProxyListener<R_Node> listener =
+		new ProxyListener<R_Node>()
+	{
+		protected boolean enumerated = false;
+		public void proxyAdded(R_Node proxy) {
+			if(enumerated)
+				nodeAdded(proxy);
+		}
+		public void enumerationComplete() {
+			enumerated = true;
+			updateListModel();
+		}
+		public void proxyRemoved(R_Node proxy) {
+			nodeRemoved(proxy);
+		}
+		public void proxyChanged(R_Node proxy, String a) {
+			nodeChanged(proxy, a);
+		}
+	};
 
-	/** Button to edit the currently selected roadway node */
-	protected JButton edit_btn = new JButton("Edit");
+	/** Listener for geo_loc changes */
+	protected final ProxyListener<GeoLoc> loc_listener =
+		new ProxyListener<GeoLoc>()
+	{
+		public void proxyAdded(GeoLoc proxy) { }
+		public void enumerationComplete() { }
+		public void proxyRemoved(GeoLoc proxy) { }
+		public void proxyChanged(GeoLoc proxy, String a) {
+			geoLocChanged(proxy, a);
+		}
+	};
 
-	/** Button the shift the selected node left */
-	protected JButton lf_btn = new JButton("<-");
-
-	/** Button the shift the selected node right */
-	protected JButton rt_btn = new JButton("->");
-
-	/** Button to remove the currently selected roadway node */
-	protected JButton remove_btn = new JButton("Remove");
-
-	/** Create a corridor list */
+	/** Create a new corridor list */
 	public CorridorList(R_NodeManager m, R_NodeCreator c, IrisClient ic) {
 		super(new GridBagLayout());
 		manager = m;
 		creator = c;
 		client = ic;
+		layer = m.getLayer();
 		r_nodes = creator.getR_Nodes();
 		geo_locs = creator.getGeoLocs();
-		setBorder(BorderFactory.createTitledBorder(
-			"Corridor Node List"));
+		corridor_combo.setModel(new WrapperComboBoxModel(
+			manager.getCorridorModel()));
 		n_list.setCellRenderer(new R_NodeCellRenderer());
 		n_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		JScrollPane scroll = new JScrollPane(n_list);
+		setBorder(BorderFactory.createTitledBorder(
+			"Selected Roadway Corridor"));
+	}
+
+	/** Initialize the corridor list */
+	public void initialize() {
 		GridBagConstraints bag = new GridBagConstraints();
-		bag.gridx = 0;
+		bag.gridx = GridBagConstraints.RELATIVE;
 		bag.gridy = 0;
-		bag.gridwidth = 5;
 		bag.insets = new Insets(2, 4, 2, 4);
+		add(new JLabel("Corridor"), bag);
+		bag.weightx = 0.5f;
+		bag.fill = GridBagConstraints.BOTH;
+		add(corridor_combo, bag);
+		bag.weightx = 0;
+		bag.fill = GridBagConstraints.NONE;
+		add(add_btn, bag);
+		add(remove_btn, bag);
+		bag.gridx = 0;
+		bag.gridy = 1;
+		bag.gridwidth = 4;
 		bag.fill = GridBagConstraints.BOTH;
 		bag.weightx = 1;
 		bag.weighty = 1;
+		JScrollPane scroll = new JScrollPane(n_list);
 		add(scroll, bag);
-		bag.gridy = 1;
-		bag.gridwidth = 1;
-		bag.fill = GridBagConstraints.NONE;
-		bag.weightx = 0.1f;
-		bag.weighty = 0;
-		add(add_btn, bag);
-		bag.gridx = GridBagConstraints.RELATIVE;
-		add(edit_btn, bag);
-		add(lf_btn, bag);
-		add(rt_btn, bag);
-		add(remove_btn, bag);
-		r_nodes.addProxyListener(this);
-		geo_locs.addProxyListener(new ProxyListener<GeoLoc>() {
-			public void proxyAdded(GeoLoc proxy) { }
-			public void enumerationComplete() { }
-			public void proxyRemoved(GeoLoc proxy) { }
-			public void proxyChanged(GeoLoc proxy, String a) {
-				geoLocChanged(proxy, a);
-			}
-		});
+		r_nodes.addProxyListener(listener);
+		geo_locs.addProxyListener(loc_listener);
 		createJobs();
 	}
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ListSelectionJob(this, n_list) {
+		new ActionJob(this, corridor_combo) {
 			public void perform() {
-				if(!event.getValueIsAdjusting())
-					updateNodeSelection();
+				Object s = corridor_combo.getSelectedItem();
+				if(s instanceof CorridorBase)
+					setCorridor((CorridorBase)s);
+				else
+					setCorridor(null);
 			}
 		};
-		n_list.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent ev) {
-				if(ev.getClickCount() == 2)
-					edit_btn.doClick();
-			}
-		});
 		new ActionJob(this, add_btn) {
 			public void perform() {
 				doAddButton();
-			}
-		};
-		new ActionJob(this, edit_btn) {
-			public void perform() {
-				manager.showPropertiesForm();
-			}
-		};
-		new ActionJob(this, lf_btn) {
-			public void perform() {
-				doShiftLeft();
-			}
-		};
-		new ActionJob(this, rt_btn) {
-			public void perform() {
-				doShiftRight();
 			}
 		};
 		new ActionJob(this, remove_btn) {
@@ -177,64 +187,52 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 				doRemoveButton();
 			}
 		};
-	}
-
-	/** Shift the selected r_node to the left */
-	protected void doShiftLeft() {
-		R_Node proxy = getSelectedNode();
-		int shift = proxy.getShift();
-		if(shift > 0)
-			proxy.setShift(shift - 1);
-	}
-
-	/** Shift the selected r_node to the right */
-	protected void doShiftRight() {
-		R_Node proxy = getSelectedNode();
-		int shift = proxy.getShift();
-		if(shift < 12)
-			proxy.setShift(shift + 1);
-	}
-
-	/** Enumeration complete flag */
-	protected boolean complete;
-
-	/** Called when a proxy has been added */
-	public void proxyAdded(final R_Node proxy) {
-		// Don't hog the SONAR TaskProcessor thread
-		if(complete && manager.checkCorridor(proxy)) {
-			new AbstractJob() {
-				public void perform() {
-					updateListModel();
-				}
-			}.addToScheduler();
-		}
-	}
-
-	/** Called when proxy enumeration is complete */
-	public void enumerationComplete() {
-		complete = true;
-		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		new ListSelectionJob(this, n_list) {
 			public void perform() {
-				updateListModel();
+				if(!event.getValueIsAdjusting())
+					updateNodeSelection();
 			}
-		}.addToScheduler();
+		};
 	}
 
-	/** Called when a proxy has been removed */
-	public void proxyRemoved(R_Node proxy) {
-		if(manager.checkCorridor(proxy)) {
-			// Don't hog the SONAR TaskProcessor thread
-			new AbstractJob() {
-				public void perform() {
-					updateListModel();
-				}
-			}.addToScheduler();
-		}
+	/** Set a new selected corridor */
+	protected void setCorridor(CorridorBase c) {
+		manager.setCorridor(c);
+		updateListModel();
+		layer.updateExtent();
+		if(map != null)
+			map.zoomTo(layer.getExtent());
 	}
 
-	/** Called when a proxy attribute has changed */
-	public void proxyChanged(R_Node proxy, String a) {
+	/** Dispose of the corridor chooser */
+	public void dispose() {
+		geo_locs.removeProxyListener(loc_listener);
+		r_nodes.removeProxyListener(listener);
+		removeAll();
+	}
+
+	/** Map bean */
+	protected MapBean map;
+
+	/** Set the map */
+	public void setMap(MapBean m) {
+		map = m;
+	}
+
+	/** Called when an r_node has been added */
+	protected void nodeAdded(R_Node proxy) {
+		if(manager.checkCorridor(proxy))
+			updateListModel();
+	}
+
+	/** Called when an r_node has been removed */
+	protected void nodeRemoved(R_Node proxy) {
+		if(manager.checkCorridor(proxy))
+			updateListModel();
+	}
+
+	/** Called when an r_node attribute has changed */
+	protected void nodeChanged(R_Node proxy, String a) {
 		if(manager.checkCorridor(proxy))
 			n_model.updateItem(proxy);
 	}
@@ -299,7 +297,17 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	}
 
 	/** Update the corridor list model */
-	public void updateListModel() {
+	protected void updateListModel() {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				doUpdateListModel();
+			}
+		}.addToScheduler();
+	}
+
+	/** Update the corridor list model */
+	protected void doUpdateListModel() {
 		Set<R_Node> node_s = manager.createSet();
 		n_model = createNodeList(node_s);
 		n_list.setModel(n_model);
@@ -354,9 +362,6 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		R_Node proxy = getSelectedNode();
 		if(proxy != null)
 			manager.getSelectionModel().setSelected(proxy);
-		edit_btn.setEnabled(proxy != null);
-		lf_btn.setEnabled(proxy != null);
-		rt_btn.setEnabled(proxy != null);
 		remove_btn.setEnabled(proxy != null);
 	}
 

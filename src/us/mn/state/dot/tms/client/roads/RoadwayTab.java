@@ -27,10 +27,7 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class RoadwayTab extends MapTab {
 
-	/** Corridor chooser component */
-	protected final CorridorChooser chooser;
-
-	/** Selected corridor list */
+	/** Corridor list */
 	protected final CorridorList clist;
 
 	/** Create a new roadway node tab */
@@ -40,15 +37,14 @@ public class RoadwayTab extends MapTab {
 		R_NodeCreator creator = new R_NodeCreator(st,session.getUser());
 		clist = new CorridorList(man, creator,
 			session.getDesktop().client);
-		chooser = new CorridorChooser(man, clist);
-		add(chooser, BorderLayout.NORTH);
 		add(clist, BorderLayout.CENTER);
+		clist.initialize();
 	}
 
 	/** Set the map for this tab */
 	public void setMap(MapBean m) {
 		super.setMap(m);
-		chooser.setMap(m);
+		clist.setMap(m);
 	}
 
 	/** Get the tab number */
@@ -56,9 +52,9 @@ public class RoadwayTab extends MapTab {
 		return 5;
 	}
 
-	/** Dispose of the DMS tab */
+	/** Dispose of the roadway tab */
 	public void dispose() {
 		super.dispose();
-		chooser.dispose();
+		clist.dispose();
 	}
 }
