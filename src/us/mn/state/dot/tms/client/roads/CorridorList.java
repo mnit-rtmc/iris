@@ -56,6 +56,9 @@ public class CorridorList extends JPanel {
 	/** Roadway node manager */
 	protected final R_NodeManager manager;
 
+	/** Selected r_node panel */
+	protected final R_NodePanel panel;
+
 	/** Roadway node creator */
 	protected final R_NodeCreator creator;
 
@@ -123,9 +126,12 @@ public class CorridorList extends JPanel {
 	};
 
 	/** Create a new corridor list */
-	public CorridorList(R_NodeManager m, R_NodeCreator c, IrisClient ic) {
+	public CorridorList(R_NodeManager m, R_NodePanel p, R_NodeCreator c,
+		IrisClient ic)
+	{
 		super(new GridBagLayout());
 		manager = m;
+		panel = p;
 		creator = c;
 		client = ic;
 		layer = m.getLayer();
@@ -364,6 +370,7 @@ public class CorridorList extends JPanel {
 		R_Node proxy = getSelectedNode();
 		if(proxy != null)
 			manager.getSelectionModel().setSelected(proxy);
+		panel.setR_Node(proxy);
 		remove_btn.setEnabled(proxy != null);
 	}
 

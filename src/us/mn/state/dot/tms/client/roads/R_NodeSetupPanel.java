@@ -19,12 +19,14 @@ import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
@@ -66,13 +68,16 @@ public class R_NodeSetupPanel extends FormPanel {
 	protected final JSpinner speed_spn = new JSpinner(
 		new SpinnerNumberModel(55, 25, 120, 5));
 
+	/** User session */
+	protected final Session session;
+
 	/** Node being edited */
-	protected final R_Node node;
+	protected R_Node node;
 
 	/** Create the roadway node setup panel */
-	public R_NodeSetupPanel(R_Node n) {
-		super(true);
-		node = n;
+	public R_NodeSetupPanel(Session s) {
+		super(false);
+		session = s;
 	}
 
 	/** Initialize the panel */
@@ -87,83 +92,214 @@ public class R_NodeSetupPanel extends FormPanel {
 		addRow("Station ID", station_txt);
 		addRow("Speed Limit", speed_spn);
 		createJobs();
+		clear();
 	}
 
 	/** Create the jobs */
 	protected void createJobs() {
 		new ActionJob(this, type_cmb) {
 			public void perform() {
-				node.setNodeType(type_cmb.getSelectedIndex());
+				setNodeType(type_cmb.getSelectedIndex());
 			}
 		};
 		new ActionJob(this, pick_cbx) {
 			public void perform() {
-				node.setPickable(pick_cbx.isSelected());
+				setPickable(pick_cbx.isSelected());
 			}
 		};
 		new ActionJob(this, above_cbx) {
 			public void perform() {
-				node.setAbove(above_cbx.isSelected());
+				setAbove(above_cbx.isSelected());
 			}
 		};
 		new ActionJob(this, trans_cmb) {
 			public void perform() {
-				node.setTransition(
-					trans_cmb.getSelectedIndex());
+				setTransition(trans_cmb.getSelectedIndex());
 			}
 		};
 		new ChangeJob(this, lane_spn) {
 			public void perform() {
 				Number n = (Number)lane_spn.getValue();
-				node.setLanes(n.intValue());
+				setLanes(n.intValue());
 			}
 		};
 		new ActionJob(this, attach_cbx) {
 			public void perform() {
-				node.setAttachSide(attach_cbx.isSelected());
+				setAttachSide(attach_cbx.isSelected());
 			}
 		};
 		new ChangeJob(this, shift_spn) {
 			public void perform() {
 				Number n = (Number)shift_spn.getValue();
-				node.setShift(n.intValue());
+				setShift(n.intValue());
 			}
 		};
 		new FocusJob(station_txt) {
 			public void perform() {
 				if(wasLost()) {
 					String s = station_txt.getText().trim();
-					node.setStationID(s);
+					setStationID(s);
 				}
 			}
 		};
 		new ChangeJob(this, speed_spn) {
 			public void perform() {
 				Number n = (Number)speed_spn.getValue();
-				node.setSpeedLimit(n.intValue());
+				setSpeedLimit(n.intValue());
 			}
 		};
 	}
 
-	/** Update one attribute on the form */
-	public void doUpdateAttribute(String a) {
-		if(a == null || a.equals("nodeType"))
-			type_cmb.setSelectedIndex(node.getNodeType());
-		if(a == null || a.equals("pickable"))
-			pick_cbx.setSelected(node.getPickable());
-		if(a == null || a.equals("above"))
-			above_cbx.setSelected(node.getAbove());
-		if(a == null || a.equals("transition"))
-			trans_cmb.setSelectedIndex(node.getTransition());
-		if(a == null || a.equals("lanes"))
-			lane_spn.setValue(node.getLanes());
-		if(a == null || a.equals("attachSide"))
-			attach_cbx.setSelected(node.getAttachSide());
-		if(a == null || a.equals("shift"))
-			shift_spn.setValue(node.getShift());
-		if(a == null || a.equals("stationID"))
-			station_txt.setText(node.getStationID());
-		if(a == null || a.equals("speedLimit"))
-			speed_spn.setValue(node.getSpeedLimit());
+	/** Set the node type */
+	protected void setNodeType(int t) {
+		R_Node n = node;
+		if(n != null)
+			n.setNodeType(t);
+	}
+
+	/** Set the pickable flag */
+	protected void setPickable(boolean p) {
+		R_Node n = node;
+		if(n != null)
+			n.setPickable(p);
+	}
+
+	/** Set the above flag */
+	protected void setAbove(boolean a) {
+		R_Node n = node;
+		if(n != null)
+			n.setAbove(a);
+	}
+
+	/** Set the transition */
+	protected void setTransition(int t) {
+		R_Node n = node;
+		if(n != null)
+			n.setTransition(t);
+	}
+
+	/** Set the number of lanes */
+	protected void setLanes(int l) {
+		R_Node n = node;
+		if(n != null)
+			n.setLanes(l);
+	}
+
+	/** Set the attach side */
+	protected void setAttachSide(boolean a) {
+		R_Node n = node;
+		if(n != null)
+			n.setAttachSide(a);
+	}
+
+	/** Set the lane shift */
+	protected void setShift(int s) {
+		R_Node n = node;
+		if(n != null)
+			n.setShift(s);
+	}
+
+	/** Set the station ID */
+	protected void setStationID(String s) {
+		R_Node n = node;
+		if(n != null)
+			n.setStationID(s);
+	}
+
+	/** Set the speed limit */
+	protected void setSpeedLimit(int s) {
+		R_Node n = node;
+		if(n != null)
+			n.setSpeedLimit(s);
+	}
+
+	/** Update one attribute */
+	public final void update(final R_Node n, final String a) {
+		// Serialize on WORKER thread
+		new AbstractJob() {
+			public void perform() {
+				doUpdate(n, a);
+			}
+		}.addToScheduler();
+	}
+
+	/** Update one attribute */
+	protected void doUpdate(R_Node n, String a) {
+		if(a == null)
+			node = n;
+		if(a == null || a.equals("nodeType")) {
+			type_cmb.setEnabled(canUpdate(n, "nodeType"));
+			type_cmb.setSelectedIndex(n.getNodeType());
+		}
+		if(a == null || a.equals("pickable")) {
+			pick_cbx.setEnabled(canUpdate(n, "pickable"));
+			pick_cbx.setSelected(n.getPickable());
+		}
+		if(a == null || a.equals("above")) {
+			above_cbx.setEnabled(canUpdate(n, "above"));
+			above_cbx.setSelected(n.getAbove());
+		}
+		if(a == null || a.equals("transition")) {
+			trans_cmb.setEnabled(canUpdate(n, "transition"));
+			trans_cmb.setSelectedIndex(n.getTransition());
+		}
+		if(a == null || a.equals("lanes")) {
+			lane_spn.setEnabled(canUpdate(n, "lanes"));
+			lane_spn.setValue(n.getLanes());
+		}
+		if(a == null || a.equals("attachSide")) {
+			attach_cbx.setEnabled(canUpdate(n, "attachSide"));
+			attach_cbx.setSelected(n.getAttachSide());
+		}
+		if(a == null || a.equals("shift")) {
+			shift_spn.setEnabled(canUpdate(n, "shift"));
+			shift_spn.setValue(n.getShift());
+		}
+		if(a == null || a.equals("stationID")) {
+			station_txt.setEnabled(canUpdate(n, "stationID"));
+			station_txt.setText(n.getStationID());
+		}
+		if(a == null || a.equals("speedLimit")) {
+			speed_spn.setEnabled(canUpdate(n, "speedLimit"));
+			speed_spn.setValue(n.getSpeedLimit());
+		}
+	}
+
+	/** Test if the user can update an attribute */
+	protected boolean canUpdate(R_Node n, String a) {
+		return session.canUpdate(n, a);
+	}
+
+	/** Clear all attributes */
+	public final void clear() {
+		// Serialize on WORKER thread
+		new AbstractJob() {
+			public void perform() {
+				doClear();
+			}
+		}.addToScheduler();
+	}
+
+	/** Clear all attributes */
+	protected void doClear() {
+		node = null;
+		type_cmb.setEnabled(false);
+		type_cmb.setSelectedIndex(0);
+		pick_cbx.setEnabled(false);
+		pick_cbx.setSelected(false);
+		above_cbx.setEnabled(false);
+		above_cbx.setSelected(false);
+		trans_cmb.setEnabled(false);
+		trans_cmb.setSelectedIndex(0);
+		lane_spn.setEnabled(false);
+		lane_spn.setValue(0);
+		attach_cbx.setEnabled(false);
+		attach_cbx.setSelected(false);
+		shift_spn.setEnabled(false);
+		shift_spn.setValue(0);
+		station_txt.setEnabled(false);
+		station_txt.setText("");
+		speed_spn.setEnabled(false);
+		speed_spn.setValue(55);
 	}
 }

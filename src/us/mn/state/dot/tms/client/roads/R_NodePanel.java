@@ -1,0 +1,103 @@
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+package us.mn.state.dot.tms.client.roads;
+
+import java.awt.BorderLayout;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
+
+/**
+ * A panel for viewing and editing roadway node parameters.
+ *
+ * @author Douglas Lau
+ */
+public class R_NodePanel extends JPanel {
+
+	/** Proxy watcher */
+	protected final ProxyWatcher<R_Node> watcher;
+
+	/** Tabbed pane */
+	protected final JTabbedPane tab = new JTabbedPane();
+
+	/** Location panel */
+	protected final R_NodeLocationPanel loc_pnl;
+
+	/** Setup panel */
+	protected final R_NodeSetupPanel setup_pnl;
+
+	/** Detector panel */
+	protected final R_NodeDetectorPanel det_pnl;
+
+	/** Proxy view */
+	protected final ProxyView<R_Node> view = new ProxyView<R_Node>() {
+		public void update(R_Node n, String a) {
+			loc_pnl.update(n, a);
+			setup_pnl.update(n, a);
+		}
+		public void clear() {
+			loc_pnl.clear();
+			setup_pnl.clear();
+			det_pnl.setR_Node(null);
+		}
+	};
+
+	/** Set a new r_node */
+	public void setR_Node(R_Node n) {
+		if(n != null)
+			loc_pnl.setGeoLoc(n.getGeoLoc());
+		else
+			loc_pnl.setGeoLoc(null);
+		det_pnl.setR_Node(n);
+		watcher.setProxy(n);
+	}
+
+	/** Create a new roadway node panel */
+	public R_NodePanel(Session s) {
+		super(new BorderLayout());
+		loc_pnl = new R_NodeLocationPanel(s);
+		setup_pnl = new R_NodeSetupPanel(s);
+		det_pnl = new R_NodeDetectorPanel(s);
+		TypeCache<R_Node> cache =
+			s.getSonarState().getDetCache().getR_Nodes();
+		watcher = new ProxyWatcher<R_Node>(s, view, cache, false);
+		setBorder(BorderFactory.createTitledBorder("Selected R_Node"));
+	}
+
+	/** Initialize the widgets on the panel */
+	public void initialize() {
+		watcher.initialize();
+		loc_pnl.initialize();
+		setup_pnl.initialize();
+		det_pnl.initialize();
+		tab.add("Location", loc_pnl);
+		tab.add("Setup", setup_pnl);
+		tab.add("Detectors", det_pnl);
+		add(tab, BorderLayout.CENTER);
+	}
+
+	/** Dispose of the panel */
+	public void dispose() {
+		det_pnl.dispose();
+		setup_pnl.dispose();
+		loc_pnl.dispose();
+		watcher.dispose();
+	}
+}

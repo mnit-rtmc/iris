@@ -36,28 +36,39 @@ public class R_NodeDetectorPanel extends JPanel {
 	/** Detector table */
 	protected final ZTable det_table = new ZTable();
 
+	/** User session */
+	protected final Session session;
+
 	/** R_Node detector model */
-	protected final R_NodeDetectorModel det_model;
+	protected R_NodeDetectorModel det_model;
+
+	/** Set the r_node */
+	public void setR_Node(R_Node n) {
+		R_NodeDetectorModel m = det_model;
+		if(m != null)
+			m.dispose();
+		det_model = new R_NodeDetectorModel(session, n);
+		det_model.initialize();
+		det_table.setModel(det_model);
+		det_table.setColumnModel(det_model.createColumnModel());
+	}
 
 	/** Detector panel */
 	protected final DetectorPanel det_pnl;
 
 	/** Create a new roadway node detector panel */
-	public R_NodeDetectorPanel(Session s, R_Node n) {
+	public R_NodeDetectorPanel(Session s) {
 		super(new BorderLayout());
-		det_model = new R_NodeDetectorModel(s, n);
+		session = s;
 		det_pnl = new DetectorPanel(s);
 		setBorder(TmsForm.BORDER);
-		add(new JScrollPane(det_table), BorderLayout.WEST);
-		add(det_pnl, BorderLayout.CENTER);
+		add(new JScrollPane(det_table), BorderLayout.CENTER);
+		add(det_pnl, BorderLayout.EAST);
 	}
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
-		det_model.initialize();
 		det_table.setAutoCreateColumnsFromModel(false);
-		det_table.setModel(det_model);
-		det_table.setColumnModel(det_model.createColumnModel());
 		det_table.setRowHeight(20);
 		det_table.setVisibleRowCount(6);
 		createJobs();
@@ -82,13 +93,18 @@ public class R_NodeDetectorPanel extends JPanel {
 
 	/** Get the currently selected detector */
 	protected Detector getSelectedDetector() {
-		return det_model.getProxy(det_table.getSelectedRow());
+		R_NodeDetectorModel m = det_model;
+		if(m != null)
+			return m.getProxy(det_table.getSelectedRow());
+		else
+			return null;
 	}
 
 	/** Dispose of the panel */
 	public void dispose() {
 		det_pnl.dispose();
-		det_model.dispose();
+		if(det_model != null)
+			det_model.dispose();
 		removeAll();
 	}
 }

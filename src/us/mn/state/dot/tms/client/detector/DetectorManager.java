@@ -55,9 +55,6 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Name of "no controller" style */
 	static public final String STYLE_NO_CONTROLLER = "No controller";
 
-	/** Name of "no r_node" style */
-	static public final String STYLE_NO_R_NODE = "No R_Node";
-
 	/** R_Node manager */
 	protected final R_NodeManager r_node_manager;
 
@@ -94,7 +91,6 @@ public class DetectorManager extends ProxyManager<Detector> {
 			ProxyTheme.OUTLINE_INACTIVE);
 		theme.addStyle(STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(STYLE_NO_R_NODE);
 		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
@@ -116,8 +112,6 @@ public class DetectorManager extends ProxyManager<Detector> {
 			return ctr == null || !ctr.getActive();
 		} else if(STYLE_NO_CONTROLLER.equals(s))
 			return proxy.getController() == null;
-		else if(STYLE_NO_R_NODE.equals(s))
-			return proxy.getR_Node() == null;
 		else
 			return STYLE_ALL.equals(s);
 	}

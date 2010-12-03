@@ -27,6 +27,9 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class RoadwayTab extends MapTab {
 
+	/** R_Node panel */
+	protected final R_NodePanel panel;
+
 	/** Corridor list */
 	protected final CorridorList clist;
 
@@ -34,10 +37,13 @@ public class RoadwayTab extends MapTab {
 	public RoadwayTab(Session session, R_NodeManager man) {
 		super("Roadway", "View / edit roadway nodes");
 		SonarState st = session.getSonarState();
+		panel = new R_NodePanel(session);
+		add(panel, BorderLayout.NORTH);
 		R_NodeCreator creator = new R_NodeCreator(st,session.getUser());
-		clist = new CorridorList(man, creator,
+		clist = new CorridorList(man, panel, creator,
 			session.getDesktop().client);
 		add(clist, BorderLayout.CENTER);
+		panel.initialize();
 		clist.initialize();
 	}
 
@@ -54,7 +60,8 @@ public class RoadwayTab extends MapTab {
 
 	/** Dispose of the roadway tab */
 	public void dispose() {
-		super.dispose();
 		clist.dispose();
+		panel.dispose();
+		super.dispose();
 	}
 }

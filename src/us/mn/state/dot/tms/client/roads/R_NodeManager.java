@@ -318,16 +318,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Show the properties form for the selected proxy */
 	public void showPropertiesForm() {
-		if(s_model.getSelectedCount() == 1) {
-			for(R_Node n: s_model.getSelected())
-				showPropertiesForm(n);
-		}
-	}
-
-	/** Show the properties form for the given proxy */
-	protected void showPropertiesForm(R_Node n) {
-		SmartDesktop desktop = session.getDesktop();
-		desktop.show(new R_NodeProperties(session, n));
+		// FIXME
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
@@ -348,12 +339,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	protected JPopupMenu createSinglePopup(R_Node proxy) {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
-		p.addSeparator();
-		p.add(new PropertiesAction<R_Node>(proxy) {
-			protected void do_perform() {
-				showPropertiesForm();
-			}
-		});
 		return p;
 	}
 
