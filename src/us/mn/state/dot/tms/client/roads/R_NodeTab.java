@@ -18,7 +18,6 @@ import java.awt.BorderLayout;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * The R_NodeTab class provides the GUI for editing roadway nodes.
@@ -36,12 +35,9 @@ public class R_NodeTab extends MapTab {
 	/** Create a new roadway node tab */
 	public R_NodeTab(Session session, R_NodeManager man) {
 		super("R_Node", "View / edit roadway nodes");
-		SonarState st = session.getSonarState();
 		panel = new R_NodePanel(session);
 		add(panel, BorderLayout.NORTH);
-		R_NodeCreator creator = new R_NodeCreator(st,session.getUser());
-		clist = new CorridorList(man, panel, creator,
-			session.getDesktop().client);
+		clist = new CorridorList(session, man, panel);
 		add(clist, BorderLayout.CENTER);
 		panel.initialize();
 		clist.initialize();

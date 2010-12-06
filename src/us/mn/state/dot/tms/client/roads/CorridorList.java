@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.IrisClient;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
@@ -52,6 +53,9 @@ import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
  * @author Douglas Lau
  */
 public class CorridorList extends JPanel {
+
+	/** User session */
+	protected final Session session;
 
 	/** Roadway node manager */
 	protected final R_NodeManager manager;
@@ -126,14 +130,13 @@ public class CorridorList extends JPanel {
 	};
 
 	/** Create a new corridor list */
-	public CorridorList(R_NodeManager m, R_NodePanel p, R_NodeCreator c,
-		IrisClient ic)
-	{
+	public CorridorList(Session s, R_NodeManager m, R_NodePanel p) {
 		super(new GridBagLayout());
+		session = s;
 		manager = m;
 		panel = p;
-		creator = c;
-		client = ic;
+		creator = new R_NodeCreator(s.getSonarState(), s.getUser());
+		client = s.getDesktop().client;
 		layer = m.getLayer();
 		r_nodes = creator.getR_Nodes();
 		geo_locs = creator.getGeoLocs();
@@ -172,6 +175,8 @@ public class CorridorList extends JPanel {
 		geo_locs.addProxyListener(loc_listener);
 		createJobs();
 		updateNodeSelection();
+		add_btn.setEnabled(canAdd());
+		remove_btn.setEnabled(false);
 	}
 
 	/** Create the jobs */
@@ -371,7 +376,7 @@ public class CorridorList extends JPanel {
 		if(proxy != null)
 			manager.getSelectionModel().setSelected(proxy);
 		panel.setR_Node(proxy);
-		remove_btn.setEnabled(proxy != null);
+		remove_btn.setEnabled(canRemove(proxy));
 	}
 
 	/** Do the add button action */
@@ -400,7 +405,7 @@ public class CorridorList extends JPanel {
 		} else
 			creator.create(e, n);
 		client.setPointSelector(null);
-		add_btn.setEnabled(true);
+		add_btn.setEnabled(canAdd());
 	}
 
 	/** Find an r_node model near a point */
@@ -425,5 +430,15 @@ public class CorridorList extends JPanel {
 			proxy.destroy();
 			loc.destroy();
 		}
+	}
+
+	/** Test if a new r_node can be added */
+	protected boolean canAdd() {
+		return session.canAdd(R_Node.SONAR_TYPE);
+	}
+
+	/** Test if an r_node can be removed */
+	protected boolean canRemove(R_Node n) {
+		return n != null && session.canRemove(n);
 	}
 }
