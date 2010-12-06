@@ -19,7 +19,7 @@ import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
@@ -70,7 +70,6 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Set the detector */
 	public void setDetector(Detector det) {
-		detector = det;
 		watcher.setProxy(det);
 	}
 
@@ -195,15 +194,18 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Update one attribute */
 	public final void update(final Detector d, final String a) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
+		// Serialize on WORKER thread
+		new AbstractJob() {
+			public void perform() {
 				doUpdate(d, a);
 			}
-		});
+		}.addToScheduler();
 	}
 
 	/** Update one attribute */
 	protected void doUpdate(Detector d, String a) {
+		if(a == null)
+			detector = d;
 		if(a == null || a.equals("laneType")) {
 			type_cmb.setSelectedIndex(d.getLaneType());
 			type_cmb.setEnabled(watcher.canUpdate(d, "laneType"));
@@ -237,15 +239,17 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Clear all attributes */
 	public final void clear() {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
+		// Serialize on WORKER thread
+		new AbstractJob() {
+			public void perform() {
 				doClear();
 			}
-		});
+		}.addToScheduler();
 	}
 
 	/** Clear all attributes */
 	protected void doClear() {
+		detector = null;
 		type_cmb.setSelectedIndex(0);
 		type_cmb.setEnabled(false);
 		lane_spn.setValue(0);
