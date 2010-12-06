@@ -14,7 +14,8 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import javax.swing.JTextArea;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.tms.R_Node;
@@ -28,7 +29,10 @@ import us.mn.state.dot.tms.client.Session;
 public class R_NodeLocationPanel extends LocationPanel {
 
 	/** Component for editing notes */
-	protected final JTextArea notes_txt = new JTextArea(3, 20);
+	protected final JTextField notes_txt = new JTextField(20);
+
+	/** Label for r_node name */
+	protected final JLabel name_lbl = new JLabel();
 
 	/** Node being edited */
 	protected R_Node node;
@@ -42,6 +46,8 @@ public class R_NodeLocationPanel extends LocationPanel {
 	public void initialize() {
 		super.initialize();
 		addRow("Notes", notes_txt);
+		setCenter();
+		addRow(name_lbl);
 		clear();
 	}
 
@@ -75,8 +81,10 @@ public class R_NodeLocationPanel extends LocationPanel {
 
 	/** Update one attribute */
 	protected void doUpdate(R_Node n, String a) {
-		if(a == null)
+		if(a == null) {
 			node = n;
+			name_lbl.setText(n.getName());
+		}
 		if(a == null || a.equals("notes")) {
 			notes_txt.setEnabled(canUpdate(n, "notes"));
 			notes_txt.setText(n.getNotes());
@@ -92,6 +100,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	protected void doClear() {
 		super.doClear();
 		node = null;
+		name_lbl.setText("(none selected)");
 		notes_txt.setEnabled(false);
 		notes_txt.setText("");
 	}
