@@ -271,6 +271,10 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		new AbstractJob() {
 			public void perform() {
 				doUpdate(l, a);
+				// NOTE: this is needed to fix a problem where
+				//       a combo box displays the wrong entry
+				//       after a call to setSelectedItem
+				repaint();
 			}
 		}.addToScheduler();
 	}
