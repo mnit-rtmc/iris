@@ -304,12 +304,16 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 			crossDir.setSelectedIndex(l.getCrossDir());
 		}
 		if(a == null || a.equals("easting")) {
-			easting.setEnabled(canUpdate(l, "easting"));
+			boolean p = canUpdate(l, "easting");
+			easting.setEnabled(p);
 			easting.setValue(asInt(l.getEasting()));
+			select_btn.setEnabled(p);
 		}
 		if(a == null || a.equals("northing")) {
-			northing.setEnabled(canUpdate(l, "northing"));
+			boolean p = canUpdate(l, "northing");
+			northing.setEnabled(p);
 			northing.setValue(asInt(l.getNorthing()));
+			select_btn.setEnabled(p);
 		}
 	}
 
@@ -345,5 +349,6 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		easting.setValue(0);
 		northing.setEnabled(false);
 		northing.setValue(0);
+		select_btn.setEnabled(false);
 	}
 }
