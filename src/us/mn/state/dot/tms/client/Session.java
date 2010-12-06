@@ -338,6 +338,12 @@ public class Session {
 		       namespace.canUpdate(user, new Name(proxy, aname));
 	}
 
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(SonarObject proxy) {
+		return proxy != null &&
+		       namespace.canRemove(user, new Name(proxy));
+	}
+
 	/** Dispose of the session */
 	public void dispose() {
 		desktop.closeFrames();

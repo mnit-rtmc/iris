@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.util.HashMap;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -67,5 +68,25 @@ public class R_NodeDetectorModel extends ProxyTableModel<Detector> {
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
+	}
+
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return Detector.SONAR_TYPE;
+	}
+
+	/** Create a new detector */
+	public void create(String name) {
+		if(name.length() > 0 && canAdd(name)) {
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("r_node", r_node);;
+			cache.createObject(name, attrs);
+		}
+	}
+
+	/** Transfer a detector to the r_node */
+	public void transfer(Detector det) {
+		det.setR_Node(r_node);
 	}
 }
