@@ -52,7 +52,7 @@ import us.mn.state.dot.tms.client.meter.RampMeterTab;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
-import us.mn.state.dot.tms.client.roads.RoadwayTab;
+import us.mn.state.dot.tms.client.roads.R_NodeTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
@@ -266,8 +266,8 @@ public class Session {
 			tabs.add(new LcsTab(this, lcs_array_manager));
 		if(canRead(RampMeter.SONAR_TYPE))
 			tabs.add(new RampMeterTab(this, meter_manager));
-		if(canAdd(R_Node.SONAR_TYPE))
-			tabs.add(new RoadwayTab(this, r_node_manager));
+		if(canRead(R_Node.SONAR_TYPE))
+			tabs.add(new R_NodeTab(this, r_node_manager));
 	}
 
 	/** Create the layer states.  The map bean and model must be seperate

@@ -21,11 +21,11 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
- * The RoadwayTab class provides the GUI for editing roadway nodes.
+ * The R_NodeTab class provides the GUI for editing roadway nodes.
  *
  * @author Douglas Lau
  */
-public class RoadwayTab extends MapTab {
+public class R_NodeTab extends MapTab {
 
 	/** R_Node panel */
 	protected final R_NodePanel panel;
@@ -34,8 +34,8 @@ public class RoadwayTab extends MapTab {
 	protected final CorridorList clist;
 
 	/** Create a new roadway node tab */
-	public RoadwayTab(Session session, R_NodeManager man) {
-		super("Roadway", "View / edit roadway nodes");
+	public R_NodeTab(Session session, R_NodeManager man) {
+		super("R_Node", "View / edit roadway nodes");
 		SonarState st = session.getSonarState();
 		panel = new R_NodePanel(session);
 		add(panel, BorderLayout.NORTH);
