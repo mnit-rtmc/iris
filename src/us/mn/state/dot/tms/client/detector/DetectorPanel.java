@@ -86,7 +86,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	public void initialize() {
 		addRow("Lane type", type_cmb);
 		addRow("Lane #", lane_spn);
-		addRow("Abandoned", aband_cbx);
+		add("Abandoned", aband_cbx);
 		addRow("Force Fail", fail_cbx);
 		addRow("Field Len", field_spn);
 		addRow("Fake", fake_txt);
