@@ -82,15 +82,17 @@ public class R_NodeSetupPanel extends FormPanel {
 
 	/** Initialize the panel */
 	public void initialize() {
-		addRow("Node type", type_cmb);
+		add("Node type", type_cmb);
 		addRow("Pickable", pick_cbx);
+		add("Transition", trans_cmb);
 		addRow("Above", above_cbx);
-		addRow("Transition", trans_cmb);
-		addRow("Lanes", lane_spn);
+		add("Lanes", lane_spn);
 		addRow("Attach side", attach_cbx);
-		addRow("Shift", shift_spn);
-		addRow("Station ID", station_txt);
-		addRow("Speed Limit", speed_spn);
+		add("Shift", shift_spn);
+		finishRow();
+		add("Station ID", station_txt);
+		finishRow();
+		add("Speed Limit", speed_spn);
 		createJobs();
 		clear();
 	}
