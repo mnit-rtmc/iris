@@ -343,6 +343,11 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		return false;
 	}
 
+	/** Determine if delete button is available */
+	public boolean hasDelete() {
+		return true;
+	}
+
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
 		return canAdd("oname");

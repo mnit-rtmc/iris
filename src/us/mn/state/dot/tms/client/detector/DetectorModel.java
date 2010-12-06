@@ -82,4 +82,9 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 	public boolean hasController() {
 		return true;
 	}
+
+	/** Determine if delete button is available */
+	public boolean hasDelete() {
+		return false;
+	}
 }

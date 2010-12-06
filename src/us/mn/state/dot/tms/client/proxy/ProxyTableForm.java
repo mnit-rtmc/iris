@@ -135,7 +135,10 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 			panel.add(ctrl_btn);
 		if(model.hasProperties())
 			panel.add(prop_btn);
-		panel.addRow(del_btn);
+		if(model.hasDelete())
+			panel.addRow(del_btn);
+		else
+			panel.finishRow();
 		ctrl_btn.setEnabled(false);
 		prop_btn.setEnabled(false);
 		del_btn.setEnabled(false);
