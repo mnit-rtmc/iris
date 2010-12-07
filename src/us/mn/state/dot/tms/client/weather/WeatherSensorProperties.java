@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 
 	/** Frame title */
-	static private final String TITLE = "Lane Marking: ";
+	static private final String TITLE = "Weather Sensor: ";
 
 	/** Location panel */
 	protected LocationPanel location;
