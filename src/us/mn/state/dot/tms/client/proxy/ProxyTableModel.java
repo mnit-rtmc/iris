@@ -22,13 +22,9 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
@@ -67,19 +63,11 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Set of all proxies */
 	protected final TreeSet<T> proxies = createProxySet();
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new proxy table model */
 	public ProxyTableModel(Session s, TypeCache<T> c) {
 		session = s;
 		cache = c;
 		columns = createColumns();
-		namespace = s.getSonarState().getNamespace();
-		user = s.getUser();
 	}
 
 	/** Initialize the proxy table model. This cannot be done in the
@@ -309,23 +297,6 @@ abstract public class ProxyTableModel<T extends SonarObject>
 			proxy.destroy();
 	}
 
-	/** Show the controller form for a proxy */
-	public void showControllerForm(T proxy) {
-		SonarObjectForm<Controller> form = createControllerForm(proxy);
-		if(form != null)
-			session.getDesktop().show(form);
-	}
-
-	/** Create a controller form for one proxy */
-	protected SonarObjectForm<Controller> createControllerForm(T proxy) {
-		return null;
-	}
-
-	/** Determine if a controller form is available */
-	public boolean hasController() {
-		return false;
-	}
-
 	/** Show the properties form for a proxy */
 	public void showPropertiesForm(T proxy) {
 		SonarObjectForm<T> prop = createPropertiesForm(proxy);
@@ -349,17 +320,17 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	}
 
 	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return canAdd("oname");
-	}
-
-	/** Check if the user can add a proxy */
 	public boolean canAdd(String n) {
 		String tname = getSonarType();
 		if(tname != null)
-			return namespace.canAdd(user, new Name(tname, n));
+			return session.canAdd(tname, n);
 		else
 			return false;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return canAdd("oname");
 	}
 
 	/** Get the SONAR type name.  Subclasses must override this to allow
@@ -370,19 +341,16 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Check if the user can update a proxy */
 	public boolean canUpdate(T proxy) {
-		return proxy != null &&
-		       namespace.canUpdate(user, new Name(proxy));
+		return session.canUpdate(proxy);
 	}
 
 	/** Check if the user can update a proxy */
 	public boolean canUpdate(T proxy, String aname) {
-		return proxy != null &&
-		       namespace.canUpdate(user, new Name(proxy, aname));
+		return session.canUpdate(proxy, aname);
 	}
 
 	/** Check if the user can remove a proxy */
 	public boolean canRemove(T proxy) {
-		return proxy != null &&
-		       namespace.canRemove(user, new Name(proxy));
+		return session.canRemove(proxy);
 	}
 }

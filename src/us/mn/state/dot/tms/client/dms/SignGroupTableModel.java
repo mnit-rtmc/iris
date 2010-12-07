@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
@@ -157,9 +156,8 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Check if the user can add and remove the specified name */
 	protected boolean canAddAndRemove(String oname) {
-		Name name = new Name(DmsSignGroup.SONAR_TYPE, oname);
-		return namespace.canAdd(user, name) &&
-		       namespace.canRemove(user, name);
+		return session.canAdd(DmsSignGroup.SONAR_TYPE, oname) &&
+		       session.canRemove(DmsSignGroup.SONAR_TYPE, oname);
 	}
 
 	/** Get the SONAR type name */

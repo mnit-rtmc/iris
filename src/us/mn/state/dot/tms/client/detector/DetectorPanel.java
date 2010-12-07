@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
@@ -24,11 +25,13 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
+import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
@@ -62,6 +65,12 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Note text field */
 	protected final JTextField note_txt = new JTextField(12);
 
+	/** Button to display the controller */
+	protected final JButton ctrl_btn = new JButton("Controller");
+
+	/** User session */
+	protected final Session session;
+
 	/** Proxy watcher */
 	protected final ProxyWatcher<Detector> watcher;
 
@@ -76,6 +85,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Create the detector panel */
 	public DetectorPanel(Session s) {
 		super(false);
+		session = s;
 		TypeCache<Detector> cache =
 			s.getSonarState().getDetCache().getDetectors();
 		watcher = new ProxyWatcher<Detector>(s, this, cache, false);
@@ -90,6 +100,11 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		addRow("Field Len", field_spn);
 		addRow("Fake", fake_txt);
 		addRow("Notes", note_txt);
+		setWest();
+		setWidth(2);
+		bag.insets.bottom = 0;
+		add(ctrl_btn);
+		finishRow();
 		createJobs();
 		watcher.initialize();
 	}
@@ -133,6 +148,11 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 			public void perform() {
 				if(wasLost())
 					setNotes(note_txt.getText().trim());
+			}
+		};
+		new ActionJob(this, ctrl_btn) {
+			public void perform() {
+				showControllerForm(detector);
 			}
 		};
 	}
@@ -186,6 +206,23 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 			det.setNotes(n);
 	}
 
+	/** Show the controller form for a detector */
+	protected void showControllerForm(Detector d) {
+		ControllerForm form = createControllerForm(d);
+		if(form != null)
+			session.getDesktop().show(form);
+	}
+
+	/** Create a controller form */
+	protected ControllerForm createControllerForm(Detector d) {
+		if(d != null) {
+			Controller c = d.getController();
+			if(c != null)
+				return new ControllerForm(session, c);
+		}
+		return null;
+	}
+
 	/** Dispose of the panel */
 	public void dispose() {
 		watcher.dispose();
@@ -204,8 +241,11 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Update one attribute */
 	protected void doUpdate(Detector d, String a) {
-		if(a == null)
+		if(a == null) {
 			detector = d;
+			ctrl_btn.setEnabled(d != null &&
+			                    d.getController() != null);
+		}
 		if(a == null || a.equals("laneType")) {
 			type_cmb.setSelectedIndex(d.getLaneType());
 			type_cmb.setEnabled(watcher.canUpdate(d, "laneType"));
@@ -264,5 +304,6 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		fake_txt.setEnabled(false);
 		note_txt.setText("");
 		note_txt.setEnabled(false);
+		ctrl_btn.setEnabled(false);
 	}
 }

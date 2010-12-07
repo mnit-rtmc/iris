@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ public interface TmsForm {
 	int HGAP = 4;
 
 	/** Standard vertical gap between components */
-	int VGAP = 6;
+	int VGAP = 4;
 
 	/** Empty border to put around panels */
 	EmptyBorder BORDER = new EmptyBorder(VGAP, HGAP, VGAP, HGAP);

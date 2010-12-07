@@ -55,13 +55,17 @@ public class FormPanel extends JPanel {
 	public FormPanel(boolean e) {
 		super(new GridBagLayout());
 		enable = e;
-		setBorder(TmsForm.BORDER);
 		finishRow();
 	}
 
 	/** Dispose of the form panel */
 	public void dispose() {
 		removeAll();
+	}
+
+	/** Set the default border */
+	public void setBorder() {
+		setBorder(TmsForm.BORDER);
 	}
 
 	/** Set the form title */

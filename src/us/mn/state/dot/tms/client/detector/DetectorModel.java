@@ -16,13 +16,11 @@ package us.mn.state.dot.tms.client.detector;
 
 import java.util.Comparator;
 import java.util.TreeSet;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.toast.ControllerForm;
 
 /**
  * Table model for detectors
@@ -64,23 +62,16 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 		);
 	}
 
+	/** Get the count of rows in the table */
+	public int getRowCount() {
+		synchronized(proxies) {
+			return proxies.size();
+		}
+	}
+
 	/** Get the SONAR type name */
 	protected String getSonarType() {
 		return Detector.SONAR_TYPE;
-	}
-
-	/** Create a controller form for one detector */
-	protected ControllerForm createControllerForm(Detector d) {
-		Controller c = d.getController();
-		if(c != null)
-			return new ControllerForm(session, c);
-		else
-			return null;
-	}
-
-	/** Determine if a controller form is available */
-	public boolean hasController() {
-		return true;
 	}
 
 	/** Determine if delete button is available */

@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.system;
 
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Capability;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -124,8 +123,6 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Check if the user can update role capabilities */
 	protected boolean canUpdateRoleCapabilities() {
-		Role r = role;		// Avoid NPE
-		return (r != null) && namespace.canUpdate(user, new Name(r,
-			"capabilities"));
+		return session.canUpdate(role, "capabilities");
 	}
 }

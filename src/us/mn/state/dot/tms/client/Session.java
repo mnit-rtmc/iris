@@ -344,6 +344,11 @@ public class Session {
 		       namespace.canRemove(user, new Name(proxy));
 	}
 
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(String tname, String oname) {
+		return namespace.canRemove(user, new Name(tname, oname));
+	}
+
 	/** Dispose of the session */
 	public void dispose() {
 		desktop.closeFrames();
