@@ -38,12 +38,23 @@ public class R_NodeListModel extends DefaultListModel {
 
 	/** Update the list item for the specified proxy */
 	public void updateItem(R_Node proxy) {
+		int row = getRow(proxy);
+		if(row >= 0)
+			fireContentsChanged(this, row, row);
+	}
+
+	/** Get the proxy at the specified row */
+	public R_Node getProxy(int row) {
+		return ((R_NodeModel)getElementAt(row)).r_node;
+	}
+
+	/** Get the row for the specified proxy */
+	public int getRow(R_Node proxy) {
 		for(int i = 0; i < getSize(); i++) {
 			R_NodeModel m = (R_NodeModel)getElementAt(i);
-			if(m.r_node == proxy) {
-				fireContentsChanged(this, i, i);
-				return;
-			}
+			if(m.r_node == proxy)
+				return i;
 		}
+		return -1;
 	}
 }

@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
@@ -90,11 +91,17 @@ public class CorridorList extends JPanel {
 	/** Button to remove the currently selected roadway node */
 	protected JButton remove_btn = new JButton("Remove");
 
+	/** R_Node selection model */
+	protected final ProxySelectionModel<R_Node> sel_model;
+
 	/** List component for nodes */
 	protected final JList n_list = new JList();
 
 	/** Roadway node list model */
 	protected R_NodeListModel n_model = new R_NodeListModel();
+
+	/** R_Node list selection model */
+	protected R_NodeListSelectionModel smodel;
 
 	/** Listener for r_node changes */
 	protected final ProxyListener<R_Node> listener =
@@ -142,6 +149,7 @@ public class CorridorList extends JPanel {
 		geo_locs = creator.getGeoLocs();
 		corridor_combo.setModel(new WrapperComboBoxModel(
 			manager.getCorridorModel()));
+		sel_model = manager.getSelectionModel();
 		n_list.setCellRenderer(new R_NodeCellRenderer());
 		n_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setBorder(BorderFactory.createTitledBorder(
@@ -325,9 +333,13 @@ public class CorridorList extends JPanel {
 
 	/** Update the corridor list model */
 	protected void doUpdateListModel() {
+		if(smodel != null)
+			smodel.dispose();
 		Set<R_Node> node_s = manager.createSet();
 		n_model = createNodeList(node_s);
+		smodel = new R_NodeListSelectionModel(n_model, sel_model);
 		n_list.setModel(n_model);
+		n_list.setSelectionModel(smodel);
 	}
 
 	/** Create a list model of roadway node models for one corridor */
@@ -377,8 +389,6 @@ public class CorridorList extends JPanel {
 	/** Update the roadway node selection */
 	protected void updateNodeSelection() {
 		R_Node proxy = getSelectedNode();
-		if(proxy != null)
-			manager.getSelectionModel().setSelected(proxy);
 		panel.setR_Node(proxy);
 		remove_btn.setEnabled(canRemove(proxy));
 	}
