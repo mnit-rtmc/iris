@@ -31,6 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
@@ -350,7 +351,12 @@ public class CorridorList extends JPanel {
 		smodel = new R_NodeListSelectionModel(n_model, sel_model);
 		n_list.setModel(n_model);
 		n_list.setSelectionModel(smodel);
-		n_list.ensureIndexIsVisible(n_list.getLeadSelectionIndex());
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				n_list.ensureIndexIsVisible(
+					n_list.getLeadSelectionIndex());
+			}
+		});
 	}
 
 	/** Create a list model of roadway node models for one corridor */
