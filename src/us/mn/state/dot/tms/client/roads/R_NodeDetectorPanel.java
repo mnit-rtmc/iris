@@ -103,7 +103,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	public R_NodeDetectorPanel(Session s) {
 		super(new GridBagLayout());
 		session = s;
-		det_pnl = new DetectorPanel(s);
+		det_pnl = new DetectorPanel(s, false);
 		setBorder(TmsForm.BORDER);
 	}
 

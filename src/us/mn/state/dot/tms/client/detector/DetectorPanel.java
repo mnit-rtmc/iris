@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
@@ -68,8 +69,14 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Button to display the controller */
 	protected final JButton ctrl_btn = new JButton("Controller");
 
+	/** Button to display the r_node */
+	protected final JButton rnode_btn = new JButton("R_Node");
+
 	/** User session */
 	protected final Session session;
+
+	/** Flag to include r_node button */
+	protected final boolean has_r_btn;
 
 	/** Proxy watcher */
 	protected final ProxyWatcher<Detector> watcher;
@@ -83,9 +90,10 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	}
 
 	/** Create the detector panel */
-	public DetectorPanel(Session s) {
+	public DetectorPanel(Session s, boolean r) {
 		super(false);
 		session = s;
+		has_r_btn = r;
 		TypeCache<Detector> cache =
 			s.getSonarState().getDetCache().getDetectors();
 		watcher = new ProxyWatcher<Detector>(s, this, cache, false);
@@ -104,6 +112,8 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		setWidth(2);
 		bag.insets.bottom = 0;
 		add(ctrl_btn);
+		if(has_r_btn)
+			add(rnode_btn);
 		finishRow();
 		createJobs();
 		watcher.initialize();
@@ -153,6 +163,11 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		new ActionJob(this, ctrl_btn) {
 			public void perform() {
 				showControllerForm(detector);
+			}
+		};
+		new ActionJob(this, rnode_btn) {
+			public void perform() {
+				showRNode(detector);
 			}
 		};
 	}
@@ -213,6 +228,12 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 			session.getDesktop().show(form);
 	}
 
+	/** Show the r_node for a detector */
+	protected void showRNode(Detector d) {
+		R_Node n = d.getR_Node();
+		session.getR_NodeManager().getSelectionModel().setSelected(n);
+	}
+
 	/** Create a controller form */
 	protected ControllerForm createControllerForm(Detector d) {
 		if(d != null) {
@@ -245,6 +266,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 			detector = d;
 			ctrl_btn.setEnabled(d != null &&
 			                    d.getController() != null);
+			rnode_btn.setEnabled(d != null);
 		}
 		if(a == null || a.equals("laneType")) {
 			type_cmb.setSelectedIndex(d.getLaneType());
@@ -305,5 +327,6 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		note_txt.setText("");
 		note_txt.setEnabled(false);
 		ctrl_btn.setEnabled(false);
+		rnode_btn.setEnabled(false);
 	}
 }

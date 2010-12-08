@@ -37,7 +37,7 @@ public class DetectorForm extends ProxyTableForm<Detector> {
 	/** Create a new detector form */
 	public DetectorForm(Session s) {
 		super("Detectors", new DetectorModel(s));
-		det_pnl = new DetectorPanel(s);
+		det_pnl = new DetectorPanel(s, true);
 		det_pnl.initialize();
 	}
 
