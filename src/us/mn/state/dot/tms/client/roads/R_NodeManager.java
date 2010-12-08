@@ -124,7 +124,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Get a corridor for the specified r_node */
-	protected CorridorBase getCorridor(R_Node r_node) {
+	public CorridorBase getCorridor(R_Node r_node) {
 		GeoLoc loc = r_node.getGeoLoc();
 		String cid = GeoLocHelper.getCorridorName(loc);
 		if(cid != null) {

@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
@@ -102,6 +103,19 @@ public class CorridorList extends JPanel {
 
 	/** R_Node list selection model */
 	protected R_NodeListSelectionModel smodel;
+
+	/** R_Node selection listener */
+	protected final ProxySelectionListener<R_Node> sel_listener =
+		new ProxySelectionListener<R_Node>()
+	{
+		public void selectionAdded(R_Node proxy) {
+			if(!manager.checkCorridor(proxy)) {
+				CorridorBase cb = manager.getCorridor(proxy);
+				corridor_combo.setSelectedItem(cb);
+			}
+		}
+		public void selectionRemoved(R_Node proxy) { }
+	};
 
 	/** Listener for r_node changes */
 	protected final ProxyListener<R_Node> listener =
@@ -181,6 +195,7 @@ public class CorridorList extends JPanel {
 		add(scroll, bag);
 		r_nodes.addProxyListener(listener);
 		geo_locs.addProxyListener(loc_listener);
+		sel_model.addProxySelectionListener(sel_listener);
 		createJobs();
 		updateNodeSelection();
 		add_btn.setEnabled(canAdd());
@@ -227,6 +242,7 @@ public class CorridorList extends JPanel {
 
 	/** Dispose of the corridor chooser */
 	public void dispose() {
+		sel_model.removeProxySelectionListener(sel_listener);
 		geo_locs.removeProxyListener(loc_listener);
 		r_nodes.removeProxyListener(listener);
 		removeAll();
