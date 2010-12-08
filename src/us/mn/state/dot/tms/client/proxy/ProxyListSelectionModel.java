@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,16 +21,16 @@ import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * The style list selection model synchronized the selection with a proxy
+ * The proxy list selection model synchronizes the selection with a proxy
  * selection model.
  *
  * @author Douglas lau
  */
-public class StyleListSelectionModel<T extends SonarObject>
+public class ProxyListSelectionModel<T extends SonarObject>
 	extends DefaultListSelectionModel
 {
-	/** Style list model */
-	protected final StyleListModel<T> model;
+	/** Proxy list model */
+	protected final ProxyListModel<T> model;
 
 	/** Proxy selection model */
 	protected final ProxySelectionModel<T> sel;
@@ -39,7 +39,7 @@ public class StyleListSelectionModel<T extends SonarObject>
 	protected int adjusting = 0;
 
 	/** Create a new proxy list selection model */
-	public StyleListSelectionModel(StyleListModel<T> m,
+	public ProxyListSelectionModel(ProxyListModel<T> m,
 		ProxyManager<T> manager)
 	{
 		model = m;
@@ -109,7 +109,7 @@ public class StyleListSelectionModel<T extends SonarObject>
 
 	/** Remove an interval from the model */
 	public void removeIndexInterval(int index0, int index1) {
-		// NOTE: other style models should not be affected by removing
+		// NOTE: other models should not be affected by removing
 		//       a proxy from this model
 		adjusting++;
 		super.removeIndexInterval(index0, index1);
@@ -120,8 +120,8 @@ public class StyleListSelectionModel<T extends SonarObject>
 	public void setSelectionInterval(int index0, int index1) {
 		adjusting++;
 		super.setSelectionInterval(index0, index1);
-		// NOTE: we need to deselect any selected items not in this
-		//       style list model.
+		// NOTE: we need to deselect any selected items not in the
+		//       list model.
 		for(T proxy: sel.getSelected()) {
 			int i = model.getRow(proxy);
 			if(i < index0 || i > index1)

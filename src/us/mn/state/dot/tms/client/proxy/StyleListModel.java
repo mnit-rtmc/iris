@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	/** Legend icon */
 	protected final Icon legend;
 
-	/** Selection model for the style list model */
-	protected final StyleListSelectionModel<T> smodel;
+	/** Selection model for the list model */
+	protected final ProxyListSelectionModel<T> smodel;
 
 	/** Create a new style list model */
 	public StyleListModel(ProxyManager<T> m, String n, Icon l) {
@@ -43,7 +43,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 		manager = m;
 		name = n;
 		legend = l;
-		smodel = new StyleListSelectionModel<T>(this, m);
+		smodel = new ProxyListSelectionModel<T>(this, m);
 	}
 
 	/** Dispose of the list model */
@@ -77,7 +77,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	}
 
 	/** Get the list selection model */
-	public StyleListSelectionModel<T> getSelectionModel() {
+	public ProxyListSelectionModel<T> getSelectionModel() {
 		return smodel;
 	}
 
