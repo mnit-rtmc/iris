@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
-import java.util.LinkedList;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
