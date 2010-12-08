@@ -40,10 +40,10 @@ public class ProxyListSelectionModel<T extends SonarObject>
 
 	/** Create a new proxy list selection model */
 	public ProxyListSelectionModel(ProxyListModel<T> m,
-		ProxyManager<T> manager)
+		ProxySelectionModel<T> s)
 	{
 		model = m;
-		sel = manager.getSelectionModel();
+		sel = s;
 		sel.addProxySelectionListener(new ProxySelectionListener<T>() {
 			public void selectionAdded(T proxy) {
 				if(adjusting > 0)
