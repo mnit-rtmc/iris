@@ -35,7 +35,6 @@ import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -113,6 +112,7 @@ public class CorridorList extends JPanel {
 				CorridorBase cb = manager.getCorridor(proxy);
 				corridor_combo.setSelectedItem(cb);
 			}
+			updateNodeSelection(proxy);
 		}
 		public void selectionRemoved(R_Node proxy) { }
 	};
@@ -197,7 +197,7 @@ public class CorridorList extends JPanel {
 		geo_locs.addProxyListener(loc_listener);
 		sel_model.addProxySelectionListener(sel_listener);
 		createJobs();
-		updateNodeSelection();
+		updateNodeSelection(null);
 		add_btn.setEnabled(canAdd());
 		remove_btn.setEnabled(false);
 	}
@@ -221,12 +221,6 @@ public class CorridorList extends JPanel {
 		new ActionJob(this, remove_btn) {
 			public void perform() {
 				doRemoveButton();
-			}
-		};
-		new ListSelectionJob(this, n_list) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					updateNodeSelection();
 			}
 		};
 	}
@@ -356,6 +350,7 @@ public class CorridorList extends JPanel {
 		smodel = new R_NodeListSelectionModel(n_model, sel_model);
 		n_list.setModel(n_model);
 		n_list.setSelectionModel(smodel);
+		n_list.ensureIndexIsVisible(n_list.getLeadSelectionIndex());
 	}
 
 	/** Create a list model of roadway node models for one corridor */
@@ -393,18 +388,8 @@ public class CorridorList extends JPanel {
 		return no_loc;
 	}
 
-	/** Get the selected roadway node */
-	protected R_Node getSelectedNode() {
-		Object sel = n_list.getSelectedValue();
-		if(sel instanceof R_NodeModel)
-			return ((R_NodeModel)sel).r_node;
-		else
-			return null;
-	}
-
 	/** Update the roadway node selection */
-	protected void updateNodeSelection() {
-		R_Node proxy = getSelectedNode();
+	protected void updateNodeSelection(R_Node proxy) {
 		panel.setR_Node(proxy);
 		remove_btn.setEnabled(canRemove(proxy));
 	}
@@ -460,6 +445,15 @@ public class CorridorList extends JPanel {
 			proxy.destroy();
 			loc.destroy();
 		}
+	}
+
+	/** Get the selected roadway node */
+	protected R_Node getSelectedNode() {
+		Object sel = n_list.getSelectedValue();
+		if(sel instanceof R_NodeModel)
+			return ((R_NodeModel)sel).r_node;
+		else
+			return null;
 	}
 
 	/** Test if a new r_node can be added */
