@@ -266,9 +266,13 @@ public class CorridorList extends JPanel {
 		// NOTE: The fast path assumes that GeoLoc name matches R_Node
 		//       name.  If that is not the case, the GeoLoc should
 		//       still be found by checkNodeList(GeoLoc).
-		R_Node proxy = r_nodes.lookupObject(loc.getName());
-		return (proxy != null && manager.checkCorridor(proxy)) ||
-			checkNodeList(loc);
+		return checkCorridor(loc.getName()) || checkNodeList(loc);
+	}
+
+	/** Check the corridor for an r_node with the given name */
+	protected boolean checkCorridor(String name) {
+		R_Node proxy = r_nodes.lookupObject(name);
+		return proxy != null && manager.checkCorridor(proxy);
 	}
 
 	/** Check the node list for a geo location. This is needed in case
