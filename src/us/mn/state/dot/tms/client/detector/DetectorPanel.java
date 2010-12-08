@@ -231,6 +231,8 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Show the r_node for a detector */
 	protected void showRNode(Detector d) {
 		R_Node n = d.getR_Node();
+		if(n == null)
+			return;
 		session.getR_NodeManager().getSelectionModel().setSelected(n);
 	}
 
@@ -266,7 +268,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 			detector = d;
 			ctrl_btn.setEnabled(d != null &&
 			                    d.getController() != null);
-			rnode_btn.setEnabled(d != null);
+			rnode_btn.setEnabled(d != null && d.getR_Node() !=null);
 		}
 		if(a == null || a.equals("laneType")) {
 			type_cmb.setSelectedIndex(d.getLaneType());
