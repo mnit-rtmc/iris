@@ -38,34 +38,47 @@ public class ProxyListSelectionModel<T extends SonarObject>
 	/** The "valueIsAdjusting" crap doesn't work right */
 	protected int adjusting = 0;
 
+	/** Listener for proxy selection events */
+	protected final ProxySelectionListener<T> listener =
+		new ProxySelectionListener<T> ()
+	{
+		public void selectionAdded(T proxy) {
+			if(adjusting == 0)
+				doSelectionAdded(proxy);
+		}
+		public void selectionRemoved(T proxy) {
+			if(adjusting == 0)
+				doSelectionRemoved(proxy);
+		}
+	};
+
+	/** Update the selection model when a selection is added */
+	protected void doSelectionAdded(T proxy) {
+		int i = model.getRow(proxy);
+		if(i >= 0) {
+			adjusting++;
+			addSelectionInterval(i, i);
+			adjusting--;
+		}
+	}
+
+	/** Update the selection model when a selection is removed */
+	protected void doSelectionRemoved(T proxy) {
+		int i = model.getRow(proxy);
+		if(i >= 0) {
+			adjusting++;
+			removeSelectionInterval(i, i);
+			adjusting--;
+		}
+	}
+
 	/** Create a new proxy list selection model */
 	public ProxyListSelectionModel(ProxyListModel<T> m,
 		ProxySelectionModel<T> s)
 	{
 		model = m;
 		sel = s;
-		sel.addProxySelectionListener(new ProxySelectionListener<T>() {
-			public void selectionAdded(T proxy) {
-				if(adjusting > 0)
-					return;
-				int i = model.getRow(proxy);
-				if(i >= 0) {
-					adjusting++;
-					addSelectionInterval(i, i);
-					adjusting--;
-				}
-			}
-			public void selectionRemoved(T proxy) {
-				if(adjusting > 0)
-					return;
-				int i = model.getRow(proxy);
-				if(i >= 0) {
-					adjusting++;
-					removeSelectionInterval(i, i);
-					adjusting--;
-				}
-			}
-		});
+		sel.addProxySelectionListener(listener);
 		addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
 				if(adjusting > 0 || e.getValueIsAdjusting())
