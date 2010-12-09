@@ -292,12 +292,8 @@ public class Session {
 			mm.addLayer(warn_manager.getLayer().createState(mb));
 		if(canRead(Incident.SONAR_TYPE))
 			mm.addLayer(inc_manager.getLayer().createState(mb));
-		if(canAdd(R_Node.SONAR_TYPE)) {
-			LayerState ls = r_node_manager.getLayer().createState(
-				mb);
-			ls.setVisible(false);
-			mm.addLayer(ls);
-		}
+		if(canAdd(R_Node.SONAR_TYPE))
+			mm.addLayer(r_node_manager.getLayer().createState(mb));
 	}
 
 	/** Check if the user can add an object */

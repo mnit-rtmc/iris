@@ -460,6 +460,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Get the layer scale visibility threshold */
 	protected float getScaleThreshold() {
-		return 0.2f;
+		return 0.025f;
 	}
 }
