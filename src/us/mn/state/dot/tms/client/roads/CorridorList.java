@@ -114,12 +114,12 @@ public class CorridorList extends JPanel {
 				CorridorBase cb = manager.getCorridor(proxy);
 				corridor_combo.setSelectedItem(cb);
 			}
-			updateNodeSelection();
+			updateNodeSelection(proxy);
 			r_node = proxy;
 		}
 		public void selectionRemoved(R_Node proxy) {
 			if(proxy == r_node)
-				updateNodeSelection();
+				updateNodeSelection(null);
 		}
 	};
 
@@ -203,7 +203,7 @@ public class CorridorList extends JPanel {
 		geo_locs.addProxyListener(loc_listener);
 		sel_model.addProxySelectionListener(sel_listener);
 		createJobs();
-		updateNodeSelection();
+		updateNodeSelection(null);
 		add_btn.setEnabled(canAdd());
 		remove_btn.setEnabled(false);
 	}
@@ -397,11 +397,6 @@ public class CorridorList extends JPanel {
 			}
 		}
 		return no_loc;
-	}
-
-	/** Update the roadway node selection */
-	protected void updateNodeSelection() {
-		updateNodeSelection(getSelectedNode());
 	}
 
 	/** Update the roadway node selection */
