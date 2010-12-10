@@ -360,7 +360,7 @@ CREATE RULE alarm_delete AS ON DELETE TO iris.alarm DO INSTEAD
 
 CREATE TABLE iris._detector (
 	name VARCHAR(10) PRIMARY KEY,
-	r_node VARCHAR(10) REFERENCES iris.r_node(name),
+	r_node VARCHAR(10) NOT NULL REFERENCES iris.r_node(name),
 	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
 	lane_number smallint NOT NULL,
 	abandoned boolean NOT NULL,
@@ -1334,7 +1334,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_num_preset_btns	3
 camera_num_video_frames	900
 camera_ptz_panel_enable	false
-database_version	3.124.0
+database_version	3.125.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_log_enable	false
