@@ -20,7 +20,6 @@ import java.util.NavigableMap;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
-import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
@@ -187,11 +186,6 @@ public class StationImpl implements Station {
 	/** Does this node have the specified detector? */
 	public boolean hasDetector(DetectorImpl det) {
 		return r_node.hasDetector(det);
-	}
-
-	/** Get the station label */
-	public String getLabel() {
-		return StationHelper.getLabel(this);
 	}
 
 	/** Is this station active? */

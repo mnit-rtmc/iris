@@ -95,7 +95,7 @@ public class Segment {
 			sb.append(": ");
 			Station sta = StationHelper.lookup(sid);
 			if(sta != null)
-				sb.append(sta.getLabel());
+				sb.append(StationHelper.getLabel(sta));
 		}
 		return sb.toString().trim();
 	}

@@ -26,9 +26,6 @@ public interface Station extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "station";
 
-	/** Get the station label */
-	String getLabel();
-
 	/** Get the roadway node */
 	R_Node getR_Node();
 
