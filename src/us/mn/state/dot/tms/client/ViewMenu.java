@@ -20,6 +20,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
+import us.mn.state.dot.tms.client.detector.StationForm;
 import us.mn.state.dot.tms.client.dms.SignMenu;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
@@ -66,6 +67,9 @@ public class ViewMenu extends JMenu {
 		JMenuItem item = createDetectorItem();
 		if(item != null)
 			add(item);
+		item = createStationItem();
+		if(item != null)
+			add(item);
 		item = createMeterItem();
 		if(item != null)
 			add(item);
@@ -86,6 +90,20 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new DetectorForm(session));
+			}
+		};
+		return item;
+	}
+
+	/** Create the station menu item */
+	protected JMenuItem createStationItem() {
+		if(!StationForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Stations");
+		item.setMnemonic('s');
+		new ActionJob(item) {
+			public void perform() {
+				desktop.show(new StationForm(session));
 			}
 		};
 		return item;
