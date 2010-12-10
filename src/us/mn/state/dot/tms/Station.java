@@ -28,13 +28,4 @@ public interface Station extends SonarObject {
 
 	/** Get the roadway node */
 	R_Node getR_Node();
-
-	/** Is this station active? */
-	boolean getActive();
-
-	/** Get the average station flow */
-	int getFlow();
-
-	/** Get the average station speed */
-	int getSpeed();
 }
