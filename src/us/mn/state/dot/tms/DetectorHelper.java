@@ -25,9 +25,6 @@ import us.mn.state.dot.sonar.Checker;
  */
 public class DetectorHelper extends BaseHelper {
 
-	/** Future detector label */
-	static protected final String FUTURE = "FUTURE";
-
 	/** Pattern to match detector names */
 	static protected final Pattern DET_NAME =
 		Pattern.compile("([0-9]*)(.*)");
@@ -35,28 +32,6 @@ public class DetectorHelper extends BaseHelper {
 	/** Don't allow instances to be created */
 	private DetectorHelper() {
 		assert false;
-	}
-
-	/** Get the root label (for a detector or a station) */
-	static public String getRootLabel(Detector det) {
-		GeoLoc loc = getGeoLoc(det);
-		if(loc == null)
-			return FUTURE;
-		Road roadway = loc.getRoadway();
-		Road cross = loc.getCrossStreet();
-		if(roadway == null || cross == null)
-			return FUTURE;
-		Direction rd = Direction.fromOrdinal(loc.getRoadDir());
-		Direction cd = Direction.fromOrdinal(loc.getCrossDir());
-		LocModifier cm = LocModifier.fromOrdinal(loc.getCrossMod());
-		StringBuilder b = new StringBuilder();
-		b.append(roadway.getAbbrev());
-		b.append("/");
-		b.append(cd.abbrev);
-		b.append(cm.abbrev);
-		b.append(cross.getAbbrev());
-		b.append(rd.det_dir);
-		return b.toString();
 	}
 
 	/** Get the geo location of a detector */
@@ -71,9 +46,9 @@ public class DetectorHelper extends BaseHelper {
 	/** Get the detector label */
 	static public String getLabel(Detector det) {
 		StringBuilder b = new StringBuilder();
-		b.append(getRootLabel(det));
-		if(b.toString().equals(FUTURE))
-			return FUTURE;
+		b.append(GeoLocHelper.getRootLabel(getGeoLoc(det)));
+		if(b.toString().equals(GeoLocHelper.FUTURE))
+			return b.toString();
 		LaneType lt = LaneType.fromOrdinal(det.getLaneType());
 		b.append(lt.suffix);
 		int l_num = det.getLaneNumber();
@@ -82,11 +57,6 @@ public class DetectorHelper extends BaseHelper {
 		if(det.getAbandoned())
 			b.append("-ABND");
 		return b.toString();
-	}
-
-	/** Get a station label */
-	static public String getStationLabel(Detector det) {
-		return getRootLabel(det);
 	}
 
 	/** Compare two detectors for sorting */

@@ -29,6 +29,9 @@ import us.mn.state.dot.sonar.Checker;
  */
 public class GeoLocHelper extends BaseHelper {
 
+	/** Future detector label */
+	static public final String FUTURE = "FUTURE";
+
 	/** Get the UTM zone for the system */
 	static protected UTMZone getZone() {
 		return new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
@@ -367,5 +370,26 @@ public class GeoLocHelper extends BaseHelper {
 	static public GeoLoc lookup(String name) {
 		return (GeoLoc)namespace.lookupObject(GeoLoc.SONAR_TYPE,
 			name);
+	}
+
+	/** Get the root label (for a detector or a station) */
+	static public String getRootLabel(GeoLoc loc) {
+		if(loc == null)
+			return FUTURE;
+		Road roadway = loc.getRoadway();
+		Road cross = loc.getCrossStreet();
+		if(roadway == null || cross == null)
+			return FUTURE;
+		Direction rd = Direction.fromOrdinal(loc.getRoadDir());
+		Direction cd = Direction.fromOrdinal(loc.getCrossDir());
+		LocModifier cm = LocModifier.fromOrdinal(loc.getCrossMod());
+		StringBuilder b = new StringBuilder();
+		b.append(roadway.getAbbrev());
+		b.append("/");
+		b.append(cd.abbrev);
+		b.append(cm.abbrev);
+		b.append(cross.getAbbrev());
+		b.append(rd.det_dir);
+		return b.toString();
 	}
 }

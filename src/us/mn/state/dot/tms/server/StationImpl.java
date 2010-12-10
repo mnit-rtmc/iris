@@ -18,9 +18,9 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.NavigableMap;
 import us.mn.state.dot.tms.Constants;
-import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
+import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
@@ -191,11 +191,7 @@ public class StationImpl implements Station {
 
 	/** Get the station label */
 	public String getLabel() {
-		DetectorImpl[] dets = r_node.getDetectors();
-		if(dets.length > 0)
-			return DetectorHelper.getStationLabel(dets[0]);
-		else
-			return "UNASSIGNED";
+		return StationHelper.getLabel(this);
 	}
 
 	/** Is this station active? */
