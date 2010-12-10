@@ -120,6 +120,9 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 		R_NodeModel mdl = null;	// node model
 		for(R_Node n: corridor) {
 			MapGeoLoc loc = manager.findGeoLoc(n);
+			// Node may not be on selected corridor...
+			if(loc == null)
+				continue;
 			if(un != null) {
 				if(R_NodeHelper.isJoined(n) &&
 				   !isTooDistant(ploc, loc))
