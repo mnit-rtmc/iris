@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
-import java.util.Comparator;
-import java.util.TreeSet;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -49,17 +47,6 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 	/** Create a new detector table model */
 	public DetectorModel(Session s) {
 		super(s, s.getSonarState().getDetCache().getDetectors());
-	}
-
-	/** Create an empty set of proxies */
-	protected TreeSet<Detector> createProxySet() {
-		return new TreeSet<Detector>(
-			new Comparator<Detector>() {
-				public int compare(Detector a, Detector b) {
-					return DetectorHelper.compare(a, b);
-				}
-			}
-		);
 	}
 
 	/** Get the count of rows in the table */

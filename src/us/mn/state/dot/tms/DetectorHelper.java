@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -24,10 +22,6 @@ import us.mn.state.dot.sonar.Checker;
  * @author Douglas Lau
  */
 public class DetectorHelper extends BaseHelper {
-
-	/** Pattern to match detector names */
-	static protected final Pattern DET_NAME =
-		Pattern.compile("([0-9]*)(.*)");
 
 	/** Don't allow instances to be created */
 	private DetectorHelper() {
@@ -57,45 +51,6 @@ public class DetectorHelper extends BaseHelper {
 		if(det.getAbandoned())
 			b.append("-ABND");
 		return b.toString();
-	}
-
-	/** Compare two detectors for sorting */
-	static public int compare(Detector a, Detector b) {
-		String an = parseName(a.getName());
-		String bn = parseName(b.getName());
-		return an.compareTo(bn);
-	}
-
-	/** Parse a detector name */
-	static protected String parseName(String n) {
-		Matcher m = DET_NAME.matcher(n);
-		if(m.find())
-			return formatInteger(m.group(1)) + m.group(2);
-		else
-			return n;
-	}
-
-	/** Format an integer to eight digits */
-	static protected String formatInteger(String s) {
-		Integer n = parseInteger(s);
-		if(n != null) {
-			StringBuilder b = new StringBuilder();
-			b.append(n.toString());
-			while(b.length() < 8)
-				b.insert(0, '0');
-			return b.toString();
-		} else
-			return "";
-	}
-
-	/** Parse a string and return an integer */
-	static protected Integer parseInteger(String s) {
-		try {
-			return Integer.valueOf(s);
-		}
-		catch(NumberFormatException e) {
-			return null;
-		}
 	}
 
 	/** Find detectors using a Checker */

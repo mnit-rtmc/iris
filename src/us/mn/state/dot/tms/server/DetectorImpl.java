@@ -46,9 +46,8 @@ import us.mn.state.dot.tms.server.event.DetFailEvent;
  *
  * @author Douglas Lau
  */
-public class DetectorImpl extends DeviceImpl implements Detector,
-	Comparable<DetectorImpl>
-{
+public class DetectorImpl extends DeviceImpl implements Detector {
+
 	/** Detector debug log */
 	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
 
@@ -205,11 +204,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		super.doDestroy();
 		if(r_node != null)
 			r_node.removeDetector(this);
-	}
-
-	/** Compare to another detector */
-	public int compareTo(DetectorImpl other) {
-		return DetectorHelper.compare(this, other);
 	}
 
 	/** R_Node (roadway network node) */

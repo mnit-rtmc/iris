@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * A detector set is a logical grouping of detectors
@@ -40,23 +41,25 @@ public class DetectorSet {
 	/** Density considered "full" for space capacity calculation */
 	static protected final int FULL_DENSITY = 32;
 
+	/** Detector comparator */
+	static protected final Comparator<DetectorImpl> COMPARATOR =
+		new Comparator<DetectorImpl>()
+	{
+		public int compare(DetectorImpl a, DetectorImpl b) {
+			int la = a.getLaneNumber();
+			int lb = b.getLaneNumber();
+			int n = la - lb;
+			if(n == 0) {
+				return NumericAlphaComparator.compareStrings(
+					a.getName(), b.getName());
+			} else
+				return n;
+		}
+	};
+
 	/** Set of detectors */
 	protected final TreeSet<DetectorImpl> detectors =
-		new TreeSet<DetectorImpl>(
-			new Comparator<DetectorImpl>() {
-				public int compare(DetectorImpl a,
-					DetectorImpl b)
-				{
-					int la = a.getLaneNumber();
-					int lb = b.getLaneNumber();
-					int n = la - lb;
-					if(n == 0)
-						return a.compareTo(b);
-					else
-						return n;
-				}
-			}
-		);
+		new TreeSet<DetectorImpl>(COMPARATOR);
 
 	/** Add a detector to the detector set */
 	public void addDetector(DetectorImpl det) {
