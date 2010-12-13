@@ -319,7 +319,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		       canUpdateIO(LaneMarking.SONAR_TYPE) &&
 		       canUpdateIO(LCSIndication.SONAR_TYPE) &&
 		       canUpdateIO(RampMeter.SONAR_TYPE) &&
-		       canUpdateIO(WarningSign.SONAR_TYPE);
+		       canUpdateIO(WarningSign.SONAR_TYPE) &&
+		       canUpdateIO(WeatherSensor.SONAR_TYPE);
 	}
 
 	/** Check if the user can update one device IO */
