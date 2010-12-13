@@ -11,6 +11,35 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.125.0 (13 December 2010)</dt>
+	<dd><ul>
+		<li>
+			Renamed "Roadway" tab to "R_Node" and improved user
+			interface for managing r_nodes and detectors.
+		</li>
+		<li>
+			Added "R_Node" button to detector form to look up
+			the r_node for a detector.
+		</li>
+		<li>
+			Added station form, which includes a list of stations.
+		</li>
+		<li>
+			Removed unused attributes from Station objects.
+		</li>
+		<li>
+			Fixed a problem with camera stream exceptions.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.125.sql</code>.
+			Running this script will add a NOT NULL clause to the
+			detector r_node column.
+			If there are any detectors which are not assigned to
+			an r_node, they must be fixed before upgrading.
+		</li>
+	</ul></dd>
 	<dt>3.124.0 (30 November 2010)</dt>
 	<dd><ul>
 		<li>
