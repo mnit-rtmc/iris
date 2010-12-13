@@ -379,8 +379,52 @@ FIXME
 <h3>Mapping</h3>
 FIXME
 
-<h3>Roads and Nodes</h3>
-FIXME
+<h3>Road Modelling</h3>
+<p>
+	For many of the features IRIS provides, it requires a model of the
+	road network.
+	This model consists of a set of roadway nodes, or <b>r_node</b>s, which
+	describe all the points of interest on the road network.
+	For instance, each entrance or exit ramp, detector station or
+	intersection would be represented by an r_node.
+</p>
+<h4>Road Setup</h4>
+<p>
+	Before creating the r_nodes, some roads must be created.
+	On the View menu, select System -&gt; Roads to bring up the Roads
+	form.
+	To create a new road, select the last (empty) cell in the Road column
+	and type the name of the road.
+	This name can be up to 20 characters in length, and uniquely identifies
+	the road.
+	It's a good idea to capitalize each word, and abbreviate any
+	designators -- for example, "Main St".
+</p>
+<p>
+	The next column is "Abbrev".
+	Here, an abbreviation of up to 6 characters can be entered.
+	This is used for labelling detectors and stations.
+</p>
+<p>
+	The "Road Class" determines the presentation of the road on the map.
+	For example, a road marked "Freeway" would be drawn thicker and more
+	prominent than an "Expressway" or "Arterial".
+</p>
+<p>
+	"Direction" and "Alt Dir" determine the primary and secondary compass
+	directions of the road.
+</p>
+<h4>R_Node Setup</h4>
+<p>
+	The most important attribute of an r_node is the location.
+	The location is described by the road, direction-of-travel, nearest
+	cross-street, and coordinates.
+</p>
+<p>
+	A <b>corridor</b> is an ordered list of all r_nodes associated with a
+	road and direction-of-travel.
+	The r_nodes in a corridor are put in order based on their coordinates.
+</p>
 
 <h3>Comm Links</h3>
 FIXME
