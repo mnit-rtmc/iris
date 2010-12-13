@@ -116,7 +116,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createRoadItem() {
 		if(!RoadForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Roadways");
+		JMenuItem item = new JMenuItem("Roads");
 		item.setMnemonic('R');
 		new ActionJob(item) {
 			public void perform() throws Exception {
