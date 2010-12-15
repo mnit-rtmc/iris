@@ -172,4 +172,9 @@ public class MapGeoLoc implements MapObject {
 	public void setShape(Shape s) {
 		shape = s;
 	}
+
+	/** Get the outline shape */
+	public Shape getOutlineShape() {
+		return shape;
+	}
 }

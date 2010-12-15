@@ -64,7 +64,9 @@ abstract public class SegmentTheme extends StyledTheme {
 
 	/** Draw the specified map object */
 	public void draw(Graphics2D g, MapObject mo, float scale) {
-		getSymbol(mo).draw(g, mo.getShape(), scale);
+		// don't apply transform
+		getSymbol(mo).draw(g, mo.getShape(), mo.getOutlineShape(),
+			scale);
 	}
 
 	/** Draw a selected map object */

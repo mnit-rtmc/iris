@@ -58,13 +58,22 @@ public class MapSegment implements MapObject {
 		return shape;
 	}
 
+	/** Shape to draw outline */
+	protected final Shape outline;
+
+	/** Get the outline to draw this object */
+	public Shape getOutlineShape() {
+		return outline;
+	}
+
 	/** Create a new map segment */
 	public MapSegment(Segment s, float scale) {
 		segment = s;
 		lane = null;
 		float inner = calculateInner(scale);
 		float outer = inner + calculateWidth(scale);
-		shape = createShape(inner, inner, outer);
+		shape = createShape(inner, outer, inner, outer);
+		outline = createOutline(inner, outer, inner, outer);
 	}
 
 	/** Calculate the spacing between the centerline and segment */
@@ -111,18 +120,13 @@ public class MapSegment implements MapObject {
 		float in_b = inner + width * mdl.getDownstreamOffset(sh);
 		float out_b = inner + width * mdl.getDownstreamOffset(sh + 1);
 		shape = createShape(in_a, out_a, in_b, out_b);
+		outline = createOutline(in_a, out_a, in_b, out_b);
 	}
 
 	/** Calculate the width of one lane */
 	protected float calculateLaneWidth(float scale) {
 		return calculateWidth(scale) / 2 +
 		       5 * (20 - scale) / 20;
-	}
-
-	/** Create the shape to draw this object */
-	protected Shape createShape(float inner_a, float inner_b, float width) {
-		return createShape(inner_a, inner_a + width, inner_b,
-			inner_b + width);
 	}
 
 	/** Create the shape to draw this object */
@@ -142,6 +146,25 @@ public class MapSegment implements MapObject {
 		loc_a.setPoint(p, inner_a);
 		path.lineTo(p.getX(), p.getY());
 		path.closePath();
+		return path;
+	}
+
+	/** Create the outline to draw this object */
+	protected Shape createOutline(float inner_a, float outer_a,
+		float inner_b, float outer_b)
+	{
+		Point2D.Float p = new Point2D.Float();
+		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
+		MapGeoLoc loc_a = segment.loc_up;
+		MapGeoLoc loc_b = segment.loc_dn;
+		loc_a.setPoint(p, outer_a);
+		path.moveTo(p.getX(), p.getY());
+		loc_b.setPoint(p, outer_b);
+		path.lineTo(p.getX(), p.getY());
+		loc_b.setPoint(p, inner_b);
+		path.moveTo(p.getX(), p.getY());
+		loc_a.setPoint(p, inner_a);
+		path.lineTo(p.getX(), p.getY());
 		return path;
 	}
 
