@@ -19,6 +19,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import us.mn.state.dot.map.MapObject;
+import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
 /**
@@ -57,11 +59,52 @@ public class MapSegment implements MapObject {
 	}
 
 	/** Create a new map segment */
+	public MapSegment(Segment s, float scale) {
+		segment = s;
+		lane = null;
+		float inner = calculateInner(scale);
+		float outer = inner + calculateWidth(scale);
+		shape = createShape(inner, inner, outer);
+	}
+
+	/** Calculate the spacing between the centerline and segment */
+	protected float calculateInner(float scale) {
+		return scale * roadClassScale() / 14;
+	}
+
+	/** Calculate the ideal segment width */
+	protected float calculateWidth(float scale) {
+		return scale * roadClassScale();
+	}
+
+	/** Get the scale factor for the road class */
+	protected float roadClassScale() {
+		Road r = segment.getModel().r_node.getGeoLoc().getRoadway();
+		RoadClass rc = RoadClass.fromOrdinal(r.getRClass());
+		return roadClassScale(rc);
+	}
+
+	/** Get the scale factor for the road class */
+	static protected float roadClassScale(RoadClass rc) {
+		switch(rc) {
+		case ARTERIAL:
+		case EXPRESSWAY:
+			return 4;
+		case FREEWAY:
+			return 6;
+		case CD_ROAD:
+			return 5;
+		default:
+			return 3;
+		}
+	}
+
+	/** Create a new map segment */
 	public MapSegment(Segment s, int sh, float scale) {
 		segment = s;
 		lane = segment.getLane(sh);
-		float inner = scale / 2;
-		float width = 3 * scale + 5 * (20 - scale) / 20;
+		float inner = calculateInner(scale);
+		float width = calculateLaneWidth(scale);
 		R_NodeModel mdl = segment.getModel();
 		float in_a = inner + width * mdl.getUpstreamOffset(sh);
 		float out_a = inner + width * mdl.getUpstreamOffset(sh + 1);
@@ -70,13 +113,10 @@ public class MapSegment implements MapObject {
 		shape = createShape(in_a, out_a, in_b, out_b);
 	}
 
-	/** Create a new map segment */
-	public MapSegment(Segment s, float scale) {
-		segment = s;
-		lane = null;
-		float inner = scale / 2;
-		float outer = 6 * scale;
-		shape = createShape(inner, inner, outer);
+	/** Calculate the width of one lane */
+	protected float calculateLaneWidth(float scale) {
+		return calculateWidth(scale) / 2 +
+		       5 * (20 - scale) / 20;
 	}
 
 	/** Create the shape to draw this object */
