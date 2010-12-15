@@ -51,10 +51,8 @@ public class SegmentLayerState extends LayerState {
 
 	/** Iterate through the stations in the layer */
 	protected MapObject forEachStation(MapSearcher s, float scale) {
-		float inner = scale / 2;		// inner scale
-		float outer = 6 * scale;		// outer scale
 		for(Segment seg: seg_layer) {
-			MapSegment ms = new MapSegment(seg, inner, outer);
+			MapSegment ms = new MapSegment(seg, scale);
 			if(s.next(ms))
 				return ms;
 		}
@@ -66,21 +64,11 @@ public class SegmentLayerState extends LayerState {
 	 * @param scale Number of meters per pixel.
 	 * @return Map object found, if any. */
 	protected MapObject forEachLane(MapSearcher s, float scale) {
-		final float lane_width = 3 * scale + 5 * (20 - scale) / 20;
 		for(Segment seg: seg_layer) {
-			R_NodeModel mdl = seg.getModel();
-			int left = seg.getLeftLine();
-			int right = seg.getRightLine();
-			int n_lanes = Math.max(right - left, 1);
-			float inner = scale / 2;
-			float outer = lane_width * n_lanes;
-			float width = (outer - inner) / n_lanes;
-			for(int i = right; i > left; i--) {
-				int ln = 1 + seg.getLaneShift() - i;
-				float in_a = inner + width * mdl.getUpstream(i);
-				float in_b = inner + width*mdl.getDownstream(i);
-				MapSegment ms = new MapSegment(seg, ln, in_a,
-					in_a + width, in_b, in_b + width);
+			for(int sh = seg.getLeftMin(); sh < seg.getRightMax();
+			    sh++)
+			{
+				MapSegment ms = new MapSegment(seg, sh, scale);
 				if(s.next(ms))
 					return ms;
 			}

@@ -119,9 +119,11 @@ public class R_NodeModel {
 		return null;
 	}
 
-	/** Get the lane offset for an upstream shift */
-	public int getUpstream(int sh) {
-		return clampUpstream(sh) - getUpstreamLane(true) - 1;
+	/** Get the lane offset for an upstream shift.
+	 * @param sh Absolute shift.
+	 * @return Offset from r_node */
+	public int getUpstreamOffset(int sh) {
+		return clampUpstream(sh) - getUpstreamLane(true);
 	}
 
 	/** Clamp an upstream lane */
@@ -130,9 +132,11 @@ public class R_NodeModel {
 		       Math.max(getUpstreamLane(true), sh));
 	}
 
-	/** Get the lane offset for a downstream shift */
-	public int getDownstream(int sh) {
-		return clampDownstream(sh) - getDownstreamLane(true) - 1;
+	/** Get the lane offset for a downstream shift.
+	 * @param sh Absolute shift.
+	 * @return Offset from r_node */
+	public int getDownstreamOffset(int sh) {
+		return clampDownstream(sh) - getDownstreamLane(true);
 	}
 
 	/** Clamp a downstream lane */

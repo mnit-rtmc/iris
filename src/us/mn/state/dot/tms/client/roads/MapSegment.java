@@ -56,18 +56,33 @@ public class MapSegment implements MapObject {
 		return shape;
 	}
 
-	/** Create a new segment */
-	public MapSegment(Segment s, Integer l, float inner_a, float outer_a,
-		float inner_b, float outer_b)
-	{
+	/** Create a new map segment */
+	public MapSegment(Segment s, int sh, float scale) {
 		segment = s;
-		lane = l;
-		shape = createShape(inner_a, outer_a, inner_b, outer_b);
+		lane = segment.getLane(sh);
+		float inner = scale / 2;
+		float width = 3 * scale + 5 * (20 - scale) / 20;
+		R_NodeModel mdl = segment.getModel();
+		float in_a = inner + width * mdl.getUpstreamOffset(sh);
+		float out_a = inner + width * mdl.getUpstreamOffset(sh + 1);
+		float in_b = inner + width * mdl.getDownstreamOffset(sh);
+		float out_b = inner + width * mdl.getDownstreamOffset(sh + 1);
+		shape = createShape(in_a, out_a, in_b, out_b);
 	}
 
-	/** Create a new segment */
-	public MapSegment(Segment s, float inner, float outer) {
-		this(s, null, inner, outer, inner, outer);
+	/** Create a new map segment */
+	public MapSegment(Segment s, float scale) {
+		segment = s;
+		lane = null;
+		float inner = scale / 2;
+		float outer = 6 * scale;
+		shape = createShape(inner, inner, outer);
+	}
+
+	/** Create the shape to draw this object */
+	protected Shape createShape(float inner_a, float inner_b, float width) {
+		return createShape(inner_a, inner_a + width, inner_b,
+			inner_b + width);
 	}
 
 	/** Create the shape to draw this object */

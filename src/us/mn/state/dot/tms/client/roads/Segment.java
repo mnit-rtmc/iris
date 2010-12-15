@@ -202,20 +202,22 @@ public class Segment {
 			return null;
 	}
 
-	/** Get the left line for the segment */
-	public int getLeftLine() {
+	/** Get the minimum left shift */
+	public int getLeftMin() {
 		return Math.min(model.getUpstreamLane(true),
 				model.getDownstreamLane(true));
 	}
 
-	/** Get the right side line for the segment */
-	public int getRightLine() {
+	/** Get the maximum right shift */
+	public int getRightMax() {
 		return Math.max(model.getUpstreamLane(false),
 				model.getDownstreamLane(false));
 	}
 
-	/** Get the lane shift */
-	public int getLaneShift() {
-		return model.getDownstreamLane(false) - shift;
+	/** Get the lane for the given shift.
+	 * @param sh Absolute shift.
+	 * @return Lane number (1 for right lane) */
+	public int getLane(int sh) {
+		return model.getDownstreamLane(false) - sh - shift;
 	}
 }
