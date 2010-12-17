@@ -43,7 +43,6 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
-import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.system.LoginForm;
@@ -93,9 +92,6 @@ public class IrisClient extends JFrame {
 	/** Array of screen panes */
 	protected final ScreenPane[] s_panes;
 
-	/** Base layers */
-	protected final List<Layer> baseLayers;
-
 	/** Desktop pane */
 	protected final SmartDesktop desktop;
 
@@ -141,7 +137,6 @@ public class IrisClient extends JFrame {
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
 		desktop = new SmartDesktop(screens[0], this);
-		baseLayers = new BaseLayers().getLayers();
 		initializeScreenPanes();
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent evt) {
@@ -375,11 +370,6 @@ public class IrisClient extends JFrame {
 	/** Create a new map model */
 	protected MapModel createMapModel(MapBean mb, Session s) {
 		MapModel mm = new MapModel();
-		for(Layer l: baseLayers) {
-			LayerState ls = l.createState(mb);
-			mm.addLayer(ls);
-			mm.setHomeLayer(ls);
-		}
 		if(s != null)
 			s.createLayers(mb, mm);
 		else

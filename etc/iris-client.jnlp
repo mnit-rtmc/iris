@@ -24,8 +24,6 @@
 	<jar href="lib/tms-log-@@TMSLOG.VERSION@@.jar"/>
 	<jar href="lib/geokit-@@GEOKIT.VERSION@@.jar"/>
 	<jar href="lib/tdxml-@@TDXML.VERSION@@.jar"/>
-	<jar href="lib/TrafMap-@@TRAFMAP.VERSION@@.jar"/>
-	<jar href="lib/shapes-@@SHAPES.VERSION@@.jar"/>
 	<extension name="mail" href="mail.jnlp"/>
     </resources>
     <security>
