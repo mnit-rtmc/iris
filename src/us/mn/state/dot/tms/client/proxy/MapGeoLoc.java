@@ -100,7 +100,10 @@ public class MapGeoLoc implements MapObject {
 			return getDefaultAngle();
 	}
 
-	/** Set a point */
+	/** Set a point relative to the location, offset by the tangent angle.
+	 * @param p Point to set.
+	 * @param distance Distance from the location, in meter units.
+	 * @return true If the point was set, otherwise false. */
 	public boolean setPoint(Point2D p, float distance) {
 		Integer x = GeoLocHelper.getTrueEasting(loc);
 		Integer y = GeoLocHelper.getTrueNorthing(loc);
