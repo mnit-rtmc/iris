@@ -34,21 +34,21 @@ import us.mn.state.dot.map.MapBean;
  */
 public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 
-	/** The map */
-	protected final MapBean m_map;
+	/** Map bean */
+	protected final MapBean map;
 
-	/** The label used for cursor coordinates */
-	protected final JLabel m_coordinates = new JLabel();
+	/** Label used for cursor coordinates */
+	protected final JLabel coord_lbl = new JLabel();
 
-	/** The lat long decimal format */
-	static protected final String LAT_LONG_DECIMAL_FORMAT = "0.000000";
+	/** Lat/lon decimal format */
+	static protected final String LAT_LON_FORMAT = "0.000000";
 
 	/** Constructor */
 	public CoordinatePanel(MapBean m) {
 		assert m !=  null;
-		m_map = m;
-		add(m_coordinates);
-		m_map.addMouseMotionListener(this);		
+		map = m;
+		add(coord_lbl);
+		map.addMouseMotionListener(this);
 	}
 
 	/** is this panel IRIS enabled? */
@@ -58,16 +58,14 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 
 	/** Process the mouse moved event and update the status bar */
 	public void mouseMoved(MouseEvent e) {
-		Point2D p = m_map.transformPoint(e.getPoint());
+		Point2D p = map.transformPoint(e.getPoint());
 		SphericalMercatorPosition smp =
 			new SphericalMercatorPosition(p.getX(), p.getY());
 		Position pos = smp.getPosition(GeodeticDatum.WGS_84);
-		DecimalFormat df = 
-			new DecimalFormat(LAT_LONG_DECIMAL_FORMAT);
+		DecimalFormat df = new DecimalFormat(LAT_LON_FORMAT);
 		String lat = df.format(pos.getLatitude());
 		String lon = df.format(pos.getLongitude());
-		m_coordinates.setText("lat " + lat + "\u00B0 lon " + lon +
-			"\u00B0"); 
+		coord_lbl.setText("lat " + lat + "\u00B0 lon " + lon +"\u00B0");
 	}
 
 	/** Process the mouse dragged event and update the status bar */
@@ -77,6 +75,6 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 
 	/** cleanup */
 	public void dispose() {
-		m_map.removeMouseMotionListener(this);		
+		map.removeMouseMotionListener(this);
 	}
 }
