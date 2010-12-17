@@ -20,6 +20,10 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
@@ -198,8 +202,11 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		};
 		final PointSelector ps = new PointSelector() {
 			public void selectPoint(Point2D p) {
-				easting.setValue((int)p.getX());
-				northing.setValue((int)p.getY());
+				UTMPosition utm = getPosition(p);
+				easting.setValue(
+					(int)Math.round(utm.getEasting()));
+				northing.setValue(
+					(int)Math.round(utm.getNorthing()));
 				client.setPointSelector(null);
 			}
 		};
@@ -208,6 +215,14 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 				client.setPointSelector(ps);
 			}
 		};
+	}
+
+	/** Get a UTM position */
+	protected UTMPosition getPosition(Point2D p) {
+		SphericalMercatorPosition smp = new SphericalMercatorPosition(
+			p.getX(), p.getY());
+		Position pos = smp.getPosition(GeodeticDatum.WGS_84);
+		return UTMPosition.convert(GeodeticDatum.WGS_84,pos);
 	}
 
 	/** Set the roadway */
