@@ -137,7 +137,7 @@ fi
 %{_clientdir}/lib/mail.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
 %{_clientdir}/lib/iris-common-%{version}.jar
-%{_clientdir}/lib/MapBean-@@MAPBEAN.VERSION@@.jar
+%{_clientdir}/lib/mapbean-@@MAPBEAN.VERSION@@.jar
 %{_clientdir}/lib/scheduler-@@SCHEDULER.VERSION@@.jar
 %{_clientdir}/lib/sonar-client-@@SONAR.VERSION@@.jar
 %{_clientdir}/lib/tdxml-@@TDXML.VERSION@@.jar

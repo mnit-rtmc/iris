@@ -20,7 +20,7 @@
 	<jar href="lib/iris-common-@@VERSION@@.jar"/>
 	<jar href="lib/scheduler-@@SCHEDULER.VERSION@@.jar"/>
 	<jar href="lib/sonar-client-@@SONAR.VERSION@@.jar"/>
-	<jar href="lib/MapBean-@@MAPBEAN.VERSION@@.jar"/>
+	<jar href="lib/mapbean-@@MAPBEAN.VERSION@@.jar"/>
 	<jar href="lib/tms-log-@@TMSLOG.VERSION@@.jar"/>
 	<jar href="lib/geokit-@@GEOKIT.VERSION@@.jar"/>
 	<jar href="lib/tdxml-@@TDXML.VERSION@@.jar"/>

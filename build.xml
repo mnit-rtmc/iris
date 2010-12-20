@@ -61,7 +61,7 @@
 		  value="sonar-server-${sonar.version}.jar"/>
 	<property name="sonar.client.jar"
 		  value="sonar-client-${sonar.version}.jar"/>
-	<property name="mapbean.jar" value="MapBean-${mapbean.version}.jar"/>
+	<property name="mapbean.jar" value="mapbean-${mapbean.version}.jar"/>
 	<property name="tms-log.jar" value="tms-log-${tms-log.version}.jar"/>
 	<property name="geokit.jar" value="geokit-${geokit.version}.jar"/>
 	<property name="tdxml.jar" value="tdxml-${tdxml.version}.jar"/>

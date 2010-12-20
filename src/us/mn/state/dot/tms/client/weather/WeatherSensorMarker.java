@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.weather;
 
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.map.AbstractMarker;
 
 /**
  * Marker used to paint weather sensors.

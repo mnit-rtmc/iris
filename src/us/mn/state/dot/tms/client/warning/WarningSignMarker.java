@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.warning;
 
 import java.awt.geom.Ellipse2D;
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.map.AbstractMarker;
 
 /**
  * Marker used to paint warning signs.
