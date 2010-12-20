@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,20 +26,20 @@ import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * Provides a Support form for the IRIS client, which consists of html text
+ * Provides a support form for the IRIS client, which consists of html text
  * and a single image. The text is read from the I18N message bundle.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class Support extends AbstractForm {
+public class SupportForm extends AbstractForm {
 
 	/** text */
 	final static String m_text1 = I18N.get("SupportForm.Text1");;
 
-	/** Create a new form */
-	public Support() {
+	/** Create a new support form */
+	public SupportForm() {
 		super("IRIS Support");
 	}
 
