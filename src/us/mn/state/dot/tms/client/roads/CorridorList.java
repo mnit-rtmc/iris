@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -241,7 +241,7 @@ public class CorridorList extends JPanel {
 		updateListModel();
 		layer.updateExtent();
 		if(map != null)
-			map.zoomTo(layer.getExtent());
+			map.setExtent(layer.getExtent());
 	}
 
 	/** Dispose of the corridor chooser */

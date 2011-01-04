@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -220,7 +220,7 @@ public class ScreenPane extends JPanel {
 		JButton b = new JButton(me.getName());
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
-				map.zoomTo(new Rectangle2D.Double(
+				map.setExtent(new Rectangle2D.Double(
 					me.getEasting(), me.getNorthing(),
 					me.getEastSpan(), me.getNorthSpan()
 				));
