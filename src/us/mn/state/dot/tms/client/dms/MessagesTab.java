@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -169,7 +169,7 @@ public class MessagesTab extends JPanel {
 		bag.anchor = GridBagConstraints.WEST;
 		add(font_cmb, bag);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			bag.anchor = GridBagConstraints.NONE;
+			bag.anchor = GridBagConstraints.CENTER;
 			bag.gridy = 4;
 			bag.gridx = 0;
 			add(awsAllowed, bag);
