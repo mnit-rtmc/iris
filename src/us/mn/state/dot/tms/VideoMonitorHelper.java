@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,8 +42,11 @@ public class VideoMonitorHelper extends BaseHelper {
 			new LinkedList<VideoMonitor>();
 		find(new Checker<VideoMonitor>() {
 			public boolean check(VideoMonitor m) {
-				if(m.getRestricted() && (m.getCamera() == cam))
-					restricted.add(m);
+				if(m.getRestricted()) {
+					Camera c = m.getCamera();
+					if(c == cam || c == null)
+						restricted.add(m);
+				}
 				return false;
 			}
 		});
