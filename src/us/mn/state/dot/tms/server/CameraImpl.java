@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -215,7 +215,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	protected void blankRestrictedMonitors() throws TMSException {
 		for(VideoMonitor m: VideoMonitorHelper.findRestricted(this)) {
 			if(m instanceof VideoMonitorImpl)
-				((VideoMonitorImpl)m).selectCamera("");
+				((VideoMonitorImpl)m).selectBlankCamera();
 		}
 	}
 

@@ -1331,6 +1331,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
+camera_id_blank	
 camera_num_preset_btns	3
 camera_num_video_frames	900
 camera_ptz_panel_enable	false

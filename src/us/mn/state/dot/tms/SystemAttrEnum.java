@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public enum SystemAttrEnum {
+	CAMERA_ID_BLANK(""),
 	CAMERA_NUM_PRESET_BTNS(3, 0, 20, Change.RESTART_CLIENT),
 	CAMERA_NUM_VIDEO_FRAMES(900, 0),
 	CAMERA_PTZ_PANEL_ENABLE(false, Change.RESTART_CLIENT),
