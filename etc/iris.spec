@@ -4,7 +4,7 @@
 #     and Douglas Lau
 #
 # IRIS -- Intelligent Roadway Information System
-# Copyright (C) 2009-2010  Minnesota Department of Transportation
+# Copyright (C) 2009-2011  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,11 +24,6 @@
 %define _serverdir	%{_serverlink}-%{version}
 %define _clientlink	/var/www/html/iris-client
 %define _clientdir	%{_clientlink}-%{version}
-
-# These are needed so that we can build the i386 package on an x86_64 host.
-# Otherwise, the package will require the x86_64 version of libc.
-%define _use_internal_dependency_generator 0
-%define __find_requires %{nil} 
 
 Name:		%{name}
 Summary:	The IRIS advanced traffic management system (ATMS).
