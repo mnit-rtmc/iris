@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.manchester;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -49,12 +50,16 @@ public class OpMoveCamera extends OpDevice {
 	/** The direction to zoom the camera */
 	protected final int zoom;
 
+	/** Time stamp at start of operation */
+	public final long stamp;
+
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
 		super(PriorityLevel.COMMAND, c);
 		pan = map_float(p, PTZ_RANGE);
 		tilt = map_float(t, PTZ_RANGE);
 		zoom = map_float(z, PTZ_RANGE);
+		stamp = TimeSteward.currentTimeMillis();
 	}
 
 	/**

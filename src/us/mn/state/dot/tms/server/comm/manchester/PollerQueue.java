@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.manchester;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.CameraImpl;
 
 /**
@@ -25,12 +27,18 @@ import us.mn.state.dot.tms.server.CameraImpl;
  */
 public class PollerQueue extends Thread {
 
+	/** Operation timeout in miliseconds */
+	static protected final int OP_TIMEOUT_MS = 30000;
+
 	/** The number of milliseconds between commands */
 	protected static final int CMD_INTERVAL = 60;
 
 	/** Mapping of camera names to current PTZ commands */
 	protected final HashMap<String, OpMoveCamera> commands =
 		new HashMap<String, OpMoveCamera>();
+
+	/** List of expired camera IDs */
+	protected final LinkedList<String> expired = new LinkedList<String>();
 
 	/** Add a PTZ command to the queue.
 	 * cmd The OpMoveCamera command to be added.
@@ -58,7 +66,16 @@ public class PollerQueue extends Thread {
 
 	/** Send all current commands to cameras */
 	protected synchronized void sendCommands() {
-		for(OpMoveCamera cmd: commands.values())
-			cmd.start();
+		long now = TimeSteward.currentTimeMillis();
+		for(String cid: commands.keySet()) {
+			OpMoveCamera cmd = commands.get(cid);
+			if(cmd.stamp + OP_TIMEOUT_MS < now)
+				cmd.start();
+			else
+				expired.add(cid);
+		}
+		for(String cid: expired)
+			commands.remove(cid);
+		expired.clear();
 	}
 }
