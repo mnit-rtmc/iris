@@ -27,9 +27,6 @@ import us.mn.state.dot.tms.server.CameraImpl;
  */
 public class PollerQueue extends Thread {
 
-	/** Operation timeout in miliseconds */
-	static protected final int OP_TIMEOUT_MS = 30000;
-
 	/** The number of milliseconds between commands */
 	protected static final int CMD_INTERVAL = 60;
 
@@ -69,7 +66,7 @@ public class PollerQueue extends Thread {
 		long now = TimeSteward.currentTimeMillis();
 		for(String cid: commands.keySet()) {
 			OpMoveCamera cmd = commands.get(cid);
-			if(cmd.stamp + OP_TIMEOUT_MS < now)
+			if(now < cmd.expire)
 				cmd.start();
 			else
 				expired.add(cid);

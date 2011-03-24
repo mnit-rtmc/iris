@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpMoveCamera extends OpDevice {
 
+	/** Operation timeout in miliseconds */
+	static protected final int OP_TIMEOUT_MS = 30000;
+
 	/** Range of PTZ values */
 	static protected final int PTZ_RANGE = 8;
 
@@ -50,8 +53,8 @@ public class OpMoveCamera extends OpDevice {
 	/** The direction to zoom the camera */
 	protected final int zoom;
 
-	/** Time stamp at start of operation */
-	public final long stamp;
+	/** Time stamp when operation will expire */
+	public final long expire;
 
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
@@ -59,7 +62,7 @@ public class OpMoveCamera extends OpDevice {
 		pan = map_float(p, PTZ_RANGE);
 		tilt = map_float(t, PTZ_RANGE);
 		zoom = map_float(z, PTZ_RANGE);
-		stamp = TimeSteward.currentTimeMillis();
+		expire = TimeSteward.currentTimeMillis() + OP_TIMEOUT_MS;
 	}
 
 	/**
