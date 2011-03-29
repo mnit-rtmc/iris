@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -117,6 +117,8 @@ class OpMessage extends OpDms {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
+		m_dms.setMessageNext(m_sm);
+
 		// dms is configured
 		if(dmsConfigured())
 			return createPhaseTwo();
@@ -386,5 +388,11 @@ class OpMessage extends OpDms {
 				return this;
 			return null;
 		}
+	}
+
+	/** Cleanup the operation. Called by MessagePoller.doPoll(). */
+	public void cleanup() {
+		m_dms.setMessageNext(null);
+		super.cleanup();
 	}
 }

@@ -827,12 +827,17 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** The next message to be displayed.  This is a write-only SONAR
 	 * attribute.  It is checked to prevent a lower priority message from
 	 * getting queued during the time when a message gets queued and it
-	 * becomes activated.  It must be set to null after an operation
-	 * completes.
+	 * becomes activated.
 	 * @see DMSImpl#shouldActivate */
 	protected transient SignMessage messageNext;
 
-	/** Set the next sign message */
+	/** Set the next sign message.  This method is not called by SONAR
+	 * automatically; instead, it must be called by operations after
+	 * getting exclusive device ownership.  It must be set back to null
+	 * after the operation completes.  This is necessary to prevent the
+	 * ReaperJob from destroying a SignMessage before it has been sent to
+	 * a sign.
+	 * @see DeviceImpl.acquire */
 	public void setMessageNext(SignMessage sm) {
 		messageNext = sm;
 	}
