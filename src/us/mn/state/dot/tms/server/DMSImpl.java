@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -900,16 +900,16 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new InvalidMessageException(name +
 				": INVALID MESSAGE, " + sm.getMulti());
 		}
-		validateBitmaps(sm);
+		validateBitmaps(sm, multi);
 		return sm;
 	}
 
 	/** Validate the message bitmaps */
-	protected void validateBitmaps(SignMessage sm)
+	protected void validateBitmaps(SignMessage sm, MultiString multi)
 		throws ChangeVetoException
 	{
 		try {
-			validateBitmaps(sm.getBitmaps());
+			validateBitmaps(sm.getBitmaps(), multi);
 		}
 		catch(IOException e) {
 			throw new ChangeVetoException("Base64 decode error");
@@ -920,8 +920,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Validate the message bitmaps */
-	protected void validateBitmaps(String bmaps) throws IOException,
-		ChangeVetoException
+	protected void validateBitmaps(String bmaps, MultiString multi)
+		throws IOException, ChangeVetoException
 	{
 		byte[] bitmaps = Base64.decode(bmaps);
 		BitmapGraphic bitmap = createBlankBitmap();
@@ -930,9 +930,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new ChangeVetoException("Invalid sign size");
 		if(bitmaps.length % blen != 0)
 			throw new ChangeVetoException("Invalid bitmap length");
-		String[] pixels = pixelStatus;	// Avoid races
-		if(pixels != null && pixels.length == 2)
-			validateBitmaps(bitmaps, pixels, bitmap);
+		if(!multi.isBlank()) {
+			String[] pixels = pixelStatus;	// Avoid races
+			if(pixels != null && pixels.length == 2)
+				validateBitmaps(bitmaps, pixels, bitmap);
+		}
 	}
 
 	/** Validate the message bitmaps */
