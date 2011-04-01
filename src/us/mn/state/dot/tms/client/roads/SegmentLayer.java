@@ -158,8 +158,9 @@ public class SegmentLayer extends Layer implements DynamicLayer,
 
 	/** Check if two locations are too distant */
 	static protected boolean isTooDistant(MapGeoLoc l0, MapGeoLoc l1) {
-		return GeoLocHelper.metersTo(l0.getGeoLoc(), l1.getGeoLoc()) >
-		       SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
+		Double m = GeoLocHelper.metersTo(l0.getGeoLoc(),l1.getGeoLoc());
+		return m == null ||
+		       m > SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
 	}
 
 	/** Create a new layer state */

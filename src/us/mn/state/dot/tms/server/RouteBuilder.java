@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,8 @@ public class RouteBuilder {
 			return;
 		}
 		R_NodeImpl r_node = c.findDownstreamNode(origin);
-		if(Corridor.metersTo(r_node, origin) > MAX_ORIGIN_DISTANCE) {
+		Double m = Corridor.metersTo(r_node, origin);
+		if(m == null || m > MAX_ORIGIN_DISTANCE) {
 			throw new BadRouteException("ORIGIN OFF MAINLINE: " +
 				GeoLocHelper.getDescription(origin));
 		}

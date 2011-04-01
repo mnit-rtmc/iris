@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -521,10 +521,12 @@ public class IncidentDispatcher extends JPanel
 		}
 		public boolean check(Camera cam) {
 			GeoLoc loc = cam.getGeoLoc();
-			double d = GeoLocHelper.metersTo(loc, easting,northing);
-			cameras.put(d, cam);
-			while(cameras.size() > 5)
-				cameras.pollLastEntry();
+			Double d = GeoLocHelper.metersTo(loc, easting,northing);
+			if(d != null) {
+				cameras.put(d, cam);
+				while(cameras.size() > 5)
+					cameras.pollLastEntry();
+			}
 			return false;
 		}
 		protected Camera[] getNearest() {

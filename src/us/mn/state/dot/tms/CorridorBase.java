@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -167,29 +167,38 @@ public class CorridorBase implements Iterable<R_Node> {
 	protected void linkNearestNode() {
 		R_Node first = r_nodes.getFirst();
 		R_Node last = r_nodes.getLast();
-		R_Node fnear = findNearest(first);
-		R_Node lnear = findNearest(last);
-		if(metersTo(first, fnear) < metersTo(last, lnear)) {
-			r_nodes.addFirst(fnear);
-			unsorted.remove(fnear);
+		NodeDistance fnear = findNearest(first);
+		NodeDistance lnear = findNearest(last);
+		if(fnear == null || lnear == null)
+			unsorted.clear();
+		else if(fnear.meters < lnear.meters) {
+			r_nodes.addFirst(fnear.node);
+			unsorted.remove(fnear.node);
 		} else {
-			r_nodes.addLast(lnear);
-			unsorted.remove(lnear);
+			r_nodes.addLast(lnear.node);
+			unsorted.remove(lnear.node);
+		}
+	}
+
+	/** Simple structure to hold a node and distance */
+	protected class NodeDistance {
+		protected final double meters;
+		protected final R_Node node;
+		public NodeDistance(Double m, R_Node n) {
+			meters = m;
+			node = n;
 		}
 	}
 
 	/** Find the nearest unsorted node to the given node */
-	protected R_Node findNearest(R_Node end) {
-		R_Node nearest = null;
-		double n_meters = 0;
+	protected NodeDistance findNearest(R_Node end) {
+		NodeDistance near = null;
 		for(R_Node r_node: unsorted) {
-			double m = metersTo(r_node, end);
-			if(nearest == null || m < n_meters) {
-				nearest = r_node;
-				n_meters = m;
-			}
+			Double m = metersTo(r_node, end);
+			if(m != null && (near == null || m < near.meters))
+				near = new NodeDistance(m, r_node);
 		}
-		return nearest;
+		return near;
 	}
 
 	/** Check if the roadway nodes are in reverse order */
@@ -240,8 +249,12 @@ public class CorridorBase implements Iterable<R_Node> {
 		float miles = 0;
 		R_Node previous = null;
 		for(R_Node n: r_nodes) {
-			if(previous != null)
-				miles += metersToMiles(metersTo(previous, n));
+			if(previous != null) {
+				Double m = metersTo(previous, n);
+				if(m == null)
+					continue;
+				miles += metersToMiles(m);
+			}
 			while(n_points.containsKey(miles))
 				miles += calculateEpsilon(miles);
 			n_points.put(miles, n);
@@ -261,17 +274,21 @@ public class CorridorBase implements Iterable<R_Node> {
 		double n_meters = 0;
 		for(Float mile: n_points.keySet()) {
 			R_Node n = n_points.get(mile);
-			double m = metersTo(n, loc);
-			if(nearest == null || m < n_meters) {
-				nearest = n;
-				n_after = n;
-				n_mile = mile;
-				n_meters = m;
-			} else if(n_after == nearest)
-				n_after = n;
+			Double m = metersTo(n, loc);
+			if(m != null) {
+				if(nearest == null || m < n_meters) {
+					nearest = n;
+					n_after = n;
+					n_mile = mile;
+					n_meters = m;
+				} else if(n_after == nearest)
+					n_after = n;
+			}
 		}
 		float mi = metersToMiles(n_meters);
-		if(metersTo(n_after, nearest) > metersTo(n_after, loc))
+		Double m0 = metersTo(n_after, nearest);
+		Double m1 = metersTo(n_after, loc);
+		if(m0 != null && m1 != null && m0 > m1)
 			return n_mile + mi;
 		else
 			return n_mile - mi;
@@ -297,9 +314,9 @@ public class CorridorBase implements Iterable<R_Node> {
 		R_Node nearest = null;
 		double n_meters = 0;
 		for(R_Node n: r_nodes) {
-			double m = GeoLocHelper.metersTo(n.getGeoLoc(), easting,
+			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), easting,
 				northing);
-			if(nearest == null || m < n_meters) {
+			if(m != null && (nearest == null || m < n_meters)) {
 				nearest = n;
 				n_meters = m;
 			}
@@ -314,9 +331,9 @@ public class CorridorBase implements Iterable<R_Node> {
 		for(R_Node n: r_nodes) {
 			if(n.getNodeType() != nt.ordinal())
 				continue;
-			double m = GeoLocHelper.metersTo(n.getGeoLoc(), easting,
+			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), easting,
 				northing);
-			if(nearest == null || m < n_meters) {
+			if(m != null && (nearest == null || m < n_meters)) {
 				nearest = n;
 				n_meters = m;
 			}
@@ -355,26 +372,28 @@ public class CorridorBase implements Iterable<R_Node> {
 		R_Node n_after = null;
 		double n_meters = 0;
 		for(R_Node n: r_nodes) {
-			double m = GeoLocHelper.metersTo(n.getGeoLoc(),
+			Double m = GeoLocHelper.metersTo(n.getGeoLoc(),
 				easting, northing);
-			if(nearest == null || m < n_meters) {
-				n_before = nearest;
-				nearest = n;
-				n_after = n;
-				n_meters = m;
-			} else if(m == n_meters) {
-				// coincident points
-				nearest = n;
-				n_after = n;
-			} else if(n_after == nearest)
-				n_after = n;
+			if(m != null) {
+				if(nearest == null || m < n_meters) {
+					n_before = nearest;
+					nearest = n;
+					n_after = n;
+					n_meters = m;
+				} else if(m == n_meters) {
+					// coincident points
+					nearest = n;
+					n_after = n;
+				} else if(n_after == nearest)
+					n_after = n;
+			}
 		}
 		if(nearest == null)
 			return null;
 		GeoLoc ga = n_after.getGeoLoc();
-		double m0 = GeoLocHelper.metersTo(ga, nearest.getGeoLoc());
-		double m1 = GeoLocHelper.metersTo(ga, easting, northing);
-		if(m0 > m1)
+		Double m0 = GeoLocHelper.metersTo(ga, nearest.getGeoLoc());
+		Double m1 = GeoLocHelper.metersTo(ga, easting, northing);
+		if(m0 != null && m1 != null && m0 > m1)
 			return nearest;
 		else
 			return n_before;

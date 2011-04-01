@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -263,22 +263,22 @@ public class GeoLocHelper extends BaseHelper {
 	}
 
 	/** Calculate the distance between two locations (in meters) */
-	static public double metersTo(GeoLoc l0, GeoLoc l1) {
+	static public Double metersTo(GeoLoc l0, GeoLoc l1) {
 		Integer e0 = getTrueEasting(l0);
 		Integer e1 = getTrueEasting(l1);
 		Integer n0 = getTrueNorthing(l0);
 		Integer n1 = getTrueNorthing(l1);
 		if(e0 == null || e1 == null || n0 == null || n1 == null)
-			return Double.POSITIVE_INFINITY;
+			return null;
 		return Math.hypot(e0 - e1, n0 - n1);
 	}
 
 	/** Calculate the distance between two locations (in meters) */
-	static public double metersTo(GeoLoc l, int easting, int northing) {
+	static public Double metersTo(GeoLoc l, int easting, int northing) {
 		Integer e = getTrueEasting(l);
 		Integer n = getTrueNorthing(l);
 		if(e == null || n == null)
-			return Double.POSITIVE_INFINITY;
+			return null;
 		return Math.hypot(e - easting, n - northing);
 	}
 
