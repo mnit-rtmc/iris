@@ -24,45 +24,51 @@
  * stop the java service as well.
  */
 
+/* Child process ID */
 int pid;
 
-void handle_signal(int sig_num) {
-	kill(pid, sig_num);
+/* Signal handle for SIGTERM.  This cleans up by killing the child process
+ * before exiting. */
+static void handle_signal(int sig_num) {
+	if(pid > 0)
+		kill(pid, sig_num);
 	exit(1);
 }
 
+/* Exec the child process */
+static int exec_child(char **args) {
+	signal(SIGTERM, handle_signal);
+	while(1) {
+		pid = fork();
+		if(pid < 0)
+			return 1;
+		else if(pid > 0) {
+			int status;
+			if(wait(&status) < 0)
+				return 1;
+			if(WIFEXITED(status) && 
+			  (WEXITSTATUS(status) == EXIT_SUCCESS))
+				return 0;
+		} else {
+			execv(args[0], args);
+			/* exec only returns on errors ... */
+			return 1;
+		}
+	}
+}
+
+/* Main entry point */
 int main(int argc, char *args[]) {
-	char **fargs;
-	int status;
 	if(argc < 2) {
 		fprintf(stderr, "Syntax: %s <file> [arg1] ... [argN]\n",
 			args[0]);
 		return 1;
 	}
-	fargs = (char **)calloc(argc, sizeof(char *));
-	if(fargs == NULL)
-		goto fail;
-	memcpy(fargs, args + 1, argc * sizeof(char **));
-	signal(SIGTERM, handle_signal);
-	while(1) {
-		pid = fork();
-		if(pid < 0)
-			goto fail;
-		else if(pid > 0) {
-			if(wait(&status) < 0)
-				goto fail;
-			if(WIFEXITED(status) && 
-			  (WEXITSTATUS(status) == EXIT_SUCCESS))
-				break;
-		}
-		else {
-			execv(fargs[0], fargs);
-			goto fail;
-		}
-	}
-	free(fargs);
-	return 0;
-fail:
-	fprintf(stderr, "%s\n", strerror(errno));
-	return 1;
+	memmove(args, args + 1, argc * sizeof(char *));
+	args[argc] = NULL;
+	if(exec_child(args)) {
+		fprintf(stderr, "%s\n", strerror(errno));
+		return 1;
+	} else
+		return 0;
 }
