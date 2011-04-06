@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,8 @@ int main(int argc, char *args[]) {
 		else if(pid > 0) {
 			if(wait(&status) < 0)
 				goto fail;
-			if(WIFEXITED(status) && WEXITSTATUS(status))
+			if(WIFEXITED(status) && 
+			  (WEXITSTATUS(status) == EXIT_SUCCESS))
 				break;
 		}
 		else {
