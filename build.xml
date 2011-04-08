@@ -116,7 +116,7 @@
 		</copy>
 	</target>
 
-	<!-- Clone a mercurial subproject -->
+	<!-- Check a mercurial subproject -->
 	<target name="hg-check" unless="file.exists">
 		<available property="dir.exists"
 		           file="${build.deps}/${repo.name}"/>
@@ -266,7 +266,7 @@
 	<!-- Compile the source code -->
 	<target name="compile"
 	        depends="check,prepare"
-	        description="Compile all of the source files for the project">
+	        description="Compile all of the source files">
 		<javac srcdir="${build.src}"
 		       destdir="${build.classes}"
 		       debug="${debug}"
