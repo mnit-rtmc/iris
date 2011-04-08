@@ -121,6 +121,9 @@ public class CameraViewer extends JPanel
 	/** Proxy manager for camera devices */
 	protected final CameraManager manager;
 
+	/** Stream manager for controlling video streams */
+	protected final StreamManager streamManager;
+
 	/** Logged in user */
 	protected final User user;
 
@@ -150,6 +153,7 @@ public class CameraViewer extends JPanel
 		super(new GridBagLayout());
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
+		streamManager = StreamManager.getInstance();
 		state = session.getSonarState();
 		user = session.getUser();
 		request = new VideoRequest(session.getProperties());
