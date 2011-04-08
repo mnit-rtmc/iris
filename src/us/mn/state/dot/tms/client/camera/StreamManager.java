@@ -44,8 +44,8 @@ abstract class StreamManager {
 		}
 	}
 	
-	abstract void request_stream(VideoRequest req, String camId, JPanel displayPanel);
+	abstract void requestStream(VideoRequest req, String camId, JPanel displayPanel);
 
-	abstract void clear_stream(JPanel displayPanel);
+	abstract void clearStream(JPanel displayPanel);
 
 }

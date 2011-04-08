@@ -66,7 +66,7 @@ final public class GstManager extends StreamManager {
 		System.out.println("\t" + camId + " ---> " + sink.getName());
 	}
 
-	public void request_stream(final VideoRequest req, final String camId, final JPanel displayPanel){
+	public void requestStream(final VideoRequest req, final String camId, final JPanel displayPanel){
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				System.out.println("Streaming camera " + camId);
@@ -86,7 +86,7 @@ final public class GstManager extends StreamManager {
 		});
 	}
 
-	public void clear_stream(final JPanel displayPanel){
+	public void clearStream(final JPanel displayPanel){
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				if(pipe != null){

@@ -30,12 +30,12 @@ final public class JavaManager extends StreamManager {
 		return new StreamPanel();
 	}
 
-	public void request_stream(VideoRequest req, String camId, JPanel displayPanel){
+	public void requestStream(VideoRequest req, String camId, JPanel displayPanel){
 		System.out.println(
 				"Java implementation of starting a stream on camera " + camId);
 	}
 	
-	public void clear_stream(JPanel displayPanel){
+	public void clearStream(JPanel displayPanel){
 		System.out.println("JAVA implementation of stopping a stream.");
 	}
 }
