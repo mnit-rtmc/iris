@@ -408,12 +408,12 @@ public class CameraViewer extends JPanel
 
 	/** Start video streaming */
 	protected void playPressed(Camera c) {
-		s_panel.requestStream(request, c.getName());
+		streamManager.requestStream(request, c.getName(), s_panel);
 	}
 
 	/** Stop video streaming */
 	protected void stopPressed() {
-		s_panel.clearStream();
+		streamManager.clearStream(s_panel);
 	}
 
 	/** Clear all of the fields */
