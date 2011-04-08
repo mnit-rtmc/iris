@@ -14,7 +14,12 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Image;
+import java.io.IOException;
+
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
@@ -22,20 +27,115 @@ import javax.swing.JPanel;
  *
  * @author Tim Johnson
  */
-final public class JavaManager extends StreamManager {
+final public class JavaManager extends StreamPanel {
+
+	/** Label to display video stream */
+	private final JLabel screen = new JLabel();
+
+	/** Current video stream */
+	private VideoStream stream = null;
+
+	/** Total number of frames requested */
+	private int n_frames = 0;
 
 	protected JavaManager(){}
 
-	public JComponent createStreamRenderer(){
-		return new StreamPanel();
+	/** Anonymous thread to read video stream */
+	private final Thread thread = new Thread() {
+		public void run() {
+			while(true) {
+				VideoStream vs = stream;
+				if(vs != null)
+					readStream(vs);
+				else {
+					synchronized(thread) {
+						try {
+							thread.wait();
+						}
+						catch(InterruptedException e) {
+							// nothing to do
+						}
+					}
+				}
+			}
+		}
+	};
+
+	/** Read a video stream */
+	protected void readStream(final VideoStream vs) {
+		try {
+			while(vs == stream) {
+				byte[] idata = vs.getImage();
+				screen.setIcon(createIcon(idata));
+				progress.setValue(vs.getFrameCount());
+				if(vs.getFrameCount() >= n_frames)
+					break;
+			}
+		}
+		catch(IOException e) {
+			progress.setString(e.getMessage());
+			progress.setStringPainted(true);
+		}
+		finally {
+			try {
+				vs.close();
+			}
+			catch(IOException e) {
+				progress.setString(e.getMessage());
+				progress.setStringPainted(true);
+			}
+			clearVideoStream(vs);
+			screen.setIcon(null);
+		}
 	}
 
-	public void requestStream(VideoRequest req, String camId, JPanel displayPanel){
-		System.out.println(
-				"Java implementation of starting a stream on camera " + camId);
+	/** Clear the specified video stream */
+	protected synchronized void clearVideoStream(VideoStream vs) {
+		if(stream == vs) {
+			stream = null;
+			n_frames = 0;
+			progress.setValue(0);
+		}
+	}
+
+	public void requestStream(VideoRequest request, String cid){
+		try {
+			HttpDataSource source = new HttpDataSource(
+				request.getUrl(cid));
+			setVideoStream(source.createStream(),
+				request.getFrames());
+		}
+		catch(IOException e) {
+			progress.setString(e.getMessage());
+			progress.setStringPainted(true);
+		}
 	}
 	
-	public void clearStream(JPanel displayPanel){
+	/** Clear the video stream */
+	public void clearStream(){
 		System.out.println("JAVA implementation of stopping a stream.");
+	}
+
+	/** Set the video stream to display */
+	protected synchronized void setVideoStream(VideoStream vs, int f) {
+		stream = vs;
+		n_frames = f;
+		progress.setMaximum(n_frames);
+		progress.setValue(0);
+		progress.setStringPainted(false);
+		synchronized(thread) {
+			thread.notify();
+		}
+	}
+
+	/** Create an image icon from image data */
+	protected ImageIcon createIcon(byte[] idata) {
+		ImageIcon icon = new ImageIcon(idata);
+		if(icon.getIconWidth() == imageSize.width &&
+		   icon.getIconHeight() == imageSize.height)
+			return icon;
+		Image im = icon.getImage().getScaledInstance(
+			imageSize.width, imageSize.height, Image.SCALE_FAST);
+		return new ImageIcon(im);
 	}
 }

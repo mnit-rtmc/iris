@@ -47,6 +47,7 @@ import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
  * GUI for viewing camera images
  *
  * @author Douglas Lau
+ * @author Tim Johnson
  */
 public class CameraViewer extends JPanel
 	implements ProxySelectionListener<Camera>
@@ -103,7 +104,7 @@ public class CameraViewer extends JPanel
 	protected VideoMonitor video_monitor;
 
 	/** Streaming video viewer */
-	protected final StreamPanel s_panel = new StreamPanel();
+	protected final StreamPanel s_panel = StreamPanel.getInstance();
 
 	/** Button used to play video */
 	protected final JButton play = new JButton(Icons.getIcon("play"));
@@ -120,9 +121,6 @@ public class CameraViewer extends JPanel
 
 	/** Proxy manager for camera devices */
 	protected final CameraManager manager;
-
-	/** Stream manager for controlling video streams */
-	protected final StreamManager streamManager;
 
 	/** Logged in user */
 	protected final User user;
@@ -153,7 +151,6 @@ public class CameraViewer extends JPanel
 		super(new GridBagLayout());
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
-		streamManager = StreamManager.getInstance();
 		state = session.getSonarState();
 		user = session.getUser();
 		request = new VideoRequest(session.getProperties());
@@ -408,12 +405,12 @@ public class CameraViewer extends JPanel
 
 	/** Start video streaming */
 	protected void playPressed(Camera c) {
-		streamManager.requestStream(request, c.getName(), s_panel);
+		s_panel.requestStream(request, c.getName());
 	}
 
 	/** Stop video streaming */
 	protected void stopPressed() {
-		streamManager.clearStream(s_panel);
+		s_panel.clearStream();
 	}
 
 	/** Clear all of the fields */

@@ -31,7 +31,7 @@ import org.gstreamer.swing.VideoComponent;
  * @author Tim Johnson
  */
 
-final public class GstManager extends StreamManager {
+final public class GstManager extends StreamPanel {
 
 	static boolean gstInitialized = false;
 	static VideoComponent vc = null;
@@ -66,7 +66,8 @@ final public class GstManager extends StreamManager {
 		System.out.println("\t" + camId + " ---> " + sink.getName());
 	}
 
-	public void requestStream(final VideoRequest req, final String camId, final JPanel displayPanel){
+	public void requestStream(final VideoRequest req, final String camId){
+		final JPanel display = this;
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				System.out.println("Streaming camera " + camId);
@@ -74,19 +75,20 @@ final public class GstManager extends StreamManager {
 					pipe.stop();
 					pipe.setState(State.NULL);
 				}
-				displayPanel.removeAll();
-				displayPanel.repaint();
+				display.removeAll();
+				display.repaint();
 				vc = new VideoComponent();
 				vc.setPreferredSize(new Dimension(720, 576));
-				displayPanel.add(vc);
-				displayPanel.doLayout();
+				display.add(vc);
+				display.doLayout();
 				pipe = Pipeline.launch(createPipeString(camId));
 				connect(camId,vc.getElement(),pipe);
 			}
 		});
 	}
 
-	public void clearStream(final JPanel displayPanel){
+	public void clearStream(){
+		final JPanel display = this;
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				if(pipe != null){
@@ -94,8 +96,8 @@ final public class GstManager extends StreamManager {
 					pipe.stop();
 					pipe.setState(State.NULL);
 				}
-				displayPanel.removeAll();
-				displayPanel.repaint();
+				display.removeAll();
+				display.repaint();
 			}
 		});
 	}
