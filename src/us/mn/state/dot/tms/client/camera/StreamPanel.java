@@ -70,9 +70,9 @@ abstract public class StreamPanel extends JPanel {
 	static public StreamPanel getInstance(){
 		try{
 			Class.forName("org.gstreamer.Gst");
-			return new GstManager();
+			return new GstPanel();
 		}catch(ClassNotFoundException cnfe){
-			return new JavaManager();
+			return new JavaPanel();
 		}
 	}
 	

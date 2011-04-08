@@ -27,7 +27,7 @@ import javax.swing.JPanel;
  *
  * @author Tim Johnson
  */
-final public class JavaManager extends StreamPanel {
+final public class JavaPanel extends StreamPanel {
 
 	/** Label to display video stream */
 	private final JLabel screen = new JLabel();
@@ -38,7 +38,7 @@ final public class JavaManager extends StreamPanel {
 	/** Total number of frames requested */
 	private int n_frames = 0;
 
-	protected JavaManager(){}
+	protected JavaPanel(){}
 
 	/** Anonymous thread to read video stream */
 	private final Thread thread = new Thread() {

@@ -31,13 +31,13 @@ import org.gstreamer.swing.VideoComponent;
  * @author Tim Johnson
  */
 
-final public class GstManager extends StreamPanel {
+final public class GstPanel extends StreamPanel {
 
 	static boolean gstInitialized = false;
 	static VideoComponent vc = null;
 	static Pipeline pipe = null;
 
-	protected GstManager(){
+	protected GstPanel(){
 		if(!gstInitialized){
 			String[] args = {};
 			Gst.init("IRIS", args);
