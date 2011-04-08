@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.util.Hashtable;
-
 import javax.swing.JPanel;
 
 /**
@@ -27,8 +25,6 @@ import javax.swing.JPanel;
 abstract class StreamManager {
 
 	private static StreamManager manager = null;
-	final Hashtable<String, String> sources = new Hashtable<String, String>();
-	final Hashtable<String, String> uris = new Hashtable<String, String>();
 	
 	public final String toString(){
 		return this.getClass().getSimpleName();
