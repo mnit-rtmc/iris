@@ -35,6 +35,9 @@ import javax.swing.border.BevelBorder;
  */
 abstract public class StreamPanel extends JPanel {
 
+	/** JPanel which holds the component used to render the video stream */
+	protected final JPanel screenPanel = new JPanel();
+
 	/** Size of a quarter SIF */
 	static protected final Dimension SIF_QUARTER = new Dimension(176, 120);
 
@@ -58,13 +61,12 @@ abstract public class StreamPanel extends JPanel {
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 0;
 		c.gridy = GridBagConstraints.RELATIVE;
-//		p.add(screen, c);
+		p.add(screenPanel, c);
 		p.add(progress, c);
 		add(p);
 		setVideoSize(imageSize);
-//		screen.setBorder(BorderFactory.createBevelBorder(
-//			BevelBorder.LOWERED));
-//		thread.start();
+		screenPanel.setBorder(BorderFactory.createBevelBorder(
+			BevelBorder.LOWERED));
 	}
 
 	static public StreamPanel getInstance(){
@@ -83,8 +85,9 @@ abstract public class StreamPanel extends JPanel {
 	/** Set the dimensions of the video stream */
 	protected void setVideoSize(Dimension d) {
 		imageSize = d;
-//		screen.setPreferredSize(d);
-//		screen.setMinimumSize(d);
+		screenPanel.setPreferredSize(d);
+		screenPanel.setMinimumSize(d);
+		screenPanel.setMaximumSize(d);
 	}
 
 }

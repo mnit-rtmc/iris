@@ -14,13 +14,17 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.io.IOException;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
 
 /**
  * A JavaManager is responsible for managing video streams using the built-in java libraries.
@@ -38,7 +42,10 @@ final public class JavaPanel extends StreamPanel {
 	/** Total number of frames requested */
 	private int n_frames = 0;
 
-	protected JavaPanel(){}
+	protected JavaPanel(){
+		screenPanel.add(screen);
+		thread.start();
+	}
 
 	/** Anonymous thread to read video stream */
 	private final Thread thread = new Thread() {
