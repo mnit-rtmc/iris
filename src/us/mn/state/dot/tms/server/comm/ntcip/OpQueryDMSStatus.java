@@ -50,6 +50,10 @@ public class OpQueryDMSStatus extends OpDMS {
 	/** Short Error status */
 	protected final ShortErrorStatus shortError = new ShortErrorStatus();
 
+	/** Pixel failure table row count */
+	protected final PixelFailureTableNumRows pix_rows =
+		new PixelFailureTableNumRows();
+
 	/** Create a new DMS query status object */
 	public OpQueryDMSStatus(DMSImpl d) {
 		super(PriorityLevel.DEVICE_DATA, d);
@@ -218,8 +222,6 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsActivateMsgError msg_err = new DmsActivateMsgError();
 			ControllerErrorStatus con = new ControllerErrorStatus();
-			PixelFailureTableNumRows pix_rows =
-				new PixelFailureTableNumRows();
 			if(shortError.checkError(ShortErrorStatus.MESSAGE))
 				mess.add(msg_err);
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
@@ -233,20 +235,6 @@ public class OpQueryDMSStatus extends OpDMS {
 				DMS_LOG.log(dms.getName() + ": " + con);
 			if(shortError.checkError(ShortErrorStatus.PIXEL))
 				DMS_LOG.log(dms.getName() + ": " + pix_rows);
-			// Set controller maint and error status
-			if(shortError.isMaintenance())
-				setMaintStatus(shortError.getValue());
-			else if(pix_rows.getInteger() > pixelMaintThreshold())
-				setMaintStatus("Too many pixel errors: " +
-					pix_rows.getInteger());
-			else
-				setMaintStatus("");
-			// If no error status bits should be reported,
-			// clear the controller error status by setting "".
-			if(shortError.isCritical())
-				setErrorStatus(shortError.getValue());
-			else
-				setErrorStatus("");
 			return new PowerSupplyCount();
 		}
 	}
@@ -458,9 +446,33 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success)
+		if(success) {
 			dms.setPhotocellStatus(formatPhotocellStatus());
+			setMaintStatus(formatMaintStatus());
+			setErrorStatus(formatErrorStatus());
+		}
 		super.cleanup();
+	}
+
+	/** Format the new maintenance status */
+	protected String formatMaintStatus() {
+		if(shortError.isMaintenance())
+			return shortError.getValue();
+		if(shortError.checkError(ShortErrorStatus.PIXEL) &&
+		   pix_rows.getInteger() > pixelMaintThreshold())
+			return "Too many pixel errors: " +pix_rows.getInteger();
+		else
+			return "";
+	}
+
+	/** Format the new error status */
+	protected String formatErrorStatus() {
+		// If no error status bits should be reported,
+		// clear the controller error status by setting "".
+		if(shortError.isCritical())
+			return shortError.getValue();
+		else
+			return "";
 	}
 
 	/** Format the photocell status table */
