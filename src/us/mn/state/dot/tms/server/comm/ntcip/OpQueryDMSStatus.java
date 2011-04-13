@@ -454,6 +454,21 @@ public class OpQueryDMSStatus extends OpDMS {
 		super.cleanup();
 	}
 
+	/** Format the photocell status table */
+	protected String[] formatPhotocellStatus() {
+		light_sensors.add("composite," + photocellStatus() + "," +
+			p_level.getInteger());
+		return light_sensors.toArray(new String[0]);
+	}
+
+	/** Get the composite photocell status */
+	protected String photocellStatus() {
+		if(shortError.checkError(ShortErrorStatus.PHOTOCELL))
+			return "fail";
+		else
+			return "noError";
+	}
+
 	/** Format the new maintenance status */
 	protected String formatMaintStatus() {
 		if(shortError.isMaintenance())
@@ -473,20 +488,5 @@ public class OpQueryDMSStatus extends OpDMS {
 			return shortError.getValue();
 		else
 			return "";
-	}
-
-	/** Format the photocell status table */
-	protected String[] formatPhotocellStatus() {
-		light_sensors.add("composite," + photocellStatus() + "," +
-			p_level.getInteger());
-		return light_sensors.toArray(new String[0]);
-	}
-
-	/** Get the composite photocell status */
-	protected String photocellStatus() {
-		if(shortError.checkError(ShortErrorStatus.PHOTOCELL))
-			return "fail";
-		else
-			return "noError";
 	}
 }
