@@ -1362,6 +1362,7 @@ dms_page_on_min_secs	0.5
 dms_page_on_selection_enable	false
 dms_pixel_off_limit	2
 dms_pixel_on_limit	1
+dms_pixel_maint_threshold	35
 dms_pixel_status_enable	true
 dms_pixel_test_timeout_secs	30
 dms_poll_period_secs	30

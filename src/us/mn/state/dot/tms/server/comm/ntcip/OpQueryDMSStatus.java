@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -33,8 +34,10 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
  */
 public class OpQueryDMSStatus extends OpDMS {
 
-	/** Number of pixel errors before reported for maintenance */
-	static protected final int REPORT_PIXEL_ERROR_COUNT = 35;
+	/** Get the pixel maintenance threshold */
+	static private int pixelMaintThreshold() {
+		return SystemAttrEnum.DMS_PIXEL_MAINT_THRESHOLD.getInt();
+	}
 
 	/** Photocell level */
 	protected final DmsIllumPhotocellLevelStatus p_level =
@@ -233,12 +236,10 @@ public class OpQueryDMSStatus extends OpDMS {
 			// Set controller maint and error status
 			if(shortError.isMaintenance())
 				setMaintStatus(shortError.getValue());
-			else if(pix_rows.getInteger() >
-				REPORT_PIXEL_ERROR_COUNT)
-			{
+			else if(pix_rows.getInteger() > pixelMaintThreshold())
 				setMaintStatus("Too many pixel errors: " +
 					pix_rows.getInteger());
-			} else
+			else
 				setMaintStatus("");
 			// If no error status bits should be reported,
 			// clear the controller error status by setting "".
