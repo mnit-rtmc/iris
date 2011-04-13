@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
  * @author Douglas Lau
  */
 public class OpQueryDMSStatus extends OpDMS {
+
+	/** Number of pixel errors before reported for maintenance */
+	static protected final int REPORT_PIXEL_ERROR_COUNT = 35;
 
 	/** Photocell level */
 	protected final DmsIllumPhotocellLevelStatus p_level =
@@ -201,16 +204,6 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(shortError);
 			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + shortError);
-			if(shortError.isMaintenance())
-				setMaintStatus(shortError.getValue());
-			else
-				setMaintStatus("");
-			// If no error status bits should be reported,
-			// clear the controller error status by setting "".
-			if(shortError.isCritical())
-				setErrorStatus(shortError.getValue());
-			else
-				setErrorStatus("");
 			return new MoreFailures();
 		}
 	}
@@ -222,19 +215,37 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsActivateMsgError msg_err = new DmsActivateMsgError();
 			ControllerErrorStatus con = new ControllerErrorStatus();
+			PixelFailureTableNumRows pix_rows =
+				new PixelFailureTableNumRows();
 			if(shortError.checkError(ShortErrorStatus.MESSAGE))
 				mess.add(msg_err);
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
 				mess.add(con);
-			if(shortError.checkError(ShortErrorStatus.MESSAGE |
-			                         ShortErrorStatus.CONTROLLER))
-			{
-				mess.queryProps();
-			}
+			if(shortError.checkError(ShortErrorStatus.PIXEL))
+				mess.add(pix_rows);
+			mess.queryProps();
 			if(shortError.checkError(ShortErrorStatus.MESSAGE))
 				DMS_LOG.log(dms.getName() + ": " + msg_err);
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
 				DMS_LOG.log(dms.getName() + ": " + con);
+			if(shortError.checkError(ShortErrorStatus.PIXEL))
+				DMS_LOG.log(dms.getName() + ": " + pix_rows);
+			// Set controller maint and error status
+			if(shortError.isMaintenance())
+				setMaintStatus(shortError.getValue());
+			else if(pix_rows.getInteger() >
+				REPORT_PIXEL_ERROR_COUNT)
+			{
+				setMaintStatus("Too many pixel errors: " +
+					pix_rows.getInteger());
+			} else
+				setMaintStatus("");
+			// If no error status bits should be reported,
+			// clear the controller error status by setting "".
+			if(shortError.isCritical())
+				setErrorStatus(shortError.getValue());
+			else
+				setErrorStatus("");
 			return new PowerSupplyCount();
 		}
 	}

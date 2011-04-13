@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,6 +166,8 @@ public class SNMP extends BER {
 		 * @throws IOException On any errors sending a request or
 		 *         receiving response */
 		public void queryProps() throws IOException {
+			if(mos.isEmpty())
+				return;
 			is.skip(is.available());
 			encodeVarBindList(false);
 			encodeRequestPDU(Tag.GET_REQUEST);
@@ -181,6 +183,8 @@ public class SNMP extends BER {
 		 * @throws IOException On any errors sending a request or
 		 *         receiving response */
 		public void storeProps() throws IOException {
+			if(mos.isEmpty())
+				return;
 			is.skip(is.available());
 			encodeVarBindList(true);
 			encodeRequestPDU(Tag.SET_REQUEST);
