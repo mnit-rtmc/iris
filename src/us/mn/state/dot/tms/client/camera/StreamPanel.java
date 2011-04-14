@@ -18,17 +18,18 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
-import java.io.IOException;
+
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.border.BevelBorder;
 
+import us.mn.state.dot.tms.Camera;
+
 /**
- * A JPanel that can display a video stream.
+ * A JPanel that can display a video stream. It includes a progress bar and methods to
+ * set the size of the video. Implementations of this class are responsible for handling
+ * the stream including connecting, stopping and processing.
  *
  * @author Timothy Johnson
  * @author Douglas Lau
@@ -78,7 +79,7 @@ abstract public class StreamPanel extends JPanel {
 		}
 	}
 	
-	abstract void requestStream(VideoRequest req, String camId);
+	abstract void requestStream(VideoRequest req, Camera cam);
 
 	abstract void clearStream();
 
@@ -86,8 +87,6 @@ abstract public class StreamPanel extends JPanel {
 	protected void setVideoSize(Dimension d) {
 		imageSize = d;
 		screenPanel.setPreferredSize(d);
-		screenPanel.setMinimumSize(d);
-		screenPanel.setMaximumSize(d);
 	}
 
 }

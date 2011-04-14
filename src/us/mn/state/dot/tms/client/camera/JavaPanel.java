@@ -14,20 +14,16 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
+
+import us.mn.state.dot.tms.Camera;
 
 /**
- * A JavaManager is responsible for managing video streams using the built-in java libraries.
+ * A JavaPanel is responsible for managing video streams using the built-in java libraries.
  *
  * @author Tim Johnson
  */
@@ -105,10 +101,10 @@ final public class JavaPanel extends StreamPanel {
 		}
 	}
 
-	public void requestStream(VideoRequest request, String cid){
+	public void requestStream(VideoRequest request, Camera cam){
 		try {
 			HttpDataSource source = new HttpDataSource(
-				request.getUrl(cid));
+				request.getUrl(cam.getName()));
 			setVideoStream(source.createStream(),
 				request.getFrames());
 		}

@@ -25,6 +25,8 @@ import org.gstreamer.Pipeline;
 import org.gstreamer.State;
 import org.gstreamer.swing.VideoComponent;
 
+import us.mn.state.dot.tms.Camera;
+
 /**
  * A GstManager is responsible for managing video streams using the GStreamer-java library.
  *
@@ -34,7 +36,7 @@ import org.gstreamer.swing.VideoComponent;
 final public class GstPanel extends StreamPanel {
 
 	static boolean gstInitialized = false;
-	static VideoComponent vc = null;
+	static VideoComponent screen = null;
 	static Pipeline pipe = null;
 
 	protected GstPanel(){
@@ -44,51 +46,54 @@ final public class GstPanel extends StreamPanel {
 		}
 	}
 	
-	private String createPipeString(String camId){
+	private String createPipeString(Camera cam){
+		String encoder = cam.getEncoder();
+		if(encoder == null) return null;
+		encoder = encoder.substring(0,encoder.indexOf(':'));
 		StringBuilder sb = new StringBuilder();
 		sb.append("rtspsrc ");
-		sb.append("location=rtsp://root:video@151.111.8.155:554/mpeg4/1/media.amp ");
-		sb.append("latency=0 name=rtspsrc_1 ! decodebin name=db1 ! ffmpegcolorspace name=" + camId);
+		sb.append("location=rtsp://" + encoder + ":554/mpeg4/1/media.amp ");
+		sb.append("latency=0 name=rtspsrc_1 ! decodebin name=db1 ! ffmpegcolorspace name=" + cam.getName());
 		return sb.toString();
 	}
 
-	protected Element getSink(){
-		return vc.getElement();
+	private Element getSink(){
+		return screen.getElement();
 	}
 	
-	private synchronized void connect(String camId, Element sink, Pipeline pipe){
+	private synchronized void connect(Camera cam, Element sink, Pipeline pipe){
 		pipe.add(sink);
 		System.out.println("Adding initial sink.");
-		pipe.getElementByName(camId).link(sink);
+		pipe.getElementByName(cam.getName()).link(sink);
 		pipe.setState(State.PAUSED);
 		pipe.play();
 		pipe.setState(State.PLAYING);
-		System.out.println("\t" + camId + " ---> " + sink.getName());
+		System.out.println("\t" + cam.getName() + " ---> " + sink.getName());
 	}
 
-	public void requestStream(final VideoRequest req, final String camId){
-		final JPanel display = this;
+	public void requestStream(final VideoRequest req, final Camera cam){
+		final JPanel screenPanel = this.screenPanel;
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				System.out.println("Streaming camera " + camId);
+				System.out.println("Streaming camera " + cam.getName());
 				if(pipe != null){
 					pipe.stop();
 					pipe.setState(State.NULL);
 				}
-				display.removeAll();
-				display.repaint();
-				vc = new VideoComponent();
-				vc.setPreferredSize(new Dimension(720, 576));
-				display.add(vc);
-				display.doLayout();
-				pipe = Pipeline.launch(createPipeString(camId));
-				connect(camId,vc.getElement(),pipe);
+				screenPanel.removeAll();
+				screenPanel.repaint();
+				screen = new VideoComponent();
+				screen.setPreferredSize(screenPanel.getPreferredSize());
+				screenPanel.add(screen);
+				screenPanel.doLayout();
+				pipe = Pipeline.launch(createPipeString(cam));
+				connect(cam, screen.getElement(), pipe);
 			}
 		});
 	}
 
 	public void clearStream(){
-		final JPanel display = this;
+		final JPanel screenPanel = this.screenPanel;
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				if(pipe != null){
@@ -96,8 +101,8 @@ final public class GstPanel extends StreamPanel {
 					pipe.stop();
 					pipe.setState(State.NULL);
 				}
-				display.removeAll();
-				display.repaint();
+				screenPanel.removeAll();
+				screenPanel.repaint();
 			}
 		});
 	}
