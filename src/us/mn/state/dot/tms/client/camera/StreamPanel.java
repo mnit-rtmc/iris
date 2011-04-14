@@ -15,11 +15,13 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.border.BevelBorder;
@@ -36,9 +38,21 @@ import us.mn.state.dot.tms.Camera;
  */
 abstract public class StreamPanel extends JPanel {
 
-	/** JPanel which holds the component used to render the video stream */
-	protected final JPanel screenPanel = new JPanel();
+	/** Constant for MPEG-4 codec */
+	protected static final String MPEG4 = "MPEG-4";
+	
+	/** Constant for MotionJPEG codec */
+	protected static final String MJPG = "MotionJPEG";
 
+	/** JPanel which holds the component used to render the video stream */
+	protected final JPanel screenPanel = new JPanel(new BorderLayout());
+
+	/** JPanel which holds the status widgets */
+	protected final JPanel statusPanel = new JPanel(new BorderLayout());
+
+	/** JLabel for displaying the stream details (codec, size, framerate) */
+	protected final JLabel streamLabel = new JLabel();
+	
 	/** Size of a quarter SIF */
 	static protected final Dimension SIF_QUARTER = new Dimension(176, 120);
 
@@ -63,9 +77,16 @@ abstract public class StreamPanel extends JPanel {
 		c.gridx = 0;
 		c.gridy = GridBagConstraints.RELATIVE;
 		p.add(screenPanel, c);
-		p.add(progress, c);
+		statusPanel.add(streamLabel, BorderLayout.WEST);
+		statusPanel.add(progress, BorderLayout.EAST);
+		p.add(statusPanel, c);
 		add(p);
 		setVideoSize(imageSize);
+		progress.setBorder(null);
+		progress.setOpaque(true);
+		progress.setBackground(Color.BLUE);
+		statusPanel.setBorder(BorderFactory.createBevelBorder(
+				BevelBorder.LOWERED));
 		screenPanel.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
 	}
@@ -73,13 +94,16 @@ abstract public class StreamPanel extends JPanel {
 	static public StreamPanel getInstance(){
 		try{
 			Class.forName("org.gstreamer.Gst");
+			Class.forName("com.sun.jna.Library");
 			return new GstPanel();
 		}catch(ClassNotFoundException cnfe){
+			return new JavaPanel();
+		}catch(NoClassDefFoundError ncdfe){
 			return new JavaPanel();
 		}
 	}
 	
-	abstract void requestStream(VideoRequest req, Camera cam);
+	abstract void requestStream(VideoRequest req, Camera c);
 
 	abstract void clearStream();
 
@@ -88,5 +112,8 @@ abstract public class StreamPanel extends JPanel {
 		imageSize = d;
 		screenPanel.setPreferredSize(d);
 	}
-
+	
+	final protected void dispose(){
+		clearStream();
+	}
 }
