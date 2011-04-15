@@ -16,10 +16,11 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.UnknownHostException;
 import java.net.URL;
-import java.util.LinkedList;
+import java.net.UnknownHostException;
 import java.util.Properties;
+
+import us.mn.state.dot.tms.Camera;
 
 /**
  * The video stream request parameter wrapper.
@@ -44,45 +45,39 @@ public class VideoRequest {
 		SMALL, MEDIUM, LARGE;
 	}
 
-	/** Video backend host property name */
-	static protected final String VIDEO_BACKEND_HOST =
-		"video.backend.host";
+	/** Video host property name */
+	static protected final String VIDEO_HOST = "video.host";
 
-	/** Video backend port property name */
-	static protected final String VIDEO_BACKEND_PORT =
-		"video.backend.port";
+	/** Video port property name */
+	static protected final String VIDEO_PORT = "video.port";
 
-	/** Create an array of urls for connecting to the backend servers.
+	private String videoHost = null;
+	private String videoPort = null;
+	
+	/** The camera for which to request a stream */
+	protected Camera camera = null;
+
+	/**
+	/** Create a url for connecting to the video server.
 	 * @param p Properties
 	 * @param st Servlet type */
-	static protected String[] createUrls(Properties p, StreamType st) {
-		LinkedList<String> urls = new LinkedList<String>();
-		for(int id = 0; ; id++) {
-			String url = createUrl(p, id);
-			if(url != null)
-				urls.add(url + st.servlet);
-			else
-				break;
-		}
-		return (String[])urls.toArray(new String[0]);
-	}
-
-	/** Create one backend url */
-	static protected String createUrl(Properties p, int id) {
-		String ip = p.getProperty(VIDEO_BACKEND_HOST + id);
-		if(ip != null) {
+	protected String createBaseUrl(Properties p, StreamType st) {
+		videoHost = p.getProperty(VIDEO_HOST);
+		String url = null;
+		if(videoHost != null) {
 			try {
-				ip = InetAddress.getByName(ip).getHostAddress();
-				String port = p.getProperty(VIDEO_BACKEND_PORT +
-					id,p.getProperty(VIDEO_BACKEND_PORT+0));
-				return "http://" + ip + ":" + port + "/video/";
+				videoHost = InetAddress.getByName(videoHost).getHostAddress();
+				videoPort = p.getProperty(VIDEO_PORT);
+				url = "http://" + videoHost + ":" + videoPort + "/video/";
 			}
 			catch(UnknownHostException uhe) {
-				System.out.println("Invalid backend server " +
-					id + " " + uhe.getMessage());
+				System.out.println("Invalid video server " +
+					uhe.getMessage());
 			}
 		}
-		return null;
+		if(url != null)
+				url = url + st.servlet;
+		return url;
 	}
 
 	/** Sonar session identifier for authenticating to the video system */
@@ -150,27 +145,84 @@ public class VideoRequest {
 		size = sz;
 	}
 
-	/** The base URLs of the backend video stream servers */
-	private final String[] area_urls;
+	/** The base URL of the video server */
+	private final String base_url;
 
 	/** Create a new video request */
 	public VideoRequest(Properties p) {
-		area_urls = createUrls(p, StreamType.STREAM);
+		base_url = createBaseUrl(p, StreamType.STREAM);
+	}
+
+	/** Check if the video host and video port properties have been set. */
+	private boolean useProxyServer(){
+		return (videoHost != null) && (videoPort != null);
+	}
+	
+	/** Create a URL for an MPEG4 stream */
+	private String getMPEG4UrlString() throws MalformedURLException {
+		if(useProxyServer()){
+			System.out.println("Using proxy server for MPEG-4");
+			//mpeg4 is not supported on the proxy server yet.
+			return "rtsp://" + videoHost + ":" + videoPort +
+					"/video/stream?id=" + camera.getName();
+		}else{
+			return "rtsp://" + getCameraIp() + ":554/mpeg4/1/media.amp";
+		}
+	}
+
+	private String getResolution(){
+		if(size == Size.SMALL)  return "176x144";
+		if(size == Size.MEDIUM) return "352x240";
+		if(size == Size.LARGE)  return "704x480";
+		return "";
+	}
+	
+	/** Create a URL for a MJPEG stream */
+	private URL getMJPEGUrl() throws MalformedURLException {
+		if(useProxyServer()){
+			System.out.println("Using proxy server for MJPEG");
+			return new URL(base_url +
+					"?id=" + camera.getName() +
+					"&size=" + (size.ordinal() + 1) +
+					"&ssid=" + sonarSessionId);
+		}else{
+			return new URL("http://" +
+					camera.getEncoder() +
+					"/axis-cgi/mjpg/video.cgi?" +
+					"resolution=" + getResolution());
+		}
 	}
 
 	/** Get the URL for the request */
-	public URL getUrl(String cid) throws MalformedURLException {
-		if(area >= 0 && area < area_urls.length)
-			return createURL(cid);
-		else
-			return null;
+	public String getUrlString(String codec) {
+		if(camera == null) return null;
+		try{
+			if(codec.equals(StreamPanel.MPEG4)) return getMPEG4UrlString();
+			if(codec.equals(StreamPanel.MJPEG)) return getMJPEGUrl().toString();
+		}catch(MalformedURLException mue){
+			mue.printStackTrace();
+		}
+		return null;
 	}
 
-	/** Create the URL for the request */
-	protected URL createURL(String cid) throws MalformedURLException {
-		return new URL(area_urls[area] +
-			"?id=" + cid +
-			"&size=" + (size.ordinal() + 1) +
-			"&ssid=" + sonarSessionId);
+	/** Get the host ip for the stream.
+	 * If the video.host property has been set, then use the video host.
+	 * Otherwise, use the ip address of the camera itself.
+	 * @return
+	 */
+	private String getCameraIp(){
+		if(camera == null) return null;
+		String encoder = camera.getEncoder();
+		if(encoder == null) return null;
+		if(encoder.indexOf(':') == -1) return encoder;
+		return encoder.substring(0, encoder.indexOf(':'));
+	}
+	
+	public Camera getCamera() {
+		return camera;
+	}
+
+	public void setCamera(Camera camera) {
+		this.camera = camera;
 	}
 }
