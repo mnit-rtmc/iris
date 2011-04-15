@@ -26,8 +26,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.border.BevelBorder;
 
-import us.mn.state.dot.tms.Camera;
-
 /**
  * A JPanel that can display a video stream. It includes a progress bar and methods to
  * set the size of the video. Implementations of this class are responsible for handling
@@ -42,7 +40,7 @@ abstract public class StreamPanel extends JPanel {
 	protected static final String MPEG4 = "MPEG-4";
 	
 	/** Constant for MotionJPEG codec */
-	protected static final String MJPG = "MotionJPEG";
+	protected static final String MJPEG = "MotionJPEG";
 
 	/** JPanel which holds the component used to render the video stream */
 	protected final JPanel screenPanel = new JPanel(new BorderLayout());
@@ -103,7 +101,7 @@ abstract public class StreamPanel extends JPanel {
 		}
 	}
 	
-	abstract void requestStream(VideoRequest req, Camera c);
+	abstract void requestStream(VideoRequest req);
 
 	abstract void clearStream();
 
