@@ -14,18 +14,18 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.Dimension;
+import java.util.List;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.Gst;
+import org.gstreamer.Pad;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
+import org.gstreamer.elements.RGBDataSink;
 import org.gstreamer.swing.VideoComponent;
-
-import us.mn.state.dot.tms.Camera;
 
 /**
  * A GstManager is responsible for managing video streams using the GStreamer-java library.
@@ -39,6 +39,9 @@ final public class GstPanel extends StreamPanel {
 	static VideoComponent screen = null;
 	static Pipeline pipe = null;
 
+	/** The name of the last element in the pipe which connects to the sink. */
+	static final String DECODER = "decoder";
+
 	protected GstPanel(){
 		if(!gstInitialized){
 			String[] args = {};
@@ -46,63 +49,104 @@ final public class GstPanel extends StreamPanel {
 		}
 	}
 	
-	private String createPipeString(Camera cam){
-		String encoder = cam.getEncoder();
-		if(encoder == null) return null;
-		encoder = encoder.substring(0,encoder.indexOf(':'));
+	private String createPipeString(String urlString){
+		if(urlString == null) return null;
 		StringBuilder sb = new StringBuilder();
-		sb.append("rtspsrc ");
-		sb.append("location=rtsp://" + encoder + ":554/mpeg4/1/media.amp ");
-		sb.append("latency=0 name=rtspsrc_1 ! decodebin name=db1 ! ffmpegcolorspace name=" + cam.getName());
+		if(urlString.startsWith("rtsp")){
+			sb.append("rtspsrc ");
+			sb.append("location=" + urlString + " ");
+			sb.append("latency=0 ! decodebin ! ffmpegcolorspace ");
+		}else if(urlString.startsWith("http")){
+			sb.append("souphttpsrc ");
+			sb.append("location=" + urlString + " ");
+			sb.append("timeout=5 ! jpegdec ");
+		}
+		sb.append("name=" + DECODER);
 		return sb.toString();
 	}
 
-	private Element getSink(){
-		return screen.getElement();
-	}
-	
-	private synchronized void connect(Camera cam, Element sink, Pipeline pipe){
-		pipe.add(sink);
-		System.out.println("Adding initial sink.");
-		pipe.getElementByName(cam.getName()).link(sink);
+	/** This method should only be called on the swing thread. */
+	private synchronized void connect(){
+		screen = new VideoComponent();
+		screenPanel.add(screen);
+		pipe.add(screen.getElement());
+		pipe.getElementByName(DECODER).link(screen.getElement());
 		pipe.setState(State.PAUSED);
 		pipe.play();
 		pipe.setState(State.PLAYING);
-		System.out.println("\t" + cam.getName() + " ---> " + sink.getName());
 	}
 
-	public void requestStream(final VideoRequest req, final Camera cam){
-		final JPanel screenPanel = this.screenPanel;
+	/** This method should only be called on the swing thread. */
+	private void disconnect(){
+		if(pipe != null){
+			pipe.stop();
+			pipe.setState(State.NULL);
+		}
+		screenPanel.removeAll();
+		screenPanel.repaint();
+	}
+
+	public void requestStream(final VideoRequest req){
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				System.out.println("Streaming camera " + cam.getName());
-				if(pipe != null){
-					pipe.stop();
-					pipe.setState(State.NULL);
+				disconnect();
+				String urlString = req.getUrlString(MPEG4);
+				if(urlString != null) pipe = Pipeline.launch(createPipeString(urlString));
+				connect();
+				if(!pipe.isPlaying()){
+					disconnect();
+					urlString = req.getUrlString(MJPEG);
+					if(urlString != null) pipe = Pipeline.launch(createPipeString(urlString));
+					connect();
 				}
-				screenPanel.removeAll();
-				screenPanel.repaint();
-				screen = new VideoComponent();
-				screen.setPreferredSize(screenPanel.getPreferredSize());
-				screenPanel.add(screen);
+				statusPanel.doLayout();
 				screenPanel.doLayout();
-				pipe = Pipeline.launch(createPipeString(cam));
-				connect(cam, screen.getElement(), pipe);
+				updateStatus();
 			}
 		});
 	}
 
+	private void updateStatus(){
+		int w = 0;
+		int h = 0;
+		String encoding = "";
+		int fps = 0;
+		List<Element> elements = pipe.getElements();
+		for(Element e : elements){
+			if(e instanceof RGBDataSink) continue; //no useful info from sink
+			if(e.getName().startsWith("souphttp")){
+				streamLabel.setText(MJPEG);
+				return;
+			}
+			List<Pad> pads = e.getSrcPads();
+			for(Pad p : pads){
+				Caps c = p.getCaps();
+				if(c.size() > 0){
+					String capDesc = c.getStructure(0).getName();
+					try{
+						for(int i=0; i<c.size(); i++){
+							if(capDesc.startsWith("video")){
+								w = c.getStructure(i).getInteger("width");
+								h = c.getStructure(i).getInteger("height");
+							}else if(capDesc.startsWith("application")){
+								encoding = c.getStructure(i).getString("encoding-name");
+								fps = (Float.valueOf(c.getStructure(i).getString("a-framerate"))).intValue();
+							}
+						}
+					}catch(Exception ex){}
+				}
+			}
+		}
+		if(encoding.startsWith("MP4V")) encoding = MPEG4;
+		streamLabel.setText(encoding + " (" + w + "x" + h + ")");
+	}
+	
 	public void clearStream(){
-		final JPanel screenPanel = this.screenPanel;
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				if(pipe != null){
-					System.out.println("Stopping stream");
-					pipe.stop();
-					pipe.setState(State.NULL);
-				}
-				screenPanel.removeAll();
-				screenPanel.repaint();
+				disconnect();
+				streamLabel.setText("Stopped");
+				statusPanel.doLayout();
 			}
 		});
 	}
