@@ -80,9 +80,6 @@ abstract public class StreamPanel extends JPanel {
 		p.add(statusPanel, c);
 		add(p);
 		setVideoSize(imageSize);
-		progress.setBorder(null);
-		progress.setOpaque(true);
-		progress.setBackground(Color.BLUE);
 		statusPanel.setBorder(BorderFactory.createBevelBorder(
 				BevelBorder.LOWERED));
 		screenPanel.setBorder(BorderFactory.createBevelBorder(
