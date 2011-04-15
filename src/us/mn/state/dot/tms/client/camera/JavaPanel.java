@@ -16,11 +16,10 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Image;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-
-import us.mn.state.dot.tms.Camera;
 
 /**
  * A JavaPanel is responsible for managing video streams using the built-in java libraries.
@@ -76,16 +75,14 @@ final public class JavaPanel extends StreamPanel {
 			}
 		}
 		catch(IOException e) {
-			progress.setString(e.getMessage());
-			progress.setStringPainted(true);
+			streamLabel.setText(e.getMessage());
 		}
 		finally {
 			try {
 				vs.close();
 			}
 			catch(IOException e) {
-				progress.setString(e.getMessage());
-				progress.setStringPainted(true);
+				streamLabel.setText(e.getMessage());
 			}
 			clearVideoStream(vs);
 			screen.setIcon(null);
@@ -101,16 +98,15 @@ final public class JavaPanel extends StreamPanel {
 		}
 	}
 
-	public void requestStream(VideoRequest request, Camera cam){
+	public void requestStream(VideoRequest request){
 		try {
 			HttpDataSource source = new HttpDataSource(
-				request.getUrl(cam.getName()));
+					new URL(request.getUrlString(MJPEG)));
 			setVideoStream(source.createStream(),
 				request.getFrames());
 		}
 		catch(IOException e) {
-			progress.setString(e.getMessage());
-			progress.setStringPainted(true);
+			streamLabel.setText(e.getMessage());
 		}
 	}
 	
@@ -125,7 +121,6 @@ final public class JavaPanel extends StreamPanel {
 		n_frames = f;
 		progress.setMaximum(n_frames);
 		progress.setValue(0);
-		progress.setStringPainted(false);
 		synchronized(thread) {
 			thread.notify();
 		}
