@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -362,9 +362,10 @@ public class IrisClient extends JFrame {
 	/** Set initial map extent */
 	public void setInitExtent() {
 		Rectangle2D e = MapExtentHelper.getHomeExtent();
-		if(e != null)
+		if(e != null) {
 			for(ScreenPane sp: s_panes)
 				sp.getMap().setExtent(e);
+		}
  	}
 
 	/** Create a new map model */
