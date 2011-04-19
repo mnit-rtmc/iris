@@ -443,8 +443,8 @@ public class CorridorList extends JPanel {
 	protected UTMPosition getPosition(Point2D p) {
 		SphericalMercatorPosition smp = new SphericalMercatorPosition(
 			p.getX(), p.getY());
-		Position pos = smp.getPosition(GeodeticDatum.WGS_84);
-		return UTMPosition.convert(GeodeticDatum.WGS_84,pos);
+		Position pos = smp.getPosition();
+		return UTMPosition.convert(GeodeticDatum.WGS_84, pos);
 	}
 
 	/** Find an r_node model near a point */

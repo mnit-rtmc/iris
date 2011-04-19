@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -220,8 +220,8 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	protected UTMPosition getPosition(Point2D p) {
 		SphericalMercatorPosition smp = new SphericalMercatorPosition(
 			p.getX(), p.getY());
-		Position pos = smp.getPosition(GeodeticDatum.WGS_84);
-		return UTMPosition.convert(GeodeticDatum.WGS_84,pos);
+		Position pos = smp.getPosition();
+		return UTMPosition.convert(GeodeticDatum.WGS_84, pos);
 	}
 
 	/** Dispose of the location panel */

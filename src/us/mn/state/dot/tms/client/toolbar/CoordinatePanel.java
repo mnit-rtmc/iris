@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2009  AHMCT, University of California, Davis
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import javax.swing.JLabel;
 import java.text.DecimalFormat;
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.MapBean;
@@ -61,7 +60,7 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 		Point2D p = map.transformPoint(e.getPoint());
 		SphericalMercatorPosition smp =
 			new SphericalMercatorPosition(p.getX(), p.getY());
-		Position pos = smp.getPosition(GeodeticDatum.WGS_84);
+		Position pos = smp.getPosition();
 		DecimalFormat df = new DecimalFormat(LAT_LON_FORMAT);
 		String lat = df.format(pos.getLatitude());
 		String lon = df.format(pos.getLongitude());

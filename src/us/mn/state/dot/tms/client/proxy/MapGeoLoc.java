@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Douglas Lau
  */
 public class MapGeoLoc implements MapObject {
-
-	/** Geodetic datum for coordinates */
-	static protected final GeodeticDatum DATUM = GeodeticDatum.WGS_84;
 
 	/** UTM zone for conversion to lat/lon */
 	static protected final UTMZone UTM_ZONE =
@@ -160,8 +157,8 @@ public class MapGeoLoc implements MapObject {
 		int northing)
 	{
 		UTMPosition utm = new UTMPosition(UTM_ZONE, easting, northing);
-		Position p = utm.getPosition(DATUM);
-		return SphericalMercatorPosition.convert(DATUM, p);
+		Position p = utm.getPosition(GeodeticDatum.WGS_84);
+		return SphericalMercatorPosition.convert(p);
 	}
 
 	/** Get the transform to render as a map object */
