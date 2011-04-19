@@ -43,6 +43,7 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
+import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.system.LoginForm;
@@ -200,7 +201,6 @@ public class IrisClient extends JFrame {
 			});
 			desktop.add(sp, JLayeredPane.DEFAULT_LAYER);
 		}
-		updateMaps(null);
 	}
 
 	/** Make the frame displayable (called by window toolkit) */
@@ -361,10 +361,10 @@ public class IrisClient extends JFrame {
 
 	/** Set initial map extent */
 	public void setInitExtent() {
-		Rectangle2D e = MapExtentHelper.getHomeExtent();
-		if(e != null) {
+		MapExtent me = MapExtentHelper.lookup("Home");
+		if(me != null) {
 			for(ScreenPane sp: s_panes)
-				sp.getMap().setExtent(e);
+				sp.setMapExtent(me);
 		}
  	}
 
