@@ -42,7 +42,7 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 	/** Lat/lon decimal format */
 	static protected final String LAT_LON_FORMAT = "0.000000";
 
-	/** Constructor */
+	/** Create a new coordinate panel */
 	public CoordinatePanel(MapBean m) {
 		assert m !=  null;
 		map = m;
@@ -55,7 +55,7 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 		return true;
 	}
 
-	/** Process the mouse moved event and update the status bar */
+	/** Process the mouse moved event */
 	public void mouseMoved(MouseEvent e) {
 		Point2D p = map.transformPoint(e.getPoint());
 		SphericalMercatorPosition smp =
@@ -67,12 +67,13 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 		coord_lbl.setText("lat " + lat + "\u00B0 lon " + lon +"\u00B0");
 	}
 
-	/** Process the mouse dragged event and update the status bar */
+	/** Process the mouse dragged event */
 	public void mouseDragged(MouseEvent e) {
-		mouseMoved(e);
+		// dragging on the map is for panning,
+		// so coordinate bar should not be updated
 	}
 
-	/** cleanup */
+	/** Cleanup */
 	public void dispose() {
 		map.removeMouseMotionListener(this);
 	}
