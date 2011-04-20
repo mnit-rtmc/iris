@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.sonar.Name;
