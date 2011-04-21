@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 
 /**
@@ -81,7 +82,7 @@ public class DMSStyleModel extends StyleListModel<DMS> {
 
 	/** Respond to a controller changed event */
 	protected void controllerChanged(final Controller c) {
-		DMS proxy = find(new Checker<DMS>() {
+		DMS proxy = DMSHelper.find(new Checker<DMS>() {
 			public boolean check(DMS proxy) {
 				return proxy.getController() == c;
 			}
