@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -70,19 +69,6 @@ public class CameraViewer extends JPanel
 
 	/** Network worker thread */
 	static protected final Scheduler NETWORKER = new Scheduler("NETWORKER");
-
-	/** Parse the integer ID of a monitor or camera */
-	static protected int parseUID(String name) {
-		String id = name;
-		while(!Character.isDigit(id.charAt(0)))
-			id = id.substring(1);
-		try {
-			return Integer.parseInt(id);
-		}
-		catch(NumberFormatException e) {
-			return 0;
-		}
-	}
 
 	/** Sonar state */
 	protected final SonarState state;
@@ -281,16 +267,18 @@ public class CameraViewer extends JPanel
 
 	/** Select the next camera */
 	protected void selectNextCamera() {
-		Camera camera = selected;	// Avoid race
-		if(camera != null)
-			selectCamera(parseUID(camera.getName()) + 1);
+		Camera cam = state.getCamCache().getCameraModel().higher(
+			selected);
+		if(cam != null)
+			manager.getSelectionModel().setSelected(cam);
 	}
 
 	/** Select the previous camera */
 	protected void selectPreviousCamera() {
-		Camera camera = selected;	// Avoid race
-		if(camera != null)
-			selectCamera(parseUID(camera.getName()) - 1);
+		Camera cam = state.getCamCache().getCameraModel().lower(
+			selected);
+		if(cam != null)
+			manager.getSelectionModel().setSelected(cam);
 	}
 
 	/** Command current camera to goto preset location */
@@ -298,22 +286,6 @@ public class CameraViewer extends JPanel
 		Camera proxy = selected;	// Avoid race
 		if(proxy != null)
 			proxy.setRecallPreset(preset);
-	}
-
-	/** Select the camera by number */
-	protected void selectCamera(int uid) {
-		StringBuilder b = new StringBuilder();
-		b.append(uid);
-		while(b.length() < 3)
-			b.insert(0, '0');
-		selectCamera("C" + b);
-	}
-
-	/** Select the camera by ID */
-	protected void selectCamera(String id) {
-		Camera proxy = CameraHelper.lookup(id);
-		if(proxy != null)
-			manager.getSelectionModel().setSelected(proxy);
 	}
 
 	/** Dispose of the camera viewer */

@@ -242,4 +242,18 @@ public class ProxyListModel<T extends SonarObject>
 		if(proxy != null)
 			proxy.destroy();
 	}
+
+	/** Get the first proxy lower than the given proxy */
+	public T lower(T proxy) {
+		synchronized(proxies) {
+			return proxies.lower(proxy);
+		}
+	}
+
+	/** Get the first proxy higher than the given proxy */
+	public T higher(T proxy) {
+		synchronized(proxies) {
+			return proxies.higher(proxy);
+		}
+	}
 }
