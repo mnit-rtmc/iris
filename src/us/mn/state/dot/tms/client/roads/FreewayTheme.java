@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.Color;
 import us.mn.state.dot.map.Style;
 
 /**
@@ -23,13 +24,18 @@ import us.mn.state.dot.map.Style;
  */
 public class FreewayTheme extends SegmentTheme {
 
+	/** Default freeway style theme */
+	static protected final Style CLEAR_STYLE = new Style("",
+		OUTLINE, new Color(0, 0, 0, 0.1f));
+
 	/** Create a new freeway theme */
 	public FreewayTheme() {
 		super("Freeway");
+		addStyle(CLEAR_STYLE);
 	}
 
 	/** Get the style to draw a given segment */
 	protected Style getStyle(MapSegment ms) {
-		return DEFAULT_STYLE;
+		return CLEAR_STYLE;
 	}
 }
