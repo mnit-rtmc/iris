@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.map.StyledTheme;
@@ -173,13 +177,22 @@ public class IncidentCreator extends JPanel {
 			return;
 		m.addPointSelector(new PointSelector() {
 			public void selectPoint(Point2D p) {
-				int x = (int)p.getX();
-				int y = (int)p.getY();
-				createIncident(et, x, y);
+				UTMPosition utm = getPosition(p);
+				int e = (int)Math.round(utm.getEasting());
+				int n = (int)Math.round(utm.getNorthing());
+				createIncident(et, e, n);
 				btn.setSelected(false);
 				setEnabled(true);
 			}
 		});
+	}
+
+	/** Get a UTM position */
+	protected UTMPosition getPosition(Point2D p) {
+		SphericalMercatorPosition smp = new SphericalMercatorPosition(
+			p.getX(), p.getY());
+		Position pos = smp.getPosition();
+		return UTMPosition.convert(GeodeticDatum.WGS_84, pos);
 	}
 
 	/** Create an incident */

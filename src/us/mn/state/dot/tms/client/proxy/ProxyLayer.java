@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,13 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import javax.swing.SwingUtilities;
-import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
+import us.mn.state.dot.map.LayerChange;
+import us.mn.state.dot.map.LayerChangedEvent;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
-import us.mn.state.dot.map.event.LayerChange;
-import us.mn.state.dot.map.event.LayerChangedEvent;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -36,7 +35,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
  * @author Douglas Lau
  */
 public class ProxyLayer<T extends SonarObject> extends Layer
-	implements DynamicLayer, ProxyListener<T>
+	implements ProxyListener<T>
 {
 	/** Shape used for calculating the layer extent */
 	static protected final Rectangle2D EXTENT_SHAPE =

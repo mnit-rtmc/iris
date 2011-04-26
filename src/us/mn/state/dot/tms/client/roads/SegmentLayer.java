@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentSkipListMap;
-import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
+import us.mn.state.dot.map.LayerChange;
+import us.mn.state.dot.map.LayerChangedEvent;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.map.event.LayerChange;
-import us.mn.state.dot.map.event.LayerChangedEvent;
 import us.mn.state.dot.tdxml.SensorListener;
 import us.mn.state.dot.tdxml.SensorSample;
 import us.mn.state.dot.tdxml.TdxmlException;
@@ -48,9 +47,8 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
  *
  * @author Douglas Lau
   */
-public class SegmentLayer extends Layer implements DynamicLayer,
-	Iterable<Segment>
-{
+public class SegmentLayer extends Layer implements Iterable<Segment> {
+
 	/** Mapping of corridor names to segment lists */
 	protected final ConcurrentSkipListMap<String, List<Segment>> cor_segs =
 		new ConcurrentSkipListMap<String, List<Segment>>();

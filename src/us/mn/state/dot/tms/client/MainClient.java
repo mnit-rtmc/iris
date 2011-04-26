@@ -67,21 +67,6 @@ public class MainClient {
 		return new IrisClient(props, handler);
 	}
 
-	/** Create the IRIS client with a splash screen */
-	static protected IrisClient createClientSplash(String[] args,
-		SimpleHandler handler) throws IOException
-	{
-		SplashScreen splash = new SplashScreen();
-		splash.setVisible(true);
-		try {
-			return createClient(args, handler);
-		}
-		finally {
-			splash.setVisible(false);
-			splash.dispose();
-		}
-	}
-
 	/**
 	 * Main IRIS client entry point.
 	 *
@@ -93,7 +78,7 @@ public class MainClient {
 		checkAssert();
 		tweakLookAndFeel();
 		try {
-			IrisClient c = createClientSplash(args, handler);
+			IrisClient c = createClient(args, handler);
 			handler.setOwner(c);
 			c.setVisible(true);
 		}

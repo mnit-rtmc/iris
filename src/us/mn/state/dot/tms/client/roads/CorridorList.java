@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,10 @@ import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
@@ -237,7 +241,7 @@ public class CorridorList extends JPanel {
 		updateListModel();
 		layer.updateExtent();
 		if(map != null)
-			map.zoomTo(layer.getExtent());
+			map.setExtent(layer.getExtent());
 	}
 
 	/** Dispose of the corridor chooser */
@@ -416,8 +420,9 @@ public class CorridorList extends JPanel {
 
 	/** Create a new node at a specified point */
 	protected void createNode(CorridorBase c, Point2D p) {
-		int e = (int)p.getX();
-		int n = (int)p.getY();
+		UTMPosition utm = getPosition(p);
+		int e = (int)Math.round(utm.getEasting());
+		int n = (int)Math.round(utm.getNorthing());
 		if(c != null) {
 			int lanes = 2;
 			int shift = 4;
@@ -432,6 +437,14 @@ public class CorridorList extends JPanel {
 			creator.create(e, n);
 		client.setPointSelector(null);
 		add_btn.setEnabled(canAdd());
+	}
+
+	/** Get a UTM position */
+	protected UTMPosition getPosition(Point2D p) {
+		SphericalMercatorPosition smp = new SphericalMercatorPosition(
+			p.getX(), p.getY());
+		Position pos = smp.getPosition();
+		return UTMPosition.convert(GeodeticDatum.WGS_84, pos);
 	}
 
 	/** Find an r_node model near a point */

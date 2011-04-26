@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,8 +31,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.log.TmsLogFactory;
-import us.mn.state.dot.map.Layer;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.map.PointSelector;
@@ -43,7 +39,7 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
-import us.mn.state.dot.trafmap.BaseLayers;
+import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.system.LoginForm;
@@ -93,9 +89,6 @@ public class IrisClient extends JFrame {
 	/** Array of screen panes */
 	protected final ScreenPane[] s_panes;
 
-	/** Base layers */
-	protected final List<Layer> baseLayers;
-
 	/** Desktop pane */
 	protected final SmartDesktop desktop;
 
@@ -141,7 +134,6 @@ public class IrisClient extends JFrame {
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
 		desktop = new SmartDesktop(screens[0], this);
-		baseLayers = new BaseLayers().getLayers();
 		initializeScreenPanes();
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent evt) {
@@ -205,7 +197,6 @@ public class IrisClient extends JFrame {
 			});
 			desktop.add(sp, JLayeredPane.DEFAULT_LAYER);
 		}
-		updateMaps(null);
 	}
 
 	/** Make the frame displayable (called by window toolkit) */
@@ -366,20 +357,16 @@ public class IrisClient extends JFrame {
 
 	/** Set initial map extent */
 	public void setInitExtent() {
-		Rectangle2D e = MapExtentHelper.getHomeExtent();
-		if(e != null)
+		MapExtent me = MapExtentHelper.lookup("Home");
+		if(me != null) {
 			for(ScreenPane sp: s_panes)
-				sp.getMap().setExtent(e);
+				sp.setMapExtent(me);
+		}
  	}
 
 	/** Create a new map model */
 	protected MapModel createMapModel(MapBean mb, Session s) {
 		MapModel mm = new MapModel();
-		for(Layer l: baseLayers) {
-			LayerState ls = l.createState(mb);
-			mm.addLayer(ls);
-			mm.setHomeLayer(ls);
-		}
 		if(s != null)
 			s.createLayers(mb, mm);
 		else

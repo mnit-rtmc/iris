@@ -20,11 +20,11 @@ import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPopupMenu;
+import us.mn.state.dot.map.LayerChange;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
-import us.mn.state.dot.map.event.LayerChange;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**

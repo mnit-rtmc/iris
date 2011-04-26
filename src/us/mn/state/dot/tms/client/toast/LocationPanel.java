@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,10 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
@@ -197,8 +201,11 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		};
 		final PointSelector ps = new PointSelector() {
 			public void selectPoint(Point2D p) {
-				easting.setValue((int)p.getX());
-				northing.setValue((int)p.getY());
+				UTMPosition utm = getPosition(p);
+				easting.setValue(
+					(int)Math.round(utm.getEasting()));
+				northing.setValue(
+					(int)Math.round(utm.getNorthing()));
 				desktop.client.setPointSelector(null);
 			}
 		};
@@ -207,6 +214,14 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 				desktop.client.setPointSelector(ps);
 			}
 		};
+	}
+
+	/** Get a UTM position */
+	protected UTMPosition getPosition(Point2D p) {
+		SphericalMercatorPosition smp = new SphericalMercatorPosition(
+			p.getX(), p.getY());
+		Position pos = smp.getPosition();
+		return UTMPosition.convert(GeodeticDatum.WGS_84, pos);
 	}
 
 	/** Dispose of the location panel */

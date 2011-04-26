@@ -61,9 +61,7 @@
 		  value="sonar-server-${sonar.version}.jar"/>
 	<property name="sonar.client.jar"
 		  value="sonar-client-${sonar.version}.jar"/>
-	<property name="mapbean.jar" value="MapBean-${mapbean.version}.jar"/>
-	<property name="trafmap.jar" value="TrafMap-${trafmap.version}.jar"/>
-	<property name="shapes.jar" value="shapes-${shapes.version}.jar"/>
+	<property name="mapbean.jar" value="mapbean-${mapbean.version}.jar"/>
 	<property name="tms-log.jar" value="tms-log-${tms-log.version}.jar"/>
 	<property name="geokit.jar" value="geokit-${geokit.version}.jar"/>
 	<property name="tdxml.jar" value="tdxml-${tdxml.version}.jar"/>
@@ -177,16 +175,6 @@
 			<param name="repo.name" value="mapbean"/>
 			<param name="repo.version" value="${mapbean.version}"/>
 		</antcall>
-		<antcall target="check-subproject">
-			<param name="file.dep" value="${trafmap.jar}"/>
-			<param name="repo.name" value="trafmap"/>
-			<param name="repo.version" value="${trafmap.version}"/>
-		</antcall>
-		<antcall target="check-subproject">
-			<param name="file.dep" value="${shapes.jar}"/>
-			<param name="repo.name" value="shapes"/>
-			<param name="repo.version" value="${shapes.version}"/>
-		</antcall>
 	</target>
 
 	<!-- Prepare the build/etc directory -->
@@ -210,10 +198,6 @@
 					value="${tdxml.version}"/>
 				<filter token="MAPBEAN.VERSION"
 					value="${mapbean.version}"/>
-				<filter token="TRAFMAP.VERSION"
-					value="${trafmap.version}"/>
-				<filter token="SHAPES.VERSION"
-					value="${shapes.version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
 				<filter token="RPM.URL" value="${rpm.url}"/>
 				<filter token="RPM.PACKAGER"
@@ -372,8 +356,6 @@
 				<include name="${geokit.jar}"/>
 				<include name="${tdxml.jar}"/>
 				<include name="${mapbean.jar}"/>
-				<include name="${trafmap.jar}"/>
-				<include name="${shapes.jar}"/>
 				<include name="${sonar.client.jar}"/>
 				<include name="${tms-log.jar}"/>
 			</fileset>
@@ -533,8 +515,6 @@
 				<include name="${geokit.jar}"/>
 				<include name="${tdxml.jar}"/>
 				<include name="${mapbean.jar}"/>
-				<include name="${trafmap.jar}"/>
-				<include name="${shapes.jar}"/>
 				<include name="${sonar.client.jar}"/>
 				<include name="${sonar.server.jar}"/>
 				<include name="${tms-log.jar}"/>

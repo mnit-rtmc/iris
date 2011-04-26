@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.map.AbstractMarker;
 
 /**
  * Marker used to paint detector stations.

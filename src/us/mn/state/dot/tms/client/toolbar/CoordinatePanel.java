@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  AHMCT, University of California, Davis
+ * Copyright (C) 2010-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,52 +20,34 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import javax.swing.JLabel;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.UTMPosition;
-import us.mn.state.dot.geokit.UTMZone;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
  * A tool panel that contains the map coordinates of the mouse pointer.
  *
  * @author Stephen Donecker
  * @author Michael Darter
- * @company University of California, Davis
+ * @author Douglas Lau
  */
 public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 
-	/** The map */
-	protected final MapBean m_map;
+	/** Map bean */
+	protected final MapBean map;
 
-	/** The label used for cursor coordinates */
-	protected final JLabel m_coordinates = new JLabel();
+	/** Label used for cursor coordinates */
+	protected final JLabel coord_lbl = new JLabel();
 
-	/** Determine displayed coordinate type */
-	static protected final String COORDINATE_TYPE = 
-		SystemAttrEnum.MAP_TOOLBAR_COORDS.getString();
+	/** Lat/lon decimal format */
+	static protected final String LAT_LON_FORMAT = "0.000000";
 
-	/** UTM zone for conversion to lat/lon */
-	static protected final UTMZone UTM_ZONE =
-		new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
-			SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean());
-
-	/** The lat long decimal format */
-	static protected final String LAT_LONG_DECIMAL_FORMAT = "0.000000";
-
-	/** The UTM decimal format */
-	static protected final String UTM_DECIMAL_FORMAT = "0.0";
-
-	/** Constructor */
+	/** Create a new coordinate panel */
 	public CoordinatePanel(MapBean m) {
 		assert m !=  null;
-		m_map = m;
-		add(m_coordinates);
-		// listen for mouse motion
-		m_map.addMouseMotionListener(this);		
+		map = m;
+		add(coord_lbl);
+		map.addMouseMotionListener(this);
 	}
 
 	/** is this panel IRIS enabled? */
@@ -72,38 +55,26 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 		return true;
 	}
 
-	/** Process the mouse moved event and update the status bar */
+	/** Process the mouse moved event */
 	public void mouseMoved(MouseEvent e) {
-		Point2D p = m_map.transformPoint(e.getPoint());
-		// UTM
-		if(COORDINATE_TYPE.toLowerCase().equals("utm")) {
-			DecimalFormat df = 
-				new DecimalFormat(UTM_DECIMAL_FORMAT);
-			String easting = df.format(p.getX());
-			String northing = df.format(p.getY());
-			m_coordinates.setText(easting + " m E " + 
-				northing + " m N");
-		// WGS84
-		} else {
-			UTMPosition utm = new UTMPosition(UTM_ZONE, p.getX(),
-				p.getY());
-			Position pos = utm.getPosition(GeodeticDatum.WGS_84);
-			DecimalFormat df = 
-				new DecimalFormat(LAT_LONG_DECIMAL_FORMAT);
-			String lat = df.format(pos.getLatitude());
-			String lon = df.format(pos.getLongitude());
-			m_coordinates.setText("lat " + lat + 
-				"\u00B0 lon " + lon + "\u00B0"); 
-		}
+		Point2D p = map.transformPoint(e.getPoint());
+		SphericalMercatorPosition smp =
+			new SphericalMercatorPosition(p.getX(), p.getY());
+		Position pos = smp.getPosition();
+		DecimalFormat df = new DecimalFormat(LAT_LON_FORMAT);
+		String lat = df.format(pos.getLatitude());
+		String lon = df.format(pos.getLongitude());
+		coord_lbl.setText("lat " + lat + "\u00B0 lon " + lon +"\u00B0");
 	}
 
-	/** Process the mouse dragged event and update the status bar */
+	/** Process the mouse dragged event */
 	public void mouseDragged(MouseEvent e) {
-		mouseMoved(e);
+		// dragging on the map is for panning,
+		// so coordinate bar should not be updated
 	}
 
-	/** cleanup */
+	/** Cleanup */
 	public void dispose() {
-		m_map.removeMouseMotionListener(this);		
+		map.removeMouseMotionListener(this);
 	}
 }

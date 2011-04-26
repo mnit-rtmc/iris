@@ -132,12 +132,10 @@ fi
 %{_clientdir}/lib/mail.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
 %{_clientdir}/lib/iris-common-%{version}.jar
-%{_clientdir}/lib/MapBean-@@MAPBEAN.VERSION@@.jar
+%{_clientdir}/lib/mapbean-@@MAPBEAN.VERSION@@.jar
 %{_clientdir}/lib/scheduler-@@SCHEDULER.VERSION@@.jar
-%{_clientdir}/lib/shapes-@@SHAPES.VERSION@@.jar
 %{_clientdir}/lib/sonar-client-@@SONAR.VERSION@@.jar
 %{_clientdir}/lib/tdxml-@@TDXML.VERSION@@.jar
 %{_clientdir}/lib/geokit-@@GEOKIT.VERSION@@.jar
 %{_clientdir}/lib/tms-log-@@TMSLOG.VERSION@@.jar
-%{_clientdir}/lib/TrafMap-@@TRAFMAP.VERSION@@.jar
 %attr(0644,tms,apache) %{_clientdir}/session_ids

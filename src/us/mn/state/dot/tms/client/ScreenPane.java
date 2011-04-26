@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,11 @@ import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.geokit.UTMPosition;
+import us.mn.state.dot.geokit.UTMZone;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapToolBar;
@@ -37,6 +42,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MapExtent;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -51,6 +57,12 @@ import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
  * @author Michael Darter
  */
 public class ScreenPane extends JPanel {
+
+	/** UTM zone for conversion to lat/lon */
+	static protected UTMZone utmZone() {
+		return new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
+			SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean());
+	}
 
 	/** Tabbed side pane */
 	protected final JTabbedPane tab_pane;
@@ -220,12 +232,36 @@ public class ScreenPane extends JPanel {
 		JButton b = new JButton(me.getName());
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
-				map.zoomTo(new Rectangle2D.Double(
-					me.getEasting(), me.getNorthing(),
-					me.getEastSpan(), me.getNorthSpan()
-				));
+				setMapExtent(me);
 			}
 		});
 		return b;
+	}
+
+	/** Set the map extent */
+	public void setMapExtent(MapExtent me) {
+		map.setExtent(createExtent(me));
+	}
+
+	/** Create an extent rectangle in spherical mercator units */
+	static protected Rectangle2D createExtent(MapExtent me) {
+		SphericalMercatorPosition p0 = position(me.getEasting(),
+			me.getNorthing());
+		SphericalMercatorPosition p1 = position(me.getEasting() +
+			me.getEastSpan(), me.getNorthing() + me.getNorthSpan());
+		double x = p0.getX();
+		double y = p0.getY();
+		double w = p1.getX() - p0.getX();
+		double h = p1.getY() - p0.getY();
+		return new Rectangle2D.Double(x, y, w, h);
+	}
+
+	/** Get a spherical mercator position */
+	static protected SphericalMercatorPosition position(int easting,
+		int northing)
+	{
+		UTMPosition utm = new UTMPosition(utmZone(), easting, northing);
+		Position p = utm.getPosition(GeodeticDatum.WGS_84);
+		return SphericalMercatorPosition.convert(p);
 	}
 }

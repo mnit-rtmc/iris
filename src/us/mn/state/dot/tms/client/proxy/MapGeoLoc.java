@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,16 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.geokit.UTMPosition;
+import us.mn.state.dot.geokit.UTMZone;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Helper for creating location transforms.
@@ -29,6 +35,11 @@ import us.mn.state.dot.tms.GeoLocHelper;
  * @author Douglas Lau
  */
 public class MapGeoLoc implements MapObject {
+
+	/** UTM zone for conversion to lat/lon */
+	static protected final UTMZone UTM_ZONE =
+		new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
+			SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean());
 
 	/** Radians to rotate marker for a Northbound device */
 	static protected final double RAD_NORTH = Math.toRadians(0);
@@ -44,6 +55,9 @@ public class MapGeoLoc implements MapObject {
 
 	/** Geo location */
 	protected final GeoLoc loc;
+
+	/** Spherical mercator position */
+	protected SphericalMercatorPosition pos;
 
 	/** Get the geo location */
 	public GeoLoc getGeoLoc() {
@@ -100,11 +114,15 @@ public class MapGeoLoc implements MapObject {
 			return getDefaultAngle();
 	}
 
-	/** Set a point */
+	/** Set a point relative to the location, offset by the tangent angle.
+	 * @param p Point to set.
+	 * @param distance Distance from the location, in meter units.
+	 * @return true If the point was set, otherwise false. */
 	public boolean setPoint(Point2D p, float distance) {
-		Integer x = GeoLocHelper.getTrueEasting(loc);
-		Integer y = GeoLocHelper.getTrueNorthing(loc);
-		if(x != null && y != null) {
+		SphericalMercatorPosition smp = pos;
+		if(smp != null) {
+			double x = smp.getX();
+			double y = smp.getY();
 			Double t = tangent;
 			if(t != null) {
 				double xo = distance * Math.cos(t);
@@ -122,14 +140,25 @@ public class MapGeoLoc implements MapObject {
 
 	/** Update the traffic device transform */
 	protected void updateTransform() {
-		int easting = 0;
-		int northing = 0;
-		if(loc.getEasting() != null)
-			easting += loc.getEasting();
-		if(loc.getNorthing() != null)
-			northing += loc.getNorthing();
-		transform.setToTranslation(easting, northing);
+		Integer easting = GeoLocHelper.getTrueEasting(loc);
+		Integer northing = GeoLocHelper.getTrueNorthing(loc);
+		if(easting != null && northing != null) {
+			pos = createPosition(easting, northing);
+			transform.setToTranslation(pos.getX(), pos.getY());
+		} else {
+			pos = null;
+			transform.setToIdentity();
+		}
 		transform.rotate(getTangent());
+	}
+
+	/** Create spherical mercator position */
+	protected SphericalMercatorPosition createPosition(int easting,
+		int northing)
+	{
+		UTMPosition utm = new UTMPosition(UTM_ZONE, easting, northing);
+		Position p = utm.getPosition(GeodeticDatum.WGS_84);
+		return SphericalMercatorPosition.convert(p);
 	}
 
 	/** Get the transform to render as a map object */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
+import us.mn.state.dot.map.TileLayer;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
@@ -34,8 +34,6 @@ import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
@@ -107,6 +105,9 @@ public class Session {
 	public Logger getLogger() {
 		return logger;
 	}
+
+	/** Tile layer */
+	protected final TileLayer tile_layer;
 
 	/** Segment layer */
 	protected final SegmentLayer seg_layer;
@@ -230,6 +231,15 @@ public class Session {
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
 		seg_layer = r_node_manager.getSegmentLayer();
+		tile_layer = createTileLayer(props.getProperty("map.tile.url"));
+	}
+
+	/** Create the tile layer */
+	protected TileLayer createTileLayer(String url) {
+		if(url != null)
+			return new TileLayer("Base map", url, 500);
+		else
+			return null;
 	}
 
 	/** Initialize the session */
@@ -237,6 +247,8 @@ public class Session {
 		initializeManagers();
 		addTabs();
 		seg_layer.start(props, logger);
+		if(tile_layer != null)
+			tile_layer.initialize();
 	}
 
 	/** Initialize all the proxy managers */
@@ -276,6 +288,8 @@ public class Session {
 	 * @param mb Map bean to render the layer states.
 	 * @param mm Map model to contain layer states. */
 	public void createLayers(MapBean mb, MapModel mm) {
+		if(tile_layer != null)
+			mm.addLayer(tile_layer.createState(mb));
 		if(seg_layer != null)
 			mm.addLayer(seg_layer.createState(mb));
 		if(canRead(Camera.SONAR_TYPE))

@@ -51,7 +51,7 @@ public class HelpMenu extends JMenu {
 		item.setMnemonic('S');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new Support());
+				desktop.show(new SupportForm());
 			}
 		};
 		add(item);

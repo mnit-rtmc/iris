@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
+ * Copyright (C) 2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +15,8 @@
  */
 package us.mn.state.dot.tms;
 
-import java.awt.geom.Rectangle2D;
-
 /**
- * Helper class for MapExtent. Used on the client and server.
+ * Helper class for MapExtent.
  *
  * @author Michael Darter
  */
@@ -30,20 +29,7 @@ public class MapExtentHelper extends BaseHelper {
 
 	/** Lookup the MapExtent with the specified name */
 	static public MapExtent lookup(String name) {
-		if(namespace == null)
-			return null;
-		return (MapExtent)namespace.lookupObject(
-			MapExtent.SONAR_TYPE, name);
-	}
-
-	/** Get home extent */
-	public static Rectangle2D getHomeExtent() {
-		MapExtent e = lookup("Home");
-		Rectangle2D.Double r = null;
-		if(e != null)
-			r = new Rectangle2D.Double(
-				e.getEasting(), e.getNorthing(), 
-				e.getEastSpan(), e.getNorthSpan());
-		return r;
+		return (MapExtent)namespace.lookupObject(MapExtent.SONAR_TYPE,
+			name);
 	}
 }
