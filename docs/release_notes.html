@@ -11,6 +11,60 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.126.0 (26 April 2011)</dt>
+	<dd><ul>
+		<li>
+			Changed client base map to use tiles instead of
+			shapefiles.
+			Map is now projected to spherical mercator coordinates
+			instead of UTM.
+		</li>
+		<li>
+			Splash screen removed -- startup is very fast now.
+		</li>
+		<li>
+			Fixed problems with NTCIP maintenance status for signs.
+		</li>
+		<li>
+			Fixed bug which prevented IRIS from restarting when
+			the Java virtual machine crashes.
+		</li>
+		<li>
+			Timeout LDAP authentications after 5 seconds.
+		</li>
+		<li>
+			Fixed serious SONAR stalling bug.
+		</li>
+		<li>
+			Fixed an infinite loop on corridor milepoint
+			calculation.
+		</li>
+		<li>
+			Fixed bug in dmsxml protocol which caused sign messages
+			to be deleted prematurely.
+		</li>
+		<li>
+			Bypass pixel error checks when blanking signs.
+		</li>
+		<li>
+			Fixed infinite panning problem in manchester PTZ
+			protocol.
+		</li>
+		<li>
+			Added camera_id_blank system attribute to specify a
+			camera to use when unpublishing a camera.
+		</li>
+		<li>
+			Added dms_pixel_maint_threshold system attribute to
+			specify how many pixels need to be failed before a
+			sign goes to maintenance status.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.126.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.125.0 (13 December 2010)</dt>
 	<dd><ul>
 		<li>
