@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@ public class XmlConfigJob extends Job {
 
 	/** Detector XML writer */
 	protected final DetectorXmlWriter det_writer = new DetectorXmlWriter();
+
+	/** R_Node XML writer */
+	protected final R_NodeXmlWriter node_writer = new R_NodeXmlWriter();
 
 	/** Ramp meter XML writer */
 	protected final RampMeterXmlWriter meter_writer =
@@ -60,9 +63,9 @@ public class XmlConfigJob extends Job {
 
 	/** Write the TMS xml configuration files */
 	protected void writeXmlConfiguration() throws IOException {
-		det_writer.write();
 		BaseObjectImpl.corridors.createCorridors();
-		new R_NodeXmlWriter(BaseObjectImpl.corridors).write();
+		det_writer.write();
+		node_writer.write();
 		meter_writer.write();
 		cam_writer.write();
 		loc_writer.write();

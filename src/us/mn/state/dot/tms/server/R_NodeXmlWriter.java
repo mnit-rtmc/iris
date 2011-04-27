@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,9 +31,9 @@ public class R_NodeXmlWriter extends XmlWriter {
 	protected final CorridorManager manager;
 
 	/** Create a new r_node XML writer */
-	public R_NodeXmlWriter(CorridorManager m) {
+	public R_NodeXmlWriter() {
 		super(R_NODE_XML, false);
-		manager = m;
+		manager = BaseObjectImpl.corridors;
 	}
 
 	/** Print the body of the r_node list XML file */
