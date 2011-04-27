@@ -26,21 +26,8 @@ import us.mn.state.dot.sched.TimeSteward;
  */
 public class XmlConfigJob extends Job {
 
-	/** Detector XML writer */
-	protected final DetectorXmlWriter det_writer = new DetectorXmlWriter();
-
-	/** R_Node XML writer */
-	protected final R_NodeXmlWriter node_writer = new R_NodeXmlWriter();
-
-	/** Ramp meter XML writer */
-	protected final RampMeterXmlWriter meter_writer =
-		new RampMeterXmlWriter();;
-
-	/** Camera XML writer */
-	protected final CameraXmlWriter cam_writer = new CameraXmlWriter();
-
-	/** Geo loc XML writer */
-	protected final GeoLocXmlWriter loc_writer = new GeoLocXmlWriter();
+	/** TMS config XML writer */
+	protected final TmsConfigXmlWriter xml_writer =new TmsConfigXmlWriter();
 
 	/** Create a new XML config writer job */
 	public XmlConfigJob() {
@@ -64,10 +51,6 @@ public class XmlConfigJob extends Job {
 	/** Write the TMS xml configuration files */
 	protected void writeXmlConfiguration() throws IOException {
 		BaseObjectImpl.corridors.createCorridors();
-		det_writer.write();
-		node_writer.write();
-		meter_writer.write();
-		cam_writer.write();
-		loc_writer.write();
+		xml_writer.writeFragments();
 	}
 }
