@@ -539,10 +539,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return corridors.getCorridor(cid);
 	}
 
-	/** Print a single detector as an XML element */
-	public void printXmlElement(PrintWriter out) {
+	/** Print meter as an XML element */
+	public void printXml(PrintWriter out) {
 		lookupGreenDetector();
-		out.print("<meter");
+		out.print("  <meter");
 		out.print(XmlWriter.createAttribute("name", getName()));
 		out.print(XmlWriter.createAttribute("label", getLabel()));
 		out.print(" storage='" + getStorage() + "'");
@@ -577,6 +577,35 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			ds.getDetectorSet(LaneType.QUEUE).asAttr()));
 		out.print(XmlWriter.createAttribute("bypass",
 			ds.getDetectorSet(LaneType.BYPASS).asAttr()));
+	}
+
+	/** Get the r_node associated with the ramp meter */
+	public R_NodeImpl getR_Node() {
+		Corridor.NodeFinder finder = new Corridor.NodeFinder() {
+			public boolean check(R_NodeImpl n) {
+				if(n.getNodeType() ==
+					R_NodeType.ENTRANCE.ordinal())
+				{
+					GeoLoc l = n.getGeoLoc();
+					if(GeoLocHelper.matchesRoot(l, geo_loc))
+						return true;
+				}
+				return false;
+			}
+		};
+		Corridor corridor = getCorridor();
+		if(corridor != null) {
+			R_NodeImpl n = corridor.findNode(finder);
+			if(n != null)
+				return n;
+			String cd = corridor.getLinkedCDRoad();
+			if(cd != null) {
+				Corridor cd_road = corridors.getCorridor(cd);
+				if(cd_road != null)
+					return cd_road.findNode(finder);
+			}
+		}
+		return null;
 	}
 
 	/** Get the number of milliseconds the meter has been failed */

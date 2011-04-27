@@ -14,31 +14,27 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 
 /**
  * This class writes out the current r_node configuration to an XML file.
  *
  * @author Douglas Lau
  */
-public class R_NodeXmlWriter extends XmlWriter {
-
-	/** R_Node list XML file */
-	static protected final String R_NODE_XML = "r_nodes.xml";
+public class R_NodeXmlWriter {
 
 	/** Corridor manager */
 	protected final CorridorManager manager;
 
 	/** Create a new r_node XML writer */
 	public R_NodeXmlWriter() {
-		super(R_NODE_XML, false);
 		manager = BaseObjectImpl.corridors;
 	}
 
 	/** Print the DTD for r_node elements */
 	public void printDtd(PrintWriter out) {
-		out.println("<!ELEMENT corridor (r_node)*>");
+		out.println("<!ELEMENT corridor (r_node | meter)*>");
 		out.println("<!ATTLIST corridor route CDATA #REQUIRED>");
 		out.println("<!ATTLIST corridor dir CDATA #REQUIRED>");
 		out.println("<!ELEMENT r_node (detector)*>");
@@ -64,10 +60,21 @@ public class R_NodeXmlWriter extends XmlWriter {
 		out.println("<!ATTLIST detector category CDATA ''>");
 		out.println("<!ATTLIST detector lane CDATA '0'>");
 		out.println("<!ATTLIST detector field CDATA '22.0'>");
+		out.println("<!ELEMENT meter EMPTY>");
+		out.println("<!ATTLIST meter name CDATA #REQUIRED>");
+		out.println("<!ATTLIST meter label CDATA #REQUIRED>");
+		out.println("<!ATTLIST meter storage CDATA #REQUIRED>");
+		out.println("<!ATTLIST meter max_wait CDATA '" +
+			RampMeterImpl.DEFAULT_MAX_WAIT +"'>");
+		out.println("<!ATTLIST meter green CDATA #IMPLIED>");
+		out.println("<!ATTLIST meter passage CDATA #IMPLIED>");
+		out.println("<!ATTLIST meter merge CDATA #IMPLIED>");
+		out.println("<!ATTLIST meter queue CDATA #IMPLIED>");
+		out.println("<!ATTLIST meter bypass CDATA #IMPLIED>");
 	}
 
 	/** Print the body of the r_node list XML file */
-	public void print(PrintWriter out) {
-		manager.printXmlBody(out);
+	public void print(PrintWriter out, Map<String, RampMeterImpl> m_nodes) {
+		manager.printXmlBody(out, m_nodes);
 	}
 }

@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Direction;
@@ -168,11 +169,20 @@ public class Corridor extends CorridorBase {
 	}
 
 	/** Print out the corridor to an XML file */
-	public void printXml(PrintWriter out) {
+	public void printXml(PrintWriter out,
+		Map<String, RampMeterImpl> m_nodes)
+	{
 		out.println("<corridor route='" + roadway + "' dir='" +
 			Direction.fromOrdinal(road_dir).abbrev + "'>");
-		for(R_Node n: r_nodes)
-			((R_NodeImpl)n).printXml(out);
+		for(R_Node n: r_nodes) {
+			R_NodeImpl r_node = (R_NodeImpl)n;
+			r_node.printXml(out);
+			String key = r_node.getName();
+			if(m_nodes.containsKey(key)) {
+				RampMeterImpl meter = m_nodes.get(key);
+				meter.printXml(out);
+			}
+		}
 		out.println("</corridor>");
 	}
 

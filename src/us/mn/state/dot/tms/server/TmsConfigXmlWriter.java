@@ -65,18 +65,16 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	/** Print the DTD */
 	protected void printDtd(PrintWriter out) {
 		out.println("<!DOCTYPE tms_config [");
-		out.println("<!ELEMENT tms_config (corridor | meter)*>");
+		out.println("<!ELEMENT tms_config (corridor)*>");
 		out.println("<!ATTLIST tms_config system CDATA #REQUIRED>");
 		out.println("<!ATTLIST tms_config time_stamp CDATA #REQUIRED>");
 		node_writer.printDtd(out);
-		meter_writer.printDtd(out);
 		out.println("]>");
 	}
 
 	/** Print the body of the TMS config XML file */
 	protected void printBody(PrintWriter out) {
-		node_writer.print(out);
-		meter_writer.print(out);
+		node_writer.print(out, meter_writer.getNodeMapping());
 	}
 
 	/** Print the tail of the TMS config XML file */

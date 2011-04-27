@@ -132,9 +132,11 @@ public class CorridorManager {
 	}
 
 	/** Print the body of the r_node configuration XML file */
-	public synchronized void printXmlBody(PrintWriter out) {
+	public synchronized void printXmlBody(PrintWriter out,
+		Map<String, RampMeterImpl> m_nodes)
+	{
 		for(Corridor c: corridors.values())
-			c.printXml(out);
+			c.printXml(out, m_nodes);
 	}
 
 	/** Find the current bottlenecks for all corridors */
