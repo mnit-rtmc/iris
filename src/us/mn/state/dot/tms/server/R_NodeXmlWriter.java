@@ -41,7 +41,7 @@ public class R_NodeXmlWriter extends XmlWriter {
 		out.println("<!ELEMENT corridor (r_node)*>");
 		out.println("<!ATTLIST corridor route CDATA #REQUIRED>");
 		out.println("<!ATTLIST corridor dir CDATA #REQUIRED>");
-		out.println("<!ELEMENT r_node EMPTY>");
+		out.println("<!ELEMENT r_node (detector)*>");
 		out.println("<!ATTLIST r_node id ID #REQUIRED>");
 		out.println("<!ATTLIST r_node n_type CDATA ''>");
 		out.println("<!ATTLIST r_node pickable CDATA 'f'>");
@@ -58,6 +58,13 @@ public class R_NodeXmlWriter extends XmlWriter {
 			R_NodeImpl.DEFAULT_SPEED_LIMIT +"'>");
 		out.println("<!ATTLIST r_node dets IDREFS #IMPLIED>");
 		out.println("<!ATTLIST r_node downstream IDREFS #IMPLIED>");
+		out.println("<!ELEMENT detector EMPTY>");
+		out.println("<!ATTLIST detector name CDATA #REQUIRED>");
+		out.println("<!ATTLIST detector label CDATA 'FUTURE'>");
+		out.println("<!ATTLIST detector abandoned CDATA 'f'>");
+		out.println("<!ATTLIST detector category CDATA ''>");
+		out.println("<!ATTLIST detector lane CDATA '0'>");
+		out.println("<!ATTLIST detector field CDATA '22.0'>");
 	}
 
 	/** Print the body of the r_node list XML file */

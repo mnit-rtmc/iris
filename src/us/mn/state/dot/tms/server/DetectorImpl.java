@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -814,8 +814,8 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		float field = getFieldLength();
 		String l = XmlWriter.validateElementValue(
 			DetectorHelper.getLabel(this));
-		// NOTE: the 'D' is needed for XML validity
-		out.print("<detector index='D" + name + "' ");
+		out.print("<detector ");
+		out.print(XmlWriter.createAttribute("name", name));
 		if(!l.equals("FUTURE"))
 			out.print("label='" + l + "' ");
 		if(abandoned)

@@ -29,9 +29,6 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	/** TMS config XML file */
 	static protected final String CONFIG_XML = "tms_config.xml";
 
-	/** Detector XML writer */
-	protected final DetectorXmlWriter det_writer = new DetectorXmlWriter();
-
 	/** R_Node XML writer */
 	protected final R_NodeXmlWriter node_writer = new R_NodeXmlWriter();
 
@@ -68,11 +65,9 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	/** Print the DTD */
 	protected void printDtd(PrintWriter out) {
 		out.println("<!DOCTYPE tms_config [");
-		out.println("<!ELEMENT tms_config (corridor | meter | " +
-			"detector)*>");
+		out.println("<!ELEMENT tms_config (corridor | meter)*>");
 		out.println("<!ATTLIST tms_config system CDATA #REQUIRED>");
 		out.println("<!ATTLIST tms_config time_stamp CDATA #REQUIRED>");
-		det_writer.printDtd(out);
 		node_writer.printDtd(out);
 		meter_writer.printDtd(out);
 		out.println("]>");
@@ -80,7 +75,6 @@ public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** Print the body of the TMS config XML file */
 	protected void printBody(PrintWriter out) {
-		det_writer.print(out);
 		node_writer.print(out);
 		meter_writer.print(out);
 	}
@@ -92,7 +86,6 @@ public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** Write individual XML fragments */
 	public void writeFragments() throws IOException {
-		det_writer.write();
 		node_writer.write();
 		meter_writer.write();
 		cam_writer.write();

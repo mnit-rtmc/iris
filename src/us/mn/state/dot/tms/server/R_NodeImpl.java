@@ -588,21 +588,22 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		int slim = getSpeedLimit();
 		if(slim != DEFAULT_SPEED_LIMIT)
 			out.print("s_limit='" + slim + "' ");
-		DetectorImpl[] dets = detectors.toArray();
-		if(dets.length > 0) {
-			out.print("dets='");
-			StringBuilder b = new StringBuilder();
-			for(DetectorImpl det: dets)
-				b.append("D" + det.getName() + " ");
-			out.print(b.toString().trim() + "' ");
-		}
 		if(downstream.size() > 0) {
 			out.print("downstream='");
 			StringBuilder b = new StringBuilder();
 			for(R_NodeImpl d: downstream)
-				b.append("N" + d.getName() + " ");
+				b.append(d.getName() + " ");
 			out.print(b.toString().trim() + "' ");
 		}
-		out.println("/>");
+		DetectorImpl[] dets = detectors.toArray();
+		if(dets.length > 0) {
+			out.println(">");
+			for(DetectorImpl det: dets) {
+				out.print("\t");
+				det.printXmlElement(out);
+			}
+			out.println("</r_node>");
+		} else
+			out.println("/>");
 	}
 }
