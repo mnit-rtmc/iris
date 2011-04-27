@@ -350,15 +350,14 @@ public class GeoLocHelper extends BaseHelper {
 			matchRootName(x0.getName(), x1.getName());
 	}
 
-	/** Return GeoLoc as Point in WGS84 */
-	static public Point getWgs84Position(GeoLoc p) {
+	/** Return GeoLoc as a Position in WGS84 */
+	static public Position getWgs84Position(GeoLoc p) {
 		Integer easting = getTrueEasting(p);
 		Integer northing = getTrueNorthing(p);
 		if(easting == null || northing == null)
 			return null;
 		UTMPosition utm = new UTMPosition(getZone(), easting, northing);
-		Position pos = utm.getPosition(GeodeticDatum.WGS_84);
-		return new Point(pos.getLongitude(), pos.getLatitude());
+		return utm.getPosition(GeodeticDatum.WGS_84);
 	}
 
 	/** Find geo-locs using a Checker */

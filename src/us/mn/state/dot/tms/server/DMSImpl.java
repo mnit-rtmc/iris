@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
@@ -44,6 +45,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.Point;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -1409,12 +1411,13 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return getName();
 	}
 
-	/** get geometry (KmlPlacemark interface) */
+	/** Get geometry (KmlPlacemark interface) */
 	public KmlGeometry getGeometry() {
-		GeoLoc loc = getGeoLoc();
-		if(loc == null)
+		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
+		if(pos != null)
+			return new Point(pos.getLongitude(), pos.getLatitude());
+		else
 			return null;
-		return GeoLocHelper.getWgs84Position(loc);
 	}
 
 	/** get placemark description (KmlPlacemark interface) */

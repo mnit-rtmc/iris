@@ -86,8 +86,6 @@ public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** Write individual XML fragments */
 	public void writeFragments() throws IOException {
-		node_writer.write();
-		meter_writer.write();
 		cam_writer.write();
 		loc_writer.write();
 	}
