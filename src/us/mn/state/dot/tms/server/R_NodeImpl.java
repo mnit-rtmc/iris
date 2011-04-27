@@ -556,22 +556,23 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	public void printXml(PrintWriter out) {
 		out.print("  <r_node");
 		out.print(XmlWriter.createAttribute("name", name));
-		out.print(" n_type='" + node_type.description + "'");
+		if(node_type != R_NodeType.STATION)
+			out.print(" n_type='" + node_type.description + "'");
 		if(pickable)
 			out.print(" pickable='t'");
 		if(above)
 			out.print(" above='t'");
-		out.print(" transition='" + transition.description + "'");
+		if(transition != R_NodeTransition.NONE)
+			out.print(" transition='" + transition.description+"'");
 		String sid = station_id;
 		if(sid != null)
-			out.print(" station_id='" + sid + "'");
+			out.print(XmlWriter.createAttribute("station_id", sid));
 		GeoLoc loc = geo_loc;
 		if(loc != null) {
 			Road x = loc.getCrossStreet();
 			if(x != null) {
-				String xs = XmlWriter.validateElementValue(
-					x.getName());
-				out.print(" label='" + xs + "'");
+				out.print(XmlWriter.createAttribute("label",
+					x.getName()));
 			}
 			out.print(" easting='" + getTrueEasting() + "'");
 			out.print(" northing='" + getTrueNorthing() + "'");
