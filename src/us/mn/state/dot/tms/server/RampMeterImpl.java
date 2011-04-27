@@ -542,12 +542,13 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Print a single detector as an XML element */
 	public void printXmlElement(PrintWriter out) {
 		lookupGreenDetector();
-		out.print("<meter id='" + getName() + "' ");
-		out.print("label='" + getLabel() + "' ");
-		out.print("storage='" + getStorage() + "' ");
+		out.print("<meter");
+		out.print(XmlWriter.createAttribute("name", getName()));
+		out.print(XmlWriter.createAttribute("label", getLabel()));
+		out.print(" storage='" + getStorage() + "'");
 		int w = getMaxWait();
 		if(w != DEFAULT_MAX_WAIT)
-			out.print("max_wait='" + w + "' ");
+			out.print(" max_wait='" + w + "'");
 		printMeterDetectors(out);
 		out.println("/>");
 	}
@@ -560,38 +561,22 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		Road x = geo_loc.getCrossStreet();
 		if(x != null)
 			b.append(x.getName());
-		return XmlWriter.validateElementValue(b.toString().trim());
+		return b.toString().trim();
 	}
 
 	/** Print the detectors associated with a ramp meter */
 	protected void printMeterDetectors(PrintWriter out) {
 		DetectorSet ds = getDetectorSet();
-		printAttribute(out, "green",
-			ds.getDetectorSet(LaneType.GREEN));
-		printAttribute(out, "passage",
-			ds.getDetectorSet(LaneType.PASSAGE));
-		printAttribute(out, "merge",
-			ds.getDetectorSet(LaneType.MERGE));
-		printAttribute(out, "queue",
-			ds.getDetectorSet(LaneType.QUEUE));
-		printAttribute(out, "bypass",
-			ds.getDetectorSet(LaneType.BYPASS));
-	}
-
-	/** Print a meter detector set attribute */
-	protected void printAttribute(PrintWriter out, String attr,
-		DetectorSet ds)
-	{
-		if(ds.size() > 0) {
-			StringBuilder b = new StringBuilder();
-			for(DetectorImpl det: ds.toArray()) {
-				b.append(" D");
-				b.append(det.getName());
-			}
-			out.print(attr + "='");
-			out.print(b.toString().trim());
-			out.print("' ");
-		}
+		out.print(XmlWriter.createAttribute("green",
+			ds.getDetectorSet(LaneType.GREEN).asAttr()));
+		out.print(XmlWriter.createAttribute("passage",
+			ds.getDetectorSet(LaneType.PASSAGE).asAttr()));
+		out.print(XmlWriter.createAttribute("merge",
+			ds.getDetectorSet(LaneType.MERGE).asAttr()));
+		out.print(XmlWriter.createAttribute("queue",
+			ds.getDetectorSet(LaneType.QUEUE).asAttr()));
+		out.print(XmlWriter.createAttribute("bypass",
+			ds.getDetectorSet(LaneType.BYPASS).asAttr()));
 	}
 
 	/** Get the number of milliseconds the meter has been failed */

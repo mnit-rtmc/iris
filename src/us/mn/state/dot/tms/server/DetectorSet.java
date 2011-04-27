@@ -222,6 +222,21 @@ public class DetectorSet {
 		return buf.toString();
 	}
 
+	/** Get a detector set attribute string */
+	public String asAttr() {
+		if(size() > 0) {
+			StringBuilder b = new StringBuilder();
+			for(DetectorImpl det: detectors) {
+				b.append(" ");
+				b.append(det.getName());
+			}
+			String attr = b.toString().trim();
+			if(attr.length() > 0)
+				return attr;
+		}
+		return null;
+	}
+
 	/** Get the detector set for the given lane type */
 	public DetectorSet getDetectorSet(LaneType lt) {
 		DetectorSet set = new DetectorSet();

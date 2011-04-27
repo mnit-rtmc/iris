@@ -42,7 +42,7 @@ public class R_NodeXmlWriter extends XmlWriter {
 		out.println("<!ATTLIST corridor route CDATA #REQUIRED>");
 		out.println("<!ATTLIST corridor dir CDATA #REQUIRED>");
 		out.println("<!ELEMENT r_node (detector)*>");
-		out.println("<!ATTLIST r_node id ID #REQUIRED>");
+		out.println("<!ATTLIST r_node name CDATA #REQUIRED>");
 		out.println("<!ATTLIST r_node n_type CDATA ''>");
 		out.println("<!ATTLIST r_node pickable CDATA 'f'>");
 		out.println("<!ATTLIST r_node above CDATA 'f'>");
@@ -56,8 +56,7 @@ public class R_NodeXmlWriter extends XmlWriter {
 		out.println("<!ATTLIST r_node shift CDATA '0'>");
 		out.println("<!ATTLIST r_node s_limit CDATA '" +
 			R_NodeImpl.DEFAULT_SPEED_LIMIT +"'>");
-		out.println("<!ATTLIST r_node dets IDREFS #IMPLIED>");
-		out.println("<!ATTLIST r_node downstream IDREFS #IMPLIED>");
+		out.println("<!ATTLIST r_node downstream CDATA #IMPLIED>");
 		out.println("<!ELEMENT detector EMPTY>");
 		out.println("<!ATTLIST detector name CDATA #REQUIRED>");
 		out.println("<!ATTLIST detector label CDATA 'FUTURE'>");

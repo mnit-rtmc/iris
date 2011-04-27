@@ -38,16 +38,16 @@ public class RampMeterXmlWriter extends XmlWriter {
 	/** Print the DTD for ramp meter elements */
 	public void printDtd(PrintWriter out) {
 		out.println("<!ELEMENT meter EMPTY>");
-		out.println("<!ATTLIST meter id ID #REQUIRED>");
+		out.println("<!ATTLIST meter name CDATA #REQUIRED>");
 		out.println("<!ATTLIST meter label CDATA #REQUIRED>");
 		out.println("<!ATTLIST meter storage CDATA #REQUIRED>");
 		out.println("<!ATTLIST meter max_wait CDATA '" +
 			RampMeterImpl.DEFAULT_MAX_WAIT +"'>");
-		out.println("<!ATTLIST meter green IDREFS #IMPLIED>");
-		out.println("<!ATTLIST meter passage IDREFS #IMPLIED>");
-		out.println("<!ATTLIST meter merge IDREFS #IMPLIED>");
-		out.println("<!ATTLIST meter queue IDREFS #IMPLIED>");
-		out.println("<!ATTLIST meter bypass IDREFS #IMPLIED>");
+		out.println("<!ATTLIST meter green CDATA #IMPLIED>");
+		out.println("<!ATTLIST meter passage CDATA #IMPLIED>");
+		out.println("<!ATTLIST meter merge CDATA #IMPLIED>");
+		out.println("<!ATTLIST meter queue CDATA #IMPLIED>");
+		out.println("<!ATTLIST meter bypass CDATA #IMPLIED>");
 	}
 
 	/** Print the body of the ramp meter list XML file */
