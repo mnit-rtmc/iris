@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,7 +164,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Event date (timestamp) */
-	protected Date event_date = new Date();
+	protected Date event_date = TimeSteward.getDateInstance();
 
 	/** Get the event date (timestamp) */
 	public long getEventDate() {

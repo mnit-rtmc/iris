@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -51,7 +52,7 @@ public class SendSettingsJob extends Job {
 	/** Perform the send settings job */
 	public void perform() {
 		System.err.println("Sending settings to all controllers @ " +
-			new Date());
+			TimeSteward.getDateInstance());
 		sendSettings();
 	}
 

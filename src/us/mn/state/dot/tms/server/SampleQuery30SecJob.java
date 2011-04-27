@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,8 +127,8 @@ public class SampleQuery30SecJob extends Job {
 	protected void printSampleXmlHead(PrintWriter out) {
 		out.println(XmlWriter.XML_DECLARATION);
 		out.println("<!DOCTYPE traffic_sample SYSTEM 'tms.dtd'>");
-		out.println("<traffic_sample time_stamp='" + new Date() +
-			"' period='30'>");
+		out.println("<traffic_sample time_stamp='" +
+			TimeSteward.getDateInstance() + "' period='30'>");
 		out.println("\t&detectors;");
 	}
 

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
+import us.mn.state.dot.sched.TimeSteward;
 
 /**
  * This class writes out the TMS configuration data to an XML file.
@@ -61,7 +62,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 		out.println(XML_DECLARATION);
 		printDtd(out);
 		out.println("<tms_config system='RTMC' time_stamp='" +
-			new Date() + "'>");
+			TimeSteward.getDateInstance() + "'>");
 	}
 
 	/** Print the DTD */

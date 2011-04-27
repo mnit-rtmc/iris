@@ -1449,7 +1449,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		desc.append(Kml.descItem("Last Operation", getOpStatus()));
 
 		desc.append("<br>Updated by IRIS " + 
-			new Date().toString() + "<br><br>");
+			TimeSteward.getDateInstance() + "<br><br>");
 
 		desc.append("<br>");
 

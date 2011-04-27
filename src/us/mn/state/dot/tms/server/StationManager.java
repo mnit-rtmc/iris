@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
@@ -64,8 +65,8 @@ class StationManager {
 		out.println("<?xml version='1.0'?>");
 		out.println(
 			"<!DOCTYPE traffic_sample SYSTEM 'tms_config.dtd'>");
-		out.println("<traffic_sample time_stamp='" + new Date() +
-			"' period='30'>");
+		out.println("<traffic_sample time_stamp='" +
+			TimeSteward.getDateInstance() + "' period='30'>");
 		out.println("\t&r_nodes;");
 		out.println("\t&detectors;");
 	}
@@ -105,8 +106,8 @@ class StationManager {
 	/** Print the header of the station sample XML file */
 	protected void printStationXmlHead(PrintWriter out) {
 		out.println("<?xml version='1.0'?>");
-		out.println("<station_data time_stamp='" + new Date() +
-			"' sample_period='30'>");
+		out.println("<station_data time_stamp='" +
+			TimeSteward.getDateInstance() +"' sample_period='30'>");
 	}
 
 	/** Print the body of the station sample XML file */

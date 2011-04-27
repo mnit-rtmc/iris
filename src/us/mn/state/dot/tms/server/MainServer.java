@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import java.io.PrintStream;
 import java.util.Date;
 import java.util.Properties;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.BaseHelper;
@@ -101,7 +102,8 @@ public class MainServer {
 	static protected void redirectStdStreams() throws IOException {
 		System.setOut(createPrintStream(STD_OUT));
 		System.setErr(createPrintStream(STD_ERR));
-		String msg = "IRIS @@VERSION@@ restarted @ " + new Date();
+		String msg = "IRIS @@VERSION@@ restarted @ " +
+			TimeSteward.getDateInstance();
 		System.out.println(msg);
 		System.err.println(msg);
 	}
