@@ -812,20 +812,25 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		LaneType lt = lane_type;
 		short lane = getLaneNumber();
 		float field = getFieldLength();
-		String l = XmlWriter.validateElementValue(
-			DetectorHelper.getLabel(this));
-		out.print("<detector ");
+		String l = DetectorHelper.getLabel(this);
+		out.print("<detector");
 		out.print(XmlWriter.createAttribute("name", name));
 		if(!l.equals("FUTURE"))
-			out.print("label='" + l + "' ");
+			out.print(XmlWriter.createAttribute("label", l));
 		if(abandoned)
-			out.print("abandoned='t' ");
-		if(lt != LaneType.NONE && lt != LaneType.MAINLINE)
-			out.print("category='" + lt.suffix + "' ");
-		if(lane > 0)
-			out.print("lane='" + lane + "' ");
-		if(field != Constants.DEFAULT_FIELD_LENGTH)
-			out.print("field='" + field + "' ");
+			out.print(XmlWriter.createAttribute("abandoned", "t"));
+		if(lt != LaneType.NONE && lt != LaneType.MAINLINE) {
+			out.print(XmlWriter.createAttribute("category",
+				lt.suffix));
+		}
+		if(lane > 0) {
+			out.print(XmlWriter.createAttribute("lane",
+				Short.toString(lane)));
+		}
+		if(field != Constants.DEFAULT_FIELD_LENGTH) {
+			out.print(XmlWriter.createAttribute("field",
+				Float.toString(field)));
+		}
 		out.println("/>");
 	}
 

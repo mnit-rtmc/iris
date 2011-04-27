@@ -554,55 +554,55 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Print the r_node as an XML element */
 	public void printXml(PrintWriter out) {
-		out.print("\t<r_node ");
-		out.print("id='N" + getName() + "' ");
-		out.print("n_type='" + node_type.description + "' ");
+		out.print("  <r_node");
+		out.print(XmlWriter.createAttribute("name", name));
+		out.print(" n_type='" + node_type.description + "'");
 		if(pickable)
-			out.print("pickable='t' ");
+			out.print(" pickable='t'");
 		if(above)
-			out.print("above='t' ");
-		out.print("transition='" + transition.description + "' ");
+			out.print(" above='t'");
+		out.print(" transition='" + transition.description + "'");
 		String sid = station_id;
 		if(sid != null)
-			out.print("station_id='" + sid + "' ");
+			out.print(" station_id='" + sid + "'");
 		GeoLoc loc = geo_loc;
 		if(loc != null) {
 			Road x = loc.getCrossStreet();
 			if(x != null) {
 				String xs = XmlWriter.validateElementValue(
 					x.getName());
-				out.print("label='" + xs + "' ");
+				out.print(" label='" + xs + "'");
 			}
-			out.print("easting='" + getTrueEasting() + "' ");
-			out.print("northing='" + getTrueNorthing() + "' ");
+			out.print(" easting='" + getTrueEasting() + "'");
+			out.print(" northing='" + getTrueNorthing() + "'");
 		}
 		int l = getLanes();
 		if(l != 0)
-			out.print("lanes='" + l + "' ");
+			out.print(" lanes='" + l + "'");
 		boolean side = getAttachSide();
 		if(side)
-			out.print("attach_side='left' ");
+			out.print(" attach_side='left'");
 		int s = getShift();
 		if(s != 0)
-			out.print("shift='" + s + "' ");
+			out.print(" shift='" + s + "'");
 		int slim = getSpeedLimit();
 		if(slim != DEFAULT_SPEED_LIMIT)
-			out.print("s_limit='" + slim + "' ");
+			out.print(" s_limit='" + slim + "'");
 		if(downstream.size() > 0) {
-			out.print("downstream='");
+			out.print(" downstream='");
 			StringBuilder b = new StringBuilder();
 			for(R_NodeImpl d: downstream)
 				b.append(d.getName() + " ");
-			out.print(b.toString().trim() + "' ");
+			out.print(b.toString().trim() + "'");
 		}
 		DetectorImpl[] dets = detectors.toArray();
 		if(dets.length > 0) {
 			out.println(">");
 			for(DetectorImpl det: dets) {
-				out.print("\t");
+				out.print("    ");
 				det.printXmlElement(out);
 			}
-			out.println("</r_node>");
+			out.println("  </r_node>");
 		} else
 			out.println("/>");
 	}
