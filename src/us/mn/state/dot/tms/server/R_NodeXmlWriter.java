@@ -56,7 +56,7 @@ public class R_NodeXmlWriter extends XmlWriter {
 		out.println("<!ATTLIST r_node shift CDATA '0'>");
 		out.println("<!ATTLIST r_node s_limit CDATA '" +
 			R_NodeImpl.DEFAULT_SPEED_LIMIT +"'>");
-		out.println("<!ATTLIST r_node downstream CDATA #IMPLIED>");
+		out.println("<!ATTLIST r_node forks CDATA #IMPLIED>");
 		out.println("<!ELEMENT detector EMPTY>");
 		out.println("<!ATTLIST detector name CDATA #REQUIRED>");
 		out.println("<!ATTLIST detector label CDATA 'FUTURE'>");

@@ -548,6 +548,16 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return downstream;
 	}
 
+	/** Get a list of nodes forked from here */
+	public List<R_NodeImpl> getForks() {
+		LinkedList<R_NodeImpl> forks = new LinkedList<R_NodeImpl>();
+		for(R_NodeImpl d: downstream) {
+			if(!GeoLocHelper.isSameCorridor(geo_loc, d.geo_loc))
+				forks.add(d);
+		}
+		return forks;
+	}
+
 	/** Get the linked corridor for an entrance or exit */
 	public Corridor getLinkedCorridor() {
 		String c = GeoLocHelper.getLinkedCorridor(geo_loc);
@@ -596,11 +606,12 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		int slim = getSpeedLimit();
 		if(slim != DEFAULT_SPEED_LIMIT)
 			out.print(" s_limit='" + slim + "'");
-		if(downstream.size() > 0) {
-			out.print(" downstream='");
+		List<R_NodeImpl> forks = getForks();
+		if(forks.size() > 0) {
+			out.print(" forks='");
 			StringBuilder b = new StringBuilder();
-			for(R_NodeImpl d: downstream)
-				b.append(d.getName() + " ");
+			for(R_NodeImpl f: forks)
+				b.append(f.getName() + " ");
 			out.print(b.toString().trim() + "'");
 		}
 		DetectorImpl[] dets = detectors.toArray();
