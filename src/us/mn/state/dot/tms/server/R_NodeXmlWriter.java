@@ -36,6 +36,28 @@ public class R_NodeXmlWriter extends XmlWriter {
 		manager = BaseObjectImpl.corridors;
 	}
 
+	/** Print the DTD for r_node elements */
+	public void printDtd(PrintWriter out) {
+		out.println("<!ELEMENT corridor (r_node)*>");
+		out.println("<!ATTLIST corridor route CDATA #REQUIRED>");
+		out.println("<!ATTLIST corridor dir CDATA #REQUIRED>");
+		out.println("<!ELEMENT r_node EMPTY>");
+		out.println("<!ATTLIST r_node id ID #REQUIRED>");
+		out.println("<!ATTLIST r_node n_type CDATA ''>");
+		out.println("<!ATTLIST r_node station_id CDATA #IMPLIED>");
+		out.println("<!ATTLIST r_node label CDATA ''>");
+		out.println("<!ATTLIST r_node pickable CDATA 'f'>");
+		out.println("<!ATTLIST r_node easting CDATA '0'>");
+		out.println("<!ATTLIST r_node northing CDATA '0'>");
+		out.println("<!ATTLIST r_node lanes CDATA '0'>");
+		out.println("<!ATTLIST r_node attach_side CDATA 'right'>");
+		out.println("<!ATTLIST r_node shift CDATA '0'>");
+		out.println("<!ATTLIST r_node s_limit CDATA '" +
+			R_NodeImpl.DEFAULT_SPEED_LIMIT +"'>");
+		out.println("<!ATTLIST r_node dets IDREFS #IMPLIED>");
+		out.println("<!ATTLIST r_node downstream IDREFS #IMPLIED>");
+	}
+
 	/** Print the body of the r_node list XML file */
 	public void print(PrintWriter out) {
 		manager.printXmlBody(out);

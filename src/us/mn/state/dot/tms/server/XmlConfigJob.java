@@ -51,6 +51,7 @@ public class XmlConfigJob extends Job {
 	/** Write the TMS xml configuration files */
 	protected void writeXmlConfiguration() throws IOException {
 		BaseObjectImpl.corridors.createCorridors();
+		xml_writer.write();
 		xml_writer.writeFragments();
 	}
 }

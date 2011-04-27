@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		new Integer(RampMeterLock.OFF.ordinal());
 
 	/** Default maximum wait time (in seconds) */
-	static protected final int DEFAULT_MAX_WAIT = 240;
+	static public final int DEFAULT_MAX_WAIT = 240;
 
 	/** Meter debug log */
 	static protected final IDebugLog METER_LOG = new IDebugLog("meter");

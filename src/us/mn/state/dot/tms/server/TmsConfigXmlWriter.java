@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 
 /**
  * This class writes out the TMS configuration data to an XML file.
@@ -48,13 +49,44 @@ public class TmsConfigXmlWriter extends XmlWriter {
 		super(CONFIG_XML, true);
 	}
 
-	/** Print the body of the TMS config XML file */
+	/** Print the TMS config XML file */
 	public void print(final PrintWriter out) {
+		printHead(out);
+		printBody(out);
+		printTail(out);
+	}
+
+	/** Print the head of the TMS config XML file */
+	protected void printHead(PrintWriter out) {
+		out.println(XML_DECLARATION);
+		printDtd(out);
+		out.println("<tms_config system='RTMC' time_stamp='" +
+			new Date() + "'>");
+	}
+
+	/** Print the DTD */
+	protected void printDtd(PrintWriter out) {
+		out.println("<!DOCTYPE tms_config [");
+		out.println("<!ELEMENT tms_config (corridor | meter | " +
+			"detector)*>");
+		out.println("<!ATTLIST tms_config system CDATA #REQUIRED>");
+		out.println("<!ATTLIST tms_config time_stamp CDATA #REQUIRED>");
+		det_writer.printDtd(out);
+		node_writer.printDtd(out);
+		meter_writer.printDtd(out);
+		out.println("]>");
+	}
+
+	/** Print the body of the TMS config XML file */
+	protected void printBody(PrintWriter out) {
 		det_writer.print(out);
 		node_writer.print(out);
 		meter_writer.print(out);
-		cam_writer.print(out);
-		loc_writer.print(out);
+	}
+
+	/** Print the tail of the TMS config XML file */
+	protected void printTail(PrintWriter out) {
+		out.println("</tms_config>");
 	}
 
 	/** Write individual XML fragments */

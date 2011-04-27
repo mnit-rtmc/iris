@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,17 @@ public class DetectorXmlWriter extends XmlWriter {
 	/** Create a new detector XML writer */
 	public DetectorXmlWriter() {
 		super(DETS_XML, false);
+	}
+
+	/** Print the DTD for detector elements */
+	public void printDtd(PrintWriter out) {
+		out.println("<!ELEMENT detector EMPTY>");
+		out.println("<!ATTLIST detector index ID #REQUIRED>");
+		out.println("<!ATTLIST detector label CDATA 'FUTURE'>");
+		out.println("<!ATTLIST detector abandoned CDATA 'f'>");
+		out.println("<!ATTLIST detector category CDATA ''>");
+		out.println("<!ATTLIST detector lane CDATA '0'>");
+		out.println("<!ATTLIST detector field CDATA '22.0'>");
 	}
 
 	/** Print the body of the detector list XML file */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	static protected final int SHIFT_MAX = 12;
 
 	/** Default speed limit */
-	static protected final int DEFAULT_SPEED_LIMIT = 55;
+	static public final int DEFAULT_SPEED_LIMIT = 55;
 
 	/** Minimum roadway speed limit */
 	static protected final int MINIMUM_SPEED_LIMIT = 45;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,21 @@ public class RampMeterXmlWriter extends XmlWriter {
 	/** Create a new ramp meter XML writer */
 	public RampMeterXmlWriter() {
 		super(METER_XML, false);
+	}
+
+	/** Print the DTD for ramp meter elements */
+	public void printDtd(PrintWriter out) {
+		out.println("<!ELEMENT meter EMPTY>");
+		out.println("<!ATTLIST meter id ID #REQUIRED>");
+		out.println("<!ATTLIST meter label CDATA #REQUIRED>");
+		out.println("<!ATTLIST meter storage CDATA #REQUIRED>");
+		out.println("<!ATTLIST meter max_wait CDATA '" +
+			RampMeterImpl.DEFAULT_MAX_WAIT +"'>");
+		out.println("<!ATTLIST meter green IDREFS #IMPLIED>");
+		out.println("<!ATTLIST meter passage IDREFS #IMPLIED>");
+		out.println("<!ATTLIST meter merge IDREFS #IMPLIED>");
+		out.println("<!ATTLIST meter queue IDREFS #IMPLIED>");
+		out.println("<!ATTLIST meter bypass IDREFS #IMPLIED>");
 	}
 
 	/** Print the body of the ramp meter list XML file */
