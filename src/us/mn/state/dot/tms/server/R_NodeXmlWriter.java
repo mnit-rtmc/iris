@@ -44,9 +44,11 @@ public class R_NodeXmlWriter extends XmlWriter {
 		out.println("<!ELEMENT r_node EMPTY>");
 		out.println("<!ATTLIST r_node id ID #REQUIRED>");
 		out.println("<!ATTLIST r_node n_type CDATA ''>");
+		out.println("<!ATTLIST r_node pickable CDATA 'f'>");
+		out.println("<!ATTLIST r_node above CDATA 'f'>");
+		out.println("<!ATTLIST r_node transition CDATA ''>");
 		out.println("<!ATTLIST r_node station_id CDATA #IMPLIED>");
 		out.println("<!ATTLIST r_node label CDATA ''>");
-		out.println("<!ATTLIST r_node pickable CDATA 'f'>");
 		out.println("<!ATTLIST r_node easting CDATA '0'>");
 		out.println("<!ATTLIST r_node northing CDATA '0'>");
 		out.println("<!ATTLIST r_node lanes CDATA '0'>");
