@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
-import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -583,11 +582,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			out.print(XmlWriter.createAttribute("station_id", sid));
 		GeoLoc loc = geo_loc;
 		if(loc != null) {
-			Road x = loc.getCrossStreet();
-			if(x != null) {
-				out.print(XmlWriter.createAttribute("label",
-					x.getName()));
-			}
+			String label = GeoLocHelper.getCrossDescription(loc);
+			out.print(XmlWriter.createAttribute("label", label));
 			Position pos = GeoLocHelper.getWgs84Position(loc);
 			if(pos != null) {
 				out.print(XmlWriter.createAttribute("lon",

@@ -62,7 +62,6 @@ public class R_NodeXmlWriter {
 		out.println("<!ATTLIST detector field CDATA '22.0'>");
 		out.println("<!ELEMENT meter EMPTY>");
 		out.println("<!ATTLIST meter name CDATA #REQUIRED>");
-		out.println("<!ATTLIST meter label CDATA #REQUIRED>");
 		out.println("<!ATTLIST meter storage CDATA #REQUIRED>");
 		out.println("<!ATTLIST meter max_wait CDATA '" +
 			RampMeterImpl.DEFAULT_MAX_WAIT +"'>");

@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -37,7 +36,6 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
-import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -544,23 +542,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public void printXml(PrintWriter out) {
 		out.print("<meter");
 		out.print(XmlWriter.createAttribute("name", getName()));
-		out.print(XmlWriter.createAttribute("label", getLabel()));
 		out.print(" storage='" + getStorage() + "'");
 		int w = getMaxWait();
 		if(w != DEFAULT_MAX_WAIT)
 			out.print(" max_wait='" + w + "'");
 		out.println("/>");
-	}
-
-	/** Get the label of a ramp meter */
-	protected String getLabel() {
-		StringBuilder b = new StringBuilder();
-		b.append(Direction.fromOrdinal(geo_loc.getCrossDir()).abbrev);
-		b.append(' ');
-		Road x = geo_loc.getCrossStreet();
-		if(x != null)
-			b.append(x.getName());
-		return b.toString().trim();
 	}
 
 	/** Get the r_node associated with the ramp meter */
