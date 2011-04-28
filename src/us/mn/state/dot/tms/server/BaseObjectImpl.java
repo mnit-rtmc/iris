@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.text.NumberFormat;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.TMSException;
@@ -135,5 +136,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	protected void notifyAttribute(String aname) {
 		if(MainServer.server != null)
 			MainServer.server.setAttribute(this, aname);
+	}
+
+	/** Format a double value */
+	static String formatDouble(double value) {
+		NumberFormat nf = NumberFormat.getNumberInstance();
+		nf.setMaximumFractionDigits(5);
+		return nf.format(value);
 	}
 }

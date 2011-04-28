@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
 import java.sql.ResultSet;
-import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -630,12 +629,5 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			out.println("  </r_node>");
 		} else
 			out.println("/>");
-	}
-
-	/** Format a double value */
-	static String formatDouble(double value) {
-		NumberFormat nf = NumberFormat.getNumberInstance();
-		nf.setMaximumFractionDigits(5);
-		return nf.format(value);
 	}
 }

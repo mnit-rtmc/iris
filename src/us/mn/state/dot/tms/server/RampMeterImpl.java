@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
@@ -542,6 +543,13 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public void printXml(PrintWriter out) {
 		out.print("<meter");
 		out.print(XmlWriter.createAttribute("name", getName()));
+		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
+		if(pos != null) {
+			out.print(XmlWriter.createAttribute("lon",
+				formatDouble(pos.getLongitude())));
+			out.print(XmlWriter.createAttribute("lat",
+				formatDouble(pos.getLatitude())));
+		}
 		out.print(" storage='" + getStorage() + "'");
 		int w = getMaxWait();
 		if(w != DEFAULT_MAX_WAIT)
