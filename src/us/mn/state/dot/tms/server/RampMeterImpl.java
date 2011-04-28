@@ -549,7 +549,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		int w = getMaxWait();
 		if(w != DEFAULT_MAX_WAIT)
 			out.print(" max_wait='" + w + "'");
-		printMeterDetectors(out);
 		out.println("/>");
 	}
 
@@ -562,21 +561,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if(x != null)
 			b.append(x.getName());
 		return b.toString().trim();
-	}
-
-	/** Print the detectors associated with a ramp meter */
-	protected void printMeterDetectors(PrintWriter out) {
-		DetectorSet ds = getDetectorSet();
-		out.print(XmlWriter.createAttribute("green",
-			ds.getDetectorSet(LaneType.GREEN).asAttr()));
-		out.print(XmlWriter.createAttribute("passage",
-			ds.getDetectorSet(LaneType.PASSAGE).asAttr()));
-		out.print(XmlWriter.createAttribute("merge",
-			ds.getDetectorSet(LaneType.MERGE).asAttr()));
-		out.print(XmlWriter.createAttribute("queue",
-			ds.getDetectorSet(LaneType.QUEUE).asAttr()));
-		out.print(XmlWriter.createAttribute("bypass",
-			ds.getDetectorSet(LaneType.BYPASS).asAttr()));
 	}
 
 	/** Get the r_node associated with the ramp meter */

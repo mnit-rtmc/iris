@@ -66,11 +66,6 @@ public class R_NodeXmlWriter {
 		out.println("<!ATTLIST meter storage CDATA #REQUIRED>");
 		out.println("<!ATTLIST meter max_wait CDATA '" +
 			RampMeterImpl.DEFAULT_MAX_WAIT +"'>");
-		out.println("<!ATTLIST meter green CDATA #IMPLIED>");
-		out.println("<!ATTLIST meter passage CDATA #IMPLIED>");
-		out.println("<!ATTLIST meter merge CDATA #IMPLIED>");
-		out.println("<!ATTLIST meter queue CDATA #IMPLIED>");
-		out.println("<!ATTLIST meter bypass CDATA #IMPLIED>");
 	}
 
 	/** Print the body of the r_node list XML file */
