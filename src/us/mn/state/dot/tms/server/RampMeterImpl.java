@@ -542,7 +542,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Print meter as an XML element */
 	public void printXml(PrintWriter out) {
-		lookupGreenDetector();
 		out.print("  <meter");
 		out.print(XmlWriter.createAttribute("name", getName()));
 		out.print(XmlWriter.createAttribute("label", getLabel()));
@@ -582,6 +581,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Get the r_node associated with the ramp meter */
 	public R_NodeImpl getR_Node() {
+		lookupGreenDetector();
 		DetectorImpl det = green_det;
 		if(det != null) {
 			R_Node n = det.getR_Node();
