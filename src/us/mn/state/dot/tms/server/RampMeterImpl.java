@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
@@ -581,29 +582,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Get the r_node associated with the ramp meter */
 	public R_NodeImpl getR_Node() {
-		Corridor.NodeFinder finder = new Corridor.NodeFinder() {
-			public boolean check(R_NodeImpl n) {
-				if(n.getNodeType() ==
-					R_NodeType.ENTRANCE.ordinal())
-				{
-					GeoLoc l = n.getGeoLoc();
-					if(GeoLocHelper.matchesRoot(l, geo_loc))
-						return true;
-				}
-				return false;
-			}
-		};
-		Corridor corridor = getCorridor();
-		if(corridor != null) {
-			R_NodeImpl n = corridor.findNode(finder);
-			if(n != null)
-				return n;
-			String cd = corridor.getLinkedCDRoad();
-			if(cd != null) {
-				Corridor cd_road = corridors.getCorridor(cd);
-				if(cd_road != null)
-					return cd_road.findNode(finder);
-			}
+		DetectorImpl det = green_det;
+		if(det != null) {
+			R_Node n = det.getR_Node();
+			if(n instanceof R_NodeImpl)
+				return (R_NodeImpl)n;
 		}
 		return null;
 	}
