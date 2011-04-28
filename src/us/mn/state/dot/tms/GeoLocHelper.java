@@ -87,7 +87,7 @@ public class GeoLocHelper extends BaseHelper {
 	}
 
 	/** Get a description of the cross-street location */
-	static private String getCrossDescription(GeoLoc l, String connect) {
+	static public String getCrossDescription(GeoLoc l, String connect) {
 		if(l != null) {
 			Road x = l.getCrossStreet();
 			if(x != null) {

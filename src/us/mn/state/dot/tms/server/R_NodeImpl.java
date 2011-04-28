@@ -582,8 +582,11 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			out.print(XmlWriter.createAttribute("station_id", sid));
 		GeoLoc loc = geo_loc;
 		if(loc != null) {
-			String label = GeoLocHelper.getCrossDescription(loc);
-			out.print(XmlWriter.createAttribute("label", label));
+			String mod = GeoLocHelper.getModifier(loc);
+			if(loc.getCrossMod() == 0)
+				mod = "";
+			String lbl = GeoLocHelper.getCrossDescription(loc, mod);
+			out.print(XmlWriter.createAttribute("label", lbl));
 			Position pos = GeoLocHelper.getWgs84Position(loc);
 			if(pos != null) {
 				out.print(XmlWriter.createAttribute("lon",
