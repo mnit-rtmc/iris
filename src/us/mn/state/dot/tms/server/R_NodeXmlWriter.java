@@ -34,10 +34,10 @@ public class R_NodeXmlWriter {
 
 	/** Print the DTD for r_node elements */
 	public void printDtd(PrintWriter out) {
-		out.println("<!ELEMENT corridor (r_node | meter)*>");
+		out.println("<!ELEMENT corridor (r_node)*>");
 		out.println("<!ATTLIST corridor route CDATA #REQUIRED>");
 		out.println("<!ATTLIST corridor dir CDATA #REQUIRED>");
-		out.println("<!ELEMENT r_node (detector)*>");
+		out.println("<!ELEMENT r_node (detector | meter)*>");
 		out.println("<!ATTLIST r_node name CDATA #REQUIRED>");
 		out.println("<!ATTLIST r_node n_type CDATA 'Station'>");
 		out.println("<!ATTLIST r_node pickable CDATA 'f'>");

@@ -565,7 +565,9 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Print the r_node as an XML element */
-	public void printXml(PrintWriter out) {
+	public void printXml(PrintWriter out,
+		Map<String, RampMeterImpl> m_nodes)
+	{
 		out.print("  <r_node");
 		out.print(XmlWriter.createAttribute("name", name));
 		if(node_type != R_NodeType.STATION)
@@ -615,11 +617,16 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			out.print(b.toString().trim() + "'");
 		}
 		DetectorImpl[] dets = detectors.toArray();
-		if(dets.length > 0) {
+		if(dets.length > 0 || m_nodes.containsKey(name)) {
 			out.println(">");
 			for(DetectorImpl det: dets) {
 				out.print("    ");
 				det.printXmlElement(out);
+			}
+			if(m_nodes.containsKey(name)) {
+				RampMeterImpl meter = m_nodes.get(name);
+				out.print("    ");
+				meter.printXml(out);
 			}
 			out.println("  </r_node>");
 		} else

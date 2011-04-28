@@ -176,12 +176,7 @@ public class Corridor extends CorridorBase {
 			Direction.fromOrdinal(road_dir).abbrev + "'>");
 		for(R_Node n: r_nodes) {
 			R_NodeImpl r_node = (R_NodeImpl)n;
-			r_node.printXml(out);
-			String key = r_node.getName();
-			if(m_nodes.containsKey(key)) {
-				RampMeterImpl meter = m_nodes.get(key);
-				meter.printXml(out);
-			}
+			r_node.printXml(out, m_nodes);
 		}
 		out.println("</corridor>");
 	}

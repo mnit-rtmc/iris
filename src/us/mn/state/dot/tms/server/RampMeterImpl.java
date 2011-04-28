@@ -542,7 +542,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Print meter as an XML element */
 	public void printXml(PrintWriter out) {
-		out.print("  <meter");
+		out.print("<meter");
 		out.print(XmlWriter.createAttribute("name", getName()));
 		out.print(XmlWriter.createAttribute("label", getLabel()));
 		out.print(" storage='" + getStorage() + "'");
