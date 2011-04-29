@@ -18,11 +18,13 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
@@ -274,14 +276,19 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			cp.sendRecallPreset(this, preset);
 	}
 
-	/** Render the camera object as xml */
-	public void printXmlElement(PrintWriter out){
-		out.print("<camera ");
-		out.print(XmlWriter.createAttribute("id", getName()));
-		out.print(XmlWriter.createAttribute("encoder", getEncoder()));
-		out.print(XmlWriter.createAttribute("encoder_channel", getEncoderChannel()));
-		if(getGeoLoc() != null)
-			out.print(XmlWriter.createAttribute("geoloc", getGeoLoc().getName()));
+	/** Print camera as an XML element */
+	public void printXml(PrintWriter out) {
+		out.print("<camera");
+		out.print(XmlWriter.createAttribute("name", getName()));
+		out.print(XmlWriter.createAttribute("description",
+			GeoLocHelper.getDescription(geo_loc)));
+		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
+		if(pos != null) {
+			out.print(XmlWriter.createAttribute("lon",
+				formatDouble(pos.getLongitude())));
+			out.print(XmlWriter.createAttribute("lat",
+				formatDouble(pos.getLatitude())));
+		}
 		out.println("/>");
 	}
 }

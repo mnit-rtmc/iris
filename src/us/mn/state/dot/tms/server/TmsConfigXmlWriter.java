@@ -65,16 +65,27 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	/** Print the DTD */
 	protected void printDtd(PrintWriter out) {
 		out.println("<!DOCTYPE tms_config [");
-		out.println("<!ELEMENT tms_config (corridor)*>");
+		out.println("<!ELEMENT tms_config (corridor | camera)*>");
 		out.println("<!ATTLIST tms_config system CDATA #REQUIRED>");
 		out.println("<!ATTLIST tms_config time_stamp CDATA #REQUIRED>");
 		node_writer.printDtd(out);
+		printCameraDtd(out);
 		out.println("]>");
+	}
+
+	/** Print the DTD for camera elements */
+	protected void printCameraDtd(PrintWriter out) {
+		out.println("<!ELEMENT camera EMPTY>");
+		out.println("<!ATTLIST camera name CDATA #REQUIRED>");
+		out.println("<!ATTLIST camera description CDATA #REQUIRED>");
+		out.println("<!ATTLIST camera lon CDATA #IMPLIED>");
+		out.println("<!ATTLIST camera lat CDATA #IMPLIED>");
 	}
 
 	/** Print the body of the TMS config XML file */
 	protected void printBody(PrintWriter out) {
 		node_writer.print(out, meter_writer.getNodeMapping());
+		cam_writer.print(out);
 	}
 
 	/** Print the tail of the TMS config XML file */
@@ -84,7 +95,6 @@ public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** Write individual XML fragments */
 	public void writeFragments() throws IOException {
-		cam_writer.write();
 		loc_writer.write();
 	}
 }

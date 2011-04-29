@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Camera;
@@ -26,27 +25,16 @@ import us.mn.state.dot.tms.CameraHelper;
  * @author Tim Johnson
  * @author Douglas Lau
  */
-public class CameraXmlWriter extends XmlWriter {
-
-	/** Camera XML file */
-	static protected final String CAMERA_XML = "camera.xml";
-
-	/** Create a new camera XML writer */
-	public CameraXmlWriter() {
-		super(CAMERA_XML, false);
-	}
+public class CameraXmlWriter {
 
 	/** Print the body of the camera list XML file */
 	public void print(final PrintWriter out) {
-		out.println(XML_DECLARATION);
-		out.println("<list>");
 		CameraHelper.find(new Checker<Camera>() {
 			public boolean check(Camera cam) {
 				if(cam instanceof CameraImpl)
-					((CameraImpl)cam).printXmlElement(out);
+					((CameraImpl)cam).printXml(out);
 				return false;
 			}
 		});
-		out.println("</list>");
 	}
 }
