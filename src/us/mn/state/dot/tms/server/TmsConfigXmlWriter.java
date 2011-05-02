@@ -14,9 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 
 /**
@@ -38,9 +36,6 @@ public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** Camera XML writer */
 	protected final CameraXmlWriter cam_writer = new CameraXmlWriter();
-
-	/** Geo loc XML writer */
-	protected final GeoLocXmlWriter loc_writer = new GeoLocXmlWriter();
 
 	/** Create a new TMS config XML writer */
 	public TmsConfigXmlWriter() {
@@ -91,10 +86,5 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	/** Print the tail of the TMS config XML file */
 	protected void printTail(PrintWriter out) {
 		out.println("</tms_config>");
-	}
-
-	/** Write individual XML fragments */
-	public void writeFragments() throws IOException {
-		loc_writer.write();
 	}
 }
