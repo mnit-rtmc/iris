@@ -14,9 +14,12 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
@@ -41,6 +44,21 @@ final public class GstPanel extends StreamPanel {
 
 	/** The name of the last element in the pipe which connects to the sink. */
 	static final String DECODER = "decoder";
+
+	Timer timer = null;
+	
+	/** Seconds of video elapsed */
+	int seconds = 0;
+	/** Milliseconds between updates to the progress */
+	int delay = 1000;
+	ActionListener taskPerformer = new ActionListener() {
+		public void actionPerformed(ActionEvent evt) {
+			progress.setValue(++seconds);
+			if(seconds > progress.getMaximum()){
+				disconnect();
+			}
+		}
+	};
 
 	protected GstPanel(){
 		if(!gstInitialized){
@@ -69,11 +87,15 @@ final public class GstPanel extends StreamPanel {
 	private synchronized void connect(){
 		screen = new VideoComponent();
 		screenPanel.add(screen);
+		screen.setPreferredSize(screenPanel.getPreferredSize());
+		screen.doLayout();
 		pipe.add(screen.getElement());
 		pipe.getElementByName(DECODER).link(screen.getElement());
 		pipe.setState(State.PAUSED);
 		pipe.play();
 		pipe.setState(State.PLAYING);
+		timer = new Timer(delay, taskPerformer);
+		timer.start();
 	}
 
 	/** This method should only be called on the swing thread. */
@@ -84,6 +106,10 @@ final public class GstPanel extends StreamPanel {
 		}
 		screenPanel.removeAll();
 		screenPanel.repaint();
+		if(timer != null) timer.stop();
+		seconds = 0;
+		progress.setValue(seconds);
+		streamLabel.setText(null);
 	}
 
 	public void requestStream(final VideoRequest req){
