@@ -70,6 +70,7 @@ final public class JavaPanel extends StreamPanel {
 				byte[] idata = vs.getImage();
 				screen.setIcon(createIcon(idata));
 				progress.setValue(vs.getFrameCount());
+				streamLabel.setText(MJPEG);
 				if(vs.getFrameCount() >= n_frames)
 					break;
 			}
@@ -95,6 +96,7 @@ final public class JavaPanel extends StreamPanel {
 			stream = null;
 			n_frames = 0;
 			progress.setValue(0);
+			streamLabel.setText(null);
 		}
 	}
 
@@ -112,7 +114,7 @@ final public class JavaPanel extends StreamPanel {
 	
 	/** Clear the video stream */
 	public void clearStream(){
-		System.out.println("JAVA implementation of stopping a stream.");
+		setVideoStream(null, 0);
 	}
 
 	/** Set the video stream to display */
