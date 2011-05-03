@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2010  Minnesota Department of Transportation
+ * Copyright (C) 2002-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,9 +26,10 @@ import javax.swing.JProgressBar;
 import javax.swing.border.BevelBorder;
 
 /**
- * A JPanel that can display a video stream. It includes a progress bar and methods to
- * set the size of the video. Implementations of this class are responsible for handling
- * the stream including connecting, stopping and processing.
+ * A JPanel that can display a video stream. It includes a progress bar and
+ * methods to set the size of the video. Implementations of this class are
+ * responsible for handling the stream including connecting, stopping and
+ * processing.
  *
  * @author Timothy Johnson
  * @author Douglas Lau
@@ -37,10 +37,19 @@ import javax.swing.border.BevelBorder;
 abstract public class StreamPanel extends JPanel {
 
 	/** Constant for MPEG-4 codec */
-	protected static final String MPEG4 = "MPEG-4";
-	
+	static protected final String MPEG4 = "MPEG-4";
+
 	/** Constant for MotionJPEG codec */
-	protected static final String MJPEG = "MotionJPEG";
+	static protected final String MJPEG = "MotionJPEG";
+
+	/** Size of a quarter SIF */
+	static protected final Dimension SIF_QUARTER = new Dimension(176, 120);
+
+	/** Size of a full SIF */
+	static protected final Dimension SIF_FULL = new Dimension(352, 240);
+
+	/** Size of 4 x SIF */
+	static protected final Dimension SIF_4X = new Dimension(704, 480);
 
 	/** JPanel which holds the component used to render the video stream */
 	protected final JPanel screenPanel = new JPanel(new BorderLayout());
@@ -50,15 +59,6 @@ abstract public class StreamPanel extends JPanel {
 
 	/** JLabel for displaying the stream details (codec, size, framerate) */
 	protected final JLabel streamLabel = new JLabel();
-	
-	/** Size of a quarter SIF */
-	static protected final Dimension SIF_QUARTER = new Dimension(176, 120);
-
-	/** Size of a full SIF */
-	static protected final Dimension SIF_FULL = new Dimension(352, 240);
-
-	/** Size of 4 x SIF */
-	static protected final Dimension SIF_4X = new Dimension(704, 480);
 
 	/** Progress bar for duration */
 	protected final JProgressBar progress = new JProgressBar(0, 100);
@@ -81,23 +81,25 @@ abstract public class StreamPanel extends JPanel {
 		add(p);
 		setVideoSize(imageSize);
 		statusPanel.setBorder(BorderFactory.createBevelBorder(
-				BevelBorder.LOWERED));
+			BevelBorder.LOWERED));
 		screenPanel.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
 	}
 
-	static public StreamPanel getInstance(){
-		try{
+	static public StreamPanel getInstance() {
+		try {
 			Class.forName("org.gstreamer.Gst");
 			Class.forName("com.sun.jna.Library");
 			return new GstPanel();
-		}catch(ClassNotFoundException cnfe){
+		}
+		catch(ClassNotFoundException cnfe) {
 			return new JavaPanel();
-		}catch(NoClassDefFoundError ncdfe){
+		}
+		catch(NoClassDefFoundError ncdfe) {
 			return new JavaPanel();
 		}
 	}
-	
+
 	abstract void requestStream(VideoRequest req);
 
 	abstract void clearStream();
@@ -107,8 +109,8 @@ abstract public class StreamPanel extends JPanel {
 		imageSize = d;
 		screenPanel.setPreferredSize(d);
 	}
-	
-	final protected void dispose(){
+
+	final protected void dispose() {
 		clearStream();
 	}
 }

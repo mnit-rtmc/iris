@@ -17,14 +17,15 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.Image;
 import java.io.IOException;
 import java.net.URL;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 /**
- * A JavaPanel is responsible for managing video streams using the built-in java libraries.
+ * A JavaPanel is responsible for managing video streams using the built-in
+ * java libraries.
  *
  * @author Tim Johnson
+ * @author Douglas Lau
  */
 final public class JavaPanel extends StreamPanel {
 
@@ -37,7 +38,8 @@ final public class JavaPanel extends StreamPanel {
 	/** Total number of frames requested */
 	private int n_frames = 0;
 
-	protected JavaPanel(){
+	/** Create a new panel */
+	protected JavaPanel() {
 		screenPanel.add(screen);
 		thread.start();
 	}
@@ -100,10 +102,10 @@ final public class JavaPanel extends StreamPanel {
 		}
 	}
 
-	public void requestStream(VideoRequest request){
+	public void requestStream(VideoRequest request) {
 		try {
 			HttpDataSource source = new HttpDataSource(
-					new URL(request.getUrlString(MJPEG)));
+				new URL(request.getUrlString(MJPEG)));
 			setVideoStream(source.createStream(),
 				request.getFrames());
 		}
@@ -111,9 +113,9 @@ final public class JavaPanel extends StreamPanel {
 			streamLabel.setText(e.getMessage());
 		}
 	}
-	
+
 	/** Clear the video stream */
-	public void clearStream(){
+	public void clearStream() {
 		setVideoStream(null, 0);
 	}
 

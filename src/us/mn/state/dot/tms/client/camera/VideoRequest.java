@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2010  Minnesota Department of Transportation
+ * Copyright (C) 2003-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
-
 import us.mn.state.dot.tms.Camera;
 
 /**
@@ -57,7 +56,6 @@ public class VideoRequest {
 	/** The camera for which to request a stream */
 	protected Camera camera = null;
 
-	/**
 	/** Create a url for connecting to the video server.
 	 * @param p Properties
 	 * @param st Servlet type */
@@ -66,9 +64,11 @@ public class VideoRequest {
 		String url = null;
 		if(videoHost != null) {
 			try {
-				videoHost = InetAddress.getByName(videoHost).getHostAddress();
+				videoHost = InetAddress.getByName(
+					videoHost).getHostAddress();
 				videoPort = p.getProperty(VIDEO_PORT);
-				url = "http://" + videoHost + ":" + videoPort + "/video/";
+				url = "http://" + videoHost + ":" + videoPort +
+					"/video/";
 			}
 			catch(UnknownHostException uhe) {
 				System.out.println("Invalid video server " +
@@ -76,7 +76,7 @@ public class VideoRequest {
 			}
 		}
 		if(url != null)
-				url = url + st.servlet;
+			url = url + st.servlet;
 		return url;
 	}
 
@@ -154,38 +154,42 @@ public class VideoRequest {
 	}
 
 	/** Check if the video host and video port properties have been set. */
-	private boolean useProxyServer(){
+	private boolean useProxyServer() {
 		return (videoHost != null) && (videoPort != null);
 	}
 	
 	/** Create a URL for an MPEG4 stream */
 	private String getMPEG4UrlString() throws MalformedURLException {
-		if(useProxyServer()){
+		if(useProxyServer()) {
 			System.out.println("Using proxy server for MPEG-4");
 			//mpeg4 is not supported on the proxy server yet.
 			return "rtsp://" + videoHost + ":" + videoPort +
 					"/video/stream?id=" + camera.getName();
-		}else{
-			return "rtsp://" + getCameraIp() + ":554/mpeg4/1/media.amp";
+		} else {
+			return "rtsp://" + getCameraIp() +
+				":554/mpeg4/1/media.amp";
 		}
 	}
 
-	private String getResolution(){
-		if(size == Size.SMALL)  return "176x144";
-		if(size == Size.MEDIUM) return "352x240";
-		if(size == Size.LARGE)  return "704x480";
+	private String getResolution() {
+		if(size == Size.SMALL)
+			return "176x144";
+		if(size == Size.MEDIUM)
+			return "352x240";
+		if(size == Size.LARGE)
+			return "704x480";
 		return "";
 	}
 	
 	/** Create a URL for a MJPEG stream */
 	private URL getMJPEGUrl() throws MalformedURLException {
-		if(useProxyServer()){
+		if(useProxyServer()) {
 			System.out.println("Using proxy server for MJPEG");
 			return new URL(base_url +
 					"?id=" + camera.getName() +
 					"&size=" + (size.ordinal() + 1) +
 					"&ssid=" + sonarSessionId);
-		}else{
+		} else {
 			return new URL("http://" +
 					camera.getEncoder() +
 					"/axis-cgi/mjpg/video.cgi?" +
@@ -195,11 +199,15 @@ public class VideoRequest {
 
 	/** Get the URL for the request */
 	public String getUrlString(String codec) {
-		if(camera == null) return null;
-		try{
-			if(codec.equals(StreamPanel.MPEG4)) return getMPEG4UrlString();
-			if(codec.equals(StreamPanel.MJPEG)) return getMJPEGUrl().toString();
-		}catch(MalformedURLException mue){
+		if(camera == null)
+			return null;
+		try {
+			if(codec.equals(StreamPanel.MPEG4))
+				return getMPEG4UrlString();
+			if(codec.equals(StreamPanel.MJPEG))
+				return getMJPEGUrl().toString();
+		}
+		catch(MalformedURLException mue) {
 			mue.printStackTrace();
 		}
 		return null;
@@ -210,11 +218,14 @@ public class VideoRequest {
 	 * Otherwise, use the ip address of the camera itself.
 	 * @return
 	 */
-	private String getCameraIp(){
-		if(camera == null) return null;
+	private String getCameraIp() {
+		if(camera == null)
+			return null;
 		String encoder = camera.getEncoder();
-		if(encoder == null) return null;
-		if(encoder.indexOf(':') == -1) return encoder;
+		if(encoder == null)
+			return null;
+		if(encoder.indexOf(':') == -1)
+			return encoder;
 		return encoder.substring(0, encoder.indexOf(':'));
 	}
 	
