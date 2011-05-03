@@ -61,31 +61,25 @@ public class VideoRequest {
 	/** Video port property name */
 	static protected final String VIDEO_PORT = "video.port";
 
-	private String videoHost = null;
-	private String videoPort = null;
-
 	/** Create a url for connecting to the video server.
-	 * @param p Properties
-	 * @param st Servlet type */
-	protected String createBaseUrl(Properties p, StreamType st) {
-		videoHost = p.getProperty(VIDEO_HOST);
-		String url = null;
-		if(videoHost != null) {
+	 * @param p Properties */
+	protected String createBaseUrl(Properties p) {
+		String ip = p.getProperty(VIDEO_HOST);
+		if(ip != null) {
 			try {
-				videoHost = InetAddress.getByName(
-					videoHost).getHostAddress();
-				videoPort = p.getProperty(VIDEO_PORT);
-				url = "http://" + videoHost + ":" + videoPort +
-					"/video/";
+				ip = InetAddress.getByName(ip).getHostAddress();
+				String port = p.getProperty(VIDEO_PORT);
+				if(port != null)
+					return ip + ":" + port;
+				else
+					return ip;
 			}
 			catch(UnknownHostException uhe) {
 				System.out.println("Invalid video server " +
 					uhe.getMessage());
 			}
 		}
-		if(url != null)
-			url = url + st.servlet;
-		return url;
+		return null;
 	}
 
 	/** Sonar session identifier for authenticating to the video system */
@@ -138,41 +132,43 @@ public class VideoRequest {
 	/** The base URL of the video server */
 	private final String base_url;
 
+	/** Stream servlet type */
+	private final StreamType stream_type = StreamType.STREAM;
+
 	/** Create a new video request */
 	public VideoRequest(Properties p, Size sz) {
-		base_url = createBaseUrl(p, StreamType.STREAM);
+		base_url = createBaseUrl(p);
 		size = sz;
-	}
-
-	/** Check if the video host and video port properties have been set. */
-	private boolean useProxyServer() {
-		return (videoHost != null) && (videoPort != null);
 	}
 
 	/** Create a URL for an MPEG4 stream */
 	public URL getMPEG4Url(Camera cam) throws MalformedURLException {
-		if(useProxyServer()) {
-			System.out.println("Using proxy server for MPEG-4");
-			//mpeg4 is not supported on the proxy server yet.
-			return new URL("rtsp://" + videoHost + ":" + videoPort +
-					"/video/stream?id=" + cam.getName());
-		} else {
+		if(base_url != null)
+			return getServletUrl("rtsp", cam);
+		else {
 			return new URL("rtsp://" + getCameraIp(cam) +
 				":554/mpeg4/1/media.amp");
 		}
 	}
 
+	/** Create a video servlet URL */
+	protected URL getServletUrl(String prot, Camera cam)
+		throws MalformedURLException
+	{
+		// rtsp is not supported by the video servlet yet.
+		return new URL(prot + "://" + base_url +
+		               "/video/" + stream_type.servlet +
+		               "?id=" + cam.getName() +
+		               "&size=" + (size.ordinal() + 1) +
+		               "&ssid=" + sonarSessionId);
+	}
+
 	/** Create a URL for a MJPEG stream */
 	public URL getMJPEGUrl(Camera cam) throws MalformedURLException {
-		if(useProxyServer()) {
-			System.out.println("Using proxy server for MJPEG");
-			return new URL(base_url +
-					"?id=" + cam.getName() +
-					"&size=" + (size.ordinal() + 1) +
-					"&ssid=" + sonarSessionId);
-		} else {
-			return new URL("http://" +
-					cam.getEncoder() +
+		if(base_url != null)
+			return getServletUrl("http", cam);
+		else {
+			return new URL("http://" + cam.getEncoder() +
 					"/axis-cgi/mjpg/video.cgi?" +
 					"resolution=" + size.getResolution());
 		}
