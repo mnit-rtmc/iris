@@ -93,10 +93,10 @@ abstract public class StreamPanel extends JPanel {
 			return new GstPanel();
 		}
 		catch(ClassNotFoundException cnfe) {
-			return new JavaPanel();
+			return new NoGstPanel();
 		}
 		catch(NoClassDefFoundError ncdfe) {
-			return new JavaPanel();
+			return new NoGstPanel();
 		}
 	}
 

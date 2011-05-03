@@ -21,13 +21,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 /**
- * A JavaPanel is responsible for managing video streams using the built-in
- * java libraries.
+ * A NoGstPanel is responsible for managing video streams without using the
+ * gstreamer-java library.
  *
  * @author Tim Johnson
  * @author Douglas Lau
  */
-final public class JavaPanel extends StreamPanel {
+public class NoGstPanel extends StreamPanel {
 
 	/** Label to display video stream */
 	private final JLabel screen = new JLabel();
@@ -38,8 +38,8 @@ final public class JavaPanel extends StreamPanel {
 	/** Total number of frames requested */
 	private int n_frames = 0;
 
-	/** Create a new panel */
-	protected JavaPanel() {
+	/** Create a new stream panel */
+	protected NoGstPanel() {
 		screenPanel.add(screen);
 		thread.start();
 	}
