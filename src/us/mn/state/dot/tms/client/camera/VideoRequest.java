@@ -101,19 +101,6 @@ public class VideoRequest {
 		sonarSessionId = ssid;
 	}
 
-	/** Area number */
-	private int area = 0;
-
-	/** Get the area number */
-	public int getArea() {
-		return area;
-	}
-
-	/** Set the area number */
-	public void setArea(int area) {
-		this.area = area;
-	}
-
 	/** Frame rate (per second) */
 	private int rate = 30;
 
