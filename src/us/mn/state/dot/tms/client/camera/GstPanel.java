@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -27,23 +29,25 @@ import org.gstreamer.Pipeline;
 import org.gstreamer.State;
 import org.gstreamer.elements.RGBDataSink;
 import org.gstreamer.swing.VideoComponent;
+import us.mn.state.dot.tms.Camera;
 
 /**
  * A GstManager is responsible for managing video streams using the
  * GStreamer-java library.
  *
  * @author Tim Johnson
+ * @author Douglas Lau
  */
-final public class GstPanel extends StreamPanel {
+public class GstPanel extends StreamPanel {
+
+	/** The last element in the pipe which connects to the sink */
+	static protected final String DECODER = "decoder";
 
 	static boolean gstInitialized = false;
-	static VideoComponent screen = null;
-	static Pipeline pipe = null;
 
-	/** The last element in the pipe which connects to the sink. */
-	static final String DECODER = "decoder";
+	protected Pipeline pipe = null;
 
-	Timer timer = null;
+	protected Timer timer = null;
 
 	/** Seconds of video elapsed */
 	int seconds = 0;
@@ -60,6 +64,7 @@ final public class GstPanel extends StreamPanel {
 		}
 	};
 
+	/** Create a new gstreamer stream panel */
 	protected GstPanel() {
 		if(!gstInitialized) {
 			String[] args = {};
@@ -67,26 +72,24 @@ final public class GstPanel extends StreamPanel {
 		}
 	}
 
-	private String createPipeString(String urlString) {
-		if(urlString == null)
-			return null;
+	private String createPipeString(URL url) {
 		StringBuilder sb = new StringBuilder();
-		if(urlString.startsWith("rtsp")) {
+		if(url.toString().startsWith("rtsp")) {
 			sb.append("rtspsrc ");
-			sb.append("location=" + urlString + " ");
+			sb.append("location=" + url + " ");
 			sb.append("latency=0 ! decodebin ! ffmpegcolorspace ");
-		} else if(urlString.startsWith("http")) {
+		} else if(url.toString().startsWith("http")) {
 			sb.append("souphttpsrc ");
-			sb.append("location=" + urlString + " ");
+			sb.append("location=" + url + " ");
 			sb.append("timeout=5 ! jpegdec ");
 		}
 		sb.append("name=" + DECODER);
 		return sb.toString();
 	}
 
-	/** This method should only be called on the swing thread. */
-	private synchronized void connect() {
-		screen = new VideoComponent();
+	/** This method should only be called on the swing thread */
+	private void connect() {
+		VideoComponent screen = new VideoComponent();
 		screenPanel.add(screen);
 		screen.setPreferredSize(screenPanel.getPreferredSize());
 		screen.doLayout();
@@ -99,41 +102,79 @@ final public class GstPanel extends StreamPanel {
 		timer.start();
 	}
 
-	/** This method should only be called on the swing thread. */
+	/** This method should only be called on the swing thread */
 	private void disconnect() {
-		if(pipe != null) {
-			pipe.stop();
-			pipe.setState(State.NULL);
+		Timer t = timer;
+		if(t != null) {
+			t.stop();
+			timer = null;
+		}
+		Pipeline p = pipe;
+		if(p != null) {
+			p.stop();
+			p.setState(State.NULL);
+			pipe = null;
 		}
 		screenPanel.removeAll();
 		screenPanel.repaint();
-		if(timer != null)
-			timer.stop();
 		seconds = 0;
 		progress.setValue(seconds);
 		streamLabel.setText(null);
 	}
 
-	public void requestStream(final VideoRequest req) {
+	/** Request a new video stream */
+	public void requestStream(final VideoRequest req, final Camera c) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				disconnect();
-				String urlString = req.getUrlString(MPEG4);
-				if(urlString != null)
-					pipe = Pipeline.launch(createPipeString(urlString));
-				connect();
-				if(!pipe.isPlaying()) {
-					disconnect();
-					urlString = req.getUrlString(MJPEG);
-					if(urlString != null)
-						pipe = Pipeline.launch(createPipeString(urlString));
-					connect();
+				try {
+					doRequestStream(req, c);
 				}
-				statusPanel.doLayout();
-				screenPanel.doLayout();
-				updateStatus();
+				catch(MalformedURLException e) {
+					streamLabel.setText(e.getMessage());
+				}
 			}
 		});
+	}
+
+	/** Request a new video stream */
+	protected void doRequestStream(VideoRequest req, Camera c)
+		throws MalformedURLException
+	{
+		try {
+			requestMPEG4Stream(req, c);
+		}
+		catch(MalformedURLException e) {
+			disconnect();
+		}
+		if(!isPlaying())
+			requestMJPEGStream(req, c);
+		statusPanel.doLayout();
+		screenPanel.doLayout();
+		updateStatus();
+	}
+
+	/** Check if the stream is playing */
+	protected boolean isPlaying() {
+		Pipeline p = pipe;
+		return p != null && p.isPlaying();
+	}
+
+	/** Request an MPEG4 video stream */
+	protected void requestMPEG4Stream(VideoRequest req, Camera c)
+		throws MalformedURLException
+	{
+		disconnect();
+		pipe = Pipeline.launch(createPipeString(req.getMPEG4Url(c)));
+		connect();
+	}
+
+	/** Request an MJPEG video stream */
+	protected void requestMJPEGStream(VideoRequest req, Camera c)
+		throws MalformedURLException
+	{
+		disconnect();
+		pipe = Pipeline.launch(createPipeString(req.getMJPEGUrl(c)));
+		connect();
 	}
 
 	private void updateStatus() {
@@ -142,31 +183,26 @@ final public class GstPanel extends StreamPanel {
 		String encoding = "";
 		int fps = 0;
 		List<Element> elements = pipe.getElements();
-		for(Element e : elements) {
+		for(Element e: elements) {
 			if(e instanceof RGBDataSink)
-				continue; //no useful info from sink
+				continue; // no useful info from sink
 			if(e.getName().startsWith("souphttp")) {
 				streamLabel.setText(MJPEG);
 				return;
 			}
 			List<Pad> pads = e.getSrcPads();
-			for(Pad p : pads) {
+			for(Pad p: pads) {
 				Caps c = p.getCaps();
 				if(c.size() > 0) {
 					String capDesc = c.getStructure(0).getName();
-					try {
-						for(int i = 0; i < c.size(); i++) {
-							if(capDesc.startsWith("video")) {
-								w = c.getStructure(i).getInteger("width");
-								h = c.getStructure(i).getInteger("height");
-							} else if(capDesc.startsWith("application")) {
-								encoding = c.getStructure(i).getString("encoding-name");
-								fps = (Float.valueOf(c.getStructure(i).getString("a-framerate"))).intValue();
-							}
+					for(int i = 0; i < c.size(); i++) {
+						if(capDesc.startsWith("video")) {
+							w = c.getStructure(i).getInteger("width");
+							h = c.getStructure(i).getInteger("height");
+						} else if(capDesc.startsWith("application")) {
+							encoding = c.getStructure(i).getString("encoding-name");
+							fps = (Float.valueOf(c.getStructure(i).getString("a-framerate"))).intValue();
 						}
-					}
-					catch(Exception ex) {
-						// FIXME
 					}
 				}
 			}

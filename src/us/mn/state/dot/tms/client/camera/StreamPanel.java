@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.border.BevelBorder;
+import us.mn.state.dot.tms.Camera;
 
 /**
  * A JPanel that can display a video stream. It includes a progress bar and
@@ -100,7 +101,8 @@ abstract public class StreamPanel extends JPanel {
 		}
 	}
 
-	abstract void requestStream(VideoRequest req);
+	/** Request a new video stream */
+	abstract void requestStream(VideoRequest req, Camera c);
 
 	abstract void clearStream();
 

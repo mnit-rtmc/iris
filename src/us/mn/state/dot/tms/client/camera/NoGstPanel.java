@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2002-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import us.mn.state.dot.tms.Camera;
 
 /**
  * A NoGstPanel is responsible for managing video streams without using the
@@ -102,12 +103,12 @@ public class NoGstPanel extends StreamPanel {
 		}
 	}
 
-	public void requestStream(VideoRequest request) {
+	/** Request a new video stream */
+	public void requestStream(VideoRequest req, Camera cam) {
 		try {
 			HttpDataSource source = new HttpDataSource(
-				new URL(request.getUrlString(MJPEG)));
-			setVideoStream(source.createStream(),
-				request.getFrames());
+				req.getMJPEGUrl(cam));
+			setVideoStream(source.createStream(), req.getFrames());
 		}
 		catch(IOException e) {
 			streamLabel.setText(e.getMessage());

@@ -52,9 +52,6 @@ public class VideoRequest {
 
 	private String videoHost = null;
 	private String videoPort = null;
-	
-	/** The camera for which to request a stream */
-	protected Camera camera = null;
 
 	/** Create a url for connecting to the video server.
 	 * @param p Properties
@@ -157,17 +154,17 @@ public class VideoRequest {
 	private boolean useProxyServer() {
 		return (videoHost != null) && (videoPort != null);
 	}
-	
+
 	/** Create a URL for an MPEG4 stream */
-	private String getMPEG4UrlString() throws MalformedURLException {
+	public URL getMPEG4Url(Camera cam) throws MalformedURLException {
 		if(useProxyServer()) {
 			System.out.println("Using proxy server for MPEG-4");
 			//mpeg4 is not supported on the proxy server yet.
-			return "rtsp://" + videoHost + ":" + videoPort +
-					"/video/stream?id=" + camera.getName();
+			return new URL("rtsp://" + videoHost + ":" + videoPort +
+					"/video/stream?id=" + cam.getName());
 		} else {
-			return "rtsp://" + getCameraIp() +
-				":554/mpeg4/1/media.amp";
+			return new URL("rtsp://" + getCameraIp(cam) +
+				":554/mpeg4/1/media.amp");
 		}
 	}
 
@@ -180,37 +177,21 @@ public class VideoRequest {
 			return "704x480";
 		return "";
 	}
-	
+
 	/** Create a URL for a MJPEG stream */
-	private URL getMJPEGUrl() throws MalformedURLException {
+	public URL getMJPEGUrl(Camera cam) throws MalformedURLException {
 		if(useProxyServer()) {
 			System.out.println("Using proxy server for MJPEG");
 			return new URL(base_url +
-					"?id=" + camera.getName() +
+					"?id=" + cam.getName() +
 					"&size=" + (size.ordinal() + 1) +
 					"&ssid=" + sonarSessionId);
 		} else {
 			return new URL("http://" +
-					camera.getEncoder() +
+					cam.getEncoder() +
 					"/axis-cgi/mjpg/video.cgi?" +
 					"resolution=" + getResolution());
 		}
-	}
-
-	/** Get the URL for the request */
-	public String getUrlString(String codec) {
-		if(camera == null)
-			return null;
-		try {
-			if(codec.equals(StreamPanel.MPEG4))
-				return getMPEG4UrlString();
-			if(codec.equals(StreamPanel.MJPEG))
-				return getMJPEGUrl().toString();
-		}
-		catch(MalformedURLException mue) {
-			mue.printStackTrace();
-		}
-		return null;
 	}
 
 	/** Get the host ip for the stream.
@@ -218,22 +199,12 @@ public class VideoRequest {
 	 * Otherwise, use the ip address of the camera itself.
 	 * @return
 	 */
-	private String getCameraIp() {
-		if(camera == null)
-			return null;
-		String encoder = camera.getEncoder();
+	static private String getCameraIp(Camera cam) {
+		String encoder = cam.getEncoder();
 		if(encoder == null)
 			return null;
 		if(encoder.indexOf(':') == -1)
 			return encoder;
 		return encoder.substring(0, encoder.indexOf(':'));
-	}
-	
-	public Camera getCamera() {
-		return camera;
-	}
-
-	public void setCamera(Camera camera) {
-		this.camera = camera;
 	}
 }
