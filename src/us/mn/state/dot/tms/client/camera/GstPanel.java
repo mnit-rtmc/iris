@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
@@ -65,7 +66,8 @@ public class GstPanel extends StreamPanel {
 	};
 
 	/** Create a new gstreamer stream panel */
-	protected GstPanel() {
+	protected GstPanel(Dimension sz) {
+		super(sz);
 		if(!gstInitialized) {
 			String[] args = {};
 			Gst.init("IRIS", args);

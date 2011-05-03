@@ -41,7 +41,18 @@ public class VideoRequest {
 
 	/** Video stream size enum */
 	static public enum Size {
-		SMALL, MEDIUM, LARGE;
+		SMALL(176, 120),	// Quarter SIF
+		MEDIUM(352, 240),	// Full SIF
+		LARGE(704, 480);	// 4x SIF
+		private Size(int w, int h) {
+			width = w;
+			height = h;
+		}
+		public final int width;
+		public final int height;
+		public String getResolution() {
+			return "" + width + 'x' + height;
+		}
 	}
 
 	/** Video host property name */
@@ -130,24 +141,20 @@ public class VideoRequest {
 	}
 
 	/** Stream size */
-	private Size size = Size.MEDIUM;
+	private final Size size;
 
 	/** Get the stream size */
 	public Size getSize() {
 		return size;
 	}
 
-	/** Set the stream size */
-	public void setSize(Size sz) {
-		size = sz;
-	}
-
 	/** The base URL of the video server */
 	private final String base_url;
 
 	/** Create a new video request */
-	public VideoRequest(Properties p) {
+	public VideoRequest(Properties p, Size sz) {
 		base_url = createBaseUrl(p, StreamType.STREAM);
+		size = sz;
 	}
 
 	/** Check if the video host and video port properties have been set. */
@@ -168,16 +175,6 @@ public class VideoRequest {
 		}
 	}
 
-	private String getResolution() {
-		if(size == Size.SMALL)
-			return "176x144";
-		if(size == Size.MEDIUM)
-			return "352x240";
-		if(size == Size.LARGE)
-			return "704x480";
-		return "";
-	}
-
 	/** Create a URL for a MJPEG stream */
 	public URL getMJPEGUrl(Camera cam) throws MalformedURLException {
 		if(useProxyServer()) {
@@ -190,7 +187,7 @@ public class VideoRequest {
 			return new URL("http://" +
 					cam.getEncoder() +
 					"/axis-cgi/mjpg/video.cgi?" +
-					"resolution=" + getResolution());
+					"resolution=" + size.getResolution());
 		}
 	}
 

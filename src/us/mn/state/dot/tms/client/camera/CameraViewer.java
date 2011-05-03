@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -70,6 +71,10 @@ public class CameraViewer extends JPanel
 	/** Network worker thread */
 	static protected final Scheduler NETWORKER = new Scheduler("NETWORKER");
 
+	/** Video size */
+	static protected final VideoRequest.Size SIZE =
+		VideoRequest.Size.MEDIUM;
+
 	/** Parse the integer ID of a monitor or camera */
 	static protected int parseUID(String name) {
 		String id = name;
@@ -102,7 +107,7 @@ public class CameraViewer extends JPanel
 	protected VideoMonitor video_monitor;
 
 	/** Streaming video viewer */
-	protected final StreamPanel s_panel = StreamPanel.getInstance();
+	protected final StreamPanel s_panel;
 
 	/** Button used to play video */
 	protected final JButton play = new JButton(Icons.getIcon("play"));
@@ -147,11 +152,13 @@ public class CameraViewer extends JPanel
 	/** Create a new camera viewer */
 	public CameraViewer(Session session, CameraManager man) {
 		super(new GridBagLayout());
+		s_panel = StreamPanel.getInstance(new Dimension(SIZE.width,
+			SIZE.height));
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
 		state = session.getSonarState();
 		user = session.getUser();
-		request = new VideoRequest(session.getProperties());
+		request = new VideoRequest(session.getProperties(), SIZE);
 		request.setFrames(STREAM_DURATION);
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();

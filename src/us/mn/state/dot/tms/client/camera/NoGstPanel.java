@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Dimension;
 import java.awt.Image;
 import java.io.IOException;
 import java.net.URL;
@@ -40,7 +41,8 @@ public class NoGstPanel extends StreamPanel {
 	private int n_frames = 0;
 
 	/** Create a new stream panel */
-	protected NoGstPanel() {
+	protected NoGstPanel(Dimension sz) {
+		super(sz);
 		screenPanel.add(screen);
 		thread.start();
 	}

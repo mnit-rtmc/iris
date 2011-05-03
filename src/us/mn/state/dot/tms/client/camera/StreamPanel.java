@@ -43,15 +43,6 @@ abstract public class StreamPanel extends JPanel {
 	/** Constant for MotionJPEG codec */
 	static protected final String MJPEG = "MotionJPEG";
 
-	/** Size of a quarter SIF */
-	static protected final Dimension SIF_QUARTER = new Dimension(176, 120);
-
-	/** Size of a full SIF */
-	static protected final Dimension SIF_FULL = new Dimension(352, 240);
-
-	/** Size of 4 x SIF */
-	static protected final Dimension SIF_4X = new Dimension(704, 480);
-
 	/** JPanel which holds the component used to render the video stream */
 	protected final JPanel screenPanel = new JPanel(new BorderLayout());
 
@@ -65,10 +56,10 @@ abstract public class StreamPanel extends JPanel {
 	protected final JProgressBar progress = new JProgressBar(0, 100);
 
 	/** Size of video image */
-	protected Dimension imageSize = new Dimension(SIF_FULL);
+	protected final Dimension imageSize;
 
 	/** Create a new stream panel */
-	public StreamPanel() {
+	public StreamPanel(Dimension sz) {
 		super(new BorderLayout());
 		JPanel p = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -80,24 +71,25 @@ abstract public class StreamPanel extends JPanel {
 		statusPanel.add(progress, BorderLayout.EAST);
 		p.add(statusPanel, c);
 		add(p);
-		setVideoSize(imageSize);
+		imageSize = new Dimension(sz);
 		statusPanel.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
 		screenPanel.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
+		screenPanel.setPreferredSize(imageSize);
 	}
 
-	static public StreamPanel getInstance() {
+	static public StreamPanel getInstance(Dimension sz) {
 		try {
 			Class.forName("org.gstreamer.Gst");
 			Class.forName("com.sun.jna.Library");
-			return new GstPanel();
+			return new GstPanel(sz);
 		}
 		catch(ClassNotFoundException cnfe) {
-			return new NoGstPanel();
+			return new NoGstPanel(sz);
 		}
 		catch(NoClassDefFoundError ncdfe) {
-			return new NoGstPanel();
+			return new NoGstPanel(sz);
 		}
 	}
 
@@ -105,12 +97,6 @@ abstract public class StreamPanel extends JPanel {
 	abstract void requestStream(VideoRequest req, Camera c);
 
 	abstract void clearStream();
-
-	/** Set the dimensions of the video stream */
-	protected void setVideoSize(Dimension d) {
-		imageSize = d;
-		screenPanel.setPreferredSize(d);
-	}
 
 	final protected void dispose() {
 		clearStream();
