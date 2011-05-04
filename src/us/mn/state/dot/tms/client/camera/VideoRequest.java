@@ -20,6 +20,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 
 /**
  * The video stream request parameter wrapper.
@@ -146,7 +147,8 @@ public class VideoRequest {
 		if(base_url != null)
 			return getServletUrl("rtsp", cam);
 		else {
-			return new URL("rtsp://" + getCameraIp(cam) +
+			return new URL("rtsp://" +
+				CameraHelper.parseEncoderIp(cam) +
 				":554/mpeg4/1/media.amp");
 		}
 	}
@@ -168,23 +170,10 @@ public class VideoRequest {
 		if(base_url != null)
 			return getServletUrl("http", cam);
 		else {
-			return new URL("http://" + cam.getEncoder() +
-					"/axis-cgi/mjpg/video.cgi?" +
-					"resolution=" + size.getResolution());
+			return new URL("http://" +
+				CameraHelper.parseEncoderIp(cam) +
+				":80/axis-cgi/mjpg/video.cgi" +
+				"?resolution=" + size.getResolution());
 		}
-	}
-
-	/** Get the host ip for the stream.
-	 * If the video.host property has been set, then use the video host.
-	 * Otherwise, use the ip address of the camera itself.
-	 * @return
-	 */
-	static private String getCameraIp(Camera cam) {
-		String encoder = cam.getEncoder();
-		if(encoder == null)
-			return null;
-		if(encoder.indexOf(':') == -1)
-			return encoder;
-		return encoder.substring(0, encoder.indexOf(':'));
 	}
 }
