@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,5 +37,14 @@ public class CameraHelper extends BaseHelper {
 	static public Camera lookup(String name) {
 		return (Camera)namespace.lookupObject(Camera.SONAR_TYPE,
 			name);
+	}
+
+	/** Get the host ip for the camera's encoder */
+	static public String parseEncoderIp(Camera cam) {
+		String enc = cam.getEncoder();
+		if(enc != null && enc.indexOf(':') >= 0)
+			return enc.substring(0, enc.indexOf(':'));
+		else
+			return enc;
 	}
 }

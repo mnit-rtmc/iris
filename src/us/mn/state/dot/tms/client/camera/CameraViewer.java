@@ -14,11 +14,11 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -31,7 +31,7 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -46,6 +46,7 @@ import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
  * GUI for viewing camera images
  *
  * @author Douglas Lau
+ * @author Tim Johnson
  */
 public class CameraViewer extends JPanel
 	implements ProxySelectionListener<Camera>
@@ -70,6 +71,10 @@ public class CameraViewer extends JPanel
 	/** Network worker thread */
 	static protected final Scheduler NETWORKER = new Scheduler("NETWORKER");
 
+	/** Video size */
+	static protected final VideoRequest.Size SIZE =
+		VideoRequest.Size.MEDIUM;
+
 	/** Sonar state */
 	protected final SonarState state;
 
@@ -89,7 +94,7 @@ public class CameraViewer extends JPanel
 	protected VideoMonitor video_monitor;
 
 	/** Streaming video viewer */
-	protected final StreamPanel s_panel = new StreamPanel();
+	protected final StreamPanel s_panel;
 
 	/** Button used to play video */
 	protected final JButton play = new JButton(Icons.getIcon("play"));
@@ -134,11 +139,13 @@ public class CameraViewer extends JPanel
 	/** Create a new camera viewer */
 	public CameraViewer(Session session, CameraManager man) {
 		super(new GridBagLayout());
+		s_panel = StreamPanel.getInstance(new Dimension(SIZE.width,
+			SIZE.height));
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
 		state = session.getSonarState();
 		user = session.getUser();
-		request = new VideoRequest(session.getProperties());
+		request = new VideoRequest(session.getProperties(), SIZE);
 		request.setFrames(STREAM_DURATION);
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();
@@ -376,7 +383,8 @@ public class CameraViewer extends JPanel
 
 	/** Start video streaming */
 	protected void playPressed(Camera c) {
-		s_panel.requestStream(request, c.getName());
+		if(c != null)
+			s_panel.requestStream(request, c);
 	}
 
 	/** Stop video streaming */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2010  Minnesota Department of Transportation
+ * Copyright (C) 2003-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,11 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.UnknownHostException;
 import java.net.URL;
-import java.util.LinkedList;
+import java.net.UnknownHostException;
 import java.util.Properties;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 
 /**
  * The video stream request parameter wrapper.
@@ -41,45 +42,42 @@ public class VideoRequest {
 
 	/** Video stream size enum */
 	static public enum Size {
-		SMALL, MEDIUM, LARGE;
-	}
-
-	/** Video backend host property name */
-	static protected final String VIDEO_BACKEND_HOST =
-		"video.backend.host";
-
-	/** Video backend port property name */
-	static protected final String VIDEO_BACKEND_PORT =
-		"video.backend.port";
-
-	/** Create an array of urls for connecting to the backend servers.
-	 * @param p Properties
-	 * @param st Servlet type */
-	static protected String[] createUrls(Properties p, StreamType st) {
-		LinkedList<String> urls = new LinkedList<String>();
-		for(int id = 0; ; id++) {
-			String url = createUrl(p, id);
-			if(url != null)
-				urls.add(url + st.servlet);
-			else
-				break;
+		SMALL(176, 120),	// Quarter SIF
+		MEDIUM(352, 240),	// Full SIF
+		LARGE(704, 480);	// 4x SIF
+		private Size(int w, int h) {
+			width = w;
+			height = h;
 		}
-		return (String[])urls.toArray(new String[0]);
+		public final int width;
+		public final int height;
+		public String getResolution() {
+			return "" + width + 'x' + height;
+		}
 	}
 
-	/** Create one backend url */
-	static protected String createUrl(Properties p, int id) {
-		String ip = p.getProperty(VIDEO_BACKEND_HOST + id);
+	/** Video host property name */
+	static protected final String VIDEO_HOST = "video.host";
+
+	/** Video port property name */
+	static protected final String VIDEO_PORT = "video.port";
+
+	/** Create a url for connecting to the video server.
+	 * @param p Properties */
+	protected String createBaseUrl(Properties p) {
+		String ip = p.getProperty(VIDEO_HOST);
 		if(ip != null) {
 			try {
 				ip = InetAddress.getByName(ip).getHostAddress();
-				String port = p.getProperty(VIDEO_BACKEND_PORT +
-					id,p.getProperty(VIDEO_BACKEND_PORT+0));
-				return "http://" + ip + ":" + port + "/video/";
+				String port = p.getProperty(VIDEO_PORT);
+				if(port != null)
+					return ip + ":" + port;
+				else
+					return ip;
 			}
 			catch(UnknownHostException uhe) {
-				System.out.println("Invalid backend server " +
-					id + " " + uhe.getMessage());
+				System.out.println("Invalid video server " +
+					uhe.getMessage());
 			}
 		}
 		return null;
@@ -96,19 +94,6 @@ public class VideoRequest {
 	/** Set the SONAR session ID */
 	public void setSonarSessionId(long ssid) {
 		sonarSessionId = ssid;
-	}
-
-	/** Area number */
-	private int area = 0;
-
-	/** Get the area number */
-	public int getArea() {
-		return area;
-	}
-
-	/** Set the area number */
-	public void setArea(int area) {
-		this.area = area;
 	}
 
 	/** Frame rate (per second) */
@@ -138,39 +123,57 @@ public class VideoRequest {
 	}
 
 	/** Stream size */
-	private Size size = Size.MEDIUM;
+	private final Size size;
 
 	/** Get the stream size */
 	public Size getSize() {
 		return size;
 	}
 
-	/** Set the stream size */
-	public void setSize(Size sz) {
+	/** The base URL of the video server */
+	private final String base_url;
+
+	/** Stream servlet type */
+	private final StreamType stream_type = StreamType.STREAM;
+
+	/** Create a new video request */
+	public VideoRequest(Properties p, Size sz) {
+		base_url = createBaseUrl(p);
 		size = sz;
 	}
 
-	/** The base URLs of the backend video stream servers */
-	private final String[] area_urls;
-
-	/** Create a new video request */
-	public VideoRequest(Properties p) {
-		area_urls = createUrls(p, StreamType.STREAM);
+	/** Create a URL for an MPEG4 stream */
+	public URL getMPEG4Url(Camera cam) throws MalformedURLException {
+		if(base_url != null)
+			return getServletUrl("rtsp", cam);
+		else {
+			return new URL("rtsp://" +
+				CameraHelper.parseEncoderIp(cam) +
+				":554/mpeg4/1/media.amp");
+		}
 	}
 
-	/** Get the URL for the request */
-	public URL getUrl(String cid) throws MalformedURLException {
-		if(area >= 0 && area < area_urls.length)
-			return createURL(cid);
-		else
-			return null;
+	/** Create a video servlet URL */
+	protected URL getServletUrl(String prot, Camera cam)
+		throws MalformedURLException
+	{
+		// rtsp is not supported by the video servlet yet.
+		return new URL(prot + "://" + base_url +
+		               "/video/" + stream_type.servlet +
+		               "?id=" + cam.getName() +
+		               "&size=" + (size.ordinal() + 1) +
+		               "&ssid=" + sonarSessionId);
 	}
 
-	/** Create the URL for the request */
-	protected URL createURL(String cid) throws MalformedURLException {
-		return new URL(area_urls[area] +
-			"?id=" + cid +
-			"&size=" + (size.ordinal() + 1) +
-			"&ssid=" + sonarSessionId);
+	/** Create a URL for a MJPEG stream */
+	public URL getMJPEGUrl(Camera cam) throws MalformedURLException {
+		if(base_url != null)
+			return getServletUrl("http", cam);
+		else {
+			return new URL("http://" +
+				CameraHelper.parseEncoderIp(cam) +
+				":80/axis-cgi/mjpg/video.cgi" +
+				"?resolution=" + size.getResolution());
+		}
 	}
 }
