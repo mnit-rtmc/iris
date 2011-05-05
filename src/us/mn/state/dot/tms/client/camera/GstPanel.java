@@ -142,14 +142,9 @@ public class GstPanel extends StreamPanel {
 	protected void doRequestStream(VideoRequest req, Camera c)
 		throws MalformedURLException
 	{
-		try {
-			requestMPEG4Stream(req, c);
-		}
-		catch(MalformedURLException e) {
-			disconnect();
-		}
-		if(!isPlaying())
-			requestMJPEGStream(req, c);
+		disconnect();
+		pipe = Pipeline.launch(createPipeString(req.getUrl(c)));
+		connect();
 		statusPanel.doLayout();
 		screenPanel.doLayout();
 		updateStatus();
@@ -159,24 +154,6 @@ public class GstPanel extends StreamPanel {
 	protected boolean isPlaying() {
 		Pipeline p = pipe;
 		return p != null && p.isPlaying();
-	}
-
-	/** Request an MPEG4 video stream */
-	protected void requestMPEG4Stream(VideoRequest req, Camera c)
-		throws MalformedURLException
-	{
-		disconnect();
-		pipe = Pipeline.launch(createPipeString(req.getMPEG4Url(c)));
-		connect();
-	}
-
-	/** Request an MJPEG video stream */
-	protected void requestMJPEGStream(VideoRequest req, Camera c)
-		throws MalformedURLException
-	{
-		disconnect();
-		pipe = Pipeline.launch(createPipeString(req.getMJPEGUrl(c)));
-		connect();
 	}
 
 	private void updateStatus() {

@@ -109,7 +109,7 @@ public class NoGstPanel extends StreamPanel {
 	public void requestStream(VideoRequest req, Camera cam) {
 		try {
 			HttpDataSource source = new HttpDataSource(
-				req.getMJPEGUrl(cam));
+				req.getUrl(cam));
 			setVideoStream(source.createStream(), req.getFrames());
 		}
 		catch(IOException e) {

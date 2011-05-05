@@ -21,6 +21,7 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.EncoderType;
 
 /**
  * The video stream request parameter wrapper.
@@ -142,38 +143,40 @@ public class VideoRequest {
 		size = sz;
 	}
 
-	/** Create a URL for an MPEG4 stream */
-	public URL getMPEG4Url(Camera cam) throws MalformedURLException {
+	/** Create a URL for a stream */
+	public URL getUrl(Camera cam) throws MalformedURLException {
 		if(base_url != null)
-			return getServletUrl("rtsp", cam);
-		else {
-			return new URL("rtsp://" +
-				CameraHelper.parseEncoderIp(cam) +
-				":554/mpeg4/1/media.amp");
-		}
+			return getServletUrl(cam);
+		else
+			return getCameraUrl(cam);
 	}
 
 	/** Create a video servlet URL */
-	protected URL getServletUrl(String prot, Camera cam)
-		throws MalformedURLException
-	{
-		// rtsp is not supported by the video servlet yet.
-		return new URL(prot + "://" + base_url +
+	protected URL getServletUrl(Camera cam) throws MalformedURLException {
+		return new URL("http://" + base_url +
 		               "/video/" + stream_type.servlet +
 		               "?id=" + cam.getName() +
 		               "&size=" + (size.ordinal() + 1) +
 		               "&ssid=" + sonarSessionId);
 	}
 
-	/** Create a URL for a MJPEG stream */
-	public URL getMJPEGUrl(Camera cam) throws MalformedURLException {
-		if(base_url != null)
-			return getServletUrl("http", cam);
-		else {
-			return new URL("http://" +
-				CameraHelper.parseEncoderIp(cam) +
-				":80/axis-cgi/mjpg/video.cgi" +
+	/** Create a camera encoder URL */
+	protected URL getCameraUrl(Camera cam) throws MalformedURLException {
+		String ip = CameraHelper.parseEncoderIp(cam);
+		switch(EncoderType.fromOrdinal(cam.getEncoderType())) {
+		case AXIS_MJPEG:
+			return new URL("http://" + ip +
+				"/axis-cgi/mjpg/video.cgi" +
 				"?resolution=" + size.getResolution());
+		case AXIS_MPEG4:
+			return new URL("rtsp://" + ip + "/mpeg4/media.amp");
+		case INFINOVA_MJPEG:
+			return new URL("http://" + ip +
+				"/jpegmulreq/1/image.jpg");
+		case INFINOVA_MPEG4:
+			return new URL("rtsp://" + ip + "/1.AMP");
+		default:
+			return null;
 		}
 	}
 }
