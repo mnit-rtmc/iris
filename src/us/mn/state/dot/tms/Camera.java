@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@ public interface Camera extends Device {
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 
-	/** Set the video encoder host name (and port) */
+	/** Set the video encoder host name */
 	void setEncoder(String enc);
 
-	/** Get the video encoder host name (and port) */
+	/** Get the video encoder host name */
 	String getEncoder();
 
 	/** Set the input channel on the encoder */
@@ -39,11 +39,11 @@ public interface Camera extends Device {
 	/** Get the input channel on the encoder */
 	int getEncoderChannel();
 
-	/** Set the video NVR host name (and port) */
-	void setNvr(String n);
+	/** Set the encoder type */
+	void setEncoderType(int et);
 
-	/** Get the video NVR host name (and port) */
-	String getNvr();
+	/** Get the encoder type */
+	int getEncoderType();
 
 	/** Set flag to allow publishing camera images */
 	void setPublish(boolean p);

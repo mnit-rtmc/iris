@@ -23,6 +23,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -44,7 +45,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		System.err.println("Loading cameras...");
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"encoder, encoder_channel, nvr, publish " +
+			"encoder, encoder_channel, encoder_type, publish " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -56,7 +57,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 					row.getString(5),	// notes
 					row.getString(6),	// encoder
 					row.getInt(7),	// encoder_channel
-					row.getString(8),	// nvr
+					row.getInt(8),		// encoder_type
 					row.getBoolean(9)	// publish
 				));
 			}
@@ -73,7 +74,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("notes", notes);
 		map.put("encoder", encoder);
 		map.put("encoder_channel", encoder_channel);
-		map.put("nvr", nvr);
+		map.put("encoder_type", encoder_type.ordinal());
 		map.put("publish", publish);
 		return map;
 	}
@@ -98,24 +99,24 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Create a camera */
 	protected CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
-		String nt, String e, int ec, String nv, boolean pb)
+		String nt, String e, int ec, int et, boolean pb)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
 		encoder = e;
 		encoder_channel = ec;
-		nvr = nv;
+		encoder_type = EncoderType.fromOrdinal(et);
 		publish = pb;
 		initTransients();
 	}
 
 	/** Create a camera */
 	protected CameraImpl(Namespace ns, String n, String l, String c,
-		int p, String nt, String e, int ec, String nv, boolean pb)
+		int p, String nt, String e, int ec, int et, boolean pb)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l),
 			(ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,
-			c), p, nt, e, ec, nv, pb);
+			c), p, nt, e, ec, et, pb);
 	}
 
 	/** Destroy an object */
@@ -174,25 +175,26 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return encoder_channel;
 	}
 
-	/** Host (and port) of NVR for digital video stream */
-	protected String nvr = "";
+	/** Encoder type */
+	protected EncoderType encoder_type = EncoderType.NONE;
 
-	/** Set the video NVR host name (and port) */
-	public void setNvr(String n) {
-		nvr = n;
+	/** Set the encoder type */
+	public void setEncoderType(int et) {
+		encoder_type = EncoderType.fromOrdinal(et);
 	}
 
-	/** Set the video NVR host name (and port) */
-	public void doSetNvr(String n) throws TMSException {
-		if(n.equals(nvr))
+	/** Set the encoder type */
+	public void doSetEncoderType(int t) throws TMSException {
+		EncoderType et = EncoderType.fromOrdinal(t);
+		if(et == encoder_type)
 			return;
-		store.update(this, "nvr", n);
-		setNvr(n);
+		store.update(this, "encoder_type", t);
+		setEncoderType(t);
 	}
 
-	/** Get the video NVR host name (and port) */
-	public String getNvr() {
-		return nvr;
+	/** Get the encoder type */
+	public int getEncoderType() {
+		return encoder_type.ordinal();
 	}
 
 	/** Flag to allow publishing camera images */

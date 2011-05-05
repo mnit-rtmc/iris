@@ -407,13 +407,18 @@ CREATE RULE detector_update AS ON UPDATE TO iris.detector DO INSTEAD
 CREATE RULE detector_delete AS ON DELETE TO iris.detector DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
+CREATE TABLE iris.encoder_type (
+	id integer PRIMARY KEY,
+	description VARCHAR(20) NOT NULL
+);
+
 CREATE TABLE iris._camera (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
 	encoder text NOT NULL,
 	encoder_channel integer NOT NULL,
-	nvr text NOT NULL,
+	encoder_type integer NOT NULL REFERENCES iris.encoder_type(id),
 	publish boolean NOT NULL
 );
 
@@ -421,15 +426,15 @@ ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.camera AS SELECT
-	c.name, geo_loc, controller, pin, notes, encoder, encoder_channel, nvr,
-		publish
+	c.name, geo_loc, controller, pin, notes, encoder, encoder_channel,
+		encoder_type, publish
 	FROM iris._camera c JOIN iris._device_io d ON c.name = d.name;
 
 CREATE RULE camera_insert AS ON INSERT TO iris.camera DO INSTEAD
 (
 	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._camera VALUES (NEW.name, NEW.geo_loc, NEW.notes,
-		NEW.encoder, NEW.encoder_channel, NEW.nvr, NEW.publish);
+		NEW.encoder, NEW.encoder_channel, NEW.encoder_type,NEW.publish);
 );
 
 CREATE RULE camera_update AS ON UPDATE TO iris.camera DO INSTEAD
@@ -443,7 +448,7 @@ CREATE RULE camera_update AS ON UPDATE TO iris.camera DO INSTEAD
 		notes = NEW.notes,
 		encoder = NEW.encoder,
 		encoder_channel = NEW.encoder_channel,
-		nvr = NEW.nvr,
+		encoder_type = NEW.encoder_type,
 		publish = NEW.publish
 	WHERE name = OLD.name;
 );
@@ -978,12 +983,18 @@ CREATE VIEW ramp_meter_view AS
 	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
+CREATE VIEW encoder_type_view AS
+	SELECT id, description FROM iris.encoder_type;
+GRANT SELECT ON encoder_type_view TO PUBLIC;
+
 CREATE VIEW camera_view AS
-	SELECT c.name, c.notes, c.encoder, c.encoder_channel, c.nvr, c.publish,
-	c.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+	SELECT c.name, c.notes, c.encoder, c.encoder_channel,
+	et.description AS encoder_type, c.publish, c.geo_loc, l.roadway,
+	l.road_dir, l.cross_mod, l.cross_street,
 	l.cross_dir, l.easting, l.northing,
 	c.controller, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.camera c
+	JOIN iris.encoder_type et ON c.encoder_type = et.id
 	JOIN geo_loc_view l ON c.geo_loc = l.name
 	LEFT JOIN iris.controller ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
@@ -1317,6 +1328,14 @@ COPY iris.meter_lock (id, description) FROM stdin;
 6	Other reason
 \.
 
+COPY iris.encoder_type (id, description) FROM stdin;
+0	
+1	Axis MJPEG
+2	Axis MPEG4
+3	Infinova MJPEG
+4	Infinova MPEG4
+\.
+
 COPY iris.plan_state (id, description) FROM stdin;
 0	undeployed
 1	deploying
@@ -1335,7 +1354,7 @@ camera_id_blank
 camera_num_preset_btns	3
 camera_num_video_frames	900
 camera_ptz_panel_enable	false
-database_version	3.126.0
+database_version	3.127.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_log_enable	false

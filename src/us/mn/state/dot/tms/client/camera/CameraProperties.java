@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
@@ -29,6 +30,7 @@ import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
@@ -65,8 +67,9 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Encoder channel spinner */
 	protected final JSpinner encoder_channel = new JSpinner(num_model);
 
-	/** Video stream NVR host (and port) */
-	protected final JTextField nvr = new JTextField("", 20);
+	/** Encoder type combobox */
+	protected final JComboBox type_cmb =
+		new JComboBox(EncoderType.getDescriptions());
 
 	/** Checkbox to allow publishing camera images */
 	protected final JCheckBox publish = new JCheckBox();
@@ -132,7 +135,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		FormPanel panel = new FormPanel(canUpdate());
 		panel.addRow("Encoder", encoder);
 		panel.addRow("Encoder Channel", encoder_channel);
-		panel.addRow("NVR", nvr);
+		panel.addRow("Encoder Type", type_cmb);
 		panel.addRow("Publish", publish);
 		return panel;
 	}
@@ -155,9 +158,9 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 				proxy.setEncoderChannel(c.intValue());
 			}
 		};
-		new FocusJob(nvr) {
+		new ActionJob(this, type_cmb) {
 			public void perform() {
-				proxy.setNvr(nvr.getText());
+			      proxy.setEncoderType(type_cmb.getSelectedIndex());
 			}
 		};
 		new ActionJob(this, publish) {
@@ -175,8 +178,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 			encoder.setText(proxy.getEncoder());
 		if(a == null || a.equals("encoderChannel"))
 			encoder_channel.setValue(proxy.getEncoderChannel());
-		if(a == null || a.equals("nvr"))
-			nvr.setText(proxy.getNvr());
+		if(a == null || a.equals("encoderType"))
+			type_cmb.setSelectedIndex(proxy.getEncoderType());
 		if(a == null || a.equals("publish"))
 			publish.setSelected(proxy.getPublish());
 	}
