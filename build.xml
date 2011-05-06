@@ -72,7 +72,16 @@
 	<!-- Compiler configuration -->
 	<property name="build.compiler.pedantic" value="true"/>
 	<path id="classpath">
-		<fileset dir="${lib.dir}" includes="*.jar"/>
+		<fileset dir="${lib.dir}">
+			<include name="mail.jar"/>
+			<include name="${geokit.jar}"/>
+			<include name="${mapbean.jar}"/>
+			<include name="${scheduler.jar}"/>
+			<include name="${sonar.server.jar}"/>
+			<include name="${sonar.client.jar}"/>
+			<include name="${tdxml.jar}"/>
+			<include name="${tms-log.jar}"/>
+		</fileset>
 	</path>
 
 	<!-- junit related -->
