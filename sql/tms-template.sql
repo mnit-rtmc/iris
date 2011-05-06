@@ -1332,8 +1332,7 @@ COPY iris.encoder_type (id, description) FROM stdin;
 0	
 1	Axis MJPEG
 2	Axis MPEG4
-3	Infinova MJPEG
-4	Infinova MPEG4
+3	Infinova MPEG4
 \.
 
 COPY iris.plan_state (id, description) FROM stdin;

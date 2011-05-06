@@ -21,8 +21,7 @@ COPY iris.encoder_type (id, description) FROM stdin;
 0	
 1	Axis MJPEG
 2	Axis MPEG4
-3	Infinova MJPEG
-4	Infinova MPEG4
+3	Infinova MPEG4
 \.
 
 CREATE VIEW encoder_type_view AS

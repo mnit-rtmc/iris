@@ -33,10 +33,7 @@ public enum EncoderType {
 	/** Axis MPEG4 (2) */
 	AXIS_MPEG4("Axis MPEG4"),
 
-	/** Infinova MJPEG (3) */
-	INFINOVA_MJPEG("Infinova MJPEG"),
-
-	/** Infinova MPEG4 (4) */
+	/** Infinova MPEG4 (3) */
 	INFINOVA_MPEG4("Infinova MPEG4");
 
 	/** Create a new encoder type */

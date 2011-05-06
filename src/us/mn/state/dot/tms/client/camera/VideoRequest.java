@@ -170,9 +170,6 @@ public class VideoRequest {
 				"?resolution=" + size.getResolution());
 		case AXIS_MPEG4:
 			return new URL("rtsp://" + ip + "/mpeg4/media.amp");
-		case INFINOVA_MJPEG:
-			return new URL("http://" + ip +
-				"/jpegmulreq/1/image.jpg");
 		case INFINOVA_MPEG4:
 			return new URL("rtsp://" + ip + "/1.AMP");
 		default:
