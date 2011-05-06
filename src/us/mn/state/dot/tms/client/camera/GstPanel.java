@@ -147,7 +147,7 @@ public class GstPanel extends StreamPanel {
 		connect();
 		statusPanel.doLayout();
 		screenPanel.doLayout();
-		updateStatus();
+		streamLabel.setText(getStreamStatus());
 	}
 
 	/** Check if the stream is playing */
@@ -156,7 +156,8 @@ public class GstPanel extends StreamPanel {
 		return p != null && p.isPlaying();
 	}
 
-	private void updateStatus() {
+	/** Get the stream status */
+	private String getStreamStatus() {
 		int w = 0;
 		int h = 0;
 		String encoding = "";
@@ -165,10 +166,8 @@ public class GstPanel extends StreamPanel {
 		for(Element e: elements) {
 			if(e instanceof RGBDataSink)
 				continue; // no useful info from sink
-			if(e.getName().startsWith("souphttp")) {
-				streamLabel.setText(MJPEG);
-				return;
-			}
+			if(e.getName().startsWith("souphttp"))
+				return MJPEG;
 			List<Pad> pads = e.getSrcPads();
 			for(Pad p: pads) {
 				Caps c = p.getCaps();
@@ -188,7 +187,7 @@ public class GstPanel extends StreamPanel {
 		}
 		if(encoding.startsWith("MP4V"))
 			encoding = MPEG4;
-		streamLabel.setText(encoding + " (" + w + "x" + h + ")");
+		return encoding + " (" + w + "x" + h + ")";
 	}
 
 	public void clearStream() {
