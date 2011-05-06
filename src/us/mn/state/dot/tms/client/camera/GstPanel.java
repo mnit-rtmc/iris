@@ -157,10 +157,9 @@ public class GstPanel extends StreamPanel {
 
 	/** Get the stream status */
 	private String getStreamStatus() {
+		String enc = "";
 		int w = 0;
 		int h = 0;
-		String encoding = "";
-		int fps = 0;
 		for(Element e: pipe.getElements()) {
 			if(e instanceof RGBDataSink)
 				continue; // no useful info from sink
@@ -169,22 +168,40 @@ public class GstPanel extends StreamPanel {
 			for(Pad p: e.getSrcPads()) {
 				Caps c = p.getCaps();
 				if(c.size() > 0) {
-					String capDesc = c.getStructure(0).getName();
-					for(int i = 0; i < c.size(); i++) {
-						if(capDesc.startsWith("video")) {
-							w = c.getStructure(i).getInteger("width");
-							h = c.getStructure(i).getInteger("height");
-						} else if(capDesc.startsWith("application")) {
-							encoding = c.getStructure(i).getString("encoding-name");
-							fps = (Float.valueOf(c.getStructure(i).getString("a-framerate"))).intValue();
-						}
+					String n = c.getStructure(0).getName();
+					if(n.startsWith("application"))
+						enc = getEncoding(c, enc);
+					if(n.startsWith("video")) {
+						w = getWidth(c, w);
+						h = getHeight(c, h);
 					}
 				}
 			}
 		}
-		if(encoding.startsWith("MP4V"))
-			encoding = MPEG4;
-		return encoding + " (" + w + "x" + h + ")";
+		if(enc.startsWith("MP4V"))
+			enc = MPEG4;
+		return enc + " (" + w + "x" + h + ")";
+	}
+
+	/** Get width from Caps */
+	static protected int getWidth(Caps c, int w) {
+		for(int i = 0; i < c.size(); i++)
+			return c.getStructure(i).getInteger("width");
+		return w;
+	}
+
+	/** Get height from Caps */
+	static protected int getHeight(Caps c, int h) {
+		for(int i = 0; i < c.size(); i++)
+			return c.getStructure(i).getInteger("height");
+		return h;
+	}
+
+	/** Get encoding from Caps */
+	static protected String getEncoding(Caps c, String enc) {
+		for(int i = 0; i < c.size(); i++)
+			return c.getStructure(i).getString("encoding-name");
+		return enc;
 	}
 
 	public void clearStream() {
