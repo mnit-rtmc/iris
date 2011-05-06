@@ -41,10 +41,14 @@ import us.mn.state.dot.tms.Camera;
  */
 public class GstPanel extends StreamPanel {
 
+	/** Initialize gstreamer when loaded */
+	static {
+		String[] args = {};
+		Gst.init("IRIS", args);
+	}
+
 	/** The last element in the pipe which connects to the sink */
 	static protected final String DECODER = "decoder";
-
-	static boolean gstInitialized = false;
 
 	protected Pipeline pipe = null;
 
@@ -68,10 +72,6 @@ public class GstPanel extends StreamPanel {
 	/** Create a new gstreamer stream panel */
 	protected GstPanel(Dimension sz) {
 		super(sz);
-		if(!gstInitialized) {
-			String[] args = {};
-			Gst.init("IRIS", args);
-		}
 	}
 
 	private String createPipeString(URL url) {
