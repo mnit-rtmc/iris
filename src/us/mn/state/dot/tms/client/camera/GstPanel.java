@@ -45,8 +45,7 @@ public class GstPanel extends StreamPanel {
 
 	/** Initialize gstreamer when loaded */
 	static {
-		String[] args = {};
-		Gst.init("IRIS", args);
+		Gst.init();
 	}
 
 	/** The last element in the pipe which connects to the sink */
