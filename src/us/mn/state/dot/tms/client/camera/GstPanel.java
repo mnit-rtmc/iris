@@ -21,9 +21,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import org.gstreamer.Bus;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.Gst;
+import org.gstreamer.GstObject;
 import org.gstreamer.Pad;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
@@ -66,6 +68,13 @@ public class GstPanel extends StreamPanel {
 			if(seconds > progress.getMaximum()) {
 				disconnect();
 			}
+		}
+	};
+
+	/** Listener for gstreamer Bus errors */
+	protected final Bus.ERROR error_listener = new Bus.ERROR() {
+		public void errorMessage(GstObject src, int code, String msg) {
+			System.err.println("gstreamer error: " + msg);
 		}
 	};
 
@@ -144,6 +153,7 @@ public class GstPanel extends StreamPanel {
 	{
 		disconnect();
 		pipe = Pipeline.launch(createPipeString(req.getUrl(c)));
+		pipe.getBus().connect(error_listener);
 		connect();
 		statusPanel.doLayout();
 		screenPanel.doLayout();
