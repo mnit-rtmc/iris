@@ -198,7 +198,7 @@ public class GstPanel extends StreamPanel {
 	static protected int getWidth(Caps c, int w) {
 		for(int i = 0; i < c.size(); i++) {
 			Structure s = c.getStructure(i);
-			if(s.hasField("width"))
+			if(s.hasIntField("width"))
 				return s.getInteger("width");
 		}
 		return w;
@@ -208,7 +208,7 @@ public class GstPanel extends StreamPanel {
 	static protected int getHeight(Caps c, int h) {
 		for(int i = 0; i < c.size(); i++) {
 			Structure s = c.getStructure(i);
-			if(s.hasField("height"))
+			if(s.hasIntField("height"))
 				return s.getInteger("height");
 		}
 		return h;
