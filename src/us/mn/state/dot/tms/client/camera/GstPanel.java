@@ -19,7 +19,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import org.gstreamer.Caps;
@@ -162,14 +161,12 @@ public class GstPanel extends StreamPanel {
 		int h = 0;
 		String encoding = "";
 		int fps = 0;
-		List<Element> elements = pipe.getElements();
-		for(Element e: elements) {
+		for(Element e: pipe.getElements()) {
 			if(e instanceof RGBDataSink)
 				continue; // no useful info from sink
 			if(e.getName().startsWith("souphttp"))
 				return MJPEG;
-			List<Pad> pads = e.getSrcPads();
-			for(Pad p: pads) {
+			for(Pad p: e.getSrcPads()) {
 				Caps c = p.getCaps();
 				if(c.size() > 0) {
 					String capDesc = c.getStructure(0).getName();
