@@ -27,6 +27,7 @@ import org.gstreamer.Gst;
 import org.gstreamer.Pad;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
+import org.gstreamer.Structure;
 import org.gstreamer.elements.RGBDataSink;
 import org.gstreamer.swing.VideoComponent;
 import us.mn.state.dot.tms.Camera;
@@ -185,22 +186,31 @@ public class GstPanel extends StreamPanel {
 
 	/** Get width from Caps */
 	static protected int getWidth(Caps c, int w) {
-		for(int i = 0; i < c.size(); i++)
-			return c.getStructure(i).getInteger("width");
+		for(int i = 0; i < c.size(); i++) {
+			Structure s = c.getStructure(i);
+			if(s.hasField("width"))
+				return s.getInteger("width");
+		}
 		return w;
 	}
 
 	/** Get height from Caps */
 	static protected int getHeight(Caps c, int h) {
-		for(int i = 0; i < c.size(); i++)
-			return c.getStructure(i).getInteger("height");
+		for(int i = 0; i < c.size(); i++) {
+			Structure s = c.getStructure(i);
+			if(s.hasField("height"))
+				return s.getInteger("height");
+		}
 		return h;
 	}
 
 	/** Get encoding from Caps */
 	static protected String getEncoding(Caps c, String enc) {
-		for(int i = 0; i < c.size(); i++)
-			return c.getStructure(i).getString("encoding-name");
+		for(int i = 0; i < c.size(); i++) {
+			Structure s = c.getStructure(i);
+			if(s.hasField("encoding-name"))
+				return s.getString("encoding-name");
+		}
 		return enc;
 	}
 
