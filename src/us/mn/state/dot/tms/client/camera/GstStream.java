@@ -14,10 +14,9 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.Dimension;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
-import javax.swing.SwingUtilities;
+import javax.swing.JComponent;
 import org.gstreamer.Bus;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
@@ -32,13 +31,13 @@ import org.gstreamer.swing.VideoComponent;
 import us.mn.state.dot.tms.Camera;
 
 /**
- * A GstManager is responsible for managing video streams using the
+ * A GstStream is a video stream which can read streams handled by the
  * GStreamer-java library.
  *
- * @author Tim Johnson
  * @author Douglas Lau
+ * @author Tim Johnson
  */
-public class GstPanel extends StreamPanel {
+public class GstStream implements VideoStream {
 
 	/** Initialize gstreamer when loaded */
 	static {
@@ -48,20 +47,38 @@ public class GstPanel extends StreamPanel {
 	/** The last element in the pipe which connects to the sink */
 	static protected final String DECODER = "decoder";
 
-	protected Pipeline pipe = null;
+	/** Component to display video stream */
+	private final VideoComponent screen = new VideoComponent();
 
-	/** Listener for gstreamer Bus errors */
+	/** Gstreamer pipeline */
+	private final Pipeline pipe;
+
+	/** Listener for Gstreamer bus errors */
 	protected final Bus.ERROR error_listener = new Bus.ERROR() {
 		public void errorMessage(GstObject src, int code, String msg) {
-			System.err.println("gstreamer error: " + msg);
+			error_msg = msg;
 		}
 	};
 
-	/** Create a new gstreamer stream panel */
-	protected GstPanel(Dimension sz) {
-		super(sz);
+	/** Stream status */
+	private final String status;
+
+	/** Stream error message */
+	private String error_msg = null;
+
+	/** Create a new gstreamer stream */
+	public GstStream(VideoRequest req, Camera c) throws IOException {
+		pipe = Pipeline.launch(createPipeString(req.getUrl(c)));
+		pipe.getBus().connect(error_listener);
+		pipe.add(screen.getElement());
+		pipe.getElementByName(DECODER).link(screen.getElement());
+		pipe.setState(State.PAUSED);
+		pipe.play();
+		pipe.setState(State.PLAYING);
+		status = getStreamStatus();
 	}
 
+	/** Create the pipeline string */
 	private String createPipeString(URL url) {
 		StringBuilder sb = new StringBuilder();
 		if(url.toString().startsWith("rtsp")) {
@@ -75,66 +92,6 @@ public class GstPanel extends StreamPanel {
 		}
 		sb.append("name=" + DECODER);
 		return sb.toString();
-	}
-
-	/** This method should only be called on the swing thread */
-	private void connect() {
-		VideoComponent screen = new VideoComponent();
-		screenPanel.add(screen);
-		screen.setPreferredSize(screenPanel.getPreferredSize());
-		screen.doLayout();
-		pipe.add(screen.getElement());
-		pipe.getElementByName(DECODER).link(screen.getElement());
-		pipe.setState(State.PAUSED);
-		pipe.play();
-		pipe.setState(State.PLAYING);
-	}
-
-	/** This method should only be called on the swing thread */
-	private void disconnect() {
-		Pipeline p = pipe;
-		if(p != null) {
-			p.stop();
-			p.setState(State.NULL);
-			pipe = null;
-		}
-		screenPanel.removeAll();
-		screenPanel.repaint();
-		streamLabel.setText(null);
-	}
-
-	/** Request a new video stream */
-	protected void requestStream(final VideoRequest req, final Camera c) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					doRequestStream(req, c);
-				}
-				catch(MalformedURLException e) {
-					streamLabel.setText(e.getMessage());
-				}
-			}
-		});
-		super.requestStream(req, c);
-	}
-
-	/** Request a new video stream */
-	protected void doRequestStream(VideoRequest req, Camera c)
-		throws MalformedURLException
-	{
-		disconnect();
-		pipe = Pipeline.launch(createPipeString(req.getUrl(c)));
-		pipe.getBus().connect(error_listener);
-		connect();
-		statusPanel.doLayout();
-		screenPanel.doLayout();
-		streamLabel.setText(getStreamStatus());
-	}
-
-	/** Check if the stream is playing */
-	protected boolean isPlaying() {
-		Pipeline p = pipe;
-		return p != null && p.isPlaying();
 	}
 
 	/** Get the stream status */
@@ -195,14 +152,24 @@ public class GstPanel extends StreamPanel {
 		return enc;
 	}
 
-	protected void clearStream() {
-		super.clearStream();
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				disconnect();
-				streamLabel.setText("Stopped");
-				statusPanel.doLayout();
-			}
-		});
+	/** Get a component for displaying the video stream */
+	public JComponent getComponent() {
+		return screen;
+	}
+
+	/** Get the status of the stream */
+	public String getStatus() {
+		String e = error_msg;
+		if(e != null)
+			return e;
+		else
+			return status;
+	}
+
+	/** Dispose of the video stream */
+	public void dispose() {
+		pipe.stop();
+		pipe.setState(State.NULL);
+		pipe.getBus().disconnect(error_listener);
 	}
 }

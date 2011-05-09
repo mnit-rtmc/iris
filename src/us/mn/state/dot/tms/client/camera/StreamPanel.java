@@ -21,7 +21,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -31,14 +33,12 @@ import us.mn.state.dot.tms.Camera;
 
 /**
  * A JPanel that can display a video stream. It includes a progress bar and
- * methods to set the size of the video. Implementations of this class are
- * responsible for handling the stream including connecting, stopping and
- * processing.
+ * status label.
  *
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-abstract public class StreamPanel extends JPanel {
+public class StreamPanel extends JPanel {
 
 	/** JPanel which holds the component used to render the video stream */
 	protected final JPanel screenPanel = new JPanel(new BorderLayout());
@@ -48,9 +48,6 @@ abstract public class StreamPanel extends JPanel {
 
 	/** JLabel for displaying the stream details (codec, size, framerate) */
 	protected final JLabel streamLabel = new JLabel();
-
-	/** Size of video image */
-	protected final Dimension imageSize;
 
 	/** Progress bar for duration */
 	private final JProgressBar progress = new JProgressBar(0, 100);
@@ -82,6 +79,9 @@ abstract public class StreamPanel extends JPanel {
 	/** Stream progress timer */
 	protected final Timer timer = new Timer(TIMER_DELAY, progress_timer);
 
+	/** Current video stream */
+	private VideoStream stream = null;
+
 	/** Create a new stream panel */
 	public StreamPanel(Dimension sz) {
 		super(new BorderLayout());
@@ -95,41 +95,59 @@ abstract public class StreamPanel extends JPanel {
 		statusPanel.add(progress, BorderLayout.EAST);
 		p.add(statusPanel, c);
 		add(p);
-		imageSize = new Dimension(sz);
 		statusPanel.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
 		screenPanel.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
-		screenPanel.setPreferredSize(imageSize);
-	}
-
-	static public StreamPanel getInstance(Dimension sz) {
-		try {
-			Class.forName("org.gstreamer.Gst");
-			Class.forName("com.sun.jna.Library");
-			return new GstPanel(sz);
-		}
-		catch(ClassNotFoundException cnfe) {
-			return new NoGstPanel(sz);
-		}
-		catch(NoClassDefFoundError ncdfe) {
-			return new NoGstPanel(sz);
-		}
+		screenPanel.setPreferredSize(sz);
 	}
 
 	/** Request a new video stream */
-	protected void requestStream(VideoRequest req, Camera c) {
-		progress_timer.start(req.getDuration());
-		timer.start();
+	public void requestStream(VideoRequest req, Camera c) {
+		try {
+			stream = createStream(req, c);
+			JComponent screen = stream.getComponent();
+			screen.setPreferredSize(screenPanel.getPreferredSize());
+			screenPanel.add(screen);
+			progress_timer.start(req.getDuration());
+			timer.start();
+		}
+		catch(IOException e) {
+			streamLabel.setText(e.getMessage());
+		}
+	}
+
+	/** Create a new video stream */
+	protected VideoStream createStream(VideoRequest req, Camera cam)
+		throws IOException
+	{
+		try {
+			Class.forName("org.gstreamer.Gst");
+			Class.forName("com.sun.jna.Library");
+			return new GstStream(req, cam);
+		}
+		catch(ClassNotFoundException cnfe) {
+			return new MJPEGStream(req, cam);
+		}
+		catch(NoClassDefFoundError ncdfe) {
+			return new MJPEGStream(req, cam);
+		}
 	}
 
 	/** Clear the video stream */
 	protected void clearStream() {
 		timer.stop();
 		progress_timer.stop();
+		VideoStream vs = stream;
+		if(vs != null) {
+			vs.dispose();
+			stream = null;
+			streamLabel.setText(null);
+		}
 	}
 
-	final protected void dispose() {
+	/** Dispose of the stream panel */
+	protected final void dispose() {
 		clearStream();
 	}
 }

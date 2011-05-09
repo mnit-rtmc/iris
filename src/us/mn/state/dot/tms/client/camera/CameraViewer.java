@@ -135,7 +135,7 @@ public class CameraViewer extends JPanel
 	/** Create a new camera viewer */
 	public CameraViewer(Session session, CameraManager man) {
 		super(new GridBagLayout());
-		s_panel = StreamPanel.getInstance(new Dimension(SIZE.width,
+		s_panel = new StreamPanel(new Dimension(SIZE.width,
 			SIZE.height));
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
