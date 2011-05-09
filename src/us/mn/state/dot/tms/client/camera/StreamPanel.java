@@ -115,6 +115,7 @@ public class StreamPanel extends JPanel {
 		if(stream != null)
 			clearStream();
 		try {
+			status_lbl.setText("Opening stream");
 			stream = createStream(req, c);
 			JComponent screen = stream.getComponent();
 			screen.setPreferredSize(screen_pnl.getPreferredSize());
