@@ -14,19 +14,28 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.io.IOException;
+import javax.swing.JComponent;
 
 /**
- * A video stream produces a stream of image data.
+ * A video stream displays a video on a swing component.
  *
- * @author Timothy Johnson
  * @author Douglas Lau
+ * @author Timothy Johnson
  */
 public interface VideoStream {
 
-	/** Get the next image in the stream */
-	byte[] getImage() throws IOException;
+	/** Constant for MotionJPEG codec */
+	String MJPEG = "MotionJPEG";
 
-	/** Close the video stream */
-	void close() throws IOException;
+	/** Constant for MPEG-4 codec */
+	String MPEG4 = "MPEG-4";
+
+	/** Get a component for displaying the video stream */
+	JComponent getComponent();
+
+	/** Get the status of the stream */
+	String getStatus();
+
+	/** Dispose of the video stream */
+	void dispose();
 }

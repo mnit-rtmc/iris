@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2010  Minnesota Department of Transportation
+ * Copyright (C) 2003-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,35 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import us.mn.state.dot.tms.Camera;
 
 /**
  * A video stream which reads an MJPEG source.
  *
- * @author Timothy Johnson
  * @author Douglas Lau
+ * @author Timothy Johnson
  */
 public class MJPEGStream implements VideoStream {
+
+	/** Default timeout for direct URL Connections */
+	static protected final int TIMEOUT_DIRECT = 5 * 1000;
+
+	/** Label to display video stream */
+	private final JLabel screen = new JLabel();
+
+	/** URL of the data source */
+	private final URL url;
+
+	/** Requested video size */
+	private final VideoRequest.Size size;
 
 	/** Input stream to read */
 	private final InputStream stream;
@@ -31,13 +50,54 @@ public class MJPEGStream implements VideoStream {
 	/** Count of rendered frames */
 	private int n_frames = 0;
 
+	/** Flag to continue running stream */
+	private boolean running = true;
+
+	/** Stream error message */
+	private String error_msg = null;
+
 	/** Create a new MJPEG stream */
-	public MJPEGStream(InputStream is) {
-		stream = is;
+	public MJPEGStream(VideoRequest req, Camera cam) throws IOException {
+		url = req.getUrl(cam);
+		size = req.getSize();
+		stream = createInputStream();
+		thread.start();
+	}
+
+	/** Create an input stream from an HTTP connection */
+	protected InputStream createInputStream() throws IOException {
+		HttpURLConnection c = (HttpURLConnection)url.openConnection();
+		HttpURLConnection.setFollowRedirects(true);
+		c.setConnectTimeout(TIMEOUT_DIRECT);
+		c.setReadTimeout(TIMEOUT_DIRECT);
+		return c.getInputStream();
+	}
+
+	/** Anonymous thread to read video stream */
+	private final Thread thread = new Thread() {
+		public void run() {
+			readStream();
+		}
+	};
+
+	/** Read a video stream */
+	protected void readStream() {
+		try {
+			while(running) {
+				byte[] idata = getImage();
+				screen.setIcon(createIcon(idata));
+			}
+		}
+		catch(IOException e) {
+			error_msg = e.getMessage();
+		}
+		finally {
+			screen.setIcon(null);
+		}
 	}
 
 	/** Get the next image in the mjpeg stream */
-	public byte[] getImage() throws IOException {
+	protected byte[] getImage() throws IOException {
 		int n_size = getImageSize();
 		byte[] image = new byte[n_size];
 		int n_bytes = 0;
@@ -50,6 +110,17 @@ public class MJPEGStream implements VideoStream {
 		}
 		n_frames++;
 		return image;
+	}
+
+	/** Create an image icon from image data */
+	protected ImageIcon createIcon(byte[] idata) {
+		ImageIcon icon = new ImageIcon(idata);
+		if(icon.getIconWidth() == size.width &&
+		   icon.getIconHeight() == size.height)
+			return icon;
+		Image im = icon.getImage().getScaledInstance(size.width,
+			size.height, Image.SCALE_FAST);
+		return new ImageIcon(im);
 	}
 
 	/** Get the length of the next image */
@@ -96,8 +167,34 @@ public class MJPEGStream implements VideoStream {
 		return b.toString();
 	}
 
-	/** Close the video stream */
-	public void close() throws IOException {
-		stream.close();
+	/** Get a component for displaying the video stream */
+	public JComponent getComponent() {
+		return screen;
+	}
+
+	/** Get the status of the stream */
+	public String getStatus() {
+		String e = error_msg;
+		if(e != null)
+			return e;
+		else
+			return MJPEG;
+	}
+
+	/** Dispose of the video stream */
+	public void dispose() {
+		running = false;
+		try {
+			thread.join();
+		}
+		catch(InterruptedException e) {
+			error_msg = e.getMessage();
+		}
+		try {
+			stream.close();
+		}
+		catch(IOException e) {
+			error_msg = e.getMessage();
+		}
 	}
 }

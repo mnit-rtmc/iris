@@ -146,7 +146,7 @@ public class GstPanel extends StreamPanel {
 			if(e instanceof RGBDataSink)
 				continue; // no useful info from sink
 			if(e.getName().startsWith("souphttp"))
-				return MJPEG;
+				return VideoStream.MJPEG;
 			for(Pad p: e.getSrcPads()) {
 				Caps c = p.getCaps();
 				if(c.size() > 0) {
@@ -161,7 +161,7 @@ public class GstPanel extends StreamPanel {
 			}
 		}
 		if(enc.startsWith("MP4V"))
-			enc = MPEG4;
+			enc = VideoStream.MPEG4;
 		return enc + " (" + w + "x" + h + ")";
 	}
 

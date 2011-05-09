@@ -40,12 +40,6 @@ import us.mn.state.dot.tms.Camera;
  */
 abstract public class StreamPanel extends JPanel {
 
-	/** Constant for MPEG-4 codec */
-	static protected final String MPEG4 = "MPEG-4";
-
-	/** Constant for MotionJPEG codec */
-	static protected final String MJPEG = "MotionJPEG";
-
 	/** JPanel which holds the component used to render the video stream */
 	protected final JPanel screenPanel = new JPanel(new BorderLayout());
 
