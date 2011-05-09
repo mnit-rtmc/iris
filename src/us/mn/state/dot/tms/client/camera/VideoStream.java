@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,6 @@ public interface VideoStream {
 
 	/** Get the next image in the stream */
 	byte[] getImage() throws IOException;
-
-	/** Get the number of frames rendered */
-	int getFrameCount();
 
 	/** Close the video stream */
 	void close() throws IOException;

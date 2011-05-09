@@ -100,9 +100,4 @@ public class MJPEGStream implements VideoStream {
 	public void close() throws IOException {
 		stream.close();
 	}
-
-	/** Get the number of frames rendered */
-	public int getFrameCount() {
-		return n_frames;
-	}
 }
