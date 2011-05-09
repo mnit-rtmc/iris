@@ -56,6 +56,12 @@ public class MJPEGStream implements VideoStream {
 	/** Stream error message */
 	private String error_msg = null;
 
+	/** Set the stream error message */
+	protected void setErrorMsg(String e) {
+		if(error_msg == null)
+			error_msg = e;
+	}
+
 	/** Create a new MJPEG stream */
 	public MJPEGStream(VideoRequest req, Camera cam) throws IOException {
 		url = req.getUrl(cam);
@@ -89,7 +95,7 @@ public class MJPEGStream implements VideoStream {
 			}
 		}
 		catch(IOException e) {
-			error_msg = e.getMessage();
+			setErrorMsg(e.getMessage());
 		}
 		finally {
 			screen.setIcon(null);
@@ -194,13 +200,13 @@ public class MJPEGStream implements VideoStream {
 			thread.join();
 		}
 		catch(InterruptedException e) {
-			error_msg = e.getMessage();
+			setErrorMsg(e.getMessage());
 		}
 		try {
 			stream.close();
 		}
 		catch(IOException e) {
-			error_msg = e.getMessage();
+			setErrorMsg(e.getMessage());
 		}
 	}
 }
