@@ -173,7 +173,7 @@ public class VideoRequest {
 		case INFINOVA_MPEG4:
 			return new URL("rtsp://" + ip + "/1.AMP");
 		default:
-			return null;
+			throw new MalformedURLException("No encoder");
 		}
 	}
 }
