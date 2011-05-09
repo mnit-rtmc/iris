@@ -86,7 +86,7 @@ abstract public class StreamPanel extends JPanel {
 	protected final ProgressTimer progress_timer = new ProgressTimer();
 
 	/** Stream progress timer */
-	protected Timer timer = null;
+	protected final Timer timer = new Timer(TIMER_DELAY, progress_timer);
 
 	/** Create a new stream panel */
 	public StreamPanel(Dimension sz) {
@@ -125,18 +125,13 @@ abstract public class StreamPanel extends JPanel {
 
 	/** Request a new video stream */
 	protected void requestStream(VideoRequest req, Camera c) {
-		timer = new Timer(TIMER_DELAY, progress_timer);
-		timer.start();
 		progress_timer.start(req.getDuration());
+		timer.start();
 	}
 
 	/** Clear the video stream */
 	protected void clearStream() {
-		Timer t = timer;
-		if(t != null) {
-			t.stop();
-			timer = null;
-		}
+		timer.stop();
 		progress_timer.stop();
 	}
 
