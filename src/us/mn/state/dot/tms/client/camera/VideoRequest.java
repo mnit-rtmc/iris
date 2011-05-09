@@ -110,25 +110,17 @@ public class VideoRequest {
 		rate = rt;
 	}
 
-	/** Number of frames requested */
-	private int frames = 60 * 30;
-
-	/** Get the number of frames */
-	public int getFrames() {
-		return frames;
-	}
-
-	/** Set the number of frames */
-	public void setFrames(int f) {
-		frames = f;
-	}
+	/** Duration of stream (seconds) */
+	private int duration = 60;
 
 	/** Get requested duration in seconds */
 	public int getDuration() {
-		if(rate > 0)
-			return frames / rate;
-		else
-			return 0;
+		return duration;
+	}
+
+	/** Set the stream duration in seconds */
+	public void setDuration(int d) {
+		duration = d;
 	}
 
 	/** Stream size */

@@ -51,10 +51,6 @@ import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 public class CameraViewer extends JPanel
 	implements ProxySelectionListener<Camera>
 {
-	/** System attribute for number of frames to process (for streaming) */
-	static protected final int STREAM_DURATION =
-		SystemAttrEnum.CAMERA_NUM_VIDEO_FRAMES.getInt();
-
 	/** Dead zone needed for too-precise joystick drivers */
 	static protected final float AXIS_DEADZONE = 3f / 64;
 
@@ -146,7 +142,8 @@ public class CameraViewer extends JPanel
 		state = session.getSonarState();
 		user = session.getUser();
 		request = new VideoRequest(session.getProperties(), SIZE);
-		request.setFrames(STREAM_DURATION);
+		request.setDuration(
+			SystemAttrEnum.CAMERA_STREAM_DURATION_SECS.getInt());
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
