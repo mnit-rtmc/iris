@@ -123,6 +123,14 @@ public class VideoRequest {
 		frames = f;
 	}
 
+	/** Get requested duration in seconds */
+	public int getDuration() {
+		if(rate > 0)
+			return frames / rate;
+		else
+			return 0;
+	}
+
 	/** Stream size */
 	private final Size size;
 

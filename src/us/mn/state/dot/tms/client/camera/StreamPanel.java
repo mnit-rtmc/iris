@@ -19,10 +19,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import us.mn.state.dot.tms.Camera;
 
@@ -52,11 +55,38 @@ abstract public class StreamPanel extends JPanel {
 	/** JLabel for displaying the stream details (codec, size, framerate) */
 	protected final JLabel streamLabel = new JLabel();
 
-	/** Progress bar for duration */
-	protected final JProgressBar progress = new JProgressBar(0, 100);
-
 	/** Size of video image */
 	protected final Dimension imageSize;
+
+	/** Progress bar for duration */
+	private final JProgressBar progress = new JProgressBar(0, 100);
+
+	/** Milliseconds between updates to the progress */
+	static protected final int TIMER_DELAY = 1000;
+
+	/** Timer listener for updating video progress */
+	protected class ProgressTimer implements ActionListener {
+		protected int seconds = 0;
+		public void start(int n_seconds) {
+			seconds = 0;
+			progress.setValue(0);
+			progress.setMaximum(n_seconds);
+		}
+		public void stop() {
+			progress.setValue(0);
+		}
+		public void actionPerformed(ActionEvent evt) {
+			progress.setValue(++seconds);
+			if(seconds > progress.getMaximum())
+				clearStream();
+		}
+	};
+
+	/** Timer task for updating video progress */
+	protected final ProgressTimer progress_timer = new ProgressTimer();
+
+	/** Stream progress timer */
+	protected Timer timer = null;
 
 	/** Create a new stream panel */
 	public StreamPanel(Dimension sz) {
@@ -94,9 +124,21 @@ abstract public class StreamPanel extends JPanel {
 	}
 
 	/** Request a new video stream */
-	abstract void requestStream(VideoRequest req, Camera c);
+	protected void requestStream(VideoRequest req, Camera c) {
+		timer = new Timer(TIMER_DELAY, progress_timer);
+		timer.start();
+		progress_timer.start(req.getDuration());
+	}
 
-	abstract void clearStream();
+	/** Clear the video stream */
+	protected void clearStream() {
+		Timer t = timer;
+		if(t != null) {
+			t.stop();
+			timer = null;
+		}
+		progress_timer.stop();
+	}
 
 	final protected void dispose() {
 		clearStream();

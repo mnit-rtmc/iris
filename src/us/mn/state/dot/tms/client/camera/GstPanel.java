@@ -15,12 +15,9 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 import org.gstreamer.Bus;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
@@ -52,23 +49,6 @@ public class GstPanel extends StreamPanel {
 	static protected final String DECODER = "decoder";
 
 	protected Pipeline pipe = null;
-
-	protected Timer timer = null;
-
-	/** Seconds of video elapsed */
-	int seconds = 0;
-
-	/** Milliseconds between updates to the progress */
-	int delay = 1000;
-
-	ActionListener taskPerformer = new ActionListener() {
-		public void actionPerformed(ActionEvent evt) {
-			progress.setValue(++seconds);
-			if(seconds > progress.getMaximum()) {
-				disconnect();
-			}
-		}
-	};
 
 	/** Listener for gstreamer Bus errors */
 	protected final Bus.ERROR error_listener = new Bus.ERROR() {
@@ -108,17 +88,10 @@ public class GstPanel extends StreamPanel {
 		pipe.setState(State.PAUSED);
 		pipe.play();
 		pipe.setState(State.PLAYING);
-		timer = new Timer(delay, taskPerformer);
-		timer.start();
 	}
 
 	/** This method should only be called on the swing thread */
 	private void disconnect() {
-		Timer t = timer;
-		if(t != null) {
-			t.stop();
-			timer = null;
-		}
 		Pipeline p = pipe;
 		if(p != null) {
 			p.stop();
@@ -127,13 +100,11 @@ public class GstPanel extends StreamPanel {
 		}
 		screenPanel.removeAll();
 		screenPanel.repaint();
-		seconds = 0;
-		progress.setValue(seconds);
 		streamLabel.setText(null);
 	}
 
 	/** Request a new video stream */
-	public void requestStream(final VideoRequest req, final Camera c) {
+	protected void requestStream(final VideoRequest req, final Camera c) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -144,6 +115,7 @@ public class GstPanel extends StreamPanel {
 				}
 			}
 		});
+		super.requestStream(req, c);
 	}
 
 	/** Request a new video stream */
@@ -223,7 +195,8 @@ public class GstPanel extends StreamPanel {
 		return enc;
 	}
 
-	public void clearStream() {
+	protected void clearStream() {
+		super.clearStream();
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				disconnect();

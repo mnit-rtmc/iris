@@ -74,7 +74,6 @@ public class NoGstPanel extends StreamPanel {
 			while(vs == stream) {
 				byte[] idata = vs.getImage();
 				screen.setIcon(createIcon(idata));
-				progress.setValue(vs.getFrameCount());
 				streamLabel.setText(MJPEG);
 				if(vs.getFrameCount() >= n_frames)
 					break;
@@ -100,13 +99,12 @@ public class NoGstPanel extends StreamPanel {
 		if(stream == vs) {
 			stream = null;
 			n_frames = 0;
-			progress.setValue(0);
 			streamLabel.setText(null);
 		}
 	}
 
 	/** Request a new video stream */
-	public void requestStream(VideoRequest req, Camera cam) {
+	protected void requestStream(VideoRequest req, Camera cam) {
 		try {
 			HttpDataSource source = new HttpDataSource(
 				req.getUrl(cam));
@@ -115,10 +113,12 @@ public class NoGstPanel extends StreamPanel {
 		catch(IOException e) {
 			streamLabel.setText(e.getMessage());
 		}
+		super.requestStream(req, cam);
 	}
 
 	/** Clear the video stream */
-	public void clearStream() {
+	protected void clearStream() {
+		super.clearStream();
 		setVideoStream(null, 0);
 	}
 
@@ -126,8 +126,6 @@ public class NoGstPanel extends StreamPanel {
 	protected synchronized void setVideoStream(VideoStream vs, int f) {
 		stream = vs;
 		n_frames = f;
-		progress.setMaximum(n_frames);
-		progress.setValue(0);
 		synchronized(thread) {
 			thread.notify();
 		}
