@@ -27,6 +27,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import us.mn.state.dot.tms.Camera;
@@ -72,10 +73,11 @@ public class StreamPanel extends JPanel {
 			seconds++;
 			VideoStream vs = stream;
 			if(vs != null) {
-				status_lbl.setText(vs.getStatus());
 				progress.setValue(seconds);
 				if(seconds > duration || !vs.isPlaying())
 					clearStream();
+				if(seconds <= duration)
+					status_lbl.setText(vs.getStatus());
 			}
 		}
 	};
@@ -151,9 +153,13 @@ public class StreamPanel extends JPanel {
 		if(vs != null) {
 			vs.dispose();
 			stream = null;
-			status_lbl.setText(null);
 		}
-		screen_pnl.revalidate();
+		status_lbl.setText(null);
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				screen_pnl.repaint();
+			}
+		});
 	}
 
 	/** Dispose of the stream panel */
