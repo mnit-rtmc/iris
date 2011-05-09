@@ -41,13 +41,13 @@ import us.mn.state.dot.tms.Camera;
 public class StreamPanel extends JPanel {
 
 	/** JPanel which holds the component used to render the video stream */
-	protected final JPanel screenPanel = new JPanel(new BorderLayout());
+	protected final JPanel screen_pnl = new JPanel(new BorderLayout());
 
 	/** JPanel which holds the status widgets */
-	protected final JPanel statusPanel = new JPanel(new BorderLayout());
+	protected final JPanel status_pnl = new JPanel(new BorderLayout());
 
 	/** JLabel for displaying the stream details (codec, size, framerate) */
-	protected final JLabel streamLabel = new JLabel();
+	protected final JLabel status_lbl = new JLabel();
 
 	/** Progress bar for duration */
 	private final JProgressBar progress = new JProgressBar(0, 100);
@@ -58,8 +58,10 @@ public class StreamPanel extends JPanel {
 	/** Timer listener for updating video progress */
 	protected class ProgressTimer implements ActionListener {
 		protected int seconds = 0;
+		protected int duration = 0;
 		public void start(int n_seconds) {
 			seconds = 0;
+			duration = n_seconds;
 			progress.setValue(0);
 			progress.setMaximum(n_seconds);
 		}
@@ -67,9 +69,14 @@ public class StreamPanel extends JPanel {
 			progress.setValue(0);
 		}
 		public void actionPerformed(ActionEvent evt) {
-			progress.setValue(++seconds);
-			if(seconds > progress.getMaximum())
-				clearStream();
+			seconds++;
+			VideoStream vs = stream;
+			if(vs != null) {
+				status_lbl.setText(vs.getStatus());
+				progress.setValue(seconds);
+				if(seconds > duration || !vs.isPlaying())
+					clearStream();
+			}
 		}
 	};
 
@@ -90,30 +97,31 @@ public class StreamPanel extends JPanel {
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 0;
 		c.gridy = GridBagConstraints.RELATIVE;
-		p.add(screenPanel, c);
-		statusPanel.add(streamLabel, BorderLayout.WEST);
-		statusPanel.add(progress, BorderLayout.EAST);
-		p.add(statusPanel, c);
+		p.add(screen_pnl, c);
+		status_pnl.add(status_lbl, BorderLayout.WEST);
+		status_pnl.add(progress, BorderLayout.EAST);
+		p.add(status_pnl, c);
 		add(p);
-		statusPanel.setBorder(BorderFactory.createBevelBorder(
+		screen_pnl.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
-		screenPanel.setBorder(BorderFactory.createBevelBorder(
-			BevelBorder.LOWERED));
-		screenPanel.setPreferredSize(sz);
+		screen_pnl.setPreferredSize(sz);
+		status_pnl.setPreferredSize(new Dimension(sz.width, 20));
 	}
 
 	/** Request a new video stream */
 	public void requestStream(VideoRequest req, Camera c) {
+		if(stream != null)
+			clearStream();
 		try {
 			stream = createStream(req, c);
 			JComponent screen = stream.getComponent();
-			screen.setPreferredSize(screenPanel.getPreferredSize());
-			screenPanel.add(screen);
+			screen.setPreferredSize(screen_pnl.getPreferredSize());
+			screen_pnl.add(screen);
 			progress_timer.start(req.getDuration());
 			timer.start();
 		}
 		catch(IOException e) {
-			streamLabel.setText(e.getMessage());
+			status_lbl.setText(e.getMessage());
 		}
 	}
 
@@ -136,14 +144,16 @@ public class StreamPanel extends JPanel {
 
 	/** Clear the video stream */
 	protected void clearStream() {
+		screen_pnl.removeAll();
 		timer.stop();
 		progress_timer.stop();
 		VideoStream vs = stream;
 		if(vs != null) {
 			vs.dispose();
 			stream = null;
-			streamLabel.setText(null);
+			status_lbl.setText(null);
 		}
+		screen_pnl.revalidate();
 	}
 
 	/** Dispose of the stream panel */

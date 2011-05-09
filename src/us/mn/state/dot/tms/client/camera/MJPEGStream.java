@@ -93,6 +93,7 @@ public class MJPEGStream implements VideoStream {
 		}
 		finally {
 			screen.setIcon(null);
+			running = false;
 		}
 	}
 
@@ -179,6 +180,11 @@ public class MJPEGStream implements VideoStream {
 			return e;
 		else
 			return MJPEG;
+	}
+
+	/** Test if the video is playing */
+	public boolean isPlaying() {
+		return running;
 	}
 
 	/** Dispose of the video stream */

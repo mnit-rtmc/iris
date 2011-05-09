@@ -166,6 +166,11 @@ public class GstStream implements VideoStream {
 			return status;
 	}
 
+	/** Test if the video is playing */
+	public boolean isPlaying() {
+		return pipe.getState() == State.PLAYING;
+	}
+
 	/** Dispose of the video stream */
 	public void dispose() {
 		pipe.stop();

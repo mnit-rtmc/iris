@@ -36,6 +36,9 @@ public interface VideoStream {
 	/** Get the status of the stream */
 	String getStatus();
 
+	/** Test if the video is playing */
+	boolean isPlaying();
+
 	/** Dispose of the video stream */
 	void dispose();
 }
