@@ -56,7 +56,11 @@ public class GstStream implements VideoStream {
 	/** Listener for Gstreamer bus errors */
 	protected final Bus.ERROR error_listener = new Bus.ERROR() {
 		public void errorMessage(GstObject src, int code, String msg) {
-			error_msg = msg;
+			// Only record first error on stream
+			if(error_msg == null)
+				error_msg = msg;
+			pipe.stop();
+			pipe.setState(State.NULL);
 		}
 	};
 
