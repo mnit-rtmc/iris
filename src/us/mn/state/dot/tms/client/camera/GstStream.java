@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.io.IOException;
-import java.net.URL;
 import javax.swing.JComponent;
 import org.gstreamer.Bus;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
+import org.gstreamer.ElementFactory;
 import org.gstreamer.Gst;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pad;
@@ -29,6 +29,7 @@ import org.gstreamer.Structure;
 import org.gstreamer.elements.RGBDataSink;
 import org.gstreamer.swing.VideoComponent;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.EncoderType;
 
 /**
  * A GstStream is a video stream which can read streams handled by the
@@ -44,9 +45,6 @@ public class GstStream implements VideoStream {
 		Gst.init();
 	}
 
-	/** The last element in the pipe which connects to the sink */
-	static protected final String DECODER = "decoder";
-
 	/** Component to display video stream */
 	private final VideoComponent screen = new VideoComponent();
 
@@ -60,7 +58,6 @@ public class GstStream implements VideoStream {
 			if(error_msg == null)
 				error_msg = msg;
 			pipe.stop();
-			pipe.setState(State.NULL);
 		}
 	};
 
@@ -71,31 +68,44 @@ public class GstStream implements VideoStream {
 	private String error_msg = null;
 
 	/** Create a new gstreamer stream */
-	public GstStream(VideoRequest req, Camera c) throws IOException {
-		pipe = Pipeline.launch(createPipeString(req.getUrl(c)));
+	public GstStream(VideoRequest req, Camera c) {
+		pipe = createPipe(createSource(req, c));
 		pipe.getBus().connect(error_listener);
-		pipe.add(screen.getElement());
-		pipe.getElementByName(DECODER).link(screen.getElement());
-		pipe.setState(State.PAUSED);
-		pipe.play();
 		pipe.setState(State.PLAYING);
 		status = getStreamStatus();
 	}
 
-	/** Create the pipeline string */
-	private String createPipeString(URL url) {
-		StringBuilder sb = new StringBuilder();
-		if(url.toString().startsWith("rtsp")) {
-			sb.append("rtspsrc ");
-			sb.append("location=" + url + " ");
-			sb.append("latency=0 ! decodebin ! ffmpegcolorspace ");
-		} else if(url.toString().startsWith("http")) {
-			sb.append("souphttpsrc ");
-			sb.append("location=" + url + " ");
-			sb.append("timeout=5 ! jpegdec ");
+	/** Create the pipeline */
+	private Pipeline createPipe(String src) {
+		Pipeline p = Pipeline.launch(src + " ! decodebin2 ! " +
+			"ffmpegcolorspace name=tail");
+		Element filter = ElementFactory.make("capsfilter", "filter");
+		// NOTE: Ideally, this filter should not be necessary, but the
+		//       red_mask and blue_mask need to be specified in order to
+		//       work around a bug in gstreamer-java VideoComponent
+		filter.setCaps(Caps.fromString("video/x-raw-rgb, bpp=32, " +
+			"depth=24, red_mask=0xFF00, green_mask=0xFF0000, " +
+			"blue_mask=0xFF000000")); 
+		p.add(filter);
+		p.getElementByName("tail").link(filter);
+		Element sink = screen.getElement();
+		p.add(sink);
+		filter.link(sink);
+		return p;
+	}
+
+	/** Create a source element */
+	private String createSource(VideoRequest req, Camera c) {
+		switch(EncoderType.fromOrdinal(c.getEncoderType()).stream_type){
+		case MJPEG:
+			return "souphttpsrc location=" + req.getUrl(c) +
+				" timeout=5";
+		case MPEG4:
+			return "rtspsrc location=" + req.getUrl(c) +
+				" latency=0";
+		default:
+			return "fakesrc";
 		}
-		sb.append("name=" + DECODER);
-		return sb.toString();
 	}
 
 	/** Get the stream status */

@@ -64,7 +64,7 @@ public class MJPEGStream implements VideoStream {
 
 	/** Create a new MJPEG stream */
 	public MJPEGStream(VideoRequest req, Camera cam) throws IOException {
-		url = req.getUrl(cam);
+		url = new URL(req.getUrl(cam));
 		size = req.getSize();
 		stream = createInputStream();
 		thread.start();

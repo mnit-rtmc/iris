@@ -30,6 +30,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.EncoderType;
 
 /**
  * A JPanel that can display a video stream. It includes a progress bar and
@@ -128,19 +129,26 @@ public class StreamPanel extends JPanel {
 	}
 
 	/** Create a new video stream */
-	protected VideoStream createStream(VideoRequest req, Camera cam)
+	protected VideoStream createStream(VideoRequest req, Camera c)
 		throws IOException
 	{
-		try {
-			Class.forName("org.gstreamer.Gst");
-			Class.forName("com.sun.jna.Library");
-			return new GstStream(req, cam);
-		}
-		catch(ClassNotFoundException cnfe) {
-			return new MJPEGStream(req, cam);
-		}
-		catch(NoClassDefFoundError ncdfe) {
-			return new MJPEGStream(req, cam);
+		switch(EncoderType.fromOrdinal(c.getEncoderType()).stream_type){
+		case MJPEG:
+			return new MJPEGStream(req, c);
+		case MPEG4:
+			try {
+				Class.forName("org.gstreamer.Gst");
+				Class.forName("com.sun.jna.Library");
+				return new GstStream(req, c);
+			}
+			catch(ClassNotFoundException cnfe) {
+				throw new IOException("Missing gstreamer");
+			}
+			catch(NoClassDefFoundError ncdfe) {
+				throw new IOException("Missing gstreamer");
+			}
+		default:
+			throw new IOException("No encoder");
 		}
 	}
 

@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
 import us.mn.state.dot.tms.Camera;
@@ -144,7 +142,7 @@ public class VideoRequest {
 	}
 
 	/** Create a URL for a stream */
-	public URL getUrl(Camera cam) throws MalformedURLException {
+	public String getUrl(Camera cam) {
 		if(base_url != null)
 			return getServletUrl(cam);
 		else
@@ -152,28 +150,28 @@ public class VideoRequest {
 	}
 
 	/** Create a video servlet URL */
-	protected URL getServletUrl(Camera cam) throws MalformedURLException {
-		return new URL("http://" + base_url +
-		               "/video/" + servlet_type.servlet +
-		               "?id=" + cam.getName() +
-		               "&size=" + (size.ordinal() + 1) +
-		               "&ssid=" + sonarSessionId);
+	protected String getServletUrl(Camera cam) {
+		return new String("http://" + base_url +
+			"/video/" + servlet_type.servlet +
+			"?id=" + cam.getName() +
+			"&size=" + (size.ordinal() + 1) +
+			"&ssid=" + sonarSessionId);
 	}
 
 	/** Create a camera encoder URL */
-	protected URL getCameraUrl(Camera cam) throws MalformedURLException {
+	protected String getCameraUrl(Camera cam) {
 		String ip = CameraHelper.parseEncoderIp(cam);
 		switch(EncoderType.fromOrdinal(cam.getEncoderType())) {
 		case AXIS_MJPEG:
-			return new URL("http://" + ip +
+			return new String("http://" + ip +
 				"/axis-cgi/mjpg/video.cgi" +
 				"?resolution=" + size.getResolution());
 		case AXIS_MPEG4:
-			return new URL("rtsp://" + ip + "/mpeg4/media.amp");
+			return new String("rtsp://" + ip + "/mpeg4/media.amp");
 		case INFINOVA_MPEG4:
-			return new URL("rtsp://" + ip + "/1.AMP");
+			return new String("rtsp://" + ip + "/1.AMP");
 		default:
-			throw new MalformedURLException("No encoder");
+			return "no_encoder";
 		}
 	}
 }

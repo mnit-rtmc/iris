@@ -25,24 +25,28 @@ import java.util.LinkedList;
 public enum EncoderType {
 
 	/** Undefined encoder type (0) */
-	NONE(" "),
+	NONE(" ", StreamType.NONE),
 
 	/** Axis MJPEG (1) */
-	AXIS_MJPEG("Axis MJPEG"),
+	AXIS_MJPEG("Axis MJPEG", StreamType.MJPEG),
 
 	/** Axis MPEG4 (2) */
-	AXIS_MPEG4("Axis MPEG4"),
+	AXIS_MPEG4("Axis MPEG4", StreamType.MPEG4),
 
 	/** Infinova MPEG4 (3) */
-	INFINOVA_MPEG4("Infinova MPEG4");
+	INFINOVA_MPEG4("Infinova MPEG4", StreamType.MPEG4);
 
 	/** Create a new encoder type */
-	private EncoderType(String d) {
+	private EncoderType(String d, StreamType st) {
 		description = d;
+		stream_type = st;
 	}
 
 	/** Description */
 	public final String description;
+
+	/** Stream type */
+	public final StreamType stream_type;
 
 	/** Get the string description of the encoder type */
 	public String toString() {
