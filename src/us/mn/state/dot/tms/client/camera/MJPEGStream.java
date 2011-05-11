@@ -23,6 +23,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.StreamType;
 
 /**
  * A video stream which reads an MJPEG source.
@@ -63,8 +64,8 @@ public class MJPEGStream implements VideoStream {
 	}
 
 	/** Create a new MJPEG stream */
-	public MJPEGStream(VideoRequest req, Camera cam) throws IOException {
-		url = new URL(req.getUrl(cam));
+	public MJPEGStream(VideoRequest req, Camera c) throws IOException {
+		url = new URL(req.getUrl(c));
 		size = req.getSize();
 		stream = createInputStream();
 		thread.start();
@@ -185,7 +186,7 @@ public class MJPEGStream implements VideoStream {
 		if(e != null)
 			return e;
 		else
-			return MJPEG;
+			return StreamType.MJPEG.toString();
 	}
 
 	/** Test if the video is playing */

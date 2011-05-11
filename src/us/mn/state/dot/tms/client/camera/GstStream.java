@@ -22,14 +22,12 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Gst;
 import org.gstreamer.GstObject;
-import org.gstreamer.Pad;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
-import org.gstreamer.Structure;
-import org.gstreamer.elements.RGBDataSink;
 import org.gstreamer.swing.VideoComponent;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.StreamType;
 
 /**
  * A GstStream is a video stream which can read streams handled by the
@@ -61,18 +59,19 @@ public class GstStream implements VideoStream {
 		}
 	};
 
-	/** Stream status */
-	private final String status;
+	/** Stream type */
+	private final StreamType stream_type;
 
 	/** Stream error message */
 	private String error_msg = null;
 
 	/** Create a new gstreamer stream */
 	public GstStream(VideoRequest req, Camera c) {
+		stream_type =
+			EncoderType.fromOrdinal(c.getEncoderType()).stream_type;
 		pipe = createPipe(createSource(req, c));
 		pipe.getBus().connect(error_listener);
 		pipe.setState(State.PLAYING);
-		status = getStreamStatus();
 	}
 
 	/** Create the pipeline */
@@ -108,64 +107,6 @@ public class GstStream implements VideoStream {
 		}
 	}
 
-	/** Get the stream status */
-	private String getStreamStatus() {
-		String enc = "";
-		int w = 0;
-		int h = 0;
-		for(Element e: pipe.getElements()) {
-			if(e instanceof RGBDataSink)
-				continue; // no useful info from sink
-			if(e.getName().startsWith("souphttp"))
-				return VideoStream.MJPEG;
-			for(Pad p: e.getSrcPads()) {
-				Caps c = p.getCaps();
-				if(c.size() > 0) {
-					String n = c.getStructure(0).getName();
-					if(n.startsWith("application"))
-						enc = getEncoding(c, enc);
-					if(n.startsWith("video")) {
-						w = getWidth(c, w);
-						h = getHeight(c, h);
-					}
-				}
-			}
-		}
-		if(enc.startsWith("MP4V"))
-			enc = VideoStream.MPEG4;
-		return enc + " (" + w + "x" + h + ")";
-	}
-
-	/** Get width from Caps */
-	static protected int getWidth(Caps c, int w) {
-		for(int i = 0; i < c.size(); i++) {
-			Structure s = c.getStructure(i);
-			if(s.hasIntField("width"))
-				return s.getInteger("width");
-		}
-		return w;
-	}
-
-	/** Get height from Caps */
-	static protected int getHeight(Caps c, int h) {
-		for(int i = 0; i < c.size(); i++) {
-			Structure s = c.getStructure(i);
-			if(s.hasIntField("height"))
-				return s.getInteger("height");
-		}
-		return h;
-	}
-
-	/** Get encoding from Caps */
-	static protected String getEncoding(Caps c, String enc) {
-		for(int i = 0; i < c.size(); i++) {
-			Structure s = c.getStructure(i);
-			if(s.hasField("encoding-name"))
-				return s.getString("encoding-name");
-		}
-		return enc;
-	}
-
 	/** Get a component for displaying the video stream */
 	public JComponent getComponent() {
 		return screen;
@@ -177,7 +118,7 @@ public class GstStream implements VideoStream {
 		if(e != null)
 			return e;
 		else
-			return status;
+			return stream_type.toString();
 	}
 
 	/** Test if the video is playing */

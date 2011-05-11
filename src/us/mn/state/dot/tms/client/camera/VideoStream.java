@@ -24,12 +24,6 @@ import javax.swing.JComponent;
  */
 public interface VideoStream {
 
-	/** Constant for MotionJPEG codec */
-	String MJPEG = "MotionJPEG";
-
-	/** Constant for MPEG-4 codec */
-	String MPEG4 = "MPEG-4";
-
 	/** Get a component for displaying the video stream */
 	JComponent getComponent();
 
