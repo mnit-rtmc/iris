@@ -26,7 +26,6 @@ import org.gstreamer.Pipeline;
 import org.gstreamer.State;
 import org.gstreamer.swing.VideoComponent;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.StreamType;
 
 /**
@@ -67,8 +66,7 @@ public class GstStream implements VideoStream {
 
 	/** Create a new gstreamer stream */
 	public GstStream(VideoRequest req, Camera c) {
-		stream_type =
-			EncoderType.fromOrdinal(c.getEncoderType()).stream_type;
+		stream_type = req.getStreamType(c);
 		pipe = createPipe(createSource(req, c));
 		pipe.getBus().connect(error_listener);
 		pipe.setState(State.PLAYING);
@@ -95,7 +93,7 @@ public class GstStream implements VideoStream {
 
 	/** Create a source element */
 	private String createSource(VideoRequest req, Camera c) {
-		switch(EncoderType.fromOrdinal(c.getEncoderType()).stream_type){
+		switch(req.getStreamType(c)) {
 		case MJPEG:
 			return "souphttpsrc location=" + req.getUrl(c) +
 				" timeout=5";

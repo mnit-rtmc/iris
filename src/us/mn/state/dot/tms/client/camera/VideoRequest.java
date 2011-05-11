@@ -20,6 +20,7 @@ import java.util.Properties;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.StreamType;
 
 /**
  * The video stream request parameter wrapper.
@@ -161,7 +162,7 @@ public class VideoRequest {
 	/** Create a camera encoder URL */
 	protected String getCameraUrl(Camera cam) {
 		String ip = CameraHelper.parseEncoderIp(cam);
-		switch(EncoderType.fromOrdinal(cam.getEncoderType())) {
+		switch(getEncoderType(cam)) {
 		case AXIS_MJPEG:
 			return new String("http://" + ip +
 				"/axis-cgi/mjpg/video.cgi" +
@@ -173,5 +174,18 @@ public class VideoRequest {
 		default:
 			return "no_encoder";
 		}
+	}
+
+	/** Get the stream type for a camera */
+	public StreamType getStreamType(Camera cam) {
+		if(base_url != null)
+			return StreamType.MJPEG;
+		else
+			return getEncoderType(cam).stream_type;
+	}
+
+	/** Get the encoder type for a camera */
+	static protected EncoderType getEncoderType(Camera cam) {
+		return EncoderType.fromOrdinal(cam.getEncoderType());
 	}
 }
