@@ -31,12 +31,12 @@ import us.mn.state.dot.tms.EncoderType;
  */
 public class VideoRequest {
 
-	/** Stream type servlet enum */
-	static public enum StreamType {
+	/** Servlet type enum */
+	static public enum ServletType {
 		STREAM("stream"), STILL("image");
 
 		private final String servlet;
-		private StreamType(String srv) {
+		private ServletType(String srv) {
 			servlet = srv;
 		}
 	}
@@ -134,8 +134,8 @@ public class VideoRequest {
 	/** The base URL of the video server */
 	private final String base_url;
 
-	/** Stream servlet type */
-	private final StreamType stream_type = StreamType.STREAM;
+	/** Servlet type */
+	private final ServletType servlet_type = ServletType.STREAM;
 
 	/** Create a new video request */
 	public VideoRequest(Properties p, Size sz) {
@@ -154,7 +154,7 @@ public class VideoRequest {
 	/** Create a video servlet URL */
 	protected URL getServletUrl(Camera cam) throws MalformedURLException {
 		return new URL("http://" + base_url +
-		               "/video/" + stream_type.servlet +
+		               "/video/" + servlet_type.servlet +
 		               "?id=" + cam.getName() +
 		               "&size=" + (size.ordinal() + 1) +
 		               "&ssid=" + sonarSessionId);
