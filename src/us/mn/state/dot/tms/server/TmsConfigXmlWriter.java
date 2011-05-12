@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
+import java.util.Properties;
 import us.mn.state.dot.sched.TimeSteward;
 
 /**
@@ -25,7 +26,15 @@ import us.mn.state.dot.sched.TimeSteward;
 public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** TMS config XML file */
-	static protected final String CONFIG_XML = "tms_config.xml";
+	static protected final String CONFIG_XML = "_config.xml";
+
+	/** Agency district property */
+	static protected String district = "tms";
+
+	/** Initialize the district property */
+	static public void init(Properties props) {
+		district = props.getProperty("district", "tms");
+	}
 
 	/** R_Node XML writer */
 	protected final R_NodeXmlWriter node_writer = new R_NodeXmlWriter();
@@ -39,7 +48,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** Create a new TMS config XML writer */
 	public TmsConfigXmlWriter() {
-		super(CONFIG_XML, true);
+		super(district + CONFIG_XML, true);
 	}
 
 	/** Print the TMS config XML file */
@@ -53,7 +62,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	protected void printHead(PrintWriter out) {
 		out.println(XML_DECLARATION);
 		printDtd(out);
-		out.println("<tms_config system='RTMC' time_stamp='" +
+		out.println("<tms_config time_stamp='" +
 			TimeSteward.getDateInstance() + "'>");
 	}
 
@@ -61,7 +70,6 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	protected void printDtd(PrintWriter out) {
 		out.println("<!DOCTYPE tms_config [");
 		out.println("<!ELEMENT tms_config (corridor | camera)*>");
-		out.println("<!ATTLIST tms_config system CDATA #REQUIRED>");
 		out.println("<!ATTLIST tms_config time_stamp CDATA #REQUIRED>");
 		node_writer.printDtd(out);
 		printCameraDtd(out);

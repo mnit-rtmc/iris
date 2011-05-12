@@ -80,6 +80,7 @@ public class MainServer {
 			IrisRoleImpl.lookup(store, ns);
 			IrisUserImpl.lookup(store, ns);
 			BaseObjectImpl.loadAll(store, ns);
+			TmsConfigXmlWriter.init(props);
 			BaseEvent.store = store;
 			scheduleTimerJobs();
 			scheduleFlushJobs();
