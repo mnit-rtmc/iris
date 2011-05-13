@@ -62,13 +62,25 @@ class StationManager {
 
 	/** Print the header of the station sample XML file */
 	protected void printSampleXmlHead(PrintWriter out) {
-		out.println("<?xml version='1.0'?>");
-		out.println(
-			"<!DOCTYPE traffic_sample SYSTEM 'tms_config.dtd'>");
+		out.println(XmlWriter.XML_DECLARATION);
+		printDtd(out);
 		out.println("<traffic_sample time_stamp='" +
 			TimeSteward.getDateInstance() + "' period='30'>");
-		out.println("\t&r_nodes;");
-		out.println("\t&detectors;");
+	}
+
+	/** Print the DTD */
+	protected void printDtd(PrintWriter out) {
+		out.println("<!DOCTYPE traffic_sample [");
+		out.println("<!ELEMENT traffic_sample (sample)*>");
+		out.println("<!ATTLIST traffic_sample time_stamp " +
+			"CDATA #REQUIRED>");
+		out.println("<!ATTLIST traffic_sample period CDATA #REQUIRED>");
+		out.println("<!ELEMENT sample EMPTY>");
+		out.println("<!ATTLIST sample sensor CDATA #REQUIRED>");
+		out.println("<!ATTLIST sample flow CDATA 'UNKNOWN'>");
+		out.println("<!ATTLIST sample speed CDATA 'UNKNOWN'>");
+		out.println("<!ATTLIST sample occ CDATA 'UNKNOWN'>");
+		out.println("]>");
 	}
 
 	/** Print the body of the station sample XML file */
@@ -77,7 +89,7 @@ class StationManager {
 			public boolean check(Station s) {
 				if(s instanceof StationImpl) {
 					StationImpl si = (StationImpl)s;
-					si.printSampleXmlElement(out);
+					si.printSampleXml(out);
 				}
 				return false;
 			}

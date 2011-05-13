@@ -388,16 +388,20 @@ public class StationImpl implements Station {
 	}
 
 	/** Print the current sample as an XML element */
-	public void printSampleXmlElement(PrintWriter out) {
+	public void printSampleXml(PrintWriter out) {
 		if(!getActive())
 			return;
 		int f = getFlow();
 		int s = getSpeed();
-		out.print("\t<sample sensor='" + name);
+		float o = occupancy;
+		out.print("\t<sample");
+		out.print(XmlWriter.createAttribute("sensor", name));
 		if(f > Constants.MISSING_DATA)
-			out.print("' flow='" + f);
+			out.print(XmlWriter.createAttribute("flow", f));
 		if(s > 0)
-			out.print("' speed='" + s);
+			out.print(XmlWriter.createAttribute("speed", s));
+		if(o >= 0)
+			out.print(XmlWriter.createAttribute("occ", o));
 		out.println("'/>");
 	}
 
