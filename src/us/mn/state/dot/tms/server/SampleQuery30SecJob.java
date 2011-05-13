@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.HolidayHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -41,6 +42,11 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  * @author Douglas Lau
  */
 public class SampleQuery30SecJob extends Job {
+
+	/** Check if obsolete station.xml output is enabled */
+	static protected boolean isStationXmlEnabled() {
+		return SystemAttrEnum.STATION_XML_ENABLE.getBoolean();
+	}
 
 	/** Detector sample file */
 	static protected final String SAMPLE_XML = "det_sample.xml";
@@ -60,7 +66,8 @@ public class SampleQuery30SecJob extends Job {
 			try {
 				station_manager.calculateData();
 				station_manager.writeSampleXml();
-				station_manager.writeStationXml();
+				if(isStationXmlEnabled())
+					station_manager.writeStationXml();
 				writeSampleXml();
 				BaseObjectImpl.corridors.findBottlenecks();
 			}

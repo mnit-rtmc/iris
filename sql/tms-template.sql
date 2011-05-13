@@ -1410,6 +1410,7 @@ meter_yellow_secs	0.7
 operation_retry_threshold	3
 sample_archive_enable	true
 sample_archive_directory	/var/lib/iris/traffic
+station_xml_enable	true
 temp_fahrenheit_enable	true
 tesla_host	
 travel_time_max_legs	8
