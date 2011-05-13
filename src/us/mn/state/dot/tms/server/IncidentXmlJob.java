@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 
@@ -37,7 +36,7 @@ public class IncidentXmlJob extends Job {
 	}
 
 	/** Perform the incident XML job */
-	public void perform() throws IOException {
+	public void perform() {
 		writer.write();
 	}
 }

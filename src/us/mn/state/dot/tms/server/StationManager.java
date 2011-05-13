@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
@@ -49,7 +48,7 @@ class StationManager {
 	}
 
 	/** Write the station sample data out as XML */
-	public void writeSampleXml() throws IOException {
+	public void writeSampleXml() {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			public void print(PrintWriter out) {
 				printSampleXmlHead(out);
@@ -104,7 +103,7 @@ class StationManager {
 	/** Write the station data out as XML.  This is retained for backwards
 	 * compatibility.  It is not recommended to use this XML file for new
 	 * software, since it may be removed in the future. */
-	public void writeStationXml() throws IOException {
+	public void writeStationXml() {
 		XmlWriter w = new XmlWriter(STATION_XML, false) {
 			public void print(PrintWriter out) {
 				printStationXmlHead(out);

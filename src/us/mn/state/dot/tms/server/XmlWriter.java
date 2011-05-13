@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.zip.GZIPOutputStream;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
@@ -95,16 +96,24 @@ abstract public class XmlWriter {
 	}
 
 	/** Write the XML file */
-	public void write() throws IOException {
-		PrintWriter out = new PrintWriter(createOutputStream());
+	public void write() {
 		try {
-			print(out);
+			PrintWriter out = new PrintWriter(createOutputStream());
+			try {
+				print(out);
+			}
+			finally {
+				out.close();
+			}
+			if(!temp.renameTo(file)) {
+				System.err.println("Error renaming " + file +
+					" @ " + TimeSteward.getDateInstance());
+			}
 		}
-		finally {
-			out.close();
+		catch(IOException e) {
+			System.err.println("I/O Error: " + e.getMessage() +
+				" @ " + TimeSteward.getDateInstance());
 		}
-		if(!temp.renameTo(file))
-			throw new IOException("rename failed: " + file);
 	}
 
 	/** Print the XML to a print writer */

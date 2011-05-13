@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 
@@ -37,7 +36,7 @@ public class SignMessageXmlJob extends Job {
 	}
 
 	/** Perform the sign message XML job */
-	public void perform() throws IOException {
+	public void perform() {
 		writer.write();
 	}
 }

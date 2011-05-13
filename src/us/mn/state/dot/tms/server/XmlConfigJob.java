@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
@@ -40,7 +39,7 @@ public class XmlConfigJob extends Job {
 	}
 
 	/** Perform the XML config job */
-	public void perform() throws IOException {
+	public void perform() {
 		System.err.println("Starting XMLDUMP @ " +
 			TimeSteward.getDateInstance());
 		writeXmlConfiguration();
@@ -49,7 +48,7 @@ public class XmlConfigJob extends Job {
 	}
 
 	/** Write the TMS xml configuration files */
-	protected void writeXmlConfiguration() throws IOException {
+	protected void writeXmlConfiguration() {
 		BaseObjectImpl.corridors.createCorridors();
 		xml_writer.write();
 	}

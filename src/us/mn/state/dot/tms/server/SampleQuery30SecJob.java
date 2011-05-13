@@ -62,7 +62,7 @@ public class SampleQuery30SecJob extends Job {
 
 	/** Job to be performed on completion */
 	protected final Job complete_job = new Job() {
-		public void perform() throws IOException {
+		public void perform() {
 			try {
 				station_manager.calculateData();
 				station_manager.writeSampleXml();
@@ -119,7 +119,7 @@ public class SampleQuery30SecJob extends Job {
 	}
 
 	/** Write the sample data out as XML */
-	protected void writeSampleXml() throws IOException {
+	protected void writeSampleXml() {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			public void print(PrintWriter out) {
 				printSampleXmlHead(out);
