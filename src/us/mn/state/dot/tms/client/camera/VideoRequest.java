@@ -166,9 +166,11 @@ public class VideoRequest {
 		case AXIS_MJPEG:
 			return new String("http://" + ip +
 				"/axis-cgi/mjpg/video.cgi" +
-				"?resolution=" + size.getResolution());
+				"?camera=" + cam.getEncoderChannel() +
+				"&resolution=" + size.getResolution());
 		case AXIS_MPEG4:
-			return new String("rtsp://" + ip + "/mpeg4/media.amp");
+			return new String("rtsp://" + ip + "/mpeg4/" +
+				cam.getEncoderChannel() + "/media.amp");
 		case INFINOVA_MPEG4:
 			return new String("rtsp://" + ip + "/1.AMP");
 		default:
