@@ -428,7 +428,6 @@
 		</copy>
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
-		<mkdir dir="${install.dir}/var/lib/iris/xml"/>
 		<mkdir dir="${install.dir}/var/log/iris"/>
 		<mkdir dir="${install.dir}/var/www/html/iris_xml"/>
 

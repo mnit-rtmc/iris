@@ -114,7 +114,6 @@ fi
 %dir %attr(0775,tms,tms) /var/lib/iris/sql
 %dir %attr(0775,tms,tms) /var/lib/iris/meter
 %dir %attr(0775,tms,tms) /var/lib/iris/traffic
-%dir %attr(0775,tms,tms) /var/lib/iris/xml
 
 # /var/log/iris
 %dir %attr(3775,tms,tms) /var/log/iris
