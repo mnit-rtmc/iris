@@ -33,7 +33,7 @@ public class GeoLocHelper extends BaseHelper {
 	static public final String FUTURE = "FUTURE";
 
 	/** Get the UTM zone for the system */
-	static protected UTMZone getZone() {
+	static public UTMZone getZone() {
 		return new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
 			SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean());
 	}

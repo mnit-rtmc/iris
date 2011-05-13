@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.Camera;
@@ -281,11 +284,11 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Render the incident as xml */
-	public void printXmlElement(PrintWriter out) {
+	public void printXml(PrintWriter out) {
 		String dtl = lookupDetail();
 		String loc = lookupLocation();
 		out.print("<incident");
-		out.print(XmlWriter.createAttribute("id", getName()));
+		out.print(XmlWriter.createAttribute("name", getName()));
 		out.print(XmlWriter.createAttribute("event_type",
 			EventType.fromId(event_desc_id)));
 		out.print(XmlWriter.createAttribute("event_date", event_date));
@@ -298,8 +301,11 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 			Direction.fromOrdinal(dir).abbrev));
 		if(loc != null)
 			out.print(XmlWriter.createAttribute("location", loc));
-		out.print(XmlWriter.createAttribute("easting", easting));
-		out.print(XmlWriter.createAttribute("northing", northing));
+		Position pos = getWgs84Position();
+		out.print(XmlWriter.createAttribute("lon",
+			formatDouble(pos.getLongitude())));
+		out.print(XmlWriter.createAttribute("lat",
+			formatDouble(pos.getLatitude())));
 		out.print(XmlWriter.createAttribute("camera", camera));
 		out.print(XmlWriter.createAttribute("impact", impact));
 		out.print(XmlWriter.createAttribute("cleared", cleared));
@@ -325,5 +331,12 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		if(rnd == null)
 			return null;
 		return GeoLocHelper.getCrossDescription(rnd.getGeoLoc());
+	}
+
+	/** Get Position in WGS84 */
+	protected Position getWgs84Position() {
+		UTMPosition utm = new UTMPosition(GeoLocHelper.getZone(),
+			easting, northing);
+		return utm.getPosition(GeodeticDatum.WGS_84);
 	}
 }
