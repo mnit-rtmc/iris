@@ -17,6 +17,9 @@ package us.mn.state.dot.tms.server;
 import java.io.PrintWriter;
 import java.util.Properties;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 
 /**
  * This class writes out the TMS configuration data to an XML file.
@@ -69,10 +72,11 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	/** Print the DTD */
 	protected void printDtd(PrintWriter out) {
 		out.println("<!DOCTYPE tms_config [");
-		out.println("<!ELEMENT tms_config (corridor | camera)*>");
+		out.println("<!ELEMENT tms_config (corridor | camera | dms)*>");
 		out.println("<!ATTLIST tms_config time_stamp CDATA #REQUIRED>");
 		node_writer.printDtd(out);
 		printCameraDtd(out);
+		printDmsDtd(out);
 		out.println("]>");
 	}
 
@@ -85,10 +89,31 @@ public class TmsConfigXmlWriter extends XmlWriter {
 		out.println("<!ATTLIST camera lat CDATA #IMPLIED>");
 	}
 
+	/** Print the DTD for DMS elements */
+	protected void printDmsDtd(PrintWriter out) {
+		out.println("<!ELEMENT dms EMPTY>");
+		out.println("<!ATTLIST dms name CDATA #REQUIRED>");
+		out.println("<!ATTLIST dms description CDATA #REQUIRED>");
+		out.println("<!ATTLIST dms lon CDATA #IMPLIED>");
+		out.println("<!ATTLIST dms lat CDATA #IMPLIED>");
+	}
+
 	/** Print the body of the TMS config XML file */
 	protected void printBody(PrintWriter out) {
 		node_writer.print(out, meter_writer.getNodeMapping());
 		cam_writer.print(out);
+		printDmsBody(out);
+	}
+
+	/** Print the DMS elements */
+	protected void printDmsBody(final PrintWriter out) {
+		DMSHelper.find(new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				if(dms instanceof DMSImpl)
+					((DMSImpl)dms).printXml(out);
+				return false;
+			}
+		});
 	}
 
 	/** Print the tail of the TMS config XML file */

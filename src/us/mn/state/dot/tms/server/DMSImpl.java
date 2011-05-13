@@ -1492,32 +1492,26 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return KmlColorImpl.Black;
 	}
 
-	/** Render the DMS object as xml */
-	public void printXmlElement(PrintWriter out) {
-		final User owner = getOwnerCurrent();	// Avoid race
-		final String op_status = getOpStatus();	// Avoid race
-		final GeoLoc loc = getGeoLoc();		// Avoid race
-		out.print("<" + DMSABBR);
-		out.print(XmlWriter.createAttribute("id", getName()));
-		out.print(XmlWriter.createAttribute("status",
-			DMSHelper.getAllStyles(this)));
-		if(owner != null) {
-			out.print(XmlWriter.createAttribute("owner",
-				owner.getFullName()));
+	/** Print DMS as an XML element */
+	public void printXml(PrintWriter out) {
+		out.print("<dms");
+		out.print(XmlWriter.createAttribute("name", getName()));
+		out.print(XmlWriter.createAttribute("description",
+			GeoLocHelper.getDescription(geo_loc)));
+		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
+		if(pos != null) {
+			out.print(XmlWriter.createAttribute("lon",
+				formatDouble(pos.getLongitude())));
+			out.print(XmlWriter.createAttribute("lat",
+				formatDouble(pos.getLatitude())));
 		}
-		out.print(XmlWriter.createAttribute("notes", getNotes()));
-		if(op_status != null) {
-			out.print(XmlWriter.createAttribute("last_operation",
-				op_status));
-		}
-		if(loc != null) {
-			out.print(XmlWriter.createAttribute("geoloc",
-				loc.getName()));
-		}
-		out.println(">");
+		out.println("/>");
+	}
+
+	/** Render the sign message as xml */
+	public void printSignMessageXml(PrintWriter out) {
 		SignMessage msg = getMessageCurrent();
 		if(msg instanceof SignMessageImpl)
-			((SignMessageImpl)msg).printXmlElement(out);
-		out.println("</" + DMSABBR + ">");
+			((SignMessageImpl)msg).printXml(out, this);
 	}
 }

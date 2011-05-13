@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -190,22 +191,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Render the SignMessage object as xml */
-	public void printXmlElement(PrintWriter out) {
+	public void printXml(PrintWriter out, DMSImpl dms) {
 		if(SignMessageHelper.isBlank(this))
 			return;
-		String[] ml = SignMessageHelper.createLines(this);
-		if(ml != null && ml.length > 0) {
-			out.print("<" + SONAR_TYPE);
-			String[] fonts = SignMessageHelper.getFontNames(this,1);
-			if(fonts.length > 0) {
-				String f = SString.toString(fonts);
-				out.print(XmlWriter.createAttribute("font", f));
-			}
-			for(int i = 0; i < ml.length; i++) {
-				String an = "line_" + (i + 1);
-				out.print(XmlWriter.createAttribute(an, ml[i]));
-			}
-			out.println("/>");
-		}
+		out.print("<sign_message");
+		out.print(XmlWriter.createAttribute("dms", dms.getName()));
+		out.print(XmlWriter.createAttribute("status",
+			DMSHelper.getAllStyles(dms)));
+		out.print(XmlWriter.createAttribute("multi", multi));
+		out.println("/>");
 	}
 }
