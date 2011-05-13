@@ -430,6 +430,7 @@
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
 		<mkdir dir="${install.dir}/var/lib/iris/xml"/>
 		<mkdir dir="${install.dir}/var/log/iris"/>
+		<mkdir dir="${install.dir}/var/www/html/iris_xml"/>
 
 		<copy todir="${install.dir}/usr/share/java/${dist.server}">
 			<fileset dir="${dist.server}"/>

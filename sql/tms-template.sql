@@ -1427,7 +1427,7 @@ vsa_start_intervals	3
 vsa_start_threshold	-1500
 vsa_stop_threshold	-750
 window_title	IRIS:
-xml_output_directory	/var/www/html/dds/
+xml_output_directory	/var/www/html/iris_xml/
 \.
 
 COPY iris.r_node_type (n_type, name) FROM stdin;

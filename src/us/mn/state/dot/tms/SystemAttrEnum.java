@@ -102,7 +102,7 @@ public enum SystemAttrEnum {
 	VSA_START_THRESHOLD(-1500, -5000, -200),
 	VSA_STOP_THRESHOLD(-750, -5000, -200),
 	WINDOW_TITLE("IRIS: ", Change.RESTART_CLIENT),
-	XML_OUTPUT_DIRECTORY("/var/www/html/dds/");
+	XML_OUTPUT_DIRECTORY("/var/www/html/iris_xml/");
 
 	/** Change action, which indicates what action the admin must
 	 *  take after changing a system attribute. */

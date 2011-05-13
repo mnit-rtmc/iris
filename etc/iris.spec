@@ -119,6 +119,9 @@ fi
 # /var/log/iris
 %dir %attr(3775,tms,tms) /var/log/iris
 
+# /var/www/html/iris_xml
+%dir %attr(3775,tms,tms) /var/www/html/iris_xml
+
 # client: /var/www/html/iris-client-x.x.x
 %dir %attr(0755,apache,apache) %{_clientdir}
 %dir %attr(0755,apache,apache) %{_clientdir}/images
