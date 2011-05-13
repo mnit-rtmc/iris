@@ -845,6 +845,6 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			out.print(XmlWriter.createAttribute("speed", speed));
 		if(occ >= 0)
 			out.print(XmlWriter.createAttribute("occ", occ));
-		out.println("'/>");
+		out.println("/>");
 	}
 }

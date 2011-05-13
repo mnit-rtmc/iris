@@ -402,7 +402,7 @@ public class StationImpl implements Station {
 			out.print(XmlWriter.createAttribute("speed", s));
 		if(o >= 0)
 			out.print(XmlWriter.createAttribute("occ", o));
-		out.println("'/>");
+		out.println("/>");
 	}
 
 	/** Print the current sample as an XML element.  This is used for the
