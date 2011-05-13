@@ -133,10 +133,24 @@ public class SampleQuery30SecJob extends Job {
 	/** Print the header of the detector sample XML file */
 	protected void printSampleXmlHead(PrintWriter out) {
 		out.println(XmlWriter.XML_DECLARATION);
-		out.println("<!DOCTYPE traffic_sample SYSTEM 'tms.dtd'>");
+		printDtd(out);
 		out.println("<traffic_sample time_stamp='" +
 			TimeSteward.getDateInstance() + "' period='30'>");
-		out.println("\t&detectors;");
+	}
+
+	/** Print the DTD */
+	protected void printDtd(PrintWriter out) {
+		out.println("<!DOCTYPE traffic_sample [");
+		out.println("<!ELEMENT traffic_sample (sample)*>");
+		out.println("<!ATTLIST traffic_sample time_stamp " +
+			"CDATA #REQUIRED>");
+		out.println("<!ATTLIST traffic_sample period CDATA #REQUIRED>");
+		out.println("<!ELEMENT sample EMPTY>");
+		out.println("<!ATTLIST sample sensor CDATA #REQUIRED>");
+		out.println("<!ATTLIST sample flow CDATA 'UNKNOWN'>");
+		out.println("<!ATTLIST sample speed CDATA 'UNKNOWN'>");
+		out.println("<!ATTLIST sample occ CDATA 'UNKNOWN'>");
+		out.println("]>");
 	}
 
 	/** Print the body of the detector sample XML file */
@@ -146,7 +160,7 @@ public class SampleQuery30SecJob extends Job {
 				if(d instanceof DetectorImpl) {
 					DetectorImpl det = (DetectorImpl)d;
 					det.calculateFakeData();
-					det.printSampleXmlElement(out);
+					det.printSampleXml(out);
 				}
 				return false;
 			}

@@ -823,29 +823,28 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			out.print(XmlWriter.createAttribute("category",
 				lt.suffix));
 		}
-		if(lane > 0) {
-			out.print(XmlWriter.createAttribute("lane",
-				Short.toString(lane)));
-		}
-		if(field != Constants.DEFAULT_FIELD_LENGTH) {
-			out.print(XmlWriter.createAttribute("field",
-				Float.toString(field)));
-		}
+		if(lane > 0)
+			out.print(XmlWriter.createAttribute("lane", lane));
+		if(field != Constants.DEFAULT_FIELD_LENGTH)
+			out.print(XmlWriter.createAttribute("field", field));
 		out.println("/>");
 	}
 
 	/** Print the current sample as an XML element */
-	public void printSampleXmlElement(PrintWriter out) {
+	public void printSampleXml(PrintWriter out) {
 		if(abandoned || !isSampling())
 			return;
 		int flow = Math.round(getFlowRaw());
 		int speed = Math.round(getSpeed());
-		// NOTE: the 'D' is needed for XML validity
-		out.print("\t<sample sensor='D" + name);
+		float occ = getOccupancy();
+		out.print("\t<sample");
+		out.print(XmlWriter.createAttribute("sensor", name));
 		if(flow != Constants.MISSING_DATA)
-			out.print("' flow='" + flow);
+			out.print(XmlWriter.createAttribute("flow", flow));
 		if(isMainline() && speed > 0)
-			out.print("' speed='" + speed);
+			out.print(XmlWriter.createAttribute("speed", speed));
+		if(occ >= 0)
+			out.print(XmlWriter.createAttribute("occ", occ));
 		out.println("'/>");
 	}
 }
