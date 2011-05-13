@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ public class Segment {
 	/** Add detection to the segment */
 	public void addDetection(Set<Detector> dets) {
 		for(Detector d: dets) {
-			String sid = "D" + d.getName();
+			String sid = d.getName();
 			int ln = d.getLaneNumber();
 			lane_sensors.put(sid, ln);
 			addDetectorLabel(d);
