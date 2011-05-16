@@ -146,7 +146,6 @@ public class ScreenPane extends JPanel {
 		if(tab instanceof MapTab) {
 			MapTab mt = (MapTab)tab;
 			LayerState ls = mt.getHomeLayer();
-			map.getModel().setHomeLayer(ls);
 			if(ls instanceof ProxyLayerState) {
 				home_layer = (ProxyLayerState)ls;
 				home_layer.setTabSelected(true);
@@ -211,7 +210,6 @@ public class ScreenPane extends JPanel {
 	protected MapToolBar createMapToolBar() {
 		MapToolBar b = new MapToolBar(map);
 		b.setFloatable(false);
-		b.addHomeButton();
 		return b;
 	}
 

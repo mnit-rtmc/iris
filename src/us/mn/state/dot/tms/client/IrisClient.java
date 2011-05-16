@@ -369,8 +369,6 @@ public class IrisClient extends JFrame {
 		MapModel mm = new MapModel();
 		if(s != null)
 			s.createLayers(mb, mm);
-		else
-			mm.home();
 		return mm;
 	}
 
