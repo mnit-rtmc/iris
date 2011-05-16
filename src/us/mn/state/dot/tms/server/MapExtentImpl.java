@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,17 +32,15 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading map extents...");
 		namespace.registerType(SONAR_TYPE, MapExtentImpl.class);
-		store.query("SELECT name, easting, east_span, northing, " +
-			"north_span FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, lon, lat, zoom FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new MapExtentImpl(
 					row.getString(1),	// name
-					row.getInt(2),		// easting
-					row.getInt(3),		// east_span
-					row.getInt(4),		// northing
-					row.getInt(5)		// north_span
+					row.getFloat(2),	// lon
+					row.getFloat(3),	// lat
+					row.getInt(4)		// zoom
 				));
 			}
 		});
@@ -52,10 +50,9 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("easting", easting);
-		map.put("east_span", east_span);
-		map.put("northing", northing);
-		map.put("north_span", north_span);
+		map.put("lon", lon);
+		map.put("lat", lat);
+		map.put("zoom", zoom);
 		return map;
 	}
 
@@ -75,99 +72,75 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	}
 
 	/** Create a map extent */
-	protected MapExtentImpl(String n, int x, int xs, int y, int ys) {
+	protected MapExtentImpl(String n, float ln, float lt, int z) {
 		super(n);
-		easting = x;
-		east_span = xs;
-		northing = y;
-		north_span = ys;
+		lon = ln;
+		lat = lt;
+		zoom = z;
 	}
 
-	/** UTM Easting */
-	protected int easting;
+	/** Longitude */
+	protected float lon;
 
-	/** Set the UTM Easting */
-	public void setEasting(int x) {
-		easting = x;
+	/** Set the longitude */
+	public void setLon(float ln) {
+		lon = ln;
 	}
 
-	/** Set the UTM Easting */
-	public void doSetEasting(int x) throws TMSException {
-		if(x == easting)
+	/** Set the longitude */
+	public void doSetLon(float ln) throws TMSException {
+		if(ln == lon)
 			return;
-		store.update(this, "easting", x);
-		setEasting(x);
+		store.update(this, "lon", ln);
+		setLon(ln);
 	}
 
-	/** Get the UTM Easting */
-	public int getEasting() {
-		return easting;
+	/** Get the longitude */
+	public float getLon() {
+		return lon;
 	}
 
-	/** UTM Easting span */
-	protected int east_span;
+	/** Latitude */
+	protected float lat;
 
-	/** Set the UTM Easting span */
-	public void setEastSpan(int xs) {
-		east_span = xs;
+	/** Set the latitude */
+	public void setLat(float lt) {
+		lat = lt;
 	}
 
-	/** Set the UTM Easting span */
-	public void doSetEastSpan(int xs) throws TMSException {
-		if(xs == east_span)
+	/** Set the latitude */
+	public void doSetLat(float lt) throws TMSException {
+		if(lt == lat)
 			return;
-		if(xs < 0)
-			throw new ChangeVetoException("Invalid Easting span");
-		store.update(this, "east_span", xs);
-		setEastSpan(xs);
+		store.update(this, "lat", lt);
+		setLat(lt);
 	}
 
-	/** Get the UTM Easting span */
-	public int getEastSpan() {
-		return east_span;
+	/** Get the latitude */
+	public float getLat() {
+		return lat;
 	}
 
-	/** UTM Northing */
-	protected int northing;
+	/** Zoom level */
+	protected int zoom;
 
-	/** Set the UTM Northing */
-	public void setNorthing(int y) {
-		northing = y;
+	/** Set the zoom level */
+	public void setZoom(int z) {
+		zoom = z;
 	}
 
-	/** Set the UTM Northing */
-	public void doSetNorthing(int y) throws TMSException {
-		if(y == northing)
+	/** Set the zoom level */
+	public void doSetZoom(int z) throws TMSException {
+		if(z == zoom)
 			return;
-		if(y < 0)
-			throw new ChangeVetoException("Invalid Northing");
-		store.update(this, "northing", y);
-		setNorthing(y);
+		if(z < 0 || z > 18)
+			throw new ChangeVetoException("Invalid zoom level");
+		store.update(this, "zoom", z);
+		setZoom(z);
 	}
 
-	/** Get the UTM Northing */
-	public int getNorthing() {
-		return northing;
-	}
-
-	/** UTM Northing span */
-	protected int north_span;
-
-	/** Set the UTM Northing span */
-	public void setNorthSpan(int ys) {
-		north_span = ys;
-	}
-
-	/** Set the UTM Northing span */
-	public void doSetNorthSpan(int ys) throws TMSException {
-		if(ys == north_span)
-			return;
-		store.update(this, "north_span", ys);
-		setNorthSpan(ys);
-	}
-
-	/** Get the UTM Northing span */
-	public int getNorthSpan() {
-		return north_span;
+	/** Get the zoom level */
+	public int getZoom() {
+		return zoom;
 	}
 }

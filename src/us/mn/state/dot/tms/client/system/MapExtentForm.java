@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.system;
 
 import us.mn.state.dot.tms.MapExtent;
+import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 
@@ -31,8 +32,8 @@ public class MapExtentForm extends ProxyTableForm<MapExtent> {
 	}
 
 	/** Create a new map extent form */
-	public MapExtentForm(Session s) {
-		super("Map Extents", new MapExtentModel(s));
+	public MapExtentForm(Session s, IrisClient ic) {
+		super("Map Extents", new MapExtentModel(s, ic));
 	}
 
 	/** Get the visible row count */

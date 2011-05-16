@@ -238,10 +238,9 @@ CREATE TABLE iris.geo_loc (
 
 CREATE TABLE iris.map_extent (
 	name VARCHAR(20) PRIMARY KEY,
-	easting INTEGER NOT NULL,
-	east_span INTEGER NOT NULL,
-	northing INTEGER NOT NULL,
-	north_span INTEGER NOT NULL
+	lon real NOT NULL,
+	lat real NOT NULL,
+	zoom INTEGER NOT NULL
 );
 
 CREATE TABLE iris.lane_type (
@@ -1353,7 +1352,7 @@ camera_id_blank
 camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
-database_version	3.127.0
+database_version	3.128.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_log_enable	false

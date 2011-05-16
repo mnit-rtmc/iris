@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,27 +26,21 @@ public interface MapExtent extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "map_extent";
 
-	/** Set the UTM Easting */
-	void setEasting(int x);
+	/** Set the longitude */
+	void setLon(float ln);
 
-	/** Get the UTM Easting */
-	int getEasting();
+	/** Get the longitude */
+	float getLon();
 
-	/** Set the UTM Easting span */
-	void setEastSpan(int x);
+	/** Set the latitude */
+	void setLat(float lt);
 
-	/** Get the UTM Easting span */
-	int getEastSpan();
+	/** Get the latitude */
+	float getLat();
 
-	/** Set the UTM Northing */
-	void setNorthing(int y);
+	/** Set the zoom level */
+	void setZoom(int z);
 
-	/** Get the UTM Northing */
-	int getNorthing();
-
-	/** Set the UTM Northing span */
-	void setNorthSpan(int y);
-
-	/** Get the UTM Northing span */
-	int getNorthSpan();
+	/** Get the zoom level */
+	int getZoom();
 }

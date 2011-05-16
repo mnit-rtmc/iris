@@ -20,7 +20,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -30,11 +30,9 @@ import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.geokit.UTMPosition;
-import us.mn.state.dot.geokit.UTMZone;
+import us.mn.state.dot.geokit.ZoomLevel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapToolBar;
@@ -57,12 +55,6 @@ import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
  * @author Michael Darter
  */
 public class ScreenPane extends JPanel {
-
-	/** UTM zone for conversion to lat/lon */
-	static protected UTMZone utmZone() {
-		return new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
-			SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean());
-	}
 
 	/** Tabbed side pane */
 	protected final JTabbedPane tab_pane;
@@ -238,28 +230,18 @@ public class ScreenPane extends JPanel {
 
 	/** Set the map extent */
 	public void setMapExtent(MapExtent me) {
-		map.setExtent(createExtent(me));
+		Point2D ctr = createCenter(me);
+		ZoomLevel zoom = ZoomLevel.fromOrdinal(me.getZoom());
+		if(ctr != null && zoom != null)
+			map.getModel().setExtent(ctr, zoom);
 	}
 
-	/** Create an extent rectangle in spherical mercator units */
-	static protected Rectangle2D createExtent(MapExtent me) {
-		SphericalMercatorPosition p0 = position(me.getEasting(),
-			me.getNorthing());
-		SphericalMercatorPosition p1 = position(me.getEasting() +
-			me.getEastSpan(), me.getNorthing() + me.getNorthSpan());
-		double x = p0.getX();
-		double y = p0.getY();
-		double w = p1.getX() - p0.getX();
-		double h = p1.getY() - p0.getY();
-		return new Rectangle2D.Double(x, y, w, h);
-	}
-
-	/** Get a spherical mercator position */
-	static protected SphericalMercatorPosition position(int easting,
-		int northing)
-	{
-		UTMPosition utm = new UTMPosition(utmZone(), easting, northing);
-		Position p = utm.getPosition(GeodeticDatum.WGS_84);
-		return SphericalMercatorPosition.convert(p);
+	/** Create a center point in spherical mercator units */
+	static protected Point2D createCenter(MapExtent me) {
+		float lat = me.getLat();
+		float lon = me.getLon();
+		SphericalMercatorPosition c = SphericalMercatorPosition.convert(
+			new Position(lat, lon));
+		return new Point2D.Double(c.getX(), c.getY());
 	}
 }

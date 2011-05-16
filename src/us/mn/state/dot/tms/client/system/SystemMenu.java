@@ -106,7 +106,8 @@ public class SystemMenu extends JMenu {
 		item.setMnemonic('e');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new MapExtentForm(session));
+				desktop.show(new MapExtentForm(session,
+					desktop.client));
 			}
 		};
 		return item;

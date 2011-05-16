@@ -372,6 +372,13 @@ public class IrisClient extends JFrame {
 		return mm;
 	}
 
+	/** Get the map model for the first screen pane */
+	public MapModel getMapModel() {
+		for(ScreenPane sp: s_panes)
+			return sp.getMap().getModel();
+		return null;
+	}
+
 	/** Logout of the current session */
 	public void logout() {
 		new AbstractJob(LOGIN) {
