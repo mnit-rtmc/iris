@@ -11,6 +11,38 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.128.0 (16 May 2011)</dt>
+	<dd><ul>
+		<li>
+			Map extent buttons now use lat/lon instead of UTM
+			easting/northing.
+			Old map extent buttons will need to be recreated.
+		</li>
+		<li>
+			Changed default XML output directory to
+			/var/www/html/iris_xml/.
+		</li>
+		<li>
+			Fixed error handling when writing XML output files.
+		</li>
+		<li>
+			Added occupancy to det_sample.xml.gz and
+			stat_sample.xml.gz.
+			Also removed "D" prefix from detector names.
+		</li>
+		<li>
+			Changed coordinates in incident.xml to lat/lon;
+			gzipped file as well.
+		</li>
+		<li>
+			Replaced dms.xml with sign_message.xml.gz.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.128.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.127.0 (12 May 2011)</dt>
 	<dd><ul>
 		<li>
