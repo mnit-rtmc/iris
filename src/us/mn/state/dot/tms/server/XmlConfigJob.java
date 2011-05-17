@@ -25,9 +25,6 @@ import us.mn.state.dot.sched.TimeSteward;
  */
 public class XmlConfigJob extends Job {
 
-	/** TMS config XML writer */
-	protected final TmsConfigXmlWriter xml_writer =new TmsConfigXmlWriter();
-
 	/** Create a new XML config writer job */
 	public XmlConfigJob() {
 		super(Calendar.DATE, 1, Calendar.HOUR, 20);
@@ -50,6 +47,7 @@ public class XmlConfigJob extends Job {
 	/** Write the TMS xml configuration files */
 	protected void writeXmlConfiguration() {
 		BaseObjectImpl.corridors.createCorridors();
+		TmsConfigXmlWriter xml_writer = new TmsConfigXmlWriter();
 		xml_writer.write();
 	}
 }

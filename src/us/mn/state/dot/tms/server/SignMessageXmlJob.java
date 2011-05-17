@@ -27,9 +27,6 @@ public class SignMessageXmlJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static protected final int OFFSET_SECS = 20;
 
-	/** Sign message XML writer */
-	protected final SignMessageXmlWriter writer =new SignMessageXmlWriter();
-
 	/** Create a new sign message XML job */
 	public SignMessageXmlJob() {
 		super(Calendar.MINUTE, 1, Calendar.SECOND, OFFSET_SECS);
@@ -37,6 +34,7 @@ public class SignMessageXmlJob extends Job {
 
 	/** Perform the sign message XML job */
 	public void perform() {
+		SignMessageXmlWriter writer = new SignMessageXmlWriter();
 		writer.write();
 	}
 }

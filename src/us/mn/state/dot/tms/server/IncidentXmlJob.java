@@ -27,9 +27,6 @@ public class IncidentXmlJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static protected final int OFFSET_SECS = 7;
 
-	/** Incident xml writer */
-	protected final IncidentXmlWriter writer = new IncidentXmlWriter();
-
 	/** Create a new incident XML job */
 	public IncidentXmlJob() {
 		super(Calendar.MINUTE, 1, Calendar.SECOND, OFFSET_SECS);
@@ -37,6 +34,7 @@ public class IncidentXmlJob extends Job {
 
 	/** Perform the incident XML job */
 	public void perform() {
+		IncidentXmlWriter writer = new IncidentXmlWriter();
 		writer.write();
 	}
 }
