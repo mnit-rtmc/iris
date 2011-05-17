@@ -843,8 +843,10 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			out.print(XmlWriter.createAttribute("flow", flow));
 		if(isMainline() && speed > 0)
 			out.print(XmlWriter.createAttribute("speed", speed));
-		if(occ >= 0)
-			out.print(XmlWriter.createAttribute("occ", occ));
+		if(occ >= 0) {
+			out.print(XmlWriter.createAttribute("occ",
+				formatFloat(occ, 2)));
+		}
 		out.println("/>");
 	}
 }

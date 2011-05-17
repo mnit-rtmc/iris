@@ -138,6 +138,13 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			MainServer.server.setAttribute(this, aname);
 	}
 
+	/** Format a float value */
+	static String formatFloat(float value, int digits) {
+		NumberFormat nf = NumberFormat.getNumberInstance();
+		nf.setMaximumFractionDigits(digits);
+		return nf.format(value);
+	}
+
 	/** Format a double value */
 	static String formatDouble(double value) {
 		NumberFormat nf = NumberFormat.getNumberInstance();

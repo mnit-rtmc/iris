@@ -400,8 +400,10 @@ public class StationImpl implements Station {
 			out.print(XmlWriter.createAttribute("flow", f));
 		if(s > 0)
 			out.print(XmlWriter.createAttribute("speed", s));
-		if(o >= 0)
-			out.print(XmlWriter.createAttribute("occ", o));
+		if(o >= 0) {
+			out.print(XmlWriter.createAttribute("occ",
+				BaseObjectImpl.formatFloat(o, 2)));
+		}
 		out.println("/>");
 	}
 
