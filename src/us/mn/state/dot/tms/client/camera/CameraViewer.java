@@ -19,6 +19,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.Properties;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -74,8 +75,14 @@ public class CameraViewer extends JPanel
 	/** Sonar state */
 	protected final SonarState state;
 
-	/** The video stream request parameter wrapper */
-	private final VideoRequest request;
+	/** Logged in user */
+	protected final User user;
+
+	/** Client properties */
+	protected final Properties props;
+
+	/** Session ID for sonar connection */
+	protected final long session_id;
 
 	/** Displays the name of the selected camera */
 	protected final JTextField txtId = new JTextField();
@@ -108,9 +115,6 @@ public class CameraViewer extends JPanel
 	/** Proxy manager for camera devices */
 	protected final CameraManager manager;
 
-	/** Logged in user */
-	protected final User user;
-
 	/** Currently selected camera */
 	protected Camera selected = null;
 
@@ -141,9 +145,9 @@ public class CameraViewer extends JPanel
 		manager.getSelectionModel().addProxySelectionListener(this);
 		state = session.getSonarState();
 		user = session.getUser();
-		request = new VideoRequest(session.getProperties(), SIZE);
-		request.setDuration(
-			SystemAttrEnum.CAMERA_STREAM_DURATION_SECS.getInt());
+		props = session.getProperties();
+		Connection c = state.lookupConnection(state.getConnection());
+		session_id = c.getSessionId();
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
@@ -202,9 +206,6 @@ public class CameraViewer extends JPanel
 			}
 		};
 		clear();
-		Connection c = state.lookupConnection(state.getConnection());
-		request.setSonarSessionId(c.getSessionId());
-		request.setRate(30);
 		ptz_poller.setDaemon(true);
 		ptz_poller.start();
 		joystick.addJoystickListener(new JoystickListener() {
@@ -380,8 +381,14 @@ public class CameraViewer extends JPanel
 
 	/** Start video streaming */
 	protected void playPressed(Camera c) {
-		if(c != null)
-			s_panel.requestStream(request, c);
+		if(c != null) {
+			VideoRequest vr = new VideoRequest(props, SIZE);
+			vr.setDuration(SystemAttrEnum.
+				CAMERA_STREAM_DURATION_SECS.getInt());
+			vr.setSonarSessionId(session_id);
+			vr.setRate(30);
+			s_panel.requestStream(vr, c);
+		}
 	}
 
 	/** Stop video streaming */
