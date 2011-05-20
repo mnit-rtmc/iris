@@ -36,7 +36,6 @@ import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.geokit.UTMPosition;
-import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
@@ -240,8 +239,6 @@ public class CorridorList extends JPanel {
 		manager.setCorridor(c);
 		updateListModel();
 		layer.updateExtent();
-		if(map != null)
-			map.setExtent(layer.getExtent());
 	}
 
 	/** Dispose of the corridor chooser */
@@ -250,14 +247,6 @@ public class CorridorList extends JPanel {
 		geo_locs.removeProxyListener(loc_listener);
 		r_nodes.removeProxyListener(listener);
 		removeAll();
-	}
-
-	/** Map bean */
-	protected MapBean map;
-
-	/** Set the map */
-	public void setMap(MapBean m) {
-		map = m;
 	}
 
 	/** Called when an r_node has been added */

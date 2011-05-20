@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.BorderLayout;
-import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 
@@ -41,12 +40,6 @@ public class R_NodeTab extends MapTab {
 		add(clist, BorderLayout.CENTER);
 		panel.initialize();
 		clist.initialize();
-	}
-
-	/** Set the map for this tab */
-	public void setMap(MapBean m) {
-		super.setMap(m);
-		clist.setMap(m);
 	}
 
 	/** Get the tab number */
