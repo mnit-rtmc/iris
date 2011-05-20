@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,11 +132,6 @@ public class DetectorManager extends ProxyManager<Detector> {
 		return DetectorHelper.getGeoLoc(proxy);
 	}
 
-	/** Get the layer scale visibility threshold */
-	protected float getScaleThreshold() {
-		return 1.0f;
-	}
-
 	/** Mapping of r_node names to detector sets */
 	protected final HashMap<String, HashSet<Detector>> nodes =
 		new HashMap<String, HashSet<Detector>>();
@@ -183,5 +178,10 @@ public class DetectorManager extends ProxyManager<Detector> {
 			}
 		}.addToScheduler();
 		super.enumerationComplete();
+	}
+
+	/** Get the layer zoom visibility threshold */
+	protected int getZoomThreshold() {
+		return 18;
 	}
 }

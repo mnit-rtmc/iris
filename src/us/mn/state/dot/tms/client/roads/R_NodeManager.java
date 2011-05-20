@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -458,8 +458,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			(int)pnt.x, (int)pnt.y, dist);
 	}
 
-	/** Get the layer scale visibility threshold */
-	protected float getScaleThreshold() {
-		return 0.025f;
+	/** Get the layer zoom visibility threshold */
+	protected int getZoomThreshold() {
+		return 18;
 	}
 }

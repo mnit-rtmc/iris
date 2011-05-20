@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
- * Copyright (C) 2010 AHMCT, University of California
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -368,13 +368,12 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Check if the corresponding layer is visible.
-	 * @param scale Size of a pixel in world coordinates.
+	 * @param zoom Current map zoom level.
 	 * @return True if the layer should be visible. */
-	public boolean isVisible(float scale) {
-		float rel = scale / getIconSizeScaleMax();
-		return rel < getScaleThreshold();
+	public boolean isVisible(int zoom) {
+		return zoom >= getZoomThreshold();
 	}
 
-	/** Get the layer scale visibility threshold */
-	abstract protected float getScaleThreshold();
+	/** Get the layer zoom visibility threshold */
+	abstract protected int getZoomThreshold();
 }
