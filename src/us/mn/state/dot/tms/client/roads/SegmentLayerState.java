@@ -55,15 +55,20 @@ public class SegmentLayerState extends LayerState {
 
 	/** Iterate through the segments in the layer */
 	public MapObject forEach(MapSearcher s) {
-		float scale = getScale();
-		if(scale > 20)
-			return forEachStation(s, scale);
+		if(isPastLaneZoomThreshold())
+			return forEachLane(s);
 		else
-			return forEachLane(s, scale);
+			return forEachStation(s);
+	}
+
+	/** Is the zoom level past the "individual lane" threshold? */
+	protected boolean isPastLaneZoomThreshold() {
+		return map.getModel().getZoomLevel().ordinal() >= 14;
 	}
 
 	/** Iterate through the stations in the layer */
-	protected MapObject forEachStation(MapSearcher s, float scale) {
+	protected MapObject forEachStation(MapSearcher s) {
+		float scale = getScale();
 		for(Segment seg: seg_layer) {
 			MapSegment ms = new MapSegment(seg, scale);
 			if(s.next(ms))
@@ -74,9 +79,9 @@ public class SegmentLayerState extends LayerState {
 
 	/** Iterate through each lane segment in the layer.
 	 * @param s Map searcher callback.
-	 * @param scale Number of meters per pixel.
 	 * @return Map object found, if any. */
-	protected MapObject forEachLane(MapSearcher s, float scale) {
+	protected MapObject forEachLane(MapSearcher s) {
+		float scale = getScale();
 		for(Segment seg: seg_layer) {
 			for(int sh = seg.getLeftMin(); sh < seg.getRightMax();
 			    sh++)
