@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,19 @@ public class SegmentLayerState extends LayerState {
 		addTheme(new FlowTheme());
 		addTheme(new FreewayTheme());
 		seg_layer = sl;
+	}
+
+	/** Get the visibility flag */
+	public boolean isVisible() {
+		if(visible == null)
+			return isZoomVisible();
+		else
+			return visible;
+	}
+
+	/** Is the layer visible at the current zoom level? */
+	protected boolean isZoomVisible() {
+		return map.getModel().getZoomLevel().ordinal() >= 10;
 	}
 
 	/** Iterate through the segments in the layer */
