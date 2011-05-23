@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN'
+	  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+<svg id="us_route1"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 174 174"
+     width="18"
+     height="18">
+<g transform='translate(86,104) scale(1,1)'>
+	<path style="fill:white;stroke:black;stroke-width:5"
+	          d="M 70,-52
+		     C 68,-54 74,-64 74,-64
+		     L 48,-84
+		     C 48,-84 36,-72 24,-72
+		     C 10,-72 0,-84 0,-84
+		     C 0,-84 -10,-72 -24,-72
+		     C -36,-72 -48,-84 -48,-84
+		     L -74,-64
+		     C -74,-64 -68,-54 -70,-52
+		     C -70,-48 -69,-41 -72,-32
+	             C -75,-23 -96,9 -60,40
+	             C -46,48 -16,48 -10,58
+	             C -4,64 -4,64 0,68
+	             C 4,64 4,64 10,58
+	             C 16,48 46,48 60,40
+	             C 96,8 75,-23 72,-32
+	             C 69,-41 70,-48 70,-52
+		     z" />
+</g>
+</svg>

@@ -1,0 +1,54 @@
+--- iris_osm.xml	2011-05-23 10:03:50.000000000 -0500
++++ iris_osm.xml	2011-05-23 10:06:04.000000000 -0500
+@@ -273,24 +273,6 @@
+       <TextSymbolizer name="name" fontset_name="book-fonts" size="10" fill="#000033" halo_radius="1" wrap_width="20"/>
+     </Rule>
+ </Style>
+-<Style name="highway-junctions">
+-    <Rule>
+-      &maxscale_zoom11;
+-      &minscale_zoom11;
+-      <TextSymbolizer name="ref" fontset_name="oblique-fonts" size="9" fill="#6666ff" halo_radius="1" wrap_width="12" min_distance="2" />
+-    </Rule>
+-    <Rule>
+-      &maxscale_zoom12;
+-      &minscale_zoom14;
+-      <TextSymbolizer name="ref" fontset_name="oblique-fonts" size="9" fill="#6666ff" halo_radius="1" wrap_width="12" min_distance="2"/>
+-      <TextSymbolizer name="name" fontset_name="oblique-fonts" size="8" fill="#6666ff" halo_radius="1" wrap_width="2" dy="-8" min_distance="2" wrap_character=";" />
+-    </Rule>
+-    <Rule>
+-      &maxscale_zoom15;
+-      <TextSymbolizer name="ref" fontset_name="oblique-fonts" size="12" fill="#6666ff" halo_radius="1" wrap_width="12" min_distance="2"/>
+-      <TextSymbolizer name="name" fontset_name="oblique-fonts" size="11" fill="#6666ff" halo_radius="1" wrap_width="2" dy="-10" min_distance="2" wrap_character=";" />
+-    </Rule>
+-</Style>
+ <Style name="text">
+     <Rule>
+       <Filter>[place] = 'island'</Filter>
+@@ -6570,7 +6552,6 @@
+ &layer-amenity-stations;
+ &layer-amenity-symbols;
+ &layer-amenity-points;
+-&layer-power;
+ <Layer name="planet roads text osm low zoom" status="on" srs="&osm2pgsql_projection;">
+      <StyleName>roads-text-low-zoom</StyleName>
+      <Datasource>
+@@ -6584,18 +6565,6 @@
+       &datasource-settings;
+     </Datasource>
+ </Layer>
+-<Layer name="highway-junctions" status="on" srs="&osm2pgsql_projection;">
+-    <StyleName>highway-junctions</StyleName>
+-    <Datasource>
+-     <Parameter name="table">
+-     (select way,ref,name
+-      from &prefix;_point
+-      where highway='motorway_junction'
+-     ) as junctions
+-     </Parameter>
+-     &datasource-settings;
+-    </Datasource>
+-</Layer>
+ <Layer name="planet roads text osm" status="on" srs="&osm2pgsql_projection;">
+      <StyleName>roads-text</StyleName>
+      <Datasource>

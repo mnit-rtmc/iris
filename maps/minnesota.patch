@@ -1,0 +1,55 @@
+--- generate_tiles.py	2011-05-23 14:56:39.000000000 -0500
++++ generate_tiles.py	2011-05-23 14:59:51.000000000 -0500
+@@ -202,49 +202,6 @@
+     #
+     # Change the following for different bounding boxes and zoom levels
+     #
+-    # Start with an overview
+-    # World
+-    bbox = (-180.0,-90.0, 180.0,90.0)
+-
+-    render_tiles(bbox, mapfile, tile_dir, 0, 5, "World")
+-
+-    minZoom = 10
+-    maxZoom = 16
+-    bbox = (-2, 50.0,1.0,52.0)
+-    render_tiles(bbox, mapfile, tile_dir, minZoom, maxZoom)
+-
+-    # Muenchen
+-    bbox = (11.4,48.07, 11.7,48.22)
+-    render_tiles(bbox, mapfile, tile_dir, 1, 12 , "Muenchen")
+-
+-    # Muenchen+
+-    bbox = (11.3,48.01, 12.15,48.44)
+-    render_tiles(bbox, mapfile, tile_dir, 7, 12 , "Muenchen+")
+-
+-    # Muenchen++
+-    bbox = (10.92,47.7, 12.24,48.61)
+-    render_tiles(bbox, mapfile, tile_dir, 7, 12 , "Muenchen++")
+-
+-    # Nuernberg
+-    bbox=(10.903198,49.560441,49.633534,11.038085)
+-    render_tiles(bbox, mapfile, tile_dir, 10, 16, "Nuernberg")
+-
+-    # Karlsruhe
+-    bbox=(8.179113,48.933617,8.489252,49.081707)
+-    render_tiles(bbox, mapfile, tile_dir, 10, 16, "Karlsruhe")
+-
+-    # Karlsruhe+
+-    bbox = (8.3,48.95,8.5,49.05)
+-    render_tiles(bbox, mapfile, tile_dir, 1, 16, "Karlsruhe+")
+-
+-    # Augsburg
+-    bbox = (8.3,48.95,8.5,49.05)
+-    render_tiles(bbox, mapfile, tile_dir, 1, 16, "Augsburg")
+-
+-    # Augsburg+
+-    bbox=(10.773251,48.369594,10.883834,48.438577)
+-    render_tiles(bbox, mapfile, tile_dir, 10, 14, "Augsburg+")
+-
+-    # Europe+
+-    bbox = (1.0,10.0, 20.6,50.0)
+-    render_tiles(bbox, mapfile, tile_dir, 1, 11 , "Europe+")
++    # Minnesota
++    bbox = (-97.5, 43.0, -89.0, 49.5)
++    render_tiles(bbox, mapfile, tile_dir, 0, 18, "Minnesota")

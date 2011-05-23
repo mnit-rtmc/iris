@@ -1,0 +1,132 @@
+--- iris_osm.xml	2011-05-23 10:11:23.000000000 -0500
++++ iris_osm.xml	2011-05-23 10:17:25.000000000 -0500
+@@ -5312,52 +5312,40 @@
+       <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/interstate3.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 1</Filter>
++      <Filter>[prefix] = 'US' and [tlength] = 1</Filter>
+       &maxscale_zoom11;
+       &minscale_zoom12;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield1.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#000" placement="line" file="&symbols;/us_route1.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 2</Filter>
++      <Filter>[prefix] = 'US' and [tlength] = 2</Filter>
+       &maxscale_zoom11;
+       &minscale_zoom12;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield2.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#000" placement="line" file="&symbols;/us_route2.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 3</Filter>
++      <Filter>[prefix] = 'US' and [tlength] >= 3</Filter>
+       &maxscale_zoom11;
+       &minscale_zoom12;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield3.png" min_distance="24" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#000" placement="line" file="&symbols;/us_route3.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 4</Filter>
++      <Filter>[prefix] = 'MN' and [tlength] = 1</Filter>
+       &maxscale_zoom11;
+       &minscale_zoom12;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield4.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/trunk_highway1.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 5</Filter>
++      <Filter>[prefix] = 'MN' and [tlength] = 2</Filter>
+       &maxscale_zoom11;
+       &minscale_zoom12;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield5.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/trunk_highway2.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 6</Filter>
++      <Filter>[prefix] = 'MN' and [tlength] >= 3</Filter>
+       &maxscale_zoom11;
+       &minscale_zoom12;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield6.png" min_distance="30" spacing="750"/>
+-    </Rule>
+-    <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 7</Filter>
+-      &maxscale_zoom11;
+-      &minscale_zoom12;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield7.png" min_distance="30" spacing="750"/>
+-    </Rule>
+-    <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 8</Filter>
+-      &maxscale_zoom11;
+-      &minscale_zoom12;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield8.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/trunk_highway3.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+       <Filter>[highway] = 'primary' and [length] = 1</Filter>
+@@ -5428,52 +5416,40 @@
+       <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/interstate3.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 1</Filter>
+-      &maxscale_zoom13;
+-      &minscale_zoom18;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield1.png" min_distance="30" spacing="750"/>
+-    </Rule>
+-    <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 2</Filter>
+-      &maxscale_zoom13;
+-      &minscale_zoom18;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield2.png" min_distance="30" spacing="750"/>
+-    </Rule>
+-    <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 3</Filter>
++      <Filter>[prefix] = 'US' and [tlength] = 1</Filter>
+       &maxscale_zoom13;
+       &minscale_zoom18;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield3.png" min_distance="24" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#000" placement="line" file="&symbols;/us_route1.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 4</Filter>
++      <Filter>[prefix] = 'US' and [tlength] = 2</Filter>
+       &maxscale_zoom13;
+       &minscale_zoom18;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield4.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#000" placement="line" file="&symbols;/us_route2.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 5</Filter>
++      <Filter>[prefix] = 'US' and [tlength] >= 3</Filter>
+       &maxscale_zoom13;
+       &minscale_zoom18;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield5.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#000" placement="line" file="&symbols;/us_route3.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 6</Filter>
++      <Filter>[prefix] = 'MN' and [tlength] = 1</Filter>
+       &maxscale_zoom13;
+       &minscale_zoom18;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield6.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/trunk_highway1.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 7</Filter>
++      <Filter>[prefix] = 'MN' and [tlength] = 2</Filter>
+       &maxscale_zoom13;
+       &minscale_zoom18;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield7.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/trunk_highway2.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+-      <Filter>[highway] = 'trunk' and [length] = 8</Filter>
++      <Filter>[prefix] = 'MN' and [tlength] >= 3</Filter>
+       &maxscale_zoom13;
+       &minscale_zoom18;
+-      <ShieldSymbolizer name="ref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/tru_shield8.png" min_distance="30" spacing="750"/>
++      <ShieldSymbolizer name="tref" fontset_name="bold-fonts" size="10" fill="#fff" placement="line" file="&symbols;/trunk_highway3.png" min_distance="30" spacing="750"/>
+     </Rule>
+     <Rule>
+       <Filter>[highway] = 'primary' and [length] = 1</Filter>

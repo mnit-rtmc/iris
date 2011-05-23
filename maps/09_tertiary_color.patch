@@ -1,0 +1,119 @@
+--- iris_osm.xml	2011-05-23 14:43:20.000000000 -0500
++++ iris_osm.xml	2011-05-23 14:43:28.000000000 -0500
+@@ -1932,7 +1932,7 @@
+       &maxscale_zoom13;
+       &minscale_zoom13;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">4.5</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -1943,7 +1943,7 @@
+       &maxscale_zoom14;
+       &minscale_zoom14;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">6</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -1954,7 +1954,7 @@
+       &maxscale_zoom15;
+       &minscale_zoom16;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">9.4</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -1965,7 +1965,7 @@
+       &maxscale_zoom17;
+       &minscale_zoom18;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">13</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -2118,7 +2118,7 @@
+       &minscale_zoom15;
+       <Filter>([highway] = 'proposed' or [highway]='construction') and ([construction]='tertiary' or [construction]='tertiary_link')</Filter>
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">4</CssParameter>
+       </LineSymbolizer>
+       <LineSymbolizer>
+@@ -2216,7 +2216,7 @@
+       &minscale_zoom18;
+       <Filter>([highway] = 'proposed' or [highway]='construction') and ([construction]='tertiary' or [construction]='tertiary_link')</Filter>
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">8</CssParameter>
+       </LineSymbolizer>
+       <LineSymbolizer>
+@@ -2873,7 +2873,7 @@
+       &maxscale_zoom13;
+       &minscale_zoom13;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">4.5</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -2884,7 +2884,7 @@
+       &maxscale_zoom14;
+       &minscale_zoom14;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">6</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -2895,7 +2895,7 @@
+       &maxscale_zoom15;
+       &minscale_zoom16;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">9.4</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -2906,7 +2906,7 @@
+       &maxscale_zoom17;
+       &minscale_zoom18;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">13</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -4530,7 +4530,7 @@
+       &maxscale_zoom14;
+       &minscale_zoom14;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">6</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -4541,7 +4541,7 @@
+       &maxscale_zoom15;
+       &minscale_zoom16;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">9.5</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
+@@ -4552,7 +4552,7 @@
+       &maxscale_zoom17;
+       &minscale_zoom18;
+       <LineSymbolizer>
+-        <CssParameter name="stroke">#ffffb3</CssParameter>
++        <CssParameter name="stroke">#ffffa9</CssParameter>
+         <CssParameter name="stroke-width">14</CssParameter>
+         <CssParameter name="stroke-linejoin">round</CssParameter>
+         <CssParameter name="stroke-linecap">round</CssParameter>
