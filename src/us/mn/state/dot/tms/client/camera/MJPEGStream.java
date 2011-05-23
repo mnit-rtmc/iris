@@ -142,7 +142,7 @@ public class MJPEGStream implements VideoStream {
 				return parseContentLength(s);
 			}
 		}
-		throw new IOException("Too many headers");
+		throw new IOException("Missing content-length");
 	}
 
 	/** Parse the content-length header */
