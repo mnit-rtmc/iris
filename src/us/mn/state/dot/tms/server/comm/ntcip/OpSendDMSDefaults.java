@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,8 @@ public class OpSendDMSDefaults extends OpDMS {
 			DmsEndDurationMessage end_msg =
 				new DmsEndDurationMessage();
 			power_time.setInteger(0);
-			comm_time.setInteger(10);
+			comm_time.setInteger(SystemAttrEnum.
+				DMS_COMM_LOSS_MINUTES.getInt());
 			end_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
 			end_msg.setNumber(1);
 			end_msg.setCrc(0);

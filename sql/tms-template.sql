@@ -1360,11 +1360,12 @@ dms_aws_log_filename	/var/www/html/awsreport.txt
 dms_aws_read_offset	0
 dms_aws_retry_threshold	6
 dms_brightness_enable	true
+dms_comm_loss_minutes	5
+dms_composer_edit_mode	1
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_duration_enable	true
 dms_font_selection_enable	false
-dms_composer_edit_mode	1
 dms_form	1
 dms_high_temp_cutoff	60
 dms_lamp_test_timeout_secs	30
