@@ -45,6 +45,6 @@ public class CameraHelper extends BaseHelper {
 		if(enc != null && enc.indexOf(':') >= 0)
 			return enc.substring(0, enc.indexOf(':'));
 		else
-			return enc;
+			return enc.trim();
 	}
 }

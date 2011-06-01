@@ -65,7 +65,7 @@ public class GstStream implements VideoStream {
 	private String error_msg = null;
 
 	/** Create a new gstreamer stream */
-	public GstStream(VideoRequest req, Camera c) {
+	public GstStream(VideoRequest req, Camera c) throws IOException {
 		stream_type = req.getStreamType(c);
 		pipe = createPipe(createSource(req, c));
 		pipe.getBus().connect(error_listener);
@@ -92,7 +92,9 @@ public class GstStream implements VideoStream {
 	}
 
 	/** Create a source element */
-	private String createSource(VideoRequest req, Camera c) {
+	private String createSource(VideoRequest req, Camera c)
+		throws IOException
+	{
 		switch(req.getStreamType(c)) {
 		case MJPEG:
 			return "souphttpsrc location=" + req.getUrl(c) +
@@ -101,7 +103,7 @@ public class GstStream implements VideoStream {
 			return "rtspsrc location=" + req.getUrl(c) +
 				" latency=0";
 		default:
-			return "fakesrc";
+			throw new IOException("Invalid stream type");
 		}
 	}
 

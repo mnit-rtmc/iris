@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
@@ -143,7 +144,7 @@ public class VideoRequest {
 	}
 
 	/** Create a URL for a stream */
-	public String getUrl(Camera cam) {
+	public String getUrl(Camera cam) throws IOException {
 		if(base_url != null)
 			return getServletUrl(cam);
 		else
@@ -160,8 +161,10 @@ public class VideoRequest {
 	}
 
 	/** Create a camera encoder URL */
-	protected String getCameraUrl(Camera cam) {
+	protected String getCameraUrl(Camera cam) throws IOException {
 		String ip = CameraHelper.parseEncoderIp(cam);
+		if(ip.length() < 1)
+			throw new IOException("No Encoder IP");
 		switch(getEncoderType(cam)) {
 		case AXIS_MJPEG:
 			return new String("http://" + ip +
@@ -174,7 +177,7 @@ public class VideoRequest {
 		case INFINOVA_MPEG4:
 			return new String("rtsp://" + ip + "/1.AMP");
 		default:
-			return "no_encoder";
+			throw new IOException("No Encoder");
 		}
 	}
 
