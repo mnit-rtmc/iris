@@ -286,7 +286,15 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(status);
 			mess.add(mfr_status);
 			mess.add(voltage);
-			mess.queryProps();
+			try {
+				mess.queryProps();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// Come on, man!  If we got here, 1203v2
+				// objects should really be supported ...
+				dms.setPowerStatus(new String[0]);
+				return new LedstarStatus();
+			}
 			DMS_LOG.log(dms.getName() + ": " + desc);
 			DMS_LOG.log(dms.getName() + ": " + p_type);
 			DMS_LOG.log(dms.getName() + ": " + status);
@@ -338,14 +346,14 @@ public class OpQueryDMSStatus extends OpDMS {
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// 1203v2 not supported ...
-				return null;
+				return new LedstarStatus();
 			}
 			DMS_LOG.log(dms.getName() + ": " + n_snsr);
 			if(n_snsr.getInteger() > 0) {
 				return new QueryLightSensorStatus(
 					n_snsr.getInteger());
 			} else
-				return null;
+				return new LedstarStatus();
 		}
 	}
 
@@ -378,7 +386,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			if(row <= n_sensors)
 				return this;
 			else
-				return null;
+				return new LedstarStatus();
 		}
 	}
 
