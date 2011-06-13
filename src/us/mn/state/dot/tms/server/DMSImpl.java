@@ -900,12 +900,17 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(sched != null && multi.isBlank()) {
 			// Don't blank the sign if there's a scheduled message
 			// -- send the scheduled message instead.
-			sm = sched;
-			multi = new MultiString(sm.getMulti());
-		}
-		if(!multi.isValid()) {
-			throw new InvalidMessageException(name +
-				": INVALID MESSAGE, " + sm.getMulti());
+			try {
+				validateBitmaps(sched,
+					new MultiString(sched.getMulti()));
+				return sched;
+			}
+			catch(TMSException e) {
+				System.err.println("Scheduled message for " +
+					getName() + " not deployed: " +
+					e.getMessage());
+				// Ok, go ahead and blank the sign
+			}
 		}
 		validateBitmaps(sm, multi);
 		return sm;
@@ -913,8 +918,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Validate the message bitmaps */
 	protected void validateBitmaps(SignMessage sm, MultiString multi)
-		throws ChangeVetoException
+		throws TMSException
 	{
+		if(!multi.isValid()) {
+			throw new InvalidMessageException(name +
+				": INVALID MESSAGE, " + sm.getMulti());
+		}
 		try {
 			validateBitmaps(sm.getBitmaps(), multi);
 		}
