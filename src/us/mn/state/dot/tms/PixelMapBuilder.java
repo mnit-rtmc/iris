@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -139,9 +139,32 @@ public class PixelMapBuilder {
 			return c_height;
 		Font f = FontHelper.find(default_font);
 		if(f != null)
-			return f.getHeight() + f.getLineSpacing();
+			return f.getHeight();
 		else
 			return height;
+	}
+
+	/** Get the optimal line spacing (pixels) */
+	public int getLineSpacingPixels() {
+		if(c_height > 0)
+			return 0;
+		Font f = FontHelper.find(default_font);
+		if(f != null)
+			return f.getLineSpacing();
+		else
+			return 1;
+	}
+
+	/** Get the number of lines of text using the default font */
+	public int getLineCount() {
+		int lh = getLineHeightPixels();
+		int ls = getLineSpacingPixels();
+		int l_max = SystemAttrEnum.DMS_MAX_LINES.getInt();
+		for(int lines = 1; lines < l_max; lines++) {
+			if(lh * (lines + 1) + ls * lines > height)
+				return lines;
+		}
+		return l_max;
 	}
 
 	/** Render a BitmapGraphic for each page */

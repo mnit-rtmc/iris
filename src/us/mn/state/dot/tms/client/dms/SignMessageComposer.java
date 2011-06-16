@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -246,36 +246,11 @@ public class SignMessageComposer extends JPanel {
 
 	/** Get the number of lines on the selected sign(s) */
 	protected int getLineCount() {
-		return Math.min(getLineCountSign(),
-			SystemAttrEnum.DMS_MAX_LINES.getInt());
-	}
-
-	/** Get the number of lines on the selected sign(s) */
-	protected int getLineCountSign() {
-		int h = getHeightPixels();
-		int lh = getLineHeightPixels();
-		if(lh > 0 && h >= lh)
-			return h / lh;
+		PixelMapBuilder b = builder;
+		if(b != null)
+			return b.getLineCount();
 		else
 			return 3;
-	}
-
-	/** Get the line height */
-	protected int getLineHeightPixels() {
-		PixelMapBuilder b = builder;
-		if(b != null)
-			return b.getLineHeightPixels();
-		else
-			return 0;
-	}
-
-	/** Get the pixel height */
-	protected int getHeightPixels() {
-		PixelMapBuilder b = builder;
-		if(b != null)
-			return b.height;
-		else
-			return 0;
 	}
 
 	/** Initialize the widgets */
