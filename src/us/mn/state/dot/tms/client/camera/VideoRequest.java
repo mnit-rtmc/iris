@@ -167,10 +167,13 @@ public class VideoRequest {
 			throw new IOException("No Encoder IP");
 		switch(getEncoderType(cam)) {
 		case AXIS_MJPEG:
+			/* The showlength parameter is needed to force ancient
+			 * (2401) servers to provide Content-Length headers */
 			return new String("http://" + ip +
 				"/axis-cgi/mjpg/video.cgi" +
 				"?camera=" + cam.getEncoderChannel() +
-				"&resolution=" + size.getResolution());
+				"&resolution=" + size.getResolution() +
+				"&showlength=1");
 		case AXIS_MPEG4:
 			return new String("rtsp://" + ip + "/mpeg4/" +
 				cam.getEncoderChannel() + "/media.amp");
