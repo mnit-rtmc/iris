@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,8 @@ public class R_NodeHelper extends BaseHelper {
 		return null != DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector d) {
 				return d.getR_Node() == r_node &&
-				       !d.getAbandoned();
+				       (!d.getAbandoned()) &&
+				       DetectorHelper.isActive(d);
 			}
 		});
 	}

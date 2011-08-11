@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,5 +63,11 @@ public class DetectorHelper extends BaseHelper {
 	static public Detector lookup(String name) {
 		return (Detector)namespace.lookupObject(Detector.SONAR_TYPE,
 			name);
+	}
+
+	/** Test if a detector is active */
+	static public boolean isActive(Detector det) {
+		Controller ctr = det.getController();
+		return ctr != null && ctr.getActive();
 	}
 }
