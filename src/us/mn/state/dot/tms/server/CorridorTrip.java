@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -200,10 +200,18 @@ public class CorridorTrip {
 	}
 
 	/** Print the trip to a print stream */
-	public void print(PrintStream out) {
-		out.println("\tTrip origin: " + origin + ", destin: " +
-			destination);
-		for(StationImpl s: stations.values())
-			out.println("\t\tStation: " + s.getName());
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("trip: ");
+		sb.append("o: ");
+		sb.append(origin);
+		sb.append(", d: ");
+		sb.append(destination);
+		sb.append(", st: ");
+		for(StationImpl s: stations.values()) {
+			sb.append(s.getName());
+			sb.append(" ");
+		}
+		return sb.toString();
 	}
 }

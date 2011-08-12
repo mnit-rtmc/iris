@@ -191,9 +191,7 @@ public class RouteBuilder {
 		if(TRAVEL_LOG.isOpen()) {
 			GeoLoc dest = odf.getDestination();
 			TRAVEL_LOG.log(name + ": FOUND ROUTE TO " +
-				GeoLocHelper.getDescription(dest) + ", " +
-				r.getLength() + " miles, " + r.getTurns() +
-				" turns, goodness: " + r.getGoodness());
+				GeoLocHelper.getDescription(dest) + ", " + r);
 			if(max_mi == r.getGoodness()) {
 				TRAVEL_LOG.log(name + ": LOWERED MAX DIST TO " +
 					max_mi);
