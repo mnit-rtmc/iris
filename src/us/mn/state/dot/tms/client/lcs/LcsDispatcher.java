@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Operation of selected LCS array */
 	protected final JTextField operationTxt = FormPanel.createTextField();
 
+	/** Status of selected LCS array */
+	protected final JTextField statusTxt = FormPanel.createTextField();
+
 	/** LCS lock combo box component */
 	protected final JComboBox lcs_lock = new JComboBox(
 		LCSArrayLock.getDescriptions());
@@ -143,6 +146,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			EtchedBorder.LOWERED));
 		panel.addRow("Location", locationTxt);
 		panel.addRow("Operation", operationTxt);
+		panel.addRow("Status", statusTxt);
 		panel.add("Lock", lcs_lock);
 		panel.finishRow();
 		panel.addRow(buildSelectorBox());
@@ -273,8 +277,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		setCameraAction(null);
 		locationTxt.setText("");
 		operationTxt.setText("");
-		operationTxt.setForeground(null);
-		operationTxt.setBackground(null);
+		statusTxt.setText("");
+		statusTxt.setForeground(null);
+		statusTxt.setBackground(null);
 		lcs_lock.setEnabled(false);
 		lcs_lock.setSelectedItem(null);
 		indicationSelector.setEnabled(false);
@@ -307,14 +312,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 				lcs_array));
 		}
 		if(a == null || a.equals("operation")) {
-			String status = LCSArrayHelper.lookupStatus(lcs_array);
-			if("".equals(status)) {
-				operationTxt.setForeground(null);
-				operationTxt.setBackground(null);
-			} else {
-				operationTxt.setForeground(Color.WHITE);
-				operationTxt.setBackground(Color.GRAY);
-			}
+			updateStatus(lcs_array);
 			String op = lcs_array.getOperation();
 			operationTxt.setText(op);
 			// These operations can be very slow -- discourage
@@ -340,6 +338,43 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			});
 			indicationSelector.setIndications(ind);
 		}
+	}
+
+	/** Update the status widgets */
+	protected void updateStatus(LCSArray lcs_array) {
+		String status = LCSArrayHelper.getStatus(lcs_array);
+		if(status.isEmpty())
+			updateCritical(lcs_array);
+		else {
+			statusTxt.setForeground(Color.WHITE);
+			statusTxt.setBackground(Color.GRAY);
+			statusTxt.setText(status);
+		}
+	}
+
+	/** Update the critical error status */
+	protected void updateCritical(LCSArray lcs_array) {
+		String critical = LCSArrayHelper.getCriticalError(lcs_array);
+		if(critical.isEmpty())
+			updateMaintenance(lcs_array);
+		else {
+			statusTxt.setForeground(Color.WHITE);
+			statusTxt.setBackground(Color.BLACK);
+			statusTxt.setText(critical);
+		}
+	}
+
+	/** Update the maintenance error status */
+	protected void updateMaintenance(LCSArray lcs_array) {
+		String maintenance = LCSArrayHelper.getMaintenance(lcs_array);
+		if(maintenance.isEmpty()) {
+			statusTxt.setForeground(null);
+			statusTxt.setBackground(null);
+		} else {
+			statusTxt.setForeground(Color.BLACK);
+			statusTxt.setBackground(Color.YELLOW);
+		}
+		statusTxt.setText(maintenance);
 	}
 
 	/** Select the DMS for the specified lane */

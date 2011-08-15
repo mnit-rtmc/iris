@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,6 +96,24 @@ public class LCSArrayHelper extends BaseHelper {
 		});
 	}
 
+	/** Lookup the DMS objects for an array */
+	static public DMS lookupDMS(final LCSArray lcs_array,
+		final Checker<DMS> checker)
+	{
+		final DMS[] found = { null };
+		lookupLCS(lcs_array, new Checker<LCS>() {
+			public boolean check(LCS lcs) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms != null && checker.check(dms)) {
+					found[0] = dms;
+					return true;
+				}
+				return false;
+			}
+		});
+		return found[0];
+	}
+
 	/** Lookup the location of the LCS array */
 	static public String lookupLocation(LCSArray lcs_array) {
 		return GeoLocHelper.getDescription(lookupGeoLoc(lcs_array));
@@ -111,71 +129,77 @@ public class LCSArrayHelper extends BaseHelper {
 	}
 
 	/** Get the controller status */
-	static public String lookupStatus(LCSArray lcs_array) {
-		final LinkedList<String> status = new LinkedList<String>();
-		status.add("???");
-		lookupLCS(lcs_array, new Checker<LCS>() {
-			public boolean check(LCS lcs) {
-				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms != null) {
-					Controller c = dms.getController();
-					if(c != null) {
-						String s = c.getStatus();
-						status.add(s);
-						return !"".equals(s);
-					}
-				}
-				return false;
+	static public String getStatus(LCSArray lcs_array) {
+		final String[] status = { "???" };
+		lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				String s = DMSHelper.getStatus(dms);
+				if(s.isEmpty())
+					status[0] = s;
+				else
+					status[0] = dms.getName() + ": " + s;
+				return !s.isEmpty();
 			}
 		});
-		return status.getLast();
+		return status[0];
 	}
 
 	/** Check if an LCS array is failed */
 	static public boolean isFailed(final LCSArray lcs_array) {
-		final LinkedList<LCS> lcss = new LinkedList<LCS>();
-		lookupLCS(lcs_array, new Checker<LCS>() {
-			public boolean check(LCS lcs) {
-				lcss.add(lcs);
-				return false;
+		return lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				return DMSHelper.isFailed(dms);
 			}
-		});
-		for(LCS lcs: lcss) {
-			if(LCSHelper.isFailed(lcs))
-				return true;
-		}
-		return false;
+		}) != null;
 	}
 
 	/** Check if all LCSs in an array are failed */
 	static public boolean isAllFailed(final LCSArray lcs_array) {
-		final LinkedList<LCS> lcss = new LinkedList<LCS>();
-		lookupLCS(lcs_array, new Checker<LCS>() {
-			public boolean check(LCS lcs) {
-				lcss.add(lcs);
-				return false;
+		return lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				return !DMSHelper.isFailed(dms);
 			}
-		});
-		for(LCS lcs: lcss) {
-			if(!LCSHelper.isFailed(lcs))
-				return false;
-		}
-		return true;
+		}) == null;
 	}
 
 	/** Check if any LCSs in an array need maintenance */
 	static public boolean needsMaintenance(final LCSArray lcs_array) {
-		final LinkedList<LCS> lcss = new LinkedList<LCS>();
-		lookupLCS(lcs_array, new Checker<LCS>() {
-			public boolean check(LCS lcs) {
-				lcss.add(lcs);
-				return false;
+		return lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				return DMSHelper.needsMaintenance(dms);
+			}
+		}) != null;
+	}
+
+	/** Get controller critical error */
+	static public String getCriticalError(LCSArray lcs_array) {
+		final String[] status = { "???" };
+		lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				String s = DMSHelper.getCriticalError(dms);
+				if(s.isEmpty())
+					status[0] = s;
+				else
+					status[0] = dms.getName() + ": " + s;
+				return !s.isEmpty();
 			}
 		});
-		for(LCS lcs: lcss) {
-			if(LCSHelper.needsMaintenance(lcs))
-				return true;
-		}
-		return false;
+		return status[0];
+	}
+
+	/** Get controller maintenance */
+	static public String getMaintenance(LCSArray lcs_array) {
+		final String[] status = { "???" };
+		lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				String s = DMSHelper.getMaintenance(dms);
+				if(s.isEmpty())
+					status[0] = s;
+				else
+					status[0] = dms.getName() + ": " + s;
+				return !s.isEmpty();
+			}
+		});
+		return status[0];
 	}
 }
