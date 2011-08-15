@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -62,41 +61,8 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
-	/** Dark red color */
-	static protected final Color DARK_RED = new Color(100, 0, 0);
-
 	/** Empty text field */
 	static protected final String EMPTY_TXT = "    ";
-
-	/** Formatter for displaying the hour and minute */
-	static protected final SimpleDateFormat HOUR_MINUTE =
-		new SimpleDateFormat("HH:mm");
-
-	/** Milliseconds per day */
-	static protected final long MS_PER_DAY = 24 * 60 * 60 * (long)1000;
-
-	/** Format the message deployed time */
-	static protected String formatDeploy(DMS dms) {
-		long deploy = dms.getDeployTime();
-		if(System.currentTimeMillis() < deploy + MS_PER_DAY)
-			return HOUR_MINUTE.format(deploy);
-		else
-			return "";
-	}
-
-	/** Format the message expriation */
-	static protected String formatExpires(DMS dms) {
-		SignMessage m = dms.getMessageCurrent();
-		Integer duration = m.getDuration();
-		if(duration == null)
-			return EMPTY_TXT; 
-		if(duration <= 0 || duration >= 65535)
-			return EMPTY_TXT;
-		Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(dms.getDeployTime());
-		c.add(Calendar.MINUTE, duration);
-		return HOUR_MINUTE.format(c.getTime());
-	}
 
 	/** Displays the id of the DMS */
 	protected final JTextField nameTxt = createTextField();
@@ -113,20 +79,14 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	/** AWS controlled checkbox (optional) */
 	protected final JCheckBox awsControlledCbx = new JCheckBox();
 
-	/** Displays the current operation of the DMS */
-	protected final JTextField operationTxt = createTextField();
-
 	/** Displays the controller status */
 	protected final JTextField statusTxt = createTextField();
 
+	/** Displays the current operation of the DMS */
+	protected final JTextField operationTxt = createTextField();
+
 	/** Displays the controller operation status (optional) */
 	protected final JTextField opStatusTxt = createTextField();
-
-	/** Displays the current message deploy time */
-	protected final JTextField deployTxt = createTextField();
-
-	/** Displays the current message expiration */
-	protected final JTextField expiresTxt = createTextField();
 
 	/** DMS dispatcher */
 	protected final DMSDispatcher dispatcher;
@@ -180,15 +140,12 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		addRow("Camera", cameraBtn);
 		locationTxt.setMinimumSize(new Dimension(260, 20));
 		addRow("Location", locationTxt);
-		addRow(I18N.get("SingleSignTab.OperationTitle"), operationTxt);
-		statusTxt.setColumns(10);
 		addRow(I18N.get("SingleSignTab.ControllerStatus"), statusTxt);
-		opStatusTxt.setColumns(10);
-		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean())
+		addRow(I18N.get("SingleSignTab.OperationTitle"), operationTxt);
+		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean()) {
+			opStatusTxt.setColumns(10);
 			addRow("Operation Status", opStatusTxt);
-		add("Deployed", deployTxt);
-		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean())
-			add("Expires", expiresTxt);
+		}
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			setWest();
 			final String mid = "dms.aws.controlled";
@@ -198,8 +155,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			awsControlledCbx.setToolTipText(
 				I18N.get(mid + ".tooltip"));
 			addRow(awsControlledCbx);
-		} else
-			finishRow();
+		}
 		tab.add("Current", currentPnl);
 		tab.add("Preview", previewPnl);
 		addRow(tab);
@@ -309,13 +265,11 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		locationTxt.setText("");
 		awsControlledCbx.setSelected(false);
 		awsControlledCbx.setEnabled(false);
-		operationTxt.setText("");
 		statusTxt.setText("");
 		statusTxt.setForeground(null);
 		statusTxt.setBackground(null);
+		operationTxt.setText("");
 		opStatusTxt.setText("");
-		deployTxt.setText("");
-		expiresTxt.setText(EMPTY_TXT);
 	}
 
 	/** Set the camera action */
@@ -352,8 +306,6 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		if(a == null || a.equals("operation"))
 			updateStatus(dms);
 		if(a == null || a.equals("messageCurrent")) {
-			deployTxt.setText(formatDeploy(dms));
-			expiresTxt.setText(formatExpires(dms));
 			if(!preview) {
 				updateCurrentPanel(dms);
 				updateMessageCurrent(dms);

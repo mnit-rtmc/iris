@@ -75,11 +75,11 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Location of LCS array */
 	protected final JTextField locationTxt = FormPanel.createTextField();
 
-	/** Operation of selected LCS array */
-	protected final JTextField operationTxt = FormPanel.createTextField();
-
 	/** Status of selected LCS array */
 	protected final JTextField statusTxt = FormPanel.createTextField();
+
+	/** Operation of selected LCS array */
+	protected final JTextField operationTxt = FormPanel.createTextField();
 
 	/** LCS lock combo box component */
 	protected final JComboBox lcs_lock = new JComboBox(
@@ -145,8 +145,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
 		panel.addRow("Location", locationTxt);
-		panel.addRow("Operation", operationTxt);
 		panel.addRow("Status", statusTxt);
+		panel.addRow("Operation", operationTxt);
 		panel.add("Lock", lcs_lock);
 		panel.finishRow();
 		panel.addRow(buildSelectorBox());
@@ -276,10 +276,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		nameTxt.setText("");
 		setCameraAction(null);
 		locationTxt.setText("");
-		operationTxt.setText("");
 		statusTxt.setText("");
 		statusTxt.setForeground(null);
 		statusTxt.setBackground(null);
+		operationTxt.setText("");
 		lcs_lock.setEnabled(false);
 		lcs_lock.setSelectedItem(null);
 		indicationSelector.setEnabled(false);
