@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public class TeslaAction<T extends SonarObject> extends ProxyAction {
 	/** Create a new TESLA action */
 	public TeslaAction(T p) {
 		super(p);
-		putValue(Action.NAME, "Log");
+		putValue(Action.NAME, "Log " + p.getName());
 		putValue(Action.SHORT_DESCRIPTION, "Log a " +
 			proxy.getTypeName() + " failure.");
 		putValue(Action.LONG_DESCRIPTION, "Log a failure " +

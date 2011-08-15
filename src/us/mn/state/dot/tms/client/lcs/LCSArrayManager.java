@@ -310,7 +310,11 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 			p.add(blankAction);
 		if(TeslaAction.isConfigured()) {
 			p.addSeparator();
-			p.add(new TeslaAction<LCSArray>(la));
+			for(int i = 1; i <= LCSArray.MAX_LANES; i++) {
+				DMS dms = LCSArrayHelper.lookupDMS(la, i);
+				if(dms != null)
+					p.add(new TeslaAction<DMS>(dms));
+			}
 		}
 		p.addSeparator();
 		p.add(new PropertiesAction<LCSArray>(la) {
