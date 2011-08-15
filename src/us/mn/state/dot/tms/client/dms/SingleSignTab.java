@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -62,17 +62,11 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
+	/** Dark red color */
+	static protected final Color DARK_RED = new Color(100, 0, 0);
+
 	/** Empty text field */
 	static protected final String EMPTY_TXT = "    ";
-
-	/** Get the controller status */
-	static protected String getControllerStatus(DMS proxy) {
-		Controller c = proxy.getController();
-		if(c == null)
-			return "???";
-		else
-			return c.getStatus();
-	}
 
 	/** Formatter for displaying the hour and minute */
 	static protected final SimpleDateFormat HOUR_MINUTE =
@@ -122,7 +116,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	/** Displays the current operation of the DMS */
 	protected final JTextField operationTxt = createTextField();
 
-	/** Displays the controller status (optional) */
+	/** Displays the controller status */
 	protected final JTextField statusTxt = createTextField();
 
 	/** Displays the controller operation status (optional) */
@@ -188,8 +182,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		addRow("Location", locationTxt);
 		addRow(I18N.get("SingleSignTab.OperationTitle"), operationTxt);
 		statusTxt.setColumns(10);
-		if(SystemAttrEnum.DMS_QUERYMSG_ENABLE.getBoolean())
-			addRow(I18N.get("SingleSignTab.ControllerStatus"), statusTxt);
+		addRow(I18N.get("SingleSignTab.ControllerStatus"), statusTxt);
 		opStatusTxt.setColumns(10);
 		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean())
 			addRow("Operation Status", opStatusTxt);
@@ -356,20 +349,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			locationTxt.setText(GeoLocHelper.getDescription(
 				dms.getGeoLoc()));
 		}
-		if(a == null || a.equals("operation")) {
-			String status = getControllerStatus(dms);
-			boolean cok = status.isEmpty();
-			if(cok) {
-				operationTxt.setForeground(null);
-				operationTxt.setBackground(null);
-			} else {
-				operationTxt.setForeground(Color.WHITE);
-				operationTxt.setBackground(Color.GRAY);
-			}
-			operationTxt.setText(dms.getOperation());
-			statusTxt.setText(status);
-			opStatusTxt.setText(dms.getOpStatus());
-		}
+		if(a == null || a.equals("operation"))
+			updateStatus(dms);
 		if(a == null || a.equals("messageCurrent")) {
 			deployTxt.setText(formatDeploy(dms));
 			expiresTxt.setText(formatExpires(dms));
@@ -386,6 +367,45 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			awsControlledCbx.setSelected(dms.getAwsControlled());
 		if(a == null || a.equals("opStatus"))
 			opStatusTxt.setText(dms.getOpStatus());
+	}
+
+	/** Update the status widgets */
+	protected void updateStatus(DMS dms) {
+		String status = DMSHelper.getStatus(dms);
+		if(status.isEmpty())
+			updateCritical(dms);
+		else {
+			statusTxt.setForeground(Color.WHITE);
+			statusTxt.setBackground(Color.GRAY);
+			statusTxt.setText(status);
+		}
+		operationTxt.setText(dms.getOperation());
+		opStatusTxt.setText(dms.getOpStatus());
+	}
+
+	/** Update the critical error status */
+	protected void updateCritical(DMS dms) {
+		String critical = DMSHelper.getCriticalError(dms);
+		if(critical.isEmpty())
+			updateMaintenance(dms);
+		else {
+			statusTxt.setForeground(Color.WHITE);
+			statusTxt.setBackground(Color.BLACK);
+			statusTxt.setText(critical);
+		}
+	}
+
+	/** Update the maintenance error status */
+	protected void updateMaintenance(DMS dms) {
+		String maintenance = DMSHelper.getMaintenance(dms);
+		if(maintenance.isEmpty()) {
+			statusTxt.setForeground(null);
+			statusTxt.setBackground(null);
+		} else {
+			statusTxt.setForeground(Color.BLACK);
+			statusTxt.setBackground(Color.YELLOW);
+			statusTxt.setText(maintenance);
+		}
 	}
 
 	/** Update the current panel */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -191,38 +191,54 @@ public class DMSHelper extends BaseHelper {
 		       isScheduled(proxy);
 	}
 
+	/** Get the maintenance status of a DMS */
+	static public String getMaintenance(DMS proxy) {
+		Controller ctr = proxy.getController();
+		if(ctr != null)
+			return ctr.getMaint();
+		else
+			return "No controller";
+	}
+
 	/** Test if a DMS needs maintenance */
 	static public boolean needsMaintenance(DMS proxy) {
 		if(isFailed(proxy) || !isActive(proxy))
 			return false;
 		if(hasCriticalError(proxy))
 			return true;
+		return !getMaintenance(proxy).isEmpty();
+	}
+
+	/** Get the DMS critical error */
+	static public String getCriticalError(DMS proxy) {
+		Integer h = proxy.getFaceHeight();
+		Integer w = proxy.getFaceWidth();
+		if(h == null || w == null || h <= 0 || w <= 0)
+			return "Invalid dimensions";
 		Controller ctr = proxy.getController();
-		if(ctr != null) {
-			String m = ctr.getMaint();
-			return !m.equals("");
-		} else
-			return false;
+		if(ctr != null)
+			return ctr.getError();
+		else
+			return "No controller";
 	}
 
 	/** Test if a DMS has a critical error */
 	static public boolean hasCriticalError(DMS proxy) {
-		Integer h = proxy.getFaceHeight();
-		Integer w = proxy.getFaceWidth();
-		if(h == null || w == null || h <= 0 || w <= 0)
-			return true;
-		Controller ctr = proxy.getController();
-		if(ctr != null) {
-			String e = ctr.getError();
-			return !e.equals("");
-		} else
-			return false;
+		return !getCriticalError(proxy).isEmpty();
+	}
+
+	/** Get DMS controller communication status */
+	static public String getStatus(DMS proxy) {
+		Controller c = proxy.getController();
+		if(c == null)
+			return "No controller";
+		else
+			return c.getStatus();
 	}
 
 	/** Test if a DMS if failed */
 	static public boolean isFailed(DMS proxy) {
-		Controller ctr = proxy.getController();
-		return ctr != null && (!"".equals(ctr.getStatus()));
+		return isActive(proxy) && !getStatus(proxy).isEmpty();
 	}
 
 	/** Check the style of the specified proxy */
