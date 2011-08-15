@@ -309,10 +309,10 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		locationTxt.setText("");
 		awsControlledCbx.setSelected(false);
 		awsControlledCbx.setEnabled(false);
-		operationTxt.setForeground(null);
-		operationTxt.setBackground(null);
 		operationTxt.setText("");
 		statusTxt.setText("");
+		statusTxt.setForeground(null);
+		statusTxt.setBackground(null);
 		opStatusTxt.setText("");
 		deployTxt.setText("");
 		expiresTxt.setText(EMPTY_TXT);
@@ -404,8 +404,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		} else {
 			statusTxt.setForeground(Color.BLACK);
 			statusTxt.setBackground(Color.YELLOW);
-			statusTxt.setText(maintenance);
 		}
+		statusTxt.setText(maintenance);
 	}
 
 	/** Update the current panel */
