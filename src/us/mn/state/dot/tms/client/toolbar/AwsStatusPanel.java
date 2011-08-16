@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,9 +17,7 @@ package us.mn.state.dot.tms.client.toolbar;
 
 import java.util.Iterator;
 import java.util.TreeMap;
-import javax.swing.JButton;
 import javax.swing.JLabel;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.dms.DmsCache;
@@ -52,10 +50,6 @@ public class AwsStatusPanel extends ToolPanel implements
 	/** SystemAttribute type cache */
 	protected final TypeCache<SystemAttribute> m_sysattribs;
 
-	/** Button to view all AWS messages */
-	protected final String m_btnViewText = m_awsName + " Messages";
-	protected final JButton m_btnView = new JButton(m_btnViewText);
-
 	/** The label used for AWS messages */
 	protected final JLabel m_awstext = new JLabel();
 
@@ -73,7 +67,6 @@ public class AwsStatusPanel extends ToolPanel implements
 		m_dms = st.getDmsCache();
 		m_sysattribs = st.getSystemAttributes();
 		m_desktop = desktop;
-		createComponents();
 		addComponents();
 
 		// listen for changes to DMS
@@ -88,23 +81,9 @@ public class AwsStatusPanel extends ToolPanel implements
 		return SystemAttrEnum.DMS_AWS_ENABLE.getBoolean();
 	}
 
-	/** create components */
-	protected void createComponents() {
-		m_btnView.setToolTipText("View current " + 
-			m_awsName + " messages.");
-
-		// add action for view button click
-		new ActionJob(this, m_btnView) {
-			public void perform() throws Exception {
-				m_desktop.show(new ViewAwsMsgsForm());
-			}
-		};
-	}
-
 	/** add components to panel */
 	protected void addComponents() {
 		add(m_awstext);
-		add(m_btnView);
 	}
 
 	/** Update the AWS text on the toolbar and tooltip text */
