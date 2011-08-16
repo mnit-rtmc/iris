@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.msgfeed;
 
-import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,16 +28,28 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  */
 public class MsgFeedProperty extends ControllerProperty {
 
+	/** Number of iterations reading from input stream */
+	static private final int BUF_READS = 100;
+
+	/** Buffer for reading messages */
+	protected final char[] buf = new char[1024];
+
 	/** Perform a get request, parsing all feed messages */
 	public void doGetRequest(InputStream input) throws IOException {
 		if(input == null)
 			throw new EOFException();
+		StringBuilder sb = new StringBuilder();
 		InputStreamReader isr = new InputStreamReader(input,"US-ASCII");
-		BufferedReader br = new BufferedReader(isr);
-		while(true) {
-			String line = br.readLine();
-			if(line == null)
+		/* We can't use something like BufferedReader.readLine, because
+		 * it will happily keep reading data from the reader until all
+		 * memory is exhausted. */
+		for(int i = 0; i < BUF_READS; i++) {
+			int n_chars = isr.read(buf, 0, buf.length);
+			if(n_chars < 0)
 				break;
+			sb.append(buf, 0, n_chars);
+		}
+		for(String line: sb.toString().split("\n")) {
 			FeedMsg msg = new FeedMsg(line);
 			if(msg.isValid())
 				msg.activate();
