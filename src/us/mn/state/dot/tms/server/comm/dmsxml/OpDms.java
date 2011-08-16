@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import us.mn.state.dot.tms.server.comm.aws.AwsPoller;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
@@ -150,12 +149,16 @@ abstract class OpDms extends OpDevice {
 		}
 	};
 
+	/** Return name of AWS system */
+	public static String awsName() {
+		return I18N.get("dms.aws.abbreviation");
+	}
+
 	/** Return true if the message is owned by the AWS */
 	static boolean ownerIsAws(final String msg_owner) {
 		if(msg_owner == null)
 			return false;
-		final String awsName = AwsPoller.awsName();
-		return msg_owner.toLowerCase().equals(awsName.toLowerCase());
+		return msg_owner.toLowerCase().equals(awsName().toLowerCase());
 	}
 
 	/** set message attributes which are a function of the 
