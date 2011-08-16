@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,26 +44,5 @@ public class CommLinkHelper extends BaseHelper {
 				return c.getProtocol() == proto.ordinal();
 			}
 		});
-	}
-
-	/** Count the number of comm links with the specified protocol */
-	static public int countCommLinks(CommProtocol proto) {
-		LinkCounter lc = new LinkCounter(proto);
-		find(lc);
-		return lc.n_links;
-	}
-
-	/** Simple class to count comm links */
-	static protected class LinkCounter implements Checker<CommLink> {
-		protected final CommProtocol proto;
-		int n_links = 0;
-		protected LinkCounter(CommProtocol cp) {
-			proto = cp;
-		}
-		public boolean check(CommLink c) {
-			if(c.getProtocol() == proto.ordinal())
-				n_links++;
-			return false;
-		}
 	}
 }

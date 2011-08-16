@@ -1352,12 +1352,9 @@ camera_id_blank
 camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
-database_version	3.128.0
+database_version	3.129.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
-dms_aws_log_enable	false
-dms_aws_log_filename	/var/www/html/awsreport.txt
-dms_aws_read_offset	0
 dms_aws_retry_threshold	6
 dms_brightness_enable	true
 dms_comm_loss_minutes	5

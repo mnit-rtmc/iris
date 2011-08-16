@@ -1007,9 +1007,55 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * @param sm SignMessage being activated.
 	 * @return true If priority is high enough to deploy. */
 	public boolean shouldActivate(SignMessage sm) {
-		return SignMessageHelper.shouldActivate(messageCurrent, sm) &&
-		       SignMessageHelper.shouldActivate(messageNext, sm) &&
-		       SignMessageHelper.lookup(sm.getName()) == sm;
+		if(sm != null) {
+			DMSMessagePriority p = DMSMessagePriority.fromOrdinal(
+			       sm.getActivationPriority());
+			MultiString multi = new MultiString(sm.getMulti());
+			return shouldActivate(p, multi, sm.getScheduled()) &&
+			       SignMessageHelper.lookup(sm.getName()) == sm;
+		} else
+			return false;
+	}
+
+	/** Test if a message should be activated.
+	 * @param ap Activation priority.
+	 * @param multi Multi string of new message.
+	 * @param sched Scheduled flag.
+	 * @return True if message should be activated; false otherwise. */
+	public boolean shouldActivate(DMSMessagePriority ap, MultiString multi,
+		boolean sched)
+	{
+		return shouldActivate(messageCurrent, ap, multi, sched) &&
+		       shouldActivate(messageNext, ap, multi, sched);
+	}
+
+	/** Test if a sign message should be activated.
+	 * @param existing Message existing on DMS.
+	 * @param ap Activation priority.
+	 * @param multi Multi string of new message.
+	 * @param sched Scheduled flag.
+	 * @return True if message should be activated; false otherwise. */
+	static protected boolean shouldActivate(SignMessage existing,
+		DMSMessagePriority ap, MultiString multi, boolean sched)
+	{
+		if(existing == null)
+			return true;
+		if(existing.getScheduled() && sched)
+			return true;
+		// This check is needed because even blank messages will always
+		// activate if the priority is OVERRIDE.
+		if(ap == DMSMessagePriority.OVERRIDE)
+			return true;
+		DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
+			existing.getRunTimePriority());
+		if(multi.isBlank()) {
+			// Only send a blank message if the new activation
+			// priority matches the current runtime priority.  This
+			// means that a blank AWS message will not blank the
+			// sign unless the current message is an AWS message.
+			return ap == rp;
+		} else
+			return ap.ordinal() >= rp.ordinal();
 	}
 
 	/** Send a sign message created by IRIS server */

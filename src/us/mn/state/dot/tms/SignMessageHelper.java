@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -159,38 +159,6 @@ public class SignMessageHelper extends BaseHelper {
 		}
 		catch(IOException e) {
 			return false;
-		}
-	}
-
-	/** Test if a sign message should be activated.
-	 * @param existing Message existing on DMS.
-	 * @param activating Message to be activated.
-	 * @return True if message should be activated; false otherwise. */
-	static public boolean shouldActivate(final SignMessage existing,
-		final SignMessage activating)
-	{
-		if(existing == null)
-			return true;
-		if(activating == null)
-			return false;
-		if(existing.getScheduled() && activating.getScheduled())
-			return true;
-		// This check is needed because even blank messages will always
-		// activate if the priority is OVERRIDE.
-		if(activating.getActivationPriority() ==
-		   DMSMessagePriority.OVERRIDE.ordinal())
-			return true;
-		MultiString ms = new MultiString(activating.getMulti());
-		if(ms.isBlank()) {
-			// Only send a blank message if the new activation
-			// priority matches the current runtime priority.  This
-			// means that a blank AWS message will not blank the
-			// sign unless the current message is an AWS message.
-			return activating.getActivationPriority() ==
-			       existing.getRunTimePriority();
-		} else {
-			return activating.getActivationPriority() >=
-			       existing.getRunTimePriority();
 		}
 	}
 }

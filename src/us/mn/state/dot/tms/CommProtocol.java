@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,8 +54,8 @@ public enum CommProtocol {
 	/** DMS XML (9) */
 	DMSXML("DMS XML"),
 
-	/** AWS (10) */
-	AWS("AWS"),
+	/** Msg Feed (10) */
+	MSG_FEED("MSG_FEED"),
 
 	/** NTCIP Class A (11) */
 	NTCIP_A("NTCIP Class A"),

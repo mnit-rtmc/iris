@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
-import us.mn.state.dot.tms.server.comm.msgfeed.AwsPoller;
+import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 import us.mn.state.dot.tms.server.comm.ntcip.HDLCMessenger;
 import us.mn.state.dot.tms.server.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.server.comm.org815.Org815Poller;
@@ -338,9 +338,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return new DmsXmlPoller(name, createSocketMessenger());
 	}
 
-	/** Create a AWS poller */
-	protected MessagePoller createAwsPoller() throws IOException {
-		return new AwsPoller(name, createHttpFileMessenger());
+	/** Create a MSG FEED poller */
+	protected MessagePoller createMsgFeedPoller() throws IOException {
+		return new MsgFeedPoller(name, createHttpFileMessenger());
 	}
 
 	/** Create a Pelco video switch poller */
@@ -379,8 +379,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return createManchesterPoller();
 		case DMSXML:
 			return createDmsXmlPoller();
-		case AWS:
-			return createAwsPoller();
+		case MSG_FEED:
+			return createMsgFeedPoller();
 		case PELCO_SWITCHER:
 			return createPelcoPoller();
 		case VICON_PTZ:

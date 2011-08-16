@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * AWS Message.
+ * Feed Message.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -31,8 +31,8 @@ public class Message implements CommMessage {
 	/** Associated messenger */
 	protected final Messenger messenger;
 
-	/** AWS property to parse */
-	protected AwsProperty prop = null;
+	/** Msg feed property to parse */
+	protected MsgFeedProperty prop = null;
 
 	/** Create a new message */
 	public Message(Messenger mess) {
@@ -41,8 +41,8 @@ public class Message implements CommMessage {
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		if(cp instanceof AwsProperty)
-			prop = (AwsProperty)cp;
+		if(cp instanceof MsgFeedProperty)
+			prop = (MsgFeedProperty)cp;
 	}
 
 	/** Query the controller properties.
