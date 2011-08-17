@@ -39,6 +39,7 @@ public class MsgFeedQueryJob extends Job {
 
 	/** Perform the message feed query job */
 	public void perform() {
+		FeedBucket.purgeExpired();
 		ControllerHelper.find(new Checker<Controller>() {
 			public boolean check(Controller c) {
 				if(c instanceof ControllerImpl)

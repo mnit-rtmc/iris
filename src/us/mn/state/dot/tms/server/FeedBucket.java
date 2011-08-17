@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Feed bucket for storing feed messages.
@@ -49,6 +50,22 @@ public class FeedBucket {
 				new HashMap<String, FeedMsg>();
 			bucket.put(fid, feed);
 			return feed;
+		}
+	}
+
+	/** Purge all expired feed messages */
+	static public synchronized void purgeExpired() {
+		for(HashMap<String, FeedMsg> feed: bucket.values())
+			purgeExpired(feed);
+	}
+
+	/** Purge expired messages in the given feed */
+	static private void purgeExpired(HashMap<String, FeedMsg> feed) {
+		Iterator<String> it = feed.keySet().iterator();
+		while(it.hasNext()) {
+			FeedMsg msg = feed.get(it.next());
+			if(msg.hasExpired())
+				it.remove();
 		}
 	}
 }
