@@ -14,7 +14,10 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiString;
@@ -73,8 +76,14 @@ public class FeedMsg {
 
 	/** Parse a time stamp */
 	private Date parseTime(String time) {
-		/* FIXME */
-		return new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat(
+			"yyyy-MM-dd HH:mm:ssZ", Locale.US);
+		try {
+			return sdf.parse(time);
+		}
+		catch(ParseException e) {
+			return null;
+		}
 	}
 
 	/** Get a string representation of the feed message */
