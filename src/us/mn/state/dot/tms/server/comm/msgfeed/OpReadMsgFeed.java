@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.msgfeed;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
@@ -31,6 +32,7 @@ public class OpReadMsgFeed extends OpController {
 	/** Create a new operation to read msg feed */
 	protected OpReadMsgFeed(ControllerImpl c) {
 		super(PriorityLevel.DATA_30_SEC, c);
+		MsgFeedPoller.log("Polling feed " + c.getLabel());
 	}
 
 	/** Begin the operation */
@@ -51,5 +53,17 @@ public class OpReadMsgFeed extends OpController {
 			}
 			return null;
 		}
+	}
+
+	/** Handle a communication error */
+	public void handleCommError(EventType et, String msg) {
+		MsgFeedPoller.log("ERROR: " + msg);
+		super.handleCommError(et, msg);
+	}
+
+	/** Cleanup the operation */
+	public void cleanup() {
+		MsgFeedPoller.log("Finished feed " + controller.getLabel());
+		super.cleanup();
 	}
 }

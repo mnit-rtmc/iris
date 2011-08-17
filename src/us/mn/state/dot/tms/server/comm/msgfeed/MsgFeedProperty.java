@@ -31,28 +31,32 @@ public class MsgFeedProperty extends ControllerProperty {
 	/** Number of iterations reading from input stream */
 	static private final int BUF_READS = 100;
 
-	/** Buffer for reading messages */
-	protected final char[] buf = new char[1024];
-
 	/** Perform a get request, parsing all feed messages */
 	public void doGetRequest(InputStream input) throws IOException {
 		if(input == null)
 			throw new EOFException();
-		StringBuilder sb = new StringBuilder();
 		InputStreamReader isr = new InputStreamReader(input,"US-ASCII");
+		for(String line: parseReader(isr).split("\n")) {
+			FeedMsg msg = new FeedMsg(line);
+			msg.activate();
+		}
+	}
+
+	/** Parse the feed from a reader */
+	private String parseReader(InputStreamReader reader) throws IOException{
+		StringBuilder sb = new StringBuilder();
+		char[] buf = new char[1024];
 		/* We can't use something like BufferedReader.readLine, because
 		 * it will happily keep reading data from the reader until all
 		 * memory is exhausted. */
 		for(int i = 0; i < BUF_READS; i++) {
-			int n_chars = isr.read(buf, 0, buf.length);
+			int n_chars = reader.read(buf, 0, buf.length);
 			if(n_chars < 0)
-				break;
+				return sb.toString();
 			sb.append(buf, 0, n_chars);
 		}
-		for(String line: sb.toString().split("\n")) {
-			FeedMsg msg = new FeedMsg(line);
-			if(msg.isValid())
-				msg.activate();
-		}
+		MsgFeedPoller.log("Feed too long; stopped at " + BUF_READS +
+			"reads");
+		return sb.toString();
 	}
 }

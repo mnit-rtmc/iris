@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
- * Copyright (C) 2008-2010  AHMCT, University of California, Davis
+ * Copyright (C) 2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +14,18 @@
  */
 package us.mn.state.dot.tms.server.comm.msgfeed;
 
+import java.util.Date;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * Feed sign message.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class FeedMsg {
-
-	/** Message priority for feed messages */
-	static private final DMSMessagePriority PRIO = DMSMessagePriority.PSA;
 
 	/** DMS to send message */
 	private final DMSImpl dms;
@@ -40,14 +33,15 @@ public class FeedMsg {
 	/** MULTI string */
 	private final MultiString multi;
 
+	/** Expire time */
+	private final Date expire;
+
 	/** Create a new feed message */
 	public FeedMsg(String line) {
-		String[] msg = line.split("\t", 2);
+		String[] msg = line.split("\t", 3);
 		dms = parseDms(msg[0]);
-		if(msg.length > 1)
-			multi = new MultiString(msg[1]);
-		else
-			multi = new MultiString();
+		multi = (msg.length > 1) ? new MultiString(msg[1]) : null;
+		expire = (msg.length > 2) ? parseTime(msg[2]) : null;
 	}
 
 	/** Return the DMS or null if it doesn't exist */
@@ -59,47 +53,41 @@ public class FeedMsg {
 			return null;
 	}
 
-	/** Check if the feed message is valid */
-	public boolean isValid() {
-		return dms != null && multi.isValid();
+	/** Parse a time stamp */
+	private Date parseTime(String time) {
+		/* FIXME */
+		return new Date();
+	}
+
+	/** Get a string representation of the feed message */
+	public String toString() {
+		return "dms: " + dms + ", multi: " + multi +
+			", expire: " + expire;
 	}
 
 	/** Activate the message */
 	public void activate() {
-		if(shouldSendMessage())
-			sendMessage();
-	}
-
-	/** Decide if the message should be sent to a DMS.
-	 * @return true to send the message. */
-	protected boolean shouldSendMessage() {
-		/* FIXME: check that DMS exists in sign group */
-		/* FIXME: check that message exists in sign group messages */
-		return (!isMessageEquivalent()) &&
-		       dms.shouldActivate(PRIO, multi, false);
-	}
-
-	/** Is the current sign message equivalent to the specified MULTI? */
-	protected boolean isMessageEquivalent() {
-		return multi.isEquivalent(dms.getMessageCurrent().getMulti());
-	}
-
-	/** Send the message to the DMS */
-	protected void sendMessage() {
-		try {
-			dms.doSetMessageNext(createMessage(), null);
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
+		if(isValid()) {
+			dms.setFeedMessage(multi);
+			MsgFeedPoller.log("VALID " + toString());
+		} else {
+			dms.setFeedMessage(new MultiString());
+			MsgFeedPoller.log("INVALID " + toString());
 		}
 	}
 
-	/** Create a SignMessage version of this message.
-	 * @return A SignMessage that contains the text of the message and
-	 *         rendered bitmap(s). */
-	private SignMessage createMessage() {
-		DMSMessagePriority rp = (multi.isBlank() ? 
-			DMSMessagePriority.BLANK : PRIO);
-		return dms.createMessage(multi.toString(), PRIO, rp, null);
+	/** Check if the feed message is valid */
+	private boolean isValid() {
+		return dms != null && isMultiValid() && !hasExpired();
+	}
+
+	/** Check if the multi string is valid */
+	private boolean isMultiValid() {
+		return multi != null && multi.isValid();
+	}
+
+	/** Check if the feed message has expired */
+	private boolean hasExpired() {
+		return expire == null || expire.after(new Date());
 	}
 }

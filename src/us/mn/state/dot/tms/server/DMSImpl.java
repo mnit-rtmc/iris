@@ -1366,6 +1366,16 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		}
 	}
 
+	/** Feed message */
+	protected transient MultiString feed_msg = new MultiString();
+
+	/** Set the feed message */
+	public void setFeedMessage(MultiString feed) {
+		feed_msg = feed;
+		/* FIXME: check that DMS exists in sign group */
+		/* FIXME: check that message exists in sign group messages */
+	}
+
 	/** Flag for current scheduled message.  This is used to guarantee that
 	 * performAction is called at least once between each call to
 	 * updateScheduledMessage.  If not, then the scheduled message is
