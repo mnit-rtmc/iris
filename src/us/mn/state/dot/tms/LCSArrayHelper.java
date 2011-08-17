@@ -100,18 +100,19 @@ public class LCSArrayHelper extends BaseHelper {
 	static public DMS lookupDMS(final LCSArray lcs_array,
 		final Checker<DMS> checker)
 	{
-		final DMS[] found = { null };
+		final LinkedList<LCS> lcss = new LinkedList<LCS>();
 		lookupLCS(lcs_array, new Checker<LCS>() {
 			public boolean check(LCS lcs) {
-				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms != null && checker.check(dms)) {
-					found[0] = dms;
-					return true;
-				}
+				lcss.add(lcs);
 				return false;
 			}
 		});
-		return found[0];
+		for(LCS lcs: lcss) {
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null && checker.check(dms))
+				return dms;
+		}
+		return null;
 	}
 
 	/** Lookup the location of the LCS array */
