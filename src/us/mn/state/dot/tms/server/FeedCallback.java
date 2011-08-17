@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignTextHelper;
 
 /**
  * MultiString for replacing feed tags
@@ -56,7 +57,11 @@ public class FeedCallback extends MultiString {
 
 	/** Get the feed message string */
 	private String getFeedString() {
-		/* FIXME: check that sign group messages match */
+		String[] lines = msg.getMulti().getText();
+		for(int i = 0; i < lines.length; i++) {
+			if(!SignTextHelper.match(group, (short)(i+1), lines[i]))
+				return null;
+		}
 		return msg.getMulti().toString();
 	}
 }
