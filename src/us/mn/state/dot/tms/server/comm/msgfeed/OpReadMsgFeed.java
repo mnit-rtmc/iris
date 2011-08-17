@@ -29,10 +29,14 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpReadMsgFeed extends OpController {
 
+	/** Feed name */
+	protected final String feed;
+
 	/** Create a new operation to read msg feed */
-	protected OpReadMsgFeed(ControllerImpl c) {
+	protected OpReadMsgFeed(ControllerImpl c, String fid) {
 		super(PriorityLevel.DATA_30_SEC, c);
-		MsgFeedPoller.log("Polling feed " + c.getLabel());
+		feed = fid;
+		MsgFeedPoller.log("Polling feed " + feed);
 	}
 
 	/** Begin the operation */
@@ -48,7 +52,7 @@ public class OpReadMsgFeed extends OpController {
 		protected Phase poll(CommMessage m) throws IOException {
 			if(m instanceof Message) {
 				Message mess = (Message)m;
-				mess.add(new MsgFeedProperty());
+				mess.add(new MsgFeedProperty(feed));
 				mess.queryProps();
 			}
 			return null;
@@ -63,7 +67,7 @@ public class OpReadMsgFeed extends OpController {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		MsgFeedPoller.log("Finished feed " + controller.getLabel());
+		MsgFeedPoller.log("Finished feed " + feed);
 		super.cleanup();
 	}
 }

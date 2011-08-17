@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public class MultiString implements MultiStringState {
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAGS = Pattern.compile(
-		"(nl|np|jl|jp|fo|g|cf|pt|tr|tt|vsa)(.*)");
+		"(nl|np|jl|jp|fo|g|cf|pt|tr|tt|vsa|feed)(.*)");
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
@@ -383,6 +383,13 @@ public class MultiString implements MultiStringState {
 		multi.append("[vsa]");
 	}
 
+	/** Add a feed message */
+	public void addFeed(String fid) {
+		multi.append("[feed");
+		multi.append(fid);
+		multi.append("]");
+	}
+
 	/** Get the value of the MULTI string */
 	public String toString() {
 		return multi.toString();
@@ -439,6 +446,8 @@ public class MultiString implements MultiStringState {
 				cb.addTravelTime(tparam);
 			else if(tid.equals("vsa"))
 				cb.addSpeedAdvisory();
+			else if(tid.equals("feed"))
+				cb.addFeed(tparam);
 		}
 	}
 

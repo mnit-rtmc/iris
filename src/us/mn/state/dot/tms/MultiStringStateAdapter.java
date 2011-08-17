@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,6 +118,11 @@ public class MultiStringStateAdapter implements MultiStringState {
 
 	/** Add a speed advisory */
 	public void addSpeedAdvisory() {
+		// subclass must handle
+	}
+
+	/** Add a feed message */
+	public void addFeed(String fid) {
 		// subclass must handle
 	}
 }

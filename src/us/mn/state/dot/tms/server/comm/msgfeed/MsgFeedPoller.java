@@ -37,9 +37,13 @@ public class MsgFeedPoller extends MessagePoller {
 		FEED_LOG.log(msg);
 	}
 
+	/** Feed ID */
+	private final String feed_id;
+
 	/** Create a new poller */
 	public MsgFeedPoller(String n, Messenger m) {
 		super(n, m);
+		feed_id = n;
 	}
 
 	/** Create a new message for the specified controller, 
@@ -55,6 +59,6 @@ public class MsgFeedPoller extends MessagePoller {
 
 	/** Query message feed */
 	public void queryMessages(ControllerImpl c) {
-		new OpReadMsgFeed(c).start();
+		new OpReadMsgFeed(c, feed_id).start();
 	}
 }

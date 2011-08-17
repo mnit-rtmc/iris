@@ -12,13 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.msgfeed;
+package us.mn.state.dot.tms.server;
 
 import java.util.Date;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * Feed sign message.
@@ -27,28 +26,47 @@ import us.mn.state.dot.tms.server.DMSImpl;
  */
 public class FeedMsg {
 
+	/** Feed name */
+	private final String feed;
+
+	/** Get the feed name */
+	public String getFeed() {
+		return feed;
+	}
+
 	/** DMS to send message */
-	private final DMSImpl dms;
+	private final String dms;
+
+	/** Get the DMS */
+	public String getDms() {
+		return dms;
+	}
 
 	/** MULTI string */
 	private final MultiString multi;
+
+	/** Get the MULTI string */
+	public MultiString getMulti() {
+		return multi;
+	}
 
 	/** Expire time */
 	private final Date expire;
 
 	/** Create a new feed message */
-	public FeedMsg(String line) {
+	public FeedMsg(String fd, String line) {
+		feed = fd;
 		String[] msg = line.split("\t", 3);
 		dms = parseDms(msg[0]);
 		multi = (msg.length > 1) ? new MultiString(msg[1]) : null;
 		expire = (msg.length > 2) ? parseTime(msg[2]) : null;
 	}
 
-	/** Return the DMS or null if it doesn't exist */
-	private DMSImpl parseDms(String txt) {
+	/** Return the DMS name or null if it doesn't exist */
+	private String parseDms(String txt) {
 		DMS dms = DMSHelper.lookup(txt.trim());
-		if(dms instanceof DMSImpl)
-			return (DMSImpl)dms;
+		if(dms != null)
+			return dms.getName();
 		else
 			return null;
 	}
@@ -65,19 +83,8 @@ public class FeedMsg {
 			", expire: " + expire;
 	}
 
-	/** Activate the message */
-	public void activate() {
-		if(isValid()) {
-			dms.setFeedMessage(multi);
-			MsgFeedPoller.log("VALID " + toString());
-		} else {
-			dms.setFeedMessage(new MultiString());
-			MsgFeedPoller.log("INVALID " + toString());
-		}
-	}
-
 	/** Check if the feed message is valid */
-	private boolean isValid() {
+	public boolean isValid() {
 		return dms != null && isMultiValid() && !hasExpired();
 	}
 
@@ -87,7 +94,7 @@ public class FeedMsg {
 	}
 
 	/** Check if the feed message has expired */
-	private boolean hasExpired() {
+	public boolean hasExpired() {
 		return expire == null || expire.after(new Date());
 	}
 }

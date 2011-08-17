@@ -18,6 +18,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import us.mn.state.dot.tms.server.FeedBucket;
+import us.mn.state.dot.tms.server.FeedMsg;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -31,14 +33,26 @@ public class MsgFeedProperty extends ControllerProperty {
 	/** Number of iterations reading from input stream */
 	static private final int BUF_READS = 100;
 
+	/** Feed name */
+	private final String feed;
+
+	/** Create a new msg_feed property */
+	public MsgFeedProperty(String fd) {
+		feed = fd;
+	}
+
 	/** Perform a get request, parsing all feed messages */
 	public void doGetRequest(InputStream input) throws IOException {
 		if(input == null)
 			throw new EOFException();
 		InputStreamReader isr = new InputStreamReader(input,"US-ASCII");
 		for(String line: parseReader(isr).split("\n")) {
-			FeedMsg msg = new FeedMsg(line);
-			msg.activate();
+			FeedMsg msg = new FeedMsg(feed, line);
+			if(msg.isValid()) {
+				FeedBucket.add(msg);
+				MsgFeedPoller.log("VALID " + msg);
+			} else
+				MsgFeedPoller.log("INVALID " + msg);
 		}
 	}
 

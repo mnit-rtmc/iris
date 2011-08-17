@@ -1366,16 +1366,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		}
 	}
 
-	/** Feed message */
-	protected transient MultiString feed_msg = new MultiString();
-
-	/** Set the feed message */
-	public void setFeedMessage(MultiString feed) {
-		feed_msg = feed;
-		/* FIXME: check that DMS exists in sign group */
-		/* FIXME: check that message exists in sign group messages */
-	}
-
 	/** Flag for current scheduled message.  This is used to guarantee that
 	 * performAction is called at least once between each call to
 	 * updateScheduledMessage.  If not, then the scheduled message is
@@ -1427,9 +1417,31 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			da.getActivationPriority());
 		DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
 			da.getRunTimePriority());
-		String m = createMulti(da.getQuickMessage());
+		String m = createMulti(da);
 		if(m != null)
 			return createMessage(m, ap, rp, true, d);
+		else
+			return null;
+	}
+
+	/** Create a multi string for a DMS action */
+	protected String createMulti(DmsAction da) {
+		QuickMessage qm = da.getQuickMessage();
+		if(qm != null) {
+			FeedCallback fc = new FeedCallback(this,
+				da.getSignGroup());
+			MultiString multi = new MultiString(qm.getMulti());
+			multi.parse(fc);
+			return createMulti(fc.toString());
+		} else
+			return null;
+	}
+
+	/** Create a MULTI string for a message */
+	protected String createMulti(String qm) {
+		String m = travel_est.replaceTravelTimes(qm);
+		if(m != null)
+			return advisory.replaceSpeedAdvisory(m);
 		else
 			return null;
 	}
@@ -1449,16 +1461,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			}
 		}
 		is_scheduled = false;
-	}
-
-	/** Create a MULTI string for a quick message */
-	protected String createMulti(QuickMessage qm) {
-		if(qm != null) {
-			String m = travel_est.replaceTravelTimes(qm.getMulti());
-			if(m != null)
-				return advisory.replaceSpeedAdvisory(m);
-		}
-		return null;
 	}
 
 	/** render to kml (KmlPlacemark interface) */
