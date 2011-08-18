@@ -11,6 +11,35 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.129.0 (18 August 2011)</dt>
+	<dd><ul>
+		<li>
+			Converted AWS protocol into more general "msgfeed"
+			protocol.
+			Messages can be read from an external http server
+			and deployed by an action plan.
+			Removed system attributes: dms_aws_log_enable,
+			dms_aws_log_filename, dms_aws_read_offset.
+		</li>
+		<li>
+			Added "Status" field for DMS and LCS tabs, which
+			displays error messages when signs need maintenance.
+		</li>
+		<li>
+			Added dms_comm_loss_minutes system attribute to
+			control how long before a DMS will blank after no
+			communication.
+		</li>
+		<li>
+			Allow some system attributes to be changed without
+			needing to restart client or server.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.129.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.128.0 (16 May 2011)</dt>
 	<dd><ul>
 		<li>
