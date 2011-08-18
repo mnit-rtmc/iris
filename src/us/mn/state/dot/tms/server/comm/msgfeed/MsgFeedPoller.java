@@ -59,6 +59,7 @@ public class MsgFeedPoller extends MessagePoller {
 
 	/** Query message feed */
 	public void queryMessages(ControllerImpl c) {
+		log("creating OpReadMsgFeed: " + c);
 		new OpReadMsgFeed(c, feed_id).start();
 	}
 }
