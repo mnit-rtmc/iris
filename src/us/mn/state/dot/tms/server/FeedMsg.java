@@ -88,8 +88,8 @@ public class FeedMsg {
 
 	/** Get a string representation of the feed message */
 	public String toString() {
-		return "dms: " + dms + ", multi: " + multi +
-			", expire: " + expire;
+		return "feed: " + feed +  ", dms: " + dms + ", multi: " +
+			multi + ", expire: " + expire;
 	}
 
 	/** Check if the feed message is valid */

@@ -47,6 +47,7 @@ public class MsgFeedProperty extends ControllerProperty {
 			throw new EOFException();
 		InputStreamReader isr = new InputStreamReader(input,"US-ASCII");
 		for(String line: parseReader(isr).split("\n")) {
+			MsgFeedPoller.log("parsing " + line);
 			FeedMsg msg = new FeedMsg(feed, line);
 			if(msg.isValid()) {
 				FeedBucket.add(msg);
