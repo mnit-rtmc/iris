@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
- * Copyright (C) 2009-2010 AHMCT, University of California
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,16 +30,12 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IrisUserHelper;
-import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -273,42 +269,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Get the bitmap graphic for page one */
 	protected BitmapGraphic getPageOne(DMS dms) {
-		if(dms == null)
-			return null;
-		SignMessage m = dms.getMessageCurrent();
-		if(m == null)
-			return null;
-		byte[] bmaps = decodeBitmaps(m.getBitmaps());
-		if(bmaps == null || bmaps.length == 0)
-			return null;
-		BitmapGraphic bg = createBitmapGraphic(dms);
-		if(bg == null)
-			return null;
-		int blen = bg.length();
-		if(blen == 0 || bmaps.length % blen != 0)
-			return null;
-		byte[] b = new byte[blen];
-		System.arraycopy(bmaps, 0, b, 0, blen);
-		bg.setPixels(b);
-		return bg;
-	}
-
-	/** Decode the bitmaps */
-	protected byte[] decodeBitmaps(String bitmaps) {
-		try {
-			return Base64.decode(bitmaps);
-		}
-		catch(IOException e) {
-			return null;
-		}
-	}
-
-	/** Create a bitmap graphic */
-	protected BitmapGraphic createBitmapGraphic(DMS dms) {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		if(wp != null && hp != null)
-			return new BitmapGraphic(wp, hp);
+		BitmapGraphic[] bitmaps = DMSHelper.getBitmaps(dms);
+		if(bitmaps != null && bitmaps.length > 0)
+			return bitmaps[0];
 		else
 			return null;
 	}

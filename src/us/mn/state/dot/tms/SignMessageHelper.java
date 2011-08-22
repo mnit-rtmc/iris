@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2011  Minnesota Department of Transportation
- * Copyright (C) 2010 AHMCT, University of California
+ * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,15 +150,26 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Check if the bitmap is blank */
 	static public boolean isBitmapBlank(SignMessage m) {
-		try {
-			for(byte b: Base64.decode(m.getBitmaps())) {
+		byte[] bmaps = decodeBitmaps(m);
+		if(bmaps != null) {
+			for(byte b: bmaps) {
 				if(b != 0)
 					return false;
 			}
 			return true;
+		} else
+			return false;
+	}
+
+	/** Decode the bitmaps on a sign message */
+	static public byte[] decodeBitmaps(SignMessage sm) {
+		if(sm == null)
+			return null;
+		try {
+			return Base64.decode(sm.getBitmaps());
 		}
 		catch(IOException e) {
-			return false;
+			return null;
 		}
 	}
 }

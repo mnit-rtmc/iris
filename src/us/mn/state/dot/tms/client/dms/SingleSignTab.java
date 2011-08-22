@@ -36,7 +36,6 @@ import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -389,7 +388,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	protected void updateCurrentPanel(DMS dms) {
 		clearPager();
 		if(dms != null) {
-			BitmapGraphic[] bmaps = getBitmaps(dms);
+			BitmapGraphic[] bmaps = DMSHelper.getBitmaps(dms);
 			if(bmaps != null) {
 				pnlPager = new DMSPanelPager(currentPnl, dms,
 					bmaps, getPgOnTime(dms));
@@ -403,53 +402,6 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		adjusting++;
 		dispatcher.setMessage(getMultiString(dms));
 		adjusting--;
-	}
-
-	/** Get the current bitmap graphic for all pages of the specified DMS.
-	 * @param DMS with the graphic.
-	 * @return Array of bitmaps, one for each page, or null on error. */
-	protected BitmapGraphic[] getBitmaps(DMS dms) {
-		SignMessage sm = dms.getMessageCurrent();
-		if(sm == null)
-			return null;
-		byte[] bmaps = decodeBitmaps(sm.getBitmaps());
-		if(bmaps == null)
-			return null;
-		BitmapGraphic bg = createBitmapGraphic(dms);
-		if(bg == null)
-			return null;
-		int blen = bg.length();
-		if(blen == 0 || bmaps.length % blen != 0)
-			return null;
-		int n_pages = bmaps.length / blen;
-		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
-		for(int i = 0; i < n_pages; i++) {
-			bitmaps[i] = createBitmapGraphic(dms);
-			byte[] b = new byte[blen];
-			System.arraycopy(bmaps, i * blen, b, 0, blen);
-			bitmaps[i].setPixels(b);
-		}
-		return bitmaps;
-	}
-
-	/** Decode the bitmaps */
-	protected byte[] decodeBitmaps(String bitmaps) {
-		try {
-			return Base64.decode(bitmaps);
-		}
-		catch(IOException e) {
-			return null;
-		}
-	}
-
-	/** Create a bitmap graphic */
-	protected BitmapGraphic createBitmapGraphic(DMS dms) {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		if(wp != null && hp != null)
-			return new BitmapGraphic(wp, hp);
-		else
-			return null;
 	}
 
 	/** Get the page on-time for the current message on the 

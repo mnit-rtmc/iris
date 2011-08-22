@@ -423,4 +423,43 @@ public class DMSHelper extends BaseHelper {
 			return false;
 		return SString.enclosedBy(line, "_");
 	}
+
+	/** Get the current bitmap graphic for all pages of the specified DMS.
+	 * @param DMS with the graphic.
+	 * @return Array of bitmaps, one for each page, or null on error. */
+	static public BitmapGraphic[] getBitmaps(DMS dms) {
+		if(dms == null)
+			return null;
+		SignMessage sm = dms.getMessageCurrent();
+		if(sm == null)
+			return null;
+		byte[] bmaps = SignMessageHelper.decodeBitmaps(sm);
+		if(bmaps == null)
+			return null;
+		BitmapGraphic bg = createBitmapGraphic(dms);
+		if(bg == null)
+			return null;
+		int blen = bg.length();
+		if(blen == 0 || bmaps.length % blen != 0)
+			return null;
+		int n_pages = bmaps.length / blen;
+		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
+		for(int i = 0; i < n_pages; i++) {
+			bitmaps[i] = createBitmapGraphic(dms);
+			byte[] b = new byte[blen];
+			System.arraycopy(bmaps, i * blen, b, 0, blen);
+			bitmaps[i].setPixels(b);
+		}
+		return bitmaps;
+	}
+
+	/** Create a bitmap graphic for the specified DMS */
+	static protected BitmapGraphic createBitmapGraphic(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		if(wp != null && hp != null)
+			return new BitmapGraphic(wp, hp);
+		else
+			return null;
+	}
 }
