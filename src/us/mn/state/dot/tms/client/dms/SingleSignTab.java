@@ -17,6 +17,9 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.Calendar;
 import javax.swing.BorderFactory;
@@ -44,6 +47,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -88,6 +92,9 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	/** Displays the controller operation status (optional) */
 	protected final JTextField opStatusTxt = createTextField();
 
+	/** Client session */
+	protected final Session session;
+
 	/** DMS dispatcher */
 	protected final DMSDispatcher dispatcher;
 
@@ -103,6 +110,17 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Tabbed pane for current/preview panels */
 	protected final JTabbedPane tab = new JTabbedPane();
+
+	/** Mouse listener for popup menus */
+	protected final MouseListener popper = new MouseAdapter() {
+		public void mousePressed(MouseEvent me) {
+			doPopup(me);
+		}
+		// NOTE: needed for cross-platform functionality
+		public void mouseReleased(MouseEvent me) {
+			doPopup(me);
+		}
+	};
 
 	/** Cache of DMS proxy objects */
 	protected final TypeCache<DMS> cache;
@@ -122,15 +140,14 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	 * callbacks to this class.  This prevents infinite loops. */
 	protected int adjusting = 0;
 
-	/** Create a new single sign tab. */
-	public SingleSignTab(DMSDispatcher d, TypeCache<DMS> tc,
-		ProxySelectionModel<Camera> csm)
-	{
+	/** Create a new single sign tab */
+	public SingleSignTab(Session s, DMSDispatcher d) {
 		super(true);
+		session = s;
 		dispatcher = d;
-		cache = tc;
+		cache = s.getSonarState().getDmsCache().getDMSs();
 		cache.addProxyListener(this);
-		cam_sel_model = csm;
+		cam_sel_model = s.getCameraManager().getSelectionModel();
 		nameTxt.setMinimumSize(new Dimension(36, 20));
 		add("Name", nameTxt);
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
@@ -183,6 +200,14 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 				}
 			}
 		};
+		currentPnl.addMouseListener(popper);
+		previewPnl.addMouseListener(popper);
+	}
+
+	/** Process a popup menu event */
+	protected void doPopup(MouseEvent me) {
+		if(me.isPopupTrigger())
+			session.getDMSManager().showPopupMenu(me);
 	}
 
 	/** Dispose of the sign tab */

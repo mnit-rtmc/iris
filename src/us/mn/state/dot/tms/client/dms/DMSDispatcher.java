@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -152,8 +152,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		blankBtn.setAction(blankAction);
 		manager.setBlankAction(blankAction);
 		composer = new SignMessageComposer(session, this);
-		singleTab = new SingleSignTab(this, dms_cache.getDMSs(),
-			session.getCameraManager().getSelectionModel());
+		singleTab = new SingleSignTab(session, this);
 		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
 		tabPane.addTab("Single", singleTab);
 		tabPane.addTab("Multiple", multipleTab);
