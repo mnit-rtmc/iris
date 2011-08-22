@@ -29,8 +29,10 @@ import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
  */
 public class MsgFeedQueryJob extends Job {
 
-	/** Seconds to offset each poll from start of interval */
-	static protected final int OFFSET_SECS = 5;
+	/** Seconds to offset each poll from start of interval.  This should be
+	 * 5 seconds before performing the ActionPlanJob. */
+	static protected final int OFFSET_SECS =
+		(ActionPlanJob.OFFSET_SECS + 30 - 5) % 30;
 
 	/** Create a new message feed query job */
 	protected MsgFeedQueryJob() {
