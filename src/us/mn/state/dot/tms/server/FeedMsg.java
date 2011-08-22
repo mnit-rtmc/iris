@@ -104,6 +104,6 @@ public class FeedMsg {
 
 	/** Check if the feed message has expired */
 	public boolean hasExpired() {
-		return expire == null || expire.after(new Date());
+		return expire == null || expire.before(new Date());
 	}
 }
