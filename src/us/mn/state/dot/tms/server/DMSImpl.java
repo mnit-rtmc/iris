@@ -1432,9 +1432,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				da.getSignGroup());
 			MultiString multi = new MultiString(qm.getMulti());
 			multi.parse(fc);
-			return createMulti(fc.toString());
-		} else
-			return null;
+			String m = fc.toString();
+			if(m != null)
+				return createMulti(m);
+		}
+		return null;
 	}
 
 	/** Create a MULTI string for a message */
