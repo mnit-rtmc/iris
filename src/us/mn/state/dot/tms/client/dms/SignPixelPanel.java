@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
- * Copyright (C) 2010 AHMCT, University of California, Davis
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010  AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -226,6 +226,12 @@ public class SignPixelPanel extends JPanel {
 	protected void paintPixels(Graphics2D g, BitmapGraphic b) {
 		// NOTE: unlit pixels are drawn first to allow blooming to
 		//       overdraw for lit pixels
+		paintUnlitPixels(g, b);
+		paintLitPixels(g, b);
+	}
+
+	/** Paint the unlit pixels */
+	protected void paintUnlitPixels(Graphics2D g, BitmapGraphic b) {
 		if(antialias)
 			setBloom(0);
 		else
@@ -241,13 +247,17 @@ public class SignPixelPanel extends JPanel {
 					g.fillOval(xx, yy, px, py);
 			}
 		}
+	}
+
+	/** Paint the lit pixels */
+	protected void paintLitPixels(Graphics2D g, BitmapGraphic b) {
 		if(antialias)
 			setBloom(0.6f);
 		else
 			setBloom(1);
 		g.setColor(lit_color);
-		px = Math.round(hpitch_mm + getBloomX());
-		py = Math.round(vpitch_mm + getBloomY());
+		int px = Math.round(hpitch_mm + getBloomX());
+		int py = Math.round(vpitch_mm + getBloomY());
 		for(int y = 0; y < height_pix; y++) {
 			int yy = Math.round(getPixelY(y));
 			for(int x = 0; x < width_pix; x++) {
