@@ -234,7 +234,7 @@ public class SignPixelPanel extends JPanel {
 			setBloom(0);
 		else
 			setBloom(1);
-		g.setColor(Color.GRAY);
+		g.setColor(Color.DARK_GRAY);
 		int px = Math.round(hpitch_mm + getBloomX());
 		int py = Math.round(vpitch_mm + getBloomY());
 		for(int y = 0; y < height_pix; y++) {
