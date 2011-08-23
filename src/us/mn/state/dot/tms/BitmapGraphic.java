@@ -66,37 +66,9 @@ public class BitmapGraphic extends RasterGraphic {
 			pixels[by] &= bi ^ 0xff;
 	}
 
-	/** Update the bitmap by clearing pixels not in another bitmap */
-	public void union(BitmapGraphic b) {
-		if(width != b.width)
-			throw new IndexOutOfBoundsException("width mismatch");
-		if(height != b.height)
-			throw new IndexOutOfBoundsException("height mismatch");
-		for(int x = 0; x < width; x++) {
-			for(int y = 0; y < height; y++) {
-				if(!b.getPixel(x, y).isLit())
-					setPixel(x, y, DmsColor.BLACK);
-			}
-		}
-	}
-
-	/** Update the bitmap by clearing pixels in another bitmap */
-	public void difference(BitmapGraphic b) {
-		if(width != b.width)
-			throw new IndexOutOfBoundsException("width mismatch");
-		if(height != b.height)
-			throw new IndexOutOfBoundsException("height mismatch");
-		for(int x = 0; x < width; x++) {
-			for(int y = 0; y < height; y++) {
-				if(b.getPixel(x, y).isLit())
-					setPixel(x, y, DmsColor.BLACK);
-			}
-		}
-	}
-
 	/** Set all pixels adjacent to lit pixels (clearing lit pixels) */
 	public void outline() {
-		BitmapGraphic b = new BitmapGraphic(width, height);
+		BitmapGraphic b = createBlankCopy();
 		b.copy(this);
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {

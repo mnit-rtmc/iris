@@ -97,4 +97,32 @@ abstract public class RasterGraphic {
 			}
 		}
 	}
+
+	/** Update the raster by clearing pixels not in another raster */
+	public void union(RasterGraphic rg) {
+		if(width != rg.width)
+			throw new IndexOutOfBoundsException("width mismatch");
+		if(height != rg.height)
+			throw new IndexOutOfBoundsException("height mismatch");
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(!rg.getPixel(x, y).isLit())
+					setPixel(x, y, DmsColor.BLACK);
+			}
+		}
+	}
+
+	/** Update the raster by clearing pixels in another raster */
+	public void difference(RasterGraphic rg) {
+		if(width != rg.width)
+			throw new IndexOutOfBoundsException("width mismatch");
+		if(height != rg.height)
+			throw new IndexOutOfBoundsException("height mismatch");
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(rg.getPixel(x, y).isLit())
+					setPixel(x, y, DmsColor.BLACK);
+			}
+		}
+	}
 }
