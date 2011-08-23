@@ -52,4 +52,9 @@ public class DmsColor {
 	public boolean isLit() {
 		return red > 0 || green > 0 || blue > 0;
 	}
+
+	/** Get the 24-bit RGB color value */
+	public int rgb() {
+		return red << 16 | green << 8 | blue;
+	}
 }

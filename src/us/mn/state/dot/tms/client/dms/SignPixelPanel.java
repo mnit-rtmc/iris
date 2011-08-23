@@ -25,7 +25,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
-import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.DmsColor;
+import us.mn.state.dot.tms.RasterGraphic;
 
 /**
  * Pixel panel renders a representation of the pixels on a sign.
@@ -40,9 +41,6 @@ public class SignPixelPanel extends JPanel {
 
 	/** Color of sign face */
 	protected final Color face_color;
-
-	/** Color to paint a lit pixel */
-	protected final Color lit_color = Color.YELLOW;
 
 	/** Sign width (mm) */
 	protected int width_mm = 0;
@@ -77,8 +75,8 @@ public class SignPixelPanel extends JPanel {
 	/** Transform from user (mm) to screen coordinates */
 	protected AffineTransform transform;
 
-	/** Bitmap graphic to paint */
-	protected BitmapGraphic graphic;
+	/** Raster graphic to paint */
+	protected RasterGraphic graphic;
 
 	/** Buffer for screen display */
 	protected BufferedImage buffer;
@@ -137,9 +135,9 @@ public class SignPixelPanel extends JPanel {
 		dirty = true;
 	}
 
-	/** Set the bitmap graphic displayed */
-	public void setGraphic(BitmapGraphic g) {
-		graphic = g;
+	/** Set the graphic displayed */
+	public void setGraphic(RasterGraphic rg) {
+		graphic = rg;
 		dirty = true;
 		repaint();
 	}
@@ -223,15 +221,15 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Paint the pixels of the sign */
-	protected void paintPixels(Graphics2D g, BitmapGraphic b) {
+	protected void paintPixels(Graphics2D g, RasterGraphic rg) {
 		// NOTE: unlit pixels are drawn first to allow blooming to
 		//       overdraw for lit pixels
-		paintUnlitPixels(g, b);
-		paintLitPixels(g, b);
+		paintUnlitPixels(g, rg);
+		paintLitPixels(g, rg);
 	}
 
 	/** Paint the unlit pixels */
-	protected void paintUnlitPixels(Graphics2D g, BitmapGraphic b) {
+	protected void paintUnlitPixels(Graphics2D g, RasterGraphic rg) {
 		if(antialias)
 			setBloom(0);
 		else
@@ -243,27 +241,29 @@ public class SignPixelPanel extends JPanel {
 			int yy = Math.round(getPixelY(y));
 			for(int x = 0; x < width_pix; x++) {
 				int xx = Math.round(getPixelX(x));
-				if(!b.getPixel(x, y).isLit())
+				if(!rg.getPixel(x, y).isLit())
 					g.fillOval(xx, yy, px, py);
 			}
 		}
 	}
 
 	/** Paint the lit pixels */
-	protected void paintLitPixels(Graphics2D g, BitmapGraphic b) {
+	protected void paintLitPixels(Graphics2D g, RasterGraphic rg) {
 		if(antialias)
 			setBloom(0.6f);
 		else
 			setBloom(1);
-		g.setColor(lit_color);
 		int px = Math.round(hpitch_mm + getBloomX());
 		int py = Math.round(vpitch_mm + getBloomY());
 		for(int y = 0; y < height_pix; y++) {
 			int yy = Math.round(getPixelY(y));
 			for(int x = 0; x < width_pix; x++) {
 				int xx = Math.round(getPixelX(x));
-				if(b.getPixel(x, y).isLit())
+				DmsColor clr = rg.getPixel(x, y);
+				if(clr.isLit()) {
+					g.setColor(new Color(clr.rgb()));
 					g.fillOval(xx, yy, px, py);
+				}
 			}
 		}
 	}
