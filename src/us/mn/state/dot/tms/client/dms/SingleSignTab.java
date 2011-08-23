@@ -36,7 +36,6 @@ import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
@@ -44,6 +43,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -388,10 +388,10 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	protected void updateCurrentPanel(DMS dms) {
 		clearPager();
 		if(dms != null) {
-			BitmapGraphic[] bmaps = DMSHelper.getBitmaps(dms);
-			if(bmaps != null) {
+			RasterGraphic[] rg = DMSHelper.getBitmaps(dms);
+			if(rg != null) {
 				pnlPager = new DMSPanelPager(currentPnl, dms,
-					bmaps, getPgOnTime(dms));
+					rg, getPgOnTime(dms));
 			} else
 				currentPnl.clear();
 		}
@@ -433,8 +433,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		clearPager();
 		if(dms != null) {
 			String ms = dispatcher.getMessage();
-			BitmapGraphic[] bmaps = dispatcher.getBitmaps();
-			pnlPager = new DMSPanelPager(previewPnl, dms, bmaps,
+			RasterGraphic[] rg = dispatcher.getBitmaps();
+			pnlPager = new DMSPanelPager(previewPnl, dms, rg,
 				getPgOnTime(ms));
 		}
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
@@ -42,8 +43,8 @@ public class DMSPanelPager {
 	/** Selected DMS */
 	protected final DMS dms;
 
-	/** Bitmaps for each page */
-	protected final BitmapGraphic[] bitmaps;
+	/** Rasters for each page */
+	protected final RasterGraphic[] rasters;
 
 	/** Current page being displayed */
 	protected int page = 0;
@@ -66,20 +67,20 @@ public class DMSPanelPager {
 	/** Create a new DMS panel pager.
 	 *  @param p SignPixelPanel.
 	 *  @param proxy DMS proxy.
-	 *  @param b Array of bitmapgraphics.
+	 *  @param rg Array of raster graphics.
 	 *  @param ot Page on-time, which is validated, so if zero, is 
 	 *	   assigned the system default. */
-	public DMSPanelPager(SignPixelPanel p, DMS proxy, BitmapGraphic[] b,
+	public DMSPanelPager(SignPixelPanel p, DMS proxy, RasterGraphic[] rg,
 		DmsPgTime ot)
 	{
 		panel = p;
 		dms = proxy;
-		bitmaps = getBitmaps(b);
-		int npg = bitmaps.length;
+		rasters = getRasters(rg);
+		int npg = rasters.length;
 		pgOnTime = DmsPgTime.validateOnTime(ot, npg <= 1);
 		pgOffTime = DmsPgTime.getDefaultOff();
 		setDimensions();
-		panel.setGraphic(bitmaps[page]);
+		panel.setGraphic(rasters[page]);
 		timer = new Timer(TIMER_TICK_MS, new ActionListener() { 
 			public void actionPerformed(ActionEvent e) {
 				pageTimerTick();
@@ -94,12 +95,12 @@ public class DMSPanelPager {
 		timer.stop();
 	}
 
-	/** Get bitmaps to display on the panel */
-	protected BitmapGraphic[] getBitmaps(BitmapGraphic[] b) {
-		if(b != null && b.length > 0)
-			return b;
+	/** Get rasters to display on the panel */
+	protected RasterGraphic[] getRasters(RasterGraphic[] rg) {
+		if(rg != null && rg.length > 0)
+			return rg;
 		else {
-			return new BitmapGraphic[] {
+			return new RasterGraphic[] {
 				createBlankPage()
 			};
 		}
@@ -137,8 +138,8 @@ public class DMSPanelPager {
 			panel.setLogicalDimensions(wp, hp, cw, ch);
 	}
 
-	/** Create a blank bitmap graphic */
-	protected BitmapGraphic createBlankPage() {
+	/** Create a blank raster graphic */
+	protected RasterGraphic createBlankPage() {
 		Integer wp = dms.getWidthPixels();
 		Integer hp = dms.getHeightPixels();
 		if(wp != null && hp != null)
@@ -191,14 +192,14 @@ public class DMSPanelPager {
 	protected void nextPage() {
 		if(isMultipage()) {
 			page++;
-			if(page >= bitmaps.length)
+			if(page >= rasters.length)
 				page = 0;
-			panel.setGraphic(bitmaps[page]);
+			panel.setGraphic(rasters[page]);
 		}
 	}
 
 	/** Check if the current message has multiple pages */
 	protected boolean isMultipage() {
-		return bitmaps.length > 1;
+		return rasters.length > 1;
 	}
 }
