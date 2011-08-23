@@ -168,23 +168,35 @@ public class PixelMapBuilder {
 	}
 
 	/** Render a BitmapGraphic for each page */
-	public BitmapGraphic[] createPixmaps(MultiString ms) {
+	public BitmapGraphic[] createBitmaps(MultiString ms) {
 		int n_pages = ms.getNumPages();
-		BitmapGraphic[] pixmaps = new BitmapGraphic[n_pages];
-		for(int p = 0; p < n_pages; p++)
-			pixmaps[p] = createBitmap(ms, p);
+		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
+		for(int p = 0; p < n_pages; p++) {
+			bitmaps[p] = new BitmapGraphic(width, height);
+			render(ms, p, bitmaps[p]);
+		}
+		return bitmaps;
+	}
+
+	/** Render a PixmapGraphic for each page */
+	public RasterGraphic[] createPixmaps(MultiString ms) {
+		int n_pages = ms.getNumPages();
+		RasterGraphic[] pixmaps = new RasterGraphic[n_pages];
+		for(int p = 0; p < n_pages; p++) {
+			/* FIXME: change to PixmapGraphic */
+			pixmaps[p] = new BitmapGraphic(width, height);
+			render(ms, p, pixmaps[p]);
+		}
 		return pixmaps;
 	}
 
-	/** Create and render a BitmapGraphic for the specified page number */
-	protected BitmapGraphic createBitmap(MultiString ms, int p) {
-		BitmapGraphic bg = new BitmapGraphic(width, height);
-		MultiRenderer mr = new MultiRenderer(bg, p, c_width, c_height,
+	/** Render to a RasterGraphic for the specified page number */
+	protected void render(MultiString ms, int p, RasterGraphic rg) {
+		MultiRenderer mr = new MultiRenderer(rg, p, c_width, c_height,
 			default_font);
 		ms = DMSHelper.ignoreFilter(ms);
 		ms.parse(mr);
 		mr.complete();
 		// FIXME: check MultiRenderer.syntax_err
-		return bg;
 	}
 }

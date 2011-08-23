@@ -379,7 +379,7 @@ public class MessagesTab extends JPanel {
 			return new BitmapGraphic[0];
 		int df = DMSHelper.getDefaultFontNumber(proxy);
 		PixelMapBuilder b = new PixelMapBuilder(w, h, cw, ch, df);
-		return b.createPixmaps(ms);
+		return b.createBitmaps(ms);
 	}
 
 	/** Get the selected sign text message */

@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -376,7 +377,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		PixelMapBuilder b = builder;
 		if(b != null) {
 			MultiString ms = new MultiString(multi);
-			return encodeBitmaps(b.createPixmaps(ms));
+			return encodeBitmaps(b.createBitmaps(ms));
 		} else
 			return null;
 	}
@@ -561,8 +562,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		singleTab.selectPreview(p);
 	}
 
-	/** Get the bitmap graphic array for the current message */
-	public BitmapGraphic[] getBitmaps() {
+	/** Get the raster graphic array for the current message */
+	public RasterGraphic[] getPixmaps() {
 		PixelMapBuilder b = builder;
 		if(b != null) {
 			MultiString multi = new MultiString(message);
