@@ -30,12 +30,12 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IrisUserHelper;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -267,11 +267,11 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			pixelPnl.setLogicalDimensions(0, 0, 0, 0);
 	}
 
-	/** Get the bitmap graphic for page one */
-	protected BitmapGraphic getPageOne(DMS dms) {
-		BitmapGraphic[] bitmaps = DMSHelper.getBitmaps(dms);
-		if(bitmaps != null && bitmaps.length > 0)
-			return bitmaps[0];
+	/** Get the raster graphic for page one */
+	protected RasterGraphic getPageOne(DMS dms) {
+		RasterGraphic[] rasters = DMSHelper.getBitmaps(dms);
+		if(rasters != null && rasters.length > 0)
+			return rasters[0];
 		else
 			return null;
 	}
