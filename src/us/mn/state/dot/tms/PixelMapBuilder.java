@@ -183,8 +183,7 @@ public class PixelMapBuilder {
 		int n_pages = ms.getNumPages();
 		RasterGraphic[] pixmaps = new RasterGraphic[n_pages];
 		for(int p = 0; p < n_pages; p++) {
-			/* FIXME: change to PixmapGraphic */
-			pixmaps[p] = new BitmapGraphic(width, height);
+			pixmaps[p] = new PixmapGraphic(width, height);
 			render(ms, p, pixmaps[p]);
 		}
 		return pixmaps;
