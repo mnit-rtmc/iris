@@ -29,7 +29,7 @@ public class DmsColor {
 	/** Black color */
 	static public final DmsColor BLACK = new DmsColor(0, 0, 0);
 
-	/** Amber color */
+	/** Amber color (Standard traffic amber) */
 	static public final DmsColor AMBER = new DmsColor(255, 208, 0);
 
 	/** Red component of color */
