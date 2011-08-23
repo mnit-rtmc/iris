@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -208,7 +208,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			c.setPixels(pixels);
 			for(int yy = 0; yy < h; yy++) {
 				for(int xx = 0; xx < w; xx++) {
-					int p = c.getPixel(xx, yy);
+					DmsColor p = c.getPixel(xx, yy);
 					raster.setPixel(x + xx, y + yy, p);
 				}
 			}

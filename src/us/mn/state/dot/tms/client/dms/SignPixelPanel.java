@@ -243,7 +243,7 @@ public class SignPixelPanel extends JPanel {
 			int yy = Math.round(getPixelY(y));
 			for(int x = 0; x < width_pix; x++) {
 				int xx = Math.round(getPixelX(x));
-				if(b.getPixel(x, y) == 0)
+				if(!b.getPixel(x, y).isLit())
 					g.fillOval(xx, yy, px, py);
 			}
 		}
@@ -262,7 +262,7 @@ public class SignPixelPanel extends JPanel {
 			int yy = Math.round(getPixelY(y));
 			for(int x = 0; x < width_pix; x++) {
 				int xx = Math.round(getPixelX(x));
-				if(b.getPixel(x, y) > 0)
+				if(b.getPixel(x, y).isLit())
 					g.fillOval(xx, yy, px, py);
 			}
 		}

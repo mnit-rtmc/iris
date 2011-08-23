@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import javax.swing.JToggleButton;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.toast.TmsForm;
@@ -170,7 +171,8 @@ public class GlyphEditor extends JPanel {
 			for(int x = 0; x < b.getWidth(); x++) {
 				int i = y * b.getWidth() + x;
 				p_button[i] = createPixelButton();
-				p_button[i].setSelected(b.getPixel(x, y) > 0);
+				p_button[i].setSelected(
+					b.getPixel(x, y).isLit());
 				gpanel.add(p_button[i]);
 			}
 		}
@@ -184,9 +186,9 @@ public class GlyphEditor extends JPanel {
 		for(int y = 0; y < b.getHeight(); y++) {
 			for(int x = 0; x < b.getWidth(); x++) {
 				int i = y * b.getWidth() + x;
-				int p = 0;
+				DmsColor p = DmsColor.BLACK;
 				if(p_button[i].isSelected())
-					p = 1;
+					p = DmsColor.AMBER;
 				b.setPixel(x, y, p);
 			}
 		}

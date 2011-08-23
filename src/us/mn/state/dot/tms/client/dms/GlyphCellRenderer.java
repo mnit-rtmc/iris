@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 		for(int y = 0; y < bitmap.getHeight(); y++, yy += pitch) {
 			float xx = left;
 			for(int x = 0; x < bitmap.getWidth(); x++, xx += pitch){
-				if(bitmap.getPixel(x, y) > 0)
+				if(bitmap.getPixel(x, y).isLit())
 					g.setColor(Color.YELLOW);
 				else
 					g.setColor(Color.GRAY);

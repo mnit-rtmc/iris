@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -178,7 +179,7 @@ public class GraphicForm extends AbstractForm {
 		for(int y = 0; y < im.getHeight(); y++) {
 			for(int x = 0; x < im.getWidth(); x++) {
 				if((im.getRGB(x, y) & 0xFFFFFF) > 0)
-					bg.setPixel(x, y, 1);
+					bg.setPixel(x, y, DmsColor.AMBER);
 			}
 		}
 		return Base64.encode(bg.getPixels());

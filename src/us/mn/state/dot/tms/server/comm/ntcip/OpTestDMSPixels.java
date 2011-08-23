@@ -19,6 +19,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -222,9 +223,9 @@ public class OpTestDMSPixels extends OpDMS {
 			int y = y_loc.getInteger() - 1;
 			try {
 				if(status.isStuckOn())
-					stuck_on.setPixel(x, y, 1);
+					stuck_on.setPixel(x, y, DmsColor.AMBER);
 				else
-					stuck_off.setPixel(x, y, 1);
+					stuck_off.setPixel(x, y,DmsColor.AMBER);
 			}
 			catch(IndexOutOfBoundsException e) {
 				// Ignore; configuration has not been read yet

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,20 +44,23 @@ public class BitmapGraphic extends RasterGraphic {
 		return (y * width) + x;
 	}
 
-	/** Get the pixel value at the specified location */
-	public int getPixel(int x, int y) {
+	/** Get the pixel color at the specified location */
+	public DmsColor getPixel(int x, int y) {
 		int p = pixelIndex(x, y);
 		int by = p / 8;
 		int bi = 7 - (p % 8);
-		return (pixels[by] >> bi) & 1;
+		if(((pixels[by] >> bi) & 1) > 0)
+			return DmsColor.AMBER;
+		else
+			return DmsColor.BLACK;
 	}
 
-	/** Set the pixel value at the specified location */
-	public void setPixel(int x, int y, int value) {
+	/** Set the pixel color at the specified location */
+	public void setPixel(int x, int y, DmsColor clr) {
 		int p = pixelIndex(x, y);
 		int by = p / 8;
 		int bi = 1 << (7 - (p % 8));
-		if(value > 0)
+		if(clr.isLit())
 			pixels[by] |= bi;
 		else
 			pixels[by] &= bi ^ 0xff;
@@ -71,8 +74,8 @@ public class BitmapGraphic extends RasterGraphic {
 			throw new IndexOutOfBoundsException("height mismatch");
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				if(b.getPixel(x, y) == 0)
-					setPixel(x, y, 0);
+				if(!b.getPixel(x, y).isLit())
+					setPixel(x, y, DmsColor.BLACK);
 			}
 		}
 	}
@@ -85,8 +88,8 @@ public class BitmapGraphic extends RasterGraphic {
 			throw new IndexOutOfBoundsException("height mismatch");
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				if(b.getPixel(x, y) > 0)
-					setPixel(x, y, 0);
+				if(b.getPixel(x, y).isLit())
+					setPixel(x, y, DmsColor.BLACK);
 			}
 		}
 	}
@@ -97,7 +100,7 @@ public class BitmapGraphic extends RasterGraphic {
 		b.copy(this);
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				if(b.getPixel(x, y) > 0)
+				if(b.getPixel(x, y).isLit())
 					setNeighbors(x, y);
 			}
 		}
@@ -112,7 +115,7 @@ public class BitmapGraphic extends RasterGraphic {
 		int ymax = Math.min(y + 2, height);
 		for(int xx = xmin; xx < xmax; xx++) {
 			for(int yy = ymin; yy < ymax; yy++)
-				setPixel(xx, yy, 1);
+				setPixel(xx, yy, DmsColor.AMBER);
 		}
 	}
 

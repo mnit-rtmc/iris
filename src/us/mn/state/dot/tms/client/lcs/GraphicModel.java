@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 			final int rgb = 0xFFFFFF;
 			for(int y = 0; y < g.getHeight(); y++) {
 				for(int x = 0; x < g.getWidth(); x++) {
-					if(bg.getPixel(x, y) > 0)
+					if(bg.getPixel(x, y).isLit())
 						im.setRGB(x, y, rgb);
 				}
 			}

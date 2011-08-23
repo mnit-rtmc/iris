@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,18 +64,18 @@ abstract public class RasterGraphic {
 	/** Get the pixel data length in bytes */
 	abstract public int length();
 
-	/** Get the pixel value at the specified location */
-	abstract public int getPixel(int x, int y);
+	/** Get the pixel color at the specified location */
+	abstract public DmsColor getPixel(int x, int y);
 
-	/** Set the pixel value at the specified location */
-	abstract public void setPixel(int x, int y, int value);
+	/** Set the pixel color at the specified location */
+	abstract public void setPixel(int x, int y, DmsColor clr);
 
 	/** Get the count of lit pixels */
 	public int getLitCount() {
 		int n_lit = 0;
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				if(getPixel(x, y) > 0)
+				if(getPixel(x, y).isLit())
 					n_lit++;
 			}
 		}
@@ -92,7 +92,7 @@ abstract public class RasterGraphic {
 		int h = Math.min(height, b.height);
 		for(int x = 0; x < w; x++) {
 			for(int y = 0; y < h; y++) {
-				int v = b.getPixel(x1 + x, y1 + y);
+				DmsColor v = b.getPixel(x1 + x, y1 + y);
 				setPixel(x0 + x, y0 + y, v);
 			}
 		}
