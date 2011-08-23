@@ -204,12 +204,14 @@ public class MultiRenderer extends MultiStringStateAdapter {
 		int h = g.getHeight();
 		try {
 			byte[] pixels = Base64.decode(g.getPixels());
-			BitmapGraphic c = new BitmapGraphic(w, h);
-			c.setPixels(pixels);
+			BitmapGraphic bg = new BitmapGraphic(w, h);
+			bg.setPixels(pixels);
 			for(int yy = 0; yy < h; yy++) {
 				for(int xx = 0; xx < w; xx++) {
-					DmsColor p = c.getPixel(xx, yy);
-					raster.setPixel(x + xx, y + yy, p);
+					if(bg.getPixel(xx, yy).isLit()) {
+						raster.setPixel(x + xx, y + yy,
+							ms_foreground);
+					}
 				}
 			}
 		}

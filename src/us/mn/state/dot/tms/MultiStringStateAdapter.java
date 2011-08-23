@@ -72,9 +72,12 @@ public class MultiStringStateAdapter implements MultiStringState {
 		ms_justl = jl;
 	}
 
+	/** Foreground color */
+	protected DmsColor ms_foreground = DmsColor.AMBER;
+
 	/** Set the foreground color */
 	public void setColorForeground(int r, int g, int b) {
-		// subclass must handle
+		ms_foreground = new DmsColor(r, g, b);
 	}
 
 	/** Set the text rectangle */
