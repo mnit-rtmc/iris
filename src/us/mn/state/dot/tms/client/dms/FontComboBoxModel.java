@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@ import java.util.Comparator;
 import java.util.TreeSet;
 import javax.swing.ComboBoxModel;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.PixelMapBuilder;
-import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
  * Combobox model for fonts.
@@ -32,14 +32,14 @@ import us.mn.state.dot.tms.Font;
 public class FontComboBoxModel extends ProxyListModel<Font>
 	implements ComboBoxModel 
 {
-	/** Pixel map builder */
-	protected final PixelMapBuilder builder;
+	/** Raster graphic builder */
+	protected final RasterBuilder builder;
 
 	/** Currently selected font */
 	protected Font m_selected;
 
 	/** Create a new font combo box model */
-	public FontComboBoxModel(TypeCache<Font> arg_fonts, PixelMapBuilder b) {
+	public FontComboBoxModel(TypeCache<Font> arg_fonts, RasterBuilder b) {
 		super(arg_fonts);
 		builder = b;
 		initialize();

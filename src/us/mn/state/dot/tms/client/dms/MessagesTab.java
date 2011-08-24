@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -352,7 +352,7 @@ public class MessagesTab extends JPanel {
 
 	/** Get the line height of the sign */
 	protected Integer getLineHeightPixels() {
-		PixelMapBuilder b = DMSHelper.createPixelMapBuilder(proxy);
+		RasterBuilder b = DMSHelper.createRasterBuilder(proxy);
 		if(b != null)
 			return b.getLineHeightPixels();
 		else
@@ -378,7 +378,7 @@ public class MessagesTab extends JPanel {
 		if(w == null || h == null || cw == null || ch == null)
 			return new BitmapGraphic[0];
 		int df = DMSHelper.getDefaultFontNumber(proxy);
-		PixelMapBuilder b = new PixelMapBuilder(w, h, cw, ch, df);
+		RasterBuilder b = new RasterBuilder(w, h, cw, ch, df);
 		return b.createBitmaps(ms);
 	}
 

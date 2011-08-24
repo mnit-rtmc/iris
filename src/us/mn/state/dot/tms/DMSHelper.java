@@ -341,17 +341,17 @@ public class DMSHelper extends BaseHelper {
 		return FontHelper.DEFAULT_FONT_NUM;
 	}
 
-	/** Create a pixel map builder for a DMS.
+	/** Create a raster builder for a DMS.
 	 * @param dms DMS with proper dimensions for the builder.
 	 * @return A pixel map builder, or null is dimensions are invalid. */
-	static public PixelMapBuilder createPixelMapBuilder(DMS dms) {
+	static public RasterBuilder createRasterBuilder(DMS dms) {
 		Integer w = dms.getWidthPixels();
 		Integer h = dms.getHeightPixels();
 		Integer cw = dms.getCharWidthPixels();
 		Integer ch = dms.getCharHeightPixels();
 		int df = getDefaultFontNumber(dms);
 		if(w != null && h != null && cw != null && ch != null)
-			return new PixelMapBuilder(w, h, cw, ch, df);
+			return new RasterBuilder(w, h, cw, ch, df);
 		else
 			return null;
 	}

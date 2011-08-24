@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -72,8 +72,8 @@ public class SignMessageComposer extends JPanel {
 	/** Default font number */
 	protected int default_font = FontHelper.DEFAULT_FONT_NUM;
 
-	/** Pixel map builder for the selected sign */
-	protected PixelMapBuilder builder;
+	/** Raster builder for the selected sign */
+	protected RasterBuilder builder;
 
 	/** Sign text model for the selected sign */
 	protected SignTextModel st_model;
@@ -213,7 +213,7 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Update the message combo box models */
-	public void setSign(DMS proxy, PixelMapBuilder b) {
+	public void setSign(DMS proxy, RasterBuilder b) {
 		builder = b;
 		default_font = DMSHelper.getDefaultFontNumber(proxy);
 		SignTextModel stm = createSignTextModel(proxy);
@@ -246,7 +246,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Get the number of lines on the selected sign(s) */
 	protected int getLineCount() {
-		PixelMapBuilder b = builder;
+		RasterBuilder b = builder;
 		if(b != null)
 			return b.getLineCount();
 		else

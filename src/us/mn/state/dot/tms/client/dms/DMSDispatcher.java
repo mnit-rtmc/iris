@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -133,8 +133,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Sign message creator */
 	protected final SignMessageCreator creator;
 
-	/** Pixel map builder */
-	protected PixelMapBuilder builder;
+	/** Raster graphic builder */
+	protected RasterBuilder builder;
 
 	/** Current message MULTI string */
 	protected String message = "";
@@ -240,7 +240,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Check the dimensions of a sign against the pixel map builder */
 	protected boolean checkDimensions(DMS dms) {
-		PixelMapBuilder b = builder;
+		RasterBuilder b = builder;
 		if(b != null) {
 			Integer w = dms.getWidthPixels();
 			Integer h = dms.getHeightPixels();
@@ -374,7 +374,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Create bitmap graphics for a MULTI string */
 	protected String createBitmaps(String multi) {
-		PixelMapBuilder b = builder;
+		RasterBuilder b = builder;
 		if(b != null) {
 			MultiString ms = new MultiString(multi);
 			return encodeBitmaps(b.createBitmaps(ms));
@@ -422,7 +422,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Create a pixel map builder */
 	protected void createBuilder(DMS dms) {
-		builder = DMSHelper.createPixelMapBuilder(dms);
+		builder = DMSHelper.createRasterBuilder(dms);
 		composer.setSign(dms, builder);
 	}
 
@@ -564,7 +564,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Get the raster graphic array for the current message */
 	public RasterGraphic[] getPixmaps() {
-		PixelMapBuilder b = builder;
+		RasterBuilder b = builder;
 		if(b != null) {
 			MultiString multi = new MultiString(message);
 			try {

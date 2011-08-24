@@ -44,9 +44,9 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.Point;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -1267,7 +1267,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	protected SignMessage createMessage(String m, DMSMessagePriority ap,
 		DMSMessagePriority rp, boolean s, Integer d)
 	{
-		PixelMapBuilder builder = DMSHelper.createPixelMapBuilder(this);
+		RasterBuilder builder = DMSHelper.createRasterBuilder(this);
 		if(builder != null) {
 			MultiString ms = new MultiString(m);
 			BitmapGraphic[] pages = builder.createBitmaps(ms);

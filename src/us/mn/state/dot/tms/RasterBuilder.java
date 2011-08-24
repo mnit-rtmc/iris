@@ -19,13 +19,13 @@ import us.mn.state.dot.sonar.Checker;
 import java.util.TreeMap;
 
 /**
- * A pixel map builder creates pixel maps for DMS display.
+ * A raster builder creates raster graphics for DMS display.
  * @see MultiStringState, MultiStringStateAdapter, MultiString
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class PixelMapBuilder {
+public class RasterBuilder {
 
 	/** Pixel width of sign */
 	public final int width;
@@ -45,7 +45,7 @@ public class PixelMapBuilder {
 	protected final int default_font;
 
 	/**
-	 * Create a new pixel map builder.
+	 * Create a new raster builder.
 	 * @param w Sign width in pixels.
 	 * @param h Sign height in pixels.
 	 * @param cw Character width (pixels) for character-matrix signs.
@@ -54,7 +54,7 @@ public class PixelMapBuilder {
 	 *           signs.  Use 0 for full-matrix signs.
 	 * @param df Default font number.
 	 */
-	public PixelMapBuilder(int w, int h, int cw, int ch, int df) {
+	public RasterBuilder(int w, int h, int cw, int ch, int df) {
 		width = w;
 		height = h;
 		c_width = cw;

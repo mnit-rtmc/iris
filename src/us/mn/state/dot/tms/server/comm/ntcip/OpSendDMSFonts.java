@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -72,7 +72,7 @@ public class OpSendDMSFonts extends OpDMS {
 	public OpSendDMSFonts(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
 		final LinkedList<Font> fonts = new LinkedList<Font>();
-		PixelMapBuilder builder = DMSHelper.createPixelMapBuilder(d);
+		RasterBuilder builder = DMSHelper.createRasterBuilder(d);
 		if(builder != null) {
 			builder.findFonts(new Checker<Font>() {
 				public boolean check(Font font) {
