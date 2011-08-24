@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -46,12 +45,13 @@ class OpMessage extends OpDms {
 	private final SignMessage m_sm;
 
 	/** Number of pages in message */
-	private int m_npages;
+	private final int m_npages;
 
 	/** Create a new DMS command message object */
 	public OpMessage(DMSImpl d, SignMessage m, User u) {
 		super(PriorityLevel.COMMAND, d, "Sending new message", u);
 		m_sm = m;
+		m_npages = calcNumPages();
 	}
 
 	/** Return the bitmap page as a hex string for all pages. */
@@ -129,7 +129,6 @@ class OpMessage extends OpDms {
 
 	/** create 2nd phase */
 	private Phase createPhaseTwo() {
-		m_npages = calcNumPages();
 		if(m_npages <= 0)
 			return null;
 		return new PhaseSendMessage();
