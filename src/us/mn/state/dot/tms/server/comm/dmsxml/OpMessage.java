@@ -19,13 +19,13 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -75,7 +75,7 @@ class OpMessage extends OpDms {
 	public String getBitmapPage(int pg) {
 		if(m_sm == null)
 			return "";
-		byte[] bitmaps = getBitmaps();
+		byte[] bitmaps = SignMessageHelper.decodeBitmaps(m_sm);
 		if(bitmaps == null)
 			return "";
 		BitmapGraphic oldbmg = DMSHelper.createBitmapGraphic(m_dms);
@@ -93,16 +93,6 @@ class OpMessage extends OpDms {
 		BitmapGraphic newbmg = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
 		newbmg.copy(oldbmg);
 		return new HexString(newbmg.getPixels()).toString();
-	}
-
-	/** Get the sign message bitmaps */
-	protected byte[] getBitmaps() {
-		try {
-			return Base64.decode(m_sm.getBitmaps());
-		}
-		catch(IOException e) {
-			return null;
-		}
 	}
 
 	/** Create the first real phase of the operation */
@@ -131,7 +121,7 @@ class OpMessage extends OpDms {
 	/** Calculate the number of pages.
 	 *  @return If a fatal error occurred 0, else the number of pages. */
 	private int calcNumPages() {
-		byte[] bitmaps = getBitmaps();
+		byte[] bitmaps = SignMessageHelper.decodeBitmaps(m_sm);
 		if(bitmaps == null)
 			return 0;
 		int blen = getPageLength();
