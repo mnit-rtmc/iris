@@ -444,4 +444,49 @@ public class DMSHelper extends BaseHelper {
 		else
 			return null;
 	}
+
+	/** Get the current raster graphics for all pages of the specified DMS.
+	 * @param dms Sign in question.
+	 * @return RasterGraphic array, one for each page, or null on error.
+	 */
+	static public RasterGraphic[] getRasters(DMS dms) {
+		if(dms == null)
+			return null;
+		SignMessage sm = dms.getMessageCurrent();
+		if(sm == null)
+			return null;
+		RasterBuilder rb = createRasterBuilder(dms);
+		if(rb == null)
+			return null;
+		RasterGraphic[] rasters = rb.createPixmaps(new MultiString(
+			sm.getMulti()));
+		BitmapGraphic[] bitmaps = SignMessageHelper.getBitmaps(sm, dms);
+		if(graphicsMatch(rasters, bitmaps))
+			return rasters;
+		else
+			return bitmaps;
+	}
+
+	/** Check if an array of raster graphics match another */
+	static private boolean graphicsMatch(RasterGraphic[] rg,
+		BitmapGraphic[] bm)
+	{
+		if(rg.length != bm.length)
+			return false;
+		for(int i = 0; i < rg.length; i++) {
+			RasterGraphic r = rg[i];
+			BitmapGraphic b = bm[i];
+			BitmapGraphic test = b.createBlankCopy();
+			test.copy(b);
+			try {
+				test.difference(r);
+			}
+			catch(IndexOutOfBoundsException e) {
+				return false;
+			}
+			if(test.getLitCount() > 0)
+				return false;
+		}
+		return true;
+	}
 }

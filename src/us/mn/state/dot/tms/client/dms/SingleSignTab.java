@@ -388,7 +388,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	protected void updateCurrentPanel(DMS dms) {
 		clearPager();
 		if(dms != null) {
-			RasterGraphic[] rg = DMSHelper.getBitmaps(dms);
+			RasterGraphic[] rg = DMSHelper.getRasters(dms);
 			if(rg != null) {
 				pnlPager = new DMSPanelPager(currentPnl, dms,
 					rg, getPgOnTime(dms));

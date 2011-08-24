@@ -269,7 +269,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Get the raster graphic for page one */
 	protected RasterGraphic getPageOne(DMS dms) {
-		RasterGraphic[] rasters = DMSHelper.getBitmaps(dms);
+		RasterGraphic[] rasters = DMSHelper.getRasters(dms);
 		if(rasters != null && rasters.length > 0)
 			return rasters[0];
 		else
