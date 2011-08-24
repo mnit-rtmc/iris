@@ -42,12 +42,6 @@ import us.mn.state.dot.tms.utils.STime;
  */
 class OpMessage extends OpDms {
 
-	/** Maximum message priority */
-	private static final int MAX_MESSAGE_PRIORITY = 255;
-
-	/** Flag to avoid phase loops */
-	private boolean modify = true;
-
 	/** Sign message */
 	private final SignMessage m_sm;
 
