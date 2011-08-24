@@ -47,15 +47,19 @@ class OpMessage extends OpDms {
 	/** Number of pages in message */
 	private final int m_npages;
 
+	/** Bitmaps for all pages as a hex string */
+	private final String m_bitmaps;
+
 	/** Create a new DMS command message object */
 	public OpMessage(DMSImpl d, SignMessage m, User u) {
 		super(PriorityLevel.COMMAND, d, "Sending new message", u);
 		m_sm = m;
 		m_npages = calcNumPages();
+		m_bitmaps = getBitmapPage();
 	}
 
 	/** Return the bitmap page as a hex string for all pages. */
-	public String getBitmapPage() {
+	private String getBitmapPage() {
 		StringBuilder p = new StringBuilder();
 		for(int i = 0; i < m_npages; ++i)
 			p.append(getBitmapPage(i));
@@ -66,7 +70,7 @@ class OpMessage extends OpDms {
 	 * Return the bitmap page as a hex string. The width of the 
 	 * bitmap is adjusted as necessary.
 	 */
-	public String getBitmapPage(int pg) {
+	private String getBitmapPage(int pg) {
 		if(m_sm == null)
 			return "";
 		byte[] bitmaps = SignMessageHelper.decodeBitmaps(m_sm);
@@ -234,7 +238,7 @@ class OpMessage extends OpDms {
 			m_user != null ? m_user.getName() : "");
 
 		// bitmap
-		xrr.addReq("Bitmap", getBitmapPage());
+		xrr.addReq("Bitmap", m_bitmaps);
 
 		// response
 		xrr.addRes("Id");
