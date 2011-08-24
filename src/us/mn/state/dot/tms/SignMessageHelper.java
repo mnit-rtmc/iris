@@ -80,7 +80,7 @@ public class SignMessageHelper extends BaseHelper {
 			return true;
 		if(sm1 == null || sm2 == null)
 			return false;
-		if(!MultiString.isEquivalent(sm1.getMulti(), sm2.getMulti()))
+		if(!new MultiString(sm1.getMulti()).equals(sm2.getMulti()))
 			return false;
 		if(sm1.getActivationPriority() != sm2.getActivationPriority())
 			return false;

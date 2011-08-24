@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,8 +67,8 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				return canUpdate(qm);
 			}
 			public void setValueAt(QuickMessage qm, Object value) {
-				qm.setMulti(new MultiString(
-					value.toString()).normalize());
+				qm.setMulti(MultiString.normalize(
+					value.toString()));
 			}
 		}
 	    };

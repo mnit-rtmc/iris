@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2011  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -71,7 +71,7 @@ public class MsgComboBox extends JComboBox {
 			txt = ((SignText)o).getMessage();
 		else if(o != null)
 			txt = o.toString();
-		return new MultiString(txt).normalize();
+		return MultiString.normalize(txt);
 	}
 
 	/** Sign message composer containing the combo box */

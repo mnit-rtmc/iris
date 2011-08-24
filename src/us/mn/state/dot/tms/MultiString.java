@@ -179,70 +179,17 @@ public class MultiString implements MultiStringState {
 	/** MULTI string buffer */
 	protected final StringBuilder multi = new StringBuilder();
 
-        /** Test if the MULTI string is equal to another MULTI string.
-	 *  This is a simple string comparison.
-	 *  @see isEquivalent() for a broader functional comparison. */
+        /** Test if the MULTI string is equal to another MULTI string. */
         public boolean equals(Object o) {
 		if(this == o)
 			return true;
-                if(o instanceof MultiString)
-                        return normalize().equals(
-                                ((MultiString)o).normalize());
-                if(o instanceof String)
-                        return normalize().equals(
-                                new MultiString((String)o).normalize());
+		if(o != null) {
+			String ms = normalize(toString());
+			String oms = normalize(o.toString());
+			return ms.equals(oms);
+		}
                 return false;
         }
-
-	/** Test if the MULTI string is equivalent to another MULTI string.
-	 *  This is a functional comparison based on attributes. */
-	public boolean isEquivalent(Object o) {
-		if(o instanceof MultiString)
-			return isEquivalent(this, (MultiString)o);
-		else if(o instanceof String)
-			return isEquivalent(toString(), (String)o);
-		else
-			return false;
-	}
-
-	/** Test if the MULTI string is equivalent to another MULTI string.
-	 *  This is a functional comparison based on attributes.
-	 * @param a MULTI string, may not be null.
-	 * @param b MULTI string, may not be null. 
-	 * @return True if ms1 equals ms2 else false. */
-	public static boolean isEquivalent(String a, String b) {
-		return isEquivalent(new MultiString(a), new MultiString(b));
-	}
-
-	/** Test if the MULTI string is equivalent to another MULTI string.
-	 *  This is a functional comparison based on attributes.
-	 * @param a MultiString, may be null.
-	 * @param b MultiString, may be null. 
-	 * @return True if ms1 equals ms2 else false. */
-	public static boolean isEquivalent(MultiString a, MultiString b) {
-		if(a == null && b == null)
-			return true;
-		if(a == null || b == null)
-			return false;
-		if(!Arrays.equals(a.getFonts(FontHelper.DEFAULT_FONT_NUM), 
-			b.getFonts(FontHelper.DEFAULT_FONT_NUM)))
-		{
-			return false;
-		}
-		if(a.getNumPages() != b.getNumPages())
-			return false;
-		if(!Arrays.equals(a.getText(), b.getText()))
-			return false;
-		// page on-times
-		int apont = DmsPgTime.getDefaultOn(a.singlePage()).toTenths();
-		int bpont = DmsPgTime.getDefaultOn(b.singlePage()).toTenths();
-		if(!Arrays.equals(a.getPageOnTimes(apont), 
-			b.getPageOnTimes(bpont)))
-		{
-			return false;
-		}
-		return true;
-	}
 
 	/** Calculate a hash code for the MULTI string */
 	public int hashCode() {
@@ -485,7 +432,7 @@ public class MultiString implements MultiStringState {
 	 * @return A normalized MULTI string with lowercase spans converted
 	 *         to uppercase, invalid character removed, invalid tags
 	 *         removed, etc. */
-	public String normalize() {
+	static public String normalize(String multi) {
 		MultiString ms = new MultiString() {
 			public void addSpan(String s) {
 				s = s.toUpperCase();
@@ -494,7 +441,7 @@ public class MultiString implements MultiStringState {
 					super.addSpan(m.group());
 			}
 		};
-		parse(ms);
+		new MultiString(multi).parse(ms);
 		return ms.toString();
 	}
 
