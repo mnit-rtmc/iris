@@ -136,7 +136,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Raster graphic builder */
 	protected RasterBuilder builder;
 
-	/** Current message MULTI string */
+	/** Selected message MULTI string */
 	protected String message = "";
 
 	/** Create a new DMS dispatcher */
@@ -552,7 +552,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		}
 	}
 
-	/** Get the current selected message */
+	/** Get the selected message */
 	public String getMessage() {
 		return message;
 	}
@@ -562,7 +562,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		singleTab.selectPreview(p);
 	}
 
-	/** Get the raster graphic array for the current message */
+	/** Get raster graphic array for the selected message */
 	public RasterGraphic[] getPixmaps() {
 		RasterBuilder b = builder;
 		if(b != null) {
