@@ -190,14 +190,15 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			x0 = x;
 		if(y != null)
 			y0 = y;
-		renderGraphic(graphic, x0, y0);
+		renderGraphic(graphic, ms_foreground, x0, y0);
 	}
 
 	/** Render a graphic onto the raster.
-	 * @param g Graphic to render
+	 * @param g Graphic to render.
+	 * @param fg Foreground color.
 	 * @param x X-position on raster (1-based)
 	 * @param y Y-position on raster (1-based) */
-	protected void renderGraphic(Graphic g, int x, int y) {
+	protected void renderGraphic(Graphic g, DmsColor fg, int x, int y) {
 		x--;
 		y--;
 		int w = g.getWidth();
@@ -208,10 +209,8 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			bg.setPixels(pixels);
 			for(int yy = 0; yy < h; yy++) {
 				for(int xx = 0; xx < w; xx++) {
-					if(bg.getPixel(xx, yy).isLit()) {
-						raster.setPixel(x + xx, y + yy,
-							ms_foreground);
-					}
+					if(bg.getPixel(xx, yy).isLit())
+						raster.setPixel(x+xx, y+yy, fg);
 				}
 			}
 		}
@@ -401,9 +400,11 @@ public class MultiRenderer extends MultiStringStateAdapter {
 	protected class Span {
 		protected final String span;
 		protected final Font font;
+		protected final DmsColor foreground;
 		protected Span(String s) {
 			span = s;
 			font = FontHelper.find(ms_fnum);
+			foreground = ms_foreground;
 		}
 		int getCharSpacing(Span other) {
 			if(other == null)
@@ -429,7 +430,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			for(int i = 0; i < span.length(); i++) {
 				int cp = span.charAt(i);
 				Graphic g = FontHelper.lookupGraphic(font, cp);
-				renderGraphic(g, x, y);
+				renderGraphic(g, foreground, x, y);
 				x += g.getWidth() + font.getCharSpacing();
 			}
 		}
