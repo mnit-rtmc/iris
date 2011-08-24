@@ -16,10 +16,7 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.LinkedList;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Helper for dealing with sign messages.
@@ -189,7 +186,7 @@ public class SignMessageHelper extends BaseHelper {
 	}
 
 	/** Decode the bitmaps on a sign message */
-	static public byte[] decodeBitmaps(SignMessage sm) {
+	static private byte[] decodeBitmaps(SignMessage sm) {
 		if(sm == null)
 			return null;
 		try {
