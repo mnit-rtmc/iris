@@ -21,7 +21,6 @@ import java.util.GregorianCalendar;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DmsPgTime;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
@@ -54,42 +53,28 @@ class OpMessage extends OpDms {
 	public OpMessage(DMSImpl d, SignMessage m, User u) {
 		super(PriorityLevel.COMMAND, d, "Sending new message", u);
 		m_sm = m;
-		m_npages = calcNumPages();
-		m_bitmaps = getBitmapPage();
+		BitmapGraphic[] bitmaps = SignMessageHelper.getBitmaps(m, d);
+		m_npages = bitmaps != null ? bitmaps.length : 0;
+		m_bitmaps = convertToHexString(bitmaps);
 	}
 
 	/** Return the bitmap page as a hex string for all pages. */
-	private String getBitmapPage() {
-		StringBuilder p = new StringBuilder();
-		for(int i = 0; i < m_npages; ++i)
-			p.append(getBitmapPage(i));
-		return p.toString(); 
+	private String convertToHexString(BitmapGraphic[] bitmaps) {
+		StringBuilder hs = new StringBuilder();
+		if(bitmaps != null) {
+			for(BitmapGraphic bg: bitmaps)
+				hs.append(getBitmapPage(bg));
+		}
+		return hs.toString(); 
 	}
 
 	/** 
 	 * Return the bitmap page as a hex string. The width of the 
 	 * bitmap is adjusted as necessary.
 	 */
-	private String getBitmapPage(int pg) {
-		if(m_sm == null)
-			return "";
-		byte[] bitmaps = SignMessageHelper.decodeBitmaps(m_sm);
-		if(bitmaps == null)
-			return "";
-		BitmapGraphic oldbmg = DMSHelper.createBitmapGraphic(m_dms);
-		if(oldbmg == null)
-			return "";
-		int blen = oldbmg.length();
-		if(bitmaps.length % blen != 0)
-			return "";
-		int pages = bitmaps.length / blen;
-		if(pg < 0 || pg >= pages)
-			return "";
-		byte[] pix = new byte[blen];
-		System.arraycopy(bitmaps, pg * blen, pix, 0, blen);
-		oldbmg.setPixels(pix);
+	private String getBitmapPage(BitmapGraphic bg) {
 		BitmapGraphic newbmg = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
-		newbmg.copy(oldbmg);
+		newbmg.copy(bg);
 		return new HexString(newbmg.getPixels()).toString();
 	}
 
@@ -116,35 +101,11 @@ class OpMessage extends OpDms {
 		return flashing;
 	}
 
-	/** Calculate the number of pages.
-	 *  @return If a fatal error occurred 0, else the number of pages. */
-	private int calcNumPages() {
-		byte[] bitmaps = SignMessageHelper.decodeBitmaps(m_sm);
-		if(bitmaps == null)
-			return 0;
-		int blen = getPageLength();
-		if(blen == 0 || bitmaps.length % blen != 0)
-			return 0;
-		int np = bitmaps.length / blen;
-		if(np <= 0)
-			return 0;
-		return np;
-	}
-
 	/** create 2nd phase */
 	private Phase createPhaseTwo() {
 		if(m_npages <= 0)
 			return null;
 		return new PhaseSendMessage();
-	}
-
-	/** Get the length of one bitmap page */
-	protected int getPageLength() {
-		BitmapGraphic b = DMSHelper.createBitmapGraphic(m_dms);
-		if(b != null)
-			return b.length();
-		else
-			return 0;
 	}
 
 	/** 
