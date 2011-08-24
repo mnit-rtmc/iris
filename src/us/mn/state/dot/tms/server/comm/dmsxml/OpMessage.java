@@ -22,6 +22,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DmsPgTime;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
@@ -77,7 +78,7 @@ class OpMessage extends OpDms {
 		byte[] bitmaps = getBitmaps();
 		if(bitmaps == null)
 			return "";
-		BitmapGraphic oldbmg = createBitmap();
+		BitmapGraphic oldbmg = DMSHelper.createBitmapGraphic(m_dms);
 		if(oldbmg == null)
 			return "";
 		int blen = oldbmg.length();
@@ -102,17 +103,6 @@ class OpMessage extends OpDms {
 		catch(IOException e) {
 			return null;
 		}
-	}
-
-	/** Create a bitmap matching the sign dimensions */
-	protected BitmapGraphic createBitmap() {
-		Integer w = m_dms.getWidthPixels();
-		if(w == null || w < 1)
-			return null;
-		Integer h = m_dms.getHeightPixels();
-		if(h == null || h < 1)
-			return null;
-		return new BitmapGraphic(w, h);
 	}
 
 	/** Create the first real phase of the operation */
@@ -163,7 +153,7 @@ class OpMessage extends OpDms {
 
 	/** Get the length of one bitmap page */
 	protected int getPageLength() {
-		BitmapGraphic b = createBitmap();
+		BitmapGraphic b = DMSHelper.createBitmapGraphic(m_dms);
 		if(b != null)
 			return b.length();
 		else

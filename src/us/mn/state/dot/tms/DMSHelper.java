@@ -454,7 +454,7 @@ public class DMSHelper extends BaseHelper {
 	}
 
 	/** Create a bitmap graphic for the specified DMS */
-	static protected BitmapGraphic createBitmapGraphic(DMS dms) {
+	static public BitmapGraphic createBitmapGraphic(DMS dms) {
 		Integer wp = dms.getWidthPixels();
 		Integer hp = dms.getHeightPixels();
 		if(wp != null && hp != null)
