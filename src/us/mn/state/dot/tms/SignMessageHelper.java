@@ -161,6 +161,33 @@ public class SignMessageHelper extends BaseHelper {
 			return false;
 	}
 
+	/** Get the bitmap graphic for all pages of the specified DMS.
+	 * @param sm SignMessage in question.
+	 * @param DMS with the graphic.
+	 * @return Array of bitmaps, one for each page, or null on error. */
+	static public BitmapGraphic[] getBitmaps(SignMessage sm, DMS dms) {
+		if(sm == null || dms == null)
+			return null;
+		byte[] bmaps = decodeBitmaps(sm);
+		if(bmaps == null)
+			return null;
+		BitmapGraphic bg = DMSHelper.createBitmapGraphic(dms);
+		if(bg == null)
+			return null;
+		int blen = bg.length();
+		if(blen == 0 || bmaps.length % blen != 0)
+			return null;
+		int n_pages = bmaps.length / blen;
+		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
+		for(int i = 0; i < n_pages; i++) {
+			bitmaps[i] = DMSHelper.createBitmapGraphic(dms);
+			byte[] b = new byte[blen];
+			System.arraycopy(bmaps, i * blen, b, 0, blen);
+			bitmaps[i].setPixels(b);
+		}
+		return bitmaps;
+	}
+
 	/** Decode the bitmaps on a sign message */
 	static public byte[] decodeBitmaps(SignMessage sm) {
 		if(sm == null)
