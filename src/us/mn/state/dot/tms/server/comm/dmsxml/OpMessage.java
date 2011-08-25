@@ -130,13 +130,6 @@ class OpMessage extends OpDms {
 		return offtime;
 	}
 
-	/** Return a validated MULTI string for a non-flashing single page 
-	 *  message, which by definition must have a page on-time of zero. */
-	protected String validateMultiOnePageMessage(String ms) {
-		String ret = MultiString.replacePageOnTime(ms, 0);
-		return ret;
-	}
-
 	/** Build request message in this format:
 	 *	<dmsxml><elemname>
 	 *		<Id>...</Id>
@@ -163,7 +156,7 @@ class OpMessage extends OpDms {
 		xrr.addReq("Address", controller.getDrop());
 
 		// MsgText
-		xrr.addReq("MsgText", m_sm.getMulti());
+		xrr.addReq("MsgText", MultiString.canonical(m_sm.getMulti()));
 
 		// UseOnTime, always true
 		xrr.addReq("UseOnTime", true);

@@ -450,6 +450,14 @@ public class MultiString implements MultiStringState {
 		return ms.toString();
 	}
 
+	/** Return the canonical version of a MULTI string.
+	 * @return A canonical MULTI string with all default tag values
+	 *         included and redundant tags removed. */
+	static public String canonical(String multi) {
+		/* FIXME: include default tag values */
+		return normalize(multi);
+	}
+
 	/** Get an array of font numbers.
 	 * @param f_num Default font number, one based.
 	 * @return An array of font numbers for each page of the message. */
