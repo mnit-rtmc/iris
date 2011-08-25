@@ -111,17 +111,13 @@ public class RasterBuilder {
 			return false;
 		if(isCharMatrix()) {
 			// char-matrix signs must match font width
-			if(c_width != f.getWidth())
-				return false;
-			// char-matrix signs must not have char spacing
-			if(f.getCharSpacing() > 0)
-				return false;
+			// and must not have character spacing
+			return c_width == f.getWidth() &&
+			       f.getCharSpacing() == 0;
 		} else {
 			// line- or full-matrix signs must have char spacing
-			if(f.getCharSpacing() == 0)
-				return false;
+			return f.getCharSpacing() > 0;
 		}
-		return true;
 	}
 
 	/** Check if a font height is usable */
@@ -130,17 +126,13 @@ public class RasterBuilder {
 			return false;
 		if(isFullMatrix()) {
 			// full-matrix signs must have line spacing
-			if(f.getLineSpacing() == 0)
-				return false;
+			return f.getLineSpacing() > 0;
 		} else {
 			// char- or line-matrix signs must match font height
-			if(c_height != f.getHeight())
-				return false;
-			// char- or line-matrix signs must not have line spacing
-			if(f.getLineSpacing() > 0)
-				return false;
+			// and must not have line spacing
+			return c_height == f.getHeight() &&
+			       f.getLineSpacing() == 0;
 		}
-		return true;
 	}
 
 	/** Get the optimal line height (pixels) */
