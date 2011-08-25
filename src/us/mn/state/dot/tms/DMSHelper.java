@@ -461,7 +461,7 @@ public class DMSHelper extends BaseHelper {
 		RasterGraphic[] rasters = rb.createPixmaps(new MultiString(
 			sm.getMulti()));
 		BitmapGraphic[] bitmaps = SignMessageHelper.getBitmaps(sm, dms);
-		if(graphicsMatch(rasters, bitmaps))
+		if(graphicsMatch(rasters, bitmaps) || bitmaps.length == 0)
 			return rasters;
 		else
 			return bitmaps;
