@@ -37,9 +37,19 @@ public class RasterBuilder {
 	 * line-matrix or full-matrix signs. */
 	protected final int c_width;
 
+	/** Check for character-matrix sign */
+	public boolean isCharMatrix() {
+		return c_width > 0;
+	}
+
 	/** Character height (pixels) for character- or line-matrix signs.
 	 * Use 0 for full-matrix signs. */
 	protected final int c_height;
+
+	/** Check for full-matrix sign */
+	public boolean isFullMatrix() {
+		return c_height <= 0;
+	}
 
 	/** Default font number */
 	protected final int default_font;
@@ -99,7 +109,7 @@ public class RasterBuilder {
 	protected boolean isFontWidthUsable(Font f) {
 		if(f.getWidth() > width)
 			return false;
-		if(c_width > 0) {
+		if(isCharMatrix()) {
 			// char-matrix signs must match font width
 			if(c_width != f.getWidth())
 				return false;
@@ -118,16 +128,16 @@ public class RasterBuilder {
 	protected boolean isFontHeightUsable(Font f) {
 		if(f.getHeight() > height)
 			return false;
-		if(c_height > 0) {
+		if(isFullMatrix()) {
+			// full-matrix signs must have line spacing
+			if(f.getLineSpacing() == 0)
+				return false;
+		} else {
 			// char- or line-matrix signs must match font height
 			if(c_height != f.getHeight())
 				return false;
 			// char- or line-matrix signs must not have line spacing
 			if(f.getLineSpacing() > 0)
-				return false;
-		} else {
-			// full-matrix signs must have line spacing
-			if(f.getLineSpacing() == 0)
 				return false;
 		}
 		return true;
