@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.utils.SString;
 /** 
  * MultiString test cases
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class MultiStringTest extends TestCase {
 
@@ -36,7 +37,6 @@ public class MultiStringTest extends TestCase {
 		normalization();
 		replacePageOnTime();
 		equals();
-		isEquivalent();
 		getText();
 		getNumPages();
 		etc();
@@ -248,65 +248,65 @@ public class MultiStringTest extends TestCase {
 
 	/** normalization */
 	private void normalization() {
-		assertTrue(new MultiString("01234567890").normalize().
+		assertTrue(MultiString.normalize("01234567890").
 			equals("01234567890"));
-		assertTrue(new MultiString("ABC").normalize().
+		assertTrue(MultiString.normalize("ABC").
 			equals("ABC"));
-		assertTrue(new MultiString("abc").normalize().
+		assertTrue(MultiString.normalize("abc").
 			equals("ABC"));
-		assertTrue(new MultiString("DON'T").normalize().
+		assertTrue(MultiString.normalize("DON'T").
 			equals("DON'T"));
-		assertTrue(new MultiString("SPACE SPACE").normalize().
+		assertTrue(MultiString.normalize("SPACE SPACE").
 			equals("SPACE SPACE"));
-		assertTrue(new MultiString("AB|C").normalize().
+		assertTrue(MultiString.normalize("AB|C").
 			equals("ABC"));
-		assertTrue(new MultiString("AB|{}{}C{}").normalize().
+		assertTrue(MultiString.normalize("AB|{}{}C{}").
 			equals("ABC"));
-		assertTrue(new MultiString("ABC DEF").normalize().
+		assertTrue(MultiString.normalize("ABC DEF").
 			equals("ABC DEF"));
-		assertTrue(new MultiString("ABC[bad]DEF").normalize().
+		assertTrue(MultiString.normalize("ABC[bad]DEF").
 			equals("ABCDEF"));
-		assertTrue(new MultiString("ABC[nl]DEF").normalize().
+		assertTrue(MultiString.normalize("ABC[nl]DEF").
 			equals("ABC[nl]DEF"));
-		assertTrue(new MultiString("ABC[nl3]DEF").normalize().
+		assertTrue(MultiString.normalize("ABC[nl3]DEF").
 			equals("ABC[nl]DEF"));
-		assertTrue(new MultiString("ABC[np]DEF").normalize().
+		assertTrue(MultiString.normalize("ABC[np]DEF").
 			equals("ABC[np]DEF"));
-		assertTrue(new MultiString("ABC[jl4]DEF").normalize().
+		assertTrue(MultiString.normalize("ABC[jl4]DEF").
 			equals("ABC[jl4]DEF"));
-		assertTrue(new MultiString("ABC[jl6]DEF").normalize().
+		assertTrue(MultiString.normalize("ABC[jl6]DEF").
 			equals("ABCDEF"));
-		assertTrue(new MultiString("ABC[jp4]DEF").normalize().
+		assertTrue(MultiString.normalize("ABC[jp4]DEF").
 			equals("ABC[jp4]DEF"));
-		assertTrue(new MultiString("[fo3]ABC DEF").normalize().
+		assertTrue(MultiString.normalize("[fo3]ABC DEF").
 			equals("[fo3]ABC DEF"));
-		assertTrue(new MultiString("[fo3,beef]ABC DEF").normalize().
+		assertTrue(MultiString.normalize("[fo3,beef]ABC DEF").
 			equals("[fo3,beef]ABC DEF"));
-		assertTrue(new MultiString("[g1]").normalize().
+		assertTrue(MultiString.normalize("[g1]").
 			equals("[g1]"));
-		assertTrue(new MultiString("[g1,5,5]").normalize().
+		assertTrue(MultiString.normalize("[g1,5,5]").
 			equals("[g1,5,5]"));
-		assertTrue(new MultiString("[g1,5,5,beef]").normalize().
+		assertTrue(MultiString.normalize("[g1,5,5,beef]").
 			equals("[g1,5,5,beef]"));
-		assertTrue(new MultiString("[cf255,255,255]").normalize().
+		assertTrue(MultiString.normalize("[cf255,255,255]").
 			equals("[cf255,255,255]"));
-		assertTrue(new MultiString("[cf0,255,255]").normalize().
+		assertTrue(MultiString.normalize("[cf0,255,255]").
 			equals("[cf0,255,255]"));
-		assertTrue(new MultiString("[cf0,255,0]").normalize().
+		assertTrue(MultiString.normalize("[cf0,255,0]").
 			equals("[cf0,255,0]"));
-		assertTrue(new MultiString("[pto]").normalize().
+		assertTrue(MultiString.normalize("[pto]").
 			equals("[pto]"));
-		assertTrue(new MultiString("[pt10o]").normalize().
+		assertTrue(MultiString.normalize("[pt10o]").
 			equals("[pt10o]"));
-		assertTrue(new MultiString("[pt10o5]").normalize().
+		assertTrue(MultiString.normalize("[pt10o5]").
 			equals("[pt10o5]"));
-		assertTrue(new MultiString("[pto5]").normalize().
+		assertTrue(MultiString.normalize("[pto5]").
 			equals("[pto5]"));
-		assertTrue(new MultiString("[tr1,1,40,20]").normalize().
+		assertTrue(MultiString.normalize("[tr1,1,40,20]").
 			equals("[tr1,1,40,20]"));
-		assertTrue(new MultiString("[tr1,1,0,0]").normalize().
+		assertTrue(MultiString.normalize("[tr1,1,0,0]").
 			equals("[tr1,1,0,0]"));
-		assertTrue(new MultiString("[ttS100]").normalize().
+		assertTrue(MultiString.normalize("[ttS100]").
 			equals("[ttS100]"));
 	}
 
@@ -333,46 +333,6 @@ public class MultiStringTest extends TestCase {
 		// verify normalization used
 		assertTrue(new MultiString("[fo1]abc").equals("[fo1]ABC"));
 		assertTrue(new MultiString("[fo1]abc").equals(new MultiString("[fo1]ABC")));
-	}
-
-	/** isEquivalent */
-	private void isEquivalent() {
-		{
-			MultiString s1 = null;
-			MultiString s2 = null;
-			assertTrue(MultiString.isEquivalent(s1, s2));
-		}
-		assertFalse(MultiString.isEquivalent(null, new MultiString("")));
-		assertTrue(MultiString.isEquivalent("", ""));
-		assertFalse(MultiString.isEquivalent("[fo2]LINE1", "[fo1]LINE1"));
-		assertTrue(MultiString.isEquivalent("LINE1[nl][nl]", "LINE1"));
-		assertTrue(MultiString.isEquivalent("LINE1[nl][np]", "LINE1[np]"));
-
-		// an absent font specification should equal the default
-		// font number.
-		String deffont = "[fo" + SString.intToString(
-			FontHelper.DEFAULT_FONT_NUM) + "]";
-		assertTrue(MultiString.isEquivalent(deffont + "LINE1", "LINE1"));
-		assertTrue(MultiString.isEquivalent(deffont + "LINE1[np]" + 
-			deffont + "PAGE2", "LINE1[np]PAGE2"));
-
-		// an absent page on-time on a single page message should 
-		// equal an explicit page on-time of the system default for
-		// a single page message (zero).
-		String spgdef = DmsPgTime.getDefaultOn(true).toString();
-		assertTrue(MultiString.isEquivalent("[pt" + spgdef + 
-			"o]PAGE1", "PAGE1"));
-
-		// an absent page on-timeon a multi-page message should
-		// equal an explicit page on-time of the system default,
-		// for a multi-page message.
-		String mpgdef = DmsPgTime.getDefaultOn(false).toString();
-		assertTrue(MultiString.isEquivalent("[pt" + mpgdef + 
-			"o]PAGE1[np]PAGE2", "PAGE1[np]PAGE2"));
-
-		// blank multistrings containing other text tags are equal
-		assertTrue(MultiString.isEquivalent("[fo1]", "[fo2]"));
-		assertTrue(MultiString.isEquivalent("[pt3o3]", "[pt9o2]"));
 	}
 
 	/** getText */
