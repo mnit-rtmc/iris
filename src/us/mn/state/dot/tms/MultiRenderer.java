@@ -115,11 +115,11 @@ public class MultiRenderer extends MultiStringStateAdapter {
 		}
 	}
 
-	/** Add a line */
-	public void addLine() {
-		super.addLine();
+	/** Add a new line */
+	public void addLine(Integer spacing) {
+		super.addLine(spacing);
 		Block block = currentBlock();
-		block.addLine();
+		block.addLine(spacing);
 	}
 
 	/** Get the current text block */
@@ -229,7 +229,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			Line line = currentLine();
 			line.addSpan(s);
 		}
-		void addLine() {
+		void addLine(Integer spacing) {
 			Line line = currentLine();
 			if(line.getHeight() == 0) {
 				// The line height can be zero on full-matrix
@@ -238,11 +238,11 @@ public class MultiRenderer extends MultiStringStateAdapter {
 				// height to be taken from the current font.
 				line.addSpan(new Span(""));
 			}
-			lines.addLast(new Line());
+			lines.addLast(new Line(spacing));
 		}
 		Line currentLine() {
 			if(lines.isEmpty())
-				lines.addLast(new Line());
+				lines.addLast(new Line(null));
 			return lines.peekLast();
 		}
 		void render() throws InvalidMessageException {
@@ -293,28 +293,36 @@ public class MultiRenderer extends MultiStringStateAdapter {
 	protected class Line {
 		protected final LinkedList<Fragment> fragments =
 			new LinkedList<Fragment>();
+		private final Integer spacing;
+		Line(Integer s) {
+			spacing = s;
+		}
 		int getHeight() {
 			int h = c_height;
 			for(Fragment f: fragments)
 				h = Math.max(h, f.getHeight());
 			return h;
 		}
-		int getSpacing() {
+		private int getFragmentSpacing() {
 			int ls = 0;
 			for(Fragment f: fragments)
 				ls = Math.max(ls, f.getSpacing());
 			return ls;
 		}
-		int getSpacing(Line other) {
-			if(other == null)
-				return 0;
-			int sp0 = getSpacing();
-			int sp1 = other.getSpacing();
-			// NTCIP 1203 fontLineSpacing:
-			// "The number of pixels between adjacent lines is the
-			// average of the 2 line spacings of each line, rounded
-			// up to the nearest whole pixel." ???
-			return Math.round((sp0 + sp1) / 2.0f);
+		int getSpacing(Line prev) {
+			if(spacing != null)
+				return spacing;
+			else {
+				if(prev == null)
+					return 0;
+				int sp0 = getFragmentSpacing();
+				int sp1 = prev.getFragmentSpacing();
+				// NTCIP 1203 fontLineSpacing:
+				// "The number of pixels between adjacent lines
+				// is the average of the 2 line spacings of each
+				// line, rounded up to the nearest whole pixel."
+				return Math.round((sp0 + sp1) / 2.0f);
+			}
 		}
 		void addSpan(Span s) {
 			Fragment f = new Fragment();

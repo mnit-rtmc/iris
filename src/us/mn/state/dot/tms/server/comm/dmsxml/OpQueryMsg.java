@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -123,11 +123,11 @@ class OpQueryMsg extends OpDms {
 		// method for why this is a hack.
 		for(int i = 0; i < pages.length; i++) {
 			multi.addSpan(DMSHelper.NOTXT_L1);
-			multi.addLine();
+			multi.addLine(null);
 			multi.addSpan(DMSHelper.NOTXT_L2);
-			multi.addLine();
+			multi.addLine(null);
 			multi.addSpan(DMSHelper.NOTXT_L3);
-			multi.addLine();
+			multi.addLine(null);
 			if(i + 1 < pages.length)
 				multi.addPage();
 		}

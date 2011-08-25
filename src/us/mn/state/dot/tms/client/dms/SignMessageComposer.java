@@ -421,7 +421,7 @@ public class SignMessageComposer extends JPanel {
 					if(f != null)
 						multi.setFont(f, null);
 				} else
-					multi.addLine();
+					multi.addLine(null);
 			}
 			multi.addSpan(mess[i]);
 		}

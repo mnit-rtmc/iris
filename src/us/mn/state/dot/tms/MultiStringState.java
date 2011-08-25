@@ -33,8 +33,9 @@ public interface MultiStringState {
 	 * @param pt_off Page off time (tenths of second; null means default) */
 	void setPageTimes(Integer pt_on, Integer pt_off);
 
-	/** Add a line */
-	void addLine();
+	/** Add a new line.
+	 * @param spacing Pixel spacing (null means use font spacing) */
+	void addLine(Integer spacing);
 
 	/** Set the line justification */
 	void setJustificationLine(MultiString.JustificationLine jl);

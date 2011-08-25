@@ -42,9 +42,6 @@ public class MultiString implements MultiStringState {
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
 		"[' !#$%&()*+,-./0-9:;<=>?@A-Z]*");
 
-	/** New line MULTI tag */
-	static public final String NEWLINE = "[nl]";
-
 	/** New page MULTI tag */
 	static public final String NEWPAGE = "[np]";
 
@@ -165,11 +162,16 @@ public class MultiString implements MultiStringState {
 
 	/** Parse an integer value */
 	static protected Integer parseInt(String[] args, int n) {
+		if(n < args.length)
+			return parseInt(args[n]);
+		else
+			return null;
+	}
+
+	/** Parse an integer value */
+	static protected Integer parseInt(String param) {
 		try {
-			if(n < args.length)
-				return Integer.parseInt(args[n]);
-			else
-				return null;
+			return Integer.parseInt(param);
 		}
 		catch(NumberFormatException e) {
 			return null;
@@ -226,8 +228,11 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** Add a new line */
-	public void addLine() {
-		multi.append(NEWLINE);
+	public void addLine(Integer spacing) {
+		multi.append("[nl");
+		if(spacing != null)
+			multi.append(spacing);
+		multi.append("]");
 	}
 
 	/** Add a new page */
@@ -370,7 +375,7 @@ public class MultiString implements MultiStringState {
 			String tid = mtag.group(1).toLowerCase();
 			String tparam = mtag.group(2);
 			if(tid.equals("nl"))
-				cb.addLine();
+				cb.addLine(parseInt(tparam));
 			else if(tid.equals("np"))
 				cb.addPage();
 			else if(tid.equals("jl")) {

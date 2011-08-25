@@ -59,8 +59,8 @@ public class MultiStringStateAdapter implements MultiStringState {
 	/** Line number on page, zero based */
 	protected int ms_line;
 
-	/** Add a line */
-	public void addLine() {
+	/** Add a new line */
+	public void addLine(Integer spacing) {
 		ms_line++;
 	}
 
