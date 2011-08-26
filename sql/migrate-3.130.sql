@@ -13,7 +13,7 @@ ALTER TABLE iris.sign_text ALTER COLUMN multi SET NOT NULL;
 ALTER TABLE iris.sign_text DROP COLUMN message;
 
 CREATE VIEW sign_text_view AS
-	SELECT dms, local, line, message, priority
+	SELECT dms, local, line, multi, priority
 	FROM iris.dms_sign_group dsg
 	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
 	JOIN iris.sign_text st ON sg.name = st.sign_group;
