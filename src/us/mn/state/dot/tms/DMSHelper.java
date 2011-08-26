@@ -367,12 +367,12 @@ public class DMSHelper extends BaseHelper {
 	}
 
 	/** Get current sign message text as an array of strings. */
-	static public String[] getText(DMS proxy) {
+	static public String[] getLines(DMS proxy) {
 		SignMessage sm = proxy.getMessageCurrent();
 		if(sm != null) {
 			String multi = sm.getMulti();
 			if(multi != null)
-				return new MultiString(multi).getText();
+				return new MultiString(multi).getLines();
 		}
 		return new String[0];
 	}
@@ -390,6 +390,17 @@ public class DMSHelper extends BaseHelper {
 				ret.append(" / ");
 		}
 		return ret.toString();
+	}
+
+	/** Get current sign message text as an array of strings. */
+	static private String[] getText(DMS proxy) {
+		SignMessage sm = proxy.getMessageCurrent();
+		if(sm != null) {
+			String multi = sm.getMulti();
+			if(multi != null)
+				return new MultiString(multi).getText();
+		}
+		return new String[0];
 	}
 
 	/** Messages lines that flag no DMS message text available */

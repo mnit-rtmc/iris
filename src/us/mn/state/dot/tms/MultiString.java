@@ -38,6 +38,10 @@ public class MultiString implements MultiStringState {
 	static protected final Pattern TAGS = Pattern.compile(
 		"(nl|np|jl|jp|fo|g|cf|pt|tr|tt|vsa|feed)(.*)");
 
+	/** Regular expression to match invalid line-oriented MULTI tags */
+	static protected final Pattern TAG_LINE = Pattern.compile(
+		"\\[(nl|np|jp|g|pt|tr|feed)(.*)\\]");
+
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
 		"[' !#$%&()*+,-./0-9:;<=>?@A-Z]*");
@@ -549,25 +553,19 @@ public class MultiString implements MultiStringState {
 		return ms.toString();
 	}
 
-	/** Get message line text as an array of strings. */
-	public String[] getText() {
-		return getText(0);
-	}
-
 	/** Get message lines text as an array of strings. See the test
 	 *  cases for further information.
-	 * @param n_lines Number of lines in the MULTI string argument.
-	 * @return A string array with length <= n_lines and >= the maximum
-	 *	   defined number of lines per page (system attribute). */
-	public String[] getText(final int n_lines) {
+	 * @return A string array containing text spans for each line. */
+	public String[] getText() {
 		final LinkedList<String> ls = new LinkedList<String>();
 		parse(new MultiStringStateAdapter() {
+			private int n_lines = 0;
 			public void addSpan(String span) {
 				// note: fields in span use ms prefix
-				int m_lines = Math.max(n_lines, ms_line + 1);
-				while(ls.size() < (ms_page + 1) * m_lines)
+				n_lines = Math.max(n_lines, ms_line + 1);
+				while(ls.size() < (ms_page + 1) * n_lines)
 					ls.add("");
-				int i = ms_page * m_lines + ms_line;
+				int i = ms_page * n_lines + ms_line;
 				String v = ls.get(i);
 				ls.set(i, SString.trimJoin(v, span));
 			}
@@ -575,36 +573,32 @@ public class MultiString implements MultiStringState {
 		return ls.toArray(new String[0]);
 	}
 
-	/** Validate single-line message text */
-	static public boolean isValidLine(String multi) {
-		final boolean[] valid = { true };
-		new MultiString(multi).parse(new MultiStringStateAdapter() {
-			public void addPage() {
-				valid[0] = false;
-			}
-			public void setJustificationPage(
-				MultiString.JustificationPage jp)
-			{
-				valid[0] = false;
-			}
-			public void setPageTimes(Integer pt_on, Integer pt_off){
-				valid[0] = false;
-			}
-			public void addLine(Integer spacing) {
-				valid[0] = false;
-			}
-			public void setTextRectangle(int x, int y, int w,int h){
-				valid[0] = false;
-			}
-			public void addGraphic(int g_num, Integer x, Integer y,
-				String g_id)
-			{
-				valid[0] = false;
-			}
-			public void addFeed(String fid) {
-				valid[0] = false;
-			}
-		});
-		return valid[0];
+	/** Get message lines text as an array of strings. See the test
+	 *  cases for further information.
+	 * @return A string array containing text spans for each line. */
+	public String[] getLines() {
+		String[] pages = multi.toString().split("\\[np\\]");
+		int n_lines = 0;
+		for(String pg: pages) {
+			String[] lns = pg.split("\\[nl.?\\]");
+			n_lines = Math.max(n_lines, lns.length);
+		}
+		String[] lines = new String[n_lines * pages.length];
+		for(int i = 0; i < lines.length; i++)
+			lines[i] = "";
+		for(int i = 0; i < pages.length; i++) {
+			String[] lns = pages[i].split("\\[nl.?\\]");
+			for(int ln = 0; ln < lns.length; ln++)
+				lines[i*n_lines + ln] = normalizeLine(lns[ln]);
+		}
+		return lines;
+	}
+
+	/** Normalize a single line MULTI string */
+	static public String normalizeLine(String multi) {
+		StringBuilder sb = new StringBuilder();
+		for(String txt: TAG_LINE.split(normalize(multi)))
+			sb.append(txt);
+		return sb.toString();
 	}
 }

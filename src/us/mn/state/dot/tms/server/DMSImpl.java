@@ -1500,7 +1500,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			DMSHelper.getAllStyles(this)));
 
 		SignMessage sm = getMessageCurrent();
-		String[] ml = SignMessageHelper.createLines(sm);
+		String[] ml = SignMessageHelper.createTextLines(sm);
 		if(ml == null || ml.length <= 0)
 			desc.append(Kml.descItem("Messages Lines", "none"));
 		else {

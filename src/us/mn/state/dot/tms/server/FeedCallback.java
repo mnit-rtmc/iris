@@ -57,7 +57,7 @@ public class FeedCallback extends MultiString {
 
 	/** Get the feed message string */
 	private String getFeedString() {
-		String[] lines = msg.getMulti().getText();
+		String[] lines = msg.getMulti().getLines();
 		for(int i = 0; i < lines.length; i++) {
 			if(!SignTextHelper.match(group, (short)(i+1), lines[i]))
 				return null;

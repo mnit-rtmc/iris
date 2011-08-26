@@ -442,8 +442,7 @@ public class SignMessageComposer extends JPanel {
 		// font from the font combobox.
 		MultiString multi = new MultiString(ms);
 		setFontComboBoxes(multi);
-		int nl = getLineCount();
-		String[] lines = multi.getText(nl);
+		String[] lines = multi.getLines();
 		final MsgComboBox[] cl = cmbLine;	// Avoid races
 		for(int i = 0; i < cl.length; i++) {
 			MsgComboBox cbox = cl[i];

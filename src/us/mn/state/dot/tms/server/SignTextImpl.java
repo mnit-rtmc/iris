@@ -36,8 +36,8 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	static protected void validateMulti(String t)
 		throws ChangeVetoException
 	{
-		String multi = MultiString.normalize(t);
-		if(!multi.equals(t) || !MultiString.isValidLine(multi))
+		String multi = MultiString.normalizeLine(t);
+		if(!multi.equals(t))
 			throw new ChangeVetoException("Invalid message: " + t);
 		if(multi.length() > 64)
 			throw new ChangeVetoException("Message too wide");

@@ -124,15 +124,11 @@ public class SignMessageHelper extends BaseHelper {
 	}
 
 	/** Create an array of lines from the given message */
-	static public String[] createLines(SignMessage m) {
-		return createLines(m, 0);
-	}
-
-	/** Create an array of lines from the given message */
-	static public String[] createLines(SignMessage m, final int n_lines) {
-		if(m == null)
+	static public String[] createTextLines(SignMessage m) {
+		if(m != null)
+			return new MultiString(m.getMulti()).getText();
+		else
 			return new String[0];
-		return new MultiString(m.getMulti()).getText(n_lines);
 	}
 
 	/** Check if a sign message is blank */
