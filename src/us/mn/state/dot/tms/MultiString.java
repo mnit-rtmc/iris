@@ -574,4 +574,37 @@ public class MultiString implements MultiStringState {
 		});
 		return ls.toArray(new String[0]);
 	}
+
+	/** Validate single-line message text */
+	static public boolean isValidLine(String multi) {
+		final boolean[] valid = { true };
+		new MultiString(multi).parse(new MultiStringStateAdapter() {
+			public void addPage() {
+				valid[0] = false;
+			}
+			public void setJustificationPage(
+				MultiString.JustificationPage jp)
+			{
+				valid[0] = false;
+			}
+			public void setPageTimes(Integer pt_on, Integer pt_off){
+				valid[0] = false;
+			}
+			public void addLine(Integer spacing) {
+				valid[0] = false;
+			}
+			public void setTextRectangle(int x, int y, int w,int h){
+				valid[0] = false;
+			}
+			public void addGraphic(int g_num, Integer x, Integer y,
+				String g_id)
+			{
+				valid[0] = false;
+			}
+			public void addFeed(String fid) {
+				valid[0] = false;
+			}
+		});
+		return valid[0];
+	}
 }

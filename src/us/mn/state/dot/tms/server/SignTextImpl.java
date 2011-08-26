@@ -17,10 +17,9 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.TMSException;
@@ -33,18 +32,14 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class SignTextImpl extends BaseObjectImpl implements SignText {
 
-	/** Sign message text validation regex pattern */
-	static protected final Pattern MESS_PATTERN = Pattern.compile(
-		"[0-9A-Z !#$%&()*+,-./:;<=>?'@]*");
-
-	/** Validate a message string */
-	static protected void validateMessage(String t)
+	/** Validate a MULTI string */
+	static protected void validateMulti(String t)
 		throws ChangeVetoException
 	{
-		Matcher m = MESS_PATTERN.matcher(t);
-		if(!m.matches())
+		String multi = MultiString.normalize(t);
+		if(!multi.equals(t) || !MultiString.isValidLine(multi))
 			throw new ChangeVetoException("Invalid message: " + t);
-		if(t.length() > 24)
+		if(multi.length() > 64)
 			throw new ChangeVetoException("Message too wide");
 	}
 
@@ -150,7 +145,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	public void doSetMessage(String m) throws TMSException {
 		if(m.equals(multi))
 			return;
-		validateMessage(m);
+		validateMulti(m);
 		store.update(this, "multi", m);
 		setMulti(m);
 	}
