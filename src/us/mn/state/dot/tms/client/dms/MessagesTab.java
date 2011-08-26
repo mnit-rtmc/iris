@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -360,10 +361,10 @@ public class MessagesTab extends JPanel {
 			return null;
 	}
 
-	/** Render a message to a bitmap graphic */
-	protected BitmapGraphic renderMessage(SignText st) {
+	/** Render a message to a raster graphic */
+	protected RasterGraphic renderMessage(SignText st) {
 		MultiString multi = new MultiString(st.getMulti());
-		BitmapGraphic[] pages = renderPages(multi);
+		RasterGraphic[] pages = renderPages(multi);
 		if(pages.length > 0)
 			return pages[0];
 		else
@@ -371,7 +372,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Render the pages of a text message */
-	protected BitmapGraphic[] renderPages(MultiString ms) {
+	protected RasterGraphic[] renderPages(MultiString ms) {
 		Integer w = proxy.getWidthPixels();
 		Integer h = getLineHeightPixels();
 		Integer cw = proxy.getCharWidthPixels();
@@ -380,7 +381,7 @@ public class MessagesTab extends JPanel {
 			return new BitmapGraphic[0];
 		int df = DMSHelper.getDefaultFontNumber(proxy);
 		RasterBuilder b = new RasterBuilder(w, h, cw, ch, df);
-		return b.createBitmaps(ms);
+		return b.createPixmaps(ms);
 	}
 
 	/** Get the selected sign text message */
