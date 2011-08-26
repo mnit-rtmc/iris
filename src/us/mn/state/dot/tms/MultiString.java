@@ -601,4 +601,17 @@ public class MultiString implements MultiStringState {
 			sb.append(txt);
 		return sb.toString();
 	}
+
+	/** Get a MULTI string as text only (tags stripped) */
+	public String asText() {
+		final StringBuilder sb = new StringBuilder();
+		parse(new MultiStringStateAdapter() {
+			public void addSpan(String span) {
+				if(sb.length() > 0)
+					sb.append(' ');
+				sb.append(span);
+			}
+		});
+		return sb.toString();
+	}
 }

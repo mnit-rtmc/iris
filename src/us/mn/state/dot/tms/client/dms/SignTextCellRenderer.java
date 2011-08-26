@@ -20,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.SwingConstants;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 
 /**
@@ -41,7 +42,7 @@ public class SignTextCellRenderer extends BasicComboBoxRenderer {
 		short p = 50;
 		if(value instanceof SignText) {
 			SignText t = (SignText)value;
-			v = t.getMulti();
+			v = new MultiString(t.getMulti()).asText();
 			p = t.getPriority();
 		}
 		JLabel r = (JLabel)super.getListCellRendererComponent(
