@@ -36,13 +36,13 @@ public class SignTextHelper extends BaseHelper {
 
 	/** Check if there is a matching sign text */
 	static public boolean match(final SignGroup sg, final short line,
-		final String msg)
+		final String multi)
 	{
 		return find(new Checker<SignText>() {
 			public boolean check(SignText st) {
 				return st.getSignGroup() == sg &&
 				       st.getLine() == line &&
-				       st.getMessage().equals(msg);
+				       st.getMulti().equals(multi);
 			}
 		}) != null;
 	}

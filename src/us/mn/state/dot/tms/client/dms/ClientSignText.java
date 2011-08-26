@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,17 +24,17 @@ import us.mn.state.dot.tms.SignText;
  */
 public class ClientSignText implements SignText {
 
-	/** Sign text message */
-	protected final String message;
+	/** Sign text MULTI string */
+	protected final String multi;
 
 	/** Create a new client sign text */
 	public ClientSignText(String m) {
-		message = m;
+		multi = m;
 	}
 
 	/** Get the SONAR object name */
 	public String getName() {
-		return "client_sign_text_" + message;
+		return "client_sign_text_" + multi;
 	}
 
 	/** Get the SONAR type name */
@@ -57,14 +57,14 @@ public class ClientSignText implements SignText {
 		return 0;
 	}
 
-	/** Set the message */
-	public void setMessage(String m) {
+	/** Set the MULTI string */
+	public void setMulti(String m) {
 		// do nothing
 	}
 
-	/** Get the message */
-	public String getMessage() {
-		return message;
+	/** Get the MULTI string */
+	public String getMulti() {
+		return multi;
 	}
 
 	/** Set the priority */

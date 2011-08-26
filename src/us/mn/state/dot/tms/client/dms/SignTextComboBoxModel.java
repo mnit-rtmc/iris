@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -86,7 +86,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 		SignText st = m_selected;
 		// filter lines that should be ignored
 		if(st != null && st instanceof ClientSignText) {
-			if(DMSHelper.ignoreLineFilter(st.getMessage()))
+			if(DMSHelper.ignoreLineFilter(st.getMulti()))
 				return BLANK_SIGN_TEXT;
 		}
 		return st;
@@ -128,7 +128,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 	 */
 	protected SignText lookupMessage(String t) {
 		for(SignText st: m_items) {
-			if(t.equals(st.getMessage()))
+			if(t.equals(st.getMulti()))
 				return st;
 		}
 		return null;
@@ -178,12 +178,12 @@ public class SignTextComboBoxModel extends AbstractListModel
 	public void updateMessageLibrary() {
 		SignText st = m_selected;
 		if(st instanceof ClientSignText && st != BLANK_SIGN_TEXT)
-			addMsgToLib(st.getMessage());
+			addMsgToLib(st.getMulti());
 	}
 
 	/** Add a message to the local sign group library */
-	protected void addMsgToLib(String message) {
-		m_signTextModel.createSignText(m_cbline, message,
+	protected void addMsgToLib(String multi) {
+		m_signTextModel.createSignText(m_cbline, multi,
 			ON_THE_FLY_PRIORITY);
 	}
 }

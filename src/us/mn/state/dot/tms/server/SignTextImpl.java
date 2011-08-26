@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.TMSException;
 
 /**
- * Sign text contains the properties of a single line message for display
+ * Sign text contains the properties of a single line MULTI string for display
  * on a dynamic message sign (DMS).
  *
  * @author Douglas Lau
@@ -52,7 +52,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading sign text...");
 		namespace.registerType(SONAR_TYPE, SignTextImpl.class);
-		store.query("SELECT name, sign_group, line, message, priority" +
+		store.query("SELECT name, sign_group, line, multi, priority" +
 			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -60,7 +60,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 					row.getString(1),	// name
 					row.getString(2),	// sign_group
 					row.getShort(3),	// line
-					row.getString(4),	// message
+					row.getString(4),	// multi
 					row.getShort(5)		// priority
 				));
 			}
@@ -73,7 +73,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		map.put("name", name);
 		map.put("sign_group", sign_group);
 		map.put("line", line);
-		map.put("message", message);
+		map.put("multi", multi);
 		map.put("priority", priority);
 		return map;
 	}
@@ -98,7 +98,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		super(n);
 		sign_group = g;
 		line = l;
-		message = m;
+		multi = m;
 		priority = p;
 	}
 
@@ -138,26 +138,26 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		return line;
 	}
 
-	/** Message text */
-	protected String message;
+	/** MULTI string */
+	protected String multi;
 
-	/** Set the message */
-	public void setMessage(String m) {
-		message = m;
+	/** Set the MULTI string */
+	public void setMulti(String m) {
+		multi = m;
 	}
 
-	/** Set the message */
+	/** Set the MULTI string */
 	public void doSetMessage(String m) throws TMSException {
-		if(m.equals(message))
+		if(m.equals(multi))
 			return;
 		validateMessage(m);
-		store.update(this, "message", m);
-		setMessage(m);
+		store.update(this, "multi", m);
+		setMulti(m);
 	}
 
-	/** Get the message */
-	public String getMessage() {
-		return message;
+	/** Get the MULTI string */
+	public String getMulti() {
+		return multi;
 	}
 
 	/** Message ordering priority */

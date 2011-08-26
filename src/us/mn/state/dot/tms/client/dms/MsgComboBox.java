@@ -68,7 +68,7 @@ public class MsgComboBox extends JComboBox {
 	static protected String formatItem(Object o) {
 		String txt = "";
 		if(o instanceof SignText)
-			txt = ((SignText)o).getMessage();
+			txt = ((SignText)o).getMulti();
 		else if(o != null)
 			txt = o.toString();
 		return MultiString.normalize(txt);
@@ -220,7 +220,7 @@ public class MsgComboBox extends JComboBox {
 			if(edit_mode == EditMode.ALWAYS)
 				return formatItem(editor.getItem());
 			else
-				return ((SignText)o).getMessage();
+				return ((SignText)o).getMulti();
 		} else
 			return "";
 	}

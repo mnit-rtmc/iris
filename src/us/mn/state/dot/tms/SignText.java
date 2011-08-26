@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * Sign text contains the properties of a single line message for display
+ * Sign text contains the properties of a single line MULTI string for display
  * on a dynamic message sign (DMS).
  *
  * @author Douglas Lau
@@ -36,11 +36,11 @@ public interface SignText extends SonarObject {
 	/** Get the line */
 	short getLine();
 
-	/** Set the message */
-	void setMessage(String m);
+	/** Set the MULTI string */
+	void setMulti(String m);
 
-	/** Get the message */
-	String getMessage();
+	/** Get the MULTI string */
+	String getMulti();
 
 	/** Set the priority */
 	void setPriority(short p);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,16 +150,14 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	/** 
 	 * Create a new sign text and add to the local sign text library.
 	 * @param line Combobox line number.
-	 * @param message Line text.
+	 * @param multi MULTI string for line.
 	 * @param priority line priority
 	 */
-	protected void createSignText(short line, String messarg,
-		short priority)
-	{
+	protected void createSignText(short line, String multi, short priority){
 		SignGroup sg = getLocalSignGroup();
 		if(sg != null) {
-			if(messarg.length() > 0)
-				creator.create(sg, line, messarg, priority);
+			if(multi.length() > 0)
+				creator.create(sg, line, multi, priority);
 		}
 	}
 
@@ -178,10 +176,10 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	 * @param line Message line number (1 based)
 	 * @return the matching SignText else null if it doesn't exist.
 	 */
-	protected SignText lookupSignText(final short line, final String msg,
+	protected SignText lookupSignText(final short line, final String multi,
 		final SignGroup sg)
 	{
-		if(sign_text == null || msg == null || sg == null || line < 1)
+		if(sign_text == null || multi == null || sg == null || line < 1)
 			return null;
 		return sign_text.findObject(new Checker<SignText>() {
 			public boolean check(SignText st) {
@@ -189,7 +187,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 					return false;
 				if(st.getSignGroup() != sg)
 					return false;
-				if(!st.getMessage().equals(msg))
+				if(!st.getMulti().equals(multi))
 					return false;
 				return true;
 			}

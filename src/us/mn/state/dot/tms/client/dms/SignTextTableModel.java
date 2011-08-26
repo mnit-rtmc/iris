@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,9 +57,9 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				}
 			}
 		},
-		new ProxyColumn<SignText>("Message", 200) {
+		new ProxyColumn<SignText>("MULTI", 400) {
 			public Object getValueAt(SignText st) {
-				return st.getMessage();
+				return st.getMulti();
 			}
 			public boolean isEditable(SignText st) {
 				if(st != null)
@@ -68,9 +68,9 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 					return canAdd();
 			}
 			public void setValueAt(SignText st, Object value) {
-				String v = formatMessage(value);
+				String v = formatMulti(value);
 				if(st != null)
-					st.setMessage(v);
+					st.setMulti(v);
 				else if(v.length() > 0)
 					createSignText(v);
 			}
@@ -98,9 +98,9 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	    };
 	}
 
-	/** Format message text */
-	static protected String formatMessage(Object value) {
-		return value.toString().trim().toUpperCase();
+	/** Format MULTI string */
+	static protected String formatMulti(Object value) {
+		return value.toString().trim();
 	}
 
 	/** Create an empty set of proxies */
@@ -131,8 +131,8 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Create a new sign text message using the current line and priority
 	 * values */
-	protected void createSignText(String message) {
-		creator.create(group, (short)1, message, (short)50);
+	protected void createSignText(String multi) {
+		creator.create(group, (short)1, multi, (short)50);
 	}
 
 	/** Check if the user can add a proxy */

@@ -361,7 +361,7 @@ public class MessagesTab extends JPanel {
 
 	/** Render a message to a bitmap graphic */
 	protected BitmapGraphic renderMessage(SignText st) {
-		MultiString multi = new MultiString(st.getMessage());
+		MultiString multi = new MultiString(st.getMulti());
 		BitmapGraphic[] pages = renderPages(multi);
 		if(pages.length > 0)
 			return pages[0];
