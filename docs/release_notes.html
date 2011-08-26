@@ -11,6 +11,27 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.130.0 (26 August 2011)</dt>
+	<dd><ul>
+		<li>
+			Fixed problems with new msg_feed protocol.
+		</li>
+		<li>
+			User interface now displays full-color view of DMS
+			which are capable of full-color operation.
+		</li>
+		<li>
+			Allow some MULTI tags to be included on sign text
+			message libraries.
+			These tags include foreground color [cf] and line
+			justification [jl].
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.130.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.129.0 (18 August 2011)</dt>
 	<dd><ul>
 		<li>
