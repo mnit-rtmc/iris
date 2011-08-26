@@ -65,20 +65,20 @@ public class SignTextCreator {
 	 * Create a new sign text and add to the sign text library.
 	 * @param sg SignGroup the new message will be associated with.
 	 * @param line Combobox line number.
-	 * @param mess Message text.
+	 * @param multi MULTI string.
 	 * @param priority Message sort priority
 	 */
-	public void create(SignGroup sg, short line, String mess,
+	public void create(SignGroup sg, short line, String multi,
 		short priority)
 	{
-		mess = MultiString.normalize(mess);
+		multi = MultiString.normalize(multi);
 		String name = createUniqueSignTextName(sg);
 		if(canAddSignText(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("sign_group", sg);
 			attrs.put("line", new Short(line));
-			attrs.put("message", mess);
+			attrs.put("multi", multi);
 			attrs.put("priority", new Short(priority));
 			sign_text.createObject(name, attrs);
 		}
