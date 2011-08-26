@@ -131,14 +131,15 @@ public class MessagesTab extends JPanel {
 		bag.fill = GridBagConstraints.BOTH;
 		bag.gridx = 0;
 		bag.gridy = 0;
-		bag.weightx = 1;
+		bag.weightx = 0.25f;
 		bag.weighty = 1;
 		JScrollPane scroll = new JScrollPane(group_table);
 		add(scroll, bag);
 		scroll = new JScrollPane(sign_text_table);
-		scroll.setPreferredSize(new Dimension(284, 0));
+		scroll.setPreferredSize(new Dimension(440, 0));
 		bag.gridx = 1;
 		bag.gridy = 0;
+		bag.weightx = 1;
 		add(scroll, bag);
 		bag.fill = GridBagConstraints.NONE;
 		bag.gridx = 0;

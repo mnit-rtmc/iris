@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<SignGroup>("Sign Group", 200) {
+		new ProxyColumn<SignGroup>("Sign Group", 120) {
 			public Object getValueAt(SignGroup sg) {
 				return sg.getName();
 			}
