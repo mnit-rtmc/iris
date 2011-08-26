@@ -117,8 +117,10 @@ public class SignTextComboBoxModel extends AbstractListModel
 		SignText st = lookupMessage(s);
 		if(st != null)
 			return st;
-		else
-			return new ClientSignText(s);
+		else {
+			return new ClientSignText(MultiString.normalize(
+				s.trim()));
+		}
 	}
 
 	/** 
