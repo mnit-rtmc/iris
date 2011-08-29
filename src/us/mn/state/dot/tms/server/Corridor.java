@@ -95,7 +95,7 @@ public class Corridor extends CorridorBase {
 		for(Float m: n_points.keySet()) {
 			assert m != null;
 			R_NodeImpl n = (R_NodeImpl)n_points.get(m);
-			if(R_NodeHelper.isActiveStation(n)) {
+			if(n.getActive() && R_NodeHelper.isStation(n)) {
 				StationImpl s = n.getStation();
 				if(s != null && finder.check(m, s))
 					return s;
