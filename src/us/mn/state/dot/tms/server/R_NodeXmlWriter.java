@@ -50,6 +50,7 @@ public class R_NodeXmlWriter {
 		out.println("<!ATTLIST r_node lanes CDATA '0'>");
 		out.println("<!ATTLIST r_node attach_side CDATA 'right'>");
 		out.println("<!ATTLIST r_node shift CDATA '0'>");
+		out.println("<!ATTLIST r_node active CDATA 't'>");
 		out.println("<!ATTLIST r_node s_limit CDATA '" +
 			R_NodeImpl.DEFAULT_SPEED_LIMIT +"'>");
 		out.println("<!ATTLIST r_node forks CDATA #IMPLIED>");

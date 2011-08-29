@@ -616,12 +616,13 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		int l = getLanes();
 		if(l != 0)
 			out.print(" lanes='" + l + "'");
-		boolean side = getAttachSide();
-		if(side)
+		if(getAttachSide())
 			out.print(" attach_side='left'");
 		int s = getShift();
 		if(s != 0)
 			out.print(" shift='" + s + "'");
+		if(!getActive())
+			out.print(" active='f'");
 		int slim = getSpeedLimit();
 		if(slim != DEFAULT_SPEED_LIMIT)
 			out.print(" s_limit='" + slim + "'");
