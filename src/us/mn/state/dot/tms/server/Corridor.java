@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,11 +91,11 @@ public class Corridor extends CorridorBase {
 	}
 
 	/** Find a station using a station finder callback interface */
-	public StationImpl findStation(StationFinder finder) {
+	protected StationImpl findStation(StationFinder finder) {
 		for(Float m: n_points.keySet()) {
 			assert m != null;
 			R_NodeImpl n = (R_NodeImpl)n_points.get(m);
-			if(R_NodeHelper.isStation(n)) {
+			if(R_NodeHelper.isActiveStation(n)) {
 				StationImpl s = n.getStation();
 				if(s != null && finder.check(m, s))
 					return s;

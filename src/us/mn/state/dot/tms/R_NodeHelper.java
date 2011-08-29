@@ -33,9 +33,10 @@ public class R_NodeHelper extends BaseHelper {
 		return (R_Node)namespace.findObject(R_Node.SONAR_TYPE, checker);
 	}
 
-	/** Check if the r_node is a station */
-	static public boolean isStation(R_Node r_node) {
-		return r_node.getNodeType() == R_NodeType.STATION.ordinal();
+	/** Check if the r_node is an active station */
+	static public boolean isActiveStation(R_Node r_node) {
+		return r_node.getNodeType() == R_NodeType.STATION.ordinal() &&
+		       r_node.getActive();
 	}
 
 	/** Check if the r_node is an entrance */
@@ -94,7 +95,7 @@ public class R_NodeHelper extends BaseHelper {
 
 	/** Check if a node is at a station break */
 	static public boolean isStationBreak(R_Node r_node) {
-		return isStation(r_node) && hasDetection(r_node);
+		return isActiveStation(r_node) && hasDetection(r_node);
 	}
 
 	/** Check if a node should be joined with a segment */
