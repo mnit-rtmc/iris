@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,6 +75,12 @@ public interface R_Node extends SonarObject {
 
 	/** Get the lane shift */
 	int getShift();
+
+	/** Activate / deactivate the r_node */
+	void setActive(boolean a);
+
+	/** Get the active state */
+	boolean getActive();
 
 	/** Set the station ID */
 	void setStationID(String s);

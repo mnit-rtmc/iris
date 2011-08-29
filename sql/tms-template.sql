@@ -269,6 +269,7 @@ CREATE TABLE iris.r_node (
 	lanes integer NOT NULL,
 	attach_side boolean NOT NULL,
 	shift integer NOT NULL,
+	active boolean NOT NULL,
 	station_id VARCHAR(10),
 	speed_limit integer NOT NULL,
 	notes text NOT NULL
@@ -922,8 +923,8 @@ GRANT SELECT ON geo_loc_view TO PUBLIC;
 CREATE VIEW r_node_view AS
 	SELECT n.name, roadway, road_dir, cross_mod, cross_street,
 	cross_dir, nt.name AS node_type, n.pickable, n.above,
-	tr.name AS transition, n.lanes, n.attach_side, n.shift, n.station_id,
-	n.speed_limit, n.notes
+	tr.name AS transition, n.lanes, n.attach_side, n.shift, n.active,
+	n.station_id, n.speed_limit, n.notes
 	FROM iris.r_node n
 	JOIN geo_loc_view l ON n.geo_loc = l.name
 	JOIN iris.r_node_type nt ON n.node_type = nt.n_type
@@ -931,7 +932,7 @@ CREATE VIEW r_node_view AS
 GRANT SELECT ON r_node_view TO PUBLIC;
 
 CREATE VIEW roadway_station_view AS
-	SELECT station_id, roadway, road_dir, cross_mod, cross_street,
+	SELECT station_id, roadway, road_dir, cross_mod, cross_street, active,
 	speed_limit
 	FROM iris.r_node r, geo_loc_view l
 	WHERE r.geo_loc = l.name AND station_id IS NOT NULL;
@@ -1352,7 +1353,7 @@ camera_id_blank
 camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
-database_version	3.130.0
+database_version	3.131.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_retry_threshold	6

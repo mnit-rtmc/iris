@@ -117,8 +117,10 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 			GeoLoc loc = r_node.getGeoLoc();
 			if(GeoLocHelper.isNull(loc))
 				setBackground(R_NodeManager.COLOR_NO_LOC);
-			else
+			else if(r_node.getActive())
 				setBackground(R_NodeManager.COLOR_GPS);
+			else
+				setBackground(R_NodeManager.COLOR_INACTIVE);
 		}
 	}
 

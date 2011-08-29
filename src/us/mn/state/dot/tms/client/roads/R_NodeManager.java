@@ -62,6 +62,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Background color for nodes with bad locations */
 	static public final Color COLOR_NO_LOC = Color.RED;
 
+	/** Background color for inactive nodes */
+	static public final Color COLOR_INACTIVE = Color.GRAY;
+
 	/** Marker to draw r_nodes */
 	static protected final R_NodeMarker MARKER =
 		new R_NodeMarker();
@@ -74,6 +77,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Name of "no location" style */
 	static public final String STYLE_NO_LOC = "No Location";
+
+	/** Name of "inactive" style */
+	static public final String STYLE_INACTIVE = "Inactive";
 
 	/** Map to of corridor names to corridors */
 	protected final Map<String, CorridorBase> corridors =
@@ -245,6 +251,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			return !GeoLocHelper.isNull(getGeoLoc(proxy));
 		else if(STYLE_NO_LOC.equals(s))
 			return GeoLocHelper.isNull(getGeoLoc(proxy));
+		else if(STYLE_INACTIVE.equals(s))
+			return !proxy.getActive();
 		else if(corridors.containsKey(s)) {
 			String c=GeoLocHelper.getCorridorName(getGeoLoc(proxy));
 			return s.equals(c);
@@ -263,6 +271,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		R_NodeMapTheme theme = new R_NodeMapTheme(this);
 		theme.addStyle(STYLE_GPS, COLOR_GPS);
 		theme.addStyle(STYLE_NO_LOC, COLOR_NO_LOC);
+		theme.addStyle(STYLE_INACTIVE, COLOR_INACTIVE);
 		theme.addStyle(STYLE_ALL);
 		return theme;
 	}

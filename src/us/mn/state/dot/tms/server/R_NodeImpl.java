@@ -64,7 +64,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		namespace.registerType(SONAR_TYPE, R_NodeImpl.class);
 		store.query("SELECT name, geo_loc, node_type, pickable, " +
 			"above, transition, lanes, attach_side, shift, " +
-			"station_id, speed_limit, notes FROM iris." +
+			"active, station_id, speed_limit, notes FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -78,9 +78,10 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 					row.getInt(7),		// lanes
 					row.getBoolean(8),	// attach_side
 					row.getInt(9),		// shift
-					row.getString(10),	// station_id
-					row.getInt(11),		// speed_limit
-					row.getString(12)	// notes
+					row.getBoolean(10),	// active
+					row.getString(11),	// station_id
+					row.getInt(12),		// speed_limit
+					row.getString(13)	// notes
 				));
 			}
 		});
@@ -98,6 +99,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		map.put("lanes", lanes);
 		map.put("attach_side", attach_side);
 		map.put("shift", shift);
+		map.put("active", active);
 		map.put("station_id", station_id);
 		map.put("speed_limit", speed_limit);
 		map.put("notes", notes);
@@ -122,8 +124,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Create an r_node */
 	protected R_NodeImpl(String n, GeoLocImpl loc, int typ, boolean p,
-		boolean a, int trn, int l, boolean as, int s, String st, int sl,
-		String nt)
+		boolean a, int trn, int l, boolean as, int s, boolean act,
+		String st, int sl, String nt)
 	{
 		super(n);
 		geo_loc = loc;
@@ -134,6 +136,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		lanes = l;
 		attach_side = as;
 		shift = s;
+		active = act;
 		station_id = st;
 		speed_limit = sl;
 		notes = nt;
@@ -143,10 +146,10 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Create an r_node */
 	protected R_NodeImpl(Namespace ns, String n, String loc, int typ,
 		boolean p, boolean a, int trn, int l, boolean as, int s,
-		String st, int sl, String nt)
+		boolean act, String st, int sl, String nt)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-			typ, p, a, trn, l, as, s, st, sl, nt);
+			typ, p, a, trn, l, as, s, act, st, sl, nt);
 	}
 
 	/** Initialize transient fields */
@@ -176,11 +179,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Get the location */
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
-	}
-
-	/** Check if the location is valid */
-	public boolean hasLocation() {
-		return !GeoLocHelper.isNull(geo_loc);
 	}
 
 	/** Node type */
@@ -384,6 +382,27 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Get the lane shift */
 	public int getShift() {
 		return shift;
+	}
+
+	/** Active state */
+	protected boolean active;
+
+	/** Set the active state */
+	public void setActive(boolean a) {
+		active = a;
+	}
+
+	/** Set the active state */
+	public void doSetActive(boolean a) throws TMSException {
+		if(a == active)
+			return;
+		store.update(this, "active", a);
+		setActive(a);
+	}
+
+	/** Get the active state */
+	public boolean getActive() {
+		return active;
 	}
 
 	/** Staiton ID */

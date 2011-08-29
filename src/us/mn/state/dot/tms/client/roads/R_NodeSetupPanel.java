@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,9 @@ public class R_NodeSetupPanel extends FormPanel {
 	protected final JSpinner shift_spn = new JSpinner(
 		new SpinnerNumberModel(0, 0, 12, 1));
 
+	/** Active check box */
+	protected final JCheckBox active_cbx = new JCheckBox();
+
 	/** Station ID text field */
 	protected final JTextField station_txt = new JTextField(8);
 
@@ -89,7 +92,7 @@ public class R_NodeSetupPanel extends FormPanel {
 		add("Lanes", lane_spn);
 		addRow("Attach side", attach_cbx);
 		add("Shift", shift_spn);
-		finishRow();
+		addRow("Active", active_cbx);
 		add("Station ID", station_txt);
 		finishRow();
 		add("Speed Limit", speed_spn);
@@ -134,6 +137,11 @@ public class R_NodeSetupPanel extends FormPanel {
 			public void perform() {
 				Number n = (Number)shift_spn.getValue();
 				setShift(n.intValue());
+			}
+		};
+		new ActionJob(this, active_cbx) {
+			public void perform() {
+				setActive(active_cbx.isSelected());
 			}
 		};
 		new FocusJob(station_txt) {
@@ -192,6 +200,13 @@ public class R_NodeSetupPanel extends FormPanel {
 		R_Node n = node;
 		if(n != null)
 			n.setAttachSide(a);
+	}
+
+	/** Set the active state */
+	protected void setActive(boolean a) {
+		R_Node n = node;
+		if(n != null)
+			n.setActive(a);
 	}
 
 	/** Set the lane shift */
@@ -257,6 +272,10 @@ public class R_NodeSetupPanel extends FormPanel {
 			shift_spn.setEnabled(canUpdate(n, "shift"));
 			shift_spn.setValue(n.getShift());
 		}
+		if(a == null || a.equals("active")) {
+			active_cbx.setEnabled(canUpdate(n, "active"));
+			active_cbx.setSelected(n.getActive());
+		}
 		if(a == null || a.equals("stationID")) {
 			station_txt.setEnabled(canUpdate(n, "stationID"));
 			station_txt.setText(n.getStationID());
@@ -299,6 +318,8 @@ public class R_NodeSetupPanel extends FormPanel {
 		attach_cbx.setSelected(false);
 		shift_spn.setEnabled(false);
 		shift_spn.setValue(0);
+		active_cbx.setEnabled(false);
+		active_cbx.setSelected(false);
 		station_txt.setEnabled(false);
 		station_txt.setText("");
 		speed_spn.setEnabled(false);
