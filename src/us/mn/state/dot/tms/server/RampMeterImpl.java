@@ -480,12 +480,12 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		};
 		Corridor corridor = getCorridor();
 		if(corridor != null) {
-			corridor.findNode(finder);
+			corridor.findActiveNode(finder);
 			String cd = corridor.getLinkedCDRoad();
 			if(cd != null) {
 				Corridor cd_road = corridors.getCorridor(cd);
 				if(cd_road != null)
-					cd_road.findNode(finder);
+					cd_road.findActiveNode(finder);
 			}
 		}
 		return ds;

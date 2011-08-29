@@ -75,11 +75,11 @@ public class Corridor extends CorridorBase {
 		public boolean check(R_NodeImpl r_node);
 	}
 
-	/** Find a node using a node finder callback interface */
-	public R_NodeImpl findNode(NodeFinder finder) {
+	/** Find an active node using a node finder callback interface */
+	public R_NodeImpl findActiveNode(NodeFinder finder) {
 		for(R_Node n: n_points.values()) {
 			R_NodeImpl r_node = (R_NodeImpl)n;
-			if(finder.check(r_node))
+			if(r_node.getActive() && finder.check(r_node))
 				return r_node;
 		}
 		return null;
@@ -144,11 +144,11 @@ public class Corridor extends CorridorBase {
 		throw new BadRouteException("No downstream nodes");
 	}
 
-	/** Find a node using a node finder callback (reverse order) */
-	public R_NodeImpl findNodeReverse(NodeFinder finder) {
+	/** Find an active node using a node finder callback (reverse order) */
+	public R_NodeImpl findActiveNodeReverse(NodeFinder finder) {
 		for(R_Node n: n_points.descendingMap().values()) {
 			R_NodeImpl r_node = (R_NodeImpl)n;
-			if(finder.check(r_node))
+			if(r_node.getActive() && finder.check(r_node))
 				return r_node;
 		}
 		return null;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2010  Minnesota Department of Transportation
+ * Copyright (C) 2001-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -899,7 +899,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			if(c != null) {
 				Corridor.NodeFinder nf =
 					new EntranceFollower(this, branch);
-				if(c.findNodeReverse(nf) != null)
+				if(c.findActiveNodeReverse(nf) != null)
 					return;
 			}
 			SZM_LOG.log("Missing entrance detection @ " +
@@ -911,7 +911,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			if(c != null) {
 				Corridor.NodeFinder nf =
 					new ExitFollower(this, branch);
-				if(c.findNode(nf) != null)
+				if(c.findActiveNode(nf) != null)
 					return;
 			}
 			SZM_LOG.log("Missing exit detection @ " +
@@ -1138,7 +1138,7 @@ public class StratifiedPlanState extends TimingPlanState {
 	protected void createAllLayers() {
 		states.clear();
 		ZoneBuilder zone_builder = new ZoneBuilder();
-		corridor.findNode(zone_builder);
+		corridor.findActiveNode(zone_builder);
 		zones.addAll(zone_builder.getList());
 	}
 
