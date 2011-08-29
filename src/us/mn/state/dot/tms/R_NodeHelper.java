@@ -33,24 +33,31 @@ public class R_NodeHelper extends BaseHelper {
 		return (R_Node)namespace.findObject(R_Node.SONAR_TYPE, checker);
 	}
 
-	/** Check if the r_node is a station */
+	/** Check if an r_node is a station */
 	static public boolean isStation(R_Node r_node) {
 		return r_node.getNodeType() == R_NodeType.STATION.ordinal();
 	}
 
-	/** Check if the r_node is an entrance */
+	/** Check if an r_node is an entrance */
 	static public boolean isEntrance(R_Node r_node) {
 		return r_node.getNodeType() == R_NodeType.ENTRANCE.ordinal();
 	}
 
-	/** Check if the r_node is an exit */
+	/** Check if an r_node is an exit */
 	static public boolean isExit(R_Node r_node) {
 		return r_node.getNodeType() == R_NodeType.EXIT.ordinal();
 	}
 
-	/** Check if this r_node links to a CD road */
+	/** Check if an r_node links to a CD road */
 	static public boolean isCD(R_Node r_node) {
-		return r_node.getNodeType() == R_NodeTransition.CD.ordinal();
+		return r_node.getNodeTransition() ==
+		       R_NodeTransition.CD.ordinal();
+	}
+
+	/** Check if an r_node an an intersection */
+	static public boolean isIntersection(R_Node r_node) {
+		return r_node.getNodeType() ==
+		       R_NodeType.INTERSECTION.ordinal();
 	}
 
 	/** Test if an r_node (acc) is linked by another r_node (ot) */
@@ -59,7 +66,7 @@ public class R_NodeHelper extends BaseHelper {
 		       acc.getGeoLoc(), ot.getGeoLoc());
 	}
 
-	/** Check if the r_node is an access node */
+	/** Check if an r_node is an access node */
 	static public boolean isAccess(R_Node r_node) {
 		return r_node.getNodeType() == R_NodeType.ACCESS.ordinal();
 	}
@@ -101,7 +108,8 @@ public class R_NodeHelper extends BaseHelper {
 
 	/** Check if a node should be joined with a segment */
 	static public boolean isJoined(R_Node r_node) {
-		return r_node.getTransition() != R_NodeTransition.COMMON.ordinal() ||
+		return r_node.getTransition() !=
+		       R_NodeTransition.COMMON.ordinal() ||
 		       r_node.getNodeType() != R_NodeType.ENTRANCE.ordinal();
 	}
 
