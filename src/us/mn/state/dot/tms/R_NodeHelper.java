@@ -50,8 +50,7 @@ public class R_NodeHelper extends BaseHelper {
 
 	/** Check if an r_node links to a CD road */
 	static public boolean isCD(R_Node r_node) {
-		return r_node.getNodeTransition() ==
-		       R_NodeTransition.CD.ordinal();
+		return r_node.getTransition() == R_NodeTransition.CD.ordinal();
 	}
 
 	/** Check if an r_node an an intersection */

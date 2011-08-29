@@ -31,8 +31,8 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeTransition;
-import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
@@ -918,24 +918,23 @@ public class StratifiedPlanState extends TimingPlanState {
 				GeoLocHelper.getDescription(branch));
 		}
 		public boolean check(R_NodeImpl n) {
-			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
-			if(nt == R_NodeType.INTERSECTION) {
+			if(R_NodeHelper.isIntersection(n)) {
 				removeInvalidZones();
 				return false;
 			}
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() == 0) {
- 				if(nt == R_NodeType.ENTRANCE)
+ 				if(R_NodeHelper.isEntrance(n))
 					followEntrance(n);
-				if(nt == R_NodeType.EXIT)
+				if(R_NodeHelper.isExit(n))
 					followExit(n);
 				return false;
 			}
-			if(nt == R_NodeType.STATION)
+			if(R_NodeHelper.isStation(n))
 				addStation(ds);
-			else if(nt == R_NodeType.ENTRANCE)
+			else if(R_NodeHelper.isEntrance(n))
 				addEntrance(ds);
-			else if(nt == R_NodeType.EXIT)
+			else if(R_NodeHelper.isExit(n))
 				addExit(ds);
 			return false;
 		}
@@ -979,17 +978,16 @@ public class StratifiedPlanState extends TimingPlanState {
 				return check_found_inside(n);
 		}
 		protected boolean check_found_inside(R_NodeImpl n) {
-			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
-			if(nt == R_NodeType.INTERSECTION)
+			if(R_NodeHelper.isIntersection(n))
 				return true;
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() > 0) {
-				if(nt == R_NodeType.ENTRANCE) {
+				if(R_NodeHelper.isEntrance(n)) {
 					zone_builder.addEntrance(ds);
 					if(n.getLanes() == 0)
 						return true;
 				}
-				if(nt == R_NodeType.STATION && is_not_CD(n)) {
+				if(R_NodeHelper.isStation(n) && is_not_CD(n)) {
 					zone_builder.addEntrance(ds);
 					return true;
 				}
@@ -1001,7 +999,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			return !GeoLocHelper.matchesRoot(loc, branch);
 		}
 		protected boolean check_not_found(R_NodeImpl n) {
-			if(n.getNodeType() != R_NodeType.EXIT.ordinal())
+			if(!R_NodeHelper.isExit(n))
 				return false;
 			GeoLoc loc = n.getGeoLoc();
 			if(GeoLocHelper.rampMatches(loc, branch)) {
@@ -1046,21 +1044,20 @@ public class StratifiedPlanState extends TimingPlanState {
 				return check_found_inside(n);
 		}
 		protected boolean check_found_inside(R_NodeImpl n) {
-			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
-			if(nt == R_NodeType.INTERSECTION)
+			if(R_NodeHelper.isIntersection(n))
 				return true;
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() > 0) {
-				if(nt == R_NodeType.STATION) {
+				if(R_NodeHelper.isStation(n)) {
 					zone_builder.addExit(ds);
 					return true;
-				} else if(nt == R_NodeType.EXIT)
+				} else if(R_NodeHelper.isExit(n))
 					zone_builder.addExit(ds);
 			}
 			return false;
 		}
 		protected boolean check_not_found(R_NodeImpl n) {
-			if(n.getNodeType() != R_NodeType.ENTRANCE.ordinal())
+			if(!R_NodeHelper.isEntrance(n))
 				return false;
 			GeoLoc loc = n.getGeoLoc();
 			if(GeoLocHelper.rampMatches(loc, branch)) {
