@@ -11,6 +11,24 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.131.0 (30 August 2011)</dt>
+	<dd><ul>
+		<li>
+			Added "active" field to r_nodes.
+			Deactivated r_node detectors will be ignored for
+			segment maps, travel time, variable speed advisory and
+			ramp metering.
+		</li>
+		<li>
+			Fixed user interface problems with sign text with
+			included MULTI tags.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.131.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.130.0 (26 August 2011)</dt>
 	<dd><ul>
 		<li>
