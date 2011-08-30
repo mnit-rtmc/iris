@@ -15,7 +15,7 @@
 	</shortcut>
     </information>
     <resources>
-	<j2se version="1.6+" max-heap-size="256m"/>
+	<j2se version="1.6+" max-heap-size="512m"/>
 	<jar href="lib/iris-client-@@VERSION@@.jar"/>
 	<jar href="lib/iris-common-@@VERSION@@.jar"/>
 	<jar href="lib/scheduler-@@SCHEDULER.VERSION@@.jar"/>
