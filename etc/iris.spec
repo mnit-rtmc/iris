@@ -107,6 +107,7 @@ fi
 %{_serverdir}/geokit-@@GEOKIT.VERSION@@.jar
 %{_serverdir}/scheduler-@@SCHEDULER.VERSION@@.jar
 %{_serverdir}/sonar-server-@@SONAR.VERSION@@.jar
+%{_serverdir}/tms-log-@@TMSLOG.VERSION@@.jar
 
 # /var/lib/iris
 %dir %attr(0775,tms,tms) /var/lib/iris

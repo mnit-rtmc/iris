@@ -299,6 +299,7 @@
 				<include name="${scheduler.jar}"/>
 				<include name="${geokit.jar}"/>
 				<include name="${sonar.server.jar}"/>
+				<include name="${tms-log.jar}"/>
 			</fileset>
 		</copy>
 	</target>

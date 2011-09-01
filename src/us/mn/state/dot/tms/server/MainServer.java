@@ -18,6 +18,7 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.ProxySelector;
 import java.util.Date;
 import java.util.Properties;
 import us.mn.state.dot.sched.Scheduler;
@@ -32,6 +33,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
+import us.mn.state.dot.util.HTTPProxySelector;
 
 /**
  * This is the main class to start the IRIS server.
@@ -72,6 +74,7 @@ public class MainServer {
 		try {
 			initialize();
 			Properties props = PropertyLoader.load(PROP_FILE);
+			initProxySelector(props);
 			store = createStore(props);
 			I18N.initialize(props);
 			ServerNamespace ns = createNamespace();
@@ -125,6 +128,13 @@ public class MainServer {
 		assert assertsEnabled = true;
 		System.err.println("Assertions are turned " +
 			(assertsEnabled ? "on" : "off") + ".");
+	}
+
+	/** Initialize the proxy selector */
+	static protected void initProxySelector(Properties props) {
+		HTTPProxySelector ps = new HTTPProxySelector(props);
+		if(ps.hasProxies())
+			ProxySelector.setDefault(ps);
 	}
 
 	/** Create the database connection */
