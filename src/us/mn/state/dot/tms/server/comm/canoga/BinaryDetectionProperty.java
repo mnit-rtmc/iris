@@ -96,13 +96,15 @@ public class BinaryDetectionProperty extends CanogaProperty {
 
 		protected final int duration;	// milliseconds
 		protected final int start;	// millisecond stamp
-		protected final int count;
+		protected final int count;	// vehicle count
+		protected final int state;	// event state
 
 		/** Create a new detection event */
 		protected DetectionEvent(int d, int s, int c, int st) {
 			duration = d;
 			start = s;
 			count = c;
+			state = st;
 		}
 
 		/** Test if two detection events are the same */
@@ -110,8 +112,9 @@ public class BinaryDetectionProperty extends CanogaProperty {
 			if(o instanceof DetectionEvent) {
 				DetectionEvent other = (DetectionEvent)o;
 				return (duration == other.duration) &&
-					(start == other.start) &&
-					(count == other.count);
+				       (start == other.start) &&
+				       (count == other.count) &&
+				       (state == other.state);
 			} else
 				return false;
 		}
@@ -124,7 +127,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 		/** Get a string representation of the detection event */
 		public String toString() {
 			return "duration:" + duration + ",start:" + start +
-				",count:" + count;
+				",count:" + count + ",state:" + state;
 		}
 
 		/** Check if the Canoga has been reset */
