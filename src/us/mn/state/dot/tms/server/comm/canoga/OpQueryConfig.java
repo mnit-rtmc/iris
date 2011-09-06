@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.canoga;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -25,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpQueryConfig extends OpController {
+public class OpQueryConfig extends OpCanoga {
 
 	/** Canoga card serial number */
 	protected final SerialNumberProperty serial_number =
@@ -36,7 +35,7 @@ public class OpQueryConfig extends OpController {
 
 	/** Create an operation to query the Canoga configuration */
 	public OpQueryConfig(ControllerImpl c) {
-		super(PriorityLevel.DOWNLOAD, c, c.toString());
+		super(PriorityLevel.DOWNLOAD, c);
 	}
 
 	/** Begin the query config operation */
@@ -52,6 +51,8 @@ public class OpQueryConfig extends OpController {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(serial_number);
 			mess.queryProps();
+			CANOGA_LOG.log(controller.getName() + " " +
+				serial_number);
 			return new QueryVersion();
 		}
 	}
@@ -63,6 +64,7 @@ public class OpQueryConfig extends OpController {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(version);
 			mess.queryProps();
+			CANOGA_LOG.log(controller.getName() + " " + version);
 			return null;
 		}
 	}

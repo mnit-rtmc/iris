@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,11 @@ public class VersionProperty extends CanogaProperty {
 	/** Format a basic "SET" request */
 	protected byte[] formatPayloadSet() throws IOException {
 		throw new CanogaError("Firmware version is read-only");
+	}
+
+	/** Get the property name */
+	protected String getName() {
+		return "Firmware Version";
 	}
 
 	/** Firmware version */

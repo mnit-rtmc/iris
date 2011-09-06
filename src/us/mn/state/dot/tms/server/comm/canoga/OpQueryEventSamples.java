@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.io.IOException;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -26,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpQueryEventSamples extends OpController {
+public class OpQueryEventSamples extends OpCanoga {
 
 	/** Minimum time before volume LSB can wrap */
 	static protected final int VOL_COUNT_WRAP = 4 * 60 * 1000;
@@ -37,7 +36,7 @@ public class OpQueryEventSamples extends OpController {
 
 	/** Create a new operation to query detector event samples */
 	public OpQueryEventSamples(ControllerImpl c) {
-		super(PriorityLevel.DATA_5_MIN, c, c.toString());
+		super(PriorityLevel.DATA_5_MIN, c);
 	}
 
 	/** Handle a communication error */
@@ -69,6 +68,7 @@ public class OpQueryEventSamples extends OpController {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(detection);
 			mess.queryProps();
+			CANOGA_LOG.log(controller.getName() + " " + detection);
 			success = true;
 			detection.logEvents(controller);
 			if(controller.hasActiveDetector())

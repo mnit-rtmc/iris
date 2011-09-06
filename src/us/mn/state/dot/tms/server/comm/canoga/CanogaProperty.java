@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,11 +39,19 @@ abstract public class CanogaProperty extends ControllerProperty {
 	/** Format a basic "SET" request */
 	abstract protected byte[] formatPayloadSet() throws IOException;
 
+	/** Get the property name */
+	abstract protected String getName();
+
 	/** Set the requested value */
 	abstract protected void setValue(byte[] v);
 
 	/** Get the requested value */
 	abstract protected String getValue();
+
+	/** Get a string representation of the property */
+	public String toString() {
+		return getName() + ": " + getValue();
+	}
 
 	/** Get the ASCII hex digit for the given nybble */
 	static protected byte hex_digit(byte b) {
