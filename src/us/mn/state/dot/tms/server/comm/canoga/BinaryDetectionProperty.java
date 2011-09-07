@@ -245,11 +245,11 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	public void logEvents(ControllerImpl controller) {
 		Calendar stamp = TimeSteward.getCalendarInstance();
 		for(int i = 0; i < 4; i++)
-			logEvents(controller, stamp, i);
+			logEvent(controller, stamp, i);
 	}
 
 	/** Log a new vehicle detection event for one input */
-	protected void logEvents(ControllerImpl controller, Calendar stamp,
+	protected void logEvent(ControllerImpl controller, Calendar stamp,
 		int inp)
 	{
 		DetectionEvent pe = p_events[inp];
@@ -259,17 +259,24 @@ public class BinaryDetectionProperty extends CanogaProperty {
 		if(pe == null || (ce.is_reset() && !ce.equals(pe))) {
 			controller.logEvent(null, inp + 1, 0, 0, 0);
 		} else if(!ce.equals(pe)) {
-			int speed = 0;
-			int sp = controller.getSpeedPair(inp + 1);
-			if(sp > 0 && sp <= 4) {
-				DetectorImpl d = controller.getDetectorAtPin(
-					inp + 1);
-				speed = ce.calculateSpeed(c_events[sp - 1],
-					d.getFieldLength());
-			}
+			int speed = calculateSpeed(controller, inp);
 			ce.log_event(stamp, controller, inp, pe, speed);
 		}
 		p_events[inp] = c_events[inp];
+	}
+
+	/** Calculate the speed from a matching speed loop */
+	protected int calculateSpeed(ControllerImpl controller, int inp) {
+		int sp = controller.getSpeedPair(inp + 1);
+		if(sp > 0 && sp <= 4) {
+			DetectorImpl d = controller.getDetectorAtPin(inp + 1);
+			if(d != null) {
+				DetectionEvent ce = c_events[inp];
+				return ce.calculateSpeed(c_events[sp - 1],
+					d.getFieldLength());
+			}
+		}
+		return 0;
 	}
 
 	/** Get the property name */
