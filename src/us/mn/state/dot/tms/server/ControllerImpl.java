@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -388,20 +388,20 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return false;
 	}
 
+	/** Find a matching detector for the specified input */
+	public int getSpeedPair(int pin) {
+		DetectorImpl d = getDetectorAtPin(pin);
+		if(d != null && d.isVelocity())
+			return getSpeedPair(d);
+		return 0;
+	}
+
 	/** Find a matching detector for the specified velocity detector */
 	protected synchronized int getSpeedPair(DetectorImpl v) {
 		for(Map.Entry<Integer, ControllerIO> e: io_pins.entrySet()) {
 			if(v.isSpeedPair(e.getValue()))
 				return e.getKey();
 		}
-		return 0;
-	}
-
-	/** Find a matching detector for the specified input */
-	public int getSpeedPair(int pin) {
-		DetectorImpl d = getDetectorAtPin(pin);
-		if(d != null && d.isVelocity())
-			return getSpeedPair(d);
 		return 0;
 	}
 
