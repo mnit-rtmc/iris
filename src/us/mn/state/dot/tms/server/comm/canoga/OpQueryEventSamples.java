@@ -68,7 +68,8 @@ public class OpQueryEventSamples extends OpCanoga {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(detection);
 			mess.queryProps();
-			CANOGA_LOG.log(controller.getName() + " " + detection);
+			if(CANOGA_LOG.isOpen())
+				detection.debug(CANOGA_LOG, controller);
 			success = true;
 			detection.logEvents(controller);
 			if(controller.hasActiveDetector())

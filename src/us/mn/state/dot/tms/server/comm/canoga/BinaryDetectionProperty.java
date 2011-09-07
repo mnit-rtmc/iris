@@ -19,6 +19,7 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 
 /**
@@ -308,5 +309,16 @@ public class BinaryDetectionProperty extends CanogaProperty {
 			sb.append(c_events[i]);
 		}
 		return sb.toString();
+	}
+
+	/** Debug the event */
+	public void debug(IDebugLog dlog, ControllerImpl controller) {
+		String name = controller.getName();
+		for(int i = 0; i < 4; i++) {
+			DetectionEvent pe = p_events[i];
+			DetectionEvent ce = c_events[i];
+			if(ce != null && !ce.equals(pe))
+				dlog.log(name + " event:" + i + "," + ce);
+		}
 	}
 }
