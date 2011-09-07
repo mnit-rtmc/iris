@@ -155,36 +155,46 @@ public class BinaryDetectionProperty extends CanogaProperty {
 			return false;
 		}
 
-		/** Calculate the time elapsed from t1 to t2 */
-		static protected int calculateElapsed(int t1, int t2) {
-			long e = t2 - t1;
-			if(e < 0)
-				e += (1 << 32);
-			return (int)e;
-		}
-
 		/** Calculate the average elapsed time between events */
 		protected float calculateAvgElapsed(DetectionEvent upstream) {
-			int e1 = calculateElapsed(upstream.start, start);
+			int e1 = calculateElapsed(upstream);
 			int d = duration - upstream.duration;
 			int e2 = e1 + d;
 			return (e1 + e2) / 2.0f;
+		}
+
+		/** Calculate the time elapsed since another event */
+		protected int calculateElapsed(DetectionEvent other) {
+			long e = start - other.start;
+			// Test for rollover
+			if(e < 0)
+				e += (1 << 32);
+			return (int)e;
 		}
 
 		/** Log the current event in the detection log */
 		public void log_event(Calendar stamp, ControllerImpl controller,
 			int inp, DetectionEvent prev, int speed)
 		{
-			int headway = calculateElapsed(prev.start, start);
-			int c = prev.count + 1;
-			while((c & 0xFF) != count) {
-				c += 1;
-				headway = 0;
-				speed = 0;
-				controller.logEvent(stamp, inp + 1, 0, 0, 0);
+			int headway = 0;
+			if(!prev.is_reset()) {
+				int missed = calculate_missed(prev);
+				for(int i = 0; i < missed; i++)
+					controller.logEvent(stamp, inp+1,0,0,0);
+				// If no vehicles were missed, headway is valid
+				if(missed == 0)
+					headway = calculateElapsed(prev);
 			}
 			controller.logEvent(stamp, inp + 1, duration, headway,
 				speed);
+		}
+
+		/** Calculate the number of missed vehicles */
+		private int calculate_missed(DetectionEvent prev) {
+			int n_vehicles = count - prev.count;
+			if(n_vehicles < 0)
+				n_vehicles += 256;
+			return n_vehicles > 0 ? n_vehicles - 1 : 0;
 		}
 
 		/** Calculate speed (mph) from upstream event/spacing (ft).
@@ -256,9 +266,11 @@ public class BinaryDetectionProperty extends CanogaProperty {
 		DetectionEvent ce = c_events[inp];
 		if(ce.has_errors(pe))
 			return;
-		if(pe == null || (ce.is_reset() && !ce.equals(pe))) {
+		if(ce.equals(pe)) {
+			/* don't log -- same event as last time */
+		} else if(pe == null || ce.is_reset()) {
 			controller.logEvent(null, inp + 1, 0, 0, 0);
-		} else if(!ce.equals(pe)) {
+		} else {
 			int speed = calculateSpeed(controller, inp);
 			ce.log_event(stamp, controller, inp, pe, speed);
 		}
