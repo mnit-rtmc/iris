@@ -166,7 +166,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 		/** Calculate the time elapsed since another event */
 		protected int calculateElapsed(DetectionEvent other) {
 			long e = start - other.start;
-			// Test for rollover
+			// Test for rollover (about once every 50 days)
 			if(e < 0)
 				e += (1 << 32);
 			return (int)e;
