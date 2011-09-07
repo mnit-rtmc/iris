@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,6 @@ public class VehicleEventLog {
 	/** Sample archive factory */
 	private final SampleArchiveFactory factory;
 
-	/** Previous file location */
-	private File file;
-
 	/** Create a new vehicle event log */
 	public VehicleEventLog(SampleArchiveFactory f) {
 		factory = f;
@@ -46,7 +43,7 @@ public class VehicleEventLog {
 		int speed) throws IOException
 	{
 		String line = formatEvent(stamp, duration, headway, speed);
-		file = getFile(stamp);
+		File file = factory.createFile(getStampMillis(stamp));
 		if(file != null) {
 			FileWriter fw = new FileWriter(file, true);
 			try {
@@ -105,11 +102,11 @@ public class VehicleEventLog {
 		return b.toString();
 	}
 
-	/** Get a file for the given timestamp */
-	protected File getFile(Calendar stamp) throws IOException {
+	/** Get milliseconds for a given timestamp */
+	static protected long getStampMillis(Calendar stamp) {
 		if(stamp != null)
-			return factory.createFile(stamp.getTimeInMillis());
+			return stamp.getTimeInMillis();
 		else
-			return file;
+			return TimeSteward.currentTimeMillis();
 	}
 }
