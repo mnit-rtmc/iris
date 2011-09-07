@@ -94,10 +94,17 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	/** Class for vehicle detection events */
 	static protected final class DetectionEvent {
 
-		protected final int duration;	// milliseconds
-		protected final int start;	// millisecond stamp
-		protected final int count;	// vehicle count
-		protected final int state;	// event state
+		/** Duration of vehicle (in milliseconds) */
+		protected final int duration;
+
+		/** Time since detector reset (in milliseconds) */
+		protected final int start;
+
+		/** Vehicle count (increments for each event) */
+		protected final int count;
+
+		/** Event state */
+		protected final int state;
 
 		/** Create a new detection event */
 		protected DetectionEvent(int d, int s, int c, int st) {
@@ -180,7 +187,9 @@ public class BinaryDetectionProperty extends CanogaProperty {
 				speed);
 		}
 
-		/** Calculate speed (mph) from upstream event/spacing (ft) */
+		/** Calculate speed (mph) from upstream event/spacing (ft).
+		 * Upstream detection event must be from same detector card
+		 * for time stamps to be comparable. */
 		public int calculateSpeed(DetectionEvent upstream,
 			float spacing)
 		{
