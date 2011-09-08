@@ -265,7 +265,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	{
 		DetectionEvent pe = p_events[inp];
 		DetectionEvent ce = c_events[inp];
-		if(ce.has_errors(pe))
+		if(ce == null || ce.has_errors(pe))
 			return;
 		if(ce.equals(pe)) {
 			/* don't log -- same event as last time */
