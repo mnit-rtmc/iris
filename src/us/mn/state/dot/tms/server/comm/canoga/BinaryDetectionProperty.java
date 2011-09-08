@@ -106,22 +106,26 @@ public class BinaryDetectionProperty extends CanogaProperty {
 		DetectionEvent ce = c_events[inp];
 		if(ce == null || ce.hasErrors(pe))
 			return;
-		if((!ce.isReset()) && (!ce.equals(pe))) {
-			int speed = calculateSpeed(controller, inp);
-			ce.logEvent(stamp, controller, inp, pe, speed);
-		}
-		p_events[inp] = c_events[inp];
+		DetectorImpl det = controller.getDetectorAtPin(inp + 1);
+		if(det != null) {
+			if((!ce.isReset()) && (!ce.equals(pe))) {
+				int speed = calculateSpeed(controller, inp);
+				ce.logEvent(stamp, det, pe, speed);
+			}
+			p_events[inp] = c_events[inp];
+		} else
+			p_events[inp] = null;
 	}
 
 	/** Calculate the speed from a matching speed loop */
 	protected int calculateSpeed(ControllerImpl controller, int inp) {
 		int sp = controller.getSpeedPair(inp + 1);
 		if(sp > 0 && sp <= 4) {
-			DetectorImpl d = controller.getDetectorAtPin(inp + 1);
-			if(d != null) {
+			DetectorImpl det = controller.getDetectorAtPin(inp + 1);
+			if(det != null) {
 				DetectionEvent ce = c_events[inp];
 				return ce.calculateSpeed(c_events[sp - 1],
-					d.getFieldLength());
+					det.getFieldLength());
 			}
 		}
 		return 0;

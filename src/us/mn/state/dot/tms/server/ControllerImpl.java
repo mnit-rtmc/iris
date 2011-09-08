@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.sql.ResultSet;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -456,15 +455,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			det.storeData5Minute(stamp, sampleValue(volume, i),
 				sampleValue(scans, i));
 		}
-	}
-
-	/** Log a vehicle detection event */
-	public void logEvent(Calendar stamp, int pin, int duration,
-		int headway, int speed)
-	{
-		DetectorImpl det = getDetectorAtPin(pin);
-		if(det != null)
-			det.logEvent(stamp, duration, headway, speed);
 	}
 
 	/** Bin 30-second sample data */

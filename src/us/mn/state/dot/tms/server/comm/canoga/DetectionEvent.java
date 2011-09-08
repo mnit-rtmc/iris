@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.util.Calendar;
-import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.DetectorImpl;
 
 /**
  * Canoga vehicle detection event
@@ -128,22 +128,22 @@ public class DetectionEvent {
 	}
 
 	/** Log the current event in the detection log */
-	public void logEvent(Calendar stamp, ControllerImpl controller,
-		int inp, DetectionEvent prev, int speed)
+	public void logEvent(Calendar stamp, DetectorImpl det,
+		DetectionEvent prev, int speed)
 	{
 		int headway = 0;
 		if(isHeadwayValid(prev)) {
 			int missed = calculateMissed(prev);
 			for(int i = 0; i < missed; i++)
-				controller.logEvent(stamp, inp + 1, 0, 0, 0);
+				det.logEvent(stamp, 0, 0, 0);
 			// If no vehicles were missed, log headway
 			if(missed == 0)
 				headway = calculateElapsed(prev);
 		} else {
 			// There is a gap in vehicle event log
-			controller.logEvent(null, inp + 1, 0, 0, 0);
+			det.logEvent(null, 0, 0, 0);
 		}
-		controller.logEvent(stamp, inp + 1, duration, headway, speed);
+		det.logEvent(stamp, duration, headway, speed);
 	}
 
 	/** Test if headway from previous event is valid */
