@@ -195,7 +195,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 
 		/** Test if headway from previous event is valid */
 		private boolean is_headway_valid(DetectionEvent prev) {
-			if(prev.is_reset())
+			if(prev.is_reset() || is_reset())
 				return false;
 			else {
 				int headway = calculateElapsed(prev);
