@@ -69,7 +69,7 @@ public class OpQueryEventSamples extends OpCanoga {
 			mess.add(detection);
 			mess.queryProps();
 			if(CANOGA_LOG.isOpen())
-				detection.debug(CANOGA_LOG, controller);
+				detection.debug(CANOGA_LOG, id);
 			success = true;
 			detection.logEvents(controller);
 			if(controller.hasActiveDetector())

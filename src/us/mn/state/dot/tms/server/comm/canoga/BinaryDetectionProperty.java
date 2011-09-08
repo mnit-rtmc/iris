@@ -312,13 +312,12 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Debug the event */
-	public void debug(IDebugLog dlog, ControllerImpl controller) {
-		String name = controller.getName();
+	public void debug(IDebugLog dlog, String id) {
 		for(int i = 0; i < 4; i++) {
 			DetectionEvent pe = p_events[i];
 			DetectionEvent ce = c_events[i];
 			if(ce != null && !ce.equals(pe))
-				dlog.log(name + " event:" + i + "," + ce);
+				dlog.log(id + " event:" + i + "," + ce);
 		}
 	}
 }
