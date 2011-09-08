@@ -87,7 +87,7 @@ public class VehicleEventLog {
 		b.append(',');
 		p_stamp = stamp;
 		if(log_stamp) {
-			if(headway > 0) {
+			if(headway > 0 || duration > 0) {
 				long st = stamp.getTimeInMillis();
 				b.append(TimeSteward.timeShortString(st));
 			} else
