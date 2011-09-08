@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,8 +105,11 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 				qes = new OpQueryEventSamples(c);
 				collectors.add(qes);
 				qes.start();
-			} else if(intvl == 30)
+			} else if(intvl == 30) {
+				// Cleanup causes operation counters to be
+				// incremented and data to be binned
 				qes.cleanup();
+			}
 		}
 	}
 }
