@@ -42,7 +42,13 @@ public class VehicleEventLog {
 	public void logVehicle(Calendar stamp, int duration, int headway,
 		int speed) throws IOException
 	{
-		String line = formatEvent(stamp, duration, headway, speed);
+		appendEvent(stamp, formatEvent(stamp, duration, headway,speed));
+	}
+
+	/** Append an event to the log */
+	private void appendEvent(Calendar stamp, String line)
+		throws IOException
+	{
 		File file = factory.createFile(getStampMillis(stamp));
 		if(file != null) {
 			FileWriter fw = new FileWriter(file, true);
@@ -55,6 +61,12 @@ public class VehicleEventLog {
 		}
 	}
 
+	/** Log a gap in vehicle events */
+	public void logGap() throws IOException {
+		p_stamp = null;
+		appendEvent(null, "*\n");
+	}
+
 	/** Time stamp of most recent vehicle event */
 	protected transient Calendar p_stamp;
 
@@ -62,10 +74,6 @@ public class VehicleEventLog {
 	protected String formatEvent(Calendar stamp, int duration, int headway,
 		int speed)
 	{
-		if(stamp == null) {
-			p_stamp = null;
-			return "*\n";
-		}
 		boolean log_stamp = false;
 		StringBuilder b = new StringBuilder();
 		if(duration > 0)

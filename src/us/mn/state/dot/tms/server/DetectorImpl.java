@@ -783,6 +783,16 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		});
 	}
 
+	/** Log a gap in vehicle events.
+	 */
+	public void logGap() {
+		MainServer.FLUSH.addJob(new Job() {
+			public void perform() throws IOException {
+				v_log.logGap();
+			}
+		});
+	}
+
 	/** Milliseconds per sample */
 	static protected final int MS_PER_SAMPLE =
 		Constants.SECONDS_PER_SAMPLE * 1000;

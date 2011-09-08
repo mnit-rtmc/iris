@@ -141,7 +141,7 @@ public class DetectionEvent {
 				headway = calculateElapsed(prev);
 		} else {
 			// There is a gap in vehicle event log
-			det.logEvent(null, 0, 0, 0);
+			det.logGap();
 		}
 		det.logEvent(stamp, duration, headway, speed);
 	}
