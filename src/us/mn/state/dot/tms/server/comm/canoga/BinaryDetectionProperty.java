@@ -248,8 +248,10 @@ public class BinaryDetectionProperty extends CanogaProperty {
 
 	/** Set the requested value */
 	protected void setValue(byte[] v) {
-		for(int i = 0; i < 4; i++)
-			c_events[i] = parse_event(v, i);
+		if(v.length == expectedResponseOctets()) {
+			for(int i = 0; i < 4; i++)
+				c_events[i] = parse_event(v, i);
+		}
 	}
 
 	/** Log new vehicle detection events */
