@@ -59,6 +59,9 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	/** Maximum valid duration (120 seconds) */
 	static protected final int MAX_DURATION = 120 * 1000;
 
+	/** Maximum valid headway (12 hours) */
+	static protected final int MAX_HEADWAY = 12 * 60 * 60 * 1000;
+
 	/** Message payload for a GET request */
 	static protected final byte[] PAYLOAD_GET = { '*' };
 
@@ -178,16 +181,26 @@ public class BinaryDetectionProperty extends CanogaProperty {
 			int inp, DetectionEvent prev, int speed)
 		{
 			int headway = 0;
-			if(!prev.is_reset()) {
+			if(is_headway_valid(prev)) {
 				int missed = calculate_missed(prev);
 				for(int i = 0; i < missed; i++)
 					controller.logEvent(stamp, inp+1,0,0,0);
-				// If no vehicles were missed, headway is valid
+				// If no vehicles were missed, log headway
 				if(missed == 0)
 					headway = calculateElapsed(prev);
 			}
 			controller.logEvent(stamp, inp + 1, duration, headway,
 				speed);
+		}
+
+		/** Test if headway from previous event is valid */
+		private boolean is_headway_valid(DetectionEvent prev) {
+			if(prev.is_reset())
+				return false;
+			else {
+				int headway = calculateElapsed(prev);
+				return headway > 0 && headway < MAX_HEADWAY;
+			}
 		}
 
 		/** Calculate the number of missed vehicles */
