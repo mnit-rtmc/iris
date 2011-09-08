@@ -766,7 +766,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	 * @param duration Event duration in milliseconds.
 	 * @param headway Headway since last event in milliseconds.
 	 * @param speed Speed in miles per hour. */
-	public void logEvent(final Calendar stamp, final int duration,
+	public void logVehicle(final Calendar stamp, final int duration,
 		final int headway, final int speed)
 	{
 		ev_vehicles++;

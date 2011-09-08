@@ -135,7 +135,7 @@ public class DetectionEvent {
 		if(isHeadwayValid(prev)) {
 			int missed = calculateMissed(prev);
 			for(int i = 0; i < missed; i++)
-				det.logEvent(stamp, 0, 0, 0);
+				det.logVehicle(stamp, 0, 0, 0);
 			// If no vehicles were missed, log headway
 			if(missed == 0)
 				headway = calculateElapsed(prev);
@@ -143,7 +143,7 @@ public class DetectionEvent {
 			// There is a gap in vehicle event log
 			det.logGap();
 		}
-		det.logEvent(stamp, duration, headway, speed);
+		det.logVehicle(stamp, duration, headway, speed);
 	}
 
 	/** Test if headway from previous event is valid */
