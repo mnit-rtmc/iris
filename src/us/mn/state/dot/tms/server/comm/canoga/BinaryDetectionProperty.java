@@ -188,6 +188,9 @@ public class BinaryDetectionProperty extends CanogaProperty {
 				// If no vehicles were missed, log headway
 				if(missed == 0)
 					headway = calculateElapsed(prev);
+			} else {
+				// There is a gap in vehicle event log
+				controller.logEvent(null, inp + 1, 0, 0, 0);
 			}
 			controller.logEvent(stamp, inp + 1, duration, headway,
 				speed);
@@ -282,11 +285,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 		DetectionEvent ce = c_events[inp];
 		if(ce == null || ce.has_errors(pe))
 			return;
-		if(ce.equals(pe)) {
-			/* don't log -- same event as last time */
-		} else if(pe == null || ce.is_reset()) {
-			controller.logEvent(null, inp + 1, 0, 0, 0);
-		} else {
+		if((!ce.is_reset()) && (!ce.equals(pe))) {
 			int speed = calculateSpeed(controller, inp);
 			ce.log_event(stamp, controller, inp, pe, speed);
 		}
