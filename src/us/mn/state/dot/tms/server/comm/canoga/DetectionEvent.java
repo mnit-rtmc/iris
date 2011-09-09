@@ -107,7 +107,7 @@ public class DetectionEvent {
 
 	/** Check for transmission errors in event data */
 	public boolean hasErrors(DetectionEvent prev) {
-		if(prev == null)
+		if(prev == null || isReset())
 			return false;
 		if(start == prev.start)
 			return !equals(prev);
@@ -115,7 +115,18 @@ public class DetectionEvent {
 			return !equals(prev);
 		if(duration > MAX_DURATION)
 			return true;
-		return false;
+		else
+			return hasDataErrors(prev);
+	}
+
+	/** Check for a specific type of data error which can escape detection
+	 * by the simple XOR checksum.  It can happen if an extraneous byte is
+	 * inserted at the beginning of a response.  We test for it by shifting
+	 * duration by one byte and comparing it to the previous duration.  If
+	 * they match, it's likely that the error has occurred. */
+	private boolean hasDataErrors(DetectionEvent prev) {
+		return ((duration >> 8) == prev.duration) &&
+		       !isHeadwayValid(prev);
 	}
 
 	/** Calculate the time elapsed since another event */
