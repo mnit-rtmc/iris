@@ -148,7 +148,7 @@ public class DetectionEvent {
 
 	/** Test if headway from previous event is valid */
 	private boolean isHeadwayValid(DetectionEvent prev) {
-		if(prev.isReset() || isReset())
+		if(prev == null || prev.isReset() || isReset())
 			return false;
 		else {
 			int headway = calculateElapsed(prev);
