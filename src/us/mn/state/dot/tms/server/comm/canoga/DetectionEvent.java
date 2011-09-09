@@ -120,10 +120,10 @@ public class DetectionEvent {
 	}
 
 	/** Check for a specific type of data error which can escape detection
-	 * by the simple XOR checksum.  It can happen if an extraneous byte is
-	 * inserted at the beginning of a response.  We test for it by shifting
-	 * duration by one byte and comparing it to the previous duration.  If
-	 * they match, it's likely that the error has occurred. */
+	 * by the simple XOR checksum.  It can happen if the first byte of the
+	 * response is lost.  We test for it by shifting duration by one byte
+	 * and comparing it to the previous duration.  If they match, it's
+	 * likely that the error has occurred. */
 	private boolean hasDataErrors(DetectionEvent prev) {
 		return ((duration >> 8) == prev.duration) &&
 		       !isHeadwayValid(prev);
