@@ -1243,8 +1243,8 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 6	Pelco D PTZ
 7	NTCIP Class C
 8	Manchester PTZ
-9	DMS Lite
-10	AWS
+9	DMS XML
+10	MSG_FEED
 11	NTCIP Class A
 12	Pelco Switcher
 13	Vicon PTZ
