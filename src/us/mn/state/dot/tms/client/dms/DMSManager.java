@@ -112,7 +112,8 @@ public class DMSManager extends ProxyManager<DMS> {
 			ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(DMSHelper.STYLE_DEPLOYED,
 			ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(DMSHelper.STYLE_SCHEDULED, Color.ORANGE);
+		theme.addStyle(DMSHelper.STYLE_SCHEDULED,
+			ProxyTheme.COLOR_SCHEDULED);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
 			theme.addStyle(DMSHelper.STYLE_AWS_DEPLOYED, Color.RED);
 		theme.addStyle(DMSHelper.STYLE_MAINTENANCE,
