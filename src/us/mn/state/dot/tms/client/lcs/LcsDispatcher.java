@@ -342,14 +342,12 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Update the status widgets */
 	protected void updateStatus(LCSArray lcs_array) {
-		String status = LCSArrayHelper.getStatus(lcs_array);
-		if(status.isEmpty())
-			updateCritical(lcs_array);
-		else {
+		if(LCSArrayHelper.isFailed(lcs_array)) {
 			statusTxt.setForeground(Color.WHITE);
 			statusTxt.setBackground(Color.GRAY);
-			statusTxt.setText(status);
-		}
+			statusTxt.setText(LCSArrayHelper.getStatus(lcs_array));
+		} else
+			updateCritical(lcs_array);
 	}
 
 	/** Update the critical error status */
