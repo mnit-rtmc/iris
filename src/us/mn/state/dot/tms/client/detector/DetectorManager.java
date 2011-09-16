@@ -63,8 +63,8 @@ public class DetectorManager extends ProxyManager<Detector> {
 		R_NodeManager r_man)
 	{
 		super(c, lm);
-		cache.addProxyListener(this);
 		r_node_manager = r_man;
+		cache.addProxyListener(this);
 	}
 
 	/** Create a style list model for the given symbol */
