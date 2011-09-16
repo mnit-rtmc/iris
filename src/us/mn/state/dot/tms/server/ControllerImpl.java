@@ -564,7 +564,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Set the administrator notes */
 	protected void setFailTime(Long ft) {
 		try {
-			store.update(this, "fail_time", ft);
+			store.update(this, "fail_time", asTimestamp(ft));
 		}
 		catch(TMSException e) {
 			// FIXME: what else can we do with this exception?
