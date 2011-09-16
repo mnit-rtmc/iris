@@ -50,8 +50,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		System.err.println("Loading controllers...");
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
 		store.query("SELECT name, cabinet, comm_link, drop_id, " +
-			"active, password, notes FROM iris." + SONAR_TYPE  +";",
-			new ResultFactory()
+			"active, password, notes, fail_time FROM iris." +
+			SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ControllerImpl(
@@ -62,7 +62,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 					row.getShort(4),	// drop_id
 					row.getBoolean(5),	// active
 					row.getString(6),	// password
-					row.getString(7)	// notes
+					row.getString(7),	// notes
+					row.getTimestamp(8)	// failTime
 				));
 			}
 		});
@@ -78,7 +79,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		map.put("active", active);
 		map.put("password", password);
 		map.put("notes", notes);
+		map.put("fail_time", asTimestamp(failTime));
 		return map;
+	}
+
+	/** Get the fail time as a time stamp */
+	static private Date asTimestamp(Long ft) {
+		if(ft != null)
+			return new Date(ft);
+		else
+			return null;
 	}
 
 	/** Get the database table name */
@@ -101,7 +111,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Create a new controller */
 	protected ControllerImpl(String n, Cabinet c, CommLink l, short d,
-		boolean a, String p, String nt) throws TMSException
+		boolean a, String p, String nt, Date ft) throws TMSException
 	{
 		super(n);
 		cabinet = c;
@@ -110,22 +120,31 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		active = a;
 		password = p;
 		notes = nt;
+		failTime = stampMillis(ft);
 		initTransients();
+	}
+
+	/** Get fail time as milliseconds since epoch */
+	static private Long stampMillis(Date ft) {
+		if(ft != null)
+			return ft.getTime();
+		else
+			return null;
 	}
 
 	/** Create a new controller */
 	protected ControllerImpl(Namespace ns, String n, String c, String l,
-		short d, boolean a, String p, String nt) throws TMSException
+		short d, boolean a, String p, String nt, Date ft)
+		throws TMSException
 	{
 		this(n, (Cabinet)ns.lookupObject(Cabinet.SONAR_TYPE, c),
 			(CommLink)ns.lookupObject(CommLink.SONAR_TYPE, l),
-			d, a, p, nt);
+			d, a, p, nt, ft);
 	}
 
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		version = "";
-		failed = true;
 		if(comm_link instanceof CommLinkImpl) {
 			CommLinkImpl link = (CommLinkImpl)comm_link;
 			link.putController(drop_id, this);
@@ -486,48 +505,72 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			link.addOperation(o);
 	}
 
-	/** Controller communication status */
-	protected transient String status = Constants.UNKNOWN;
+	/** Controller error status */
+	protected transient String errorStatus = "";
 
-	/** Get the controller communication status */
+	/** Set the controller error status */
+	public void setErrorStatus(String s) {
+		if(errorStatus.equals(s) || s == null)
+			return;
+		errorStatus = s;
+		notifyAttribute("status");
+	}
+
+	/** Controller communication status */
+	protected transient String commStatus = Constants.UNKNOWN;
+
+	/** Get the controller error status */
 	public String getStatus() {
 		if(isFailed())
-			return status;
+			return commStatus;
 		else
-			return "";
+			return errorStatus; 
 	}
 
 	/** Set the controller communication status */
-	protected void setStatus(String s) {
+	protected void setCommStatus(String s) {
 		// NOTE: the status attribute is set here, but don't notify
 		// clients until communication fails. That happens in the
 		// setFailed method.
-		status = s;
+		commStatus = s;
 	}
 
 	/** Log a comm event */
 	public void logCommEvent(EventType et, String id, String message) {
 		incrementCommCounter(et);
-		setStatus(message);
+		setCommStatus(message);
 		if(!isFailed())
 			logCommEvent(et, id);
 	}
 
-	/** Failed status of controller */
-	protected transient boolean failed = true;
+	/** Time stamp of most recent comm failure */
+	protected Long failTime = TimeSteward.currentTimeMillis();
 
 	/** Set the failed status of the controller */
 	protected void setFailed(boolean f, String id) {
-		if(f == failed)
+		if(f == isFailed())
 			return;
 		if(f) {
-			failTime = TimeSteward.currentTimeMillis();
+			setFailTime(TimeSteward.currentTimeMillis());
 			logCommEvent(EventType.COMM_FAILED, id);
-		} else
+		} else {
+			setFailTime(null);
 			logCommEvent(EventType.COMM_RESTORED, id);
-		failed = f;
+		}
 		notifyAttribute("status");
-		notifyAttribute("error");
+		notifyAttribute("failTime");
+	}
+
+	/** Set the administrator notes */
+	protected void setFailTime(Long ft) {
+		try {
+			store.update(this, "fail_time", ft);
+		}
+		catch(TMSException e) {
+			// FIXME: what else can we do with this exception?
+			e.printStackTrace();
+		}
+		failTime = ft;
 	}
 
 	/** Set the failed status of the controller */
@@ -537,7 +580,22 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get the failure status */
 	public boolean isFailed() {
-		return failed;
+		return failTime != null;
+	}
+
+	/** Get the controller fail time, or null if communication is not
+	 * failed.  This time is in milliseconds since the epoch. */
+	public Long getFailTime() {
+		return failTime;
+	}
+
+	/** Get the number of milliseconds the controller has been failed */
+	public long getFailMillis() {
+		Long ft = failTime;
+		if(ft != null)
+			return TimeSteward.currentTimeMillis() - failTime;
+		else
+			return 0;
 	}
 
 	/** Controller maint status */
@@ -555,37 +613,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the controller maint status */
 	public String getMaint() {
 		return maint;
-	}
-
-	/** Time stamp of most recent comm failure */
-	protected transient long failTime = TimeSteward.currentTimeMillis();
-
-	/** Controller error detail */
-	protected transient String error = "";
-
-	/** Set the controller error detail */
-	public void setError(String s) {
-		if(s == null)
-			error = "";
-		else
-			error = s;
-		notifyAttribute("error");
-	}
-
-	/** Get the controller error detail */
-	public String getError() {
-		if(isFailed())
-			return "FAIL @ " + new Date(failTime);
-		else
-			return error;
-	}
-
-	/** Get the number of milliseconds the controller has been failed */
-	public long getFailMillis() {
-		if(isFailed())
-			return TimeSteward.currentTimeMillis() - failTime;
-		else
-			return 0;
 	}
 
 	/** Timeout error count */
@@ -693,7 +720,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Clear the counters and error status */
 	public void setCounters(boolean clear) {
 		setMaint("");
-		setError("");
+		setErrorStatus("");
 		timeoutErr = 0;
 		notifyAttribute("timeoutErr");
 		checksumErr = 0;

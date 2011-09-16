@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -97,17 +98,17 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 					c.setActive((Boolean)value);
 			}
 		},
-		new ProxyColumn<Controller>("Status", 44) {
+		new ProxyColumn<Controller>("Comm", 44) {
 			public Object getValueAt(Controller c) {
-				return c.getStatus();
+				return c;
 			}
 			protected TableCellRenderer createCellRenderer() {
-				return new StatusCellRenderer();
+				return new CommCellRenderer();
 			}
 		},
-		new ProxyColumn<Controller>("Error Detail", 240) {
+		new ProxyColumn<Controller>("Status", 240) {
 			public Object getValueAt(Controller c) {
-				return c.getError();
+				return c.getStatus();
 			}
 		},
 		new ProxyColumn<Controller>("Version", 120) {
@@ -188,8 +189,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		}
 	}
 
-	/** Renderer for link status in a table cell */
-	protected class StatusCellRenderer extends DefaultTableCellRenderer {
+	/** Renderer for comm status in a table cell */
+	protected class CommCellRenderer extends DefaultTableCellRenderer {
 		protected final Icon ok = new ControllerIcon(
 			COLOR_AVAILABLE);
 		protected final Icon fail = new ControllerIcon(Color.GRAY);
@@ -203,17 +204,16 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				(JLabel)super.getTableCellRendererComponent(
 				table, "", isSelected, hasFocus, row,
 				column);
-			if(value == null)
-				label.setIcon(null);
-			else if("".equals(value))
-				label.setIcon(ok);
-			else {
-				Controller c = getProxy(row);
-				if(c != null && c.getActive())
+			if(value instanceof Controller) {
+				Controller c = (Controller)value;
+				if(ControllerHelper.isFailed(c))
 					label.setIcon(fail);
+				else if(ControllerHelper.isActive(c))
+					label.setIcon(ok);
 				else
 					label.setIcon(inactive);
-			}
+			} else
+				label.setIcon(null);
 			return label;
 		}
 	}

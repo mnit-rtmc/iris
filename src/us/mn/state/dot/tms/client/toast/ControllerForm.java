@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.toast;
 
 import java.awt.Color;
+import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -105,8 +106,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Status */
 	protected final JLabel status = new JLabel();
 
-	/** Error detail */
-	protected final JLabel error = new JLabel();
+	/** Fail time */
+	protected final JLabel fail_time_lbl = new JLabel();
 
 	/** Timeout errors label */
 	protected final JLabel timeout_lbl = new JLabel();
@@ -341,7 +342,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.addRow("Version:", version);
 		panel.addRow("Maint Status:", maint);
 		panel.addRow("Status:", status);
-		panel.addRow("Error Detail:", error);
+		panel.addRow("Fail Time:", fail_time_lbl);
 		panel.addRow("Timeout Errors:", timeout_lbl);
 		panel.addRow("Checksum Errors:", checksum_lbl);
 		panel.addRow("Parsing Errors:", parsing_lbl);
@@ -387,8 +388,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			maint.setText(proxy.getMaint());
 		if(a == null || a.equals("status"))
 			status.setText(proxy.getStatus());
-		if(a == null || a.equals("error"))
-			error.setText(proxy.getError());
+		if(a == null || a.equals("failTime")) {
+			Long ft = proxy.getFailTime();
+			if(ft != null)
+				fail_time_lbl.setText(new Date(ft).toString());
+			else
+				fail_time_lbl.setText("");
+		}
 		if(a == null || a.equals("timeoutErr")) {
 			timeout_lbl.setText(String.valueOf(
 				proxy.getTimeoutErr()));

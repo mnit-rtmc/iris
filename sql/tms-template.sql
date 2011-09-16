@@ -309,7 +309,8 @@ CREATE TABLE iris.controller (
 	cabinet VARCHAR(20) NOT NULL REFERENCES iris.cabinet(name),
 	active boolean NOT NULL,
 	password VARCHAR(16),
-	notes VARCHAR(128) NOT NULL
+	notes VARCHAR(128) NOT NULL,
+	fail_time timestamp WITH time zone
 );
 
 CREATE UNIQUE INDEX ctrl_link_drop_idx ON iris.controller
@@ -1353,7 +1354,7 @@ camera_id_blank
 camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
-database_version	3.131.0
+database_version	3.132.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_retry_threshold	6

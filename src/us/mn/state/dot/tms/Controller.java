@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,16 +65,17 @@ public interface Controller extends SonarObject {
 	/** Get the administrator notes */
 	String getNotes();
 
-	/** Get the controller communication status */
+	/** Get the controller fail time, or null if communication is not
+	 * failed.  This time is in milliseconds since the epoch. */
+	Long getFailTime();
+
+	/** Get the controller error status.  If this attribute is set (not
+	 * an empty string), there is a critical error. */
 	String getStatus();
 
 	/** Get the controller maint status.  If this attribute is set (not
 	 * an empty string), there is a non-critical maintenance problem. */
 	String getMaint();
-
-	/** Get the controller error status.  If this attribute is set (not
-	 * an empty string), there is a critical error. */
-	String getError();
 
 	/** Get the timeout error count */
 	int getTimeoutErr();

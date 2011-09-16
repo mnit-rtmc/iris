@@ -14,8 +14,14 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
+import java.awt.Component;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.TreeSet;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -55,12 +61,34 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 				return c.getDrop();
 			}
 		},
-		new ProxyColumn<Controller>("Error Detail", 240) {
+		new ProxyColumn<Controller>("Fail Time", 240) {
 			public Object getValueAt(Controller c) {
-				return c.getError();
+				return c.getFailTime();
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new FailTimeCellRenderer();
 			}
 		}
 	    };
+	}
+
+	/** Renderer for fail time in a table cell */
+	protected class FailTimeCellRenderer extends DefaultTableCellRenderer {
+		public Component getTableCellRendererComponent(JTable table,
+			Object value, boolean isSelected, boolean hasFocus,
+			int row, int column)
+		{
+			JLabel label =
+				(JLabel)super.getTableCellRendererComponent(
+				table, "", isSelected, hasFocus, row,
+				column);
+			if(value instanceof Long) {
+				Long ft = (Long)value;
+				label.setText(new Date(ft).toString());
+			} else
+				label.setText("");
+			return label;
+		}
 	}
 
 	/** Create an empty set of proxies */

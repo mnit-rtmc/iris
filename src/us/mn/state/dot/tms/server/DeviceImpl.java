@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,10 +72,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** Check if the controller has an error */
 	public boolean hasError() {
 		ControllerImpl c = controller;	// Avoid race
-		if(c == null)
-			return true;
-		else
-			return !"".equals(c.getError());
+		return c == null || isFailed() || !c.getStatus().isEmpty();
 	}
 
 	/** Get the message poller */

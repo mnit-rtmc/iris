@@ -216,7 +216,7 @@ public class DMSHelper extends BaseHelper {
 			return "Invalid dimensions";
 		Controller ctr = proxy.getController();
 		if(ctr != null)
-			return ctr.getError();
+			return ctr.getStatus();
 		else
 			return "No controller";
 	}

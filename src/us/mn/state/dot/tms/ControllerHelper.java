@@ -67,6 +67,6 @@ public class ControllerHelper extends BaseHelper {
 
 	/** Check if a controller is failed */
 	static public boolean isFailed(Controller ctrl) {
-		return isActive(ctrl) && !ctrl.getStatus().isEmpty();
+		return isActive(ctrl) && ctrl.getFailTime() != null;
 	}
 }
