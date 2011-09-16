@@ -1386,8 +1386,8 @@ dms_poll_period_secs	30
 dms_querymsg_enable	false
 dms_reset_enable	false
 dms_send_confirmation_enable	false
-dmslite_modem_op_timeout_secs	305
-dmslite_op_timeout_secs	65
+dmsxml_modem_op_timeout_secs	305
+dmsxml_op_timeout_secs	65
 email_sender_client	
 email_sender_server	
 email_smtp_host	
