@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -293,6 +294,7 @@ public class CommLinkForm extends AbstractForm {
 		ftable.setColumnModel(fmodel.createColumnModel());
 		ftable.setRowHeight(ROW_HEIGHT);
 		ftable.setVisibleRowCount(16);
+		ftable.setRowSorter(new TableRowSorter(fmodel));
 		panel.addRow(ftable);
 		panel.add(go_button);
 		return panel;
@@ -301,7 +303,8 @@ public class CommLinkForm extends AbstractForm {
 	/** Go to the failed controller (on the main tab) */
 	protected void goFailedController() {
 		int row = ftable.getSelectedRow();
-		Controller c = fmodel.getProxy(row);
+		int mrow = ftable.convertRowIndexToModel(row);
+		Controller c = fmodel.getProxy(mrow);
 		if(c != null)
 			goController(c);
 	}

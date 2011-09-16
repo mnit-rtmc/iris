@@ -56,12 +56,12 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 				return c.getCommLink().getName();
 			}
 		},
-		new ProxyColumn<Controller>("Drop", 60) {
+		new ProxyColumn<Controller>("Drop", 60, Short.class) {
 			public Object getValueAt(Controller c) {
 				return c.getDrop();
 			}
 		},
-		new ProxyColumn<Controller>("Fail Time", 240) {
+		new ProxyColumn<Controller>("Fail Time", 240, Long.class) {
 			public Object getValueAt(Controller c) {
 				return c.getFailTime();
 			}
