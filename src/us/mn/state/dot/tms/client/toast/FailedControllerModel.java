@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.toast;
 import java.util.Comparator;
 import java.util.TreeSet;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -28,11 +29,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class FailedControllerModel extends ProxyTableModel<Controller> {
-
-	/** Check if a controller is "failed" */
-	static protected boolean isFailed(Controller c) {
-		return c != null && c.getActive() && !c.getStatus().equals("");
-	}
 
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
@@ -98,7 +94,7 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 
 	/** Add a Controller proxy if it is failed */
 	protected int doProxyAdded(Controller proxy) {
-		if(isFailed(proxy))
+		if(ControllerHelper.isFailed(proxy))
 			return super.doProxyAdded(proxy);
 		else
 			return -1;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,18 +62,6 @@ public class LCSHelper extends BaseHelper {
 	/** Lookup the LCS with the specified name */
 	static public LCS lookup(String name) {
 		return (LCS)namespace.lookupObject(LCS.SONAR_TYPE, name);
-	}
-
-	/** Check if an LCS is failed */
-	static public boolean isFailed(LCS lcs) {
-		String name = lcs.getName();
-		DMS dms = DMSHelper.lookup(name);
-		if(dms != null) {
-			Controller ctr = dms.getController();
-			if(ctr != null && "".equals(ctr.getStatus()))
-				return false;
-		}
-		return true;
 	}
 
 	/** Check if an LCS needs maintenance */

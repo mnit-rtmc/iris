@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,5 +40,15 @@ public class RampMeterHelper extends BaseHelper {
 			return meter.getCamera();
 		else
 			return null;
+	}
+
+	/** Test if a ramp meter is active */
+	static public boolean isActive(RampMeter meter) {
+		return ControllerHelper.isActive(meter.getController());
+	}
+
+	/** Test if a ramp meter is failed */
+	static public boolean isFailed(RampMeter meter) {
+		return ControllerHelper.isFailed(meter.getController());
 	}
 }

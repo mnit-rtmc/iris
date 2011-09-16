@@ -67,7 +67,6 @@ public class DetectorHelper extends BaseHelper {
 
 	/** Test if a detector is active */
 	static public boolean isActive(Detector det) {
-		Controller ctr = det.getController();
-		return ctr != null && ctr.getActive();
+		return ControllerHelper.isActive(det.getController());
 	}
 }

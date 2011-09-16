@@ -19,7 +19,7 @@ import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.Session;
@@ -92,19 +92,14 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		if(STYLE_DEPLOYED.equals(s))
 			return proxy.getDeployed();
 		else if(STYLE_AVAILABLE.equals(s)) {
-			return (!isControllerFailed(proxy.getController())) &&
-				!proxy.getDeployed();
+			return (!ControllerHelper.isFailed(
+			       proxy.getController())) && !proxy.getDeployed();
 		} else if(STYLE_FAILED.equals(s))
-			return isControllerFailed(proxy.getController());
+			return ControllerHelper.isFailed(proxy.getController());
 		else if(STYLE_NO_CONTROLLER.equals(s))
 			return proxy.getController() == null;
 		else
 			return STYLE_ALL.equals(s);
-	}
-
-	/** Test if a controller is failed */
-	static protected boolean isControllerFailed(Controller ctr) {
-		return ctr == null || !("".equals(ctr.getStatus()));
 	}
 
 	/** Show the properties form for the selected proxy */

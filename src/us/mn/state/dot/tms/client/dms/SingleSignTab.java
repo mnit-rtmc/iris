@@ -347,14 +347,12 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Update the status widgets */
 	protected void updateStatus(DMS dms) {
-		String status = DMSHelper.getStatus(dms);
-		if(status.isEmpty())
-			updateCritical(dms);
-		else {
+		if(DMSHelper.isFailed(dms)) {
 			statusTxt.setForeground(Color.WHITE);
 			statusTxt.setBackground(Color.GRAY);
-			statusTxt.setText(status);
-		}
+			statusTxt.setText(DMSHelper.getStatus(dms));
+		} else
+			updateCritical(dms);
 		operationTxt.setText(dms.getOperation());
 		opStatusTxt.setText(dms.getOpStatus());
 	}

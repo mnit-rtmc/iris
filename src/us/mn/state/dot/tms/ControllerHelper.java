@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,5 +58,15 @@ public class ControllerHelper extends BaseHelper {
 				return GeoLocHelper.getDescription(loc);
 		}
 		return "";
+	}
+
+	/** Test if a controller is active */
+	static public boolean isActive(Controller ctrl) {
+		return ctrl != null && ctrl.getActive();
+	}
+
+	/** Check if a controller is failed */
+	static public boolean isFailed(Controller ctrl) {
+		return isActive(ctrl) && !ctrl.getStatus().isEmpty();
 	}
 }

@@ -83,8 +83,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Test if a DMS is active */
 	static public boolean isActive(DMS proxy) {
-		Controller ctr = proxy.getController();
-		return ctr != null && ctr.getActive();
+		return ControllerHelper.isActive(proxy.getController());
 	}
 
 	/** Test if a DMS has a travel time message deployed */
@@ -238,7 +237,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Test if a DMS if failed */
 	static public boolean isFailed(DMS proxy) {
-		return isActive(proxy) && !getStatus(proxy).isEmpty();
+		return ControllerHelper.isFailed(proxy.getController());
 	}
 
 	/** Check the style of the specified proxy */

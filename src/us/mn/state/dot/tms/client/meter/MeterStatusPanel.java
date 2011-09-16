@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
@@ -48,15 +47,6 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 public class MeterStatusPanel extends FormPanel
 	implements ProxyListener<RampMeter>, ProxySelectionListener<RampMeter>
 {
-	/** Get the controller status */
-	static protected String getControllerStatus(RampMeter proxy) {
-		Controller c = proxy.getController();
-		if(c == null)
-			return "???";
-		else
-			return c.getStatus();
-	}
-
 	/** Format the meter release rate */
 	static public String formatRelease(Integer rate) {
 		if(rate !=  null)
@@ -275,13 +265,12 @@ public class MeterStatusPanel extends FormPanel
 				meter.getGeoLoc()));
 		}
 		if(a == null || a.equals("operation")) {
-			String status = getControllerStatus(meter);
-			if("".equals(status)) {
-				operationTxt.setForeground(null);
-				operationTxt.setBackground(null);
-			} else {
+			if(RampMeterHelper.isFailed(meter)) {
 				operationTxt.setForeground(Color.WHITE);
 				operationTxt.setBackground(Color.GRAY);
+			} else {
+				operationTxt.setForeground(null);
+				operationTxt.setBackground(null);
 			}
 			operationTxt.setText(meter.getOperation());
 		}
