@@ -22,6 +22,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -30,6 +31,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -112,6 +115,10 @@ public class CommLinkForm extends AbstractForm {
 		fmodel = new FailedControllerModel(s);
 		sorter = new TableRowSorter<FailedControllerModel>(fmodel);
 		sorter.setSortsOnUpdates(true);
+		LinkedList<RowSorter.SortKey> keys =
+			new LinkedList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(4, SortOrder.DESCENDING));
+		sorter.setSortKeys(keys);
 		filter = new RowFilter<FailedControllerModel, Integer>() {
 			public boolean include(Entry<? extends
 				FailedControllerModel, ? extends Integer> entry)
