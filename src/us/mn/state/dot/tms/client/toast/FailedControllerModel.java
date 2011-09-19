@@ -15,26 +15,23 @@
 package us.mn.state.dot.tms.client.toast;
 
 import java.awt.Component;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.TreeSet;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for failed controllers
  *
  * @author Douglas Lau
  */
-public class FailedControllerModel extends ProxyTableModel<Controller> {
+public class FailedControllerModel extends ProxyTableModel2<Controller> {
 
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
@@ -91,45 +88,14 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 		}
 	}
 
-	/** Create an empty set of proxies */
-	protected TreeSet<Controller> createProxySet() {
-		return new TreeSet<Controller>(
-			new Comparator<Controller>() {
-				public int compare(Controller a, Controller b) {
-					String la = a.getCommLink().getName();
-					String lb = b.getCommLink().getName();
-					int c = la.compareTo(lb);
-					if(c != 0)
-						return c;
-					Short aa = Short.valueOf(a.getDrop());
-					Short bb = Short.valueOf(b.getDrop());
-					return aa.compareTo(bb);
-				}
-				public boolean equals(Object o) {
-					return o == this;
-				}
-				public int hashCode() {
-					return super.hashCode();
-				}
-			}
-		);
-	}
-
 	/** Create a new failed controller table model */
 	public FailedControllerModel(Session s) {
 		super(s, s.getSonarState().getConCache().getControllers());
 	}
 
-	/** Add a Controller proxy if it is failed */
-	protected int doProxyAdded(Controller proxy) {
-		if(ControllerHelper.isFailed(proxy))
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
-	}
-
-	/** Get the count of rows in the table */
-	public int getRowCount() {
-		return super.getRowCount() - 1;
+	/** Change a proxy in the table model */
+	protected void proxyChangedSlow(Controller proxy, String attrib) {
+		if(!"status".equals(attrib))
+			super.proxyChangedSlow(proxy, attrib);
 	}
 }

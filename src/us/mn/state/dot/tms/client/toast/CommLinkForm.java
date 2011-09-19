@@ -29,12 +29,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -84,6 +86,12 @@ public class CommLinkForm extends AbstractForm {
 	/** Failed controller table model */
 	protected final FailedControllerModel fmodel;
 
+	/** Table row sorter */
+	protected final TableRowSorter<FailedControllerModel> sorter;
+
+	/** Table row filter */
+	protected final RowFilter<FailedControllerModel, Integer> filter;
+
 	/** Button to show controller properties */
 	protected final JButton ctr_props = new JButton("Properties");
 
@@ -102,6 +110,18 @@ public class CommLinkForm extends AbstractForm {
 		session = s;
 		model = new CommLinkModel(s);
 		fmodel = new FailedControllerModel(s);
+		sorter = new TableRowSorter<FailedControllerModel>(fmodel);
+		sorter.setSortsOnUpdates(true);
+		filter = new RowFilter<FailedControllerModel, Integer>() {
+			public boolean include(Entry<? extends
+				FailedControllerModel, ? extends Integer> entry)
+			{
+				Controller ctrl = fmodel.getRowProxy(
+					entry.getIdentifier());
+				return ControllerHelper.isFailed(ctrl);
+			}
+		};
+		sorter.setRowFilter(filter);
 	}
 
 	/** Initializze the widgets in the form */
@@ -294,7 +314,7 @@ public class CommLinkForm extends AbstractForm {
 		ftable.setColumnModel(fmodel.createColumnModel());
 		ftable.setRowHeight(ROW_HEIGHT);
 		ftable.setVisibleRowCount(16);
-		ftable.setRowSorter(new TableRowSorter(fmodel));
+		ftable.setRowSorter(sorter);
 		panel.addRow(ftable);
 		panel.add(go_button);
 		return panel;
@@ -304,7 +324,7 @@ public class CommLinkForm extends AbstractForm {
 	protected void goFailedController() {
 		int row = ftable.getSelectedRow();
 		int mrow = ftable.convertRowIndexToModel(row);
-		Controller c = fmodel.getProxy(mrow);
+		Controller c = fmodel.getRowProxy(mrow);
 		if(c != null)
 			goController(c);
 	}
