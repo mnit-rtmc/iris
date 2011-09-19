@@ -11,6 +11,32 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.132.0 (19 September 2011)</dt>
+	<dd><ul>
+		<li>
+			Store controller fail time stamp in database so it will
+			not be lost on a server restart.
+		</li>
+		<li>
+			Sort failed controller list by fail time, and allow
+			user to sort based on other columns as well.
+		</li>
+		<li>
+			Improved map tile performance.
+		</li>
+		<li>
+			Allow msgfeed protocol to be used through an HTTP proxy
+			server.  New properties in server.properties file.
+		</li>
+		<li>
+			Lots of fixes and improvements for canoga protocol.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.132.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.131.0 (30 August 2011)</dt>
 	<dd><ul>
 		<li>
