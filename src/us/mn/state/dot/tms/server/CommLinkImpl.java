@@ -93,7 +93,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if(cp != null)
 			protocol = cp;
 		timeout = t;
-		openPoller();
+		poller = null;
 	}
 
 	/** Destroy an object */
@@ -137,7 +137,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "url", u);
 		setUrl(u);
-		openPoller();
+		closePoller();
 	}
 
 	/** Get remote URL for link */
@@ -164,7 +164,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "protocol", p);
 		setProtocol(p);
-		openPoller();
+		closePoller();
 	}
 
 	/** Get the communication protocol */
@@ -211,14 +211,15 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			setStatus(poller.getStatus());
 			if(poller.isAlive())
 				return poller;
+			else
+				closePoller();
 		}
-		failControllers();
 		return openPoller();
 	}
 
-	/** Open the message poller */
+	/** Open the message poller.  Poller must be null prior to calling. */
 	protected synchronized MessagePoller openPoller() {
-		closePoller();
+		assert poller == null;
 		try {
 			poller = MessagePoller.create(name, protocol, url);
 			poller.setTimeout(timeout);
@@ -233,6 +234,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Close the message poller */
 	protected synchronized void closePoller() {
+		failControllers();
 		if(poller != null)
 			poller.stopPolling();
 		poller = null;
