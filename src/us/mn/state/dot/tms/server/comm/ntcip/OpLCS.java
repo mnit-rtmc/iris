@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -31,6 +32,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpLCS extends OpDevice {
+
+	/** LCS debug log */
+	static protected final IDebugLog LCS_LOG = new IDebugLog("lcs");
 
 	/** LCS array to query */
 	protected final LCSArrayImpl lcs_array;
@@ -78,7 +82,7 @@ abstract public class OpLCS extends OpDevice {
 	protected void lookupDMSs() {
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
 		if(lcss.length != ind_before.length) {
-			System.err.println("lookupDMS: array invalid");
+			LCS_LOG.log("lookupDMS: array invalid");
 			return;
 		}
 		for(int i = 0; i < lcss.length; i++) {
