@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
@@ -30,6 +31,15 @@ import us.mn.state.dot.tms.server.IDebugLog;
  * @author Douglas Lau
  */
 abstract public class MessagePoller extends Thread {
+
+	/** Create a message poller */
+	static public MessagePoller create(String name, CommProtocol protocol,
+		String url) throws IOException
+	{
+		MessagePollerFactory factory = new MessagePollerFactory(name,
+			protocol, url);
+		return factory.create();
+	}
 
 	/** Get a message describing an IO exception */
 	static protected String exceptionMessage(IOException e) {
@@ -78,7 +88,7 @@ abstract public class MessagePoller extends Thread {
 	}
 
 	/** Create a new message poller */
-	public MessagePoller(String name, Messenger m) {
+	protected MessagePoller(String name, Messenger m) {
 		super(GROUP, "Poller: " + name);
 		setDaemon(true);
 		messenger = m;
