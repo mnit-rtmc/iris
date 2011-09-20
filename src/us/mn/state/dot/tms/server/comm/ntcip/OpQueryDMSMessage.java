@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,8 +105,7 @@ public class OpQueryDMSMessage extends OpDMS {
 				Integer d = parseDuration(time.getInteger());
 				setCurrentMessage(multi.getValue(), d);
 			} else {
-				System.err.println("OpQueryDMSMessage: " +
-					dms.getName() + ", " + status);
+				DMS_LOG.log(dms.getName() + ": INVALID STATUS");
 				setErrorStatus(status.toString());
 			}
 			return null;
