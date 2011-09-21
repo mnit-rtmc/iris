@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
@@ -40,29 +42,11 @@ import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
  */
 public class MessagePollerFactory {
 
-	/** Create an inet socket address */
-	static protected InetSocketAddress createSocketAddress(String url)
-		throws IOException
-	{
-		String[] s = url.split(":");
-		if(s.length != 2)
-			throw new IOException("INVALID SOCKET ADDRESS");
-		int p = parsePort(s[1]);
-		return new InetSocketAddress(s[0], p);
-	}
+	/** Default URI for UDP sockets */
+	static private final String UDP = "udp:/";
 
-	/** Parse the port number */
-	static protected int parsePort(String p) throws IOException {
-		try {
-			int i = Integer.parseInt(p);
-			if(i >= 0 && i <= 65535)
-				return i;
-		}
-		catch(NumberFormatException e) {
-			// Fall out
-		}
-		throw new IOException("INVALID PORT: " + p);
-	}
+	/** Default URI for TCP sockets */
+	static private final String TCP = "tcp:/";
 
 	/** Name of comm link */
 	protected final String name;
@@ -70,14 +54,14 @@ public class MessagePollerFactory {
 	/** Communication protocol */
 	protected final CommProtocol protocol;
 
-	/** URL of comm link */
-	protected final String url;
+	/** URI of comm link */
+	protected final String uri;
 
 	/** Create a new message poller factory */
 	public MessagePollerFactory(String n, CommProtocol cp, String u) {
 		name = n;
 		protocol = cp;
-		url = u;
+		uri = u;
 	}
 
 	/** Create a message poller */
@@ -119,75 +103,114 @@ public class MessagePollerFactory {
 		}
 	}
 
-	/** Create a stream messenger */
-	protected Messenger createStreamMessenger() throws IOException {
-		return new StreamMessenger(createSocketAddress(url));
+	/** Create a socket messenger */
+	private Messenger createSocketMessenger(String d_uri)
+		throws IOException
+	{
+		try {
+			URI u = createURI(d_uri);
+			InetSocketAddress addr = createSocketAddress(u);
+			if("tcp".equals(u.getScheme()))
+				return new StreamMessenger(addr);
+			else if("udp".equals(u.getScheme()))
+				return new DatagramMessenger(addr);
+			else
+				throw new IOException("INVALID URI SCHEME");
+		}
+		catch(URISyntaxException e) {
+			throw new IOException("INVALID URI");
+		}
 	}
 
-	/** Create a datagram messenger */
-	protected Messenger createDatagramMessenger() throws IOException {
-		return new DatagramMessenger(createSocketAddress(url));
+	/** Create the URI with a default URI scheme */
+	private URI createURI(String d_uri) throws URISyntaxException {
+		return URI.create(d_uri).resolve(createURI());
+	}
+
+	/** Create the URI */
+	private URI createURI() throws URISyntaxException {
+		try {
+			return new URI(uri);
+		}
+		catch(URISyntaxException e) {
+			// If the URI begins with a host IP address,
+			// we need to prepend a couple of slashes
+			return new URI("//" + uri);
+		}
+	}
+
+	/** Create an inet socket address */
+	private InetSocketAddress createSocketAddress(URI u) throws IOException{
+		String host = u.getHost();
+		int p = u.getPort();
+		if(host == null)
+			throw new IOException("INVALID SOCKET ADDRESS");
+		if(p <= 0)
+			throw new IOException("INVALID PORT: " + p);
+		return new InetSocketAddress(host, p);
 	}
 
 	/** Create an http file messenger */
 	protected Messenger createHttpFileMessenger() throws IOException {
-		return new HttpFileMessenger(new URL(url));
+		return new HttpFileMessenger(new URL(uri));
 	}
 
 	/** Create an NTCIP Class A poller */
 	protected MessagePoller createNtcipAPoller() throws IOException {
-		return new NtcipPoller(name, createDatagramMessenger());
+		return new NtcipPoller(name, createSocketMessenger(UDP));
 	}
 
 	/** Create an NTCIP Class B poller */
 	protected MessagePoller createNtcipBPoller() throws IOException {
-		HDLCMessenger hdlc = new HDLCMessenger(createStreamMessenger());
+		HDLCMessenger hdlc = new HDLCMessenger(
+			createSocketMessenger(TCP));
 		return new NtcipPoller(name, hdlc);
 	}
 
 	/** Create an NTCIP Class C poller */
 	protected MessagePoller createNtcipCPoller() throws IOException {
-		return new NtcipPoller(name, createStreamMessenger());
+		return new NtcipPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a MnDOT poller */
 	protected MessagePoller createMndotPoller() throws IOException {
-		return new MndotPoller(name, createStreamMessenger(), protocol);
+		return new MndotPoller(name, createSocketMessenger(TCP),
+			protocol);
 	}
 
 	/** Create an SS105 poller */
 	protected MessagePoller createSS105Poller() throws IOException {
-		return new SS105Poller(name, createStreamMessenger());
+		return new SS105Poller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create an SS125 poller */
 	protected MessagePoller createSS125Poller() throws IOException {
-		return new SS125Poller(name, createStreamMessenger());
+		return new SS125Poller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a Canoga poller */
 	protected MessagePoller createCanogaPoller() throws IOException {
-		return new CanogaPoller(name, createStreamMessenger());
+		return new CanogaPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a Vicon poller */
 	protected MessagePoller createViconPoller() throws IOException {
-		return new ViconPoller(name, createStreamMessenger());
+		return new ViconPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a PelcoD poller */
 	protected MessagePoller createPelcoDPoller() throws IOException {
-		return new PelcoDPoller(name, createDatagramMessenger());
+		return new PelcoDPoller(name, createSocketMessenger(UDP));
 	}
 
 	/** Create a Manchester poller */
 	protected MessagePoller createManchesterPoller() throws IOException {
-		return new ManchesterPoller(name, createDatagramMessenger());
+		return new ManchesterPoller(name, createSocketMessenger(UDP));
 	}
 
 	/** Create a DMS XML poller */
 	protected MessagePoller createDmsXmlPoller() throws IOException {
-		return new DmsXmlPoller(name, createStreamMessenger());
+		return new DmsXmlPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a MSG FEED poller */
@@ -197,16 +220,16 @@ public class MessagePollerFactory {
 
 	/** Create a Pelco video switch poller */
 	protected MessagePoller createPelcoPoller() throws IOException {
-		return new PelcoPoller(name, createStreamMessenger());
+		return new PelcoPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a Vicon PTZ poller */
 	protected MessagePoller createViconPTZPoller() throws IOException {
-		return new ViconPTZPoller(name, createDatagramMessenger());
+		return new ViconPTZPoller(name, createSocketMessenger(UDP));
 	}
 
 	/** Create a ORG-815 precipitation sensor poller */
 	protected MessagePoller createOrg815Poller() throws IOException {
-		return new Org815Poller(name, createStreamMessenger());
+		return new Org815Poller(name, createSocketMessenger(TCP));
 	}
 }
