@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -173,6 +173,32 @@ public class IntervalDataProperty extends SS125Property {
 		return speeds;
 	}
 
+	/** Get the 85th percentile speeds for all lanes */
+	public int[] getSpeed85() {
+		int[] speeds = new int[lanes.length];
+		for(int i = 0; i < speeds.length; i++) {
+			LaneInterval li = lanes[i];
+			if(li != null && li.speed_85 != null)
+				speeds[i] = Math.round(li.speed_85);
+			else
+				speeds[i] = Constants.MISSING_DATA;
+		}
+		return speeds;
+	}
+
+	/** Get the headway for all lanes */
+	public int[] getHeadway() {
+		int[] headway = new int[lanes.length];
+		for(int i = 0; i < headway.length; i++) {
+			LaneInterval li = lanes[i];
+			if(li != null)
+				headway[i] = li.headway;
+			else
+				headway[i] = Constants.MISSING_DATA;
+		}
+		return headway;
+	}
+
 	/** Get a string representation of the property */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -190,6 +216,12 @@ public class IntervalDataProperty extends SS125Property {
 		sb.setLength(sb.length() - 1);
 		sb.append("], speed: [");
 		for(int s: getSpeed())
+			sb.append("" + s + ",");
+		sb.append("], speed85: [");
+		for(int s: getSpeed85())
+			sb.append("" + s + ",");
+		sb.append("], headway: [");
+		for(int s: getHeadway())
 			sb.append("" + s + ",");
 		sb.setLength(sb.length() - 1);
 		sb.append("]");
