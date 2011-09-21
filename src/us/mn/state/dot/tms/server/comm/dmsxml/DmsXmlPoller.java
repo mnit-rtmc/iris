@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
-import us.mn.state.dot.tms.server.comm.SocketMessenger;
+import us.mn.state.dot.tms.server.comm.StreamMessenger;
 import us.mn.state.dot.tms.utils.Log;
 
 /**
@@ -51,7 +51,7 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	/** Create a new dmsxml poller */
 	public DmsXmlPoller(String n, Messenger m) {
 		super(n, m);
-		assert m instanceof SocketMessenger;
+		assert m instanceof StreamMessenger;
 	}
 
 	/**

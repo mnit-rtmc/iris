@@ -119,9 +119,9 @@ public class MessagePollerFactory {
 		}
 	}
 
-	/** Create a socket messenger */
-	protected Messenger createSocketMessenger() throws IOException {
-		return new SocketMessenger(createSocketAddress(url));
+	/** Create a stream messenger */
+	protected Messenger createStreamMessenger() throws IOException {
+		return new StreamMessenger(createSocketAddress(url));
 	}
 
 	/** Create a datagram messenger */
@@ -141,38 +141,38 @@ public class MessagePollerFactory {
 
 	/** Create an NTCIP Class B poller */
 	protected MessagePoller createNtcipBPoller() throws IOException {
-		HDLCMessenger hdlc = new HDLCMessenger(createSocketMessenger());
+		HDLCMessenger hdlc = new HDLCMessenger(createStreamMessenger());
 		return new NtcipPoller(name, hdlc);
 	}
 
 	/** Create an NTCIP Class C poller */
 	protected MessagePoller createNtcipCPoller() throws IOException {
-		return new NtcipPoller(name, createSocketMessenger());
+		return new NtcipPoller(name, createStreamMessenger());
 	}
 
 	/** Create a MnDOT poller */
 	protected MessagePoller createMndotPoller() throws IOException {
-		return new MndotPoller(name, createSocketMessenger(), protocol);
+		return new MndotPoller(name, createStreamMessenger(), protocol);
 	}
 
 	/** Create an SS105 poller */
 	protected MessagePoller createSS105Poller() throws IOException {
-		return new SS105Poller(name, createSocketMessenger());
+		return new SS105Poller(name, createStreamMessenger());
 	}
 
 	/** Create an SS125 poller */
 	protected MessagePoller createSS125Poller() throws IOException {
-		return new SS125Poller(name, createSocketMessenger());
+		return new SS125Poller(name, createStreamMessenger());
 	}
 
 	/** Create a Canoga poller */
 	protected MessagePoller createCanogaPoller() throws IOException {
-		return new CanogaPoller(name, createSocketMessenger());
+		return new CanogaPoller(name, createStreamMessenger());
 	}
 
 	/** Create a Vicon poller */
 	protected MessagePoller createViconPoller() throws IOException {
-		return new ViconPoller(name, createSocketMessenger());
+		return new ViconPoller(name, createStreamMessenger());
 	}
 
 	/** Create a PelcoD poller */
@@ -187,7 +187,7 @@ public class MessagePollerFactory {
 
 	/** Create a DMS XML poller */
 	protected MessagePoller createDmsXmlPoller() throws IOException {
-		return new DmsXmlPoller(name, createSocketMessenger());
+		return new DmsXmlPoller(name, createStreamMessenger());
 	}
 
 	/** Create a MSG FEED poller */
@@ -197,7 +197,7 @@ public class MessagePollerFactory {
 
 	/** Create a Pelco video switch poller */
 	protected MessagePoller createPelcoPoller() throws IOException {
-		return new PelcoPoller(name, createSocketMessenger());
+		return new PelcoPoller(name, createStreamMessenger());
 	}
 
 	/** Create a Vicon PTZ poller */
@@ -207,6 +207,6 @@ public class MessagePollerFactory {
 
 	/** Create a ORG-815 precipitation sensor poller */
 	protected MessagePoller createOrg815Poller() throws IOException {
-		return new Org815Poller(name, createSocketMessenger());
+		return new Org815Poller(name, createStreamMessenger());
 	}
 }

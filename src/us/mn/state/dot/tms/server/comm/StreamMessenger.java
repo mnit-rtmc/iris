@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@ import java.net.SocketAddress;
 import java.net.Socket;
 
 /**
- * A SocketMessenger is a class which can poll a field controller and get the
+ * A StreamMessenger is a class which can poll a field controller and get the
  * response using a TCP socket connection.
  *
  * @author Douglas Lau
  */
-public class SocketMessenger extends Messenger {
+public class StreamMessenger extends Messenger {
 
 	/** Address to connect */
 	protected final SocketAddress address;
@@ -43,12 +43,12 @@ public class SocketMessenger extends Messenger {
 			s.setSoTimeout(t);
 	}
 
-	/** Create a new socket messenger */
-	public SocketMessenger(SocketAddress a) {
+	/** Create a new stream messenger */
+	public StreamMessenger(SocketAddress a) {
 		address = a;
 	}
 
-	/** Open the socket messenger */
+	/** Open the stream messenger */
 	public void open() throws IOException {
 		Socket s = new Socket();
 		s.setSoTimeout(timeout);
@@ -58,7 +58,7 @@ public class SocketMessenger extends Messenger {
 		socket = s;
 	}
 
-	/** Close the socket messenger */
+	/** Close the stream messenger */
 	public void close() {
 		Socket s = socket;
 		if(s != null) {
