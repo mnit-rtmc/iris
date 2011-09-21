@@ -26,8 +26,8 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
- * CanogaPoller is a java implementation of the 3M Canoga (tm) serial
- * communication protocol
+ * CanogaPoller is a java implementation of the Canoga (tm) Traffic Sensing
+ * System serial communication protocol
  *
  * @author Douglas Lau
  */

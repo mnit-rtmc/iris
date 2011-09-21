@@ -36,7 +36,7 @@ public enum CommProtocol {
 	/** Wavetronix SmartSensor 105 (3) */
 	SS_105("SmartSensor 105"),
 
-	/** 3M Canoga (4) */
+	/** Canoga (4) */
 	CANOGA("Canoga"),
 
 	/** Vicon video matrix switcher (5) */

@@ -30,10 +30,9 @@ import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
  * The CommLinkImpl class represents a single communication link which is
- * connected with one or more field device controllers. Many different
- * protocols are supported, including Mn/DOT's 4- and 5-bit 170 protocols,
- * NTCIP class B, Wavetronix SmartSensor, and 3M Canoga.
+ * connected with one or more field device controllers.
  *
+ * @see us.mn.state.dot.tms.CommProtocol
  * @author Douglas Lau
  */
 public class CommLinkImpl extends BaseObjectImpl implements CommLink {
