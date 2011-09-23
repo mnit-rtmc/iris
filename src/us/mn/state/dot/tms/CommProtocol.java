@@ -70,7 +70,10 @@ public enum CommProtocol {
 	SS_125("SmartSensor 125 HD"),
 
 	/** Optical Scientific ORG-815 Precipitation Sensor (15) */
-	ORG_815("OSi ORG-815");
+	ORG_815("OSi ORG-815"),
+
+	/** Infinova wrapping Pelco D camera control (16) */
+	INFINOVA_D_PTZ("Infinova D PTZ");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

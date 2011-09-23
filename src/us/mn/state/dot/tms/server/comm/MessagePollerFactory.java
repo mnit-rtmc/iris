@@ -22,6 +22,7 @@ import java.net.URL;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
+import us.mn.state.dot.tms.server.comm.infinova.InfinovaMessenger;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
@@ -98,6 +99,8 @@ public class MessagePollerFactory {
 			return createViconPTZPoller();
 		case ORG_815:
 			return createOrg815Poller();
+		case INFINOVA_D_PTZ:
+			return createInfinovaDPoller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -231,5 +234,11 @@ public class MessagePollerFactory {
 	/** Create a ORG-815 precipitation sensor poller */
 	protected MessagePoller createOrg815Poller() throws IOException {
 		return new Org815Poller(name, createSocketMessenger(TCP));
+	}
+
+	/** Create an Infinova D PTZ poller */
+	protected MessagePoller createInfinovaDPoller() throws IOException {
+		return new PelcoDPoller(name, new InfinovaMessenger(
+			createSocketMessenger(TCP)));
 	}
 }

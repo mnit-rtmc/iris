@@ -1251,6 +1251,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 13	Vicon PTZ
 14	SmartSensor 125 HD
 15	OSi ORG-815
+16	Infinova D PTZ
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
@@ -1354,7 +1355,7 @@ camera_id_blank
 camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
-database_version	3.132.0
+database_version	3.133.0
 detector_auto_fail_enable	true
 dms_aws_enable	false
 dms_aws_retry_threshold	6
