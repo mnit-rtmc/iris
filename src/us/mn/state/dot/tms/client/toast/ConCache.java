@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
@@ -69,6 +70,14 @@ public class ConCache {
 		return comm_link_model;
 	}
 
+	/** Cache of modem proxies */
+	protected final TypeCache<Modem> modems;
+
+	/** Get the modem type cache */
+	public TypeCache<Modem> getModems() {
+		return modems;
+	}
+
 	/** Cache of controller proxies */
 	protected final TypeCache<Controller> controllers;
 
@@ -90,6 +99,7 @@ public class ConCache {
 		comm_links = new TypeCache<CommLink>(CommLink.class, client);
 		comm_link_model = new ProxyListModel<CommLink>(comm_links);
 		comm_link_model.initialize();
+		modems = new TypeCache<Modem>(Modem.class, client);
 		controllers = new TypeCache<Controller>(Controller.class,
 			client);
 	}
@@ -99,6 +109,7 @@ public class ConCache {
 		client.populateReadable(cabinet_styles);
 		client.populateReadable(cabinets);
 		client.populateReadable(comm_links);
+		client.populateReadable(modems);
 		client.populateReadable(controllers);
 		if(client.canRead(Controller.SONAR_TYPE)) {
 			controllers.ignoreAttribute("timeoutErr");

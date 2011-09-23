@@ -51,6 +51,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		MapExtentImpl.loadAll();
 		IncidentDetailImpl.loadAll();
 		CommLinkImpl.loadAll();
+		ModemImpl.loadAll();
 		CabinetStyleImpl.loadAll();
 		CabinetImpl.loadAll();
 		ControllerImpl.loadAll();
