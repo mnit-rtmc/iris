@@ -86,7 +86,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		uri = u;
 	}
 
-	/** Set remote URL for modem */
+	/** Set remote URI for modem */
 	public void doSetUri(String u) throws TMSException {
 		if(u.equals(uri))
 			return;

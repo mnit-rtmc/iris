@@ -41,7 +41,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading comm links...");
 		namespace.registerType(SONAR_TYPE, CommLinkImpl.class);
-		store.query("SELECT name, description, url, protocol, " +
+		store.query("SELECT name, description, uri, protocol, " +
 			"timeout FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
@@ -49,7 +49,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 				namespace.addObject(new CommLinkImpl(
 					row.getString(1),	// name
 					row.getString(2),	// description
-					row.getString(3),	// url
+					row.getString(3),	// uri
 					row.getShort(4),	// protocol
 					row.getInt(5)		// timeout
 				));
@@ -62,7 +62,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("description", description);
-		map.put("url", url);
+		map.put("uri", uri);
 		map.put("protocol", (short)protocol.ordinal());
 		map.put("timeout", timeout);
 		return map;
@@ -87,7 +87,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	public CommLinkImpl(String n, String d, String u, short p, int t) {
 		super(n);
 		description = d;
-		url = u;
+		uri = u;
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
 		if(cp != null)
 			protocol = cp;
@@ -122,26 +122,26 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return description;
 	}
 
-	/** Remote URL for link */
-	protected String url = "";
+	/** Remote URI for link */
+	protected String uri = "";
 
-	/** Set remote URL for link */
-	public void setUrl(String u) {
-		url = u;
+	/** Set remote URI for link */
+	public void setUri(String u) {
+		uri = u;
 	}
 
-	/** Set remote URL for link */
-	public void doSetUrl(String u) throws TMSException {
-		if(u.equals(url))
+	/** Set remote URI for link */
+	public void doSetUri(String u) throws TMSException {
+		if(u.equals(uri))
 			return;
-		store.update(this, "url", u);
-		setUrl(u);
+		store.update(this, "uri", u);
+		setUri(u);
 		closePoller();
 	}
 
-	/** Get remote URL for link */
-	public String getUrl() {
-		return url;
+	/** Get remote URI for link */
+	public String getUri() {
+		return uri;
 	}
 
 	/** Communication protocol */
@@ -220,7 +220,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	protected synchronized MessagePoller openPoller() {
 		assert poller == null;
 		try {
-			poller = MessagePoller.create(name, protocol, url);
+			poller = MessagePoller.create(name, protocol, uri);
 			poller.setTimeout(timeout);
 			poller.start();
 		}

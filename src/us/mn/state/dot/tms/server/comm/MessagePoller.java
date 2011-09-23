@@ -34,10 +34,10 @@ abstract public class MessagePoller extends Thread {
 
 	/** Create a message poller */
 	static public MessagePoller create(String name, CommProtocol protocol,
-		String url) throws IOException
+		String uri) throws IOException
 	{
 		MessagePollerFactory factory = new MessagePollerFactory(name,
-			protocol, url);
+			protocol, uri);
 		return factory.create();
 	}
 

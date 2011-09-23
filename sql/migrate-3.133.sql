@@ -25,3 +25,17 @@ INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
 INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
 	priv_d) VALUES
 	('prv_mdm1', 'device_admin', 'modem/.*', false, true, true, true);
+
+DROP VIEW comm_link_view;
+
+ALTER TABLE iris.comm_link ADD COLUMN uri VARCHAR(64);
+UPDATE iris.comm_link SET uri = url;
+ALTER TABLE iris.comm_link ALTER COLUMN uri SET NOT NULL;
+ALTER TABLE iris.comm_link DROP COLUMN url;
+
+CREATE VIEW comm_link_view AS
+	SELECT cl.name, cl.description, cl.uri, cp.description AS protocol,
+	cl.timeout
+	FROM iris.comm_link cl
+	JOIN iris.comm_protocol cp ON cl.protocol = cp.id;
+GRANT SELECT ON comm_link_view TO PUBLIC;
