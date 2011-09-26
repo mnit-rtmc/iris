@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import us.mn.state.dot.tms.Modem;
+import us.mn.state.dot.tms.server.IDebugLog;
 
 /**
  * A Modem Messenger provides modem dialup support on top of another messenger
@@ -28,6 +29,9 @@ import us.mn.state.dot.tms.Modem;
  * @author Douglas Lau
  */
 public class ModemMessenger extends Messenger {
+
+	/** Modem debug log */
+	static protected final IDebugLog MODEM_LOG = new IDebugLog("modem");
 
 	/** Wrapped messenger */
 	protected final Messenger wrapped;
@@ -41,21 +45,29 @@ public class ModemMessenger extends Messenger {
 	/** Read timeout (ms) */
 	protected int timeout = 750;
 
+	/** Log a message to debug log */
+	private void log(String msg) {
+		MODEM_LOG.log(modem.getName() + ": " + msg);
+	}
+
 	/** Create a new modem messenger */
 	public ModemMessenger(Messenger m, Modem mdm, String phone) {
 		wrapped = m;
 		modem = mdm;
 		phone_number = phone;
+		log("created ModemMessenger");
 	}
 
 	/** Set the messenger timeout */
 	public void setTimeout(int t) throws IOException {
+		log("set timeout to " + t + " ms");
 		wrapped.setTimeout(t);
 		timeout = t;
 	}
 
 	/** Open the messenger */
 	public void open() throws IOException {
+		log("open");
 		wrapped.open();
 		output = wrapped.getOutputStream();
 		input = wrapped.getInputStream();
@@ -64,6 +76,7 @@ public class ModemMessenger extends Messenger {
 
 	/** Close the messenger */
 	public void close() {
+		log("close");
 		wrapped.close();
 		output = null;
 		input = null;
@@ -71,6 +84,7 @@ public class ModemMessenger extends Messenger {
 
     	/** Connect the modem to the specified phone number */
 	protected void connectModem() throws IOException {
+		log("connect");
 		OutputStreamWriter osw = new OutputStreamWriter(output,
 			"US-ASCII");
 		PrintWriter pw = new PrintWriter(osw, true);
@@ -92,16 +106,20 @@ public class ModemMessenger extends Messenger {
 	protected void configureModem(PrintWriter pw, InputStreamReader isr,
 		String config) throws IOException
 	{
+		log("configure: " + config);
 		pw.println("\r\n\r\n\r\n" + config + "\r\n");
 		String resp = readResponse(isr);
-		if(!resp.toUpperCase().contains("OK"))
+		if(!resp.toUpperCase().contains("OK")) {
+			log("config error: " + resp);
 			throw new IOException("Modem config error: " + resp);
+		}
 	}
 
 	/** Dial the modem */
 	protected void dialModem(PrintWriter pw, InputStreamReader isr)
 		throws IOException
 	{
+		log("dial: " + phone_number);
 		pw.println("ATDT" + phone_number + "\r\n");
 		readResponse(isr);
 	}
@@ -110,9 +128,12 @@ public class ModemMessenger extends Messenger {
 	protected void waitForConnect(InputStreamReader isr)
 		throws IOException
 	{
+		log("wait for CONNECT");
 		String resp = readResponse(isr);
-		if(!resp.toUpperCase().contains("CONNECT"))
+		if(!resp.toUpperCase().contains("CONNECT")) {
+			log("connect error: " + resp);
 			throw new IOException("Modem connect error: " + resp);
+		}
 	}
 
 	/** Read a reaponse from the modem */
