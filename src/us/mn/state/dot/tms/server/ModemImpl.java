@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.Modem;
@@ -97,6 +99,18 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	/** Get remote URI for modem */
 	public String getUri() {
 		return uri;
+	}
+
+	/** Create the URI */
+	public URI createURI() throws URISyntaxException {
+		try {
+			return new URI(uri);
+		}
+		catch(URISyntaxException e) {
+			// If the URI begins with a host IP address,
+			// we need to prepend a couple of slashes
+			return new URI("//" + uri);
+		}
 	}
 
 	/** Config string */

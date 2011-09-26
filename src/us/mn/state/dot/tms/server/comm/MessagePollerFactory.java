@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.server.ModemImpl;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaMessenger;
@@ -112,11 +113,12 @@ public class MessagePollerFactory {
 	{
 		try {
 			URI u = createURI(d_uri);
-			InetSocketAddress addr = createSocketAddress(u);
 			if("tcp".equals(u.getScheme()))
-				return new StreamMessenger(addr);
+				return createStreamMessenger(u);
 			else if("udp".equals(u.getScheme()))
-				return new DatagramMessenger(addr);
+				return createDatagramMessenger(u);
+			else if("modem".equals(u.getScheme()))
+				return createModemMessenger(u);
 			else
 				throw new IOException("INVALID URI SCHEME");
 		}
@@ -142,6 +144,16 @@ public class MessagePollerFactory {
 		}
 	}
 
+	/** Create a TCP stream messenger */
+	private Messenger createStreamMessenger(URI u) throws IOException {
+		return new StreamMessenger(createSocketAddress(u));
+	}
+
+	/** Create a UDP datagram messenger */
+	private Messenger createDatagramMessenger(URI u) throws IOException {
+		return new DatagramMessenger(createSocketAddress(u));
+	}
+
 	/** Create an inet socket address */
 	private InetSocketAddress createSocketAddress(URI u) throws IOException{
 		String host = u.getHost();
@@ -151,6 +163,27 @@ public class MessagePollerFactory {
 		if(p <= 0)
 			throw new IOException("INVALID PORT: " + p);
 		return new InetSocketAddress(host, p);
+	}
+
+	/** Create a modem messenger */
+	private Messenger createModemMessenger(URI u) throws IOException {
+		ModemImpl modem = ModemMessenger.getModem();
+		if(modem != null) {
+			return new ModemMessenger(new StreamMessenger(
+				createSocketAddress(createModemURI(modem))),
+				modem, u.getHost());
+		} else
+			throw new IOException("No modem available");
+	}
+
+	/** Create a URI for the modem */
+	private URI createModemURI(ModemImpl modem) throws IOException {
+		try {
+			return modem.createURI();
+		}
+		catch(URISyntaxException e) {
+			throw new IOException("INVALID MODEM URI");
+		}
 	}
 
 	/** Create an http file messenger */

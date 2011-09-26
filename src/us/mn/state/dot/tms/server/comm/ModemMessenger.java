@@ -19,8 +19,11 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Modem;
+import us.mn.state.dot.tms.ModemHelper;
 import us.mn.state.dot.tms.server.IDebugLog;
+import us.mn.state.dot.tms.server.ModemImpl;
 
 /**
  * A Modem Messenger provides modem dialup support on top of another messenger
@@ -32,6 +35,20 @@ public class ModemMessenger extends Messenger {
 
 	/** Modem debug log */
 	static protected final IDebugLog MODEM_LOG = new IDebugLog("modem");
+
+	/** Get the first available modem */
+	static public ModemImpl getModem() {
+		Modem mdm = ModemHelper.find(new Checker<Modem>() {
+			public boolean check(Modem mdm) {
+				// FIXME: find available modem
+				return true;
+			}
+		});
+		if(mdm instanceof ModemImpl)
+			return (ModemImpl)mdm;
+		else
+			return null;
+	}
 
 	/** Wrapped messenger */
 	protected final Messenger wrapped;
