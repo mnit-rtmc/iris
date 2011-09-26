@@ -17,14 +17,13 @@ package us.mn.state.dot.tms.server.comm.infinova;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
-import java.io.FilterOutputStream;
 
 /**
- * A FilterOutputStream which prepends an Infinova header to messages.
+ * An OutputStream which prepends an Infinova header to messages.
  *
  * @author Douglas Lau
  */
-public class InfinovaOutputStream extends FilterOutputStream {
+public class InfinovaOutputStream extends OutputStream {
 
 	/** Maximum message size */
 	static protected final int MAX_MESSAGE = 256;
@@ -41,12 +40,21 @@ public class InfinovaOutputStream extends FilterOutputStream {
 	/** Authentication message */
 	static protected final byte[] AUTH = new byte[AUTH_SZ + 2];
 
+	/** Buffered output stream */
+	private final BufferedOutputStream out;
+
 	/** Flag for needs authentication */
-	protected boolean needs_auth = true;
+	private boolean needs_auth = true;
 
 	/** Create an Infinova output stream */
 	public InfinovaOutputStream(OutputStream os) {
-		super(new BufferedOutputStream(os, MAX_MESSAGE));
+		out = new BufferedOutputStream(os, MAX_MESSAGE);
+	}
+
+	/** Write one byte to the output stream.  This method bypasses the
+	 * Infinova header stuff. */
+	public void write(int b) throws IOException {
+		out.write(b);
 	}
 
 	/** Write the specified buffer to the output stream */
@@ -55,13 +63,18 @@ public class InfinovaOutputStream extends FilterOutputStream {
 			writeAuthentication();
 		writeHeader(MSG_ID_PTZ, AUTH_SZ + len);
 		writePtzHeader(len);
-		super.write(b, off, len);
+		out.write(b, off, len);
+	}
+
+	/** Write the specified buffer to the output stream */
+	public void write(byte[] b) throws IOException {
+		write(b, 0, b.length);
 	}
 
 	/** Write an authentication message */
 	private void writeAuthentication() throws IOException {
 		writeHeader(MSG_ID_AUTH, AUTH_SZ);
-		super.write(AUTH);
+		out.write(AUTH);
 		needs_auth = false;
 	}
 
@@ -76,7 +89,7 @@ public class InfinovaOutputStream extends FilterOutputStream {
 			header[7] = 1;
 		}
 		header[11] = (byte)len;
-		super.write(header);
+		out.write(header);
 	}
 
 	/** Write a PTZ header */
@@ -84,6 +97,21 @@ public class InfinovaOutputStream extends FilterOutputStream {
 		byte[] header = new byte[12];
 		header[0] = 1;
 		header[7] = (byte)len;
-		super.write(header);
+		out.write(header);
+	}
+
+	/** Flush pending data to the output stream */
+	public void flush() throws IOException {
+		out.flush();
+	}
+
+	/** Close the output stream */
+	public void close() throws IOException {
+		try {
+			flush();
+		}
+		finally {
+			out.close();
+		}
 	}
 }
