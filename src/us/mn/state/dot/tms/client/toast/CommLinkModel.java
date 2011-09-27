@@ -17,14 +17,11 @@ package us.mn.state.dot.tms.client.toast;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.LinkedList;
-import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -125,7 +122,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 					cl.setTimeout((Integer)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				return new TimeoutEditor();
+				return new TimeoutCellEditor();
 			}
 		}
 	    };
@@ -155,25 +152,6 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 			else
 				label.setIcon(fail);
 			return label;
-		}
-	}
-
-	/** Editor for timeout values in a table cell */
-	public class TimeoutEditor extends AbstractCellEditor
-		implements TableCellEditor
-	{
-		protected final SpinnerNumberModel model =
-			new SpinnerNumberModel(0, 0, 8000, 50);
-		protected final JSpinner spinner = new JSpinner(model);
-
-		public Component getTableCellEditorComponent(JTable table,
-			Object value, boolean isSelected, int row, int column)
-		{
-			spinner.setValue(value);
-			return spinner;
-		}
-		public Object getCellEditorValue() {
-			return spinner.getValue();
 		}
 	}
 
