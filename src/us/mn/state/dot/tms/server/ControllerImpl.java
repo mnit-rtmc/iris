@@ -757,11 +757,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get the message poller */
 	public MessagePoller getPoller() {
-		CommLinkImpl link = (CommLinkImpl)comm_link;
-		if(link != null)
-			return link.getPoller();
-		else
-			return null;
+		if(getActive()) {
+			CommLinkImpl link = (CommLinkImpl)comm_link;
+			if(link != null)
+				return link.getPoller();
+		}
+		return null;
 	}
 
 	/** Perform a controller download (reset) */

@@ -1132,12 +1132,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Get the DMS poller */
 	protected DMSPoller getDMSPoller() {
-		if(isActive()) {
-			MessagePoller mp = getPoller();
-			if(mp instanceof DMSPoller)
-				return (DMSPoller)mp;
-		}
-		return null;
+		MessagePoller mp = getPoller();
+		if(mp instanceof DMSPoller)
+			return (DMSPoller)mp;
+		else
+			return null;
 	}
 
 	/** LDC pot base (Ledstar-specific value) */
