@@ -122,7 +122,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 					cl.setTimeout((Integer)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				return new TimeoutCellEditor();
+				return new TimeoutCellEditor(8000);
 			}
 		}
 	    };

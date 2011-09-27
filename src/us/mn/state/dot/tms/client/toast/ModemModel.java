@@ -44,17 +44,6 @@ public class ModemModel extends ProxyTableModel<Modem> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Modem>("Config String", 200) {
-			public Object getValueAt(Modem m) {
-				return m.getConfig();
-			}
-			public boolean isEditable(Modem m) {
-				return canUpdate(m, "config");
-			}
-			public void setValueAt(Modem m, Object value) {
-				m.setConfig(value.toString().trim());
-			}
-		},
 		new ProxyColumn<Modem>("URI", 280) {
 			public Object getValueAt(Modem m) {
 				return m.getUri();
@@ -66,7 +55,18 @@ public class ModemModel extends ProxyTableModel<Modem> {
 				m.setUri(value.toString().trim());
 			}
 		},
-		new ProxyColumn<Modem>("Timeout", 60) {
+		new ProxyColumn<Modem>("Config String", 200) {
+			public Object getValueAt(Modem m) {
+				return m.getConfig();
+			}
+			public boolean isEditable(Modem m) {
+				return canUpdate(m, "config");
+			}
+			public void setValueAt(Modem m, Object value) {
+				m.setConfig(value.toString().trim());
+			}
+		},
+		new ProxyColumn<Modem>("Timeout", 80) {
 			public Object getValueAt(Modem m) {
 				return m.getTimeout();
 			}
@@ -78,7 +78,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 					m.setTimeout((Integer)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				return new TimeoutCellEditor();
+				return new TimeoutCellEditor(60000);
 			}
 		}
 	    };

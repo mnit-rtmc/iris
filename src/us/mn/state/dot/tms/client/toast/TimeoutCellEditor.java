@@ -29,12 +29,13 @@ import javax.swing.table.TableCellEditor;
 public class TimeoutCellEditor extends AbstractCellEditor
 	implements TableCellEditor
 {
-	/** Spinner model */
-	protected final SpinnerNumberModel model =
-		new SpinnerNumberModel(0, 0, 8000, 50);
-
 	/** Spinner component */
-	protected final JSpinner spinner = new JSpinner(model);
+	protected final JSpinner spinner;
+
+	/** Create a new timeout cell editor */
+	public TimeoutCellEditor(int mx) {
+		spinner = new JSpinner(new SpinnerNumberModel(0, 0, mx, 50));
+	}
 
 	/** Get a table cell editor component */
 	public Component getTableCellEditorComponent(JTable table, Object value,
