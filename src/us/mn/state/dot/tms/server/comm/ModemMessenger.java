@@ -132,11 +132,6 @@ public class ModemMessenger extends Messenger {
 	{
 		log("dial: " + phone_number);
 		pw.println("ATDT" + phone_number + "\r\n");
-		String resp = readResponse(isr).trim();
-		if(!resp.toUpperCase().contains("OK")) {
-			log("dial error: " + resp);
-			throw new IOException("Modem config error: " + resp);
-		}
 		try {
 			wrapped.setTimeout(modem.getTimeout());
 			waitForConnect(isr);
