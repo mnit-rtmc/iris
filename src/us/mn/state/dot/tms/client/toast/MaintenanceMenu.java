@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,9 @@ public class MaintenanceMenu extends JMenu {
 		JMenuItem item = createCommLinkItem();
 		if(item != null)
 			add(item);
+		item = createModemItem();
+		if(item != null)
+			add(item);
 		item = createAlarmItem();
 		if(item != null)
 			add(item);
@@ -58,6 +61,20 @@ public class MaintenanceMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new CommLinkForm(session));
+			}
+		};
+		return item;
+	}
+
+	/** Create the modem menu item */
+	protected JMenuItem createModemItem() {
+		if(!ModemForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Modems");
+		item.setMnemonic('m');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new ModemForm(session));
 			}
 		};
 		return item;
