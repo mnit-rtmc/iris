@@ -41,7 +41,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 					row.getString(1),	// name
 					row.getString(2),	// uri
 					row.getString(3),	// config
-					row.getInt(5)		// timeout
+					row.getInt(4)		// timeout
 				));
 			}
 		});
