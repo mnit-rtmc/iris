@@ -113,8 +113,12 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		}
 	}
 
-	/** Config string */
-	protected String config = "";
+	/** Config string.  The default value sets the "Disconnect activity
+	 * timer" (S30) to 20 seconds.  This has been tested with a StarComm
+	 * modem -- who knows if it works for other brands.  The disconnect
+	 * after timeout feature is necessary for proper operation, since IRIS
+	 * will never tell the modem to hang up. */
+	protected String config = "ATS30=2";
 
 	/** Set config string */
 	public void setConfig(String c) {
