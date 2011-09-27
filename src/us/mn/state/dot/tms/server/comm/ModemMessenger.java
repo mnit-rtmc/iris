@@ -71,7 +71,7 @@ public class ModemMessenger extends Messenger {
 	public ModemMessenger(Messenger m, Modem mdm, String phone) {
 		wrapped = m;
 		modem = mdm;
-		phone_number = phone;
+		phone_number = phone.replace("p", ",");
 		log("created ModemMessenger");
 	}
 
