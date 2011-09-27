@@ -87,7 +87,7 @@ public class ModemMessenger extends Messenger {
 		log("open");
 		wrapped.open();
 		output = wrapped.getOutputStream();
-		input = wrapped.getInputStream();
+		input = new ModemInputStream(wrapped.getInputStream());
 		connectModem();
 	}
 
