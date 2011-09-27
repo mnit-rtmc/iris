@@ -101,7 +101,6 @@ public class ModemMessenger extends Messenger {
 
     	/** Connect the modem to the specified phone number */
 	protected void connectModem() throws IOException {
-		log("connect");
 		OutputStreamWriter osw = new OutputStreamWriter(output,
 			"US-ASCII");
 		PrintWriter pw = new PrintWriter(osw, true);
@@ -111,6 +110,7 @@ public class ModemMessenger extends Messenger {
 			configureModem(pw, isr, config);
 		if(phone_number != null && phone_number.length() > 0)
 			dialModem(pw, isr);
+		log("connected");
     	}
 
 	/** Configure the modem */
@@ -132,8 +132,11 @@ public class ModemMessenger extends Messenger {
 	{
 		log("dial: " + phone_number);
 		pw.println("ATDT" + phone_number + "\r\n");
-		String resp = readResponse(isr);
-		log("response: " + resp);
+		String resp = readResponse(isr).trim();
+		if(!resp.toUpperCase().contains("OK")) {
+			log("dial error: " + resp);
+			throw new IOException("Modem config error: " + resp);
+		}
 		try {
 			wrapped.setTimeout(modem.getTimeout());
 			waitForConnect(isr);
@@ -148,7 +151,7 @@ public class ModemMessenger extends Messenger {
 		throws IOException
 	{
 		log("wait for CONNECT");
-		String resp = readResponse(isr);
+		String resp = readResponse(isr).trim();
 		if(!resp.toUpperCase().contains("CONNECT")) {
 			log("connect error: " + resp);
 			throw new IOException("Modem connect error: " + resp);
