@@ -109,14 +109,8 @@ public class ModemMessenger extends Messenger {
 		String config = modem.getConfig();
 		if(config != null && config.length() > 0)
 			configureModem(pw, isr, config);
-		dialModem(pw, isr);
-		try {
-			wrapped.setTimeout(modem.getTimeout());
-			waitForConnect(isr);
-		}
-		finally {
-			wrapped.setTimeout(timeout);
-		}
+		if(phone_number != null && phone_number.length() > 0)
+			dialModem(pw, isr);
     	}
 
 	/** Configure the modem */
@@ -138,7 +132,15 @@ public class ModemMessenger extends Messenger {
 	{
 		log("dial: " + phone_number);
 		pw.println("ATDT" + phone_number + "\r\n");
-		readResponse(isr);
+		String resp = readResponse(isr);
+		log("response: " + resp);
+		try {
+			wrapped.setTimeout(modem.getTimeout());
+			waitForConnect(isr);
+		}
+		finally {
+			wrapped.setTimeout(timeout);
+		}
 	}
 
 	/** Wait for successful connection */
