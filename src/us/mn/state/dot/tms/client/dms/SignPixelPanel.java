@@ -55,10 +55,10 @@ public class SignPixelPanel extends JPanel {
 	protected int vborder_mm;
 
 	/** Width of individual pixels (mm) */
-	protected float hpitch_mm = 1;
+	protected int hpitch_mm = 1;
 
 	/** Height of individual pixels (mm) */
-	protected float vpitch_mm = 1;
+	protected int vpitch_mm = 1;
 
 	/** Sign pixel width */
 	protected int width_pix = 0;
@@ -174,13 +174,6 @@ public class SignPixelPanel extends JPanel {
 
 	/** Rescale when the component is resized or the sign changes */
 	protected void rescale() {
-		float w = width_mm - hborder_mm * 2;
-		if(width_pix > 0 && w > 0 && width_pix * hpitch_mm > w)
-			hpitch_mm = w / width_pix;
-		float h = height_mm - vborder_mm * 2;
-		if(height_pix > 0 && h > 0 && height_pix * vpitch_mm > h)
-			vpitch_mm = h / height_pix; 
-
 		int wp = getWidth();
 		int hp = getHeight();
 		if(wp > 0 && hp > 0)
@@ -189,12 +182,14 @@ public class SignPixelPanel extends JPanel {
 
 	/** Rescale the component to the specified size */
 	protected void rescale(double w, double h) {
-		if(width_mm > 0 && height_mm > 0) {
-			double sx = w / width_mm;
-			double sy = h / height_mm;
+		int w_mm = width_mm;
+		int h_mm = height_mm;
+		if(w_mm > 0 && h_mm > 0) {
+			double sx = w / w_mm;
+			double sy = h / h_mm;
 			double scale = Math.min(sx, sy);
-			double tx = width_mm * (sx - scale) / 2;
-			double ty = height_mm * (sy - scale) / 2;
+			double tx = w_mm * (sx - scale) / 2;
+			double ty = h_mm * (sy - scale) / 2;
 			AffineTransform t = new AffineTransform();
 			t.translate(tx, ty);
 			t.scale(scale, scale);
@@ -235,8 +230,8 @@ public class SignPixelPanel extends JPanel {
 		else
 			setBloom(1);
 		g.setColor(Color.DARK_GRAY);
-		int px = Math.round(hpitch_mm + getBloomX());
-		int py = Math.round(vpitch_mm + getBloomY());
+		int px = Math.round(getHorizontalPitch() + getBloomX());
+		int py = Math.round(getVerticalPitch() + getBloomY());
 		for(int y = 0; y < height_pix; y++) {
 			int yy = Math.round(getPixelY(y));
 			for(int x = 0; x < width_pix; x++) {
@@ -253,8 +248,8 @@ public class SignPixelPanel extends JPanel {
 			setBloom(0.6f);
 		else
 			setBloom(1);
-		int px = Math.round(hpitch_mm + getBloomX());
-		int py = Math.round(vpitch_mm + getBloomY());
+		int px = Math.round(getHorizontalPitch() + getBloomX());
+		int py = Math.round(getVerticalPitch() + getBloomY());
 		for(int y = 0; y < height_pix; y++) {
 			int yy = Math.round(getPixelY(y));
 			for(int x = 0; x < width_pix; x++) {
@@ -273,66 +268,108 @@ public class SignPixelPanel extends JPanel {
 		bloom = b;
 	}
 
-	/** Get the bloom in the y-direction */
-	protected float getBloomY() {
-		return vpitch_mm * bloom / 2;
-	}
-
-	/** Get the y-distance to the given pixel */
-	protected float getPixelY(int y) {
-		return vborder_mm + getLineOffset(y) + vpitch_mm * y -
-			getBloomY() / 2;
-	}
-
-	/** Get the line offset (for line- or character-matrix signs) */
-	protected float getLineOffset(int y) {
-		if(height_line > 0)
-			return calculateLineGap() * (y / height_line);
-		else
-			return 0;
-	}
-
-	/** Calculate the height of the gap between lines (mm) */
-	protected float calculateLineGap() {
-		assert height_line > 0;
-		float excess = height_mm - 2 * vborder_mm -
-			height_pix * vpitch_mm;
-		int gaps = height_pix / height_line - 1;
-		if(excess > 0 && gaps > 0)
-			return excess / gaps;
-		else
-			return 0;
-	}
-
 	/** Get the bloom in the x-direction */
 	protected float getBloomX() {
-		return hpitch_mm * bloom / 2;
+		return getHorizontalPitch() * bloom / 2;
 	}
 
 	/** Get the x-distance to the given pixel */
 	protected float getPixelX(int x) {
-		return hborder_mm + getCharacterOffset(x) + hpitch_mm * x -
-			getBloomX() / 2;
+		return getHorizontalBorder() + getCharacterOffset(x) +
+			getHorizontalPitch() * x - getBloomX() / 2;
 	}
 
 	/** Get the character offset (for character-matrix signs only) */
 	protected float getCharacterOffset(int x) {
 		if(width_char > 0)
-			return calculateCharGap() * (x / width_char);
+			return (x / width_char) * calculateCharGap();
 		else
 			return 0;
 	}
 
 	/** Calculate the width of the gap between characters (mm) */
 	protected float calculateCharGap() {
-		assert width_char > 0;
-		float excess = width_mm - 2 * hborder_mm -
-			width_pix * vpitch_mm;
-		int gaps = width_pix / width_char - 1;
+		float excess = width_mm - 2 * getHorizontalBorder() -
+			width_pix * getHorizontalPitch();
+		int gaps = getCharacterGaps();
 		if(excess > 0 && gaps > 0)
 			return excess / gaps;
 		else
 			return 0;
+	}
+
+	/** Get the horizontal border (mm).  This does some sanity checks in
+	 * case the sign vendor supplies stupid values. */
+	protected float getHorizontalBorder() {
+		float excess = width_mm - getHorizontalPitch() *
+			(width_pix + getCharacterGaps());
+		return Math.min(hborder_mm, Math.max(0, excess / 2));
+	}
+
+	/** Get the horizontal pitch (mm).  This does some sanity checks in
+	 * case the sign vendor supplies stupid values. */
+	protected float getHorizontalPitch() {
+		float gaps = width_pix + getCharacterGaps();
+		float mx = gaps > 0 ? width_mm / gaps : width_mm;
+		return Math.min(hpitch_mm, mx);
+	}
+
+	/** Get the number of gaps between characters */
+	protected int getCharacterGaps() {
+		return (width_char > 1 && width_pix > width_char) ?
+			width_pix / width_char - 1 : 0;
+	}
+
+	/** Get the bloom in the y-direction */
+	protected float getBloomY() {
+		return getVerticalPitch() * bloom / 2;
+	}
+
+	/** Get the y-distance to the given pixel */
+	protected float getPixelY(int y) {
+		return getVerticalBorder() + getLineOffset(y) +
+			getVerticalPitch() * y - getBloomY() / 2;
+	}
+
+	/** Get the line offset (for line- or character-matrix signs) */
+	protected float getLineOffset(int y) {
+		if(height_line > 0)
+			return (y / height_line) * calculateLineGap();
+		else
+			return 0;
+	}
+
+	/** Calculate the height of the gap between lines (mm) */
+	protected float calculateLineGap() {
+		float excess = height_mm - 2 * getVerticalBorder() -
+			height_pix * getVerticalPitch();
+		int gaps = getLineGaps();
+		if(excess > 0 && gaps > 0)
+			return excess / gaps;
+		else
+			return 0;
+	}
+
+	/** Get the vertical border (mm).  This does some sanity checks in case
+	 * the sign vendor supplies stupid values. */
+	protected float getVerticalBorder() {
+		float excess = height_mm - getVerticalPitch() *
+			(height_pix + getLineGaps());
+		return Math.min(vborder_mm, Math.max(0, excess / 2));
+	}
+
+	/** Get the vertical pitch (mm).  This does some sanity checks in case
+	 * the sign vendor supplies stupid values. */
+	protected float getVerticalPitch() {
+		float gaps = height_pix + getLineGaps();
+		float mx = gaps > 0 ? height_mm / gaps : height_mm;
+		return Math.min(vpitch_mm, mx);
+	}
+
+	/** Get the number of gaps between lines */
+	protected int getLineGaps() {
+		return (height_line > 1 && height_pix > height_line) ?
+			height_pix / height_line - 1 : 0;
 	}
 
 	/** Set the panel size */
