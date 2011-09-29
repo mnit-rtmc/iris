@@ -119,7 +119,7 @@ public class ModemMessenger extends Messenger {
 	{
 		log("configure: " + config);
 		pw.println("\r\n\r\n\r\n" + config + "\r\n");
-		String resp = readResponse(isr);
+		String resp = readResponse(isr).trim();
 		if(!resp.toUpperCase().contains("OK")) {
 			log("config error: " + resp);
 			throw new IOException("Modem config error: " + resp);
