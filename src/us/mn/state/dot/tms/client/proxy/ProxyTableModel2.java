@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.HashSet;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
@@ -55,8 +55,8 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	/** Proxy columns */
 	protected final ProxyColumn<T>[] columns;
 
-	/** List of all proxies */
-	protected final LinkedList<T> proxies = new LinkedList<T>();
+	/** Set of all proxies */
+	protected final HashSet<T> proxies = new HashSet<T>();
 
 	/** Listener for SONAR proxy events */
 	private final ProxyListener<T> proxy_listener = new ProxyListener<T>() {
