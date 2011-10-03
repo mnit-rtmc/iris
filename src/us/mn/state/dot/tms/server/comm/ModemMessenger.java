@@ -88,7 +88,7 @@ public class ModemMessenger extends Messenger {
 		wrapped.open();
 		output = wrapped.getOutputStream();
 		input = new ModemInputStream(wrapped.getInputStream());
-		connectModem();
+		connectModemRetry();
 	}
 
 	/** Close the messenger */
@@ -97,6 +97,24 @@ public class ModemMessenger extends Messenger {
 		wrapped.close();
 		output = null;
 		input = null;
+	}
+
+	/** Connect the modem with up to three tries */
+	private void connectModemRetry() throws IOException {
+		int i = 0;
+		while(true) {
+			try {
+				connectModem();
+				return;
+			}
+			catch(ModemException e) {
+				if(i >= 3)
+					throw e;
+			}
+			i++;
+			log("connect retry #" + i);
+			input.skip(input.available());
+		}
 	}
 
     	/** Connect the modem to the specified phone number */
@@ -122,7 +140,7 @@ public class ModemMessenger extends Messenger {
 		String resp = readResponse(isr).trim();
 		if(!resp.toUpperCase().contains("OK")) {
 			log("config error: " + resp);
-			throw new IOException("Modem config error: " + resp);
+			throw new ModemException("config " + resp);
 		}
 	}
 
@@ -149,7 +167,7 @@ public class ModemMessenger extends Messenger {
 		String resp = readResponse(isr).trim();
 		if(!resp.toUpperCase().contains("CONNECT")) {
 			log("connect error: " + resp);
-			throw new IOException("Modem connect error: " + resp);
+			throw new ModemException("connect " + resp);
 		}
 	}
 
