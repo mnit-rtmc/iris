@@ -1582,4 +1582,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(msg instanceof SignMessageImpl)
 			((SignMessageImpl)msg).printXml(out, this);
 	}
+
+	/** Determine if the DMS is periodically queriable. */
+	public boolean isPeriodicallyQueriable() {
+		// FIXME: signAccess is supposed to indicate the *physical*
+		//        access of the DMS.  It was never intended to be used
+		//        in this manner.  We should really lookup the comm
+		//        link and figure it out from there. This is presently
+		//	  agency specific code (Caltrans).
+		return !SString.containsIgnoreCase(getSignAccess(), "dialup");
+	}
 }

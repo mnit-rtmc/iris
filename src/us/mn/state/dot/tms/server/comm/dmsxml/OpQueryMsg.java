@@ -487,10 +487,8 @@ class OpQueryMsg extends OpDms {
 			throws IOException
 		{
 			// ignore startup operations for DMS on dial-up lines
-			if(m_startup && 
-				!DMSHelper.isPeriodicallyQueriable(m_dms)) {
+			if(m_startup && !m_dms.isPeriodicallyQueriable())
 				return null;
-			}
 
 			updateInterStatus("Starting operation", false);
 			Log.finest("OpQueryMsg.PhaseQueryMsg.poll(msg) " +

@@ -355,16 +355,6 @@ public class DMSHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Determine if the DMS is periodically queriable. */
-	static public boolean isPeriodicallyQueriable(DMS d) {
-		// FIXME: signAccess is supposed to indicate the *physical*
-		//        access of the DMS.  It was never intended to be used
-		//        in this manner.  We should really lookup the comm
-		//        link and figure it out from there. This is presently
-		//	  agency specific code (Caltrans).
-		return !SString.containsIgnoreCase(d.getSignAccess(), "dialup");
-	}
-
 	/** Get current sign message text as an array of strings. */
 	static public String[] getLines(DMS proxy) {
 		SignMessage sm = proxy.getMessageCurrent();
