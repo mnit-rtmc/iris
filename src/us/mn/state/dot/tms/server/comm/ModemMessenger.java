@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.SocketTimeoutException;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.ModemHelper;
@@ -104,6 +105,7 @@ public class ModemMessenger extends Messenger {
 		int i = 0;
 		while(true) {
 			try {
+				input.skip(input.available());
 				connectModem();
 				return;
 			}
@@ -113,7 +115,6 @@ public class ModemMessenger extends Messenger {
 			}
 			i++;
 			log("connect retry #" + i);
-			input.skip(input.available());
 		}
 	}
 
@@ -137,10 +138,15 @@ public class ModemMessenger extends Messenger {
 	{
 		log("configure: " + config);
 		pw.println("\r\n\r\n\r\n" + config + "\r\n");
-		String resp = readResponse(isr).trim();
-		if(!resp.toUpperCase().contains("OK")) {
-			log("config error: " + resp);
-			throw new ModemException("config " + resp);
+		try {
+			String resp = readResponse(isr).trim();
+			if(!resp.toUpperCase().contains("OK")) {
+				log("config error: " + resp);
+				throw new ModemException("config " + resp);
+			}
+		}
+		catch(SocketTimeoutException e) {
+			throw new ModemException("config no response");
 		}
 	}
 
