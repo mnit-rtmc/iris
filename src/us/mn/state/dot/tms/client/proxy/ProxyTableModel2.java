@@ -181,7 +181,9 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		if(row >= 0) {
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
-					fireTableRowsInserted(row, row);
+					// should be:
+					// fireTableRowsInserted(row, row);
+					// but it causes repaint problems
 				}
 			});
 		}
@@ -207,7 +209,10 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		if(row >= 0) {
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
-					fireTableRowsDeleted(row, row);
+					fireTableDataChanged();
+					// should be:
+					// fireTableRowsDeleted(row, row);
+					// but it causes repaint problems
 				}
 			});
 		}
@@ -219,7 +224,10 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		if(row >= 0) {
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
-					fireTableRowsUpdated(row, row);
+					fireTableDataChanged();
+					// should be:
+					// fireTableRowsUpdated(row, row);
+					// but it causes repaint problems
 				}
 			});
 		}
