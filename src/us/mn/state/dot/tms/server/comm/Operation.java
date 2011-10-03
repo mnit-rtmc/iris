@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2010  Minnesota Department of Transportation
+ * Copyright (C) 2002-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.server.IDebugLog;
 
 /**
  * An operation to be performed on a field controller.  Each message
@@ -26,6 +27,9 @@ import us.mn.state.dot.tms.EventType;
  * @author Douglas Lau
  */
 abstract public class Operation {
+
+	/** Operation error log */
+	static protected final IDebugLog OP_LOG = new IDebugLog("operation");
 
 	/** Priority of the operation */
 	protected PriorityLevel priority;
@@ -49,6 +53,8 @@ abstract public class Operation {
 	public Operation(PriorityLevel prio) {
 		priority = prio;
 		phase = null;
+		if(OP_LOG.isOpen())
+			OP_LOG.log(getOpName() + " created");
 	}
 
 	/** Get a string description of the operation */
@@ -83,7 +89,9 @@ abstract public class Operation {
 	abstract public boolean begin();
 
 	/** Cleanup the operation */
-	public void cleanup() {}
+	public void cleanup() {
+		OP_LOG.log(getOpName() + " cleanup");
+	}
 
 	/** Handle a communication error */
 	public void handleCommError(EventType et, String msg) {
@@ -124,15 +132,8 @@ abstract public class Operation {
 			throws IOException, DeviceContentionException;
 	}
 
-	/** 
-	  * Get a human readable description of the operation, which
-	  * is the name of the operation class. 
-	  */
+	/** Get a description of the operation */
 	public String getOperationDescription() {
-		String name = this.getClass().getName();
-		int i = name.lastIndexOf('.');
-		if(i >= 0)
-			return name.substring(i + 1);
-		return name;
+		return getOpName();
 	}
 }
