@@ -790,4 +790,24 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		super.doDestroy();
 		MainServer.server.removeObject(cabinet);
 	}
+
+	/** Check if the controller is assigned to a modem comm link */
+	public boolean hasModemCommLink() {
+		CommLink cl = comm_link;
+		if(cl instanceof CommLinkImpl) {
+			CommLinkImpl link = (CommLinkImpl)cl;
+			return link.isModemLink();
+		} else
+			return false;
+	}
+
+	/** Check if the controller comm link is currently connected */
+	public boolean isConnected() {
+		CommLink cl = comm_link;
+		if(cl instanceof CommLinkImpl) {
+			CommLinkImpl link = (CommLinkImpl)cl;
+			return link.isConnected();
+		} else
+			return false;
+	}
 }

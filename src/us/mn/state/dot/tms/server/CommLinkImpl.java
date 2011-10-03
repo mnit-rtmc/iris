@@ -330,4 +330,15 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	public float getLoad() {
 		return load;
 	}
+
+	/** Check if a modem is required for the link */
+	public boolean isModemLink() {
+		return uri.startsWith("modem:");
+	}
+
+	/** Check if the comm link is currently connected */
+	public boolean isConnected() {
+		MessagePoller p = poller;
+		return p != null && p.isAlive();
+	}
 }

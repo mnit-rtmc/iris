@@ -243,4 +243,22 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		}
 		super.doDestroy();
 	}
+
+	/** Check if the device is connected to a modem comm link */
+	protected boolean hasModemCommLink() {
+		ControllerImpl c = controller;
+		if(c != null)
+			return c.hasModemCommLink();
+		else
+			return false;
+	}
+
+	/** Check if the device is on a "connected" comm link */
+	protected boolean isConnected() {
+		ControllerImpl c = controller;
+		if(c != null)
+			return c.isConnected();
+		else
+			return false;
+	}
 }

@@ -1583,9 +1583,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			((SignMessageImpl)msg).printXml(out, this);
 	}
 
-	/** Determine if the DMS is periodically queriable. */
+	/** Check if the sign is periodically queriable */
 	public boolean isPeriodicallyQueriable() {
-		return !isDmsXMLDialup();
+		return (!isDmsXMLDialup()) &&
+		       ((!hasModemCommLink()) || isConnected());
 	}
 
 	/** Check if the sign is a DMSXML dialup sign */
