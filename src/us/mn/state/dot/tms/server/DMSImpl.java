@@ -1583,6 +1583,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			((SignMessageImpl)msg).printXml(out, this);
 	}
 
+	/** Check if the sign is an active dialup sign */
+	public boolean isActiveDialup() {
+		return isActive() && (isDmsXMLDialup() || hasModemCommLink());
+	}
+
 	/** Check if the sign is periodically queriable */
 	public boolean isPeriodicallyQueriable() {
 		return (!isDmsXMLDialup()) &&

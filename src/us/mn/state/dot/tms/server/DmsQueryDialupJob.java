@@ -69,7 +69,7 @@ public class DmsQueryDialupJob extends Job {
 			public boolean check(DMS d) {
 				if(d instanceof DMSImpl) {
 					DMSImpl dms = (DMSImpl)d;
-					if(!dms.isPeriodicallyQueriable())
+					if(dms.isActiveDialup())
 						signs.offer(dms);
 				}
 				return false;
