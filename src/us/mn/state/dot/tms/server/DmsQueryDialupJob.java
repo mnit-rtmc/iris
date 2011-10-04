@@ -51,7 +51,7 @@ public class DmsQueryDialupJob extends Job {
 
 	/** Perform the DMS query dialup job */
 	public void perform() {
-		if(isNewPeriod())
+		if(isNewPeriod() && signs.isEmpty())
 			queueAllDialupSigns();
 		DMSImpl dms = signs.poll();
 		if(dms != null)
