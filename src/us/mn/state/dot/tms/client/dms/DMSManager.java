@@ -21,6 +21,7 @@ import java.awt.Shape;
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
+import java.util.LinkedList;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -130,6 +131,17 @@ public class DMSManager extends ProxyManager<DMS> {
 		theme.addStyle(DMSHelper.STYLE_ALL,
 			ProxyTheme.COLOR_INACTIVE, ProxyTheme.OUTLINE_INACTIVE);
 		return theme;
+	}
+
+	/** Get an array of all styles.  This overrides the ProxyManager
+	 * version so that STYLE_NO_CONTROLLER is filtered out. */
+	public String[] getStyles() {
+		LinkedList<String> styles = new LinkedList<String>();
+		for(Symbol s: theme.getSymbols()) {
+			if(!DMSHelper.STYLE_NO_CONTROLLER.equals(s.getLabel()))
+				styles.add(s.getLabel());
+		}
+		return (String[])styles.toArray(new String[0]);
 	}
 
 	/** Create a list cell renderer */
