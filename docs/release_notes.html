@@ -11,6 +11,31 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.134.0 (4 October 2011)</dt>
+	<dd><ul>
+		<li>
+			Improved dial-up modem support.
+		</li>
+		<li>
+			Added "dialup_poll_period_mins" system attribute to
+			control polling period for dialup devices.
+		</li>
+		<li>
+			Fixed problems with failed controller table.
+		</li>
+		<li>
+			Sign pixel panel can better cope with invalid sign
+			dimensions returned from a sign.
+		</li>
+		<li>
+			Fixed a serious bug in Infinova PTZ driver.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.134.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.133.0 (26 September 2011)</dt>
 	<dd><ul>
 		<li>
