@@ -51,9 +51,6 @@ public class DMSHelper extends BaseHelper {
 	/** Name of maintenance style */
 	static public final String STYLE_MAINTENANCE = "Maintenance";
 
-	/** Name of inactive style */
-	static public final String STYLE_INACTIVE = "Inactive";
-
 	/** Name of failed style */
 	static public final String STYLE_FAILED = "Failed";
 
@@ -67,11 +64,12 @@ public class DMSHelper extends BaseHelper {
 	/** Name of all style */
 	static public final String STYLE_ALL = "All";
 
-	/** all styles */
-	static public final String[] STYLES_ALL = {STYLE_AVAILABLE, 
-		STYLE_DEPLOYED, STYLE_SCHEDULED, STYLE_TRAVEL_TIME,
-		STYLE_MAINTENANCE, STYLE_INACTIVE, STYLE_FAILED,
-		STYLE_AWS_CONTROLLED, STYLE_NO_CONTROLLER};
+	/** All styles */
+	static public final String[] STYLES_ALL = {
+		STYLE_AVAILABLE, STYLE_DEPLOYED, STYLE_SCHEDULED,
+		STYLE_TRAVEL_TIME, STYLE_MAINTENANCE, STYLE_FAILED,
+		STYLE_AWS_CONTROLLED, STYLE_NO_CONTROLLER
+	};
 
 	/** Test if a DMS is available */
 	static public boolean isAvailable(DMS proxy) {
@@ -262,8 +260,6 @@ public class DMSHelper extends BaseHelper {
 			return isAwsMessageDeployed(proxy);
 		else if(STYLE_MAINTENANCE.equals(s))
 			return needsMaintenance(proxy);
-		else if(STYLE_INACTIVE.equals(s))
-			return !isActive(proxy);
 		else if(STYLE_FAILED.equals(s))
 			return isFailed(proxy);
 		else if(STYLE_AWS_CONTROLLED.equals(s))

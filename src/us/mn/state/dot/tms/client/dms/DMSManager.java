@@ -118,8 +118,6 @@ public class DMSManager extends ProxyManager<DMS> {
 			theme.addStyle(DMSHelper.STYLE_AWS_DEPLOYED, Color.RED);
 		theme.addStyle(DMSHelper.STYLE_MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(DMSHelper.STYLE_INACTIVE,
-			ProxyTheme.COLOR_INACTIVE, ProxyTheme.OUTLINE_INACTIVE);
 		theme.addStyle(DMSHelper.STYLE_FAILED, ProxyTheme.COLOR_FAILED);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			theme.addStyle(DMSHelper.STYLE_AWS_CONTROLLED,
@@ -127,7 +125,10 @@ public class DMSManager extends ProxyManager<DMS> {
 		}
 		theme.addStyle(DMSHelper.STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(DMSHelper.STYLE_ALL);
+		// NOTE: If a sign doesn't fit in one of the other themes,
+		//       it will be rendered using the STYLE_ALL theme.
+		theme.addStyle(DMSHelper.STYLE_ALL,
+			ProxyTheme.COLOR_INACTIVE, ProxyTheme.OUTLINE_INACTIVE);
 		return theme;
 	}
 

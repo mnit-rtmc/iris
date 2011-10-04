@@ -1553,8 +1553,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			return KmlColorImpl.Orange;
 		if(DMSHelper.checkStyle(DMSHelper.STYLE_MAINTENANCE, this))
 			return KmlColorImpl.Black;
-		if(DMSHelper.checkStyle(DMSHelper.STYLE_INACTIVE, this))
-			return KmlColorImpl.White;
 		if(DMSHelper.checkStyle(DMSHelper.STYLE_FAILED, this))
 			return KmlColorImpl.Gray;
 		return KmlColorImpl.Black;
