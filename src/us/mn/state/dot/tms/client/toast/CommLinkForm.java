@@ -234,7 +234,6 @@ public class CommLinkForm extends AbstractForm {
 		bag.weightx = 1;
 		bag.weighty = 1;
 		ctable.setAutoCreateColumnsFromModel(false);
-//		ctable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		ctable.setRowHeight(ROW_HEIGHT);
 		// NOTE: the width of the controller table is the same as the
 		// comm link table on purpose.
@@ -330,10 +329,14 @@ public class CommLinkForm extends AbstractForm {
 	/** Go to the failed controller (on the main tab) */
 	protected void goFailedController() {
 		int row = ftable.getSelectedRow();
-		int mrow = ftable.convertRowIndexToModel(row);
-		Controller c = fmodel.getRowProxy(mrow);
-		if(c != null)
-			goController(c);
+		if(row >= 0) {
+			int mrow = ftable.convertRowIndexToModel(row);
+			if(mrow >= 0) {
+				Controller c = fmodel.getRowProxy(mrow);
+				if(c != null)
+					goController(c);
+			}
+		}
 	}
 
 	/** Go to the specified controller (on the main tab) */
