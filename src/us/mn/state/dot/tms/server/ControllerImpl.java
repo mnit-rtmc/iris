@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +16,13 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
@@ -28,6 +31,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -42,6 +46,7 @@ import us.mn.state.dot.tms.server.event.CommEvent;
  * A controller represents a field device controller.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class ControllerImpl extends BaseObjectImpl implements Controller {
 
@@ -809,5 +814,31 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return link.isConnected();
 		} else
 			return false;
+	}
+
+	/** Print the controller as an XML element */
+	public void printXml(PrintWriter out) {
+		out.print("<controller");
+		out.print(XmlWriter.createAttribute("name", getName()));
+		out.print(XmlWriter.createAttribute("active", getActive()));
+		out.print(XmlWriter.createAttribute("drop", getDrop()));
+		CommLink cl = getCommLink();
+		if(cl != null)
+			out.print(XmlWriter.createAttribute("commlink", cl.getName()));
+		Position pos = ControllerHelper.getPosition(this);
+		if(pos != null) {
+			out.print(XmlWriter.createAttribute("lon",
+				formatDouble(pos.getLongitude())));
+			out.print(XmlWriter.createAttribute("lat",
+				formatDouble(pos.getLatitude())));
+		}
+		out.print(XmlWriter.createAttribute("location", 
+			ControllerHelper.getLocation(this)));
+		Cabinet cab = getCabinet();
+		if(cab != null && cab.toString().length() > 0)
+			out.print(XmlWriter.createAttribute("cabinet", getCabinet()));
+		if(getNotes().length() > 0)
+			out.print(XmlWriter.createAttribute("notes", getNotes()));
+		out.println("/>");
 	}
 }

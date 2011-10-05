@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -837,6 +838,9 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			out.print(XmlWriter.createAttribute("lane", lane));
 		if(field != Constants.DEFAULT_FIELD_LENGTH)
 			out.print(XmlWriter.createAttribute("field", field));
+		Controller c = getController();
+		if(c != null) 
+			out.print(XmlWriter.createAttribute("controller", c.getName()));
 		out.println("/>");
 	}
 

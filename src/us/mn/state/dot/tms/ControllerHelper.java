@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.geokit.Position;
 
 /**
  * Helper for controllers.
@@ -49,15 +51,31 @@ public class ControllerHelper extends BaseHelper {
 		});
 	}
 
-	/** Get a controller location */
-	static public String getLocation(Controller ctrl) {
+	/** Get the geo location of a controller or null */
+	static public GeoLoc getGeoLoc(Controller ctrl) {
 		Cabinet cab = ctrl.getCabinet();
-		if(cab != null) {
-			GeoLoc loc = cab.getGeoLoc();
-			if(loc != null)
-				return GeoLocHelper.getDescription(loc);
-		}
-		return "";
+		if(cab != null)
+			return cab.getGeoLoc();
+		else
+			return null;
+	}
+
+	/** Get a controller location or an empty string */
+	static public String getLocation(Controller ctrl) {
+		GeoLoc loc = getGeoLoc(ctrl);
+		if(loc != null)
+			return GeoLocHelper.getDescription(loc);
+		else
+			return "";
+	}
+
+	/** Get a controller position or null */
+	static public Position getPosition(Controller ctrl) {
+		GeoLoc gl = getGeoLoc(ctrl);
+		if(gl != null)
+			return GeoLocHelper.getWgs84Position(gl);
+		else
+			return null;
 	}
 
 	/** Test if a controller is active */

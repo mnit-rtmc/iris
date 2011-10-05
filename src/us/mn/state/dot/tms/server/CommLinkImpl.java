@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +36,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
  *
  * @see us.mn.state.dot.tms.CommProtocol
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
@@ -339,5 +342,15 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	public boolean isConnected() {
 		MessagePoller p = poller;
 		return p != null && p.isConnected();
+	}
+
+	/** Print the comm link as an XML element */
+	public void printXml(PrintWriter out) {
+		out.print("<commlink");
+		out.print(XmlWriter.createAttribute("name", getName()));
+		out.print(XmlWriter.createAttribute("description", getDescription()));
+		String p = CommProtocol.fromOrdinal(getProtocol()).toString();
+		out.print(XmlWriter.createAttribute("protocol", p));
+		out.println("/>");
 	}
 }

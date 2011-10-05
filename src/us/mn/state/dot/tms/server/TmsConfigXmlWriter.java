@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ import us.mn.state.dot.tms.DMSHelper;
  * This class writes out the TMS configuration data to an XML file.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class TmsConfigXmlWriter extends XmlWriter {
 
@@ -39,6 +41,13 @@ public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** Camera XML writer */
 	protected final CameraXmlWriter cam_writer = new CameraXmlWriter();
+
+	/** Controller XML writer */
+	protected final ControllerXmlWriter controller_writer = 
+		new ControllerXmlWriter();
+
+	/** Commlink XML writer */
+	protected final CommLinkXmlWriter commlink_writer = new CommLinkXmlWriter();
 
 	/** Create a new TMS config XML writer */
 	public TmsConfigXmlWriter() {
@@ -63,10 +72,13 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	/** Print the DTD */
 	protected void printDtd(PrintWriter out) {
 		out.println("<!DOCTYPE tms_config [");
-		out.println("<!ELEMENT tms_config (corridor | camera | dms)*>");
+		out.println("<!ELEMENT tms_config (corridor | camera | commlink | " +
+			"controller | dms)*>");
 		out.println("<!ATTLIST tms_config time_stamp CDATA #REQUIRED>");
 		node_writer.printDtd(out);
 		printCameraDtd(out);
+		printCommLinkDtd(out);
+		printControllerDtd(out);
 		printDmsDtd(out);
 		out.println("]>");
 	}
@@ -78,6 +90,28 @@ public class TmsConfigXmlWriter extends XmlWriter {
 		out.println("<!ATTLIST camera description CDATA #REQUIRED>");
 		out.println("<!ATTLIST camera lon CDATA #IMPLIED>");
 		out.println("<!ATTLIST camera lat CDATA #IMPLIED>");
+	}
+
+	/** Print the DTD for comm link elements */
+	protected void printCommLinkDtd(PrintWriter out) {
+		out.println("<!ELEMENT commlink EMPTY>");
+		out.println("<!ATTLIST commlink name CDATA #REQUIRED>");
+		out.println("<!ATTLIST commlink description CDATA #REQUIRED>");
+		out.println("<!ATTLIST commlink protocol CDATA #REQUIRED>");
+	}
+
+	/** Print the DTD for controlleri elements */
+	protected void printControllerDtd(PrintWriter out) {
+		out.println("<!ELEMENT controller EMPTY>");
+		out.println("<!ATTLIST controller name CDATA #REQUIRED>");
+		out.println("<!ATTLIST controller active CDATA #REQUIRED>");
+		out.println("<!ATTLIST controller drop CDATA #REQUIRED>");
+		out.println("<!ATTLIST controller commlink CDATA #IMPLIED>");
+		out.println("<!ATTLIST controller lon CDATA #IMPLIED>");
+		out.println("<!ATTLIST controller lat CDATA #IMPLIED>");
+		out.println("<!ATTLIST controller location CDATA #REQUIRED>");
+		out.println("<!ATTLIST controller cabinet CDATA #IMPLIED>");
+		out.println("<!ATTLIST controller notes CDATA #IMPLIED>");
 	}
 
 	/** Print the DTD for DMS elements */
@@ -93,6 +127,8 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	protected void printBody(PrintWriter out) {
 		node_writer.print(out, meter_writer.getNodeMapping());
 		cam_writer.print(out);
+		commlink_writer.print(out);
+		controller_writer.print(out);
 		printDmsBody(out);
 	}
 

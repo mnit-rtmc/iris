@@ -61,6 +61,7 @@ public class R_NodeXmlWriter {
 		out.println("<!ATTLIST detector category CDATA ''>");
 		out.println("<!ATTLIST detector lane CDATA '0'>");
 		out.println("<!ATTLIST detector field CDATA '22.0'>");
+		out.println("<!ATTLIST detector controller CDATA #IMPLIED>");
 		out.println("<!ELEMENT meter EMPTY>");
 		out.println("<!ATTLIST meter name CDATA #REQUIRED>");
 		out.println("<!ATTLIST meter lon CDATA #IMPLIED>");
