@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,10 +31,13 @@ public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 	 * @return Directory to store sample data.
 	 * @throws IOException If directory cannot be created. */
 	static protected File directory(long stamp) throws IOException {
-		String d = TimeSteward.dateShortString(stamp);
-		File year = new File(
+		File arc = new File(
 			SystemAttrEnum.SAMPLE_ARCHIVE_DIRECTORY.getString(),
-			d.substring(0, 4));
+			MainServer.districtId());
+		if(!arc.exists() && !arc.mkdir())
+			throw new IOException("mkdir failed: " + arc);
+		String d = TimeSteward.dateShortString(stamp);
+		File year = new File(arc, d.substring(0, 4));
 		if(!year.exists() && !year.mkdir())
 			throw new IOException("mkdir failed: " + year);
 		File dir = new File(year.getPath(), d);

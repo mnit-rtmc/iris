@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,8 @@ public class ArchiveSamplesJob extends Job {
 	/** Get an array of years in the sample archive directory */
 	protected File[] listYears() {
 		File arc = new File(
-			SystemAttrEnum.SAMPLE_ARCHIVE_DIRECTORY.getString());
+			SystemAttrEnum.SAMPLE_ARCHIVE_DIRECTORY.getString(),
+			MainServer.districtId());
 		return arc.listFiles(new FileFilter() {
 			public boolean accept(File file) {
 				return file.isDirectory() &&
