@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
-import java.util.Properties;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DMS;
@@ -31,14 +30,6 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	/** TMS config XML file */
 	static protected final String CONFIG_XML = "_config.xml";
 
-	/** Agency district property */
-	static protected String district = "tms";
-
-	/** Initialize the district property */
-	static public void init(Properties props) {
-		district = props.getProperty("district", "tms");
-	}
-
 	/** R_Node XML writer */
 	protected final R_NodeXmlWriter node_writer = new R_NodeXmlWriter();
 
@@ -51,7 +42,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** Create a new TMS config XML writer */
 	public TmsConfigXmlWriter() {
-		super(district + CONFIG_XML, true);
+		super(MainServer.districtId() + CONFIG_XML, true);
 	}
 
 	/** Print the TMS config XML file */

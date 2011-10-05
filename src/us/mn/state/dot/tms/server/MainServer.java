@@ -69,11 +69,20 @@ public class MainServer {
 	/** SQL connection */
 	static protected SQLConnection store;
 
+	/** Agency district property */
+	static protected String district = "tms";
+
+	/** Get the district ID */
+	static public String districtId() {
+		return district;
+	}
+
 	/** Main server entry point */
 	static public void main(String[] args) {
 		try {
 			initialize();
 			Properties props = PropertyLoader.load(PROP_FILE);
+			district = props.getProperty("district", "tms");
 			initProxySelector(props);
 			store = createStore(props);
 			I18N.initialize(props);
@@ -83,7 +92,6 @@ public class MainServer {
 			IrisRoleImpl.lookup(store, ns);
 			IrisUserImpl.lookup(store, ns);
 			BaseObjectImpl.loadAll(store, ns);
-			TmsConfigXmlWriter.init(props);
 			BaseEvent.store = store;
 			scheduleTimerJobs();
 			scheduleFlushJobs();
