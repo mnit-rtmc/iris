@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 	static protected final int MAX_OUTPUT = 65535;
 
 	/** Amount to adjust light output on feedback */
-	static protected final int ADJ_OUTPUT = 256;
+	static protected final int ADJ_OUTPUT = 1024;
 
 	/** Index into table level for light output */
 	static protected final int LEVEL_OUT = 0;
