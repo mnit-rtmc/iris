@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -233,8 +233,7 @@ public class OpSendDMSGraphics extends OpDMS {
 
 	/** Compare the graphic ID */
 	protected boolean isIDCorrect(int g) throws IOException {
-		GraphicInfoList gil = new GraphicInfoList(graphic,
-			graphic.getGNumber());
+		GraphicInfoList gil = new GraphicInfoList(graphic);
 		int crc = gil.getCrc() ^ CRC16.INITIAL_CRC;
 		int gid = ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
 		return g == gid;

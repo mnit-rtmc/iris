@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
 public class GraphicInfoList extends CRC16 {
 
 	/** Create a new GraphicInfoList */
-	public GraphicInfoList(Graphic graphic, int g_num) throws IOException {
+	public GraphicInfoList(Graphic graphic) throws IOException {
 		DataOutputStream dos = new DataOutputStream(this);
-		dos.writeByte(g_num);
+		dos.writeByte(graphic.getGNumber());
 		dos.writeShort(graphic.getHeight());
 		dos.writeShort(graphic.getWidth());
 		dos.writeByte(DmsColorScheme.Enum.fromBpp(
