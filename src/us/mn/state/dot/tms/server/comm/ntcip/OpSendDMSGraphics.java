@@ -426,13 +426,31 @@ public class OpSendDMSGraphics extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.getEnum() ==
 			   DmsGraphicStatus.Enum.readyForUse)
-				return nextGraphicPhase();
+				return new VerifyGraphicFinal();
 			if(TimeSteward.currentTimeMillis() > expire) {
 				DMS_LOG.log(dms.getName() + ": graphic status" +
 					" timeout expired -- aborted");
 				return nextGraphicPhase();
 			} else
 				return this;
+		}
+	}
+
+	/** Phase to verify a graphic after validating */
+	protected class VerifyGraphicFinal extends Phase {
+
+		/** Verify a graphic */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsGraphicID gid = new DmsGraphicID(row);
+			mess.add(gid);
+			mess.queryProps();
+			DMS_LOG.log(dms.getName() + ": " + gid);
+			if(!isIDCorrect(gid.getInteger())) {
+				System.err.println("DMS " + dms.getName() +
+					" graphic " + graphic.getGNumber() +
+					" INVALID after validating!");
+			}
+			return nextGraphicPhase();
 		}
 	}
 }
