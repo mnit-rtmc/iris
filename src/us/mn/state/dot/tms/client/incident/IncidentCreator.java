@@ -160,13 +160,13 @@ public class IncidentCreator extends JPanel {
 			// NOTE: cannot use ButtonGroup for this because it
 			// will not let the user deselect a button by clicking
 			// on it once it has been selected.  Arrgh!
-			if(btn != crash_btn)
+			if(btn != crash_btn && crash_btn.isSelected())
 				crash_btn.setSelected(false);
-			if(btn != stall_btn)
+			if(btn != stall_btn && stall_btn.isSelected())
 				stall_btn.setSelected(false);
-			if(btn != work_btn)
+			if(btn != work_btn && work_btn.isSelected())
 				work_btn.setSelected(false);
-			if(btn != hazard_btn)
+			if(btn != hazard_btn && hazard_btn.isSelected())
 				hazard_btn.setSelected(false);
 			createIncident(btn, et);
 		}
