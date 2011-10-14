@@ -402,6 +402,7 @@ public class CorridorList extends JPanel {
 	protected void doAddButton() {
 		client.setPointSelector(new PointSelector() {
 			public void selectPoint(Point2D p) {
+				client.setPointSelector(null);
 				createNode(corridor, p);
 			}
 		});
@@ -424,7 +425,6 @@ public class CorridorList extends JPanel {
 				lanes, shift);
 		} else
 			creator.create(e, n);
-		client.setPointSelector(null);
 		add_btn.setEnabled(canAdd());
 	}
 

@@ -201,12 +201,12 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		};
 		final PointSelector ps = new PointSelector() {
 			public void selectPoint(Point2D p) {
+				desktop.client.setPointSelector(null);
 				UTMPosition utm = getPosition(p);
 				easting.setValue(
 					(int)Math.round(utm.getEasting()));
 				northing.setValue(
 					(int)Math.round(utm.getNorthing()));
-				desktop.client.setPointSelector(null);
 			}
 		};
 		new ActionJob(this, select_btn) {
