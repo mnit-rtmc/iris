@@ -157,8 +157,6 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 
 	/** Select a camera for the video monitor */
 	public void selectCamera(final String cam) {
-		// FIXME: video monitor should implement ControllerIO so that
-		//        multiple video switchers can be used.
 		ControllerHelper.find(new Checker<Controller>() {
 			public boolean check(Controller c) {
 				if(c instanceof ControllerImpl)
