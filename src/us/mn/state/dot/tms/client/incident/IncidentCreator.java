@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
@@ -75,6 +76,16 @@ public class IncidentCreator extends JPanel {
 
 	/** Iris client */
 	protected final IrisClient client;
+
+	/** Listener for proxy selection events */
+	private final ProxySelectionListener<Incident> sel_listener =
+		new ProxySelectionListener<Incident>()
+	{
+		public void selectionAdded(Incident inc) {
+			clearWidgets();
+		}
+		public void selectionRemoved(Incident inc) { }
+	};
 
 	/** Create a new incident creator */
 	public IncidentCreator(Session s, StyledTheme theme,
@@ -113,6 +124,7 @@ public class IncidentCreator extends JPanel {
 		box.add(Box.createHorizontalGlue());
 		add(box);
 		setEnabled(false);
+		selectionModel.addProxySelectionListener(sel_listener);
 	}
 
 	/** Create the lane type combo box */
@@ -211,7 +223,6 @@ public class IncidentCreator extends JPanel {
 				(short)lt.ordinal(), road, dir, east, north,
 				createImpact(n_lanes));
 			selectionModel.setSelected(ci);
-			ltype_cbox.setSelectedItem(LaneType.MAINLINE);
 		}
 	}
 
@@ -286,16 +297,28 @@ public class IncidentCreator extends JPanel {
 		return null;
 	}
 
+	/** Clear the widgets */
+	private void clearWidgets() {
+		client.setPointSelector(null);
+		crash_btn.setSelected(false);
+		stall_btn.setSelected(false);
+		work_btn.setSelected(false);
+		hazard_btn.setSelected(false);
+		ltype_cbox.setSelectedItem(LaneType.MAINLINE);
+	}
+
 	/** Set enabled */
 	public void setEnabled(boolean e) {
 		crash_btn.setEnabled(e);
 		stall_btn.setEnabled(e);
 		work_btn.setEnabled(e);
 		hazard_btn.setEnabled(e);
+		ltype_cbox.setEnabled(e);
 	}
 
 	/** Dispose of the incident creator */
 	public void dispose() {
+		selectionModel.removeProxySelectionListener(sel_listener);
 		removeAll();
 	}
 }
