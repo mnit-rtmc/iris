@@ -36,7 +36,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -453,11 +452,7 @@ public class IncidentDispatcher extends JPanel
 		if(a == null) {
 			detail_cbx.setSelectedItem(inc.getDetail());
 			type_lbl.setText(manager.getTypeDesc(inc));
-			Symbol sym = manager.getSymbol(inc);
-			if(sym != null)
-				type_lbl.setIcon(sym.getLegend());
-			else
-				type_lbl.setIcon(null);
+			type_lbl.setIcon(manager.getIcon(inc));
 			location_txt.setText(
 				manager.getGeoLoc(inc).getDescription());
 			if(inc instanceof ClientIncident)
@@ -486,7 +481,7 @@ public class IncidentDispatcher extends JPanel
 	/** Clear the event type */
 	protected void clearEventType() {
 		type_lbl.setText("");
-		type_lbl.setIcon(null);
+		type_lbl.setIcon(manager.getIcon(null));
 	}
 
 	/** Create a combo box model for nearby cameras */

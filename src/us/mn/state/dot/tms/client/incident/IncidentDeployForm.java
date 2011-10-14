@@ -26,7 +26,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.SwingConstants;
-import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
@@ -182,9 +181,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		JLabel lbl = new JLabel();
 		lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		lbl.setText(manager.getDescription(proxy));
-		Symbol sym = manager.getSymbol(proxy);
-		if(sym != null)
-			lbl.setIcon(sym.getLegend());
+		lbl.setIcon(manager.getIcon(proxy));
 		FormPanel panel = new FormPanel(false);
 		panel.addRow(lbl);
 		panel.addRow("<html><p align=\"right\">Proposed" +

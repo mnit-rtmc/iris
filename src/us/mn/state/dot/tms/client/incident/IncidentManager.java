@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
@@ -268,6 +269,16 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return getTheme().getSymbol(sty);
 		else
 			return null;
+	}
+
+	/** Get the icon for an incident */
+	public Icon getIcon(Incident inc) {
+		if(inc != null) {
+			Symbol sym = getSymbol(inc);
+			if(sym != null)
+				return sym.getLegend();
+		}
+		return getTheme().getSymbol(STYLE_CLEARED).getLegend();
 	}
 
 	/** Get the layer zoom visibility threshold */

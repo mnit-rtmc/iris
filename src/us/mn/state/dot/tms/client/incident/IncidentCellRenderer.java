@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.Component;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.SwingConstants;
-import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Incident;
 
@@ -53,21 +53,18 @@ public class IncidentCellRenderer extends DefaultListCellRenderer {
 				Incident inc = (Incident)value;
 				String dsc = manager.getDescription(inc);
 				lbl.setText(dsc + getCamera(inc));
-				Symbol sym = lookupSymbol(inc);
-				if(sym != null)
-					lbl.setIcon(sym.getLegend());
+				lbl.setIcon(lookupIcon(inc));
 			}
 		}
 		return c;
 	}
 
-	/** Lookup the symbol to use for an incident */
-	protected Symbol lookupSymbol(Incident inc) {
-		if(inc.getCleared()) {
-			return manager.getTheme().getSymbol(
-				IncidentManager.STYLE_CLEARED);
-		} else
-			return manager.getSymbol(inc);
+	/** Lookup the icon to use for an incident */
+	protected Icon lookupIcon(Incident inc) {
+		if(inc.getCleared())
+			return manager.getIcon(null);
+		else
+			return manager.getIcon(inc);
 	}
 
 	/** Get the incident camera */
