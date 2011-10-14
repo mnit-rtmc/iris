@@ -300,10 +300,14 @@ public class IncidentCreator extends JPanel {
 	/** Clear the widgets */
 	private void clearWidgets() {
 		client.setPointSelector(null);
-		crash_btn.setSelected(false);
-		stall_btn.setSelected(false);
-		work_btn.setSelected(false);
-		hazard_btn.setSelected(false);
+		if(crash_btn.isSelected())
+			crash_btn.setSelected(false);
+		if(stall_btn.isSelected())
+			stall_btn.setSelected(false);
+		if(work_btn.isSelected())
+			work_btn.setSelected(false);
+		if(hazard_btn.isSelected())
+			hazard_btn.setSelected(false);
 		ltype_cbox.setSelectedItem(LaneType.MAINLINE);
 	}
 
