@@ -236,6 +236,7 @@ public class CorridorList extends JPanel {
 
 	/** Set a new selected corridor */
 	protected void setCorridor(CorridorBase c) {
+		client.setPointSelector(null);
 		manager.setCorridor(c);
 		updateListModel();
 		layer.updateExtent();
@@ -394,6 +395,7 @@ public class CorridorList extends JPanel {
 
 	/** Update the roadway node selection */
 	protected void updateNodeSelection(R_Node proxy) {
+		client.setPointSelector(null);
 		panel.setR_Node(proxy);
 		remove_btn.setEnabled(canRemove(proxy));
 	}
