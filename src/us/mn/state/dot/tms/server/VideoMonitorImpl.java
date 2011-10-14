@@ -118,7 +118,7 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 		store.update(this, "restricted", r);
 		setRestricted(r);
 		if(r && !isCameraPublished(camera))
-			selectBlankCamera();
+			setCameraNotify(null);
 	}
 
 	/** Get flag to restrict publishing camera images */
@@ -135,7 +135,7 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	}
 
 	/** Set the camera displayed on the monitor */
-	public void doSetCamera(Camera c) throws TMSException {
+	public void doSetCamera(Camera c) {
 		if(restricted && !isCameraPublished(c))
 			c = null;
 		setCamera(c);
@@ -143,6 +143,12 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 			selectBlankCamera();
 		else
 			selectCamera(c.getName());
+	}
+
+	/** Set the camera and notify clients of the change */
+	public void setCameraNotify(Camera c) {
+		doSetCamera(c);
+		notifyAttribute("camera");
 	}
 
 	/** Get the camera displayed on the monitor */
@@ -155,8 +161,13 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 		return c != null && c.getPublish();
 	}
 
+	/** Select a blank camera for the video monitor */
+	private void selectBlankCamera() {
+		selectCamera(SystemAttrEnum.CAMERA_ID_BLANK.getString());
+	}
+
 	/** Select a camera for the video monitor */
-	public void selectCamera(final String cam) {
+	private void selectCamera(final String cam) {
 		ControllerHelper.find(new Checker<Controller>() {
 			public boolean check(Controller c) {
 				if(c instanceof ControllerImpl)
@@ -167,16 +178,11 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	}
 
 	/** Select a camera for the video monitor */
-	protected void selectCamera(ControllerImpl c, String cam) {
+	private void selectCamera(ControllerImpl c, String cam) {
 		MessagePoller p = c.getPoller();
 		if(p instanceof VideoMonitorPoller) {
 			VideoMonitorPoller vmp = (VideoMonitorPoller)p;
 			vmp.setMonitorCamera(c, this, cam);
 		}
-	}
-
-	/** Select a blank camera for the video monitor */
-	public void selectBlankCamera() {
-		selectCamera(SystemAttrEnum.CAMERA_ID_BLANK.getString());
 	}
 }

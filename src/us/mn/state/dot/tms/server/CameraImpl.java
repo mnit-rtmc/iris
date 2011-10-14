@@ -219,7 +219,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	protected void blankRestrictedMonitors() throws TMSException {
 		for(VideoMonitor m: VideoMonitorHelper.findRestricted(this)) {
 			if(m instanceof VideoMonitorImpl)
-				((VideoMonitorImpl)m).selectBlankCamera();
+				((VideoMonitorImpl)m).setCameraNotify(null);
 		}
 	}
 
