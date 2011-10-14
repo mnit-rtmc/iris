@@ -409,6 +409,7 @@ public class IncidentDispatcher extends JPanel
 	protected void setSelected(Incident inc) {
 		if(watching != null)
 			cache.ignoreObject(watching);
+		impact_pnl.setImpact(inc.getImpact());
 		if(inc instanceof ClientIncident)
 			watching = null;
 		else {
