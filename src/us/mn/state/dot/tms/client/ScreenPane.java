@@ -94,6 +94,7 @@ public class ScreenPane extends JPanel {
 		add(map_panel, BorderLayout.CENTER);
 		tab_pane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
+				map.addPointSelector(null);
 				setHomeLayer();
 				storeSelectedTabIndex();
 			}
