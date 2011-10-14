@@ -27,7 +27,6 @@ import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.geokit.UTMPosition;
-import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
@@ -41,6 +40,8 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.client.IrisClient;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
@@ -72,16 +73,17 @@ public class IncidentCreator extends JPanel {
 	/** R_Node manager */
 	protected final R_NodeManager r_node_manager;
 
-	/** Map bean */
-	protected MapBean map;
+	/** Iris client */
+	protected final IrisClient client;
 
 	/** Create a new incident creator */
-	public IncidentCreator(StyledTheme theme,
-		ProxySelectionModel<Incident> sel_model, R_NodeManager r_man)
+	public IncidentCreator(Session s, StyledTheme theme,
+		ProxySelectionModel<Incident> sel_model)
 	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		selectionModel = sel_model;
-		r_node_manager = r_man;
+		r_node_manager = s.getR_NodeManager();
+		client = s.getDesktop().client;
 		setBorder(BorderFactory.createTitledBorder(
 			"Create new incident"));
 		crash_btn = createButton(IncidentManager.STYLE_CRASH,
@@ -155,12 +157,6 @@ public class IncidentCreator extends JPanel {
 			if(btn != hazard_btn)
 				hazard_btn.setSelected(false);
 			createIncident(btn, et);
-		} else {
-			if(getSelected() == null) {
-				MapBean m = map;
-				if(m != null)
-					m.addPointSelector(null);
-			}
 		}
 	}
 
@@ -172,11 +168,9 @@ public class IncidentCreator extends JPanel {
 		       et == EventType.INCIDENT_STALL ||
 		       et == EventType.INCIDENT_ROADWORK ||
 		       et == EventType.INCIDENT_HAZARD;
-		MapBean m = map;
-		if(m == null)
-			return;
-		m.addPointSelector(new PointSelector() {
+		client.setPointSelector(new PointSelector() {
 			public void selectPoint(Point2D p) {
+				client.setPointSelector(null);
 				UTMPosition utm = getPosition(p);
 				int e = (int)Math.round(utm.getEasting());
 				int n = (int)Math.round(utm.getNorthing());
@@ -303,10 +297,5 @@ public class IncidentCreator extends JPanel {
 	/** Dispose of the incident creator */
 	public void dispose() {
 		removeAll();
-	}
-
-	/** Set the map */
-	public void setMap(MapBean m) {
-		map = m;
 	}
 }
