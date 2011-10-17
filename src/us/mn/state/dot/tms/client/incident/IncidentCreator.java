@@ -233,7 +233,7 @@ public class IncidentCreator extends JPanel {
 		GeoLoc loc = r_node_manager.createGeoLoc(easting, northing,
 			lt == LaneType.CD_LANE);
 		if(loc != null)
-			createIncident(replaces, et, lt, easting, northing);
+			createIncident(replaces, et, lt, loc);
 	}
 
 	/** Create an incident */
