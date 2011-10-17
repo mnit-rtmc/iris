@@ -186,9 +186,25 @@ public class IncidentCreator extends JPanel {
 				UTMPosition utm = getPosition(p);
 				int e = (int)Math.round(utm.getEasting());
 				int n = (int)Math.round(utm.getNorthing());
-				createIncident(et, e, n);
+				createIncident(null, et, e, n);
 				btn.setSelected(false);
 				setEnabled(true);
+			}
+		});
+	}
+
+	/** Replace an existing incident */
+	public void replaceIncident(Incident inc) {
+		final String replaces = inc.getName();
+		final EventType et = EventType.fromId(inc.getEventType());
+		final LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
+		client.setPointSelector(new PointSelector() {
+			public void selectPoint(Point2D p) {
+				client.setPointSelector(null);
+				UTMPosition utm = getPosition(p);
+				int e = (int)Math.round(utm.getEasting());
+				int n = (int)Math.round(utm.getNorthing());
+				createIncident(replaces, et, lt, e, n);
 			}
 		});
 	}
@@ -202,16 +218,28 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Create an incident */
-	protected void createIncident(final EventType et, int easting,
-		int northing)
+	private void createIncident(String replaces, EventType et,
+		int easting, int northing)
 	{
 		LaneType lt = (LaneType)ltype_cbox.getSelectedItem();
-		if(lt == null)
-			return;
+		if(lt != null)
+			createIncident(replaces, et, lt, easting, northing);
+	}
+
+	/** Create an incident */
+	private void createIncident(String replaces, EventType et, LaneType lt,
+		int easting, int northing)
+	{
 		GeoLoc loc = r_node_manager.createGeoLoc(easting, northing,
 			lt == LaneType.CD_LANE);
-		if(loc == null)
-			return;
+		if(loc != null)
+			createIncident(replaces, et, lt, easting, northing);
+	}
+
+	/** Create an incident */
+	private void createIncident(String replaces, EventType et, LaneType lt,
+		GeoLoc loc)
+	{
 		loc = snapGeoLoc(lt, loc);
 		Road road = loc.getRoadway();
 		short dir = loc.getRoadDir();
@@ -219,7 +247,7 @@ public class IncidentCreator extends JPanel {
 		int north = GeoLocHelper.getTrueNorthing(loc);
 		int n_lanes = getLaneCount(lt, loc);
 		if(n_lanes > 0) {
-			ClientIncident ci = new ClientIncident(et.id,
+			ClientIncident ci = new ClientIncident(replaces, et.id,
 				(short)lt.ordinal(), road, dir, east, north,
 				createImpact(n_lanes));
 			selectionModel.setSelected(ci);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,10 @@ import us.mn.state.dot.tms.Road;
 public class ClientIncident implements Incident {
 
 	/** Create a new client incident */
-	public ClientIncident(int et, short lt, Road rd, short d, int e, int n,
-		String i)
+	public ClientIncident(String rpl, int et, short lt, Road rd, short d,
+		int e, int n, String i)
 	{
+		replaces = rpl;
 		event_type = et;
 		lane_type = LaneType.fromOrdinal(lt);
 		road = rd;
@@ -48,6 +49,14 @@ public class ClientIncident implements Incident {
 	/** Get the SONAR type name */
 	public String getTypeName() {
 		return SONAR_TYPE;
+	}
+
+	/** Name of replaced incident */
+	protected final String replaces;
+
+	/** Get name of incident this replaces */
+	public String getReplaces() {
+		return replaces;
 	}
 
 	/** Event type */

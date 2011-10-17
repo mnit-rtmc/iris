@@ -1709,6 +1709,7 @@ CREATE TABLE event.incident_detail (
 CREATE TABLE event.incident (
 	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	name VARCHAR(16) NOT NULL UNIQUE,
+	replaces VARCHAR(16) REFERENCES event.incident(name),
 	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),

@@ -82,6 +82,12 @@ public class IncidentDispatcher extends JPanel
 	/** User session */
 	protected final Session session;
 
+	/** Incident manager */
+	protected final IncidentManager manager;
+
+	/** Incident creator */
+	protected final IncidentCreator creator;
+
 	/** Cache of incident proxy objects */
 	protected final TypeCache<Incident> cache;
 
@@ -124,16 +130,20 @@ public class IncidentDispatcher extends JPanel
 	/** Button to clear an incident */
 	protected final JCheckBox clear_btn = new JCheckBox("Clear");
 
-	/** Incident manager */
-	protected final IncidentManager manager;
+	/** Button to edit incident */
+	protected final JButton edit_btn = new JButton("Edit");
 
 	/** Currently watching incident */
 	protected Incident watching;
 
 	/** Create a new incident dispatcher */
-	public IncidentDispatcher(Session s, IncidentManager man) {
+	public IncidentDispatcher(Session s, IncidentManager man,
+		IncidentCreator ic)
+	{
 		super(new BorderLayout());
 		session = s;
+		manager = man;
+		creator = ic;
 		SonarState st = session.getSonarState();
 		cache = st.getIncidents();
 		dtl_model = new ProxyListModel<IncidentDetail>(
@@ -142,7 +152,6 @@ public class IncidentDispatcher extends JPanel
 		detail_cbx.setRenderer(new IncidentDetailRenderer());
 		detail_cbx.setModel(new WrapperComboBoxModel(dtl_model, true,
 			true));
-		manager = man;
 		selectionModel = manager.getSelectionModel();
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
@@ -170,6 +179,7 @@ public class IncidentDispatcher extends JPanel
 		btns.add(log_btn);
 		btns.add(deploy_btn);
 		btns.add(clear_btn);
+		btns.add(edit_btn);
 		panel.addRow(btns);
 		return panel;
 	}
@@ -228,6 +238,23 @@ public class IncidentDispatcher extends JPanel
 					inc.setCleared(clear_btn.isSelected());
 			}
 		};
+		new ActionJob(edit_btn) {
+			public void perform() {
+				Incident inc = getSingleSelection();
+				if(inc != null)
+					editIncident(inc);
+			}
+		};
+	}
+
+	/** Edit (replace) an existing incident */
+	private void editIncident(Incident inc) {
+		ClientIncident ci = new ClientIncident(inc.getName(),
+			inc.getEventType(), inc.getLaneType(), inc.getRoad(),
+			inc.getDir(), inc.getEasting(), inc.getNorthing(),
+			inc.getImpact());
+		selectionModel.setSelected(ci);
+		creator.replaceIncident(inc);
 	}
 
 	/** Create a new incident */
@@ -236,6 +263,11 @@ public class IncidentDispatcher extends JPanel
 		if(canAdd(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
+			String replaces = inc.getReplaces();
+			if(replaces != null) {
+				destroyIncident(replaces);
+				attrs.put("replaces", replaces);
+			}
 			attrs.put("event_desc_id", inc.getEventType());
 			IncidentDetail dtl = getSelectedDetail();
 			if(dtl != null)
@@ -254,6 +286,15 @@ public class IncidentDispatcher extends JPanel
 				selectionModel.setSelected(proxy);
 			else
 				selectionModel.clearSelection();
+		}
+	}
+
+	/** Destroy the named incident */
+	private void destroyIncident(String name) {
+		Incident inc = cache.lookupObject(name);
+		if(inc != null) {
+			inc.setCleared(true);
+			inc.destroy();
 		}
 	}
 
@@ -402,6 +443,7 @@ public class IncidentDispatcher extends JPanel
 		deploy_btn.setEnabled(false);
 		clear_btn.setEnabled(false);
 		clear_btn.setSelected(false);
+		edit_btn.setEnabled(false);
 		impact_pnl.setImpact("");
 	}
 
@@ -430,6 +472,7 @@ public class IncidentDispatcher extends JPanel
 			log_btn.setEnabled(create);
 			deploy_btn.setEnabled(false);
 			clear_btn.setEnabled(false);
+			edit_btn.setEnabled(false);
 		} else {
 			boolean update = canUpdate(inc);
 			detail_cbx.setEnabled(false);
@@ -439,6 +482,7 @@ public class IncidentDispatcher extends JPanel
 			deploy_btn.setEnabled(update && canDeploy(inc) &&
 				!inc.getCleared());
 			clear_btn.setEnabled(update);
+			edit_btn.setEnabled(update);
 		}
 	}
 

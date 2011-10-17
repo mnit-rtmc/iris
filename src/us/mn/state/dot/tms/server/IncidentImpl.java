@@ -62,25 +62,26 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading active incidents...");
 		namespace.registerType(SONAR_TYPE, IncidentImpl.class);
-		store.query("SELECT name, event_desc_id, event_date, detail, " +
-			"lane_type, road, dir, easting, northing, camera, " +
-			"impact, cleared FROM event." + SONAR_TYPE +
-			" WHERE cleared = 'f';", new ResultFactory()
+		store.query("SELECT name, replaces, event_desc_id, " +
+			"event_date, detail, lane_type, road, dir, easting, " +
+			"northing, camera, impact, cleared FROM event." +
+			SONAR_TYPE + " WHERE cleared = 'f';",new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new IncidentImpl(namespace,
 					row.getString(1),	// name
-					row.getInt(2),		// event_desc_id
-					row.getTimestamp(3),	// event_date
-					row.getString(4),	// detail
-					row.getShort(5),	// lane_type
-					row.getString(6),	// road
-					row.getShort(7),	// dir
-					row.getInt(8),		// easting
-					row.getInt(9),		// northing
-					row.getString(10),	// camera
-					row.getString(11),	// impact
-					row.getBoolean(12)	// cleared
+					row.getString(2),	// replaces
+					row.getInt(3),		// event_desc_id
+					row.getTimestamp(4),	// event_date
+					row.getString(5),	// detail
+					row.getShort(6),	// lane_type
+					row.getString(7),	// road
+					row.getShort(8),	// dir
+					row.getInt(9),		// easting
+					row.getInt(10),		// northing
+					row.getString(11),	// camera
+					row.getString(12),	// impact
+					row.getBoolean(13)	// cleared
 				));
 			}
 		});
@@ -90,6 +91,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("replaces", replaces);
 		map.put("event_desc_id", event_desc_id);
 		map.put("event_date", event_date);
 		map.put("detail", detail);
@@ -120,22 +122,23 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Create an incident */
-	protected IncidentImpl(Namespace ns, String n, int et, Date ed,
-		String dtl, short lt, String r, short d, int ue, int un,
-		String cam, String im, boolean c)
+	protected IncidentImpl(Namespace ns, String n, String rpl, int et,
+		Date ed, String dtl, short lt, String r, short d, int ue,
+		int un, String cam, String im, boolean c)
 	{
-		this(n, et, ed, (IncidentDetail)ns.lookupObject(
+		this(n, rpl, et, ed, (IncidentDetail)ns.lookupObject(
 		     IncidentDetail.SONAR_TYPE, dtl), lt,
 		     (Road)ns.lookupObject(Road.SONAR_TYPE, r), d, ue, un,
 		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam), im, c);
 	}
 
 	/** Create an incident */
-	protected IncidentImpl(String n, int et, Date ed, IncidentDetail dtl,
-		short lt, Road r, short d, int ue, int un, Camera cam,
-		String im, boolean c)
+	protected IncidentImpl(String n, String rpl, int et, Date ed,
+		IncidentDetail dtl, short lt, Road r, short d, int ue, int un,
+		Camera cam, String im, boolean c)
 	{
 		super(n);
+		replaces = rpl;
 		event_desc_id = et;
 		event_date = new Date(ed.getTime());
 		detail = dtl;
@@ -156,6 +159,14 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		// be DELETEd.  Just set the 'cleared' column to true, and it
 		// won't get loaded on the next server restart.
 		doSetCleared(true);
+	}
+
+	/** Name of replaced incident */
+	protected String replaces;
+
+	/** Get name of incident this replaces */
+	public String getReplaces() {
+		return replaces;
 	}
 
 	/** Event type (id of EventType enum) */
@@ -289,6 +300,10 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		String loc = lookupLocation();
 		out.print("<incident");
 		out.print(XmlWriter.createAttribute("name", getName()));
+		if(replaces != null) {
+			out.print(XmlWriter.createAttribute("replaces",
+				replaces));
+		}
 		out.print(XmlWriter.createAttribute("event_type",
 			EventType.fromId(event_desc_id)));
 		out.print(XmlWriter.createAttribute("event_date", event_date));
