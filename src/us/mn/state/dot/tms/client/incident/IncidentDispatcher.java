@@ -482,7 +482,7 @@ public class IncidentDispatcher extends JPanel
 			deploy_btn.setEnabled(update && canDeploy(inc) &&
 				!inc.getCleared());
 			clear_btn.setEnabled(update);
-			edit_btn.setEnabled(update);
+			edit_btn.setEnabled(update && !inc.getCleared());
 		}
 	}
 
