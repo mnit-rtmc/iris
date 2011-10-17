@@ -28,11 +28,12 @@ import us.mn.state.dot.tms.Road;
 public class ClientIncident implements Incident {
 
 	/** Create a new client incident */
-	public ClientIncident(String rpl, int et, short lt, Road rd, short d,
-		int e, int n, String i)
+	public ClientIncident(String rpl, int et, IncidentDetail id, short lt,
+		Road rd, short d, int e, int n, String i)
 	{
 		replaces = rpl;
 		event_type = et;
+		detail = id;
 		lane_type = LaneType.fromOrdinal(lt);
 		road = rd;
 		dir = d;
@@ -72,9 +73,12 @@ public class ClientIncident implements Incident {
 		return System.currentTimeMillis();
 	}
 
+	/** Incident detail */
+	protected final IncidentDetail detail;
+
 	/** Get the incident detail */
 	public IncidentDetail getDetail() {
-		return null;
+		return detail;
 	}
 
 	/** Lane type */

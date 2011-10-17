@@ -250,9 +250,9 @@ public class IncidentDispatcher extends JPanel
 	/** Edit (replace) an existing incident */
 	private void editIncident(Incident inc) {
 		ClientIncident ci = new ClientIncident(inc.getName(),
-			inc.getEventType(), inc.getLaneType(), inc.getRoad(),
-			inc.getDir(), inc.getEasting(), inc.getNorthing(),
-			inc.getImpact());
+			inc.getEventType(), inc.getDetail(), inc.getLaneType(),
+			inc.getRoad(), inc.getDir(), inc.getEasting(),
+			inc.getNorthing(), inc.getImpact());
 		selectionModel.setSelected(ci);
 		creator.replaceIncident(inc);
 	}

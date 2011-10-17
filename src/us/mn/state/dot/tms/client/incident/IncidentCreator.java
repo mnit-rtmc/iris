@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
@@ -197,6 +198,7 @@ public class IncidentCreator extends JPanel {
 	public void replaceIncident(Incident inc) {
 		final String replaces = inc.getName();
 		final EventType et = EventType.fromId(inc.getEventType());
+		final IncidentDetail dtl = inc.getDetail();
 		final LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
 		client.setPointSelector(new PointSelector() {
 			public void selectPoint(Point2D p) {
@@ -204,7 +206,7 @@ public class IncidentCreator extends JPanel {
 				UTMPosition utm = getPosition(p);
 				int e = (int)Math.round(utm.getEasting());
 				int n = (int)Math.round(utm.getNorthing());
-				createIncident(replaces, et, lt, e, n);
+				createIncident(replaces, et, dtl, lt, e, n);
 			}
 		});
 	}
@@ -222,23 +224,25 @@ public class IncidentCreator extends JPanel {
 		int easting, int northing)
 	{
 		LaneType lt = (LaneType)ltype_cbox.getSelectedItem();
-		if(lt != null)
-			createIncident(replaces, et, lt, easting, northing);
+		if(lt != null) {
+			createIncident(replaces, et, (IncidentDetail)null, lt,
+				easting, northing);
+		}
 	}
 
 	/** Create an incident */
-	private void createIncident(String replaces, EventType et, LaneType lt,
-		int easting, int northing)
+	private void createIncident(String replaces, EventType et,
+		IncidentDetail dtl, LaneType lt, int easting, int northing)
 	{
 		GeoLoc loc = r_node_manager.createGeoLoc(easting, northing,
 			lt == LaneType.CD_LANE);
 		if(loc != null)
-			createIncident(replaces, et, lt, loc);
+			createIncident(replaces, et, dtl, lt, loc);
 	}
 
 	/** Create an incident */
-	private void createIncident(String replaces, EventType et, LaneType lt,
-		GeoLoc loc)
+	private void createIncident(String replaces, EventType et,
+		IncidentDetail dtl, LaneType lt, GeoLoc loc)
 	{
 		loc = snapGeoLoc(lt, loc);
 		Road road = loc.getRoadway();
@@ -248,8 +252,8 @@ public class IncidentCreator extends JPanel {
 		int n_lanes = getLaneCount(lt, loc);
 		if(n_lanes > 0) {
 			ClientIncident ci = new ClientIncident(replaces, et.id,
-				(short)lt.ordinal(), road, dir, east, north,
-				createImpact(n_lanes));
+				dtl, (short)lt.ordinal(), road, dir, east,
+				north, createImpact(n_lanes));
 			selectionModel.setSelected(ci);
 		}
 	}
