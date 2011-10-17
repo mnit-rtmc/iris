@@ -11,6 +11,48 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.135.0 (17 October 2011)</dt>
+	<dd><ul>
+		<li>
+			Allow incidents to be "edited" (replaced), changing
+			location, camera or detail fields.
+		</li>
+		<li>
+			Record initial incident impact by changing trigger
+			for incident_update table.
+		</li>
+		<li>
+			Fixed user interface problems with map point selectors
+			for incidents and r_nodes.
+		</li>
+		<li>
+			Fixed some user interface quirks on the incident tab.
+		</li>
+		<li>
+			Traffic sample data archive now includes district
+			name in archive directory.
+			Some minor adjustments are required on server to keep
+			data archive consistent.
+		</li>
+		<li>
+			Added controllers and comm_links to XML config file.
+		</li>
+		<li>
+			Removed "inactive" and "no controller" DMS status
+			from user interface.
+		</li>
+		<li>
+			Increased the DMS brightness level feedback adjustment.
+		</li>
+		<li>
+			Fixed problems with video monitor "camera" attribute.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.135.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.134.0 (4 October 2011)</dt>
 	<dd><ul>
 		<li>
