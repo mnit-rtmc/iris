@@ -59,6 +59,7 @@ public class IncidentXmlWriter extends XmlWriter {
 			"CDATA #REQUIRED>");
 		out.println("<!ELEMENT incident EMPTY>");
 		out.println("<!ATTLIST incident name CDATA #REQUIRED>");
+		out.println("<!ATTLIST incident replaces CDATA #IMPLIED>");
 		out.println("<!ATTLIST incident event_type CDATA #REQUIRED>");
 		out.println("<!ATTLIST incident event_date CDATA #REQUIRED>");
 		out.println("<!ATTLIST incident detail CDATA #IMPLIED>");
