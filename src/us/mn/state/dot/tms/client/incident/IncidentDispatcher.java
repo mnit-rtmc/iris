@@ -263,10 +263,10 @@ public class IncidentDispatcher extends JPanel
 		if(canAdd(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			String replaces = inc.getReplaces();
-			if(replaces != null) {
-				destroyIncident(replaces);
-				attrs.put("replaces", replaces);
+			Incident rpl = getReplaces(inc);
+			if(rpl != null) {
+				attrs.put("replaces", getOriginalReplaces(rpl));
+				destroyIncident(rpl);
 			}
 			attrs.put("event_desc_id", inc.getEventType());
 			IncidentDetail dtl = getSelectedDetail();
@@ -289,13 +289,28 @@ public class IncidentDispatcher extends JPanel
 		}
 	}
 
+	/** Get the incident that is being replaced */
+	private Incident getReplaces(ClientIncident inc) {
+		String rpl = inc.getReplaces();
+		if(rpl != null)
+			return cache.lookupObject(rpl);
+		else
+			return null;
+	}
+
+	/** Get name of original incident this replaces */
+	private static String getOriginalReplaces(Incident inc) {
+		String rpl = inc.getReplaces();
+		if(rpl != null && rpl.length() > 0)
+			return rpl;
+		else
+			return inc.getName();
+	}
+
 	/** Destroy the named incident */
-	private void destroyIncident(String name) {
-		Incident inc = cache.lookupObject(name);
-		if(inc != null) {
-			inc.setCleared(true);
-			inc.destroy();
-		}
+	private void destroyIncident(Incident inc) {
+		inc.setCleared(true);
+		inc.destroy();
 	}
 
 	/** Get the selected incident detail */

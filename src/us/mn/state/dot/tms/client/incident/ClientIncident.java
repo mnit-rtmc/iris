@@ -55,7 +55,9 @@ public class ClientIncident implements Incident {
 	/** Name of replaced incident */
 	protected final String replaces;
 
-	/** Get name of incident this replaces */
+	/** Get name of incident this replaces.  Note: for client incidents,
+	 * this is not the original incident (in a chain), but the previous
+	 * incident. */
 	public String getReplaces() {
 		return replaces;
 	}
