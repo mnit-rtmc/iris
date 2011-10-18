@@ -196,7 +196,7 @@ public class IncidentCreator extends JPanel {
 
 	/** Replace an existing incident */
 	public void replaceIncident(Incident inc) {
-		final String replaces = inc.getName();
+		final String replaces = getReplaces(inc);
 		final EventType et = EventType.fromId(inc.getEventType());
 		final IncidentDetail dtl = inc.getDetail();
 		final LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
@@ -209,6 +209,15 @@ public class IncidentCreator extends JPanel {
 				createIncident(replaces, et, dtl, lt, e, n);
 			}
 		});
+	}
+
+	/** Get name of original incident this replaces */
+	private static String getReplaces(Incident inc) {
+		String rpl = inc.getReplaces();
+		if(rpl != null)
+			return rpl;
+		else
+			return inc.getName();
 	}
 
 	/** Get a UTM position */
