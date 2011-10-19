@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,16 +67,15 @@ public class OpSendSensorSettings extends OpSS125 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(gen_config);
 			mess.queryProps();
-			SS125_LOG.log(controller.getName() + ": orientation " +
+			log(controller, ": orientation " +
 				gen_config.getOrientation());
-			SS125_LOG.log(controller.getName() + ": location " +
+			log(controller, ": location " +
 				gen_config.getLocation());
-			SS125_LOG.log(controller.getName() + ": description " +
+			log(controller, ": description " +
 				gen_config.getDescription());
-			SS125_LOG.log(controller.getName() + ": serial # " +
+			log(controller, ": serial # " +
 				gen_config.getSerialNumber());
-			SS125_LOG.log(controller.getName() + ": metric " +
-				gen_config.isMetric());
+			log(controller, ": metric " + gen_config.isMetric());
 			if(shouldUpdateGenConfig())
 				return new SendGenConfig();
 			else
@@ -101,10 +100,9 @@ public class OpSendSensorSettings extends OpSS125 {
 				controller));
 			gen_config.setMetric(false);
 			mess.add(gen_config);
-			SS125_LOG.log(controller.getName() + ":= location " +
+			log(controller, ":= location " +
 				gen_config.getLocation());
-			SS125_LOG.log(controller.getName() + ":= metric " +
-				gen_config.isMetric());
+			log(controller, ":= metric " + gen_config.isMetric());
 			mess.storeProps();
 			config_updated = true;
 			return new QueryDataConfig();
@@ -129,16 +127,14 @@ public class OpSendSensorSettings extends OpSS125 {
 
 	/** Log data configuration */
 	protected void logDataConfig() {
-		SS125_LOG.log(controller.getName() + ": interval " +
-			data_config.getInterval());
-		SS125_LOG.log(controller.getName() + ": mode " +
-			data_config.getMode());
+		log(controller, ": interval " + data_config.getInterval());
+		log(controller, ": mode " + data_config.getMode());
 		logPushConfig(data_config.getEventPush(), "event");
 		logPushConfig(data_config.getIntervalPush(), "interval");
 		logPushConfig(data_config.getPresencePush(), "presence");
-		SS125_LOG.log(controller.getName() + ": default separation " +
+		log(controller, ": default separation " +
 			data_config.getDefaultSeparation());
-		SS125_LOG.log(controller.getName() + ": default size " +
+		log(controller, ": default size " +
 			data_config.getDefaultSize());
 	}
 
@@ -146,16 +142,14 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected void logPushConfig(DataConfigProperty.PushConfig pc,
 		String dtype)
 	{
-		SS125_LOG.log(controller.getName() + ": " + dtype +
-			" enable " + pc.enable);
+		log(controller, ": " + dtype + " enable " + pc.enable);
 		if(pc.enable) {
-			SS125_LOG.log(controller.getName() + ": " + dtype +
-				" port " + pc.port);
-			SS125_LOG.log(controller.getName() + ": " + dtype +
+			log(controller, ": " + dtype + " port " + pc.port);
+			log(controller, ": " + dtype +
 				" protocol " + pc.protocol);
-			SS125_LOG.log(controller.getName() + ": " + dtype +
+			log(controller, ": " + dtype +
 				" dest_sub_id " + pc.dest_sub_id);
-			SS125_LOG.log(controller.getName() + ": " + dtype +
+			log(controller, ": " + dtype +
 				" dest_id " + pc.dest_id);
 		}
 	}
@@ -188,7 +182,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			data_config.getIntervalPush().enable = false;
 			data_config.getPresencePush().enable = false;
 			mess.add(data_config);
-			SS125_LOG.log(controller.getName() + ":= data config");
+			log(controller, ":= data config");
 			mess.storeProps();
 			config_updated = true;
 			return configDonePhase();
@@ -210,7 +204,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		protected Phase poll(CommMessage mess) throws IOException {
 			FlashConfigProperty flash = new FlashConfigProperty();
 			mess.add(flash);
-			SS125_LOG.log(controller.getName() + ":= flash config");
+			log(controller, ":= flash config");
 			mess.storeProps();
 			return new QueryDateTime();
 		}
@@ -224,8 +218,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.queryProps();
-			SS125_LOG.log(controller.getName() + ": date/time " +
-				date_time.getStamp());
+			log(controller, ": date/time " + date_time.getStamp());
 			if(shouldUpdateDateTime(date_time.getStamp().getTime()))
 				return new SendDateTime();
 			else
@@ -248,8 +241,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.storeProps();
-			SS125_LOG.log(controller.getName() + ":= date/time " +
-				date_time.getStamp());
+			log(controller, ":= date/time " + date_time.getStamp());
 			return null;
 		}
 	}

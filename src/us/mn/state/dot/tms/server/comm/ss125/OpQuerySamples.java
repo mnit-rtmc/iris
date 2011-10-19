@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,10 +76,10 @@ public class OpQuerySamples extends OpSS125 {
 			mess.add(sample_data);
 			mess.queryProps();
 			stamp = sample_data.getTime();
-			SS125_LOG.log(controller.getName() + ": " +sample_data);
+			log(controller, ": " + sample_data);
 			if(stamp < oldest || stamp > newest) {
-				SS125_LOG.log("BAD TIMESTAMP: " +
-					new Date(stamp) + " for " + controller);
+				log(controller, " BAD TIMESTAMP: " +
+					new Date(stamp));
 				setFailed();
 				throw new DownloadRequestException(
 					controller.toString());
