@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -248,6 +248,11 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Set the complete flag */
 	protected void setComplete(boolean c) {
 		complete = c;
+	}
+
+	/** Test the if property has some data */
+	public boolean hasData() {
+		return false;
 	}
 
 	/** Delay before checking for response */

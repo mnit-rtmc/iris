@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -74,6 +75,9 @@ public class Message implements CommMessage {
 	/** Serial input stream */
 	protected final InputStream input;
 
+	/** Controller for message */
+	protected final ControllerImpl ctrl;
+
 	/** SS125 destination ID (drop address) */
 	protected final short dest_id;
 
@@ -87,6 +91,7 @@ public class Message implements CommMessage {
 	public Message(OutputStream out, InputStream is, ControllerImpl c) {
 		output = out;
 		input = is;
+		ctrl = c;
 		dest_id = c.getDrop();
 	}
 
@@ -105,7 +110,16 @@ public class Message implements CommMessage {
 		byte[] header = formatHeader(body);
 		doPoll(header, body);
 		while(!prop.isComplete()) {
-			prop.parsePayload(doResponse(header, body));
+			try {
+				prop.parsePayload(doResponse(header, body));
+			}
+			catch(SocketTimeoutException e) {
+				if(prop.hasData()) {
+					OpSS125.log(ctrl, "PARTIAL INTERVAL: " +
+						prop.toString());
+				}
+				throw e;
+			}
 			header[8]++;	// Increment sequence number
 			body[1]++;	// Sub ID is like a packet number
 		}

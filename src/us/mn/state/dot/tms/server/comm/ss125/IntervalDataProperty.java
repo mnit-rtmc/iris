@@ -105,6 +105,11 @@ public class IntervalDataProperty extends SS125Property {
 	/** Lane interval data */
 	protected LaneInterval[] lanes = new LaneInterval[0];
 
+	/** Test the if property has some data */
+	public boolean hasData() {
+		return lanes.length > 0;
+	}
+
 	/** Lane interval data */
 	static public class LaneInterval {
 		public final Float speed;
@@ -206,6 +211,10 @@ public class IntervalDataProperty extends SS125Property {
 		sb.append(interval);
 		sb.append(", ");
 		sb.append(new Date(stamp));
+		sb.append(", ");
+		sb.append(n_lanes);
+		sb.append(", ");
+		sb.append(n_approaches);
 		sb.append(", vol: [");
 		for(int v: getVolume())
 			sb.append("" + v + ",");

@@ -29,14 +29,14 @@ abstract public class OpSS125 extends OpController {
 	/** SS 125 debug log */
 	static protected final IDebugLog SS125_LOG = new IDebugLog("ss125");
 
+	/** Log a debug message */
+	static public void log(ControllerImpl ctrl, String msg) {
+		if(SS125_LOG.isOpen())
+			SS125_LOG.log(ctrl.getName() + msg);
+	}
+
 	/** Create a new SS125 operation */
 	protected OpSS125(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
-	}
-
-	/** Log a debug message */
-	public void log(ControllerImpl ctrl, String msg) {
-		if(SS125_LOG.isOpen())
-			SS125_LOG.log(ctrl.getName() + msg);
 	}
 }
