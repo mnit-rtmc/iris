@@ -265,6 +265,10 @@ public class IncidentDispatcher extends JPanel
 				new HashMap<String, Object>();
 			Incident rpl = getReplaces(inc);
 			if(rpl != null) {
+				if(!needsReplacing(inc, rpl)) {
+					logUpdate(rpl);
+					return;
+				}
 				attrs.put("replaces", getOriginalReplaces(rpl));
 				destroyIncident(rpl);
 			}
@@ -296,6 +300,16 @@ public class IncidentDispatcher extends JPanel
 			return cache.lookupObject(rpl);
 		else
 			return null;
+	}
+
+	/** Test if an incident needs to be replaced */
+	private boolean needsReplacing(ClientIncident inc, Incident rpl) {
+		return getSelectedDetail() != rpl.getDetail() ||
+		       inc.getRoad() != rpl.getRoad() ||
+		       inc.getDir() != rpl.getDir() ||
+		       inc.getEasting() != rpl.getEasting() ||
+		       inc.getNorthing() != rpl.getNorthing() ||
+		       getSelectedCamera() != rpl.getCamera();
 	}
 
 	/** Get name of original incident this replaces */
