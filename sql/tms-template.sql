@@ -7,6 +7,8 @@ SET check_function_bodies = false;
 
 CREATE PROCEDURAL LANGUAGE plpgsql;
 
+\set ON_ERROR_STOP
+
 CREATE SCHEMA iris;
 ALTER SCHEMA iris OWNER TO tms;
 
@@ -509,6 +511,11 @@ CREATE TABLE iris.meter_type (
 	lanes INTEGER NOT NULL
 );
 
+CREATE TABLE iris.meter_algorithm (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
 CREATE TABLE iris.meter_lock (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL
@@ -521,6 +528,9 @@ CREATE TABLE iris._ramp_meter (
 	meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
 	storage INTEGER NOT NULL,
 	max_wait INTEGER NOT NULL,
+	algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
+	am_target INTEGER NOT NULL,
+	pm_target INTEGER NOT NULL,
 	camera VARCHAR(10) REFERENCES iris._camera(name),
 	m_lock INTEGER REFERENCES iris.meter_lock(id)
 );
@@ -530,15 +540,17 @@ ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
 
 CREATE VIEW iris.ramp_meter AS SELECT
 	m.name, geo_loc, controller, pin, notes, meter_type, storage,
-	max_wait, camera, m_lock
+	max_wait, algorithm, am_target, pm_target, camera, m_lock
 	FROM iris._ramp_meter m JOIN iris._device_io d ON m.name = d.name;
 
 CREATE RULE ramp_meter_insert AS ON INSERT TO iris.ramp_meter DO INSTEAD
 (
 	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._ramp_meter VALUES (NEW.name, NEW.geo_loc, NEW.notes,
-		NEW.meter_type, NEW.storage, NEW.max_wait, NEW.camera,
-		NEW.m_lock);
+	INSERT INTO iris._ramp_meter (name, geo_loc, notes, meter_type, storage,
+		max_wait, algorithm, am_target, pm_target, camera, m_lock)
+		VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.meter_type,
+		NEW.storage, NEW.max_wait, NEW.algorithm, NEW.am_target,
+		NEW.pm_target, NEW.camera, NEW.m_lock);
 );
 
 CREATE RULE ramp_meter_update AS ON UPDATE TO iris.ramp_meter DO INSTEAD
@@ -553,6 +565,9 @@ CREATE RULE ramp_meter_update AS ON UPDATE TO iris.ramp_meter DO INSTEAD
 		meter_type = NEW.meter_type,
 		storage = NEW.storage,
 		max_wait = NEW.max_wait,
+		algorithm = NEW.algorithm,
+		am_target = NEW.am_target,
+		pm_target = NEW.pm_target,
 		camera = NEW.camera,
 		m_lock = NEW.m_lock
 	WHERE name = OLD.name;
@@ -858,21 +873,18 @@ CREATE TABLE iris.lane_action (
 	state INTEGER NOT NULL REFERENCES iris.plan_state
 );
 
-CREATE TABLE iris.timing_plan_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
+CREATE TABLE iris.meter_action (
+	name VARCHAR(20) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	ramp_meter VARCHAR(10) NOT NULL REFERENCES iris._ramp_meter,
+	state INTEGER NOT NULL REFERENCES iris.plan_state
 );
 
-CREATE TABLE iris.timing_plan (
-	name VARCHAR(16) PRIMARY KEY,
-	plan_type INTEGER NOT NULL REFERENCES iris.timing_plan_type,
-	device VARCHAR(10) NOT NULL REFERENCES iris._device_io,
-	start_min INTEGER NOT NULL,
-	stop_min INTEGER NOT NULL,
-	active BOOLEAN NOT NULL,
-	testing BOOLEAN NOT NULL,
-	target INTEGER NOT NULL
-);
+CREATE VIEW action_plan_view AS
+	SELECT name, ap.description, sync_actions, deploying_secs,
+	undeploying_secs, active, ps.description AS state
+	FROM iris.action_plan ap, iris.plan_state ps WHERE ap.state = ps.id;
+GRANT SELECT ON action_plan_view TO PUBLIC;
 
 CREATE FUNCTION hour_min(integer) RETURNS text
     AS '
@@ -897,13 +909,11 @@ BEGIN
 END;'
     LANGUAGE plpgsql;
 
-CREATE VIEW timing_plan_view AS
-	SELECT name, pt.description AS plan_type, device,
-	hour_min(start_min) AS start_time, hour_min(stop_min) AS stop_time,
-	active, testing, target
-	FROM iris.timing_plan
-	LEFT JOIN iris.timing_plan_type pt ON plan_type = pt.id;
-GRANT SELECT ON timing_plan_view TO PUBLIC;
+CREATE VIEW time_action_view AS
+	SELECT name, action_plan, day_plan, hour_min(minute) AS time_of_day,
+	deploy
+	FROM iris.time_action;
+GRANT SELECT ON time_action_view TO PUBLIC;
 
 CREATE VIEW road_view AS
 	SELECT name, abbrev, rcl.description AS r_class, dir.direction,
@@ -981,12 +991,14 @@ GRANT SELECT ON lcs_indication_view TO PUBLIC;
 
 CREATE VIEW ramp_meter_view AS
 	SELECT m.name, geo_loc, controller, pin, notes,
-	mt.description AS meter_type, storage, max_wait, camera,
+	mt.description AS meter_type, storage, max_wait,
+	alg.description AS algorithm, am_target, pm_target, camera,
 	ml.description AS meter_lock,
 	l.rd, l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing
 	FROM iris.ramp_meter m
 	LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
+	LEFT JOIN iris.meter_algorithm alg ON m.algorithm = alg.id
 	LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
 	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
@@ -1332,6 +1344,12 @@ COPY iris.meter_type (id, description, lanes) FROM stdin;
 2	Two Lane, Simultaneous Release	2
 \.
 
+COPY iris.meter_algorithm (id, description) FROM stdin;
+0	No Metering
+1	Simple Metering
+2	Stratified Metering
+\.
+
 COPY iris.meter_lock (id, description) FROM stdin;
 1	Knocked down
 2	Incident
@@ -1355,18 +1373,12 @@ COPY iris.plan_state (id, description) FROM stdin;
 3	undeploying
 \.
 
-COPY iris.timing_plan_type (id, description) FROM stdin;
-0	Travel Time
-1	Simple Metering
-2	Stratified Metering
-\.
-
 COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
-database_version	3.135.0
+database_version	3.136.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
@@ -1521,7 +1533,6 @@ PRV_0032	lcs_tab	lcs_array(/.*)?	t	f	f	f
 PRV_0033	lcs_tab	lcs_indication(/.*)?	t	f	f	f
 PRV_0034	lcs_tab	quick_message(/.*)?	t	f	f	f
 PRV_0035	meter_tab	ramp_meter(/.*)?	t	f	f	f
-PRV_0036	meter_tab	timing_plan(/.*)?	t	f	f	f
 PRV_0037	maintenance	alarm(/.*)?	t	f	f	f
 PRV_0038	maintenance	cabinet(/.*)?	t	f	f	f
 PRV_0039	maintenance	cabinet_style(/.*)?	t	f	f	f
@@ -1567,12 +1578,13 @@ PRV_0078	policy_admin	incident_detail/.*	f	t	t	t
 PRV_0079	policy_admin	lane_action(/.*)?	t	f	f	f
 PRV_0080	policy_admin	lane_action/.*	f	t	t	t
 PRV_0081	policy_admin	map_extent/.*	f	t	t	t
-PRV_0082	policy_admin	quick_message/.*	f	t	t	t
-PRV_0083	policy_admin	sign_group/.*	f	t	t	t
-PRV_0084	policy_admin	sign_text/.*	f	t	t	t
-PRV_0085	policy_admin	time_action(/.*)?	t	f	f	f
-PRV_0086	policy_admin	time_action/.*	f	t	t	t
-PRV_0087	policy_admin	timing_plan/.*	f	t	t	t
+PRV_0036	policy_admin	meter_action(/.*)?	t	f	f	f
+PRV_0082	policy_admin	meter_action/.*	f	t	t	t
+PRV_0083	policy_admin	quick_message/.*	f	t	t	t
+PRV_0084	policy_admin	sign_group/.*	f	t	t	t
+PRV_0085	policy_admin	sign_text/.*	f	t	t	t
+PRV_0086	policy_admin	time_action(/.*)?	t	f	f	f
+PRV_0087	policy_admin	time_action/.*	f	t	t	t
 PRV_0088	device_admin	alarm/.*	f	t	t	t
 PRV_0089	device_admin	cabinet/.*	f	t	t	t
 PRV_0090	device_admin	camera/.*	f	t	t	t
