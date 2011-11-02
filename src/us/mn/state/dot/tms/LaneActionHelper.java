@@ -30,7 +30,7 @@ public class LaneActionHelper extends BaseHelper {
 
 	/** Find lane actions using a Checker */
 	static public LaneAction find(final Checker<LaneAction> checker) {
-		return (LaneAction)namespace.findObject(LaneAction.SONAR_TYPE, 
+		return (LaneAction)namespace.findObject(LaneAction.SONAR_TYPE,
 			checker);
 	}
 
