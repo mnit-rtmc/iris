@@ -20,19 +20,19 @@ import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanState;
-import us.mn.state.dot.tms.LaneAction;
-import us.mn.state.dot.tms.LaneMarking;
-import us.mn.state.dot.tms.LaneMarkingHelper;
+import us.mn.state.dot.tms.MeterAction;
+import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for lane actions assigned to action plans
+ * Table model for meter actions assigned to action plans
  *
  * @author Douglas Lau
  */
-public class LaneActionModel extends ProxyTableModel<LaneAction> {
+public class MeterActionModel extends ProxyTableModel<MeterAction> {
 
 	/** Allowed states */
 	static protected final ActionPlanState[] STATES = {
@@ -46,33 +46,33 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<LaneAction>("Lane Marking", 160) {
-			public Object getValueAt(LaneAction la) {
-				return la.getLaneMarking();
+		new ProxyColumn<MeterAction>("Ramp Meter", 160) {
+			public Object getValueAt(MeterAction ma) {
+				return ma.getRampMeter();
 			}
-			public boolean isEditable(LaneAction la) {
-				return la == null && canAdd();
+			public boolean isEditable(MeterAction ma) {
+				return ma == null && canAdd();
 			}
-			public void setValueAt(LaneAction la, Object value) {
+			public void setValueAt(MeterAction ma, Object value) {
 				String v = value.toString().trim();
-				LaneMarking lm = LaneMarkingHelper.lookup(v);
-				if(lm != null)
-					create(lm);
+				RampMeter rm = RampMeterHelper.lookup(v);
+				if(rm != null)
+					create(rm);
 			}
 		},
-		new ProxyColumn<LaneAction>("State", 80) {
-			public Object getValueAt(LaneAction la) {
+		new ProxyColumn<MeterAction>("State", 80) {
+			public Object getValueAt(MeterAction ma) {
 				return ActionPlanState.fromOrdinal(
-					la.getState());
+					ma.getState());
 			}
-			public boolean isEditable(LaneAction la) {
-				return canUpdate(la);
+			public boolean isEditable(MeterAction ma) {
+				return canUpdate(ma);
 			}
-			public void setValueAt(LaneAction la, Object value) {
+			public void setValueAt(MeterAction ma, Object value) {
 				if(value instanceof ActionPlanState) {
 					ActionPlanState st =
 						(ActionPlanState)value;
-					la.setState(st.ordinal());
+					ma.setState(st.ordinal());
 				}
 			}
 			protected TableCellEditor createCellEditor() {
@@ -86,34 +86,34 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
-	/** Create a new lane action table model */
-	public LaneActionModel(Session s, ActionPlan ap) {
-		super(s, s.getSonarState().getLaneActions());
+	/** Create a new meter action table model */
+	public MeterActionModel(Session s, ActionPlan ap) {
+		super(s, s.getSonarState().getMeterActions());
 		action_plan = ap;
 	}
 
 	/** Add a new proxy to the table model */
-	protected int doProxyAdded(LaneAction la) {
-		if(la.getActionPlan() == action_plan)
-			return super.doProxyAdded(la);
+	protected int doProxyAdded(MeterAction ma) {
+		if(ma.getActionPlan() == action_plan)
+			return super.doProxyAdded(ma);
 		else
 			return -1;
 	}
 
-	/** Create a new lane action */
-	protected void create(LaneMarking lm) {
+	/** Create a new meter action */
+	protected void create(RampMeter rm) {
 		String name = createUniqueName();
 		if(name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
-			attrs.put("lane_marking", lm);
+			attrs.put("ramp_meter", rm);
 			attrs.put("state", ActionPlanState.deployed.ordinal());
 			cache.createObject(name, attrs);
 		}
 	}
 
-	/** Create a unique lane action name */
+	/** Create a unique meter action name */
 	protected String createUniqueName() {
 		for(int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
@@ -125,6 +125,6 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 
 	/** Get the SONAR type name */
 	protected String getSonarType() {
-		return LaneAction.SONAR_TYPE;
+		return MeterAction.SONAR_TYPE;
 	}
 }

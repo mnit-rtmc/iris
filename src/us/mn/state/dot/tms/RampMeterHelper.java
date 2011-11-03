@@ -28,6 +28,12 @@ public class RampMeterHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Lookup the ramp meter with the specified name */
+	static public RampMeter lookup(String name) {
+		return (RampMeter)namespace.lookupObject(RampMeter.SONAR_TYPE,
+			name);
+	}
+
 	/** Find ramp meters using a Checker */
 	static public RampMeter find(final Checker<RampMeter> checker) {
 		return (RampMeter)namespace.findObject(RampMeter.SONAR_TYPE,

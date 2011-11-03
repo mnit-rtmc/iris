@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.LaneAction;
+import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -88,6 +89,15 @@ public class ActionPlanPanel extends FormPanel {
 	/** Button to delete the selected lane action */
 	protected final JButton del_l_btn = new JButton("Delete");
 
+	/** Table model for meter actions */
+	protected MeterActionModel m_model;
+
+	/** Table to hold meter actions */
+	protected final ZTable m_table = new ZTable();
+
+	/** Button to delete the selected meter action */
+	protected final JButton del_m_btn = new JButton("Delete");
+
 	/** User session */
 	protected final Session session;
 
@@ -109,6 +119,7 @@ public class ActionPlanPanel extends FormPanel {
 		addTimeActionJobs();
 		addDmsActionJobs();
 		addLaneActionJobs();
+		addMeterActionJobs();
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(p_model.createColumnModel());
@@ -142,6 +153,14 @@ public class ActionPlanPanel extends FormPanel {
 		l_panel.addRow(del_l_btn);
 		del_l_btn.setEnabled(false);
 		tab.add("Lane Actions", l_panel);
+		FormPanel m_panel = new FormPanel(true);
+		m_table.setAutoCreateColumnsFromModel(false);
+		m_table.setRowHeight(ROW_HEIGHT);
+		m_table.setVisibleRowCount(10);
+		m_panel.addRow(m_table);
+		m_panel.addRow(del_m_btn);
+		del_m_btn.setEnabled(false);
+		tab.add("Meter Actions", m_panel);
 		p_panel.add(tab);
 		setFill();
 		addRow(p_panel);
@@ -223,6 +242,25 @@ public class ActionPlanPanel extends FormPanel {
 		};
 	}
 
+	/** Add jobs for meter action table */
+	protected void addMeterActionJobs() {
+		final ListSelectionModel sm = m_table.getSelectionModel();
+		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, sm) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectMeterAction();
+			}
+		};
+		new ActionJob(this, del_m_btn) {
+			public void perform() throws Exception {
+				int row = sm.getMinSelectionIndex();
+				if(row >= 0)
+					m_model.deleteRow(row);
+			}
+		};
+	}
+
 	/** Dispose of the form */
 	public void dispose() {
 		p_model.dispose();
@@ -237,6 +275,10 @@ public class ActionPlanPanel extends FormPanel {
 		if(l_model != null) {
 			l_model.dispose();
 			l_model = null;
+		}
+		if(m_model != null) {
+			m_model.dispose();
+			m_model = null;
 		}
 		super.dispose();
 	}
@@ -269,6 +311,14 @@ public class ActionPlanPanel extends FormPanel {
 		l_table.setModel(l_model);
 		if(ol_model != null)
 			ol_model.dispose();
+		del_m_btn.setEnabled(false);
+		MeterActionModel om_model = m_model;
+		m_model = new MeterActionModel(session, ap);
+		m_model.initialize();
+		m_table.setColumnModel(m_model.createColumnModel());
+		m_table.setModel(m_model);
+		if(om_model != null)
+			om_model.dispose();
 	}
 
 	/** Change the selected time action */
@@ -287,5 +337,11 @@ public class ActionPlanPanel extends FormPanel {
 	protected void selectLaneAction() {
 		LaneAction la = l_model.getProxy(l_table.getSelectedRow());
 		del_l_btn.setEnabled(l_model.canRemove(la));
+	}
+
+	/** Change the selected meter action */
+	protected void selectMeterAction() {
+		MeterAction ma = m_model.getProxy(m_table.getSelectedRow());
+		del_m_btn.setEnabled(m_model.canRemove(ma));
 	}
 }
