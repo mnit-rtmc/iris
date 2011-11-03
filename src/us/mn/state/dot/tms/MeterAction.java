@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,26 +14,27 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.SonarObject;
+
 /**
- * Device is the base interface for all field devices, including detectors,
- * cameras, ramp meters, dynamic message signs, etc.
+ * Action for controlling a ramp meter.
  *
  * @author Douglas Lau
  */
-public interface Device extends ControllerIO {
+public interface MeterAction extends SonarObject {
 
-	/** Set the administrator notes */
-	void setNotes(String n);
+	/** SONAR type name */
+	String SONAR_TYPE = "meter_action";
 
-	/** Get the administrator notes */
-	String getNotes();
+	/** Get the action plan */
+	ActionPlan getActionPlan();
 
-	/** Request a device operation (query message, test pixels, etc.) */
-	void setDeviceRequest(int r);
+	/** Get the ramp meter */
+	RampMeter getRampMeter();
 
-	/** Get the operation description */
-	String getOperation();
+	/** Set the plan state to perform action */
+	void setState(int s);
 
-	/** Get the operation status */
-	String getOpStatus();
+	/** Get the plan state to perform action */
+	int getState();
 }

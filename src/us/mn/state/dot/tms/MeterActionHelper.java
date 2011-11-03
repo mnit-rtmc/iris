@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,20 +17,26 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.Checker;
 
 /**
- * Timing plan helper methods.
+ * Helper class for meter actions.
  *
  * @author Douglas Lau
  */
-public class TimingPlanHelper extends BaseHelper {
+public class MeterActionHelper extends BaseHelper {
 
-	/** Disallow instantiation */
-	protected TimingPlanHelper() {
+	/** Don't allow instances to be created */
+	private MeterActionHelper() {
 		assert false;
 	}
 
-	/** Find timing plans using a Checker */
-	static public TimingPlan find(final Checker<TimingPlan> checker) {
-		return (TimingPlan)namespace.findObject(TimingPlan.SONAR_TYPE, 
+	/** Find meter actions using a Checker */
+	static public MeterAction find(final Checker<MeterAction> checker) {
+		return (MeterAction)namespace.findObject(MeterAction.SONAR_TYPE,
 			checker);
+	}
+
+	/** Lookup the meter action with the specified name */
+	static public MeterAction lookup(String name) {
+		return (MeterAction)namespace.lookupObject(
+			MeterAction.SONAR_TYPE, name);
 	}
 }

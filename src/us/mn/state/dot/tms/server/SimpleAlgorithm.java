@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@ import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
- * Simple timing plan state
+ * Simple metering algorithm state
  *
  * @author Douglas Lau
  */
-public class SimplePlanState extends TimingPlanState {
+public class SimpleAlgorithm extends MeterAlgorithmState {
 
 	/** Get the absolute maximum release rate */
 	static protected int getMaxRelease() {
@@ -32,20 +32,13 @@ public class SimplePlanState extends TimingPlanState {
 	/** Demand rate (vehicles per hour) */
 	protected Integer demand = null;
 
-	/** Validate a timing plan */
-	public void validate(TimingPlanImpl plan) {
-		if(plan.isOperating()) {
-			if(demand != null) {
-				int diff = plan.getTarget() - demand;
-				demand += Math.round(diff / 2.0f);
-			} else
-				demand = getMaxRelease();
-			Device device = plan.getDevice();
-			if(device instanceof RampMeterImpl) {
-				RampMeterImpl meter = (RampMeterImpl)device;
-				meter.setRatePlanned(demand);
-			}
+	/** Validate a ramp meter */
+	public void validate(RampMeterImpl meter) {
+		if(demand != null) {
+			int diff = meter.getTarget() - demand;
+			demand += Math.round(diff / 2.0f);
 		} else
-			demand = null;
+			demand = getMaxRelease();
+		meter.setRatePlanned(demand);
 	}
 }

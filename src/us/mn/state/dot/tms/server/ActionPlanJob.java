@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@ import us.mn.state.dot.tms.HolidayHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
+import us.mn.state.dot.tms.MeterAction;
+import us.mn.state.dot.tms.MeterActionHelper;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
@@ -58,6 +61,7 @@ public class ActionPlanJob extends Job {
 		performTimeActions();
 		performDmsActions();
 		performLaneActions();
+		performMeterActions();
 	}
 
 	/** Update the action plan states */
@@ -157,5 +161,26 @@ public class ActionPlanJob extends Job {
 		LaneMarking lm = la.getLaneMarking();
 		if(lm != null)
 			lm.setDeployed(s == la.getState());
+	}
+
+	/** Perform all meter actions */
+	private void performMeterActions() {
+		MeterActionHelper.find(new Checker<MeterAction>() {
+			public boolean check(MeterAction ma) {
+				ActionPlan ap = ma.getActionPlan();
+				if(ap.getActive())
+					performMeterAction(ma, ap.getState());
+				return false;
+			}
+		});
+	}
+
+	/** Perform a meter action */
+	protected void performMeterAction(MeterAction ma, int s) {
+		RampMeter rm = ma.getRampMeter();
+		if(rm instanceof RampMeterImpl) {
+			RampMeterImpl meter = (RampMeterImpl)rm;
+			meter.setOperating(s == ma.getState());
+		}
 	}
 }

@@ -17,11 +17,16 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Constants;
@@ -31,6 +36,9 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.MeterAction;
+import us.mn.state.dot.tms.MeterActionHelper;
+import us.mn.state.dot.tms.MeterAlgorithm;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
@@ -38,6 +46,8 @@ import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.TimeAction;
+import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
@@ -75,14 +85,19 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return Math.min(r0, r1);
 	}
 
+	/** Get the current AM/PM period */
+	static protected int currentPeriod() {
+		return TimeSteward.getCalendarInstance().get(Calendar.AM_PM);
+	}
+
 	/** Load all the ramp meters */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading ramp meters...");
 		namespace.registerType(SONAR_TYPE, RampMeterImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"meter_type, storage, max_wait, camera, " +
-			"m_lock FROM iris." + SONAR_TYPE  + ";",
-			new ResultFactory()
+			"meter_type, storage, max_wait, algorithm, am_target, "+
+			"pm_target, camera, m_lock FROM iris." + SONAR_TYPE +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new RampMeterImpl(namespace,
@@ -94,8 +109,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					row.getInt(6),		// meter_type
 					row.getInt(7),		// storage
 					row.getInt(8),		// max_wait
-					row.getString(9),	// camera
-					row.getInt(10)		// m_lock
+					row.getInt(9),		// algorithm
+					row.getInt(10),		// am_target
+					row.getInt(11),		// pm_target
+					row.getString(12),	// camera
+					row.getInt(13)		// m_lock
 				));
 			}
 		});
@@ -112,6 +130,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		map.put("meter_type", meter_type.ordinal());
 		map.put("storage", storage);
 		map.put("max_wait", max_wait);
+		map.put("algorithm", algorithm);
+		map.put("am_target", am_target);
+		map.put("pm_target", pm_target);
 		map.put("camera", camera);
 		if(m_lock != null)
 			map.put("m_lock", m_lock.ordinal());
@@ -138,7 +159,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Create a ramp meter */
 	protected RampMeterImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, int t, int st, int w, Camera cam, Integer lk)
+		int p, String nt, int t, int st, int w, int alg, int at, int pt,
+		Camera cam, Integer lk)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -146,6 +168,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		storage = st;
 		max_wait = w;
 		camera = cam;
+		algorithm = alg;
+		am_target = at;
+		pm_target = pt;
 		m_lock = RampMeterLock.fromOrdinal(lk);
 		rate = null;
 		initTransients();
@@ -153,11 +178,12 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Create a ramp meter */
 	protected RampMeterImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, int t, int st, int w, String cam, Integer lk)
+		int p, String nt, int t, int st, int w, int alg, int at, int pt,
+		String cam, Integer lk)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
 		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
-		     p, nt, t, st, w,
+		     p, nt, t, st, w, alg, at, pt,
 		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam), lk);
 	}
 
@@ -246,6 +272,133 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Get the maximum allowed meter wait time (in seconds) */
 	public int getMaxWait() {
 		return max_wait;
+	}
+
+	/** Ordinal of meter algorithm enumeration */
+	private int algorithm;
+
+	/** Set the metering algorithm */
+	public void setAlgorithm(int a) {
+		algorithm = a;
+	}
+
+	/** Set the metering algorithm */
+	public void doSetAlgorithm(int a) throws TMSException {
+		int alg = MeterAlgorithm.fromOrdinal(a).ordinal();
+		if(alg == algorithm)
+			return;
+		store.update(this, "algorithm", alg);
+		setAlgorithm(alg);
+		// FIXME
+		alg_state = null;
+	}
+
+	/** Get the metering algorithm */
+	public int getAlgorithm() {
+		return algorithm;
+	}
+
+	/** AM target rate */
+	private int am_target;
+
+	/** Set the AM target rate */
+	public void setAmTarget(int t) {
+		am_target = t;
+	}
+
+	/** Set the AM target rate */
+	public void doSetAmTarget(int t) throws TMSException {
+		if(t == am_target)
+			return;
+		store.update(this, "am_target", t);
+		setAmTarget(t);
+	}
+
+	/** Get the AM target rate */
+	public int getAmTarget() {
+		return am_target;
+	}
+
+	/** PM target rate */
+	private int pm_target;
+
+	/** Set the PM target rate */
+	public void setPmTarget(int t) {
+		pm_target = t;
+	}
+
+	/** Set the PM target rate */
+	public void doSetPmTarget(int t) throws TMSException {
+		if(t == pm_target)
+			return;
+		store.update(this, "pm_target", t);
+		setPmTarget(t);
+	}
+
+	/** Get the PM target rate */
+	public int getPmTarget() {
+		return pm_target;
+	}
+
+	/** Get the target rate for current period */
+	public int getTarget() {
+		if(currentPeriod() == Calendar.AM)
+			return getAmTarget();
+		else
+			return getPmTarget();
+	}
+
+	/** Get the start minute for current period */
+	public int getStartMin() {
+		return getTimeActionMinute(true);
+	}
+
+	/** Get the stop minute for current period */
+	public int getStopMin() {
+		return getTimeActionMinute(false);
+	}
+
+	/** Get the minute for a matching time action */
+	private int getTimeActionMinute(final boolean start) {
+		final int period = currentPeriod();
+		final LinkedList<ActionPlan> plans = getActionPlans();
+		TimeAction t = TimeActionHelper.find(new Checker<TimeAction>() {
+			public boolean check(TimeAction ta) {
+				ActionPlan ap = ta.getActionPlan();
+				return plans.contains(ap) &&
+				       checkTimeAction(ta, start, period);
+			}
+		});
+		if(t != null)
+			return t.getMinute();
+		else
+			return TimeActionHelper.NOON;
+	}
+
+	/** Get a list of all action plans which control the meter */
+	private LinkedList<ActionPlan> getActionPlans() {
+		final RampMeterImpl meter = this;
+		final LinkedList<ActionPlan> plans =
+			new LinkedList<ActionPlan>();
+		MeterActionHelper.find(new Checker<MeterAction>() {
+			public boolean check(MeterAction ma) {
+				if(ma.getRampMeter() == meter) {
+					ActionPlan ap = ma.getActionPlan();
+					if(ap.getActive())
+						plans.add(ap);
+				}
+				return false;
+			}
+		});
+		return plans;
+	}
+
+	/** Check a time action */
+	private boolean checkTimeAction(TimeAction ta, boolean start,
+		int period)
+	{
+		return (ta.getDeploy() == start) &&
+		       (TimeActionHelper.getPeriod(ta) == period);
 	}
 
 	/** Camera from which this can be seen */
@@ -373,6 +526,51 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		MeterPoller p = getMeterPoller();
 		if(p != null)
 			p.sendRequest(this, DeviceRequest.fromOrdinal(r));
+	}
+
+	/** Metering algorithm state */
+	private transient MeterAlgorithmState alg_state;
+
+	/** Set the algorithm operating state */
+	public void setOperating(boolean o) {
+		if(o) {
+			if(alg_state == null)
+				alg_state = createState();
+		} else
+			alg_state = null;
+	}
+
+	/** Get the algorithm operating state */
+	public boolean isOperating() {
+		return alg_state != null;
+	}
+
+	/** Create the meter algorithm state */
+	private MeterAlgorithmState createState() {
+		switch(MeterAlgorithm.fromOrdinal(algorithm)) {
+		case SIMPLE:
+			return new SimpleAlgorithm();
+		case STRATIFIED:
+			return lookupOrCreateStratified();
+		default:
+			return null;
+		}
+	}
+
+	/** Lookup or create a stratified algorithm state */
+	protected MeterAlgorithmState lookupOrCreateStratified() {
+		Corridor c = getCorridor();
+		if(c != null)
+			return StratifiedAlgorithm.lookupCorridor(c);
+		else
+			return null;
+	}
+
+	/** Validate the metering algorithm */
+	public void validateAlgorithm() {
+		MeterAlgorithmState s = alg_state;
+		if(s != null)
+			s.validate(this);
 	}
 
 	/** Ramp meter queue status */

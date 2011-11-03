@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,43 +17,43 @@ package us.mn.state.dot.tms;
 import java.util.LinkedList;
 
 /**
- * Timing plan type enumeration.
+ * Meter algorithm enumeration.
  *
  * @author Douglas Lau
  */
-public enum TimingPlanType {
+public enum MeterAlgorithm {
 
-	/** Invalid timing plan (was Travel Time) */
-	INVALID("Invalid"),
+	/** No metering */
+	NONE("No metering"),
 
-	/** Simple metering plan */
+	/** Simple metering algorithm */
 	SIMPLE("Simple Metering"),
 
-	/** Stratified metering plan */
+	/** Stratified metering algorithm */
 	STRATIFIED("Stratified Metering");
 
-	/** Create a new timing plan type */
-	private TimingPlanType(String d) {
+	/** Create a new metering algorithm */
+	private MeterAlgorithm(String d) {
 		description = d;
 	}
 
-	/** Description of the type */
+	/** Description of the algorithm */
 	public final String description;
 
-	/** Get a timing plan type from an ordinal value */
-	static public TimingPlanType fromOrdinal(int o) {
-		for(TimingPlanType t: TimingPlanType.values()) {
-			if(t.ordinal() == o)
-				return t;
+	/** Get a meter algorithm from an ordinal value */
+	static public MeterAlgorithm fromOrdinal(int o) {
+		for(MeterAlgorithm ma: MeterAlgorithm.values()) {
+			if(ma.ordinal() == o)
+				return ma;
 		}
-		return INVALID;
+		return NONE;
 	}
 
-	/** Get an array of timing plan type descriptions */
+	/** Get an array of meter algorithm descriptions */
 	static public String[] getDescriptions() {
 		LinkedList<String> d = new LinkedList<String>();
-		for(TimingPlanType t: TimingPlanType.values())
-			d.add(t.description);
+		for(MeterAlgorithm ma: MeterAlgorithm.values())
+			d.add(ma.description);
 		return d.toArray(new String[0]);
 	}
 }

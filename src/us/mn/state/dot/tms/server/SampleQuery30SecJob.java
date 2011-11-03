@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
-import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
@@ -27,12 +26,9 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
-import us.mn.state.dot.tms.HolidayHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TimingPlan;
-import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
@@ -72,10 +68,7 @@ public class SampleQuery30SecJob extends Job {
 				BaseObjectImpl.corridors.findBottlenecks();
 			}
 			finally {
-				Calendar cal = Calendar.getInstance();
-				cal.setTimeInMillis(comp.getStamp());
-				if(!HolidayHelper.isHoliday(cal))
-					validateTimingPlans();
+				validateMetering();
 			}
 		}
 	};
@@ -172,16 +165,18 @@ public class SampleQuery30SecJob extends Job {
 		out.println("</traffic_sample>");
 	}
 
-	/** Validate all timing plans */
-	protected void validateTimingPlans() {
-		TimingPlanHelper.find(new Checker<TimingPlan>() {
-			public boolean check(TimingPlan p) {
-				TimingPlanImpl plan = (TimingPlanImpl)p;
-				plan.validate();
+	/** Validate all metering algorithms */
+	protected void validateMetering() {
+		RampMeterHelper.find(new Checker<RampMeter>() {
+			public boolean check(RampMeter rm) {
+				if(rm instanceof RampMeterImpl) {
+					RampMeterImpl meter = (RampMeterImpl)rm;
+					meter.validateAlgorithm();
+				}
 				return false;
 			}
 		});
-		StratifiedPlanState.processAllStates();
+		StratifiedAlgorithm.processAllStates();
 		RampMeterHelper.find(new Checker<RampMeter>() {
 			public boolean check(RampMeter m) {
 				RampMeterImpl meter = (RampMeterImpl)m;

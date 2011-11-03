@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Calendar;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -38,5 +39,16 @@ public class TimeActionHelper extends BaseHelper {
 	static public TimeAction lookup(String name) {
 		return (TimeAction)namespace.lookupObject(TimeAction.SONAR_TYPE,
 			name);
+	}
+
+	/** Minute of 12 Noon in day */
+	static public final int NOON = 12 * 60;
+
+	/** Get the peak period for a time action */
+	static public int getPeriod(TimeAction ta) {
+		if(ta.getMinute() < NOON)
+			return Calendar.AM;
+		else
+			return Calendar.PM;
 	}
 }

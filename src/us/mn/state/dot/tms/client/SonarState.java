@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2011  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,11 +41,11 @@ import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
+import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TimeAction;
-import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.camera.CamCache;
@@ -314,12 +314,12 @@ public class SonarState extends Client {
 		return lane_actions;
 	}
 
-	/** Cache of timing plans */
-	protected final TypeCache<TimingPlan> timing_plans;
+	/** Cache of meter actions */
+	protected final TypeCache<MeterAction> meter_actions;
 
-	/** Get the timing plan cache */
-	public TypeCache<TimingPlan> getTimingPlans() {
-		return timing_plans;
+	/** Get the meter action cache */
+	public TypeCache<MeterAction> getMeterActions() {
+		return meter_actions;
 	}
 
 	/** Create a new Sonar state */
@@ -375,7 +375,8 @@ public class SonarState extends Client {
 		time_actions = new TypeCache<TimeAction>(TimeAction.class,this);
 		dms_actions = new TypeCache<DmsAction>(DmsAction.class, this);
 		lane_actions = new TypeCache<LaneAction>(LaneAction.class,this);
-		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
+		meter_actions = new TypeCache<MeterAction>(MeterAction.class,
+			this);
 		// FIXME: this is an ugly hack
 		BaseHelper.namespace = getNamespace();
 	}
@@ -462,7 +463,7 @@ public class SonarState extends Client {
 		populateReadable(time_actions);
 		populateReadable(dms_actions);
 		populateReadable(lane_actions);
-		populateReadable(timing_plans);
+		populateReadable(meter_actions);
 	}
 
 	/** Look up the specified connection */

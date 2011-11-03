@@ -80,7 +80,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		TimeActionImpl.loadAll();
 		DmsActionImpl.loadAll();
 		LaneActionImpl.loadAll();
-		TimingPlanImpl.loadAll();
+		MeterActionImpl.loadAll();
 	}
 
 	/** Get the primary key name */

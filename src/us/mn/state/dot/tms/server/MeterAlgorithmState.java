@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,12 @@
 package us.mn.state.dot.tms.server;
 
 /**
- * Timing plan state
+ * Meter algorithm state
  *
  * @author Douglas Lau
  */
-abstract public class TimingPlanState {
+abstract public class MeterAlgorithmState {
 
-	/** Validate a timing plan */
-	abstract public void validate(TimingPlanImpl plan);
+	/** Validate algorithm state for a meter */
+	abstract public void validate(RampMeterImpl meter);
 }

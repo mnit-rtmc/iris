@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,16 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
+import java.util.LinkedList;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanState;
+import us.mn.state.dot.tms.MeterAction;
+import us.mn.state.dot.tms.MeterActionHelper;
+import us.mn.state.dot.tms.MeterAlgorithm;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TimingPlan;
-import us.mn.state.dot.tms.TimingPlanHelper;
+import us.mn.state.dot.tms.TimeAction;
+import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -48,18 +54,6 @@ public class OpSendMeterSettings extends OpDevice {
 
 	/** PM midpoint time (BCD; minute of day) */
 	static protected final int PM_MID_TIME = 1630;
-
-	/** Minute of 12 Noon in day */
-	static protected final int NOON = 12 * 60;
-
-	/** Check if a timing plan is for the given peak period */
-	static protected boolean checkPeriod(TimingPlan plan, int period) {
-		if(period == Calendar.AM && plan.getStopMin() <= NOON)
-			return true;
-		if(period == Calendar.PM && plan.getStartMin() >= NOON)
-			return true;
-		return false;
-	}
 
 	/** Get the system meter green time */
 	static protected int getGreenTime() {
@@ -97,33 +91,61 @@ public class OpSendMeterSettings extends OpDevice {
 	public OpSendMeterSettings(RampMeterImpl m) {
 		super(PriorityLevel.DOWNLOAD, m);
 		meter = m;
-		updateTimingTable();
+		if(meter.getAlgorithm() != MeterAlgorithm.NONE.ordinal())
+			updateTimingTable();
 	}
 
 	/** Update the timing table with active timing plans */
 	protected void updateTimingTable() {
-		TimingPlanHelper.find(new Checker<TimingPlan>() {
-			public boolean check(TimingPlan p) {
-				if(p.getActive() && p.getDevice() == meter)
-					updateTable(p);
+		final LinkedList<ActionPlan> plans =
+			new LinkedList<ActionPlan>();
+		MeterActionHelper.find(new Checker<MeterAction>() {
+			public boolean check(MeterAction ma) {
+				if(ma.getRampMeter() == meter &&
+				   ActionPlanState.isDeployed(ma.getState()))
+					plans.add(ma.getActionPlan());
+				return false;
+			}
+		});
+		for(ActionPlan ap: plans) {
+			if(ap.getActive())
+				updateTable(ap);
+		}
+	}
+
+	/** Update one timing table with an action plan */
+	protected void updateTable(final ActionPlan ap) {
+		TimeActionHelper.find(new Checker<TimeAction>() {
+			public boolean check(TimeAction ta) {
+				if(ta.getActionPlan() == ap)
+					updateTable(ta);
 				return false;
 			}
 		});
 	}
 
-	/** Update one timing table with a timing plan */
-	protected void updateTable(TimingPlan p) {
-		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
-			if(checkPeriod(p, t)) {
-				int sta = minuteBCD(p.getStartMin());
-				int sto = minuteBCD(p.getStopMin());
-				float r = MndotPoller.calculateRedTime(meter,
-					p.getTarget());
-				table_red[t] = Math.round(r * 10);
-				table_rate[t] = MeterRate.TOD;
-				table_start[t] = Math.min(table_start[t], sta);
-				table_stop[t] = Math.max(table_stop[t], sto);
-			}
+	/** Update one timing table with a time action */
+	private void updateTable(TimeAction ta) {
+		int p = TimeActionHelper.getPeriod(ta);
+		int min = minuteBCD(ta.getMinute());
+		float r = MndotPoller.calculateRedTime(meter, getTarget(p));
+		table_red[p] = Math.round(r * 10);
+		table_rate[p] = MeterRate.TOD;
+		if(ta.getDeploy())
+			table_start[p] = Math.min(table_start[p], min);
+		else
+			table_stop[p] = Math.max(table_stop[p], min);
+	}
+
+	/** Get the target release rate for the given period */
+	private int getTarget(int p) {
+		switch(p) {
+		case Calendar.AM:
+			return meter.getAmTarget();
+		case Calendar.PM:
+			return meter.getPmTarget();
+		default:
+			return 2000;
 		}
 	}
 

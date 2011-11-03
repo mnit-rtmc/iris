@@ -39,11 +39,11 @@ import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
- * Stratified metering timing plan state
+ * Stratified metering algorithm
  *
  * @author Douglas Lau
  */
-public class StratifiedPlanState extends TimingPlanState {
+public class StratifiedAlgorithm extends MeterAlgorithmState {
 
 	/** Zone debug log */
 	static protected final IDebugLog SZM_LOG = new IDebugLog("szm");
@@ -107,14 +107,14 @@ public class StratifiedPlanState extends TimingPlanState {
 	}
 
 	/** States for all stratified zone corridors */
-	static protected HashMap<String, StratifiedPlanState> all_states =
-		new HashMap<String, StratifiedPlanState>();
+	static protected HashMap<String, StratifiedAlgorithm> all_states =
+		new HashMap<String, StratifiedAlgorithm>();
 
 	/** Lookup the stratified zone state for one corridor */
-	static public StratifiedPlanState lookupCorridor(Corridor c) {
-		StratifiedPlanState state = all_states.get(c.getID());
+	static public StratifiedAlgorithm lookupCorridor(Corridor c) {
+		StratifiedAlgorithm state = all_states.get(c.getID());
 		if(state == null) {
-			state = new StratifiedPlanState(c);
+			state = new StratifiedAlgorithm(c);
 			all_states.put(c.getID(), state);
 		}
 		return state;
@@ -122,10 +122,10 @@ public class StratifiedPlanState extends TimingPlanState {
 
 	/** Process one interval for all stratified zone states */
 	static public void processAllStates() {
-		Iterator<StratifiedPlanState> it =
+		Iterator<StratifiedAlgorithm> it =
 			all_states.values().iterator();
 		while(it.hasNext()) {
-			StratifiedPlanState state = it.next();
+			StratifiedAlgorithm state = it.next();
 			state.processInterval();
 			if(state.isDone())
 				it.remove();
@@ -179,12 +179,27 @@ public class StratifiedPlanState extends TimingPlanState {
 		return exit;
 	}
 
+	/** Get a stamp of the current 30 second interval */
+	static public String stamp_30() {
+		int i30 = TimeSteward.currentSecondOfDayInt() / 30 + 1;
+		StringBuilder b = new StringBuilder();
+		b.append(i30 / 120);
+		while(b.length() < 2)
+			b.insert(0, '0');
+		b.append(':');
+		b.append((i30 % 120) / 2);
+		while(b.length() < 5)
+			b.insert(3, '0');
+		b.append(':');
+		b.append((i30 % 2) * 30);
+		while(b.length() < 8)
+			b.insert(6, '0');
+		return b.toString();
+	}
+
 	/** Meter state holds stratified plan state for a meter. For each meter
 	 *  in the stratified plan, there will be one MeterState object. */
 	protected class MeterState {
-
-		/** Timing plan for the meter */
-		protected final TimingPlanImpl plan;
 
 		/** Ramp meter */
 		protected final RampMeterImpl meter;
@@ -257,9 +272,8 @@ public class StratifiedPlanState extends TimingPlanState {
 		protected boolean done;
 
 		/** Create a new ramp meter state */
-		protected MeterState(RampMeterImpl m, TimingPlanImpl p) {
+		protected MeterState(RampMeterImpl m) {
 			meter = m;
-			plan = p;
 			valid = findDetectors();
 			rate_accum = getMaxRelease();
 			p_flow = getMaxRelease();
@@ -276,7 +290,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			if(good)
 				release = getMaxRelease();
 			else
-				release = plan.getTarget();
+				release = meter.getTarget();
 			control = null;
 		}
 
@@ -340,7 +354,7 @@ public class StratifiedPlanState extends TimingPlanState {
 		/** Check if we're in the flushing window */
 		protected boolean isFlushing() {
 			int min = TimeSteward.currentMinuteOfDayInt();
-			int stop_min = plan.getStopMin();
+			int stop_min = meter.getStopMin();
 			return min >= stop_min - FLUSH_MINUTES &&
 			       min <= stop_min;
 		}
@@ -348,7 +362,7 @@ public class StratifiedPlanState extends TimingPlanState {
 		/** Check if we're in the first half of the plan window */
 		protected boolean isFirstHalf() {
 			int min = TimeSteward.currentMinuteOfDayInt();
-			return min * 2 < plan.getStartMin() + plan.getStopMin();
+			return min * 2 < meter.getStartMin()+meter.getStopMin();
 		}
 
 		/** Start metering */
@@ -450,7 +464,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Check for the existance of a queue */
 		protected RampMeterQueue getQueue() {
-			if(plan.isOperating() && metering) {
+			if(meter.isOperating() && metering) {
 				if(queue_backup)
 					return RampMeterQueue.FULL;
 				else if(has_queue)
@@ -1088,26 +1102,20 @@ public class StratifiedPlanState extends TimingPlanState {
 	/** Current log file name */
 	protected File log_name;
 
-	/** Create a new stratified plan */
-	protected StratifiedPlanState(Corridor c) {
+	/** Create a new stratified algorithm state */
+	protected StratifiedAlgorithm(Corridor c) {
 		corridor = c;
 	}
 
 	/** Validate a timing plan */
-	public void validate(TimingPlanImpl plan) {
-		if(plan.isOperating()) {
-			MeterState state = getMeterState(plan);
-			if(state != null)
-				state.validate();
-		}
+	public void validate(RampMeterImpl meter) {
+		MeterState state = getMeterState(meter);
+		if(state != null)
+			state.validate();
 	}
 
-	/** Get the meter state for a given timing plan */
-	protected MeterState getMeterState(TimingPlanImpl plan) {
-		Device device = plan.getDevice();
-		if(!(device instanceof RampMeterImpl))
-			return null;
-		RampMeterImpl meter = (RampMeterImpl)device;
+	/** Get the meter state for a given meter */
+	protected MeterState getMeterState(RampMeterImpl meter) {
 		if(meter.getCorridor() != corridor) {
 			// Meter must have been changed to a different
 			// corridor; throw away old meter state
@@ -1117,10 +1125,10 @@ public class StratifiedPlanState extends TimingPlanState {
 				", not on corridor " + cid);
 			return null;
 		}
-		MeterState state = getMeterState(meter);
+		MeterState state = lookupMeterState(meter);
 		if(state != null)
 			return state;
-		state = new MeterState(meter, plan);
+		state = new MeterState(meter);
 		if(state.valid) {
 			if(zones.isEmpty())
 				createAllLayers();
@@ -1139,8 +1147,8 @@ public class StratifiedPlanState extends TimingPlanState {
 		zones.addAll(zone_builder.getList());
 	}
 
-	/** Get the meter state for a specified meter */
-	protected MeterState getMeterState(RampMeter meter) {
+	/** Lookup meter state for a specified meter */
+	protected MeterState lookupMeterState(RampMeter meter) {
 		return states.get(meter.getName());
 	}
 
@@ -1209,7 +1217,7 @@ public class StratifiedPlanState extends TimingPlanState {
 		Iterator<MeterState> it = states.values().iterator();
 		while(it.hasNext()) {
 			MeterState state = it.next();
-			if(!state.plan.isOperating()) {
+			if(!state.meter.isOperating()) {
 				state.updateQueueStatus();
 				it.remove();
 			}
@@ -1234,7 +1242,7 @@ public class StratifiedPlanState extends TimingPlanState {
 		MeterState state = getOneMeterState();
 		if(state == null)
 			return;
-		String name = cid + '.' + state.plan.getStamp();
+		String name = cid + '.' + stamp_hhmm(state.meter.getStartMin());
 		try {
 			String date = TimeSteward.currentDateShortString();
 			PrintStream stream = createLogFile(date, name);
@@ -1249,6 +1257,20 @@ public class StratifiedPlanState extends TimingPlanState {
 			SZM_LOG.log("printSetup: " + cid + ", " +
 				e.getMessage());
 		}
+	}
+
+	/** Create a 4 character time stamp.
+	 * @param min Minute of the day (0-1440)
+	 * @return 4 character time stamp (1330 for 1:30 PM) */
+	static protected String stamp_hhmm(int min) {
+		StringBuilder b = new StringBuilder();
+		b.append(min / 60);
+		while(b.length() < 2)
+			b.insert(0, '0');
+		b.append(min % 60);
+		while(b.length() < 4)
+			b.insert(2, '0');
+		return b.toString();
 	}
 
 	/** Get one meter state which has been defined */
@@ -1276,8 +1298,7 @@ public class StratifiedPlanState extends TimingPlanState {
 	protected void printStates() {
 		try {
 			PrintStream stream = appendLogFile();
-			stream.println("  <interval time='" +
-				TimingPlanImpl.stamp_30() +"'>");
+			stream.println("  <interval time='" + stamp_30() +"'>");
 			printZoneState(stream);
 			printMeterState(stream);
 			stream.println("  </interval>");
