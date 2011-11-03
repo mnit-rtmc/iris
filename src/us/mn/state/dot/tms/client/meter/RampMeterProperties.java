@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.MeterAlgorithm;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
@@ -80,6 +81,16 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Field for Maximum wait time (seconds) */
 	protected final JTextField wait = new JTextField();
+
+	/** Combo box for metering algorithm */
+	private final JComboBox algorithm_cbx = new JComboBox(
+		MeterAlgorithm.getDescriptions());
+
+	/** Field for AM target rate */
+	protected final JTextField am_target_txt = new JTextField();
+
+	/** Field for PM target rate */
+	protected final JTextField pm_target_txt = new JTextField();
 
 	/** Release rate component */
 	protected final JLabel release = new JLabel();
@@ -182,6 +193,25 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 					wait.getText()));
 			}
 		};
+		new ActionJob(this, algorithm_cbx) {
+			public void perform() {
+				int a = algorithm_cbx.getSelectedIndex();
+				if(a >= 0)
+					proxy.setAlgorithm(a);
+			}
+		};
+		new FocusJob(am_target_txt) {
+			public void perform() {
+				proxy.setAmTarget(Integer.parseInt(
+					am_target_txt.getText()));
+			}
+		};
+		new FocusJob(pm_target_txt) {
+			public void perform() {
+				proxy.setPmTarget(Integer.parseInt(
+					pm_target_txt.getText()));
+			}
+		};
 		m_lock.setAction(new LockMeterAction(proxy, m_lock));
 	}
 
@@ -225,6 +255,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		panel.addRow("Meter Type", meterType);
 		panel.addRow("Storage (feet)", storage);
 		panel.addRow("Max Wait (seconds)", wait);
+		panel.addRow("Metering Algorithm", algorithm_cbx);
+		panel.addRow("AM Target (v/h)", am_target_txt);
+		panel.addRow("PM Target (v/h)", pm_target_txt);
 		return panel;
 	}
 
@@ -255,6 +288,12 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			storage.setText("" + proxy.getStorage());
 		if(a == null || a.equals("wait"))
 			wait.setText("" + proxy.getMaxWait());
+		if(a == null || a.equals("algorithm"))
+			algorithm_cbx.setSelectedIndex(proxy.getAlgorithm());
+		if(a == null || a.equals("amTarget"))
+			am_target_txt.setText("" + proxy.getAmTarget());
+		if(a == null || a.equals("pmTarget"))
+			pm_target_txt.setText("" + proxy.getPmTarget());
 		if(a == null || a.equals("rate")) {
 			Integer rate = proxy.getRate();
 			cycle.setText(MeterStatusPanel.formatCycle(rate));
