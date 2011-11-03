@@ -11,6 +11,25 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.136.0 (3 November 2011)</dt>
+	<dd><ul>
+		<li>
+			Ramp meter "timing plans" replaced with meter actions,
+			linked to action plans, as used with DMS.
+			Special care must be taken with day plans when
+			upgrading -- only if ramp metering is being used.
+			The migrate script assumes two day plans exist,
+			DEFAULT_AM and DEFAULT_PM.
+		</li>
+		<li>
+			A couple of bugs fixed for replacing incidents.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.136.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.135.0 (17 October 2011)</dt>
 	<dd><ul>
 		<li>
