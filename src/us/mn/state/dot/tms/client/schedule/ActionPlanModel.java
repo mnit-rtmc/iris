@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -30,19 +26,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 
-	/** Allowed states */
-	static protected final ActionPlanState[] STATES = {
-		ActionPlanState.undeployed,
-		ActionPlanState.deploying,
-		ActionPlanState.deployed,
-		ActionPlanState.undeploying
-	};
-
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<ActionPlan>("Plan Name", 100) {
+		new ProxyColumn<ActionPlan>("Plan Name", 120) {
 			public Object getValueAt(ActionPlan ap) {
 				return ap.getName();
 			}
@@ -113,27 +101,6 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 			public void setValueAt(ActionPlan ap, Object value) {
 				if(value instanceof Boolean)
 					ap.setActive((Boolean)value);
-			}
-		},
-		new ProxyColumn<ActionPlan>("State", 80) {
-			public Object getValueAt(ActionPlan ap) {
-				return ActionPlanState.fromOrdinal(
-					ap.getState());
-			}
-			public boolean isEditable(ActionPlan ap) {
-				return canUpdate(ap);
-			}
-			public void setValueAt(ActionPlan ap, Object value) {
-				if(value instanceof ActionPlanState) {
-					ActionPlanState st =
-						(ActionPlanState)value;
-					ap.setDeployed(
-						ActionPlanState.isDeployed(st));
-				}
-			}
-			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(STATES);
-				return new DefaultCellEditor(combo);
 			}
 		}
 	    };
