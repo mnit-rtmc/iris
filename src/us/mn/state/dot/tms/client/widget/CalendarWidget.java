@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,12 +120,7 @@ public class CalendarWidget extends JPanel {
 			int half = hgap / 2;
 			if(highlighter.isHighlighted(tcal)) {
 				g.setColor(COL_HOLIDAY);
-				g.fillRect(x + 1, y + 1, half - 1, vgap - 2);
-			}
-			tcal.set(Calendar.AM_PM, Calendar.PM);
-			if(highlighter.isHighlighted(tcal)) {
-				g.setColor(COL_HOLIDAY);
-				g.fillRect(x + half, y + 1, half - 1, vgap - 2);
+				g.fillRect(x + 1, y + 1, hgap - 2, vgap - 2);
 			}
 			g.setColor(Color.BLACK);
 			drawText(g2, String.valueOf(day), x + hgap / 2,
