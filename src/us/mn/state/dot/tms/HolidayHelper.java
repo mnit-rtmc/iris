@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,6 @@ public class HolidayHelper extends BaseHelper {
 		int week = h.getWeek();
 		int weekday = h.getWeekday();
 		int shift = h.getShift();
-		int period = h.getPeriod();
 		if(month != Holiday.ANY_MONTH &&
 		   month != stamp.get(Calendar.MONTH))
 			return false;
@@ -74,9 +73,6 @@ public class HolidayHelper extends BaseHelper {
 			if(weekday != stamp.get(Calendar.DAY_OF_WEEK))
 				return false;
 		}
-		if(period != Holiday.ANY_PERIOD &&
-		   period != stamp.get(Calendar.AM_PM))
-			return false;
 		return true;
 	}
 }

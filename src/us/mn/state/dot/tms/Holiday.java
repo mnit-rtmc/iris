@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2007  Minnesota Department of Transportation
+ * Copyright (C) 2003-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,10 +70,4 @@ public interface Holiday extends SonarObject {
 
 	/** Constant for holidays not determined by period */
 	int ANY_PERIOD = -1;
-
-	/** Set the period */
-	void setPeriod(int p);
-
-	/** Set the period */
-	int getPeriod();
 }

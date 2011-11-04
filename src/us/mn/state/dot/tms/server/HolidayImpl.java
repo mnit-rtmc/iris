@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2009  Minnesota Department of Transportation
+ * Copyright (C) 2003-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 		System.err.println("Loading holidays...");
 		namespace.registerType(SONAR_TYPE, HolidayImpl.class);
 		store.query("SELECT name, month, day, week, weekday, " +
-			"shift, period FROM iris." + SONAR_TYPE  + ";",
+			"shift FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -45,8 +45,7 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 					row.getInt(3),		// day
 					row.getInt(4),		// week
 					row.getInt(5),		// weekday
-					row.getInt(6),		// shift
-					row.getInt(7)		// period
+					row.getInt(6)		// shift
 				));
 			}
 		});
@@ -61,7 +60,6 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 		map.put("week", week);
 		map.put("weekday", weekday);
 		map.put("shift", shift);
-		map.put("period", period);
 		return map;
 	}
 
@@ -81,16 +79,13 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 	}
 
 	/** Create a new holiday */
-	protected HolidayImpl(String n, int m, int d, int w, int wd, int s,
-		int p)
-	{
+	protected HolidayImpl(String n, int m, int d, int w, int wd, int s) {
 		this(n);
 		month = m;
 		day = d;
 		week = w;
 		weekday = wd;
 		shift = s;
-		period = p;
 	}
 
 	/** Compare to another holiday */
@@ -251,32 +246,5 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 	/** Get the shift from the actual holiday */
 	public int getShift() {
 		return shift;
-	}
-
-	/** Period (AM/PM) */
-	protected int period = ANY_PERIOD;
-
-	/** Set the period */
-	public void setPeriod(int p) {
-		period = p;
-	}
-
-	/** Set the period */
-	public void doSetPeriod(int p) throws TMSException {
-		if(p == period)
-			return;
-		if(p != ANY_PERIOD) {
-			if(p != Calendar.AM && p != Calendar.PM) {
-				throw new ChangeVetoException(
-					"Invalid period:" + p);
-			}
-		}
-		store.update(this, "period", p);
-		setPeriod(p);
-	}
-
-	/** Set the period */
-	public int getPeriod() {
-		return period;
 	}
 }
