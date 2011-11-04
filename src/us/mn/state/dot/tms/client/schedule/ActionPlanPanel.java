@@ -48,7 +48,7 @@ public class ActionPlanPanel extends FormPanel {
 	}
 
 	/** Table row height */
-	static protected final int ROW_HEIGHT = 20;
+	static protected final int ROW_HEIGHT = 22;
 
 	/** Table model for action plans */
 	protected final ActionPlanModel p_model;
@@ -128,39 +128,11 @@ public class ActionPlanPanel extends FormPanel {
 		addRow(p_table);
 		addRow(del_p_btn);
 		del_p_btn.setEnabled(false);
-		FormPanel t_panel = new FormPanel(true);
-		t_table.setAutoCreateColumnsFromModel(false);
-		t_table.setRowHeight(ROW_HEIGHT);
-		t_table.setVisibleRowCount(12);
-		t_panel.addRow(t_table);
-		t_panel.addRow(del_t_btn);
-		del_t_btn.setEnabled(false);
-		p_panel.add(t_panel);
-		FormPanel d_panel = new FormPanel(true);
-		d_table.setAutoCreateColumnsFromModel(false);
-		d_table.setRowHeight(ROW_HEIGHT);
-		d_table.setVisibleRowCount(10);
-		d_panel.addRow(d_table);
-		d_panel.addRow(del_d_btn);
-		del_d_btn.setEnabled(false);
+		p_panel.add(createTimeActionPanel());
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("DMS Actions", d_panel);
-		FormPanel l_panel = new FormPanel(true);
-		l_table.setAutoCreateColumnsFromModel(false);
-		l_table.setRowHeight(ROW_HEIGHT);
-		l_table.setVisibleRowCount(10);
-		l_panel.addRow(l_table);
-		l_panel.addRow(del_l_btn);
-		del_l_btn.setEnabled(false);
-		tab.add("Lane Actions", l_panel);
-		FormPanel m_panel = new FormPanel(true);
-		m_table.setAutoCreateColumnsFromModel(false);
-		m_table.setRowHeight(ROW_HEIGHT);
-		m_table.setVisibleRowCount(10);
-		m_panel.addRow(m_table);
-		m_panel.addRow(del_m_btn);
-		del_m_btn.setEnabled(false);
-		tab.add("Meter Actions", m_panel);
+		tab.add("DMS Actions", createDmsActionPanel());
+		tab.add("Lane Actions", createLaneActionPanel());
+		tab.add("Meter Actions", createMeterActionPanel());
 		p_panel.add(tab);
 		setFill();
 		addRow(p_panel);
@@ -185,6 +157,18 @@ public class ActionPlanPanel extends FormPanel {
 		};
 	}
 
+	/** Create the time action panel */
+	private JPanel createTimeActionPanel() {
+		FormPanel t_panel = new FormPanel(true);
+		t_table.setAutoCreateColumnsFromModel(false);
+		t_table.setRowHeight(ROW_HEIGHT);
+		t_table.setVisibleRowCount(12);
+		t_panel.addRow(t_table);
+		t_panel.addRow(del_t_btn);
+		del_t_btn.setEnabled(false);
+		return t_panel;
+	}
+
 	/** Add jobs for time action table */
 	protected void addTimeActionJobs() {
 		final ListSelectionModel sm = t_table.getSelectionModel();
@@ -202,6 +186,18 @@ public class ActionPlanPanel extends FormPanel {
 					t_model.deleteRow(row);
 			}
 		};
+	}
+
+	/** Create the DMS action panel */
+	private JPanel createDmsActionPanel() {
+		FormPanel d_panel = new FormPanel(true);
+		d_table.setAutoCreateColumnsFromModel(false);
+		d_table.setRowHeight(ROW_HEIGHT);
+		d_table.setVisibleRowCount(10);
+		d_panel.addRow(d_table);
+		d_panel.addRow(del_d_btn);
+		del_d_btn.setEnabled(false);
+		return d_panel;
 	}
 
 	/** Add jobs for DMS action table */
@@ -223,6 +219,18 @@ public class ActionPlanPanel extends FormPanel {
 		};
 	}
 
+	/** Create the lane action panel */
+	private JPanel createLaneActionPanel() {
+		FormPanel l_panel = new FormPanel(true);
+		l_table.setAutoCreateColumnsFromModel(false);
+		l_table.setRowHeight(ROW_HEIGHT);
+		l_table.setVisibleRowCount(10);
+		l_panel.addRow(l_table);
+		l_panel.addRow(del_l_btn);
+		del_l_btn.setEnabled(false);
+		return l_panel;
+	}
+
 	/** Add jobs for lane action table */
 	protected void addLaneActionJobs() {
 		final ListSelectionModel sm = l_table.getSelectionModel();
@@ -240,6 +248,18 @@ public class ActionPlanPanel extends FormPanel {
 					l_model.deleteRow(row);
 			}
 		};
+	}
+
+	/** Create the meter action panel */
+	private JPanel createMeterActionPanel() {
+		FormPanel m_panel = new FormPanel(true);
+		m_table.setAutoCreateColumnsFromModel(false);
+		m_table.setRowHeight(ROW_HEIGHT);
+		m_table.setVisibleRowCount(10);
+		m_panel.addRow(m_table);
+		m_panel.addRow(del_m_btn);
+		del_m_btn.setEnabled(false);
+		return m_panel;
 	}
 
 	/** Add jobs for meter action table */
