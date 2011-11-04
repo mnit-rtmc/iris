@@ -57,7 +57,7 @@ public class StratifiedAlgorithm extends MeterAlgorithmState {
 	/** Constant for filtering accumulated release rate */
 	static protected final float K_RATE_ACCUM = 0.2f;
 
-	/** Total number of layers in stratified timing plan */
+	/** Total number of layers in stratified algorithm */
 	static protected final int TOTAL_LAYERS = 6;
 
 	/** Queue occupancy override threshold */
@@ -1090,7 +1090,7 @@ public class StratifiedAlgorithm extends MeterAlgorithmState {
 	protected final HashMap<String, MeterState> states =
 		new HashMap<String, MeterState>();
 
-	/** Linked list of zones in this timing plan */
+	/** Linked list of zones */
 	protected final LinkedList<Zone> zones = new LinkedList<Zone>();
 
 	/** Zone change flag */
@@ -1107,7 +1107,7 @@ public class StratifiedAlgorithm extends MeterAlgorithmState {
 		corridor = c;
 	}
 
-	/** Validate a timing plan */
+	/** Validate a ramp meter */
 	public void validate(RampMeterImpl meter) {
 		MeterState state = getMeterState(meter);
 		if(state != null)
