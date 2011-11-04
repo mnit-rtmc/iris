@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
-import java.awt.GridLayout;
+import java.awt.BorderLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -79,7 +79,7 @@ public class ActionPlanPanel extends JPanel {
 
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
-		super(new GridLayout(2, 1));
+		super(new BorderLayout());
 		session = s;
 		p_model = new ActionPlanModel(s);
 		day_model = s.getSonarState().getDayModel();
@@ -93,13 +93,13 @@ public class ActionPlanPanel extends JPanel {
 	protected void initialize() {
 		p_model.initialize();
 		addActionPlanJobs();
-		add(createActionPlanPanel());
+		add(createActionPlanPanel(), BorderLayout.NORTH);
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Schedule", t_panel);
 		tab.add("DMS Actions", d_panel);
 		tab.add("Lane Actions", l_panel);
 		tab.add("Meter Actions", m_panel);
-		add(tab);
+		add(tab, BorderLayout.SOUTH);
 	}
 
 	/** Create the main action plan panel */
@@ -109,7 +109,7 @@ public class ActionPlanPanel extends JPanel {
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(p_model.createColumnModel());
 		p_table.setRowHeight(ROW_HEIGHT);
-		p_table.setVisibleRowCount(8);
+		p_table.setVisibleRowCount(10);
 		p_panel.addRow(p_table);
 		p_panel.addRow(del_p_btn);
 		del_p_btn.setEnabled(false);
@@ -153,5 +153,10 @@ public class ActionPlanPanel extends JPanel {
 		d_panel.setTableModel(new DmsActionModel(session, ap));
 		l_panel.setTableModel(new LaneActionModel(session, ap));
 		m_panel.setTableModel(new MeterActionModel(session, ap));
+		// We need to revalidate here, because the PlanTablePanels
+		// don't resize properly on their own.  I think it has something
+		// to do with JTables inside of JScrollPanes, and empty models
+		// versus models with actual data in them.
+		revalidate();
 	}
 }

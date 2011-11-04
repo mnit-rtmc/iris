@@ -47,7 +47,7 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 		super(true);
 		table.setAutoCreateColumnsFromModel(false);
 		table.setRowHeight(ROW_HEIGHT);
-		table.setVisibleRowCount(8);
+		table.setVisibleRowCount(10);
 		addRow(table);
 		addRow(del_btn);
 		del_btn.setEnabled(false);
