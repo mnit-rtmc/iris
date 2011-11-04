@@ -60,41 +60,17 @@ public class ActionPlanPanel extends JPanel {
 	/** Button to delete the selected action plan */
 	protected final JButton del_p_btn = new JButton("Delete Plan");
 
-	/** Table model for time plans */
-	protected TimeActionModel t_model;
+	/** Time action table panel */
+	private final PlanTablePanel<TimeAction> t_panel;
 
-	/** Table to hold time actions */
-	protected final ZTable t_table = new ZTable();
+	/** DMS action table panel */
+	private final PlanTablePanel<DmsAction> d_panel;
 
-	/** Button to delete the selected time action */
-	protected final JButton del_t_btn = new JButton("Delete");
+	/** Lane action table panel */
+	private final PlanTablePanel<LaneAction> l_panel;
 
-	/** Table model for DMS actions */
-	protected DmsActionModel d_model;
-
-	/** Table to hold DMS actions */
-	protected final ZTable d_table = new ZTable();
-
-	/** Button to delete the selected DMS action */
-	protected final JButton del_d_btn = new JButton("Delete");
-
-	/** Table model for lane actions */
-	protected LaneActionModel l_model;
-
-	/** Table to hold lane actions */
-	protected final ZTable l_table = new ZTable();
-
-	/** Button to delete the selected lane action */
-	protected final JButton del_l_btn = new JButton("Delete");
-
-	/** Table model for meter actions */
-	protected MeterActionModel m_model;
-
-	/** Table to hold meter actions */
-	protected final ZTable m_table = new ZTable();
-
-	/** Button to delete the selected meter action */
-	protected final JButton del_m_btn = new JButton("Delete");
+	/** Meter action table panel */
+	private final PlanTablePanel<MeterAction> m_panel;
 
 	/** User session */
 	protected final Session session;
@@ -108,22 +84,22 @@ public class ActionPlanPanel extends JPanel {
 		session = s;
 		p_model = new ActionPlanModel(s);
 		day_model = s.getSonarState().getDayModel();
+		t_panel = new PlanTablePanel<TimeAction>();
+		d_panel = new PlanTablePanel<DmsAction>();
+		l_panel = new PlanTablePanel<LaneAction>();
+		m_panel = new PlanTablePanel<MeterAction>();
 	}
 
 	/** Initializze the widgets on the panel */
 	protected void initialize() {
 		p_model.initialize();
 		addActionPlanJobs();
-		addTimeActionJobs();
-		addDmsActionJobs();
-		addLaneActionJobs();
-		addMeterActionJobs();
 		add(createActionPlanPanel());
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Schedule", createTimeActionPanel());
-		tab.add("DMS Actions", createDmsActionPanel());
-		tab.add("Lane Actions", createLaneActionPanel());
-		tab.add("Meter Actions", createMeterActionPanel());
+		tab.add("Schedule", t_panel);
+		tab.add("DMS Actions", d_panel);
+		tab.add("Lane Actions", l_panel);
+		tab.add("Meter Actions", m_panel);
 		add(tab);
 	}
 
@@ -134,7 +110,7 @@ public class ActionPlanPanel extends JPanel {
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(p_model.createColumnModel());
 		p_table.setRowHeight(ROW_HEIGHT);
-		p_table.setVisibleRowCount(6);
+		p_table.setVisibleRowCount(8);
 		p_panel.addRow(p_table);
 		p_panel.addRow(del_p_btn);
 		del_p_btn.setEnabled(false);
@@ -160,210 +136,23 @@ public class ActionPlanPanel extends JPanel {
 		};
 	}
 
-	/** Create the time action panel */
-	private JPanel createTimeActionPanel() {
-		FormPanel t_panel = new FormPanel(true);
-		t_table.setAutoCreateColumnsFromModel(false);
-		t_table.setRowHeight(ROW_HEIGHT);
-		t_table.setVisibleRowCount(12);
-		t_panel.addRow(t_table);
-		t_panel.addRow(del_t_btn);
-		del_t_btn.setEnabled(false);
-		return t_panel;
-	}
-
-	/** Add jobs for time action table */
-	protected void addTimeActionJobs() {
-		final ListSelectionModel sm = t_table.getSelectionModel();
-		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, sm) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectTimeAction();
-			}
-		};
-		new ActionJob(this, del_t_btn) {
-			public void perform() throws Exception {
-				int row = sm.getMinSelectionIndex();
-				if(row >= 0)
-					t_model.deleteRow(row);
-			}
-		};
-	}
-
-	/** Create the DMS action panel */
-	private JPanel createDmsActionPanel() {
-		FormPanel d_panel = new FormPanel(true);
-		d_table.setAutoCreateColumnsFromModel(false);
-		d_table.setRowHeight(ROW_HEIGHT);
-		d_table.setVisibleRowCount(10);
-		d_panel.addRow(d_table);
-		d_panel.addRow(del_d_btn);
-		del_d_btn.setEnabled(false);
-		return d_panel;
-	}
-
-	/** Add jobs for DMS action table */
-	protected void addDmsActionJobs() {
-		final ListSelectionModel sm = d_table.getSelectionModel();
-		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, sm) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectDmsAction();
-			}
-		};
-		new ActionJob(this, del_d_btn) {
-			public void perform() throws Exception {
-				int row = sm.getMinSelectionIndex();
-				if(row >= 0)
-					d_model.deleteRow(row);
-			}
-		};
-	}
-
-	/** Create the lane action panel */
-	private JPanel createLaneActionPanel() {
-		FormPanel l_panel = new FormPanel(true);
-		l_table.setAutoCreateColumnsFromModel(false);
-		l_table.setRowHeight(ROW_HEIGHT);
-		l_table.setVisibleRowCount(10);
-		l_panel.addRow(l_table);
-		l_panel.addRow(del_l_btn);
-		del_l_btn.setEnabled(false);
-		return l_panel;
-	}
-
-	/** Add jobs for lane action table */
-	protected void addLaneActionJobs() {
-		final ListSelectionModel sm = l_table.getSelectionModel();
-		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, sm) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectLaneAction();
-			}
-		};
-		new ActionJob(this, del_l_btn) {
-			public void perform() throws Exception {
-				int row = sm.getMinSelectionIndex();
-				if(row >= 0)
-					l_model.deleteRow(row);
-			}
-		};
-	}
-
-	/** Create the meter action panel */
-	private JPanel createMeterActionPanel() {
-		FormPanel m_panel = new FormPanel(true);
-		m_table.setAutoCreateColumnsFromModel(false);
-		m_table.setRowHeight(ROW_HEIGHT);
-		m_table.setVisibleRowCount(10);
-		m_panel.addRow(m_table);
-		m_panel.addRow(del_m_btn);
-		del_m_btn.setEnabled(false);
-		return m_panel;
-	}
-
-	/** Add jobs for meter action table */
-	protected void addMeterActionJobs() {
-		final ListSelectionModel sm = m_table.getSelectionModel();
-		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, sm) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectMeterAction();
-			}
-		};
-		new ActionJob(this, del_m_btn) {
-			public void perform() throws Exception {
-				int row = sm.getMinSelectionIndex();
-				if(row >= 0)
-					m_model.deleteRow(row);
-			}
-		};
-	}
-
 	/** Dispose of the form */
 	public void dispose() {
 		p_model.dispose();
-		if(t_model != null) {
-			t_model.dispose();
-			t_model = null;
-		}
-		if(d_model != null) {
-			d_model.dispose();
-			d_model = null;
-		}
-		if(l_model != null) {
-			l_model.dispose();
-			l_model = null;
-		}
-		if(m_model != null) {
-			m_model.dispose();
-			m_model = null;
-		}
+		t_panel.dispose();
+		d_panel.dispose();
+		l_panel.dispose();
+		m_panel.dispose();
 	}
 
 	/** Change the selected action plan */
 	protected void selectActionPlan() {
 		ActionPlan ap = p_model.getProxy(p_table.getSelectedRow());
 		del_p_btn.setEnabled(p_model.canRemove(ap));
-		del_t_btn.setEnabled(false);
-		TimeActionModel ot_model = t_model;
-		t_model = new TimeActionModel(session, ap, day_model);
-		t_model.initialize();
-		t_table.setColumnModel(t_model.createColumnModel());
-		t_table.setModel(t_model);
-		if(ot_model != null)
-			ot_model.dispose();
-		del_d_btn.setEnabled(false);
-		DmsActionModel od_model = d_model;
-		d_model = new DmsActionModel(session, ap);
-		d_model.initialize();
-		d_table.setColumnModel(d_model.createColumnModel());
-		d_table.setModel(d_model);
-		if(od_model != null)
-			od_model.dispose();
-		del_l_btn.setEnabled(false);
-		LaneActionModel ol_model = l_model;
-		l_model = new LaneActionModel(session, ap);
-		l_model.initialize();
-		l_table.setColumnModel(l_model.createColumnModel());
-		l_table.setModel(l_model);
-		if(ol_model != null)
-			ol_model.dispose();
-		del_m_btn.setEnabled(false);
-		MeterActionModel om_model = m_model;
-		m_model = new MeterActionModel(session, ap);
-		m_model.initialize();
-		m_table.setColumnModel(m_model.createColumnModel());
-		m_table.setModel(m_model);
-		if(om_model != null)
-			om_model.dispose();
-	}
-
-	/** Change the selected time action */
-	protected void selectTimeAction() {
-		TimeAction ta = t_model.getProxy(t_table.getSelectedRow());
-		del_t_btn.setEnabled(t_model.canRemove(ta));
-	}
-
-	/** Change the selected DMS action */
-	protected void selectDmsAction() {
-		DmsAction da = d_model.getProxy(d_table.getSelectedRow());
-		del_d_btn.setEnabled(d_model.canRemove(da));
-	}
-
-	/** Change the selected lane action */
-	protected void selectLaneAction() {
-		LaneAction la = l_model.getProxy(l_table.getSelectedRow());
-		del_l_btn.setEnabled(l_model.canRemove(la));
-	}
-
-	/** Change the selected meter action */
-	protected void selectMeterAction() {
-		MeterAction ma = m_model.getProxy(m_table.getSelectedRow());
-		del_m_btn.setEnabled(m_model.canRemove(ma));
+		t_panel.setTableModel(new TimeActionModel(session, ap,
+			day_model));
+		d_panel.setTableModel(new DmsActionModel(session, ap));
+		l_panel.setTableModel(new LaneActionModel(session, ap));
+		m_panel.setTableModel(new MeterActionModel(session, ap));
 	}
 }
