@@ -175,7 +175,7 @@ public class DayPlanPanel extends JPanel {
 		h_table.setAutoCreateColumnsFromModel(false);
 		h_table.setColumnModel(h_model.createColumnModel());
 		h_table.setRowHeight(22);
-		h_table.setVisibleRowCount(10);
+		h_table.setVisibleRowCount(12);
 		bag.gridx = 0;
 		bag.gridy = 2;
 		bag.gridwidth = 9;
