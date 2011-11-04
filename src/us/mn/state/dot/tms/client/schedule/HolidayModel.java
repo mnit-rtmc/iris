@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2009  Minnesota Department of Transportation
+ * Copyright (C) 2003-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,15 +91,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		SHIFTS.add(ANY);
 		SHIFTS.add("+1");
 		SHIFTS.add("+2");
-	}
-
-	/** List of all possible period selections */
-	static protected final LinkedList<String> PERIODS =
-		new LinkedList<String>();
-	static {
-		PERIODS.add(ANY);
-		PERIODS.add("AM");
-		PERIODS.add("PM");
 	}
 
 	/** Create the columns in the model */
@@ -197,23 +188,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 					SHIFTS.toArray());
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<Holiday>("Period", 64) {
-			public Object getValueAt(Holiday h) {
-				return PERIODS.get(h.getPeriod() + 1);
-			}
-			public boolean isEditable(Holiday h) {
-				return canUpdate(h);
-			}
-			public void setValueAt(Holiday h, Object value) {
-				h.setPeriod(PERIODS.indexOf(value) - 1);
-			}
-			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					PERIODS.toArray());
-				return new DefaultCellEditor(combo);
-			}
-		},
+		}
 	    };
 	}
 
