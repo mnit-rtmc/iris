@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,12 +73,6 @@ public class DayPlanPanel extends JPanel {
 	/** Button to delete the selected day plan */
 	protected final JButton del_plan = new JButton("Delete");
 
-	/** Table model for holidays */
-	protected final DayPlanHolidayModel dh_model;
-
-	/** Table to hold the day plan holidays */
-	protected final ZTable dh_table = new ZTable();
-
 	/** Month to display on calendar widget */
 	protected final Calendar month = Calendar.getInstance();
 
@@ -139,22 +133,7 @@ public class DayPlanPanel extends JPanel {
 		bag.gridy = 1;
 		bag.gridwidth = 2;
 		add(del_plan, bag);
-		dh_model = new DayPlanHolidayModel(s);
-		dh_model.initialize();
-		dh_table.setModel(dh_model);
-		dh_table.setAutoCreateColumnsFromModel(false);
-		dh_table.setColumnModel(dh_model.createColumnModel());
-		dh_table.setRowHeight(18);
-		dh_table.setVisibleRowCount(10);
 		bag.gridx = 2;
-		bag.gridy = 0;
-		bag.gridwidth = 1;
-		bag.gridheight = 2;
-		JScrollPane dh_pane = new JScrollPane(dh_table,
-			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		add(dh_pane, bag);
-		bag.gridx = 3;
 		bag.gridy = 0;
 		bag.gridwidth = 1;
 		bag.gridheight = 1;
@@ -162,28 +141,28 @@ public class DayPlanPanel extends JPanel {
 		prev_month.setRolloverEnabled(true);
 		prev_month.setBorderPainted(false);
 		add(prev_month, bag);
-		bag.gridx = 4;
+		bag.gridx = 3;
 		setMonthLabel();
 		add(month_lbl, bag);
-		bag.gridx = 5;
+		bag.gridx = 4;
 		next_month.setContentAreaFilled(false);
 		next_month.setRolloverEnabled(true);
 		next_month.setBorderPainted(false);
 		add(next_month, bag);
-		bag.gridx = 6;
+		bag.gridx = 5;
 		prev_year.setContentAreaFilled(false);
 		prev_year.setRolloverEnabled(true);
 		prev_year.setBorderPainted(false);
 		add(prev_year, bag);
-		bag.gridx = 7;
+		bag.gridx = 6;
 		setYearLabel();
 		add(year_lbl, bag);
-		bag.gridx = 8;
+		bag.gridx = 7;
 		next_year.setContentAreaFilled(false);
 		next_year.setRolloverEnabled(true);
 		next_year.setBorderPainted(false);
 		add(next_year, bag);
-		bag.gridx = 3;
+		bag.gridx = 2;
 		bag.gridy = 1;
 		bag.gridwidth = 6;
 		bag.gridheight = 1;
@@ -205,8 +184,8 @@ public class DayPlanPanel extends JPanel {
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		add(h_pane, bag);
-		bag.gridx = 3;
-		bag.gridy = 3;
+		bag.gridx = 2;
+		bag.gridy = 6;
 		bag.gridwidth = GridBagConstraints.REMAINDER;
 		add(del_holiday, bag);
 		del_plan.setEnabled(false);
@@ -224,7 +203,7 @@ public class DayPlanPanel extends JPanel {
 			public void proxyRemoved(DayPlan dp) {}
 			public void proxyChanged(DayPlan dp, String attrib) {
 				if(attrib.equals("holidays")) {
-					dh_model.updateHolidays(dp);
+					h_model.updateHolidays(dp);
 					updateCalendarWidget();
 				}
 			}
@@ -330,7 +309,7 @@ public class DayPlanPanel extends JPanel {
 		Object item = day_cbox.getSelectedItem();
 		if(item != null) {
 			DayPlan dp = getSelectedPlan();
-			dh_model.setDayPlan(dp);
+			h_model.setDayPlan(dp);
 			del_plan.setEnabled(canRemove(dp));
 			if(dp == null) {
 				String name = item.toString().trim();
@@ -338,7 +317,7 @@ public class DayPlanPanel extends JPanel {
 					cache.createObject(name);
 			}
 		} else {
-			dh_model.setDayPlan(null);
+			h_model.setDayPlan(null);
 			del_plan.setEnabled(false);
 		}
 		updateCalendarWidget();
