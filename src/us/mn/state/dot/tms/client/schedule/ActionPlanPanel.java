@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  *
  * @author Douglas Lau
  */
-public class ActionPlanPanel extends FormPanel {
+public class ActionPlanPanel extends JPanel {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -58,9 +58,6 @@ public class ActionPlanPanel extends FormPanel {
 
 	/** Button to delete the selected action plan */
 	protected final JButton del_p_btn = new JButton("Delete Plan");
-
-	/** Plan panel */
-	protected final JPanel p_panel = new JPanel(new GridLayout(1, 2));
 
 	/** Table model for time plans */
 	protected TimeActionModel t_model;
@@ -106,7 +103,7 @@ public class ActionPlanPanel extends FormPanel {
 
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
-		super(true);
+		super(new GridLayout(2, 1));
 		session = s;
 		p_model = new ActionPlanModel(s);
 		day_model = s.getSonarState().getDayModel();
@@ -120,22 +117,27 @@ public class ActionPlanPanel extends FormPanel {
 		addDmsActionJobs();
 		addLaneActionJobs();
 		addMeterActionJobs();
+		add(createActionPlanPanel());
+		JTabbedPane tab = new JTabbedPane();
+		tab.add("Schedule", createTimeActionPanel());
+		tab.add("DMS Actions", createDmsActionPanel());
+		tab.add("Lane Actions", createLaneActionPanel());
+		tab.add("Meter Actions", createMeterActionPanel());
+		add(tab);
+	}
+
+	/** Create the main action plan panel */
+	private JPanel createActionPlanPanel() {
+		FormPanel p_panel = new FormPanel(true);
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(p_model.createColumnModel());
 		p_table.setRowHeight(ROW_HEIGHT);
 		p_table.setVisibleRowCount(6);
-		addRow(p_table);
-		addRow(del_p_btn);
+		p_panel.addRow(p_table);
+		p_panel.addRow(del_p_btn);
 		del_p_btn.setEnabled(false);
-		p_panel.add(createTimeActionPanel());
-		JTabbedPane tab = new JTabbedPane();
-		tab.add("DMS Actions", createDmsActionPanel());
-		tab.add("Lane Actions", createLaneActionPanel());
-		tab.add("Meter Actions", createMeterActionPanel());
-		p_panel.add(tab);
-		setFill();
-		addRow(p_panel);
+		return p_panel;
 	}
 
 	/** Add jobs for action plan table */
@@ -300,7 +302,6 @@ public class ActionPlanPanel extends FormPanel {
 			m_model.dispose();
 			m_model = null;
 		}
-		super.dispose();
 	}
 
 	/** Change the selected action plan */
