@@ -41,8 +41,11 @@ public class CalendarWidget extends JPanel {
 	/** Color to draw outlines of date boxes */
 	static protected final Color OUTLINE = new Color(0, 0, 0, 32);
 
+	/** Color to fill non-holiday boxes */
+	static protected final Color COL_DAY = new Color(192, 224, 128);
+
 	/** Color to fill holiday boxes */
-	static protected final Color COL_HOLIDAY = new Color(128, 208, 32, 128);
+	static protected final Color COL_HOLIDAY = new Color(224, 192, 128);
 
 	/** Formatter for weekday labels */
 	static protected final SimpleDateFormat WEEK_DAY =
@@ -74,6 +77,7 @@ public class CalendarWidget extends JPanel {
 		month.setTimeInMillis(c.getTimeInMillis());
 		month.set(Calendar.DAY_OF_MONTH, 1);
 		month.set(Calendar.HOUR_OF_DAY, 6);
+		repaint();
 	}
 
 	/** Get the preferred size of the calendar widget */
@@ -84,6 +88,8 @@ public class CalendarWidget extends JPanel {
 	/** Paint the calendar widget */
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D)g;
+		g.setColor(getBackground());
+		g.fillRect(0, 0, getWidth(), getHeight());
 		Dimension size = getSize();
 		int hgap = size.width / 7;
 		int vgap = size.height / 7;
@@ -91,7 +97,6 @@ public class CalendarWidget extends JPanel {
 		g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, points));
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(month.getTimeInMillis());
-		g.setColor(COL_HOLIDAY);
 		int wday = month.get(Calendar.DAY_OF_WEEK) -
 			month.getFirstDayOfWeek();
 		Calendar wcal = Calendar.getInstance();
@@ -120,6 +125,14 @@ public class CalendarWidget extends JPanel {
 			int half = hgap / 2;
 			if(highlighter.isHighlighted(tcal)) {
 				g.setColor(COL_HOLIDAY);
+				g.fillRect(x + 1, y + 1, hgap - 2, vgap - 2);
+				g.setColor(Color.BLACK);
+				g.drawLine(x + 2, y + 2, x + hgap - 2,
+					y + vgap - 2);
+				g.drawLine(x + hgap - 2, y + 2, x + 2,
+					y + vgap - 2);
+			} else {
+				g.setColor(COL_DAY);
 				g.fillRect(x + 1, y + 1, hgap - 2, vgap - 2);
 			}
 			g.setColor(Color.BLACK);
