@@ -19,15 +19,17 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
  * Table model for DMS actions assigned to action plans
@@ -35,14 +37,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class DmsActionModel extends ProxyTableModel<DmsAction> {
-
-	/** Allowed states */
-	static protected final ActionPlanState[] STATES = {
-		ActionPlanState.undeployed,
-		ActionPlanState.deploying,
-		ActionPlanState.deployed,
-		ActionPlanState.undeploying
-	};
 
 	/** Allowed priorities */
 	static protected final DMSMessagePriority[] PRIORITIES = {
@@ -73,23 +67,24 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 					create(sg);
 			}
 		},
-		new ProxyColumn<DmsAction>("State", 80) {
+		new ProxyColumn<DmsAction>("Phase", 100) {
 			public Object getValueAt(DmsAction da) {
-				return ActionPlanState.fromOrdinal(
-					da.getState());
+				if(da != null)
+					return da.getPhase();
+				else
+					return null;
 			}
 			public boolean isEditable(DmsAction da) {
 				return canUpdate(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				if(value instanceof ActionPlanState) {
-					ActionPlanState st =
-						(ActionPlanState)value;
-					da.setState(st.ordinal());
-				}
+				if(value instanceof PlanPhase)
+					da.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(STATES);
+				JComboBox combo = new JComboBox();
+				combo.setModel(new WrapperComboBoxModel(
+					phase_model));
 				return new DefaultCellEditor(combo);
 			}
 		},
@@ -152,10 +147,16 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
+	/** Plan phase model */
+	private final ProxyListModel<PlanPhase> phase_model;
+
 	/** Create a new DMS action table model */
-	public DmsActionModel(Session s, ActionPlan ap) {
+	public DmsActionModel(Session s, ActionPlan ap,
+		ProxyListModel<PlanPhase> pm)
+	{
 		super(s, s.getSonarState().getDmsActions());
 		action_plan = ap;
+		phase_model = pm;
 	}
 
 	/** Add a new proxy to the table model */
@@ -174,7 +175,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
 			attrs.put("sign_group", sg);
-			attrs.put("state", ActionPlanState.deployed.ordinal());
+			attrs.put("phase", action_plan.getDefaultPhase());
 			attrs.put("a_priority",
 				DMSMessagePriority.SCHEDULED.ordinal());
 			attrs.put("r_priority",

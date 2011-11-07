@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,24 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * Action for triggering an action plan to be deployed or undeployed.
+ * Phase for action plans.
  *
  * @author Douglas Lau
  */
-public interface TimeAction extends SonarObject {
+public interface PlanPhase extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "time_action";
+	String SONAR_TYPE = "plan_phase";
 
-	/** Get the action plan */
-	ActionPlan getActionPlan();
+	/** Set the hold time (seconds) */
+	void setHoldTime(int s);
 
-	/** Get the day plan */
-	DayPlan getDayPlan();
+	/** Get the hold time (seconds) */
+	int getHoldTime();
 
-	/** Get the minute-of-day (0-1440) */
-	short getMinute();
+	/** Set the next phase */
+	void setNextPhase(PlanPhase np);
 
-	/** Set the phase to trigger */
-	void setPhase(PlanPhase p);
-
-	/** Get the phase to trigger */
-	PlanPhase getPhase();
+	/** Get the next phase */
+	PlanPhase getNextPhase();
 }

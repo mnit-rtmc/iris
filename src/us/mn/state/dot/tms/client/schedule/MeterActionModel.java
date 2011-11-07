@@ -19,13 +19,15 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.MeterAction;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
  * Table model for meter actions assigned to action plans
@@ -33,14 +35,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class MeterActionModel extends ProxyTableModel<MeterAction> {
-
-	/** Allowed states */
-	static protected final ActionPlanState[] STATES = {
-		ActionPlanState.undeployed,
-		ActionPlanState.deploying,
-		ActionPlanState.deployed,
-		ActionPlanState.undeploying
-	};
 
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
@@ -60,23 +54,24 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 					create(rm);
 			}
 		},
-		new ProxyColumn<MeterAction>("State", 80) {
+		new ProxyColumn<MeterAction>("Phase", 100) {
 			public Object getValueAt(MeterAction ma) {
-				return ActionPlanState.fromOrdinal(
-					ma.getState());
+				if(ma != null)
+					return ma.getPhase();
+				else
+					return null;
 			}
 			public boolean isEditable(MeterAction ma) {
 				return canUpdate(ma);
 			}
 			public void setValueAt(MeterAction ma, Object value) {
-				if(value instanceof ActionPlanState) {
-					ActionPlanState st =
-						(ActionPlanState)value;
-					ma.setState(st.ordinal());
-				}
+				if(value instanceof PlanPhase)
+					ma.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(STATES);
+				JComboBox combo = new JComboBox();
+				combo.setModel(new WrapperComboBoxModel(
+					phase_model));
 				return new DefaultCellEditor(combo);
 			}
 		},
@@ -86,10 +81,16 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
+	/** Plan phase model */
+	private final ProxyListModel<PlanPhase> phase_model;
+
 	/** Create a new meter action table model */
-	public MeterActionModel(Session s, ActionPlan ap) {
+	public MeterActionModel(Session s, ActionPlan ap,
+		ProxyListModel<PlanPhase> pm)
+	{
 		super(s, s.getSonarState().getMeterActions());
 		action_plan = ap;
+		phase_model = pm;
 	}
 
 	/** Add a new proxy to the table model */
@@ -108,7 +109,7 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
 			attrs.put("ramp_meter", rm);
-			attrs.put("state", ActionPlanState.deployed.ordinal());
+			attrs.put("phase", action_plan.getDefaultPhase());
 			cache.createObject(name, attrs);
 		}
 	}

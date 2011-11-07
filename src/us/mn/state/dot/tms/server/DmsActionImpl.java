@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
@@ -38,7 +38,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		System.err.println("Loading DMS actions...");
 		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
 		store.query("SELECT name, action_plan, sign_group, " +
-			"state, quick_message, a_priority, r_priority " +
+			"phase, quick_message, a_priority, r_priority " +
 			"FROM iris." + SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -46,7 +46,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 					row.getString(1),	// name
 					row.getString(2),	// action_plan
 					row.getString(3),	// sign_group
-					row.getInt(4),		// state
+					row.getString(4),	// phase
 					row.getString(5),	// quick_message
 					row.getInt(6),		// a_priority
 					row.getInt(7)		// r_priority
@@ -61,7 +61,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		map.put("name", name);
 		map.put("action_plan", action_plan);
 		map.put("sign_group", sign_group);
-		map.put("state", state);
+		map.put("phase", phase);
 		map.put("quick_message", quick_message);
 		map.put("a_priority", a_priority);
 		map.put("r_priority", r_priority);
@@ -85,22 +85,23 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 
 	/** Create a new DMS action */
 	protected DmsActionImpl(Namespace ns, String n, String a, String sg,
-		int st, String qm, int ap, int rp)
+		String p, String qm, int ap, int rp)
 	{
 		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		    (SignGroup)ns.lookupObject(SignGroup.SONAR_TYPE, sg), st,
+		    (SignGroup)ns.lookupObject(SignGroup.SONAR_TYPE, sg),
+		    (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p),
 		    (QuickMessage)ns.lookupObject(QuickMessage.SONAR_TYPE, qm),
 		    ap, rp);
 	}
 
 	/** Create a new DMS action */
-	protected DmsActionImpl(String n, ActionPlan a, SignGroup sg, int st,
-		QuickMessage qm, int ap, int rp)
+	protected DmsActionImpl(String n, ActionPlan a, SignGroup sg,
+		PlanPhase p, QuickMessage qm, int ap, int rp)
 	{
 		this(n);
 		action_plan = a;
 		sign_group = sg;
-		state = st;
+		phase = p;
 		quick_message = qm;
 		a_priority = ap;
 		r_priority = rp;
@@ -122,27 +123,25 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		return sign_group;
 	}
 
-	/** Action plan state to trigger DMS action */
-	protected int state;
+	/** Action plan phase to trigger DMS action */
+	private PlanPhase phase;
 
-	/** Set the plan state to perform action */
-	public void setState(int s) {
-		state = s;
+	/** Set the plan phase to perform action */
+	public void setPhase(PlanPhase p) {
+		phase = p;
 	}
 
-	/** Set the plan state to perform action */
-	public void doSetState(int s) throws TMSException {
-		if(s == state)
+	/** Set the plan phase to perform action */
+	public void doSetPhase(PlanPhase p) throws TMSException {
+		if(p == phase)
 			return;
-		if(ActionPlanState.fromOrdinal(s) == null)
-			throw new ChangeVetoException("Invalid plan state");
-		store.update(this, "state", s);
-		setState(s);
+		store.update(this, "phase", p);
+		setPhase(p);
 	}
 
-	/** Get the plan state to perform action */
-	public int getState() {
-		return state;
+	/** Get the plan phase to perform action */
+	public PlanPhase getPhase() {
+		return phase;
 	}
 
 	/** Quick message to send when action happens */

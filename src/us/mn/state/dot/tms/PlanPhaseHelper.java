@@ -14,27 +14,29 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.Checker;
 
 /**
- * Action for controlling a ramp meter.
+ * Helper class for plan phases.
  *
  * @author Douglas Lau
  */
-public interface MeterAction extends SonarObject {
+public class PlanPhaseHelper extends BaseHelper {
 
-	/** SONAR type name */
-	String SONAR_TYPE = "meter_action";
+	/** Don't allow instances to be created */
+	private PlanPhaseHelper() {
+		assert false;
+	}
 
-	/** Get the action plan */
-	ActionPlan getActionPlan();
+	/** Lookup the phase with the specified name */
+	static public PlanPhase lookup(String name) {
+		return (PlanPhase)namespace.lookupObject(PlanPhase.SONAR_TYPE,
+			name);
+	}
 
-	/** Get the ramp meter */
-	RampMeter getRampMeter();
-
-	/** Set the phase to perform action */
-	void setPhase(PlanPhase p);
-
-	/** Get the phase to perform action */
-	PlanPhase getPhase();
+	/** Find plan phase using a Checker */
+	static public PlanPhase find(final Checker<PlanPhase> checker) {
+		return (PlanPhase)namespace.findObject(PlanPhase.SONAR_TYPE, 
+			checker);
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.TreeSet;
 import javax.swing.DefaultCellEditor;
-import javax.swing.ListModel;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DayPlan;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
@@ -125,10 +126,10 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 				day_plan = null;
 			}
 		},
-		new ProxyColumn<TimeAction>("Deploy", 60, Boolean.class) {
+		new ProxyColumn<TimeAction>("Phase", 100) {
 			public Object getValueAt(TimeAction ta) {
 				if(ta != null)
-					return ta.getDeploy();
+					return ta.getPhase();
 				else
 					return null;
 			}
@@ -136,8 +137,14 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 				return canUpdate(ta);
 			}
 			public void setValueAt(TimeAction ta, Object value) {
-				if(value instanceof Boolean)
-					ta.setDeploy((Boolean)value);
+				if(value instanceof PlanPhase)
+					ta.setPhase((PlanPhase)value);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox();
+				combo.setModel(new WrapperComboBoxModel(
+					phase_model));
+				return new DefaultCellEditor(combo);
 			}
 		}
 	    };
@@ -158,16 +165,22 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	protected final ActionPlan action_plan;
 
 	/** Day model */
-	protected final ListModel day_model;
+	private final ProxyListModel<DayPlan> day_model;
+
+	/** Plan phase model */
+	private final ProxyListModel<PlanPhase> phase_model;
 
 	/** Day plan for new time action */
 	protected DayPlan day_plan;
 
 	/** Create a new time action table model */
-	public TimeActionModel(Session s, ActionPlan ap, ListModel dm) {
+	public TimeActionModel(Session s, ActionPlan ap,
+		ProxyListModel<DayPlan> dm, ProxyListModel<PlanPhase> pm)
+	{
 		super(s, s.getSonarState().getTimeActions());
 		action_plan = ap;
 		day_model = dm;
+		phase_model = pm;
 	}
 
 	/** Add a new proxy to the table model */
@@ -187,6 +200,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 			attrs.put("day_plan", day_plan);
 			attrs.put("action_plan", action_plan);
 			attrs.put("minute", m);
+			attrs.put("phase", action_plan.getDefaultPhase());
 			cache.createObject(name, attrs);
 		}
 	}

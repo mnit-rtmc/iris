@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,27 +38,21 @@ public interface ActionPlan extends SonarObject {
 	/** Get the sync actions flag */
 	boolean getSyncActions();
 
-	/** Set the number of seconds to remain in deploying state */
-	void setDeployingSecs(int s);
-
-	/** Get the number of seconds to remain in deploying state */
-	int getDeployingSecs();
-
-	/** Set the number of seconds to remain in undeploying state */
-	void setUndeployingSecs(int s);
-
-	/** Get the number of seconds to remain in undeploying state */
-	int getUndeployingSecs();
-
 	/** Set the active status */
 	void setActive(boolean a);
 
 	/** Get the active status */
 	boolean getActive();
 
-	/** Set the deployed status */
-	void setDeployed(boolean d);
+	/** Set the default phase */
+	void setDefaultPhase(PlanPhase dp);
 
-	/** Get state (ordinal of ActionPlanState enum) */
-	int getState();
+	/** Get the default phase */
+	PlanPhase getDefaultPhase();
+
+	/** Set the phase */
+	void setPhase(PlanPhase p);
+
+	/** Get the phase */
+	PlanPhase getPhase();
 }

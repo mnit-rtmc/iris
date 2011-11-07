@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TimeAction;
@@ -57,19 +58,19 @@ public class ActionPlanJob extends Job {
 
 	/** Perform the action plan job */
 	public void perform() {
-		updateActionPlanStates();
+		updateActionPlanPhases();
 		performTimeActions();
 		performDmsActions();
 		performLaneActions();
 		performMeterActions();
 	}
 
-	/** Update the action plan states */
-	protected void updateActionPlanStates() {
+	/** Update the action plan phases */
+	protected void updateActionPlanPhases() {
 		ActionPlanHelper.find(new Checker<ActionPlan>() {
 			public boolean check(ActionPlan ap) {
 				if(ap instanceof ActionPlanImpl)
-					((ActionPlanImpl)ap).updateState();
+					((ActionPlanImpl)ap).updatePhase();
 				return false;
 			}
 		});
@@ -94,7 +95,7 @@ public class ActionPlanJob extends Job {
 			public boolean check(DmsAction da) {
 				ActionPlan ap = da.getActionPlan();
 				if(ap.getActive()) {
-					if(ap.getState() == da.getState())
+					if(ap.getPhase() == da.getPhase())
 						performDmsAction(da);
 				}
 				return false;
@@ -150,17 +151,17 @@ public class ActionPlanJob extends Job {
 			public boolean check(LaneAction la) {
 				ActionPlan ap = la.getActionPlan();
 				if(ap.getActive())
-					performLaneAction(la, ap.getState());
+					performLaneAction(la, ap.getPhase());
 				return false;
 			}
 		});
 	}
 
 	/** Perform a lane action */
-	protected void performLaneAction(LaneAction la, int s) {
+	private void performLaneAction(LaneAction la, PlanPhase phase) {
 		LaneMarking lm = la.getLaneMarking();
 		if(lm != null)
-			lm.setDeployed(s == la.getState());
+			lm.setDeployed(phase == la.getPhase());
 	}
 
 	/** Perform all meter actions */
@@ -169,18 +170,18 @@ public class ActionPlanJob extends Job {
 			public boolean check(MeterAction ma) {
 				ActionPlan ap = ma.getActionPlan();
 				if(ap.getActive())
-					performMeterAction(ma, ap.getState());
+					performMeterAction(ma, ap.getPhase());
 				return false;
 			}
 		});
 	}
 
 	/** Perform a meter action */
-	protected void performMeterAction(MeterAction ma, int s) {
+	private void performMeterAction(MeterAction ma, PlanPhase phase) {
 		RampMeter rm = ma.getRampMeter();
 		if(rm instanceof RampMeterImpl) {
 			RampMeterImpl meter = (RampMeterImpl)rm;
-			meter.setOperating(s == ma.getState());
+			meter.setOperating(phase == ma.getPhase());
 		}
 	}
 }

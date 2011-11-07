@@ -19,13 +19,15 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneMarkingHelper;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
  * Table model for lane actions assigned to action plans
@@ -33,14 +35,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class LaneActionModel extends ProxyTableModel<LaneAction> {
-
-	/** Allowed states */
-	static protected final ActionPlanState[] STATES = {
-		ActionPlanState.undeployed,
-		ActionPlanState.deploying,
-		ActionPlanState.deployed,
-		ActionPlanState.undeploying
-	};
 
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
@@ -60,23 +54,24 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 					create(lm);
 			}
 		},
-		new ProxyColumn<LaneAction>("State", 80) {
+		new ProxyColumn<LaneAction>("Phase", 100) {
 			public Object getValueAt(LaneAction la) {
-				return ActionPlanState.fromOrdinal(
-					la.getState());
+				if(la != null)
+					return la.getPhase();
+				else
+					return null;
 			}
 			public boolean isEditable(LaneAction la) {
 				return canUpdate(la);
 			}
 			public void setValueAt(LaneAction la, Object value) {
-				if(value instanceof ActionPlanState) {
-					ActionPlanState st =
-						(ActionPlanState)value;
-					la.setState(st.ordinal());
-				}
+				if(value instanceof PlanPhase)
+					la.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(STATES);
+				JComboBox combo = new JComboBox();
+				combo.setModel(new WrapperComboBoxModel(
+					phase_model));
 				return new DefaultCellEditor(combo);
 			}
 		},
@@ -86,10 +81,16 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
+	/** Plan phase model */
+	private final ProxyListModel<PlanPhase> phase_model;
+
 	/** Create a new lane action table model */
-	public LaneActionModel(Session s, ActionPlan ap) {
+	public LaneActionModel(Session s, ActionPlan ap,
+		ProxyListModel<PlanPhase> pm)
+	{
 		super(s, s.getSonarState().getLaneActions());
 		action_plan = ap;
+		phase_model = pm;
 	}
 
 	/** Add a new proxy to the table model */
@@ -108,7 +109,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
 			attrs.put("lane_marking", lm);
-			attrs.put("state", ActionPlanState.deployed.ordinal());
+			attrs.put("phase", action_plan.getDefaultPhase());
 			cache.createObject(name, attrs);
 		}
 	}

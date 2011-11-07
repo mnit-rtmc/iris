@@ -67,30 +67,6 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 					ap.setSyncActions((Boolean)value);
 			}
 		},
-		new ProxyColumn<ActionPlan>("Dep.Secs", 80, Integer.class) {
-			public Object getValueAt(ActionPlan ap) {
-				return ap.getDeployingSecs();
-			}
-			public boolean isEditable(ActionPlan ap) {
-				return canUpdate(ap);
-			}
-			public void setValueAt(ActionPlan ap, Object value) {
-				if(value instanceof Integer)
-					ap.setDeployingSecs((Integer)value);
-			}
-		},
-		new ProxyColumn<ActionPlan>("Undep.Secs", 80, Integer.class) {
-			public Object getValueAt(ActionPlan ap) {
-				return ap.getUndeployingSecs();
-			}
-			public boolean isEditable(ActionPlan ap) {
-				return canUpdate(ap);
-			}
-			public void setValueAt(ActionPlan ap, Object value) {
-				if(value instanceof Integer)
-					ap.setUndeployingSecs((Integer)value);
-			}
-		},
 		new ProxyColumn<ActionPlan>("Active", 80, Boolean.class) {
 			public Object getValueAt(ActionPlan ap) {
 				return ap.getActive();

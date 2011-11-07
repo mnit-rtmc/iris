@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TMSException;
 
@@ -37,7 +38,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		System.err.println("Loading time actions...");
 		namespace.registerType(SONAR_TYPE, TimeActionImpl.class);
 		store.query("SELECT name, action_plan, day_plan, minute, " +
-			"deploy FROM iris." + SONAR_TYPE  +";",
+			"phase FROM iris." + SONAR_TYPE  +";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -47,7 +48,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 					row.getString(2),	// action_plan
 					row.getString(3),	// day_plan
 					row.getShort(4),	// minute
-					row.getBoolean(5)	// deploy
+					row.getString(5)	// phase
 				));
 			}
 		});
@@ -60,7 +61,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		map.put("action_plan", action_plan);
 		map.put("day_plan", day_plan);
 		map.put("minute", minute);
-		map.put("deploy", deploy);
+		map.put("phase", phase);
 		return map;
 	}
 
@@ -81,21 +82,22 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 
 	/** Create a new time action */
 	protected TimeActionImpl(Namespace ns, String n, String a, String d,
-		short m, boolean dp)
+		short m, String p)
 	{
 		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		     (DayPlan)ns.lookupObject(DayPlan.SONAR_TYPE, d), m, dp);
+		     (DayPlan)ns.lookupObject(DayPlan.SONAR_TYPE, d), m,
+		     (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p));
 	}
 
 	/** Create a new time action */
 	protected TimeActionImpl(String n, ActionPlan a, DayPlan d, short m,
-		boolean dp)
+		PlanPhase p)
 	{
 		this(n);
 		action_plan = a;
 		day_plan = d;
 		minute = m;
-		deploy = dp;
+		phase = p;
 	}
 
 	/** Action plan */
@@ -122,25 +124,25 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		return minute;
 	}
 
-	/** Flag to trigger action plan deployed / undeployed */
-	protected boolean deploy;
+	/** Phase to trigger */
+	private PlanPhase phase;
 
-	/** Set the deploy trigger flag */
-	public void setDeploy(boolean d) {
-		deploy = d;
+	/** Set the phase to trigger */
+	public void setPhase(PlanPhase p) {
+		phase = p;
 	}
 
-	/** Set the deploy trigger flag */
-	public void doSetDeploy(boolean d) throws TMSException {
-		if(d == deploy)
+	/** Set the phase to trigger */
+	public void doSetPhase(PlanPhase p) throws TMSException {
+		if(p == phase)
 			return;
-		store.update(this, "deploy", d);
-		setDeploy(d);
+		store.update(this, "phase", p);
+		setPhase(p);
 	}
 
-	/** Get the deploy trigger flag */
-	public boolean getDeploy() {
-		return deploy;
+	/** Get the phase to trigger */
+	public PlanPhase getPhase() {
+		return phase;
 	}
 
 	/** Perform action if date and time is right */
@@ -157,7 +159,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		if(ap instanceof ActionPlanImpl) {
 			ActionPlanImpl api = (ActionPlanImpl)ap;
 			if(api.getActive())
-				api.setDeployed(getDeploy());
+				api.setPhaseNotify(getPhase());
 		}
 	}
 }

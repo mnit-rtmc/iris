@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,9 @@ public interface LaneAction extends SonarObject {
 	/** Get the lane marking */
 	LaneMarking getLaneMarking();
 
-	/** Set the plan state to perform action */
-	void setState(int s);
+	/** Set the phase to perform action */
+	void setPhase(PlanPhase p);
 
-	/** Get the plan state to perform action */
-	int getState();
+	/** Get the phase to perform action */
+	PlanPhase getPhase();
 }

@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MeterAction;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttribute;
@@ -282,6 +283,22 @@ public class SonarState extends Client {
 		return day_model;
 	}
 
+	/** Cache of plan phases */
+	protected final TypeCache<PlanPhase> plan_phases;
+
+	/** Get the plan phase cache */
+	public TypeCache<PlanPhase> getPlanPhases() {
+		return plan_phases;
+	}
+
+	/** Plan phase proxy list model */
+	private final ProxyListModel<PlanPhase> phase_model;
+
+	/** Get the phase list model */
+	public ProxyListModel<PlanPhase> getPhaseModel() {
+		return phase_model;
+	}
+
 	/** Cache of action plans */
 	protected final TypeCache<ActionPlan> action_plans;
 
@@ -371,6 +388,9 @@ public class SonarState extends Client {
 		day_plans = new TypeCache<DayPlan>(DayPlan.class, this);
 		day_model = new ProxyListModel<DayPlan>(day_plans);
 		day_model.initialize();
+		plan_phases = new TypeCache<PlanPhase>(PlanPhase.class, this);
+		phase_model = new ProxyListModel<PlanPhase>(plan_phases);
+		phase_model.initialize();
 		action_plans = new TypeCache<ActionPlan>(ActionPlan.class,this);
 		time_actions = new TypeCache<TimeAction>(TimeAction.class,this);
 		dms_actions = new TypeCache<DmsAction>(DmsAction.class, this);
@@ -459,6 +479,7 @@ public class SonarState extends Client {
 		populateReadable(incidents);
 		populateReadable(holidays);
 		populateReadable(day_plans);
+		populateReadable(plan_phases);
 		populateReadable(action_plans);
 		populateReadable(time_actions);
 		populateReadable(dms_actions);

@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.MeterAction;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TMSException;
 
@@ -36,7 +36,7 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading meter actions...");
 		namespace.registerType(SONAR_TYPE, MeterActionImpl.class);
-		store.query("SELECT name, action_plan, ramp_meter, state " +
+		store.query("SELECT name, action_plan, ramp_meter, phase " +
 			"FROM iris." + SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -45,7 +45,7 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 					row.getString(1),	// name
 					row.getString(2),	// action_plan
 					row.getString(3),	// ramp_meter
-					row.getInt(4)		// state
+					row.getString(4)	// phase
 				));
 			}
 		});
@@ -57,7 +57,7 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 		map.put("name", name);
 		map.put("action_plan", action_plan);
 		map.put("ramp_meter", ramp_meter);
-		map.put("state", state);
+		map.put("phase", phase);
 		return map;
 	}
 
@@ -78,20 +78,21 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 
 	/** Create a new meter action */
 	protected MeterActionImpl(Namespace ns, String n, String a, String rm,
-		int st)
+		String p)
 	{
 		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		    (RampMeter)ns.lookupObject(RampMeter.SONAR_TYPE, rm), st);
+		    (RampMeter)ns.lookupObject(RampMeter.SONAR_TYPE, rm),
+		    (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p));
 	}
 
 	/** Create a new meter action */
 	protected MeterActionImpl(String n, ActionPlan a, RampMeter rm,
-		int st)
+		PlanPhase p)
 	{
 		this(n);
 		action_plan = a;
 		ramp_meter = rm;
-		state = st;
+		phase = p;
 	}
 
 	/** Action plan */
@@ -110,26 +111,24 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 		return ramp_meter;
 	}
 
-	/** Action plan state to trigger action */
-	protected int state;
+	/** Action plan phase to trigger action */
+	private PlanPhase phase;
 
-	/** Set the plan state to perform action */
-	public void setState(int s) {
-		state = s;
+	/** Set the plan phase to perform action */
+	public void setPhase(PlanPhase p) {
+		phase = p;
 	}
 
-	/** Set the plan state to perform action */
-	public void doSetState(int s) throws TMSException {
-		if(s == state)
+	/** Set the plan phase to perform action */
+	public void doSetPhase(PlanPhase p) throws TMSException {
+		if(p == phase)
 			return;
-		if(ActionPlanState.fromOrdinal(s) == null)
-			throw new ChangeVetoException("Invalid plan state");
-		store.update(this, "state", s);
-		setState(s);
+		store.update(this, "phase", p);
+		setPhase(p);
 	}
 
-	/** Get the plan state to perform action */
-	public int getState() {
-		return state;
+	/** Get the plan phase to perform action */
+	public PlanPhase getPhase() {
+		return phase;
 	}
 }

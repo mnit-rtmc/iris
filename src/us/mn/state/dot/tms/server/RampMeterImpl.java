@@ -361,12 +361,13 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Get the minute for a matching time action */
 	private int getTimeActionMinute(final boolean start) {
 		final int period = currentPeriod();
-		final LinkedList<ActionPlan> plans = getActionPlans();
+		final LinkedList<MeterAction> act = getMeterActions();
 		TimeAction t = TimeActionHelper.find(new Checker<TimeAction>() {
 			public boolean check(TimeAction ta) {
-				ActionPlan ap = ta.getActionPlan();
-				return plans.contains(ap) &&
-				       checkTimeAction(ta, start, period);
+				if(TimeActionHelper.getPeriod(ta) == period)
+					return checkTimeAction(ta, start, act);
+				else
+					return false;
 			}
 		});
 		if(t != null)
@@ -375,30 +376,36 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			return TimeActionHelper.NOON;
 	}
 
-	/** Get a list of all action plans which control the meter */
-	private LinkedList<ActionPlan> getActionPlans() {
+	/** Get a list of all meter actions which control the meter */
+	private LinkedList<MeterAction> getMeterActions() {
 		final RampMeterImpl meter = this;
-		final LinkedList<ActionPlan> plans =
-			new LinkedList<ActionPlan>();
+		final LinkedList<MeterAction> act =
+			new LinkedList<MeterAction>();
 		MeterActionHelper.find(new Checker<MeterAction>() {
 			public boolean check(MeterAction ma) {
 				if(ma.getRampMeter() == meter) {
 					ActionPlan ap = ma.getActionPlan();
 					if(ap.getActive())
-						plans.add(ap);
+						act.add(ma);
 				}
 				return false;
 			}
 		});
-		return plans;
+		return act;
 	}
 
 	/** Check a time action */
 	private boolean checkTimeAction(TimeAction ta, boolean start,
-		int period)
+		LinkedList<MeterAction> act)
 	{
-		return (ta.getDeploy() == start) &&
-		       (TimeActionHelper.getPeriod(ta) == period);
+		for(MeterAction ma: act) {
+			if(ta.getActionPlan() == ma.getActionPlan()) {
+				boolean deploy = ta.getPhase() == ma.getPhase();
+				if(deploy == start)
+					return true;
+			}
+		}
+		return false;
 	}
 
 	/** Camera from which this can be seen */

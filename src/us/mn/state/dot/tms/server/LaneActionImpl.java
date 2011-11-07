@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -36,7 +36,7 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading lane actions...");
 		namespace.registerType(SONAR_TYPE, LaneActionImpl.class);
-		store.query("SELECT name, action_plan, lane_marking, state " +
+		store.query("SELECT name, action_plan, lane_marking, phase " +
 			"FROM iris." + SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -45,7 +45,7 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 					row.getString(1),	// name
 					row.getString(2),	// action_plan
 					row.getString(3),	// lane_marking
-					row.getInt(4)		// state
+					row.getString(4)	// phase
 				));
 			}
 		});
@@ -57,7 +57,7 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 		map.put("name", name);
 		map.put("action_plan", action_plan);
 		map.put("lane_marking", lane_marking);
-		map.put("state", state);
+		map.put("phase", phase);
 		return map;
 	}
 
@@ -78,21 +78,21 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 
 	/** Create a new lane action */
 	protected LaneActionImpl(Namespace ns, String n, String a, String lm,
-		int st)
+		String p)
 	{
 		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
 		    (LaneMarking)ns.lookupObject(LaneMarking.SONAR_TYPE, lm),
-		    st);
+		    (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p));
 	}
 
 	/** Create a new lane action */
 	protected LaneActionImpl(String n, ActionPlan a, LaneMarking lm,
-		int st)
+		PlanPhase p)
 	{
 		this(n);
 		action_plan = a;
 		lane_marking = lm;
-		state = st;
+		phase = p;
 	}
 
 	/** Action plan */
@@ -111,26 +111,24 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 		return lane_marking;
 	}
 
-	/** Action plan state to trigger action */
-	protected int state;
+	/** Action plan phase to trigger action */
+	private PlanPhase phase;
 
-	/** Set the plan state to perform action */
-	public void setState(int s) {
-		state = s;
+	/** Set the plan phase to perform action */
+	public void setPhase(PlanPhase p) {
+		phase = p;
 	}
 
-	/** Set the plan state to perform action */
-	public void doSetState(int s) throws TMSException {
-		if(s == state)
+	/** Set the plan phase to perform action */
+	public void doSetPhase(PlanPhase p) throws TMSException {
+		if(p == phase)
 			return;
-		if(ActionPlanState.fromOrdinal(s) == null)
-			throw new ChangeVetoException("Invalid plan state");
-		store.update(this, "state", s);
-		setState(s);
+		store.update(this, "phase", p);
+		setPhase(p);
 	}
 
-	/** Get the plan state to perform action */
-	public int getState() {
-		return state;
+	/** Get the plan phase to perform action */
+	public PlanPhase getPhase() {
+		return phase;
 	}
 }

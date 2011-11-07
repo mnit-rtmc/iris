@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.LinkedList;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.MeterAlgorithm;
@@ -97,41 +96,41 @@ public class OpSendMeterSettings extends OpDevice {
 
 	/** Update the timing table with active timing plans */
 	protected void updateTimingTable() {
-		final LinkedList<ActionPlan> plans =
-			new LinkedList<ActionPlan>();
+		final LinkedList<MeterAction> act =
+			new LinkedList<MeterAction>();
 		MeterActionHelper.find(new Checker<MeterAction>() {
 			public boolean check(MeterAction ma) {
-				if(ma.getRampMeter() == meter &&
-				   ActionPlanState.isDeployed(ma.getState()))
-					plans.add(ma.getActionPlan());
+				if(ma.getRampMeter() == meter)
+				   act.add(ma);
 				return false;
 			}
 		});
-		for(ActionPlan ap: plans) {
-			if(ap.getActive())
-				updateTable(ap);
+		for(MeterAction ma: act) {
+			if(ma.getActionPlan().getActive())
+				updateTable(ma);
 		}
 	}
 
-	/** Update one timing table with an action plan */
-	protected void updateTable(final ActionPlan ap) {
+	/** Update one timing table with a meter action */
+	protected void updateTable(final MeterAction ma) {
+		final ActionPlan ap = ma.getActionPlan();
 		TimeActionHelper.find(new Checker<TimeAction>() {
 			public boolean check(TimeAction ta) {
 				if(ta.getActionPlan() == ap)
-					updateTable(ta);
+					updateTable(ma, ta);
 				return false;
 			}
 		});
 	}
 
 	/** Update one timing table with a time action */
-	private void updateTable(TimeAction ta) {
+	private void updateTable(MeterAction ma, TimeAction ta) {
 		int p = TimeActionHelper.getPeriod(ta);
 		int min = minuteBCD(ta.getMinute());
 		float r = MndotPoller.calculateRedTime(meter, getTarget(p));
 		table_red[p] = Math.round(r * 10);
 		table_rate[p] = MeterRate.TOD;
-		if(ta.getDeploy())
+		if(ma.getPhase() == ta.getPhase())
 			table_start[p] = Math.min(table_start[p], min);
 		else
 			table_stop[p] = Math.max(table_stop[p], min);
