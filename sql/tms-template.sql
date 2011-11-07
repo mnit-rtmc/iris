@@ -832,19 +832,19 @@ CREATE UNIQUE INDEX lane_use_multi_indication_idx ON iris.lane_use_multi
 CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
 	USING btree (msg_num, width, height);
 
-CREATE TABLE iris.plan_state (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(12) NOT NULL
+CREATE TABLE iris.plan_phase (
+	name VARCHAR(12) PRIMARY KEY,
+	hold_time INTEGER NOT NULL,
+	next_phase VARCHAR(12) REFERENCES iris.plan_phase
 );
 
 CREATE TABLE iris.action_plan (
 	name VARCHAR(16) PRIMARY KEY,
 	description VARCHAR(64) NOT NULL,
 	sync_actions BOOLEAN NOT NULL,
-	deploying_secs INTEGER NOT NULL,
-	undeploying_secs INTEGER NOT NULL,
 	active BOOLEAN NOT NULL,
-	state INTEGER NOT NULL REFERENCES iris.plan_state
+	default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE TABLE iris.time_action (
@@ -852,14 +852,14 @@ CREATE TABLE iris.time_action (
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
 	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
 	minute SMALLINT NOT NULL,
-	deploy BOOLEAN NOT NULL
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE TABLE iris.dms_action (
 	name VARCHAR(20) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
 	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
-	state INTEGER NOT NULL REFERENCES iris.plan_state,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message,
 	a_priority INTEGER NOT NULL,
 	r_priority INTEGER NOT NULL
@@ -869,20 +869,19 @@ CREATE TABLE iris.lane_action (
 	name VARCHAR(20) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
 	lane_marking VARCHAR(10) NOT NULL REFERENCES iris._lane_marking,
-	state INTEGER NOT NULL REFERENCES iris.plan_state
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE TABLE iris.meter_action (
 	name VARCHAR(20) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
 	ramp_meter VARCHAR(10) NOT NULL REFERENCES iris._ramp_meter,
-	state INTEGER NOT NULL REFERENCES iris.plan_state
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE VIEW action_plan_view AS
-	SELECT name, ap.description, sync_actions, deploying_secs,
-	undeploying_secs, active, ps.description AS state
-	FROM iris.action_plan ap, iris.plan_state ps WHERE ap.state = ps.id;
+	SELECT name, description, sync_actions, active, default_phase, phase
+	FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
 CREATE FUNCTION hour_min(integer) RETURNS text
@@ -910,7 +909,7 @@ END;'
 
 CREATE VIEW time_action_view AS
 	SELECT name, action_plan, day_plan, hour_min(minute) AS time_of_day,
-	deploy
+	phase
 	FROM iris.time_action;
 GRANT SELECT ON time_action_view TO PUBLIC;
 
@@ -1365,13 +1364,6 @@ COPY iris.encoder_type (id, description) FROM stdin;
 3	Infinova MPEG4
 \.
 
-COPY iris.plan_state (id, description) FROM stdin;
-0	undeployed
-1	deploying
-2	deployed
-3	undeploying
-\.
-
 COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
@@ -1577,45 +1569,47 @@ PRV_0078	policy_admin	incident_detail/.*	f	t	t	t
 PRV_0079	policy_admin	lane_action(/.*)?	t	f	f	f
 PRV_0080	policy_admin	lane_action/.*	f	t	t	t
 PRV_0081	policy_admin	map_extent/.*	f	t	t	t
-PRV_0036	policy_admin	meter_action(/.*)?	t	f	f	f
-PRV_0082	policy_admin	meter_action/.*	f	t	t	t
-PRV_0083	policy_admin	quick_message/.*	f	t	t	t
-PRV_0084	policy_admin	sign_group/.*	f	t	t	t
-PRV_0085	policy_admin	sign_text/.*	f	t	t	t
-PRV_0086	policy_admin	time_action(/.*)?	t	f	f	f
-PRV_0087	policy_admin	time_action/.*	f	t	t	t
-PRV_0088	device_admin	alarm/.*	f	t	t	t
-PRV_0089	device_admin	cabinet/.*	f	t	t	t
-PRV_0090	device_admin	camera/.*	f	t	t	t
-PRV_0091	device_admin	comm_link/.*	f	t	t	t
-PRV_0092	device_admin	controller/.*	f	t	t	t
-PRV_0093	device_admin	detector/.*	f	t	t	t
-PRV_0094	device_admin	dms/.*	f	t	t	t
-PRV_0095	device_admin	geo_loc/.*	f	t	t	t
-PRV_0096	device_admin	lane_marking(/.*)?	t	f	f	f
-PRV_0097	device_admin	lane_marking/.*	f	t	t	t
-PRV_0098	device_admin	lcs/.*	f	t	t	t
-PRV_0099	device_admin	lcs_array/.*	f	t	t	t
-PRV_0100	device_admin	lcs_indication/.*	f	t	t	t
-PRV_0101	device_admin	modem/.*	f	t	t	t
-PRV_0102	device_admin	r_node/.*	f	t	t	t
-PRV_0103	device_admin	ramp_meter/.*	f	t	t	t
-PRV_0104	device_admin	road/.*	f	t	t	t
-PRV_0105	device_admin	video_monitor/.*	f	t	t	t
-PRV_0106	device_admin	warning_sign/.*	f	t	t	t
-PRV_0107	device_admin	weather_sensor(/.*)?	t	f	f	f
-PRV_0108	device_admin	weather_sensor/.*	f	t	t	t
-PRV_0109	system_admin	cabinet_style/.*	f	t	t	t
-PRV_0110	system_admin	font/.*	f	t	t	t
-PRV_0111	system_admin	glyph/.*	f	t	t	t
-PRV_0112	system_admin	graphic/.*	f	t	t	t
-PRV_0113	system_admin	lane_use_multi/.*	f	t	t	t
-PRV_0114	system_admin	system_attribute/.*	f	t	t	t
-PRV_0115	user_admin	user/.*	f	t	t	t
-PRV_0116	user_admin	role/.*	f	t	t	t
-PRV_0117	user_admin	privilege/.*	f	t	t	t
-PRV_0118	user_admin	capability/.*	f	t	t	t
-PRV_0119	user_admin	connection/.*	f	f	f	t
+PRV_0082	policy_admin	meter_action(/.*)?	t	f	f	f
+PRV_0083	policy_admin	meter_action/.*	f	t	t	t
+PRV_0084	policy_admin	plan_phase(/.*)?	t	f	f	f
+PRV_0085	policy_admin	plan_phase/.*	f	t	t	t
+PRV_0086	policy_admin	quick_message/.*	f	t	t	t
+PRV_0087	policy_admin	sign_group/.*	f	t	t	t
+PRV_0088	policy_admin	sign_text/.*	f	t	t	t
+PRV_0089	policy_admin	time_action(/.*)?	t	f	f	f
+PRV_0090	policy_admin	time_action/.*	f	t	t	t
+PRV_0091	device_admin	alarm/.*	f	t	t	t
+PRV_0092	device_admin	cabinet/.*	f	t	t	t
+PRV_0093	device_admin	camera/.*	f	t	t	t
+PRV_0094	device_admin	comm_link/.*	f	t	t	t
+PRV_0095	device_admin	controller/.*	f	t	t	t
+PRV_0096	device_admin	detector/.*	f	t	t	t
+PRV_0097	device_admin	dms/.*	f	t	t	t
+PRV_0098	device_admin	geo_loc/.*	f	t	t	t
+PRV_0099	device_admin	lane_marking(/.*)?	t	f	f	f
+PRV_0100	device_admin	lane_marking/.*	f	t	t	t
+PRV_0101	device_admin	lcs/.*	f	t	t	t
+PRV_0102	device_admin	lcs_array/.*	f	t	t	t
+PRV_0103	device_admin	lcs_indication/.*	f	t	t	t
+PRV_0104	device_admin	modem/.*	f	t	t	t
+PRV_0105	device_admin	r_node/.*	f	t	t	t
+PRV_0106	device_admin	ramp_meter/.*	f	t	t	t
+PRV_0107	device_admin	road/.*	f	t	t	t
+PRV_0108	device_admin	video_monitor/.*	f	t	t	t
+PRV_0109	device_admin	warning_sign/.*	f	t	t	t
+PRV_0110	device_admin	weather_sensor(/.*)?	t	f	f	f
+PRV_0111	device_admin	weather_sensor/.*	f	t	t	t
+PRV_0112	system_admin	cabinet_style/.*	f	t	t	t
+PRV_0113	system_admin	font/.*	f	t	t	t
+PRV_0114	system_admin	glyph/.*	f	t	t	t
+PRV_0115	system_admin	graphic/.*	f	t	t	t
+PRV_0116	system_admin	lane_use_multi/.*	f	t	t	t
+PRV_0117	system_admin	system_attribute/.*	f	t	t	t
+PRV_0118	user_admin	user/.*	f	t	t	t
+PRV_0119	user_admin	role/.*	f	t	t	t
+PRV_0120	user_admin	privilege/.*	f	t	t	t
+PRV_0121	user_admin	capability/.*	f	t	t	t
+PRV_0122	user_admin	connection/.*	f	f	f	t
 \.
 
 COPY iris.role (name, enabled) FROM stdin;
