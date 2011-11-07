@@ -158,7 +158,8 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 		ProxyColumn pc = getProxyColumn(col);
 		if(pc != null)
 			return pc.getValueAt(ta);
-		return null;
+		else
+			return null;
 	}
 
 	/** Currently selected action plan */
