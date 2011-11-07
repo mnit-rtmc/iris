@@ -14,10 +14,16 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
  * Table model for action plans.
@@ -78,13 +84,35 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				if(value instanceof Boolean)
 					ap.setActive((Boolean)value);
 			}
-		}
+		},
+		new ProxyColumn<ActionPlan>("Default Phase", 100) {
+			public Object getValueAt(ActionPlan ap) {
+				return ap.getDefaultPhase();
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return canUpdate(ap);
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				if(value instanceof PlanPhase)
+					ap.setDefaultPhase((PlanPhase)value);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox();
+				combo.setModel(new WrapperComboBoxModel(
+					phase_model));
+				return new DefaultCellEditor(combo);
+			}
+		},
 	    };
 	}
 
+	/** Plan phase model */
+	private final ProxyListModel<PlanPhase> phase_model;
+
 	/** Create a new action plan table model */
-	public ActionPlanModel(Session s) {
+	public ActionPlanModel(Session s, ProxyListModel<PlanPhase> pm) {
 		super(s, s.getSonarState().getActionPlans());
+		phase_model = pm;
 	}
 
 	/** Get the SONAR type name */

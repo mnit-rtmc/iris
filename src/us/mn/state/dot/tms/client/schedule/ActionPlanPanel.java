@@ -88,7 +88,7 @@ public class ActionPlanPanel extends JPanel {
 		session = s;
 		day_model = s.getSonarState().getDayModel();
 		phase_model = s.getSonarState().getPhaseModel();
-		p_model = new ActionPlanModel(s);
+		p_model = new ActionPlanModel(s, phase_model);
 		t_panel = new PlanTablePanel<TimeAction>();
 		d_panel = new PlanTablePanel<DmsAction>();
 		l_panel = new PlanTablePanel<LaneAction>();
