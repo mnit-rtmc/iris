@@ -222,12 +222,14 @@
 <p>
 	<a href="http://iris.dot.state.mn.us/rpms/">Download</a> and install
 	the IRIS package.
-	This should be a file called <i>iris-xx.yy.zz-bb.i386.rpm</i>, with
+	This should be a file called <i>iris-xx.yy.zz-bb.aa.rpm</i>, with
 	<i>xx</i> indicating the major version, <i>yy</i> minor, <i>zz</i>
 	micro, and <i>bb</i> the build version.
+	The system architecture, <i>aa</i>, will be either <i>i386</i> (32-bit)
+	or <i>x86_64</i> (64-bit).
 	It can be installed with the following command (as root):
 </p>
-<pre class="code">rpm -i iris-xx.yy.zz-bb.i386.rpm</pre>
+<pre class="code">rpm -i iris-xx.yy.zz-bb.aa.rpm</pre>
 <p>
 	Next, you must initialize the IRIS server installation.
 	This will create a SSL key pair for encrypted communication between the
