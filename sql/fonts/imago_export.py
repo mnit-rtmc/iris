@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+'''This simple script connects to an IRIS database and exports a single font in
+Imago .ifnt format.'''
+
 from sys import argv, exit
 from base64 import b64decode
 import pgdb

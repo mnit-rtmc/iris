@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+'''This simple script connects to an IRIS database and exports a single font as
+a series of SQL statements.'''
+
 from sys import argv, exit
 import pgdb
 
