@@ -45,7 +45,7 @@ def read_glyphs(conn, name):
 	cursor.close()
 
 if len(argv) != 2:
-	print "Usage:\n./extract_font.py [font-name]\n"
+	print "Usage:\n./sql_export.py [font-name]\n"
 	exit(1)
 name = argv[1]
 connection = pgdb.connect(database='tms')
