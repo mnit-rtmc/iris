@@ -427,6 +427,10 @@
 			<fileset file="${sql.dir}/tms-template.sql"/>
 			<fileset file="${sql.dir}/migrate-*.sql"/>
 		</copy>
+		<mkdir dir="${install.dir}/var/lib/iris/sql/fonts"/>
+		<copy todir="${install.dir}/var/lib/iris/sql/fonts">
+			<fileset file="${sql.dir}/fonts/*.sql"/>
+		</copy>
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
 		<mkdir dir="${install.dir}/var/log/iris"/>
