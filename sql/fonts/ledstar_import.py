@@ -3,7 +3,7 @@
 '''This simple script takes a font in Ledstar .lf1 format and creates a series
 of SQL statements to import the font into IRIS.'''
 
-from sys import argv
+from sys import argv, exit
 from base64 import b64encode
 from binascii import unhexlify
 
@@ -40,4 +40,7 @@ def create_font_sql(lines):
 		except StopIteration:
 			break
 
+if len(argv) != 2:
+	print "Usage:\n./ledstar_import.py [file-name]\n"
+	exit(1)
 create_font_sql(line.strip() for line in open(argv[1]))
