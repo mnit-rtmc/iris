@@ -175,13 +175,11 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	protected DayPlan day_plan;
 
 	/** Create a new time action table model */
-	public TimeActionModel(Session s, ActionPlan ap,
-		ProxyListModel<DayPlan> dm, ProxyListModel<PlanPhase> pm)
-	{
+	public TimeActionModel(Session s, ActionPlan ap) {
 		super(s, s.getSonarState().getTimeActions());
 		action_plan = ap;
-		day_model = dm;
-		phase_model = pm;
+		day_model = s.getSonarState().getDayModel();
+		phase_model = s.getSonarState().getPhaseModel();
 	}
 
 	/** Add a new proxy to the table model */

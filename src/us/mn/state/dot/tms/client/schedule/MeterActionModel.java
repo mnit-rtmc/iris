@@ -85,12 +85,10 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 	private final ProxyListModel<PlanPhase> phase_model;
 
 	/** Create a new meter action table model */
-	public MeterActionModel(Session s, ActionPlan ap,
-		ProxyListModel<PlanPhase> pm)
-	{
+	public MeterActionModel(Session s, ActionPlan ap) {
 		super(s, s.getSonarState().getMeterActions());
 		action_plan = ap;
-		phase_model = pm;
+		phase_model = s.getSonarState().getPhaseModel();
 	}
 
 	/** Add a new proxy to the table model */

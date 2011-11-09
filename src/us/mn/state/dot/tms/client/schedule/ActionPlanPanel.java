@@ -22,14 +22,12 @@ import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -77,19 +75,11 @@ public class ActionPlanPanel extends JPanel {
 	/** User session */
 	protected final Session session;
 
-	/** Day plan model */
-	private final ProxyListModel<DayPlan> day_model;
-
-	/** Plan phase model */
-	private final ProxyListModel<PlanPhase> phase_model;
-
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
 		super(new BorderLayout());
 		session = s;
-		day_model = s.getSonarState().getDayModel();
-		phase_model = s.getSonarState().getPhaseModel();
-		p_model = new ActionPlanModel(s, phase_model);
+		p_model = new ActionPlanModel(s);
 		t_panel = new PlanTablePanel<TimeAction>();
 		d_panel = new PlanTablePanel<DmsAction>();
 		l_panel = new PlanTablePanel<LaneAction>();
@@ -155,14 +145,10 @@ public class ActionPlanPanel extends JPanel {
 	protected void selectActionPlan() {
 		ActionPlan ap = p_model.getProxy(p_table.getSelectedRow());
 		del_p_btn.setEnabled(p_model.canRemove(ap));
-		t_panel.setTableModel(new TimeActionModel(session, ap,
-			day_model, phase_model));
-		d_panel.setTableModel(new DmsActionModel(session, ap,
-			phase_model));
-		l_panel.setTableModel(new LaneActionModel(session, ap,
-			phase_model));
-		m_panel.setTableModel(new MeterActionModel(session, ap,
-			phase_model));
+		t_panel.setTableModel(new TimeActionModel(session, ap));
+		d_panel.setTableModel(new DmsActionModel(session, ap));
+		l_panel.setTableModel(new LaneActionModel(session, ap));
+		m_panel.setTableModel(new MeterActionModel(session, ap));
 		// We need to revalidate here, because the PlanTablePanels
 		// don't resize properly on their own.  I think it has something
 		// to do with JTables inside of JScrollPanes, and empty models

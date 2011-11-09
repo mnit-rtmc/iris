@@ -85,12 +85,10 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	private final ProxyListModel<PlanPhase> phase_model;
 
 	/** Create a new lane action table model */
-	public LaneActionModel(Session s, ActionPlan ap,
-		ProxyListModel<PlanPhase> pm)
-	{
+	public LaneActionModel(Session s, ActionPlan ap) {
 		super(s, s.getSonarState().getLaneActions());
 		action_plan = ap;
-		phase_model = pm;
+		phase_model = s.getSonarState().getPhaseModel();
 	}
 
 	/** Add a new proxy to the table model */

@@ -110,9 +110,9 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	private final ProxyListModel<PlanPhase> phase_model;
 
 	/** Create a new action plan table model */
-	public ActionPlanModel(Session s, ProxyListModel<PlanPhase> pm) {
+	public ActionPlanModel(Session s) {
 		super(s, s.getSonarState().getActionPlans());
-		phase_model = pm;
+		phase_model = s.getSonarState().getPhaseModel();
 	}
 
 	/** Get the SONAR type name */

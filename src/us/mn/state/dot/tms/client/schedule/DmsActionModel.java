@@ -151,12 +151,10 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	private final ProxyListModel<PlanPhase> phase_model;
 
 	/** Create a new DMS action table model */
-	public DmsActionModel(Session s, ActionPlan ap,
-		ProxyListModel<PlanPhase> pm)
-	{
+	public DmsActionModel(Session s, ActionPlan ap) {
 		super(s, s.getSonarState().getDmsActions());
 		action_plan = ap;
-		phase_model = pm;
+		phase_model = s.getSonarState().getPhaseModel();
 	}
 
 	/** Add a new proxy to the table model */
