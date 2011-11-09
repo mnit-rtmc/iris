@@ -71,7 +71,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		map.put("description", description);
 		map.put("sync_actions", sync_actions);
 		map.put("active", active);
-		map.put("default_phsae", default_phase);
+		map.put("default_phase", default_phase);
 		map.put("phase", phase);
 		return map;
 	}
