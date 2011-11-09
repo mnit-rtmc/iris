@@ -82,7 +82,8 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 		if(mdl != null) {
 			T proxy = mdl.getProxy(row);
 			del_btn.setEnabled(mdl.canRemove(proxy));
-		}
+		} else
+			del_btn.setEnabled(false);
 	}
 
 	/** Delete the plan at the specified row */
