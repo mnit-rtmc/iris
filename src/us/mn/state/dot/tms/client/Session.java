@@ -27,6 +27,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
@@ -52,6 +53,8 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.R_NodeTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
+import us.mn.state.dot.tms.client.schedule.PlanManager;
+import us.mn.state.dot.tms.client.schedule.PlanTab;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 import us.mn.state.dot.tms.client.weather.WeatherSensorManager;
@@ -193,6 +196,9 @@ public class Session {
 	/** Incident manager */
 	protected final IncidentManager inc_manager;
 
+	/** Action plan manager */
+	private final PlanManager plan_manager;
+
 	/** List of all tabs */
 	protected final List<MapTab> tabs = new LinkedList<MapTab>();
 
@@ -230,6 +236,7 @@ public class Session {
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
+		plan_manager = new PlanManager(this, loc_manager);
 		seg_layer = r_node_manager.getSegmentLayer();
 		tile_layer = createTileLayer(props.getProperty("map.tile.url"));
 	}
@@ -264,6 +271,7 @@ public class Session {
 		weather_sensor_manager.initialize();
 		meter_manager.initialize();
 		inc_manager.initialize();
+		plan_manager.initialize();
 	}
 
 	/** Add the tabs */
@@ -280,6 +288,8 @@ public class Session {
 			tabs.add(new RampMeterTab(this, meter_manager));
 		if(canRead(R_Node.SONAR_TYPE))
 			tabs.add(new R_NodeTab(this, r_node_manager));
+		if(canRead(ActionPlan.SONAR_TYPE))
+			tabs.add(new PlanTab(this, plan_manager));
 	}
 
 	/** Create the layer states.  The map bean and model must be seperate
@@ -364,6 +374,7 @@ public class Session {
 		desktop.closeFrames();
 		for(MapTab tab: tabs)
 			tab.dispose();
+		plan_manager.dispose();
 		r_node_manager.dispose();
 		det_manager.dispose();
 		cam_manager.dispose();
