@@ -46,6 +46,7 @@ public class ActionPlanPanel extends JPanel {
 		       s.canRead(DmsAction.SONAR_TYPE) &&
 		       s.canRead(LaneAction.SONAR_TYPE) &&
 		       s.canRead(MeterAction.SONAR_TYPE) &&
+		       s.canRead(PlanPhase.SONAR_TYPE) &&
 		       s.canRead(TimeAction.SONAR_TYPE);
 	}
 

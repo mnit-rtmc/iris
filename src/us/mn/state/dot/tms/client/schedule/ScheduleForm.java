@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.Color;
 import javax.swing.JTabbedPane;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 
@@ -44,11 +45,16 @@ public class ScheduleForm extends AbstractForm {
 	/** Day plan panel */
 	protected final DayPlanPanel d_panel;
 
+	/** Plan phase panel */
+	private final PlanTablePanel<PlanPhase> pp_panel;
+
 	/** Create a new schedule form */
 	public ScheduleForm(Session s) {
 		super(TITLE);
 		p_panel = new ActionPlanPanel(s);
 		d_panel = new DayPlanPanel(s);
+		pp_panel = new PlanTablePanel<PlanPhase>();
+		pp_panel.setTableModel(new PlanPhaseModel(s));
 	}
 
 	/** Initializze the widgets in the form */
@@ -56,13 +62,15 @@ public class ScheduleForm extends AbstractForm {
 		p_panel.initialize();
 		tab.add("Action Plans", p_panel);
 		tab.add("Day Plans", d_panel);
+		tab.add("Plan Phases", pp_panel);
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
 	}
 
 	/** Dispose of the form */
 	protected void dispose() {
-		p_panel.dispose();
+		pp_panel.dispose();
 		d_panel.dispose();
+		p_panel.dispose();
 	}
 }
