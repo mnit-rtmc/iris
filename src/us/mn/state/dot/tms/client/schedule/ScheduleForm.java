@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.Color;
 import javax.swing.JTabbedPane;
+import javax.swing.border.EmptyBorder;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -60,6 +61,7 @@ public class ScheduleForm extends AbstractForm {
 	/** Initializze the widgets in the form */
 	protected void initialize() {
 		p_panel.initialize();
+		tab.setBorder(new EmptyBorder(0, 0, 24, 0));
 		tab.add("Action Plans", p_panel);
 		tab.add("Day Plans", d_panel);
 		tab.add("Plan Phases", pp_panel);

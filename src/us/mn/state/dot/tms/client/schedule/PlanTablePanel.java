@@ -21,6 +21,7 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -45,6 +46,7 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 	/** Create a new plan table panel */
 	public PlanTablePanel() {
 		super(true);
+		setBorder(TmsForm.BORDER);
 		table.setAutoCreateColumnsFromModel(false);
 		table.setRowHeight(ROW_HEIGHT);
 		table.setVisibleRowCount(10);

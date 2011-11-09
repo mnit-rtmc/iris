@@ -19,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.ActionPlan;
@@ -29,6 +30,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -92,6 +94,7 @@ public class ActionPlanPanel extends JPanel {
 		addActionPlanJobs();
 		add(createActionPlanPanel(), BorderLayout.NORTH);
 		JTabbedPane tab = new JTabbedPane();
+		tab.setBorder(new EmptyBorder(0, 12, 12, 12));
 		tab.add("Schedule", t_panel);
 		tab.add("DMS Actions", d_panel);
 		tab.add("Lane Actions", l_panel);
@@ -102,6 +105,7 @@ public class ActionPlanPanel extends JPanel {
 	/** Create the main action plan panel */
 	private JPanel createActionPlanPanel() {
 		FormPanel p_panel = new FormPanel(true);
+		p_panel.setBorder(TmsForm.BORDER);
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(p_model.createColumnModel());
