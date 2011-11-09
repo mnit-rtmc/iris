@@ -50,16 +50,13 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 			public void setValueAt(LaneAction la, Object value) {
 				String v = value.toString().trim();
 				LaneMarking lm = LaneMarkingHelper.lookup(v);
-				if(lm != null)
+				if(lm != null && action_plan != null)
 					create(lm);
 			}
 		},
 		new ProxyColumn<LaneAction>("Phase", 100) {
 			public Object getValueAt(LaneAction la) {
-				if(la != null)
-					return la.getPhase();
-				else
-					return null;
+				return la.getPhase();
 			}
 			public boolean isEditable(LaneAction la) {
 				return canUpdate(la);
@@ -80,6 +77,11 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return action_plan != null && super.canAdd();
+	}
 
 	/** Plan phase model */
 	private final ProxyListModel<PlanPhase> phase_model;

@@ -50,16 +50,13 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 			public void setValueAt(MeterAction ma, Object value) {
 				String v = value.toString().trim();
 				RampMeter rm = RampMeterHelper.lookup(v);
-				if(rm != null)
+				if(rm != null && action_plan != null)
 					create(rm);
 			}
 		},
 		new ProxyColumn<MeterAction>("Phase", 100) {
 			public Object getValueAt(MeterAction ma) {
-				if(ma != null)
-					return ma.getPhase();
-				else
-					return null;
+				return ma.getPhase();
 			}
 			public boolean isEditable(MeterAction ma) {
 				return canUpdate(ma);
@@ -80,6 +77,11 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return action_plan != null && super.canAdd();
+	}
 
 	/** Plan phase model */
 	private final ProxyListModel<PlanPhase> phase_model;

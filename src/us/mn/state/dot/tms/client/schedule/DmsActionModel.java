@@ -63,16 +63,13 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			public void setValueAt(DmsAction da, Object value) {
 				String v = value.toString().trim();
 				SignGroup sg = SignGroupHelper.lookup(v);
-				if(sg != null)
+				if(sg != null && action_plan != null)
 					create(sg);
 			}
 		},
 		new ProxyColumn<DmsAction>("Phase", 100) {
 			public Object getValueAt(DmsAction da) {
-				if(da != null)
-					return da.getPhase();
-				else
-					return null;
+				return da.getPhase();
 			}
 			public boolean isEditable(DmsAction da) {
 				return canUpdate(da);
@@ -146,6 +143,11 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return action_plan != null && super.canAdd();
+	}
 
 	/** Plan phase model */
 	private final ProxyListModel<PlanPhase> phase_model;
