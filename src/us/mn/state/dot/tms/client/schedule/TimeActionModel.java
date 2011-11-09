@@ -192,22 +192,25 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 
 	/** Create a new time action */
 	protected void create(int m) {
-		String name = createUniqueName();
-		if(name != null) {
-			HashMap<String, Object> attrs =
-				new HashMap<String, Object>();
-			attrs.put("day_plan", day_plan);
-			attrs.put("action_plan", action_plan);
-			attrs.put("minute", m);
-			attrs.put("phase", action_plan.getDefaultPhase());
-			cache.createObject(name, attrs);
+		ActionPlan ap = action_plan;
+		if(ap != null) {
+			String name = createUniqueName(ap);
+			if(name != null) {
+				HashMap<String, Object> attrs =
+					new HashMap<String, Object>();
+				attrs.put("day_plan", day_plan);
+				attrs.put("action_plan", ap);
+				attrs.put("minute", m);
+				attrs.put("phase", ap.getDefaultPhase());
+				cache.createObject(name, attrs);
+			}
 		}
 	}
 
 	/** Create a unique time action name */
-	protected String createUniqueName() {
+	protected String createUniqueName(ActionPlan ap) {
 		for(int uid = 1; uid <= 999; uid++) {
-			String n = action_plan.getName() + "_" + uid;
+			String n = ap.getName() + "_" + uid;
 			if(cache.lookupObject(n) == null)
 				return n;
 		}
