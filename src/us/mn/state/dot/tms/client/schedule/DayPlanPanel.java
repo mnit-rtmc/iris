@@ -312,6 +312,7 @@ public class DayPlanPanel extends JPanel {
 			h_model.setDayPlan(dp);
 			del_plan.setEnabled(canRemove(dp));
 			if(dp == null) {
+				day_cbox.setSelectedItem(null);
 				String name = item.toString().trim();
 				if(name.length() > 0 && canAdd(name))
 					cache.createObject(name);
@@ -340,6 +341,7 @@ public class DayPlanPanel extends JPanel {
 			DayPlan dp = DayPlanHelper.lookup(name);
 			if(dp != null)
 				dp.destroy();
+			day_cbox.setSelectedItem(null);
 		}
 	}
 
