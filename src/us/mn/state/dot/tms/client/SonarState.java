@@ -480,6 +480,8 @@ public class SonarState extends Client {
 		populateReadable(holidays);
 		populateReadable(day_plans);
 		populateReadable(plan_phases);
+		// Populate a second time to resolve nextPhase self-references
+		populateReadable(plan_phases);
 		populateReadable(action_plans);
 		populateReadable(time_actions);
 		populateReadable(dms_actions);
