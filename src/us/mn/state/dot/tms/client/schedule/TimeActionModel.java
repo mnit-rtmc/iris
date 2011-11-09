@@ -165,6 +165,11 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return action_plan != null && super.canAdd();
+	}
+
 	/** Day model */
 	private final ProxyListModel<DayPlan> day_model;
 
@@ -192,25 +197,28 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 
 	/** Create a new time action */
 	protected void create(int m) {
-		ActionPlan ap = action_plan;
-		if(ap != null) {
-			String name = createUniqueName(ap);
-			if(name != null) {
-				HashMap<String, Object> attrs =
-					new HashMap<String, Object>();
-				attrs.put("day_plan", day_plan);
-				attrs.put("action_plan", ap);
-				attrs.put("minute", m);
-				attrs.put("phase", ap.getDefaultPhase());
-				cache.createObject(name, attrs);
-			}
+		DayPlan dp = day_plan;
+		if(action_plan != null && dp != null) {
+			String name = createUniqueName();
+			if(name != null)
+				create(name, dp, m);
 		}
 	}
 
+	/** Create a new time action */
+	private void create(String name, DayPlan dp, int m) {
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("day_plan", dp);
+		attrs.put("action_plan", action_plan);
+		attrs.put("minute", m);
+		attrs.put("phase", action_plan.getDefaultPhase());
+		cache.createObject(name, attrs);
+	}
+
 	/** Create a unique time action name */
-	protected String createUniqueName(ActionPlan ap) {
+	protected String createUniqueName() {
 		for(int uid = 1; uid <= 999; uid++) {
-			String n = ap.getName() + "_" + uid;
+			String n = action_plan.getName() + "_" + uid;
 			if(cache.lookupObject(n) == null)
 				return n;
 		}
