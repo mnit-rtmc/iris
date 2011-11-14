@@ -1441,7 +1441,7 @@ vsa_min_station_miles	0.1
 vsa_start_intervals	3
 vsa_start_threshold	-1500
 vsa_stop_threshold	-750
-window_title	IRIS:
+window_title	IRIS: 
 xml_output_directory	/var/www/html/iris_xml/
 \.
 
@@ -1479,7 +1479,7 @@ meter_tab	t
 meter_control	t
 detection	t
 det_control	t
-plan_control	t
+plan_tab	t
 maintenance	t
 publish	t
 policy_admin	t
@@ -1552,64 +1552,71 @@ PRV_0061	meter_control	ramp_meter/.*/rateNext	f	t	f	f
 PRV_0062	detection	detector(/.*)?	t	f	f	f
 PRV_0063	detection	r_node(/.*)?	t	f	f	f
 PRV_0064	detection	station(/.*)?	t	f	f	f
-PRV_0065	plan_control	action_plan(/.*)?	t	f	f	f
-PRV_0066	plan_control	action_plan/.*/deployed	f	t	f	f
-PRV_0067	det_control	detector/.*/fieldLength	f	t	f	f
-PRV_0068	det_control	detector/.*/forceFail	f	t	f	f
-PRV_0069	policy_admin	action_plan(/.*)?	t	f	f	f
-PRV_0070	policy_admin	action_plan/.*	f	t	t	t
-PRV_0071	policy_admin	day_plan(/.*)?	t	f	f	f
-PRV_0072	policy_admin	day_plan/.*	f	t	t	t
-PRV_0073	policy_admin	dms_action(/.*)?	t	f	f	f
-PRV_0074	policy_admin	dms_action/.*	f	t	t	t
-PRV_0075	policy_admin	dms_sign_group/.*	f	t	t	t
-PRV_0076	policy_admin	holiday(/.*)?	t	f	f	f
-PRV_0077	policy_admin	holiday/.*	f	t	t	t
-PRV_0078	policy_admin	incident_detail/.*	f	t	t	t
-PRV_0079	policy_admin	lane_action(/.*)?	t	f	f	f
-PRV_0080	policy_admin	lane_action/.*	f	t	t	t
-PRV_0081	policy_admin	map_extent/.*	f	t	t	t
-PRV_0082	policy_admin	meter_action(/.*)?	t	f	f	f
-PRV_0083	policy_admin	meter_action/.*	f	t	t	t
-PRV_0084	policy_admin	plan_phase(/.*)?	t	f	f	f
-PRV_0085	policy_admin	plan_phase/.*	f	t	t	t
-PRV_0086	policy_admin	quick_message/.*	f	t	t	t
-PRV_0087	policy_admin	sign_group/.*	f	t	t	t
-PRV_0088	policy_admin	sign_text/.*	f	t	t	t
-PRV_0089	policy_admin	time_action(/.*)?	t	f	f	f
-PRV_0090	policy_admin	time_action/.*	f	t	t	t
-PRV_0091	device_admin	alarm/.*	f	t	t	t
-PRV_0092	device_admin	cabinet/.*	f	t	t	t
-PRV_0093	device_admin	camera/.*	f	t	t	t
-PRV_0094	device_admin	comm_link/.*	f	t	t	t
-PRV_0095	device_admin	controller/.*	f	t	t	t
-PRV_0096	device_admin	detector/.*	f	t	t	t
-PRV_0097	device_admin	dms/.*	f	t	t	t
-PRV_0098	device_admin	geo_loc/.*	f	t	t	t
-PRV_0099	device_admin	lane_marking(/.*)?	t	f	f	f
-PRV_0100	device_admin	lane_marking/.*	f	t	t	t
-PRV_0101	device_admin	lcs/.*	f	t	t	t
-PRV_0102	device_admin	lcs_array/.*	f	t	t	t
-PRV_0103	device_admin	lcs_indication/.*	f	t	t	t
-PRV_0104	device_admin	modem/.*	f	t	t	t
-PRV_0105	device_admin	r_node/.*	f	t	t	t
-PRV_0106	device_admin	ramp_meter/.*	f	t	t	t
-PRV_0107	device_admin	road/.*	f	t	t	t
-PRV_0108	device_admin	video_monitor/.*	f	t	t	t
-PRV_0109	device_admin	warning_sign/.*	f	t	t	t
-PRV_0110	device_admin	weather_sensor(/.*)?	t	f	f	f
-PRV_0111	device_admin	weather_sensor/.*	f	t	t	t
-PRV_0112	system_admin	cabinet_style/.*	f	t	t	t
-PRV_0113	system_admin	font/.*	f	t	t	t
-PRV_0114	system_admin	glyph/.*	f	t	t	t
-PRV_0115	system_admin	graphic/.*	f	t	t	t
-PRV_0116	system_admin	lane_use_multi/.*	f	t	t	t
-PRV_0117	system_admin	system_attribute/.*	f	t	t	t
-PRV_0118	user_admin	user/.*	f	t	t	t
-PRV_0119	user_admin	role/.*	f	t	t	t
-PRV_0120	user_admin	privilege/.*	f	t	t	t
-PRV_0121	user_admin	capability/.*	f	t	t	t
-PRV_0122	user_admin	connection/.*	f	f	f	t
+PRV_0065	plan_tab	action_plan(/.*)?	t	f	f	f
+PRV_0066	plan_tab	action_plan/.*/phase	f	t	f	f
+PRV_0067	plan_tab	day_plan(/.*)?	t	f	f	f
+PRV_0068	plan_tab	dms_action(/.*)?	t	f	f	f
+PRV_0069	plan_tab	holiday(/.*)?	t	f	f	f
+PRV_0070	plan_tab	lane_action(/.*)?	t	f	f	f
+PRV_0071	plan_tab	meter_action(/.*)?	t	f	f	f
+PRV_0072	plan_tab	plan_phase(/.*)?	t	f	f	f
+PRV_0073	plan_tab	time_action(/.*)?	t	f	f	f
+PRV_0075	det_control	detector/.*/fieldLength	f	t	f	f
+PRV_0076	det_control	detector/.*/forceFail	f	t	f	f
+PRV_0077	policy_admin	action_plan(/.*)?	t	f	f	f
+PRV_0078	policy_admin	action_plan/.*	f	t	t	t
+PRV_0079	policy_admin	day_plan(/.*)?	t	f	f	f
+PRV_0080	policy_admin	day_plan/.*	f	t	t	t
+PRV_0081	policy_admin	dms_action(/.*)?	t	f	f	f
+PRV_0082	policy_admin	dms_action/.*	f	t	t	t
+PRV_0083	policy_admin	dms_sign_group/.*	f	t	t	t
+PRV_0084	policy_admin	holiday(/.*)?	t	f	f	f
+PRV_0085	policy_admin	holiday/.*	f	t	t	t
+PRV_0086	policy_admin	incident_detail/.*	f	t	t	t
+PRV_0087	policy_admin	lane_action(/.*)?	t	f	f	f
+PRV_0088	policy_admin	lane_action/.*	f	t	t	t
+PRV_0089	policy_admin	map_extent/.*	f	t	t	t
+PRV_0090	policy_admin	meter_action(/.*)?	t	f	f	f
+PRV_0091	policy_admin	meter_action/.*	f	t	t	t
+PRV_0092	policy_admin	plan_phase(/.*)?	t	f	f	f
+PRV_0093	policy_admin	plan_phase/.*	f	t	t	t
+PRV_0094	policy_admin	quick_message/.*	f	t	t	t
+PRV_0095	policy_admin	sign_group/.*	f	t	t	t
+PRV_0096	policy_admin	sign_text/.*	f	t	t	t
+PRV_0097	policy_admin	time_action(/.*)?	t	f	f	f
+PRV_0098	policy_admin	time_action/.*	f	t	t	t
+PRV_0099	device_admin	alarm/.*	f	t	t	t
+PRV_0100	device_admin	cabinet/.*	f	t	t	t
+PRV_0101	device_admin	camera/.*	f	t	t	t
+PRV_0102	device_admin	comm_link/.*	f	t	t	t
+PRV_0103	device_admin	controller/.*	f	t	t	t
+PRV_0104	device_admin	detector/.*	f	t	t	t
+PRV_0105	device_admin	dms/.*	f	t	t	t
+PRV_0106	device_admin	geo_loc/.*	f	t	t	t
+PRV_0107	device_admin	lane_marking(/.*)?	t	f	f	f
+PRV_0108	device_admin	lane_marking/.*	f	t	t	t
+PRV_0109	device_admin	lcs/.*	f	t	t	t
+PRV_0110	device_admin	lcs_array/.*	f	t	t	t
+PRV_0111	device_admin	lcs_indication/.*	f	t	t	t
+PRV_0112	device_admin	modem/.*	f	t	t	t
+PRV_0113	device_admin	r_node/.*	f	t	t	t
+PRV_0114	device_admin	ramp_meter/.*	f	t	t	t
+PRV_0115	device_admin	road/.*	f	t	t	t
+PRV_0116	device_admin	video_monitor/.*	f	t	t	t
+PRV_0117	device_admin	warning_sign/.*	f	t	t	t
+PRV_0118	device_admin	weather_sensor(/.*)?	t	f	f	f
+PRV_0119	device_admin	weather_sensor/.*	f	t	t	t
+PRV_0120	system_admin	cabinet_style/.*	f	t	t	t
+PRV_0121	system_admin	font/.*	f	t	t	t
+PRV_0122	system_admin	glyph/.*	f	t	t	t
+PRV_0123	system_admin	graphic/.*	f	t	t	t
+PRV_0124	system_admin	lane_use_multi/.*	f	t	t	t
+PRV_0125	system_admin	system_attribute/.*	f	t	t	t
+PRV_0126	user_admin	user/.*	f	t	t	t
+PRV_0127	user_admin	role/.*	f	t	t	t
+PRV_0128	user_admin	privilege/.*	f	t	t	t
+PRV_0129	user_admin	capability/.*	f	t	t	t
+PRV_0130	user_admin	connection/.*	f	f	f	t
 \.
 
 COPY iris.role (name, enabled) FROM stdin;
@@ -1633,7 +1640,7 @@ administrator	policy_admin
 administrator	device_admin
 administrator	maintenance
 administrator	det_control
-administrator	plan_control
+administrator	plan_tab
 administrator	system_admin
 administrator	user_admin
 operator	login
@@ -1646,6 +1653,7 @@ operator	lcs_tab
 operator	lcs_control
 operator	meter_tab
 operator	meter_control
+operator	plan_tab
 operator	detection
 \.
 

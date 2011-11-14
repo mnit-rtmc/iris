@@ -91,3 +91,45 @@ INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
 	priv_d)
 	VALUES ('prv_phs1', 'policy_admin', 'plan_phase/.*', false, true,
 	true, true);
+
+INSERT INTO iris.capability (name, enabled) VALUES ('plan_tab', true);
+UPDATE iris.role_capability SET capability = 'plan_tab'
+	WHERE capability = 'plan_control';
+DELETE FROM iris.privilege WHERE capability = 'plan_control';
+DELETE FROM iris.capability WHERE name = 'plan_control';
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_ptb0', 'plan_tab', 'action_plan(/.*)?', true, false,
+	false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_ptb1', 'plan_tab', 'action_plan/.*/phase', false, true,
+	false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_ptb2', 'plan_tab', 'day_plan(/.*)?', true, false,
+	false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_ptb3', 'plan_tab', 'dms_action(/.*)?', true, false,
+	false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_ptb4', 'plan_tab', 'holiday(/.*)?', true, false,
+	false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_ptb5', 'plan_tab', 'lane_action(/.*)?', true, false,
+	false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_ptb6', 'plan_tab', 'meter_action(/.*)?', true, false,
+	false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_ptb7', 'plan_tab', 'plan_phase(/.*)?', true, false,
+	false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_ptb8', 'plan_tab', 'time_action(/.*)?', true, false,
+	false, false);
