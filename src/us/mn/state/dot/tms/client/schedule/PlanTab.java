@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.BorderLayout;
-import javax.swing.JPanel;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -31,22 +30,20 @@ public class PlanTab extends MapTab {
 	/** Plan manager */
 	private final PlanManager manager;
 
+	/** Plan dispatcher */
+	private final PlanDispatcher dispatcher;
+
 	/** Summary of plans of each status */
-	protected final StyleSummary<ActionPlan> summary;
+	private final StyleSummary<ActionPlan> summary;
 
 	/** Create a new action plan tab */
   	public PlanTab(Session session, PlanManager m) {
 		super("Plan", "Manage Action Plans");
 		manager = m;
+		dispatcher = new PlanDispatcher(session, m);
 		summary = manager.createStyleSummary();
-		add(createNorthPanel(), BorderLayout.NORTH);
+		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
-	}
-
-	/** Create the north panel */
-	protected JPanel createNorthPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
-		return panel;
 	}
 
 	/** Get the tab number */
@@ -58,6 +55,7 @@ public class PlanTab extends MapTab {
 	public void dispose() {
 		super.dispose();
 		manager.getSelectionModel().clearSelection();
+		dispatcher.dispose();
 		summary.dispose();
 	}
 }

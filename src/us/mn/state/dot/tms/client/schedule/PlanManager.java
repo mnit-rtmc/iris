@@ -27,8 +27,10 @@ import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
+import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -173,6 +175,11 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		StyleSummary<ActionPlan> summary = super.createStyleSummary();
 		summary.setStyle(STYLE_ALL);
 		return summary;
+	}
+
+	/** Get the description of an action plan */
+	public String getDescription(ActionPlan plan) {
+		return plan.getName() + " -- " + plan.getDescription();
 	}
 
 	/** Get the layer zoom visibility threshold */
