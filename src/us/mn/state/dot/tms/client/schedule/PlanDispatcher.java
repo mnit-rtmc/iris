@@ -202,6 +202,19 @@ public class PlanDispatcher extends FormPanel
 
 	/** Create a combo box model for plan phases */
 	private DefaultComboBoxModel createPhaseModel(final ActionPlan plan) {
+		TreeSet<PlanPhase> phases = createPhaseSet(plan);
+		removeNextPhases(phases);
+		DefaultComboBoxModel model = new DefaultComboBoxModel();
+		model.addElement(plan.getDefaultPhase());
+		phases.remove(plan.getDefaultPhase());
+		for(PlanPhase p: phases)
+			model.addElement(p);
+		model.setSelectedItem(plan.getPhase());
+		return model;
+	}
+
+	/** Create a set of phases for an action plan */
+	private TreeSet<PlanPhase> createPhaseSet(final ActionPlan plan) {
 		final TreeSet<PlanPhase> phases =
 			new TreeSet<PlanPhase>(comparator);
 		DmsActionHelper.find(new Checker<DmsAction>() {
@@ -225,13 +238,7 @@ public class PlanDispatcher extends FormPanel
 				return false;
 			}
 		});
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
-		model.addElement(plan.getDefaultPhase());
-		phases.remove(plan.getDefaultPhase());
-		for(PlanPhase p: phases)
-			model.addElement(p);
-		model.setSelectedItem(plan.getPhase());
-		return model;
+		return phases;
 	}
 
 	/** Comparator for plan phases */
@@ -244,6 +251,18 @@ public class PlanDispatcher extends FormPanel
 			return aa.compareTo(bb);
 		}
 	};
+
+	/** Remove phases which are "next" phases */
+	private void removeNextPhases(TreeSet<PlanPhase> phases) {
+		TreeSet<PlanPhase> n_phases =
+			new TreeSet<PlanPhase>(comparator);
+		for(PlanPhase p: phases) {
+			PlanPhase np = p.getNextPhase();
+			if(np != null)
+				n_phases.add(np);
+		}
+		phases.removeAll(n_phases);
+	}
 
 	/** Enable or disable the panel */
 	public void setEnabled(boolean enabled) {
