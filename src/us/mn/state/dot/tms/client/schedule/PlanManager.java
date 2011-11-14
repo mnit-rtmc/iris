@@ -48,17 +48,17 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  */
 public class PlanManager extends ProxyManager<ActionPlan> {
 
-	/** Name of time style */
-	static public final String STYLE_TIME = "Time";
-
 	/** Name of DMS style */
 	static public final String STYLE_DMS = "DMS";
+
+	/** Name of meter style */
+	static public final String STYLE_METER = "Meter";
 
 	/** Name of lane style */
 	static public final String STYLE_LANE = "Lane";
 
-	/** Name of meter style */
-	static public final String STYLE_METER = "Meter";
+	/** Name of time style */
+	static public final String STYLE_TIME = "Time";
 
 	/** Name of active style */
 	static public final String STYLE_ACTIVE = "Active";
@@ -99,10 +99,10 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Create a styled theme for action plans */
 	protected StyledTheme createTheme() {
 		PlanTheme theme = new PlanTheme(this);
-		theme.addStyle(STYLE_TIME, new TimeMarker());
 		theme.addStyle(STYLE_DMS, new DmsMarker());
-		theme.addStyle(STYLE_LANE);
 		theme.addStyle(STYLE_METER, new MeterMarker());
+		theme.addStyle(STYLE_LANE);
+		theme.addStyle(STYLE_TIME, new TimeMarker());
 		theme.addStyle(STYLE_ACTIVE);
 		theme.addStyle(STYLE_ALL);
 		return theme;
@@ -120,14 +120,14 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, ActionPlan proxy) {
-		if(STYLE_TIME.equals(s))
-			return hasTimeAction(proxy);
-		else if(STYLE_DMS.equals(s))
-			return hasDmsAction(proxy);
-		else if(STYLE_LANE.equals(s))
-			return hasLaneAction(proxy);
+		if(STYLE_DMS.equals(s))
+			return proxy.getActive() && hasDmsAction(proxy);
 		else if(STYLE_METER.equals(s))
-			return hasMeterAction(proxy);
+			return proxy.getActive() && hasMeterAction(proxy);
+		else if(STYLE_LANE.equals(s))
+			return proxy.getActive() && hasLaneAction(proxy);
+		else if(STYLE_TIME.equals(s))
+			return proxy.getActive() && hasTimeAction(proxy);
 		else if(STYLE_ACTIVE.equals(s))
 			return proxy.getActive();
 		else
