@@ -137,7 +137,8 @@ public class ModemMessenger extends Messenger {
 		String config) throws IOException
 	{
 		log("configure: " + config);
-		pw.println("\r\n\r\n\r\n" + config + "\r\n");
+		pw.print(config + "\r\n");
+		pw.flush();
 		try {
 			String resp = readResponse(isr).trim();
 			if(!resp.toUpperCase().contains("OK")) {
