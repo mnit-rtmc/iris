@@ -44,7 +44,7 @@ public class MultiString implements MultiStringState {
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
-		"[' !#$%&()*+,-./0-9:;<=>?@A-Z]*");
+		"[' !#$%&()*+,-./0-9:;<=>?@A-Za-z^_`]*");
 
 	/** New page MULTI tag */
 	static public final String NEWPAGE = "[np]";
@@ -444,7 +444,6 @@ public class MultiString implements MultiStringState {
 	static public String normalize(String multi) {
 		MultiString ms = new MultiString() {
 			public void addSpan(String s) {
-				s = s.toUpperCase();
 				Matcher m = TEXT_PATTERN.matcher(s);
 				while(m.find())
 					super.addSpan(m.group());

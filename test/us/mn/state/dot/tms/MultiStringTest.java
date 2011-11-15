@@ -254,7 +254,7 @@ public class MultiStringTest extends TestCase {
 		assertTrue(MultiString.normalize("ABC").
 			equals("ABC"));
 		assertTrue(MultiString.normalize("abc").
-			equals("ABC"));
+			equals("abc"));
 		assertTrue(MultiString.normalize("DON'T").
 			equals("DON'T"));
 		assertTrue(MultiString.normalize("SPACE SPACE").
@@ -332,8 +332,8 @@ public class MultiStringTest extends TestCase {
 		assertFalse(new MultiString("XXX").equals("XXY"));
 		assertFalse(new MultiString("XXX").equals(new MultiString("XXY")));
 		// verify normalization used
-		assertTrue(new MultiString("[fo1]abc").equals("[fo1]ABC"));
-		assertTrue(new MultiString("[fo1]abc").equals(new MultiString("[fo1]ABC")));
+		assertTrue(new MultiString("[fo1]abc").equals("[fo1]abc"));
+		assertTrue(new MultiString("[fo1]abc").equals(new MultiString("[fo1]abc")));
 	}
 
 	/** getText */
