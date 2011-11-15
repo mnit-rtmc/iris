@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.incident;
 
 import junit.framework.TestCase;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.LaneUseIndication;
 
 /** 
@@ -70,7 +71,8 @@ public class IncidentPolicyTest extends TestCase {
 	}
 
 	protected ClientIncident createIncident(String impact) {
-		return new ClientIncident(21, (short)1, null, (short)1, 0, 0,
-			impact);
+		return new ClientIncident(null,
+			EventType.INCIDENT_CRASH.ordinal(), null, (short)1,
+			null, (short)1, 0, 0, impact);
 	}
 }
