@@ -24,15 +24,6 @@ import java.util.LinkedList;
  */
 public class MultiRenderer extends MultiStringStateAdapter {
 
-	/** Enumeration of MULTI syntax errors */
-	static public enum SyntaxError {
-		undefined, other, none, unsupportedTag, unsupportedTagValue,
-		textTooBig, fontNotDefined, characterNotDefined,
-		fieldDeviceNotExist, fieldDeviceError, flashRegionError,
-		tagConflict, tooManyPages, fontVersionID, graphicID,
-		graphicNotDefined;
-	}
-
 	/** Raster graphic to render */
 	protected final RasterGraphic raster;
 
@@ -48,7 +39,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 	protected final int c_height;
 
 	/** MULTI syntax error */
-	protected SyntaxError syntax_err = SyntaxError.none;
+	protected MultiSyntaxError syntax_err = MultiSyntaxError.none;
 
 	/** X position of text rectangle (1-based) */
 	protected int tr_x;
@@ -98,7 +89,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 		Block block = new Block();
 		Block cb = currentBlock();
 		if(block.justp.ordinal() < cb.justp.ordinal())
-			syntax_err = SyntaxError.tagConflict;
+			syntax_err = MultiSyntaxError.tagConflict;
 		if(block.justp.ordinal() > cb.justp.ordinal())
 			blocks.addLast(block);
 	}
@@ -111,7 +102,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 				Block block = currentBlock();
 				block.addSpan(s);
 			} else
-				syntax_err = SyntaxError.fontNotDefined;
+				syntax_err = MultiSyntaxError.fontNotDefined;
 		}
 	}
 
@@ -148,9 +139,9 @@ public class MultiRenderer extends MultiStringStateAdapter {
 		tr_width = w;
 		tr_height = h;
 		if(tr_x + tr_width > raster.getWidth() + 1)
-			syntax_err = SyntaxError.unsupportedTagValue;
+			syntax_err = MultiSyntaxError.unsupportedTagValue;
 		if(tr_y + tr_height > raster.getHeight() + 1)
-			syntax_err = SyntaxError.unsupportedTagValue;
+			syntax_err = MultiSyntaxError.unsupportedTagValue;
 	}
 
 	/** Complete the rendering */
@@ -166,10 +157,10 @@ public class MultiRenderer extends MultiStringStateAdapter {
 					block.render();
 			}
 			catch(InvalidMessageException e) {
-				syntax_err = SyntaxError.characterNotDefined;
+				syntax_err=MultiSyntaxError.characterNotDefined;
 			}
 			catch(IndexOutOfBoundsException e) {
-				syntax_err = SyntaxError.textTooBig;
+				syntax_err = MultiSyntaxError.textTooBig;
 			}
 		}
 		blocks.clear();
@@ -181,7 +172,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			return;
 		Graphic graphic = GraphicHelper.find(g_num);
 		if(graphic == null) {
-			syntax_err = SyntaxError.graphicNotDefined;
+			syntax_err = MultiSyntaxError.graphicNotDefined;
 			return;
 		}
 		int x0 = 1;
@@ -217,7 +208,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 		catch(IOException e) {
 			// This happens if the graphic contains
 			// invalid Base64 pixel data.
-			syntax_err = SyntaxError.other;
+			syntax_err = MultiSyntaxError.other;
 		}
 	}
 
@@ -248,7 +239,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 		void render() throws InvalidMessageException {
 			int top = getTop();
 			if(top < tr_y) {
-				syntax_err = SyntaxError.textTooBig;
+				syntax_err = MultiSyntaxError.textTooBig;
 				return;
 			}
 			int y = 0;
@@ -328,7 +319,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			Fragment f = new Fragment();
 			Fragment cf = currentFragment();
 			if(f.justl.ordinal() < cf.justl.ordinal())
-				syntax_err = SyntaxError.tagConflict;
+				syntax_err = MultiSyntaxError.tagConflict;
 			if(f.justl.ordinal() > cf.justl.ordinal())
 				fragments.addLast(f);
 			currentFragment().addSpan(s);
@@ -366,7 +357,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 		void render(int base) throws InvalidMessageException {
 			int left = getLeft();
 			if(left < tr_x) {
-				syntax_err = SyntaxError.textTooBig;
+				syntax_err = MultiSyntaxError.textTooBig;
 				return;
 			}
 			int x = 0;
@@ -429,7 +420,7 @@ public class MultiRenderer extends MultiStringStateAdapter {
 				return FontHelper.calculateWidth(font, span);
 			}
 			catch(InvalidMessageException e) {
-				syntax_err = SyntaxError.characterNotDefined;
+				syntax_err=MultiSyntaxError.characterNotDefined;
 				return 0;
 			}
 		}

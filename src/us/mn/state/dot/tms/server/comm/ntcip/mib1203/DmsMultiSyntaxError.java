@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
+import us.mn.state.dot.tms.MultiSyntaxError;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
@@ -23,24 +24,6 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsMultiSyntaxError extends ASN1Integer {
 
-	/** Enumeration of MULTI syntax errors */
-	static public enum Enum {
-		undefined, other, none, unsupportedTag, unsupportedTagValue,
-		textTooBig, fontNotDefined, characterNotDefined,
-		fieldDeviceNotExist, fieldDeviceError, flashRegionError,
-		tagConflict, tooManyPages, fontVersionID, graphicID,
-		graphicNotDefined;
-
-		/** Get MULTI syntax error from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
 	/** Create a new DmsMultiSyntaxError object */
 	public DmsMultiSyntaxError() {
 		super(MIB1203.signControl.create(new int[] {18, 0}));
@@ -48,11 +31,11 @@ public class DmsMultiSyntaxError extends ASN1Integer {
 
 	/** Set the integer value */
 	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
+		value = MultiSyntaxError.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
+		return MultiSyntaxError.fromOrdinal(value).toString();
 	}
 }
