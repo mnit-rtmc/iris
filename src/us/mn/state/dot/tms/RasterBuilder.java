@@ -20,7 +20,7 @@ import java.util.TreeMap;
 
 /**
  * A raster builder creates raster graphics for DMS display.
- * @see MultiStringState, MultiStringStateAdapter, MultiString
+ * @see Multi, MultiAdapter, MultiString
  *
  * @author Douglas Lau
  * @author Michael Darter

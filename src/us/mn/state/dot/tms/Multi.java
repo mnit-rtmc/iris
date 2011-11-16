@@ -20,7 +20,7 @@ package us.mn.state.dot.tms;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public interface MultiStringState {
+public interface Multi {
 
 	/** Add a page */
 	void addPage();

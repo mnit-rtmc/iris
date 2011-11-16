@@ -23,7 +23,7 @@ package us.mn.state.dot.tms;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class MultiStringStateAdapter implements MultiStringState {
+public class MultiAdapter implements Multi {
 
 	/** Page number, zero based */
 	protected int ms_page;
@@ -111,7 +111,7 @@ public class MultiStringStateAdapter implements MultiStringState {
 	}
 
 	/** Create a new MULTI string adapter */
-	public MultiStringStateAdapter() {
+	public MultiAdapter() {
 		ms_page = 0;
 		ms_justp = MultiString.JustificationPage.DEFAULT;
 		ms_line = 0;

@@ -22,7 +22,7 @@ import java.util.LinkedList;
  *
  * @author Douglas Lau
  */
-public class MultiRenderer extends MultiStringStateAdapter {
+public class MultiRenderer extends MultiAdapter {
 
 	/** Raster graphic to render */
 	protected final RasterGraphic raster;

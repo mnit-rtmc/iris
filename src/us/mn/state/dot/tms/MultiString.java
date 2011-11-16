@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class MultiString implements MultiStringState {
+public class MultiString implements Multi {
 
 	/** Regular expression to locate tags */
 	static protected final Pattern TAG = Pattern.compile(
@@ -104,7 +104,7 @@ public class MultiString implements MultiStringState {
 	/** Parse page times from a [pt.o.] tag.
 	 * @param v Page time tag value.
 	 * @param cb Callback to set page times. */
-	static protected void parsePageTimes(String v, MultiStringState cb) {
+	static protected void parsePageTimes(String v, Multi cb) {
 		String[] args = v.split("o", 2);
 		Integer pt_on = parseInt(args, 0);
 		Integer pt_off = parseInt(args, 1);
@@ -112,9 +112,7 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** Parse a page background color tag */
-	static protected void parsePageBackground(String v,
-		MultiStringState cb)
-	{
+	static protected void parsePageBackground(String v, Multi cb) {
 		String[] args = v.split(",", 3);
 		Integer r = parseInt(args, 0);
 		Integer g = parseInt(args, 1);
@@ -124,9 +122,7 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** Parse a color foreground tag */
-	static protected void parseColorForeground(String v,
-		MultiStringState cb)
-	{
+	static protected void parseColorForeground(String v, Multi cb) {
 		String[] args = v.split(",", 3);
 		Integer r = parseInt(args, 0);
 		Integer g = parseInt(args, 1);
@@ -138,7 +134,7 @@ public class MultiString implements MultiStringState {
 	/** Parse a font number from an [fox] or [fox,cccc] tag.
 	 * @param f Font tag value (x or x,cccc from [fox] or [fox,cccc] tag).
 	 * @param cb Callback to set font information. */
-	static protected void parseFont(String f, MultiStringState cb) {
+	static protected void parseFont(String f, Multi cb) {
 		String[] args = f.split(",", 2);
 		Integer f_num = parseInt(args, 0);
 		String f_id = null;
@@ -151,7 +147,7 @@ public class MultiString implements MultiStringState {
 	/** Parse a graphic number from a [gn] or [gn,x,y] or [gn,x,y,cccc] tag.
 	 * @param g Graphic tag value (n or n,x,y or n,x,y,cccc from tag).
 	 * @param cb Callback to set graphic information */
-	static protected void parseGraphic(String g, MultiStringState cb) {
+	static protected void parseGraphic(String g, Multi cb) {
 		String[] args = g.split(",", 4);
 		Integer g_num = parseInt(args, 0);
 		Integer x = parseInt(args, 1);
@@ -166,7 +162,7 @@ public class MultiString implements MultiStringState {
 	/** Parse color rectangle from a [cr...] tag.
 	 * @param v Color rectangle tag value.
 	 * @param cb Callback to set color rectangle. */
-	static private void parseColorRectangle(String v, MultiStringState cb) {
+	static private void parseColorRectangle(String v, Multi cb) {
 		String[] args = v.split(",", 7);
 		Integer x = parseInt(args, 0);
 		Integer y = parseInt(args, 1);
@@ -183,7 +179,7 @@ public class MultiString implements MultiStringState {
 	/** Parse text rectangle from a [tr...] tag.
 	 * @param v Text rectangle tag value.
 	 * @param cb Callback to set text rectangle. */
-	static protected void parseTextRectangle(String v, MultiStringState cb){
+	static protected void parseTextRectangle(String v, Multi cb) {
 		String[] args = v.split(",", 4);
 		Integer x = parseInt(args, 0);
 		Integer y = parseInt(args, 1);
@@ -419,7 +415,7 @@ public class MultiString implements MultiStringState {
 
 	/** Parse the MULTI string.
 	 * @param cb A callback which keeps track of the MULTI state. */
-	public void parse(MultiStringState cb) {
+	public void parse(Multi cb) {
 		int offset = 0;
 		Matcher m = TAG.matcher(multi);
 		while(m.find()) {
@@ -434,7 +430,7 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** Parse one MULTI tag */
-	protected void parseTag(String tag, MultiStringState cb) {
+	protected void parseTag(String tag, Multi cb) {
 		Matcher mtag = TAGS.matcher(tag);
 		if(mtag.find()) {
 			String tid = mtag.group(1).toLowerCase();
@@ -475,7 +471,7 @@ public class MultiString implements MultiStringState {
 	/** Is the MULTI string blank? */
 	public boolean isBlank() {
 		final StringBuilder _b = new StringBuilder();
-		parse(new MultiStringStateAdapter() {
+		parse(new MultiAdapter() {
 			public void addSpan(String span) {
 				_b.append(span);
 			}
@@ -497,7 +493,7 @@ public class MultiString implements MultiStringState {
 
 	/** Get the number of pages in the multistring */
 	public int getNumPages() {
-		MultiStringStateAdapter msa = new MultiStringStateAdapter();
+		MultiAdapter msa = new MultiAdapter();
 		parse(msa);
 		return msa.ms_page + 1;
 	}
@@ -536,7 +532,7 @@ public class MultiString implements MultiStringState {
 		final int[] ret = new int[np]; // font numbers indexed by pg
 		for(int i = 0; i < ret.length; i++)
 			ret[i] = f_num;
-		MultiStringStateAdapter msa = new MultiStringStateAdapter() {
+		MultiAdapter msa = new MultiAdapter() {
 			public void addSpan(String span) {
 				// note: fields in span use ms prefix
 				if(ms_page >= 0 && ms_page < ret.length)
@@ -573,7 +569,7 @@ public class MultiString implements MultiStringState {
 		final int[] ret = new int[np]; // pg time indexed by pg
 		for(int i = 0; i < ret.length; ++i)
 			ret[i] = def_pont;
-		parse(new MultiStringStateAdapter() {
+		parse(new MultiAdapter() {
 			public void addSpan(String span) {
 				// note: fields in span use ms prefix
 				if(ms_page >= 0 && ms_page < ret.length) {
@@ -622,7 +618,7 @@ public class MultiString implements MultiStringState {
 	 * @return A string array containing text spans for each line. */
 	public String[] getText() {
 		final LinkedList<String> ls = new LinkedList<String>();
-		parse(new MultiStringStateAdapter() {
+		parse(new MultiAdapter() {
 			private int n_lines = 0;
 			public void addSpan(String span) {
 				// note: fields in span use ms prefix
@@ -669,7 +665,7 @@ public class MultiString implements MultiStringState {
 	/** Get a MULTI string as text only (tags stripped) */
 	public String asText() {
 		final StringBuilder sb = new StringBuilder();
-		parse(new MultiStringStateAdapter() {
+		parse(new MultiAdapter() {
 			public void addSpan(String span) {
 				if(sb.length() > 0)
 					sb.append(' ');
