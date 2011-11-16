@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.Multi;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
@@ -30,13 +30,12 @@ public class DefaultJustificationPage extends ASN1Integer {
 	}
 
 	/** Set the enum value */
-	public void setEnum(MultiString.JustificationPage j) {
+	public void setEnum(Multi.JustificationPage j) {
 		value = j.ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return MultiString.JustificationPage.fromOrdinal(
-		       value).toString();
+		return Multi.JustificationPage.fromOrdinal(value).toString();
 	}
 }

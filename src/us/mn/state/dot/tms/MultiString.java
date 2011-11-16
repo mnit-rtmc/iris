@@ -49,58 +49,6 @@ public class MultiString implements Multi {
 	/** New page MULTI tag */
 	static public final String NEWPAGE = "[np]";
 
-	/** Page Justification enumeration. See NTCIP 1203 as necessary. */
-	public enum JustificationPage {
-		UNDEFINED, OTHER, TOP, MIDDLE, BOTTOM;
-
-		static public JustificationPage fromOrdinal(int v) {
-			for(JustificationPage pj: JustificationPage.values()) {
-				if(pj.ordinal() == v)
-					return pj;
-			}
-			return UNDEFINED;
-		}
-
-		static protected JustificationPage parse(String v) {
-			try {
-				int j = Integer.parseInt(v);
-				return fromOrdinal(j);
-			}
-			catch(NumberFormatException e) {
-				return UNDEFINED;
-			}
-		}
-
-		static public final JustificationPage DEFAULT = fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
-	}
-
-	/** Line Justification enumeration */
-	public enum JustificationLine {
-		UNDEFINED, OTHER, LEFT, CENTER, RIGHT, FULL;
-
-		static public JustificationLine fromOrdinal(int v) {
-			for(JustificationLine lj: JustificationLine.values()) {
-				if(lj.ordinal() == v)
-					return lj;
-			}
-			return UNDEFINED;
-		}
-
-		static protected JustificationLine parse(String v) {
-			try {
-				int j = Integer.parseInt(v);
-				return fromOrdinal(j);
-			}
-			catch(NumberFormatException e) {
-				return UNDEFINED;
-			}
-		}
-
-		static public final JustificationLine DEFAULT = fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
-	}
-
 	/** Parse page times from a [pt.o.] tag.
 	 * @param v Page time tag value.
 	 * @param cb Callback to set page times. */
@@ -109,6 +57,28 @@ public class MultiString implements Multi {
 		Integer pt_on = parseInt(args, 0);
 		Integer pt_off = parseInt(args, 1);
 		cb.setPageTimes(pt_on, pt_off);
+	}
+
+	/** Parse a line justification tag.
+	 * @param v Line justification tag value.
+	 * @param cb Callback to set line justification. */
+	static protected void parseJustificationLine(String v, Multi cb) {
+		JustificationLine jl = JustificationLine.UNDEFINED;
+		Integer j = parseInt(v);
+		if(j != null)
+			jl = JustificationLine.fromOrdinal(j);
+		cb.setJustificationLine(jl);
+	}
+
+	/** Parse a page justification tag.
+	 * @param v Page justification tag value.
+	 * @param cb Callback to set page justification. */
+	static protected void parseJustificationPage(String v, Multi cb) {
+		JustificationPage jp = JustificationPage.UNDEFINED;
+		Integer j = parseInt(v);
+		if(j != null)
+			jp = JustificationPage.fromOrdinal(j);
+		cb.setJustificationPage(jp);
 	}
 
 	/** Parse a page background color tag */
@@ -441,13 +411,11 @@ public class MultiString implements Multi {
 				cb.addPage();
 			else if(tid.equals("pt"))
 				parsePageTimes(tparam, cb);
-			else if(tid.equals("jl")) {
-				cb.setJustificationLine(
-					JustificationLine.parse(tparam));
-			} else if(tid.equals("jp")) {
-				cb.setJustificationPage(
-					JustificationPage.parse(tparam));
-			} else if(tid.equals("pb"))
+			else if(tid.equals("jl"))
+				parseJustificationLine(tparam, cb);
+			else if(tid.equals("jp"))
+				parseJustificationPage(tparam, cb);
+			else if(tid.equals("pb"))
 				parsePageBackground(tparam, cb);
 			else if(tid.equals("cf"))
 				parseColorForeground(tparam, cb);

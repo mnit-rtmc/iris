@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.Multi;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -105,8 +105,8 @@ public class OpSendDMSDefaults extends OpDMS {
 				new DefaultJustificationPage();
 			DefaultPageOnTime on_time = new DefaultPageOnTime();
 			DefaultPageOffTime off_time = new DefaultPageOffTime();
-			line.setEnum(MultiString.JustificationLine.CENTER);
-			page.setEnum(MultiString.JustificationPage.TOP);
+			line.setEnum(Multi.JustificationLine.CENTER);
+			page.setEnum(Multi.JustificationPage.TOP);
 			on_time.setInteger(Math.round(10 * SystemAttrEnum.
 				DMS_PAGE_ON_DEFAULT_SECS.getFloat()));
 			off_time.setInteger(Math.round(10 * SystemAttrEnum.

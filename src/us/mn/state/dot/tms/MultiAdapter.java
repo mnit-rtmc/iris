@@ -49,10 +49,10 @@ public class MultiAdapter implements Multi {
 	}
 
 	/** Page justification */
-	protected MultiString.JustificationPage ms_justp;
+	protected JustificationPage ms_justp;
 
 	/** Set the page justification */
-	public void setJustificationPage(MultiString.JustificationPage jp) {
+	public void setJustificationPage(JustificationPage jp) {
 		ms_justp = jp;
 	}
 
@@ -65,10 +65,10 @@ public class MultiAdapter implements Multi {
 	}
 
 	/** Line justification */
-	protected MultiString.JustificationLine ms_justl;
+	protected JustificationLine ms_justl;
 
 	/** Set the line justification */
-	public void setJustificationLine(MultiString.JustificationLine jl) {
+	public void setJustificationLine(JustificationLine jl) {
 		ms_justl = jl;
 	}
 
@@ -113,9 +113,9 @@ public class MultiAdapter implements Multi {
 	/** Create a new MULTI string adapter */
 	public MultiAdapter() {
 		ms_page = 0;
-		ms_justp = MultiString.JustificationPage.DEFAULT;
+		ms_justp = JustificationPage.DEFAULT;
 		ms_line = 0;
-		ms_justl = MultiString.JustificationLine.DEFAULT;
+		ms_justl = JustificationLine.DEFAULT;
 		ms_fnum = 1;
 	}
 

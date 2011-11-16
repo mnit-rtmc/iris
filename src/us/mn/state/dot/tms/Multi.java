@@ -22,6 +22,42 @@ package us.mn.state.dot.tms;
  */
 public interface Multi {
 
+	/** Page Justification enumeration. See NTCIP 1203 as necessary. */
+	enum JustificationPage {
+		UNDEFINED, OTHER, TOP, MIDDLE, BOTTOM;
+
+		/** Get page justification from an ordinal value */
+		static public JustificationPage fromOrdinal(int v) {
+			for(JustificationPage pj: values()) {
+				if(pj.ordinal() == v)
+					return pj;
+			}
+			return UNDEFINED;
+		}
+
+		/** Default page justification */
+		static public final JustificationPage DEFAULT = fromOrdinal(
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
+	}
+
+	/** Line Justification enumeration */
+	enum JustificationLine {
+		UNDEFINED, OTHER, LEFT, CENTER, RIGHT, FULL;
+
+		/** Get line justification from an ordinal value */
+		static public JustificationLine fromOrdinal(int v) {
+			for(JustificationLine lj: values()) {
+				if(lj.ordinal() == v)
+					return lj;
+			}
+			return UNDEFINED;
+		}
+
+		/** Default line justification */
+		static public final JustificationLine DEFAULT = fromOrdinal(
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
+	}
+
 	/** Add a page */
 	void addPage();
 
@@ -31,14 +67,14 @@ public interface Multi {
 	void setPageTimes(Integer pt_on, Integer pt_off);
 
 	/** Set the page justification */
-	void setJustificationPage(MultiString.JustificationPage jp);
+	void setJustificationPage(JustificationPage jp);
 
 	/** Add a new line.
 	 * @param spacing Pixel spacing (null means use font spacing) */
 	void addLine(Integer spacing);
 
 	/** Set the line justification */
-	void setJustificationLine(MultiString.JustificationLine jl);
+	void setJustificationLine(JustificationLine jl);
 
 	/** Set the page background color */
 	void setPageBackground(int r, int g, int b);

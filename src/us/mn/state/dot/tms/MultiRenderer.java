@@ -84,7 +84,7 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Set the page justification */
-	public void setJustificationPage(MultiString.JustificationPage jp) {
+	public void setJustificationPage(JustificationPage jp) {
 		super.setJustificationPage(jp);
 		Block block = new Block();
 		Block cb = currentBlock();
@@ -247,7 +247,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** A block of text to be rendered */
 	protected class Block {
 		protected final LinkedList<Line> lines = new LinkedList<Line>();
-		protected final MultiString.JustificationPage justp = ms_justp;
+		protected final JustificationPage justp = ms_justp;
 		void addSpan(Span s) {
 			Line line = currentLine();
 			line.addSpan(s);
@@ -370,7 +370,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** A fragment of text to be rendered */
 	protected class Fragment {
 		protected final LinkedList<Span> spans = new LinkedList<Span>();
-		protected final MultiString.JustificationLine justl = ms_justl;
+		protected final JustificationLine justl = ms_justl;
 		int getHeight() {
 			int h = c_height;
 			for(Span s: spans)
