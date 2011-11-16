@@ -125,6 +125,23 @@ public class MultiRenderer extends MultiStringStateAdapter {
 		renderText();
 		resetTextRectangle();
 		super.addPage();
+		fillBackground();
+	}
+
+	/** Set the page background color */
+	public void setPageBackground(int r, int g, int b) {
+		super.setPageBackground(r, g, b);
+		fillBackground();
+	}
+
+	/** Fill the page with the current background color */
+	private void fillBackground() {
+		if(page == ms_page) {
+			for(int y = 0; y < raster.getHeight(); y++) {
+				for(int x = 0; x < raster.getWidth(); x++)
+					raster.setPixel(x, y, ms_background);
+			}
+		}
 	}
 
 	/** Set the text rectangle */

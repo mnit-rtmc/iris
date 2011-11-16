@@ -36,7 +36,7 @@ public class MultiString implements MultiStringState {
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAGS = Pattern.compile(
-		"(nl|np|jl|jp|fo|g|cf|pt|tr|tt|vsa|feed)(.*)");
+		"(nl|np|jl|jp|fo|g|pb|cf|pt|tr|tt|vsa|feed)(.*)");
 
 	/** Regular expression to match invalid line-oriented MULTI tags */
 	static protected final Pattern TAG_LINE = Pattern.compile(
@@ -99,6 +99,18 @@ public class MultiString implements MultiStringState {
 
 		static public final JustificationLine DEFAULT = fromOrdinal(
 			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
+	}
+
+	/** Parse a page background color tag */
+	static protected void parsePageBackground(String v,
+		MultiStringState cb)
+	{
+		String[] args = v.split(",", 3);
+		Integer r = parseInt(args, 0);
+		Integer g = parseInt(args, 1);
+		Integer b = parseInt(args, 2);
+		if(r != null && g != null && b != null)
+			cb.setPageBackground(r, g, b);
 	}
 
 	/** Parse a color foreground tag */
@@ -303,6 +315,17 @@ public class MultiString implements MultiStringState {
 		multi.append("]");
 	}
 
+	/** Set the page background color */
+	public void setPageBackground(int red, int green, int blue) {
+		multi.append("[pb");
+		multi.append(red);
+		multi.append(',');
+		multi.append(green);
+		multi.append(',');
+		multi.append(blue);
+		multi.append("]");
+	}
+
 	/** Set the color foreground */
 	public void setColorForeground(int red, int green, int blue) {
 		multi.append("[cf");
@@ -388,7 +411,9 @@ public class MultiString implements MultiStringState {
 			} else if(tid.equals("jp")) {
 				cb.setJustificationPage(
 					JustificationPage.parse(tparam));
-			} else if(tid.equals("cf"))
+			} else if(tid.equals("pb"))
+				parsePageBackground(tparam, cb);
+			else if(tid.equals("cf"))
 				parseColorForeground(tparam, cb);
 			else if(tid.equals("fo"))
 				parseFont(tparam, cb);

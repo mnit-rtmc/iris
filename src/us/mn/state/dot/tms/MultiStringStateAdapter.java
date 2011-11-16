@@ -72,6 +72,14 @@ public class MultiStringStateAdapter implements MultiStringState {
 		ms_justl = jl;
 	}
 
+	/** Page background color */
+	protected DmsColor ms_background = DmsColor.BLACK;
+
+	/** Set the page background color */
+	public void setPageBackground(int r, int g, int b) {
+		ms_background = new DmsColor(r, g, b);
+	}
+
 	/** Foreground color */
 	protected DmsColor ms_foreground = DmsColor.AMBER;
 

@@ -40,6 +40,9 @@ public interface MultiStringState {
 	/** Set the line justification */
 	void setJustificationLine(MultiString.JustificationLine jl);
 
+	/** Set the page background color */
+	void setPageBackground(int r, int g, int b);
+
 	/** Set the foreground color */
 	void setColorForeground(int r, int g, int b);
 
