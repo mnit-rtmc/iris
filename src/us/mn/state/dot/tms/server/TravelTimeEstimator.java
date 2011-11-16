@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import java.util.SortedSet;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
@@ -55,12 +56,11 @@ public class TravelTimeEstimator {
 
 	/** Replace travel time tags in a MULTI string */
 	public String replaceTravelTimes(String trav) {
-		MultiString m = new MultiString(trav);
 		TravelCallback cb = new TravelCallback();
-		m.parse(cb);
+		MultiParser.parse(trav, cb);
 		if(cb.isChanged()) {
 			cb.clear();
-			m.parse(cb);
+			MultiParser.parse(trav, cb);
 		}
 		if(cb.valid)
 			return cb.toString();

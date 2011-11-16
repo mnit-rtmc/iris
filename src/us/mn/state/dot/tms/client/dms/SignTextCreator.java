@@ -21,7 +21,7 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
@@ -71,7 +71,7 @@ public class SignTextCreator {
 	public void create(SignGroup sg, short line, String multi,
 		short priority)
 	{
-		multi = MultiString.normalize(multi);
+		multi = MultiParser.normalize(multi);
 		String name = createUniqueSignTextName(sg);
 		if(canAddSignText(name)) {
 			HashMap<String, Object> attrs =

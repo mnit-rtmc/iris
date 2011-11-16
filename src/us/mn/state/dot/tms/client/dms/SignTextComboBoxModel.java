@@ -20,7 +20,7 @@ import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignGroup;
 
@@ -118,7 +118,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 		if(st != null)
 			return st;
 		else {
-			return new ClientSignText(MultiString.normalize(
+			return new ClientSignText(MultiParser.normalize(
 				s.trim()));
 		}
 	}

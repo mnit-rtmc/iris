@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.Point;
 import us.mn.state.dot.tms.QuickMessage;
@@ -1429,8 +1430,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(qm != null) {
 			FeedCallback fc = new FeedCallback(this,
 				da.getSignGroup());
-			MultiString multi = new MultiString(qm.getMulti());
-			multi.parse(fc);
+			MultiParser.parse(qm.getMulti(), fc);
 			String m = fc.toString();
 			if(m != null)
 				return createMulti(m);

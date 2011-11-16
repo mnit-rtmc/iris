@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
@@ -132,7 +132,7 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	public void doSetMulti(String m) throws TMSException {
 		if(m.equals(multi))
 			return;
-		if(!new MultiString(m).isValid())
+		if(!MultiParser.isValid(m))
 			throw new ChangeVetoException("Invalid MULTI: " + m);
 		store.update(this, "multi", m);
 		setMulti(m);

@@ -19,7 +19,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
@@ -101,7 +101,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Format MULTI string */
 	static protected String formatMulti(Object value) {
-		return MultiString.normalize(value.toString().trim());
+		return MultiParser.normalize(value.toString().trim());
 	}
 
 	/** Create an empty set of proxies */

@@ -195,8 +195,8 @@ public class RasterBuilder {
 	protected void render(MultiString ms, int p, RasterGraphic rg) {
 		MultiRenderer mr = new MultiRenderer(rg, p, c_width, c_height,
 			default_font);
-		ms = DMSHelper.ignoreFilter(ms);
-		ms.parse(mr);
+		String multi = DMSHelper.ignoreFilter(ms).toString();
+		MultiParser.parse(multi, mr);
 		mr.complete();
 		// FIXME: check MultiRenderer.syntax_err
 	}

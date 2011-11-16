@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -67,7 +67,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				return canUpdate(qm);
 			}
 			public void setValueAt(QuickMessage qm, Object value) {
-				qm.setMulti(MultiString.normalize(
+				qm.setMulti(MultiParser.normalize(
 					value.toString()));
 			}
 		}

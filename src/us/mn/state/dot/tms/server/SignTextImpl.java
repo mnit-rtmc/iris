@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.TMSException;
@@ -36,7 +36,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	static protected void validateMulti(String t)
 		throws ChangeVetoException
 	{
-		String multi = MultiString.normalizeLine(t);
+		String multi = MultiParser.normalizeLine(t);
 		if(!multi.equals(t))
 			throw new ChangeVetoException("Invalid message: " + t);
 		if(multi.length() > 64)

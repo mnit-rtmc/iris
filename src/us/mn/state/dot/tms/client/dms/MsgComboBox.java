@@ -27,7 +27,7 @@ import java.awt.event.KeyListener;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
@@ -71,7 +71,7 @@ public class MsgComboBox extends JComboBox {
 			txt = ((SignText)o).getMulti();
 		else if(o != null)
 			txt = o.toString();
-		return MultiString.normalize(txt);
+		return MultiParser.normalize(txt);
 	}
 
 	/** Sign message composer containing the combo box */

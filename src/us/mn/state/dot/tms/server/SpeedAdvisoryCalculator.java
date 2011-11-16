@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
@@ -36,9 +37,8 @@ public class SpeedAdvisoryCalculator {
 
 	/** Replace speed advisory tags in a MULTI string */
 	public String replaceSpeedAdvisory(String multi) {
-		MultiString m = new MultiString(multi);
 		MultiCallback cb = new MultiCallback();
-		m.parse(cb);
+		MultiParser.parse(multi, cb);
 		if(cb.valid)
 			return cb.toString();
 		else
