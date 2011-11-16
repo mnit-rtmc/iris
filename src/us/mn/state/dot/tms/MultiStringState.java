@@ -25,13 +25,13 @@ public interface MultiStringState {
 	/** Add a page */
 	void addPage();
 
-	/** Set the page justification */
-	void setJustificationPage(MultiString.JustificationPage jp);
-
 	/** Set the page times.
 	 * @param pt_on Page on time (tenths of second; null means default)
 	 * @param pt_off Page off time (tenths of second; null means default) */
 	void setPageTimes(Integer pt_on, Integer pt_off);
+
+	/** Set the page justification */
+	void setJustificationPage(MultiString.JustificationPage jp);
 
 	/** Add a new line.
 	 * @param spacing Pixel spacing (null means use font spacing) */

@@ -36,11 +36,11 @@ public class MultiString implements MultiStringState {
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAGS = Pattern.compile(
-		"(nl|np|jl|jp|fo|g|pb|cf|pt|tr|tt|vsa|feed)(.*)");
+		"(nl|np|pt|jl|jp|fo|g|pb|cf|tr|tt|vsa|feed)(.*)");
 
 	/** Regular expression to match invalid line-oriented MULTI tags */
 	static protected final Pattern TAG_LINE = Pattern.compile(
-		"\\[(nl|np|jp|g|pt|tr|feed)(.*)\\]");
+		"\\[(nl|np|pt|jp|g|pb|tr|feed)(.*)\\]");
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
@@ -101,6 +101,16 @@ public class MultiString implements MultiStringState {
 			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
 	}
 
+	/** Parse page times from a [pt.o.] tag.
+	 * @param v Page time tag value.
+	 * @param cb Callback to set page times. */
+	static protected void parsePageTimes(String v, MultiStringState cb) {
+		String[] args = v.split("o", 2);
+		Integer pt_on = parseInt(args, 0);
+		Integer pt_off = parseInt(args, 1);
+		cb.setPageTimes(pt_on, pt_off);
+	}
+
 	/** Parse a page background color tag */
 	static protected void parsePageBackground(String v,
 		MultiStringState cb)
@@ -151,16 +161,6 @@ public class MultiString implements MultiStringState {
 			g_id = args[3];
 		if(g_num != null)
 			cb.addGraphic(g_num, x, y, g_id);
-	}
-
-	/** Parse page times from a [pt.o.] tag.
-	 * @param v Page time tag value.
-	 * @param cb Callback to set page times. */
-	static protected void parsePageTimes(String v, MultiStringState cb) {
-		String[] args = v.split("o", 2);
-		Integer pt_on = parseInt(args, 0);
-		Integer pt_off = parseInt(args, 1);
-		cb.setPageTimes(pt_on, pt_off);
 	}
 
 	/** Parse text rectangle from a [tr...] tag.
@@ -256,6 +256,19 @@ public class MultiString implements MultiStringState {
 		multi.append(NEWPAGE);
 	}
 
+	/** Set page times.
+	 * @param pt_on Page on-time (tenths of second; null for default).
+	 * @param pt_off Page off-time (tenths of second; null for default). */
+	public void setPageTimes(Integer pt_on, Integer pt_off) {
+		multi.append("[pt");
+		if(pt_on != null)
+			multi.append(pt_on);
+		multi.append('o');
+		if(pt_off != null)
+			multi.append(pt_off);
+		multi.append("]");
+	}
+
 	/** Set the page justification */
 	public void setJustificationPage(JustificationPage jp) {
 		if(jp != JustificationPage.UNDEFINED) {
@@ -272,19 +285,6 @@ public class MultiString implements MultiStringState {
 			multi.append(jl.ordinal());
 			multi.append("]");
 		}
-	}
-
-	/** Set page times.
-	 * @param pt_on Page on-time (tenths of second; null for default).
-	 * @param pt_off Page off-time (tenths of second; null for default). */
-	public void setPageTimes(Integer pt_on, Integer pt_off) {
-		multi.append("[pt");
-		if(pt_on != null)
-			multi.append(pt_on);
-		multi.append('o');
-		if(pt_off != null)
-			multi.append(pt_off);
-		multi.append("]");
 	}
 
 	/** Add a graphic */
@@ -405,6 +405,8 @@ public class MultiString implements MultiStringState {
 				cb.addLine(parseInt(tparam));
 			else if(tid.equals("np"))
 				cb.addPage();
+			else if(tid.equals("pt"))
+				parsePageTimes(tparam, cb);
 			else if(tid.equals("jl")) {
 				cb.setJustificationLine(
 					JustificationLine.parse(tparam));
@@ -419,8 +421,6 @@ public class MultiString implements MultiStringState {
 				parseFont(tparam, cb);
 			else if(tid.equals("g"))
 				parseGraphic(tparam, cb);
-			else if(tid.equals("pt"))
-				parsePageTimes(tparam, cb);
 			else if(tid.equals("tr"))
 				parseTextRectangle(tparam, cb);
 			else if(tid.equals("tt"))

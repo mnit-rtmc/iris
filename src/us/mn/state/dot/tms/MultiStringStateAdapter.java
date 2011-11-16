@@ -34,14 +34,6 @@ public class MultiStringStateAdapter implements MultiStringState {
 		ms_line = 0;
 	}
 
-	/** Page justification */
-	protected MultiString.JustificationPage ms_justp;
-
-	/** Set the page justification */
-	public void setJustificationPage(MultiString.JustificationPage jp) {
-		ms_justp = jp;
-	}
-
 	/** Page on time (tenths of a second) */
 	protected Integer ms_pt_on;
 
@@ -54,6 +46,14 @@ public class MultiStringStateAdapter implements MultiStringState {
 	public void setPageTimes(Integer pt_on, Integer pt_off) {
 		ms_pt_on = pt_on;
 		ms_pt_off = pt_off;
+	}
+
+	/** Page justification */
+	protected MultiString.JustificationPage ms_justp;
+
+	/** Set the page justification */
+	public void setJustificationPage(MultiString.JustificationPage jp) {
+		ms_justp = jp;
 	}
 
 	/** Line number on page, zero based */
