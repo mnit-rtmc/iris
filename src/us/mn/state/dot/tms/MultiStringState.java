@@ -46,6 +46,9 @@ public interface MultiStringState {
 	/** Set the foreground color */
 	void setColorForeground(int r, int g, int b);
 
+	/** Add a color rectangle */
+	void addColorRectangle(int x, int y, int w, int h, int r, int g, int b);
+
 	/** Set the text rectangle */
 	void setTextRectangle(int x, int y, int w, int h);
 

@@ -88,6 +88,13 @@ public class MultiStringStateAdapter implements MultiStringState {
 		ms_foreground = new DmsColor(r, g, b);
 	}
 
+	/** Add a color rectangle */
+	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
+		int b)
+	{
+		// subclass must handle
+	}
+
 	/** Set the text rectangle */
 	public void setTextRectangle(int x, int y, int w, int h) {
 		// subclass must handle

@@ -136,10 +136,25 @@ public class MultiRenderer extends MultiStringStateAdapter {
 
 	/** Fill the page with the current background color */
 	private void fillBackground() {
+		fillRectangle(1, 1, raster.getWidth(), raster.getHeight(),
+			ms_background);
+	}
+
+	/** Add a color rectangle */
+	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
+		int b)
+	{
+		fillRectangle(x, y, w, h, new DmsColor(r, g, b));
+	}
+
+	/** Fill a rectangle with a specified color */
+	private void fillRectangle(int x, int y, int w, int h, DmsColor clr) {
 		if(page == ms_page) {
-			for(int y = 0; y < raster.getHeight(); y++) {
-				for(int x = 0; x < raster.getWidth(); x++)
-					raster.setPixel(x, y, ms_background);
+			x--;	/* make X zero-based for raster */
+			y--;	/* make Y zero-based for raster */
+			for(int yy = 0; yy < h; yy++) {
+				for(int xx = 0; xx < w; xx++)
+					raster.setPixel(x + xx, y + yy, clr);
 			}
 		}
 	}

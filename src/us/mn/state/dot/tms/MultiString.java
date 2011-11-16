@@ -36,11 +36,11 @@ public class MultiString implements MultiStringState {
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAGS = Pattern.compile(
-		"(nl|np|pt|jl|jp|fo|g|pb|cf|tr|tt|vsa|feed)(.*)");
+		"(nl|np|pt|jl|jp|fo|g|pb|cf|cr|tr|tt|vsa|feed)(.*)");
 
 	/** Regular expression to match invalid line-oriented MULTI tags */
 	static protected final Pattern TAG_LINE = Pattern.compile(
-		"\\[(nl|np|pt|jp|g|pb|tr|feed)(.*)\\]");
+		"\\[(nl|np|pt|jp|g|pb|cr|tr|feed)(.*)\\]");
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
@@ -161,6 +161,23 @@ public class MultiString implements MultiStringState {
 			g_id = args[3];
 		if(g_num != null)
 			cb.addGraphic(g_num, x, y, g_id);
+	}
+
+	/** Parse color rectangle from a [cr...] tag.
+	 * @param v Color rectangle tag value.
+	 * @param cb Callback to set color rectangle. */
+	static private void parseColorRectangle(String v, MultiStringState cb) {
+		String[] args = v.split(",", 7);
+		Integer x = parseInt(args, 0);
+		Integer y = parseInt(args, 1);
+		Integer w = parseInt(args, 2);
+		Integer h = parseInt(args, 3);
+		Integer r = parseInt(args, 4);
+		Integer g = parseInt(args, 5);
+		Integer b = parseInt(args, 6);
+		if(x != null && y != null && w != null && h != null &&
+		   r != null && g != null && b != null)
+			cb.addColorRectangle(x, y, w, h, r, g, b);
 	}
 
 	/** Parse text rectangle from a [tr...] tag.
@@ -337,6 +354,27 @@ public class MultiString implements MultiStringState {
 		multi.append("]");
 	}
 
+	/** Add a color rectangle */
+	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
+		int b)
+	{
+		multi.append("[cr");
+		multi.append(x);
+		multi.append(',');
+		multi.append(y);
+		multi.append(',');
+		multi.append(w);
+		multi.append(',');
+		multi.append(h);
+		multi.append(',');
+		multi.append(r);
+		multi.append(',');
+		multi.append(g);
+		multi.append(',');
+		multi.append(b);
+		multi.append("]");
+	}
+
 	/** Set the text rectangle */
 	public void setTextRectangle(int x, int y, int w, int h) {
 		multi.append("[tr");
@@ -421,6 +459,8 @@ public class MultiString implements MultiStringState {
 				parseFont(tparam, cb);
 			else if(tid.equals("g"))
 				parseGraphic(tparam, cb);
+			else if(tid.equals("cr"))
+				parseColorRectangle(tparam, cb);
 			else if(tid.equals("tr"))
 				parseTextRectangle(tparam, cb);
 			else if(tid.equals("tt"))
