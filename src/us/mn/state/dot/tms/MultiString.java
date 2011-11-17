@@ -414,4 +414,9 @@ public class MultiString implements Multi {
 		});
 		return sb.toString();
 	}
+
+	/** Normalize a MULTI string */
+	static public String normalize(String ms) {
+		return MultiParser.normalize(ms);
+	}
 }
