@@ -57,6 +57,8 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 			public void setValueAt(TimeAction ta, Object value) {
 				if(value instanceof DayPlan)
 					day_plan = (DayPlan)value;
+				else
+					day_plan = null;
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox combo = new JComboBox();
