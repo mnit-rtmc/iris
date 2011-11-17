@@ -126,7 +126,7 @@ public class OpSendMeterSettings extends OpDevice {
 	/** Update one timing table with a time action */
 	private void updateTable(MeterAction ma, TimeAction ta) {
 		int p = TimeActionHelper.getPeriod(ta);
-		int min = minuteBCD(ta.getMinute());
+		int min = minuteBCD(TimeActionHelper.getMinute(ta));
 		float r = MndotPoller.calculateRedTime(meter, getTarget(p));
 		table_red[p] = Math.round(r * 10);
 		table_rate[p] = MeterRate.TOD;

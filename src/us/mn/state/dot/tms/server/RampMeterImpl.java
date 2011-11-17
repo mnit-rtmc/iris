@@ -371,7 +371,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			}
 		});
 		if(t != null)
-			return t.getMinute();
+			return TimeActionHelper.getMinute(t);
 		else
 			return TimeActionHelper.NOON;
 	}

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
@@ -24,6 +25,7 @@ import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
+import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -37,8 +39,8 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading time actions...");
 		namespace.registerType(SONAR_TYPE, TimeActionImpl.class);
-		store.query("SELECT name, action_plan, day_plan, minute, " +
-			"phase FROM iris." + SONAR_TYPE  +";",
+		store.query("SELECT name, action_plan, day_plan, sched_date, " +
+			"time_of_day, phase FROM iris." + SONAR_TYPE  +";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -47,8 +49,9 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 					row.getString(1),	// name
 					row.getString(2),	// action_plan
 					row.getString(3),	// day_plan
-					row.getShort(4),	// minute
-					row.getString(5)	// phase
+					row.getDate(4),		// sched_date
+					row.getTime(5),		// time_of_day
+					row.getString(6)	// phase
 				));
 			}
 		});
@@ -60,7 +63,8 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		map.put("name", name);
 		map.put("action_plan", action_plan);
 		map.put("day_plan", day_plan);
-		map.put("minute", minute);
+		map.put("sched_date", sched_date);
+		map.put("time_of_day", time_of_day);
 		map.put("phase", phase);
 		return map;
 	}
@@ -82,21 +86,22 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 
 	/** Create a new time action */
 	protected TimeActionImpl(Namespace ns, String n, String a, String d,
-		short m, String p)
+		Date sd, Date tod, String p)
 	{
 		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		     (DayPlan)ns.lookupObject(DayPlan.SONAR_TYPE, d), m,
+		     (DayPlan)ns.lookupObject(DayPlan.SONAR_TYPE, d), sd, tod,
 		     (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p));
 	}
 
 	/** Create a new time action */
-	protected TimeActionImpl(String n, ActionPlan a, DayPlan d, short m,
-		PlanPhase p)
+	protected TimeActionImpl(String n, ActionPlan a, DayPlan d, Date sd,
+		Date tod, PlanPhase p)
 	{
 		this(n);
 		action_plan = a;
 		day_plan = d;
-		minute = m;
+		sched_date = TimeActionHelper.formatDate(sd);
+		time_of_day = TimeActionHelper.formatTime(tod);
 		phase = p;
 	}
 
@@ -116,12 +121,20 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		return day_plan;
 	}
 
-	/** Minute-of-day (0-1440) */
-	protected short minute;
+	/** Scheduled date */
+	protected String sched_date;
 
-	/** Get the minute-of-day (0-1440) */
-	public short getMinute() {
-		return minute;
+	/** Get the scheduled date */
+	public String getSchedDate() {
+		return sched_date;
+	}
+
+	/** Time-of-day */
+	protected String time_of_day;
+
+	/** Get the time-of-day */
+	public String getTimeOfDay() {
+		return time_of_day;
 	}
 
 	/** Phase to trigger */
@@ -147,10 +160,30 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 
 	/** Perform action if date and time is right */
 	public void perform(Calendar cal, int min) {
-		if(getMinute() == min) {
-			if(!DayPlanHelper.isHoliday(day_plan, cal))
-				perform();
-		}
+		if(TimeActionHelper.getMinute(this) == min && isDayValid(cal))
+			perform();
+	}
+
+	/** Test if the time action is scheduled for the specified date */
+	private boolean isDayValid(Calendar cal) {
+		return isDayPlanValid(cal) || isDateScheduleValid(cal);
+	}
+
+	/** Test if the day plan is valid for the specified date */
+	private boolean isDayPlanValid(Calendar cal) {
+		return day_plan != null &&
+		       !DayPlanHelper.isHoliday(day_plan, cal);
+	}
+
+	/** Test if the date schedule is valid for the specified date */
+	private boolean isDateScheduleValid(Calendar cal) {
+		if(sched_date == null)
+			return false;
+		Calendar sd = Calendar.getInstance();
+		sd.setTime(TimeActionHelper.parseDate(sched_date));
+		return sd.get(Calendar.YEAR) == cal.get(Calendar.YEAR) &&
+		       sd.get(Calendar.MONTH) == cal.get(Calendar.MONTH) &&
+		       sd.get(Calendar.DATE) == cal.get(Calendar.DATE);
 	}
 
 	/** Perform the time action */

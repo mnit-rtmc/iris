@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Date;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
@@ -32,8 +33,11 @@ public interface TimeAction extends SonarObject {
 	/** Get the day plan */
 	DayPlan getDayPlan();
 
-	/** Get the minute-of-day (0-1440) */
-	short getMinute();
+	/** Get the scheduled date */
+	String getSchedDate();
+
+	/** Get the time-of-day */
+	String getTimeOfDay();
 
 	/** Set the phase to trigger */
 	void setPhase(PlanPhase p);
