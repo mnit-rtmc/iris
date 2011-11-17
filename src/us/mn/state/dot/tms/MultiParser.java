@@ -32,7 +32,7 @@ public class MultiParser {
 
 	/** Regular expression to match supported MULTI tags */
 	static private final Pattern TAGS = Pattern.compile(
-		"(nl|np|pt|jl|jp|fo|g|pb|cf|cr|tr|tt|vsa|feed)(.*)");
+		"(nl|np|pt|jl|jp|fo|g|sc|pb|cf|cr|tr|tt|vsa|feed)(.*)");
 
 	/** Regular expression to match invalid line-oriented MULTI tags */
 	static private final Pattern TAG_LINE = Pattern.compile(
@@ -86,6 +86,8 @@ public class MultiParser {
 				parseFont(tparam, cb);
 			else if(tid.equals("g"))
 				parseGraphic(tparam, cb);
+			else if(tid.equals("sc"))
+				parseCharSpacing(tparam, cb);
 			else if(tid.equals("cr"))
 				parseColorRectangle(tparam, cb);
 			else if(tid.equals("tr"))
@@ -177,6 +179,13 @@ public class MultiParser {
 			g_id = args[3];
 		if(g_num != null)
 			cb.addGraphic(g_num, x, y, g_id);
+	}
+
+	/** Parse character spacing from a [scx] tag.
+	 * @param sc Character spacing value from tag.
+	 * @param cb Callback to set spacing information. */
+	static private void parseCharSpacing(String sc, Multi cb) {
+		cb.setCharSpacing(parseInt(sc));
 	}
 
 	/** Parse color rectangle from a [cr...] tag.

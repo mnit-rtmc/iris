@@ -140,6 +140,18 @@ public class MultiString implements Multi {
 		multi.append("]");
 	}
 
+	/** Set the character spacing.
+	 * @param sc Character spacing (null means use font spacing) */
+	public void setCharSpacing(Integer sc) {
+		multi.append("[");
+		if(sc != null) {
+			multi.append("sc");
+			multi.append(sc);
+		} else
+			multi.append("/sc");
+		multi.append("]");
+	}
+
 	/** Set the page background color */
 	public void setPageBackground(int red, int green, int blue) {
 		multi.append("[pb");

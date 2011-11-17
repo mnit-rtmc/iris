@@ -53,6 +53,9 @@ public class MultiRenderer extends MultiAdapter {
 	/** Height of text rectangle */
 	protected int tr_height;
 
+	/** Character spacing */
+	protected Integer char_spacing;
+
 	/** List of all blocks within the current text rectangle */
 	protected final LinkedList<Block> blocks = new LinkedList<Block>();
 
@@ -92,6 +95,12 @@ public class MultiRenderer extends MultiAdapter {
 			syntax_err = MultiSyntaxError.tagConflict;
 		if(block.justp.ordinal() > cb.justp.ordinal())
 			blocks.addLast(block);
+	}
+
+	/** Set the character spacing.
+	 * @param sc Character spacing (null means use font spacing) */
+	public void setCharSpacing(Integer sc) {
+		char_spacing = sc;
 	}
 
 	/** Add a span of text */
@@ -432,16 +441,25 @@ public class MultiRenderer extends MultiAdapter {
 		protected final String span;
 		protected final Font font;
 		protected final DmsColor foreground;
+		protected final int c_space;
 		protected Span(String s) {
 			span = s;
 			font = FontHelper.find(ms_fnum);
 			foreground = ms_foreground;
+			c_space = getCharSpacing();
+		}
+		int getCharSpacing() {
+			Integer cs = char_spacing;
+			if(cs != null)
+				return cs;
+			else
+				return font.getCharSpacing();
 		}
 		int getCharSpacing(Span other) {
 			if(other == null)
 				return 0;
-			int sp0 = font.getCharSpacing();
-			int sp1 = other.font.getCharSpacing();
+			int sp0 = c_space;
+			int sp1 = other.c_space;
 			// NTCIP 1203 fontCharSpacing:
 			// "... the average character spacing of the two fonts,
 			// rounded up to the nearest whole pixel ..." ???
@@ -449,7 +467,8 @@ public class MultiRenderer extends MultiAdapter {
 		}
 		int getWidth() {
 			try {
-				return FontHelper.calculateWidth(font, span);
+				return FontHelper.calculateWidth(font, span,
+					c_space);
 			}
 			catch(InvalidMessageException e) {
 				syntax_err=MultiSyntaxError.characterNotDefined;
@@ -462,7 +481,7 @@ public class MultiRenderer extends MultiAdapter {
 				int cp = span.charAt(i);
 				Graphic g = FontHelper.lookupGraphic(font, cp);
 				renderGraphic(g, foreground, x, y);
-				x += g.getWidth() + font.getCharSpacing();
+				x += g.getWidth() + c_space;
 			}
 		}
 	}

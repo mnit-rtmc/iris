@@ -110,6 +110,12 @@ public class MultiAdapter implements Multi {
 		ms_fnum = f_num;
 	}
 
+	/** Set the character spacing.
+	 * @param sc Character spacing (null means use font spacing) */
+	public void setCharSpacing(Integer sc) {
+		// subclass must handle
+	}
+
 	/** Create a new MULTI string adapter */
 	public MultiAdapter() {
 		ms_page = 0;

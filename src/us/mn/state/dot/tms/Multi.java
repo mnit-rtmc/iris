@@ -93,6 +93,10 @@ public interface Multi {
 	 * @param f_id Font version ID (4-digit hex) */
 	void setFont(int f_num, String f_id);
 
+	/** Set the character spacing.
+	 * @param sc Character spacing (null means use font spacing) */
+	void setCharSpacing(Integer sc);
+
 	/** Add a span of text */
 	void addSpan(String span);
 

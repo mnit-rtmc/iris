@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,10 +102,22 @@ public class FontHelper extends BaseHelper {
 	static public int calculateWidth(Font font, String t)
 		throws InvalidMessageException
 	{
+		return calculateWidth(font, t, font.getCharSpacing());
+	}
+
+	/** Calculate the width of a span of text.
+	 * @param font Font to use for text.
+	 * @param t Text to calculate.
+	 * @param cs Character spacing.
+	 * @return Width in pixels of text.
+	 * @throws InvalidMessageException if the font is missing a character */
+	static public int calculateWidth(Font font, String t, int cs)
+		throws InvalidMessageException
+	{
 		int w = 0;
 		for(int i = 0; i < t.length(); i++) {
 			if(i > 0)
-				w += font.getCharSpacing();
+				w += cs;
 			int cp = t.charAt(i);
 			Graphic c = lookupGraphic(font, cp);
 			w += c.getWidth();
