@@ -850,9 +850,14 @@ CREATE TABLE iris.action_plan (
 CREATE TABLE iris.time_action (
 	name VARCHAR(20) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
-	minute SMALLINT NOT NULL,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+	day_plan VARCHAR(10) REFERENCES iris.day_plan,
+	sched_date DATE,
+	time_of_day TIME WITHOUT TIME ZONE NOT NULL,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+	CONSTRAINT time_action_date CHECK (
+		((day_plan IS NULL) OR (sched_date IS NULL)) AND
+		((day_plan IS NOT NULL) OR (sched_date IS NOT NULL))
+	)
 );
 
 CREATE TABLE iris.dms_action (
@@ -884,32 +889,8 @@ CREATE VIEW action_plan_view AS
 	FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
-CREATE FUNCTION hour_min(integer) RETURNS text
-    AS '
-DECLARE
-	min_of_day ALIAS FOR $1;
-	hour integer;
-	minute integer;
-	output text;
-BEGIN
-	hour := min_of_day / 60;
-	minute := min_of_day % 60;
-	output := '''';
-	IF hour < 10 THEN
-		output := ''0'';
-	END IF;
-	output := output || hour || '':'';
-	IF minute < 10 THEN
-		output := output || ''0'';
-	END IF;
-	output := output || minute;
-	RETURN output;
-END;'
-    LANGUAGE plpgsql;
-
 CREATE VIEW time_action_view AS
-	SELECT name, action_plan, day_plan, hour_min(minute) AS time_of_day,
-	phase
+	SELECT name, action_plan, day_plan, sched_date, time_of_day, phase
 	FROM iris.time_action;
 GRANT SELECT ON time_action_view TO PUBLIC;
 
@@ -1369,7 +1350,7 @@ camera_id_blank
 camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
-database_version	3.137.0
+database_version	3.138.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
