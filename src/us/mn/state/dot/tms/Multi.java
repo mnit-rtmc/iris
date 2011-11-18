@@ -22,23 +22,25 @@ package us.mn.state.dot.tms;
  */
 public interface Multi {
 
-	/** Page Justification enumeration. See NTCIP 1203 as necessary. */
-	enum JustificationPage {
-		UNDEFINED, OTHER, TOP, MIDDLE, BOTTOM;
+	/** Add a span of text */
+	void addSpan(String span);
 
-		/** Get page justification from an ordinal value */
-		static public JustificationPage fromOrdinal(int v) {
-			for(JustificationPage pj: values()) {
-				if(pj.ordinal() == v)
-					return pj;
-			}
-			return UNDEFINED;
-		}
+	/** Set the page background color */
+	void setPageBackground(int r, int g, int b);
 
-		/** Default page justification */
-		static public final JustificationPage DEFAULT = fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
-	}
+	/** Set the foreground color */
+	void setColorForeground(int r, int g, int b);
+
+	/** Add a color rectangle */
+	void addColorRectangle(int x, int y, int w, int h, int r, int g, int b);
+
+	/** Set the font number.
+	 * @param f_num Font number (1 to 255)
+	 * @param f_id Font version ID (4-digit hex) */
+	void setFont(int f_num, String f_id);
+
+	/** Add a graphic */
+	void addGraphic(int g_num, Integer x, Integer y, String g_id);
 
 	/** Line Justification enumeration */
 	enum JustificationLine {
@@ -58,13 +60,26 @@ public interface Multi {
 			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
 	}
 
-	/** Add a page */
-	void addPage();
+	/** Set the line justification */
+	void setJustificationLine(JustificationLine jl);
 
-	/** Set the page times.
-	 * @param pt_on Page on time (tenths of second; null means default)
-	 * @param pt_off Page off time (tenths of second; null means default) */
-	void setPageTimes(Integer pt_on, Integer pt_off);
+	/** Page Justification enumeration. See NTCIP 1203 as necessary. */
+	enum JustificationPage {
+		UNDEFINED, OTHER, TOP, MIDDLE, BOTTOM;
+
+		/** Get page justification from an ordinal value */
+		static public JustificationPage fromOrdinal(int v) {
+			for(JustificationPage pj: values()) {
+				if(pj.ordinal() == v)
+					return pj;
+			}
+			return UNDEFINED;
+		}
+
+		/** Default page justification */
+		static public final JustificationPage DEFAULT = fromOrdinal(
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
+	}
 
 	/** Set the page justification */
 	void setJustificationPage(JustificationPage jp);
@@ -73,35 +88,22 @@ public interface Multi {
 	 * @param spacing Pixel spacing (null means use font spacing) */
 	void addLine(Integer spacing);
 
-	/** Set the line justification */
-	void setJustificationLine(JustificationLine jl);
+	/** Add a page */
+	void addPage();
 
-	/** Set the page background color */
-	void setPageBackground(int r, int g, int b);
-
-	/** Set the foreground color */
-	void setColorForeground(int r, int g, int b);
-
-	/** Add a color rectangle */
-	void addColorRectangle(int x, int y, int w, int h, int r, int g, int b);
-
-	/** Set the text rectangle */
-	void setTextRectangle(int x, int y, int w, int h);
-
-	/** Set the font number.
-	 * @param f_num Font number (1 to 255)
-	 * @param f_id Font version ID (4-digit hex) */
-	void setFont(int f_num, String f_id);
+	/** Set the page times.
+	 * @param pt_on Page on time (tenths of second; null means default)
+	 * @param pt_off Page off time (tenths of second; null means default) */
+	void setPageTimes(Integer pt_on, Integer pt_off);
 
 	/** Set the character spacing.
 	 * @param sc Character spacing (null means use font spacing) */
 	void setCharSpacing(Integer sc);
 
-	/** Add a span of text */
-	void addSpan(String span);
+	/** Set the text rectangle */
+	void setTextRectangle(int x, int y, int w, int h);
 
-	/** Add a graphic */
-	void addGraphic(int g_num, Integer x, Integer y, String g_id);
+	/* IRIS-specific (not part of MULTI) */
 
 	/** Add a travel time destination */
 	void addTravelTime(String sid);
