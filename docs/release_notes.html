@@ -11,6 +11,34 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.138.0 (18 November 2011)</dt>
+	<dd><ul>
+		<li>
+			Added a "scheduled date" to time actions as an
+			alternative to using a day plan.
+		</li>
+		<li>
+			Allow DMS MULTI string messages to contain lowercase
+			letters if defined in the font.
+		</li>
+		<li>
+			Added support for more MULTI tags: pb (page background
+			color), cr (color rectangle), and sc (character
+			spacing).
+		</li>
+		<li>
+			Cleaned up code dealing with MULTI parsing and
+			rendering.
+		</li>
+		<li>
+			Fixed a modem config bug (removed extra characters).
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.138.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.137.0 (15 November 2011)</dt>
 	<dd><ul>
 		<li>
