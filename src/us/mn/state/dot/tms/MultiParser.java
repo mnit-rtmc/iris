@@ -32,11 +32,11 @@ public class MultiParser {
 
 	/** Regular expression to match supported MULTI tags */
 	static private final Pattern TAGS = Pattern.compile(
-		"(nl|np|pt|jl|jp|fo|g|sc|pb|cf|cr|tr|tt|vsa|feed)(.*)");
+		"(pb|cf|cr|fo|g|jl|jp|nl|np|pt|sc|tr|tt|vsa|feed)(.*)");
 
 	/** Regular expression to match invalid line-oriented MULTI tags */
 	static private final Pattern TAG_LINE = Pattern.compile(
-		"\\[(nl|np|pt|jp|g|pb|cr|tr|feed)(.*)\\]");
+		"\\[(pb|cr|g|jp|nl|np|pt|tr|feed)(.*)\\]");
 
 	/** Regular expression to match text between MULTI tags */
 	static private final Pattern TEXT_PATTERN = Pattern.compile(
@@ -68,28 +68,28 @@ public class MultiParser {
 		if(mtag.find()) {
 			String tid = mtag.group(1).toLowerCase();
 			String tparam = mtag.group(2);
-			if(tid.equals("nl"))
+			if(tid.equals("pb"))
+				parsePageBackground(tparam, cb);
+			else if(tid.equals("cf"))
+				parseColorForeground(tparam, cb);
+			else if(tid.equals("cr"))
+				parseColorRectangle(tparam, cb);
+			else if(tid.equals("fo"))
+				parseFont(tparam, cb);
+			else if(tid.equals("g"))
+				parseGraphic(tparam, cb);
+			else if(tid.equals("jl"))
+				parseJustificationLine(tparam, cb);
+			else if(tid.equals("jp"))
+				parseJustificationPage(tparam, cb);
+			else if(tid.equals("nl"))
 				cb.addLine(parseInt(tparam));
 			else if(tid.equals("np"))
 				cb.addPage();
 			else if(tid.equals("pt"))
 				parsePageTimes(tparam, cb);
-			else if(tid.equals("jl"))
-				parseJustificationLine(tparam, cb);
-			else if(tid.equals("jp"))
-				parseJustificationPage(tparam, cb);
-			else if(tid.equals("pb"))
-				parsePageBackground(tparam, cb);
-			else if(tid.equals("cf"))
-				parseColorForeground(tparam, cb);
-			else if(tid.equals("fo"))
-				parseFont(tparam, cb);
-			else if(tid.equals("g"))
-				parseGraphic(tparam, cb);
 			else if(tid.equals("sc"))
 				parseCharSpacing(tparam, cb);
-			else if(tid.equals("cr"))
-				parseColorRectangle(tparam, cb);
 			else if(tid.equals("tr"))
 				parseTextRectangle(tparam, cb);
 			else if(tid.equals("tt"))
@@ -99,38 +99,6 @@ public class MultiParser {
 			else if(tid.equals("feed"))
 				cb.addFeed(tparam);
 		}
-	}
-
-	/** Parse page times from a [pt.o.] tag.
-	 * @param v Page time tag value.
-	 * @param cb Callback to set page times. */
-	static private void parsePageTimes(String v, Multi cb) {
-		String[] args = v.split("o", 2);
-		Integer pt_on = parseInt(args, 0);
-		Integer pt_off = parseInt(args, 1);
-		cb.setPageTimes(pt_on, pt_off);
-	}
-
-	/** Parse a line justification tag.
-	 * @param v Line justification tag value.
-	 * @param cb Callback to set line justification. */
-	static private void parseJustificationLine(String v, Multi cb) {
-		Multi.JustificationLine jl = Multi.JustificationLine.UNDEFINED;
-		Integer j = parseInt(v);
-		if(j != null)
-			jl = Multi.JustificationLine.fromOrdinal(j);
-		cb.setJustificationLine(jl);
-	}
-
-	/** Parse a page justification tag.
-	 * @param v Page justification tag value.
-	 * @param cb Callback to set page justification. */
-	static private void parseJustificationPage(String v, Multi cb) {
-		Multi.JustificationPage jp = Multi.JustificationPage.UNDEFINED;
-		Integer j = parseInt(v);
-		if(j != null)
-			jp = Multi.JustificationPage.fromOrdinal(j);
-		cb.setJustificationPage(jp);
 	}
 
 	/** Parse a page background color tag */
@@ -151,6 +119,23 @@ public class MultiParser {
 		Integer b = parseInt(args, 2);
 		if(r != null && g != null && b != null)
 			cb.setColorForeground(r, g, b);
+	}
+
+	/** Parse color rectangle from a [cr...] tag.
+	 * @param v Color rectangle tag value.
+	 * @param cb Callback to set color rectangle. */
+	static private void parseColorRectangle(String v, Multi cb) {
+		String[] args = v.split(",", 7);
+		Integer x = parseInt(args, 0);
+		Integer y = parseInt(args, 1);
+		Integer w = parseInt(args, 2);
+		Integer h = parseInt(args, 3);
+		Integer r = parseInt(args, 4);
+		Integer g = parseInt(args, 5);
+		Integer b = parseInt(args, 6);
+		if(x != null && y != null && w != null && h != null &&
+		   r != null && g != null && b != null)
+			cb.addColorRectangle(x, y, w, h, r, g, b);
 	}
 
 	/** Parse a font number from an [fox] or [fox,cccc] tag.
@@ -181,28 +166,43 @@ public class MultiParser {
 			cb.addGraphic(g_num, x, y, g_id);
 	}
 
+	/** Parse a line justification tag.
+	 * @param v Line justification tag value.
+	 * @param cb Callback to set line justification. */
+	static private void parseJustificationLine(String v, Multi cb) {
+		Multi.JustificationLine jl = Multi.JustificationLine.UNDEFINED;
+		Integer j = parseInt(v);
+		if(j != null)
+			jl = Multi.JustificationLine.fromOrdinal(j);
+		cb.setJustificationLine(jl);
+	}
+
+	/** Parse a page justification tag.
+	 * @param v Page justification tag value.
+	 * @param cb Callback to set page justification. */
+	static private void parseJustificationPage(String v, Multi cb) {
+		Multi.JustificationPage jp = Multi.JustificationPage.UNDEFINED;
+		Integer j = parseInt(v);
+		if(j != null)
+			jp = Multi.JustificationPage.fromOrdinal(j);
+		cb.setJustificationPage(jp);
+	}
+
+	/** Parse page times from a [pt.o.] tag.
+	 * @param v Page time tag value.
+	 * @param cb Callback to set page times. */
+	static private void parsePageTimes(String v, Multi cb) {
+		String[] args = v.split("o", 2);
+		Integer pt_on = parseInt(args, 0);
+		Integer pt_off = parseInt(args, 1);
+		cb.setPageTimes(pt_on, pt_off);
+	}
+
 	/** Parse character spacing from a [scx] tag.
 	 * @param sc Character spacing value from tag.
 	 * @param cb Callback to set spacing information. */
 	static private void parseCharSpacing(String sc, Multi cb) {
 		cb.setCharSpacing(parseInt(sc));
-	}
-
-	/** Parse color rectangle from a [cr...] tag.
-	 * @param v Color rectangle tag value.
-	 * @param cb Callback to set color rectangle. */
-	static private void parseColorRectangle(String v, Multi cb) {
-		String[] args = v.split(",", 7);
-		Integer x = parseInt(args, 0);
-		Integer y = parseInt(args, 1);
-		Integer w = parseInt(args, 2);
-		Integer h = parseInt(args, 3);
-		Integer r = parseInt(args, 4);
-		Integer g = parseInt(args, 5);
-		Integer b = parseInt(args, 6);
-		if(x != null && y != null && w != null && h != null &&
-		   r != null && g != null && b != null)
-			cb.addColorRectangle(x, y, w, h, r, g, b);
 	}
 
 	/** Parse text rectangle from a [tr...] tag.
