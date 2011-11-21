@@ -72,34 +72,6 @@ public class RasterBuilder {
 		default_font = df;
 	}
 
-	/** Find all matching fonts */
-	public void findFonts(Checker<Font> checker) {
-		FontFinder ff = new FontFinder();
-		FontHelper.find(ff);
-		ff.findFonts(checker);
-	}
-
-	/** Simple class to find matching fonts */
-	protected class FontFinder implements Checker<Font> {
-		protected final TreeMap<Integer, Font> fonts =
-			new TreeMap<Integer, Font>();
-		public boolean check(Font f) {
-			if(isFontUsable(f))
-				fonts.put(f.getNumber(), f);
-			return false;
-		}
-		public Font getFirstFont() {
-			if(fonts.size() > 0)
-				return fonts.get(fonts.firstKey());
-			else
-				return null;
-		}
-		protected void findFonts(Checker<Font> checker) {
-			for(Font f: fonts.values())
-				checker.check(f);
-		}
-	}
-
 	/** Check if a font is usable */
 	public boolean isFontUsable(Font f) {
 		return isFontWidthUsable(f) && isFontHeightUsable(f);

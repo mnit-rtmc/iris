@@ -26,10 +26,10 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontFinder;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -71,16 +71,8 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Create a new operation to send fonts to a DMS */
 	public OpSendDMSFonts(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
-		final LinkedList<Font> fonts = new LinkedList<Font>();
-		RasterBuilder builder = DMSHelper.createRasterBuilder(d);
-		if(builder != null) {
-			builder.findFonts(new Checker<Font>() {
-				public boolean check(Font font) {
-					fonts.add(font);
-					return false;
-				}
-			});
-		}
+		FontFinder ff = new FontFinder(d);
+		LinkedList<Font> fonts = ff.getFonts();
 		for(Font f: fonts)
 			num_2_row.put(f.getNumber(), null);
 		font_iterator = fonts.iterator();
