@@ -19,8 +19,8 @@ package us.mn.state.dot.tms.server;
  *
  * @author Douglas Lau
  */
-abstract public class MeterAlgorithmState {
+public interface MeterAlgorithmState {
 
 	/** Validate algorithm state for a meter */
-	abstract public void validate(RampMeterImpl meter);
+	void validate(RampMeterImpl meter);
 }

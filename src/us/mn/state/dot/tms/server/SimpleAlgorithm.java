@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
  *
  * @author Douglas Lau
  */
-public class SimpleAlgorithm extends MeterAlgorithmState {
+public class SimpleAlgorithm implements MeterAlgorithmState {
 
 	/** Get the absolute maximum release rate */
 	static protected int getMaxRelease() {

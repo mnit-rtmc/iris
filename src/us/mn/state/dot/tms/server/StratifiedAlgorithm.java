@@ -43,7 +43,7 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
  *
  * @author Douglas Lau
  */
-public class StratifiedAlgorithm extends MeterAlgorithmState {
+public class StratifiedAlgorithm implements MeterAlgorithmState {
 
 	/** Zone debug log */
 	static protected final IDebugLog SZM_LOG = new IDebugLog("szm");
