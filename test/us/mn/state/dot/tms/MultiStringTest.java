@@ -406,13 +406,41 @@ public class MultiStringTest extends TestCase {
 
 	/** getLines */
 	private void getLines() {
-		assertTrue(new MultiString("").getLines().length == 1);
-		assertTrue(new MultiString("ABC").getLines().length == 1);
-		assertTrue(new MultiString("ABC[nl][nl]").getLines().length==1);
-		assertTrue(new MultiString("ABC[nl][np]").getLines().length==1);
-		assertTrue(new MultiString("ABC[nl][np]DEF").getLines().
-			length == 2);
-		assertTrue(new MultiString("ABC[nl][np]DEF[np]").getLines().
-			length == 2);
+		assertTrue(Arrays.equals(new String[] { "" },
+			new MultiString("").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+			new MultiString("ABC").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+			new MultiString("ABC[nl][nl]").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+			new MultiString("ABC[nl][np]").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC", "DEF" },
+			new MultiString("ABC[nl][np]DEF").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC", "DEF" },
+			new MultiString("ABC[nl][np]DEF[np]").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC", "DEF", "GHI" },
+			new MultiString("ABC[nl]DEF[nl2]GHI").getLines()));
+		assertTrue(Arrays.equals(new String[]
+			{ "ABC", "DEF", "GHI", "JKL" },
+		       new MultiString("ABC[nl]DEF[np]GHI[nl]JKL").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC", "DEF", "GHI",""},
+			new MultiString("ABC[nl]DEF[np]GHI").getLines()));
+		assertTrue(Arrays.equals(new String[] { "[jl2]ABC", "DE[fo1]F"},
+			new MultiString("[jl2]ABC[nl]DE[fo1]F").getLines()));
+		assertTrue(Arrays.equals(new String[]
+			{ "[cf0,0,0]ABC", "DE[sc5]F" },
+		       new MultiString("[cf0,0,0]ABC[nl]DE[sc5]F").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+		       new MultiString("[pb0,0,0]ABC").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+		       new MultiString("[cr255,0,0]ABC").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+		       new MultiString("[g1,0,0]ABC").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+		       new MultiString("[jp3]ABC").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+		       new MultiString("[pt50o0]ABC").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+		       new MultiString("[tr0,0,5,5]ABC").getLines()));
 	}
 }
