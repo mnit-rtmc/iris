@@ -443,6 +443,8 @@ public class MultiStringTest extends TestCase {
 		       new MultiString("[pt50o0]ABC").getLines()));
 		assertTrue(Arrays.equals(new String[] { "ABC" },
 		       new MultiString("[tr0,0,5,5]ABC").getLines()));
+		assertTrue(Arrays.equals(new String[] { "ABC [fo1]DEF" },
+		       new MultiString("[jp3]ABC [fo1]DEF").getLines()));
 	}
 
 	/** asText */

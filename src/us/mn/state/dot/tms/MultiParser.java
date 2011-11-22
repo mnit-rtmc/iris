@@ -34,10 +34,6 @@ public class MultiParser {
 	static private final Pattern TAGS = Pattern.compile(
 		"(pb|cf|cr|fo|g|jl|jp|nl|np|pt|sc|tr|tt|vsa|feed)(.*)");
 
-	/** Regular expression to match invalid line-oriented MULTI tags */
-	static private final Pattern TAG_LINE = Pattern.compile(
-		"\\[(pb|cr|g|jp|nl|np|pt|tr|feed)(.*)\\]");
-
 	/** Regular expression to match text between MULTI tags */
 	static private final Pattern TEXT_PATTERN = Pattern.compile(
 		"[' !#$%&()*+,-./0-9:;<=>?@A-Za-z^_`]*");
@@ -250,22 +246,39 @@ public class MultiParser {
 	 * @return A normalized MULTI string with invalid characters and
 	 *         invalid tags removed, etc. */
 	static public String normalize(String multi) {
-		MultiString ms = new MultiString() {
-			public void addSpan(String s) {
-				Matcher m = TEXT_PATTERN.matcher(s);
-				while(m.find())
-					super.addSpan(m.group());
-			}
-		};
+		NormalMultiString ms = new NormalMultiString();
 		parse(multi, ms);
 		return ms.toString();
 	}
 
+	/** A MULTI string which is automatically normalized */
+	static private class NormalMultiString extends MultiString {
+		public void addSpan(String s) {
+			Matcher m = TEXT_PATTERN.matcher(s);
+			while(m.find())
+				super.addSpan(m.group());
+		}
+	}
+
 	/** Normalize a single line MULTI string */
 	static public String normalizeLine(String multi) {
-		StringBuilder sb = new StringBuilder();
-		for(String txt: TAG_LINE.split(normalize(multi)))
-			sb.append(txt);
-		return sb.toString();
+		// Strip tags which don't associate with a line
+		MultiString ms = new NormalMultiString() {
+			public void setPageBackground(int r, int g, int b) {}
+			public void addColorRectangle(int x, int y, int w,
+				int h, int r, int g, int b) {}
+			public void addGraphic(int g_num, Integer x, Integer y,
+				String g_id) {}
+			public void setJustificationPage(
+				Multi.JustificationPage jp) {}
+			public void addLine(Integer spacing) {}
+			public void addPage() {}
+			public void setPageTimes(Integer on, Integer off) {}
+			public void setTextRectangle(int x, int y, int w,
+				int h) {}
+			public void addFeed(String fid) {}
+		};
+		parse(multi, ms);
+		return ms.toString();
 	}
 }
