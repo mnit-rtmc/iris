@@ -158,16 +158,24 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Populate the num_2_row mapping */
 	protected Phase populateNum2Row() {
-		for(Integer f_num: num_2_row.keySet()) {
-			if(num_2_row.get(f_num) == null) {
-				Integer r = open_rows.pollLast();
-				if(r != null)
-					num_2_row.put(f_num, r);
-				else
-					num_2_row.remove(f_num);
-			}
-		}
+		// The f_nums linked list is needed to avoid a
+		// ConcurrentModificationException on num_2_row TreeMap
+		LinkedList<Integer> f_nums = new LinkedList<Integer>();
+		f_nums.addAll(num_2_row.keySet());
+		for(Integer f_num: f_nums)
+			populateNum2Row(f_num);
 		return nextFontPhase();
+	}
+
+	/** Populate one font number in mapping */
+	private void populateNum2Row(Integer f_num) {
+		if(num_2_row.get(f_num) == null) {
+			Integer r = open_rows.pollLast();
+			if(r != null)
+				num_2_row.put(f_num, r);
+			else
+				num_2_row.remove(f_num);
+		}
 	}
 
 	/** Get the first phase of the next font */
