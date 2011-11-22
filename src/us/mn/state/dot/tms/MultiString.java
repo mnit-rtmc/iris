@@ -419,7 +419,8 @@ public class MultiString implements Multi {
 		final StringBuilder sb = new StringBuilder();
 		MultiParser.parse(toString(), new MultiAdapter() {
 			public void addSpan(String span) {
-				if(sb.length() > 0)
+				if(sb.length() > 0 &&
+				   sb.charAt(sb.length() - 1) != ' ')
 					sb.append(' ');
 				sb.append(span);
 			}

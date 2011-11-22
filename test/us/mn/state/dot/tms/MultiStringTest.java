@@ -40,6 +40,7 @@ public class MultiStringTest extends TestCase {
 		getText();
 		getNumPages();
 		getLines();
+		asText();
 		etc();
 	}
 
@@ -442,5 +443,17 @@ public class MultiStringTest extends TestCase {
 		       new MultiString("[pt50o0]ABC").getLines()));
 		assertTrue(Arrays.equals(new String[] { "ABC" },
 		       new MultiString("[tr0,0,5,5]ABC").getLines()));
+	}
+
+	/** asText */
+	private void asText() {
+		assertTrue("ABC DEF".equals(new MultiString(
+			"ABC[fo1]DEF").asText()));
+		assertTrue("ABC DEF".equals(new MultiString(
+			"ABC [fo1]DEF").asText()));
+		assertTrue("ABC DEF".equals(new MultiString(
+			"ABC [sc4]DEF").asText()));
+		assertTrue("ABC DEF".equals(new MultiString(
+			"ABC[jl4]DEF").asText()));
 	}
 }
