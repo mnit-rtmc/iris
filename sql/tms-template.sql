@@ -842,6 +842,7 @@ CREATE TABLE iris.action_plan (
 	name VARCHAR(16) PRIMARY KEY,
 	description VARCHAR(64) NOT NULL,
 	sync_actions BOOLEAN NOT NULL,
+	sticky BOOLEAN NOT NULL,
 	active BOOLEAN NOT NULL,
 	default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
@@ -885,7 +886,8 @@ CREATE TABLE iris.meter_action (
 );
 
 CREATE VIEW action_plan_view AS
-	SELECT name, description, sync_actions, active, default_phase, phase
+	SELECT name, description, sync_actions, sticky, active, default_phase,
+		phase
 	FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
@@ -1350,7 +1352,7 @@ camera_id_blank
 camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
-database_version	3.138.0
+database_version	3.139.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
