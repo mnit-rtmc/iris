@@ -84,6 +84,21 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 					ap.setSyncActions((Boolean)value);
 			}
 		},
+		new ProxyColumn<ActionPlan>("Sticky", 80, Boolean.class) {
+			public Object getValueAt(ActionPlan ap) {
+				if(ap != null)
+					return ap.getSticky();
+				else
+					return null;
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return canUpdate(ap);
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				if(value instanceof Boolean)
+					ap.setSticky((Boolean)value);
+			}
+		},
 		new ProxyColumn<ActionPlan>("Active", 80, Boolean.class) {
 			public Object getValueAt(ActionPlan ap) {
 				if(ap != null)

@@ -47,7 +47,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		System.err.println("Loading action plans...");
 		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class);
 		store.query("SELECT name, description, sync_actions, " +
-			"active, default_phase, phase FROM iris." +
+			"sticky, active, default_phase, phase FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -56,9 +56,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 					row.getString(1),  // name
 					row.getString(2),  // description
 					row.getBoolean(3), // sync_actions
-					row.getBoolean(4), // active
-					row.getString(5),  // default_phase
-					row.getString(6)   // phase
+					row.getBoolean(4), // sticky
+					row.getBoolean(5), // active
+					row.getString(6),  // default_phase
+					row.getString(7)   // phase
 				));
 			}
 		});
@@ -70,6 +71,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		map.put("name", name);
 		map.put("description", description);
 		map.put("sync_actions", sync_actions);
+		map.put("sticky", sticky);
 		map.put("active", active);
 		map.put("default_phase", default_phase);
 		map.put("phase", phase);
@@ -93,21 +95,22 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Create a new action plan */
-	private ActionPlanImpl(Namespace ns, String n, String dsc, boolean s,
-		boolean a, String dp, String p)
+	private ActionPlanImpl(Namespace ns, String n, String dsc, boolean sa,
+		boolean st, boolean a, String dp, String p)
 	{
-		this(n, dsc, s, a,
+		this(n, dsc, sa, st, a,
 		     (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, dp),
 		     (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p));
 	}
 
 	/** Create a new action plan */
-	private ActionPlanImpl(String n, String dsc, boolean s, boolean a,
-		PlanPhase dp, PlanPhase p)
+	private ActionPlanImpl(String n, String dsc, boolean sa, boolean st,
+		boolean a, PlanPhase dp, PlanPhase p)
 	{
 		this(n);
 		description = dsc;
-		sync_actions = s;
+		sync_actions = sa;
+		sticky = st;
 		active = a;
 		default_phase = dp;
 		phase = p;
@@ -153,6 +156,27 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Get the sync actions flag */
 	public boolean getSyncActions() {
 		return sync_actions;
+	}
+
+	/** Sticky flag */
+	protected boolean sticky;
+
+	/** Set the sticky flag */
+	public void setSticky(boolean s) {
+		sticky = s;
+	}
+
+	/** Set the sticky flag */
+	public void doSetSticky(boolean s) throws TMSException {
+		if(s == sticky)
+			return;
+		store.update(this, "sticky", s);
+		setSticky(s);
+	}
+
+	/** Get the sticky flag */
+	public boolean getSticky() {
+		return sticky;
 	}
 
 	/** Active status */
@@ -213,7 +237,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public void doSetPhase(PlanPhase p) throws TMSException {
 		if(p == phase)
 			return;
-		if(sync_actions) {
+		if(getSyncActions()) {
 			validateDmsActions();
 			validateLaneActions();
 			validateMeterActions();

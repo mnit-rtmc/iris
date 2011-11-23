@@ -38,6 +38,12 @@ public interface ActionPlan extends SonarObject {
 	/** Get the sync actions flag */
 	boolean getSyncActions();
 
+	/** Set the sticky flag */
+	void setSticky(boolean s);
+
+	/** Get the sticky flag */
+	boolean getSticky();
+
 	/** Set the active status */
 	void setActive(boolean a);
 

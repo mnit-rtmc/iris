@@ -1412,7 +1412,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * @param da DMS action
 	 * @return New sign message, or null on error */
 	protected SignMessage createMessage(DmsAction da) {
-		Integer d = da.getActionPlan().getSyncActions() ? null : 1;
+		Integer d = getDuration(da);
 		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
 			da.getActivationPriority());
 		DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
@@ -1422,6 +1422,19 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			return createMessage(m, ap, rp, true, d);
 		else
 			return null;
+	}
+
+	/** Get the duration of a DMS action. */
+	private Integer getDuration(DmsAction da) {
+		return da.getActionPlan().getSticky() ? null :
+			getUnstickyDuration();
+	}
+
+	/** Get the duration of an unsticky action */
+	private int getUnstickyDuration() {
+		/** FIXME: this should be twice the polling period for the
+		 *         sign.  Modem signs should have a longer duration. */
+		return 1;
 	}
 
 	/** Create a multi string for a DMS action */
