@@ -11,6 +11,29 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.139.0 (23 November 2011)</dt>
+	<dd><ul>
+		<li>
+			Added a "sticky" flag to action plans to make messages
+			remain even after communication loss or power failure.
+		</li>
+		<li>
+			Added VSA_MAX_DISPLAY_MPH system attribute to limit the
+			largest speed to use for VSA messages.
+		</li>
+		<li>
+			Improved algorithm to send fonts to DMS.
+			Also, fixed a rare exception in font algorithm.
+		</li>
+		<li>
+			Improved MULTI parsing and unit tests.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.139.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.138.0 (18 November 2011)</dt>
 	<dd><ul>
 		<li>
