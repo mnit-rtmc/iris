@@ -1419,6 +1419,7 @@ uptime_log_filename	/var/www/html/irisuptimelog.csv
 vsa_bottleneck_id_mph	55
 vsa_control_threshold	-1000
 vsa_downstream_miles	0.2
+vsa_max_display_mph	60
 vsa_min_display_mph	30
 vsa_min_station_miles	0.1
 vsa_start_intervals	3

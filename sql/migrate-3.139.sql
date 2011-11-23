@@ -15,3 +15,6 @@ CREATE VIEW action_plan_view AS
 		phase
 	FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
+
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('vsa_max_display_mph', 60);

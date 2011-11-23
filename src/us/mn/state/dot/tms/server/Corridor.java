@@ -221,7 +221,7 @@ public class Corridor extends CorridorBase {
 				if(a != null) {
 					a = Math.max(a, getMinDisplay());
 					int sa = round5Mph(a);
-					if(sa < lim)
+					if(sa < lim && sa <= getMaxDisplay())
 						return sa;
 					else
 						return null;
@@ -234,6 +234,11 @@ public class Corridor extends CorridorBase {
 	/** Get the minimum speed to display for advisory */
 	protected int getMinDisplay() {
 		return SystemAttrEnum.VSA_MIN_DISPLAY_MPH.getInt();
+	}
+
+	/** Get the maximum speed to display for advisory */
+	private int getMaxDisplay() {
+		return SystemAttrEnum.VSA_MAX_DISPLAY_MPH.getInt();
 	}
 
 	/** Class to find a bottleneck near a point */
