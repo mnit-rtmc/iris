@@ -59,11 +59,15 @@ public class FeedCallback extends MultiString {
 	private String getFeedString() {
 		String[] lines = msg.getMulti().getLines();
 		for(int i = 0; i < lines.length; i++) {
-			if(lines[i].length() == 0)
-				continue;
-			if(!SignTextHelper.match(group, (short)(i+1), lines[i]))
-				return null;
+			if(!isValidSignText((short)(i + 1), lines[i]))
+				return "";
 		}
 		return msg.getMulti().toString();
+	}
+
+	/** Check if a MULTI string is a valid sign text for the sign group */
+	private boolean isValidSignText(short line, String ms) {
+		return ms.isEmpty() ||
+		       SignTextHelper.match(group, line, ms);
 	}
 }

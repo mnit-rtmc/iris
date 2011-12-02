@@ -1445,7 +1445,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				da.getSignGroup());
 			MultiParser.parse(qm.getMulti(), fc);
 			String m = fc.toString();
-			if(m != null)
+			MultiString multi = new MultiString(m);
+			if(!multi.isBlank())
 				return createMulti(m);
 		}
 		return null;
