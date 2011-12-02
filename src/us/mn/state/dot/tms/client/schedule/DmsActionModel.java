@@ -44,6 +44,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		DMSMessagePriority.TRAVEL_TIME,
 		DMSMessagePriority.SPEED_LIMIT,
 		DMSMessagePriority.SCHEDULED,
+		DMSMessagePriority.OTHER_SYSTEM,
 		DMSMessagePriority.INCIDENT_LOW,
 		DMSMessagePriority.INCIDENT_MED,
 		DMSMessagePriority.INCIDENT_HIGH
