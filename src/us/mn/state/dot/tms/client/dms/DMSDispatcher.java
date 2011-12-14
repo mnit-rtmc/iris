@@ -395,7 +395,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Query the current message on all selected signs */
 	protected void queryMessage() {
-		for(DMS dms: getSelected()) {
+		for(DMS dms: selectionModel.getSelected()) {
 			dms.setDeviceRequest(
 				DeviceRequest.QUERY_MESSAGE.ordinal());
 		}
@@ -598,7 +598,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Can a device request be sent to all selected DMS? */
 	public boolean canRequest() {
-		List<DMS> sel = getSelected();
+		List<DMS> sel = selectionModel.getSelected();
 		if(sel.isEmpty())
 			return false;
 		for(DMS dms: sel) {
