@@ -84,7 +84,7 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Open the messenger */
-	public void open() throws IOException {
+	public synchronized void open() throws IOException {
 		log("open");
 		wrapped.open();
 		output = wrapped.getOutputStream();
@@ -93,7 +93,7 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Close the messenger */
-	public void close() {
+	public synchronized void close() {
 		log("close");
 		wrapped.close();
 		output = null;
@@ -129,7 +129,7 @@ public class ModemMessenger extends Messenger {
 			configureModem(pw, isr, config);
 		if(phone_number != null && phone_number.length() > 0)
 			dialModem(pw, isr);
-		log("connected");
+		setConnected();
     	}
 
 	/** Configure the modem */
@@ -185,5 +185,14 @@ public class ModemMessenger extends Messenger {
 		if(n_chars < 0)
 			throw new EOFException("END OF STREAM");
 		return new String(buf, 0, n_chars);
+	}
+
+	/** Set the modem to connected state */
+	private void setConnected() {
+		if(input instanceof ModemInputStream) {
+			ModemInputStream mis = (ModemInputStream)input;
+			mis.setConnected();
+		}
+		log("connected");
 	}
 }

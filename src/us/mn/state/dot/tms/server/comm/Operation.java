@@ -104,6 +104,12 @@ abstract public class Operation {
 		phase = null;
 	}
 
+	/** Indicate that the operation was aborted by a hang up */
+	public void setHungUp() {
+		success = true;
+		phase = null;
+	}
+
 	/** Check if the operation is done */
 	public boolean isDone() {
 		return phase == null;

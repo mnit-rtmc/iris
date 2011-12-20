@@ -22,7 +22,8 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * An input stream which throws an EOFException if too many timeout exceptions
- * have occurred.
+ * have occurred.  The exception thrown becomes a HangUpException once the modem
+ * is in the "connected" state.
  *
  * @author Douglas Lau
  */
@@ -39,9 +40,17 @@ public class ModemInputStream extends InputStream {
 	/** Count of timeout errors */
 	private int n_timeout = 0;
 
+	/** Exception for too many timeout errors */
+	private EOFException eof = new EOFException("DISCONNECTED");
+
 	/** Create a modem input stream */
 	public ModemInputStream(InputStream is) {
 		wrapped = is;
+	}
+
+	/** Set the modem to a connected state */
+	public void setConnected() {
+		eof = new HangUpException();
 	}
 
 	/** Close the input stream */
@@ -93,7 +102,7 @@ public class ModemInputStream extends InputStream {
 		if(n_timeout < getRetryThreshold())
 			throw e;
 		else
-			throw new EOFException("DISCONNECTED");
+			throw eof;
 	}
 
 	/** Read a buffer of data */

@@ -170,6 +170,8 @@ abstract public class MessagePoller extends Thread {
 		while(queue.hasNext()) {
 			Operation o = queue.next();
 			o.handleCommError(EventType.QUEUE_DRAINED, status);
+			if(status.equals(HangUpException.MESSAGE))
+				o.setHungUp();
 			o.cleanup();
 		}
 	}
