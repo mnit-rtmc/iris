@@ -235,9 +235,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Close the message poller */
 	protected synchronized void closePoller() {
-		failControllers();
-		if(poller != null)
+		if(poller != null && !poller.wasHungUp()) {
+			failControllers();
 			poller.stopPolling();
+		}
 		poller = null;
 	}
 

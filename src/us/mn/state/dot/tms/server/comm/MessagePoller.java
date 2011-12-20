@@ -87,6 +87,14 @@ abstract public class MessagePoller extends Thread {
 		return status;
 	}
 
+	/** Hung up flag */
+	protected boolean hung_up = false;
+
+	/** Check if the messenger was hung up on */
+	public boolean wasHungUp() {
+		return hung_up;
+	}
+
 	/** Thread started flag */
 	private boolean started;
 
@@ -150,6 +158,10 @@ abstract public class MessagePoller extends Thread {
 			performOperations();
 			status = "CLOSING";
 		}
+		catch(HangUpException e) {
+			status = exceptionMessage(e);
+			hung_up = true;
+		}
 		catch(IOException e) {
 			status = exceptionMessage(e);
 		}
@@ -170,7 +182,7 @@ abstract public class MessagePoller extends Thread {
 		while(queue.hasNext()) {
 			Operation o = queue.next();
 			o.handleCommError(EventType.QUEUE_DRAINED, status);
-			if(status.equals(HangUpException.MESSAGE))
+			if(hung_up)
 				o.setHungUp();
 			o.cleanup();
 		}
