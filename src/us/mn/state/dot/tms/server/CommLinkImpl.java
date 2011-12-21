@@ -207,7 +207,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	protected transient MessagePoller poller;
 
 	/** Get the message poller.  This must be synchronized to protect
-	 * access to the poller member variable. */
+	 * access to the poller member variable.  Only call this method when
+	 * an operation needs to be queued, since a modem may be acquired to
+	 * create the poller.  */
 	public synchronized MessagePoller getPoller() {
 		if(poller != null) {
 			setStatus(poller.getStatus());
