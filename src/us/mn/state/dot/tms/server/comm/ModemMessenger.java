@@ -84,7 +84,7 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Open the messenger */
-	public synchronized void open() throws IOException {
+	public void open() throws IOException {
 		log("open");
 		wrapped.open();
 		output = wrapped.getOutputStream();
@@ -93,7 +93,7 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Close the messenger */
-	public synchronized void close() {
+	public void close() {
 		log("close");
 		wrapped.close();
 		output = null;
