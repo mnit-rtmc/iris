@@ -104,10 +104,12 @@ public class SampleQuery30SecJob extends Job {
 
 	/** Query 30-second sample data from one controller */
 	protected void querySample30Sec(ControllerImpl c) {
-		MessagePoller p = c.getPoller();
-		if(p instanceof SamplePoller) {
-			SamplePoller sp = (SamplePoller)p;
-			sp.querySamples(c, 30, comp);
+		if(c.hasActiveDetector()) {
+			MessagePoller p = c.getPoller();
+			if(p instanceof SamplePoller) {
+				SamplePoller sp = (SamplePoller)p;
+				sp.querySamples(c, 30, comp);
+			}
 		}
 	}
 

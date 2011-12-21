@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,10 +74,12 @@ public class SampleQuery5MinJob extends Job {
 
 	/** Query 5-minute sample data from one controller */
 	protected void querySample5Min(ControllerImpl c) {
-		MessagePoller p = c.getPoller();
-		if(p instanceof SamplePoller) {
-			SamplePoller sp = (SamplePoller)p;
-			sp.querySamples(c, 300, comp);
+		if(c.hasActiveDetector()) {
+			MessagePoller p = c.getPoller();
+			if(p instanceof SamplePoller) {
+				SamplePoller sp = (SamplePoller)p;
+				sp.querySamples(c, 300, comp);
+			}
 		}
 	}
 }
