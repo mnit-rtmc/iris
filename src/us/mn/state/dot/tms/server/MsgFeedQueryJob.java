@@ -53,10 +53,12 @@ public class MsgFeedQueryJob extends Job {
 
 	/** Query message feed from one controller */
 	protected void queryMsgFeed(ControllerImpl c) {
-		MessagePoller p = c.getPoller();
-		if(p instanceof MsgFeedPoller) {
-			MsgFeedPoller mfp = (MsgFeedPoller)p;
-			mfp.queryMessages(c);
+		if(c.isMsgFeed()) {
+			MessagePoller p = c.getPoller();
+			if(p instanceof MsgFeedPoller) {
+				MsgFeedPoller mfp = (MsgFeedPoller)p;
+				mfp.queryMessages(c);
+			}
 		}
 	}
 }

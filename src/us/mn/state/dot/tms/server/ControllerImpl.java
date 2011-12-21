@@ -29,6 +29,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -444,6 +445,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 				return true;
 		}
 		return false;
+	}
+
+	/** Check if the controller is a message feed controller */
+	public boolean isMsgFeed() {
+		CommLink cl = comm_link;
+		if(cl != null) {
+			return CommProtocol.fromOrdinal(cl.getProtocol()) ==
+			       CommProtocol.MSG_FEED;
+		} else
+			return false;
 	}
 
 	/** Get a sample value from an array */
