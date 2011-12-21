@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -143,7 +143,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Get a weather sensor poller */
-	protected WeatherPoller getWeatherPoller() {
+	public WeatherPoller getWeatherPoller() {
 		if(isActive()) {
 			MessagePoller p = getPoller();
 			if(p instanceof WeatherPoller)

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,8 @@ package us.mn.state.dot.tms.server;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
 /**
@@ -39,21 +38,19 @@ public class WeatherQueryJob extends Job {
 
 	/** Perform the job */
 	public void perform() {
-		ControllerHelper.find(new Checker<Controller>() {
-			public boolean check(Controller c) {
-				if(c instanceof ControllerImpl)
-					queryWeather((ControllerImpl)c);
+		WeatherSensorHelper.find(new Checker<WeatherSensor>() {
+			public boolean check(WeatherSensor ws) {
+				if(ws instanceof WeatherSensorImpl)
+					queryWeather((WeatherSensorImpl)ws);
 				return false;
 			}
 		});
 	}
 
-	/** Query weather sample data from one controller */
-	protected void queryWeather(ControllerImpl c) {
-		MessagePoller p = c.getPoller();
-		if(p instanceof WeatherPoller) {
-			WeatherPoller wp = (WeatherPoller)p;
-			wp.queryConditions(c);
-		}
+	/** Query weather sample data from one sensor */
+	protected void queryWeather(WeatherSensorImpl ws) {
+		WeatherPoller wp = ws.getWeatherPoller();
+		if(wp != null)
+			wp.queryConditions(ws);
 	}
 }

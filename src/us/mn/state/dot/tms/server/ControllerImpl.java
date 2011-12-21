@@ -781,8 +781,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 				sp.sendSettings(this);
 		}
 		if(p instanceof WeatherPoller) {
-			WeatherPoller wp = (WeatherPoller)p;
-			wp.sendSettings(this);
+			WeatherSensorImpl ws = getActiveWeatherSensor();
+			if(ws != null) {
+				WeatherPoller wp = (WeatherPoller)p;
+				wp.sendSettings(ws);
+			}
 		}
 	}
 
