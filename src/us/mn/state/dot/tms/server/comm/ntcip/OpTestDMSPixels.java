@@ -215,7 +215,16 @@ public class OpTestDMSPixels extends OpDMS {
 			mess.add(x_loc);
 			mess.add(y_loc);
 			mess.add(status);
-			mess.queryProps();
+			try {
+				mess.queryProps();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// Okay... there is no pixel failure table for
+				// this detection type.
+				DMS_LOG.log(dms.getName() +
+					" BAD PIXEL TABLE: " + detectionType);
+				return null;
+			}
 			DMS_LOG.log(dms.getName() + ": " + x_loc);
 			DMS_LOG.log(dms.getName() + ": " + y_loc);
 			DMS_LOG.log(dms.getName() + ": " + status);
