@@ -40,9 +40,12 @@ public class ModemMessenger extends Messenger {
 	/** Get the first available modem */
 	static public ModemImpl getModem() {
 		Modem mdm = ModemHelper.find(new Checker<Modem>() {
-			public boolean check(Modem mdm) {
-				// FIXME: find available modem
-				return true;
+			public boolean check(Modem m) {
+				if(m instanceof ModemImpl) {
+					ModemImpl mdm = (ModemImpl)m;
+					return mdm.acquire();
+				} else
+					return false;
 			}
 		});
 		if(mdm instanceof ModemImpl)
@@ -55,7 +58,7 @@ public class ModemMessenger extends Messenger {
 	protected final Messenger wrapped;
 
 	/** Modem to dial */
-	protected final Modem modem;
+	protected final ModemImpl modem;
 
 	/** Phone number to dial */
 	protected final String phone_number;
@@ -69,7 +72,7 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Create a new modem messenger */
-	public ModemMessenger(Messenger m, Modem mdm, String phone) {
+	public ModemMessenger(Messenger m, ModemImpl mdm, String phone) {
 		wrapped = m;
 		modem = mdm;
 		phone_number = phone.replace("p", ",");
@@ -98,6 +101,7 @@ public class ModemMessenger extends Messenger {
 		wrapped.close();
 		output = null;
 		input = null;
+		modem.release();
 	}
 
 	/** Connect the modem with up to three tries */

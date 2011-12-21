@@ -158,4 +158,33 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	public int getTimeout() {
 		return timeout;
 	}
+
+	/** Modem ownership flag */
+	private transient boolean owned;
+
+	/** Check if the modem is currently owned */
+	public boolean isOwned() {
+		return owned;
+	}
+
+	/** Acquire ownership of the modem */
+	public boolean acquire() {
+		// Name used for unique acquire/release lock
+		synchronized(name) {
+			if(owned)
+				return false;
+			else {
+				owned = true;
+				return true;
+			}
+		}
+	}
+
+	/** Release ownership of the modem */
+	public void release() {
+		// Name used for unique acquire/release lock
+		synchronized(name) {
+			owned = false;
+		}
+	}
 }
