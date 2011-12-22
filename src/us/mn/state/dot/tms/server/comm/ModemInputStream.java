@@ -33,6 +33,10 @@ public class ModemInputStream extends InputStream {
 	static private final EOFException CONNECT_FAILED =
 		new EOFException("CONNECT FAILED");
 
+	/** Disconnected exception */
+	static private final EOFException DISCONNECTED =
+		new EOFException("DISCONNECTED");
+
 	/** Hung up exception */
 	static private final EOFException HUNG_UP = new HangUpException();
 
@@ -60,6 +64,7 @@ public class ModemInputStream extends InputStream {
 
 	/** Set the modem to a connected state */
 	public void setConnected() {
+		eof = DISCONNECTED;
 		connected = true;
 	}
 
