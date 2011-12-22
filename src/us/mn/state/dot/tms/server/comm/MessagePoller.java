@@ -95,25 +95,11 @@ abstract public class MessagePoller extends Thread {
 		return hung_up;
 	}
 
-	/** Thread started flag */
-	private boolean started;
-
-	/** Check if the poller is ready */
-	public boolean isReady() {
-		return isAlive() || !started;
-	}
-
-	/** Check if the polled is connected */
-	public boolean isConnected() {
-		return isAlive();
-	}
-
 	/** Create a new message poller */
 	protected MessagePoller(String name, Messenger m) {
 		super(GROUP, "Poller: " + name);
 		setDaemon(true);
 		messenger = m;
-		started = false;
 	}
 
 	/** Set the receive timeout */
@@ -123,7 +109,6 @@ abstract public class MessagePoller extends Thread {
 
 	/** Add an operation to the message poller */
 	public void addOperation(Operation o) {
-		ensureStarted();
 		// NOTE: we must synchronize on the queue here so that begin()
 		// gets called before the poll queue thread get access to it
 		synchronized(queue) {
@@ -131,14 +116,6 @@ abstract public class MessagePoller extends Thread {
 				queue.add(o);
 			else if(POLL_LOG.isOpen())
 				POLL_LOG.log(getName() + ", DROPPING: " + o);
-		}
-	}
-
-	/** Ensure the message poller thread has been started */
-	private void ensureStarted() {
-		if(!started) {
-			start();
-			started = true;
 		}
 	}
 
