@@ -29,6 +29,13 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class ModemInputStream extends InputStream {
 
+	/** Connect failed exception */
+	static private final EOFException CONNECT_FAILED =
+		new EOFException("CONNECT FAILED");
+
+	/** Hung up exception */
+	static private final EOFException HUNG_UP = new HangUpException();
+
 	/** Get the error retry threshold */
 	static private int getRetryThreshold() {
 		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
@@ -37,11 +44,14 @@ public class ModemInputStream extends InputStream {
 	/** Wrapped input stream */
 	private final InputStream wrapped;
 
+	/** Flag indicating that modem has connected */
+	private boolean connected = false;
+
 	/** Count of timeout errors */
 	private int n_timeout = 0;
 
 	/** Exception for too many timeout errors */
-	private EOFException eof = new EOFException("DISCONNECTED");
+	private EOFException eof = CONNECT_FAILED;
 
 	/** Create a modem input stream */
 	public ModemInputStream(InputStream is) {
@@ -50,7 +60,7 @@ public class ModemInputStream extends InputStream {
 
 	/** Set the modem to a connected state */
 	public void setConnected() {
-		eof = new HangUpException();
+		connected = true;
 	}
 
 	/** Close the input stream */
@@ -87,7 +97,8 @@ public class ModemInputStream extends InputStream {
 	public int read() throws IOException {
 		try {
 			int n_byte = wrapped.read();
-			n_timeout = 0;
+			if(n_byte >= 0)
+				handleRead(1);
 			return n_byte;
 		}
 		catch(SocketTimeoutException e) {
@@ -109,7 +120,7 @@ public class ModemInputStream extends InputStream {
 	public int read(byte[] b) throws IOException {
 		try {
 			int n_bytes = wrapped.read(b);
-			n_timeout = 0;
+			handleRead(n_bytes);
 			return n_bytes;
 		}
 		catch(SocketTimeoutException e) {
@@ -122,12 +133,21 @@ public class ModemInputStream extends InputStream {
 	public int read(byte[] b, int off, int len) throws IOException {
 		try {
 			int n_bytes = wrapped.read(b, off, len);
-			n_timeout = 0;
+			handleRead(n_bytes);
 			return n_bytes;
 		}
 		catch(SocketTimeoutException e) {
 			handleTimeout(e);
 			return -1;
+		}
+	}
+
+	/** Handle a data read event */
+	private void handleRead(int n_bytes) {
+		if(n_bytes > 0) {
+			n_timeout = 0;
+			if(connected)
+				eof = HUNG_UP;
 		}
 	}
 }
