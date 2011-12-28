@@ -187,9 +187,19 @@ public class OpSendDMSFonts extends OpDMS {
 				row = num_2_row.get(f_num);
 				return new VerifyFont();
 			}
-			DMS_LOG.log(dms.getName() + ": Skipping font " + f_num);
+			abortUpload("Table full");
 		}
 		return null;
+	}
+
+	/** Abort upload of the current font */
+	private void abortUpload(String msg) {
+		Font f = font;
+		if(f != null) {
+			String s = "Font " + f.getNumber() + " aborted -- "+msg;
+			setMaintStatus(s);
+			DMS_LOG.log(dms.getName() + " " + s);
+		}
 	}
 
 	/** Phase to verify a font */
@@ -253,7 +263,8 @@ public class OpSendDMSFonts extends OpDMS {
 			case unmanaged:
 				return new RequestStatusNotUsed();
 			default:
-				DMS_LOG.log(dms.getName() + ": font aborted");
+				abortUpload("Initial status: " +
+					status.getEnum());
 				return nextFontPhase();
 			}
 		}
@@ -283,7 +294,8 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.getEnum() != FontStatus.Enum.notUsed) {
-				DMS_LOG.log(dms.getName() + ": font aborted");
+				abortUpload("Expected notUsed, was "
+					+ status.getEnum());
 				return nextFontPhase();
 			}
 			return new RequestStatusModify();
@@ -314,7 +326,8 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.getEnum() != FontStatus.Enum.modifying) {
-				DMS_LOG.log(dms.getName() + ": font aborted");
+				abortUpload("Expected modifying, was " +
+					status.getEnum());
 				return nextFontPhase();
 			}
 			return new InvalidateFont();
@@ -462,9 +475,12 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Phase to verify the font status is ready for use */
 	protected class VerifyStatusReadyForUse extends Phase {
 
+		/** Time in seconds to allow for calculating font ID */
+		static private final int CALCULATING_ID_SECS = 15;
+
 		/** Time to stop checking if the font is ready for use */
 		protected final long expire = TimeSteward.currentTimeMillis() + 
-			15 * 1000;
+			CALCULATING_ID_SECS * 1000;
 
 		/** Verify the font status is ready for use */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -480,14 +496,15 @@ public class OpSendDMSFonts extends OpDMS {
 					return nextFontPhase();
 			case calculatingID:
 				if(TimeSteward.currentTimeMillis() > expire) {
-					DMS_LOG.log(dms.getName() + ": font " +
-					"status timeout expired -- aborted");
+					abortUpload("Still calculatingID, " +
+						CALCULATING_ID_SECS +" seconds"+
+						" after readyForUseReq");
 					return nextFontPhase();
 				} else
 					return this;
 			default:
-				DMS_LOG.log(dms.getName() + ": font status " +
-					"unexpected -- aborted");
+				abortUpload("Invalid state readyForUseReq -> " +
+					status.getEnum());
 				return nextFontPhase();
 			}
 		}
