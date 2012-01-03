@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
@@ -227,11 +226,12 @@ public class OpSendDMSMessage extends OpDMS {
 			if(!status.isValid())
 				return new ValidateMessageError();
 			if(message_crc != crc.getInteger()) {
-				DMS_LOG.log(dms.getName() + ": Message CRC " +
-					Integer.toHexString(message_crc));
-				throw new ControllerException("Message CRC: " +
+				String ms = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
-					Integer.toHexString(crc.getInteger()));
+					Integer.toHexString(crc.getInteger());
+				DMS_LOG.log(dms.getName() + ": " + ms);
+				setErrorStatus(ms);
+				return null;
 			}
 			return new ActivateMessage();
 		}
