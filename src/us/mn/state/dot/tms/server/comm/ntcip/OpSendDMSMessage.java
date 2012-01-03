@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,17 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 
 /**
- * Operation to command a new message on a DMS.
+ * Operation to send a new message to a DMS and activate it.
  *
  * @author Douglas Lau
  */
-public class OpSendDMSMessage extends OpDMSMessage {
+public class OpSendDMSMessage extends OpDMS {
 
 	/** Maximum message priority */
 	static protected final int MAX_MESSAGE_PRIORITY = 255;
@@ -41,21 +43,46 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	protected final DmsLongPowerRecoveryMessage long_msg =
 		new DmsLongPowerRecoveryMessage();
 
+	/** Flag to avoid phase loops */
+	protected boolean modify = true;
+
+	/** Sign message */
+	protected final SignMessage message;
+
+	/** Message number (row in changeable message table).  This is normally
+	 * 1 for uncached messages.  If a number greater than 1 is used, an
+	 * attempt will be made to activate that message -- if that fails, the
+	 * changeable message table will be updated and then the message will
+	 * be activated.  This allows complex messages to remain cached and
+	 * activated quickly. */
+	protected final int msg_num;
+
+	/** Message CRC */
+	protected final int message_crc;
+
 	/** User who deployed the message */
 	protected final User owner;
 
 	/** Flag to indicate message row has been updated */
 	protected boolean row_updated = false;
 
-	/** Create a new send DMS message operation */
-	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o) {
-		this(d, sm, o, 1);
+	/** Get the message duration */
+	protected int getDuration() {
+		return getDuration(message.getDuration());
 	}
 
 	/** Create a new send DMS message operation */
 	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o, int mn) {
-		super(d, sm, mn);
+		super(PriorityLevel.COMMAND, d);
+		message = sm;
 		owner = o;
+		msg_num = mn;
+		message_crc = DmsMessageCRC.calculate(sm.getMulti(), 0, 0);
+	}
+
+	/** Create a new send DMS message operation */
+	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o) {
+		this(d, sm, o, 1);
 	}
 
 	/** Create the first real phase of the operation */
@@ -69,16 +96,6 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			row_updated = true;
 			return new ModifyRequest();
 		}
-	}
-
-	/** Get the next phase of the operation */
-	protected Phase nextPhase() {
-		return new ActivateMessage();
-	}
-
-	/** Get the message duration */
-	protected int getDuration() {
-		return getDuration(message.getDuration());
 	}
 
 	/** Phase to activate a blank message */
@@ -104,6 +121,144 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			// FIXME: this should happen on SONAR thread
 			dms.setMessageCurrent(message, owner);
 			return new SetPostActivationStuff();
+		}
+	}
+
+	/** Phase to set the status to modify request */
+	protected class ModifyRequest extends Phase {
+
+		/** Set the status to modify request */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsMessageStatus status = new DmsMessageStatus(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			status.setEnum(DmsMessageStatus.Enum.modifyReq);
+			mess.add(status);
+			try {
+				DMS_LOG.log(dms.getName() + ":= " + status);
+				mess.storeProps();
+			}
+			catch(SNMP.Message.GenError e) {
+				if(modify) {
+					modify = false;
+					return new InitialStatus();
+				} else
+					throw e;
+			}
+			return new SetMultiString();
+		}
+	}
+
+	/** Phase to get the initial message status */
+	protected class InitialStatus extends Phase {
+
+		/** Get the initial message status */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsMessageStatus status = new DmsMessageStatus(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			mess.add(status);
+			mess.queryProps();
+			DMS_LOG.log(dms.getName() + ": " + status);
+			if(status.isModifying())
+				return new SetMultiString();
+			else
+				return new ModifyRequest();
+		}
+	}
+
+	/** Phase to set the message MULTI string */
+	protected class SetMultiString extends Phase {
+
+		/** Set the message MULTI string */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsMessageMultiString multi = new DmsMessageMultiString(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			DmsMessageBeacon beacon = new DmsMessageBeacon(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			DmsMessagePixelService srv = new DmsMessagePixelService(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			multi.setString(message.getMulti());
+			beacon.setInteger(0);
+			srv.setInteger(0);
+			mess.add(multi);
+			mess.add(beacon);
+			mess.add(srv);
+			DMS_LOG.log(dms.getName() + ":= " + multi);
+			DMS_LOG.log(dms.getName() + ":= " + beacon);
+			DMS_LOG.log(dms.getName() + ":= " + srv);
+			mess.storeProps();
+			return new ValidateRequest();
+		}
+	}
+
+	/** Phase to set the status to validate request */
+	protected class ValidateRequest extends Phase {
+
+		/** Set the status to modify request */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsMessageStatus status = new DmsMessageStatus(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			status.setEnum(DmsMessageStatus.Enum.validateReq);
+			mess.add(status);
+			try {
+				DMS_LOG.log(dms.getName() + ":= " + status);
+				mess.storeProps();
+			}
+			catch(SNMP.Message.GenError e) {
+				return new ValidateMessageError();
+			}
+			return new FinalStatus();
+		}
+	}
+
+	/** Phase to get the final message status */
+	protected class FinalStatus extends Phase {
+
+		/** Get the final message status */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsMessageStatus status = new DmsMessageStatus(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			DmsMessageCRC crc = new DmsMessageCRC(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			mess.add(status);
+			mess.add(crc);
+			mess.queryProps();
+			DMS_LOG.log(dms.getName() + ": " + status);
+			DMS_LOG.log(dms.getName() + ": " + crc);
+			if(!status.isValid())
+				return new ValidateMessageError();
+			if(message_crc != crc.getInteger()) {
+				DMS_LOG.log(dms.getName() + ": Message CRC " +
+					Integer.toHexString(message_crc));
+				throw new ControllerException("Message CRC: " +
+					Integer.toHexString(message_crc) + ", "+
+					Integer.toHexString(crc.getInteger()));
+			}
+			return new ActivateMessage();
+		}
+	}
+
+	/** Phase to get the validate message error */
+	protected class ValidateMessageError extends Phase {
+
+		/** Get the validate message error */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsValidateMessageError error =
+				new DmsValidateMessageError();
+			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
+			DmsMultiSyntaxErrorPosition e_pos =
+				new DmsMultiSyntaxErrorPosition();
+			mess.add(error);
+			mess.add(m_err);
+			mess.add(e_pos);
+			mess.queryProps();
+			DMS_LOG.log(dms.getName() + ": " + error);
+			DMS_LOG.log(dms.getName() + ": " + m_err);
+			DMS_LOG.log(dms.getName() + ": " + e_pos);
+			if(error.isSyntaxMulti())
+				setErrorStatus(m_err.toString());
+			else if(error.isError())
+				setErrorStatus(error.toString());
+			return null;
 		}
 	}
 
