@@ -223,7 +223,7 @@ public class OpTestDMSPixels extends OpDMS {
 				// this detection type.
 				DMS_LOG.log(dms.getName() +
 					" BAD PIXEL TABLE: " + detectionType);
-				return null;
+				return nextTablePhase();
 			}
 			DMS_LOG.log(dms.getName() + ": " + x_loc);
 			DMS_LOG.log(dms.getName() + ": " + y_loc);
@@ -242,7 +242,13 @@ public class OpTestDMSPixels extends OpDMS {
 			row++;
 			if(row <= n_rows)
 				return this;
-			else if(isPixelTest() && message_rows.getInteger() > 0){
+			else
+				return nextTablePhase();
+		}
+
+		/** Get the next table phase */
+		private Phase nextTablePhase() {
+			if(isPixelTest() && message_rows.getInteger() > 0){
 				return new QueryRows(PixelFailureDetectionType.
 					Enum.messageDisplay);
 			} else
