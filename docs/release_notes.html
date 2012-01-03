@@ -11,6 +11,29 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.140.0 (3 January 2012)</dt>
+	<dd><ul>
+		<li>
+			Fixed a problem with scheduled blank DMS messages.
+		</li>
+		<li>
+			Fixed some problems with dial-up modem operation.
+		</li>
+		<li>
+			Improved robustness of NTCIP pixel test operation.
+		</li>
+		<li>
+			Provide better feedback when NTCIP font upload fails.
+		</li>
+		<li>
+			Added a couple of DMS font scripts.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.140.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.139.0 (23 November 2011)</dt>
 	<dd><ul>
 		<li>
