@@ -230,15 +230,10 @@ public class OpTestDMSPixels extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
-			try {
-				if(status.isStuckOn())
-					stuck_on.setPixel(x, y, DmsColor.AMBER);
-				else
-					stuck_off.setPixel(x, y,DmsColor.AMBER);
-			}
-			catch(IndexOutOfBoundsException e) {
-				// Ignore; configuration has not been read yet
-			}
+			if(status.isStuckOn())
+				setStuckOn(x, y);
+			else
+				setStuckOff(x, y);
 			row++;
 			if(row <= n_rows)
 				return this;
@@ -248,11 +243,31 @@ public class OpTestDMSPixels extends OpDMS {
 
 		/** Get the next table phase */
 		private Phase nextTablePhase() {
-			if(isPixelTest() && message_rows.getInteger() > 0){
+			if(isPixelTest() && message_rows.getInteger() > 0) {
 				return new QueryRows(PixelFailureDetectionType.
 					Enum.messageDisplay);
 			} else
 				return null;
+		}
+	}
+
+	/** Set a pixel to "stuck on" status */
+	private void setStuckOn(int x, int y) {
+		try {
+			stuck_on.setPixel(x, y, DmsColor.AMBER);
+		}
+		catch(IndexOutOfBoundsException e) {
+			// Ignore; configuration has not been read yet
+		}
+	}
+
+	/** Set a pixel to "stuck off" status */
+	private void setStuckOff(int x, int y) {
+		try {
+			stuck_off.setPixel(x, y, DmsColor.AMBER);
+		}
+		catch(IndexOutOfBoundsException e) {
+			// Ignore; configuration has not been read yet
 		}
 	}
 
