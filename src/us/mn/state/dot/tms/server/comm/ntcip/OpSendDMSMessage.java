@@ -43,7 +43,7 @@ public class OpSendDMSMessage extends OpDMS {
 		new DmsLongPowerRecoveryMessage();
 
 	/** Flag to avoid phase loops */
-	protected boolean modify = true;
+	protected boolean modify_requested = false;
 
 	/** Sign message */
 	protected final SignMessage message;
@@ -61,9 +61,6 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** User who deployed the message */
 	protected final User owner;
-
-	/** Flag to indicate message row has been updated */
-	protected boolean row_updated = false;
 
 	/** Get the message duration */
 	protected int getDuration() {
@@ -91,10 +88,8 @@ public class OpSendDMSMessage extends OpDMS {
 			return new BlankMessage();
 		else if(msg_num > 1)
 			return new ActivateMessage();
-		else {
-			row_updated = true;
+		else
 			return new ModifyRequest();
-		}
 	}
 
 	/** Phase to activate a blank message */
@@ -128,6 +123,7 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Set the status to modify request */
 		protected Phase poll(CommMessage mess) throws IOException {
+			modify_requested = true;
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.Enum.modifyReq);
@@ -136,12 +132,15 @@ public class OpSendDMSMessage extends OpDMS {
 				DMS_LOG.log(dms.getName() + ":= " + status);
 				mess.storeProps();
 			}
+			catch(SNMP.Message.BadValue e) {
+				// This should only happen if the message
+				// status is "validating" ...
+				return new InitialStatus();
+			}
 			catch(SNMP.Message.GenError e) {
-				if(modify) {
-					modify = false;
-					return new InitialStatus();
-				} else
-					throw e;
+				// This should never happen (but of
+				// course, it does for some vendors)
+				return new InitialStatus();
 			}
 			return new SetMultiString();
 		}
@@ -159,8 +158,12 @@ public class OpSendDMSMessage extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.isModifying())
 				return new SetMultiString();
-			else
+			else if(!modify_requested)
 				return new ModifyRequest();
+			else {
+				setErrorStatus(status.toString());
+				return null;
+			}
 		}
 	}
 
@@ -311,10 +314,10 @@ public class OpSendDMSMessage extends OpDMS {
 			case messageStatus:
 			case messageNumber:
 			case messageCRC:
-				if(!row_updated) {
-					row_updated = true;
+				// This message doesn't exist in the table,
+				// so go back and modify the table.
+				if(!modify_requested)
 					return new ModifyRequest();
-				}
 				// else fall through to default case ...
 			default:
 				setErrorStatus(error.toString());
