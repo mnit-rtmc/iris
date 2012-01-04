@@ -112,7 +112,6 @@ public class OpSendDMSMessage extends OpDMS {
 			catch(SNMP.Message.GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			// FIXME: this should happen on SONAR thread
 			dms.setMessageCurrent(message, owner);
 			return new SetPostActivationStuff();
 		}
@@ -285,7 +284,6 @@ public class OpSendDMSMessage extends OpDMS {
 			catch(SNMP.Message.GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			// FIXME: this should happen on SONAR thread
 			dms.setMessageCurrent(message, owner);
 			return new SetPostActivationStuff();
 		}

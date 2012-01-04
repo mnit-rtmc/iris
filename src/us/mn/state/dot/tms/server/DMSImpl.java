@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1097,6 +1097,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Log a message */
 	protected void logMessage(SignMessage sm, User o) {
+		// FIXME: this should happen on a dedicated thread
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = sm.getMulti();
 		if(SignMessageHelper.isBlank(sm)) {
