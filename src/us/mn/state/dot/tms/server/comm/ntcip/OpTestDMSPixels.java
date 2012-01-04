@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,10 +161,11 @@ public class OpTestDMSPixels extends OpDMS {
 				DMS_LOG.log(dms.getName() + ": " +message_rows);
 			}
 			catch(SNMP.Message.NoSuchName e) {
-				// Must be 1203v1 only, so assume all the
-				// rows are pixelTest and hope for the best
-				test_rows.setInteger(total_rows.getInteger());
-				message_rows.setInteger(0);
+				// Must be 1203v1 only, so try reading the
+				// total row count from each table
+				int n_rows = total_rows.getInteger();
+				test_rows.setInteger(n_rows);
+				message_rows.setInteger(n_rows);
 			}
 			if(test_rows.getInteger() > 0) {
 				return new QueryRows(PixelFailureDetectionType.
@@ -219,10 +220,8 @@ public class OpTestDMSPixels extends OpDMS {
 				mess.queryProps();
 			}
 			catch(SNMP.Message.NoSuchName e) {
-				// Okay... there is no pixel failure table for
-				// this detection type.
-				DMS_LOG.log(dms.getName() +
-					" BAD PIXEL TABLE: " + detectionType);
+				// We've gone past the end of the table for
+				// this detection type.  Must be a v1 sign.
 				return nextTablePhase();
 			}
 			DMS_LOG.log(dms.getName() + ": " + x_loc);
