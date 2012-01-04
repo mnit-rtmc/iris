@@ -85,7 +85,7 @@ public class OpSendDMSMessage extends OpDMS {
 	protected Phase phaseOne() {
 		dms.setMessageNext(message);
 		if(SignMessageHelper.isBlank(message))
-			return new BlankMessage();
+			return new ActivateBlankMsg();
 		else if(msg_num > 1)
 			return new ActivateMessage();
 		else
@@ -93,9 +93,9 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Phase to activate a blank message */
-	protected class BlankMessage extends Phase {
+	protected class ActivateBlankMsg extends Phase {
 
-		/** Blank the message */
+		/** Activate a blank message */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsActivateMessage act = new DmsActivateMessage();
 			act.setDuration(DURATION_INDEFINITE);
@@ -110,7 +110,7 @@ public class OpSendDMSMessage extends OpDMS {
 				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
-				return new QueryActivateMsgError();
+				return new QueryActivateMsgErr();
 			}
 			// FIXME: this should happen on SONAR thread
 			dms.setMessageCurrent(message, owner);
@@ -135,21 +135,21 @@ public class OpSendDMSMessage extends OpDMS {
 			catch(SNMP.Message.BadValue e) {
 				// This should only happen if the message
 				// status is "validating" ...
-				return new InitialStatus();
+				return new QueryMsgStatus();
 			}
 			catch(SNMP.Message.GenError e) {
 				// This should never happen (but of
 				// course, it does for some vendors)
-				return new InitialStatus();
+				return new QueryMsgStatus();
 			}
-			return new SetMultiString();
+			return new ModifyMessage();
 		}
 	}
 
-	/** Phase to get the initial message status */
-	protected class InitialStatus extends Phase {
+	/** Phase to query the message status */
+	protected class QueryMsgStatus extends Phase {
 
-		/** Get the initial message status */
+		/** Query the message status */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
@@ -157,7 +157,7 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.isModifying())
-				return new SetMultiString();
+				return new ModifyMessage();
 			else if(!modify_requested)
 				return new ModifyRequest();
 			else {
@@ -167,10 +167,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Phase to set the message MULTI string */
-	protected class SetMultiString extends Phase {
+	/** Phase to modify the message */
+	protected class ModifyMessage extends Phase {
 
-		/** Set the message MULTI string */
+		/** Modify the message */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
@@ -195,7 +195,7 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Phase to set the status to validate request */
 	protected class ValidateRequest extends Phase {
 
-		/** Set the status to modify request */
+		/** Set the status to validate request */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
@@ -206,16 +206,16 @@ public class OpSendDMSMessage extends OpDMS {
 				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
-				return new ValidateMessageError();
+				return new QueryValidateMsgErr();
 			}
-			return new FinalStatus();
+			return new QueryMsgValidity();
 		}
 	}
 
-	/** Phase to get the final message status */
-	protected class FinalStatus extends Phase {
+	/** Phase to query the message validity */
+	protected class QueryMsgValidity extends Phase {
 
-		/** Get the final message status */
+		/** Query the message validity */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
@@ -227,7 +227,7 @@ public class OpSendDMSMessage extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			DMS_LOG.log(dms.getName() + ": " + crc);
 			if(!status.isValid())
-				return new ValidateMessageError();
+				return new QueryValidateMsgErr();
 			if(message_crc != crc.getInteger()) {
 				String ms = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
@@ -240,10 +240,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Phase to get the validate message error */
-	protected class ValidateMessageError extends Phase {
+	/** Phase to query a validate message error */
+	protected class QueryValidateMsgErr extends Phase {
 
-		/** Get the validate message error */
+		/** Query a validate message error */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsValidateMessageError error =
 				new DmsValidateMessageError();
@@ -283,7 +283,7 @@ public class OpSendDMSMessage extends OpDMS {
 				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
-				return new QueryActivateMsgError();
+				return new QueryActivateMsgErr();
 			}
 			// FIXME: this should happen on SONAR thread
 			dms.setMessageCurrent(message, owner);
@@ -291,10 +291,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Phase to query the activate message error */
-	protected class QueryActivateMsgError extends Phase {
+	/** Phase to query an activate message error */
+	protected class QueryActivateMsgErr extends Phase {
 
-		/** Query the activate message error */
+		/** Query an activate message error */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsActivateMsgError error = new DmsActivateMsgError();
 			mess.add(error);
@@ -306,7 +306,7 @@ public class OpSendDMSMessage extends OpDMS {
 				return new QueryMultiSyntaxError();
 			case other:
 				setErrorStatus(error.toString());
-				return new LedstarActivateError();
+				return new QueryLedstarActivateErr();
 			case messageMemoryType:
 				// For original 1203v1, blank memory type was
 				// not defined.  This will cause a blank msg
@@ -326,10 +326,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Phase to query the MULTI syntax error */
+	/** Phase to query a MULTI syntax error */
 	protected class QueryMultiSyntaxError extends Phase {
 
-		/** Query the MULTI syntax error */
+		/** Query a MULTI syntax error */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
 			DmsMultiSyntaxErrorPosition e_pos =
@@ -344,10 +344,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Phase to get the ledstar activate message error */
-	protected class LedstarActivateError extends Phase {
+	/** Phase to query a ledstar activate message error */
+	protected class QueryLedstarActivateErr extends Phase {
 
-		/** Get the Ledstar activate message error */
+		/** Query a Ledstar activate message error */
 		protected Phase poll(CommMessage mess) throws IOException {
 			LedActivateMsgError error = new LedActivateMsgError();
 			mess.add(error);
