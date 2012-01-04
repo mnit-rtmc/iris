@@ -370,6 +370,8 @@ public class OpSendDMSMessage extends OpDMS {
 				setErrorStatus(o_err.toString());
 			}
 			catch(SNMP.Message.NoSuchName e) {
+				// For 1203v1, dmsMultiOtherErrorDescription
+				// had not been defined...
 				setErrorStatus(m_err.toString());
 			}
 			return null;
