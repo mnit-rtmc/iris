@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -285,6 +285,8 @@ public class CorridorBase implements Iterable<R_Node> {
 					n_after = n;
 			}
 		}
+		if(nearest == null || n_after == null)
+			return null;
 		float mi = metersToMiles(n_meters);
 		Double m0 = metersTo(n_after, nearest);
 		Double m1 = metersTo(n_after, loc);
