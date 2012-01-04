@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -138,7 +138,8 @@ public class OpSendDMSFonts extends OpDMS {
 			catch(SNMP.Message.NoSuchName e) {
 				// Note: some vendors respond with NoSuchName
 				//       if the font is not valid
-				return populateNum2Row();
+				populateNum2Row();
+				return nextFontPhase();
 			}
 			DMS_LOG.log(dms.getName() + ": " + number);
 			if(version2)
@@ -151,20 +152,21 @@ public class OpSendDMSFonts extends OpDMS {
 			if(row < num_fonts.getInteger()) {
 				row++;
 				return this;
-			} else
-				return populateNum2Row();
+			} else {
+				populateNum2Row();
+				return nextFontPhase();
+			}
 		}
 	}
 
 	/** Populate the num_2_row mapping */
-	protected Phase populateNum2Row() {
+	private void populateNum2Row() {
 		// The f_nums linked list is needed to avoid a
 		// ConcurrentModificationException on num_2_row TreeMap
 		LinkedList<Integer> f_nums = new LinkedList<Integer>();
 		f_nums.addAll(num_2_row.keySet());
 		for(Integer f_num: f_nums)
 			populateNum2Row(f_num);
-		return nextFontPhase();
 	}
 
 	/** Populate one font number in mapping */
