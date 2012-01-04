@@ -303,7 +303,7 @@ public class OpSendDMSMessage extends OpDMS {
 			switch(error.getEnum()) {
 			case syntaxMULTI:
 				setErrorStatus(error.toString());
-				return new QueryMultiSyntaxError();
+				return new QueryMultiSyntaxErr();
 			case other:
 				setErrorStatus(error.toString());
 				return new QueryLedstarActivateErr();
@@ -327,7 +327,7 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Phase to query a MULTI syntax error */
-	protected class QueryMultiSyntaxError extends Phase {
+	protected class QueryMultiSyntaxErr extends Phase {
 
 		/** Query a MULTI syntax error */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -339,7 +339,39 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + m_err);
 			DMS_LOG.log(dms.getName() + ": " + e_pos);
-			setErrorStatus(m_err.toString());
+			if(m_err.isOther())
+				return new QueryOtherMultiErr(m_err);
+			else {
+				setErrorStatus(m_err.toString());
+				return null;
+			}
+		}
+	}
+
+	/** Phase to query an other MULTI error */
+	protected class QueryOtherMultiErr extends Phase {
+
+		/** MULTI syntax error */
+		protected final DmsMultiSyntaxError m_err;
+
+		/** Create a phase to query an other MULTI error */
+		protected QueryOtherMultiErr(DmsMultiSyntaxError er) {
+			m_err = er;
+		}
+
+		/** Query an other MULTI error */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsMultiOtherErrorDescription o_err =
+				new DmsMultiOtherErrorDescription();
+			mess.add(o_err);
+			try {
+				mess.queryProps();
+				DMS_LOG.log(dms.getName() + ": " + o_err);
+				setErrorStatus(o_err.toString());
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				setErrorStatus(m_err.toString());
+			}
 			return null;
 		}
 	}

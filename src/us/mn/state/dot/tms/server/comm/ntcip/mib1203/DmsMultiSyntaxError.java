@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,5 +37,10 @@ public class DmsMultiSyntaxError extends ASN1Integer {
 	/** Get the object value */
 	public String getValue() {
 		return MultiSyntaxError.fromOrdinal(value).toString();
+	}
+
+	/** Check if the MULTI syntax error is 'other' */
+	public boolean isOther() {
+		return MultiSyntaxError.other.ordinal() == value;
 	}
 }
