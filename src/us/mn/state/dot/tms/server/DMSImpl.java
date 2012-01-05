@@ -1257,7 +1257,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public SignMessage createMessage(String m, DMSMessagePriority ap,
 		DMSMessagePriority rp, Integer d)
 	{
-		return createMessage(m, ap, rp, false, d);
+		boolean s = DMSMessagePriority.isScheduled(rp);
+		return createMessage(m, ap, rp, s, d);
 	}
 
 	/** Create a message for the sign.
@@ -1289,7 +1290,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public SignMessage createMessage(String m, BitmapGraphic[] pages,
 		DMSMessagePriority ap, DMSMessagePriority rp, Integer d)
 	{
-		return createMessage(m, pages, ap, rp, false, d);
+		boolean s = DMSMessagePriority.isScheduled(rp);
+		return createMessage(m, pages, ap, rp, s, d);
 	}
 
 	/** Create a message for the sign.

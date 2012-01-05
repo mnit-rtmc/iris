@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,5 +46,19 @@ public enum DMSMessagePriority {
 				return e;
 		}
 		return INVALID;
+	}
+
+	/** Test if a run-time priority was "scheduled" */
+	static public boolean isScheduled(DMSMessagePriority p) {
+		switch(p) {
+		case INVALID:
+		case BLANK:
+		case ALERT:
+		case OPERATOR:
+		case OVERRIDE:
+			return false;
+		default:
+			return true;
+		}
 	}
 }
