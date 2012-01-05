@@ -849,14 +849,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * messageNext attribute is set.  The ownerNext attribute should have
 	 * been set by the client prior to setting this attribute. */
 	public void doSetMessageNext(SignMessage sm) throws TMSException {
-		// FIXME: make sure that ownerNext is non-null
-		try {
-			doSetMessageNext(sm, ownerNext);
-		}
-		finally {
-			// Clear the owner even if there was an exception
-			ownerNext = null;
-		}
+		User o_next = ownerNext;	// Avoid race
+		// ownerNext is only valid for one message, clear it
+		ownerNext = null;
+		if(o_next == null)
+			throw new ChangeVetoException("MUST SET OWNER FIRST");
+		doSetMessageNext(sm, o_next);
 	}
 
 	/** Set the next sign message and owner */
