@@ -177,15 +177,21 @@ public class OpSendDMSMessage extends OpDMS {
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			DmsMessagePixelService srv = new DmsMessagePixelService(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
+			DmsMessageRunTimePriority prior =
+				new DmsMessageRunTimePriority(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
 			multi.setString(message.getMulti());
 			beacon.setInteger(0);
 			srv.setInteger(0);
+			prior.setInteger(message.getRunTimePriority());
 			mess.add(multi);
 			mess.add(beacon);
 			mess.add(srv);
+			mess.add(prior);
 			DMS_LOG.log(dms.getName() + ":= " + multi);
 			DMS_LOG.log(dms.getName() + ":= " + beacon);
 			DMS_LOG.log(dms.getName() + ":= " + srv);
+			DMS_LOG.log(dms.getName() + ":= " + prior);
 			mess.storeProps();
 			return new ValidateRequest();
 		}
