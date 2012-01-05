@@ -42,7 +42,7 @@ class OpQueryConfig extends OpDms
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		m_dms.setConfigure(success);
+		m_dms.setConfigure(isSuccess());
 		super.cleanup();
 	}
 }

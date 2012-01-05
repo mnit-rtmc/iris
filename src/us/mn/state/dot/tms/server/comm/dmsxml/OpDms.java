@@ -87,7 +87,7 @@ abstract class OpDms extends OpDevice {
 
 	/** Cleanup the operation. Called by MessagePoller.doPoll(). */
 	public void cleanup() {
-		if(success) {
+		if(isSuccess()) {
 			m_dms.requestConfigure();
 		} else {
 			// flag dms not configured

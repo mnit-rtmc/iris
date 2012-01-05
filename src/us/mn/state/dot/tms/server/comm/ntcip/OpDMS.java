@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2010  Minnesota Department of Transportation
+ * Copyright (C) 2002-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ abstract public class OpDMS extends OpDevice {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success)
+		if(isSuccess())
 			dms.requestConfigure();
 		else
 			dms.setConfigure(false);

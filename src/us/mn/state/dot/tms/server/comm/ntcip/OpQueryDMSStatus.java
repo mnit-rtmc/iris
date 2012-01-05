@@ -454,7 +454,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success) {
+		if(isSuccess()) {
 			dms.setPhotocellStatus(formatPhotocellStatus());
 			setMaintStatus(formatMaintStatus());
 			setErrorStatus(formatErrorStatus());

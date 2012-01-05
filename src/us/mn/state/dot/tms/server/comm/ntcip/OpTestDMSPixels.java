@@ -272,7 +272,7 @@ public class OpTestDMSPixels extends OpDMS {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success) {
+		if(isSuccess()) {
 			String[] status = new String[2];
 			status[DMS.STUCK_OFF_BITMAP] =
 				Base64.encode(stuck_off.getPixels());

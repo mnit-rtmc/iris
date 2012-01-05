@@ -70,7 +70,7 @@ public class OpQueryConfig extends OpCanoga {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success) {
+		if(isSuccess()) {
 			controller.setVersion(version.getValue() + " (" +
 				serial_number.getValue() + ")");
 		}

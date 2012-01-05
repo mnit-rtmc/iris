@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ abstract public class OpLCS extends OpDevice {
 			lcs_array.setIndicationsCurrent(ind_after, user);
 		for(DMSImpl dms: dmss) {
 			if(dms == null || dms.isFailed())
-				success = false;
+				setFailed();
 		}
 		super.cleanup();
 	}

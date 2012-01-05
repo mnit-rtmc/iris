@@ -84,7 +84,7 @@ public class OpDeployLaneMarking extends OpDevice {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success)
+		if(isSuccess())
 			lane_marking.setDeployedStatus(deploy);
 		super.cleanup();
 	}

@@ -184,7 +184,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		dms.setConfigure(success);
+		dms.setConfigure(isSuccess());
 		super.cleanup();
 	}
 }

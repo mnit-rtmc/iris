@@ -87,7 +87,29 @@ abstract public class Operation {
 	}
 
 	/** Success or failure of operation */
-	protected boolean success = true;
+	private boolean success = true;
+
+	/** Check if the operation succeeded */
+	public boolean isSuccess() {
+		return success;
+	}
+
+	/** Set the success flag */
+	public void setSuccess(boolean s) {
+		success = s;
+	}
+
+	/** Set the operation to failed */
+	public void setFailed() {
+		setSuccess(false);
+		phase = null;
+	}
+
+	/** Set the operation to succeeded */
+	public void setSucceeded() {
+		setSuccess(true);
+		phase = null;
+	}
 
 	/** Begin the operation */
 	public boolean begin() {
@@ -103,18 +125,6 @@ abstract public class Operation {
 	/** Handle a communication error */
 	public void handleCommError(EventType et, String msg) {
 		setFailed();
-	}
-
-	/** Set the operation to failed */
-	public void setFailed() {
-		success = false;
-		phase = null;
-	}
-
-	/** Set the operation to succeeded */
-	public void setSucceeded() {
-		success = true;
-		phase = null;
 	}
 
 	/** Check if the operation is done */

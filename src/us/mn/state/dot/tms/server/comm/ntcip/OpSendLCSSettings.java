@@ -81,7 +81,7 @@ public class OpSendLCSSettings extends OpLCS {
 					LCS_LOG.log(lcs_array.getName() +
 						": LCS timeout expired -- " +
 						"giving up");
-					success = false;
+					setFailed();
 					return null;
 				}
 			}

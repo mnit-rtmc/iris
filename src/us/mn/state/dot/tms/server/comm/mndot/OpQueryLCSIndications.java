@@ -75,7 +75,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success)
+		if(isSuccess())
 			lcs_array.setIndicationsCurrent(getIndications(), null);
 		super.cleanup();
 	}

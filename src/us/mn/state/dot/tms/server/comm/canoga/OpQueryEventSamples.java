@@ -42,7 +42,7 @@ public class OpQueryEventSamples extends OpCanoga {
 	/** Handle a communication error */
 	public void handleCommError(EventType et, String msg) {
 		COMM_LOG.log(id + " " + et + ", " + msg);
-		success = false;
+		setSuccess(false);
 		controller.logCommEvent(et, id, filterMessage(msg));
 		if(!controller.hasActiveDetector())
 			setFailed();
@@ -69,7 +69,7 @@ public class OpQueryEventSamples extends OpCanoga {
 			mess.queryProps();
 			if(CANOGA_LOG.isOpen())
 				detection.debug(CANOGA_LOG, id);
-			success = true;
+			setSuccess(true);
 			detection.logEvents(controller);
 			if(controller.hasActiveDetector())
 				return this;
