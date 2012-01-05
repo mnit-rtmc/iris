@@ -1065,12 +1065,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Current message (Shall not be null) */
-	protected transient SignMessage messageCurrent =
-		createBlankMessage();
+	protected transient SignMessage messageCurrent = createBlankMessage();
 
 	/** Set the current message */
 	public void setMessageCurrent(SignMessage sm, User o) {
-		if(SignMessageHelper.isEquivalent(messageCurrent, sm))
+		if(isMessageCurrentEquivalent(sm))
 			return;
 		logMessage(sm, o);
 		setDeployTime();
@@ -1084,6 +1083,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * @return Currently active message (cannot be null) */
 	public SignMessage getMessageCurrent() {
 		return messageCurrent;
+	}
+
+	/** Test if the current message is equivalent to a sign message */
+	public boolean isMessageCurrentEquivalent(SignMessage sm) {
+		return SignMessageHelper.isEquivalent(messageCurrent, sm);
 	}
 
 	/** Owner of current message */

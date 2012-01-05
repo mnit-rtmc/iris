@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,12 +38,6 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  * @author Douglas Lau
  */
 public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
-
-	/** Check if a message is already deployed on the sign */
-	static protected boolean isMessageDeployed(DMSImpl dms, SignMessage sm){
-		// FIXME: should compare SignMessage, not just multi string
-		return sm.getMulti().equals(dms.getMessageCurrent().getMulti());
-	}
 
 	/** Create an operation to send a DMS message */
 	static public OpDMS createSendMsgOp(DMSImpl dms, SignMessage sm,
@@ -134,7 +128,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
 		throws InvalidMessageException
 	{
-		if(isMessageDeployed(dms, sm))
+		if(dms.isMessageCurrentEquivalent(sm))
 			new OpUpdateDMSDuration(dms, sm).start();
 		else
 			createSendMsgOp(dms, sm, o).start();
