@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,20 +90,26 @@ public class OpQueryDMSMessage extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
 				DmsMessageMemoryType.Enum.currentBuffer, 1);
+			DmsMessageRunTimePriority prior =
+				new DmsMessageRunTimePriority(
+				DmsMessageMemoryType.Enum.currentBuffer, 1);
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.currentBuffer, 1);
 			DmsMessageTimeRemaining time =
 				new DmsMessageTimeRemaining();
 			mess.add(multi);
+			mess.add(prior);
 			mess.add(status);
 			mess.add(time);
 			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + multi);
+			DMS_LOG.log(dms.getName() + ": " + prior);
 			DMS_LOG.log(dms.getName() + ": " + status);
 			DMS_LOG.log(dms.getName() + ": " + time);
 			if(status.isValid()) {
 				Integer d = parseDuration(time.getInteger());
-				setCurrentMessage(multi.getValue(), d);
+				setCurrentMessage(multi.getValue(),
+					prior.getEnum(), d);
 			} else {
 				DMS_LOG.log(dms.getName() + ": INVALID STATUS");
 				setErrorStatus(status.toString());
@@ -113,10 +119,10 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	protected void setCurrentMessage(String multi, Integer duration) {
-		setCurrentMessage(dms.createMessage(multi,
-			DMSMessagePriority.OTHER_SYSTEM,
-			DMSMessagePriority.OTHER_SYSTEM, duration));
+	protected void setCurrentMessage(String multi, DMSMessagePriority p,
+		Integer duration)
+	{
+		setCurrentMessage(dms.createMessage(multi, p, p, duration));
 	}
 
 	/** Set the current message on the sign */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
@@ -29,5 +30,10 @@ public class DmsMessageRunTimePriority extends ASN1Integer {
 	{
 		super(MIB1203.dmsMessageEntry.create(new int[] {
 			8, m.ordinal(), number}));
+	}
+
+	/** Get the enum value */
+	public DMSMessagePriority getEnum() {
+		return DMSMessagePriority.fromOrdinal(value);
 	}
 }
