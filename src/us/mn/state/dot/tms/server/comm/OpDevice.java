@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,18 +47,17 @@ abstract public class OpDevice extends OpController {
 			OpDevice owner = device.acquire(operation);
 			if(owner != operation)
 				throw new DeviceContentionException(owner);
-			return phaseOne();
+			return phaseTwo();
 		}
 	}
 
-	/** Create the first real phase of the operation */
-	abstract protected Phase phaseOne();
-
-	/** Begin the operation */
-	public final boolean begin() {
-		phase = new AcquireDevice();
-		return true;
+	/** Create the first phase of the operation */
+	protected final Phase phaseOne() {
+		return new AcquireDevice();
 	}
+
+	/** Create the second phase of the operation */
+	abstract protected Phase phaseTwo();
 
 	/** Cleanup the operation */
 	public void cleanup() {

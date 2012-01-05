@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,10 +54,9 @@ public class OpSendSensorSettings extends OpSS125 {
 		restart = r;
 	}
 
-	/** Begin the sensor initialization operation */
-	public boolean begin() {
-		phase = new QueryGenConfig();
-		return true;
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return new QueryGenConfig();
 	}
 
 	/** Phase to query the general config  */

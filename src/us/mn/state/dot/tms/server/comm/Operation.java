@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2011  Minnesota Department of Transportation
+ * Copyright (C) 2002-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,15 +47,19 @@ abstract public class Operation {
 	}
 
 	/** Current phase of the operation */
-	protected Phase phase;
+	private Phase phase;
 
 	/** Create a new I/O operation */
 	public Operation(PriorityLevel prio) {
 		priority = prio;
-		phase = null;
 		if(OP_LOG.isOpen())
 			OP_LOG.log(getOpName() + " created");
 	}
+
+	/** Create the first phase of the operation.  This method cannot be
+	 * called in the Operation constructor, because the object may not
+	 * have been fully constructed yet (subclass initialization). */
+	abstract protected Phase phaseOne();
 
 	/** Get a string description of the operation */
 	public String toString() {
@@ -86,7 +90,10 @@ abstract public class Operation {
 	protected boolean success = true;
 
 	/** Begin the operation */
-	abstract public boolean begin();
+	public boolean begin() {
+		phase = phaseOne();
+		return true;
+	}
 
 	/** Cleanup the operation */
 	public void cleanup() {
@@ -104,8 +111,8 @@ abstract public class Operation {
 		phase = null;
 	}
 
-	/** Indicate that the operation was aborted by a hang up */
-	public void setHungUp() {
+	/** Set the operation to succeeded */
+	public void setSucceeded() {
 		success = true;
 		phase = null;
 	}

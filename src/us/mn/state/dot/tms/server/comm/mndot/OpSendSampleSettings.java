@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +35,9 @@ public class OpSendSampleSettings extends Op170 {
 		super(PriorityLevel.DOWNLOAD, c);
 	}
 
-	/** Begin the send sample settings operation */
-	public boolean begin() {
-		phase = new SynchronizeClock();
-		return true;
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return new SynchronizeClock();
 	}
 
 	/** Phase to synchronize the clock */

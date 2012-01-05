@@ -78,8 +78,8 @@ public class OpSendDMSFonts extends OpDMS {
 		font_iterator = fonts.iterator();
 	}
 
-	/** Create the first real phase of the operation */
-	protected Phase phaseOne() {
+	/** Create the second phase of the operation */
+	protected Phase phaseTwo() {
 		return new Query1203Version();
 	}
 

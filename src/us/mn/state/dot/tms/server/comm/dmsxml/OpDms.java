@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2011  Minnesota Department of Transportation
+ * Copyright (C) 2002-2012  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -189,7 +189,7 @@ abstract class OpDms extends OpDevice {
 		// trigger error handling, changes status if necessary
 		// phase is set to null if no retry should be performed
 		handleCommError(EventType.PARSING_ERROR, msg);
-		boolean retry = (phase != null);
+		boolean retry = !isDone();
 		if(retry)
 			++m_retry;
 		return retry;

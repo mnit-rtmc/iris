@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,8 +65,12 @@ public class OpQueryMeterStatus extends Op170 {
 
 	/** Begin the operation */
 	public boolean begin() {
-		phase = new GetStatus();
-		return completer.beginTask(getKey());
+		return completer.beginTask(getKey()) && super.begin();
+	}
+
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return new GetStatus();
 	}
 
 	/** Phase to get the status of the ramp meters */

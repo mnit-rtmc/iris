@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,20 +45,19 @@ public class OpQueryEventSamples extends OpCanoga {
 		success = false;
 		controller.logCommEvent(et, id, filterMessage(msg));
 		if(!controller.hasActiveDetector())
-			phase = null;
+			setFailed();
 		switch(et) {
 		case CHECKSUM_ERROR:
 		case PARSING_ERROR:
 			retry();
 		}
 		if(controller.getFailMillis() > VOL_COUNT_WRAP)
-			phase = null;
+			setFailed();
 	}
 
-	/** Begin the sensor initialization operation */
-	public boolean begin() {
-		phase = new QueryCurrentEvents();
-		return true;
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return new QueryCurrentEvents();
 	}
 
 	/** Phase to query the current detection events */

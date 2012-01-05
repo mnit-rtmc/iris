@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,8 +41,8 @@ class OpReset extends OpDms
 		super(PriorityLevel.DEVICE_DATA, d, "Reinitializing the CMS",u);
 	}
 
-	/** Create the first real phase of the operation */
-	protected Phase phaseOne() {
+	/** Create the second phase of the operation */
+	protected Phase phaseTwo() {
 		if(dmsConfigured())
 			return new PhaseResetDms();
 

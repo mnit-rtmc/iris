@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,6 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	/** Maximum number of records to read with "BAD TIMESTAMP" errors */
 	static protected final int MAX_BAD_RECORDS = 5;
 
-	/** 5-minute completer */
-	protected final Completer completer;
-
 	/** Time stamp */
 	protected long stamp;
 
@@ -52,8 +49,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 
 	/** Create a new 5-minute data operation */
 	public OpQuerySamples5Min(ControllerImpl c, Completer comp) {
-		super(PriorityLevel.DATA_5_MIN, c);
-		completer = comp;
+		super(PriorityLevel.DATA_5_MIN, c, comp);
 		stamp = comp.getStamp();
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(stamp);
@@ -65,10 +61,9 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 		newest = cal.getTimeInMillis();
 	}
 
-	/** Begin the operation */
-	public boolean begin() {
-		phase = new GetNextRecord();
-		return completer.beginTask(getKey());
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return new GetNextRecord();
 	}
 
 	/** Phase to get the next sample data record */
@@ -132,12 +127,6 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			else
 				return null;
 		}
-	}
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		completer.completeTask(getKey());
-		super.cleanup();
 	}
 
 	/** Update meter with the most recent 5-minute green count */

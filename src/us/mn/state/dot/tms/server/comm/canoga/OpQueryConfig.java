@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,10 +38,9 @@ public class OpQueryConfig extends OpCanoga {
 		super(PriorityLevel.DOWNLOAD, c);
 	}
 
-	/** Begin the query config operation */
-	public boolean begin() {
-		phase = new QuerySerialNumber();
-		return true;
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return new QuerySerialNumber();
 	}
 
 	/** Phase to query the serial number */

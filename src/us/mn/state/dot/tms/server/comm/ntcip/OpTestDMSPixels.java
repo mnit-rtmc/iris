@@ -68,8 +68,8 @@ public class OpTestDMSPixels extends OpDMS {
 		stuck_off = new BitmapGraphic(w, h);
 	}
 
-	/** Create the first real phase of the operation */
-	protected Phase phaseOne() {
+	/** Create the second phase of the operation */
+	protected Phase phaseTwo() {
 		if(perform_test)
 			return new QueryTestStatus();
 		else

@@ -37,8 +37,8 @@ public class OpQueryDMSMessage extends OpDMS {
 		super(PriorityLevel.DEVICE_DATA, d);
 	}
 
-	/** Create the first real phase of the operation */
-	protected Phase phaseOne() {
+	/** Create the second phase of the operation */
+	protected Phase phaseTwo() {
 		return new QueryMessageSource();
 	}
 

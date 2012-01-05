@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,8 +74,12 @@ public class OpQuerySamples extends OpSS105 {
 
 	/** Begin the operation */
 	public boolean begin() {
-		phase = new GetCurrentSamples();
-		return completer.beginTask(getKey());
+		return completer.beginTask(getKey()) && super.begin();
+	}
+
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return new GetCurrentSamples();
 	}
 
 	/** Phase to get the most recent binned samples */

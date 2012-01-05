@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@ public class KillThread extends Operation {
 		super(PriorityLevel.URGENT);
 	}
 
-	/** Begin operation */
-	public boolean begin() {
-		return true;
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return null;
 	}
 }

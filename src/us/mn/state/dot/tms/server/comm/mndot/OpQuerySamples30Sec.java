@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,19 +27,14 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySamples30Sec extends OpQuerySamples {
 
-	/** 30-Second completer */
-	protected final Completer completer;
-
 	/** Create a new 30-second data operation */
 	public OpQuerySamples30Sec(ControllerImpl c, Completer comp) {
-		super(PriorityLevel.DATA_30_SEC, c);
-		completer = comp;
+		super(PriorityLevel.DATA_30_SEC, c, comp);
 	}
 
-	/** Begin the operation */
-	public boolean begin() {
-		phase = new QuerySample30Sec();
-		return completer.beginTask(getKey());
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return new QuerySample30Sec();
 	}
 
 	/** Phase to query the 30-second sample data */
@@ -60,7 +55,6 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 	public void cleanup() {
 		controller.storeData30Second(completer.getStamp(),
 			FIRST_DETECTOR_PIN, volume, scans, null);
-		completer.completeTask(getKey());
 		super.cleanup();
 	}
 }

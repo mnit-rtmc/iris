@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2011  Minnesota Department of Transportation
+ * Copyright (C) 2002-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,10 +39,9 @@ public class OpReadMsgFeed extends OpController {
 		MsgFeedPoller.log("Polling feed " + feed);
 	}
 
-	/** Begin the operation */
-	public final boolean begin() {
-		phase = new PhaseReadMsgFeed();
-		return true;
+	/** Create the first phase of the operation */
+	protected Phase phaseOne() {
+		return new PhaseReadMsgFeed();
 	}
 
 	/** Phase to read the message feed */

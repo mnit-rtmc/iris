@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,15 +36,6 @@ abstract public class OpPelco extends OpController {
 
 	/** Camera to perform operation on */
 	protected final String camera;
-
-	/** Begin the operation */
-	public final boolean begin() {
-		phase = phaseOne();
-		return true;
-	}
-
-	/** Create the first real phase of the operation */
-	abstract protected Phase phaseOne();
 
 	/** Create a new Pelco operation */
 	public OpPelco(PriorityLevel p, ControllerImpl c, VideoMonitor m,

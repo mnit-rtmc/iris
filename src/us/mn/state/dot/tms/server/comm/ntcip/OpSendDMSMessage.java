@@ -81,8 +81,8 @@ public class OpSendDMSMessage extends OpDMS {
 		this(d, sm, o, 1);
 	}
 
-	/** Create the first real phase of the operation */
-	protected Phase phaseOne() {
+	/** Create the second phase of the operation */
+	protected Phase phaseTwo() {
 		dms.setMessageNext(message);
 		if(SignMessageHelper.isBlank(message))
 			return new ActivateBlankMsg();

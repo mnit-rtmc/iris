@@ -160,7 +160,7 @@ abstract public class MessagePoller extends Thread {
 			Operation o = queue.next();
 			o.handleCommError(EventType.QUEUE_DRAINED, status);
 			if(hung_up)
-				o.setHungUp();
+				o.setSucceeded();
 			o.cleanup();
 		}
 	}
