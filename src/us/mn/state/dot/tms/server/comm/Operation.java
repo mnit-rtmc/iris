@@ -130,13 +130,13 @@ abstract public class Operation {
 	}
 
 	/** Set the operation to failed */
-	public void setFailed() {
+	public synchronized void setFailed() {
 		setSuccess(false);
 		phase = null;
 	}
 
 	/** Set the operation to succeeded */
-	public void setSucceeded() {
+	public synchronized void setSucceeded() {
 		setSuccess(true);
 		phase = null;
 	}
@@ -166,17 +166,23 @@ abstract public class Operation {
 	}
 
 	/** 
-	  * Perform a poll with an addressed message. Called by 
-	  * MessagePoller.doPoll(). Processing stops when phase is
-	  * assigned null.
-	  * @see MessagePoller.performOperations
-	  */
+	 * Perform a poll with an addressed message. Called by 
+	 * MessagePoller.doPoll(). Processing stops when phase is
+	 * assigned null.
+	 * @see MessagePoller.performOperations
+	 */
 	public void poll(CommMessage mess) throws IOException,
 		DeviceContentionException
 	{
 		final Phase p = phase;
-		if(p != null)
-			phase = p.poll(mess);
+		if(p != null) {
+			Phase np = p.poll(mess);
+			// Need to synchronize against setFailed / setSucceeded
+			synchronized(this) {
+				if(!isDone())
+					phase = np;
+			}
+		}
 	}
 
 	/** Base class for operation phases */
