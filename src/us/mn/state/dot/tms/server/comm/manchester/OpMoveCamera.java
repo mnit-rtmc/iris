@@ -107,7 +107,7 @@ public class OpMoveCamera extends OpDevice {
 			mess.storeProps();
 			stamp = TimeSteward.currentTimeMillis() +
 				CMD_INTERVAL_MS;
-			if(isDone() || isStopCmd() || isExpired())
+			if(isStopCmd() || isExpired())
 				return null;
 			else
 				return this;
