@@ -31,6 +31,37 @@ abstract public class Operation {
 	/** Operation error log */
 	static protected final IDebugLog OP_LOG = new IDebugLog("operation");
 
+	/** Systemwide count of operations */
+	static private int n_operations = 0;
+
+	/** Increment the count of operations */
+	static private int incrementCount() {
+		synchronized(OP_LOG) {
+			n_operations++;
+			return n_operations;
+		}
+	}
+
+	/** Decrement the count of operations */
+	static private int decrementCount() {
+		synchronized(OP_LOG) {
+			n_operations--;
+			return n_operations;
+		}
+	}
+
+	/** Write a message to the operation log */
+	protected void log(String msg) {
+		if(OP_LOG.isOpen())
+			OP_LOG.log(getOpName() + " " + msg);
+	}
+
+	/** Write a message to the operation log */
+	protected void log(String msg, int n_ops) {
+		if(OP_LOG.isOpen())
+			log(msg + ": " + n_ops);
+	}
+
 	/** Priority of the operation */
 	private PriorityLevel priority;
 
@@ -52,8 +83,7 @@ abstract public class Operation {
 	/** Create a new I/O operation */
 	public Operation(PriorityLevel prio) {
 		priority = prio;
-		if(OP_LOG.isOpen())
-			OP_LOG.log(getOpName() + " created");
+		log("created", incrementCount());
 	}
 
 	/** Create the first phase of the operation.  This method cannot be
@@ -119,7 +149,7 @@ abstract public class Operation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		OP_LOG.log(getOpName() + " cleanup");
+		log("cleanup", decrementCount());
 	}
 
 	/** Handle a communication error */

@@ -97,8 +97,7 @@ abstract public class OpController extends Operation {
 
 	/** Start an operation on the device */
 	public void start() {
-		if(OP_LOG.isOpen())
-			OP_LOG.log(getOpName() + " starting");
+		log("starting");
 		controller.addOperation(this);
 	}
 
