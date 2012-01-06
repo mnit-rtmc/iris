@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 public class ManchesterPoller extends MessagePoller implements CameraPoller {
 
 	/** Thread responsible for sending PTZ commands */
-	static protected final PollerQueue queue = new PollerQueue();
+	static protected final PTZStreamer streamer = new PTZStreamer();
 	
 	/** Highest allowed address for Manchester protocol */
 	static protected final int ADDRESS_MAX = 1024;
@@ -53,9 +53,9 @@ public class ManchesterPoller extends MessagePoller implements CameraPoller {
 
 	/** Send a PTZ camera move command */
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		queue.addCommand(c, new OpMoveCamera(c, p, t, z));
-		if(!queue.isAlive())
-			queue.start();
+		streamer.addCommand(c, new OpMoveCamera(c, p, t, z));
+		if(!streamer.isAlive())
+			streamer.start();
 	}
 
 	/** Send a store camera preset command */

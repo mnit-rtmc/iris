@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.CameraImpl;
  * @author Timothy A. Johnson
  * @author Douglas Lau
  */
-public class PollerQueue extends Thread {
+public class PTZStreamer extends Thread {
 
 	/** The number of milliseconds between commands */
 	protected static final int CMD_INTERVAL = 60;
@@ -37,7 +37,7 @@ public class PollerQueue extends Thread {
 	/** List of expired camera IDs */
 	protected final LinkedList<String> expired = new LinkedList<String>();
 
-	/** Add a PTZ command to the queue.
+	/** Add a PTZ command to the be streamed.
 	 * cmd The OpMoveCamera command to be added.
 	 */
 	public synchronized void addCommand(CameraImpl c, OpMoveCamera cmd) {
