@@ -15,7 +15,7 @@ SERVICE=$(basename $0)
 PROG=iris_service
 DIR=/usr/share/java/iris-server
 USER=tms
-OPTIONS="/usr/bin/java -server -Xmx256m -jar $DIR/iris-server-*.jar"
+OPTIONS="/usr/bin/java -server -Xmx512m -jar $DIR/iris-server-*.jar"
 
 # SELinux requires runuser instead of su
 if [ -x /sbin/runuser ]
