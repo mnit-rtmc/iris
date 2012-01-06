@@ -32,7 +32,7 @@ abstract public class Operation {
 	static protected final IDebugLog OP_LOG = new IDebugLog("operation");
 
 	/** Priority of the operation */
-	protected PriorityLevel priority;
+	private PriorityLevel priority;
 
 	/** Get the priority of the operation.
 	 * @return Priority of the operation (@see PriorityLevel) */
