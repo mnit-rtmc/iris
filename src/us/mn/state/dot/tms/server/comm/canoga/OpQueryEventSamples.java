@@ -78,10 +78,11 @@ public class OpQueryEventSamples extends OpCanoga {
 		}
 	}
 
-	/** Cleanup the operation.  For this operation, cleanup gets called
-	 * every 30 seconds even though the operation continues. */
-	public void cleanup() {
+	/** Store event data samples as binned data */
+	public void binSamples() {
 		controller.binEventSamples();
-		super.cleanup();
+		// Every time we bin sample data, we should update the
+		// controller operation counters
+		controller.completeOperation(id, isSuccess());
 	}
 }

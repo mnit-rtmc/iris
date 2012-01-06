@@ -106,9 +106,7 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 				collectors.add(qes);
 				qes.start();
 			} else if(intvl == 30) {
-				// Cleanup causes operation counters to be
-				// incremented and data to be binned
-				qes.cleanup();
+				qes.binSamples();
 			}
 		}
 	}

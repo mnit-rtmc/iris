@@ -134,6 +134,7 @@ abstract public class OpController extends Operation {
 		if(errorStatus != null)
 			controller.setErrorStatus(filterMessage(errorStatus));
 		controller.completeOperation(id, isSuccess());
+		super.cleanup();
 	}
 
 	/** Get the error retry threshold */
