@@ -141,14 +141,16 @@ abstract public class Operation {
 		phase = null;
 	}
 
-	/** Begin the operation */
+	/** Begin the operation.  The operation begins when it is queued for
+	 * processing. */
 	public boolean begin() {
 		phase = phaseOne();
 		log("begin", incrementCount());
 		return true;
 	}
 
-	/** Cleanup the operation */
+	/** Cleanup the operation.  The operation gets cleaned up after
+	 * processing is complete and it is removed from the queue. */
 	public void cleanup() {
 		log("cleanup", decrementCount());
 	}
