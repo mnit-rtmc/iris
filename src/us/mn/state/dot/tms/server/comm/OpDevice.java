@@ -37,6 +37,13 @@ abstract public class OpDevice extends OpController {
 		device = d;
 	}
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		return (o instanceof OpDevice) &&
+		       (getClass() == o.getClass()) &&
+		       ((OpDevice)o).device == device;
+	}
+
 	/** Phase to acquire exclusive ownership of the device */
 	protected class AcquireDevice extends Phase {
 

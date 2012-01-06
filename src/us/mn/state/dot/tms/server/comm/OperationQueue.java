@@ -24,10 +24,6 @@ import java.io.PrintStream;
  */
 public final class OperationQueue {
 
-	/** The clog threshold determines how many operations can be in the
-	 * queue before it is considered "clogged". */
-	static protected final int CLOG_THRESHOLD = 50;
-
 	/** Front node in the queue */
 	private Node front = null;
 
@@ -40,21 +36,17 @@ public final class OperationQueue {
 	}
 
 	/** Check if an operation should be added to the queue */
-	public synchronized boolean shouldAdd(Operation o) {
-		if(closing)
-			return false;
-		return o.getPriority().ordinal() <
-		       PriorityLevel.DEVICE_DATA.ordinal() || !isClogged();
+	public synchronized boolean shouldAdd(Operation op) {
+		return !closing && !contains(op);
 	}
 
-	/** Check if the queue is clogged. This is true if the queue contains
-	 * at least CLOG_THRESHOLD operations. */
-	protected boolean isClogged() {
-		int i = 0;
+	/** Check if the queue contains a given operation */
+	protected boolean contains(Operation op) {
 		Node node = front;
 		while(node != null) {
 			node = node.next;
-			if(++i > CLOG_THRESHOLD)
+			Operation nop = node.operation;
+			if(op.equals(nop) && !nop.isDone())
 				return true;
 		}
 		return false;

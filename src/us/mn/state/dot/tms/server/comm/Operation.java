@@ -91,6 +91,11 @@ abstract public class Operation {
 	 * have been fully constructed yet (subclass initialization). */
 	abstract protected Phase phaseOne();
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		return this == o;
+	}
+
 	/** Get a string description of the operation */
 	public String toString() {
 		String name;

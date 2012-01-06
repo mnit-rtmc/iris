@@ -19,8 +19,8 @@ import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.TransientPoller;
 
 /**
  * ManchesterPoller is a java implementation of the Manchester (American
@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class ManchesterPoller extends MessagePoller implements CameraPoller {
+public class ManchesterPoller extends TransientPoller implements CameraPoller {
 	
 	/** Highest allowed address for Manchester protocol */
 	static protected final int ADDRESS_MAX = 1024;
@@ -50,7 +50,6 @@ public class ManchesterPoller extends MessagePoller implements CameraPoller {
 
 	/** Send a PTZ camera move command */
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		// FIXME: force any move operations for this camera to finish
 		addOperation(new OpMoveCamera(c, p, t, z));
 	}
 

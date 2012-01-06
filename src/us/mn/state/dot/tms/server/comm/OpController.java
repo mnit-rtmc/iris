@@ -95,6 +95,13 @@ abstract public class OpController extends Operation {
 		this(p, c, c.toString());
 	}
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		return (o instanceof OpController) &&
+		       (getClass() == o.getClass()) &&
+		       ((OpController)o).controller == controller;
+	}
+
 	/** Get a string description of the operation */
 	public String toString() {
 		return super.toString() + " (" + id + ")";
