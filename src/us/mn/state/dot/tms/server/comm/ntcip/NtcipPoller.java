@@ -81,42 +81,42 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		switch(r) {
 		case RESET_DEVICE:
-			new OpResetDMS(dms).start();
+			addOperation(new OpResetDMS(dms));
 			break;
 		case SEND_SETTINGS:
-			new OpSendDMSFonts(dms).start();
-			new OpSendDMSDefaults(dms).start();
-			new OpSendDMSGraphics(dms).start();
+			addOperation(new OpSendDMSFonts(dms));
+			addOperation(new OpSendDMSDefaults(dms));
+			addOperation(new OpSendDMSGraphics(dms));
 			break;
 		case QUERY_CONFIGURATION:
-			new OpQueryDMSConfiguration(dms).start();
+			addOperation(new OpQueryDMSConfiguration(dms));
 			break;
 		case QUERY_MESSAGE:
-			new OpQueryDMSMessage(dms).start();
+			addOperation(new OpQueryDMSMessage(dms));
 			break;
 		case QUERY_STATUS:
-			new OpQueryDMSStatus(dms).start();
+			addOperation(new OpQueryDMSStatus(dms));
 			break;
 		case QUERY_PIXEL_FAILURES:
-			new OpTestDMSPixels(dms, false).start();
+			addOperation(new OpTestDMSPixels(dms, false));
 			break;
 		case TEST_PIXELS:
-			new OpTestDMSPixels(dms, true).start();
+			addOperation(new OpTestDMSPixels(dms, true));
 			break;
 		case BRIGHTNESS_TOO_DIM:
-			new OpUpdateDMSBrightness(dms,
-				EventType.DMS_BRIGHT_LOW).start();
+			addOperation(new OpUpdateDMSBrightness(dms,
+				EventType.DMS_BRIGHT_LOW));
 			break;
 		case BRIGHTNESS_GOOD:
-			new OpUpdateDMSBrightness(dms,
-				EventType.DMS_BRIGHT_GOOD).start();
+			addOperation(new OpUpdateDMSBrightness(dms,
+				EventType.DMS_BRIGHT_GOOD));
 			break;
 		case BRIGHTNESS_TOO_BRIGHT:
-			new OpUpdateDMSBrightness(dms,
-				EventType.DMS_BRIGHT_HIGH).start();
+			addOperation(new OpUpdateDMSBrightness(dms,
+				EventType.DMS_BRIGHT_HIGH));
 			break;
 		case SEND_LEDSTAR_SETTINGS:
-			new OpSendDMSLedstar(dms).start();
+			addOperation(new OpSendDMSLedstar(dms));
 			break;
 		default:
 			// Ignore other requests
@@ -129,19 +129,19 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		throws InvalidMessageException
 	{
 		if(dms.isMessageCurrentEquivalent(sm))
-			new OpUpdateDMSDuration(dms, sm).start();
+			addOperation(new OpUpdateDMSDuration(dms, sm));
 		else
-			createSendMsgOp(dms, sm, o).start();
+			addOperation(createSendMsgOp(dms, sm, o));
 	}
 
 	/** Send a device request message to an LCS array */
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
-			new OpSendLCSSettings(lcs_array).start();
+			addOperation(new OpSendLCSSettings(lcs_array));
 			break;
 		case QUERY_MESSAGE:
-			new OpQueryLCSIndications(lcs_array).start();
+			addOperation(new OpQueryLCSIndications(lcs_array));
 			break;
 		default:
 			// Ignore other requests
@@ -156,6 +156,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
-		new OpSendLCSIndications(lcs_array, ind, o).start();
+		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
 	}
 }

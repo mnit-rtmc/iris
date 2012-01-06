@@ -108,7 +108,7 @@ abstract public class MessagePoller extends Thread {
 	}
 
 	/** Add an operation to the message poller */
-	public void addOperation(Operation o) {
+	protected void addOperation(Operation o) {
 		// NOTE: we must synchronize on the queue here so that begin()
 		// gets called before the poll queue thread get access to it
 		synchronized(queue) {

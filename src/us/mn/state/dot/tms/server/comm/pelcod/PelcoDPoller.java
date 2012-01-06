@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,16 +50,16 @@ public class PelcoDPoller extends MessagePoller implements CameraPoller {
 
 	/** Send a PTZ camera move command */
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		new OpMoveCamera(c, p, t, z).start();
+		addOperation(new OpMoveCamera(c, p, t, z));
 	}
 
 	/** Send a store camera preset command */
 	public void sendStorePreset(CameraImpl c, int preset) {
-		new OpStorePreset(c, preset).start();
+		addOperation(new OpStorePreset(c, preset));
 	}
 
 	/** Send a recall camera preset command */
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		new OpRecallPreset(c, preset).start();
+		addOperation(new OpRecallPreset(c, preset));
 	}
 }

@@ -95,12 +95,6 @@ abstract public class OpController extends Operation {
 		this(p, c, c.toString());
 	}
 
-	/** Start an operation on the device */
-	public void start() {
-		log("starting");
-		controller.addOperation(this);
-	}
-
 	/** Get a string description of the operation */
 	public String toString() {
 		return super.toString() + " (" + id + ")";

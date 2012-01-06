@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +54,6 @@ public class ViconPoller extends MessagePoller implements VideoMonitorPoller {
 	public void setMonitorCamera(ControllerImpl c, VideoMonitor m,
 		String cam)
 	{
-		new OpSelectMonitorCamera(c, m, cam).start();
+		addOperation(new OpSelectMonitorCamera(c, m, cam));
 	}
 }

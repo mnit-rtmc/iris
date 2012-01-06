@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,11 +49,11 @@ public class Org815Poller extends MessagePoller implements WeatherPoller {
 
 	/** Send settings to a weather sensor */
 	public void sendSettings(WeatherSensorImpl ws) {
-		new OpQuerySettings(ws).start();
+		addOperation(new OpQuerySettings(ws));
 	}
 
 	/** Query current weather conditions */
 	public void queryConditions(WeatherSensorImpl ws) {
-		new OpQueryConditions(ws).start();
+		addOperation(new OpQueryConditions(ws));
 	}
 }

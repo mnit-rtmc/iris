@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,9 @@ public class DmsMsgTableSource extends MessageIDCode {
 	public boolean isValid() {
 		switch(getMemoryType()) {
 		case permanent:
-		case _volatile:
 		case changeable:
+		case _volatile:
+		case schedule:
 		case blank:
 			return true;
 		default:

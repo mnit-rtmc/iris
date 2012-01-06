@@ -29,9 +29,6 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  * @author Douglas Lau
  */
 public class ManchesterPoller extends MessagePoller implements CameraPoller {
-
-	/** Thread responsible for sending PTZ commands */
-	static protected final PTZStreamer streamer = new PTZStreamer();
 	
 	/** Highest allowed address for Manchester protocol */
 	static protected final int ADDRESS_MAX = 1024;
@@ -53,9 +50,8 @@ public class ManchesterPoller extends MessagePoller implements CameraPoller {
 
 	/** Send a PTZ camera move command */
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		streamer.addCommand(c, new OpMoveCamera(c, p, t, z));
-		if(!streamer.isAlive())
-			streamer.start();
+		// FIXME: force any move operations for this camera to finish
+		addOperation(new OpMoveCamera(c, p, t, z));
 	}
 
 	/** Send a store camera preset command */

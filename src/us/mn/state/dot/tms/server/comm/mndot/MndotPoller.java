@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,38 +123,38 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	protected void download(ControllerImpl c, PriorityLevel p) {
 		OpSendSampleSettings ss = new OpSendSampleSettings(c);
 		ss.setPriority(p);
-		ss.start();
+		addOperation(ss);
 		WarningSignImpl warn = c.getActiveWarningSign();
 		if(warn != null) {
 			OpSendWarningSettings s =
 				new OpSendWarningSettings(warn);
 			s.setPriority(p);
-			s.start();
+			addOperation(s);
 		}
 		RampMeterImpl meter1 = Op170.lookupMeter1(c);
 		if(meter1 != null) {
 			OpSendMeterSettings s = new OpSendMeterSettings(meter1);
 			s.setPriority(p);
-			s.start();
+			addOperation(s);
 		}
 		RampMeterImpl meter2 = Op170.lookupMeter2(c);
 		if(meter2 != null) {
 			OpSendMeterSettings s = new OpSendMeterSettings(meter2);
 			s.setPriority(p);
-			s.start();
+			addOperation(s);
 		}
 	}
 
 	/** Perform a controller reset */
 	public void resetController(ControllerImpl c) {
 		if(c.getActive())
-			new OpReset170(c).start();
+			addOperation(new OpReset170(c));
 	}
 
 	/** Send sample settings to a controller */
 	public void sendSettings(ControllerImpl c) {
 		if(c.getActive())
-			new OpSendSampleSettings(c).start();
+			addOperation(new OpSendSampleSettings(c));
 	}
 
 	/** Query sample data */
@@ -162,15 +162,15 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		switch(intvl) {
 		case 30:
 			if(c.hasActiveDetector())
-				new OpQuerySamples30Sec(c, comp).start();
+				addOperation(new OpQuerySamples30Sec(c, comp));
 			// This should happen on a meter QUERY_STATUS, but
 			// green detectors need to be queried also...
 			if(c.hasActiveMeter())
-				new OpQueryMeterStatus(c, comp).start();
+				addOperation(new OpQueryMeterStatus(c, comp));
 			break;
 		case 300:
 			if(c.hasActiveDetector() || c.hasActiveMeter())
-				new OpQuerySamples5Min(c, comp).start();
+				addOperation(new OpQuerySamples5Min(c, comp));
 			break;
 		}
 	}
@@ -178,14 +178,14 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	/** Query the status of alarms */
 	public void queryAlarms(ControllerImpl c) {
 		if(c.hasAlarm())
-			new OpQueryAlarms(c).start();
+			addOperation(new OpQueryAlarms(c));
 	}
 
 	/** Send a device request to a ramp meter */
 	public void sendRequest(RampMeterImpl meter, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
-			new OpSendMeterSettings(meter).start();
+			addOperation(new OpSendMeterSettings(meter));
 			break;
 		default:
 			// Ignore other requests
@@ -202,7 +202,8 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 			else {
 				float red = calculateRedTime(meter, rate);
 				int r = Math.round(red * 10);
-				new OpSendMeterRedTime(meter, n, r).start();
+				addOperation(new OpSendMeterRedTime(meter,
+					n, r));
 				if(!meter.isMetering())
 					startMetering(meter);
 			}
@@ -231,17 +232,17 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	protected void sendMeteringRate(RampMeterImpl meter, int rate) {
 		int n = getMeterNumber(meter);
 		if(n > 0)
-			new OpSendMeterRate(meter, n, rate).start();
+			addOperation(new OpSendMeterRate(meter, n, rate));
 	}
 
 	/** Send a device request to a warning sign */
 	public void sendRequest(WarningSignImpl sign, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
-			new OpSendWarningSettings(sign).start();
+			addOperation(new OpSendWarningSettings(sign));
 			break;
 		case QUERY_STATUS:
-			new OpQueryWarningStatus(sign).start();
+			addOperation(new OpQueryWarningStatus(sign));
 			break;
 		default:
 			// Ignore other requests
@@ -251,17 +252,17 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 
 	/** Set the deployed status of the sign */
 	public void setDeployed(WarningSignImpl sign, boolean d) {
-		new OpSendWarningCommand(sign, d).start();
+		addOperation(new OpSendWarningCommand(sign, d));
 	}
 
 	/** Send a device request to an LCS array */
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
-			new OpSendLCSSettings(lcs_array).start();
+			addOperation(new OpSendLCSSettings(lcs_array));
 			break;
 		case QUERY_MESSAGE:
-			new OpQueryLCSIndications(lcs_array).start();
+			addOperation(new OpQueryLCSIndications(lcs_array));
 			break;
 		default:
 			// Ignore other requests
@@ -271,7 +272,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 
 	/** Set the deployed status of a lane marking */
 	public void setDeployed(LaneMarkingImpl dev, boolean d) {
-		new OpDeployLaneMarking(dev, d).start();
+		addOperation(new OpDeployLaneMarking(dev, d));
 	}
 
 	/** Send new indications to an LCS array.
@@ -281,6 +282,6 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
-		new OpSendLCSIndications(lcs_array, ind, o).start();
+		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
 	}
 }

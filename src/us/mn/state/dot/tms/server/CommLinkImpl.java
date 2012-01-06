@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
-import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
  * The CommLinkImpl class represents a single communication link which is
@@ -320,13 +319,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 				c.setFailed(true);
 			}
 		}
-	}
-
-	/** Add an operation to the communication link */
-	void addOperation(Operation o) {
-		MessagePoller p = getPoller();
-		if(p != null)
-			p.addOperation(o);
 	}
 
 	/** Line load */

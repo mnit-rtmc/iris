@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpMoveCamera extends OpDevice {
 
+	/** The number of milliseconds between commands */
+	static protected final int CMD_INTERVAL_MS = 60;
+
 	/** Operation timeout in miliseconds */
 	static protected final int OP_TIMEOUT_MS = 30000;
 
@@ -54,7 +57,7 @@ public class OpMoveCamera extends OpDevice {
 	protected final int zoom;
 
 	/** Time stamp when operation will expire */
-	public final long expire;
+	private final long expire;
 
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
@@ -73,6 +76,14 @@ public class OpMoveCamera extends OpDevice {
 		return pan == 0 && tilt == 0 && zoom == 0;
 	}
 
+	/** Time stamp to send phase */
+	private long stamp = TimeSteward.currentTimeMillis();
+
+	/** Check if the operation has expired */
+	private boolean isExpired() {
+		return TimeSteward.currentTimeMillis() >= expire;
+	}
+
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
 		return new Move();
@@ -83,9 +94,23 @@ public class OpMoveCamera extends OpDevice {
 
 		/** Command controller to move the camera */
 		protected Phase poll(CommMessage mess) throws IOException {
+			long now = TimeSteward.currentTimeMillis();
+			if(stamp < now) {
+				try {
+					Thread.sleep(now - stamp);
+				}
+				catch(InterruptedException e) {
+					// Nothing to do here
+				}
+			}
 			mess.add(new CommandProperty(pan, tilt, zoom));
 			mess.storeProps();
-			return null;
+			stamp = TimeSteward.currentTimeMillis() +
+				CMD_INTERVAL_MS;
+			if(isDone() || isStopCmd() || isExpired())
+				return null;
+			else
+				return this;
 		}
 	}
 }

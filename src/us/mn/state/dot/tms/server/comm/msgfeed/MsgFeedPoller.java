@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,6 @@ public class MsgFeedPoller extends MessagePoller {
 	/** Query message feed */
 	public void queryMessages(ControllerImpl c) {
 		log("creating OpReadMsgFeed: " + c);
-		new OpReadMsgFeed(c, feed_id).start();
+		addOperation(new OpReadMsgFeed(c, feed_id));
 	}
 }

@@ -63,10 +63,8 @@ public class OpQueryDMSMessage extends OpDMS {
 			if(SignMessageHelper.isBlank(sm))
 				return new QueryCurrentMessage();
 		} else {
-			/* The source is not valid. Create a new operation to
-			 * send the "current" message to the sign. */
-			NtcipPoller.createSendMsgOp(dms, sm,
-				dms.getOwnerCurrent()).start();
+			/* The source table is not valid.  What??! */
+			DMS_LOG.log(dms.getName() + ": INVALID SOURCE");
 		}
 		return null;
 	}

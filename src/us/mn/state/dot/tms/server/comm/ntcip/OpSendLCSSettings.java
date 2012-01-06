@@ -14,11 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip;
 
-import java.util.LinkedList;
-import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -28,72 +26,24 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendLCSSettings extends OpLCS {
 
-	/** List of operations to send settings to DMS in LCS array */
-	protected final LinkedList<OpDMS> ops = new LinkedList<OpDMS>();
-
 	/** Create a new operation to send LCS settings */
 	public OpSendLCSSettings(LCSArrayImpl l) {
 		super(PriorityLevel.DEVICE_DATA, l);
-		createOperations();
+		sendSettings();
 	}
 
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
-		if(ops.isEmpty())
-			return null;
-		else
-			return new StartOperations();
+		return null;
 	}
 
-	/** Phase to start DMS operations */
-	protected class StartOperations extends Phase {
-
-		/** Start all DMS operations */
-		protected Phase poll(CommMessage mess) {
-			for(OpDMS op: ops)
-				op.start();
-			return new WaitForCompletion();
-		}
-	}
-
-	/** Phase to wait for operations to complete */
-	protected class WaitForCompletion extends Phase {
-
-		/** Time to stop waiting for completion (20 seconds) */
-		protected final long expire = TimeSteward.currentTimeMillis() + 
-			20 * 1000;
-
-		/** Wait for operations to complete */
-		protected Phase poll(CommMessage mess) {
-			try {
-				Thread.sleep(200);
-			}
-			catch(InterruptedException e) {
-				// Ignore
-			}
-			OpDMS op = ops.peekFirst();
-			if(op == null)
-				return null;
-			if(op.isDone())
-				ops.removeFirst();
-			else {
-				if(TimeSteward.currentTimeMillis() > expire) {
-					LCS_LOG.log(lcs_array.getName() +
-						": LCS timeout expired -- " +
-						"giving up");
-					setFailed();
-					return null;
-				}
-			}
-			return this;
-		}
-	}
-
-	/** Create operations to send new indications to an LCS array */
-	protected void createOperations() {
+	/** Send settings to all DMS in an LCS array */
+	protected void sendSettings() {
 		for(DMSImpl dms: dmss) {
-			if(dms != null)
-				ops.add(new OpSendDMSGraphics(dms));
+			if(dms != null) {
+				dms.setDeviceRequest(
+					DeviceRequest.SEND_SETTINGS.ordinal());
+			}
 		}
 	}
 }

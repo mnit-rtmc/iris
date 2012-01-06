@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
@@ -512,13 +511,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the controller firmware version */
 	public String getVersion() {
 		return version;
-	}
-
-	/** Add an operation to be performed */
-	public void addOperation(OpController o) {
-		CommLinkImpl link = (CommLinkImpl)comm_link;
-		if(link != null)
-			link.addOperation(o);
 	}
 
 	/** Controller error status */
