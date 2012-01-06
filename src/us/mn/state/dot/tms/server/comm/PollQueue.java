@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,10 +29,10 @@ public final class PollQueue {
 	static protected final int CLOG_THRESHOLD = 50;
 
 	/** Front node in the queue */
-	protected Node front = null;
+	private Node front = null;
 
 	/** Flag to tell when the poller is closing */
-	protected boolean closing = false;
+	private boolean closing = false;
 
 	/** Close the queue for new operations */
 	public synchronized void close() {
@@ -98,12 +98,16 @@ public final class PollQueue {
 	}
 
 	/** Does the queue have any elements? */
-	public synchronized boolean hasNext() { return front != null; }
+	public synchronized boolean hasNext() {
+		return front != null;
+	}
 
 	/** Get the next operation from the queue (and remove it) */
 	public synchronized Operation next() {
 		while(!hasNext()) {
-			try { wait(); }
+			try {
+				wait();
+			}
 			catch(InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -126,7 +130,7 @@ public final class PollQueue {
 	}
 
 	/** Do something to each operation in the queue */
-	public void forEach(OperationHandler handler) {
+	public synchronized void forEach(OperationHandler handler) {
 		Node node = front;
 		while(node != null) {
 			handler.handle(node.priority, node.operation);
