@@ -59,8 +59,8 @@ abstract public class MessagePoller extends Thread {
 	/** Thread group for all message poller threads */
 	static protected final ThreadGroup GROUP = new ThreadGroup("Poller");
 
-	/** Message Poll queue */
-	protected final PollQueue queue = new PollQueue();
+	/** Operation queue */
+	protected final OperationQueue queue = new OperationQueue();
 
 	/** Messenger for poll/response streams */
 	protected final Messenger messenger;

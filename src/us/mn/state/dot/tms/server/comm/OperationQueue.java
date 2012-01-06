@@ -22,10 +22,10 @@ import java.io.PrintStream;
  *
  * @author Douglas Lau
  */
-public final class PollQueue {
+public final class OperationQueue {
 
-	/** The clog threshold determines how many polls can be in the queue
-	 * before it is considered "clogged". */
+	/** The clog threshold determines how many operations can be in the
+	 * queue before it is considered "clogged". */
 	static protected final int CLOG_THRESHOLD = 50;
 
 	/** Front node in the queue */
@@ -48,7 +48,7 @@ public final class PollQueue {
 	}
 
 	/** Check if the queue is clogged. This is true if the queue contains
-	 * at least CLOG_THRESHOLD polls. */
+	 * at least CLOG_THRESHOLD operations. */
 	protected boolean isClogged() {
 		int i = 0;
 		Node node = front;
