@@ -83,7 +83,7 @@ abstract public class Operation {
 	/** Create a new I/O operation */
 	public Operation(PriorityLevel prio) {
 		priority = prio;
-		log("created", incrementCount());
+		log("created");
 	}
 
 	/** Create the first phase of the operation.  This method cannot be
@@ -144,6 +144,7 @@ abstract public class Operation {
 	/** Begin the operation */
 	public boolean begin() {
 		phase = phaseOne();
+		log("begin", incrementCount());
 		return true;
 	}
 
