@@ -37,6 +37,11 @@ public class PTZStreamer extends Thread {
 	/** List of expired camera IDs */
 	protected final LinkedList<String> expired = new LinkedList<String>();
 
+	/** Create a new PTZ streamer */
+	public PTZStreamer() {
+		super("PTZ Streamer");
+	}
+
 	/** Add a PTZ command to the be streamed.
 	 * cmd The OpMoveCamera command to be added.
 	 */
