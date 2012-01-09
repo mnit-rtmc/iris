@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.toolbar;
 
 import java.awt.Component;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JToolBar;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.client.Session;
@@ -35,16 +37,20 @@ public class IrisToolBar extends JToolBar {
 	/** Create a new IRIS toolbar */
 	public IrisToolBar(MapBean m) {
 		map = m;
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 	}
 
 	/** Build toolbar components */
 	public void createToolPanels(Session s) {
 		clear();
-		if(ModemPanel.getIEnabled())
+		if(ModemPanel.getIEnabled()) {
 			add(new ModemPanel(s));
+			add(Box.createGlue());
+		}
 		if(AwsStatusPanel.getIEnabled()) {
 			add(new AwsStatusPanel(s.getSonarState(),
 				s.getDesktop()));
+			add(Box.createGlue());
 		}
 		if(CoordinatePanel.getIEnabled())
 			add(new CoordinatePanel(map));
