@@ -43,6 +43,16 @@ public class OpDeployLaneMarking extends OpDevice {
 		deploy = d;
 	}
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		if(o instanceof OpDeployLaneMarking) {
+			OpDeployLaneMarking op = (OpDeployLaneMarking)o;
+			return lane_marking == op.lane_marking &&
+			       deploy == op.deploy;
+		} else
+			return false;
+	}
+
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
 		return new QueryOutputs();

@@ -58,6 +58,16 @@ class OpMessage extends OpDms {
 		m_bitmaps = convertToHexString(bitmaps);
 	}
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		if(o instanceof OpMessage) {
+			OpMessage op = (OpMessage)o;
+			return m_dms == op.m_dms &&
+			       SignMessageHelper.isEquivalent(m_sm, op.m_sm);
+		} else
+			return false;
+	}
+
 	/** Return the bitmap page as a hex string for all pages. */
 	private String convertToHexString(BitmapGraphic[] bitmaps) {
 		StringBuilder hs = new StringBuilder();

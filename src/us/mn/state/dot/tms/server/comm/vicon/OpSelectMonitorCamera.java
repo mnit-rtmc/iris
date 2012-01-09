@@ -47,6 +47,16 @@ public class OpSelectMonitorCamera extends OpVicon {
 		super(PriorityLevel.COMMAND, c, m, cam);
 	}
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		if(o instanceof OpSelectMonitorCamera) {
+			OpSelectMonitorCamera op = (OpSelectMonitorCamera)o;
+			return monitor == op.monitor &&
+			       camera.equals(op.camera);
+		} else
+			return false;
+	}
+
 	/** Create the first phase of the operation */
 	protected Phase phaseOne() {
 		return new Select();

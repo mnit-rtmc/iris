@@ -81,6 +81,16 @@ public class OpSendDMSMessage extends OpDMS {
 		this(d, sm, o, 1);
 	}
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		if(o instanceof OpSendDMSMessage) {
+			OpSendDMSMessage op = (OpSendDMSMessage)o;
+			return dms == op.dms && SignMessageHelper.isEquivalent(
+			       message, op.message);
+		} else
+			return false;
+	}
+
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
 		dms.setMessageNext(message);

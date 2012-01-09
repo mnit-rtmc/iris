@@ -48,6 +48,15 @@ public class OpSendWarningCommand extends OpDevice {
 		rate = getDeployedRate(d);
 	}
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		if(o instanceof OpSendWarningCommand) {
+			OpSendWarningCommand op = (OpSendWarningCommand)o;
+			return device == op.device && rate == op.rate;
+		} else
+			return false;
+	}
+
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
 		return new SetRate();

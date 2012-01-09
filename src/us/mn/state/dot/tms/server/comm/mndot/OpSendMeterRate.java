@@ -47,6 +47,15 @@ public class OpSendMeterRate extends OpDevice {
 		rate = (byte)r;
 	}
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		if(o instanceof OpSendMeterRate) {
+			OpSendMeterRate op = (OpSendMeterRate)o;
+			return meter == op.meter && rate == op.rate;
+		} else
+			return false;
+	}
+
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
 		return new SetRate();

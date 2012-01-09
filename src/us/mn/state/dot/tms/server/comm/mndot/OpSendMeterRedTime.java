@@ -52,6 +52,15 @@ public class OpSendMeterRedTime extends OpDevice {
 		red_time = red;
 	}
 
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		if(o instanceof OpSendMeterRedTime) {
+			OpSendMeterRedTime op = (OpSendMeterRedTime)o;
+			return meter == op.meter && red_time == op.red_time;
+		} else
+			return false;
+	}
+
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
 		return new SetRedTime();

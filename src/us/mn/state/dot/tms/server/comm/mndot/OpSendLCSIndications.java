@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
+import java.util.Arrays;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.LaneUseIndication;
@@ -41,6 +42,16 @@ public class OpSendLCSIndications extends OpLCS {
 		super(PriorityLevel.COMMAND, l);
 		indications = ind;
 		user = u;
+	}
+
+	/** Operation equality test */
+	public boolean equals(Object o) {
+		if(o instanceof OpSendLCSIndications) {
+			OpSendLCSIndications op = (OpSendLCSIndications)o;
+			return lcs_array == op.lcs_array &&
+			       Arrays.equals(indications, op.indications);
+		} else
+			return false;
 	}
 
 	/** Create the second phase of the operation */
