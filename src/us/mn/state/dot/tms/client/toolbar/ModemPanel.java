@@ -70,7 +70,7 @@ public class ModemPanel extends ToolPanel {
 	private void updateWidget(Modem m) {
 		ModemState ms = ModemState.fromOrdinal(m.getState());
 		modem_lbl.setText(m.getName() + ": " + ms);
-		modem_lbl.setBackground(backgroundColor(ms));
+		setBackground(backgroundColor(ms));
 		modem_lbl.setForeground(foregroundColor(ms));
 	}
 
