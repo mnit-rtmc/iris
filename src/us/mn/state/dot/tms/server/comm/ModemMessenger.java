@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import java.net.SocketTimeoutException;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.ModemHelper;
+import us.mn.state.dot.tms.ModemState;
 import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.ModemImpl;
 
@@ -89,10 +90,24 @@ public class ModemMessenger extends Messenger {
 	/** Open the messenger */
 	public void open() throws IOException {
 		log("open");
-		wrapped.open();
+		try {
+			wrapped.open();
+			modem.setStateNotify(ModemState.connecting);
+		}
+		catch(IOException e) {
+			modem.setStateNotify(ModemState.open_error);
+			throw e;
+		}
 		output = wrapped.getOutputStream();
 		input = new ModemInputStream(wrapped.getInputStream());
-		connectModemRetry();
+		try {
+			connectModemRetry();
+			modem.setStateNotify(ModemState.online);
+		}
+		catch(IOException e) {
+			modem.setStateNotify(ModemState.connect_error);
+			throw e;
+		}
 	}
 
 	/** Close the messenger */
@@ -101,6 +116,8 @@ public class ModemMessenger extends Messenger {
 		wrapped.close();
 		output = null;
 		input = null;
+		if(!ModemState.isError(modem.getState()))
+			modem.setStateNotify(ModemState.offline);
 		modem.release();
 	}
 

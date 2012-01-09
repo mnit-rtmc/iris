@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.Modem;
+import us.mn.state.dot.tms.ModemState;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -157,6 +158,22 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	/** Get the connect timeout (milliseconds) */
 	public int getTimeout() {
 		return timeout;
+	}
+
+	/** Current modem state */
+	private transient ModemState state = ModemState.offline;
+
+	/** Set the modem state */
+	public void setStateNotify(ModemState ms) {
+		if(ms != state) {
+			state = ms;
+			notifyAttribute("state");
+		}
+	}
+
+	/** Get the modem state (ordinal of ModemState) */
+	public int getState() {
+		return state.ordinal();
 	}
 
 	/** Modem ownership flag */
