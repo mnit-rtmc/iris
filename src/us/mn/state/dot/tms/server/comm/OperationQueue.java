@@ -67,15 +67,6 @@ public final class OperationQueue {
 		return false;
 	}
 
-	/** Requeue an in-progress operation */
-	public synchronized boolean requeue(Operation op) {
-		if(!closing) {
-			add(op);
-			return true;
-		} else
-			return false;
-	}
-
 	/** Add an operation to the queue */
 	private void add(Operation op) {
 		PriorityLevel priority = op.getPriority();
@@ -95,8 +86,21 @@ public final class OperationQueue {
 		notify();
 	}
 
+	/** Requeue an in-progress operation */
+	public synchronized boolean requeue(Operation op) {
+		if((remove(op) == op) && !closing) {
+			add(op);
+			return true;
+		} else
+			return false;
+	}
+
 	/** Remove an operation from the queue */
-	public synchronized Operation remove(Operation op) {
+	private Operation remove(Operation op) {
+		if(op == work) {
+			work = null;
+			return op;
+		}
 		Node prev = null;
 		Node node = front;
 		while(node != null) {

@@ -188,7 +188,6 @@ abstract public class MessagePoller extends Thread {
 			if(oc.getPriority().ordinal() >
 			   o.getPriority().ordinal())
 			{
-				queue.remove(oc);
 				oc.setPriority(o.getPriority());
 				if(!requeueOperation(oc))
 					oc.cleanup();
@@ -227,7 +226,7 @@ abstract public class MessagePoller extends Thread {
 		}
 	}
 
-	/** Requeue the working operation */
+	/** Requeue an in-progress operation */
 	protected boolean requeueOperation(Operation op) {
 		if(queue.requeue(op))
 			return true;
