@@ -182,16 +182,7 @@ abstract public class MessagePoller extends Thread {
 			o.poll(createMessage(o.getController()));
 		}
 		catch(DeviceContentionException e) {
-			// Another operation has the device lock. Raise its
-			// priority to that of the current operation.
-			Operation oc = e.operation;
-			if(oc.getPriority().ordinal() >
-			   o.getPriority().ordinal())
-			{
-				oc.setPriority(o.getPriority());
-				if(!requeueOperation(oc))
-					oc.cleanup();
-			}
+			handleContention(o, e);
 		}
 		catch(DownloadRequestException e) {
 			download(o.getController(), o.getPriority());
@@ -222,6 +213,21 @@ abstract public class MessagePoller extends Thread {
 			if(POLL_LOG.isOpen()) {
 				long el = sample_load(start);
 				plog(oname + " elapsed: " + el);
+			}
+		}
+	}
+
+	/** Handle device contention.  Another operation has the device lock.
+	 * Ensure that we don't have a priority inversion problem. */
+	private void handleContention(Operation op,DeviceContentionException e){
+		Operation oc = e.operation;
+		if(oc.getPriority().ordinal() > op.getPriority().ordinal()) {
+			oc.setPriority(op.getPriority());
+			// If, for some crazy reason, the operation is
+			// not on our queue, it will not be requeued.
+			if(!requeueOperation(oc)) {
+				oc.setFailed();
+				oc.cleanup();
 			}
 		}
 	}
