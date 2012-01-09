@@ -96,16 +96,16 @@ public final class OperationQueue {
 	}
 
 	/** Remove an operation from the queue */
-	public synchronized Operation remove(Operation o) {
+	public synchronized Operation remove(Operation op) {
 		Node prev = null;
 		Node node = front;
 		while(node != null) {
-			if(node.operation == o) {
+			if(node.operation == op) {
 				if(prev == null)
 					front = node;
 				else
 					prev.next = node;
-				return o;
+				return op;
 			}
 			prev = node;
 			node = node.next;
@@ -139,9 +139,9 @@ public final class OperationQueue {
 		final Operation operation;
 		final PriorityLevel priority;
 		Node next;
-		Node(Operation o, Node n) {
-			operation = o;
-			priority = o.getPriority();
+		Node(Operation op, Node n) {
+			operation = op;
+			priority = op.getPriority();
 			next = n;
 		}
 	}
@@ -158,8 +158,8 @@ public final class OperationQueue {
 	/** Print the contents of the queue to the given stream */
 	public void print(final PrintStream ps) {
 		forEach(new OperationHandler() {
-			public void handle(PriorityLevel prio, Operation o) {
-				ps.println("\t" + prio + "\t" + o);
+			public void handle(PriorityLevel prio, Operation op) {
+				ps.println("\t" + prio + "\t" + op);
 			}
 		});
 	}
