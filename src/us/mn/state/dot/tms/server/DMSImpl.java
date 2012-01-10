@@ -1052,7 +1052,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			// priority matches the current runtime priority.  This
 			// means that a blank AWS message will not blank the
 			// sign unless the current message is an AWS message.
-			return ap == rp;
+			MultiString ms = new MultiString(existing.getMulti());
+			return ap == rp && !ms.isBlank();
 		} else
 			return ap.ordinal() >= rp.ordinal();
 	}
@@ -1378,7 +1379,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	protected transient boolean is_scheduled;
 
 	/** Current scheduled message */
-	protected transient SignMessage messageSched;
+	protected transient SignMessage messageSched = createBlankMessage(
+		DMSMessagePriority.SCHEDULED);
 
 	/** Check if a DMS action is deployable */
 	public boolean isDeployable(DmsAction da) {
@@ -1468,8 +1470,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Update the scheduled message on the sign */
 	public void updateScheduledMessage() {
-		if(!is_scheduled)
-			messageSched = null;
+		if(!is_scheduled) {
+			messageSched = createBlankMessage(
+				DMSMessagePriority.SCHEDULED);
+		}
 		SignMessage sm = messageSched;
 		if(shouldActivate(sm)) {
 			try {
