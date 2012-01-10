@@ -59,10 +59,10 @@ public final class OperationQueue {
 			return true;
 		Node node = front;
 		while(node != null) {
-			node = node.next;
 			Operation nop = node.operation;
 			if(op.equals(nop) && !nop.isDone())
 				return true;
+			node = node.next;
 		}
 		return false;
 	}
