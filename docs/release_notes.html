@@ -11,6 +11,27 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.142.0 (20 January 2012)</dt>
+	<dd><ul>
+		<li>
+			Added client_event table in database to record client
+			connect/disconnect/authenticate events.
+			Also, removed these messages from iris.stderr log.
+		</li>
+		<li>
+			Fixed a NullPointerException on systems which do not
+			collect traffic data samples.
+		</li>
+		<li>
+			Added "bypass_authentication" option to sonar.ldap.urls
+			property.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.142.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.141.0 (10 January 2012)</dt>
 	<dd><ul>
 		<li>
