@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,9 +60,15 @@ public class ArchiveSamplesJob extends Job {
 
 	/** Archive data samples */
 	protected void archiveSamples() throws IOException {
-		for(File year: listYears()) {
-			for(File day: listDays(year))
-				createSampleArchive(day);
+		File[] years = listYears();
+		if(years != null) {
+			for(File year: years) {
+				File[] days = listDays(year);
+				if(days != null) {
+					for(File day: days)
+						createSampleArchive(day);
+				}
+			}
 		}
 	}
 
