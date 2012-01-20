@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,9 @@ public enum EventType {
 	CHECKSUM_ERROR(13), CONTROLLER_ERROR(14),
 	COMM_ERROR(8), COMM_FAILED(65), COMM_RESTORED(9),
 	INCIDENT_CLEARED(20), INCIDENT_CRASH(21), INCIDENT_STALL(22),
-	INCIDENT_HAZARD(23), INCIDENT_ROADWORK(24), INCIDENT_IMPACT(29);
+	INCIDENT_HAZARD(23), INCIDENT_ROADWORK(24), INCIDENT_IMPACT(29),
+	CLIENT_CONNECT(201), CLIENT_AUTHENTICATE(202),
+	CLIENT_FAIL_AUTHENTICATION(203), CLIENT_DISCONNECT(204);
 
 	/** Event type ID */
 	public final int id;

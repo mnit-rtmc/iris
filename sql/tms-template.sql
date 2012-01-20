@@ -1352,7 +1352,7 @@ camera_id_blank
 camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
-database_version	3.141.0
+database_version	3.142.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
@@ -1695,7 +1695,16 @@ CREATE TABLE event.sign_event (
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(20),
 	message text,
-	iris_user VARCHAR(15) REFERENCES iris.i_user(name)
+	iris_user VARCHAR(15)
+);
+
+CREATE TABLE event.client_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	host_port VARCHAR(64) NOT NULL,
+	iris_user VARCHAR(15)
 );
 
 CREATE TABLE event.incident_detail (
@@ -1806,6 +1815,13 @@ CREATE VIEW recent_sign_event_view AS
 	WHERE (CURRENT_TIMESTAMP - event_date) < interval '90 days';
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
+CREATE VIEW client_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.host_port,
+		e.iris_user
+	FROM event.client_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON client_event_view TO PUBLIC;
+
 COPY event.event_description (event_desc_id, description) FROM stdin;
 1	Alarm TRIGGERED
 2	Alarm CLEARED
@@ -1833,6 +1849,10 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 101	Sign BRIGHTNESS LOW
 102	Sign BRIGHTNESS GOOD
 103	Sign BRIGHTNESS HIGH
+201	Client CONNECT
+202	Client AUTHENTICATE
+203	Client FAIL AUTHENTICATION
+204	Client DISCONNECT
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;
