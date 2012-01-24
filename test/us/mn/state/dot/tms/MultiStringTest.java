@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -308,6 +308,8 @@ public class MultiStringTest extends TestCase {
 			equals("[tr1,1,40,20]"));
 		assertTrue(MultiString.normalize("[tr1,1,0,0]").
 			equals("[tr1,1,0,0]"));
+		assertTrue(MultiString.normalize("[pb0,128,255]").
+			equals("[pb0,128,255]"));
 		assertTrue(MultiString.normalize("[ttS100]").
 			equals("[ttS100]"));
 	}
