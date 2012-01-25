@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,6 +120,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, ActionPlan proxy) {
+		if(!canUpdate(proxy))
+			return false;
 		if(STYLE_DMS.equals(s))
 			return proxy.getActive() && hasDmsAction(proxy);
 		else if(STYLE_METER.equals(s))
@@ -132,6 +134,11 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 			return proxy.getActive();
 		else
 			return STYLE_ALL.equals(s);
+	}
+
+	/** Check if the user can update the given action plan */
+	private boolean canUpdate(ActionPlan plan) {
+		return session.canUpdate(plan, "phase");
 	}
 
 	/** Test if an action plan has time actions */
