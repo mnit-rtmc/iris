@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,9 +46,9 @@ public class SQLConnection {
 			new ChangeVetoException("Invalid SQL value: " + sql);
 	}
 
-	/** passed an sql statement, escape special characters */
-	static protected String escapeDelimiters(String sqlarg) {   
-		return sqlarg.replace("'", "''");
+	/** Escape a string constant value for SQL */
+	static private String escapeValue(Object value) {   
+		return value.toString().replace("'", "''").replace("\\","\\\\");
 	}
 
 	/** Location of database server */
@@ -185,7 +185,7 @@ public class SQLConnection {
 			updateNull(s, field);
 			return;
 		}
-		String v = escapeDelimiters(value.toString());
+		String v = escapeValue(value);
 		validateSql(v);
 		update("UPDATE " + s.getTable() + " SET \"" + field +
 			"\" = '" + v + "' WHERE " + s.getKeyName() +
@@ -213,10 +213,10 @@ public class SQLConnection {
 				keys.append('"');
 				keys.append(key);
 				keys.append("\",");
-				String val = value.toString();
+				String val = escapeValue(value);
 				validateSql(val);
 				values.append("'");
-				values.append(escapeDelimiters(val));
+				values.append(val);
 				values.append("',");
 			}
 		}
