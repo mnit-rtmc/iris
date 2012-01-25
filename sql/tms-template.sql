@@ -1463,6 +1463,7 @@ meter_tab	t
 meter_control	t
 detection	t
 det_control	t
+plan_control	t
 plan_tab	t
 maintenance	t
 publish	t
@@ -1536,8 +1537,8 @@ PRV_0061	meter_control	ramp_meter/.*/rateNext	f	t	f	f
 PRV_0062	detection	detector(/.*)?	t	f	f	f
 PRV_0063	detection	r_node(/.*)?	t	f	f	f
 PRV_0064	detection	station(/.*)?	t	f	f	f
-PRV_0065	plan_tab	action_plan(/.*)?	t	f	f	f
-PRV_0066	plan_tab	action_plan/.*/phase	f	t	f	f
+PRV_0065	plan_control	action_plan/.*/phase	f	t	f	f
+PRV_0066	plan_tab	action_plan(/.*)?	t	f	f	f
 PRV_0067	plan_tab	day_plan(/.*)?	t	f	f	f
 PRV_0068	plan_tab	dms_action(/.*)?	t	f	f	f
 PRV_0069	plan_tab	holiday(/.*)?	t	f	f	f
@@ -1624,6 +1625,7 @@ administrator	policy_admin
 administrator	device_admin
 administrator	maintenance
 administrator	det_control
+administrator	plan_control
 administrator	plan_tab
 administrator	system_admin
 administrator	user_admin
@@ -1637,6 +1639,7 @@ operator	lcs_tab
 operator	lcs_control
 operator	meter_tab
 operator	meter_control
+operator	plan_control
 operator	plan_tab
 operator	detection
 \.
