@@ -33,17 +33,30 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class SQLConnection {
 
-	/** Pattern to match for a SQL update value */
-	static protected final Pattern SQL_VALUE =
-		Pattern.compile("[[\\p{Graph}\\p{Blank}\n]&&[^\\\\]]*");
+	/** Pattern to match for a SQL identifier */
+	static private final Pattern SQL_IDENTIFIER =
+		Pattern.compile("[a-z_0-9.]*");
 
-	/** Validate a SQL update value */
-	static protected void validateSql(String sql)
-		throws ChangeVetoException
-	{
-		Matcher m = SQL_VALUE.matcher(sql);
-		if(!m.matches()) throw
-			new ChangeVetoException("Invalid SQL value: " + sql);
+	/** Validate a SQL identifier */
+	static private void validateIdentifier(String sql) {
+		Matcher m = SQL_IDENTIFIER.matcher(sql);
+		if(!m.matches()) {
+			// FIXME: throw an exception if identifier is mixed
+			//        case or contains spaces, etc. Then we can get
+			//        rid of the quotes around the field name.
+			System.err.println("Invalid identifier: " + sql);
+		}
+	}
+
+	/** Pattern to match for a SQL string constant value */
+	static private final Pattern SQL_VALUE =
+		Pattern.compile("[[\\p{Graph}\\p{Blank}\n]]*");
+
+	/** Validate a SQL string constant value */
+	static private void validateValue(String v) throws ChangeVetoException {
+		Matcher m = SQL_VALUE.matcher(v);
+		if(!m.matches())
+			throw new ChangeVetoException("Invalid SQL value: " +v);
 	}
 
 	/** Escape a string constant value for SQL */
@@ -178,26 +191,27 @@ public class SQLConnection {
 	public void update(Storable s, String field, Object value)
 		throws TMSException
 	{
-		// FIXME: throw an exception if field is mixed case or contains
-		// spaces, etc. Then we can get rid of the quotes around the
-		// field name.
+		validateIdentifier(field);
+		String key = escapeValue(s.getKey());
+		validateValue(key);
 		if(value == null) {
-			updateNull(s, field);
+			updateNull(s, field, key);
 			return;
 		}
 		String v = escapeValue(value);
-		validateSql(v);
+		validateValue(v);
 		update("UPDATE " + s.getTable() + " SET \"" + field +
 			"\" = '" + v + "' WHERE " + s.getKeyName() +
-			" = '" + s.getKey() + "';");
+			" = '" + key + "';");
 	}
 
 	/** Update one field with a NULL value */
-	protected void updateNull(Storable s, String field) throws TMSException
+	private void updateNull(Storable s, String field, String key)
+		throws TMSException
 	{
 		update("UPDATE " + s.getTable() + " SET \"" + field +
 			"\" = NULL WHERE " + s.getKeyName() + " = '" +
-			s.getKey() + "';");
+			key + "';");
 	}
 
 	/** Create one storable record */
@@ -208,13 +222,13 @@ public class SQLConnection {
 		for(Map.Entry<String, Object> e: columns.entrySet()) {
 			Object value = e.getValue();
 			if(value != null) {
-				String key = e.getKey();
-				validateSql(key);
+				String field = e.getKey();
+				validateIdentifier(field);
 				keys.append('"');
-				keys.append(key);
+				keys.append(field);
 				keys.append("\",");
 				String val = escapeValue(value);
-				validateSql(val);
+				validateValue(val);
 				values.append("'");
 				values.append(val);
 				values.append("',");
@@ -229,9 +243,10 @@ public class SQLConnection {
 
 	/** Destroy one storable record */
 	public void destroy(Storable s) throws TMSException {
-		validateSql(s.getKey());
+		String val = escapeValue(s.getKey());
+		validateValue(val);
 		update("DELETE FROM " + s.getTable() + " WHERE " +
-			s.getKeyName() + " = '" + s.getKey() + "';");
+			s.getKeyName() + " = '" + val + "';");
 	}
 
 	/** Update the database with a batch of SQL commands */
