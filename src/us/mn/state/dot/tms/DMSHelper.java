@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -100,25 +100,9 @@ public class DMSHelper extends BaseHelper {
 	/** Test if a DMS has a scheduled message deployed */
 	static public boolean isScheduled(DMS proxy) {
 		SignMessage sm = proxy.getMessageCurrent();
-		if(sm != null) {
-			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
-				sm.getRunTimePriority());
-			switch(rp) {
-			case PSA:
-			case TRAVEL_TIME:
-			case SCHEDULED:
-			case INCIDENT_LOW:
-			case INCIDENT_MED:
-			case INCIDENT_HIGH:
-				return true;
-			default:
-				return false;
-			}
-		} else {
-			// messageCurrent should never be null, so this means
-			// the proxy has just been removed
-			return false;
-		}
+		// messageCurrent should never be null unless the
+		// client proxy has just been removed
+		return sm != null && sm.getScheduled();
 	}
 
 	/** Test if a DMS is deployed */
