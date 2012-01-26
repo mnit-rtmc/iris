@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2011  Minnesota Department of Transportation
+ * Copyright (C) 2003-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.StreamType;
+import us.mn.state.dot.tms.client.MainClient;
 
 /**
  * The video stream request parameter wrapper.
@@ -43,15 +44,17 @@ public class VideoRequest {
 
 	/** Video stream size enum */
 	static public enum Size {
-		SMALL(176, 120),	// Quarter SIF
-		MEDIUM(352, 240),	// Full SIF
-		LARGE(704, 480);	// 4x SIF
-		private Size(int w, int h) {
+		SMALL(176, 120, 's'),	// Quarter SIF
+		MEDIUM(352, 240, 'm'),	// Full SIF
+		LARGE(704, 480, 'l');	// 4x SIF
+		private Size(int w, int h, char c) {
 			width = w;
 			height = h;
+			code = c;
 		}
 		public final int width;
 		public final int height;
+		public final char code;
 		public String getResolution() {
 			return "" + width + 'x' + height;
 		}
@@ -155,8 +158,9 @@ public class VideoRequest {
 	protected String getServletUrl(Camera cam) {
 		return new String("http://" + base_url +
 			"/video/" + servlet_type.servlet +
-			"?id=" + cam.getName() +
-			"&size=" + (size.ordinal() + 1) +
+			"/" + MainClient.districtId() +
+			"/" + cam.getName() +
+			"?size=" + size.code +
 			"&ssid=" + sonarSessionId);
 	}
 

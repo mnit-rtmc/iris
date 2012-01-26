@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,16 @@ public class MainClient {
 		String loc = getPropertyFile(args);
 		Properties props = PropertyLoader.load(loc);
 		updateSystemProperties(props);
+		district = props.getProperty("district", "tms");
 		return new IrisClient(props, handler);
+	}
+
+	/** Agency district property */
+	static protected String district = "tms";
+
+	/** Get the district ID */
+	static public String districtId() {
+		return district;
 	}
 
 	/**
