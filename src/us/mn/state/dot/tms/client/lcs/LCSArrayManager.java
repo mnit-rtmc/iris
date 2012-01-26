@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
@@ -61,10 +60,10 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	static public final String STYLE_AVAILABLE = "Available";
 
 	/** Name of deployed style */
-	static public final String STYLE_DEPLOYED = "Deployed";
+	static public final String STYLE_DEPLOYED = "User Deployed";
 
-	/** Name of locked style */
-	static public final String STYLE_LOCKED = "Locked";
+	/** Name of scheduled style */
+	static public final String STYLE_SCHEDULED = "Scheduled";
 
 	/** Name of maintenance style */
 	static public final String STYLE_MAINTENANCE = "Maintenance";
@@ -74,6 +73,16 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Name of all style */
 	static public final String STYLE_ALL = "All";
+
+	/** Test if an LCS array is active */
+	static protected boolean isActive(LCSArray proxy) {
+		return LCSArrayHelper.isActive(proxy);
+	}
+
+	/** Test if an LCS array is failed */
+	static protected boolean isFailed(LCSArray proxy) {
+		return LCSArrayHelper.isFailed(proxy);
+	}
 
 	/** Test if an LCS array is locked */
 	static protected boolean isLocked(LCSArray proxy) {
@@ -91,12 +100,25 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	static protected boolean isDeployed(LCSArray proxy) {
 		if(LCSArrayHelper.isAllFailed(proxy))
 			return false;
-		Integer[] ind = proxy.getIndicationsCurrent();
-		for(Integer i: ind) {
-			if(i != null && i != LaneUseIndication.DARK.ordinal())
-				return true;
-		}
-		return false;
+		return LCSArrayHelper.isDeployed(proxy);
+	}
+
+	/** Test if an LCS array is active, not failed and deployed */
+	static protected boolean isMessageDeployed(LCSArray proxy) {
+		return isActive(proxy) &&
+		       !isFailed(proxy) &&
+		       isDeployed(proxy);
+	}
+
+	/** Test if an LCS has been deployed by a user */
+	static protected boolean isUserDeployed(LCSArray proxy) {
+		return isMessageDeployed(proxy) &&
+		       !LCSArrayHelper.isScheduleDeployed(proxy);
+	}
+
+	/** Test if an LCS has been deployed by schedule */
+	static protected boolean isScheduleDeployed(LCSArray proxy) {
+		return LCSArrayHelper.isScheduleDeployed(proxy);
 	}
 
 	/** Get the LCS array cache */
@@ -136,7 +158,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Test if an LCS array is available */
 	protected boolean isAvailable(LCSArray proxy) {
 		return !isLocked(proxy) &&
-		       !LCSArrayHelper.isFailed(proxy) &&
+		       isActive(proxy) &&
+		       !isFailed(proxy) &&
 		       !isDeployed(proxy) &&
 		       !needsMaintenance(proxy);
 	}
@@ -185,7 +208,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 			getProxyType(), MARKER);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(STYLE_LOCKED, null);
+		theme.addStyle(STYLE_SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
 		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(STYLE_ALL);
@@ -261,13 +284,13 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		if(STYLE_AVAILABLE.equals(s))
 			return isAvailable(proxy);
 		else if(STYLE_DEPLOYED.equals(s))
-			return isDeployed(proxy);
-		else if(STYLE_LOCKED.equals(s))
-			return isLocked(proxy);
+			return isUserDeployed(proxy);
+		else if(STYLE_SCHEDULED.equals(s))
+			return isScheduleDeployed(proxy);
 		else if(STYLE_MAINTENANCE.equals(s))
 			return needsMaintenance(proxy);
 		else if(STYLE_FAILED.equals(s))
-			return LCSArrayHelper.isFailed(proxy);
+			return isFailed(proxy);
 		else
 			return STYLE_ALL.equals(s);
 	}

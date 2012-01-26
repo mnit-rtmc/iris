@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -145,6 +145,15 @@ public class LCSArrayHelper extends BaseHelper {
 		return status[0];
 	}
 
+	/** Check if an LCS array is active */
+	static public boolean isActive(final LCSArray lcs_array) {
+		return lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				return DMSHelper.isActive(dms);
+			}
+		}) != null;
+	}
+
 	/** Check if an LCS array is failed */
 	static public boolean isFailed(final LCSArray lcs_array) {
 		return lookupDMS(lcs_array, new Checker<DMS>() {
@@ -161,6 +170,32 @@ public class LCSArrayHelper extends BaseHelper {
 				return !DMSHelper.isFailed(dms);
 			}
 		}) == null;
+	}
+
+	/** Check if an LCS array is deployed */
+	static public boolean isDeployed(final LCSArray lcs_array) {
+		// First, check the indications
+		Integer[] ind = lcs_array.getIndicationsCurrent();
+		for(Integer i: ind) {
+			if(i != null && i != LaneUseIndication.DARK.ordinal())
+				return true;
+		}
+		// There might be something else on the sign that is not
+		// a lane use indication -- check DMS deployed states
+		return lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				return DMSHelper.isDeployed(dms);
+			}
+		}) != null;
+	}
+
+	/** Check if an LCS array is user deployed */
+	static public boolean isScheduleDeployed(final LCSArray lcs_array) {
+		return lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				return DMSHelper.isScheduleDeployed(dms);
+			}
+		}) != null;
 	}
 
 	/** Check if any LCSs in an array need maintenance */
