@@ -226,13 +226,7 @@ public class DMSHelper extends BaseHelper {
 	static public boolean checkStyle(String s, DMS proxy) {
 		if(STYLE_NO_CONTROLLER.equals(s))
 			return proxy.getController() == null;
-		// FIXME: this grabs to LCS type lock, and we probably
-		//        already have the DMS type lock.  Plus, this doesn't
-		//        work until the LCS objects have been enumerated.
-		//        There's got to be a better way...
-		if(LCSHelper.lookup(proxy.getName()) != null)
-			return false;
-		if(STYLE_AVAILABLE.equals(s))
+		else if(STYLE_AVAILABLE.equals(s))
 			return isAvailable(proxy);
 		else if(STYLE_DEPLOYED.equals(s))
 			return isUserDeployed(proxy);
@@ -252,13 +246,14 @@ public class DMSHelper extends BaseHelper {
 			return STYLE_ALL.equals(s);
 	}
 
-	/** return a string that contains all active DMS styles,
+	/** Get a string that contains all active DMS styles,
 	 *  separated by commas. */
 	static public String getAllStyles(DMS proxy) {
-		StringBuilder s = new StringBuilder("");
-		for(String style: STYLES_ALL)
+		StringBuilder s = new StringBuilder();
+		for(String style: STYLES_ALL) {
 			if(checkStyle(style, proxy))
 				s.append(style).append(", ");
+		}
 		return SString.removeTail(s.toString(), ", ");
 	}
 

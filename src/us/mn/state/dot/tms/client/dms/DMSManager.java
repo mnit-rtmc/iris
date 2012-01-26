@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -280,7 +281,14 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, DMS proxy) {
-		return DMSHelper.checkStyle(s, proxy);
+		// FIXME: this grabs to LCS type lock, and we probably
+		//        already have the DMS type lock.  Plus, this doesn't
+		//        work until the LCS objects have been enumerated.
+		//        There's got to be a better way...
+		if(LCSHelper.lookup(proxy.getName()) != null)
+			return false;
+		else
+			return DMSHelper.checkStyle(s, proxy);
 	}
 
 	/** Get the layer zoom visibility threshold */
