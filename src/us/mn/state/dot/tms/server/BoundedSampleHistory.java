@@ -19,13 +19,13 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * Class : Limited Queue
+ * Bounded Sample History container.
  * @param <T>
  *
  * @author Chongmyung Park (chongmyung.park@gmail.com)
  * @author Douglas Lau
  */
-public class LimitedQueue<T> {
+public class BoundedSampleHistory<T> {
 
 	/** Storage limit */
 	private final int limit;
@@ -37,7 +37,7 @@ public class LimitedQueue<T> {
 	 * Construct
 	 * @param limit storage limit
 	 */
-	public LimitedQueue(int limit) {
+	public BoundedSampleHistory(int limit) {
 		this.limit = limit;
 	}
 
