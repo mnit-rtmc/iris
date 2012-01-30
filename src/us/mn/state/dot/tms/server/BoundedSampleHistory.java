@@ -20,67 +20,66 @@ import java.util.Queue;
 
 /**
  * Bounded Sample History container.
- * @param <T>
  *
  * @author Chongmyung Park (chongmyung.park@gmail.com)
  * @author Douglas Lau
  */
-public class BoundedSampleHistory<T> {
+public class BoundedSampleHistory {
 
-	/** Storage limit */
-	private final int limit;
+	/** Maximum number of samples in history */
+	private final int max_samples;
 
 	/** Linked list to store data */
-	private final Queue<T> queue = new LinkedList<T>();
+	private final Queue<Double> queue = new LinkedList<Double>();
 
 	/**
-	 * Construct
-	 * @param limit storage limit
+	 * Create a new bounded sample history.
+	 * @param max_samples Maximum number of samples to retain.
 	 */
-	public BoundedSampleHistory(int limit) {
-		this.limit = limit;
+	public BoundedSampleHistory(int max_samples) {
+		this.max_samples = max_samples;
 	}
 
 	/**
-	 * Add data
-	 * @param obj
+	 * Add one sample to the history.
+	 * @param sam Current sample data.
 	 * @return
 	 */
-	public boolean push(T obj) {
-		boolean res = this.queue.offer(obj);
-		if(this.queue.size() > this.limit)
-			this.queue.poll();
+	public boolean push(Double sam) {
+		boolean res = queue.offer(sam);
+		if(queue.size() > max_samples)
+			queue.poll();
 		return res;
 	}
 
 	/**
 	 * Return tail data
-	 * @return T data
+	 * @return Double data
 	 */
-	public T tail() {
-		return this.get(0);
+	public Double tail() {
+		return get(0);
 	}
 
 	/**
-	 * Return data at given index (in reversed direction)
-	 *   e.g. get(0) : most recent data
-	 * @return T data
+	 * Return sample at given step index (in reversed direction)
+	 *   e.g. get(0) : most recent sample data
+	 * @return Sample data
 	 */
-	public T get(int index) {
-		int idx = this.queue.size() - 1;
-		for(T obj : this.queue) {
+	public Double get(int index) {
+		int idx = queue.size() - 1;
+		for(Double sam : queue) {
 			if(index == idx)
-				return obj;
+				return sam;
 			idx--;
 		}
 		return null;
 	}
 
 	/**
-	 * Clear storage
+	 * Clear storage.
 	 */
 	public void clear() {
-		this.queue.clear();
+		queue.clear();
 	}
 
 	/**
@@ -88,7 +87,7 @@ public class BoundedSampleHistory<T> {
 	 * @return queue size
 	 */
 	public int size() {
-		return this.queue.size();
+		return queue.size();
 	}
 
 	/**
@@ -97,10 +96,10 @@ public class BoundedSampleHistory<T> {
 	 * @param length length to calculate average
 	 */
 	public Double getAverage(int fromIndex, int length) {
-		Double sum = 0D;
+		double sum = 0;
 		int count = 0;
 		for(int i = fromIndex; i < fromIndex + length; i++) {
-			Double d = (Double) this.get(i);
+			Double d = get(i);
 			if(d == null)
 				break;
 			sum += d;

@@ -124,7 +124,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private boolean isAssociated = false;
 
 	/** Corridor density history for triggering metering stop */
-	protected BoundedSampleHistory<Double> corridorKHistory = new BoundedSampleHistory<Double>(avgDensityWindow + avgDensityTrend);
+	protected BoundedSampleHistory corridorKHistory = new BoundedSampleHistory(avgDensityWindow + avgDensityTrend);
 
 	/** Hash map of ramp meter states */
 	protected final HashMap<String, MeterState> meterStates =
@@ -793,10 +793,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		ArrayList<EntranceState> associatedEntrances = new ArrayList<EntranceState>();
 
 		/** Speed history */
-		BoundedSampleHistory<Double> speedHistory = new BoundedSampleHistory<Double>(10);
+		BoundedSampleHistory speedHistory = new BoundedSampleHistory(10);
 
 		/** Density history */
-		BoundedSampleHistory<Double> densityHistory = new BoundedSampleHistory<Double>(10);
+		BoundedSampleHistory densityHistory = new BoundedSampleHistory(10);
 
 		/** Is bottleneck ? */
 		private boolean isBottleneck = false;
@@ -905,7 +905,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param prevStep
 		 * @return average 1min data of given data at 'prevStep' time steps ago
 		 */
-		private double getAggregatedData(BoundedSampleHistory<Double> data, int prevStep) {
+		private double getAggregatedData(BoundedSampleHistory data, int prevStep) {
 			Double d1 = data.get(prevStep);
 			Double d2 = data.get(prevStep + 1);
 			int n = 2;
@@ -1139,22 +1139,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean hasBeenStoped = false;
 
 		/** Cumulative demand history */
-		private BoundedSampleHistory<Double> cumulativeDemand = new BoundedSampleHistory<Double>(maxWaitTimeIndex+1);
+		private BoundedSampleHistory cumulativeDemand = new BoundedSampleHistory(maxWaitTimeIndex+1);
 
 		/** Cumulative merging flow history */
-		private BoundedSampleHistory<Double> cumulativeMergingFlow = new BoundedSampleHistory<Double>(1);
+		private BoundedSampleHistory cumulativeMergingFlow = new BoundedSampleHistory(1);
 
 		/** Metering rate flow history */
-		private BoundedSampleHistory<Double> rateHistory = new BoundedSampleHistory<Double>(STOP_STEPS);
+		private BoundedSampleHistory rateHistory = new BoundedSampleHistory(STOP_STEPS);
 
 		/** Segment density history */
-		private BoundedSampleHistory<Double> segmentDensityHistory = new BoundedSampleHistory<Double>(STOP_STEPS);
+		private BoundedSampleHistory segmentDensityHistory = new BoundedSampleHistory(STOP_STEPS);
 
 		/** Ramp flow history */
-		private BoundedSampleHistory<Double> rampFlowHistory = new BoundedSampleHistory<Double>(STOP_STEPS);
+		private BoundedSampleHistory rampFlowHistory = new BoundedSampleHistory(STOP_STEPS);
 
 		/** Ramp demand history */
-		private BoundedSampleHistory<Double> rampDemandHistory = new BoundedSampleHistory<Double>(1);
+		private BoundedSampleHistory rampDemandHistory = new BoundedSampleHistory(1);
 
 		/**
 		 * Construct
