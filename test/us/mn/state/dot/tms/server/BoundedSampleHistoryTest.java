@@ -72,5 +72,14 @@ public class BoundedSampleHistoryTest extends TestCase {
 		assertTrue(new Double(25).equals(hist.getAverage(0, 4)));
 		assertTrue(new Double(20).equals(hist.getAverage(2, 1)));
 		assertTrue(new Double(15).equals(hist.getAverage(2, 2)));
+		hist.push(50D);
+		assertTrue(hist.size() == 4);
+		assertTrue(new Double(50).equals(hist.get(0)));
+		assertTrue(new Double(50).equals(hist.getAverage(0, 1)));
+		assertTrue(new Double(45).equals(hist.getAverage(0, 2)));
+		assertTrue(new Double(40).equals(hist.getAverage(0, 3)));
+		assertTrue(new Double(35).equals(hist.getAverage(0, 4)));
+		assertTrue(new Double(30).equals(hist.getAverage(2, 1)));
+		assertTrue(new Double(25).equals(hist.getAverage(2, 2)));
 	}
 }
