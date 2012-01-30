@@ -87,7 +87,7 @@ public class BoundedSampleHistory {
 	 * @param fromIndex start index
 	 * @param length length to calculate average
 	 */
-	public Double getAverage(int fromIndex, int length) {
+	public Double average(int fromIndex, int length) {
 		double sum = 0;
 		int count = 0;
 		for(int i = fromIndex; i < fromIndex + length; i++) {
