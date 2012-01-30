@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2011  Minnesota Department of Transportation
+ * Copyright (C) 2001-2012  Minnesota Department of Transportation
  * Copyright (C) 2011  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,8 +32,9 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
  * Metering timing plan state developed by NATSRL
  *
  * @author Chongmyung Park (chongmyung.park@gmail.com)
+ * @author Douglas Lau
  */
-public class KbasedAdaptivePlanState extends TimingPlanState {
+public class KbasedAdaptivePlanState implements MeterAlgorithmState {
 
     /** Corridor */
     protected final Corridor corridor;
@@ -116,15 +117,35 @@ public class KbasedAdaptivePlanState extends TimingPlanState {
         return state;
     }
 
-
     @Override
-    public void validate(TimingPlanImpl plan) {
-        if (plan.isOperating()) {
-            MeterState state = getMeterState(plan);
-            if (state != null) {
-                state.validate();
-            }
+    public void validate(RampMeterImpl meter) {
+        MeterState state = getMeterState(meter);
+        if (state != null)
+            state.validate();
+    }
+
+    /** Get the meter state for a given timing plan */
+    protected MeterState getMeterState(RampMeterImpl meter) {
+        if (meter.getCorridor() != corridor) {
+            // Meter must have been changed to a different
+            // corridor; throw away old meter state
+            meterStates.remove(meter.getName());
+            return null;
         }
+        MeterState state = lookupMeterState(meter);
+        if (state != null) {
+            return state;
+        }
+        state = new MeterState(meter);
+        corridorHelper.addMeterState(state);
+        meterStates.put(meter.getName(), state);
+
+        return state;
+    }
+
+    /** Lookup the meter state for a specified meter */
+    protected MeterState lookupMeterState(RampMeter meter) {
+        return meterStates.get(meter.getName());
     }
 
     /** Process one interval for all stratified zone states */
@@ -612,42 +633,11 @@ public class KbasedAdaptivePlanState extends TimingPlanState {
         }
     }
 
-    /** Get the meter state for a given timing plan */
-    protected MeterState getMeterState(TimingPlanImpl plan) {
-        Device device = plan.getDevice();
-        if (!(device instanceof RampMeterImpl)) {
-            return null;
-        }
-        RampMeterImpl meter = (RampMeterImpl) device;
-        if (meter.getCorridor() != corridor) {
-            // Meter must have been changed to a different
-            // corridor; throw away old meter state
-            meterStates.remove(meter.getName());
-            return null;
-        }
-        MeterState state = getMeterState(meter);
-        if (state != null) {
-            return state;
-        }
-        state = new MeterState(meter, plan);
-        if (state.valid) {
-        }
-        corridorHelper.addMeterState(state);
-        meterStates.put(meter.getName(), state);
-
-        return state;
-    }
-
-    /** Get the meter state for a specified meter */
-    protected MeterState getMeterState(RampMeter meter) {
-        return meterStates.get(meter.getName());
-    }
-
     /** Is this KbasedAdaptivePlanState zone done? */
     private boolean isDone() {
         boolean done = true;
         for (MeterState state : meterStates.values()) {
-            if (state.plan.isOperating()) {
+            if (state.meter.isOperating()) {
                 done = false;
                 break;
             }
@@ -1567,13 +1557,11 @@ public class KbasedAdaptivePlanState extends TimingPlanState {
     public class MeterState {
 
         RampMeterImpl meter;
-        TimingPlanImpl plan;
         boolean valid;
         private EntranceState entrance;
 
-        private MeterState(RampMeterImpl meter, TimingPlanImpl plan) {
+        private MeterState(RampMeterImpl meter) {
             this.meter = meter;
-            this.plan = plan;
         }
 
         /** Validate a ramp meter state */
