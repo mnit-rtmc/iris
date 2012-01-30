@@ -45,6 +45,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Jam Density */
 	static private final double K_JAM = 180;
 
+	/** Acceleration threshold to decide bottleneck */
+	static private final int A_BOTTLENECK = 1000;
+
+	/** How many time steps must be satisfied to stop metering */
+	static private final int STOP_STEPS = 10;
+
+	/** How many time steps for bottleneck trend after stop metering */
+	static private final int BOTTLENECK_TREND_STEPS_AFTER_STOP = 4;
+
 	/** Corridor */
 	protected final Corridor corridor;
 
@@ -57,15 +66,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Bottleneck Density */
 	protected double Kb = 25;
 
-	/** Acceleration threshold to decide bottleneck */
-	protected final int Ab = 1000;
-
-	/** How many time steps must be satisfied to stop metering */
-	protected final int stopDuration = 10;
-
 	/** How many time steps must be */
 	protected int BottleneckTrendCount = 2;
-	protected final int BottleneckTrendCountAfterStop = 4;
 
 	/** Rate value to calculated metering rate for checking if metering is started */
 	protected double KstartThres = 0.8;
@@ -205,7 +207,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		// restrict condition
 		Kb = K_DES;
-		BottleneckTrendCount = BottleneckTrendCountAfterStop;
+		BottleneckTrendCount = BOTTLENECK_TREND_STEPS_AFTER_STOP;
 
 		// let's check stop condition from now
 		this.doStopChecking = true;
@@ -216,7 +218,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 */
 	private void checkStopCondition() {
 
-		int N = stopDuration;
+		int N = STOP_STEPS;
 
 		// iterate from downstream to upstream
 		boolean hasBottleneck = false;
@@ -1143,13 +1145,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private LimitedQueue<Double> cumulativeMergingFlow = new LimitedQueue<Double>(1);
 
 		/** Metering rate flow history */
-		private LimitedQueue<Double> rateHistory = new LimitedQueue<Double>(stopDuration);
+		private LimitedQueue<Double> rateHistory = new LimitedQueue<Double>(STOP_STEPS);
 
 		/** Segment density history */
-		private LimitedQueue<Double> segmentDensityHistory = new LimitedQueue<Double>(stopDuration);
+		private LimitedQueue<Double> segmentDensityHistory = new LimitedQueue<Double>(STOP_STEPS);
 
 		/** Ramp flow history */
-		private LimitedQueue<Double> rampFlowHistory = new LimitedQueue<Double>(stopDuration);
+		private LimitedQueue<Double> rampFlowHistory = new LimitedQueue<Double>(STOP_STEPS);
 
 		/** Ramp demand history */
 		private LimitedQueue<Double> rampDemandHistory = new LimitedQueue<Double>(1);
@@ -1522,11 +1524,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 					// close bottleneck
 					if(s.stationIdx - us.stationIdx < 3) {
 						// close but independent BS
-						if(us.getAggregatedDensity() > k && us.getAcceleration() > Ab)
+						if(us.getAggregatedDensity() > k && us.getAcceleration() > A_BOTTLENECK)
 							break;
 						// close -> merge
 						us.isBottleneck = false;
-					} else if(us.getAcceleration() > Ab) {
+					} else if(us.getAcceleration() > A_BOTTLENECK) {
 						// acceleration is heigh -> BS
 						break;
 					} else
