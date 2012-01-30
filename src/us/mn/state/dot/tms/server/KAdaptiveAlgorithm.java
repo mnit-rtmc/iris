@@ -54,6 +54,42 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** How many time steps for bottleneck trend after stop metering */
 	static private final int BOTTLENECK_TREND_STEPS_AFTER_STOP = 4;
 
+	/** Get the absolute minimum release rate */
+	static protected int getMinRelease() {
+		return SystemAttributeHelper.getMeterMinRelease();
+	}
+
+	/** Get the absolute maximum release rate */
+	static protected int getMaxRelease() {
+		return SystemAttributeHelper.getMeterMaxRelease();
+	}
+
+	/** States for all stratified zone corridors */
+	static protected HashMap<String, KAdaptiveAlgorithm> all_states =
+		new HashMap<String, KAdaptiveAlgorithm>();
+
+	/** Lookup the stratified zone state for one corridor */
+	static public KAdaptiveAlgorithm lookupCorridor(Corridor c) {
+		KAdaptiveAlgorithm state = all_states.get(c.getID());
+		if(state == null) {
+			state = new KAdaptiveAlgorithm(c);
+			all_states.put(c.getID(), state);
+		}
+		return state;
+	}
+
+	/** Process one interval for all stratified zone states */
+	static public void processAllStates() {
+		Iterator<KAdaptiveAlgorithm> it =
+			all_states.values().iterator();
+		while(it.hasNext()) {
+			KAdaptiveAlgorithm state = it.next();
+			state.processInterval();
+			if(state.isDone())
+				it.remove();
+		}
+	}
+
 	/** Corridor */
 	protected final Corridor corridor;
 
@@ -94,30 +130,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	protected final HashMap<String, MeterState> meterStates =
 		new HashMap<String, MeterState>();
 
-	/** States for all stratified zone corridors */
-	static protected HashMap<String, KAdaptiveAlgorithm> all_states =
-		new HashMap<String, KAdaptiveAlgorithm>();
-
-	/** Get the absolute minimum release rate */
-	static protected int getMinRelease() {
-		return SystemAttributeHelper.getMeterMinRelease();
-	}
-
-	/** Get the absolute maximum release rate */
-	static protected int getMaxRelease() {
-		return SystemAttributeHelper.getMeterMaxRelease();
-	}
-
-	/** Lookup the stratified zone state for one corridor */
-	static public KAdaptiveAlgorithm lookupCorridor(Corridor c) {
-		KAdaptiveAlgorithm state = all_states.get(c.getID());
-		if(state == null) {
-			state = new KAdaptiveAlgorithm(c);
-			all_states.put(c.getID(), state);
-		}
-		return state;
-	}
-
 	@Override
 	public void validate(RampMeterImpl meter) {
 		MeterState state = getMeterState(meter);
@@ -145,18 +157,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Lookup the meter state for a specified meter */
 	protected MeterState lookupMeterState(RampMeter meter) {
 		return meterStates.get(meter.getName());
-	}
-
-	/** Process one interval for all stratified zone states */
-	static public void processAllStates() {
-		Iterator<KAdaptiveAlgorithm> it =
-			all_states.values().iterator();
-		while(it.hasNext()) {
-			KAdaptiveAlgorithm state = it.next();
-			state.processInterval();
-			if(state.isDone())
-				it.remove();
-		}
 	}
 
 	/** Process the stratified plan for the next interval */
