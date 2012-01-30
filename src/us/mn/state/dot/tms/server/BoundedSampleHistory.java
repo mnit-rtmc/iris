@@ -15,9 +15,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 /**
  * Bounded Sample History container.
  *
@@ -26,30 +23,38 @@ import java.util.Queue;
  */
 public class BoundedSampleHistory {
 
-	/** Maximum number of samples in history */
-	private final int max_samples;
+	/** Sample data history */
+	private final Double[] samples;
 
-	/** Linked list to store data */
-	private final Queue<Double> queue = new LinkedList<Double>();
+	/** Head sample (most recent) */
+	private int head = -1;
+
+	/** Count of samples */
+	private int n_samples = 0;
 
 	/**
 	 * Create a new bounded sample history.
 	 * @param max_samples Maximum number of samples to retain.
 	 */
 	public BoundedSampleHistory(int max_samples) {
-		this.max_samples = max_samples;
+		samples = new Double[max_samples];
 	}
 
 	/**
 	 * Add one sample to the history.
 	 * @param sam Current sample data.
-	 * @return
 	 */
-	public boolean push(Double sam) {
-		boolean res = queue.offer(sam);
-		if(queue.size() > max_samples)
-			queue.poll();
-		return res;
+	public void push(Double sam) {
+		head = nextIndex(head);
+		samples[head] = sam;
+		if(n_samples < samples.length)
+			n_samples++;
+	}
+
+	/** Get the next sample index */
+	private int nextIndex(int idx) {
+		idx++;
+		return idx < samples.length ? idx : 0;
 	}
 
 	/**
@@ -57,29 +62,30 @@ public class BoundedSampleHistory {
 	 *   e.g. get(0) : most recent sample data
 	 * @return Sample data
 	 */
-	public Double get(int index) {
-		int idx = queue.size() - 1;
-		for(Double sam : queue) {
-			if(index == idx)
-				return sam;
-			idx--;
-		}
-		return null;
+	public Double get(int i) {
+		if(i < n_samples) {
+			int idx = head - i;
+			if(idx < 0)
+				idx += samples.length;
+			return samples[idx];
+		} else
+			return null;
 	}
 
 	/**
 	 * Clear storage.
 	 */
 	public void clear() {
-		queue.clear();
+		head = -1;
+		n_samples = 0;
 	}
 
 	/**
-	 * Return current storage size
-	 * @return queue size
+	 * Return current storage size.
+	 * @return Number of samples stored
 	 */
 	public int size() {
-		return queue.size();
+		return n_samples;
 	}
 
 	/**
