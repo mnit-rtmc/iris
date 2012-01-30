@@ -1206,16 +1206,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			this.isRateUpdated = false;
 			calculateRampFlowAndDemand();
 
-			double demand = this.rampDemandHistory.tail();
-			double p_flow = this.rampFlowHistory.tail();
+			double demand = rampDemandHistory.get(0);
+			double p_flow = rampFlowHistory.get(0);
 
 			double prevCd = 0;
 			double prevCq = 0;
 
 			if(this.cumulativeDemand.size() > 0)
-				prevCd = this.cumulativeDemand.tail();
+				prevCd = cumulativeDemand.get(0);
 			if(this.cumulativeMergingFlow.size() > 0)
-				prevCq = this.cumulativeMergingFlow.tail();
+				prevCq = cumulativeMergingFlow.get(0);
 
 			this.cumulativeDemand.push(prevCd + demand);
 			this.cumulativeMergingFlow.push(prevCq + p_flow);
@@ -1280,16 +1280,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Calculate minimum rate according to waiting time
 		 */
 		private void calculateMinimumRate() {
-			if(this.cumulativeDemand.size() - 1 < maxWaitTimeIndex) {
+			if(cumulativeDemand.size() - 1 < maxWaitTimeIndex) {
 				minimumRate = this.currentFlow;
 				return;
 			}
 
 			// cumulative demand 4 min ago
-			double Cd_4mAgo = this.cumulativeDemand.get(maxWaitTimeIndex);
+			double Cd_4mAgo = cumulativeDemand.get(maxWaitTimeIndex);
 
 			// current cumulative passage flow
-			double Cf_current = this.cumulativeMergingFlow.tail();
+			double Cf_current = cumulativeMergingFlow.get(0);
 
 			// minimum rates to guarantee 4 min waitting time
 			minimumRate = (Cd_4mAgo - Cf_current);

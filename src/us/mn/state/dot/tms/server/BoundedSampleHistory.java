@@ -53,14 +53,6 @@ public class BoundedSampleHistory {
 	}
 
 	/**
-	 * Return tail data
-	 * @return Double data
-	 */
-	public Double tail() {
-		return get(0);
-	}
-
-	/**
 	 * Return sample at given step index (in reversed direction)
 	 *   e.g. get(0) : most recent sample data
 	 * @return Sample data
