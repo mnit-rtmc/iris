@@ -54,14 +54,6 @@ public class LimitedQueue<T> {
 	}
 
 	/**
-	 * Return head data
-	 * @return T data
-	 */
-	public T head() {
-		return this.queue.poll();
-	}
-
-	/**
 	 * Return tail data
 	 * @return T data
 	 */
