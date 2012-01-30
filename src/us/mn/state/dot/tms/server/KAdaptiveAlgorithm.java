@@ -29,12 +29,12 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
  * Density-based Adaptive Metering with Variable Bottleneck
- * Metering timing plan state developed by NATSRL
+ * Metering Algorithm.
  *
  * @author Chongmyung Park (chongmyung.park@gmail.com)
  * @author Douglas Lau
  */
-public class KbasedAdaptivePlanState implements MeterAlgorithmState {
+public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
     /** Corridor */
     protected final Corridor corridor;
@@ -94,8 +94,8 @@ public class KbasedAdaptivePlanState implements MeterAlgorithmState {
             new HashMap<String, MeterState>();
     
     /** States for all stratified zone corridors */
-    static protected HashMap<String, KbasedAdaptivePlanState> all_states =
-            new HashMap<String, KbasedAdaptivePlanState>();
+    static protected HashMap<String, KAdaptiveAlgorithm> all_states =
+            new HashMap<String, KAdaptiveAlgorithm>();
 
     /** Get the absolute minimum release rate */
     static protected int getMinRelease() {
@@ -108,10 +108,10 @@ public class KbasedAdaptivePlanState implements MeterAlgorithmState {
     }
 
     /** Lookup the stratified zone state for one corridor */
-    static public KbasedAdaptivePlanState lookupCorridor(Corridor c) {
-        KbasedAdaptivePlanState state = all_states.get(c.getID());
+    static public KAdaptiveAlgorithm lookupCorridor(Corridor c) {
+        KAdaptiveAlgorithm state = all_states.get(c.getID());
         if (state == null) {
-            state = new KbasedAdaptivePlanState(c);
+            state = new KAdaptiveAlgorithm(c);
             all_states.put(c.getID(), state);
         }
         return state;
@@ -150,10 +150,10 @@ public class KbasedAdaptivePlanState implements MeterAlgorithmState {
 
     /** Process one interval for all stratified zone states */
     static public void processAllStates() {
-        Iterator<KbasedAdaptivePlanState> it =
+        Iterator<KAdaptiveAlgorithm> it =
                 all_states.values().iterator();
         while (it.hasNext()) {
-            KbasedAdaptivePlanState state = it.next();
+            KAdaptiveAlgorithm state = it.next();
             state.processInterval();
             if (state.isDone()) {
                 it.remove();
@@ -609,8 +609,8 @@ public class KbasedAdaptivePlanState implements MeterAlgorithmState {
         }
     }
 
-    /** Create a new KbasedAdaptivePlanState */
-    private KbasedAdaptivePlanState(Corridor c) {
+    /** Create a new KAdaptiveAlgorithm */
+    private KAdaptiveAlgorithm(Corridor c) {
 
         this.corridor = c;
         this.createStates();
@@ -633,7 +633,7 @@ public class KbasedAdaptivePlanState implements MeterAlgorithmState {
         }
     }
 
-    /** Is this KbasedAdaptivePlanState zone done? */
+    /** Is this KAdaptiveAlgorithm zone done? */
     private boolean isDone() {
         boolean done = true;
         for (MeterState state : meterStates.values()) {
