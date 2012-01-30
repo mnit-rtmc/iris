@@ -199,8 +199,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return;
 		// check avg K of corridor average density
 		for(int i = 0; i < avgDensityTrend; i++) {
-			double ma_next = this.corridorKHistory.getAverage(i, avgDensityWindow);
-			double ma_prev = this.corridorKHistory.getAverage(i + 1, avgDensityWindow);
+			Double ma_next = this.corridorKHistory.getAverage(i, avgDensityWindow);
+			Double ma_prev = this.corridorKHistory.getAverage(i + 1, avgDensityWindow);
+			if(ma_next == null || ma_prev == null)
+				return;
 			if(ma_next > ma_prev)
 				return;
 		}

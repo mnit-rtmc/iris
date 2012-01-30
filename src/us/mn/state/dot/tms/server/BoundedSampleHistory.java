@@ -100,14 +100,14 @@ public class BoundedSampleHistory {
 		int count = 0;
 		for(int i = fromIndex; i < fromIndex + length; i++) {
 			Double d = get(i);
-			if(d == null)
-				break;
-			sum += d;
-			count++;
+			if(d != null) {
+				sum += d;
+				count++;
+			}
 		}
 		if(count > 0)
 			return sum / count;
 		else
-			return 0D;
+			return null;
 	}
 }
