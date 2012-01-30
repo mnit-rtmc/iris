@@ -30,28 +30,42 @@ public class BoundedSampleHistoryTest extends TestCase {
 
 	/** test cases */
 	public void test() {
-		BoundedSampleHistory hist = new BoundedSampleHistory(2);
+		BoundedSampleHistory hist = new BoundedSampleHistory(4);
+		assertTrue(hist.size() == 0);
 		assertTrue(new Double(0).equals(hist.getAverage(0, 1)));
 		assertTrue(new Double(0).equals(hist.getAverage(0, 2)));
 		hist.push(10D);
+		assertTrue(hist.size() == 1);
+		assertTrue(new Double(10).equals(hist.get(0)));
 		assertTrue(new Double(10).equals(hist.getAverage(0, 1)));
 		assertTrue(new Double(10).equals(hist.getAverage(0, 2)));
 		hist.push(20D);
+		assertTrue(hist.size() == 2);
+		assertTrue(new Double(20).equals(hist.get(0)));
 		assertTrue(new Double(20).equals(hist.getAverage(0, 1)));
 		assertTrue(new Double(15).equals(hist.getAverage(0, 2)));
-		hist = new BoundedSampleHistory(4);
+		hist.clear();
+		assertTrue(hist.size() == 0);
 		assertTrue(new Double(0).equals(hist.getAverage(0, 1)));
 		hist.push(10D);
+		assertTrue(hist.size() == 1);
+		assertTrue(new Double(10).equals(hist.get(0)));
 		assertTrue(new Double(10).equals(hist.getAverage(0, 1)));
 		assertTrue(new Double(10).equals(hist.getAverage(0, 2)));
 		hist.push(20D);
+		assertTrue(hist.size() == 2);
+		assertTrue(new Double(20).equals(hist.get(0)));
 		assertTrue(new Double(20).equals(hist.getAverage(0, 1)));
 		assertTrue(new Double(15).equals(hist.getAverage(0, 2)));
 		hist.push(30D);
+		assertTrue(hist.size() == 3);
+		assertTrue(new Double(30).equals(hist.get(0)));
 		assertTrue(new Double(30).equals(hist.getAverage(0, 1)));
 		assertTrue(new Double(25).equals(hist.getAverage(0, 2)));
 		assertTrue(new Double(20).equals(hist.getAverage(0, 3)));
 		hist.push(40D);
+		assertTrue(hist.size() == 4);
+		assertTrue(new Double(40).equals(hist.get(0)));
 		assertTrue(new Double(40).equals(hist.getAverage(0, 1)));
 		assertTrue(new Double(35).equals(hist.getAverage(0, 2)));
 		assertTrue(new Double(30).equals(hist.getAverage(0, 3)));
