@@ -36,6 +36,15 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
  */
 public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
+	/** Critical Density */
+	static private final double K_CRIT = 40;
+
+	/** Desired Density */
+	static private final double K_DES = K_CRIT * 0.8;
+
+	/** Jam Density */
+	static private final double K_JAM = 180;
+
 	/** Corridor */
 	protected final Corridor corridor;
 
@@ -44,15 +53,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Bottleneck Finder */
 	protected final BottleneckFinder bottleneckFinder;
-
-	/** Jam Density */
-	protected final double Kjam = 180;
-
-	/** Critical Density */
-	protected final double Kc = 40;
-
-	/** Desired Density */
-	protected final double Kd = 40 * 0.8;
 
 	/** Bottleneck Density */
 	protected double Kb = 25;
@@ -204,7 +204,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		// restrict condition
-		Kb = Kd;
+		Kb = K_DES;
 		BottleneckTrendCount = BottleneckTrendCountAfterStop;
 
 		// let's check stop condition from now
@@ -247,7 +247,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				// COMMON STOP CONDITION : segment density is low for n times
 				for(int k = 0; k < N; k++) {
 					Double sk = es.getSegmentDensity(k);
-					if(sk > Kd) {
+					if(sk > K_DES) {
 						shouldStop = true;
 						break;
 					}
@@ -378,12 +378,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		//                       |
 		//                 +     |
 		//    +                  |
-		// --p0------------p1----p2------------p3---p4-----> Kd-Kt
+		// --p0------------p1----p2------------p3---p4-----> K_DES-Kt
 		//                       |
 		//                       |
-		// p0's x = Kd - Kjam
+		// p0's x = K_DES - K_JAM
 		// p2's x = 0
-		// p4's x = Kd
+		// p4's x = K_DES
 
 		double Kt = bottleneck.getAggregatedDensity();
 		if(upstream != null)
@@ -394,14 +394,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		double Rmin = entrance.getMinimumRate();
 		double Rmax = getMaxRelease();
 		double Rt = entrance.getRate();
-		double x = Kd - Kt;
+		double x = K_DES - Kt;
 
-		KPoint p0 = new KPoint(Kd - Kjam, Rmin / Rt);
-		KPoint p1 = new KPoint((Kd - Kjam) / 3, Rmin / Rt + (1 - Rmin / Rt) / 3);
+		KPoint p0 = new KPoint(K_DES - K_JAM, Rmin / Rt);
+		KPoint p1 = new KPoint((K_DES - K_JAM) / 3, Rmin / Rt + (1 - Rmin / Rt) / 3);
 		KPoint p2 = new KPoint(0, 1);
 		if(Rmin >= Rt)
 			p0.y = p1.y = p2.y = Rmin / Rt;
-		KPoint p4 = new KPoint(Kd, Rmax / Rt);
+		KPoint p4 = new KPoint(K_DES, Rmax / Rt);
 		KPoint start = p0, end = p1;
 
 		if(x >= 0) {
