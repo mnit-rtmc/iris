@@ -290,21 +290,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void checkCorridorState() {
 		int bottleneckCount = 0;
 		StationState downstreamBS = null;
-		// calculate sum of density of bottlenecks
 		for(StationState s : stationStates) {
 			if(s.isBottleneck) {
 				downstreamBS = s;
 				bottleneckCount++;
 			}
 		}
-		double avgK = 0;
-		StationState upStation = stationStates.get(0);
-		if(downstreamBS != null)
-			avgK = getAverageDensity(upStation, downstreamBS);
-		k_hist_corridor.push(avgK);
-		int size = k_hist_corridor.size();
+		k_hist_corridor.push(calculateAverageDensity(downstreamBS));
 		if(bottleneckCount > 1)
 			return;
+		int size = k_hist_corridor.size();
 		if(size < AVG_K_STEPS + AVG_K_TREND_STEPS)
 			return;
 		// check avg K of corridor average density
@@ -322,6 +317,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		// let's check stop condition from now
 		doStopChecking = true;
+	}
+
+	/**
+	 * Calculate the average density up to a bottleneck.
+	 * @param bottleneck Bottleneck station.
+	 * @return Average density up to the bottleneck.
+	 */
+	private double calculateAverageDensity(StationState bottleneck) {
+		if(bottleneck != null) {
+			StationState up = stationStates.get(0);
+			return getAverageDensity(up, bottleneck);
+		} else
+			return 0;
 	}
 
 	/** Get number of time steps to check for bottleneck */
