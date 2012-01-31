@@ -45,6 +45,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Jam Density */
 	static private final double K_JAM = 180;
 
+	/** Rate value for checking if metering is started */
+	static private final double K_START_THRESH = 0.8;
+
 	/** Acceleration threshold to decide bottleneck */
 	static private final int A_BOTTLENECK = 1000;
 
@@ -70,28 +73,28 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return SystemAttributeHelper.getMeterMaxRelease();
 	}
 
-	/** States for all stratified zone corridors */
-	static protected HashMap<String, KAdaptiveAlgorithm> all_states =
+	/** States for all K adaptive algorithms */
+	static protected HashMap<String, KAdaptiveAlgorithm> ALL_ALGS =
 		new HashMap<String, KAdaptiveAlgorithm>();
 
-	/** Lookup the stratified zone state for one corridor */
+	/** Lookup the K adaptive algorithm state for one corridor */
 	static public KAdaptiveAlgorithm lookupCorridor(Corridor c) {
-		KAdaptiveAlgorithm state = all_states.get(c.getID());
-		if(state == null) {
-			state = new KAdaptiveAlgorithm(c);
-			all_states.put(c.getID(), state);
+		KAdaptiveAlgorithm alg = ALL_ALGS.get(c.getID());
+		if(alg == null) {
+			alg = new KAdaptiveAlgorithm(c);
+			ALL_ALGS.put(c.getID(), alg);
 		}
-		return state;
+		return alg;
 	}
 
-	/** Process one interval for all stratified zone states */
+	/** Process one interval for all K adaptive algorithm states */
 	static public void processAllStates() {
 		Iterator<KAdaptiveAlgorithm> it =
-			all_states.values().iterator();
+			ALL_ALGS.values().iterator();
 		while(it.hasNext()) {
-			KAdaptiveAlgorithm state = it.next();
-			state.processInterval();
-			if(state.isDone())
+			KAdaptiveAlgorithm alg = it.next();
+			alg.processInterval();
+			if(alg.isDone())
 				it.remove();
 		}
 	}
@@ -108,13 +111,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** How many time steps must be */
 	protected int BottleneckTrendCount = 2;
 
-	/** Rate value to calculated metering rate for checking if metering is started */
-	protected double KstartThres = 0.8;
-
 	/** Is started metering in this corridor? */
 	protected boolean isMeteringStarted = false;
 
-	/** Should do check stop condition ? (it depends on corridor's density trend) */
+	/** Should check stop condition? (depends on corridor density trend) */
 	protected boolean doStopChecking = false;
 
 	/** Are station-entrance associated? */
@@ -124,8 +124,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private final BoundedSampleHistory k_hist_corridor =
 		new BoundedSampleHistory(AVG_K_STEPS + AVG_K_TREND_STEPS);
 
+	/** All r_node states */
+	private final ArrayList<RNodeState> states =
+		new ArrayList<RNodeState>();
+
+	/** Station states list in the corridor */
+	private final ArrayList<StationState> stationStates =
+		new ArrayList<StationState>();
+
+	/** Entrance states list in the corridor */
+	private final ArrayList<EntranceState> entranceStates =
+		new ArrayList<EntranceState>();
+
 	/** Hash map of ramp meter states */
-	protected final HashMap<String, MeterState> meterStates =
+	private final HashMap<String, MeterState> meterStates =
 		new HashMap<String, MeterState>();
 
 	@Override
@@ -155,6 +167,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Lookup the meter state for a specified meter */
 	protected MeterState lookupMeterState(RampMeter meter) {
 		return meterStates.get(meter.getName());
+	}
+
+	/**
+	 * Add meter state
+	 * @param state
+	 */
+	private void addMeterState(MeterState state) {
+		R_NodeImpl rnode = state.meter.getR_Node();
+		for(EntranceState es : entranceStates) {
+			if(es.rnode.equals(rnode)) {
+				es.meterState = state;
+				state.entrance = es;
+				es.checkFreewayToFreeway();
+			}
+		}
 	}
 
 	/** Process the stratified plan for the next interval */
@@ -475,7 +502,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				for(int i = 0; i < 3; i++) {
 					double q = es.getFlow(i);
 					double rate = es.getRate(i);
-					if(q < KstartThres * rate)
+					if(q < K_START_THRESH * rate)
 						satisfyRateCondition = false;
 				}
 			}
@@ -511,7 +538,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			// Start Condition 2 : Merging flow >= KstartRate
 			double q = es.getFlow(i);
 			double rate = es.getRate(i);
-			if(q < KstartThres * rate)
+			if(q < K_START_THRESH * rate)
 				return false;
 		}
 
@@ -567,46 +594,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/** Is this KAdaptiveAlgorithm zone done? */
-	private boolean isDone() {
-		boolean done = true;
-		for(MeterState state : meterStates.values()) {
-			if(state.meter.isOperating()) {
-				done = false;
-				break;
-			}
-		}
-		return done;
-	}
-
-
-
-
-
-	/** All r_node states */
-	private final ArrayList<RNodeState> states = new ArrayList<RNodeState>();
-
-	/** Station states list in the corridor */
-	private final ArrayList<StationState> stationStates = new ArrayList<StationState>();
-
-	/** Entrance states list in the corridor */
-	private final ArrayList<EntranceState> entranceStates = new ArrayList<EntranceState>();
-
-	/**
-	 * Add meter state
-	 * @param state
-	 */
-	private void addMeterState(MeterState state) {
-		R_NodeImpl rnode = state.meter.getR_Node();
-		for(EntranceState es : entranceStates) {
-			if(es.rnode.equals(rnode)) {
-				es.meterState = state;
-				state.entrance = es;
-				es.checkFreewayToFreeway();
-			}
-		}
-	}
-
 	/**
 	 * Add entrance state
 	 * @param entranceState
@@ -627,6 +614,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		stationState.idx = states.size();
 		stationStates.add(stationState);
 		states.add(stationState);
+	}
+
+	/** Is this KAdaptiveAlgorithm zone done? */
+	private boolean isDone() {
+		boolean done = true;
+		for(MeterState state : meterStates.values()) {
+			if(state.meter.isOperating()) {
+				done = false;
+				break;
+			}
+		}
+		return done;
 	}
 
 	/**
@@ -732,10 +731,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 		return avgDensity / totalDistance;
 	}
-
-
-
-
 
 	/**
 	 * Enum : R_Node State Type
