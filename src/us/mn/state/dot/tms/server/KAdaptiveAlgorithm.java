@@ -1500,7 +1500,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	public class MeterState {
 
 		RampMeterImpl meter;
-		boolean valid;
 		private EntranceState entrance;
 
 		private MeterState(RampMeterImpl meter) {
