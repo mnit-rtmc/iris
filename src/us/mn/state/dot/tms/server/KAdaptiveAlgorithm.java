@@ -54,6 +54,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number of time steps to check before stop metering */
 	static private final int STOP_STEPS = 10;
 
+	/** Number of time steps for bottleneck trend before stop metering */
+	static private final int BOTTLENECK_TREND_STEPS_BEFORE_STOP = 2;
+
 	/** Number of time steps for bottleneck trend after stop metering */
 	static private final int BOTTLENECK_TREND_STEPS_AFTER_STOP = 4;
 
@@ -108,14 +111,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Bottleneck Density */
 	protected double Kb = 25;
 
-	/** How many time steps must be */
-	protected int BottleneckTrendCount = 2;
-
 	/** Is started metering in this corridor? */
 	protected boolean isMeteringStarted = false;
 
 	/** Should check stop condition? (depends on corridor density trend) */
-	protected boolean doStopChecking = false;
+	private boolean doStopChecking = false;
 
 	/** Are station-entrance associated? */
 	private boolean isAssociated = false;
@@ -234,10 +234,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		// restrict condition
 		Kb = K_DES;
-		BottleneckTrendCount = BOTTLENECK_TREND_STEPS_AFTER_STOP;
 
 		// let's check stop condition from now
 		doStopChecking = true;
+	}
+
+	/** Get number of time steps to check for bottleneck */
+	private int bottleneckTrendSteps() {
+		if(doStopChecking)
+			return BOTTLENECK_TREND_STEPS_AFTER_STOP;
+		else
+			return BOTTLENECK_TREND_STEPS_BEFORE_STOP;
 	}
 
 	/**
@@ -1466,7 +1473,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				boolean increaseTrend = true;
 				boolean highDensity = true;
 
-				for(int j = 0; j < BottleneckTrendCount; j++) {
+				for(int j = 0; j < bottleneckTrendSteps(); j++){
 					double k = s.getAggregatedDensity(j);
 					double pk = s.getAggregatedDensity(j + 1);
 					if(k < pk)
