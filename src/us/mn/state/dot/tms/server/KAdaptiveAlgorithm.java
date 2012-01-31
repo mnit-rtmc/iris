@@ -70,6 +70,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number of trend steps for average density to check corridor state */
 	static private final int AVG_K_TREND_STEPS = 10;
 
+	/** Factor to compute ramp demand from passage/merge flow */
+	static private final double PASSAGE_DEMAND_FACTOR = 1.15;
+
 	/** Get the absolute minimum release rate */
 	static protected int getMinRelease() {
 		return SystemAttributeHelper.getMeterMinRelease();
@@ -1143,9 +1146,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * Class : Entrance State to manage entrance
 	 */
 	class EntranceState extends RNodeState {
-
-		/** Factor to compute ramp demand from passage/merge flow */
-		private double PASSAGE_DEMAND_FACTOR = 1.15;
 
 		/** Meter state mapping this entrance */
 		private MeterState meterState;
