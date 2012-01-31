@@ -108,9 +108,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Corridor */
 	protected final Corridor corridor;
 
-	/** Bottleneck Finder */
-	protected final BottleneckFinder bottleneckFinder;
-
 	/** Bottleneck Density */
 	protected double Kb = 25;
 
@@ -193,13 +190,111 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			doAssociateStationAndEntrance();
 		for(StationState s : stationStates)
 			s.updateState();
-		bottleneckFinder.findBottlenecks();
+		findBottlenecks();
 		calculateMeteringRates();
 		if(isMeteringStarted && !doStopChecking)
 			checkCorridorState();
 		else if(doStopChecking)
 			checkStopCondition();
 		afterMetering();
+	}
+
+	/**
+	 * Should be called after added all stations and meters
+	 */
+	private void doAssociateStationAndEntrance() {
+		for(StationState s : stationStates)
+			s.setAssociatedEntrances();
+
+		/** for debugging of corridor structure */
+		if(ALG_LOG.isOpen())
+			debug();
+		isAssociated = true;
+	}
+
+	/** Debug algorithm. */
+	private void debug() {
+		ALG_LOG.log("Corridor Structure : " + corridor.getName() + " --------------------");
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < states.size(); i++) {
+			RNodeState state = states.get(i);
+			sb.append("[" + String.format("%02d", state.idx) + "] ");
+			if(state.type.isStation()) {
+				StationState ss = (StationState) state;
+				sb.append(state.rnode.station_id + " -> ");
+				for(EntranceState es : ss.getAssociatedEntrances()) {
+					if(es != null && es.hasMeter())
+						sb.append(es.meterState.meter.name + ", ");
+				}
+			}
+			if(state.type.isEntrance()) {
+				EntranceState e = (EntranceState) state;
+			if(e.hasMeter())
+				sb.append("Ent(" + e.meterState.meter.name + ")");
+			else
+				sb.append("Ent(" + e.rnode.name + ")");
+			}
+			sb.append("\n");
+		}
+		ALG_LOG.log(sb.toString());
+	}
+
+	/**
+	 * Find bottlenecks
+	 */
+	private void findBottlenecks() {
+
+		// find bottleneck candidates
+		for(int i = 0; i < stationStates.size(); i++) {
+			StationState s = stationStates.get(i);
+
+			if(s.getAggregatedDensity() < Kb)
+				continue;
+
+			boolean increaseTrend = true;
+			boolean highDensity = true;
+
+			for(int j = 0; j < bottleneckTrendSteps(); j++){
+				double k = s.getAggregatedDensity(j);
+				double pk = s.getAggregatedDensity(j + 1);
+				if(k < pk)
+					increaseTrend = false;
+				if(k < Kb || pk < Kb)
+					highDensity = false;
+			}
+
+			if(s.isPrevBottleneck || increaseTrend || highDensity)
+				s.isBottleneck = true;
+		}
+
+		// merge zone by distnace and acceleration
+		// iterate from downstream to upstream
+		for(int i = stationStates.size() - 1; i >= 0; i--) {
+			StationState s = stationStates.get(i);
+			double k = s.getAggregatedDensity();
+
+			if(!s.isBottleneck)
+				continue;
+
+			// check zone to merge
+			for(int j = s.stationIdx - 1; j >= 0; j--) {
+				StationState us = stationStates.get(j);
+				if(!us.isBottleneck)
+					continue;
+				// close bottleneck
+				if(s.stationIdx - us.stationIdx < 3) {
+					// close but independent BS
+					if(us.getAggregatedDensity() > k && us.getAcceleration() > A_BOTTLENECK)
+						break;
+					// close -> merge
+					us.isBottleneck = false;
+				} else if(us.getAcceleration() > A_BOTTLENECK) {
+					// acceleration is heigh -> BS
+					break;
+				} else
+					us.isBottleneck = false;
+			}
+		}
 	}
 
 	/**
@@ -590,7 +685,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private KAdaptiveAlgorithm(Corridor c) {
 		corridor = c;
 		createStates();
-		bottleneckFinder = new BottleneckFinder();
 	}
 
 	/** construct corridor structure */
@@ -670,46 +764,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return (StationState) st;
 		}
 		return null;
-	}
-
-	/**
-	 * Should be called after added all stations and meters
-	 */
-	public void doAssociateStationAndEntrance() {
-		for(StationState s : stationStates)
-			s.setAssociatedEntrances();
-
-		/** for debugging of corridor structure */
-		if(ALG_LOG.isOpen())
-			debug();
-		isAssociated = true;
-	}
-
-	/** Debug algorithm. */
-	private void debug() {
-		ALG_LOG.log("Corridor Structure : " + corridor.getName() + " --------------------");
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < states.size(); i++) {
-			RNodeState state = states.get(i);
-			sb.append("[" + String.format("%02d", state.idx) + "] ");
-			if(state.type.isStation()) {
-				StationState ss = (StationState) state;
-				sb.append(state.rnode.station_id + " -> ");
-				for(EntranceState es : ss.getAssociatedEntrances()) {
-					if(es != null && es.hasMeter())
-						sb.append(es.meterState.meter.name + ", ");
-				}
-			}
-			if(state.type.isEntrance()) {
-				EntranceState e = (EntranceState) state;
-			if(e.hasMeter())
-				sb.append("Ent(" + e.meterState.meter.name + ")");
-			else
-				sb.append("Ent(" + e.rnode.name + ")");
-			}
-			sb.append("\n");
-		}
-		ALG_LOG.log(sb.toString());
 	}
 
 	/**
@@ -1457,70 +1511,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void validate() {
 			if(entrance != null)
 				entrance.updateState();
-		}
-	}
-
-	/**
-	 * Class : Bottleneck Finder
-	 */
-	public class BottleneckFinder {
-
-		/**
-		 * Find bottlenecks
-		 */
-		public void findBottlenecks() {
-
-			// find bottleneck candidates
-			for(int i = 0; i < stationStates.size(); i++) {
-				StationState s = stationStates.get(i);
-
-				if(s.getAggregatedDensity() < Kb)
-					continue;
-
-				boolean increaseTrend = true;
-				boolean highDensity = true;
-
-				for(int j = 0; j < bottleneckTrendSteps(); j++){
-					double k = s.getAggregatedDensity(j);
-					double pk = s.getAggregatedDensity(j + 1);
-					if(k < pk)
-						increaseTrend = false;
-					if(k < Kb || pk < Kb)
-						highDensity = false;
-				}
-
-				if(s.isPrevBottleneck || increaseTrend || highDensity)
-					s.isBottleneck = true;
-			}
-
-			// merge zone by distnace and acceleration
-			// iterate from downstream to upstream
-			for(int i = stationStates.size() - 1; i >= 0; i--) {
-				StationState s = stationStates.get(i);
-				double k = s.getAggregatedDensity();
-
-				if(!s.isBottleneck)
-					continue;
-
-				// check zone to merge
-				for(int j = s.stationIdx - 1; j >= 0; j--) {
-					StationState us = stationStates.get(j);
-					if(!us.isBottleneck)
-						continue;
-					// close bottleneck
-					if(s.stationIdx - us.stationIdx < 3) {
-						// close but independent BS
-						if(us.getAggregatedDensity() > k && us.getAcceleration() > A_BOTTLENECK)
-							break;
-						// close -> merge
-						us.isBottleneck = false;
-					} else if(us.getAcceleration() > A_BOTTLENECK) {
-						// acceleration is heigh -> BS
-						break;
-					} else
-						us.isBottleneck = false;
-				}
-			}
 		}
 	}
 
