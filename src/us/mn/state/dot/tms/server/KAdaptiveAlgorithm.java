@@ -214,26 +214,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Debug algorithm. */
 	private void debug() {
-		ALG_LOG.log("Corridor Structure : " + corridor.getName() + " --------------------");
+		ALG_LOG.log("Corridor Structure : " + corridor.getName() +
+			" --------------------");
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < states.size(); i++) {
 			RNodeState state = states.get(i);
-			sb.append("[" + String.format("%02d", state.idx) + "] ");
-			if(state.type.isStation()) {
-				StationState ss = (StationState) state;
-				sb.append(state.rnode.station_id + " -> ");
-				for(EntranceState es : ss.getAssociatedEntrances()) {
-					if(es != null && es.hasMeter())
-						sb.append(es.meterState.meter.name + ", ");
-				}
-			}
-			if(state.type.isEntrance()) {
-				EntranceState e = (EntranceState) state;
-			if(e.hasMeter())
-				sb.append("Ent(" + e.meterState.meter.name + ")");
-			else
-				sb.append("Ent(" + e.rnode.name + ")");
-			}
+			sb.append("[" + String.format("%02d", state.idx) +"] ");
+			state.debug(sb);
 			sb.append("\n");
 		}
 		ALG_LOG.log(sb.toString());
@@ -824,10 +811,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/**
 	 * Class : R_Node State to manage station and entrance (ancestor class)
 	 */
-	class RNodeState {
+	abstract class RNodeState {
 		RSType type;
 		R_NodeImpl rnode;
 		int idx;
+
+		/** Debug an RNodeState */
+		abstract protected void debug(StringBuilder sb);
 	}
 
 	/**
@@ -1140,6 +1130,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return distance;
 			else
 				return -1;
+		}
+
+		/** Debug a StationState */
+		protected void debug(StringBuilder sb) {
+			sb.append(rnode.station_id + " -> ");
+			for(EntranceState es : associatedEntrances) {
+				if(es != null && es.hasMeter())
+					sb.append(es.meterState.meter.name + ", ");
+			}
 		}
 	}
 
@@ -1491,6 +1490,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public int getNoBottleneckCount() {
 			return noBottleneckCount;
+		}
+
+		/** Debug an EntranceState */
+		protected void debug(StringBuilder sb) {
+			if(hasMeter())
+				sb.append("Ent(" + meterState.meter.name + ")");
+			else
+				sb.append("Ent(" + rnode.name + ")");
 		}
 	}
 
