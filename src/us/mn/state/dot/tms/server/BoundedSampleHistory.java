@@ -41,30 +41,46 @@ public class BoundedSampleHistory {
 	}
 
 	/**
-	 * Add one sample to the history.
-	 * @param sam Current sample data.
+	 * Add one data sample to the history.
+	 * @param sam Current sample data, or null for missing data.
 	 */
 	public void push(Double sam) {
 		cursor = nextIndex(cursor);
-		samples[cursor] = sam;
+		samples[cursor] = filterSample(sam);
 		if(n_samples < samples.length)
 			n_samples++;
 	}
 
-	/** Get the next sample index */
+	/**
+	 * Get the next sample array index.
+	 * @param idx Index into samples array.
+	 * @return Next index, rolling over if necessary.
+	 */
 	private int nextIndex(int idx) {
 		idx++;
 		return idx < samples.length ? idx : 0;
 	}
 
 	/**
-	 * Return sample at given step index (in reversed direction)
-	 *   e.g. get(0) : most recent sample data
-	 * @return Sample data
+	 * Filter out negative data samples.
+	 * @param sam Sample data.
+	 * @return Sample data, with negative values replaced with null.
 	 */
-	public Double get(int i) {
-		if(i < n_samples) {
-			int idx = cursor - i;
+	private Double filterSample(Double sam) {
+		if(sam != null && sam >= 0)
+			return sam;
+		else
+			return null;
+	}
+
+	/**
+	 * Return sample at given time step index (in reversed direction).
+	 * @param t Time-step index (0 for most recent).
+	 * @return Sample data, or null for missing data.
+	 */
+	public Double get(int t) {
+		if(t < n_samples) {
+			int idx = cursor - t;
 			if(idx < 0)
 				idx += samples.length;
 			return samples[idx];
@@ -73,7 +89,7 @@ public class BoundedSampleHistory {
 	}
 
 	/**
-	 * Clear storage.
+	 * Clear sample history.
 	 */
 	public void clear() {
 		cursor = -1;
@@ -81,22 +97,23 @@ public class BoundedSampleHistory {
 	}
 
 	/**
-	 * Return current storage size.
-	 * @return Number of samples stored
+	 * Return the number of samples in history.
+	 * @return Number of samples in history.
 	 */
 	public int size() {
 		return n_samples;
 	}
 
 	/**
-	 * Return average data
-	 * @param fromIndex start index
-	 * @param length length to calculate average
+	 * Return the average of the specified number of samples.
+	 * @param t Starting time-step index (0 for most recent).
+	 * @param n_sam Number of samples to calculate average.
+	 * @return Average of the specified samples, or null for missing data.
 	 */
-	public Double average(int fromIndex, int length) {
+	public Double average(int t, int n_sam) {
 		double sum = 0;
 		int count = 0;
-		for(int i = fromIndex; i < fromIndex + length; i++) {
+		for(int i = t; i < t + n_sam; i++) {
 			Double d = get(i);
 			if(d != null) {
 				sum += d;
