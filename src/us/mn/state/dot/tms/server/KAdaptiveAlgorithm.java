@@ -297,10 +297,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 		}
 		k_hist_corridor.push(calculateAverageDensity(downstreamBS));
-		if(bottleneckCount > 1)
-			return;
-		int size = k_hist_corridor.size();
-		if(size < AVG_K_STEPS + AVG_K_TREND_STEPS)
+		if(bottleneckCount > 1 || !k_hist_corridor.isFull())
 			return;
 		// check avg K of corridor average density
 		for(int i = 0; i < AVG_K_TREND_STEPS; i++) {

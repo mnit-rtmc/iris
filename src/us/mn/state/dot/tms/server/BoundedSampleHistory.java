@@ -105,6 +105,14 @@ public class BoundedSampleHistory {
 	}
 
 	/**
+	 * Check if the history is full.
+	 * @return true if the history is full.
+	 */
+	public boolean isFull() {
+		return n_samples == samples.length;
+	}
+
+	/**
 	 * Return the average of the specified number of samples.
 	 * @param t Starting time-step index (0 for most recent).
 	 * @param n_sam Number of samples to calculate average.
