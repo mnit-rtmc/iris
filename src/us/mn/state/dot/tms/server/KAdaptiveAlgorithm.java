@@ -161,9 +161,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Process the stratified plan for the next interval */
 	protected void processInterval() {
-		if(!this.isAssociated)
-			this.corridorHelper.doAssociateStationAndEntrance();
-		for(StationState s : this.corridorHelper.stationStates)
+		if(!isAssociated)
+			corridorHelper.doAssociateStationAndEntrance();
+		for(StationState s : corridorHelper.stationStates)
 			s.updateState();
 		bottleneckFinder.findBottlenecks();
 		calculateMeteringRates();
@@ -192,7 +192,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if(downstreamBS != null)
 			avgK = corridorHelper.getAverageDensity(upStation, downstreamBS);
 		corridorKHistory.push(avgK);
-		int size = this.corridorKHistory.size();
+		int size = corridorKHistory.size();
 		if(bottleneckCount > 1)
 			return;
 		if(size < avgDensityWindow + avgDensityTrend)
@@ -212,7 +212,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		BottleneckTrendCount = BOTTLENECK_TREND_STEPS_AFTER_STOP;
 
 		// let's check stop condition from now
-		this.doStopChecking = true;
+		doStopChecking = true;
 	}
 
 	/**
@@ -548,14 +548,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Create a new KAdaptiveAlgorithm */
 	private KAdaptiveAlgorithm(Corridor c) {
-		this.corridor = c;
-		this.createStates();
+		corridor = c;
+		createStates();
 		bottleneckFinder = new BottleneckFinder(corridorHelper);
 	}
 
 	/** construct corridor structure */
 	private void createStates() {
-		Iterator<R_Node> itr = this.corridor.iterator();
+		Iterator<R_Node> itr = corridor.iterator();
 		while(itr.hasNext()) {
 			R_NodeImpl rnode = (R_NodeImpl) itr.next();
 			int nType = rnode.getNodeType();
@@ -603,7 +603,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void addMeterState(MeterState state) {
 			meters.add(state);
 			R_NodeImpl rnode = state.meter.getR_Node();
-			for(EntranceState es : this.entranceStates) {
+			for(EntranceState es : entranceStates) {
 				if(es.rnode.equals(rnode)) {
 					es.meterState = state;
 					state.entrance = es;
@@ -619,8 +619,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void addEntranceState(EntranceState entranceState) {
 			entranceState.entranceIdx = entranceStates.size();
 			entranceState.idx = states.size();
-			this.entranceStates.add(entranceState);
-			this.states.add(entranceState);
+			entranceStates.add(entranceState);
+			states.add(entranceState);
 		}
 
 		/**
@@ -630,8 +630,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void addStationState(StationState stationState) {
 			stationState.stationIdx = stationStates.size();
 			stationState.idx = states.size();
-			this.stationStates.add(stationState);
-			this.states.add(stationState);
+			stationStates.add(stationState);
+			states.add(stationState);
 		}
 
 		/**
@@ -738,11 +738,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double totalDistance = 0;
 			double avgDensity = 0;
 			while(true) {
-				StationState dStation = this.getDownstreamStationState(cursor.idx);
+				StationState dStation = getDownstreamStationState(cursor.idx);
 				double upDensity = cursor.getAggregatedDensity(prevStep);
 				double downDensity = dStation.getAggregatedDensity(prevStep);
 				double middleDensity = (upDensity + downDensity) / 2;
-				double distance = this.getDistanceInFeet(cursor.rnode, dStation.rnode) / 5280;
+				double distance = getDistanceInFeet(cursor.rnode, dStation.rnode) / 5280;
 				double distanceFactor = distance / 3;
 				totalDistance += distance;
 				avgDensity += (upDensity + middleDensity + downDensity) * distanceFactor;
@@ -815,11 +815,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public StationState(R_NodeImpl rnode) {
 			this.rnode = rnode;
-			this.station = rnode.station;
-			this.type = RSType.StationState;
+			station = rnode.station;
+			type = RSType.StationState;
 			// use mainline and auxiliary lane
-			this.detectorSet = this.rnode.getDetectorSet().getDetectorSet(LaneType.MAINLINE);
-			this.detectorSet.addDetectors(this.rnode.getDetectorSet().getDetectorSet(LaneType.AUXILIARY));
+			detectorSet = rnode.getDetectorSet().getDetectorSet(LaneType.MAINLINE);
+			detectorSet.addDetectors(rnode.getDetectorSet().getDetectorSet(LaneType.AUXILIARY));
 		}
 
 		/**
@@ -829,7 +829,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		public void updateState() {
 			if(station == null)
 				return;
-			Iterator<DetectorImpl> itr = this.detectorSet.detectors.iterator();
+			Iterator<DetectorImpl> itr = detectorSet.detectors.iterator();
 			double density = 0, speed = 0;
 			float u = -1, k = -1;
 			int n_u = 0, n_k = 0;
@@ -856,16 +856,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(n_k > 0)
 				density /= n_k;
 
-			this.densityHistory.push(density);
-			this.speedHistory.push(speed);
+			densityHistory.push(density);
+			speedHistory.push(speed);
 		}
 
 		/**
 		 * Process after metering
 		 */
 		public void afterMetering() {
-			this.isPrevBottleneck = this.isBottleneck;
-			this.isBottleneck = false;
+			isPrevBottleneck = isBottleneck;
+			isBottleneck = false;
 		}
 
 		/**
@@ -873,7 +873,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1min density
 		 */
 		public double getAggregatedDensity() {
-			return this.getAggregatedDensity(0);
+			return getAggregatedDensity(0);
 		}
 
 		/**
@@ -881,7 +881,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1min density at 'prevStep' time steps ago
 		 */
 		public double getAggregatedDensity(int prevStep) {
-			return getAggregatedData(this.densityHistory, prevStep);
+			return getAggregatedData(densityHistory, prevStep);
 		}
 
 		/**
@@ -889,7 +889,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1min speed
 		 */
 		public double getAggregatedSpeed() {
-			return this.getAggregatedSpeed(0);
+			return getAggregatedSpeed(0);
 		}
 
 		/**
@@ -898,7 +898,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1min speed at 'prevStep' time steps ago
 		 */
 		public double getAggregatedSpeed(int prevStep) {
-			return getAggregatedData(this.speedHistory, prevStep);
+			return getAggregatedData(speedHistory, prevStep);
 		}
 
 		/**
@@ -933,12 +933,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return acceleration from current station to down station
 		 */
 		public double getAcceleration() {
-			double u2 = this.getAggregatedSpeed();
+			double u2 = getAggregatedSpeed();
 			StationState downStationState = corridorHelper.getDownstreamStationState(idx);
 			if(downStationState == null)
 				return 0;
 			double u1 = downStationState.getAggregatedSpeed();
-			return (u1 * u1 - u2 * u2) / (2 * corridorHelper.getDistanceInFeet(this.rnode, downStationState.rnode) / 5280);
+			return (u1 * u1 - u2 * u2) / (2 * corridorHelper.getDistanceInFeet(rnode, downStationState.rnode) / 5280);
 		}
 
 		/**
@@ -959,20 +959,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *     when distance(Downstream Meter, Station) less than 1 mile
 		 */
 		private void setAssociatedEntrances() {
-			ArrayList<EntranceState> upstreamEntrances = this.getUpstreamEntrances();
-			ArrayList<EntranceState> downstreamEntrances = this.getDownstreamEntrances();
+			ArrayList<EntranceState> upstreamEntrances = getUpstreamEntrances();
+			ArrayList<EntranceState> downstreamEntrances = getDownstreamEntrances();
 
 			StationState us = null, ds = null;
-			if(this.stationIdx > 0)
-				us = corridorHelper.stationStates.get(this.stationIdx - 1);
-			if(this.stationIdx < corridorHelper.stationStates.size() - 1)
-				ds = corridorHelper.stationStates.get(this.stationIdx + 1);
+			if(stationIdx > 0)
+				us = corridorHelper.stationStates.get(stationIdx - 1);
+			if(stationIdx < corridorHelper.stationStates.size() - 1)
+				ds = corridorHelper.stationStates.get(stationIdx + 1);
 
 			if(us != null) {
 				for(EntranceState es : upstreamEntrances) {
 					if(!es.hasMeter())
 						continue;
-					int d = this.getDistanceToUpstreamEntrance(es);
+					int d = getDistanceToUpstreamEntrance(es);
 					int ud = us.getDistanceToDownstreamEntrance(es);
 
 					// very close(?) or not allocated with upstream station
@@ -989,7 +989,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				for(EntranceState es : downstreamEntrances) {
 					if(!es.hasMeter())
 						continue;
-					int d = this.getDistanceToDownstreamEntrance(es);
+					int d = getDistanceToDownstreamEntrance(es);
 					// distance to downstream entrance is less than 1 mile
 					if(d < 5280) {
 						associatedEntrances.add(es);
@@ -1005,9 +1005,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public ArrayList<EntranceState> getUpstreamEntrances() {
 			ArrayList<EntranceState> list = new ArrayList<EntranceState>();
-			if(this.idx <= 0)
+			if(idx <= 0)
 				return list;
-			for(int i = this.idx - 1; i >= 0; i--) {
+			for(int i = idx - 1; i >= 0; i--) {
 				RNodeState s = corridorHelper.states.get(i);
 				if(s.type.isStation())
 					break;
@@ -1023,10 +1023,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public ArrayList<EntranceState> getDownstreamEntrances() {
 			ArrayList<EntranceState> list = new ArrayList<EntranceState>();
-			if(this.idx >= corridorHelper.states.size() - 1)
+			if(idx >= corridorHelper.states.size() - 1)
 				return list;
 
-			for(int i = this.idx + 1; i < corridorHelper.states.size(); i++) {
+			for(int i = idx + 1; i < corridorHelper.states.size(); i++) {
 				RNodeState s = corridorHelper.states.get(i);
 				if(s.type.isStation())
 					break;
@@ -1042,14 +1042,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return distance in feet
 		 */
 		public int getDistanceToUpstreamEntrance(EntranceState es) {
-			if(this.idx <= 0)
+			if(idx <= 0)
 				return -1;
 			int distance = 0;
 			RNodeState cursor = this;
 			RNodeState s = null;
 
 			boolean found = false;
-			for(int i = this.idx - 1; i >= 0; i--) {
+			for(int i = idx - 1; i >= 0; i--) {
 				s = corridorHelper.states.get(i);
 				distance += corridorHelper.getDistanceInFeet(cursor.rnode, s.rnode);
 				if(s.equals(es)) {
@@ -1070,14 +1070,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return distance in feet
 		 */
 		public int getDistanceToDownstreamEntrance(EntranceState es) {
-			if(this.idx >= corridorHelper.states.size() - 1)
+			if(idx >= corridorHelper.states.size() - 1)
 				return -1;
 			int distance = 0;
 			RNodeState cursor = this;
 			RNodeState s = null;
 
 			boolean found = false;
-			for(int i = this.idx + 1; i < corridorHelper.states.size(); i++) {
+			for(int i = idx + 1; i < corridorHelper.states.size(); i++) {
 				s = corridorHelper.states.get(i);
 				distance += corridorHelper.getDistanceInFeet(cursor.rnode, s.rnode);
 				if(s.equals(es)) {
@@ -1164,7 +1164,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public EntranceState(R_NodeImpl rnode) {
 			this.rnode = rnode;
-			this.type = RSType.EntrancerState;
+			type = RSType.EntrancerState;
 		}
 
 		/**
@@ -1203,7 +1203,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		private void updateState() {
 
-			this.isRateUpdated = false;
+			isRateUpdated = false;
 			calculateRampFlowAndDemand();
 
 			double demand = rampDemandHistory.get(0);
@@ -1212,18 +1212,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double prevCd = 0;
 			double prevCq = 0;
 
-			if(this.cumulativeDemand.size() > 0)
+			if(cumulativeDemand.size() > 0)
 				prevCd = cumulativeDemand.get(0);
-			if(this.cumulativeMergingFlow.size() > 0)
+			if(cumulativeMergingFlow.size() > 0)
 				prevCq = cumulativeMergingFlow.get(0);
 
-			this.cumulativeDemand.push(prevCd + demand);
-			this.cumulativeMergingFlow.push(prevCq + p_flow);
+			cumulativeDemand.push(prevCd + demand);
+			cumulativeMergingFlow.push(prevCq + p_flow);
 
-			this.currentDemand = demand;
-			this.currentFlow = p_flow;
+			currentDemand = demand;
+			currentFlow = p_flow;
 
-			this.calculateMinimumRate();
+			calculateMinimumRate();
 		}
 
 		/**
@@ -1231,7 +1231,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return flow
 		 */
 		private int calculateRampFlow() {
-			DetectorSet ds = this.meterState.meter.getDetectorSet();
+			DetectorSet ds = meterState.meter.getDetectorSet();
 			DetectorSet pDet = ds.getDetectorSet(LaneType.PASSAGE);
 			DetectorSet mDet = ds.getDetectorSet(LaneType.MERGE);
 			DetectorSet bpDet = ds.getDetectorSet(LaneType.BYPASS);
@@ -1260,20 +1260,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Calculate ramp flow and demand
 		 */
 		private void calculateRampFlowAndDemand() {
-			DetectorSet ds = this.meterState.meter.getDetectorSet();
+			DetectorSet ds = meterState.meter.getDetectorSet();
 			DetectorSet qDets = ds.getDetectorSet(LaneType.QUEUE);
 
 			double rampFlow = calculateRampFlow();
 			double rampDemand = 0;
 
-			this.rampFlowHistory.push(rampFlow);
+			rampFlowHistory.push(rampFlow);
 
 			// queue detector is ok
 			if(qDets != null)
 				rampDemand = qDets.getFlow();
 			else
 				rampDemand = rampFlow * PASSAGE_DEMAND_FACTOR;
-			this.rampDemandHistory.push(rampDemand);
+			rampDemandHistory.push(rampDemand);
 		}
 
 		/**
@@ -1281,7 +1281,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		private void calculateMinimumRate() {
 			if(cumulativeDemand.size() - 1 < maxWaitTimeIndex) {
-				minimumRate = this.currentFlow;
+				minimumRate = currentFlow;
 				return;
 			}
 
@@ -1303,25 +1303,25 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param Rnext next metering rate
 		 */
 		private void setRate(double Rnext) {
-			if(!this.hasMeter())
+			if(!hasMeter())
 				return;
-			this.currentRate = Rnext;
-			this.isRateUpdated = true;
+			currentRate = Rnext;
+			isRateUpdated = true;
 			int releaseRate = (int) Math.round(Rnext);
-			this.meterState.meter.setRatePlanned(releaseRate);
+			meterState.meter.setRatePlanned(releaseRate);
 		}
 
 		/**
 		 * Stop metering
 		 */
 		public void stopMetering() {
-			this.isMetering = false;
-			this.currentDemand = 0;
-			this.currentFlow = 0;
-			this.currentRate = 0;
-			this.rateHistory.clear();
-			this.noBottleneckCount = 0;
-			this.hasBeenStoped = true;
+			isMetering = false;
+			currentDemand = 0;
+			currentFlow = 0;
+			currentRate = 0;
+			rateHistory.clear();
+			noBottleneckCount = 0;
+			hasBeenStoped = true;
 		}
 
 		/**
@@ -1337,7 +1337,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param Rnext
 		 */
 		private void saveRateHistory(double Rnext) {
-			this.rateHistory.push(Rnext);
+			rateHistory.push(Rnext);
 		}
 
 		/**
@@ -1354,7 +1354,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return ramp flow at 'prevStep' time steps ago
 		 */
 		private double getFlow(int prevStep) {
-			return this.rampFlowHistory.get(prevStep);
+			return rampFlowHistory.get(prevStep);
 		}
 
 		/**
@@ -1363,22 +1363,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		private double getRate() {
 			// initial rate = average(last 3 flows) or MAX_RATE
-			if(this.currentRate == 0) {
-				this.currentRate = this.currentFlow;
+			if(currentRate == 0) {
+				currentRate = currentFlow;
 				double flowSum = 0;
 				int cnt = 0;
 
 				for(int i = 0; i < 3; i++) {
-					flowSum += this.rampFlowHistory.get(i);
+					flowSum += rampFlowHistory.get(i);
 					cnt++;
 				}
 
 				if(cnt > 0)
-					this.currentRate = flowSum / cnt;
+					currentRate = flowSum / cnt;
 				else
-					this.currentRate = getMaxRelease();  // no flow
+					currentRate = getMaxRelease();  // no flow
 			}
-			return this.currentRate;
+			return currentRate;
 		}
 
 		/**
@@ -1393,7 +1393,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Start metering
 		 */
 		private void startMetering() {
-			this.isMetering = true;
+			isMetering = true;
 		}
 
 		/**
@@ -1401,7 +1401,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param Kt
 		 */
 		private void saveSegmentDensityHistory(double Kt) {
-			this.segmentDensityHistory.push(Kt);
+			segmentDensityHistory.push(Kt);
 		}
 
 		/**
@@ -1410,7 +1410,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return segment density at 'prevStep' time steps ago
 		 */
 		private double getSegmentDensity(int prevStep) {
-			return this.segmentDensityHistory.get(prevStep);
+			return segmentDensityHistory.get(prevStep);
 		}
 
 		/**
@@ -1418,21 +1418,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return minimum metering rate
 		 */
 		private double getMinimumRate() {
-			return this.minimumRate;
+			return minimumRate;
 		}
 
 		/**
 		 * Reset no bottleneck count
 		 */
 		private void resetNoBottleneckCount() {
-			this.noBottleneckCount = 0;
+			noBottleneckCount = 0;
 		}
 
 		/**
 		 * Add no bottleneck count
 		 */
 		public void addNoBottleneckCount() {
-			this.noBottleneckCount++;
+			noBottleneckCount++;
 		}
 
 		/**
@@ -1440,7 +1440,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return no-bottleneck count
 		 */
 		public int getNoBottleneckCount() {
-			return this.noBottleneckCount;
+			return noBottleneckCount;
 		}
 	}
 
@@ -1459,8 +1459,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Validate a ramp meter state */
 		private void validate() {
-			if(this.entrance != null)
-				this.entrance.updateState();
+			if(entrance != null)
+				entrance.updateState();
 		}
 	}
 
