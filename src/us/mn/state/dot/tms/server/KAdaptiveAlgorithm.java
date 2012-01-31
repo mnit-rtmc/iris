@@ -390,30 +390,33 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/**
-	 * Calculate metering rates
+	 * Calculate metering rates.
+	 * <pre>
+	 *                       ^
+	 *                       | Kt
+	 *                       |                 +
+	 *                       |
+	 *                       |
+	 *                       |             +
+	 *                       |
+	 *                       +
+	 *                       |
+	 *                       |
+	 *                 +     |
+	 *    +                  |
+	 * --p0------------p1----p2------------p3---p4-----> K_DES-Kt
+	 *                       |
+	 *                       |
+	 * p0's x = K_DES - K_JAM
+	 * p2's x = 0
+	 * p4's x = K_DES
+	 * </pre>
 	 * @param bottleneck
 	 * @return
 	 */
-	private double equation(StationState bottleneck, StationState upstream, EntranceState entrance) {
-
-		//                       | Kt
-		//                       |                 +
-		//                       |
-		//                       |
-		//                       |             +
-		//                       |
-		//                       +
-		//                       |
-		//                       |
-		//                 +     |
-		//    +                  |
-		// --p0------------p1----p2------------p3---p4-----> K_DES-Kt
-		//                       |
-		//                       |
-		// p0's x = K_DES - K_JAM
-		// p2's x = 0
-		// p4's x = K_DES
-
+	private double equation(StationState bottleneck, StationState upstream,
+		EntranceState entrance)
+	{
 		double Kt = bottleneck.getAggregatedDensity();
 		if(upstream != null)
 			Kt = getAverageDensity(upstream, bottleneck);
@@ -426,7 +429,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		double x = K_DES - Kt;
 
 		KPoint p0 = new KPoint(K_DES - K_JAM, Rmin / Rt);
-		KPoint p1 = new KPoint((K_DES - K_JAM) / 3, Rmin / Rt + (1 - Rmin / Rt) / 3);
+		KPoint p1 = new KPoint((K_DES - K_JAM) / 3,
+			Rmin / Rt + (1 - Rmin / Rt) / 3);
 		KPoint p2 = new KPoint(0, 1);
 		if(Rmin >= Rt)
 			p0.y = p1.y = p2.y = Rmin / Rt;
@@ -465,8 +469,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param Rnext calculated next metering rate
 	 * @return start ?
 	 */
-	private boolean checkStartCondition(StationState bs, StationState us, EntranceState es, double Rnext) {
-
+	private boolean checkStartCondition(StationState bs, StationState us,
+		EntranceState es, double Rnext)
+	{
 		es.saveRateHistory(Rnext);
 
 		// Condition 0 : already started
