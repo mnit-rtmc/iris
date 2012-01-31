@@ -752,7 +752,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return null;
 		for(int i = idx + 1; i < states.size(); i++) {
 			RNodeState st = states.get(i);
-			if(st.type.isStation())
+			if(st instanceof StationState)
 				return (StationState) st;
 		}
 		return null;
@@ -798,26 +798,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/**
-	 * Enum : R_Node State Type
-	 */
-	enum RSType {
-
-		EntrancerState, StationState;
-
-		public boolean isEntrance() {
-			return this == RSType.EntrancerState;
-		}
-
-		public boolean isStation() {
-			return this == RSType.StationState;
-		}
-	};
-
-	/**
 	 * Class : R_Node State to manage station and entrance (ancestor class)
 	 */
 	abstract class RNodeState {
-		RSType type;
 		R_NodeImpl rnode;
 		int idx;
 
@@ -861,7 +844,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		public StationState(R_NodeImpl rnode) {
 			this.rnode = rnode;
 			station = rnode.station;
-			type = RSType.StationState;
 			// use mainline and auxiliary lane
 			detectorSet = rnode.getDetectorSet().getDetectorSet(LaneType.MAINLINE);
 			detectorSet.addDetectors(rnode.getDetectorSet().getDetectorSet(LaneType.AUXILIARY));
@@ -1049,15 +1031,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return upstream entrance list
 		 */
 		public ArrayList<EntranceState> getUpstreamEntrances() {
-			ArrayList<EntranceState> list = new ArrayList<EntranceState>();
+			ArrayList<EntranceState> list =
+				new ArrayList<EntranceState>();
 			if(idx <= 0)
 				return list;
 			for(int i = idx - 1; i >= 0; i--) {
 				RNodeState s = states.get(i);
-				if(s.type.isStation())
+				if(s instanceof StationState)
 					break;
-				if(s.type.isEntrance() && ((EntranceState) s).hasMeter())
-					list.add((EntranceState) s);
+				if(s instanceof EntranceState) {
+					EntranceState es = (EntranceState)s;
+					if(es.hasMeter())
+						list.add(es);
+				}
 			}
 			return list;
 		}
@@ -1067,16 +1053,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return downstream entrance list
 		 */
 		public ArrayList<EntranceState> getDownstreamEntrances() {
-			ArrayList<EntranceState> list = new ArrayList<EntranceState>();
+			ArrayList<EntranceState> list =
+				new ArrayList<EntranceState>();
 			if(idx >= states.size() - 1)
 				return list;
-
 			for(int i = idx + 1; i < states.size(); i++) {
 				RNodeState s = states.get(i);
-				if(s.type.isStation())
+				if(s instanceof StationState)
 					break;
-				if(s.type.isEntrance() && ((EntranceState) s).hasMeter())
-					list.add((EntranceState) s);
+				if(s instanceof EntranceState) {
+					EntranceState es = (EntranceState)s;
+					if(es.hasMeter())
+						list.add(es);
+				}
 			}
 			return list;
 		}
@@ -1218,7 +1207,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public EntranceState(R_NodeImpl rnode) {
 			this.rnode = rnode;
-			type = RSType.EntrancerState;
 		}
 
 		/**
