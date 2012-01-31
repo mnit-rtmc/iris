@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
@@ -684,10 +685,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		Iterator<R_Node> itr = corridor.iterator();
 		while(itr.hasNext()) {
 			R_NodeImpl rnode = (R_NodeImpl) itr.next();
-			int nType = rnode.getNodeType();
-			if(nType == 1)   // entrance
+			R_NodeType nType = R_NodeType.fromOrdinal(
+				rnode.getNodeType());
+			if(nType == R_NodeType.ENTRANCE)
 				addEntranceState(new EntranceState(rnode));
-			else if (nType == 0) {    // station
+			else if(nType == R_NodeType.STATION) {
 				if (rnode.station_id != null && Integer.parseInt(rnode.station_id.substring(1)) / 100 != 17 /* check wavetronics */ && rnode.getDetectorSet().size() > 0) {
 					addStationState(new StationState(rnode));
 				}
