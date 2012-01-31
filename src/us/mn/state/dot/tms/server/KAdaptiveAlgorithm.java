@@ -36,6 +36,9 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
  */
 public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
+	/** Algorithm debug log */
+	static private final IDebugLog ALG_LOG = new IDebugLog("kadaptive");
+
 	/** Critical Density */
 	static private final double K_CRIT = 40;
 
@@ -677,32 +680,36 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			s.setAssociatedEntrances();
 
 		/** for debugging of corridor structure */
-		if(false) {
-			System.err.println("Corridor Structure : " + corridor.getName() + " --------------------");
-			StringBuilder sb = new StringBuilder();
-			for(int i = 0; i < states.size(); i++) {
-				RNodeState state = states.get(i);
-				sb.append("[" + String.format("%02d", state.idx) + "] ");
-				if(state.type.isStation()) {
-					StationState ss = (StationState) state;
-					sb.append(state.rnode.station_id + " -> ");
-					for(EntranceState es : ss.getAssociatedEntrances()) {
-						if(es != null && es.hasMeter())
-							sb.append(es.meterState.meter.name + ", ");
-					}
-				}
-				if(state.type.isEntrance()) {
-					EntranceState e = (EntranceState) state;
-				if(e.hasMeter())
-					sb.append("Ent(" + e.meterState.meter.name + ")");
-				else
-					sb.append("Ent(" + e.rnode.name + ")");
-				}
-				sb.append("\n");
-			}
-			System.err.println(sb.toString());
-		}
+		if(ALG_LOG.isOpen())
+			debug();
 		isAssociated = true;
+	}
+
+	/** Debug algorithm. */
+	private void debug() {
+		ALG_LOG.log("Corridor Structure : " + corridor.getName() + " --------------------");
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < states.size(); i++) {
+			RNodeState state = states.get(i);
+			sb.append("[" + String.format("%02d", state.idx) + "] ");
+			if(state.type.isStation()) {
+				StationState ss = (StationState) state;
+				sb.append(state.rnode.station_id + " -> ");
+				for(EntranceState es : ss.getAssociatedEntrances()) {
+					if(es != null && es.hasMeter())
+						sb.append(es.meterState.meter.name + ", ");
+				}
+			}
+			if(state.type.isEntrance()) {
+				EntranceState e = (EntranceState) state;
+			if(e.hasMeter())
+				sb.append("Ent(" + e.meterState.meter.name + ")");
+			else
+				sb.append("Ent(" + e.rnode.name + ")");
+			}
+			sb.append("\n");
+		}
+		ALG_LOG.log(sb.toString());
 	}
 
 	/**
