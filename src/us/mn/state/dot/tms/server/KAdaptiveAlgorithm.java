@@ -184,7 +184,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/** Process the stratified plan for the next interval */
+	/** Process the algorithm for the one interval */
 	protected void processInterval() {
 		if(!isAssociated)
 			doAssociateStationAndEntrance();
@@ -628,7 +628,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		states.add(stationState);
 	}
 
-	/** Is this KAdaptiveAlgorithm zone done? */
+	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
 		boolean done = true;
 		for(MeterState state : meterStates.values()) {
