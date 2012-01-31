@@ -133,10 +133,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private final ArrayList<StationState> stationStates =
 		new ArrayList<StationState>();
 
-	/** Entrance states list in the corridor */
-	private final ArrayList<EntranceState> entranceStates =
-		new ArrayList<EntranceState>();
-
 	/** Hash map of ramp meter states */
 	private final HashMap<String, MeterState> meterStates =
 		new HashMap<String, MeterState>();
@@ -176,11 +172,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 */
 	private void addMeterState(MeterState state) {
 		R_NodeImpl rnode = state.meter.getR_Node();
-		for(EntranceState es : entranceStates) {
-			if(es.rnode.equals(rnode)) {
-				es.meterState = state;
-				state.entrance = es;
-				es.checkFreewayToFreeway();
+		for(RNodeState ns : states) {
+			if(ns instanceof EntranceState) {
+				EntranceState es = (EntranceState)ns;
+				if(es.rnode.equals(rnode)) {
+					es.meterState = state;
+					state.entrance = es;
+					es.checkFreewayToFreeway();
+				}
 			}
 		}
 	}
@@ -242,7 +241,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			boolean increaseTrend = true;
 			boolean highDensity = true;
 
-			for(int j = 0; j < bottleneckTrendSteps(); j++){
+			for(int j = 0; j < bottleneckTrendSteps(); j++) {
 				double k = s.getAggregatedDensity(j);
 				double pk = s.getAggregatedDensity(j + 1);
 				if(k < pk)
@@ -670,8 +669,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void afterMetering() {
 		for(StationState s : stationStates)
 			s.afterMetering();
-		for(EntranceState es : entranceStates)
-			es.setBottleneck(null);
+		for(RNodeState ns : states) {
+			if(ns instanceof EntranceState) {
+				EntranceState es = (EntranceState)ns;
+				es.setBottleneck(null);
+			}
+		}
 	}
 
 	/** Create a new KAdaptiveAlgorithm */
@@ -702,9 +705,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param entranceState
 	 */
 	private void addEntranceState(EntranceState entranceState) {
-		entranceState.entranceIdx = entranceStates.size();
 		entranceState.idx = states.size();
-		entranceStates.add(entranceState);
 		states.add(entranceState);
 	}
 
@@ -1145,9 +1146,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Factor to compute ramp demand from passage/merge flow */
 		private double PASSAGE_DEMAND_FACTOR = 1.15;
-
-		/** Entrance index from upstream */
-		private int entranceIdx;
 
 		/** Meter state mapping this entrance */
 		private MeterState meterState;
