@@ -26,8 +26,8 @@ public class BoundedSampleHistory {
 	/** Sample data history */
 	private final Double[] samples;
 
-	/** Head sample (most recent) */
-	private int head = -1;
+	/** Sample cursor (most recent) */
+	private int cursor = -1;
 
 	/** Count of samples */
 	private int n_samples = 0;
@@ -45,8 +45,8 @@ public class BoundedSampleHistory {
 	 * @param sam Current sample data.
 	 */
 	public void push(Double sam) {
-		head = nextIndex(head);
-		samples[head] = sam;
+		cursor = nextIndex(cursor);
+		samples[cursor] = sam;
 		if(n_samples < samples.length)
 			n_samples++;
 	}
@@ -64,7 +64,7 @@ public class BoundedSampleHistory {
 	 */
 	public Double get(int i) {
 		if(i < n_samples) {
-			int idx = head - i;
+			int idx = cursor - i;
 			if(idx < 0)
 				idx += samples.length;
 			return samples[idx];
@@ -76,7 +76,7 @@ public class BoundedSampleHistory {
 	 * Clear storage.
 	 */
 	public void clear() {
-		head = -1;
+		cursor = -1;
 		n_samples = 0;
 	}
 
