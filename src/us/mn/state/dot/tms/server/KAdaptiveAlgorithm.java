@@ -99,9 +99,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Corridor */
 	protected final Corridor corridor;
 
-	/** Corridor Helper */
-	protected CorridorHelper corridorHelper = new CorridorHelper();
-
 	/** Bottleneck Finder */
 	protected final BottleneckFinder bottleneckFinder;
 
@@ -150,7 +147,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if(state != null)
 			return state;
 		state = new MeterState(meter);
-		corridorHelper.addMeterState(state);
+		addMeterState(state);
 		meterStates.put(meter.getName(), state);
 		return state;
 	}
@@ -163,8 +160,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Process the stratified plan for the next interval */
 	protected void processInterval() {
 		if(!isAssociated)
-			corridorHelper.doAssociateStationAndEntrance();
-		for(StationState s : corridorHelper.stationStates)
+			doAssociateStationAndEntrance();
+		for(StationState s : stationStates)
 			s.updateState();
 		bottleneckFinder.findBottlenecks();
 		calculateMeteringRates();
@@ -182,16 +179,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		int bottleneckCount = 0;
 		StationState downstreamBS = null;
 		// calculate sum of density of bottlenecks
-		for(StationState s : corridorHelper.stationStates) {
+		for(StationState s : stationStates) {
 			if(s.isBottleneck) {
 				downstreamBS = s;
 				bottleneckCount++;
 			}
 		}
 		double avgK = 0;
-		StationState upStation = corridorHelper.stationStates.get(0);
+		StationState upStation = stationStates.get(0);
 		if(downstreamBS != null)
-			avgK = corridorHelper.getAverageDensity(upStation, downstreamBS);
+			avgK = getAverageDensity(upStation, downstreamBS);
 		k_hist_corridor.push(avgK);
 		int size = k_hist_corridor.size();
 		if(bottleneckCount > 1)
@@ -225,8 +222,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		// iterate from downstream to upstream
 		boolean hasBottleneck = false;
-		for(int i = corridorHelper.stationStates.size() - 1; i >= 0; i--) {
-			StationState s = corridorHelper.stationStates.get(i);
+		for(int i = stationStates.size() - 1; i >= 0; i--) {
+			StationState s = stationStates.get(i);
 
 			// station is bottleneck
 			if(s.isBottleneck) {
@@ -303,15 +300,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void calculateMeteringRates() {
 
 		// downstream boundary -> upstream
-		for(int i = corridorHelper.stationStates.size() - 1; i >= 0; i--) {
-			StationState station = corridorHelper.stationStates.get(i);
+		for(int i = stationStates.size() - 1; i >= 0; i--) {
+			StationState station = stationStates.get(i);
 			if(!station.isBottleneck || station.station == null)
 				continue;
 			calculateMeteringRates(station, i);
 		}
 
 		// when meter is not in zone
-		for(StationState s : corridorHelper.stationStates)
+		for(StationState s : stationStates)
 			defaultMetering(s);
 	}
 
@@ -338,7 +335,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		for(int i = stationIndex - 1; i >= 0; i--) {
 
 			// break, if upstation is bottleneck
-			StationState upStation = corridorHelper.stationStates.get(i);
+			StationState upStation = stationStates.get(i);
 			if(upStation.isBottleneck)
 				break;
 			if(upStation.station == null)
@@ -392,7 +389,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		double Kt = bottleneck.getAggregatedDensity();
 		if(upstream != null)
-			Kt = corridorHelper.getAverageDensity(upstream, bottleneck);
+			Kt = getAverageDensity(upstream, bottleneck);
 
 		entrance.saveSegmentDensityHistory(Kt);
 
@@ -465,7 +462,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			// Start Condition 1 : segment density > Kb
 			double segmentDensity = 0;
 			if(us != null)
-				segmentDensity = corridorHelper.getAverageDensity(us, bs);
+				segmentDensity = getAverageDensity(us, bs);
 			else
 				segmentDensity = bs.getAggregatedDensity();
 
@@ -503,7 +500,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		for(int i = 0; i < 10; i++) {
 			if(us != null)
-				segmentDensity = corridorHelper.getAverageDensity(us, bs, i);
+				segmentDensity = getAverageDensity(us, bs, i);
 			else
 				segmentDensity = bs.getAggregatedDensity(i);
 
@@ -541,9 +538,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * Post metering process
 	 */
 	private void afterMetering() {
-		for(StationState s : corridorHelper.stationStates)
+		for(StationState s : stationStates)
 			s.afterMetering();
-		for(EntranceState es : corridorHelper.entranceStates)
+		for(EntranceState es : entranceStates)
 			es.setBottleneck(null);
 	}
 
@@ -551,7 +548,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private KAdaptiveAlgorithm(Corridor c) {
 		corridor = c;
 		createStates();
-		bottleneckFinder = new BottleneckFinder(corridorHelper);
+		bottleneckFinder = new BottleneckFinder();
 	}
 
 	/** construct corridor structure */
@@ -561,10 +558,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			R_NodeImpl rnode = (R_NodeImpl) itr.next();
 			int nType = rnode.getNodeType();
 			if(nType == 1)   // entrance
-				corridorHelper.addEntranceState(new EntranceState(rnode));
+				addEntranceState(new EntranceState(rnode));
 			else if (nType == 0) {    // station
 				if (rnode.station_id != null && Integer.parseInt(rnode.station_id.substring(1)) / 100 != 17 /* check wavetronics */ && rnode.getDetectorSet().size() > 0) {
-					corridorHelper.addStationState(new StationState(rnode));
+					addStationState(new StationState(rnode));
 				}
 			}
 		}
@@ -582,179 +579,163 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return done;
 	}
 
+
+
+
+
+	/** All r_node states */
+	private final ArrayList<RNodeState> states = new ArrayList<RNodeState>();
+
+	/** Station states list in the corridor */
+	private final ArrayList<StationState> stationStates = new ArrayList<StationState>();
+
+	/** Entrance states list in the corridor */
+	private final ArrayList<EntranceState> entranceStates = new ArrayList<EntranceState>();
+
 	/**
-	 * Class : Corridor Helper
-	 *     - manage station, entrance structures
+	 * Add meter state
+	 * @param state
 	 */
-	class CorridorHelper {
-
-		/** All r_node states */
-		ArrayList<RNodeState> states = new ArrayList<RNodeState>();
-		/** Station states list in the corridor */
-		ArrayList<StationState> stationStates = new ArrayList<StationState>();
-		/** Entrance states list in the corridor */
-		ArrayList<EntranceState> entranceStates = new ArrayList<EntranceState>();
-		/** Meter states list in the corridor */
-		ArrayList<MeterState> meters = new ArrayList<MeterState>();
-
-		/**
-		 * Add meter state
-		 * @param state
-		 */
-		private void addMeterState(MeterState state) {
-			meters.add(state);
-			R_NodeImpl rnode = state.meter.getR_Node();
-			for(EntranceState es : entranceStates) {
-				if(es.rnode.equals(rnode)) {
-					es.meterState = state;
-					state.entrance = es;
-					es.checkFreewayToFreeway();
-				}
+	private void addMeterState(MeterState state) {
+		R_NodeImpl rnode = state.meter.getR_Node();
+		for(EntranceState es : entranceStates) {
+			if(es.rnode.equals(rnode)) {
+				es.meterState = state;
+				state.entrance = es;
+				es.checkFreewayToFreeway();
 			}
-		}
-
-		/**
-		 * Add entrance state
-		 * @param entranceState
-		 */
-		private void addEntranceState(EntranceState entranceState) {
-			entranceState.entranceIdx = entranceStates.size();
-			entranceState.idx = states.size();
-			entranceStates.add(entranceState);
-			states.add(entranceState);
-		}
-
-		/**
-		 * Add station state
-		 * @param stationState
-		 */
-		private void addStationState(StationState stationState) {
-			stationState.stationIdx = stationStates.size();
-			stationState.idx = states.size();
-			stationStates.add(stationState);
-			states.add(stationState);
-		}
-
-		/**
-		 * Return distance between two r_nodes in feet
-		 * @param rn1 r_node
-		 * @param rn2 r_node
-		 */
-		public double getDistanceInFeet(R_NodeImpl rn1, R_NodeImpl rn2) {
-			int e1 = rn1.getGeoLoc().getEasting();
-			int e2 = rn2.getGeoLoc().getEasting();
-			int n1 = rn1.getGeoLoc().getNorthing();
-			int n2 = rn2.getGeoLoc().getNorthing();
-			return (int) (Math.sqrt((e1 - e2) * (e1 - e2) + (n1 - n2) * (n1 - n2)) / 1609 * 5280);
-		}
-
-		/**
-		 * Return upstream station state
-		 * @param idx rnode-index of state
-		 * @return upstream station state
-		 */
-		public StationState getUpstreamStationState(int idx) {
-			if(idx <= 0 || idx >= states.size())
-				return null;
-			for(int i = idx - 1; i >= 0; i--) {
-				RNodeState st = states.get(i);
-				if(st.type.isStation())
-					return (StationState) st;
-			}
-			return null;
-		}
-
-		/**
-		 * Return downstream station state
-		 * @param idx rnode-index of state
-		 * @return downstream station state
-		 */
-		public StationState getDownstreamStationState(int idx) {
-			if(idx < 0 || idx >= states.size() - 1)
-				return null;
-			for(int i = idx + 1; i < states.size(); i++) {
-				RNodeState st = states.get(i);
-				if(st.type.isStation())
-					return (StationState) st;
-			}
-			return null;
-		}
-
-		/**
-		 * Should be called after added all stations and meters
-		 */
-		public void doAssociateStationAndEntrance() {
-			for(StationState s : stationStates)
-				s.setAssociatedEntrances();
-
-			/** for debugging of corridor structure */
-			if(false) {
-				System.err.println("Corridor Structure : " + corridor.getName() + " --------------------");
-				StringBuilder sb = new StringBuilder();
-				for(int i = 0; i < states.size(); i++) {
-					RNodeState state = states.get(i);
-					sb.append("[" + String.format("%02d", state.idx) + "] ");
-					if(state.type.isStation()) {
-						StationState ss = (StationState) state;
-						sb.append(state.rnode.station_id + " -> ");
-						for(EntranceState es : ss.getAssociatedEntrances()) {
-							if(es != null && es.hasMeter())
-								sb.append(es.meterState.meter.name + ", ");
-						}
-					}
-					if(state.type.isEntrance()) {
-						EntranceState e = (EntranceState) state;
-					if(e.hasMeter())
-						sb.append("Ent(" + e.meterState.meter.name + ")");
-					else
-						sb.append("Ent(" + e.rnode.name + ")");
-					}
-					sb.append("\n");
-				}
-				System.err.println(sb.toString());
-			}
-			isAssociated = true;
-		}
-
-		/**
-		 * Returns average density between 2 station
-		 * @param upStation upstream station
-		 * @param downStation downstream station (not need to be next downstream of upStation)
-		 * @return average density (distance weight)
-		 */
-		public double getAverageDensity(StationState upStation, StationState downStation) {
-			return getAverageDensity(upStation, downStation, 0);
-		}
-
-		/**
-		 * Returns average density between 2 station at prevStep time steps ago
-		 * @param upStation upstream station
-		 * @param downStation downstream station (not need to be next downstream of upStation)
-		 * @param prevStep previous time steps
-		 * @return average density (distance weight)
-		 */
-		public double getAverageDensity(StationState upStation, StationState downStation, int prevStep) {
-			StationState cursor = upStation;
-
-			double totalDistance = 0;
-			double avgDensity = 0;
-			while(true) {
-				StationState dStation = getDownstreamStationState(cursor.idx);
-				double upDensity = cursor.getAggregatedDensity(prevStep);
-				double downDensity = dStation.getAggregatedDensity(prevStep);
-				double middleDensity = (upDensity + downDensity) / 2;
-				double distance = getDistanceInFeet(cursor.rnode, dStation.rnode) / 5280;
-				double distanceFactor = distance / 3;
-				totalDistance += distance;
-				avgDensity += (upDensity + middleDensity + downDensity) * distanceFactor;
-
-				if(dStation.equals(downStation))
-					break;
-				cursor = dStation;
-			}
-			return avgDensity / totalDistance;
 		}
 	}
+
+	/**
+	 * Add entrance state
+	 * @param entranceState
+	 */
+	private void addEntranceState(EntranceState entranceState) {
+		entranceState.entranceIdx = entranceStates.size();
+		entranceState.idx = states.size();
+		entranceStates.add(entranceState);
+		states.add(entranceState);
+	}
+
+	/**
+	 * Add station state
+	 * @param stationState
+	 */
+	private void addStationState(StationState stationState) {
+		stationState.stationIdx = stationStates.size();
+		stationState.idx = states.size();
+		stationStates.add(stationState);
+		states.add(stationState);
+	}
+
+	/**
+	 * Return distance between two r_nodes in feet
+	 * @param rn1 r_node
+	 * @param rn2 r_node
+	 */
+	public double getDistanceInFeet(R_NodeImpl rn1, R_NodeImpl rn2) {
+		int e1 = rn1.getGeoLoc().getEasting();
+		int e2 = rn2.getGeoLoc().getEasting();
+		int n1 = rn1.getGeoLoc().getNorthing();
+		int n2 = rn2.getGeoLoc().getNorthing();
+		return (int) (Math.sqrt((e1 - e2) * (e1 - e2) + (n1 - n2) * (n1 - n2)) / 1609 * 5280);
+	}
+
+	/**
+	 * Return downstream station state
+	 * @param idx rnode-index of state
+	 * @return downstream station state
+	 */
+	public StationState getDownstreamStationState(int idx) {
+		if(idx < 0 || idx >= states.size() - 1)
+			return null;
+		for(int i = idx + 1; i < states.size(); i++) {
+			RNodeState st = states.get(i);
+			if(st.type.isStation())
+				return (StationState) st;
+		}
+		return null;
+	}
+
+	/**
+	 * Should be called after added all stations and meters
+	 */
+	public void doAssociateStationAndEntrance() {
+		for(StationState s : stationStates)
+			s.setAssociatedEntrances();
+
+		/** for debugging of corridor structure */
+		if(false) {
+			System.err.println("Corridor Structure : " + corridor.getName() + " --------------------");
+			StringBuilder sb = new StringBuilder();
+			for(int i = 0; i < states.size(); i++) {
+				RNodeState state = states.get(i);
+				sb.append("[" + String.format("%02d", state.idx) + "] ");
+				if(state.type.isStation()) {
+					StationState ss = (StationState) state;
+					sb.append(state.rnode.station_id + " -> ");
+					for(EntranceState es : ss.getAssociatedEntrances()) {
+						if(es != null && es.hasMeter())
+							sb.append(es.meterState.meter.name + ", ");
+					}
+				}
+				if(state.type.isEntrance()) {
+					EntranceState e = (EntranceState) state;
+				if(e.hasMeter())
+					sb.append("Ent(" + e.meterState.meter.name + ")");
+				else
+					sb.append("Ent(" + e.rnode.name + ")");
+				}
+				sb.append("\n");
+			}
+			System.err.println(sb.toString());
+		}
+		isAssociated = true;
+	}
+
+	/**
+	 * Returns average density between 2 station
+	 * @param upStation upstream station
+	 * @param downStation downstream station (not need to be next downstream of upStation)
+	 * @return average density (distance weight)
+	 */
+	public double getAverageDensity(StationState upStation, StationState downStation) {
+		return getAverageDensity(upStation, downStation, 0);
+	}
+
+	/**
+	 * Returns average density between 2 station at prevStep time steps ago
+	 * @param upStation upstream station
+	 * @param downStation downstream station (not need to be next downstream of upStation)
+	 * @param prevStep previous time steps
+	 * @return average density (distance weight)
+	 */
+	public double getAverageDensity(StationState upStation, StationState downStation, int prevStep) {
+		StationState cursor = upStation;
+
+		double totalDistance = 0;
+		double avgDensity = 0;
+		while(true) {
+			StationState dStation = getDownstreamStationState(cursor.idx);
+			double upDensity = cursor.getAggregatedDensity(prevStep);
+			double downDensity = dStation.getAggregatedDensity(prevStep);
+			double middleDensity = (upDensity + downDensity) / 2;
+			double distance = getDistanceInFeet(cursor.rnode, dStation.rnode) / 5280;
+			double distanceFactor = distance / 3;
+			totalDistance += distance;
+			avgDensity += (upDensity + middleDensity + downDensity) * distanceFactor;
+
+			if(dStation.equals(downStation))
+				break;
+			cursor = dStation;
+		}
+		return avgDensity / totalDistance;
+	}
+
+
+
+
 
 	/**
 	 * Enum : R_Node State Type
@@ -935,11 +916,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public double getAcceleration() {
 			double u2 = getAggregatedSpeed();
-			StationState downStationState = corridorHelper.getDownstreamStationState(idx);
+			StationState downStationState = getDownstreamStationState(idx);
 			if(downStationState == null)
 				return 0;
 			double u1 = downStationState.getAggregatedSpeed();
-			return (u1 * u1 - u2 * u2) / (2 * corridorHelper.getDistanceInFeet(rnode, downStationState.rnode) / 5280);
+			return (u1 * u1 - u2 * u2) / (2 * getDistanceInFeet(rnode, downStationState.rnode) / 5280);
 		}
 
 		/**
@@ -965,9 +946,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 			StationState us = null, ds = null;
 			if(stationIdx > 0)
-				us = corridorHelper.stationStates.get(stationIdx - 1);
-			if(stationIdx < corridorHelper.stationStates.size() - 1)
-				ds = corridorHelper.stationStates.get(stationIdx + 1);
+				us = stationStates.get(stationIdx - 1);
+			if(stationIdx < stationStates.size() - 1)
+				ds = stationStates.get(stationIdx + 1);
 
 			if(us != null) {
 				for(EntranceState es : upstreamEntrances) {
@@ -1009,7 +990,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(idx <= 0)
 				return list;
 			for(int i = idx - 1; i >= 0; i--) {
-				RNodeState s = corridorHelper.states.get(i);
+				RNodeState s = states.get(i);
 				if(s.type.isStation())
 					break;
 				if(s.type.isEntrance() && ((EntranceState) s).hasMeter())
@@ -1024,11 +1005,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public ArrayList<EntranceState> getDownstreamEntrances() {
 			ArrayList<EntranceState> list = new ArrayList<EntranceState>();
-			if(idx >= corridorHelper.states.size() - 1)
+			if(idx >= states.size() - 1)
 				return list;
 
-			for(int i = idx + 1; i < corridorHelper.states.size(); i++) {
-				RNodeState s = corridorHelper.states.get(i);
+			for(int i = idx + 1; i < states.size(); i++) {
+				RNodeState s = states.get(i);
 				if(s.type.isStation())
 					break;
 				if(s.type.isEntrance() && ((EntranceState) s).hasMeter())
@@ -1051,8 +1032,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 			boolean found = false;
 			for(int i = idx - 1; i >= 0; i--) {
-				s = corridorHelper.states.get(i);
-				distance += corridorHelper.getDistanceInFeet(cursor.rnode, s.rnode);
+				s = states.get(i);
+				distance += getDistanceInFeet(cursor.rnode, s.rnode);
 				if(s.equals(es)) {
 					found = true;
 					break;
@@ -1071,16 +1052,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return distance in feet
 		 */
 		public int getDistanceToDownstreamEntrance(EntranceState es) {
-			if(idx >= corridorHelper.states.size() - 1)
+			if(idx >= states.size() - 1)
 				return -1;
 			int distance = 0;
 			RNodeState cursor = this;
 			RNodeState s = null;
 
 			boolean found = false;
-			for(int i = idx + 1; i < corridorHelper.states.size(); i++) {
-				s = corridorHelper.states.get(i);
-				distance += corridorHelper.getDistanceInFeet(cursor.rnode, s.rnode);
+			for(int i = idx + 1; i < states.size(); i++) {
+				s = states.get(i);
+				distance += getDistanceInFeet(cursor.rnode, s.rnode);
 				if(s.equals(es)) {
 					found = true;
 					break;
@@ -1470,22 +1451,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 */
 	public class BottleneckFinder {
 
-		CorridorHelper corridorHelper;
-
-		/**
-		 * Constructor
-		 * @param corridorHelper
-		 */
-		public BottleneckFinder(CorridorHelper corridorHelper) {
-			this.corridorHelper = corridorHelper;
-		}
-
 		/**
 		 * Find bottlenecks
 		 */
 		public void findBottlenecks() {
-
-			ArrayList<StationState> stationStates = corridorHelper.stationStates;
 
 			// find bottleneck candidates
 			for(int i = 0; i < stationStates.size(); i++) {
