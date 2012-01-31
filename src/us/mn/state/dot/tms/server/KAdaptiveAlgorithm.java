@@ -48,11 +48,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Acceleration threshold to decide bottleneck */
 	static private final int A_BOTTLENECK = 1000;
 
-	/** How many time steps must be satisfied to stop metering */
+	/** Number of time steps to check before stop metering */
 	static private final int STOP_STEPS = 10;
 
-	/** How many time steps for bottleneck trend after stop metering */
+	/** Number of time steps for bottleneck trend after stop metering */
 	static private final int BOTTLENECK_TREND_STEPS_AFTER_STOP = 4;
+
+	/** Number of steps for average density to check corridor state */
+	static private final int AVG_K_STEPS = 30;
+
+	/** Number of trend steps for average density to check corridor state */
+	static private final int AVG_K_TREND_STEPS = 10;
 
 	/** Get the absolute minimum release rate */
 	static protected int getMinRelease() {
@@ -108,12 +114,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Rate value to calculated metering rate for checking if metering is started */
 	protected double KstartThres = 0.8;
 
-	/** Window for average density to check corridor state */
-	protected int avgDensityWindow = 30;
-
-	/** Trend count for average density to check corridor state */
-	protected int avgDensityTrend = 10;
-
 	/** Is started metering in this corridor? */
 	protected boolean isMeteringStarted = false;
 
@@ -124,7 +124,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private boolean isAssociated = false;
 
 	/** Corridor density history for triggering metering stop */
-	protected BoundedSampleHistory corridorKHistory = new BoundedSampleHistory(avgDensityWindow + avgDensityTrend);
+	private final BoundedSampleHistory k_hist_corridor =
+		new BoundedSampleHistory(AVG_K_STEPS + AVG_K_TREND_STEPS);
 
 	/** Hash map of ramp meter states */
 	protected final HashMap<String, MeterState> meterStates =
@@ -191,16 +192,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		StationState upStation = corridorHelper.stationStates.get(0);
 		if(downstreamBS != null)
 			avgK = corridorHelper.getAverageDensity(upStation, downstreamBS);
-		corridorKHistory.push(avgK);
-		int size = corridorKHistory.size();
+		k_hist_corridor.push(avgK);
+		int size = k_hist_corridor.size();
 		if(bottleneckCount > 1)
 			return;
-		if(size < avgDensityWindow + avgDensityTrend)
+		if(size < AVG_K_STEPS + AVG_K_TREND_STEPS)
 			return;
 		// check avg K of corridor average density
-		for(int i = 0; i < avgDensityTrend; i++) {
-			Double ma_next = corridorKHistory.average(i, avgDensityWindow);
-			Double ma_prev = corridorKHistory.average(i + 1, avgDensityWindow);
+		for(int i = 0; i < AVG_K_TREND_STEPS; i++) {
+			Double ma_next = k_hist_corridor.average(i, AVG_K_STEPS);
+			Double ma_prev = k_hist_corridor.average(i + 1, AVG_K_STEPS);
 			if(ma_next == null || ma_prev == null)
 				return;
 			if(ma_next > ma_prev)
