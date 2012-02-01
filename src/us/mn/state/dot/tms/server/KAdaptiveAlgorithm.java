@@ -40,14 +40,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Algorithm debug log */
 	static private final IDebugLog ALG_LOG = new IDebugLog("kadaptive");
 
+	/** Bottleneck Density */
+	static private final int K_BOTTLENECK = 25;
+
 	/** Critical Density */
-	static private final double K_CRIT = 40;
+	static private final int K_CRIT = 40;
 
 	/** Desired Density */
 	static private final double K_DES = K_CRIT * 0.8;
 
 	/** Jam Density */
-	static private final double K_JAM = 180;
+	static private final int K_JAM = 180;
 
 	/** Rate value for checking if metering is started */
 	static private final double K_START_THRESH = 0.8;
@@ -111,9 +114,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Corridor */
 	protected final Corridor corridor;
-
-	/** Bottleneck Density */
-	protected double Kb = 25;
 
 	/** Is started metering in this corridor? */
 	protected boolean isMeteringStarted = false;
@@ -287,7 +287,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		for(int i = 0; i < stationStates.size(); i++) {
 			StationState s = stationStates.get(i);
 
-			if(s.getAggregatedDensity() < Kb)
+			if(s.getAggregatedDensity() < bottleneckDensity())
 				continue;
 
 			boolean increaseTrend = true;
@@ -298,7 +298,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				double pk = s.getAggregatedDensity(j + 1);
 				if(k < pk)
 					increaseTrend = false;
-				if(k < Kb || pk < Kb)
+				if(k < bottleneckDensity() ||
+				   pk < bottleneckDensity())
 					highDensity = false;
 			}
 
@@ -365,9 +366,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return;
 		}
 
-		// restrict condition
-		Kb = K_DES;
-
 		// let's check stop condition from now
 		doStopChecking = true;
 	}
@@ -385,12 +383,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return 0;
 	}
 
+	/** Get the density for determining a bottleneck */
+	private double bottleneckDensity() {
+		return doStopChecking ? K_DES : K_BOTTLENECK;
+	}
+
 	/** Get number of time steps to check for bottleneck */
 	private int bottleneckTrendSteps() {
-		if(doStopChecking)
-			return BOTTLENECK_TREND_STEPS_AFTER_STOP;
-		else
-			return BOTTLENECK_TREND_STEPS_BEFORE_STOP;
+		return doStopChecking ? BOTTLENECK_TREND_STEPS_AFTER_STOP :
+		                        BOTTLENECK_TREND_STEPS_BEFORE_STOP;
 	}
 
 	/**
@@ -636,7 +637,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		///////////////////////////////////
 
 		// Before stopped
-		//    - SegmentDensity >= Kb (just once)
+		//    - SegmentDensity >= bottleneckDensity (just once)
 		//    - OR -
 		//    - Merging flow of ramp >= KstartRate * Allocated Rate (for n times)
 		boolean satisfyDensityCondition = false;
@@ -644,14 +645,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		// segment density (average density from upstream station to bottleneck)
 		if(!es.hasBeenStoped) {
-			// Start Condition 1 : segment density > Kb
+			// Start Condition 1 : segment K > bottleneckDensity
 			double segmentDensity = 0;
 			if(us != null)
 				segmentDensity = getAverageDensity(us, bs);
 			else
 				segmentDensity = bs.getAggregatedDensity();
 
-			if(segmentDensity >= Kb)
+			if(segmentDensity >= bottleneckDensity())
 				satisfyDensityCondition = true;
 
 			// Start Condition 2 : merging flow of ramp > Rate * 0.8
@@ -674,7 +675,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		// After stopped
-		//    - SegmentDensity >= Kb (for n times)
+		//    - SegmentDensity >= bottleneckDensity (for n times)
 		//    - AND -
 		//    - Merging flow of ramp >= KstartRate * Allocated Rate (for n times)
 		double segmentDensity = 0;
@@ -689,8 +690,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			else
 				segmentDensity = bs.getAggregatedDensity(i);
 
-			// Start Condition 1 : segment density > Kb
-			if(segmentDensity < Kb)
+			// Start Condition 1 : segment density > bottleneck K
+			if(segmentDensity < bottleneckDensity())
 				return false;
 
 			// Start Condition 2 : Merging flow >= KstartRate
