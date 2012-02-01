@@ -609,57 +609,70 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		EntranceState es, double Rnext)
 	{
 		es.saveRateHistory(Rnext);
-
-		// Condition 0 : already started
 		if(es.isMetering)
 			return true;
+		if(!es.hasBeenStoped)
+			return checkStartFirst(bs, us, es);
+		else
+			return checkStartAfterStop(bs, us, es);
+	}
 
-		///////////////////////////////////
-		// Check Start Conditions
-		///////////////////////////////////
-
-		// Before stopped
-		//    - SegmentDensity >= bottleneckDensity (just once)
-		//    - OR -
-		//    - Merging flow of ramp >= KstartRate * Allocated Rate (for n times)
+	/**
+	 * Check start condition (first time -- has not stopped previously).
+	 * <pre>
+	 *	SegmentDensity &gt;= bottleneckDensity (just once)
+	 *	   - OR -
+	 *	Merging flow &gt;= KstartRate * Allocated Rate (for n steps)
+	 * </pre>
+	 * Segment density is the average density from the upstream station to
+	 * bottleneck.
+	 */
+	private boolean checkStartFirst(StationState bs, StationState us,
+		EntranceState es)
+	{
 		boolean satisfyDensityCondition = false;
 		boolean satisfyRateCondition = false;
 
-		// segment density (average density from upstream station to bottleneck)
-		if(!es.hasBeenStoped) {
-			// Start Condition 1 : segment K > bottleneckDensity
-			double segmentDensity = 0;
-			if(us != null)
-				segmentDensity = getAverageDensity(us, bs);
-			else
-				segmentDensity = bs.getAggregatedDensity();
+		double segmentDensity = 0;
+		if(us != null)
+			segmentDensity = getAverageDensity(us, bs);
+		else
+			segmentDensity = bs.getAggregatedDensity();
 
-			if(segmentDensity >= bottleneckDensity())
-				satisfyDensityCondition = true;
+		if(segmentDensity >= bottleneckDensity())
+			satisfyDensityCondition = true;
 
-			// Start Condition 2 : merging flow of ramp > Rate * 0.8
-			if(es.countRateHistory() >= 3) {
-				satisfyRateCondition = true;
-				for(int i = 0; i < 3; i++) {
-					double q = es.getFlow(i);
-					double rate = es.getRate(i);
-					if(q < K_START_THRESH * rate)
-						satisfyRateCondition = false;
-				}
+		if(es.countRateHistory() >= 3) {
+			satisfyRateCondition = true;
+			for(int i = 0; i < 3; i++) {
+				double q = es.getFlow(i);
+				double rate = es.getRate(i);
+				if(q < K_START_THRESH * rate)
+					satisfyRateCondition = false;
 			}
-
-			if(satisfyRateCondition || satisfyDensityCondition) {
-				es.startMetering();
-				isMeteringStarted = true;
-				return true;
-			}
-			return false;
 		}
 
-		// After stopped
-		//    - SegmentDensity >= bottleneckDensity (for n times)
-		//    - AND -
-		//    - Merging flow of ramp >= KstartRate * Allocated Rate (for n times)
+		if(satisfyRateCondition || satisfyDensityCondition) {
+			es.startMetering();
+			isMeteringStarted = true;
+			return true;
+		} else
+			return false;
+	}
+
+	/**
+	 * Check start condition (after stopping previously).
+	 * <pre>
+	 *	SegmentDensity &gt;= bottleneckDensity (for n steps)
+	 *	   - AND -
+	 *	Merging flow &gt;= KstartRate * Allocated Rate (for n times)
+	 * </pre>
+	 * Segment density is the average density from the upstream station to
+	 * bottleneck.
+	 */
+	private boolean checkStartAfterStop(StationState bs, StationState us,
+		EntranceState es)
+	{
 		double segmentDensity = 0;
 
 		// if rate history is short, pass (do not start)
