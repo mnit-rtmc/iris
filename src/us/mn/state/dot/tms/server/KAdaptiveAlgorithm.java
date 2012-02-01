@@ -140,6 +140,49 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private final HashMap<String, MeterState> meterStates =
 		new HashMap<String, MeterState>();
 
+	/** Create a new KAdaptiveAlgorithm */
+	private KAdaptiveAlgorithm(Corridor c) {
+		corridor = c;
+		createStates();
+	}
+
+	/** Create states from corridor structure */
+	private void createStates() {
+		Iterator<R_Node> itr = corridor.iterator();
+		while(itr.hasNext()) {
+			R_NodeImpl rnode = (R_NodeImpl) itr.next();
+			R_NodeType nType = R_NodeType.fromOrdinal(
+				rnode.getNodeType());
+			if(nType == R_NodeType.ENTRANCE)
+				addEntranceState(new EntranceState(rnode));
+			else if(nType == R_NodeType.STATION) {
+				if (rnode.station_id != null && Integer.parseInt(rnode.station_id.substring(1)) / 100 != 17 /* check wavetronics */ && rnode.getDetectorSet().size() > 0) {
+					addStationState(new StationState(rnode));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add entrance state
+	 * @param entranceState
+	 */
+	private void addEntranceState(EntranceState entranceState) {
+		entranceState.idx = states.size();
+		states.add(entranceState);
+	}
+
+	/**
+	 * Add station state
+	 * @param stationState
+	 */
+	private void addStationState(StationState stationState) {
+		stationState.stationIdx = stationStates.size();
+		stationState.idx = states.size();
+		stationStates.add(stationState);
+		states.add(stationState);
+	}
+
 	@Override
 	public void validate(RampMeterImpl meter) {
 		MeterState state = getMeterState(meter);
@@ -680,49 +723,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/** Create a new KAdaptiveAlgorithm */
-	private KAdaptiveAlgorithm(Corridor c) {
-		corridor = c;
-		createStates();
-	}
-
-	/** construct corridor structure */
-	private void createStates() {
-		Iterator<R_Node> itr = corridor.iterator();
-		while(itr.hasNext()) {
-			R_NodeImpl rnode = (R_NodeImpl) itr.next();
-			R_NodeType nType = R_NodeType.fromOrdinal(
-				rnode.getNodeType());
-			if(nType == R_NodeType.ENTRANCE)
-				addEntranceState(new EntranceState(rnode));
-			else if(nType == R_NodeType.STATION) {
-				if (rnode.station_id != null && Integer.parseInt(rnode.station_id.substring(1)) / 100 != 17 /* check wavetronics */ && rnode.getDetectorSet().size() > 0) {
-					addStationState(new StationState(rnode));
-				}
-			}
-		}
-	}
-
-	/**
-	 * Add entrance state
-	 * @param entranceState
-	 */
-	private void addEntranceState(EntranceState entranceState) {
-		entranceState.idx = states.size();
-		states.add(entranceState);
-	}
-
-	/**
-	 * Add station state
-	 * @param stationState
-	 */
-	private void addStationState(StationState stationState) {
-		stationState.stationIdx = stationStates.size();
-		stationState.idx = states.size();
-		stationStates.add(stationState);
-		states.add(stationState);
-	}
-
 	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
 		boolean done = true;
@@ -820,19 +820,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	class StationState extends RNodeState {
 
 		/** StationImpl mapping this state */
-		StationImpl station;
+		protected final StationImpl station;
 
 		/** Station index from upstream */
 		int stationIdx;
 
 		/** Associated entrances to metering */
-		ArrayList<EntranceState> associatedEntrances = new ArrayList<EntranceState>();
+		private final ArrayList<EntranceState> associatedEntrances =
+			new ArrayList<EntranceState>();
 
 		/** Speed history */
-		BoundedSampleHistory speedHistory = new BoundedSampleHistory(10);
+		private final BoundedSampleHistory speedHistory =
+			new BoundedSampleHistory(10);
 
 		/** Density history */
-		BoundedSampleHistory densityHistory = new BoundedSampleHistory(10);
+		private final BoundedSampleHistory densityHistory =
+			new BoundedSampleHistory(10);
 
 		/** Is bottleneck ? */
 		private boolean isBottleneck = false;
@@ -840,8 +843,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Is bottleneck at previous time step? */
 		private boolean isPrevBottleneck = false;
 
-		/** Detector set for the station : mainline, aux, not-wavetronics */
-		DetectorSet detectorSet;
+		/** Detector set for the station : mainline, aux */
+		private final DetectorSet detectorSet;
 
 		/**
 		 * Construct
