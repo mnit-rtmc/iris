@@ -487,7 +487,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(!es.hasMeter())
 				continue;
 			double Rnext = equation(bottleneck, es);
-			if(!checkStartCondition(bottleneck, null, es, Rnext))
+			es.saveRateHistory(Rnext);
+			if(!checkStartCondition(bottleneck, null, es))
 				continue;
 			es.setBottleneck(bottleneck);
 			es.setRate(Rnext);
@@ -507,7 +508,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				if(!es.hasMeter())
 					continue;
 				double Rnext = equation(bottleneck, upStation, es);
-				if(!checkStartCondition(bottleneck, upStation, es, Rnext))
+				es.saveRateHistory(Rnext);
+				if(!checkStartCondition(bottleneck, upStation, es))
 					continue;
 				es.setBottleneck(bottleneck);
 				es.setRate(Rnext);
@@ -606,9 +608,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @return start ?
 	 */
 	private boolean checkStartCondition(StationState bs, StationState us,
-		EntranceState es, double Rnext)
+		EntranceState es)
 	{
-		es.saveRateHistory(Rnext);
 		if(es.isMetering)
 			return true;
 		if(!es.hasBeenStoped)
