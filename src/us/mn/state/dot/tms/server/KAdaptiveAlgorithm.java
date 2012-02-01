@@ -286,25 +286,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void findBottleneckCandidates() {
 		for(int i = 0; i < stationStates.size(); i++) {
 			StationState s = stationStates.get(i);
-
-			if(s.getAggregatedDensity() < bottleneckDensity())
-				continue;
-
-			boolean increaseTrend = true;
-			boolean highDensity = true;
-
-			for(int j = 0; j < bottleneckTrendSteps(); j++) {
-				double k = s.getAggregatedDensity(j);
-				double pk = s.getAggregatedDensity(j + 1);
-				if(k < pk)
-					increaseTrend = false;
-				if(k < bottleneckDensity() ||
-				   pk < bottleneckDensity())
-					highDensity = false;
-			}
-
-			if(s.isPrevBottleneck || increaseTrend || highDensity)
-				s.isBottleneck = true;
+			s.checkBottleneck();
 		}
 	}
 
@@ -905,6 +887,27 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 			densityHistory.push(density);
 			speedHistory.push(speed);
+		}
+
+		/**
+		 * Check if the station is a bottleneck.
+		 */
+		protected void checkBottleneck() {
+			double kb = bottleneckDensity();
+			if(getAggregatedDensity() >= kb) {
+				boolean increasing = true;
+				boolean high_k = true;
+				for(int i = 0; i < bottleneckTrendSteps(); i++){
+					double k = getAggregatedDensity(i);
+					double pk = getAggregatedDensity(i + 1);
+					if(k < pk)
+						increasing = false;
+					if(k < kb || pk < kb)
+						high_k = false;
+				}
+				if(isPrevBottleneck || increasing || high_k)
+					isBottleneck = true;
+			}
 		}
 
 		/**
