@@ -242,7 +242,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			checkCorridorState();
 		else if(doStopChecking)
 			checkStopCondition();
-		afterMetering();
+		clearBottlenecks();
 	}
 
 	/**
@@ -703,17 +703,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/**
-	 * Post metering process
+	 * Clear all bottleneck state.
 	 */
-	private void afterMetering() {
-		for(StationState s : stationStates)
-			s.afterMetering();
-		for(RNodeState ns : states) {
-			if(ns instanceof EntranceState) {
-				EntranceState es = (EntranceState)ns;
-				es.setBottleneck(null);
-			}
-		}
+	private void clearBottlenecks() {
+		for(RNodeState ns : states)
+			ns.clearBottleneck();
 	}
 
 	/** Is this KAdaptiveAlgorithm done? */
@@ -802,6 +796,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	abstract class RNodeState {
 		R_NodeImpl rnode;
 		int idx;
+
+		/** Clear bottleneck state */
+		abstract protected void clearBottleneck();
 
 		/** Debug an RNodeState */
 		abstract protected void debug(StringBuilder sb);
@@ -911,9 +908,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/**
-		 * Process after metering
+		 * Clear bottleneck state.
 		 */
-		public void afterMetering() {
+		protected void clearBottleneck() {
 			isPrevBottleneck = isBottleneck;
 			isBottleneck = false;
 		}
@@ -1389,6 +1386,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		private void setBottleneck(StationState bottleneck) {
 			this.bottleneck = bottleneck;
+		}
+
+		/**
+		 * Clear bottleneck state.
+		 */
+		protected void clearBottleneck() {
+			setBottleneck(null);
 		}
 
 		/**
