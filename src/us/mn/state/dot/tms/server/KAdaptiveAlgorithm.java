@@ -273,11 +273,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/**
-	 * Find bottlenecks
+	 * Find bottlenecks.
 	 */
 	private void findBottlenecks() {
+		findBottleneckCandidates();
+		mergeBottleneckZones();
+	}
 
-		// find bottleneck candidates
+	/**
+	 * Find bottleneck candidates.
+	 */
+	private void findBottleneckCandidates() {
 		for(int i = 0; i < stationStates.size(); i++) {
 			StationState s = stationStates.get(i);
 
@@ -299,9 +305,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(s.isPrevBottleneck || increaseTrend || highDensity)
 				s.isBottleneck = true;
 		}
+	}
 
-		// merge zone by distnace and acceleration
-		// iterate from downstream to upstream
+	/**
+	 * Merge zone by distnace and acceleration.
+	 * Iterate from downstream to upstream.
+	 */
+	private void mergeBottleneckZones() {
 		for(int i = stationStates.size() - 1; i >= 0; i--) {
 			StationState s = stationStates.get(i);
 			double k = s.getAggregatedDensity();
@@ -331,7 +341,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/**
-	 * Check corridor average density condition
+	 * Check corridor average density condition.
 	 */
 	private void checkCorridorState() {
 		int bottleneckCount = 0;
