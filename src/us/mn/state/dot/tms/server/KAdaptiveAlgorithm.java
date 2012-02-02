@@ -542,7 +542,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 *                       |
 	 *                 +     |
 	 *    +                  |
-	 * --p0------------p1----p2------------p3---p4-----> K_DES-Kt
+	 * --p0------------p1----p2------------p3---p4-----&gt; K_DES-Kt
 	 *                       |
 	 *                       |
 	 * p0's x = K_DES - K_JAM

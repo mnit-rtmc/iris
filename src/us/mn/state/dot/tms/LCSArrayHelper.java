@@ -189,7 +189,7 @@ public class LCSArrayHelper extends BaseHelper {
 		}) != null;
 	}
 
-	/** Check if an LCS array is user deployed */
+	/** Check if an LCS array is schedule deployed */
 	static public boolean isScheduleDeployed(final LCSArray lcs_array) {
 		return lookupDMS(lcs_array, new Checker<DMS>() {
 			public boolean check(DMS dms) {
