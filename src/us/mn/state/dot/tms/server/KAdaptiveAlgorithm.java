@@ -126,9 +126,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private final BoundedSampleHistory k_hist_corridor =
 		new BoundedSampleHistory(AVG_K_STEPS + AVG_K_TREND_STEPS);
 
-	/** Hash map of ramp meter states */
-	private final HashMap<String, MeterState> meterStates =
-		new HashMap<String, MeterState>();
+	/** Hash map of ramp meter entrance nodes */
+	private final HashMap<String, EntranceNode> meterNodes =
+		new HashMap<String, EntranceNode>();
 
 	/** Head (furthest upstream) node on corridor */
 	private final Node head;
@@ -173,49 +173,49 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	@Override
 	public void validate(RampMeterImpl meter) {
-		MeterState state = getMeterState(meter);
-		if(state != null)
-			state.validate();
+		EntranceNode en = getEntranceNode(meter);
+		if(en != null)
+			en.updateState();
 	}
 
-	/** Get the meter state for a given timing plan */
-	protected MeterState getMeterState(RampMeterImpl meter) {
+	/** Get the entrance node for a given ramp meter */
+	protected EntranceNode getEntranceNode(RampMeterImpl meter) {
 		if(meter.getCorridor() != corridor) {
 			// Meter must have been changed to a different
-			// corridor; throw away old meter state
-			meterStates.remove(meter.getName());
+			// corridor; throw away old meter node
+			meterNodes.remove(meter.getName());
 			return null;
 		}
-		MeterState state = lookupMeterState(meter);
-		if(state != null)
-			return state;
-		state = new MeterState(meter);
-		addMeterState(state);
-		meterStates.put(meter.getName(), state);
-		return state;
+		EntranceNode en = lookupEntranceNode(meter);
+		if(en != null)
+			return en;
+		en = findEntranceNode(meter);
+		if(en != null) {
+			en.meter = meter;
+			en.checkFreewayToFreeway();
+			meterNodes.put(meter.getName(), en);
+		}
+		return en;
 	}
 
-	/** Lookup the meter state for a specified meter */
-	protected MeterState lookupMeterState(RampMeter meter) {
-		return meterStates.get(meter.getName());
+	/** Lookup the entrance node for a specified meter */
+	protected EntranceNode lookupEntranceNode(RampMeter meter) {
+		return meterNodes.get(meter.getName());
 	}
 
 	/**
-	 * Add meter state
-	 * @param state
+	 * Find an entrance node matching the given ramp meter.
 	 */
-	private void addMeterState(MeterState state) {
-		R_NodeImpl rnode = state.meter.getR_Node();
+	private EntranceNode findEntranceNode(RampMeterImpl meter) {
+		R_NodeImpl rnode = meter.getR_Node();
 		for(Node n = head; n != null; n = n.downstream) {
 			if(n instanceof EntranceNode) {
 				EntranceNode es = (EntranceNode)n;
-				if(es.rnode.equals(rnode)) {
-					es.meterState = state;
-					state.entrance = es;
-					es.checkFreewayToFreeway();
-				}
+				if(es.rnode.equals(rnode))
+					return es;
 			}
 		}
+		return null;
 	}
 
 	/** Process the algorithm for the one interval */
@@ -734,8 +734,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
 		boolean done = true;
-		for(MeterState state : meterStates.values()) {
-			if(state.meter.isOperating()) {
+		for(EntranceNode en : meterNodes.values()) {
+			if(en.meter != null && en.meter.isOperating()) {
 				done = false;
 				break;
 			}
@@ -1178,7 +1178,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append(rnode.station_id + " -> ");
 			for(EntranceNode es : associatedEntrances) {
 				if(es != null && es.hasMeter())
-					sb.append(es.meterState.meter.name + ", ");
+					sb.append(es.meter.name + ", ");
 			}
 		}
 	}
@@ -1188,8 +1188,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 */
 	class EntranceNode extends Node {
 
-		/** Meter state mapping this entrance */
-		private MeterState meterState;
+		/** Meter at this entrance */
+		private RampMeterImpl meter;
 
 		/** Associated station to metering */
 		private StationNode associatedStation;
@@ -1276,7 +1276,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return true if has meter, else false
 		 */
 		public boolean hasMeter() {
-			return meterState != null;
+			return meter != null;
 		}
 
 		/**
@@ -1315,7 +1315,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return flow
 		 */
 		private int calculateRampFlow() {
-			DetectorSet ds = meterState.meter.getDetectorSet();
+			DetectorSet ds = meter.getDetectorSet();
 			DetectorSet pDet = ds.getDetectorSet(LaneType.PASSAGE);
 			DetectorSet mDet = ds.getDetectorSet(LaneType.MERGE);
 			DetectorSet bpDet = ds.getDetectorSet(LaneType.BYPASS);
@@ -1344,7 +1344,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Calculate ramp flow and demand
 		 */
 		private void calculateRampFlowAndDemand() {
-			DetectorSet ds = meterState.meter.getDetectorSet();
+			DetectorSet ds = meter.getDetectorSet();
 			DetectorSet qDets = ds.getDetectorSet(LaneType.QUEUE);
 
 			double rampFlow = calculateRampFlow();
@@ -1392,7 +1392,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			currentRate = Rnext;
 			isRateUpdated = true;
 			int releaseRate = (int) Math.round(Rnext);
-			meterState.meter.setRatePlanned(releaseRate);
+			meter.setRatePlanned(releaseRate);
 		}
 
 		/**
@@ -1537,28 +1537,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Debug an EntranceNode */
 		protected void debug(StringBuilder sb) {
 			if(hasMeter())
-				sb.append("Ent(" + meterState.meter.name + ")");
+				sb.append("Ent(" + meter.name + ")");
 			else
 				sb.append("Ent(" + rnode.name + ")");
-		}
-	}
-
-	/**
-	 * Meter State to manage meter
-	 */
-	public class MeterState {
-
-		RampMeterImpl meter;
-		private EntranceNode entrance;
-
-		private MeterState(RampMeterImpl meter) {
-			this.meter = meter;
-		}
-
-		/** Validate a ramp meter state */
-		private void validate() {
-			if(entrance != null)
-				entrance.updateState();
 		}
 	}
 
