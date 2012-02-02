@@ -18,8 +18,6 @@ package us.mn.state.dot.tms.server;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -224,11 +222,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	protected void processInterval() {
 		if(!isAssociated)
 			doAssociateStationAndEntrance();
-		for(Node n = head; n != null; n = n.downstream) {
-			if(n instanceof StationNode) {
-				StationNode sn = (StationNode) n;
-				sn.updateState();
-			}
+		for(StationNode sn = firstStation(); sn != null;
+		    sn = sn.downstreamStation())
+		{
+			sn.updateState();
 		}
 		findBottlenecks();
 		calculateMeteringRates();
@@ -243,11 +240,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * Should be called after added all stations and meters
 	 */
 	private void doAssociateStationAndEntrance() {
-		for(Node n = head; n != null; n = n.downstream) {
-			if(n instanceof StationNode) {
-				StationNode sn = (StationNode) n;
-				sn.setAssociatedEntrances();
-			}
+		for(StationNode sn = firstStation(); sn != null;
+		    sn = sn.downstreamStation())
+		{
+			sn.setAssociatedEntrances();
 		}
 		isAssociated = true;
 
@@ -280,11 +276,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * Find bottleneck candidates.
 	 */
 	private void findBottleneckCandidates() {
-		for(Node n = head; n != null; n = n.downstream) {
-			if(n instanceof StationNode) {
-				StationNode sn = (StationNode) n;
-				sn.checkBottleneck();
-			}
+		for(StationNode sn = firstStation(); sn != null;
+		    sn = sn.downstreamStation())
+		{
+			sn.checkBottleneck();
 		}
 	}
 
@@ -293,12 +288,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * Iterate from downstream to upstream.
 	 */
 	private void mergeBottleneckZones() {
-		for(Node n = tail; n != null; n = n.upstream) {
-			if(n instanceof StationNode) {
-				StationNode sn = (StationNode) n;
-				if(sn.isBottleneck)
-					checkBottleneckMerge(sn);
-			}
+		for(StationNode sn = lastStation(); sn != null;
+		    sn = sn.upstreamStation())
+		{
+			if(sn.isBottleneck)
+				checkBottleneckMerge(sn);
 		}
 	}
 
@@ -307,23 +301,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 */
 	private void checkBottleneckMerge(final StationNode sn) {
 		double k = sn.getAggregatedDensity();
-		for(Node n = sn.upstream; n != null; n = n.upstream) {
-			if(n instanceof StationNode) {
-				StationNode un = (StationNode) n;
-				if(!un.isBottleneck)
-					continue;
-				if(un.isBottleneckTooClose(sn)) {
-					// close but independent bottleneck
-					if(un.getAggregatedDensity() > k &&
-					   un.getAcceleration() > A_BOTTLENECK)
-						break;
-					else
-						un.isBottleneck = false;
-				} else if(un.getAcceleration() > A_BOTTLENECK)
+		for(StationNode un = sn.upstreamStation(); un != null;
+			un = un.upstreamStation())
+		{
+			if(!un.isBottleneck)
+				continue;
+			if(un.isBottleneckTooClose(sn)) {
+				// close but independent bottleneck
+				if(un.getAggregatedDensity() > k &&
+				   un.getAcceleration() > A_BOTTLENECK)
 					break;
 				else
 					un.isBottleneck = false;
-			}
+			} else if(un.getAcceleration() > A_BOTTLENECK)
+				break;
+			else
+				un.isBottleneck = false;
 		}
 	}
 
@@ -333,13 +326,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void checkCorridorState() {
 		int bottleneckCount = 0;
 		StationNode downstreamBS = null;
-		for(Node n = head; n != null; n = n.downstream) {
-			if(n instanceof StationNode) {
-				StationNode sn = (StationNode) n;
-				if(sn.isBottleneck) {
-					downstreamBS = sn;
-					bottleneckCount++;
-				}
+		for(StationNode sn = firstStation(); sn != null;
+		    sn = sn.downstreamStation())
+		{
+			if(sn.isBottleneck) {
+				downstreamBS = sn;
+				bottleneckCount++;
 			}
 		}
 		k_hist_corridor.push(calculateAverageDensity(downstreamBS));
@@ -384,6 +376,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return null;
 	}
 
+	/**
+	 * Get the furthest downstream station node.
+	 */
+	private StationNode lastStation() {
+		for(Node n = tail; n != null; n = n.upstream) {
+			if(n instanceof StationNode)
+				return (StationNode) n;
+		}
+		return null;
+	}
+
 	/** Get the density for determining a bottleneck */
 	private double bottleneckDensity() {
 		return doStopChecking ? K_DES : K_BOTTLENECK;
@@ -400,12 +403,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 */
 	private void checkStopCondition() {
 		boolean hasBottleneck = false;
-		for(Node n = tail; n != null; n = n.upstream) {
-			if(n instanceof StationNode) {
-				StationNode sn = (StationNode) n;
-				hasBottleneck = checkStopCondition(sn,
-					hasBottleneck);
-			}
+		for(StationNode sn = lastStation(); sn != null;
+		    sn = sn.upstreamStation())
+		{
+			hasBottleneck = checkStopCondition(sn, hasBottleneck);
 		}
 	}
 
@@ -459,20 +460,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * Calculate metering rates for all bottlenecks
 	 */
 	private void calculateMeteringRates() {
-		for(Node n = tail; n != null; n = n.upstream) {
-			if(n instanceof StationNode) {
-				StationNode sn = (StationNode) n;
-				if(sn.isBottleneck && sn.station != null)
-					calculateMeteringRates(sn);
-			}
+		for(StationNode sn = lastStation(); sn != null;
+		    sn = sn.upstreamStation())
+		{
+			if(sn.isBottleneck && sn.station != null)
+				calculateMeteringRates(sn);
 		}
 
 		// when meter is not in zone
-		for(Node n = head; n != null; n = n.downstream) {
-			if(n instanceof StationNode) {
-				StationNode sn = (StationNode) n;
-				defaultMetering(sn);
-			}
+		for(StationNode sn = firstStation(); sn != null;
+		    sn = sn.downstreamStation())
+		{
+			defaultMetering(sn);
 		}
 	}
 
@@ -496,13 +495,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		// calculate rates
 		// from upstream station of bottleneck to upstream boundary or next bottleneck
-		for(Node n = bottleneck.upstream; n != null; n = n.upstream) {
-			if(n instanceof StationNode) {
-				StationNode sn = (StationNode) n;
-				if(sn.isBottleneck)
-					break;
-				calculateMeteringRates(sn, bottleneck);
-			}
+		for(StationNode sn = bottleneck.upstreamStation(); sn != null;
+		    sn = sn.upstreamStation())
+		{
+			if(sn.isBottleneck)
+				break;
+			calculateMeteringRates(sn, bottleneck);
 		}
 	}
 
