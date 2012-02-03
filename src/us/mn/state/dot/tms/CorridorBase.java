@@ -296,6 +296,16 @@ public class CorridorBase implements Iterable<R_Node> {
 			return n_mile - mi;
 	}
 
+	/** Get the mile point for a specified node */
+	public Float getMilePoint(R_Node r_node) {
+		for(Float mile: n_points.keySet()) {
+			R_Node n = n_points.get(mile);
+			if(n == r_node)
+				return mile;
+		}
+		return null;
+	}
+
 	/** Create a r_node iterator */
 	public Iterator<R_Node> iterator() {
 		return r_nodes.iterator();

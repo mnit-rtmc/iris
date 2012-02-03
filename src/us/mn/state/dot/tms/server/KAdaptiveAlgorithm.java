@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -150,7 +151,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		Iterator<R_Node> itr = corridor.iterator();
 		while(itr.hasNext()) {
 			R_NodeImpl rnode = (R_NodeImpl) itr.next();
-			prev = createNode(rnode, prev);
+			Node n = createNode(rnode, prev);
+			if(n != null)
+				prev = n;
 			if(first == null)
 				first = prev;
 		}
@@ -159,16 +162,27 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Create one node */
 	private Node createNode(R_NodeImpl rnode, Node prev) {
-		R_NodeType nType = R_NodeType.fromOrdinal(rnode.getNodeType());
-		if(nType == R_NodeType.ENTRANCE)
-			return new EntranceNode(rnode, prev);
-		else if(nType == R_NodeType.STATION &&
-		        rnode.station_id != null &&
-		        rnode.getDetectorSet().size() > 0)
-		{
-			return new StationNode(rnode, prev);
+		Float mile = corridor.getMilePoint(rnode);
+		if(mile != null)
+			return createNode(rnode, mile, prev);
+		else
+			return null;
+	}
+
+	/** Create one node */
+	private Node createNode(R_NodeImpl rnode, float mile, Node prev) {
+		switch(R_NodeType.fromOrdinal(rnode.getNodeType())) {
+		case ENTRANCE:
+			return new EntranceNode(rnode, mile, prev);
+		case STATION:
+			if(rnode.station_id != null &&
+			   rnode.getDetectorSet().size() > 0)
+			{
+				return new StationNode(rnode, mile, prev);
+			}
+		default:
+			return null;
 		}
-		return null;
 	}
 
 	@Override
@@ -744,19 +758,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/**
-	 * Return distance between two r_nodes in feet
-	 * @param rn1 r_node
-	 * @param rn2 r_node
-	 */
-	public double getDistanceInFeet(R_NodeImpl rn1, R_NodeImpl rn2) {
-		int e1 = rn1.getGeoLoc().getEasting();
-		int e2 = rn2.getGeoLoc().getEasting();
-		int n1 = rn1.getGeoLoc().getNorthing();
-		int n2 = rn2.getGeoLoc().getNorthing();
-		return (int) (Math.sqrt((e1 - e2) * (e1 - e2) + (n1 - n2) * (n1 - n2)) / 1609 * 5280);
-	}
-
-	/**
 	 * Returns average density between 2 station
 	 * @param upStation upstream station
 	 * @param downStation downstream station (not need to be next downstream of upStation)
@@ -783,7 +784,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double upDensity = cursor.getAggregatedDensity(prevStep);
 			double downDensity = dStation.getAggregatedDensity(prevStep);
 			double middleDensity = (upDensity + downDensity) / 2;
-			double distance = getDistanceInFeet(cursor.rnode, dStation.rnode) / 5280;
+			double distance = cursor.distanceMiles(dStation);
 			double distanceFactor = distance / 3;
 			totalDistance += distance;
 			avgDensity += (upDensity + middleDensity + downDensity) * distanceFactor;
@@ -801,6 +802,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	abstract protected class Node {
 		R_NodeImpl rnode;
 
+		/** Mile point of the node */
+		protected final float mile;
+
 		/** Link to upstream node */
 		protected final Node upstream;
 
@@ -808,10 +812,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		protected Node downstream;
 
 		/** Create a new node */
-		protected Node(Node up) {
+		protected Node(float m, Node up) {
+			mile = m;
 			up.downstream = this;
 			upstream = up;
 			downstream = null;
+		}
+
+		/** Get the distance to another node (in miles) */
+		protected float distanceMiles(Node other) {
+			return Math.abs(mile - other.mile);
+		}
+
+		/** Get the distancee to another node (in feet) */
+		protected int distanceFeet(Node other) {
+			return Math.round(distanceMiles(other) *
+			                  Constants.FEET_PER_MILE);
 		}
 
 		/** Get the tail of a node list */
@@ -856,19 +872,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean isPrevBottleneck = false;
 
 		/** Detector set for the station : mainline, aux */
-		private final DetectorSet detectorSet;
+		private final DetectorSet dets = new DetectorSet();
 
 		/**
-		 * Construct
+		 * Create a new station node.
 		 * @param rnode
 		 */
-		public StationNode(R_NodeImpl rnode, Node up) {
-			super(up);
+		public StationNode(R_NodeImpl rnode, float m, Node up) {
+			super(m, up);
 			this.rnode = rnode;
 			station = rnode.station;
+			DetectorSet ds = rnode.getDetectorSet();
 			// use mainline and auxiliary lane
-			detectorSet = rnode.getDetectorSet().getDetectorSet(LaneType.MAINLINE);
-			detectorSet.addDetectors(rnode.getDetectorSet().getDetectorSet(LaneType.AUXILIARY));
+			dets.addDetectors(ds.getDetectorSet(LaneType.MAINLINE));
+			dets.addDetectors(ds.getDetectorSet(LaneType.AUXILIARY));
 		}
 
 		/**
@@ -902,7 +919,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		public void updateState() {
 			if(station == null)
 				return;
-			Iterator<DetectorImpl> itr = detectorSet.detectors.iterator();
+			Iterator<DetectorImpl> itr = dets.detectors.iterator();
 			double density = 0, speed = 0;
 			float u = -1, k = -1;
 			int n_u = 0, n_k = 0;
@@ -1035,11 +1052,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public double getAcceleration() {
 			double u2 = getAggregatedSpeed();
-			StationNode downStationNode = downstreamStation();
-			if(downStationNode == null)
+			StationNode down = downstreamStation();
+			if(down == null)
 				return 0;
-			double u1 = downStationNode.getAggregatedSpeed();
-			return (u1 * u1 - u2 * u2) / (2 * getDistanceInFeet(rnode, downStationNode.rnode) / 5280);
+			double u1 = down.getAggregatedSpeed();
+			double dm = distanceMiles(down);
+			if(dm > 0)
+				return (u1 * u1 - u2 * u2) / (2 * dm);
+			else
+				return 0;
 		}
 
 		/**
@@ -1070,8 +1091,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				for(EntranceNode es : upstreamEntrances) {
 					if(!es.hasMeter())
 						continue;
-					int d = getDistanceToUpstreamEntrance(es);
-					int ud = us.getDistanceToDownstreamEntrance(es);
+					int d = distanceFeet(es);
+					int ud = us.distanceFeet(es);
 
 					// very close(?) or not allocated with upstream station
 					if((d < 500 && d < ud) || es.associatedStation == null) {
@@ -1087,7 +1108,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				for(EntranceNode es : downstreamEntrances) {
 					if(!es.hasMeter())
 						continue;
-					int d = getDistanceToDownstreamEntrance(es);
+					int d = distanceFeet(es);
 					// distance to downstream entrance is less than 1 mile
 					if(d < 5280) {
 						associatedEntrances.add(es);
@@ -1133,44 +1154,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				}
 			}
 			return list;
-		}
-
-		/**
-		 * Return distance to upstream entrance
-		 * @param es entrance state
-		 * @return distance in feet
-		 */
-		public int getDistanceToUpstreamEntrance(EntranceNode es) {
-			int distance = 0;
-			Node cursor = this;
-			// FIXME: use CorridorBase.calculateMilePoint
-			for(Node n = upstream; n != null; n = n.upstream) {
-				distance += getDistanceInFeet(cursor.rnode,
-					n.rnode);
-				if(n.equals(es))
-					return distance;
-				cursor = n;
-			}
-			return -1;
-		}
-
-		/**
-		 * Return distance to downstream entrance
-		 * @param es entrance state
-		 * @return distance in feet
-		 */
-		public int getDistanceToDownstreamEntrance(EntranceNode es) {
-			int distance = 0;
-			Node cursor = this;
-			// FIXME: use CorridorBase.calculateMilePoint
-			for(Node n = downstream; n != null; n = n.downstream) {
-				distance += getDistanceInFeet(cursor.rnode,
-					n.rnode);
-				if(n.equals(es))
-					return distance;
-				cursor = n;
-			}
-			return -1;
 		}
 
 		/** Debug a StationNode */
@@ -1246,8 +1229,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Construct
 		 * @param rnode
 		 */
-		public EntranceNode(R_NodeImpl rnode, Node prev) {
-			super(prev);
+		public EntranceNode(R_NodeImpl rnode, float m, Node prev) {
+			super(m, prev);
 			this.rnode = rnode;
 		}
 
