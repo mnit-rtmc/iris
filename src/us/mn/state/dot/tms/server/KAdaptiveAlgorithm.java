@@ -207,7 +207,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return en;
 		en = findEntranceNode(meter);
 		if(en != null) {
-			en.meter = meter;
+			en.setMeter(meter);
 			meterNodes.put(meter.getName(), en);
 		}
 		return en;
@@ -746,14 +746,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
-		boolean done = true;
 		for(EntranceNode en : meterNodes.values()) {
-			if(en.meter != null && en.meter.isOperating()) {
-				done = false;
-				break;
-			}
+			if(en.meter != null && en.meter.isOperating())
+				return false;
 		}
-		return done;
+		return true;
 	}
 
 	/**
@@ -1177,6 +1174,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Has been stopped before */
 		private boolean hasBeenStoped = false;
 
+		/** Queue detector set */
+		private final DetectorSet queue = new DetectorSet();
+
+		/** Passage detector set */
+		private final DetectorSet passage = new DetectorSet();
+
+		/** Merge detector set */
+		private final DetectorSet merge = new DetectorSet();
+
+		/** Bypass detector set */
+		private final DetectorSet bypass = new DetectorSet();
+
 		/** Cumulative demand history */
 		private BoundedSampleHistory cumulativeDemand = new BoundedSampleHistory(8);
 
@@ -1201,6 +1210,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public EntranceNode(R_NodeImpl rnode, float m, Node prev) {
 			super(rnode, m, prev);
+		}
+
+		/**
+		 * Associate a ramp meter with the entrance node.
+		 */
+		public void setMeter(RampMeterImpl mtr) {
+			meter = mtr;
+			queue.clear();
+			passage.clear();
+			merge.clear();
+			bypass.clear();
+			DetectorSet ds = meter.getDetectorSet();
+			queue.addDetectors(ds, LaneType.QUEUE);
+			passage.addDetectors(ds, LaneType.PASSAGE);
+			merge.addDetectors(ds, LaneType.MERGE);
+			bypass.addDetectors(ds, LaneType.BYPASS);
 		}
 
 		/**
@@ -1232,7 +1257,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *   - Calculate minimum metering rate
 		 */
 		private void updateState() {
-
 			isRateUpdated = false;
 			calculateRampFlowAndDemand();
 
@@ -1261,23 +1285,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return flow
 		 */
 		private int calculateRampFlow() {
-			DetectorSet ds = meter.getDetectorSet();
-			DetectorSet pDet = ds.getDetectorSet(LaneType.PASSAGE);
-			DetectorSet mDet = ds.getDetectorSet(LaneType.MERGE);
-			DetectorSet bpDet = ds.getDetectorSet(LaneType.BYPASS);
-
 			int p_flow = 0;
 
 			// passage detector is ok
-			if(pDet != null)
-				p_flow = pDet.getFlow();
+			if(passage.isPerfect())
+				p_flow = passage.getFlow();
 			else {
 				// merge detector is ok
-				if(mDet != null) {
-					p_flow = mDet.getFlow();
+				if(merge.isPerfect()) {
+					p_flow = merge.getFlow();
 					// bypass detector is ok
-					if(bpDet != null) {
-						p_flow -= bpDet.getFlow();
+					if(bypass.isPerfect()) {
+						p_flow -= bypass.getFlow();
 						if(p_flow < 0)
 							p_flow = 0;
 					}
@@ -1290,17 +1309,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Calculate ramp flow and demand
 		 */
 		private void calculateRampFlowAndDemand() {
-			DetectorSet ds = meter.getDetectorSet();
-			DetectorSet qDets = ds.getDetectorSet(LaneType.QUEUE);
-
 			double rampFlow = calculateRampFlow();
 			double rampDemand = 0;
-
 			rampFlowHistory.push(rampFlow);
-
-			// queue detector is ok
-			if(qDets != null)
-				rampDemand = qDets.getFlow();
+			if(queue.isPerfect())
+				rampDemand = queue.getFlow();
 			else
 				rampDemand = rampFlow * PASSAGE_DEMAND_FACTOR;
 			rampDemandHistory.push(rampDemand);

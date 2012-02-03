@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,11 @@ public class DetectorSet {
 	/** Remove a detector from the detector set */
 	public void removeDetector(DetectorImpl det) {
 		detectors.remove(det);
+	}
+
+	/** Remove all detectors from the detector set */
+	public void clear() {
+		detectors.clear();
 	}
 
 	/** Get the number of detectors in the detector set */
