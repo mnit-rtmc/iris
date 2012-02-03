@@ -163,8 +163,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if(nType == R_NodeType.ENTRANCE)
 			return new EntranceNode(rnode, prev);
 		else if(nType == R_NodeType.STATION &&
-		          rnode.station_id != null &&
-		          rnode.getDetectorSet().size() > 0)
+		        rnode.station_id != null &&
+		        rnode.getDetectorSet().size() > 0)
 		{
 			return new StationNode(rnode, prev);
 		}
@@ -255,7 +255,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Debug algorithm. */
 	private void debug() {
 		ALG_LOG.log("Corridor Structure : " + corridor.getName() +
-			" --------------------");
+		            " --------------------");
 		StringBuilder sb = new StringBuilder();
 		for(Node n = head; n != null; n = n.downstream) {
 			n.debug(sb);
