@@ -861,7 +861,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Speed history */
 		private final BoundedSampleHistory speedHistory =
-			new BoundedSampleHistory(10);
+			new BoundedSampleHistory(2);
 
 		/** Density history */
 		private final BoundedSampleHistory densityHistory =
@@ -1000,7 +1000,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1min density at 'prevStep' time steps ago
 		 */
 		public double getAggregatedDensity(int prevStep) {
-			return getAggregatedData(densityHistory, prevStep);
+			Double avg = densityHistory.average(prevStep, 2);
+			if(avg != null)
+				return avg;
+			else
+				return 0;
 		}
 
 		/**
@@ -1008,43 +1012,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1min speed
 		 */
 		public double getAggregatedSpeed() {
-			return getAggregatedSpeed(0);
-		}
-
-		/**
-		 * Return aggregated speed at 'prevStep' time steps ago
-		 * @param prevStep how many time steps ago?
-		 * @return average 1min speed at 'prevStep' time steps ago
-		 */
-		public double getAggregatedSpeed(int prevStep) {
-			return getAggregatedData(speedHistory, prevStep);
-		}
-
-		/**
-		 * Return aggregated data (average)
-		 * @param data
-		 * @param prevStep
-		 * @return average 1min data of given data at 'prevStep' time steps ago
-		 */
-		private double getAggregatedData(BoundedSampleHistory data, int prevStep) {
-			Double d1 = data.get(prevStep);
-			Double d2 = data.get(prevStep + 1);
-			int n = 2;
-
-			if(d1 == null || d1 == 0) {
-				d1 = 0D;
-				n--;
-			}
-
-			if(d2 == null || d2 == 0) {
-				d2 = 0D;
-				n--;
-			}
-
-			if(n == 0)
-				return 0;
+			Double avg = speedHistory.average(0, 2);
+			if(avg != null)
+				return avg;
 			else
-				return (d1 + d2) / n;
+				return 0;
 		}
 
 		/**
