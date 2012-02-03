@@ -883,9 +883,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			super(rnode, m, up);
 			station = stat;
 			DetectorSet ds = rnode.getDetectorSet();
-			// use mainline and auxiliary lane
-			dets.addDetectors(ds.getDetectorSet(LaneType.MAINLINE));
-			dets.addDetectors(ds.getDetectorSet(LaneType.AUXILIARY));
+			dets.addDetectors(ds, LaneType.MAINLINE);
 		}
 
 		/**
