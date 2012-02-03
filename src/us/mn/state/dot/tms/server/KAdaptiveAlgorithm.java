@@ -206,7 +206,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		en = findEntranceNode(meter);
 		if(en != null) {
 			en.meter = meter;
-			en.checkFreewayToFreeway();
 			meterNodes.put(meter.getName(), en);
 		}
 		return en;
@@ -1195,9 +1194,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Minimum metering rate */
 		private double minimumRate = 0;
 
-		/** Max wait time index (7 => 4min) */
-		private int maxWaitTimeIndex = 7;
-
 		/** How many time steps there's no bottleneck at downstream for */
 		private int noBottleneckCount = 0;
 
@@ -1208,7 +1204,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean hasBeenStoped = false;
 
 		/** Cumulative demand history */
-		private BoundedSampleHistory cumulativeDemand = new BoundedSampleHistory(maxWaitTimeIndex+1);
+		private BoundedSampleHistory cumulativeDemand = new BoundedSampleHistory(8);
 
 		/** Cumulative merging flow history */
 		private BoundedSampleHistory cumulativeMergingFlow = new BoundedSampleHistory(1);
@@ -1235,23 +1231,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/**
-		 * Check if entrance is Freeway to Freeway
+		 * Get the max wait time index for the ramp meter.
 		 */
-		public void checkFreewayToFreeway() {
-			// check if it is freeway-to-freeway entrance
-			if(rnode.geo_loc == null)
-				return;
-			String mod = GeoLocHelper.getModifier(rnode.geo_loc);
-			if(rnode.geo_loc.getCrossMod() == 0)
-				mod = "";
-			String lbl = GeoLocHelper.getCrossDescription(rnode.geo_loc, mod);
-			Iterator<Corridor> itr = BaseObjectImpl.corridors.corridors.values().iterator();
-			while(itr.hasNext()) {
-				if(itr.next().getName().contains(lbl)) {
-					maxWaitTimeIndex = 3;   // 2 minutes in 30 seconds unit
-					break;
-				}
+		private int maxWaitTimeIndex() {
+			RampMeterImpl m = meter;
+			if(m != null) {
+				int max_wait = m.getMaxWait();
+				int max_idx = max_wait / 30 - 1;
+				if(max_idx > 0)
+					return max_idx;
 			}
+			return RampMeterImpl.DEFAULT_MAX_WAIT / 30 - 1;
 		}
 
 		/**
@@ -1347,20 +1337,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Calculate minimum rate according to waiting time
 		 */
 		private void calculateMinimumRate() {
-			if(cumulativeDemand.size() - 1 < maxWaitTimeIndex) {
+			int wait_idx = maxWaitTimeIndex();
+			if(cumulativeDemand.size() - 1 < wait_idx) {
 				minimumRate = currentFlow;
 				return;
 			}
-
-			// cumulative demand 4 min ago
-			double Cd_4mAgo = cumulativeDemand.get(maxWaitTimeIndex);
-
-			// current cumulative passage flow
+			double Cd_4mAgo = cumulativeDemand.get(wait_idx);
 			double Cf_current = cumulativeMergingFlow.get(0);
-
-			// minimum rates to guarantee 4 min waitting time
 			minimumRate = (Cd_4mAgo - Cf_current);
-
 			if(minimumRate <= 0)
 				minimumRate = getMinRelease();
 		}
