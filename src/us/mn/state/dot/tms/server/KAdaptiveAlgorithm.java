@@ -1322,27 +1322,43 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return;
 			if(countRateHistory() < STOP_STEPS)
 				return;
-			for(int k = 0; k < STOP_STEPS; k++) {
-				Double sk = getSegmentDensity(k);
-				if(sk > K_DES)
-					return;
-			}
+			if(isSegmentDensityHigh())
+				return;
 			if(!hasBottleneck) {
 				addNoBottleneckCount();
 				if(getNoBottleneckCount() >= STOP_STEPS)
 					stopMetering();
 				return;
 			}
-			boolean satisfyRateCondition = true;
 			resetNoBottleneckCount();
-			for(int k = 0; k < STOP_STEPS; k++) {
-				double q = getFlow(k);
-				double rate = getRate(k);
-				if(q > rate)
-					satisfyRateCondition = false;
-			}
-			if(satisfyRateCondition)
+			if(satisfiesRateCondition())
 				stopMetering();
+		}
+
+		/**
+		 * Check if the segment density is high.
+		 */
+		private boolean isSegmentDensityHigh() {
+			for(int i = 0; i < STOP_STEPS; i++) {
+				Double sk = getSegmentDensity(i);
+				if(sk != null && sk > K_DES)
+					return true;
+			}
+			return false;
+		}
+
+		/**
+		 * Check if the metering rate has been less than flow for
+		 * STOP_STEPS time intervals.
+		 */
+		private boolean satisfiesRateCondition() {
+			for(int i = 0; i < STOP_STEPS; i++) {
+				double q = getFlow(i);
+				double rate = getRate(i);
+				if(q > rate)
+					return false;
+			}
+			return true;
 		}
 
 		/**
