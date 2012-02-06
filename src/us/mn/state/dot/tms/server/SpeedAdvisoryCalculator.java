@@ -27,6 +27,24 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class SpeedAdvisoryCalculator {
 
+	/** VSA debug log */
+	static private final IDebugLog VSA_LOG = new IDebugLog("vsa");
+
+	/** Get the minimum speed to display for advisory */
+	static private int getMinDisplay() {
+		return SystemAttrEnum.VSA_MIN_DISPLAY_MPH.getInt();
+	}
+
+	/** Get the maximum speed to display for advisory */
+	static private int getMaxDisplay() {
+		return SystemAttrEnum.VSA_MAX_DISPLAY_MPH.getInt();
+	}
+
+	/** Round up to the nearest 5 mph */
+	static private int round5Mph(float mph) {
+		return Math.round(mph / 5) * 5;
+	}
+
 	/** Location for advisory */
 	protected final GeoLoc loc;
 
@@ -61,7 +79,7 @@ public class SpeedAdvisoryCalculator {
 	}
 
 	/** Calculate the speed advisory */
-	protected Integer calculateSpeedAdvisory() {
+	private Integer calculateSpeedAdvisory() {
 		String c = GeoLocHelper.getCorridorName(loc);
 		if(c != null)
 			return calculateSpeedAdvisory(c);
@@ -70,11 +88,38 @@ public class SpeedAdvisoryCalculator {
 	}
 
 	/** Calculate the speed advisory */
-	protected Integer calculateSpeedAdvisory(String c) {
+	private Integer calculateSpeedAdvisory(String c) {
 		Corridor cor = BaseObjectImpl.corridors.getCorridor(c);
-		if(cor != null)
-			return cor.calculateSpeedAdvisory(loc);
-		else
-			return null;
+		if(cor != null) {
+			Float m = cor.calculateMilePoint(loc);
+			if(VSA_LOG.isOpen())
+				VSA_LOG.log(loc.getName() + ", mp: " + m);
+			if(m != null)
+				return calculateSpeedAdvisory(cor, m);
+		}
+		return null;
+	}
+
+	/** Calculate the speed advisory */
+	private Integer calculateSpeedAdvisory(Corridor cor, float m) {
+		VSStationFinder vss_finder = new VSStationFinder(m);
+		cor.findStation(vss_finder);
+		if(VSA_LOG.isOpen())
+			vss_finder.debug(VSA_LOG);
+		if(vss_finder.foundVSS()) {
+			Integer lim = vss_finder.getSpeedLimit();
+			if(lim != null) {
+				Float a = vss_finder.calculateSpeedAdvisory();
+				if(a != null) {
+					a = Math.max(a, getMinDisplay());
+					int sa = round5Mph(a);
+					if(sa < lim && sa <= getMaxDisplay())
+						return sa;
+					else
+						return null;
+				}
+			}
+		}
+		return null;
 	}
 }

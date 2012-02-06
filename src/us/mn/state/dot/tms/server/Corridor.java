@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.CorridorBase;
@@ -26,7 +24,6 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A corridor is a collection of all R_Node objects for one roadway corridor.
@@ -34,14 +31,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Douglas Lau
  */
 public class Corridor extends CorridorBase {
-
-	/** VSA debug log */
-	static protected final IDebugLog VSA_LOG = new IDebugLog("vsa");
-
-	/** Round up to the nearest 5 mph */
-	static protected int round5Mph(float mph) {
-		return Math.round(mph / 5) * 5;
-	}
 
 	/** Create a new corridor */
 	public Corridor(GeoLoc loc) {
@@ -196,49 +185,5 @@ public class Corridor extends CorridorBase {
 				return false;
 			}
 		});
-	}
-
-	/** Calculate the speed advisory */
-	public Integer calculateSpeedAdvisory(GeoLoc loc) {
-		Float m = calculateMilePoint(loc);
-		if(VSA_LOG.isOpen())
-			VSA_LOG.log(loc.getName() + ", mp: " + m);
-		if(m != null)
-			return calculateSpeedAdvisory(m);
-		else
-			return null;
-	}
-
-	/** Calculate the speed advisory */
-	protected Integer calculateSpeedAdvisory(float m) {
-		VSStationFinder vss_finder = new VSStationFinder(m);
-		findStation(vss_finder);
-		if(VSA_LOG.isOpen())
-			vss_finder.debug(VSA_LOG);
-		if(vss_finder.foundVSS()) {
-			Integer lim = vss_finder.getSpeedLimit();
-			if(lim != null) {
-				Float a = vss_finder.calculateSpeedAdvisory();
-				if(a != null) {
-					a = Math.max(a, getMinDisplay());
-					int sa = round5Mph(a);
-					if(sa < lim && sa <= getMaxDisplay())
-						return sa;
-					else
-						return null;
-				}
-			}
-		}
-		return null;
-	}
-
-	/** Get the minimum speed to display for advisory */
-	protected int getMinDisplay() {
-		return SystemAttrEnum.VSA_MIN_DISPLAY_MPH.getInt();
-	}
-
-	/** Get the maximum speed to display for advisory */
-	private int getMaxDisplay() {
-		return SystemAttrEnum.VSA_MAX_DISPLAY_MPH.getInt();
 	}
 }
