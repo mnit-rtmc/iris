@@ -434,40 +434,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				es.resetNoBottleneckCount();
 			return true;
 		}
-		for(EntranceNode es : s.getAssociatedEntrances()) {
-			if(!es.isMetering)
-				continue;
-			if(es.countRateHistory() < STOP_STEPS)
-				continue;
-			boolean shouldStop = false;
-			for(int k = 0; k < STOP_STEPS; k++) {
-				Double sk = es.getSegmentDensity(k);
-				if(sk > K_DES) {
-					shouldStop = true;
-					break;
-				}
-			}
-			if(shouldStop)
-				continue;
-			if(!hasBottleneck) {
-				es.addNoBottleneckCount();
-				if(es.getNoBottleneckCount() >= STOP_STEPS) {
-					es.stopMetering();
-					continue;
-				}
-				continue;
-			}
-			boolean satisfyRateCondition = true;
-			es.resetNoBottleneckCount();
-			for(int k = 0; k < STOP_STEPS; k++) {
-				double q = es.getFlow(k);
-				double rate = es.getRate(k);
-				if(q > rate)
-					satisfyRateCondition = false;
-			}
-			if(satisfyRateCondition)
-				es.stopMetering();
-		}
+		for(EntranceNode es : s.getAssociatedEntrances())
+			es.checkStopCondition(hasBottleneck);
 		return hasBottleneck;
 	}
 
@@ -1347,9 +1315,40 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/**
-		 * Stop metering
+		 * Check if the metering should be stopped.
 		 */
-		public void stopMetering() {
+		public void checkStopCondition(boolean hasBottleneck) {
+			if(!isMetering)
+				return;
+			if(countRateHistory() < STOP_STEPS)
+				return;
+			for(int k = 0; k < STOP_STEPS; k++) {
+				Double sk = getSegmentDensity(k);
+				if(sk > K_DES)
+					return;
+			}
+			if(!hasBottleneck) {
+				addNoBottleneckCount();
+				if(getNoBottleneckCount() >= STOP_STEPS)
+					stopMetering();
+				return;
+			}
+			boolean satisfyRateCondition = true;
+			resetNoBottleneckCount();
+			for(int k = 0; k < STOP_STEPS; k++) {
+				double q = getFlow(k);
+				double rate = getRate(k);
+				if(q > rate)
+					satisfyRateCondition = false;
+			}
+			if(satisfyRateCondition)
+				stopMetering();
+		}
+
+		/**
+		 * Stop metering.
+		 */
+		private void stopMetering() {
 			isMetering = false;
 			currentDemand = 0;
 			currentFlow = 0;
