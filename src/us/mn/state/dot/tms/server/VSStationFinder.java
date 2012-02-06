@@ -14,12 +14,19 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.tms.SystemAttrEnum;
+
 /**
  * Variable Speed Advisory Start Station (VSS) Finder.
  *
  * @author Douglas Lau
  */
 public class VSStationFinder implements Corridor.StationFinder {
+
+	/** Get the control deceleration threshold */
+	static private int getControlThreshold() {
+		return SystemAttrEnum.VSA_CONTROL_THRESHOLD.getInt();
+	}
 
 	/** Mile point to search for VSS */
 	protected final float ma;
@@ -82,10 +89,26 @@ public class VSStationFinder implements Corridor.StationFinder {
 
 	/** Calculate the advisory speed */
 	public Float calculateSpeedAdvisory() {
-		if(vss != null && vss_mp != null)
-			return vss.calculateSpeedAdvisory(vss_mp - ma);
-		else
-			return null;
+		if(vss != null && vss_mp != null) {
+			float spd = vss.getRollingAverageSpeed();
+			if(spd > 0)
+				return calculateSpeedAdvisory(spd, vss_mp - ma);
+		}
+		return null;
+	}
+
+	/** Calculate a speed advisory.
+	 * @param spd Average speed at VSS.
+	 * @param d Distance upstream of station.
+	 * @return Speed advisory. */
+	private float calculateSpeedAdvisory(float spd, float d) {
+		if(d > 0) {
+			int acc = -getControlThreshold();
+			double s2 = spd * spd + 2.0 * acc * d;
+			assert s2 > 0;
+			return (float)Math.sqrt(s2);
+		} else
+			return spd;
 	}
 
 	/** Debug the finder */

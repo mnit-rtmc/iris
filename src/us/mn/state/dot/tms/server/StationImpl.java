@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -650,22 +650,5 @@ public class StationImpl implements Station {
 	/** Get the downstream bottleneck distance */
 	protected float getDownstreamDistance() {
 		return SystemAttrEnum.VSA_DOWNSTREAM_MILES.getFloat();
-	}
-
-	/** Calculate a speed advisory.
-	 * @param d Distance upstream of station.
-	 * @return Speed advisory. */
-	public Float calculateSpeedAdvisory(float d) {
-		float spd = getRollingAverageSpeed();
-		if(spd > 0) {
-			if(d > 0) {
-				int acc = -getControlThreshold();
-				double s2 = spd * spd + 2.0 * acc * d;
-				assert s2 > 0;
-				return (float)Math.sqrt(s2);
-			} else
-				return spd;
-		} else
-			return null;
 	}
 }
