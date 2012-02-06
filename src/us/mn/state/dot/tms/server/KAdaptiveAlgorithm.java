@@ -66,6 +66,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number of time steps for bottleneck trend after stop metering */
 	static private final int BOTTLENECK_TREND_STEPS_AFTER_STOP = 4;
 
+	/** Spacing between two bottlenecks (soft minimum) */
+	static private final float BOTTLENECK_SPACING_MILES = 1.5f;
+
 	/** Number of steps for average density to check corridor state */
 	static private final int AVG_K_STEPS = 30;
 
@@ -945,9 +948,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Is a bottleneck station too close to another? */
 		protected boolean isBottleneckTooClose(StationNode sn) {
-			// FIXME: we need to use actual distance, not count
-			// return sn.stationIdx - stationIdx < 3;
-			return false;
+			return distanceMiles(sn) < BOTTLENECK_SPACING_MILES;
 		}
 
 		/**
