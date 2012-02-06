@@ -923,19 +923,27 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		protected void checkBottleneck() {
 			double kb = bottleneckDensity();
 			if(getAggregatedDensity() >= kb) {
-				boolean increasing = true;
-				boolean high_k = true;
-				for(int i = 0; i < bottleneckTrendSteps(); i++){
-					double k = getAggregatedDensity(i);
-					double pk = getAggregatedDensity(i + 1);
-					if(k < pk)
-						increasing = false;
-					if(k < kb || pk < kb)
-						high_k = false;
-				}
-				if(isPrevBottleneck || increasing || high_k)
+				if(isPrevBottleneck || isDensityIncreasing(kb))
 					isBottleneck = true;
 			}
+		}
+
+		/**
+		 * Check if density has been increasing for a number of steps
+		 * or that all previous steps are high.
+		 */
+		private boolean isDensityIncreasing(final double kb) {
+			boolean increasing = true;
+			boolean high_k = true;
+			for(int i = 0; i < bottleneckTrendSteps(); i++) {
+				double k = getAggregatedDensity(i);
+				double pk = getAggregatedDensity(i + 1);
+				if(k < pk)
+					increasing = false;
+				if(k < kb || pk < kb)
+					high_k = false;
+			}
+			return increasing || high_k;
 		}
 
 		/**
