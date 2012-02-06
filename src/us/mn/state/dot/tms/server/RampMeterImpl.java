@@ -559,6 +559,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			return new SimpleAlgorithm();
 		case STRATIFIED:
 			return lookupOrCreateStratified();
+		case K_ADAPTIVE:
+			return lookupOrCreateKAdaptive();
 		default:
 			return null;
 		}
@@ -569,6 +571,15 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		Corridor c = getCorridor();
 		if(c != null)
 			return StratifiedAlgorithm.lookupCorridor(c);
+		else
+			return null;
+	}
+
+	/** Lookup or create a K adaptive algorithm state */
+	protected MeterAlgorithmState lookupOrCreateKAdaptive() {
+		Corridor c = getCorridor();
+		if(c != null)
+			return KAdaptiveAlgorithm.lookupCorridor(c);
 		else
 			return null;
 	}
