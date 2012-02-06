@@ -211,13 +211,14 @@ public class Corridor extends CorridorBase {
 
 	/** Calculate the speed advisory */
 	protected Integer calculateSpeedAdvisory(float m) {
-		BottleneckFinder bf = new BottleneckFinder(m);
-		findStation(bf);
-		bf.debug();
-		if(bf.foundBottleneck()) {
-			Integer lim = bf.getSpeedLimit();
+		VSStationFinder vss_finder = new VSStationFinder(m);
+		findStation(vss_finder);
+		if(VSA_LOG.isOpen())
+			vss_finder.debug(VSA_LOG);
+		if(vss_finder.foundVSS()) {
+			Integer lim = vss_finder.getSpeedLimit();
 			if(lim != null) {
-				Float a = bf.calculateSpeedAdvisory();
+				Float a = vss_finder.calculateSpeedAdvisory();
 				if(a != null) {
 					a = Math.max(a, getMinDisplay());
 					int sa = round5Mph(a);
@@ -239,77 +240,5 @@ public class Corridor extends CorridorBase {
 	/** Get the maximum speed to display for advisory */
 	private int getMaxDisplay() {
 		return SystemAttrEnum.VSA_MAX_DISPLAY_MPH.getInt();
-	}
-
-	/** Class to find a bottleneck near a point */
-	static protected class BottleneckFinder implements StationFinder {
-		protected final float ma;	// mile point
-		protected StationImpl su;	// upstream station
-		protected Float mu;		// upstream mile pt
-		protected StationImpl sd;	// downstream station
-		protected Float md;		// downstream mile pt
-		protected StationImpl sb;	// bottleneck station
-		protected Float mb;		// bottleneck mile pt
-		protected BottleneckFinder(float m) {
-			ma = m;
-		}
-		public boolean check(Float m, StationImpl s) {
-			if(m < ma) {
-				su = s;
-				mu = m;
-			} else if(md == null || md > m) {
-				sd = s;
-				md = m;
-			}
-			if((mb == null || mb > m) && s.isBottleneckFor(m - ma)){
-				sb = s;
-				mb = m;
-			}
-			return false;
-		}
-		protected boolean foundBottleneck() {
-			return sb != null;
-		}
-		protected Float getSpeed() {
-			if(su != null && sd != null) {
-				float u0 = su.getRollingAverageSpeed();
-				float u1 = sd.getRollingAverageSpeed();
-				if(u0 > 0 && u1 > 0)
-					return Math.min(u0, u1);
-				if(u0 > 0)
-					return u0;
-				if(u1 > 0)
-					return u1;
-			}
-			return null;
-		}
-		protected Integer getSpeedLimit() {
-			if(su != null && sd != null) {
-				return Math.min(su.getSpeedLimit(),
-					sd.getSpeedLimit());
-			} else if(su != null)
-				return su.getSpeedLimit();
-			else if(sd != null)
-				return sd.getSpeedLimit();
-			else
-				return null;
-		}
-		protected Float calculateSpeedAdvisory() {
-			if(sb != null && mb != null)
-				return sb.calculateSpeedAdvisory(mb - ma);
-			else
-				return null;
-		}
-		protected void debug() {
-			if(VSA_LOG.isOpen()) {
-				Float a = calculateSpeedAdvisory();
-				VSA_LOG.log("adv: " + a +
-				            ", upstream: " + su +
-				            ", downstream: " + sd +
-				            ", bottleneck: " + sb +
-				            ", speed: " + getSpeed() +
-				            ", limit: " + getSpeedLimit());
-			}
-		}
 	}
 }
