@@ -1154,10 +1154,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final DetectorSet bypass = new DetectorSet();
 
 		/** Cumulative demand history */
-		private BoundedSampleHistory cumulativeDemand = new BoundedSampleHistory(8);
+		private final BoundedSampleHistory cumulativeDemand =
+			new BoundedSampleHistory(8);
 
-		/** Cumulative merging flow history */
-		private BoundedSampleHistory cumulativeMergingFlow = new BoundedSampleHistory(1);
+		/** Cumulative passage history */
+		private final BoundedSampleHistory cumulativePassage =
+			new BoundedSampleHistory(1);
 
 		/** Metering rate flow history */
 		private BoundedSampleHistory rateHistory = new BoundedSampleHistory(STOP_STEPS);
@@ -1165,8 +1167,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Segment density history */
 		private BoundedSampleHistory segmentDensityHistory = new BoundedSampleHistory(STOP_STEPS);
 
-		/** Ramp flow history */
-		private BoundedSampleHistory rampFlowHistory = new BoundedSampleHistory(STOP_STEPS);
+		/** Ramp passage history */
+		private final BoundedSampleHistory passageHistory =
+			new BoundedSampleHistory(STOP_STEPS);
 
 		/** Ramp demand history */
 		private BoundedSampleHistory rampDemandHistory = new BoundedSampleHistory(1);
@@ -1225,25 +1228,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		private void updateState() {
 			isRateUpdated = false;
-			calculateRampFlowAndDemand();
 
-			double demand = rampDemandHistory.get(0);
-			double p_flow = rampFlowHistory.get(0);
+			double p_flow = calculateRampFlow();
+			double demand = calculateRampDemand(p_flow);
+			double prevCd = getCumulativeDemand();
+			double prevCq = getCumulativePassage();
 
-			double prevCd = 0;
-			double prevCq = 0;
-
-			if(cumulativeDemand.size() > 0)
-				prevCd = cumulativeDemand.get(0);
-			if(cumulativeMergingFlow.size() > 0)
-				prevCq = cumulativeMergingFlow.get(0);
-
+			passageHistory.push(p_flow);
+			cumulativePassage.push(prevCq + p_flow);
+			rampDemandHistory.push(demand);
 			cumulativeDemand.push(prevCd + demand);
-			cumulativeMergingFlow.push(prevCq + p_flow);
-
 			currentDemand = demand;
 			currentFlow = p_flow;
-
 			calculateMinimumRate();
 		}
 
@@ -1273,17 +1269,29 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/**
-		 * Calculate ramp flow and demand
+		 * Calculate ramp demand
 		 */
-		private void calculateRampFlowAndDemand() {
-			double rampFlow = calculateRampFlow();
-			double rampDemand = 0;
-			rampFlowHistory.push(rampFlow);
+		private double calculateRampDemand(double p_flow) {
 			if(queue.isPerfect())
-				rampDemand = queue.getFlow();
+				return queue.getFlow();
 			else
-				rampDemand = rampFlow * PASSAGE_DEMAND_FACTOR;
-			rampDemandHistory.push(rampDemand);
+				return p_flow * PASSAGE_DEMAND_FACTOR;
+		}
+
+		/** Get the previous cumulative demand. */
+		private double getCumulativeDemand() {
+			if(cumulativeDemand.size() > 0)
+				return cumulativeDemand.get(0);
+			else
+				return 0;
+		}
+
+		/** Get the previous cumulative passage */
+		private double getCumulativePassage() {
+			if(cumulativePassage.size() > 0)
+				return cumulativePassage.get(0);
+			else
+				return 0;
 		}
 
 		/**
@@ -1296,7 +1304,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return;
 			}
 			double Cd_4mAgo = cumulativeDemand.get(wait_idx);
-			double Cf_current = cumulativeMergingFlow.get(0);
+			double Cf_current = cumulativePassage.get(0);
 			minimumRate = (Cd_4mAgo - Cf_current);
 			if(minimumRate <= 0)
 				minimumRate = getMinRelease();
@@ -1412,7 +1420,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return ramp flow at 'prevStep' time steps ago
 		 */
 		private double getFlow(int prevStep) {
-			return rampFlowHistory.get(prevStep);
+			return passageHistory.get(prevStep);
 		}
 
 		/**
@@ -1427,7 +1435,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				int cnt = 0;
 
 				for(int i = 0; i < 3; i++) {
-					flowSum += rampFlowHistory.get(i);
+					flowSum += passageHistory.get(i);
 					cnt++;
 				}
 
