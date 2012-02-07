@@ -841,9 +841,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Is bottleneck at previous time step? */
 		private boolean isPrevBottleneck = false;
 
-		/** Detector set for the station : mainline, aux */
-		private final DetectorSet dets = new DetectorSet();
-
 		/**
 		 * Create a new station node.
 		 * @param rnode
@@ -853,8 +850,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		{
 			super(rnode, m, up);
 			station = stat;
-			DetectorSet ds = rnode.getDetectorSet();
-			dets.addDetectors(ds, LaneType.MAINLINE);
 		}
 
 		/**
@@ -886,35 +881,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * It must be called before finding bottleneck.
 		 */
 		public void updateState() {
-			Iterator<DetectorImpl> itr = dets.detectors.iterator();
-			double density = 0, speed = 0;
-			float u = -1, k = -1;
-			int n_u = 0, n_k = 0;
-
-			while(itr.hasNext()) {
-				DetectorImpl d = itr.next();
-				if(!d.abandoned) {
-					k = d.getDensity();
-					u = d.getSpeed();
-				} else
-					continue;
-				if(u > 0) {
-					speed += u;
-					n_u++;
-				}
-				if(k > 0) {
-					density += k;
-					n_k++;
-				}
-			}
-
-			if(n_u > 0)
-				speed /= n_u;
-			if(n_k > 0)
-				density /= n_k;
-
-			densityHistory.push(density);
-			speedHistory.push(speed);
+			densityHistory.push((double)station.getDensity());
+			speedHistory.push((double)station.getSpeed());
 		}
 
 		/**

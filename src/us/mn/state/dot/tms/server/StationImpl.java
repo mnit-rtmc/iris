@@ -212,18 +212,18 @@ public class StationImpl implements Station {
 	}
 
 	/** Current average station density */
-	protected int density = Constants.MISSING_DATA;
+	private float density = Constants.MISSING_DATA;
 
 	/** Get the average station density */
-	public int getDensity() {
+	public float getDensity() {
 		return density;
 	}
 
 	/** Current average station speed */
-	protected int speed = Constants.MISSING_DATA;
+	private float speed = Constants.MISSING_DATA;
 
 	/** Get the average station speed */
-	public int getSpeed() {
+	public float getSpeed() {
 		return speed;
 	}
 
@@ -379,9 +379,9 @@ public class StationImpl implements Station {
 		}
 		volume = average(t_volume, n_volume);
 		occupancy = average(t_occ, n_occ);
-		flow = (int)average(t_flow, n_flow);
-		density = (int)average(t_density, n_density);
-		speed = (int)average(t_speed, n_speed);
+		flow = Math.round(average(t_flow, n_flow));
+		density = average(t_density, n_density);
+		speed = average(t_speed, n_speed);
 		updateRollingSpeed(speed);
 		updateAvgSpeed(speed);
 		updateLowSpeed(low);
@@ -392,7 +392,7 @@ public class StationImpl implements Station {
 		if(!getActive())
 			return;
 		int f = getFlow();
-		int s = getSpeed();
+		int s = Math.round(getSpeed());
 		float o = occupancy;
 		out.print("\t<sample");
 		out.print(XmlWriter.createAttribute("sensor", name));
