@@ -1104,7 +1104,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Minimum metering rate */
 		private double minimumRate = 0;
 
-		/** How many time steps there's no bottleneck at downstream for */
+		/** How many time steps there's no bottleneck at downstream */
 		private int noBottleneckCount = 0;
 
 		/** Corresponding bottleneck */
@@ -1134,17 +1134,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			new BoundedSampleHistory(1);
 
 		/** Metering rate flow history */
-		private BoundedSampleHistory rateHistory = new BoundedSampleHistory(STOP_STEPS);
+		private final BoundedSampleHistory rateHistory =
+			new BoundedSampleHistory(STOP_STEPS);
 
 		/** Segment density history */
-		private BoundedSampleHistory segmentDensityHistory = new BoundedSampleHistory(STOP_STEPS);
+		private final BoundedSampleHistory segmentDensityHistory =
+			new BoundedSampleHistory(STOP_STEPS);
 
 		/** Ramp passage history */
 		private final BoundedSampleHistory passageHistory =
 			new BoundedSampleHistory(STOP_STEPS);
 
 		/** Ramp demand history */
-		private BoundedSampleHistory rampDemandHistory = new BoundedSampleHistory(1);
+		private final BoundedSampleHistory rampDemandHistory =
+			new BoundedSampleHistory(1);
 
 		/**
 		 * Construct
