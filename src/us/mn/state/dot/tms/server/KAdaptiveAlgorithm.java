@@ -178,13 +178,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		case ENTRANCE:
 			return new EntranceNode(rnode, mile, prev);
 		case STATION:
-			StationImpl station = rnode.getStation();
-			if(station != null &&
-			   rnode.getDetectorSet().size() > 0)
-			{
-				return new StationNode(rnode, mile, prev,
-					station);
-			}
+			StationImpl stat = rnode.getStation();
+			if(stat != null && stat.getActive())
+				return new StationNode(rnode, mile, prev, stat);
 		default:
 			return null;
 		}
