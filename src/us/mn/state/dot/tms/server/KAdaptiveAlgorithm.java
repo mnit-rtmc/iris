@@ -1400,23 +1400,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return metering rate
 		 */
 		private double getRate() {
-			// initial rate = average(last 3 flows) or MAX_RATE
-			if(currentRate == 0) {
-				currentRate = currentFlow;
-				double flowSum = 0;
-				int cnt = 0;
-
-				for(int i = 0; i < 3; i++) {
-					flowSum += passageHistory.get(i);
-					cnt++;
-				}
-
-				if(cnt > 0)
-					currentRate = flowSum / cnt;
-				else
-					currentRate = getMaxRelease();  // no flow
-			}
+			if(currentRate == 0)
+				currentRate = getInitialRate();
 			return currentRate;
+		}
+
+		/** Initial rate = average(last 3 flows) or MAX_RATE */
+		private double getInitialRate() {
+			Double flow = passageHistory.average(0, 3);
+			if(flow != null)
+				return flow;
+			else
+				return getMaxRelease();  // no flow
 		}
 
 		/**
