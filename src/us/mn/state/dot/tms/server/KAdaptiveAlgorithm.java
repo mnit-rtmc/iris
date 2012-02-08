@@ -726,37 +726,42 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param downStation downstream station (not need to be next downstream of upStation)
 	 * @return average density (distance weight)
 	 */
-	public double getAverageDensity(StationNode upStation, StationNode downStation) {
+	public double getAverageDensity(StationNode upStation,
+		StationNode downStation)
+	{
 		return getAverageDensity(upStation, downStation, 0);
 	}
 
 	/**
-	 * Returns average density between 2 station at prevStep time steps ago
+	 * Returns average density between 2 station at prevStep time steps ago.
+	 * This works by splitting each "segment" between stations into 3 equal
+	 * lengths and assigning average density to the middle sub-segment.
+	 *
 	 * @param upStation upstream station
-	 * @param downStation downstream station (not need to be next downstream of upStation)
+	 * @param downStation downstream station (not necessarily consecutive)
 	 * @param prevStep previous time steps
 	 * @return average density (distance weight)
 	 */
-	public double getAverageDensity(StationNode upStation, StationNode downStation, int prevStep) {
+	public double getAverageDensity(StationNode upStation,
+		StationNode downStation, int prevStep)
+	{
 		StationNode cursor = upStation;
-
-		double totalDistance = 0;
-		double avgDensity = 0;
-		while(true) {
-			StationNode dStation = cursor.downstreamStation();
-			double upDensity = cursor.getAggregatedDensity(prevStep);
-			double downDensity = dStation.getAggregatedDensity(prevStep);
-			double middleDensity = (upDensity + downDensity) / 2;
-			double distance = cursor.distanceMiles(dStation);
-			double distanceFactor = distance / 3;
-			totalDistance += distance;
-			avgDensity += (upDensity + middleDensity + downDensity) * distanceFactor;
-
-			if(dStation.equals(downStation))
-				break;
-			cursor = dStation;
+		double dist_sum3 = 0;
+		double k_sum3 = 0;
+		double k_cursor = cursor.getAggregatedDensity(prevStep);
+		for(StationNode down = cursor.downstreamStation();
+		    down != null && cursor != downStation;
+		    down = down.downstreamStation())
+		{
+			double k_down = down.getAggregatedDensity(prevStep);
+			double k_middle = (k_cursor + k_down) / 2;
+			double distance = cursor.distanceMiles(down);
+			dist_sum3 += distance * 3;
+			k_sum3 += (k_cursor + k_middle + k_down) * distance;
+			cursor = down;
+			k_cursor = k_down;
 		}
-		return avgDensity / totalDistance;
+		return k_sum3 / dist_sum3;
 	}
 
 	/**
