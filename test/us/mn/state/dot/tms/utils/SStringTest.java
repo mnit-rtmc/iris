@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009 - 2011  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,5 +95,14 @@ public class SStringTest extends TestCase {
 		assertTrue(SString.alphaPrefixLen("abcdef1234", "abcdef1234") == 6);
 		assertTrue(SString.alphaPrefixLen("!@#$%3", "!@#$%3") == 5);
 		assertTrue(SString.alphaPrefixLen("1234", "1234") == 0);
+
+		// count
+		assertTrue(0 == SString.count(null, null));
+		assertTrue(0 == SString.count("", ""));
+		assertTrue(0 == SString.count("abc", ""));
+		assertTrue(1 == SString.count("abc", "c"));
+		assertTrue(1 == SString.count("abc", "bc"));
+		assertTrue(4 == SString.count("aaaa", "a"));
+		assertTrue(0 == SString.count("abc", "bcd"));
 	}
 }

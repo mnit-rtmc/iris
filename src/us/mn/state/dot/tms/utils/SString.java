@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008 - 2011  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,20 +28,39 @@ public class SString {
 	/** instance can't be created */
 	private SString(){}
 
-	/**
-	 *  Does a string contain the specified char?
-	 *  @param str string to search
-	 *  @param c character to search for
-	 *  @return true if str contains c else false.
-	 */
-	public static boolean containsChar(String str,char c) {
-		if (str==null)
-			return false;
-		for (int i=0; i<str.length(); ++i) {
-			if (str.charAt(i)==c)
-				return true;
-		}
-		return false;
+	/** Count the number of specified characters in the string.
+	 * @param s String to count chars in, may be null. */
+	public static int count(String s, char c) {
+		if(s == null)
+			return 0;
+		int cn = 0;
+		for(int i = 0; i < s.length(); ++i)
+			if(s.charAt(i) == c)
+				++cn;
+		return cn;
+	}
+
+	/** Count the number of times the specified string occurs 
+	 * in another string.
+	 * @param s String to count occurences in, may be null.
+	 * @param c String to count occurences of, may be null.
+	 * @return Number of times c occurs in s. */
+	public static int count(String s, String c) {
+		if(s == null || c == null || s.isEmpty() || c.isEmpty())
+			return 0;
+		int n = 0;
+		for(int i = 0; i < s.length(); ++i)
+			if(s.startsWith(c, i))
+				++n;
+		return n;
+	}
+
+	/** Does a string contain the specified char?
+	 *  @param s String to search, may be null.
+	 *  @param c Character to search for.
+	 *  @return True if s contains c else false. */
+	public static boolean containsChar(String s,char c) {
+		return count(s, c) > 0;
 	}
 
 	/**
