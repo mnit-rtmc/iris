@@ -87,7 +87,6 @@ public enum SystemAttrEnum {
 	SAMPLE_ARCHIVE_ENABLE(true),
 	SAMPLE_ARCHIVE_DIRECTORY("/var/lib/iris/traffic"),
 	STATION_XML_ENABLE(true),
-	TEMP_FAHRENHEIT_ENABLE(true, Change.RESTART_CLIENT),
 	TESLA_HOST(String.class),
 	TRAVEL_TIME_MAX_LEGS(8, 1, 20),
 	TRAVEL_TIME_MAX_MILES(16, 1, 30),

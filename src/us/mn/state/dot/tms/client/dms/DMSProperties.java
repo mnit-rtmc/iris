@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.Temperature;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
@@ -92,11 +93,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Format the temperature */
 	static protected String formatTemp(Integer minTemp, Integer maxTemp) {
 		if(minTemp == null || minTemp == maxTemp)
-			return Temperature.formatCelsius(maxTemp);
-		if(maxTemp == null)
-			return Temperature.formatCelsius(minTemp);
-		return Temperature.formatCelsius(minTemp) + " ... " +
-		       Temperature.formatCelsius(maxTemp);
+			return new Temperature(maxTemp).toString();
+		else if(maxTemp == null)
+			return new Temperature(minTemp).toString();
+		else
+			return new Temperature(minTemp).toString() + "..." + 
+				new Temperature(maxTemp).toString();
 	}
 
 	/** Frame title */
