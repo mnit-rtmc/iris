@@ -896,6 +896,15 @@ CREATE VIEW time_action_view AS
 	FROM iris.time_action;
 GRANT SELECT ON time_action_view TO PUBLIC;
 
+CREATE VIEW meter_action_view AS
+	SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
+	FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
+	WHERE ma.action_plan = ap.name
+	AND ap.name = ta.action_plan
+	AND active = true
+	ORDER BY ramp_meter, time_of_day;
+GRANT SELECT ON meter_action_view TO PUBLIC;
+
 CREATE VIEW road_view AS
 	SELECT name, abbrev, rcl.description AS r_class, dir.direction,
 	adir.direction AS alt_dir
