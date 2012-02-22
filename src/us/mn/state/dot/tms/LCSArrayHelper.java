@@ -189,6 +189,15 @@ public class LCSArrayHelper extends BaseHelper {
 		}) != null;
 	}
 
+	/** Check if an LCS array is user deployed */
+	static public boolean isUserDeployed(final LCSArray lcs_array) {
+		return lookupDMS(lcs_array, new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				return DMSHelper.isUserDeployed(dms);
+			}
+		}) != null;
+	}
+
 	/** Check if an LCS array is schedule deployed */
 	static public boolean isScheduleDeployed(final LCSArray lcs_array) {
 		return lookupDMS(lcs_array, new Checker<DMS>() {

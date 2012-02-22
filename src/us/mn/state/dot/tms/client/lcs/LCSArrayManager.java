@@ -103,17 +103,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return LCSArrayHelper.isDeployed(proxy);
 	}
 
-	/** Test if an LCS array is active, not failed and deployed */
-	static protected boolean isMessageDeployed(LCSArray proxy) {
-		return isActive(proxy) &&
-		       !isFailed(proxy) &&
-		       isDeployed(proxy);
-	}
-
 	/** Test if an LCS has been deployed by a user */
 	static protected boolean isUserDeployed(LCSArray proxy) {
-		return isMessageDeployed(proxy) &&
-		       !LCSArrayHelper.isScheduleDeployed(proxy);
+		return LCSArrayHelper.isUserDeployed(proxy);
 	}
 
 	/** Test if an LCS has been deployed by schedule */
