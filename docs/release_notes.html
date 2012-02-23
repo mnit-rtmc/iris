@@ -11,6 +11,24 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.143.0 (23 February 2012)</dt>
+	<dd><ul>
+		<li>
+			Added new K Adaptive Metering algorithm.
+		</li>
+		<li>
+			Cleaned up code for variable speed advisories.
+		</li>
+		<li>
+			Fixed LCS status not showing up as "User Deployed" when
+			it was also scheduled.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.143.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.142.0 (20 January 2012)</dt>
 	<dd><ul>
 		<li>
