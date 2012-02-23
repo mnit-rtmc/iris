@@ -39,6 +39,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Algorithm debug log */
 	static private final IDebugLog ALG_LOG = new IDebugLog("kadaptive");
 
+	/** Number of seconds for one time step */
+	static private final int STEP_SECONDS = 30;
+
+	/** Calculate the number of steps for an interval */
+	static private int steps(int seconds) {
+		return seconds / STEP_SECONDS;
+	}
+
 	/** Bottleneck Density */
 	static private final int K_BOTTLENECK = 25;
 
@@ -58,22 +66,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private final int A_BOTTLENECK = 1000;
 
 	/** Number of time steps to check before stop metering */
-	static private final int STOP_STEPS = 10;
+	static private final int STOP_STEPS = steps(300);
 
 	/** Number of time steps for bottleneck trend before stop metering */
-	static private final int BOTTLENECK_TREND_STEPS_BEFORE_STOP = 2;
+	static private final int BOTTLENECK_TREND_1_STEPS = steps(60);
 
 	/** Number of time steps for bottleneck trend after stop metering */
-	static private final int BOTTLENECK_TREND_STEPS_AFTER_STOP = 4;
+	static private final int BOTTLENECK_TREND_2_STEPS = steps(120);
 
 	/** Spacing between two bottlenecks (soft minimum) */
 	static private final float BOTTLENECK_SPACING_MILES = 1.5f;
 
 	/** Number of steps for average density to check corridor state */
-	static private final int AVG_K_STEPS = 30;
+	static private final int AVG_K_STEPS = steps(900);
 
 	/** Number of trend steps for average density to check corridor state */
-	static private final int AVG_K_TREND_STEPS = 10;
+	static private final int AVG_K_TREND_STEPS = steps(300);
 
 	/** Factor to compute ramp demand from passage/merge flow */
 	static private final double PASSAGE_DEMAND_FACTOR = 1.15;
@@ -408,8 +416,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Get number of time steps to check for bottleneck */
 	private int bottleneckTrendSteps() {
-		return doStopChecking ? BOTTLENECK_TREND_STEPS_AFTER_STOP :
-		                        BOTTLENECK_TREND_STEPS_BEFORE_STOP;
+		return doStopChecking ? BOTTLENECK_TREND_2_STEPS :
+		                        BOTTLENECK_TREND_1_STEPS;
 	}
 
 	/**
