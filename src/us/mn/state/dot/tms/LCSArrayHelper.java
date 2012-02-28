@@ -191,11 +191,18 @@ public class LCSArrayHelper extends BaseHelper {
 
 	/** Check if an LCS array is user deployed */
 	static public boolean isUserDeployed(final LCSArray lcs_array) {
-		return lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				return DMSHelper.isUserDeployed(dms);
+		Integer[] ind = lcs_array.getIndicationsCurrent();
+		for(int n = 0; n < ind.length; n++) {
+			Integer i = ind[n];
+			if(i != null && i != LaneUseIndication.DARK.ordinal()) {
+				int lane = n + 1;
+				DMS dms = lookupDMS(lcs_array, lane);
+				if(dms == null ||
+				   !DMSHelper.isScheduleDeployed(dms))
+					return true;
 			}
-		}) != null;
+		}
+		return false;
 	}
 
 	/** Check if an LCS array is schedule deployed */
