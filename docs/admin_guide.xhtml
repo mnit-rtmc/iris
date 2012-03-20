@@ -22,7 +22,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">3 February 2012</div>
+<div id="stamp">20 March 2012</div>
 <h1>IRIS Administrator Guide</h1>
 
 <h2 id="overview">Overview
@@ -249,6 +249,8 @@
 	remember an additional user name and password.
 	Otherwise, you can install and configure
 	<a href="http://www.openldap.org">OpenLDAP</a>.
+	For testing, IRIS also has an option to bypass all authentication
+	(no LDAP server required).
 </p>
 <p>
 	IRIS can also be configured to use multiple LDAP servers at once.
@@ -264,6 +266,10 @@
 	Multiple URLs must be separated by a space.
 	The URL protocol is normally <i>ldap:</i>, but must be <i>ldaps:</i>
 	for encrypted communication over SSL.
+	For testing and debugging only, the <i>sonar.ldap.urls</i> property
+	may be set to bypass_authentication.
+	This allows anyone to connect to the IRIS server without a password.
+	WARNING: Do not use this option on a production system.
 </p>
 <p>
 	(Optional)
@@ -287,6 +293,12 @@
 	the following line:
 </p>
 <pre class="code">host    all         all         127.0.0.1/32          password</pre>
+<p>
+	NOTE: The "password" in the above line indicates an authentication
+	method, not an actual password.
+	This allows TCP connections from the local host to connect to the
+	database using password authentication, as the IRIS server must.
+</p>
 <p>
 	The PostgreSQL server can now be started:
 </p>
