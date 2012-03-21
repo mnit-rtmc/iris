@@ -327,6 +327,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return io_pins.get(pin);
 	}
 
+	/** Get the number of IO pins */
+	public synchronized int getNumberIoPins() {
+		return io_pins.size();
+	}
+
 	/** Assign an IO to the specified controller I/O pin */
 	public synchronized void setIO(int pin, ControllerIO io) {
 		if(io != null)

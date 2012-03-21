@@ -295,6 +295,16 @@ public class SString {
 		return SString.removeTail(r.toString(), ", ");
 	}
 
+	/** Return a comma separated list given an int array. */
+	public static String toString(int[] i) {
+		if(i == null || i.length == 0)
+			return "";
+		StringBuilder r = new StringBuilder("");
+		for(int x : i)
+			r.append(x).append(", ");
+		return SString.removeTail(r.toString(), ", ");
+	}
+
 	/** Join two strings with a space and then trim */
 	static public String trimJoin(String a, String b) {
 		String j = a + " " + b;

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@ import java.util.LinkedList;
  * records in the iris.comm_protocol look-up table.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public enum CommProtocol {
 
@@ -73,7 +75,10 @@ public enum CommProtocol {
 	ORG_815("OSi ORG-815"),
 
 	/** Infinova wrapping Pelco D camera control (16) */
-	INFINOVA_D_PTZ("Infinova D PTZ");
+	INFINOVA_D_PTZ("Infinova D PTZ"),
+
+	/** EIS G4 (17) */
+	EIS_G4("EIS G4");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

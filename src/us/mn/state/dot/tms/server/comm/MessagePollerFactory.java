@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ import us.mn.state.dot.tms.server.ModemImpl;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaMessenger;
+import us.mn.state.dot.tms.server.comm.g4.G4Poller;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
@@ -41,6 +43,7 @@ import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
  * A factory for creating message poller threads.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class MessagePollerFactory {
 
@@ -102,6 +105,8 @@ public class MessagePollerFactory {
 			return createOrg815Poller();
 		case INFINOVA_D_PTZ:
 			return createInfinovaDPoller();
+		case EIS_G4:
+			return createEisG4Poller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -273,5 +278,10 @@ public class MessagePollerFactory {
 	protected MessagePoller createInfinovaDPoller() throws IOException {
 		return new PelcoDPoller(name, new InfinovaMessenger(
 			createSocketMessenger(TCP)));
+	}
+
+	/** Create an EIS G4 poller */
+	protected MessagePoller createEisG4Poller() throws IOException {
+		return new G4Poller(name, createSocketMessenger(TCP));
 	}
 }

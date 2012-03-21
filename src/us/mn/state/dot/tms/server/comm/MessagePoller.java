@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +30,15 @@ import us.mn.state.dot.tms.server.IDebugLog;
  * with priority-queued polling.  Subclasses are MndotPoller, NtcipPoller, etc.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 abstract public class MessagePoller extends Thread {
+
+	/** Messenger open modes */
+	public enum OpenMode {PERSISTENT, PER_OP};
+
+	/** Messenger open mode */
+	protected final OpenMode open_mode;
 
 	/** Create a message poller */
 	static public MessagePoller create(String name, CommProtocol protocol,
@@ -101,11 +109,17 @@ abstract public class MessagePoller extends Thread {
 		return hung_up;
 	}
 
-	/** Create a new message poller */
-	protected MessagePoller(String name, Messenger m) {
+	/** Create a new message poller with the open mode specified */
+	protected MessagePoller(String name, Messenger m, OpenMode om) {
 		super(GROUP, "Poller: " + name);
 		setDaemon(true);
 		messenger = m;
+		open_mode = om;
+	}
+
+	/** Create a new message poller with a persistent open mode */
+	protected MessagePoller(String name, Messenger m) {
+		this(name, m, OpenMode.PERSISTENT);
 	}
 
 	/** Set the receive timeout */
@@ -129,7 +143,8 @@ abstract public class MessagePoller extends Thread {
 		status = "STARTING";
 		plog("STARTING");
 		try {
-			messenger.open();
+			if(open_mode == OpenMode.PERSISTENT)
+				messenger.open();
 			status = "";
 			performOperations();
 			status = "CLOSING";
@@ -145,7 +160,8 @@ abstract public class MessagePoller extends Thread {
 			e.printStackTrace();
 		}
 		finally {
-			messenger.close();
+			if(open_mode == OpenMode.PERSISTENT)
+				messenger.close();
 			drainQueue();
 			plog("STOPPING");
 		}
@@ -179,7 +195,11 @@ abstract public class MessagePoller extends Thread {
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {
+			if(open_mode == OpenMode.PER_OP)
+				messenger.open();
 			o.poll(createMessage(o.getController()));
+			if(open_mode == OpenMode.PER_OP)
+				messenger.close();
 		}
 		catch(DeviceContentionException e) {
 			handleContention(o, e);
