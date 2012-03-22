@@ -65,8 +65,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Acceleration threshold to decide bottleneck */
 	static private final int A_BOTTLENECK = 1000;
 
+	/** Number fo time steps to check before start metering */
+	static private final int START_STEPS = steps(90);
+
 	/** Number of time steps to check before stop metering */
 	static private final int STOP_STEPS = steps(300);
+
+	/** Number of time steps to check before restart metering */
+	static private final int RESTART_STEPS = steps(300);
+
+	/** Maximum number of time steps needed for sample history */
+	static private final int MAX_STEPS = Math.max(Math.max(START_STEPS,
+		STOP_STEPS), RESTART_STEPS);
 
 	/** Number of time steps for bottleneck trend before stop metering */
 	static private final int BOTTLENECK_TREND_1_STEPS = steps(60);
@@ -638,9 +648,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if(segmentDensity >= bottleneckDensity())
 			satisfyDensityCondition = true;
 
-		if(en.countRateHistory() >= 3) {
+		if(en.countRateHistory() >= START_STEPS) {
 			satisfyRateCondition = true;
-			for(int i = 0; i < 3; i++) {
+			for(int i = 0; i < START_STEPS; i++) {
 				double q = en.getFlow(i);
 				double rate = en.getRate(i);
 				if(q < K_START_THRESH * rate)
@@ -672,10 +682,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		double segmentDensity = 0;
 
 		// if rate history is short, pass (do not start)
-		if(en.countRateHistory() < 10)
+		if(en.countRateHistory() < RESTART_STEPS)
 			return false;
 
-		for(int i = 0; i < 10; i++) {
+		for(int i = 0; i < RESTART_STEPS; i++) {
 			if(us != null)
 				segmentDensity = getAverageDensity(us, bs, i);
 			else
@@ -838,11 +848,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Speed history */
 		private final BoundedSampleHistory speedHistory =
-			new BoundedSampleHistory(2);
+			new BoundedSampleHistory(steps(60));
 
 		/** Density history */
 		private final BoundedSampleHistory densityHistory =
-			new BoundedSampleHistory(10);
+			new BoundedSampleHistory(steps(300));
 
 		/** Is bottleneck ? */
 		private boolean isBottleneck = false;
@@ -946,10 +956,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/**
 		 * Return aggregated density at 'prevStep' time steps ago
-		 * @return average 1min density at 'prevStep' time steps ago
+		 * @return average 1 min density at 'prevStep' time steps ago
 		 */
 		public double getAggregatedDensity(int prevStep) {
-			Double avg = densityHistory.average(prevStep, 2);
+			Double avg = densityHistory.average(prevStep,steps(60));
 			if(avg != null)
 				return avg;
 			else
@@ -961,7 +971,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1min speed
 		 */
 		public double getAggregatedSpeed() {
-			Double avg = speedHistory.average(0, 2);
+			Double avg = speedHistory.average(0, steps(60));
 			if(avg != null)
 				return avg;
 			else
@@ -1140,23 +1150,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Cumulative demand history */
 		private final BoundedSampleHistory cumulativeDemand =
-			new BoundedSampleHistory(8);
+			new BoundedSampleHistory(steps(240));
 
 		/** Cumulative passage history */
 		private final BoundedSampleHistory cumulativePassage =
-			new BoundedSampleHistory(1);
+			new BoundedSampleHistory(steps(30));
 
 		/** Metering rate flow history */
 		private final BoundedSampleHistory rateHistory =
-			new BoundedSampleHistory(STOP_STEPS);
+			new BoundedSampleHistory(MAX_STEPS);
 
 		/** Segment density history */
 		private final BoundedSampleHistory segmentDensityHistory =
-			new BoundedSampleHistory(STOP_STEPS);
+			new BoundedSampleHistory(MAX_STEPS);
 
 		/** Ramp passage history */
 		private final BoundedSampleHistory passageHistory =
-			new BoundedSampleHistory(STOP_STEPS);
+			new BoundedSampleHistory(MAX_STEPS);
 
 		/** Ramp demand history */
 		private final BoundedSampleHistory rampDemandHistory =
@@ -1193,11 +1203,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			RampMeterImpl m = meter;
 			if(m != null) {
 				int max_wait = m.getMaxWait();
-				int max_idx = max_wait / 30 - 1;
+				int max_idx = steps(max_wait) - 1;
 				if(max_idx > 0)
 					return max_idx;
 			}
-			return RampMeterImpl.DEFAULT_MAX_WAIT / 30 - 1;
+			return steps(RampMeterImpl.DEFAULT_MAX_WAIT) - 1;
 		}
 
 		/**
@@ -1421,9 +1431,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return currentRate;
 		}
 
-		/** Initial rate = average(last 3 flows) or MAX_RATE */
+		/** Initial rate = average(last 90 seconds) or MAX_RATE */
 		private double getInitialRate() {
-			Double flow = passageHistory.average(0, 3);
+			Double flow = passageHistory.average(0, steps(90));
 			if(flow != null)
 				return flow;
 			else
