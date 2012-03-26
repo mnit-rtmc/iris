@@ -137,11 +137,7 @@ abstract public class PeriodicSampleCache {
 					channel = readBuffer(f);
 					file = f;
 				}
-				if(ps.period == period) {
-					buffer.position(samplePosition(ps));
-					putValue(ps.value);
-				} else if(ps.period > period)
-					interpolate(ps);
+				putSample(ps);
 				ps = samples.pollFirst();
 			}
 			if(channel != null) {
@@ -176,6 +172,16 @@ abstract public class PeriodicSampleCache {
 		if(channel.size() > buffer.position())
 			channel.truncate(buffer.position());
 		channel.close();
+	}
+
+	/** Put one sample into the buffer.
+	 * @param ps Periodic sample. */
+	private void putSample(PeriodicSample ps) {
+		if(ps.period == period) {
+			buffer.position(samplePosition(ps));
+			putValue(ps.value);
+		} else if(ps.period > period)
+			interpolate(ps);
 	}
 
 	/** Compute the position of a sample in the file.
