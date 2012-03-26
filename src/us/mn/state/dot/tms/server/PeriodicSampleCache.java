@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,10 +53,6 @@ abstract public class PeriodicSampleCache {
 	/** Byte buffer for flushing samples to file */
 	static protected final ByteBuffer buffer = ByteBuffer.allocate(
 		samplesPerDay(MIN_PERIOD) * MAX_SAMPLE_BYTES);
-
-	/** Current file channel for flush method.  Access to this object is
-	 * protected by the buffer lock. */
-	static protected FileChannel channel;
 
 	/** Sample archive factory */
 	private final SampleArchiveFactory factory;
@@ -127,7 +123,7 @@ abstract public class PeriodicSampleCache {
 
 	/** Flush all buffered samples to archive files. */
 	private void flush_unlocked() throws IOException {
-		channel = null;
+		FileChannel channel = null;
 		buffer.clear();
 		try {
 			File file = null;
@@ -137,8 +133,8 @@ abstract public class PeriodicSampleCache {
 				File f = factory.createFile(ps.start());
 				if(!f.equals(file)) {
 					if(channel != null)
-						writeBuffer();
-					readBuffer(f);
+						writeBuffer(channel);
+					channel = readBuffer(f);
 					file = f;
 				}
 				if(ps.period == period) {
@@ -148,8 +144,10 @@ abstract public class PeriodicSampleCache {
 					interpolate(ps);
 				ps = samples.pollFirst();
 			}
-			if(channel != null)
-				writeBuffer();
+			if(channel != null) {
+				writeBuffer(channel);
+				channel = null;
+			}
 		}
 		finally {
 			if(channel != null)
@@ -159,17 +157,18 @@ abstract public class PeriodicSampleCache {
 
 	/** Read the contents of the given file into the buffer.
 	 * @param f File to read. */
-	private void readBuffer(File f) throws IOException {
-		channel = new RandomAccessFile(f, "rw").getChannel();
+	private FileChannel readBuffer(File f) throws IOException {
+		FileChannel channel = new RandomAccessFile(f,"rw").getChannel();
 		buffer.clear();
 		while(channel.read(buffer) >= 0 && buffer.hasRemaining());
 		while(buffer.position() < samplesPerDay() * sampleBytes())
 			putValue(Constants.MISSING_DATA);
 		buffer.flip();
+		return channel;
 	}
 
 	/** Write the buffer to the file channel and close the file. */
-	private void writeBuffer() throws IOException {
+	private void writeBuffer(FileChannel channel) throws IOException {
 		channel.position(0);
 		buffer.position(0);
 		while(buffer.hasRemaining())
@@ -177,7 +176,6 @@ abstract public class PeriodicSampleCache {
 		if(channel.size() > buffer.position())
 			channel.truncate(buffer.position());
 		channel.close();
-		channel = null;
 	}
 
 	/** Compute the position of a sample in the file.
