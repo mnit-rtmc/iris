@@ -122,6 +122,7 @@ abstract public class PeriodicSampleCache {
 	 * this method on each cache serially. */
 	public void flush() throws IOException {
 		synchronized(buffer) {
+			buffer.clear();
 			flush_unlocked();
 		}
 	}
@@ -129,7 +130,6 @@ abstract public class PeriodicSampleCache {
 	/** Flush all buffered samples to archive files. */
 	private void flush_unlocked() throws IOException {
 		FileChannel channel = null;
-		buffer.clear();
 		try {
 			File file = null;
 			PeriodicSample ps = samples.pollFirst();
