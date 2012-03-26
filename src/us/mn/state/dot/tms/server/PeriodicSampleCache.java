@@ -208,26 +208,33 @@ abstract public class PeriodicSampleCache {
 	 * @param total Total of all sample values. */
 	static private void interpolate(int[] values, int total) {
 		int e_total = 0;	// existing values total
-		int n_missing = 0;
+		int n_miss = 0;		// number of missing samples
 		for(int value: values) {
 			if(value < 0)
-				n_missing++;
+				n_miss++;
 			else
 				e_total += value;
 		}
-		if(n_missing > 0) {
-			int v_miss = total - e_total;
-			if(v_miss > 0) {
-				int t_miss = v_miss / n_missing;
-				int m_miss = v_miss % n_missing;
-				for(int i = 0; i < values.length; i++) {
-					if(values[i] < 0) {
-						values[i] = t_miss;
-						if(m_miss > 0) {
-							values[i]++;
-							m_miss--;
-						}
-					}
+		if(n_miss > 0) {
+			int excess = total - e_total;
+			if(excess > 0)
+				interpolate(values, excess, n_miss);
+		}
+	}
+
+	/** Interpolate sample data into an array of values.
+	 * @param values Array of existing sample values.
+	 * @param excess Excess sample data to distribute in missing samples.
+	 * @param n_miss Number of missing samples. */
+	static private void interpolate(int[] values, int excess, int n_miss) {
+		int t_miss = excess / n_miss;
+		int m_miss = excess % n_miss;
+		for(int i = 0; i < values.length; i++) {
+			if(values[i] < 0) {
+				values[i] = t_miss;
+				if(m_miss > 0) {
+					values[i]++;
+					m_miss--;
 				}
 			}
 		}
