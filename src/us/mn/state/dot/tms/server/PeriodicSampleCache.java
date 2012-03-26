@@ -229,7 +229,7 @@ abstract public class PeriodicSampleCache {
 		}
 		if(n_miss > 0) {
 			int excess = total - e_total;
-			if(excess > 0)
+			if(excess >= 0)
 				interpolate(values, excess, n_miss);
 		}
 	}
