@@ -92,6 +92,11 @@ abstract public class PeriodicSampleCache {
 		return samplesPerDay(period);
 	}
 
+	/** Get the number of bytes in buffer for one day */
+	private int bufferBytes() {
+		return samplesPerDay() * sampleBytes();
+	}
+
 	/** Add a periodic sample to the cache.
 	 * @param ps Sample to add to the cache. */
 	public void addSample(PeriodicSample ps) {
@@ -156,8 +161,13 @@ abstract public class PeriodicSampleCache {
 	private FileChannel readBuffer(File f) throws IOException {
 		FileChannel channel = new RandomAccessFile(f,"rw").getChannel();
 		buffer.clear();
+		// Read all existing sample data from file
 		while(channel.read(buffer) >= 0 && buffer.hasRemaining());
-		while(buffer.position() < samplesPerDay() * sampleBytes())
+		// Buffer should contain no more than one day of samples
+		if(buffer.position() > bufferBytes())
+			buffer.position(bufferBytes());
+		// Pad buffer with MISSING_DATA for full day
+		while(buffer.position() < bufferBytes());
 			putValue(Constants.MISSING_DATA);
 		buffer.flip();
 		return channel;
@@ -167,9 +177,11 @@ abstract public class PeriodicSampleCache {
 	private void writeBuffer(FileChannel channel) throws IOException {
 		channel.position(0);
 		buffer.position(0);
+		// Write sample data buffer to file
 		while(buffer.hasRemaining())
 			channel.write(buffer);
-		if(channel.size() > buffer.position())
+		// Truncate file if it's larger than buffer
+		if(channel.size() > bufferBytes())
 			channel.truncate(buffer.position());
 		channel.close();
 	}
