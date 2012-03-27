@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@ import us.mn.state.dot.tms.DMSHelper;
  *
  * @author Tim Johnson
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class SignMessageXmlWriter extends XmlWriter {
 
@@ -60,7 +62,18 @@ public class SignMessageXmlWriter extends XmlWriter {
 		out.println("<!ELEMENT sign_message EMPTY>");
 		out.println("<!ATTLIST sign_message dms CDATA #REQUIRED>");
 		out.println("<!ATTLIST sign_message status CDATA #REQUIRED>");
-		out.println("<!ATTLIST sign_message multi CDATA #REQUIRED>");
+		out.println("<!ATTLIST sign_message run_priority " + 
+			"CDATA #IMPLIED>");
+		out.println("<!ATTLIST sign_message act_priority " + 
+			"CDATA #IMPLIED>");
+		out.println("<!ATTLIST sign_message scheduled " + 
+			"CDATA #IMPLIED>");
+		out.println("<!ATTLIST sign_message duration " + 
+			"CDATA #IMPLIED>");
+		out.println("<!ATTLIST sign_message multi " + 
+			"CDATA #REQUIRED>");
+		out.println("<!ATTLIST sign_message bitmaps " + 
+			"CDATA #IMPLIED>");
 		out.println("]>");
 	}
 

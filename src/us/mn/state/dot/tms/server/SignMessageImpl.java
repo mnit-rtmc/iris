@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -192,13 +193,21 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Render the SignMessage object as xml */
 	public void printXml(PrintWriter out, DMSImpl dms) {
-		if(SignMessageHelper.isBlank(this))
-			return;
 		out.print("<sign_message");
 		out.print(XmlWriter.createAttribute("dms", dms.getName()));
 		out.print(XmlWriter.createAttribute("status",
 			DMSHelper.getAllStyles(dms)));
+		out.print(XmlWriter.createAttribute("run_priority", 
+			getRunTimePriority()));
+		out.print(XmlWriter.createAttribute("act_priority", 
+			getActivationPriority()));
+		out.print(XmlWriter.createAttribute("scheduled", 
+			getScheduled()));
+		out.print(XmlWriter.createAttribute("duration", 
+			getDuration()));
 		out.print(XmlWriter.createAttribute("multi", multi));
+		out.print(XmlWriter.createAttribute("bitmaps", 
+			getBitmaps()));
 		out.println("/>");
 	}
 }

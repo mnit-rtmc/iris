@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
+ * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,6 +122,8 @@ public class TmsConfigXmlWriter extends XmlWriter {
 		out.println("<!ATTLIST dms description CDATA #REQUIRED>");
 		out.println("<!ATTLIST dms lon CDATA #IMPLIED>");
 		out.println("<!ATTLIST dms lat CDATA #IMPLIED>");
+		out.println("<!ATTLIST dms width_pixels CDATA #IMPLIED>");
+		out.println("<!ATTLIST dms height_pixels CDATA #IMPLIED>");
 	}
 
 	/** Print the body of the TMS config XML file */

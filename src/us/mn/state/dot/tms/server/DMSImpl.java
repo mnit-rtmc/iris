@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
+ * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1594,6 +1595,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			out.print(XmlWriter.createAttribute("lat",
 				formatDouble(pos.getLatitude())));
 		}
+		out.print(XmlWriter.createAttribute("width_pixels",
+			getWidthPixels()));
+		out.print(XmlWriter.createAttribute("height_pixels",
+			getHeightPixels()));
 		out.println("/>");
 	}
 
