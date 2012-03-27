@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,7 +142,7 @@ public class FakeDetector {
 	protected transient float flow = Constants.MISSING_DATA;
 
 	/** Calculate the fake detector flow rate */
-	protected void calculateFlow() {
+	private void calculateFlow() {
 		int volume = 0;
 		for(int i = 0; i < plus.length; i++) {
 			int v = (int)plus[i].getVolume();
@@ -187,11 +187,11 @@ public class FakeDetector {
 	protected transient float speed = Constants.MISSING_DATA;
 
 	/** Calculate the fake detector speed */
-	public void calculateSpeed() {
+	private void calculateSpeed() {
 		float t_speed = 0;
 		int n_speed = 0;
 		for(DetectorImpl det: plus) {
-			float s = det.getSpeed();
+			float s = det.getSpeedRaw();
 			if(s > 0) {
 				t_speed += s;
 				n_speed++;
