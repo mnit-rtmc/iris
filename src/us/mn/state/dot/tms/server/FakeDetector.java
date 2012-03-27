@@ -129,53 +129,49 @@ public class FakeDetector {
 		minus = (DetectorImpl [])m.toArray(new DetectorImpl[0]);
 	}
 
-	/** Left over volume from earlier sampling intervals */
-	protected transient int leftover = 0;
-
 	/** Calculate the fake detector data */
 	public void calculate() {
-		calculateFlow();
+		flow = calculateFlow();
 		calculateSpeed();
 	}
 
 	/** Flow rate from earlier sampling interval */
 	protected transient float flow = Constants.MISSING_DATA;
 
+	/** Left over flow from earlier sampling intervals */
+	protected transient float leftover = 0;
+
 	/** Calculate the fake detector flow rate */
-	private void calculateFlow() {
-		int volume = 0;
+	private float calculateFlow() {
+		float flw = 0;
 		for(int i = 0; i < plus.length; i++) {
-			int v = (int)plus[i].getVolume();
-			if(v < 0) {
+			int f = plus[i].getFlowRaw();
+			if(f < 0) {
 				leftover = 0;
-				flow = Constants.MISSING_DATA;
-				return;
+				return Constants.MISSING_DATA;
 			}
-			volume += v;
+			flw += f;
 		}
 		for(int i = 0; i < minus.length; i++) {
-			int v = (int)minus[i].getVolume();
-			if(v < 0) {
+			int f = minus[i].getFlowRaw();
+			if(f < 0) {
 				leftover = 0;
-				flow = Constants.MISSING_DATA;
-				return;
+				return Constants.MISSING_DATA;
 			}
-			volume -= v;
+			flw -= f;
 		}
-		if(volume < 0) {
-			leftover += volume;
-			volume = 0;
+		if(flw < 0) {
+			leftover += flw;
+			flw = 0;
 		}
 		else if(leftover < 0) {
-			int diff = Math.max(leftover, -volume);
+			float diff = Math.max(leftover, -flw);
 			leftover -= diff;
-			volume += diff;
+			flw += diff;
 		}
-		if(flow < 0)
-			flow = 0;
-		float f = (constant + volume * Constants.SAMPLES_PER_HOUR) *
-			percent / 100.0f;
-		flow += 0.01f * (f - flow);
+		float ff = (constant + flw) * percent / 100.0f;
+		float adj = flow > 0 ? ff - flow : ff;
+		return flow + 0.01f * adj;
 	}
 
 	/** Get the calculated flow rate */
