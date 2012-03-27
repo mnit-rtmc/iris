@@ -55,6 +55,9 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Sample period for detectors (seconds) */
 	static protected final int SAMPLE_PERIOD_SEC = 30;
 
+	/** Sample period (Milliseconds) */
+	static protected final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
+
 	/** Create a cache for periodic volume data */
 	static protected PeriodicSampleCache createVolumeCache(String n) {
 		return new PeriodicSampleCache.EightBit(
@@ -517,7 +520,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	protected int getFlowRaw() {
 		int volume = getVolume();
 		if(volume >= 0)
-			return volume * Constants.SAMPLES_PER_HOUR;
+			return volume * Interval.HOUR / SAMPLE_PERIOD_SEC;
 		else
 			return Constants.MISSING_DATA;
 	}
@@ -667,7 +670,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			malfunction(EventType.DET_CHATTER);
 		if(volume == 0) {
 			no_hits++;
-			int secs = no_hits * Constants.SECONDS_PER_SAMPLE;
+			int secs = no_hits * SAMPLE_PERIOD_SEC;
 			if(secs > getNoHitThreshold())
 				malfunction(EventType.DET_NO_HITS);
 		} else
@@ -678,7 +681,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	protected void testScans(int scans) {
 		if(scans >= Constants.MAX_SCANS) {
 			locked_on++;
-			int secs = locked_on * Constants.SECONDS_PER_SAMPLE;
+			int secs = locked_on * SAMPLE_PERIOD_SEC;
 			if(secs > getLockedOnThreshold())
 				malfunction(EventType.DET_LOCKED_ON);
 		} else
@@ -794,15 +797,11 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		});
 	}
 
-	/** Milliseconds per sample */
-	static protected final int MS_PER_SAMPLE =
-		Constants.SECONDS_PER_SAMPLE * 1000;
-
 	/** Bin 30-second sample data */
 	public void binEventSamples() {
 		last_volume = ev_vehicles;
 		last_scans = Constants.MAX_SCANS *
-			Math.round((float)ev_duration / MS_PER_SAMPLE);
+			Math.round((float)ev_duration / SAMPLE_PERIOD_MS);
 		last_speed = calculate_speed();
 		ev_vehicles = 0;
 		ev_duration = 0;
