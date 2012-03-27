@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -488,7 +488,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	protected transient int last_speed = Constants.MISSING_DATA;
 
 	/** Get the current volume */
-	public float getVolume() {
+	public int getVolume() {
 		if(isSampling())
 			return last_volume;
 		else
@@ -506,7 +506,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Get the current flow rate (vehicles per hour) */
 	public float getFlow() {
-		float flow = getFlowRaw();
+		int flow = getFlowRaw();
 		if(flow != Constants.MISSING_DATA)
 			return flow;
 		else
@@ -514,8 +514,8 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	}
 
 	/** Get the current raw flow rate (vehicles per hour) */
-	protected float getFlowRaw() {
-		float volume = getVolume();
+	protected int getFlowRaw() {
+		int volume = getVolume();
 		if(volume >= 0)
 			return volume * Constants.SAMPLES_PER_HOUR;
 		else
@@ -544,7 +544,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	protected float getDensityFromFlowSpeed() {
 		float speed = getSpeedRaw();
 		if(speed > 0) {
-			float flow = getFlowRaw();
+			int flow = getFlowRaw();
 			if(flow > Constants.MISSING_DATA)
 				return flow / speed;
 		}
@@ -582,7 +582,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Get speed estimate based on flow / density */
 	protected float getSpeedEstimate() {
-		float flow = getFlowRaw();
+		int flow = getFlowRaw();
 		if(flow <= 0)
 			return Constants.MISSING_DATA;
 		float density = getDensityFromOccupancy();
@@ -848,7 +848,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	public void printSampleXml(PrintWriter out) {
 		if(abandoned || !isSampling())
 			return;
-		int flow = Math.round(getFlowRaw());
+		int flow = getFlowRaw();
 		int speed = Math.round(getSpeed());
 		float occ = getOccupancy();
 		out.print("\t<sample");
