@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Incident;
@@ -38,6 +40,8 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
+import us.mn.state.dot.tms.client.comm.CommTab;
+import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
@@ -117,6 +121,14 @@ public class Session {
 
 	/** Location manager */
 	protected final GeoLocManager loc_manager;
+
+	/** Controller manager */
+	private final ControllerManager controller_manager;
+
+	/** Get the controller manager */
+	public ControllerManager getControllerManager() {
+		return controller_manager;
+	}
 
 	/** Camera manager */
 	protected final CameraManager cam_manager;
@@ -221,6 +233,8 @@ public class Session {
 		det_manager = new DetectorManager(
 			state.getDetCache().getDetectors(), loc_manager,
 			r_node_manager);
+		controller_manager = new ControllerManager(this,
+			state.getConCache().getControllers(), loc_manager);
 		cam_manager = new CameraManager(this,
 			state.getCamCache().getCameras(), loc_manager);
 		dms_manager = new DMSManager(this,state.getDmsCache().getDMSs(),
@@ -262,6 +276,7 @@ public class Session {
 	protected void initializeManagers() {
 		r_node_manager.initialize();
 		det_manager.initialize();
+		controller_manager.initialize();
 		cam_manager.initialize();
 		dms_manager.initialize();
 		lcs_array_manager.initialize();
@@ -288,6 +303,8 @@ public class Session {
 			tabs.add(new RampMeterTab(this, meter_manager));
 		if(canRead(R_Node.SONAR_TYPE))
 			tabs.add(new R_NodeTab(this, r_node_manager));
+		if(canRead(CommLink.SONAR_TYPE))
+			tabs.add(new CommTab(this, controller_manager));
 		if(canRead(ActionPlan.SONAR_TYPE))
 			tabs.add(new PlanTab(this, plan_manager));
 	}
@@ -302,6 +319,10 @@ public class Session {
 			mm.addLayer(tile_layer.createState(mb));
 		if(seg_layer != null)
 			mm.addLayer(seg_layer.createState(mb));
+		if(canRead(Controller.SONAR_TYPE)) {
+			mm.addLayer(controller_manager.getLayer().createState(
+				mb));
+		}
 		if(canRead(Camera.SONAR_TYPE))
 			mm.addLayer(cam_manager.getLayer().createState(mb));
 		if(canRead(RampMeter.SONAR_TYPE))
@@ -385,6 +406,7 @@ public class Session {
 		warn_manager.dispose();
 		weather_sensor_manager.dispose();
 		meter_manager.dispose();
+		controller_manager.dispose();
 		inc_manager.dispose();
 		loc_manager.dispose();
 		state.quit();
