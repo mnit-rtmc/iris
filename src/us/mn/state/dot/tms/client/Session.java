@@ -395,6 +395,7 @@ public class Session {
 		desktop.closeFrames();
 		for(MapTab tab: tabs)
 			tab.dispose();
+		tabs.clear();
 		plan_manager.dispose();
 		r_node_manager.dispose();
 		det_manager.dispose();
