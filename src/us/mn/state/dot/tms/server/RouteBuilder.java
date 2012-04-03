@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,17 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 public class RouteBuilder {
 
 	/** Travel time debug log */
-	static protected final IDebugLog TRAVEL_LOG = new IDebugLog("travel");
+	static private final IDebugLog TRAVEL_LOG = new IDebugLog("travel");
+
+	/** Check if we're logging */
+	static public boolean isLogging() {
+		return TRAVEL_LOG.isOpen();
+	}
+
+	/** Log a message to the travel debug log */
+	static public void log(String msg) {
+		TRAVEL_LOG.log(msg);
+	}
 
 	/** Maximum distance from origin to a corridor node (in meters) */
 	static protected final float MAX_ORIGIN_DISTANCE = 1000;
@@ -67,13 +77,12 @@ public class RouteBuilder {
 	{
 		String cid = GeoLocHelper.getCorridorName(origin);
 		if(cid == null) {
-			TRAVEL_LOG.log(name + ": BAD ORIGIN: " +
-				origin.getName());
+			log(name + ": BAD ORIGIN: " + origin.getName());
 			return;
 		}
 		Corridor c = corridors.getCorridor(cid);
 		if(c == null) {
-			TRAVEL_LOG.log(name + ": MISSING CORRIDOR: " + cid);
+			log(name + ": MISSING CORRIDOR: " + cid);
 			return;
 		}
 		R_NodeImpl r_node = c.findDownstreamNode(origin);
@@ -87,25 +96,23 @@ public class RouteBuilder {
 			GeoLoc dest = r_node.getGeoLoc();
 			ODPair od = new ODPair(origin, dest, false);
 			float dist = distance + c.calculateDistance(od);
-			if(TRAVEL_LOG.isOpen()) {
-				TRAVEL_LOG.log(name + ": SEARCH FOR " +
+			if(isLogging()) {
+				log(name + ": SEARCH FOR " +
 					GeoLocHelper.getDescription(destination)
 					+ " (" + i + ", " + dist + " miles) " +
 					od);
 			}
 			if(dist > max_mi) {
-				if(TRAVEL_LOG.isOpen()) {
-					TRAVEL_LOG.log(name +
-						": MAX DISTANCE (" + max_mi +
+				if(isLogging()) {
+					log(name + ": MAX DISTANCE (" + max_mi +
 						") EXCEEDED");
 				}
 				break;
 			}
 			i++;
 			if(i > MAX_R_NODE_LIMIT) {
-				if(TRAVEL_LOG.isOpen()) {
-					TRAVEL_LOG.log(name +
-						": BREAKING R_NODE LOOP AT " +
+				if(isLogging()) {
+					log(name + ": BREAKING R_NODE LOOP AT "+
 						r_node.getName());
 				}
 				break;
@@ -141,8 +148,8 @@ public class RouteBuilder {
 
 	/** Debug a route exception */
 	protected void debugRouteException(BadRouteException e) {
-		if(TRAVEL_LOG.isOpen())
-			TRAVEL_LOG.log(name + ": BAD ROUTE: " + e.getMessage());
+		if(isLogging())
+			log(name + ": BAD ROUTE: " + e.getMessage());
 	}
 
 	/** Find all paths from an origin to a destination */
@@ -188,14 +195,12 @@ public class RouteBuilder {
 		// NOTE: this optimisation will prevent us from finding some
 		// secondary routes; we're only interested in the best route.
 		max_mi = Math.min(max_mi, r.getGoodness());
-		if(TRAVEL_LOG.isOpen()) {
+		if(isLogging()) {
 			GeoLoc dest = odf.getDestination();
-			TRAVEL_LOG.log(name + ": FOUND ROUTE TO " +
+			log(name + ": FOUND ROUTE TO " +
 				GeoLocHelper.getDescription(dest) + ", " + r);
-			if(max_mi == r.getGoodness()) {
-				TRAVEL_LOG.log(name + ": LOWERED MAX DIST TO " +
-					max_mi);
-			}
+			if(max_mi == r.getGoodness())
+				log(name + ": LOWERED MAX DIST TO " + max_mi);
 		}
 	}
 
