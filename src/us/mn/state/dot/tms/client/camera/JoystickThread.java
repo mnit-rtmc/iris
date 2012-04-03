@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.SwingUtilities;
+import us.mn.state.dot.sched.SwingRunner;
 
 /**
  * Joystick event driver for controlling camera PTZ
@@ -144,7 +144,7 @@ public final class JoystickThread extends Thread {
 	protected void setButton(int button, boolean pressed) {
 		final JoystickButtonEvent ev = new JoystickButtonEvent(this,
 			button, pressed);
-		SwingUtilities.invokeLater(new Runnable() {
+		SwingRunner.invoke(new Runnable() {
 			public void run() {
 				fireJoystickButtonEvent(ev);
 			}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +24,13 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Camera;
@@ -515,7 +515,7 @@ public class ControllerIOModel extends AbstractTableModel {
 				io[pin] = p;
 				types[pin] = getType(p);
 				final int row = pin - 1;
-				SwingUtilities.invokeLater(new Runnable() {
+				SwingRunner.invoke(new Runnable() {
 					public void run() {
 						fireTableRowsUpdated(row, row);
 					}
@@ -531,7 +531,7 @@ public class ControllerIOModel extends AbstractTableModel {
 				io[pin] = null;
 				types[pin] = null;
 				final int row = pin - 1;
-				SwingUtilities.invokeLater(new Runnable() {
+				SwingRunner.invoke(new Runnable() {
 					public void run() {
 						fireTableRowsUpdated(row, row);
 					}

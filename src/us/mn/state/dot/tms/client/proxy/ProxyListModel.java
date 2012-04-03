@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
-import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -81,7 +81,7 @@ public class ProxyListModel<T extends SonarObject>
 		final int row = doProxyAdded(proxy);
 		if(row >= 0) {
 			final ListModel model = this;
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireIntervalAdded(model, row, row);
 				}
@@ -128,7 +128,7 @@ public class ProxyListModel<T extends SonarObject>
 		final ListModel model = this;
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireIntervalRemoved(model, row, row);
 				}
@@ -161,7 +161,7 @@ public class ProxyListModel<T extends SonarObject>
 		}
 		if(pre_row >= 0 && post_row < 0) {
 			final int row = pre_row;
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireIntervalRemoved(model, row, row);
 				}
@@ -169,7 +169,7 @@ public class ProxyListModel<T extends SonarObject>
 		}
 		if(pre_row < 0 && post_row >= 0) {
 			final int row = post_row;
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireIntervalAdded(model, row, row);
 				}
@@ -178,7 +178,7 @@ public class ProxyListModel<T extends SonarObject>
 		if(pre_row >= 0 && post_row >= 0) {
 			final int r0 = Math.min(pre_row, post_row);
 			final int r1 = Math.max(pre_row, post_row);
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireContentsChanged(model, r0, r1);
 				}

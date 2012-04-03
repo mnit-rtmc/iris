@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2011  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
 import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
@@ -28,6 +27,7 @@ import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
@@ -243,7 +243,7 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	/** A proxy has been removed */
 	public void proxyRemoved(GeoLoc p) {
 		if(p == loc) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					dispose();
 				}
@@ -254,7 +254,7 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	/** A proxy has been changed */
 	public void proxyChanged(GeoLoc p, final String a) {
 		if(p == loc) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					updateAttribute(a);
 				}

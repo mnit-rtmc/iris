@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,12 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.util.Iterator;
 import java.util.HashSet;
-import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -179,7 +179,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	protected final void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
 		if(row >= 0) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					// should be:
 					// fireTableRowsInserted(row, row);
@@ -207,7 +207,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	protected final void proxyRemovedSlow(T proxy) {
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireTableDataChanged();
 					// should be:
@@ -222,7 +222,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	protected void proxyChangedSlow(T proxy, String attrib) {
 		final int row = getRow(proxy);
 		if(row >= 0) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireTableDataChanged();
 					// should be:

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2011  Minnesota Department of Transportation
+ * Copyright (C) 2002-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.tms.Camera;
 
 /**
@@ -162,7 +162,7 @@ public class StreamPanel extends JPanel {
 			stream = null;
 		}
 		status_lbl.setText(null);
-		SwingUtilities.invokeLater(new Runnable() {
+		SwingRunner.invoke(new Runnable() {
 			public void run() {
 				screen_pnl.repaint();
 			}

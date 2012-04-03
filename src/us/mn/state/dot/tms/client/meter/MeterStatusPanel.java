@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
@@ -170,7 +170,7 @@ public class MeterStatusPanel extends FormPanel
 	/** A proxy has been removed */
 	public void proxyRemoved(RampMeter proxy) {
 		if(proxy == selected) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					setSelected(null);
 				}
@@ -181,7 +181,7 @@ public class MeterStatusPanel extends FormPanel
 	/** A proxy has been changed */
 	public void proxyChanged(final RampMeter proxy, final String a) {
 		if(proxy == selected) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					updateAttribute(proxy, a);
 				}

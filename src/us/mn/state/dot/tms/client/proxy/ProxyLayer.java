@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-import javax.swing.SwingUtilities;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerChange;
 import us.mn.state.dot.map.LayerChangedEvent;
@@ -25,6 +24,7 @@ import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -151,15 +151,11 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	/** Notify listeners that the layer has changed */
 	protected void notifyLayerChanged(LayerChange reason) {
 		final LayerChangedEvent e = new LayerChangedEvent(this, reason);
-		Runnable notifier = new Runnable() {
+		SwingRunner.invoke(new Runnable() {
 			public void run() {
 				notifyLayerChangedListeners(e);
 			}
-		};
-		if(SwingUtilities.isEventDispatchThread())
-			notifier.run();
-		else
-			SwingUtilities.invokeLater(notifier);
+		});
 	}
 
 	/** Create a new layer state */

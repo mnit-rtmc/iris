@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -404,7 +404,7 @@ public class IncidentDispatcher extends JPanel
 	/** Update an attribute for the given proxy.
 	 * FIXME: this should be in ProxyDispatcher base class */
 	protected void updateAttribute(final Incident proxy, final String a) {
-		SwingUtilities.invokeLater(new Runnable() {
+		SwingRunner.invoke(new Runnable() {
 			public void run() {
 				doUpdateAttribute(proxy, a);
 			}

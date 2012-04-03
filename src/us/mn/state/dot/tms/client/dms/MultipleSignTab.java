@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
@@ -143,7 +143,7 @@ public class MultipleSignTab extends JPanel implements
 
 	/** Called whenever a sign is added to the selection */
 	public void selectionAdded(final DMS dms) {
-		SwingUtilities.invokeLater(new Runnable() {
+		SwingRunner.invoke(new Runnable() {
 			public void run() {
 				sel_model.addElement(dms);
 			}
@@ -156,7 +156,7 @@ public class MultipleSignTab extends JPanel implements
 
 	/** Called whenever a sign is removed from the selection */
 	public void selectionRemoved(final DMS dms) {
-		SwingUtilities.invokeLater(new Runnable() {
+		SwingRunner.invoke(new Runnable() {
 			public void run() {
 				sel_model.removeElement(dms);
 			}

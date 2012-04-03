@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
-import javax.swing.SwingUtilities;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignText;
@@ -154,7 +154,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 			return;
 		final int i = find(t);
 		assert i >= 0 : "Failed to find SignText after just adding in SignTextComboBoxModel.add()";
-		SwingUtilities.invokeLater(new Runnable() {
+		SwingRunner.invoke(new Runnable() {
 			public void run() {
 				fireIntervalAdded(this, i, i);
 			}
@@ -168,7 +168,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 			m_items.remove(t);
 			if(t.equals(m_selected))
 				m_selected = null;
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireIntervalRemoved(this, i, i);
 				}

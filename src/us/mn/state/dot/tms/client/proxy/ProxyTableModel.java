@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,12 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.util.Iterator;
 import java.util.TreeSet;
-import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -153,7 +153,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	protected final void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
 		if(row >= 0) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireTableRowsInserted(row, row);
 				}
@@ -194,7 +194,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	protected final void proxyRemovedSlow(T proxy) {
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireTableRowsDeleted(row, row);
 				}
@@ -221,7 +221,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		}
 		if(pre_row >= 0 && post_row < 0) {
 			final int r = pre_row;
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireTableRowsDeleted(r, r);
 				}
@@ -229,7 +229,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		}
 		if(pre_row < 0 && post_row >= 0) {
 			final int r = post_row;
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireTableRowsInserted(r, r);
 				}
@@ -238,7 +238,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		if(pre_row >= 0 && post_row >= 0) {
 			final int r0 = Math.min(pre_row, post_row);
 			final int r1 = Math.max(pre_row, post_row);
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					fireTableRowsUpdated(r0, r1);
 				}

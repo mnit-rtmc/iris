@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -142,7 +142,7 @@ public class PlanDispatcher extends FormPanel
 	/** A proxy has been removed */
 	public void proxyRemoved(ActionPlan proxy) {
 		if(proxy == selected) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					setSelected(null);
 				}
@@ -153,7 +153,7 @@ public class PlanDispatcher extends FormPanel
 	/** A proxy has been changed */
 	public void proxyChanged(final ActionPlan proxy, final String a) {
 		if(proxy == selected) {
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					updateAttribute(proxy, a);
 				}

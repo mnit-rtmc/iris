@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
@@ -39,6 +38,7 @@ import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -350,7 +350,7 @@ public class CorridorList extends JPanel {
 		smodel = new R_NodeListSelectionModel(n_model, sel_model);
 		n_list.setModel(n_model);
 		n_list.setSelectionModel(smodel);
-		SwingUtilities.invokeLater(new Runnable() {
+		SwingRunner.invoke(new Runnable() {
 			public void run() {
 				n_list.ensureIndexIsVisible(
 					n_list.getLeadSelectionIndex());
