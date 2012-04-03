@@ -170,8 +170,8 @@ public class TravelTimeEstimator {
 
 	/** Log a travel time error */
 	protected void logTravel(String m) {
-		if(RouteBuilder.isLogging())
-			RouteBuilder.log(name + ": " + m);
+		if(TravelTime.isLogging())
+			TravelTime.log(name + ": " + m);
 	}
 
 	/** Check if the given route is a final destination */

@@ -28,17 +28,14 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class RouteBuilder {
 
-	/** Travel time debug log */
-	static private final IDebugLog TRAVEL_LOG = new IDebugLog("travel");
-
 	/** Check if we're logging */
-	static public boolean isLogging() {
-		return TRAVEL_LOG.isOpen();
+	static private boolean isLogging() {
+		return TravelTime.isLogging();
 	}
 
 	/** Log a message to the travel debug log */
-	static public void log(String msg) {
-		TRAVEL_LOG.log(msg);
+	static private void log(String msg) {
+		TravelTime.log(msg);
 	}
 
 	/** Maximum distance from origin to a corridor node (in meters) */
