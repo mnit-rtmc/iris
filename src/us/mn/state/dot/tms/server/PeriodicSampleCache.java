@@ -177,7 +177,8 @@ abstract public class PeriodicSampleCache {
 
 	/** Pad the buffer with MISSING_DATA for full day */
 	private void padBuffer() {
-		while(buffer.position() < bufferBytes());
+		int n_sam = (bufferBytes() - buffer.position()) / sampleBytes();
+		for(int i = 0; i < n_sam; i++)
 			putValue(Constants.MISSING_DATA);
 	}
 
