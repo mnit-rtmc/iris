@@ -191,7 +191,7 @@ abstract public class PeriodicSampleCache {
 			channel.write(buffer);
 		// Truncate file if it's larger than buffer
 		if(channel.size() > bufferBytes())
-			channel.truncate(buffer.position());
+			channel.truncate(bufferBytes());
 		channel.close();
 	}
 
