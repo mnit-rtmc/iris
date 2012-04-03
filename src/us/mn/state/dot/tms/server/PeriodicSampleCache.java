@@ -161,16 +161,24 @@ abstract public class PeriodicSampleCache {
 	private FileChannel readBuffer(File f) throws IOException {
 		FileChannel channel = new RandomAccessFile(f,"rw").getChannel();
 		buffer.clear();
-		// Read all existing sample data from file
-		while(channel.read(buffer) >= 0 && buffer.hasRemaining());
+		readBuffer(channel);
 		// Buffer should contain no more than one day of samples
 		if(buffer.position() > bufferBytes())
 			buffer.position(bufferBytes());
-		// Pad buffer with MISSING_DATA for full day
-		while(buffer.position() < bufferBytes());
-			putValue(Constants.MISSING_DATA);
+		padBuffer();
 		buffer.flip();
 		return channel;
+	}
+
+	/** Read all existing sample data from file */
+	private void readBuffer(FileChannel channel) throws IOException {
+		while(channel.read(buffer) >= 0 && buffer.hasRemaining());
+	}
+
+	/** Pad the buffer with MISSING_DATA for full day */
+	private void padBuffer() {
+		while(buffer.position() < bufferBytes());
+			putValue(Constants.MISSING_DATA);
 	}
 
 	/** Write the buffer to the file channel and close the file. */
