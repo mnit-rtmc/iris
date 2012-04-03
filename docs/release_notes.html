@@ -11,6 +11,26 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.144.0 (3 April 2012)</dt>
+	<dd><ul>
+		<li>
+			Added driver for EIS G4 vehicle detection system.
+		</li>
+		<li>
+			Added more information to DMS xml output.
+		</li>
+		<li>
+			Added (very basic) "comm" tab to client interface.
+		</li>
+		<li>
+			Cleaned up code for VDS archiving.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.144.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.143.0 (23 February 2012)</dt>
 	<dd><ul>
 		<li>
