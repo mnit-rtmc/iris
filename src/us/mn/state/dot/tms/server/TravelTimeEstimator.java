@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,9 @@ public class TravelTimeEstimator {
 		return ((min - 1) / 5 + 1) * 5;
 	}
 
+	/** Name to use for debugging */
+	private final String name;
+
 	/** Origin location */
 	protected final GeoLoc origin;
 
@@ -50,7 +53,8 @@ public class TravelTimeEstimator {
 		new HashMap<String, Route>();
 
 	/** Create a new travel time estimator */
-	public TravelTimeEstimator(GeoLoc o) {
+	public TravelTimeEstimator(String n, GeoLoc o) {
+		name = n;
 		origin = o;
 	}
 
@@ -155,7 +159,7 @@ public class TravelTimeEstimator {
 
 	/** Create one route to a travel time destination */
 	protected Route createRoute(GeoLoc dest) {
-		RouteBuilder builder = new RouteBuilder(origin.getName(),
+		RouteBuilder builder = new RouteBuilder(name,
 			BaseObjectImpl.corridors);
 		SortedSet<Route> routes = builder.findRoutes(origin, dest);
 		if(routes.size() > 0)
@@ -167,7 +171,7 @@ public class TravelTimeEstimator {
 	/** Log a travel time error */
 	protected void logTravel(String m) {
 		if(RouteBuilder.TRAVEL_LOG.isOpen())
-			RouteBuilder.TRAVEL_LOG.log(origin.getName() + ": " +m);
+			RouteBuilder.TRAVEL_LOG.log(name + ": " +m);
 	}
 
 	/** Check if the given route is a final destination */

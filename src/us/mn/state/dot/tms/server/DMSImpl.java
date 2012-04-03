@@ -155,7 +155,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		GeoLocImpl g = new GeoLocImpl(name);
 		MainServer.server.createObject(g);
 		geo_loc = g;
-		travel_est = new TravelTimeEstimator(g);
+		travel_est = new TravelTimeEstimator(n, g);
 		advisory = new SpeedAdvisoryCalculator(g);
 	}
 
@@ -169,7 +169,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		awsAllowed = aa;
 		awsControlled = ac;
 		default_font = df;
-		travel_est = new TravelTimeEstimator(loc);
+		travel_est = new TravelTimeEstimator(n, loc);
 		advisory = new SpeedAdvisoryCalculator(loc);
 		initTransients();
 	}
