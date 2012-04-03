@@ -177,7 +177,7 @@ public class RouteBuilder {
 
 	/** Build a route from the current path */
 	protected void buildRoute(ODPair odf) throws BadRouteException {
-		Route r = new Route();
+		Route r = new Route(name);
 		int turns = 0;
 		for(ODPair od: path) {
 			Corridor c = corridors.getCorridor(od);

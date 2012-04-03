@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,9 @@ public class Route implements Comparable<Route> {
 		return minutes / 60;
 	}
 
+	/** Name for route debugging */
+	private final String name;
+
 	/** List of corridor trips */
 	protected final LinkedList<CorridorTrip> trips =
 		new LinkedList<CorridorTrip>();
@@ -41,7 +44,8 @@ public class Route implements Comparable<Route> {
 	protected int turns;
 
 	/** Create a new route */
-	public Route() {
+	public Route(String n) {
+		name = n;
 		turns = 0;
 	}
 
@@ -95,6 +99,8 @@ public class Route implements Comparable<Route> {
 		float hours = minutesToHours(turns);
 		for(CorridorTrip trip: trips)
 			hours += trip.getTravelTime(final_dest);
+		if(TravelTime.isLogging())
+			TravelTime.log(name +" TRAVEL TIME " + hours +" hours");
 		return hours;
 	}
 
