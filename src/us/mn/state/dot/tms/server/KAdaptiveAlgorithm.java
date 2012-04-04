@@ -803,7 +803,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		protected Node(R_NodeImpl n, float m, Node up) {
 			rnode = n;
 			mile = m;
-			up.downstream = this;
+			if(up != null)
+				up.downstream = this;
 			upstream = up;
 			downstream = null;
 		}
