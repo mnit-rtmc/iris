@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.tms.CorridorBase;
@@ -45,6 +44,7 @@ import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
@@ -89,7 +89,7 @@ public class IncidentCreator extends JPanel {
 	};
 
 	/** Create a new incident creator */
-	public IncidentCreator(Session s, StyledTheme theme,
+	public IncidentCreator(Session s, ProxyTheme<Incident> theme,
 		ProxySelectionModel<Incident> sel_model)
 	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -140,7 +140,7 @@ public class IncidentCreator extends JPanel {
 
 	/** Create a button for creating an incident */
 	protected JToggleButton createButton(String sty, final EventType et,
-		StyledTheme theme)
+		ProxyTheme<Incident> theme)
 	{
 		Symbol sym = theme.getSymbol(sty);
 		final JToggleButton btn = new JToggleButton(sty,

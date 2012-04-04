@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
@@ -152,8 +151,8 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return MARKER.createTransformedShape(at);
 	}
 
-	/** Create a styled theme for ramp meters */
-	protected StyledTheme createTheme() {
+	/** Create a theme for ramp meters */
+	protected ProxyTheme<RampMeter> createTheme() {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
 			getProxyType(), MARKER);
 		theme.addStyle(STYLE_AVAILABLE, COLOR_AVAILABLE);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.Checker;
@@ -266,8 +265,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return null;
 	}
 
-	/** Create a styled theme for r_nodes */
-	protected StyledTheme createTheme() {
+	/** Create a theme for r_nodes */
+	protected R_NodeMapTheme createTheme() {
 		R_NodeMapTheme theme = new R_NodeMapTheme(this);
 		theme.addStyle(STYLE_GPS, COLOR_GPS);
 		theme.addStyle(STYLE_NO_LOC, COLOR_NO_LOC);

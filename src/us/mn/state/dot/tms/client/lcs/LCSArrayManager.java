@@ -23,7 +23,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -194,8 +193,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return MARKER.createTransformedShape(at);
 	}
 
-	/** Create a styled theme for LCS arrays */
-	protected StyledTheme createTheme() {
+	/** Create a theme for LCS arrays */
+	protected ProxyTheme<LCSArray> createTheme() {
 		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
 			getProxyType(), MARKER);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);

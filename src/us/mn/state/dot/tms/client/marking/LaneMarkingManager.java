@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.marking;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneMarking;
@@ -71,8 +70,8 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 		return MARKER.createTransformedShape(at);
 	}
 
-	/** Create a styled theme for lane markings */
-	protected StyledTheme createTheme() {
+	/** Create a theme for lane markings */
+	protected ProxyTheme<LaneMarking> createTheme() {
 		ProxyTheme<LaneMarking> theme = new ProxyTheme<LaneMarking>(
 			this, getProxyType(), MARKER);
 		theme.addStyle(STYLE_NO_CONTROLLER,

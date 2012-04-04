@@ -18,7 +18,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.Controller;
@@ -77,8 +76,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 		return MARKER.createTransformedShape(at);
 	}
 
-	/** Create a styled theme for controllers */
-	protected StyledTheme createTheme() {
+	/** Create a theme for controllers */
+	protected ProxyTheme<Controller> createTheme() {
 		ProxyTheme<Controller> theme = new ProxyTheme<Controller>(this,
 			getProxyType(), MARKER);
 		theme.addStyle(STYLE_ACTIVE, ProxyTheme.COLOR_AVAILABLE);

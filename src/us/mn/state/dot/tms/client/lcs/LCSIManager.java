@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LCSIndication;
@@ -61,8 +60,8 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 		return null;
 	}
 
-	/** Create a styled theme for LCS arrays */
-	protected StyledTheme createTheme() {
+	/** Create a theme for LCS arrays */
+	protected ProxyTheme<LCSIndication> createTheme() {
 		ProxyTheme<LCSIndication> theme = new ProxyTheme<LCSIndication>(
 			this, getProxyType(), new LcsMarker());
 		theme.addStyle(STYLE_NO_CONTROLLER,

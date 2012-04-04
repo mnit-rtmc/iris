@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.Checker;
@@ -86,8 +85,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	protected final ProxySelectionModel<T> s_model =
 		new ProxySelectionModel<T>();
 
-	/** Styled theme for drawing objects on a map layer */
-	protected final StyledTheme theme;
+	/** Theme for drawing objects on a map layer */
+	protected final ProxyTheme<T> theme;
 
 	/** Map of symbol names to style list models */
 	protected final Map<String, StyleListModel<T>> models =
@@ -229,8 +228,8 @@ abstract public class ProxyManager<T extends SonarObject>
 		return new ProxyJList<T>(m);
 	}
 
-	/** Create a styled theme for this type of proxy */
-	abstract protected StyledTheme createTheme();
+	/** Create a theme for this type of proxy */
+	abstract protected ProxyTheme<T> createTheme();
 
 	/** Get a transformed marker shape */
 	abstract protected Shape getShape(AffineTransform at);
@@ -249,7 +248,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Get the theme */
-	public StyledTheme getTheme() {
+	public ProxyTheme<T> getTheme() {
 		return theme;
 	}
 

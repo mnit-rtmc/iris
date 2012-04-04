@@ -18,7 +18,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
@@ -96,8 +95,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		return null;
 	}
 
-	/** Create a styled theme for action plans */
-	protected StyledTheme createTheme() {
+	/** Create a theme for action plans */
+	protected PlanTheme createTheme() {
 		PlanTheme theme = new PlanTheme(this);
 		theme.addStyle(STYLE_DMS, new DmsMarker());
 		theme.addStyle(STYLE_METER, new MeterMarker());

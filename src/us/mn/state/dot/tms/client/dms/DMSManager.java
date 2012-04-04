@@ -27,7 +27,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
@@ -104,8 +103,8 @@ public class DMSManager extends ProxyManager<DMS> {
 		return MARKER.createTransformedShape(at);
 	}
 
-	/** Create a styled theme for DMSs */
-	protected StyledTheme createTheme() {
+	/** Create a theme for DMSs */
+	protected ProxyTheme<DMS> createTheme() {
 		// NOTE: the ordering of themes controls which color is used
 		//       to render the sign icon on the map
 		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this,

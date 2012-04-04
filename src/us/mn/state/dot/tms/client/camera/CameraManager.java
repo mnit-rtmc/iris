@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import java.awt.geom.AffineTransform;
 import java.util.List;
 import java.util.HashSet;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -86,8 +85,8 @@ public class CameraManager extends ProxyManager<Camera> {
 		return MARKER.createTransformedShape(at);
 	}
 
-	/** Create a styled theme for cameras */
-	protected StyledTheme createTheme() {
+	/** Create a theme for cameras */
+	protected ProxyTheme<Camera> createTheme() {
 		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this,
 			getProxyType(), MARKER);
 		theme.addStyle(STYLE_UNPUBLISHED, ProxyTheme.COLOR_UNAVAILABLE);

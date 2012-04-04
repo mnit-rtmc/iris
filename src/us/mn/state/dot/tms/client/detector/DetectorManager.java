@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -83,8 +82,8 @@ public class DetectorManager extends ProxyManager<Detector> {
 		return MARKER.createTransformedShape(at);
 	}
 
-	/** Create a styled theme for detectors */
-	protected StyledTheme createTheme() {
+	/** Create a theme for detectors */
+	protected ProxyTheme<Detector> createTheme() {
 		ProxyTheme<Detector> theme = new ProxyTheme<Detector>(this,
 			getProxyType(), MARKER);
 		theme.addStyle(STYLE_ACTIVE, ProxyTheme.COLOR_DEPLOYED);
