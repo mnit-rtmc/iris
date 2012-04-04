@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -65,13 +65,6 @@ public class ProxyJList<T extends SonarObject> extends JList {
 				model.getManager().showPropertiesForm();
 			}
 		}.addToScheduler();
-	}
-
-	/** Set the selected proxy */
-	protected void setSelected(SonarObject o) {
-		setSelectedValue(o, true);
-		if(getSelectedValue() != o)
-			clearSelection();
 	}
 
 	/** Popup a context-sensitive menu */
