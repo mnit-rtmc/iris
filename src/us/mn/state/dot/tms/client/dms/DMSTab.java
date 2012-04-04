@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import javax.swing.BoxLayout;
+import java.awt.BorderLayout;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -42,9 +42,8 @@ public class DMSTab extends MapTab {
 		super(manager.getProxyType(), I18N.get("dms.title"));
 		dispatcher = new DMSDispatcher(session, manager);
 		summary = manager.createStyleSummary(true);
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add(dispatcher);
-		add(summary);
+		add(dispatcher, BorderLayout.NORTH);
+		add(summary, BorderLayout.CENTER);
 	}
 
 	/** Get the tab number */
