@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.client;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
@@ -87,6 +88,8 @@ public class ScreenPane extends JPanel {
 	public ScreenPane() {
 		setLayout(new BorderLayout());
 		side_panel = new JPanel(new BorderLayout());
+		side_panel.setMinimumSize(new Dimension(500, 200));
+		side_panel.setPreferredSize(new Dimension(500, 200));
 		tab_pane = new JTabbedPane(SwingConstants.TOP);
 		side_panel.add(tab_pane, BorderLayout.CENTER);
 		add(side_panel, BorderLayout.WEST);
