@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public class RampMeterTab extends MapTab {
   	public RampMeterTab(Session session, MeterManager man)
 		throws IOException
 	{
-		super(man.getProxyType(), "Operate Ramp Meters");
+		super("Meter", "Operate Ramp Meters");
 		manager = man;
 		statusPanel = new MeterStatusPanel(session, manager);
 		summary = manager.createStyleSummary();

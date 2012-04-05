@@ -27,7 +27,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -90,7 +89,7 @@ public class ScreenPane extends JPanel {
 		side_panel = new JPanel(new BorderLayout());
 		side_panel.setMinimumSize(new Dimension(500, 200));
 		side_panel.setPreferredSize(new Dimension(500, 200));
-		tab_pane = new JTabbedPane(SwingConstants.TOP);
+		tab_pane = new JTabbedPane(JTabbedPane.TOP);
 		side_panel.add(tab_pane, BorderLayout.CENTER);
 		add(side_panel, BorderLayout.WEST);
 		map = new MapBean(true);
