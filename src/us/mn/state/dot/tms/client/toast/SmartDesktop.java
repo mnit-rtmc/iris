@@ -99,7 +99,7 @@ public class SmartDesktop extends JDesktopPane {
 		frame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		frame.addInternalFrameListener(new InternalFrameAdapter() {
 			public void internalFrameClosed(InternalFrameEvent e) {
-				SmartDesktopRequestFocus();	// see note
+				smartDesktopRequestFocus();	// see note
 				form.dispose();
 			}
 		});
@@ -119,7 +119,7 @@ public class SmartDesktop extends JDesktopPane {
 	 *  opened. The solution is to set the focus to the JDesktopPane
 	 *  explicitly as each JInternalFrame is closing. This seems to 
 	 *  work. */
-	protected void SmartDesktopRequestFocus() {
+	protected void smartDesktopRequestFocus() {
 		this.requestFocus();
 	}
 
