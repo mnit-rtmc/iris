@@ -776,6 +776,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public MessagePoller getPoller() {
 		if(getActive()) {
 			MessagePoller mp = getPoller(comm_link);
+			if(mp == null && !isFailed()) {
+				setCommStatus("comm_link error");
+				setFailed(true, null);
+			}
 			return mp;
 		}
 		return null;
