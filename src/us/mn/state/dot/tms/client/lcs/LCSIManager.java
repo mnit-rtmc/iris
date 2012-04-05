@@ -63,7 +63,7 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	/** Create a theme for LCS arrays */
 	protected ProxyTheme<LCSIndication> createTheme() {
 		ProxyTheme<LCSIndication> theme = new ProxyTheme<LCSIndication>(
-			this, getProxyType(), new LcsMarker());
+			this, new LcsMarker());
 		theme.addStyle(STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(STYLE_ALL);

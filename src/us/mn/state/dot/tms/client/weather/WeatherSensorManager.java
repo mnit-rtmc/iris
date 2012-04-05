@@ -73,7 +73,7 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	/** Create a theme for weather sensors */
 	protected ProxyTheme<WeatherSensor> createTheme() {
 		ProxyTheme<WeatherSensor> theme = new ProxyTheme<WeatherSensor>(
-			this, getProxyType(), MARKER);
+			this, MARKER);
 		theme.addStyle(STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(STYLE_ALL);

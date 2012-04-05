@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,6 @@ public class R_NodeMapTheme extends ProxyTheme<R_Node> {
 
 	/** Create a new roadway node map theme */
 	public R_NodeMapTheme(R_NodeManager m) {
-		super(m, "R_Nodes", new R_NodeMarker());
+		super(m, new R_NodeMarker());
 	}
 }

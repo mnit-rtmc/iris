@@ -76,7 +76,7 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	/** Create a theme for warning signs */
 	protected ProxyTheme<WarningSign> createTheme() {
 		ProxyTheme<WarningSign> theme =new ProxyTheme<WarningSign>(this,
-			getProxyType(), MARKER);
+			MARKER);
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);

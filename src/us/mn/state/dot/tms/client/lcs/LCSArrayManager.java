@@ -196,7 +196,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Create a theme for LCS arrays */
 	protected ProxyTheme<LCSArray> createTheme() {
 		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
-			getProxyType(), MARKER);
+			MARKER);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_SCHEDULED, ProxyTheme.COLOR_SCHEDULED);

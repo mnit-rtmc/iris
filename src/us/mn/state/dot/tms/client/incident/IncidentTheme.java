@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 
 	/** Create a new incident theme */
 	public IncidentTheme(IncidentManager man) {
-		super(man, man.getProxyType(), MARKER);
+		super(man, MARKER);
 	}
 
 	/** Get an appropriate style for the given map object */

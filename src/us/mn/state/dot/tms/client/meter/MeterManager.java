@@ -154,7 +154,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Create a theme for ramp meters */
 	protected ProxyTheme<RampMeter> createTheme() {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
-			getProxyType(), MARKER);
+			MARKER);
 		theme.addStyle(STYLE_AVAILABLE, COLOR_AVAILABLE);
 		theme.addStyle(STYLE_QUEUE_FULL, COLOR_WARNING);
 		theme.addStyle(STYLE_QUEUE_EXISTS, COLOR_DEPLOYED);

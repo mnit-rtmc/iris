@@ -85,7 +85,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Create a theme for detectors */
 	protected ProxyTheme<Detector> createTheme() {
 		ProxyTheme<Detector> theme = new ProxyTheme<Detector>(this,
-			getProxyType(), MARKER);
+			MARKER);
 		theme.addStyle(STYLE_ACTIVE, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);

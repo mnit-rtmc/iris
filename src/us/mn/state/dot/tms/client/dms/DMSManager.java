@@ -107,8 +107,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	protected ProxyTheme<DMS> createTheme() {
 		// NOTE: the ordering of themes controls which color is used
 		//       to render the sign icon on the map
-		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this,
-			getProxyType(), MARKER);
+		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this, MARKER);
 		theme.addStyle(DMSHelper.STYLE_AVAILABLE,
 			ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(DMSHelper.STYLE_DEPLOYED,

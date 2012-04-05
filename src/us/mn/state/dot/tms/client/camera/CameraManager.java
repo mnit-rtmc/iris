@@ -87,8 +87,7 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a theme for cameras */
 	protected ProxyTheme<Camera> createTheme() {
-		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this,
-			getProxyType(), MARKER);
+		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this, MARKER);
 		theme.addStyle(STYLE_UNPUBLISHED, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);

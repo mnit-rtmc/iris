@@ -73,7 +73,7 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	/** Create a theme for lane markings */
 	protected ProxyTheme<LaneMarking> createTheme() {
 		ProxyTheme<LaneMarking> theme = new ProxyTheme<LaneMarking>(
-			this, getProxyType(), MARKER);
+			this, MARKER);
 		theme.addStyle(STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(STYLE_ALL);
