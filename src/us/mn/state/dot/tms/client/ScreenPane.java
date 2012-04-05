@@ -56,6 +56,9 @@ import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
  */
 public class ScreenPane extends JPanel {
 
+	/** Side panel for tabs and menu */
+	private final JPanel side_panel;
+
 	/** Tabbed side pane */
 	protected final JTabbedPane tab_pane;
 
@@ -83,8 +86,10 @@ public class ScreenPane extends JPanel {
 	/** Create a new screen pane */
 	public ScreenPane() {
 		setLayout(new BorderLayout());
+		side_panel = new JPanel(new BorderLayout());
 		tab_pane = new JTabbedPane(SwingConstants.TOP);
-		add(tab_pane, BorderLayout.WEST);
+		side_panel.add(tab_pane, BorderLayout.CENTER);
+		add(side_panel, BorderLayout.WEST);
 		map = new MapBean(true);
 		map.setBackground(new Color(208, 216, 208));
 		map_bar = createMapToolBar();
@@ -188,6 +193,11 @@ public class ScreenPane extends JPanel {
 		switchers.clear();
 		tab_pane.removeAll();
 		tool_bar.clear();
+	}
+
+	/** Set the menu bar */
+	public void setMenuBar(IMenuBar bar) {
+		side_panel.add(bar, BorderLayout.NORTH);
 	}
 
 	/** Create the map panel */

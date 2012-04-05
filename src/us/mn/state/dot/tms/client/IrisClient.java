@@ -27,8 +27,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.log.TmsLogFactory;
 import us.mn.state.dot.map.MapBean;
@@ -104,14 +102,8 @@ public class IrisClient extends JFrame {
 	/** Exception handler */
 	protected final SimpleHandler handler;
 
-	/** Session menu */
-	protected final SessionMenu session_menu;
-
-	/** View menu */
-	protected JMenu view_menu;
-
-	/** Help menu */
-	protected final HelpMenu help_menu;
+	/** Menu bar */
+	private final IMenuBar menu_bar;
 
 	/** Login session information */
 	protected Session session;
@@ -142,9 +134,8 @@ public class IrisClient extends JFrame {
 		});
 		layout = new ScreenLayout(desktop);
 		getContentPane().add(desktop);
-		session_menu = new SessionMenu(this);
-		help_menu = new HelpMenu(desktop);
-		buildMenus();
+		menu_bar = new IMenuBar(this, desktop);
+		s_panes[0].setMenuBar(menu_bar);
 		autoLogin();
 	}
 
@@ -217,14 +208,6 @@ public class IrisClient extends JFrame {
 		}
 	}
 
-	/** Build all the menus */
-	protected void buildMenus() {
-		JMenuBar m_bar = new JMenuBar();
-		m_bar.add(session_menu);
-		m_bar.add(help_menu);
-		setJMenuBar(m_bar);
-	}
-
 	/** Auto-login the user if enabled */
 	protected void autoLogin() {
 		String user = props.getProperty("autologin.username");
@@ -289,7 +272,7 @@ public class IrisClient extends JFrame {
 	protected void doLogin(String user, char[] pwd) throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle(createTitle(TITLE_LOGIN_IN_PROGRESS));
-		session_menu.setLoggedIn(true);
+		menu_bar.disableSessionMenu();
 		closeSession();
 		try {
 			session = createSession(user, pwd);
@@ -297,7 +280,7 @@ public class IrisClient extends JFrame {
 		finally {
 			for(int i = 0; i < pwd.length; ++i)
 				pwd[i] = ' ';
-			updateMenus(session);
+			menu_bar.setSession(session);
 			updateMaps(session);
 			arrangeTabs();
 			setTitle(createTitle(session));
@@ -327,21 +310,6 @@ public class IrisClient extends JFrame {
 		SonarException, NoSuchFieldException, IllegalAccessException
 	{
 		return new SonarState(props, handler);
-	}
-
-	/** Update the menus for a session */
-	protected void updateMenus(Session s) {
-		JMenu vm = view_menu;
-		if(vm != null)
-			getJMenuBar().remove(vm);
-		boolean in = s != null;
-		if(in) {
-			view_menu = new ViewMenu(s);
-			getJMenuBar().add(view_menu, 1);
-		} else
-			view_menu = null;
-		session_menu.setLoggedIn(in);
-		help_menu.setLoggedIn(in);
 	}
 
 	/** Update the maps on all screen panes */
@@ -389,7 +357,7 @@ public class IrisClient extends JFrame {
 	/** Clean up when the user logs out */
 	protected void doLogout() {
 		writeUserProperties();
-		updateMenus(null);
+		menu_bar.setSession(null);
 		removeTabs();
 		closeSession();
 		updateMaps(null);
