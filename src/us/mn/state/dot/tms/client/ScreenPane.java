@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -95,10 +95,34 @@ public class ScreenPane extends JPanel {
 		tab_pane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				map.addPointSelector(null);
-				setHomeLayer();
+				setSelectedLayer(getSelectedHomeLayer());
 				storeSelectedTabIndex();
 			}
 		});
+	}
+
+	/** Get the currently selected tab's home layer */
+	private ProxyLayerState getSelectedHomeLayer() {
+		Component tab = tab_pane.getSelectedComponent();
+		if(tab instanceof MapTab) {
+			MapTab mt = (MapTab)tab;
+			LayerState ls = mt.getHomeLayer();
+			if(ls instanceof ProxyLayerState)
+				return (ProxyLayerState)ls;
+		}
+		return null;
+	}
+
+	/** Most recently selected layer */
+	protected ProxyLayerState sel_layer;
+
+	/** Set the selected layer for the screen pane */
+	private void setSelectedLayer(ProxyLayerState sel) {
+		if(sel_layer != null && sel != sel_layer)
+			sel_layer.setTabSelected(false);
+		if(sel != null)
+			sel.setTabSelected(true);
+		sel_layer = sel;
 	}
 
 	/** Last selected tab, which stores the index of last user selected
@@ -124,26 +148,6 @@ public class ScreenPane extends JPanel {
 	public void setSelectedTabIndex(int i) {
 		if(i >= 0 && i < tab_pane.getTabCount())
 			tab_pane.setSelectedIndex(i);
-	}
-
-	/** Most recently selected home layer */
-	protected ProxyLayerState home_layer;
-
-	/** Set the home layer for the screen pane */
-	public void setHomeLayer() {
-		if(home_layer != null) {
-			home_layer.setTabSelected(false);
-			home_layer = null;
-		}
-		Component tab = tab_pane.getSelectedComponent();
-		if(tab instanceof MapTab) {
-			MapTab mt = (MapTab)tab;
-			LayerState ls = mt.getHomeLayer();
-			if(ls instanceof ProxyLayerState) {
-				home_layer = (ProxyLayerState)ls;
-				home_layer.setTabSelected(true);
-			}
-		}
 	}
 
 	/** Add a tab to the screen pane */
