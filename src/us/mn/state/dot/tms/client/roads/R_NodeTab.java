@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public class R_NodeTab extends MapTab {
 
 	/** Create a new roadway node tab */
 	public R_NodeTab(Session session, R_NodeManager man) {
-		super("R_Node", "View / edit roadway nodes");
+		super(man.getProxyType(), "View / edit roadway nodes");
 		panel = new R_NodePanel(session);
 		add(panel, BorderLayout.NORTH);
 		clist = new CorridorList(session, man, panel);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public class IncidentTab extends MapTab {
   	public IncidentTab(Session session, IncidentManager m)
 		throws IOException
 	{
-		super("Incident", "Manage Incidents");
+		super(m.getProxyType(), "Manage Incidents");
 		manager = m;
 		creator = new IncidentCreator(session, manager.getTheme(),
 			manager.getSelectionModel());

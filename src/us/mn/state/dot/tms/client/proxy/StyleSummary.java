@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -223,7 +223,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		b.setFont(new java.awt.Font(("SansSerif"), 
 			java.awt.Font.PLAIN, 10));
 		b.setToolTipText("Switch to " + size.m_name + " " + 
-			manager.getProxyType() + " icons.");
+			manager.getLongProxyType() + " icons.");
 		Dimension bsize = new Dimension(18, 24);
 		b.setPreferredSize(bsize);
 		b.setMaximumSize(bsize);
@@ -260,7 +260,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Button click action. */
 	private void setStyleAction(String style) {
-		String t = manager.getProxyType() + " status: " + style;
+		String t = manager.getLongProxyType() + " status: " + style;
 		border.setTitle(t);
 		// Force the border title to be repainted
 		repaint();

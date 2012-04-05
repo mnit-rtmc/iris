@@ -143,6 +143,11 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
+		return "Meter";
+	}
+
+	/** Get longer proxy type name for display */
+	public String getLongProxyType() {
 		return "Ramp Meter";
 	}
 

@@ -42,7 +42,7 @@ public class RampMeterTab extends MapTab {
   	public RampMeterTab(Session session, MeterManager man)
 		throws IOException
 	{
-		super("Meter", "Operate Ramp Meters");
+		super(man.getProxyType(), "Operate Ramp Meters");
 		manager = man;
 		statusPanel = new MeterStatusPanel(session, manager);
 		summary = manager.createStyleSummary();

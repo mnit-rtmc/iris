@@ -211,6 +211,11 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Get the proxy type name */
 	abstract public String getProxyType();
 
+	/** Get longer proxy type name for display */
+	public String getLongProxyType() {
+		return getProxyType();
+	}
+
 	/** Get the proxy type cache */
 	public TypeCache<T> getCache() {
 		return cache;
