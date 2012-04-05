@@ -249,8 +249,6 @@ public class IrisClient extends JFrame {
 			sp.addTab(tab);
 		}
 		setSelectedTabViaPersist();
-		for(ScreenPane sp: visible)
-			sp.createToolPanels(s);
 	}
 
 	/** Show the login form */
@@ -317,6 +315,10 @@ public class IrisClient extends JFrame {
 		for(ScreenPane sp: s_panes) {
 			MapBean mb = sp.getMap();
 			mb.setModel(createMapModel(mb, s));
+			if(s != null)
+				sp.createToolPanels(s);
+			else
+				sp.clearToolPanels();
 		}
 		setInitExtent();
 	}

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2009  AHMCT, University of California, Davis
- * Copyright (C) 2010-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 
 	/** Create a new coordinate panel */
 	public CoordinatePanel(MapBean m) {
-		assert m !=  null;
+		assert m != null;
 		map = m;
 		add(coord_lbl);
 		map.addMouseMotionListener(this);

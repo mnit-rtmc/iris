@@ -195,7 +195,6 @@ public class ScreenPane extends JPanel {
 			ts.dispose();
 		switchers.clear();
 		tab_pane.removeAll();
-		tool_bar.clear();
 	}
 
 	/** Set the menu bar */
@@ -233,6 +232,12 @@ public class ScreenPane extends JPanel {
 			}
 		});
 		tool_bar.createToolPanels(s);
+	}
+
+	/** Clear the tool panels */
+	public void clearToolPanels() {
+		map_bar.clear();
+		tool_bar.clear();
 	}
 
 	/** Create a map extent button */
