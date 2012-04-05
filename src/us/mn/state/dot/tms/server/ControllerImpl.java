@@ -150,18 +150,22 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		version = "";
-		if(comm_link instanceof CommLinkImpl) {
-			CommLinkImpl link = (CommLinkImpl)comm_link;
+		CommLink cl = comm_link;
+		if(cl instanceof CommLinkImpl) {
+			CommLinkImpl link = (CommLinkImpl)cl;
 			link.putController(drop_id, this);
 		}
 	}
 
 	/** Get controller label */
 	public String getLabel() {
-		CommLink l = comm_link;
+		CommLink cl = comm_link;
 		StringBuilder b = new StringBuilder();
 		b.append("Link ");
-		b.append(l.getName());
+		if(cl != null)
+			b.append(cl.getName());
+		else
+			b.append("null");
 		b.append(" drop ");
 		b.append(drop_id);
 		return b.toString();
@@ -771,11 +775,19 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the message poller */
 	public MessagePoller getPoller() {
 		if(getActive()) {
-			CommLinkImpl link = (CommLinkImpl)comm_link;
-			if(link != null)
-				return link.getPoller();
+			MessagePoller mp = getPoller(comm_link);
+			return mp;
 		}
 		return null;
+	}
+
+	/** Get the message poller of a comm link */
+	static private MessagePoller getPoller(CommLink cl) {
+		if(cl instanceof CommLinkImpl) {
+			CommLinkImpl link = (CommLinkImpl)cl;
+			return link != null ? link.getPoller() : null;
+		} else
+			return null;
 	}
 
 	/** Perform a controller download (reset) */
@@ -799,8 +811,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
-		if(comm_link instanceof CommLinkImpl) {
-			CommLinkImpl link = (CommLinkImpl)comm_link;
+		CommLink cl = comm_link;
+		if(cl instanceof CommLinkImpl) {
+			CommLinkImpl link = (CommLinkImpl)cl;
 			link.pullController(this);
 		}
 		super.doDestroy();
