@@ -198,7 +198,10 @@ public class ScreenPane extends JPanel {
 
 	/** Set the menu bar */
 	public void setMenuBar(IMenuBar bar) {
-		side_panel.add(bar, BorderLayout.NORTH);
+		side_panel.removeAll();
+		if(bar != null)
+			side_panel.add(bar, BorderLayout.NORTH);
+		side_panel.add(tab_pane, BorderLayout.CENTER);
 	}
 
 	/** Create the map panel */

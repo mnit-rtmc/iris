@@ -135,7 +135,7 @@ public class IrisClient extends JFrame {
 		layout = new ScreenLayout(desktop);
 		getContentPane().add(desktop);
 		menu_bar = new IMenuBar(this, desktop);
-		s_panes[0].setMenuBar(menu_bar);
+		setMenuBar();
 		autoLogin();
 	}
 
@@ -232,10 +232,20 @@ public class IrisClient extends JFrame {
 
 	/** Arrange the tabs on the visible screen panes */
 	protected void arrangeTabs() {
+		setMenuBar();
 		removeTabs();
 		Session s = session;
 		if(s != null)
 			arrangeTabs(s);
+	}
+
+	/** Set the menu bar to the first visible screen pane */
+	private void setMenuBar() {
+		IMenuBar mb = menu_bar;
+		for(ScreenPane sp: getVisiblePanes()) {
+			sp.setMenuBar(mb);
+			mb = null;
+		}
 	}
 
 	/** Arrange the tabs on the visible screen panes */
