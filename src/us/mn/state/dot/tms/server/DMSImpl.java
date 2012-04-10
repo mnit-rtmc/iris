@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
@@ -1101,7 +1102,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Log a message */
 	protected void logMessage(SignMessage sm, User o) {
-		// FIXME: this should happen on a dedicated thread
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = sm.getMulti();
 		if(SignMessageHelper.isBlank(sm)) {
@@ -1111,13 +1111,16 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		String owner = null;
 		if(o != null)
 			owner = o.getName();
-		SignStatusEvent ev = new SignStatusEvent(et, name, text, owner);
-		try {
-			ev.doStore();
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		}
+		logEvent(new SignStatusEvent(et, name, text, owner));
+	}
+
+	/** Log a sign status event */
+	private void logEvent(final SignStatusEvent ev) {
+		MainServer.FLUSH.addJob(new Job() {
+			public void perform() throws TMSException {
+				ev.doStore();
+			}
+		});
 	}
 
 	/** Message deploy time */
@@ -1211,15 +1214,18 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Feedback brightness sample data */
 	public void feedbackBrightness(EventType et, int photo, int output) {
-		BrightnessSample bs = new BrightnessSample(et, this, photo,
-			output);
-		try {
-			bs.purgeConflicting();
-			bs.doStore();
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		}
+		logBrightnessSample(new BrightnessSample(et, this, photo,
+			output));
+	}
+
+	/** Log a brightness sample */
+	private void logBrightnessSample(final BrightnessSample bs) {
+		MainServer.FLUSH.addJob(new Job() {
+			public void perform() throws TMSException {
+				bs.purgeConflicting();
+				bs.doStore();
+			}
+		});
 	}
 
 	/** Lookup recent brightness feedback sample data */
