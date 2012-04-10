@@ -38,13 +38,13 @@ public class SQLConnection {
 		Pattern.compile("[a-z_0-9.]*");
 
 	/** Validate a SQL identifier */
-	static private void validateIdentifier(String sql) {
+	static private void validateIdentifier(String sql)
+		throws ChangeVetoException
+	{
 		Matcher m = SQL_IDENTIFIER.matcher(sql);
 		if(!m.matches()) {
-			// FIXME: throw an exception if identifier is mixed
-			//        case or contains spaces, etc. Then we can get
-			//        rid of the quotes around the field name.
-			System.err.println("Invalid identifier: " + sql);
+			throw new ChangeVetoException("Invalid SQL identifier: "
+				+ sql);
 		}
 	}
 
@@ -200,8 +200,8 @@ public class SQLConnection {
 		}
 		String v = escapeValue(value);
 		validateValue(v);
-		update("UPDATE " + s.getTable() + " SET \"" + field +
-			"\" = '" + v + "' WHERE " + s.getKeyName() +
+		update("UPDATE " + s.getTable() + " SET " + field +
+			" = '" + v + "' WHERE " + s.getKeyName() +
 			" = '" + key + "';");
 	}
 
@@ -209,8 +209,8 @@ public class SQLConnection {
 	private void updateNull(Storable s, String field, String key)
 		throws TMSException
 	{
-		update("UPDATE " + s.getTable() + " SET \"" + field +
-			"\" = NULL WHERE " + s.getKeyName() + " = '" +
+		update("UPDATE " + s.getTable() + " SET " + field +
+			" = NULL WHERE " + s.getKeyName() + " = '" +
 			key + "';");
 	}
 
@@ -224,9 +224,8 @@ public class SQLConnection {
 			if(value != null) {
 				String field = e.getKey();
 				validateIdentifier(field);
-				keys.append('"');
 				keys.append(field);
-				keys.append("\",");
+				keys.append(",");
 				String val = escapeValue(value);
 				validateValue(val);
 				values.append("'");
