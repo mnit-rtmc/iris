@@ -446,9 +446,8 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.queryProps();
 			DMS_LOG.log(dms.getName() + ": " + gid);
 			if(!isIDCorrect(gid.getInteger())) {
-				System.err.println("DMS " + dms.getName() +
-					" graphic " + graphic.getGNumber() +
-					" INVALID after validating!");
+				setErrorStatus("Graphic " +graphic.getGNumber()+
+					" ID incorrect after validating");
 			}
 			return nextGraphicPhase();
 		}
