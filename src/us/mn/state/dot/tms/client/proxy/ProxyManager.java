@@ -94,7 +94,7 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Mapping from MapObject identityHashCode to proxy objects.  This is
 	 * an optimization cache to help findProxy run fast. */
-	protected final HashMap<Integer, T> map_proxies =
+	private final HashMap<Integer, T> map_proxies =
 		new HashMap<Integer, T>();
 
 	/** Map layer for the proxy type */
@@ -159,11 +159,16 @@ abstract public class ProxyManager<T extends SonarObject>
 	protected void proxyAddedSlow(T proxy) {
 		MapGeoLoc loc = findGeoLoc(proxy);
 		if(loc != null) {
-			int i = System.identityHashCode(loc);
-			synchronized(map_proxies) {
-				map_proxies.put(i, proxy);
-			}
+			addMapProxy(proxy, loc);
 			loc_manager.setTangentAngle(loc);
+		}
+	}
+
+	/** Add a map geo log to the map proxies hash */
+	protected void addMapProxy(T proxy, MapGeoLoc loc) {
+		int i = System.identityHashCode(loc);
+		synchronized(map_proxies) {
+			map_proxies.put(i, proxy);
 		}
 	}
 
