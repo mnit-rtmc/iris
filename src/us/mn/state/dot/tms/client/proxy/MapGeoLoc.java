@@ -18,16 +18,11 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
-import us.mn.state.dot.geokit.GeodeticDatum;
-import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.geokit.UTMPosition;
-import us.mn.state.dot.geokit.UTMZone;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Helper for creating location transforms.
@@ -35,11 +30,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Douglas Lau
  */
 public class MapGeoLoc implements MapObject {
-
-	/** UTM zone for conversion to lat/lon */
-	static protected final UTMZone UTM_ZONE =
-		new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
-			SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean());
 
 	/** Radians to rotate marker for a Northbound device */
 	static protected final double RAD_NORTH = Math.toRadians(0);
@@ -145,25 +135,12 @@ public class MapGeoLoc implements MapObject {
 
 	/** Update the traffic device transform */
 	protected void updateTransform() {
-		Integer easting = GeoLocHelper.getTrueEasting(loc);
-		Integer northing = GeoLocHelper.getTrueNorthing(loc);
-		if(easting != null && northing != null) {
-			pos = createPosition(easting, northing);
+		pos = GeoLocHelper.getPosition(loc);
+		if(pos != null)
 			transform.setToTranslation(pos.getX(), pos.getY());
-		} else {
-			pos = null;
+		else
 			transform.setToIdentity();
-		}
 		transform.rotate(getTangent());
-	}
-
-	/** Create spherical mercator position */
-	protected SphericalMercatorPosition createPosition(int easting,
-		int northing)
-	{
-		UTMPosition utm = new UTMPosition(UTM_ZONE, easting, northing);
-		Position p = utm.getPosition(GeodeticDatum.WGS_84);
-		return SphericalMercatorPosition.convert(p);
 	}
 
 	/** Get the transform to render as a map object */

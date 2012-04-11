@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.io.PrintWriter;
 import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.geokit.UTMZone;
 import us.mn.state.dot.sonar.Checker;
@@ -358,6 +359,15 @@ public class GeoLocHelper extends BaseHelper {
 			return null;
 		UTMPosition utm = new UTMPosition(getZone(), easting, northing);
 		return utm.getPosition(GeodeticDatum.WGS_84);
+	}
+
+	/** Create a spherical mercator position */
+	static public SphericalMercatorPosition getPosition(GeoLoc p) {
+		Position pos = getWgs84Position(p);
+		if(pos != null)
+			return SphericalMercatorPosition.convert(pos);
+		else
+			return null;
 	}
 
 	/** Find geo-locs using a Checker */
