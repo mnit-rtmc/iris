@@ -155,6 +155,6 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Get the layer zoom visibility threshold */
 	protected int getZoomThreshold() {
-		return 14;
+		return 16;
 	}
 }
