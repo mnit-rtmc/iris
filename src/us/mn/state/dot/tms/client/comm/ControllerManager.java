@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
@@ -74,6 +75,12 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Get the shape for a given proxy */
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
+	}
+
+	/** Get the tangent angle for the given location */
+	protected Double getTangentAngle(MapGeoLoc loc) {
+		// Don't rotate markers by direction-of-travel
+		return MapGeoLoc.northTangent();
 	}
 
 	/** Create a theme for controllers */

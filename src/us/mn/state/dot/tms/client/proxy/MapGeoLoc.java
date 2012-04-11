@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,11 @@ public class MapGeoLoc implements MapObject {
 
 	/** Radians to rotate marker for a Westbound device */
 	static protected final double RAD_WEST = Math.toRadians(90);
+
+	/** Get tangent value for "north" direction */
+	static public double northTangent() {
+		return RAD_NORTH;
+	}
 
 	/** Geo location */
 	protected final GeoLoc loc;

@@ -160,7 +160,9 @@ abstract public class ProxyManager<T extends SonarObject>
 		MapGeoLoc loc = findGeoLoc(proxy);
 		if(loc != null) {
 			addMapProxy(proxy, loc);
-			loc_manager.setTangentAngle(loc);
+			Double tan = getTangentAngle(loc);
+			if(tan != null)
+				loc.setTangent(tan);
 		}
 	}
 
@@ -170,6 +172,11 @@ abstract public class ProxyManager<T extends SonarObject>
 		synchronized(map_proxies) {
 			map_proxies.put(i, proxy);
 		}
+	}
+
+	/** Get the tangent angle for the given location */
+	protected Double getTangentAngle(MapGeoLoc loc) {
+		return loc_manager.getTangentAngle(loc);
 	}
 
 	/** Called when proxy enumeration is complete */

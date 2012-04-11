@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,8 +110,8 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 		}
 	}
 
-	/** Set the tangent angle for a location */
-	public void setTangentAngle(MapGeoLoc mloc) {
+	/** Get the tangent angle for a location */
+	public Double getTangentAngle(MapGeoLoc mloc) {
 		GeoLoc loc = mloc.getGeoLoc();
 		CorridorBase c = r_node_manager.lookupCorridor(loc);
 		if(c != null) {
@@ -120,8 +120,9 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 				MapGeoLoc n_loc = r_node_manager.findGeoLoc(
 					r_node);
 				if(n_loc != null)
-					mloc.setTangent(n_loc.getTangent());
+					return n_loc.getTangent();
 			}
 		}
+		return null;
 	}
 }
