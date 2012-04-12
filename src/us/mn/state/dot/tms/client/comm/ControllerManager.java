@@ -85,13 +85,11 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Create a theme for controllers */
 	protected ProxyTheme<Controller> createTheme() {
-		ProxyTheme<Controller> theme = new ProxyTheme<Controller>(this,
-			MARKER);
+		ControllerTheme theme = new ControllerTheme(this, MARKER);
 		theme.addStyle(STYLE_ACTIVE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(STYLE_ALL, ProxyTheme.COLOR_INACTIVE,
-			ProxyTheme.OUTLINE_INACTIVE);
+		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
 
