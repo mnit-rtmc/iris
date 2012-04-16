@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms;
 
 /**
- * Constants is an interface with some traffic data related constants.
+ * Constants is a final class with some traffic data related constants.
  *
  * @author Douglas Lau
  */
