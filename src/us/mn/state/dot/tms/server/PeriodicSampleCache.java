@@ -22,7 +22,7 @@ import java.nio.channels.FileChannel;
 import java.util.concurrent.ConcurrentSkipListSet;
 import us.mn.state.dot.sched.TimeSteward;
 import static us.mn.state.dot.tms.Constants.MISSING_DATA;
-import us.mn.state.dot.tms.Interval;
+import static us.mn.state.dot.tms.Interval.DAY;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
@@ -47,7 +47,7 @@ abstract public class PeriodicSampleCache {
 
 	/** Get the number of samples per day */
 	static private int samplesPerDay(int period) {
-		return Interval.DAY / period;
+		return DAY / period;
 	}
 
 	/** Byte buffer for flushing samples to file */
