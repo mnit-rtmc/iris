@@ -476,28 +476,28 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Store 30-second detector data */
 	public void storeData30Second(long stamp, int start_pin,
-		int[] volume, int[] scans, int[] speed)
+		int[] volume, int[] scans, int[] speed, int max_scans)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
 		for(Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
 			det.storeData30Second(stamp, sampleValue(volume, i),
-				sampleValue(scans, i));
+				sampleValue(scans, i), max_scans);
 			det.storeSpeed30Second(stamp, sampleValue(speed, i));
 		}
 	}
 
 	/** Store 5-minute detector data */
 	public void storeData5Minute(long stamp, int start_pin, int[] volume,
-		int[] scans)
+		int[] scans, int max_scans)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
 		for(Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
 			det.storeData5Minute(stamp, sampleValue(volume, i),
-				sampleValue(scans, i));
+				sampleValue(scans, i), max_scans);
 		}
 	}
 

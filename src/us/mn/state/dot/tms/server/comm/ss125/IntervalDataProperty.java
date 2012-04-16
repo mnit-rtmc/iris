@@ -32,12 +32,6 @@ public class IntervalDataProperty extends SS125Property {
 	/** Interval data request ID (from volatile memory) */
 	static protected final byte MSG_ID = 0x71;
 
-	/** Maximum scan count */
-	static protected final int MAX_SCANS = 1800;
-
-	/** Multiplier to convert occupancy to scan count */
-	static protected final float OCC_SCANS = MAX_SCANS / 100f;
-
 	/** Format the body of a GET request */
 	byte[] formatBodyGet() throws IOException {
 		byte[] body = new byte[6];
@@ -114,7 +108,7 @@ public class IntervalDataProperty extends SS125Property {
 	static public class LaneInterval {
 		public final Float speed;
 		public final int volume;
-		public final float occ;
+		public final int scan;
 		public final int vol_a;
 		public final int vol_b;
 		public final int vol_c;
@@ -125,7 +119,7 @@ public class IntervalDataProperty extends SS125Property {
 		protected LaneInterval(byte[] body) {
 			speed = parse24Fixed(body, 14);
 			volume = parse24(body, 17);
-			occ = parse16Fixed(body, 20);
+			scan = parse16(body, 20);
 			vol_a = parse24(body, 22);
 			vol_b = parse24(body, 25);
 			vol_c = parse24(body, 28);
@@ -133,9 +127,6 @@ public class IntervalDataProperty extends SS125Property {
 			speed_85 = parse24Fixed(body, 34);
 			headway = parse24(body, 37);
 			gap = parse24(body, 40);
-		}
-		public int getScans() {
-			return Math.round(occ * OCC_SCANS);
 		}
 	}
 
@@ -158,7 +149,7 @@ public class IntervalDataProperty extends SS125Property {
 		for(int i = 0; i < scans.length; i++) {
 			LaneInterval li = lanes[i];
 			if(li != null)
-				scans[i] = li.getScans();
+				scans[i] = li.scan;
 			else
 				scans[i] = MISSING_DATA;
 		}

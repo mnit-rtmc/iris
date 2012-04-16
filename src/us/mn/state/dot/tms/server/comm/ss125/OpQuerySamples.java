@@ -31,6 +31,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySamples extends OpSS125 {
 
+	/** Maximum scan count for occupancy calculation.  Scans are in 16-bit
+	 * fixed-point format, with 8-bit integer value (0-100) and 8-bit
+	 * fractional part. */
+	static private final int MAX_SCANS = 100 << 8;
+
 	/** 30-Second interval completer */
 	protected final Completer completer;
 
@@ -94,7 +99,8 @@ public class OpQuerySamples extends OpSS125 {
 	/** Cleanup the operation */
 	public void cleanup() {
 		controller.storeData30Second(stamp, 1, sample_data.getVolume(),
-			sample_data.getScans(), sample_data.getSpeed());
+			sample_data.getScans(), sample_data.getSpeed(),
+			MAX_SCANS);
 		completer.completeTask(getKey());
 		super.cleanup();
 	}

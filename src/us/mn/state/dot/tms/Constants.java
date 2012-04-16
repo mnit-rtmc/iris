@@ -27,9 +27,6 @@ public final class Constants {
 	/** Number of feet in one mile */
 	static public final int FEET_PER_MILE = 5280;
 
-	/** Maximum number of scans in 30 seconds */
-	static public final int MAX_SCANS = 1800;
-
 	/** Special case value for missing data */
 	static public final byte MISSING_DATA = -1;
 

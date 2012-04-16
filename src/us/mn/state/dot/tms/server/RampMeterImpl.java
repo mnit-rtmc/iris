@@ -735,7 +735,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if(det != null) {
 			if(g == 0 && isMetering())
 				return;
-			det.storeData30Second(stamp, g, MISSING_DATA);
+			det.storeData30Second(stamp, g, MISSING_DATA, 100);
 		} else
 			METER_LOG.log("No green det for " + getName());
 	}
@@ -744,7 +744,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public void updateGreenCount5(long stamp, int g) {
 		DetectorImpl det = green_det;
 		if(det != null)
-			det.storeData5Minute(stamp, g, MISSING_DATA);
+			det.storeData5Minute(stamp, g, MISSING_DATA, 100);
 		else
 			METER_LOG.log("No green det for " + getName());
 	}

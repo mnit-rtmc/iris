@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +27,12 @@ import us.mn.state.dot.tms.utils.SString;
  * This represents a record received from a G4 controller.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class G4Rec {
+
+	/** Maximum number of scans for one sample */
+	static private final int MAX_SCANS = 1000;
 
 	/** G4 unknown speed */
 	static private final int UNKNOWN_SPEED = 240;
@@ -160,11 +165,10 @@ public class G4Rec {
 		}
 		for(int i = 0; i < num_lanes; ++i) {
 			int val = b.getSampleValue(i);
-			if(val < 0 || val > 1000)
+			if(val < 0 || val > MAX_SCANS)
 				throw new ParsingException("invalid occ");
-			double occ = val / 10d;
-			lane_samples.setOccupancy(i, occ);
-			G4Poller.info("lane_sample["+i+"]=" + occ);
+			lane_samples.setScans(i, val);
+			G4Poller.info("lane_sample["+i+"]=" + (val / 10f));
 		}
 	}
 
@@ -240,6 +244,6 @@ public class G4Rec {
 		final int STARTPIN = 1;
 		ci.storeData30Second(create_time, STARTPIN,
 			lane_samples.getVolumes(), lane_samples.getScans(), 
-			lane_samples.getSpeeds());
+			lane_samples.getSpeeds(), MAX_SCANS);
 	}
 }

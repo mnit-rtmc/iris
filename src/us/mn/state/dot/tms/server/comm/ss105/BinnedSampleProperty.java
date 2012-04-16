@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,19 +62,19 @@ public class BinnedSampleProperty extends SS105Property {
 		return null;
 	}
 
+	/** Maximum percentage value of lane sample data */
+	static public final int MAX_PERCENT = 1024;
+
 	/** Number of bytes per lane of sample data */
 	static protected final int LANE_SAMPLE_BYTES = 29;
 
 	/** Sample data for one lane */
 	static public class LaneSample {
 
-		static protected final int MAX_PERCENT = 1024;
-		static protected final int MAX_SCANS = 1800;
-
 		public final int det;
 		public final int volume;
 		public final int speed;		// Miles per Hour
-		public final int occupancy;	// 0-1024 (perentage)
+		public final int scans;		// 0-1024 (perentage)
 		public final int small;		// 0-1024 (percentage)
 		public final int medium;	// 0-1024 (percentage)
 		public final int large;		// 0-1024 (percentage)
@@ -83,7 +83,7 @@ public class BinnedSampleProperty extends SS105Property {
 			det = parseInt(s.substring(0, 1));
 			volume = parseInt(s.substring(1, 9));
 			speed = parseInt(s.substring(9, 13));
-			occupancy = parseInt(s.substring(13, 17));
+			scans = parseInt(s.substring(13, 17));
 			small = parseInt(s.substring(17, 21));
 			medium = parseInt(s.substring(21, 25));
 			large = parseInt(s.substring(25, 29));
@@ -97,15 +97,14 @@ public class BinnedSampleProperty extends SS105Property {
 			}
 		}
 		public int getScans() {
-			float o = occupancy / (float)MAX_PERCENT;
-			return Math.round(o * MAX_SCANS);
+			return scans;
 		}
 		static float percent(int i) {
 			return 100 * i / (float)MAX_PERCENT;
 		}
 		public String toString() {
 			return det + ": " + volume + ", " + speed + ", " +
-				percent(occupancy) + ", " + small + ", " +
+				percent(scans) + ", " + small + ", " +
 				medium + ", " + large;
 		}
 	}

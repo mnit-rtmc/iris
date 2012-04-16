@@ -108,7 +108,8 @@ public class OpQuerySamples extends OpSS105 {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		controller.storeData30Second(stamp, 1, volume, scans, speed);
+		controller.storeData30Second(stamp, 1, volume, scans, speed,
+			BinnedSampleProperty.MAX_PERCENT);
 		completer.completeTask(getKey());
 		super.cleanup();
 	}

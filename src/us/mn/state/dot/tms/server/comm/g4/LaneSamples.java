@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,10 +66,10 @@ public class LaneSamples {
 			assert false;
 	}
 
-	/** Set occupancy for a specific lane */
-	protected void setOccupancy(int i, double val) {
+	/** Set scans for a specific lane */
+	protected void setScans(int i, int val) {
 		if(i < lane_samples.length)
-			lane_samples[i].occupancy = val;
+			lane_samples[i].scans = val;
 		else
 			assert false;
 	}
@@ -99,7 +100,7 @@ public class LaneSamples {
 			return LaneSamples.MISSING_SAMPLE;
 		int[] scans = new int[nl];
 		for(LaneSample ls: lane_samples)
-			scans[ls.lane_num - 1] = ls.getScans();
+			scans[ls.lane_num - 1] = ls.scans;
 		return scans;
 	}
 
