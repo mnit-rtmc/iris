@@ -19,32 +19,35 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  */
-public interface Constants {
+public final class Constants {
+
+	/** Prevent instantiation */
+	private Constants() { }
 
 	/** Number of feet in one mile */
-	public int FEET_PER_MILE = 5280;
+	static public final int FEET_PER_MILE = 5280;
 
 	/** Maximum "realistic" volume for a 30-second sample */
-	public int MAX_VOLUME = 37;
+	static public final int MAX_VOLUME = 37;
 
 	/** Maximum number of scans in 30 seconds */
-	public int MAX_SCANS = 1800;
+	static public final int MAX_SCANS = 1800;
 
 	/** Maximum occupancy value (100%) */
-	public int MAX_OCCUPANCY = 100;
+	static public final int MAX_OCCUPANCY = 100;
 
 	/** Valid density threshold for speed calculation */
-	public float DENSITY_THRESHOLD = 1.2f;
+	static public final float DENSITY_THRESHOLD = 1.2f;
 
 	/** Maximum (valid) speed (miles per hour) */
-	public float MAX_SPEED = 100.0f;
+	static public final float MAX_SPEED = 100.0f;
 
 	/** Default average detector field length */
-	public float DEFAULT_FIELD_LENGTH = 22.0f;
+	static public final float DEFAULT_FIELD_LENGTH = 22.0f;
 
 	/** Special case value for missing data */
-	public byte MISSING_DATA = -1;
+	static public final byte MISSING_DATA = -1;
 
 	/** Unknown status string */
-	String UNKNOWN = "???";
+	static public final String UNKNOWN = "???";
 }
