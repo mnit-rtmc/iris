@@ -42,9 +42,6 @@ public final class Constants {
 	/** Maximum (valid) speed (miles per hour) */
 	static public final float MAX_SPEED = 100.0f;
 
-	/** Default average detector field length */
-	static public final float DEFAULT_FIELD_LENGTH = 22.0f;
-
 	/** Special case value for missing data */
 	static public final byte MISSING_DATA = -1;
 

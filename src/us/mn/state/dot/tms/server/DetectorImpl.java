@@ -51,6 +51,9 @@ import us.mn.state.dot.tms.server.event.DetFailEvent;
  */
 public class DetectorImpl extends DeviceImpl implements Detector {
 
+	/** Default average detector field length */
+	static private final float DEFAULT_FIELD_LENGTH = 22.0f;
+
 	/** Detector debug log */
 	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
 
@@ -391,7 +394,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	}
 
 	/** Average detector field length */
-	protected float field_length = Constants.DEFAULT_FIELD_LENGTH;
+	protected float field_length = DEFAULT_FIELD_LENGTH;
 
 	/** Set the average field length */
 	public void setFieldLength(float f) {
@@ -837,7 +840,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		}
 		if(lane > 0)
 			out.print(XmlWriter.createAttribute("lane", lane));
-		if(field != Constants.DEFAULT_FIELD_LENGTH)
+		if(field != DEFAULT_FIELD_LENGTH)
 			out.print(XmlWriter.createAttribute("field", field));
 		Controller c = getController();
 		if(c != null) 
