@@ -29,7 +29,7 @@ import static us.mn.state.dot.tms.Constants.FEET_PER_MILE;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.Interval;
+import static us.mn.state.dot.tms.Interval.HOUR;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeTransition;
@@ -394,7 +394,7 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 			storage = Math.max(storage, 1);
 			max_stored = density * storage / FEET_PER_MILE;
 			float max_cycle = meter.getMaxWait() / max_stored;
-			minimum = (int)(Interval.HOUR / max_cycle);
+			minimum = (int)(HOUR / max_cycle);
 			int p_demand = calculatePassageDemand();
 			int t_demand = demand;
 			q_prob = Math.min(p_flow / rate_accum, 1.0f);

@@ -21,7 +21,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.Interval;
+import static us.mn.state.dot.tms.Interval.HOUR;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -73,7 +73,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	 * @param rate Release rate (vehicles per hour).
 	 * @return Red time (seconds) */
 	static float calculateRedTime(RampMeterImpl meter, int rate) {
-		float secs_per_veh = Interval.HOUR / (float)rate;
+		float secs_per_veh = HOUR / (float)rate;
 		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
 			secs_per_veh /= 2;
 		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
@@ -92,7 +92,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		float secs_per_veh = red_time + yellow + green;
 		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
 			secs_per_veh *= 2;
-		return Math.round(Interval.HOUR / secs_per_veh);
+		return Math.round(HOUR / secs_per_veh);
 	}
 
 	/** CommProtocol (4-bit or 5-bit) */

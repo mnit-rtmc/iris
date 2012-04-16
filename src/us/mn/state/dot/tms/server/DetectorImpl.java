@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.Interval;
+import static us.mn.state.dot.tms.Interval.HOUR;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -522,7 +522,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	protected int getFlowRaw() {
 		int volume = getVolume();
 		if(volume >= 0)
-			return volume * Interval.HOUR / SAMPLE_PERIOD_SEC;
+			return volume * HOUR / SAMPLE_PERIOD_SEC;
 		else
 			return MISSING_DATA;
 	}
@@ -641,7 +641,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(isRamp()) {
 			GeoLoc loc = lookupGeoLoc();
 			if(loc != null && isReversibleLocationHack(loc))
-				return 72 * Interval.HOUR;
+				return 72 * HOUR;
 		}
 		return lane_type.no_hit_threshold;
 	}
