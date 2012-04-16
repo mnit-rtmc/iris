@@ -54,6 +54,9 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Default average detector field length */
 	static private final float DEFAULT_FIELD_LENGTH = 22.0f;
 
+	/** Valid density threshold for speed calculation */
+	static private final float DENSITY_THRESHOLD = 1.2f;
+
 	/** Detector debug log */
 	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
 
@@ -594,7 +597,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(flow <= 0)
 			return MISSING_DATA;
 		float density = getDensityFromOccupancy();
-		if(density <= Constants.DENSITY_THRESHOLD)
+		if(density <= DENSITY_THRESHOLD)
 			return MISSING_DATA;
 		return flow / density;
 	}

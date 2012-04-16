@@ -36,9 +36,6 @@ public final class Constants {
 	/** Maximum occupancy value (100%) */
 	static public final int MAX_OCCUPANCY = 100;
 
-	/** Valid density threshold for speed calculation */
-	static public final float DENSITY_THRESHOLD = 1.2f;
-
 	/** Maximum (valid) speed (miles per hour) */
 	static public final float MAX_SPEED = 100.0f;
 
