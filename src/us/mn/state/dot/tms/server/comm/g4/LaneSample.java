@@ -15,7 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.g4;
 
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
  * All samples for one lane.

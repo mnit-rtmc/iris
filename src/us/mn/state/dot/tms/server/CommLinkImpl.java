@@ -24,7 +24,6 @@ import java.util.TreeMap;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
-import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.MessagePoller;

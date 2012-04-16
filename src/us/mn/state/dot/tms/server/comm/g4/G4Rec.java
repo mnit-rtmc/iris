@@ -18,7 +18,7 @@ package us.mn.state.dot.tms.server.comm.g4;
 import java.util.Date;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.TimeSteward;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.utils.SString;

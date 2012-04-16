@@ -29,7 +29,6 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -49,6 +48,7 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 

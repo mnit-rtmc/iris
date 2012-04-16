@@ -26,9 +26,6 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Constants;
-import static us.mn.state.dot.tms.Constants.FEET_PER_MILE;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
@@ -42,6 +39,8 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.event.DetFailEvent;
 
 /**

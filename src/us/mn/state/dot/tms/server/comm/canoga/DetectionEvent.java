@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.util.Calendar;
-import static us.mn.state.dot.tms.Constants.FEET_PER_MILE;
+import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import us.mn.state.dot.tms.server.DetectorImpl;
 
 /**

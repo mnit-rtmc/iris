@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.IOException;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.PrecipitationType;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 

@@ -17,10 +17,10 @@ package us.mn.state.dot.tms.server;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.NavigableMap;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
  * A station is a group of related detectors.

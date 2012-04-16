@@ -21,9 +21,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.ConcurrentSkipListSet;
 import us.mn.state.dot.sched.TimeSteward;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.Interval.DAY;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
  * A cache for periodic sample data.  This is needed so that threads which are

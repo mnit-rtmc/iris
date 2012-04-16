@@ -16,10 +16,10 @@ package us.mn.state.dot.tms.server;
 
 import java.util.Comparator;
 import java.util.TreeSet;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.Road;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**

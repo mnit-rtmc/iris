@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.server;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 import us.mn.state.dot.sonar.Namespace;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Detector;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
  * Fake Detector

@@ -21,11 +21,11 @@ import java.sql.ResultSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 

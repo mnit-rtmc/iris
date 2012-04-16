@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import static us.mn.state.dot.tms.Constants.FEET_PER_MILE;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -26,6 +25,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SystemAttributeHelper;
+import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 
 /**
  * Density-based Adaptive Metering with Variable Bottleneck

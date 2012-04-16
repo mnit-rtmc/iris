@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
-import static us.mn.state.dot.tms.Constants.FEET_PER_MILE;
+import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;

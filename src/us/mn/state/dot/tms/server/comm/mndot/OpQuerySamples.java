@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import us.mn.state.dot.sched.Completer;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 

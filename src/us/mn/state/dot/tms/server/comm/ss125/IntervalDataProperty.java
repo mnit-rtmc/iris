@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
 import java.util.Date;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**

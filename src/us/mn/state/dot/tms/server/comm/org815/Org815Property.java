@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import static us.mn.state.dot.tms.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
