@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.g4;
 
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 
 /**
  * Samples for multiple lanes.
@@ -25,10 +25,10 @@ public class LaneSamples {
 
 	/** A missing sample for all possible lanes */
 	static protected final int[] MISSING_SAMPLE = {
-		Constants.MISSING_DATA, Constants.MISSING_DATA,
-		Constants.MISSING_DATA, Constants.MISSING_DATA,
-		Constants.MISSING_DATA, Constants.MISSING_DATA,
-		Constants.MISSING_DATA, Constants.MISSING_DATA};
+		MISSING_DATA, MISSING_DATA,
+		MISSING_DATA, MISSING_DATA,
+		MISSING_DATA, MISSING_DATA,
+		MISSING_DATA, MISSING_DATA};
 
 	/** Units */
 	private final boolean si_unit;

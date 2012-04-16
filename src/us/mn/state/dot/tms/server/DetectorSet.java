@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.util.Comparator;
 import java.util.TreeSet;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.Road;
@@ -129,7 +129,7 @@ public class DetectorSet {
 	/** Test if the detector set is not bad */
 	public boolean isNotBad() {
 		for(DetectorImpl det: detectors) {
-			if(det.getFlow() == Constants.MISSING_DATA)
+			if(det.getFlow() == MISSING_DATA)
 				return false;
 		}
 		return true;
@@ -168,18 +168,18 @@ public class DetectorSet {
 
 	/** Calculate the upstream (one lane) capacity for a mainline zone */
 	public float getUpstreamCapacity() {
-		float max_density = Constants.MISSING_DATA;
-		float speed = Constants.MISSING_DATA;
+		float max_density = MISSING_DATA;
+		float speed = MISSING_DATA;
 		for(DetectorImpl det: detectors) {
 			float d = det.getDensity();
 			float s = det.getSpeed();
-			if(d > max_density && s != Constants.MISSING_DATA) {
+			if(d > max_density && s != MISSING_DATA) {
 				max_density = d;
 				speed = s;
 			}
 		}
 		if(max_density < 0)
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 		float spare_density = FULL_DENSITY - max_density;
 		if(spare_density <= 0)
 			return 0;

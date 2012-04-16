@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -70,7 +70,7 @@ abstract public class Org815Property extends ControllerProperty {
 	 * @return Accumulation since last reset in milimeters. */
 	protected float parseAccumulation(String a) throws IOException {
 		if("---.---".equals(a))
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 		try {
 			return Float.parseFloat(a);
 		}

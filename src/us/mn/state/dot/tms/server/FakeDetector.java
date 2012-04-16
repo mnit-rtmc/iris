@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Detector;
 
 /**
@@ -32,7 +32,7 @@ public class FakeDetector {
 		if(count > 0)
 			return total / count;
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Plus composite type */
@@ -136,7 +136,7 @@ public class FakeDetector {
 	}
 
 	/** Flow rate from earlier sampling interval */
-	protected transient float flow = Constants.MISSING_DATA;
+	protected transient float flow = MISSING_DATA;
 
 	/** Left over flow from earlier sampling intervals */
 	protected transient float leftover = 0;
@@ -148,7 +148,7 @@ public class FakeDetector {
 			int f = plus[i].getFlowRaw();
 			if(f < 0) {
 				leftover = 0;
-				return Constants.MISSING_DATA;
+				return MISSING_DATA;
 			}
 			flw += f;
 		}
@@ -156,7 +156,7 @@ public class FakeDetector {
 			int f = minus[i].getFlowRaw();
 			if(f < 0) {
 				leftover = 0;
-				return Constants.MISSING_DATA;
+				return MISSING_DATA;
 			}
 			flw -= f;
 		}
@@ -180,7 +180,7 @@ public class FakeDetector {
 	}
 
 	/** Speed from earlier sampling interval */
-	protected transient float speed = Constants.MISSING_DATA;
+	protected transient float speed = MISSING_DATA;
 
 	/** Calculate the fake detector speed */
 	private void calculateSpeed() {

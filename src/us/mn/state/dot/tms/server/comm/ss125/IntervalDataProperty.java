@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
 import java.util.Date;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -147,7 +147,7 @@ public class IntervalDataProperty extends SS125Property {
 			if(li != null)
 				vol[i] = li.volume;
 			else
-				vol[i] = Constants.MISSING_DATA;
+				vol[i] = MISSING_DATA;
 		}
 		return vol;
 	}
@@ -160,7 +160,7 @@ public class IntervalDataProperty extends SS125Property {
 			if(li != null)
 				scans[i] = li.getScans();
 			else
-				scans[i] = Constants.MISSING_DATA;
+				scans[i] = MISSING_DATA;
 		}
 		return scans;
 	}
@@ -173,7 +173,7 @@ public class IntervalDataProperty extends SS125Property {
 			if(li != null && li.speed != null)
 				speeds[i] = Math.round(li.speed);
 			else
-				speeds[i] = Constants.MISSING_DATA;
+				speeds[i] = MISSING_DATA;
 		}
 		return speeds;
 	}
@@ -186,7 +186,7 @@ public class IntervalDataProperty extends SS125Property {
 			if(li != null && li.speed_85 != null)
 				speeds[i] = Math.round(li.speed_85);
 			else
-				speeds[i] = Constants.MISSING_DATA;
+				speeds[i] = MISSING_DATA;
 		}
 		return speeds;
 	}
@@ -199,7 +199,7 @@ public class IntervalDataProperty extends SS125Property {
 			if(li != null)
 				headway[i] = li.headway;
 			else
-				headway[i] = Constants.MISSING_DATA;
+				headway[i] = MISSING_DATA;
 		}
 		return headway;
 	}

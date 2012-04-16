@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.g4;
 import java.util.Date;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.utils.SString;
@@ -183,7 +183,7 @@ public class G4Rec {
 		for(int i = 0; i < num_lanes; ++i) {
 			int val = b.getSampleValue(i);
 			if(val == UNKNOWN_SPEED)
-				val = Constants.MISSING_DATA;
+				val = MISSING_DATA;
 			else if(val > maxSpeed())
 				throw new ParsingException("invalid speed");
 			lane_samples.setSpeed(i, val);

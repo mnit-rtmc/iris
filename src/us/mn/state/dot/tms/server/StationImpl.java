@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.NavigableMap;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -129,7 +129,7 @@ public class StationImpl implements Station {
 		if(count > 0)
 			return total / count;
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Staiton name */
@@ -161,11 +161,11 @@ public class StationImpl implements Station {
 		name = station_id;
 		r_node = n;
 		for(int i = 0; i < rlg_speed.length; i++)
-			rlg_speed[i] = Constants.MISSING_DATA;
+			rlg_speed[i] = MISSING_DATA;
 		for(int i = 0; i < avg_speed.length; i++)
-			avg_speed[i] = Constants.MISSING_DATA;
+			avg_speed[i] = MISSING_DATA;
 		for(int i = 0; i < low_speed.length; i++)
-			low_speed[i] = Constants.MISSING_DATA;
+			low_speed[i] = MISSING_DATA;
 	}
 
 	/** Get the SONAR type name */
@@ -198,13 +198,13 @@ public class StationImpl implements Station {
 	}
 
 	/** Current average station volume */
-	protected float volume = Constants.MISSING_DATA;
+	protected float volume = MISSING_DATA;
 
 	/** Current average station occupancy */
-	protected float occupancy = Constants.MISSING_DATA;
+	protected float occupancy = MISSING_DATA;
 
 	/** Current average station flow */
-	protected int flow = Constants.MISSING_DATA;
+	protected int flow = MISSING_DATA;
 
 	/** Get the average station flow */
 	public int getFlow() {
@@ -212,7 +212,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Current average station density */
-	private float density = Constants.MISSING_DATA;
+	private float density = MISSING_DATA;
 
 	/** Get the average station density */
 	public float getDensity() {
@@ -220,7 +220,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Current average station speed */
-	private float speed = Constants.MISSING_DATA;
+	private float speed = MISSING_DATA;
 
 	/** Get the average station speed */
 	public float getSpeed() {
@@ -267,7 +267,7 @@ public class StationImpl implements Station {
 			else
 				return getSpeedLimit();
 		} else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Samples used in previous time step */
@@ -332,7 +332,7 @@ public class StationImpl implements Station {
 	/** Calculate the current station data */
 	public void calculateData() {
 		updateRollingSamples();
-		float low = Constants.MISSING_DATA;
+		float low = MISSING_DATA;
 		float t_volume = 0;
 		int n_volume = 0;
 		float t_occ = 0;
@@ -348,22 +348,22 @@ public class StationImpl implements Station {
 			   !det.isSampling())
 				continue;
 			float f = det.getVolume();
-			if(f != Constants.MISSING_DATA) {
+			if(f != MISSING_DATA) {
 				t_volume += f;
 				n_volume++;
 			}
 			f = det.getOccupancy();
-			if(f != Constants.MISSING_DATA) {
+			if(f != MISSING_DATA) {
 				t_occ += f;
 				n_occ++;
 			}
 			f = det.getFlow();
-			if(f != Constants.MISSING_DATA) {
+			if(f != MISSING_DATA) {
 				t_flow += f;
 				n_flow++;
 			}
 			f = det.getDensity();
-			if(f != Constants.MISSING_DATA) {
+			if(f != MISSING_DATA) {
 				t_density += f;
 				n_density++;
 			}
@@ -371,7 +371,7 @@ public class StationImpl implements Station {
 			if(f > 0) {
 				t_speed += f;
 				n_speed++;
-				if(low == Constants.MISSING_DATA)
+				if(low == MISSING_DATA)
 					low = f;
 				else
 					low = Math.min(f, low);
@@ -396,7 +396,7 @@ public class StationImpl implements Station {
 		float o = occupancy;
 		out.print("\t<sample");
 		out.print(XmlWriter.createAttribute("sensor", name));
-		if(f > Constants.MISSING_DATA)
+		if(f > MISSING_DATA)
 			out.print(XmlWriter.createAttribute("flow", f));
 		if(s > 0)
 			out.print(XmlWriter.createAttribute("speed", s));
@@ -415,7 +415,7 @@ public class StationImpl implements Station {
 		String n = getIndex();
 		if(n.length() < 1)
 			return;
-		if(volume == Constants.MISSING_DATA) {
+		if(volume == MISSING_DATA) {
 			out.println("\t<station id='" + n +
 				"' status='fail'/>");
 		} else {

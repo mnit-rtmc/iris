@@ -19,7 +19,7 @@ import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
@@ -66,9 +66,9 @@ public class OpQuerySamples extends OpSS105 {
 		cal.add(Calendar.MINUTE, 5);
 		newest = cal.getTimeInMillis();
 		for(int i = 0; i < 8; i++) {
-			volume[i] = Constants.MISSING_DATA;
-			scans[i] = Constants.MISSING_DATA;
-			speed[i] = Constants.MISSING_DATA;
+			volume[i] = MISSING_DATA;
+			scans[i] = MISSING_DATA;
+			speed[i] = MISSING_DATA;
 		}
 	}
 

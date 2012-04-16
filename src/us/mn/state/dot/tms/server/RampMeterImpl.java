@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -735,7 +735,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if(det != null) {
 			if(g == 0 && isMetering())
 				return;
-			det.storeData30Second(stamp, g, Constants.MISSING_DATA);
+			det.storeData30Second(stamp, g, MISSING_DATA);
 		} else
 			METER_LOG.log("No green det for " + getName());
 	}
@@ -744,7 +744,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public void updateGreenCount5(long stamp, int g) {
 		DetectorImpl det = green_det;
 		if(det != null)
-			det.storeData5Minute(stamp, g, Constants.MISSING_DATA);
+			det.storeData5Minute(stamp, g, MISSING_DATA);
 		else
 			METER_LOG.log("No green det for " + getName());
 	}

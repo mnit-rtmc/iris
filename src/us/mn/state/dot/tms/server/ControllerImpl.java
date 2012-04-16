@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
@@ -470,7 +471,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if(values != null && i >= 0 && i < values.length)
 			return values[i];
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Store 30-second detector data */

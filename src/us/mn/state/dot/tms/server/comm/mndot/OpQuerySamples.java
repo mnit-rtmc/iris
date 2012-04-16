@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -46,8 +46,8 @@ abstract public class OpQuerySamples extends Op170 {
 		super(p, c);
 		completer = comp;
 		for(int i = 0; i < DETECTOR_INPUTS; i++) {
-			volume[i] = Constants.MISSING_DATA;
-			scans[i] = Constants.MISSING_DATA;
+			volume[i] = MISSING_DATA;
+			scans[i] = MISSING_DATA;
 		}
 	}
 

@@ -21,7 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.ConcurrentSkipListSet;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
@@ -112,7 +112,7 @@ abstract public class PeriodicSampleCache {
 	/** Check if a periodic sample should be archived */
 	private boolean shouldArchive(PeriodicSample ps) {
 		return ps.period % period == 0 &&
-		       ps.value > Constants.MISSING_DATA &&
+		       ps.value > MISSING_DATA &&
 		       ps.value <= maxValue();
 	}
 
@@ -179,7 +179,7 @@ abstract public class PeriodicSampleCache {
 	private void padBuffer() {
 		int n_sam = (bufferBytes() - buffer.position()) / sampleBytes();
 		for(int i = 0; i < n_sam; i++)
-			putValue(Constants.MISSING_DATA);
+			putValue(MISSING_DATA);
 	}
 
 	/** Write the buffer to the file channel and close the file. */

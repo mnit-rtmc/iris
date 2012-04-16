@@ -27,6 +27,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
@@ -380,7 +381,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Check if the detector is currently 'failed' */
 	public boolean isFailed() {
-		return force_fail || last_volume == Constants.MISSING_DATA;
+		return force_fail || last_volume == MISSING_DATA;
 	}
 
 	/** Check if the detector is currently sampling data */
@@ -482,35 +483,35 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	protected transient int no_hits = 0;
 
 	/** Volume from the last 30-second sample period */
-	protected transient int last_volume = Constants.MISSING_DATA;
+	protected transient int last_volume = MISSING_DATA;
 
 	/** Scans from the last 30-second sample period */
-	protected transient int last_scans = Constants.MISSING_DATA;
+	protected transient int last_scans = MISSING_DATA;
 
 	/** Speed from the last 30-second sample period */
-	protected transient int last_speed = Constants.MISSING_DATA;
+	protected transient int last_speed = MISSING_DATA;
 
 	/** Get the current volume */
 	public int getVolume() {
 		if(isSampling())
 			return last_volume;
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Get the current occupancy */
 	public float getOccupancy() {
-		if(isSampling() && last_scans != Constants.MISSING_DATA)
+		if(isSampling() && last_scans != MISSING_DATA)
 			return Constants.MAX_OCCUPANCY *
 				(float)last_scans / Constants.MAX_SCANS;
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Get the current flow rate (vehicles per hour) */
 	public float getFlow() {
 		int flow = getFlowRaw();
-		if(flow != Constants.MISSING_DATA)
+		if(flow != MISSING_DATA)
 			return flow;
 		else
 			return getFlowFake();
@@ -522,7 +523,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(volume >= 0)
 			return volume * Interval.HOUR / SAMPLE_PERIOD_SEC;
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Get the fake flow rate (vehicles per hour) */
@@ -531,13 +532,13 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(f != null)
 			return f.getFlow();
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Get the current density (vehicles per mile) */
 	public float getDensity() {
 		float density = getDensityFromFlowSpeed();
-		if(density != Constants.MISSING_DATA)
+		if(density != MISSING_DATA)
 			return density;
 		else
 			return getDensityFromOccupancy();
@@ -548,17 +549,17 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		float speed = getSpeedRaw();
 		if(speed > 0) {
 			int flow = getFlowRaw();
-			if(flow > Constants.MISSING_DATA)
+			if(flow > MISSING_DATA)
 				return flow / speed;
 		}
-		return Constants.MISSING_DATA;
+		return MISSING_DATA;
 	}
 
 	/** Get the density from occupancy (vehicles per mile) */
 	protected float getDensityFromOccupancy() {
 		float occ = getOccupancy();
-		if(occ == Constants.MISSING_DATA || field_length <= 0)
-			return Constants.MISSING_DATA;
+		if(occ == MISSING_DATA || field_length <= 0)
+			return MISSING_DATA;
 		return occ * Constants.FEET_PER_MILE / field_length /
 			Constants.MAX_OCCUPANCY;
 	}
@@ -580,17 +581,17 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(isSampling())
 			return last_speed;
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Get speed estimate based on flow / density */
 	protected float getSpeedEstimate() {
 		int flow = getFlowRaw();
 		if(flow <= 0)
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 		float density = getDensityFromOccupancy();
 		if(density <= Constants.DENSITY_THRESHOLD)
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 		return flow / density;
 	}
 
@@ -600,7 +601,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(f != null)
 			return f.getSpeed();
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Handle a detector malfunction */
@@ -708,7 +709,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			SAMPLE_PERIOD_SEC, scans));
 		last_volume = volume;
 		last_scans = scans;
-		last_speed = Constants.MISSING_DATA;
+		last_speed = MISSING_DATA;
 	}
 
 	/** Periodic volume sample cache */
@@ -814,7 +815,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(ev_n_speed > 0 && ev_speed > 0)
 			return ev_speed / ev_n_speed;
 		else
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 	}
 
 	/** Print a single detector as an XML element */
@@ -852,7 +853,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		float occ = getOccupancy();
 		out.print("\t<sample");
 		out.print(XmlWriter.createAttribute("sensor", name));
-		if(flow != Constants.MISSING_DATA)
+		if(flow != MISSING_DATA)
 			out.print(XmlWriter.createAttribute("flow", flow));
 		if(isMainline() && speed > 0)
 			out.print(XmlWriter.createAttribute("speed", speed));

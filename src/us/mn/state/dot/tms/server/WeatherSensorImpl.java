@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
@@ -164,7 +164,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	protected transient final PeriodicSampleCache pt_cache;
 
 	/** Accumulation of precipitation (micrometers) */
-	protected transient int accumulation = Constants.MISSING_DATA;
+	protected transient int accumulation = MISSING_DATA;
 
 	/** Time stamp of last sample */
 	protected transient long stamp = TimeSteward.currentTimeMillis();
@@ -199,7 +199,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 			if(val >= 0)
 				return val;
 		}
-		return Constants.MISSING_DATA;
+		return MISSING_DATA;
 	}
 
 	/** Set the type of precipitation */

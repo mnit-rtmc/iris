@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.PrecipitationType;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -81,7 +81,7 @@ public class ConditionsProperty extends Org815Property {
 	}
 
 	/** Current one-minute block average precipitation rate */
-	protected float rate = Constants.MISSING_DATA;
+	protected float rate = MISSING_DATA;
 
 	/** Get the current one-minute block average precipitation rate */
 	public float getRate() {
@@ -89,7 +89,7 @@ public class ConditionsProperty extends Org815Property {
 	}
 
 	/** Accumulation since last reset */
-	protected float accumulation = Constants.MISSING_DATA;
+	protected float accumulation = MISSING_DATA;
 
 	/** Get the accumulated precipitation since last reset */
 	public float getAccumulation() {
@@ -121,7 +121,7 @@ public class ConditionsProperty extends Org815Property {
 	 * @return Precipitation rate in milimeters per hour. */
 	protected float parseRate(String r) throws IOException {
 		if("----".equals(r))
-			return Constants.MISSING_DATA;
+			return MISSING_DATA;
 		try {
 			return Float.parseFloat(r);
 		}
