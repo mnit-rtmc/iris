@@ -27,17 +27,8 @@ public final class Constants {
 	/** Number of feet in one mile */
 	static public final int FEET_PER_MILE = 5280;
 
-	/** Maximum "realistic" volume for a 30-second sample */
-	static public final int MAX_VOLUME = 37;
-
 	/** Maximum number of scans in 30 seconds */
 	static public final int MAX_SCANS = 1800;
-
-	/** Maximum occupancy value (100%) */
-	static public final int MAX_OCCUPANCY = 100;
-
-	/** Maximum (valid) speed (miles per hour) */
-	static public final float MAX_SPEED = 100.0f;
 
 	/** Special case value for missing data */
 	static public final byte MISSING_DATA = -1;

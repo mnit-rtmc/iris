@@ -57,6 +57,12 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Valid density threshold for speed calculation */
 	static private final float DENSITY_THRESHOLD = 1.2f;
 
+	/** Maximum "realistic" volume for a 30-second sample */
+	static private final int MAX_VOLUME = 37;
+
+	/** Maximum occupancy value (100%) */
+	static private final int MAX_OCCUPANCY = 100;
+
 	/** Detector debug log */
 	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
 
@@ -509,7 +515,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Get the current occupancy */
 	public float getOccupancy() {
 		if(isSampling() && last_scans != MISSING_DATA)
-			return Constants.MAX_OCCUPANCY *
+			return MAX_OCCUPANCY *
 				(float)last_scans / Constants.MAX_SCANS;
 		else
 			return MISSING_DATA;
@@ -567,8 +573,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		float occ = getOccupancy();
 		if(occ == MISSING_DATA || field_length <= 0)
 			return MISSING_DATA;
-		return occ * FEET_PER_MILE / field_length /
-			Constants.MAX_OCCUPANCY;
+		return occ * FEET_PER_MILE / field_length / MAX_OCCUPANCY;
 	}
 
 	/** Get the current speed (miles per hour) */
@@ -674,7 +679,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Test the detector volume data with error detecting algorithms */
 	protected void testVolume(int volume) {
-		if(volume > Constants.MAX_VOLUME)
+		if(volume > MAX_VOLUME)
 			malfunction(EventType.DET_CHATTER);
 		if(volume == 0) {
 			no_hits++;
