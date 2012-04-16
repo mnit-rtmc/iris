@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.util.Calendar;
+import static us.mn.state.dot.tms.Constants.FEET_PER_MILE;
 import us.mn.state.dot.tms.server.DetectorImpl;
 
 /**
@@ -29,9 +30,6 @@ public class DetectionEvent {
 
 	/** Conversion factor from seconds to hours */
 	static protected final int SEC_PER_HOUR = 3600;
-
-	/** Conversion factor from feet to miles */
-	static protected final int FEET_PER_MILE = 5280;
 
 	/** Minimum spacing (feet) between speed pair detectors */
 	static protected final int MIN_SPACING = 6;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2011  Minnesota Department of Transportation
+ * Copyright (C) 2001-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.FEET_PER_MILE;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -392,7 +392,7 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 			int lanes = getMeteringLanes(meter);
 			storage -= QUEUE_THRESHOLD_DISTANCE * lanes;
 			storage = Math.max(storage, 1);
-			max_stored =density * storage / Constants.FEET_PER_MILE;
+			max_stored = density * storage / FEET_PER_MILE;
 			float max_cycle = meter.getMaxWait() / max_stored;
 			minimum = (int)(Interval.HOUR / max_cycle);
 			int p_demand = calculatePassageDemand();

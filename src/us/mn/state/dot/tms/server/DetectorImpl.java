@@ -27,6 +27,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
@@ -560,7 +561,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		float occ = getOccupancy();
 		if(occ == MISSING_DATA || field_length <= 0)
 			return MISSING_DATA;
-		return occ * Constants.FEET_PER_MILE / field_length /
+		return occ * FEET_PER_MILE / field_length /
 			Constants.MAX_OCCUPANCY;
 	}
 

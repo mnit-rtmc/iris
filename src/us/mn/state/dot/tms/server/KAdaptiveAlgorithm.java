@@ -18,7 +18,7 @@ package us.mn.state.dot.tms.server;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import us.mn.state.dot.tms.Constants;
+import static us.mn.state.dot.tms.Constants.FEET_PER_MILE;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -816,8 +816,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get the distancee to another node (in feet) */
 		protected int distanceFeet(Node other) {
-			return Math.round(distanceMiles(other) *
-			                  Constants.FEET_PER_MILE);
+			return Math.round(distanceMiles(other) * FEET_PER_MILE);
 		}
 
 		/** Get the tail of a node list */
