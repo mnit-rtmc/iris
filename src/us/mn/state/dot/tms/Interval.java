@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,17 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  */
-public interface Interval {
+public final class Interval {
+
+	/** Prevent instantiation */
+	private Interval() { }
 
 	/** Number of seconds in a minute */
-	int MINUTE = 60;
+	static public final int MINUTE = 60;
 
 	/** Number of seconds in an hour */
-	int HOUR = 60 * MINUTE;
+	static public final int HOUR = 60 * MINUTE;
 
 	/** Number of seconds in a day */
-	int DAY = 24 * HOUR;
+	static public final int DAY = 24 * HOUR;
 }
