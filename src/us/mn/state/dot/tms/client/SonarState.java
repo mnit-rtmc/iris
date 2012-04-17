@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -438,9 +438,9 @@ public class SonarState extends Client {
 	}
 
 	/** Populate the specified type cache */
-	public void populateReadable(TypeCache tc, boolean wait) {
+	public void populateReadable(TypeCache tc, boolean do_wait) {
 		if(canRead(tc.tname))
-			populate(tc, wait);
+			populate(tc, do_wait);
 		else
 			tc.enumerationComplete();
 	}
