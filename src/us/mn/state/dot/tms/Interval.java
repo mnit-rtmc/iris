@@ -21,9 +21,6 @@ package us.mn.state.dot.tms;
  */
 public final class Interval {
 
-	/** Prevent instantiation */
-	private Interval() { }
-
 	/** Number of seconds in a minute */
 	static public final int MINUTE = 60;
 
@@ -32,4 +29,22 @@ public final class Interval {
 
 	/** Number of seconds in a day */
 	static public final int DAY = 24 * HOUR;
+
+	/** Number of seconds in interval */
+	public final int seconds;
+
+	/** Create a new interval */
+	private Interval(int s) {
+		seconds = s;
+	}
+
+	/** Create an interval of a number of hours */
+	static public Interval hour(int h) {
+		return new Interval(h * HOUR);
+	}
+
+	/** Create an interval of a number of minutes */
+	static public Interval minute(int m) {
+		return new Interval(m * MINUTE);
+	}
 }

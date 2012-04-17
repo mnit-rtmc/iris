@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import static us.mn.state.dot.tms.Interval.HOUR;
+import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -538,7 +538,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	protected int getFlowRaw() {
 		int volume = getVolume();
 		if(volume >= 0)
-			return volume * HOUR / SAMPLE_PERIOD_SEC;
+			return volume * Interval.HOUR / SAMPLE_PERIOD_SEC;
 		else
 			return MISSING_DATA;
 	}
@@ -651,12 +651,12 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		}
 	}
 
-	/** Get the volume "no hit" threshold (seconds) */
-	protected int getNoHitThreshold() {
+	/** Get the volume "no hit" threshold */
+	private Interval getNoHitThreshold() {
 		if(isRamp()) {
 			GeoLoc loc = lookupGeoLoc();
 			if(loc != null && isReversibleLocationHack(loc))
-				return 72 * HOUR;
+				return Interval.hour(72);
 		}
 		return lane_type.no_hit_threshold;
 	}
@@ -676,8 +676,8 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		return false;
 	}
 
-	/** Get the scan "locked on" threshold (seconds) */
-	protected int getLockedOnThreshold() {
+	/** Get the scan "locked on" threshold */
+	private Interval getLockedOnThreshold() {
 		return lane_type.lock_on_threshold;
 	}
 
@@ -688,7 +688,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(volume == 0) {
 			no_hits++;
 			int secs = no_hits * SAMPLE_PERIOD_SEC;
-			if(secs > getNoHitThreshold())
+			if(secs > getNoHitThreshold().seconds)
 				malfunction(EventType.DET_NO_HITS);
 		} else
 			no_hits = 0;
@@ -699,7 +699,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(scans >= MAX_S30) {
 			locked_on++;
 			int secs = locked_on * SAMPLE_PERIOD_SEC;
-			if(secs > getLockedOnThreshold())
+			if(secs > getLockedOnThreshold().seconds)
 				malfunction(EventType.DET_LOCKED_ON);
 		} else
 			locked_on = 0;

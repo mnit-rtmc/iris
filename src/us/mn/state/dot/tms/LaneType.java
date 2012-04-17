@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms;
 
 import java.util.LinkedList;
-import static us.mn.state.dot.tms.Interval.HOUR;
-import static us.mn.state.dot.tms.Interval.MINUTE;
+import static us.mn.state.dot.tms.Interval.hour;
+import static us.mn.state.dot.tms.Interval.minute;
 
 /**
  * Road lane type enumeration.   The ordinal values correspond to the records
@@ -27,58 +27,58 @@ import static us.mn.state.dot.tms.Interval.MINUTE;
 public enum LaneType {
 
 	/** Undefined lane type (0) */
-	NONE(" ", "", 0, 0),
+	NONE(" ", "", minute(0), minute(0)),
 
 	/** Mainline lane type (1) */
-	MAINLINE("Mainline", "", 4 * HOUR, 3 * MINUTE),
+	MAINLINE("Mainline", "", hour(4), minute(3)),
 
 	/** Auxiliary lane type (2) */
-	AUXILIARY("Auxiliary", "A", 24 * HOUR, 3 * MINUTE),
+	AUXILIARY("Auxiliary", "A", hour(24), minute(3)),
 
 	/** Collector/Distributor lane type (3) */
-	CD_LANE("CD Lane", "CD", 4 * HOUR, 3 * MINUTE),
+	CD_LANE("CD Lane", "CD", hour(4), minute(3)),
 
 	/** Reversible lane type (4) */
-	REVERSIBLE("Reversible", "R", 72 * HOUR, 3 * MINUTE),
+	REVERSIBLE("Reversible", "R", hour(72), minute(3)),
 
 	/** Merge lane type (5) */
-	MERGE("Merge", "M", 12 * HOUR, 20 * MINUTE),
+	MERGE("Merge", "M", hour(12), minute(20)),
 
 	/** Queue detector lane type (6) */
-	QUEUE("Queue", "Q", 12 * HOUR, 30 * MINUTE),
+	QUEUE("Queue", "Q", hour(12), minute(30)),
 
 	/** Exit lane type (7) */
-	EXIT("Exit", "X", 8 * HOUR, 20 * MINUTE),
+	EXIT("Exit", "X", hour(8), minute(20)),
 
 	/** Meter bypass (HOV) lane type (8) */
-	BYPASS("Bypass", "B", 72 * HOUR, 20 * MINUTE),
+	BYPASS("Bypass", "B", hour(72), minute(20)),
 
 	/** Passage lane type (9) */
-	PASSAGE("Passage", "P", 12 * HOUR, 20 * MINUTE),
+	PASSAGE("Passage", "P", hour(12), minute(20)),
 
 	/** Velocity (mainline) lane type (10) */
-	VELOCITY("Velocity", "V", 4 * HOUR, 3 * MINUTE),
+	VELOCITY("Velocity", "V", hour(4), minute(3)),
 
 	/** Omnibus (ok, bus) lane type (11) */
-	OMNIBUS("Omnibus", "O", 72 * HOUR, 20 * MINUTE),
+	OMNIBUS("Omnibus", "O", hour(72), minute(20)),
 
 	/** Green count lane type (12) */
-	GREEN("Green", "G", 72 * HOUR, 20 * MINUTE),
+	GREEN("Green", "G", hour(72), minute(20)),
 
 	/** Wrong way (exit) lane type (13) */
-	WRONG_WAY("Wrong Way", "Y", 8 * HOUR, 20 * MINUTE),
+	WRONG_WAY("Wrong Way", "Y", hour(8), minute(20)),
 
 	/** High-Occupancy-Vehicle (HOV) lane type (14) */
-	HOV("HOV", "H", 8 * HOUR, 3 * MINUTE),
+	HOV("HOV", "H", hour(8), minute(3)),
 
 	/** High Occupancy / Toll (HOT) lane type (15) */
-	HOT("HOT", "HT", 8 * HOUR, 3 * MINUTE),
+	HOT("HOT", "HT", hour(8), minute(3)),
 
 	/** Dynamic shoulder lane type (16) */
-	SHOULDER("Shoulder", "D", 72 * HOUR, 3 * MINUTE);
+	SHOULDER("Shoulder", "D", hour(72), minute(3));
 
 	/** Create a new lane type */
-	private LaneType(String d, String s, int nht, int lot) {
+	private LaneType(String d, String s, Interval nht, Interval lot) {
 		description = d;
 		suffix = s;
 		no_hit_threshold = nht;
@@ -91,11 +91,11 @@ public enum LaneType {
 	/** Suffic (for detector labels) */
 	public final String suffix;
 
-	/** No hit threshold (seconds) */
-	public final int no_hit_threshold;
+	/** No hit threshold */
+	public final Interval no_hit_threshold;
 
-	/** Lock on threshold (seconds) */
-	public final int lock_on_threshold;
+	/** Lock on threshold */
+	public final Interval lock_on_threshold;
 
 	/** Get the string description of the lane type */
 	public String toString() {
