@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	protected final JTextField storage = new JTextField();
 
 	/** Field for Maximum wait time (seconds) */
-	protected final JTextField wait = new JTextField();
+	protected final JTextField max_wait = new JTextField();
 
 	/** Combo box for metering algorithm */
 	private final JComboBox algorithm_cbx = new JComboBox(
@@ -187,10 +187,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 					storage.getText()));
 			}
 		};
-		new FocusJob(wait) {
+		new FocusJob(max_wait) {
 			public void perform() {
 				proxy.setMaxWait(Integer.parseInt(
-					wait.getText()));
+					max_wait.getText()));
 			}
 		};
 		new ActionJob(this, algorithm_cbx) {
@@ -254,7 +254,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		FormPanel panel = new FormPanel(canUpdate());
 		panel.addRow("Meter Type", meterType);
 		panel.addRow("Storage (feet)", storage);
-		panel.addRow("Max Wait (seconds)", wait);
+		panel.addRow("Max Wait (seconds)", max_wait);
 		panel.addRow("Metering Algorithm", algorithm_cbx);
 		panel.addRow("AM Target (v/h)", am_target_txt);
 		panel.addRow("PM Target (v/h)", pm_target_txt);
@@ -286,8 +286,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			meterType.setSelectedIndex(proxy.getMeterType());
 		if(a == null || a.equals("storage"))
 			storage.setText("" + proxy.getStorage());
-		if(a == null || a.equals("wait"))
-			wait.setText("" + proxy.getMaxWait());
+		if(a == null || a.equals("maxWait"))
+			max_wait.setText("" + proxy.getMaxWait());
 		if(a == null || a.equals("algorithm"))
 			algorithm_cbx.setSelectedIndex(proxy.getAlgorithm());
 		if(a == null || a.equals("amTarget"))
