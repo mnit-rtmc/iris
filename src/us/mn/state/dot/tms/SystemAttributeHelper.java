@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -78,8 +78,8 @@ public class SystemAttributeHelper extends BaseHelper {
 	static protected int calculateReleaseRate(float red) {
 		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
 		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
-		float cycle = green + yellow + red;
-		return (int)(Interval.HOUR / cycle);
+		Interval cycle = Interval.second(green + yellow + red);
+		return cycle.per_hour();
 	}
 
 	/** Is the specified attribute and enum the same? */

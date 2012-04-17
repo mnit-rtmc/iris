@@ -30,12 +30,27 @@ public final class Interval {
 	/** Number of seconds in a day */
 	static public final int DAY = 24 * HOUR;
 
+	/** Number of milliseconds in interval */
+	private final long millis;
+
 	/** Number of seconds in interval */
-	public final int seconds;
+	public final int seconds() {
+		return (int)(millis / 1000);
+	}
 
 	/** Create a new interval */
 	private Interval(int s) {
-		seconds = s;
+		millis = s * 1000;
+	}
+
+	/** Create a new interval */
+	private Interval(float s) {
+		millis = Math.round(s * 1000d);
+	}
+
+	/** Get the number of intervals per hour */
+	public int per_hour() {
+		return Math.round(HOUR * 1000f / millis);
 	}
 
 	/** Create an interval of a number of hours */
@@ -46,5 +61,15 @@ public final class Interval {
 	/** Create an interval of a number of minutes */
 	static public Interval minute(int m) {
 		return new Interval(m * MINUTE);
+	}
+
+	/** Create an interval of a number of seconds */
+	static public Interval second(int s) {
+		return new Interval(s);
+	}
+
+	/** Create an interval of a number of seconds */
+	static public Interval second(float s) {
+		return new Interval(s);
 	}
 }

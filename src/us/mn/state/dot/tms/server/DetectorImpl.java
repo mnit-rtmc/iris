@@ -688,7 +688,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(volume == 0) {
 			no_hits++;
 			int secs = no_hits * SAMPLE_PERIOD_SEC;
-			if(secs > getNoHitThreshold().seconds)
+			if(secs > getNoHitThreshold().seconds())
 				malfunction(EventType.DET_NO_HITS);
 		} else
 			no_hits = 0;
@@ -699,7 +699,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(scans >= MAX_S30) {
 			locked_on++;
 			int secs = locked_on * SAMPLE_PERIOD_SEC;
-			if(secs > getLockedOnThreshold().seconds)
+			if(secs > getLockedOnThreshold().seconds())
 				malfunction(EventType.DET_LOCKED_ON);
 		} else
 			locked_on = 0;
