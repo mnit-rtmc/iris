@@ -843,8 +843,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Bin 30-second sample data */
 	public void binEventSamples() {
 		last_volume = ev_vehicles;
-		last_scans = MAX_S30 *
-			Math.round((float)ev_duration / SAMPLE_PERIOD_MS);
+		last_scans = scansToS30(ev_duration, SAMPLE_PERIOD_MS);
 		last_speed = calculate_speed();
 		ev_vehicles = 0;
 		ev_duration = 0;
