@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,6 +89,12 @@ public class BinaryDetectionProperty extends CanogaProperty {
 			for(int i = 0; i < 4; i++)
 				c_events[i] = parseEvent(v, i);
 		}
+	}
+
+	/** Add a gap in vehicle detection */
+	public void addGap() {
+		for(int i = 0; i < 4; i++)
+			p_events[i] = null;
 	}
 
 	/** Log new vehicle detection events */

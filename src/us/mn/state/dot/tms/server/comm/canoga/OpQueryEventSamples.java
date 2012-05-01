@@ -44,14 +44,15 @@ public class OpQueryEventSamples extends OpCanoga {
 		COMM_LOG.log(id + " " + et + ", " + msg);
 		setSuccess(false);
 		controller.logCommEvent(et, id, filterMessage(msg));
-		if(!controller.hasActiveDetector())
-			setFailed();
-		switch(et) {
-		case CHECKSUM_ERROR:
-		case PARSING_ERROR:
-			retry();
-		}
-		if(controller.getFailMillis() > VOL_COUNT_WRAP)
+		if(controller.hasActiveDetector()) {
+			switch(et) {
+			case CHECKSUM_ERROR:
+			case PARSING_ERROR:
+				retry();
+			}
+			if(controller.getFailMillis() > VOL_COUNT_WRAP)
+				detection.addGap();
+		} else
 			setFailed();
 	}
 
