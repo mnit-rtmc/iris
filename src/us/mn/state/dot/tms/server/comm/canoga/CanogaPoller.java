@@ -72,17 +72,32 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 	protected final LinkedList<OpQueryEventSamples> collectors =
 		new LinkedList<OpQueryEventSamples>();
 
-	/** Get a current event collector operation (if any) */
-	protected OpQueryEventSamples getEventCollector(final ControllerImpl c){
+	/** Find an existing event collector operation */
+	private OpQueryEventSamples findEventCollector(final ControllerImpl c) {
 		Iterator<OpQueryEventSamples> it = collectors.iterator();
 		while(it.hasNext()) {
 			OpQueryEventSamples qes = it.next();
-			if(qes.isDone())
+			if(qes.isDone()) {
+				qes.updateCounters();
 				it.remove();
-			else if(qes.getController() == c)
+			} else if(qes.getController() == c)
 				return qes;
 		}
 		return null;
+	}
+
+	/** Get an event collector operation */
+	private OpQueryEventSamples getEventCollector(final ControllerImpl c) {
+		OpQueryEventSamples qes = findEventCollector(c);
+		if(qes != null) {
+			qes.updateCounters();
+			return qes;
+		} else {
+			qes = new OpQueryEventSamples(c);
+			collectors.add(qes);
+			addOperation(qes);
+			return qes;
+		}
 	}
 
 	/** Perform a controller reset */
@@ -101,11 +116,7 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
 		if(c.hasActiveDetector()) {
 			OpQueryEventSamples qes = getEventCollector(c);
-			if(qes == null) {
-				qes = new OpQueryEventSamples(c);
-				collectors.add(qes);
-				addOperation(qes);
-			} else if(intvl == 30)
+			if(intvl == 30)
 				qes.binSamples();
 		}
 	}

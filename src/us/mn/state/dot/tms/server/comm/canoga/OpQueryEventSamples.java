@@ -81,8 +81,10 @@ public class OpQueryEventSamples extends OpCanoga {
 	/** Store event data samples as binned data */
 	public void binSamples() {
 		controller.binEventSamples();
-		// Every time we bin sample data, we should update the
-		// controller operation counters
+	}
+
+	/** Update the controller operation counters */
+	public void updateCounters() {
 		controller.completeOperation(id, isSuccess());
 	}
 }
