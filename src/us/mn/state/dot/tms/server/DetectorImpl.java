@@ -63,10 +63,10 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	static private final int MAX_OCCUPANCY = 100;
 
 	/** Maximum number of scans in 30 seconds */
-	static private final int MAX_S30 = 1800;
+	static private final int MAX_C30 = 1800;
 
 	/** Maximum number of scans in 300 seconds */
-	static private final int MAX_S300 = 18000;
+	static private final int MAX_C300 = 18000;
 
 	/** Detector debug log */
 	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
@@ -520,7 +520,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Get the current occupancy */
 	public float getOccupancy() {
 		if(isSampling() && last_scans != MISSING_DATA)
-			return MAX_OCCUPANCY * (float)last_scans / MAX_S30;
+			return MAX_OCCUPANCY * (float)last_scans / MAX_C30;
 		else
 			return MISSING_DATA;
 	}
@@ -695,7 +695,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Test the detector scan data with error detecting algorithms */
 	private void testScans(PeriodicSample ss) {
-		if(ss.value >= MAX_S30) {
+		if(ss.value >= MAX_C30) {
 			locked_on += ss.period;
 			if(locked_on > getLockedOnThreshold().seconds())
 				malfunction(EventType.DET_LOCKED_ON);
@@ -719,7 +719,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	public void storeData30Second(long stamp, int volume, int oscans,
 		int max_scans)
 	{
-		int scans = scansToS30(oscans, max_scans);
+		int scans = scansToC30(oscans, max_scans);
 		PeriodicSample vs = new PeriodicSample(stamp, SAMPLE_PERIOD_SEC,
 			volume);
 		PeriodicSample ss = new PeriodicSample(stamp, SAMPLE_PERIOD_SEC,
@@ -732,11 +732,11 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		last_speed = MISSING_DATA;
 	}
 
-	/** Convert protocol-specific scans to .s30 (0-1800) scans */
-	static private int scansToS30(int scans, int max_scans) {
+	/** Convert protocol-specific scans to .c30 (0-1800) scans */
+	static private int scansToC30(int scans, int max_scans) {
 		assert(max_scans > 0);
 		if(scans >= 0)
-			return Math.round((float)scans / max_scans * MAX_S30);
+			return Math.round((float)scans / max_scans * MAX_C30);
 		else
 			return MISSING_DATA;
 	}
@@ -765,18 +765,18 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	public void storeData5Minute(long stamp, int volume, int oscans,
 		int max_scans)
 	{
-		int scans = scansToS300(oscans, max_scans);
+		int scans = scansToC300(oscans, max_scans);
 		vol_cache.addSample(new PeriodicSample(stamp,
 			SAMPLE_PERIOD_SEC * 10, volume));
 		scn_cache.addSample(new PeriodicSample(stamp,
 			SAMPLE_PERIOD_SEC * 10, scans));
 	}
 
-	/** Convert protocol-specific scans to .s300 (0-18000) scans */
-	static private int scansToS300(int scans, int max_scans) {
+	/** Convert protocol-specific scans to .c300 (0-18000) scans */
+	static private int scansToC300(int scans, int max_scans) {
 		assert(max_scans > 0);
 		if(scans >= 0)
-			return Math.round((float)scans / max_scans * MAX_S300);
+			return Math.round((float)scans / max_scans * MAX_C300);
 		else
 			return MISSING_DATA;
 	}
@@ -843,7 +843,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Bin 30-second sample data */
 	public void binEventSamples() {
 		last_volume = ev_vehicles;
-		last_scans = scansToS30(ev_duration, SAMPLE_PERIOD_MS);
+		last_scans = scansToC30(ev_duration, SAMPLE_PERIOD_MS);
 		last_speed = calculate_speed();
 		ev_vehicles = 0;
 		ev_duration = 0;
