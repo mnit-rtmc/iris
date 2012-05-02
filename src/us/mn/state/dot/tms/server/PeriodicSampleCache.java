@@ -135,7 +135,7 @@ abstract public class PeriodicSampleCache {
 			PeriodicSample ps = samples.pollFirst();
 			// NOTE: an I/O exception here will lose sample data
 			while(ps != null) {
-				File f = factory.createFile(ps.start());
+				File f = factory.createFile(ps);
 				if(!f.equals(file)) {
 					if(channel != null)
 						writeBuffer(channel);

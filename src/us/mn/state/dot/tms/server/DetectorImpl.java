@@ -80,21 +80,21 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Create a cache for periodic volume data */
 	static protected PeriodicSampleCache createVolumeCache(String n) {
 		return new PeriodicSampleCache.EightBit(
-			new SampleArchiveFactoryImpl(n, "v30"),
+			new SampleArchiveFactoryImpl(n, "v"),
 			SAMPLE_PERIOD_SEC);
 	}
 
 	/** Create a cache for periodic scan data */
 	static protected PeriodicSampleCache createScanCache(String n) {
 		return new PeriodicSampleCache.SixteenBit(
-			new SampleArchiveFactoryImpl(n, "c30"),
+			new SampleArchiveFactoryImpl(n, "c"),
 			SAMPLE_PERIOD_SEC);
 	}
 
 	/** Create a cache for periodic speed data */
 	static protected PeriodicSampleCache createSpeedCache(String n) {
 		return new PeriodicSampleCache.EightBit(
-			new SampleArchiveFactoryImpl(n, "s30"),
+			new SampleArchiveFactoryImpl(n, "s"),
 			SAMPLE_PERIOD_SEC);
 	}
 

@@ -30,7 +30,7 @@ public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 	 * @param stamp Time stamp
 	 * @return Directory to store sample data.
 	 * @throws IOException If directory cannot be created. */
-	static protected File directory(long stamp) throws IOException {
+	static private String directory(long stamp) throws IOException {
 		File arc = new File(
 			SystemAttrEnum.SAMPLE_ARCHIVE_DIRECTORY.getString(),
 			MainServer.districtId());
@@ -43,11 +43,16 @@ public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 		File dir = new File(year.getPath(), d);
 		if(!dir.exists() && !dir.mkdir())
 			throw new IOException("mkdir failed: " + dir);
-		return dir;
+		return dir.getCanonicalPath();
 	}
 
 	/** File name */
-	protected final String file_name;
+	private final String file_name;
+
+	/** Get a file name for a given period */
+	private String getFileName(int period) {
+		return file_name + period;
+	}
 
 	/** Create a new sample archive factory.
 	 * @param s Sensor ID.
@@ -60,6 +65,13 @@ public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 	 * @param stamp Time stamp at beginning of sample period.
 	 * @return File to archive sample data from that time stamp. */
 	public File createFile(long stamp) throws IOException {
-		return new File(directory(stamp).getCanonicalPath(), file_name);
+		return new File(directory(stamp), file_name);
+	}
+
+	/** Create an archive file.
+	 * @param ps Periodic sample to be archived.
+	 * @return File to archive periodic sample. */
+	public File createFile(PeriodicSample ps) throws IOException {
+		return new File(directory(ps.start()), getFileName(ps.period));
 	}
 }
