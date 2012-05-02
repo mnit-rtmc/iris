@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 	 * @param s Sensor ID.
 	 * @param e File extension. */
 	public SampleArchiveFactoryImpl(String s, String e) {
-		file_name = s + e;
+		file_name = s + '.' + e;
 	}
 
 	/** Create an archive file.
