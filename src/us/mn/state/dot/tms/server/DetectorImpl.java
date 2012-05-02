@@ -494,11 +494,11 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		// no detector device requests
 	}
 
-	/** Accumulator for number of samples locked on (scans) */
-	protected transient int locked_on = 0;
+	/** Accumulator for number of seconds with no hits (volume) */
+	private transient int no_hits = 0;
 
-	/** Accumulator for number of samples with no hits (volume) */
-	protected transient int no_hits = 0;
+	/** Accumulator for number of seconds locked on (scans) */
+	private transient int locked_on = 0;
 
 	/** Volume from the last 30-second sample period */
 	protected transient int last_volume = MISSING_DATA;
@@ -682,34 +682,32 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	}
 
 	/** Test the detector volume data with error detecting algorithms */
-	protected void testVolume(int volume) {
-		if(volume > MAX_VOLUME)
+	private void testVolume(PeriodicSample vs) {
+		if(vs.value > MAX_VOLUME)
 			malfunction(EventType.DET_CHATTER);
-		if(volume == 0) {
-			no_hits++;
-			int secs = no_hits * SAMPLE_PERIOD_SEC;
-			if(secs > getNoHitThreshold().seconds())
+		if(vs.value == 0) {
+			no_hits += vs.period;
+			if(no_hits > getNoHitThreshold().seconds())
 				malfunction(EventType.DET_NO_HITS);
 		} else
 			no_hits = 0;
 	}
 
 	/** Test the detector scan data with error detecting algorithms */
-	protected void testScans(int scans) {
-		if(scans >= MAX_S30) {
-			locked_on++;
-			int secs = locked_on * SAMPLE_PERIOD_SEC;
-			if(secs > getLockedOnThreshold().seconds())
+	private void testScans(PeriodicSample ss) {
+		if(ss.value >= MAX_S30) {
+			locked_on += ss.period;
+			if(locked_on > getLockedOnThreshold().seconds())
 				malfunction(EventType.DET_LOCKED_ON);
 		} else
 			locked_on = 0;
 	}
 
 	/** Test the detector data with error detecting algorithms */
-	protected void testData(int volume, int scans) {
+	private void testData(PeriodicSample vs, PeriodicSample ss) {
 		if(lane_type != LaneType.GREEN) {
-			testVolume(volume);
-			testScans(scans);
+			testVolume(vs);
+			testScans(ss);
 		}
 	}
 
@@ -722,11 +720,13 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		int max_scans)
 	{
 		int scans = scansToS30(oscans, max_scans);
-		testData(volume, scans);
-		vol_cache.addSample(new PeriodicSample(stamp,
-			SAMPLE_PERIOD_SEC, volume));
-		scn_cache.addSample(new PeriodicSample(stamp,
-			SAMPLE_PERIOD_SEC, scans));
+		PeriodicSample vs = new PeriodicSample(stamp, SAMPLE_PERIOD_SEC,
+			volume);
+		PeriodicSample ss = new PeriodicSample(stamp, SAMPLE_PERIOD_SEC,
+			scans);
+		testData(vs, ss);
+		vol_cache.addSample(vs);
+		scn_cache.addSample(ss);
 		last_volume = volume;
 		last_scans = scans;
 		last_speed = MISSING_DATA;
