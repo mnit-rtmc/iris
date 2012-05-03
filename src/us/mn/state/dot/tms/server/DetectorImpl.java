@@ -494,13 +494,25 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Accumulator for number of seconds locked on (scans) */
 	private transient int locked_on = 0;
 
-	/** Volume from the last 30-second sample period */
+	/** Periodic volume sample cache */
+	private transient final PeriodicSampleCache vol_cache;
+
+	/** Periodic scan sample cache */
+	private transient final PeriodicSampleCache scn_cache;
+
+	/** Periodic speed sample cache */
+	private transient final PeriodicSampleCache spd_cache;
+
+	/** Volume from the last 30-second sample period.  FIXME: use
+	 * vol_cache to get "last_volume" value. */
 	protected transient int last_volume = MISSING_DATA;
 
-	/** Scans from the last 30-second sample period */
+	/** Scans from the last 30-second sample period.  FIXME: use
+	 * scn_cache to get "last"scans" value. */
 	protected transient int last_scans = MISSING_DATA;
 
-	/** Speed from the last 30-second sample period */
+	/** Speed from the last 30-second sample period.  FIXME: use
+	 * spd_cache to get "last_speed" value. */
 	protected transient int last_speed = MISSING_DATA;
 
 	/** Get the current volume */
@@ -730,15 +742,6 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(speed.period == SAMPLE_PERIOD_SEC)
 			last_speed = speed.value;
 	}
-
-	/** Periodic volume sample cache */
-	protected transient final PeriodicSampleCache vol_cache;
-
-	/** Periodic scan sample cache */
-	protected transient final PeriodicSampleCache scn_cache;
-
-	/** Periodic speed sample cache */
-	protected transient final PeriodicSampleCache spd_cache;
 
 	/** Flush buffered data to disk */
 	public void flush() {
