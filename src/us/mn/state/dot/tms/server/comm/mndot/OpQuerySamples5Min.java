@@ -32,6 +32,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySamples5Min extends OpQuerySamples {
 
+	/** Sample period (seconds) */
+	static private final int SAMPLE_PERIOD_SEC = 300;
+
 	/** Maximum number of scans in 5 minutes */
 	static private final int MAX_SCANS = 18000;
 
@@ -119,8 +122,10 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 				mess.queryProps();
 			}
 			processData(rec);
-			controller.storeData5Minute(stamp, FIRST_DETECTOR_PIN,
-				volume, scans, MAX_SCANS);
+			controller.storeVolume(stamp, SAMPLE_PERIOD_SEC,
+				FIRST_DETECTOR_PIN, volume);
+			controller.storeOccupancy(stamp, SAMPLE_PERIOD_SEC,
+				FIRST_DETECTOR_PIN, scans, MAX_SCANS);
 			updateGreenCount(meter1,
 				rec[Address.OFF_GREEN_METER_1] & 0xFF);
 			updateGreenCount(meter2,

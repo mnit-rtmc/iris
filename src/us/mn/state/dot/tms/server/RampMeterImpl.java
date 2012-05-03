@@ -48,7 +48,6 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
-import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 
@@ -735,7 +734,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if(det != null) {
 			if(g == 0 && isMetering())
 				return;
-			det.storeData30Second(stamp, g, MISSING_DATA, 100);
+			det.storeVolume(new PeriodicSample(stamp, 30, g));
 		} else
 			METER_LOG.log("No green det for " + getName());
 	}
@@ -744,7 +743,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public void updateGreenCount5(long stamp, int g) {
 		DetectorImpl det = green_det;
 		if(det != null)
-			det.storeData5Minute(stamp, g, MISSING_DATA, 100);
+			det.storeVolume(new PeriodicSample(stamp, 300, g));
 		else
 			METER_LOG.log("No green det for " + getName());
 	}

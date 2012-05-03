@@ -31,11 +31,17 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class G4Rec {
 
+	/** Sample period (seconds) */
+	static private final int SAMPLE_PERIOD_SEC = 30;
+
 	/** Maximum number of scans for one sample */
 	static private final int MAX_SCANS = 1000;
 
 	/** G4 unknown speed */
 	static private final int UNKNOWN_SPEED = 240;
+
+	/** Starting pin for controller I/O */
+	static private final int STARTPIN = 1;
 
 	/** Sensor id */
 	private int sensor_id;
@@ -241,9 +247,11 @@ public class G4Rec {
 			", vol=" + SString.toString(lane_samples.getVolumes()) + 
 			", spd=" + SString.toString(lane_samples.getSpeeds()) + 
 			", sca=" + SString.toString(lane_samples.getScans()));
-		final int STARTPIN = 1;
-		ci.storeData30Second(create_time, STARTPIN,
-			lane_samples.getVolumes(), lane_samples.getScans(), 
-			lane_samples.getSpeeds(), MAX_SCANS);
+		ci.storeVolume(create_time, SAMPLE_PERIOD_SEC, STARTPIN,
+			lane_samples.getVolumes());
+		ci.storeOccupancy(create_time, SAMPLE_PERIOD_SEC, STARTPIN,
+			lane_samples.getScans(), MAX_SCANS);
+		ci.storeSpeed(create_time, SAMPLE_PERIOD_SEC, STARTPIN,
+			lane_samples.getSpeeds());
 	}
 }

@@ -65,17 +65,11 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Maximum number of scans in 30 seconds */
 	static private final int MAX_C30 = 1800;
 
-	/** Maximum number of scans in 300 seconds */
-	static private final int MAX_C300 = 18000;
-
 	/** Detector debug log */
 	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
 
 	/** Sample period for detectors (seconds) */
 	static protected final int SAMPLE_PERIOD_SEC = 30;
-
-	/** Sample period (Milliseconds) */
-	static protected final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
 
 	/** Create a cache for periodic volume data */
 	static protected PeriodicSampleCache createVolumeCache(String n) {
@@ -651,37 +645,21 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		}
 	}
 
-	/** Get the volume "no hit" threshold */
-	private Interval getNoHitThreshold() {
-		if(isRamp()) {
-			GeoLoc loc = lookupGeoLoc();
-			if(loc != null && isReversibleLocationHack(loc))
-				return Interval.hour(72);
+	/** Store one volume sample for this detector.
+	 * @param vol PeriodicSample containing volume data. */
+	public void storeVolume(PeriodicSample vol) {
+		if(lane_type != LaneType.GREEN &&
+		   vol.period == SAMPLE_PERIOD_SEC)
+			testVolume(vol);
+		vol_cache.addSample(vol);
+		if(vol.period == SAMPLE_PERIOD_SEC) {
+			last_volume = vol.value;
+			/* FIXME: this shouldn't be needed */
+			last_speed = MISSING_DATA;
 		}
-		return lane_type.no_hit_threshold;
 	}
 
-	/** Reversible lane name */
-	static protected final String REV = "I-394 Rev";
-
-	/** Check if a location is on a reversible road */
-	protected boolean isReversibleLocationHack(GeoLoc loc) {
-		// FIXME: this is a Mn/DOT-specific hack
-		Road roadway = loc.getRoadway();
-		if(roadway != null && REV.equals(roadway.getName()))
-			return true;
-		Road cross = loc.getCrossStreet();
-		if(cross != null && REV.equals(cross.getName()))
-			return true;
-		return false;
-	}
-
-	/** Get the scan "locked on" threshold */
-	private Interval getLockedOnThreshold() {
-		return lane_type.lock_on_threshold;
-	}
-
-	/** Test the detector volume data with error detecting algorithms */
+	/** Test a volume sample with error detecting algorithms */
 	private void testVolume(PeriodicSample vs) {
 		if(vs.value > MAX_VOLUME)
 			malfunction(EventType.DET_CHATTER);
@@ -693,52 +671,64 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			no_hits = 0;
 	}
 
-	/** Test the detector scan data with error detecting algorithms */
-	private void testScans(PeriodicSample ss) {
-		if(ss.value >= MAX_C30) {
-			locked_on += ss.period;
+	/** Get the volume "no hit" threshold */
+	private Interval getNoHitThreshold() {
+		if(isRamp()) {
+			GeoLoc loc = lookupGeoLoc();
+			if(loc != null && isReversibleLocationHack(loc))
+				return Interval.hour(72);
+		}
+		return lane_type.no_hit_threshold;
+	}
+
+	/** Reversible lane name */
+	static private final String REV = "I-394 Rev";
+
+	/** Check if a location is on a reversible road */
+	private boolean isReversibleLocationHack(GeoLoc loc) {
+		// FIXME: this is a MnDOT-specific hack
+		Road roadway = loc.getRoadway();
+		if(roadway != null && REV.equals(roadway.getName()))
+			return true;
+		Road cross = loc.getCrossStreet();
+		if(cross != null && REV.equals(cross.getName()))
+			return true;
+		return false;
+	}
+
+	/** Store one occupancy sample for this detector.
+	 * @param occ Occupancy sample data. */
+	public void storeOccupancy(OccupancySample occ) {
+		int n_scans = occ.as60HzScans();
+		if(occ.period == SAMPLE_PERIOD_SEC) {
+			testScans(occ);
+			last_scans = n_scans;
+		}
+		scn_cache.addSample(new PeriodicSample(occ.stamp, occ.period,
+			n_scans));
+	}
+
+	/** Test an occupancy sample with error detecting algorithms */
+	private void testScans(OccupancySample occ) {
+		if(occ.value >= OccupancySample.MAX) {
+			locked_on += occ.period;
 			if(locked_on > getLockedOnThreshold().seconds())
 				malfunction(EventType.DET_LOCKED_ON);
 		} else
 			locked_on = 0;
 	}
 
-	/** Test the detector data with error detecting algorithms */
-	private void testData(PeriodicSample vs, PeriodicSample ss) {
-		if(lane_type != LaneType.GREEN) {
-			testVolume(vs);
-			testScans(ss);
-		}
+	/** Get the scan "locked on" threshold */
+	private Interval getLockedOnThreshold() {
+		return lane_type.lock_on_threshold;
 	}
 
-	/** Store 30-second data for this detector.
-	 * @param stamp Time stamp after end of sample period.
-	 * @param volume Vehicle count.
-	 * @param oscans Occupancy scans (ranging from 0 to max_scans)
-	 * @param max_scans Maximum occupancy scans */
-	public void storeData30Second(long stamp, int volume, int oscans,
-		int max_scans)
-	{
-		int scans = scansToC30(oscans, max_scans);
-		PeriodicSample vs = new PeriodicSample(stamp, SAMPLE_PERIOD_SEC,
-			volume);
-		PeriodicSample ss = new PeriodicSample(stamp, SAMPLE_PERIOD_SEC,
-			scans);
-		testData(vs, ss);
-		vol_cache.addSample(vs);
-		scn_cache.addSample(ss);
-		last_volume = volume;
-		last_scans = scans;
-		last_speed = MISSING_DATA;
-	}
-
-	/** Convert protocol-specific scans to .c30 (0-1800) scans */
-	static private int scansToC30(int scans, int max_scans) {
-		assert(max_scans > 0);
-		if(scans >= 0)
-			return Math.round((float)scans / max_scans * MAX_C30);
-		else
-			return MISSING_DATA;
+	/** Store one speed sample for this detector.
+	 * @param speed PeriodicSample containing speed data. */
+	public void storeSpeed(PeriodicSample speed) {
+		spd_cache.addSample(speed);
+		if(speed.period == SAMPLE_PERIOD_SEC)
+			last_speed = speed.value;
 	}
 
 	/** Periodic volume sample cache */
@@ -749,37 +739,6 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Periodic speed sample cache */
 	protected transient final PeriodicSampleCache spd_cache;
-
-	/** Store 30-second speed sample for this detector */
-	public void storeSpeed30Second(long stamp, int speed) {
-		spd_cache.addSample(new PeriodicSample(stamp,
-			SAMPLE_PERIOD_SEC, speed));
-		last_speed = speed;
-	}
-
-	/** Store 5-minute data for this detector.
-	 * @param stamp Time stamp after end of sample period.
-	 * @param volume Vehicle count.
-	 * @param oscans Occupancy scans (ranging from 0 to max_scans)
-	 * @param max_scans Maximum occupancy scans. */
-	public void storeData5Minute(long stamp, int volume, int oscans,
-		int max_scans)
-	{
-		int scans = scansToC300(oscans, max_scans);
-		vol_cache.addSample(new PeriodicSample(stamp,
-			SAMPLE_PERIOD_SEC * 10, volume));
-		scn_cache.addSample(new PeriodicSample(stamp,
-			SAMPLE_PERIOD_SEC * 10, scans));
-	}
-
-	/** Convert protocol-specific scans to .c300 (0-18000) scans */
-	static private int scansToC300(int scans, int max_scans) {
-		assert(max_scans > 0);
-		if(scans >= 0)
-			return Math.round((float)scans / max_scans * MAX_C300);
-		else
-			return MISSING_DATA;
-	}
 
 	/** Flush buffered data to disk */
 	public void flush() {
@@ -843,7 +802,9 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Bin 30-second sample data */
 	public void binEventSamples() {
 		last_volume = ev_vehicles;
-		last_scans = scansToC30(ev_duration, SAMPLE_PERIOD_MS);
+		OccupancySample occ = new OccupancySample(0, SAMPLE_PERIOD_SEC,
+			ev_duration, MAX_C30);
+		last_scans = occ.as60HzScans();
 		last_speed = calculate_speed();
 		ev_vehicles = 0;
 		ev_duration = 0;

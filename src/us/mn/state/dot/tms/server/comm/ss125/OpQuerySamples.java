@@ -31,6 +31,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySamples extends OpSS125 {
 
+	/** Sample period (seconds) */
+	static private final int SAMPLE_PERIOD_SEC = 30;
+
 	/** Maximum scan count for occupancy calculation.  Scans are in 16-bit
 	 * fixed-point format, with 8-bit integer value (0-100) and 8-bit
 	 * fractional part. */
@@ -98,9 +101,12 @@ public class OpQuerySamples extends OpSS125 {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		controller.storeData30Second(stamp, 1, sample_data.getVolume(),
-			sample_data.getScans(), sample_data.getSpeed(),
-			MAX_SCANS);
+		controller.storeVolume(stamp, SAMPLE_PERIOD_SEC, 1,
+			sample_data.getVolume());
+		controller.storeOccupancy(stamp, SAMPLE_PERIOD_SEC, 1,
+			sample_data.getScans(), MAX_SCANS);
+		controller.storeSpeed(stamp, SAMPLE_PERIOD_SEC, 1,
+			sample_data.getSpeed());
 		completer.completeTask(getKey());
 		super.cleanup();
 	}

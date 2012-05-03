@@ -27,6 +27,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySamples30Sec extends OpQuerySamples {
 
+	/** Sample period (seconds) */
+	static private final int SAMPLE_PERIOD_SEC = 30;
+
 	/** Maximum number of scans in 30 seconds */
 	static private final int MAX_SCANS = 1800;
 
@@ -56,8 +59,11 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		controller.storeData30Second(completer.getStamp(),
-			FIRST_DETECTOR_PIN, volume, scans, null, MAX_SCANS);
+		long stamp = completer.getStamp();
+		controller.storeVolume(stamp, SAMPLE_PERIOD_SEC,
+			FIRST_DETECTOR_PIN, volume);
+		controller.storeOccupancy(stamp, SAMPLE_PERIOD_SEC,
+			FIRST_DETECTOR_PIN, scans, MAX_SCANS);
 		super.cleanup();
 	}
 }

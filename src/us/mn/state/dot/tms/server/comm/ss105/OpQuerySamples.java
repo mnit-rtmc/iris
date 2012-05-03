@@ -32,6 +32,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySamples extends OpSS105 {
 
+	/** Sample period (seconds) */
+	static private final int SAMPLE_PERIOD_SEC = 30;
+
 	/** 30-Second interval completer */
 	protected final Completer completer;
 
@@ -108,8 +111,10 @@ public class OpQuerySamples extends OpSS105 {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		controller.storeData30Second(stamp, 1, volume, scans, speed,
+		controller.storeVolume(stamp, SAMPLE_PERIOD_SEC, 1, volume);
+		controller.storeOccupancy(stamp, SAMPLE_PERIOD_SEC, 1, scans,
 			BinnedSampleProperty.MAX_PERCENT);
+		controller.storeSpeed(stamp, SAMPLE_PERIOD_SEC, 1, speed);
 		completer.completeTask(getKey());
 		super.cleanup();
 	}

@@ -466,37 +466,71 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get a sample value from an array */
-	static protected int sampleValue(int[] values, int i) {
+	static private int sampleValue(int[] values, int i) {
 		if(values != null && i >= 0 && i < values.length)
 			return values[i];
 		else
 			return MISSING_DATA;
 	}
 
-	/** Store 30-second detector data */
-	public void storeData30Second(long stamp, int start_pin,
-		int[] volume, int[] scans, int[] speed, int max_scans)
+	/** Store volume sample data.
+	 * @param stamp Timestamp in milliseconds since epoch.
+	 * @param period Sampling period in seconds.
+	 * @param start_pin Start pin on controller I/O.
+	 * @param volume Array of volume samples. */
+	public void storeVolume(long stamp, int period, int start_pin,
+		int[] volume)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
 		for(Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
-			det.storeData30Second(stamp, sampleValue(volume, i),
-				sampleValue(scans, i), max_scans);
-			det.storeSpeed30Second(stamp, sampleValue(speed, i));
+			int v = sampleValue(volume, i);
+			if(v >= 0) {
+				det.storeVolume(new PeriodicSample(stamp,
+					period, v));
+			}
 		}
 	}
 
-	/** Store 5-minute detector data */
-	public void storeData5Minute(long stamp, int start_pin, int[] volume,
+	/** Store occupancy sample data.
+	 * @param stamp Timestamp in milliseconds since epoch.
+	 * @param period Sampling period in seconds.
+	 * @param start_pin Start pin on controller I/O.
+	 * @param scans Array of scan samples (0 to max_scans).
+	 * @param max_scans Maximum scan value (representing 100% occupancy). */
+	public void storeOccupancy(long stamp, int period, int start_pin,
 		int[] scans, int max_scans)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
 		for(Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
-			det.storeData5Minute(stamp, sampleValue(volume, i),
-				sampleValue(scans, i), max_scans);
+			int n_scans = sampleValue(scans, i);
+			if(n_scans >= 0) {
+				det.storeOccupancy(new OccupancySample(stamp,
+					period, n_scans, max_scans));
+			}
+		}
+	}
+
+	/** Store speed sample data.
+	 * @param stamp Timestamp in milliseconds since epoch.
+	 * @param period Sampling period in seconds.
+	 * @param start_pin Start pin on controller I/O.
+	 * @param speed Array of speed samples (MPH). */
+	public void storeSpeed(long stamp, int period, int start_pin,
+		int[] speed)
+	{
+		HashMap<Integer, DetectorImpl> dets = getDetectors();
+		for(Integer pin: dets.keySet()) {
+			DetectorImpl det = dets.get(pin);
+			int i = pin - start_pin;
+			int s = sampleValue(speed, i);
+			if(s > 0) {
+				det.storeSpeed(new PeriodicSample(stamp,
+					period, s));
+			}
 		}
 	}
 
