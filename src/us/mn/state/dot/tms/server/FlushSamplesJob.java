@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,9 @@ public class FlushSamplesJob extends Job {
 	/** Flush debug log */
 	static protected final IDebugLog FLUSH_LOG = new IDebugLog("flush");
 
+	/** Periodic sample writer */
+	private final PeriodicSampleWriter writer = new PeriodicSampleWriter();
+
 	/** Create a new flush samples job */
 	public FlushSamplesJob() {
 		super(Calendar.MINUTE, 2);
@@ -50,7 +53,7 @@ public class FlushSamplesJob extends Job {
 		DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector det) {
 				if(det instanceof DetectorImpl)
-					((DetectorImpl)det).flush();
+					((DetectorImpl)det).flush(writer);
 				return false;
 			}
 		});
@@ -61,7 +64,7 @@ public class FlushSamplesJob extends Job {
 		WeatherSensorHelper.find(new Checker<WeatherSensor>() {
 			public boolean check(WeatherSensor ws) {
 				if(ws instanceof WeatherSensorImpl)
-					((WeatherSensorImpl)ws).flush();
+					((WeatherSensorImpl)ws).flush(writer);
 				return false;
 			}
 		});

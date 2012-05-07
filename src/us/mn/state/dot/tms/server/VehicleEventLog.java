@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,13 @@ public class VehicleEventLog {
 	/** Sample archive factory */
 	private final SampleArchiveFactory factory;
 
+	/** Sensor ID */
+	private final String sensor_id;
+
 	/** Create a new vehicle event log */
-	public VehicleEventLog(SampleArchiveFactory f) {
-		factory = f;
+	public VehicleEventLog(String sid) {
+		sensor_id = sid;
+		factory = new SampleArchiveFactoryImpl();
 	}
 
 	/** Log a vehicle detection event */
@@ -49,7 +53,8 @@ public class VehicleEventLog {
 	private void appendEvent(Calendar stamp, String line)
 		throws IOException
 	{
-		File file = factory.createFile(getStampMillis(stamp));
+		File file = factory.createFile(sensor_id, "vlog",
+			getStampMillis(stamp));
 		if(file != null) {
 			FileWriter fw = new FileWriter(file, true);
 			try {

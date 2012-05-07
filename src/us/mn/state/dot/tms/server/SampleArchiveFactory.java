@@ -25,12 +25,18 @@ import java.io.IOException;
 public interface SampleArchiveFactory {
 
 	/** Create an archive file.
-	 * @param stamp Time stamp at beginning of sample period.
+	 * @param sensor_id Sensor identifier.
+	 * @param ext File extension.
+	 * @param stamp Time stamp.
 	 * @return File to archive sample data from that time stamp. */
-	File createFile(long stamp) throws IOException;
+	File createFile(String sensor_id, String ext, long stamp)
+		throws IOException;
 
 	/** Create an archive file.
+	 * @param sensor_id Sensor identifier.
+	 * @param s_type Periodic sample type.
 	 * @param ps Periodic sample to be archived.
 	 * @return File to archive periodic sample. */
-	File createFile(PeriodicSample ps) throws IOException;
+	File createFile(String sensor_id, PeriodicSampleType s_type,
+		PeriodicSample ps) throws IOException;
 }

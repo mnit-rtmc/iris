@@ -43,20 +43,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Sample period for weather sensors (ms) */
 	static protected final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
 
-	/** Create a cache for periodic sample data */
-	static protected PeriodicSampleCache createCache(String n) {
-		return new PeriodicSampleCache.SixteenBit(
-			new SampleArchiveFactoryImpl(n, "pr"),
-			SAMPLE_PERIOD_SEC);
-	}
-
-	/** Create a cache for precipitation type sample data */
-	static protected PeriodicSampleCache createPtCache(String n) {
-		return new PeriodicSampleCache.EightBit(
-			new SampleArchiveFactoryImpl(n, "pt"),
-			SAMPLE_PERIOD_SEC);
-	}
-
 	/** Load all the weather sensors */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading weather sensors...");
@@ -104,8 +90,10 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		GeoLocImpl g = new GeoLocImpl(name);
 		MainServer.server.createObject(g);
 		geo_loc = g;
-		cache = createCache(n);
-		pt_cache = createPtCache(n);
+		cache = new PeriodicSampleCache(
+			PeriodicSampleType.PRECIP_RATE, n);
+		pt_cache = new PeriodicSampleCache(
+			PeriodicSampleType.PRECIP_TYPE, n);
 	}
 
 	/** Create a weather sensor */
@@ -114,8 +102,10 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
-		cache = createCache(n);
-		pt_cache = createPtCache(n);
+		cache = new PeriodicSampleCache(
+			PeriodicSampleType.PRECIP_RATE, n);
+		pt_cache = new PeriodicSampleCache(
+			PeriodicSampleType.PRECIP_TYPE, n);
 		initTransients();
 	}
 
@@ -175,7 +165,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		int period = calculatePeriod(now);
 		int value = calculateValue(a);
 		if(period > 0 && value >= 0)
-			cache.addSample(new PeriodicSample(now, period, value));
+			cache.add(new PeriodicSample(now, period, value));
 		if(period > 0 || value < 0) {
 			accumulation = a;
 			stamp = now;
@@ -205,15 +195,15 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Set the type of precipitation */
 	public void setPrecipitationType(PrecipitationType pt) {
 		long now = TimeSteward.currentTimeMillis();
-		pt_cache.addSample(new PeriodicSample(now, SAMPLE_PERIOD_SEC,
+		pt_cache.add(new PeriodicSample(now, SAMPLE_PERIOD_SEC,
 			pt.ordinal()));
 	}
 
 	/** Flush buffered sample data to disk */
-	public void flush() {
+	public void flush(PeriodicSampleWriter writer) {
 		try {
-			cache.flush();
-			pt_cache.flush();
+			writer.flush(cache);
+			writer.flush(pt_cache);
 		}
 		catch(IOException e) {
 			e.printStackTrace();

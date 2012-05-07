@@ -71,33 +71,6 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Sample period for detectors (seconds) */
 	static protected final int SAMPLE_PERIOD_SEC = 30;
 
-	/** Create a cache for periodic volume data */
-	static protected PeriodicSampleCache createVolumeCache(String n) {
-		return new PeriodicSampleCache.EightBit(
-			new SampleArchiveFactoryImpl(n, "v"),
-			SAMPLE_PERIOD_SEC);
-	}
-
-	/** Create a cache for periodic scan data */
-	static protected PeriodicSampleCache createScanCache(String n) {
-		return new PeriodicSampleCache.SixteenBit(
-			new SampleArchiveFactoryImpl(n, "c"),
-			SAMPLE_PERIOD_SEC);
-	}
-
-	/** Create a cache for periodic speed data */
-	static protected PeriodicSampleCache createSpeedCache(String n) {
-		return new PeriodicSampleCache.EightBit(
-			new SampleArchiveFactoryImpl(n, "s"),
-			SAMPLE_PERIOD_SEC);
-	}
-
-	/** Create a vehicle event log */
-	static protected VehicleEventLog createVehicleEventLog(String n) {
-		return new VehicleEventLog(new SampleArchiveFactoryImpl(n,
-			"vlog"));
-	}
-
 	/** Load all the detectors */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading detectors...");
@@ -165,10 +138,13 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Create a new detector */
 	public DetectorImpl(String n) throws TMSException, SonarException {
 		super(n);
-		vol_cache = createVolumeCache(n);
-		scn_cache = createScanCache(n);
-		spd_cache = createSpeedCache(n);
-		v_log = createVehicleEventLog(n);
+		vol_cache = new PeriodicSampleCache(
+			PeriodicSampleType.VOLUME, n);
+		scn_cache = new PeriodicSampleCache(
+			PeriodicSampleType.SCAN, n);
+		spd_cache = new PeriodicSampleCache(
+			PeriodicSampleType.SPEED, n);
+		v_log = new VehicleEventLog(n);
 		initTransients();
 	}
 
@@ -185,10 +161,13 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		force_fail = ff;
 		field_length = fl;
 		fake = f;
-		vol_cache = createVolumeCache(n);
-		scn_cache = createScanCache(n);
-		spd_cache = createSpeedCache(n);
-		v_log = createVehicleEventLog(n);
+		vol_cache = new PeriodicSampleCache(
+			PeriodicSampleType.VOLUME, n);
+		scn_cache = new PeriodicSampleCache(
+			PeriodicSampleType.SCAN, n);
+		spd_cache = new PeriodicSampleCache(
+			PeriodicSampleType.SPEED, n);
+		v_log = new VehicleEventLog(n);
 	}
 
 	/** Create a detector */
@@ -663,7 +642,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(lane_type != LaneType.GREEN &&
 		   vol.period == SAMPLE_PERIOD_SEC)
 			testVolume(vol);
-		vol_cache.addSample(vol);
+		vol_cache.add(vol);
 		if(vol.period == SAMPLE_PERIOD_SEC) {
 			last_volume = vol.value;
 			/* FIXME: this shouldn't be needed */
@@ -716,8 +695,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			testScans(occ);
 			last_scans = n_scans;
 		}
-		scn_cache.addSample(new PeriodicSample(occ.stamp, occ.period,
-			n_scans));
+		scn_cache.add(new PeriodicSample(occ.stamp,occ.period,n_scans));
 	}
 
 	/** Test an occupancy sample with error detecting algorithms */
@@ -738,17 +716,17 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Store one speed sample for this detector.
 	 * @param speed PeriodicSample containing speed data. */
 	public void storeSpeed(PeriodicSample speed) {
-		spd_cache.addSample(speed);
+		spd_cache.add(speed);
 		if(speed.period == SAMPLE_PERIOD_SEC)
 			last_speed = speed.value;
 	}
 
 	/** Flush buffered data to disk */
-	public void flush() {
+	public void flush(PeriodicSampleWriter writer) {
 		try {
-			vol_cache.flush();
-			scn_cache.flush();
-			spd_cache.flush();
+			writer.flush(vol_cache);
+			writer.flush(scn_cache);
+			writer.flush(spd_cache);
 		}
 		catch(IOException e) {
 			e.printStackTrace();

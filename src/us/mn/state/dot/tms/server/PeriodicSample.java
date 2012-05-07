@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ public class PeriodicSample implements Comparable<PeriodicSample> {
 	 * @param p Sample period in seconds.
 	 * @param v Sample data value. */
 	public PeriodicSample(long s, int p, int v) {
+		assert p > 0;
 		stamp = s;
 		period = p;
 		value = v;
