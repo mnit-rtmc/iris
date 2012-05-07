@@ -733,6 +733,13 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		}
 	}
 
+	/** Purge all samples before a given stamp. */
+	public void purge(long before) {
+		vol_cache.purge(before);
+		scn_cache.purge(before);
+		spd_cache.purge(before);
+	}
+
 	/** Vehicle event log */
 	protected transient final VehicleEventLog v_log;
 

@@ -233,4 +233,17 @@ public class PeriodicSampleCache {
 	public Iterator<PeriodicSample> iterator() {
 		return samples.iterator();
 	}
+
+	/** Purge all samples before a specified time stamp.
+	 * @param before Time stamp to purge before. */
+	public void purge(long before) {
+		Iterator<PeriodicSample> it = iterator();
+		while(it.hasNext()) {
+			PeriodicSample ps = it.next();
+			if(ps.end() < before)
+				it.remove();
+			else
+				break;
+		}
+	}
 }

@@ -16,11 +16,13 @@ package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
+import static us.mn.state.dot.tms.Interval.MINUTE;
 
 /**
  * Job to flush sample data to disk.
@@ -32,6 +34,17 @@ public class FlushSamplesJob extends Job {
 	/** Flush debug log */
 	static protected final IDebugLog FLUSH_LOG = new IDebugLog("flush");
 
+	/** Number of seconds to cache periodic sample data */
+	static private final long SAMPLE_CACHE_SEC = 10 * MINUTE;
+
+	/** Number of milliseconds to cache periodic sample data */
+	static private final long SAMPLE_CACHE_MS = SAMPLE_CACHE_SEC * 1000;
+
+	/** Calculate a time stamp to purge samples */
+	static private long calculatePurgeStamp() {
+		return TimeSteward.currentTimeMillis() - SAMPLE_CACHE_MS;
+	}
+
 	/** Periodic sample writer */
 	private final PeriodicSampleWriter writer = new PeriodicSampleWriter();
 
@@ -42,29 +55,37 @@ public class FlushSamplesJob extends Job {
 
 	/** Perform the flush samples job */
 	public void perform() {
+		long before = calculatePurgeStamp();
 		FLUSH_LOG.log("Starting FLUSH");
-		flushDetectorSamples();
-		flushWeatherSamples();
+		flushDetectorSamples(before);
+		flushWeatherSamples(before);
 		FLUSH_LOG.log("Finished FLUSH");
 	}
 
 	/** Flush detector sample data to disk */
-	protected void flushDetectorSamples() {
+	protected void flushDetectorSamples(final long before) {
 		DetectorHelper.find(new Checker<Detector>() {
-			public boolean check(Detector det) {
-				if(det instanceof DetectorImpl)
-					((DetectorImpl)det).flush(writer);
+			public boolean check(Detector d) {
+				if(d instanceof DetectorImpl) {
+					DetectorImpl det = (DetectorImpl)d;
+					det.flush(writer);
+					det.purge(before);
+				}
 				return false;
 			}
 		});
 	}
 
 	/** Flush weather sample data to disk */
-	protected void flushWeatherSamples() {
+	protected void flushWeatherSamples(final long before) {
 		WeatherSensorHelper.find(new Checker<WeatherSensor>() {
-			public boolean check(WeatherSensor ws) {
-				if(ws instanceof WeatherSensorImpl)
-					((WeatherSensorImpl)ws).flush(writer);
+			public boolean check(WeatherSensor w) {
+				if(w instanceof WeatherSensorImpl) {
+					WeatherSensorImpl ws =
+						(WeatherSensorImpl)w;
+					ws.flush(writer);
+					ws.purge(before);
+				}
 				return false;
 			}
 		});

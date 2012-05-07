@@ -209,4 +209,10 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 			e.printStackTrace();
 		}
 	}
+
+	/** Purge all samples before a given stamp. */
+	public void purge(long before) {
+		cache.purge(before);
+		pt_cache.purge(before);
+	}
 }
