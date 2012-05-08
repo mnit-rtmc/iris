@@ -106,6 +106,49 @@ public class PeriodicSampleCacheTest extends TestCase {
 		assertFalse(it.hasNext());
 	}
 
+	public void testScan() {
+		PeriodicSampleCache cache = new PeriodicSampleCache(
+			PeriodicSampleType.SCAN, "TEST");
+		assertTrue(isEmpty(cache));
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(0);
+		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 100));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 0);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 150));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 30);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 200));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 2, 0);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 250));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 2, 30);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 300));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 3, 0);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 350));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 3, 30);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 400));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 4, 0);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 450));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 4, 30);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 500));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 5, 0);
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 550));
+		assertFalse(isEmpty(cache));
+		cal.set(2012, Calendar.JANUARY, 1, 0, 3, 0);
+		cache.purge(cal.getTimeInMillis());
+		Iterator<PeriodicSample> it = cache.iterator();
+		assertTrue(it.hasNext());
+		assertTrue(it.next().value == 350);
+		assertTrue(it.hasNext());
+		assertTrue(it.next().value == 400);
+		assertTrue(it.hasNext());
+		assertTrue(it.next().value == 450);
+		assertTrue(it.hasNext());
+		assertTrue(it.next().value == 500);
+		assertTrue(it.hasNext());
+		assertTrue(it.next().value == 550);
+		assertFalse(it.hasNext());
+	}
+
 	private boolean isEmpty(PeriodicSampleCache cache) {
 		return !cache.iterator().hasNext();
 	}
