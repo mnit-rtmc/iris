@@ -61,7 +61,7 @@ public class PeriodicSampleWriter {
 
 	/** Create a new periodic sample writer */
 	public PeriodicSampleWriter() {
-		factory = new SampleArchiveFactoryImpl();
+		factory = new SampleArchiveFactory();
 	}
 
 	/** Flush samples from a cache to files */

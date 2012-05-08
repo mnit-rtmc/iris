@@ -39,7 +39,7 @@ public class VehicleEventLog {
 	/** Create a new vehicle event log */
 	public VehicleEventLog(String sid) {
 		sensor_id = sid;
-		factory = new SampleArchiveFactoryImpl();
+		factory = new SampleArchiveFactory();
 	}
 
 	/** Log a vehicle detection event */
