@@ -22,7 +22,6 @@ import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
 import static us.mn.state.dot.tms.Interval.DAY;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
@@ -45,11 +44,6 @@ public class PeriodicSampleWriter {
 	/** Get the number of samples per day */
 	static private int samplesPerDay(int period) {
 		return DAY / period;
-	}
-
-	/** Is archiving enabled? */
-	static private boolean isArchiveEnabled() {
-		return SystemAttrEnum.SAMPLE_ARCHIVE_ENABLE.getBoolean();
 	}
 
 	/** Sample archive factory */
@@ -75,14 +69,11 @@ public class PeriodicSampleWriter {
 
 	/** Flush samples from a cache to files */
 	public void flush(PeriodicSampleCache cache) throws IOException {
-		if(isArchiveEnabled()) {
-			period = 0;
-			file = null;
-			channel = null;
-			buffer.clear();
-			flush(cache.iterator(), cache.sensor_id,
-				cache.sample_type);
-		}
+		period = 0;
+		file = null;
+		channel = null;
+		buffer.clear();
+		flush(cache.iterator(), cache.sensor_id, cache.sample_type);
 	}
 
 	/** Flush an iterator of samples to files */

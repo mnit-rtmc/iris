@@ -20,6 +20,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
 import static us.mn.state.dot.tms.Interval.MINUTE;
@@ -33,6 +34,11 @@ public class FlushSamplesJob extends Job {
 
 	/** Flush debug log */
 	static protected final IDebugLog FLUSH_LOG = new IDebugLog("flush");
+
+	/** Is archiving enabled? */
+	static private boolean isArchiveEnabled() {
+		return SystemAttrEnum.SAMPLE_ARCHIVE_ENABLE.getBoolean();
+	}
 
 	/** Number of seconds to cache periodic sample data */
 	static private final long SAMPLE_CACHE_SEC = 10 * MINUTE;
@@ -64,11 +70,13 @@ public class FlushSamplesJob extends Job {
 
 	/** Flush detector sample data to disk */
 	protected void flushDetectorSamples(final long before) {
+		final boolean do_flush = isArchiveEnabled();
 		DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector d) {
 				if(d instanceof DetectorImpl) {
 					DetectorImpl det = (DetectorImpl)d;
-					det.flush(writer);
+					if(do_flush)
+						det.flush(writer);
 					det.purge(before);
 				}
 				return false;
@@ -78,12 +86,14 @@ public class FlushSamplesJob extends Job {
 
 	/** Flush weather sample data to disk */
 	protected void flushWeatherSamples(final long before) {
+		final boolean do_flush = isArchiveEnabled();
 		WeatherSensorHelper.find(new Checker<WeatherSensor>() {
 			public boolean check(WeatherSensor w) {
 				if(w instanceof WeatherSensorImpl) {
 					WeatherSensorImpl ws =
 						(WeatherSensorImpl)w;
-					ws.flush(writer);
+					if(do_flush)
+						ws.flush(writer);
 					ws.purge(before);
 				}
 				return false;
