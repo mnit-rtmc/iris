@@ -64,7 +64,8 @@ public class PeriodicSampleCache {
 					vals[i]++;
 					m_miss--;
 				}
-			}
+			} else
+				vals[i] = MISSING_DATA;
 		}
 		return vals;
 	}
@@ -86,11 +87,15 @@ public class PeriodicSampleCache {
 			int a_total = average * values.length;
 			float excess = a_total - e_total;
 			if(excess >= 0) {
+				int[] vals = new int[values.length];
 				int m_ave = Math.round(excess / n_miss);
 				for(int i = 0; i < values.length; i++) {
 					if(values[i] < 0)
-						values[i] = m_ave;
+						vals[i] = m_ave;
+					else
+						vals[i] = MISSING_DATA;
 				}
+				return vals;
 			}
 		}
 		return new int[0];
@@ -154,8 +159,8 @@ public class PeriodicSampleCache {
 
 	/** Add a sample */
 	private void addSample(PeriodicSample ps) {
-		assert ps.period == getPeriod(ps.period);
-		assert !exists(ps.start());
+		assert ps.period == getPeriod(ps.period) : "Invalid period";
+		assert !exists(ps.start()) : "Duplicate start time";
 		samples.add(ps);
 	}
 
