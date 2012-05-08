@@ -41,19 +41,17 @@ public class PeriodicSampleCache {
 		if(n_miss > 0) {
 			int excess = total - e_total;
 			if(excess >= 0)
-				return interpolateSum(values, excess, n_miss);
+				return missingSum(values, excess, n_miss);
 		}
 		return new int[0];
 	}
 
-	/** Interpolate sample data into an array of values.
+	/** Put missing sum sample data into an array of values.
 	 * @param values Array of existing sample values.
 	 * @param excess Excess sample data to distribute in missing samples.
 	 * @param n_miss Number of missing samples.
-	 * @return Array of interpolated samples. */
-	static private int[] interpolateSum(int[] values, int excess,
-		int n_miss)
-	{
+	 * @return Array of samples which were missing. */
+	static private int[] missingSum(int[] values, int excess, int n_miss) {
 		int[] vals = new int[values.length];
 		int t_miss = excess / n_miss;
 		int m_miss = excess % n_miss;
@@ -87,18 +85,26 @@ public class PeriodicSampleCache {
 			int a_total = average * values.length;
 			float excess = a_total - e_total;
 			if(excess >= 0) {
-				int[] vals = new int[values.length];
-				int m_ave = Math.round(excess / n_miss);
-				for(int i = 0; i < values.length; i++) {
-					if(values[i] < 0)
-						vals[i] = m_ave;
-					else
-						vals[i] = MISSING_DATA;
-				}
-				return vals;
+				int m_avg = Math.round(excess / n_miss);
+				return missingAverage(values, m_avg);
 			}
 		}
 		return new int[0];
+	}
+
+	/** Put missing average sample data into an array of values.
+	 * @param values Array of existing sample values.
+	 * @param m_avg Average value to store in missing samples.
+	 * @return Array of samples which were missing. */
+	static private int[] missingAverage(int[] values, int m_avg) {
+		int[] vals = new int[values.length];
+		for(int i = 0; i < values.length; i++) {
+			if(values[i] < 0)
+				vals[i] = m_avg;
+			else
+				vals[i] = MISSING_DATA;
+		}
+		return vals;
 	}
 
 	/** Sensor ID */
