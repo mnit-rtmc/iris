@@ -59,6 +59,15 @@ public class PeriodicSampleWriter {
 	private final ByteBuffer buffer = ByteBuffer.allocate(
 		samplesPerDay(MIN_PERIOD) * PeriodicSampleType.MAX_BYTES);
 
+	/** Sample period (seconds) for current cache */
+	private transient int period;
+
+	/** Current file */
+	private transient File file;
+
+	/** Current file channel */
+	private transient FileChannel channel;
+
 	/** Create a new periodic sample writer */
 	public PeriodicSampleWriter() {
 		factory = new SampleArchiveFactory();
@@ -67,6 +76,9 @@ public class PeriodicSampleWriter {
 	/** Flush samples from a cache to files */
 	public void flush(PeriodicSampleCache cache) throws IOException {
 		if(isArchiveEnabled()) {
+			period = 0;
+			file = null;
+			channel = null;
 			buffer.clear();
 			flush(cache.iterator(), cache.sensor_id,
 				cache.sample_type);
@@ -77,30 +89,19 @@ public class PeriodicSampleWriter {
 	private void flush(Iterator<PeriodicSample> it, String sensor_id,
 		PeriodicSampleType s_type) throws IOException
 	{
-		int period = 0;
-		FileChannel channel = null;
 		try {
-			File file = null;
 			while(it.hasNext()) {
 				PeriodicSample ps = it.next();
 				period = ps.period;
 				File f = factory.createFile(sensor_id, s_type,
 					ps);
 				if(!f.equals(file)) {
-					if(channel != null) {
-						writeBuffer(channel, period,
-							s_type.sample_bytes);
-					}
-					channel = readBuffer(f, period, s_type);
 					file = f;
+					readNextFile(s_type);
 				}
 				putSample(ps, s_type);
 			}
-			if(channel != null) {
-				writeBuffer(channel, period,
-					s_type.sample_bytes);
-				channel = null;
-			}
+			writeBuffer(s_type.sample_bytes);
 		}
 		finally {
 			if(channel != null)
@@ -108,62 +109,62 @@ public class PeriodicSampleWriter {
 		}
 	}
 
+	/** Read next file (after writing current file buffer). */
+	private void readNextFile(PeriodicSampleType s_type) throws IOException{
+		writeBuffer(s_type.sample_bytes);
+		readBuffer(s_type);
+	}
+
 	/** Read the contents of the given file into the buffer.
-	 * @param f File to read.
-	 * @param period Sampling period (seconds).
 	 * @param s_type Sample type. */
-	private FileChannel readBuffer(File f, int period,
-		PeriodicSampleType s_type) throws IOException
-	{
-		int n_size = bufferBytes(period, s_type.sample_bytes);
-		FileChannel channel = new RandomAccessFile(f,"rw").getChannel();
+	private void readBuffer(PeriodicSampleType s_type) throws IOException {
+		int n_size = bufferBytes(s_type.sample_bytes);
+		channel = new RandomAccessFile(file, "rw").getChannel();
 		buffer.clear();
-		readBuffer(channel);
+		readBuffer();
 		// Buffer should contain no more than one day of samples
 		if(buffer.position() > n_size)
 			buffer.position(n_size);
-		padBuffer(period, s_type);
+		padBuffer(s_type);
 		buffer.flip();
-		return channel;
 	}
 
 	/** Get the number of bytes in buffer for one day.
-	 * @param period Sampling period (seconds).
 	 * @param s_bytes Bytes per sample.
 	 * @return Size of buffer in bytes. */
-	private int bufferBytes(int period, int s_bytes) {
+	private int bufferBytes(int s_bytes) {
 		return samplesPerDay(period) * s_bytes;
 	}
 
 	/** Read all existing sample data from file */
-	private void readBuffer(FileChannel channel) throws IOException {
+	private void readBuffer() throws IOException {
 		while(channel.read(buffer) >= 0 && buffer.hasRemaining());
 	}
 
 	/** Pad the buffer with MISSING_DATA for full day.
-	 * @param period Sampling period (seconds).
 	 * @param s_type Sample type. */
-	private void padBuffer(int period, PeriodicSampleType s_type) {
-		int n_size = bufferBytes(period, s_type.sample_bytes);
+	private void padBuffer(PeriodicSampleType s_type) {
+		int n_size = bufferBytes(s_type.sample_bytes);
 		int n_sam = (n_size - buffer.position()) / s_type.sample_bytes;
 		for(int i = 0; i < n_sam; i++)
 			s_type.putValue(buffer, MISSING_DATA);
 	}
 
 	/** Write the buffer to the file channel and close the file. */
-	private void writeBuffer(FileChannel channel, int period, int s_bytes)
-		throws IOException
-	{
-		int n_size = bufferBytes(period, s_bytes);
-		channel.position(0);
-		buffer.position(0);
-		// Write sample data buffer to file
-		while(buffer.hasRemaining())
-			channel.write(buffer);
-		// Truncate file if it's larger than buffer
-		if(channel.size() > n_size)
-			channel.truncate(n_size);
-		channel.close();
+	private void writeBuffer(int s_bytes) throws IOException {
+		if(channel != null) {
+			int n_size = bufferBytes(s_bytes);
+			channel.position(0);
+			buffer.position(0);
+			// Write sample data buffer to file
+			while(buffer.hasRemaining())
+				channel.write(buffer);
+			// Truncate file if it's larger than buffer
+			if(channel.size() > n_size)
+				channel.truncate(n_size);
+			channel.close();
+			channel = null;
+		}
 	}
 
 	/** Put one sample into the buffer.
