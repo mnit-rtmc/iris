@@ -769,6 +769,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			ev_n_speed++;
 			ev_speed += speed;
 		}
+		// FIXME: check SAMPLE_ARCHIVE_ENABLE
 		MainServer.FLUSH.addJob(new Job() {
 			public void perform() throws IOException {
 				v_log.logVehicle(stamp, duration, headway,
@@ -780,6 +781,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Log a gap in vehicle events.
 	 */
 	public void logGap() {
+		// FIXME: check SAMPLE_ARCHIVE_ENABLE
 		MainServer.FLUSH.addJob(new Job() {
 			public void perform() throws IOException {
 				v_log.logGap();
