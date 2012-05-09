@@ -53,7 +53,7 @@ public class FlushSamplesJob extends Job {
 
 	/** Periodic sample writer */
 	private final PeriodicSampleWriter writer = new PeriodicSampleWriter(
-		new SampleArchiveFactory());
+		new SampleArchiveFactoryImpl());
 
 	/** Create a new flush samples job */
 	public FlushSamplesJob() {
