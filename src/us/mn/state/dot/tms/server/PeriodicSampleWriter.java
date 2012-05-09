@@ -63,8 +63,8 @@ public class PeriodicSampleWriter {
 	private transient FileChannel channel;
 
 	/** Create a new periodic sample writer */
-	public PeriodicSampleWriter() {
-		factory = new SampleArchiveFactory();
+	public PeriodicSampleWriter(SampleArchiveFactory f) {
+		factory = f;
 	}
 
 	/** Flush samples from a cache to files */

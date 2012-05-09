@@ -52,7 +52,8 @@ public class FlushSamplesJob extends Job {
 	}
 
 	/** Periodic sample writer */
-	private final PeriodicSampleWriter writer = new PeriodicSampleWriter();
+	private final PeriodicSampleWriter writer = new PeriodicSampleWriter(
+		new SampleArchiveFactory());
 
 	/** Create a new flush samples job */
 	public FlushSamplesJob() {
