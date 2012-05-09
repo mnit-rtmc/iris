@@ -18,7 +18,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Interface for creating sample archive files.
+ * Interface for creating sample archive files.  This allows unit testing of
+ * archiving by enabling an alternate implementation for testing.
  *
  * @author Douglas Lau
  */
