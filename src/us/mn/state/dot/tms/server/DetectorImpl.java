@@ -71,6 +71,9 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Sample period for detectors (seconds) */
 	static protected final int SAMPLE_PERIOD_SEC = 30;
 
+	/** Sample period for detectors (ms) */
+	static protected final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
+
 	/** Load all the detectors */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading detectors...");
@@ -793,7 +796,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	public void binEventSamples() {
 		last_volume = ev_vehicles;
 		OccupancySample occ = new OccupancySample(0, SAMPLE_PERIOD_SEC,
-			ev_duration, MAX_C30);
+			ev_duration, SAMPLE_PERIOD_MS);
 		last_scans = occ.as60HzScans();
 		last_speed = calculate_speed();
 		ev_vehicles = 0;
