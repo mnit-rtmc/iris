@@ -375,12 +375,14 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Check if the detector is currently 'failed' */
 	public boolean isFailed() {
-		return force_fail || last_volume == MISSING_DATA;
+		return force_fail ||
+		       last_volume == MISSING_DATA ||
+		       super.isFailed();
 	}
 
 	/** Check if the detector is currently sampling data */
 	public boolean isSampling() {
-		return isActive() && !force_fail;
+		return isActive() && !isFailed();
 	}
 
 	/** Average detector field length */

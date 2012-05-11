@@ -138,7 +138,7 @@ public class DetectorSet {
 	/** Test if the detector set is (defined and) sampling "real" data */
 	public boolean isPerfect() {
 		for(DetectorImpl det: detectors) {
-			if(det.isFailed() || !det.isSampling())
+			if(!det.isSampling())
 				return false;
 		}
 		return isDefined();
