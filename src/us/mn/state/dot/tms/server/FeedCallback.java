@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignTextHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * MultiString for replacing feed tags
@@ -24,6 +25,11 @@ import us.mn.state.dot.tms.SignTextHelper;
  * @author Douglas Lau
  */
 public class FeedCallback extends MultiString {
+
+	/** Check if msg feed verify is enabled */
+	static private boolean isMsgFeedVerifyEnabled() {
+		return SystemAttrEnum.MSG_FEED_VERIFY.getBoolean();
+	}
 
 	/** DMS ID */
 	private final String did;
@@ -57,12 +63,20 @@ public class FeedCallback extends MultiString {
 
 	/** Get the feed message string */
 	private String getFeedString() {
+		if(!isMsgFeedVerifyEnabled() || isFeedMsgValid())
+			return msg.getMulti().toString();
+		else
+			return "";
+	}
+
+	/** Test if the feed message is valid */
+	private boolean isFeedMsgValid() {
 		String[] lines = msg.getMulti().getLines();
 		for(int i = 0; i < lines.length; i++) {
 			if(!isValidSignText((short)(i + 1), lines[i]))
-				return "";
+				return false;
 		}
-		return msg.getMulti().toString();
+		return true;
 	}
 
 	/** Check if a MULTI string is a valid sign text for the sign group */

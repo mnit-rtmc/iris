@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,6 +81,7 @@ public enum SystemAttrEnum {
 	METER_MAX_RED_SECS(13f, 5f, 30f),
 	METER_MIN_RED_SECS(0.1f, 0.1f, 10f),
 	METER_YELLOW_SECS(0.7f, 0.1f, 10f),
+	MSG_FEED_VERIFY(true),
 	OPERATION_RETRY_THRESHOLD(3, 1, 20),
 	SAMPLE_ARCHIVE_ENABLE(true),
 	SAMPLE_ARCHIVE_DIRECTORY("/var/lib/iris/traffic"),
