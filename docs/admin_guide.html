@@ -534,6 +534,70 @@ FIXME
 	</tr>
 </table>
 
+<h4>DMS Control Protocols</h4>
+FIXME
+
+<h4>DMS Msg Feed Protocol</h4>
+<p>
+	The "msg feed" protocol can be used to interface IRIS with an external
+	system that generates DMS messages.
+	Periodically, IRIS will poll the URI (using HTTP) for DMS messages.
+	The external system should respond with an ASCII text file, with one
+	line per message to be deployed.
+</p>
+<p>
+	Each line must contain 3 fields, separated by tab characters "\t"
+	(ASCII 0x09), and terminated with a single newline character "\n"
+	(ASCII 0x0A).
+	The fields are DMS name, MULTI string, and expiration time.
+	The DMS name must exactly match one of the DMS as identified by IRIS.
+	The MULTI string specifies a message to display on the sign, using the
+	MULTI markup language, from NTCIP 1203.
+	For example, "ROAD CLOSED[nl]AHEAD[nl]LEFT LANE CLOSED" is a valid
+	three-line MULTI message.
+	The expiration field indicates the date and time that the message
+	should expire.
+	It is in "yyyy-MM-dd HH:mm:ssZ" format, which includes date, time and
+	time zone.
+	A valid expiration time would be 2012-05-15 11:37:00-0600.
+</p>
+<p>
+	There are a couple of other required steps to enable a message feed
+	to operate.
+	First, an action plan must be created which associates a DMS action
+	with the message feed.
+	The DMS action must be associated with a quick message that references
+	the message feed, using a special MULTI tag.
+	So, if the message feed is on a Comm Link called "LFEED", then the
+	quick message MULTI string must be "[feedLFEED]".
+	Also, the action plan must be active and deployed.
+	This requirement allows only administrator-approved DMS to be controlled
+	by the message feed.
+</p>
+<p>
+	The other requirement for message feeds is that all messages used by
+	the feed must be defined in the DMS message library.
+	This requirement allows only administrator-approved messages to be
+	deployed by the message feed.
+	In some circumstances, it may be appropriate to disable this checking.
+	For example, if the message feed host is fully trusted and there is no
+	possibility of man-in-the-middle attacks between IRIS and the feed host.
+	In this case the "msg_feed_verify" system attribute can be set to
+	"false" to disable this check.
+</p>
+
+<h4>VDS Protocols</h4>
+FIXME
+
+<h4>RWIS Protocols</h4>
+FIXME
+
+<h4>CCTV PTZ Protocols</h4>
+FIXME
+
+<h4>Video Switching Protocols</h4>
+FIXME
+
 <h3>Fonts</h3>
 <p>
 	Before dynamic message signs can be used, the proper font must be
