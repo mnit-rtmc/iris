@@ -173,7 +173,7 @@
 	<li>Infinova (pan/tilt/zoom)</li>
 	<li>A/D "manchester" (pan/tilt/zoom)</li>
 	<li>Vicon (pan/tilt/zoom)</li>
-	<li>AWS (automated warning system)</li>
+	<li>Msg Feed (external system DMS messages)</li>
 	<li>Pelco Video Switcher</li>
 	<li>Vicon Video Switcher</li>
 	<li>Optical Scientific ORG-815 (precipitation)</li>
@@ -442,7 +442,97 @@ FIXME
 </p>
 
 <h3>Comm Links</h3>
-FIXME
+<p>
+	A "comm link" is a network connection to an external device or system.
+	IRIS is capable of supporting hundreds of simultaneous comm links.
+	Each comm link has a number of attributes, including URI and protocol.
+	The URI includes a DNS host name or network IP address, and port number,
+	using the standard "host:port" convention.
+	The protocol determines what type of device or system is on the other
+	end of the comm link.
+</p>
+<p>
+	The main comm link interface is found on the <code>View ➔ Maintenance
+	➔ Comm Links</code> menu item.
+</p>
+<table>
+	<tr>
+	    <th>Protocol</th>
+	    <th>Description</th>
+	</tr>
+	<tr>
+	    <td>NTCIP Class A</td>
+	    <td>DMS control over UDP (no HDLC)</td>
+	</tr>
+	<tr>
+	    <td>NTCIP Class B</td>
+	    <td>DMS control over serial link (with HDLC)</td>
+	</tr>
+	<tr>
+	    <td>NTCIP Class C</td>
+	    <td>DMS control over TCP (no HDLC)</td>
+	</tr>
+	<tr>
+	    <td>DMS XML</td>
+	    <td>DMS control to external system</td>
+	</tr>
+	<tr>
+	    <td>Msg feed</td>
+	    <td>DMS control from external system</td>
+	</tr>
+	<tr>
+	    <td>MnDOT 4</td>
+	    <td>VDS + ramp metering (170 controllers, 4-bit addressing)</td>
+	</tr>
+	<tr>
+	    <td>MnDOT 5</td>
+	    <td>VDS + ramp metering (170 controllers, 5-bit addressing)</td>
+	</tr>
+	<tr>
+	    <td>Canoga</td>
+	    <td>VDS from GTT Canoga</td>
+	</tr>
+	<tr>
+	    <td>SS105</td>
+	    <td>VDS from Wavetronix SmartSensor (original)</td>
+	</tr>
+	<tr>
+	    <td>SS125</td>
+	    <td>VDS from Wavetronix SmartSensor HD</td>
+	</tr>
+	<tr>
+	    <td>EIS G4</td>
+	    <td>VDS from EIS G4 sensor</td>
+	</tr>
+	<tr>
+	    <td>Org 815</td>
+	    <td>RWIS from ORG 815 sensor</td>
+	</tr>
+	<tr>
+	    <td>Pelco D</td>
+	    <td>PTZ for Pelco cameras</td>
+	</tr>
+	<tr>
+	    <td>Manchester</td>
+	    <td>PTZ for AD cameras</td>
+	</tr>
+	<tr>
+	    <td>Vicon</td>
+	    <td>PTZ for Vicon cameras</td>
+	</tr>
+	<tr>
+	    <td>Infinova</td>
+	    <td>PTZ for Infinova cameras</td>
+	</tr>
+	<tr>
+	    <td>Vicon Switcher</td>
+	    <td>Video switching for Vicon</td>
+	</tr>
+	<tr>
+	    <td>Pelco Switcher</td>
+	    <td>Video switching for Pelco</td>
+	</tr>
+</table>
 
 <h3>Fonts</h3>
 <p>
