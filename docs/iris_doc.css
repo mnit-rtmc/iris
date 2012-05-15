@@ -94,6 +94,9 @@ td {
 	background: white;
 	vertical-align: middle;
 }
+td.best {
+	background: lightgreen;
+}
 td.top {
 	border-top: 1px solid gray;
 }
