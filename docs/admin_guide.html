@@ -397,7 +397,7 @@ FIXME
 <h3>Road Modelling</h3>
 <p>
 	For many of the features IRIS provides, it requires a model of the
-	road network.
+	road network topology.
 	This model consists of a set of roadway nodes, or <b>r_node</b>s, which
 	describe all the points of interest on the road network.
 	For instance, each entrance or exit ramp, detector station or
@@ -443,94 +443,124 @@ FIXME
 
 <h3>Comm Links</h3>
 <p>
-	A "comm link" is a network connection to an external device or system.
+	A <b>comm link</b> is a network connection to an external device or
+	system.
 	IRIS is capable of supporting hundreds of simultaneous comm links.
+	The comm link interface is found on the <code>View ➔ Maintenance
+	➔ Comm Links</code> menu item.
 	Each comm link has a number of attributes, including URI and protocol.
-	The URI includes a DNS host name or network IP address, and port number,
-	using the standard "host:port" convention.
-	The protocol determines what type of device or system is on the other
-	end of the comm link.
 </p>
 <p>
-	The main comm link interface is found on the <code>View ➔ Maintenance
-	➔ Comm Links</code> menu item.
+	The URI includes a DNS host name or network IP address, and port number,
+	using the standard "host:port" convention.
+	The URI can also contain an optional "scheme" prefix, which can be
+	either "udp://", "tcp://" or "modem://".
+	If present, the scheme will override the default URI scheme for the
+	selected protocol.
+	For example, to use the Pelco D protocol over TCP (instead of the
+	default UDP), add a "tcp://" scheme prefix to the URI.
+</p>
+<p>
+	The protocol determines what type of device or system is on the other
+	end of the comm link.
+	The following table contains the communication protocols supported by
+	IRIS.
 </p>
 <table>
 	<tr>
 	    <th>Protocol</th>
 	    <th>Description</th>
+	    <th>Default Scheme</th>
 	</tr>
 	<tr>
 	    <td>NTCIP Class A</td>
-	    <td>DMS control over UDP (no HDLC)</td>
+	    <td>DMS control (no HDLC)</td>
+	    <td>UDP</td>
 	</tr>
 	<tr>
 	    <td>NTCIP Class B</td>
-	    <td>DMS control over serial link (with HDLC)</td>
+	    <td>DMS control over serial link (HDLC)</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>NTCIP Class C</td>
-	    <td>DMS control over TCP (no HDLC)</td>
+	    <td>DMS control (no HDLC)</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>DMS XML</td>
 	    <td>DMS control to external system</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>Msg feed</td>
 	    <td>DMS control from external system</td>
+	    <td>TCP / HTTP</td>
 	</tr>
 	<tr>
 	    <td>MnDOT 4</td>
-	    <td>VDS + ramp metering (170 controllers, 4-bit addressing)</td>
+	    <td>VDS + ramp meters (170 controllers, 4-bit)</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>MnDOT 5</td>
-	    <td>VDS + ramp metering (170 controllers, 5-bit addressing)</td>
+	    <td>VDS + ramp meters (170 controllers, 5-bit)</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>Canoga</td>
-	    <td>VDS from GTT Canoga</td>
+	    <td>VDS (GTT Canoga Traffic Sensing System)</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>SS105</td>
-	    <td>VDS from Wavetronix SmartSensor (original)</td>
+	    <td>VDS (original Wavetronix SmartSensor)</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>SS125</td>
-	    <td>VDS from Wavetronix SmartSensor HD</td>
+	    <td>VDS (Wavetronix SmartSensor HD)</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>EIS G4</td>
-	    <td>VDS from EIS G4 sensor</td>
+	    <td>VDS (EIS G4 sensor)</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>Org 815</td>
-	    <td>RWIS from ORG 815 sensor</td>
+	    <td>RWIS (ORG 815 sensor)</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>Pelco D</td>
 	    <td>PTZ for Pelco cameras</td>
+	    <td>UDP</td>
 	</tr>
 	<tr>
 	    <td>Manchester</td>
 	    <td>PTZ for AD cameras</td>
+	    <td>UDP</td>
 	</tr>
 	<tr>
 	    <td>Vicon</td>
 	    <td>PTZ for Vicon cameras</td>
+	    <td>UDP</td>
 	</tr>
 	<tr>
 	    <td>Infinova</td>
 	    <td>PTZ for Infinova cameras</td>
+	    <td>UDP</td>
 	</tr>
 	<tr>
 	    <td>Vicon Switcher</td>
 	    <td>Video switching for Vicon</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>Pelco Switcher</td>
 	    <td>Video switching for Pelco</td>
+	    <td>TCP</td>
 	</tr>
 </table>
 
