@@ -80,7 +80,6 @@ p {
 }
 table {
 	page-break-inside: avoid;
-	border-collapse: collapse;
 	border: 3px solid black;
 	background: #f0f0f0;
 }
@@ -89,8 +88,10 @@ th {
 	padding-right: 8px;
 }
 td {
-	border-left: 1px solid gray;
-	border-right: 1px solid gray;
+	padding-left: 8px;
+	padding-right: 8px;
+	border-left: 8px;
+	border-right: 8px;
 	background: white;
 	vertical-align: middle;
 }
