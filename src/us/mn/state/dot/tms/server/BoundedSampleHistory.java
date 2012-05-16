@@ -133,4 +133,12 @@ public class BoundedSampleHistory {
 		else
 			return null;
 	}
+
+	/**
+	 * Return the average of all saved samples.
+	 * @return Average of the samples, or null for missing data.
+	 */
+	public Double average() {
+		return average(0, n_samples);
+	}
 }

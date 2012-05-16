@@ -1488,20 +1488,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return (((y2 - y1) / (x2 - x1)) * (value-x1) + y1);
 		}
 
-		/** Get Average Value from BoundedSampleHistory */
-		public double getCurrentAvg(BoundedSampleHistory data) {
-			double avg = 0;
-			double sum = 0;
-			if(!data.isFull())
-				return data.get(0);
-
-			for(int i = 0; i < data.size(); i++) {
-				sum += data.get(i);
-				avg++;
-			}
-			return sum <= 0 ? 0 : sum / avg;
-		}
-
 		/** Calculate minimum rate according to waiting time */
 		private void calculateMinimumRate() {
 			minimumRate = Zv * getTvalue();
@@ -1534,17 +1520,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 
 			// Set default Tvalue
-			double maxOcc = rampOccupancyHistory.get(0);
-			double currentTvalue = getCurrentAvg(rampDemandHistory);
-
-			if(maxOcc > RampOccThreshold &&
-			   currentTvalue < TvalueHistory) {
-				Tvalue = TvalueHistory;
-			} else {
-				Tvalue = currentTvalue;
-				TvalueHistory = Tvalue;
+			Double currentTvalue = rampDemandHistory.average();
+			if(currentTvalue != null) {
+				double maxOcc = rampOccupancyHistory.get(0);
+				if(maxOcc > RampOccThreshold &&
+				   currentTvalue < TvalueHistory) {
+					Tvalue = TvalueHistory;
+				} else {
+					Tvalue = currentTvalue;
+					TvalueHistory = Tvalue;
+				}
 			}
-
 			return Tvalue;
 		}
 
