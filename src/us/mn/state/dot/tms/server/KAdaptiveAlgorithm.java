@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2001-2012  Minnesota Department of Transportation
- * Copyright (C) 2011  University of Minnesota Duluth (NATSRL)
+ * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
  *
  * @author Chongmyung Park (chongmyung.park@gmail.com)
  * @author Douglas Lau
+ * @author Soobin Jeon
  */
 public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
@@ -163,6 +164,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		corridor = c;
 		head = createNodes();
 		tail = head.tailNode();
+
+                /** set Tvalue - setup temporary T value*/
+                setTvalue();
 	}
 
 	/** Create nodes from corridor structure */
@@ -567,8 +571,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		entrance.saveSegmentDensityHistory(Kt);
 
 		double Rmin = entrance.getMinimumRate();
-		double Rmax = getMaxRelease();
+		double Rmax = entrance.getMaximumRate();
 		double Rt = entrance.getRate();
+
+                // Calculate MainLine Alpha value with MainLine Density
 		double x = K_DES - Kt;
 
 		KPoint p0 = new KPoint(K_DES - K_JAM, Rmin / Rt);
@@ -578,18 +584,41 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if(Rmin >= Rt)
 			p0.y = p1.y = p2.y = Rmin / Rt;
 		KPoint p4 = new KPoint(K_DES, Rmax / Rt);
-		KPoint start = p0, end = p1;
 
-		if(x >= 0) {
-			start = p2;
-			end = p4;
-		} else {
-			start = p0;
-			end = p2;
+                // Mainline graph connection 2 points
+		double MLalpha = getAlpha(p0, p2, p4, x);
+
+		// Calculate Ramp Alpha value with Ramp WaitingTime
+		double Rampx = entrance.desiredWaitTime() - entrance.getCurrentWaitTime();
+		double RXmax = entrance.desiredWaitTime() - entrance.maxWaitTime();
+		double RXmin = entrance.desiredWaitTime();
+
+		/*
+		 * if the ramp queue detector is not available
+		 * Use Occupancy Data
+		 * Temporary - 62W53(Valley View)
+		 */
+		if(!entrance.isQueueActive) {
+			Rampx = entrance.getDesiredOcc() -
+				entrance.getCurrentOccupancy();
+			RXmax = entrance.getDesiredOcc() - entrance.getMaxOcc();
+			RXmin = entrance.getDesiredOcc();
 		}
 
-		// line graph connection 2 points
-		double alpha = ((end.y - start.y) / (end.x - start.x)) * (x - start.x) + start.y;
+		KPoint RampP0 = new KPoint(RXmax, Rmax / Rt);
+		KPoint RampP2 = new KPoint(0, 1);
+		KPoint RampP4 = new KPoint(RXmin, Rmin / Rt);
+
+		if(Rmin >= Rt)
+			RampP4.y = RampP2.y = Rmin / Rt;
+
+		// calculate Ramp Alpha Value
+		double Rampalpha = getAlpha(RampP0, RampP2, RampP4, Rampx);
+
+		// calculate Ramp Weight (Main Line and Ramp)
+		double AlphaWeight = entrance.getAlphaWeight();
+		double alpha = (AlphaWeight * MLalpha) +
+			((1 - AlphaWeight) * Rampalpha);
 
 		// Ramp meter rate for next time interval
 		double Rnext = Rt * alpha;
@@ -602,6 +631,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			Rnext = Rmax;
 
 		return Rnext;
+	}
+
+	/** Calculate Alpha Value */
+	private double getAlpha(KPoint P0, KPoint P2, KPoint P4, double x) {
+		KPoint start = P0, end = P2;
+		if(x >= 0) {
+			start = P2;
+			end = P4;
+		} else {
+			start = P0;
+			end = P2;
+		}
+		return ((end.y - start.y) / (end.x - start.x)) *
+			(x - start.x) + start.y;
 	}
 
 	/**
@@ -1124,11 +1167,51 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Is metering rate updated at current time step ? */
 		private boolean isRateUpdated = false;
 
+		/** Is queue detector activating? */
+		private boolean isQueueActive = true;
+
 		/** Minimum metering rate */
 		private double minimumRate = 0;
 
+		/** Maximum Rate */
+		private double maximunRate = 0;
+
 		/** How many time steps there's no bottleneck at downstream */
 		private int noBottleneckCount = 0;
+
+		/** Gamma Value for Max Rate - Maximum rate = Tvalue * Gv */
+		private double Gv = 1.3;
+
+		/** Z value for Min Rate - Minimum rate = Tvalue * Zv */
+		private double Zv = 0.6;
+
+		/** Most Recently used Tvalues */
+		private double TvalueHistory = 0;
+
+		/** Ramp Occupancy Threshold for Tvalue */
+		private double RampOccThreshold = 20;
+
+		/** Desired Occupancy -- used to calculate Ramp Alpha using
+		 *  Occupancy (when the queue detector is not available) */
+		private double KDesOcc = 10;
+
+		/** Maximum Occupancy -- used to calculate Ramp Alpha using
+		 * Occupancy (when the queue detector is not available) */
+		private double MaxOcc = 50;
+
+		/** Desired WT coefficient -- Default Desired Waiting
+		 * Time = Max WaitTime * coefWT */
+		static private final double coefWT = 0.75;
+
+		/** Short Waiting Time */
+		private int shortWT = 60;
+
+		/** Short Storage */
+		private int shortStorage = 800;
+
+		/** Alpha Weight for MainLine K */
+		private double AiMax = 0.5;
+		private double AiMin = 0.3;
 
 		/** Corresponding bottleneck */
 		private StationNode bottleneck;
@@ -1170,7 +1253,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Ramp demand history */
 		private final BoundedSampleHistory rampDemandHistory =
-			new BoundedSampleHistory(1);
+			new BoundedSampleHistory(steps(300));
+
+		/** Ramp Occupancy History */
+		private final BoundedSampleHistory rampOccupancyHistory =
+			new BoundedSampleHistory(steps(90));
+
+		/** Ramp Waiting Time History */
+		private final BoundedSampleHistory rampWaitingTimeHistory =
+			new BoundedSampleHistory(steps(90));
 
 		/**
 		 * Construct
@@ -1210,6 +1301,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return steps(RampMeterImpl.DEFAULT_MAX_WAIT) - 1;
 		}
 
+		/** Get the max wait time */
+		private int maxWaitTime() {
+			RampMeterImpl m = meter;
+			if(m != null)
+				return m.getMaxWait();
+			else
+				return RampMeterImpl.DEFAULT_MAX_WAIT;
+		}
+
 		/**
 		 * Does it have meter ?
 		 * @return true if has meter, else false
@@ -1238,7 +1338,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			cumulativeDemand.push(prevCd + demand);
 			currentDemand = demand;
 			currentFlow = p_flow;
+
+			/** Calcuate history */
+			rampOccupancyHistory.push(getCurrentOccupancy());
+			rampWaitingTimeHistory.push(getWaitingTime());
+
+			/** if the ramp queue detector is not available
+			 * Temporary - 62W53(Valley View) */
+			if(meter.getName().contains("M62W53"))
+				setQueueActive(false);
+			else
+				setQueueActive(true);
+
 			calculateMinimumRate();
+			calculateMaximumRate();
 		}
 
 		/**
@@ -1292,20 +1405,152 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/**
-		 * Calculate minimum rate according to waiting time
-		 */
-		private void calculateMinimumRate() {
-			int wait_idx = maxWaitTimeIndex();
-			if(cumulativeDemand.size() - 1 < wait_idx) {
-				minimumRate = currentFlow;
-				return;
-			}
-			double Cd_4mAgo = cumulativeDemand.get(wait_idx);
+		/** Get the current waitting Time */
+		private double getCurrentWaitTime() {
+			if(rampWaitingTimeHistory.size() > 0)
+				return rampWaitingTimeHistory.get(0);
+			else
+				return 0;
+		}
+
+		/** Get current occupancy */
+		private double getCurrentOccupancy() {
+			DetectorSet ds = meter.getDetectorSet();
+			DetectorSet qDets = ds.getDetectorSet(LaneType.QUEUE);
+
+			if(qDets != null)
+				return qDets.getMaxOccupancy();
+			else
+				return 0;
+		}
+
+		/** Get Waiting Time */
+		private double getWaitingTime() {
+			// current cumulative passage flow
 			double Cf_current = cumulativePassage.get(0);
-			minimumRate = (Cd_4mAgo - Cf_current);
-			if(minimumRate <= 0)
+
+			if(cumulativeDemand.size() - 1 < maxWaitTimeIndex())
+				return 0;
+
+			for(int i = 0; i < cumulativeDemand.size(); i++) {
+				double queue = cumulativeDemand.get(i);
+				if(queue < Cf_current) {
+					if(i == 0)
+						return 0;
+					double bf_queue =
+						cumulativeDemand.get(i - 1);
+					double IF_time = STEP_SECONDS *
+						(Cf_current - queue) /
+						(bf_queue - queue);
+					return ((STEP_SECONDS * i) - IF_time);
+				}
+			}
+			return maxWaitTimeIndex() * (STEP_SECONDS + 1);
+		}
+
+		/** Get the desired waitting Time */
+		private int desiredWaitTime() {
+			int DesWT = 0;
+			int HTHWAIT = RampMeterImpl.DEFAULT_MAX_WAIT / 2;
+
+			if(maxWaitTime() <= HTHWAIT)
+				DesWT = shortWT;
+			else
+				DesWT = (int)(maxWaitTime() * coefWT);
+
+			/** Hard Code - short Ramp in TH62 hwy */
+			if(meter.getName().contains("M62W52") ||
+			   meter.getName().contains("M62W53"))
+				DesWT = shortWT;
+
+			if(DesWT < 0)
+				return (int)(RampMeterImpl.DEFAULT_MAX_WAIT * coefWT);
+			else
+				return DesWT;
+		}
+
+		/** Caculate Equation
+		 * @param y1
+		 * @param y2
+		 * @param x1
+		 * @param x2
+		 * @param value
+		 * @return
+		 */
+		private float CaculateEquation(float y1,float y2, float x1,
+			float x2, float value)
+		{
+			if(value < x1)
+				return y1;
+			else if(value > x2)
+				return y2;
+			else
+				return (((y2 - y1) / (x2 - x1)) * (value-x1) + y1);
+		}
+
+		/** Get Average Value from BoundedSampleHistory */
+		public double getCurrentAvg(BoundedSampleHistory data) {
+			double avg = 0;
+			double sum = 0;
+			if(!data.isFull())
+				return data.get(0);
+
+			for(int i = 0; i < data.size(); i++) {
+				sum += data.get(i);
+				avg++;
+			}
+			return sum <= 0 ? 0 : sum / avg;
+		}
+
+		/** Calculate minimum rate according to waiting time */
+		private void calculateMinimumRate() {
+			minimumRate = Zv * getTvalue();
+			if(minimumRate < getMinRelease())
 				minimumRate = getMinRelease();
+		}
+
+		/** Calculate maximum rate */
+		private void calculateMaximumRate() {
+			double Tvalue = getTvalue();
+			maximunRate =  Gv * Tvalue;
+			if(maximunRate < getMinRelease())
+				maximunRate = getMinRelease();
+			else if(maximunRate > getMaxRelease())
+				maximunRate = getMaxRelease();
+		}
+
+		/** get Tvalue */
+		private double getTvalue() {
+			double Tvalue = getMaxRelease();
+
+			/*
+			 * if the ramp queue detector is not available
+			 * Use the Tvalue that set by the 1-day history data
+			 * Temporary - 62W53(Valley View)
+			 */
+			if(!isQueueActive) {
+				Tvalue = meterTvalue.get(meter.getName());
+				return Tvalue;
+			}
+
+			// Set default Tvalue
+			double maxOcc = rampOccupancyHistory.get(0);
+			double currentTvalue = getCurrentAvg(rampDemandHistory);
+
+			if(maxOcc > RampOccThreshold &&
+			   currentTvalue < TvalueHistory) {
+				Tvalue = TvalueHistory;
+			} else {
+				Tvalue = currentTvalue;
+				TvalueHistory = Tvalue;
+			}
+
+			return Tvalue;
+		}
+
+		/** set Queue Active */
+		private void setQueueActive(boolean isactive) {
+			isQueueActive = isactive;
 		}
 
 		/**
@@ -1480,6 +1725,43 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return minimumRate;
 		}
 
+		/** Return maximum metering rate */
+		private double getMaximumRate() {
+			return maximunRate;
+		}
+
+		/** Return Ramp Alpha Weight */
+		public double getAlphaWeight() {
+			double Wx = desiredWaitTime() - getCurrentWaitTime();
+			double Wmin = desiredWaitTime() - maxWaitTime();
+
+			/*
+			 * if the ramp queue detector is not available
+			 * Use the Occupancy data
+			 * Temporary - 62W53(Valley View)
+			 */
+			if(!isQueueActive) {
+				Wx = getDesiredOcc() - getCurrentOccupancy();
+				Wmin = getDesiredOcc() - getMaxOcc();
+			}
+
+			if(Wx > 0)
+				return AiMax;
+			else
+				return CaculateEquation((float)AiMin,
+					(float)AiMax, (float)Wmin, 0,(float)Wx);
+		}
+
+		/** Get desired occupancy */
+		public double getDesiredOcc() {
+			return KDesOcc;
+		}
+
+		/** Get maximum occupancy */
+		public double getMaxOcc() {
+			return MaxOcc;
+		}
+
 		/**
 		 * Reset no bottleneck count
 		 */
@@ -1523,5 +1805,40 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			this.x = x;
 			this.y = y;
 		}
+	}
+
+	/** Temporary Tvalue */
+	protected final HashMap<String, Integer> meterTvalue =
+		new HashMap<String, Integer>();
+
+	/** set Tvalue - Temporary */
+	protected void setTvalue() {
+		meterTvalue.clear();
+		// East Bound
+		meterTvalue.put("M62E23", 520);
+		meterTvalue.put("M62E24", 144);
+		meterTvalue.put("M62E26", 997);
+		meterTvalue.put("M62E27", 484);
+		meterTvalue.put("M62E29", 408);
+		meterTvalue.put("M62E30", 292);
+		meterTvalue.put("M62E31", 1220);
+		meterTvalue.put("M62E32", 720);
+		meterTvalue.put("M62E33", 785);
+		meterTvalue.put("M62E34", 544);
+		meterTvalue.put("M62E35", 420);
+		meterTvalue.put("M62E37", 197);
+		meterTvalue.put("M62E40", 643);
+
+		// West Bound
+		meterTvalue.put("M62W46", 273);
+		meterTvalue.put("M62W47", 736);
+		meterTvalue.put("M62W50", 393);
+		meterTvalue.put("M62W51", 352);
+		meterTvalue.put("M62W52", 672);
+		meterTvalue.put("M62W53", 724);
+		meterTvalue.put("M62W54", 533);
+		meterTvalue.put("M62W55", 977);
+		meterTvalue.put("M62W56", 336);
+		meterTvalue.put("M62W57", 412);
 	}
 }
