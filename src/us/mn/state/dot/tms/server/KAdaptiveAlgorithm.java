@@ -643,8 +643,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			start = P0;
 			end = P2;
 		}
-		return ((end.y - start.y) / (end.x - start.x)) *
-			(x - start.x) + start.y;
+		double yd = end.y - start.y;
+		double xd = end.x - start.x;
+		if(xd != 0)
+			return (yd / xd) * (x - start.x) + start.y;
+		else
+			return 0;
 	}
 
 	/**
