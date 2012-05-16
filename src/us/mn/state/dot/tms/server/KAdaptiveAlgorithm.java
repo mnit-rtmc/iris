@@ -826,7 +826,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			cursor = down;
 			k_cursor = k_down;
 		}
-		return k_sum3 / dist_sum3;
+		if(dist_sum3 > 0)
+			return k_sum3 / dist_sum3;
+		else
+			return 0;
 	}
 
 	/**
@@ -1443,10 +1446,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 						return 0;
 					double bf_queue =
 						cumulativeDemand.get(i - 1);
-					double IF_time = STEP_SECONDS *
-						(Cf_current - queue) /
-						(bf_queue - queue);
-					return ((STEP_SECONDS * i) - IF_time);
+					double qd = bf_queue - queue;
+					if(qd != 0) {
+						double IF_time = STEP_SECONDS *
+						      (Cf_current - queue) / qd;
+						return STEP_SECONDS * i -
+						       IF_time;
+					} else
+						return 0;
 				}
 			}
 			return maxWaitTimeIndex() * (STEP_SECONDS + 1);
@@ -1488,8 +1495,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return y1;
 			else if(value > x2)
 				return y2;
-			else
-				return (((y2 - y1) / (x2 - x1)) * (value-x1) + y1);
+			else {
+				float xd = x2 - x1;
+				if(xd != 0)
+					return (y2 - y1) / xd * (value-x1) + y1;
+				else
+					return 0;
+			}
 		}
 
 		/** Calculate minimum rate according to waiting time */
