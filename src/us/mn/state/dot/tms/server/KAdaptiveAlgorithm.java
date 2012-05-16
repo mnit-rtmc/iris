@@ -1657,9 +1657,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return metering rate
 		 */
 		private double getRate() {
-			if(currentRate == 0)
-				currentRate = getInitialRate();
-			return currentRate;
+			double r = currentRate;
+			return r > 0 ? r : getInitialRate();
 		}
 
 		/** Initial rate = average(last 90 seconds) or MAX_RATE */
