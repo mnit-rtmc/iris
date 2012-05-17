@@ -35,10 +35,11 @@ h5:before {
 }
 .sidebar {
 	position: fixed;
-	left: 1%;
+	left: 0%;
 	right: 76%;
-	top: 1%;
-	bottom: 1%;
+	top: 0%;
+	bottom: 0%;
+	padding-left: 8px;
 	overflow: hidden;
 	background: #9bb;
 }
@@ -72,7 +73,7 @@ sub {
 	font-size: xx-small;
 }
 body {
-	background: #cccccc;
+	background: #ccd;
 	orphans: 3;
 }
 p {
