@@ -21,7 +21,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">15 May 2012</div>
+<div id="stamp">17 May 2012</div>
 <h1>IRIS Administrator Guide</h1>
 
 <h2 id="overview">Overview
@@ -596,7 +596,8 @@ FIXME
 	Each line must contain 3 fields, separated by tab characters "\t"
 	(ASCII 0x09), and terminated with a single newline character "\n"
 	(ASCII 0x0A).
-	The fields are DMS name, MULTI string, and expiration time.
+	The fields are DMS name, <a href="#multi">MULTI</a> string, and
+	expiration time.
 	The DMS name must exactly match one of the DMS as identified by IRIS.
 	The MULTI string specifies a message to display on the sign, using the
 	MULTI markup language, from NTCIP 1203.
@@ -754,8 +755,152 @@ FIXME
 <h3>Cameras and Video</h3>
 FIXME
 
-<h3>Dynamic Message Signs</h3>
+<h3>Dynamic Message Signs (DMS)</h3>
+
+<h4>DMS Setup</h4>
 FIXME
+
+<h4 id="multi">MULTI (Markup Language for Transpostation Information)</h4>
+<p>
+	DMS messages are specified using <b>MULTI</b>, as defined by the
+	NTCIP 1203 standard.
+	In MULTI, messages are simple ASCII strings, with formatting or other
+	instructions denoted by tags inside square brackets.
+	For example, the tag <code>[nl]</code> indicates a new line.
+	Most of the useful standard MULTI tags are supported, as well as a few
+	whch are specific to IRIS.
+	The following table summarizes the tags supported by IRIS.
+</p>
+<table>
+	<tr>
+	    <th>Tag</th>
+	    <th>Description</th>
+	    <th>Supported</th>
+	</tr>
+	<tr>
+	    <td>[cb<i>x</i>]</td>
+	    <td>Message background color</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <td>[pb<i>r</i>,<i>g</i>,<i>b</i>]</td>
+	    <td>Page background color</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <td>[cf<i>r</i>,<i>g</i>,<i>b</i>]</td>
+	    <td>Foreground color</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <td>[cr<i>x</i>,<i>y</i>,<i>w</i>,<i>h</i>,<i>r</i>,<i>g</i>,<i>b</i>]</td>
+	    <td>Color rectangle</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <td>[f<i>x</i>,<i>y</i>]</td>
+	    <td>Field data</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <td>[flt<i>x</i>o<i>y</i>]</td>
+	    <td rowspan="2">Flashing text</td>
+	    <td rowspan="2">No</td>
+	</tr>
+	<tr>
+	    <td>[flo<i>y</i>t<i>x</i>]</td>
+	</tr>
+	<tr>
+	    <td>[fo<i>x</i>]</td>
+	    <td rowspan="2">Change font</td>
+	    <td rowspan="2">Yes</td>
+	</tr>
+	<tr>
+	    <td>[fo<i>x</i>,<i>cccc</i>]</td>
+	</tr>
+	<tr>
+	    <td>[g<i>n</i>]</td>
+	    <td rowspan="3">Place graphic</td>
+	    <td rowspan="3">Yes</td>
+	</tr>
+	<tr>
+	    <td>[g<i>n</i>,<i>x</i>,<i>y</i>]</td>
+	</tr>
+	<tr>
+	    <td>[g<i>n</i>,<i>x</i>,<i>y</i>,<i>cccc</i>]</td>
+	</tr>
+	<tr>
+	    <td>[hc<i>n</i>]</td>
+	    <td>Hexadecimal character</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <td>[jl<i>n</i>]</td>
+	    <td>Line justification</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <td>[jp<i>n</i>]</td>
+	    <td>Page justification</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <td>[ms<i>x</i>,<i>y</i>]</td>
+	    <td>Manufacturer specific</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <td>[mv<i>...</i>]</td>
+	    <td>Moving text</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <td>[nl]</td>
+	    <td rowspan="2">New line</td>
+	    <td rowspan="2">Yes</td>
+	</tr>
+	<tr>
+	    <td>[nl<i>s</i>]</td>
+	</tr>
+	<tr>
+	    <td>[np]</td>
+	    <td>New page</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <td>[pt<i>n</i>]</td>
+	    <td rowspan="2">Page time</td>
+	    <td rowspan="2">Yes</td>
+	</tr>
+	<tr>
+	    <td>[pt<i>n</i>o<i>f</i>]</td>
+	</tr>
+	<tr>
+	    <td>[sc<i>x</i>]</td>
+	    <td>Character spacing</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <td>[tr<i>x</i>,<i>y</i>,<i>w</i>,<i>h</i>]</td>
+	    <td>Text rectangle</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <td>[tt<i>n</i>]</td>
+	    <td>Travel time</td>
+	    <td>IRIS-only</td>
+	</tr>
+	<tr>
+	    <td>[vsa]</td>
+	    <td>Speed advisory</td>
+	    <td>IRIS-only</td>
+	</tr>
+	<tr>
+	    <td>[feed<i>n</i>]</td>
+	    <td>Message feed</td>
+	    <td>IRIS-only</td>
+	</tr>
+</table>
 
 <h3>Lane-Use Control Signs</h3>
 FIXME
