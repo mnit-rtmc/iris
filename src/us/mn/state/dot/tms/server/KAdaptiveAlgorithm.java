@@ -164,9 +164,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		corridor = c;
 		head = createNodes();
 		tail = head.tailNode();
-
-                /** set Tvalue - setup temporary T value*/
-                setTvalue();
 	}
 
 	/** Create nodes from corridor structure */
@@ -1525,15 +1522,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private double getTvalue() {
 			double Tvalue = getMaxRelease();
 
-			/*
-			 * if the ramp queue detector is not available
-			 * Use the Tvalue that set by the 1-day history data
-			 * Temporary - 62W53(Valley View)
-			 */
-			if(!isQueueActive) {
-				Tvalue = meterTvalue.get(meter.getName());
-				return Tvalue;
-			}
+			/* If the ramp queue detector is not available
+			 * Use the fixed target value. */
+			if(!isQueueActive)
+				return getDefaultTarget(meter);
 
 			// Set default Tvalue
 			Double currentTvalue = rampDemandHistory.average();
@@ -1548,6 +1540,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				}
 			}
 			return Tvalue;
+		}
+
+		/** Get the default target metering rate */
+		private int getDefaultTarget(RampMeterImpl m) {
+			if(m != null)
+				return m.getTarget();
+			else
+				return getMaxRelease();
 		}
 
 		/** set Queue Active */
@@ -1806,40 +1806,5 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			this.x = x;
 			this.y = y;
 		}
-	}
-
-	/** Temporary Tvalue */
-	protected final HashMap<String, Integer> meterTvalue =
-		new HashMap<String, Integer>();
-
-	/** set Tvalue - Temporary */
-	protected void setTvalue() {
-		meterTvalue.clear();
-		// East Bound
-		meterTvalue.put("M62E23", 520);
-		meterTvalue.put("M62E24", 144);
-		meterTvalue.put("M62E26", 997);
-		meterTvalue.put("M62E27", 484);
-		meterTvalue.put("M62E29", 408);
-		meterTvalue.put("M62E30", 292);
-		meterTvalue.put("M62E31", 1220);
-		meterTvalue.put("M62E32", 720);
-		meterTvalue.put("M62E33", 785);
-		meterTvalue.put("M62E34", 544);
-		meterTvalue.put("M62E35", 420);
-		meterTvalue.put("M62E37", 197);
-		meterTvalue.put("M62E40", 643);
-
-		// West Bound
-		meterTvalue.put("M62W46", 273);
-		meterTvalue.put("M62W47", 736);
-		meterTvalue.put("M62W50", 393);
-		meterTvalue.put("M62W51", 352);
-		meterTvalue.put("M62W52", 672);
-		meterTvalue.put("M62W53", 724);
-		meterTvalue.put("M62W54", 533);
-		meterTvalue.put("M62W55", 977);
-		meterTvalue.put("M62W56", 336);
-		meterTvalue.put("M62W57", 412);
 	}
 }
