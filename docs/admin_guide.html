@@ -9,37 +9,80 @@
 
 <body>
 <div class="sidebar">
-  <h1>Contents</h1>
+  <h1><a id="contents_link" href="#admin_guide">Contents</a></h1>
+  <div id="contents_div"><!-- div required for js, DO NOT REMOVE --></div>
   <h2><a id="overview_link" href="#overview">Overview</a></h2>
   <div id="overview_div">
-    <h3><a id="device_types_link" href="#device_types">Device Types</a></h2>
+    <h3><a href="#device_types">Device Types</a></h2>
+    <h3><a href="#protocols">Protocols</a></h2>
+    <h3><a href="#advanced_features">Advanced Features</a></h2>
   </div>
   <h2><a id="installation_link" href="#installation">Installation</a></h2>
   <div id="installation_div">
+    <h3><a href="#operating_system">Operating System</a></h2>
+    <h3><a href="#install_dependencies">Install Dependencies</a></h2>
+    <h3><a href="#install_iris">Install IRIS</a></h2>
+    <h3><a href="#authentication_setup">Authentication Setup</a></h2>
+    <h3><a href="#database_setup">Database Setup</a></h2>
+    <h3><a href="#service_configuration">Service Configuration</a></h2>
+    <h3><a href="#start_services">Start Services</a></h2>
   </div>
   <h2><a id="basic_setup_link" href="#basic_setup">Basic Setup</a></h2>
   <div id="basic_setup_div">
+    <h3><a href="#system_attributes">System Attributes</a></h2>
+    <h3><a href="#users_and_roles">Users and Roles</a></h2>
+    <h3><a href="#mapping">Mapping</a></h2>
+    <h3><a href="#road_modelling">Road Modelling</a></h2>
+    <h3><a href="#comm_links">Comm Links</a></h2>
+    <h3><a href="#fonts">Fonts</a></h2>
   </div>
   <h2><a id="devices_link" href="#devices">Devices</a></h2>
   <div id="devices_div">
+    <h3><a href="#vehicle_detection">Vehicle Detection</a></h2>
+    <h3><a href="#cameras_and_video">Cameras and Video</a></h2>
+    <h3><a href="#dms">Dynamic Message Signs</a></h2>
+    <h3><a href="#lcs">Lane-Use Control Signs</a></h2>
+    <h3><a href="#ramp_meters">Ramp Meters</a></h2>
+    <h3><a href="#warning_beacons">Warning Beacons</a></h2>
+    <h3><a href="#lane_marking">Lane Marking</a></h2>
   </div>
   <h2><a id="features_link" href="#features">Features</a></h2>
   <div id="features_div">
+    <h3><a href="#traffic_data_map">Traffic Data Map</a></h2>
+    <h3><a href="#incident_management">Incident Management</a></h2>
+    <h3><a href="#action_plans">Action Plans</a></h2>
+    <h3><a href="#schedules">Date/Time Schedules</a></h2>
+    <h3><a href="#metering_strategies">Ramp Metering Strategies</a></h2>
+    <h3><a href="#travel_time">Travel Time Estimation</a></h2>
+    <h3><a href="#vsa">Variable Speed Advisory</a></h2>
   </div>
   <h2><a id="troubleshooting_link" href="#troubleshooting">Troubleshooting</a></h2>
   <div id="troubleshooting_div">
+    <h3><a href="#error_logs">Error Logs</a></h2>
+    <h3><a href="#xml_output">Realtime XML Output</a></h2>
+    <h3><a href="#event_tables">Database Event Tables</a></h2>
+    <h3><a href="#debug_logs">Debug Trace Logs</a></h2>
   </div>
   <h2><a id="maintenance_link" href="#maintenance">Maintenance</a></h2>
   <div id="maintenance_div">
+    <h3><a href="#database_backups">Database Backups</a></h2>
+    <h3><a href="#iris_upgrades">IRIS Upgrades</a></h2>
+    <h3><a href="#system_updates">System Software Updates</a></h2>
+    <h3><a href="#monitoring_logs">Monitoring Logs</a></h2>
   </div>
   <h2><a id="development_link" href="#development">Development</a></h2>
   <div id="development_div">
+    <h3><a href="#building">Building</a></h2>
+    <h3><a href="#history">History</a></h2>
+    <h3><a href="#future_plans">Future Plans</a></h2>
+    <h3><a href="#contributing">Contributing</a></h2>
+    <h3><a href="#coding_style">Coding Style</a></h2>
   </div>
 </div>
 
 <div class="mainbar">
 <div id="stamp">18 May 2012</div>
-<h1>IRIS Administrator Guide</h1>
+<h1 id="admin_guide">IRIS Administrator Guide</h1>
 
 <h2 id="overview">Overview</h2>
 <p>
@@ -169,7 +212,7 @@
 	<li>Warning Beacons</li>
 	<li>Precipitation Sensors</li>
 </ul>
-<h3>Protocols</h3>
+<h3 id="protocols">Protocols</h3>
 <p>
 	Many different protocols are supported for communicating with the
 	various device types.
@@ -193,7 +236,7 @@
 	<li>Vicon Video Switcher</li>
 	<li>Optical Scientific ORG-815 (precipitation)</li>
 </ul>
-<h3>Features</h3>
+<h3 id="advanced_features">Advanced Features</h3>
 <p>
 	IRIS also contains some higher-level traffic management features:
 </p>
@@ -207,9 +250,9 @@
 </ul>
 
 <h2 id="installation">Installation</h2>
-<br/>
+<p/>
 
-<h3>Operating System</h3>
+<h3 id="operating_system">Operating System</h3>
 <p>
 	Install <a href="http://fedoraproject.org">Fedora</a> onto the server
 	computer.
@@ -221,7 +264,7 @@
 	set up headless in a server room.
 </p>
 
-<h3>Install Dependencies</h3>
+<h3 id="install_dependencies">Install Dependencies</h3>
 <p>
 	Install package dependencies, including
 	<a href="http://openjdk.java.net">OpenJDK</a>,
@@ -232,7 +275,7 @@
 </p>
 <pre class="code">yum install java-1.6.0-openjdk postgresql-server postgresql-jdbc httpd</pre>
 
-<h3>Install IRIS</h3>
+<h3 id="install_iris">Install IRIS</h3>
 <p>
 	<a href="http://iris.dot.state.mn.us/rpms/">Download</a> and install
 	the IRIS package.
@@ -254,7 +297,7 @@
 </p>
 <pre class="code">service iris init</pre>
 
-<h3>Authentication Setup</h3>
+<h3 id="authentication_setup">Authentication Setup</h3>
 <p>
 	Setup an LDAP server for user authentication.
 	If your organization already has an LDAP server, such as Active
@@ -294,7 +337,7 @@
 </p>
 <pre class="code">keytool -import -alias ldap-cert -keystore /etc/iris/iris-server.keystore -file ldap.cert</pre>
 
-<h3>Database Setup</h3>
+<h3 id="database_setup">Database Setup</h3>
 <p>
 	The PostgreSQL database must be initialized before use.
 	This can be accomplished with the following command (as root):
@@ -364,10 +407,20 @@ INSERT INTO iris.i_user (name, full_name, dn, role, enabled)
 exit
 </pre>
 
-<h3>Start Services</h3>
+<h3 id="service_configuration">Service Configuration</h3>
 <p>
-	The Apache web server and the IRIS server can now be started with the
-	following commands:
+	The PostgreSQL, Apache and IRIS services should be configured to start
+	when the operating system is rebooted.
+	To do this, run following commands (as root):
+</p>
+<pre class="code">chkconfig postgresql on
+chkconfig httpd on
+chkconfig iris on</pre>
+
+<h3 id="start_services">Start Services</h3>
+<p>
+	Finally, the Apache web server and the IRIS server can now be started
+	with the following commands:
 </p>
 <pre class="code">service httpd start
 service iris start</pre>
@@ -382,20 +435,10 @@ service iris start</pre>
 	application and log in.
 </p>
 
-<h3>Service Configuration</h3>
-<p>
-	Finally, PostgreSQL, Apache and IRIS should be configured to start when
-	the operating system is rebooted.
-	To do this, run following commands (as root):
-</p>
-<pre class="code">chkconfig postgresql on
-chkconfig httpd on
-chkconfig iris on</pre>
-
 <h2 id="basic_setup">Basic Setup</h2>
 <br/>
 
-<h3>System Attributes</h3>
+<h3 id="system_attributes">System Attributes</h3>
 <p>
 	A <b>system attribute</b> is a configurable value which can be used to
 	customize an IRIS system.
@@ -415,13 +458,13 @@ chkconfig iris on</pre>
 	IRIS client or server to be restarted.
 </p>
 
-<h3>Users and Roles</h3>
+<h3 id="users_and_roles">Users and Roles</h3>
 FIXME
 
-<h3>Mapping</h3>
+<h3 id="mapping">Mapping</h3>
 FIXME
 
-<h3>Road Modelling</h3>
+<h3 id="road_modelling">Road Modelling</h3>
 <p>
 	For many of the features IRIS provides, it requires a model of the
 	road network topology.
@@ -468,7 +511,7 @@ FIXME
 	The r_nodes in a corridor are put in order based on their coordinates.
 </p>
 
-<h3>Comm Links</h3>
+<h3 id="comm_links">Comm Links</h3>
 <p>
 	A <b>comm link</b> is a network connection to an external device or
 	system.
@@ -656,7 +699,7 @@ FIXME
 <h4>Video Switching Protocols</h4>
 FIXME
 
-<h3>Fonts</h3>
+<h3 id="fonts">Fonts</h3>
 <p>
 	A font is a set of bitmapped glyphs for displaying text on a dynamic
 	message sign (DMS).
@@ -759,13 +802,13 @@ FIXME
 <h2 id="devices">Devices</h2>
 <br/>
 
-<h3>Vehicle Detection</h3>
+<h3 id="vehicle_detection">Vehicle Detection</h3>
 FIXME
 
-<h3>Cameras and Video</h3>
+<h3 id="cameras_and_video">Cameras and Video</h3>
 FIXME
 
-<h3>Dynamic Message Signs (DMS)</h3>
+<h3 id="dms">Dynamic Message Signs (DMS)</h3>
 
 <h4>DMS Setup</h4>
 FIXME
@@ -912,53 +955,53 @@ FIXME
 	</tr>
 </table>
 
-<h3>Lane-Use Control Signs</h3>
+<h3 id="lcs">Lane-Use Control Signs</h3>
 FIXME
 
-<h3>Ramp Meters</h3>
+<h3 id="ramp_meters">Ramp Meters</h3>
 FIXME
 
-<h3>Warning Beacons</h3>
+<h3 id="warning_beacons">Warning Beacons</h3>
 FIXME
 
-<h3>Lane Marking</h3>
+<h3 id="lane_marking">Lane Marking</h3>
 FIXME
 
 <h2 id="features">Features</h2>
 
-<h3>Action Plans</h3>
+<h3 id="traffic_data_map">Traffic Data Map</h3>
 FIXME
 
-<h3>Date/Time Schedules</h3>
+<h3 id="incident_management">Incident Management</h3>
 FIXME
 
-<h3>Traffic Data Map</h3>
+<h3 id="action_plans">Action Plans</h3>
 FIXME
 
-<h3>Travel Time Estimation</h3>
+<h3 id="schedules">Date/Time Schedules</h3>
 FIXME
 
-<h3>Incident Management</h3>
+<h3 id="metering_strategies">Ramp Metering Strategies</h3>
 FIXME
 
-<h3>Variable Speed Advisory</h3>
+<h3 id="travel_time">Travel Time Estimation</h3>
 FIXME
 
-<h3>Ramp Metering Strategies</h3>
+<h3 id="vsa">Variable Speed Advisory</h3>
 FIXME
 
 <h2 id="troubleshooting">Troubleshooting</h2>
 
-<h3>Error Logs</h3>
+<h3 id="error_logs">Error Logs</h3>
 FIXME
 
-<h3>Realtime XML Output</h3>
+<h3 id="xml_output">Realtime XML Output</h3>
 FIXME
 
-<h3>Database Event Tables</h3>
+<h3 id="event_tables">Database Event Tables</h3>
 FIXME
 
-<h3>Debug Trace Logs</h3>
+<h3 id="debug_logs">Debug Trace Logs</h3>
 FIXME
 
 <h2 id="maintenance">Maintenance</h2>
@@ -966,21 +1009,21 @@ FIXME
 	Once an IRIS system is set up, there are a few maintenance tasks which
 	need to be done to ensure reliable operation.
 </p>
-<h3>Database Backups</h3>
+<h3 id="database_backups">Database Backups</h3>
 FIXME
 
-<h3>IRIS Upgrades</h3>
+<h3 id="iris_upgrades">IRIS Upgrades</h3>
 FIXME
 
-<h3>System Software Updates</h3>
+<h3 id="system_updates">System Software Updates</h3>
 FIXME
 
-<h3>Monitoring Logs</h3>
+<h3 id="monitoring_logs">Monitoring Logs</h3>
 FIXME
 
 <h2 id="development">Development</h2>
 
-<h3>Building</h3>
+<h3 id="building">Building</h3>
 <p>
 	Install <a href="http://fedoraproject.org">Fedora</a> onto the
 	development system.
@@ -1036,16 +1079,16 @@ hgbase.url=http://iris.dot.state.mn.us/hg/index.cgi/
 	build/rpm/RPMS/i386/ directory.
 </p>
 
-<h3>History</h3>
+<h3 id="history">History</h3>
 FIXME
 
-<h3>Future Plans</h3>
+<h3 id="future_plans">Future Plans</h3>
 FIXME
 
-<h3>Contributing</h3>
+<h3 id="contributing">Contributing</h3>
 FIXME
 
-<h3>Coding Style</h3>
+<h3 id="coding_style">Coding Style</h3>
 <p>
 	The coding style for IRIS is focused on making code more readable.
 	Readability is the most important factor for software maintenance,

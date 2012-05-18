@@ -4,7 +4,7 @@ function hide(elem_id) {
 function show(elem_id) {
 	document.getElementById(elem_id).style.display = '';
 }
-function showOnly(sections, sec) {
+function bindShowOnly(sections, sec) {
 	document.getElementById(sec + '_link').onclick = function() {
 		for(var i = 0; i < sections.length; i++) {
 			if(sections[i] == sec) {
@@ -16,11 +16,12 @@ function showOnly(sections, sec) {
 	}
 }
 function bindClicks() {
-	var sections = ['overview', 'installation', 'basic_setup', 'devices',
-		'features', 'troubleshooting', 'maintenance', 'development'];
+	var sections = ['contents', 'overview', 'installation', 'basic_setup',
+		'devices', 'features', 'troubleshooting', 'maintenance',
+		'development'];
 	for(var i = 0; i < sections.length; i++) {
 		hide(sections[i] + '_div');
-		showOnly(sections, sections[i]);
+		bindShowOnly(sections, sections[i]);
 	}
 }
 
