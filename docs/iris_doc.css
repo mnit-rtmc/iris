@@ -6,6 +6,7 @@ h2 {
 	page-break-after: avoid;
 	counter-increment: h2cnt;
 	counter-reset: h3cnt h4cnt h5cnt;
+	margin: 0;
 }
 h2:before {
 	content: ' ' counter(h2cnt) ' ';
@@ -14,6 +15,7 @@ h3 {
 	page-break-after: avoid;
 	counter-increment: h3cnt;
 	counter-reset: h4cnt h5cnt;
+	margin: 0;
 }
 h3:before {
 	content: ' ' counter(h2cnt) '.' counter(h3cnt) ' ';
@@ -22,6 +24,7 @@ h4 {
 	page-break-after: avoid;
 	counter-increment: h4cnt;
 	counter-reset: h5cnt;
+	margin: 0;
 }
 h4:before {
 	content: ' ' counter(h2cnt) '.' counter(h3cnt) '.' counter(h4cnt) ' ';
@@ -29,6 +32,7 @@ h4:before {
 h5 {
 	page-break-after: avoid;
 	counter-increment: h5cnt;
+	margin: 0;
 }
 h5:before {
 	content: ' ' counter(h2cnt) '.' counter(h3cnt) '.' counter(h4cnt) '.' counter(h5cnt) ' ';
@@ -42,6 +46,7 @@ h5:before {
 	padding-left: 8px;
 	overflow: hidden;
 	background: #9bb;
+	font-size: 50%;
 }
 .mainbar {
 	margin-left: 25%;
@@ -123,9 +128,6 @@ dd {
 }
 .clear {
 	clear: both;
-}
-.contents {
-	font-size: small;
 }
 .show {
 	font-size: x-small;

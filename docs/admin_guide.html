@@ -9,24 +9,39 @@
 
 <body>
 <div class="sidebar">
-<h1 class="contents">Contents</h1>
-<h2 class="contents"><a id="overview_link" href="#overview">Overview</a></h2>
-<h2 class="contents"><a id="installation_link" href="#installation">Installation</a></h2>
-<h2 class="contents"><a id="basic_setup_link" href="#basic_setup">Basic Setup</a></h2>
-<h2 class="contents"><a id="devices_link" href="#devices">Devices</a></h2>
-<h2 class="contents"><a id="features_link" href="#features">Features</a></h2>
-<h2 class="contents"><a id="troubleshooting_link" href="#troubleshooting">Troubleshooting</a></h2>
-<h2 class="contents"><a id="maintenance_link" href="#maintenance">Maintenance</a></h2>
-<h2 class="contents"><a id="development_link" href="#development">Development</a></h2>
+  <h1>Contents</h1>
+  <h2><a id="overview_link" href="#overview">Overview</a></h2>
+  <div id="overview_div">
+    <h3><a id="device_types_link" href="#device_types">Device Types</a></h2>
+  </div>
+  <h2><a id="installation_link" href="#installation">Installation</a></h2>
+  <div id="installation_div">
+  </div>
+  <h2><a id="basic_setup_link" href="#basic_setup">Basic Setup</a></h2>
+  <div id="basic_setup_div">
+  </div>
+  <h2><a id="devices_link" href="#devices">Devices</a></h2>
+  <div id="devices_div">
+  </div>
+  <h2><a id="features_link" href="#features">Features</a></h2>
+  <div id="features_div">
+  </div>
+  <h2><a id="troubleshooting_link" href="#troubleshooting">Troubleshooting</a></h2>
+  <div id="troubleshooting_div">
+  </div>
+  <h2><a id="maintenance_link" href="#maintenance">Maintenance</a></h2>
+  <div id="maintenance_div">
+  </div>
+  <h2><a id="development_link" href="#development">Development</a></h2>
+  <div id="development_div">
+  </div>
 </div>
 
 <div class="mainbar">
-<div id="stamp">17 May 2012</div>
+<div id="stamp">18 May 2012</div>
 <h1>IRIS Administrator Guide</h1>
 
-<h2 id="overview">Overview
-<span class="show">[<span id="overview_show">show</span><span id="overview_hide">hide</span>]</span></h2>
-<div id="overview_div">
+<h2 id="overview">Overview</h2>
 <p>
 	IRIS is an <a href="http://www.opensource.org/docs/osd">open source</a>
 	advanced traffic management system.
@@ -137,7 +152,7 @@
 	operators.
 </p>
 
-<h3>Devices</h3>
+<h3 id="device_types">Device Types</h3>
 <p>
 	IRIS is able to manage several different types of traffic monitoring and
 	control devices.
@@ -190,11 +205,9 @@
 	<li>Variable speed advisories</li>
 	<li>Coordinated ramp metering strategies</li>
 </ul>
-</div>
 
-<h2 id="installation">Installation
-<span class="show">[<span id="installation_show">show</span><span id="installation_hide">hide</span>]</span></h2>
-<div id="installation_div">
+<h2 id="installation">Installation</h2>
+<br/>
 
 <h3>Operating System</h3>
 <p>
@@ -379,11 +392,8 @@ service iris start</pre>
 chkconfig httpd on
 chkconfig iris on</pre>
 
-</div>
-
-<h2 id="basic_setup">Basic Setup
-<span class="show">[<span id="basic_setup_show">show</span><span id="basic_setup_hide">hide</span>]</span></h2>
-<div id="basic_setup_div">
+<h2 id="basic_setup">Basic Setup</h2>
+<br/>
 
 <h3>System Attributes</h3>
 <p>
@@ -746,11 +756,8 @@ FIXME
 	font.
 </p>
 
-</div>
-
-<h2 id="devices">Devices
-<span class="show">[<span id="devices_show">show</span><span id="devices_hide">hide</span>]</span></h2>
-<div id="devices_div">
+<h2 id="devices">Devices</h2>
+<br/>
 
 <h3>Vehicle Detection</h3>
 FIXME
@@ -917,11 +924,7 @@ FIXME
 <h3>Lane Marking</h3>
 FIXME
 
-</div>
-
-<h2 id="features">Features
-<span class="show">[<span id="features_show">show</span><span id="features_hide">hide</span>]</span></h2>
-<div id="features_div">
+<h2 id="features">Features</h2>
 
 <h3>Action Plans</h3>
 FIXME
@@ -944,11 +947,7 @@ FIXME
 <h3>Ramp Metering Strategies</h3>
 FIXME
 
-</div>
-
-<h2 id="troubleshooting">Troubleshooting
-<span class="show">[<span id="troubleshooting_show">show</span><span id="troubleshooting_hide">hide</span>]</span></h2>
-<div id="troubleshooting_div">
+<h2 id="troubleshooting">Troubleshooting</h2>
 
 <h3>Error Logs</h3>
 FIXME
@@ -962,11 +961,7 @@ FIXME
 <h3>Debug Trace Logs</h3>
 FIXME
 
-</div>
-
-<h2 id="maintenance">Maintenance
-<span class="show">[<span id="maintenance_show">show</span><span id="maintenance_hide">hide</span>]</span></h2>
-<div id="maintenance_div">
+<h2 id="maintenance">Maintenance</h2>
 <p>
 	Once an IRIS system is set up, there are a few maintenance tasks which
 	need to be done to ensure reliable operation.
@@ -983,11 +978,7 @@ FIXME
 <h3>Monitoring Logs</h3>
 FIXME
 
-</div>
-
-<h2 id="development">Development
-<span class="show">[<span id="development_show">show</span><span id="development_hide">hide</span>]</span></h2>
-<div id="development_div">
+<h2 id="development">Development</h2>
 
 <h3>Building</h3>
 <p>
@@ -1106,8 +1097,6 @@ FIXME
 	&gt;&gt; == != &lt;&lt; &gt;&gt;&gt; &gt;= &lt;= ^ should be separated
 	from their operands by a space.
 </p>
-
-</div>
 
 </div>
 
