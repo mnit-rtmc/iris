@@ -183,9 +183,11 @@
 <p>
 	The software has a client/server architecture.
 	The server handles communication with all traffic control devices.
-	Configuration data is stored in a PostgreSQL database.
-	The client software is distributed by an Apache web server, using
-	Java Web Start.
+	Configuration data is stored in a
+	<a href="http://www.postgresql.org">PostgreSQL</a> database.
+	The client software is distributed by an <a
+	href="http://projects.apache.org/projects/http_server.html">Apache</a>
+	web server, using Java Web Start.
 	All communication between the server and clients is encrypted using
 	SSL.
 	The server passes authentication requests off to an external LDAP
@@ -269,7 +271,7 @@
 	Install package dependencies, including
 	<a href="http://openjdk.java.net">OpenJDK</a>,
 	<a href="http://www.postgresql.org">PostgreSQL</a> and
-	<a href="http://www.apache.org">Apache</a>.
+	<a href="http://projects.apache.org/projects/http_server.html">Apache</a>.
 	This can be performed with yum by running the following command (as
 	root):
 </p>
@@ -488,9 +490,9 @@ FIXME
 
 <h4>Get osm2pgsql dependencies</h4>
 <p>
-	Install dependencies for building osm2pgsql (see
-	http://wiki.openstreetmap.org/wiki/Osm2pgsql#Fedora).
+	Install dependencies for building <a href="http://wiki.openstreetmap.org/wiki/Osm2pgsql#Fedora">osm2pgsql</a>.
 </p>
+
 <pre class="code">yum install geos-devel proj-devel postgresql-devel libxml2-devel bzip2-devel gcc-c++ autoconf automake libtool</pre>
 
 <h4>Build osm2pgsql</h4>
@@ -502,7 +504,7 @@ FIXME
 <h4>Set bounding box</h4>
 <p>
 	Determine bounding box of region of interest (for Minnesota, it is
-	-97.5,43.0,-89.0,49.5).
+	-97.5, 43.0, -89.0, 49.5).
 </p>
 
 <h4>Import planet data into PostGIS</h4>
@@ -557,8 +559,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 
 <h3 id="road_modelling">Road Modelling</h3>
 <p>
-	For many of the features IRIS provides, it requires a model of the
-	road network topology.
+	For many of the <a href="#features">features</a> IRIS provides, it
+	requires a model of the road network topology.
 	This model consists of a set of roadway nodes, or <b>r_node</b>s, which
 	describe all the points of interest on the road network.
 	For instance, each entrance or exit ramp, detector station or
@@ -743,7 +745,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 <h4 id="msg_feed">DMS Msg Feed Protocol</h4>
 <p>
 	The "msg feed" protocol can be used to interface IRIS with an external
-	system that generates DMS messages.
+	system that generates <a href="#dms">DMS</a> messages.
 	Periodically, IRIS will poll the URI (using HTTP) for DMS messages.
 	The external system should respond with an ASCII text file, with one
 	line per message to be deployed.
@@ -786,8 +788,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	In some circumstances, it may be appropriate to disable this checking.
 	For example, if the message feed host is fully trusted and there is no
 	possibility of man-in-the-middle attacks between IRIS and the feed host.
-	In this case the "msg_feed_verify" system attribute can be set to
-	"false" to disable this check.
+	In this case the "msg_feed_verify" <a href="#system_attributes">system
+	attribute</a> can be set to "false" to disable this check.
 </p>
 
 <h4>VDS Protocols</h4>
@@ -1053,7 +1055,7 @@ FIXME
 	</tr>
 	<tr>
 	    <td>[feed<i>n</i>]</td>
-	    <td>Message feed</td>
+	    <td><a href="#msg_feed">Message feed</a></td>
 	    <td>IRIS-only</td>
 	</tr>
 </table>
