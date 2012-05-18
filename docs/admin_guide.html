@@ -661,13 +661,17 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	    <td>TCP / HTTP</td>
 	</tr>
 	<tr>
-	    <td>MnDOT 4</td>
-	    <td><a href="#vds">VDS</a> + ramp meters (170 controllers)</td>
+	    <td>MnDOT 170 4</td>
+	    <td><a href="#vds">VDS</a>,
+	        <a href="#meter_protocols">metering</a>
+	    </td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
-	    <td>MnDOT 5</td>
-	    <td><a href="#vds">VDS</a> + ramp meters (170 controllers)</td>
+	    <td>MnDOT 170 5</td>
+	    <td><a href="#vds">VDS</a>,
+	        <a href="#meter_protocols">metering</a>
+	    </td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
@@ -688,11 +692,6 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<tr>
 	    <td>EIS G4</td>
 	    <td><a href="#vds">VDS</a> (EIS G4 sensor)</td>
-	    <td>TCP</td>
-	</tr>
-	<tr>
-	    <td>Org 815</td>
-	    <td>RWIS (ORG 815 sensor)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
@@ -723,6 +722,11 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<tr>
 	    <td>Pelco Switcher</td>
 	    <td>Video switching for Pelco</td>
+	    <td>TCP</td>
+	</tr>
+	<tr>
+	    <td>Org 815</td>
+	    <td>RWIS (ORG 815 sensor)</td>
 	    <td>TCP</td>
 	</tr>
 </table>
@@ -810,12 +814,12 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	    <th>Binning</th>
 	</tr>
 	<tr>
-	    <th>MnDOT 4</th>
+	    <th>MnDOT 170 4</th>
 	    <td>4-bit (1-15)</td>
 	    <td>30 seconds (+5 minute)</td>
 	</tr>
 	<tr>
-	    <th>MnDOT 5</th>
+	    <th>MnDOT 170 5</th>
 	    <td>5-bit (1-31)</td>
 	    <td>30 seconds (+5 minute)</td>
 	</tr>
@@ -842,10 +846,24 @@ patch -p0 &lt; ../09_tertiary_color.patch
 </table>
 <p/>
 
-<h4>RWIS Protocols</h4>
-FIXME
+<h4 id="meter_protocols">Ramp Metering Protocols</h4>
+<p>
+	These protocols are used to control ramp meters in the field.
+	They enable the following:
+</p>
+<ul>
+	<li>Activating and deactivating meter</li>
+	<li>Adjusting meter release rate</li>
+	<li>Querying meter status</li>
+	<li>Querying green counts</li>
+	<li>Synchronizing clock</li>
+	<li>Configuring time-of-day operation</li>
+</ul>
 
 <h4>CCTV PTZ Protocols</h4>
+FIXME
+
+<h4>RWIS Protocols</h4>
 FIXME
 
 <h4>Video Switching Protocols</h4>
