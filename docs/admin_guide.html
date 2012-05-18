@@ -635,27 +635,27 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 	<tr>
 	    <td>NTCIP Class A</td>
-	    <td>DMS control (no HDLC)</td>
+	    <td><a href="#dms_control">DMS control</a> (no HDLC)</td>
 	    <td>UDP</td>
 	</tr>
 	<tr>
 	    <td>NTCIP Class B</td>
-	    <td>DMS control over serial link (HDLC)</td>
+	    <td><a href="#dms_control">DMS control</a> over serial (HDLC)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>NTCIP Class C</td>
-	    <td>DMS control (no HDLC)</td>
+	    <td><a href="#dms_control">DMS control</a> (no HDLC)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>DMS XML</td>
-	    <td>DMS control to external system</td>
+	    <td><a href="#dms_control">DMS control</a> to external system</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>Msg feed</td>
-	    <td>DMS control from external system</td>
+	    <td><a href="#msg_feed">DMS messages</a> from external system</td>
 	    <td>TCP / HTTP</td>
 	</tr>
 	<tr>
@@ -724,11 +724,23 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	    <td>TCP</td>
 	</tr>
 </table>
+<p/>
 
-<h4>DMS Control Protocols</h4>
-FIXME
+<h4 id="dms_control">DMS Control Protocols</h4>
+<p>
+	These protocols are used to communicate with DMS controllers in the
+	field.
+	They enable the following:
+</p>
+<ul>
+	<li>Querying configuration information</li>
+	<li>Querying diagnostic information</li>
+	<li>Sending fonts and graphics</li>
+	<li>Querying currently displayed message</li>
+	<li>Displaying new messages</li>
+</ul>
 
-<h4>DMS Msg Feed Protocol</h4>
+<h4 id="msg_feed">DMS Msg Feed Protocol</h4>
 <p>
 	The "msg feed" protocol can be used to interface IRIS with an external
 	system that generates DMS messages.
