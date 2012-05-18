@@ -662,32 +662,32 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 	<tr>
 	    <td>MnDOT 4</td>
-	    <td>VDS + ramp meters (170 controllers, 4-bit)</td>
+	    <td><a href="#vds">VDS</a> + ramp meters (170 controllers)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>MnDOT 5</td>
-	    <td>VDS + ramp meters (170 controllers, 5-bit)</td>
+	    <td><a href="#vds">VDS</a> + ramp meters (170 controllers)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>Canoga</td>
-	    <td>VDS (GTT Canoga Traffic Sensing System)</td>
+	    <td><a href="#vds">VDS</a> (GTT Canoga Traffic Sensing System)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>SS105</td>
-	    <td>VDS (original Wavetronix SmartSensor)</td>
+	    <td><a href="#vds">VDS</a> (original Wavetronix SmartSensor)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>SS125</td>
-	    <td>VDS (Wavetronix SmartSensor HD)</td>
+	    <td><a href="#vds">VDS</a> (Wavetronix SmartSensor HD)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>EIS G4</td>
-	    <td>VDS (EIS G4 sensor)</td>
+	    <td><a href="#vds">VDS</a> (EIS G4 sensor)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
@@ -792,8 +792,55 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	attribute</a> can be set to "false" to disable this check.
 </p>
 
-<h4>VDS Protocols</h4>
-FIXME
+<h4 id="vds">VDS Protocols</h4>
+<p>
+	These protocols allow IRIS to collect traffic data from vehicle
+	detection systems.
+	In most cases, this allows volume, occupancy and even speed to be
+	collected for the most recent time period bin.
+	Others allow recording timestamps and headway for each vehicle passing
+	by the sensor.
+	Some protocols allow the time binning period to be adjusted.
+	The following table summarizes features of each protocol.
+</p>
+<table>
+	<tr>
+	    <th>Protocol</th>
+	    <th>Addressing</th>
+	    <th>Binning</th>
+	</tr>
+	<tr>
+	    <th>MnDOT 4</th>
+	    <td>4-bit (1-15)</td>
+	    <td>30 seconds (+5 minute)</td>
+	</tr>
+	<tr>
+	    <th>MnDOT 5</th>
+	    <td>5-bit (1-31)</td>
+	    <td>30 seconds (+5 minute)</td>
+	</tr>
+	<tr>
+	    <th>Canoga</th>
+	    <td>8-bit (1-255)</td>
+	    <td>No (vehicle logging)</td>
+	</tr>
+	<tr>
+	    <th>SS105</th>
+	    <td>4-digit (0001-9999)</td>
+	    <td>5 seconds to 1 month</td>
+	</tr>
+	<tr>
+	    <th>SS125</th>
+	    <td>32-bit (0-65535)</td>
+	    <td>???</td>
+	</tr>
+	<tr>
+	    <th>EIS G4</th>
+	    <td>32-bit (0-65535)</td>
+	    <td>???</td>
+	</tr>
+</table>
+<p/>
 
 <h4>RWIS Protocols</h4>
 FIXME
