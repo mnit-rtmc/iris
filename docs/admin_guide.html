@@ -462,7 +462,82 @@ service iris start</pre>
 FIXME
 
 <h3 id="mapping">Mapping</h3>
-FIXME
+<p>
+	The IRIS client can use map tiles to display high-quality maps as a
+	background layer.
+	The map tiles are fetched from a web server on demand as the client map
+	is panned and zoomed.
+	The tiles can be generated from data downloaded from
+	<a href="http://openstreetmap.org">OpenStreetMap</a>.
+	The following instructions describe one method of generating the map
+	tiles.
+	(FIXME: needs work).
+</p>
+
+<h4>Get planet file</h4>
+<p>
+	Download latest planet file from
+	http://planet.openstreetmap.org/planet-latest.osm.bz2 (use wget -- this
+	will take a *long* time).
+</p>
+
+<h4>Download and install PostGIS</h4>
+<p>
+	FIXME (need details).
+</p>
+
+<h4>Get osm2pgsql dependencies</h4>
+<p>
+	Install dependencies for building osm2pgsql (see
+	http://wiki.openstreetmap.org/wiki/Osm2pgsql#Fedora).
+</p>
+<pre class="code">yum install geos-devel proj-devel postgresql-devel libxml2-devel bzip2-devel gcc-c++ autoconf automake libtool</pre>
+
+<h4>Build osm2pgsql</h4>
+<p>
+	Download osm2pqsql using subversion and build.  (see
+	http://wiki.openstreetmap.org/wiki/Osm2pgsql#From_source_.28generic.29)
+</p>
+
+<h4>Set bounding box</h4>
+<p>
+	Determine bounding box of region of interest (for Minnesota, it is
+	-97.5,43.0,-89.0,49.5).
+</p>
+
+<h4>Import planet data into PostGIS</h4>
+<pre class="code">
+osm2pgsql -d gis -s --bbox -97.5,43.0,-89.0,49.5 mapping/planet-latest.osm.bz2
+</pre>
+
+<h4>Install mapnik</h4>
+<p>
+	Install mapnik, mapnik-python, mapnik-utils.
+</p>
+
+<h4>Export osm mapnik stuff</h4>
+<pre class="code">
+svn export http://svn.openstreetmap.org/applications/rendering/mapnik osm-mapnik
+</pre>
+
+<h4>Patch osm.xml to create iris_osm.xml</h4>
+
+<pre class="code">
+cd osm-mapnik/
+cp osm.xml iris_osm.xml
+patch -p0 &lt; ../01_drop_junc_power_layers.patch
+patch -p0 &lt; ../02_interstate_shields.patch
+patch -p0 &lt; ../03_trunk_shields.patch
+patch -p0 &lt; ../04_cty_rd_shields.patch
+patch -p0 &lt; ../05_motorway_color.patch
+patch -p0 &lt; ../06_trunk_color.patch
+patch -p0 &lt; ../07_primary_color.patch
+patch -p0 &lt; ../08_secondary_color.patch
+patch -p0 &lt; ../09_tertiary_color.patch
+</pre>
+
+<h4>Copy symbols used for roadway shields</h4>
+<p/>
 
 <h3 id="road_modelling">Road Modelling</h3>
 <p>
