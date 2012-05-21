@@ -41,11 +41,13 @@
   <h2><a id="devices_link" href="#devices">Devices</a></h2>
   <div id="devices_div">
     <h3><a href="#vehicle_detection">Vehicle Detection</a></h3>
-    <h3><a href="#cameras_and_video">Cameras and Video</a></h3>
+    <h3><a href="#cameras">Cameras</a></h3>
     <h3><a href="#dms">Dynamic Message Signs</a></h3>
     <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
     <h3><a href="#ramp_meters">Ramp Meters</a></h3>
+    <h3><a href="#rwis">Road Weather Information Systems</a></h3>
     <h3><a href="#warning_beacons">Warning Beacons</a></h3>
+    <h3><a href="#alarms">Alarms</a></h3>
     <h3><a href="#lane_marking">Lane Marking</a></h3>
   </div>
   <h2><a id="features_link" href="#features">Features</a></h2>
@@ -765,7 +767,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 	<tr>
 	    <td>Org 815</td>
-	    <td><a href="#rwis">RWIS</a> (ORG 815 sensor)</td>
+	    <td><a href="#rwis_protocol">RWIS</a> (ORG 815 sensor)</td>
 	    <td>TCP</td>
 	</tr>
 </table>
@@ -931,7 +933,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	immediately displayed on the associated monitor.
 </p>
 
-<h4 id="rwis">RWIS Protocols</h4>
+<h4 id="rwis_protocol">RWIS Protocols</h4>
 <p>
 	Road Weather Information Systems (RWIS) can sense data such as
 	precipitation rate, road surface temperature, wind speed, etc.
@@ -1060,12 +1062,24 @@ patch -p0 &lt; ../09_tertiary_color.patch
 </p>
 
 <h2 id="devices">Devices</h2>
-<br/>
+<p>
+	A device is a hardware field control or sensing system.
+	IRIS supports several different device types: <a
+	href="#vehicle_detection">vehicle detection</a>,
+	<a href="#cameras">cameras</a>,
+	<a href="#dms">dynamic message signs</a>,
+	<a href="#lcs">lane-use control signs</a>,
+	<a href="#ramp_meters">ramp meters</a>,
+	<a href="#rwis">road weather information systems</a>,
+	<a href="#warning_beacons">warning beacons</a>,
+	<a href="#alarms">alarms</a>,
+	and <a href="#lane_marking">lane marking</a>.
+</p>
 
 <h3 id="vehicle_detection">Vehicle Detection</h3>
 FIXME
 
-<h3 id="cameras_and_video">Cameras and Video</h3>
+<h3 id="cameras">Cameras</h3>
 FIXME
 
 <h3 id="dms">Dynamic Message Signs (DMS)</h3>
@@ -1221,7 +1235,13 @@ FIXME
 <h3 id="ramp_meters">Ramp Meters</h3>
 FIXME
 
+<h3 id="rwis">Road Weather Information Systems</h3>
+FIXME
+
 <h3 id="warning_beacons">Warning Beacons</h3>
+FIXME
+
+<h3 id="alarms">Alarms</h3>
 FIXME
 
 <h3 id="lane_marking">Lane Marking</h3>
