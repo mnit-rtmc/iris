@@ -472,7 +472,34 @@ service iris start</pre>
 </p>
 
 <h3 id="users_and_roles">Users and Roles</h3>
-FIXME
+<p>
+	When a user logs into the IRIS system, the login credentials are
+	first checked against an LDAP server for authentication.
+	The user must have an enabled account, and be assigned to an
+	enabled <b>role</b> for a log in to succeed.
+	Select the <code>View ➔ System ➔ Users and Roles</code> menu item to
+	display the <b>Users and Roles</b> form.
+</p>
+<p>
+	The template SQL database contains two roles, administrator and
+	operator.
+	The administrator role is assigned <b>capabilities</b> which allow
+	unfettered access to the IRIS system.
+	The operator role is restricted to capabilities which are generally
+	required to operate the software, but not make configuration changes.
+	Other roles can be created by an administrator, to allow users with a
+	specific set of capabilities, as needed.
+	For example, there are capabilities defined for each of the main tabs
+	on the user interface: camera_tab, dms_tab, lcs_tab, meter_tab, etc.
+	Also, these capabilities can be disabled, preventing any user from
+	having access to them.
+	So, if a system does not contain any LCS devices, the lcs_tab capability
+	could be disabled globally, to prevent that tab from appearing in the
+	user interface for any users.
+	WARNING: changes take effect immediately &mdash; if the user_admin
+	capability is disabled or removed from the administrator role, the
+	administrator will lose access to change roles and capabilities.
+</p>
 
 <h3 id="mapping">Mapping</h3>
 <p>
