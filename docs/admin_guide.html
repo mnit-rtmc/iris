@@ -754,12 +754,12 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 	<tr>
 	    <td>Vicon Switcher</td>
-	    <td>Video switching for Vicon</td>
+	    <td><a href="#video">Video switching</a> for Vicon</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>Pelco Switcher</td>
-	    <td>Video switching for Pelco</td>
+	    <td><a href="#video">Video switching</a> for Pelco</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
@@ -837,7 +837,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 <h4 id="vds">VDS Protocols</h4>
 <p>
 	These protocols allow IRIS to collect traffic data from vehicle
-	detection systems.
+	detection systems (VDS).
 	In most cases, this allows volume, occupancy and even speed to be
 	collected for the most recent time period bin.
 	Others allow recording timestamps and headway for each vehicle passing
@@ -918,8 +918,17 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<li>Store preset positions</li>
 </ul>
 
-<h4>Video Switching Protocols</h4>
-FIXME
+<h4 id="video">Video Switching Protocols</h4>
+<p>
+	A video switcher system allows camera video (or streams) to be routed to
+	a number of video monitors.
+	Each monitor can be assigned to display the video from any specific
+	camera.
+	IRIS allows an operator to select one video monitor to be linked with
+	their camera selection on the user interface.
+	This way, every time the user selects a camera, it's video is
+	immediately displayed on the associated monitor.
+</p>
 
 <h4>RWIS Protocols</h4>
 FIXME
