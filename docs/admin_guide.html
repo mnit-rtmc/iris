@@ -35,6 +35,7 @@
     <h3><a href="#mapping">Mapping</a></h3>
     <h3><a href="#road_modelling">Road Modelling</a></h3>
     <h3><a href="#comm_links">Comm Links</a></h3>
+    <h3><a href="#controllers">Controllers</a></h3>
     <h3><a href="#fonts">Fonts</a></h3>
   </div>
   <h2><a id="devices_link" href="#devices">Devices</a></h2>
@@ -936,6 +937,26 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	precipitation rate, road surface temperature, wind speed, etc.
 	These protocols allows IRIS to collect and store this type of
 	information.
+</p>
+
+<h3 id="controllers">Controllers</h3>
+<p>
+	After a comm link has been created, a <b>controller</b> must be
+	associated with it.
+	Some protocols support <b>multi-drop</b> addressing, and others are
+	<b>single-drop</b> only.
+	Multi-drop addressing allows multiple controllers to share the same
+	comm link.
+	Each controller is assigned a unique (to the comm link) drop address,
+	which is used to route all messages sent to the controller.
+	Controllers can be assigned to a <b>cabinet</b>, which has location
+	information, to allow displaying on a map.
+</p>
+<p>
+	Each controller has a set of I/O <b>pins</b>, to which
+	<a href="#devices">devices</a> can be assigned.
+	The function of these pins is protocol specific &mdash; an input pin
+	for one protocol could be an output pin for a different protocol.
 </p>
 
 <h3 id="fonts">Fonts</h3>
