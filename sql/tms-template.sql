@@ -1624,6 +1624,7 @@ operator	t
 COPY iris.role_capability (role, capability) FROM stdin;
 administrator	login
 administrator	incident_tab
+administrator	incident_control
 administrator	camera_tab
 administrator	camera_control
 administrator	dms_tab
@@ -1643,6 +1644,7 @@ administrator	system_admin
 administrator	user_admin
 operator	login
 operator	incident_tab
+operator	incident_control
 operator	camera_tab
 operator	camera_control
 operator	dms_tab
