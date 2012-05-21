@@ -77,6 +77,10 @@ span.inblock {
 sub {
 	font-size: xx-small;
 }
+.menu {
+	background: #ccc;
+	font-family: monospace;
+}
 body {
 	background: #ccd;
 	orphans: 3;
