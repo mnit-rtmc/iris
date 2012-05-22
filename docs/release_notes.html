@@ -9,6 +9,46 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.145.0 (22 May 2012)</dt>
+	<dd><ul>
+		<li>
+			Added lots of new content to Administrator Guide.
+		</li>
+		<li>
+			Lots of cleanups to enable sample data binning periods
+			other than 30 seconds (incomplete).
+		</li>
+		<li>
+			Fixed some sample data problems with Canoga protocol.
+		</li>
+		<li>
+			Fixed a regression in sample data logging (infinite
+			loop).
+		</li>
+		<li>
+			Cause controllers to fail when comm link is not valid.
+		</li>
+		<li>
+			Cleaned up client user interface (side pane, tabs).
+		</li>
+		<li>
+			Updated K-Adaptive metering algorithm with better
+			queue management.
+		</li>
+		<li>
+			Cleaned up some weird coding issues (interfaces vs.
+			static import).
+		</li>
+		<li>
+			Added msg_feed_verify system attribute to allow skipping
+			message verification (in trusted environments).
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.145.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.144.0 (3 April 2012)</dt>
 	<dd><ul>
 		<li>
