@@ -633,7 +633,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	"Direction" and "Alt Dir" determine the primary and secondary compass
 	directions of the road.
 </p>
-<h4>R_Node Setup</h4>
+<h4 id="#r_node">R_Node Setup</h4>
 <p>
 	The most important attribute of an r_node is the location.
 	The location is described by the road, direction-of-travel, nearest
@@ -1090,6 +1090,18 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	A third type &ndash; also non-intrusive &ndash; is video detection.
 	These systems use video cameras and computer vision software to
 	detect vehicles.
+</p>
+<p>
+	To create a detector, first select the <a href="#r_node">r_node</a>
+	at the location of the detector.
+	Then, select the <b>Detectors</b> tab for the r_node.
+	Type the detector name in the text entry widget just above the
+	<b>Create</b> button, and press that button.
+	After selecting the new detector in the r_node detector table,
+	its properties, such as <b>lane type</b> and <b>lane #</b> can be
+	changed.
+	In IRIS, lanes are numbered from right-to-left, starting with the
+	right lane as 1.
 </p>
 <p>
 	For sample data to be collected, a detector must be connected to one
