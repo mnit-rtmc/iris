@@ -1077,7 +1077,42 @@ patch -p0 &lt; ../09_tertiary_color.patch
 </p>
 
 <h3 id="vehicle_detection">Vehicle Detection</h3>
-FIXME
+<p>
+	There are several types of vehicle detection systems (VDS) &mdash;
+	also called <b>traffic sensing systems</b>.
+	The oldest of these is the inductive loop detector, which is a
+	wire placed under the surface of the road.
+	It is able to magnetically detect the metal in vehicles as they pass
+	over.
+	Another type of sensor uses radar mounted on the side of the road.
+	This type is <b>non-intrusive</b>, since the road surface does not need
+	to be cut to install the detector.
+	A third type &ndash; also non-intrusive &ndash; is video detection.
+	These systems use video cameras and computer vision software to
+	detect vehicles.
+</p>
+<p>
+	Regardless of the detection type, IRIS is able to collect volume,
+	occupancy and speed data from these devices.
+	Usually, the data is binned into regular time periods, and collected
+	after each period expires.
+	Some detectors are able to record data for each individual vehicle,
+	without any binning.
+</p>
+<p>
+	Every 30 seconds, an XML file will be generated containing the most
+	recent sample data from all defined detectors.
+	The file is called det_sample.xml.gz, and it is written to the
+	<a href="#xml_output">XML output directory</a>
+</p>
+<p>
+	Sample data is archived only if the <code>sample_archive_enable</code>
+	<a href="#system_attributes">system attribute</a> is set to
+	<code>true</code>.
+	Another system attribute, <code>sample_archive_directory</code>,
+	can be used to change where sample archive files are stored.
+	By default, it is set to <code>/var/lib/iris/traffic</code>.
+</p>
 
 <h3 id="cameras">Cameras</h3>
 FIXME
@@ -1275,8 +1310,55 @@ FIXME
 <h3 id="error_logs">Error Logs</h3>
 FIXME
 
-<h3 id="xml_output">Realtime XML Output</h3>
-FIXME
+<h3 id="xml_output">XML Output</h3>
+<p>
+	There are a number of XML files which are written by the IRIS server
+	periodically.
+	These files contain configuration information about the system as
+	well as realtime data concerning the current state.
+	These files are stored in the /var/www/html/iris_xml/ directory by
+	default.
+	A <a href="#system_attributes">system attribute</a>, called
+	<code>xml_output_directory</code> can be used to change where these
+	files are stored.
+</p>
+<table>
+	<tr>
+	    <th>Filename</th>
+	    <th>Description</th>
+	    <th>Period</th>
+	</tr>
+	<tr>
+	    <td>tms_config.xml.gz</td>
+	    <td>Configuration data for IRIS system.  If the district property
+	        is changed in /etc/iris/iris-server.properties, the filename
+	        will be changed to match {district}_config.xml.gz.</td>
+	    <td>24 hours</td>
+	</tr>
+	<tr>
+	    <td>det_sample.xml.gz</td>
+	    <td>Sample data from <a href="#vehicle_detection">vehicle detection
+	        systems</a></td>
+	    <td>30&nbsp;seconds</td>
+	</tr>
+	<tr>
+	    <td>stat_sample.xml.gz</td>
+	    <td>Mainline station data from <a href="#vehicle_detection">vehicle
+	        detection systems</a></td>
+	    <td>30 seconds</td>
+	</tr>
+	<tr>
+	    <td>incident.xml.gz</td>
+	    <td>Current incident information</td>
+	    <td>30 seconds</td>
+	</tr>
+	<tr>
+	    <td>sign_message.xml.gz</td>
+	    <td>Current DMS sign message information</td>
+	    <td>30 seconds</td>
+	</tr>
+</table>
+<p/>
 
 <h3 id="event_tables">Database Event Tables</h3>
 FIXME
