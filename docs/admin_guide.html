@@ -1386,8 +1386,27 @@ FIXME
 	Once an IRIS system is set up, there are a few maintenance tasks which
 	need to be done to ensure reliable operation.
 </p>
-<h3 id="database_backups">Database Backups</h3>
-FIXME
+<h3 id="database_backups">Database Backup &amp; Restore</h3>
+<p>
+	It is a good idea to backup the IRIS database on a regular basis.
+	This can be done simply with a command such as the following:
+</p>
+<pre class="code">pg_dump tms | gzip &gt; tms-20120523.sql.gz</pre>
+<p>
+	This command can be placed in a simple python or bash script which is
+	run by cron once per day.
+	For off-site backups, the file could be copied to another host, using
+	scp or a similar utility.
+</p>
+<p>
+	To restore the tms database from one of these backup files, you will
+	first need to shut down the IRIS server (and anything else connected
+	to the tms database).
+	Then, run the following commands (as tms user):
+</p>
+<pre class="code">dropdb tms
+createdb tms
+zcat tms-20120523.sql.gz | pgsql tms</pre>
 
 <h3 id="iris_upgrades">IRIS Upgrades</h3>
 FIXME
