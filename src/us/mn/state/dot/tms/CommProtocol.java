@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -78,7 +78,28 @@ public enum CommProtocol {
 	INFINOVA_D_PTZ("Infinova D PTZ"),
 
 	/** EIS G4 (17) */
-	EIS_G4("EIS G4");
+	EIS_G4("EIS G4"),
+
+	/** EIS RTMS (18) */
+	EIS_RTMS("EIS RTMS"),
+
+	/** Infotek Wizard (19) */
+	INFOTEK_WIZARD("Infotek Wizard"),
+
+	/** Sensys (20) */
+	SENSYS("Sensys"),
+
+	/** PeMS (21) */
+	PEMS("PeMS"),
+
+	/** SSI (22) */
+	SSI("SSI"),
+
+	/** CHP Incidents (23) */
+	CHP_INCIDENTS("CHP Incidents"),
+
+	/** URMS (24) */
+	URMS("URMS");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
