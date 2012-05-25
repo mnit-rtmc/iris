@@ -85,7 +85,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">24 May 2012</div>
+<div id="stamp">25 May 2012</div>
 <h1 id="admin_guide">IRIS Administrator Guide</h1>
 
 <h2 id="overview">Overview</h2>
@@ -633,12 +633,22 @@ patch -p0 &lt; ../09_tertiary_color.patch
 </svg>
 
 <p>
-	For many of the <a href="#features">features</a> IRIS provides, it
-	requires a model of the road network topology.
+	For many of the <a href="#features">features</a> IRIS provides, a model
+	of the road network topology is required.
 	This model consists of a set of roadway nodes, or <b>r_node</b>s, which
 	describe all the points of interest on the road network.
 	For instance, each entrance or exit ramp, detector station or
 	intersection would be represented by an r_node.
+</p>
+<p>
+	All r_nodes with the same road and direction-of-travel are grouped into
+	<b>corridors</b>.
+	The r_nodes within a corridor are automatically sorted based on their
+	coordinates.
+	Corridors are linked to each other by exit and entrance r_nodes.
+	For example an exit r_node from Northbound road A to Eastbound road B
+	would automatically link to an entrance onto Eastbound road B from
+	Northbound road A.
 </p>
 <h4>Road Setup</h4>
 <p>
@@ -653,29 +663,196 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	designators — for example, "Main St".
 </p>
 <p>
-	The next column is "Abbrev".
+	The next column is <b>Abbrev</b>.
 	Here, an abbreviation of up to 6 characters can be entered.
 	This is used for labelling detectors and stations.
 </p>
 <p>
-	The "Road Class" determines the presentation of the road on the map.
+	The <b>Road Class</b> determines the presentation of the road on the
+	map.
 	For example, a road marked "Freeway" would be drawn thicker and more
 	prominent than an "Expressway" or "Arterial".
 </p>
 <p>
-	"Direction" and "Alt Dir" determine the primary and secondary compass
-	directions of the road.
+	<b>Direction</b> and <b>Alt Dir</b> determine the primary and secondary
+	compass directions of the road.
 </p>
-<h4 id="r_node">R_Node Setup</h4>
+<h4 id="r_node">R_Node Location</h4>
 <p>
-	The most important attribute of an r_node is the location.
-	The location is described by the road, direction-of-travel, nearest
-	cross-street, and coordinates.
+	Select the <b>R_Nodes</b> tab on the client interface to create or
+	edit r_nodes.
+	In the <b>Selected Roadway Corridor</b> frame, there is an <b>Add</b>
+	button.
+	Press the button to start creating a new r_node.
+	The mouse cursor will change to a <b>target</b> while over the map.
+	Select the point on the map where the r_node should be located and
+	left-click the mouse.
+	The new r_node will appear on the map, and in the list for the
+	selected corridor.
 </p>
 <p>
-	A <b>corridor</b> is an ordered list of all r_nodes associated with a
-	road and direction-of-travel.
-	The r_nodes in a corridor are put in order based on their coordinates.
+	In the <b>Selected Roadway Corridor</b> frame, there is a
+	<b>Corridor</b> widget containing a list of all corridors which
+	contain at least one r_node.
+	When a corridor is selected, the r_node list will be populated with all
+	r_nodes on the corridor.
+	Also, any new r_nodes created will be on the selected corridor.
+</p>
+<p>
+	Once an r_node is selected, any fields on the <b>Location</b> tab can
+	be edited.
+	Changing the roadway or direction will move the r_node to another
+	corridor.
+	Other attributes are nearest cross-street, cross-street direction,
+	and notes.
+</p>
+<h4>R_Node Setup</h4>
+<p>
+	The r_node <b>Setup</b> tab contains many more r_node attributes.
+</p>
+<dl>
+  <dt id='r_node_type'>node_type</dt>
+  <dd>There are six different r_node types:
+    <table>
+      <tr>
+        <th>Code</th>
+        <th>Node Type</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>0</td>
+        <td>station</td>
+        <td>Mainline detector station or shape node</td>
+      </tr>
+      <tr>
+	<td>1</td>
+	<td>entrance</td>
+	<td>Entrance ramp onto corridor</td>
+      </tr>
+      <tr>
+	<td>2</td>
+	<td>exit</td>
+	<td>Exit ramp off corridor</td>
+      </tr>
+      <tr>
+	<td>3</td>
+	<td>intersection</td>
+	<td>At-grade intersection with another corridor</td>
+      </tr>
+      <tr>
+	<td>4</td>
+	<td>access</td>
+	<td>Network access (for traveller information)</td>
+      </tr>
+      <tr>
+	<td>5</td>
+	<td>interchange</td>
+	<td>Freeway interchange (for traveller information)</td>
+      </tr>
+    </table>
+  </dd>
+  <dt id='r_node_transition'>transition</dt>
+  <dd>An r_node transition describes how entrance or exit nodes connect with
+      linked nodes.
+    <table>
+      <tr>
+	<th>Code</th>
+	<th>Transition</th>
+	<th>Description</th>
+      </tr>
+      <tr>
+	<td>0</td>
+	<td>none</td>
+	<td>No transition &mdash; non-entrance or -exit r_nodes</td>
+      </tr>
+      <tr>
+	<td>1</td>
+	<td>loop</td>
+	<td>Interchange loop ramp &mdash; "leaf" part of cloverleaf</td>
+      </tr>
+      <tr>
+	<td>2</td>
+	<td>leg</td>
+	<td>Typical "leg" ramp</td>
+      </tr>
+      <tr>
+	<td>3</td>
+	<td>slipramp</td>
+	<td>Transition ramp between parallel corridors</td>
+      </tr>
+      <tr>
+	<td>4</td>
+	<td>CD</td>
+	<td>Transition to/from collector/distributor road</td>
+      </tr>
+      <tr>
+	<td>5</td>
+	<td>HOV</td>
+	<td>Bypass ramp for high-occupancy-vehicles</td>
+      </tr>
+      <tr>
+	<td>6</td>
+	<td>common</td>
+	<td>Common section joining two corridors</td>
+      </tr>
+      <tr>
+	<td>7</td>
+	<td>flyover</td>
+	<td>Flyover ramp (bridge over mainline)</td>
+      </tr>
+    </table>
+  </dd>
+  <dt>lanes</dt>
+  <dd>Number of lanes at r_node.
+      For a ramp node, this is the number of lanes entering or exiting the
+      mainline.
+  </dd>
+  <dt>shift</dt>
+  <dd>Lane shift is the difference (number of lanes) between the corridor
+      reference lane and the attach side of the r_node.
+      This value is used for lane continuity analysis within a corridor.
+      Each corridor has a reference lane, which corresponds to the leftmost
+      lane along the entire corridor.
+  </dd>
+  <dt>station_id</dt>
+  <dd>The station_id is a unique identifier for the detectors associated with
+      the r_node.
+      It is displayed on the traffic map, and is also used for identifying
+      travel time destinations.
+  </dd>
+  <dt>speed_limit</dt>
+  <dd>This is the posted speed limit at the r_node.
+      The units are miles per hour, but should in future be dependent on locale
+      (KPH).
+      For ramp r_nodes, it may be used to indicate the advisory speed limit on
+      the ramp.
+      The limit is used in travel time estimation.
+  </dd>
+  <dt>pickable</dt>
+  <dd>For traveller information systems, an r_node can be marked pickable if a
+      user is allowed to pick a node as an origin or destination.
+      NOTE: This feature has not been implemented yet.
+  </dd>
+  <dt>above</dt>
+  <dd>When rendering the traffic map, r_nodes are rendered in two passes.
+      The second pass consists of r_nodes which have been marked <b>above</b>.
+      This prevents overpasses from being drawn incorrectly.
+  </dd>
+  <dt>attach_side</dt>
+  <dd>This flag indicates whether the r_node is attached to the left side of
+      the road.
+      This can be used to create left entrance or exit ramps.
+  </dd>
+  <dt>active</dt>
+  <dd>This flag allows an r_node to be deactivated.  An inactive r_node will
+      not be included in any corridor or drawn on the map.
+  </dd>
+</dl>
+<h4>R_Node Detectors</h4>
+<p>
+	The r_node <b>Detectors</b> tab allows
+	<a href="#vehicle_detection">detectors</a> to be created and associated
+	with an r_node.
 </p>
 
 <h3 id="comm_links">Comm Links</h3>
