@@ -1156,12 +1156,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Associated station to metering */
 		private StationNode associatedStation;
 
-		/** Ramp demand at current time step */
-		private double currentDemand = 0;
-
-		/** Ramp flow at current time step */
-		private double currentFlow = 0;
-
 		/** Metering rate at current time step */
 		private double currentRate = 0;
 
@@ -1237,10 +1231,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Cumulative demand history */
 		private final BoundedSampleHistory cumulativeDemand =
-			new BoundedSampleHistory(steps(240));
+			new BoundedSampleHistory(steps(300));
 
 		/** Cumulative passage flow rate */
 		private double cumulativePassage = 0;
+
+		/** Estimated wait time at meter (seconds) */
+		private int meterWaitSecs = 0;
 
 		/** Metering rate flow history */
 		private final BoundedSampleHistory rateHistory =
@@ -1260,10 +1257,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Ramp Occupancy History */
 		private final BoundedSampleHistory rampOccupancyHistory =
-			new BoundedSampleHistory(steps(90));
-
-		/** Ramp Waiting Time History */
-		private final BoundedSampleHistory rampWaitingTimeHistory =
 			new BoundedSampleHistory(steps(90));
 
 		/**
@@ -1290,21 +1283,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			bypass.addDetectors(ds, LaneType.BYPASS);
 		}
 
-		/**
-		 * Get the max wait time index for the ramp meter.
-		 */
-		private int maxWaitTimeIndex() {
-			RampMeterImpl m = meter;
-			if(m != null) {
-				int max_wait = m.getMaxWait();
-				int max_idx = steps(max_wait) - 1;
-				if(max_idx > 0)
-					return max_idx;
-			}
-			return steps(RampMeterImpl.DEFAULT_MAX_WAIT) - 1;
-		}
-
-		/** Get the max wait time */
+		/** Get the max wait time (seconds) */
 		private int maxWaitTime() {
 			RampMeterImpl m = meter;
 			if(m != null)
@@ -1338,12 +1317,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			cumulativePassage += p_flow;
 			rampDemandHistory.push(demand);
 			cumulativeDemand.push(prevCd + demand);
-			currentDemand = demand;
-			currentFlow = p_flow;
+			meterWaitSecs = estimateTimeWaited();
 
 			/** Calcuate history */
 			rampOccupancyHistory.push(getCurrentOccupancy());
-			rampWaitingTimeHistory.push(getWaitingTime());
 
 			/** if the ramp queue detector is not available
 			 * Temporary - 62W53(Valley View) */
@@ -1397,10 +1374,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get the current waitting Time */
 		private double getCurrentWaitTime() {
-			if(rampWaitingTimeHistory.size() > 0)
-				return rampWaitingTimeHistory.get(0);
-			else
-				return 0;
+			return meterWaitSecs;
 		}
 
 		/** Get current occupancy */
@@ -1414,29 +1388,33 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/** Get Waiting Time */
-		private double getWaitingTime() {
-			if(cumulativeDemand.size() - 1 < maxWaitTimeIndex())
-				return 0;
-
+		/** Estimate time waited at meter (seconds) */
+		private int estimateTimeWaited() {
 			for(int i = 0; i < cumulativeDemand.size(); i++) {
-				double queue = cumulativeDemand.get(i);
-				if(queue < cumulativePassage) {
+				double dem = cumulativeDemand.get(i);
+				double pex = cumulativePassage - dem;
+				/* Is current cumulative passage greater than
+				 * cumulative demand at this time step? */
+				if(pex > 0) {
 					if(i == 0)
 						return 0;
-					double bf_queue =
-						cumulativeDemand.get(i - 1);
-					double qd = bf_queue - queue;
-					if(qd != 0) {
-						double IF_time = STEP_SECONDS *
-						      (cumulativePassage - queue) / qd;
-						return STEP_SECONDS * i -
-						       IF_time;
-					} else
+					double st = i;
+					/* Demand at next step */
+					double qd = cumulativeDemand.get(i-1) -
+						dem;
+					/* subtract ratio of excess passage
+					 * to demand at next step */
+					if(qd > 0)
+						st -= pex / qd;
+					if(st > 0) {
+						return Math.round(STEP_SECONDS *
+							(float)st);
+					}
+					else
 						return 0;
 				}
 			}
-			return maxWaitTimeIndex() * (STEP_SECONDS + 1);
+			return STEP_SECONDS * cumulativeDemand.size();
 		}
 
 		/** Get the desired waitting Time */
@@ -1603,9 +1581,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		private void stopMetering() {
 			isMetering = false;
-			currentDemand = 0;
-			currentFlow = 0;
 			currentRate = 0;
+			cumulativeDemand.clear();
 			cumulativePassage = 0;
 			rateHistory.clear();
 			noBottleneckCount = 0;
@@ -1681,6 +1658,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Start metering */
 		private void startMetering() {
 			isMetering = true;
+			cumulativeDemand.clear();
 			cumulativePassage = 0;
 		}
 
