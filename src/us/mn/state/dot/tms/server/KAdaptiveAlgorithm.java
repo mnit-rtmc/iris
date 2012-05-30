@@ -287,14 +287,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Debug algorithm. */
 	private void debug() {
-		ALG_LOG.log("Corridor Structure : " + corridor.getName() +
-		            " --------------------");
-		StringBuilder sb = new StringBuilder();
+		log("-------- Corridor Structure --------");
 		for(Node n = head; n != null; n = n.downstream) {
+			StringBuilder sb = new StringBuilder();
 			n.debug(sb);
-			sb.append("\n");
+			log(sb.toString());
 		}
-		ALG_LOG.log(sb.toString());
+	}
+
+	/** Log one message */
+	private void log(String msg) {
+		ALG_LOG.log(corridor.getName() + ": " + msg);
 	}
 
 	/**
