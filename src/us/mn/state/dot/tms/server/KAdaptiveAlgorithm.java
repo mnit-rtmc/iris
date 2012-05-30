@@ -1181,38 +1181,35 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int noBottleneckCount = 0;
 
 		/** Gamma Value for Max Rate - Maximum rate = Tvalue * Gv */
-		private double Gv = 1.3;
+		static private final double Gv = 1.3;
 
 		/** Z value for Min Rate - Minimum rate = Tvalue * Zv */
-		private double Zv = 0.6;
+		static private final double Zv = 0.6;
 
 		/** Most Recently used Tvalues */
 		private double TvalueHistory = 0;
 
 		/** Ramp Occupancy Threshold for Tvalue */
-		private double RampOccThreshold = 20;
+		static private final double RampOccThreshold = 20;
 
 		/** Desired Occupancy -- used to calculate Ramp Alpha using
 		 *  Occupancy (when the queue detector is not available) */
-		private double KDesOcc = 10;
+		static private final double KDesOcc = 10;
 
 		/** Maximum Occupancy -- used to calculate Ramp Alpha using
 		 * Occupancy (when the queue detector is not available) */
-		private double MaxOcc = 50;
+		static private final double MaxOcc = 50;
 
 		/** Desired WT coefficient -- Default Desired Waiting
 		 * Time = Max WaitTime * coefWT */
 		static private final double coefWT = 0.75;
 
 		/** Short Waiting Time */
-		private int shortWT = 60;
-
-		/** Short Storage */
-		private int shortStorage = 800;
+		static private final int shortWT = 60;
 
 		/** Alpha Weight for MainLine K */
-		private double AiMax = 0.5;
-		private double AiMin = 0.3;
+		static private final double AiMax = 0.5;
+		static private final double AiMin = 0.3;
 
 		/** Corresponding bottleneck */
 		private StationNode bottleneck;
