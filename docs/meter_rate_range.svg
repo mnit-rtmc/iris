@@ -60,9 +60,9 @@
   <textPath xlink:href='#max_wait'>max wait</textPath>
 </text>
 <path id='target_rate'
-      style='fill:none;stroke:black;stroke-dasharray:1,3;stroke-width:0.5'
-      d='M60 420L340 100'/>
-<text style='font-size:8px' transform='translate(214,-250)'>
+      style='fill:none;stroke:purple;stroke-width:0.5'
+      d='M140 310L340 100'/>
+<text style='font-size:8px' transform='translate(150,-160)'>
   <textPath xlink:href='#target_rate'>target rate</textPath>
 </text>
 <path id='queue_minimum' style='fill:none' d='M380 210L500 110'/>
