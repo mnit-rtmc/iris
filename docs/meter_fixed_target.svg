@@ -80,10 +80,10 @@
 <text style='font-size:8px' transform='translate(30,-74)'>
   <textPath xlink:href='#max_rate'>target max rate (130%)</textPath>
 </text>
-<path id='wait_min'
+<path id='wait_limit'
       style='fill:none'
       d='M360 250L460 100'/>
 <text style='font-size:8px' transform='translate(21,-36)'>
-  <textPath xlink:href='#wait_min'>wait min rate</textPath>
+  <textPath xlink:href='#wait_limit'>wait time rate limit</textPath>
 </text>
 </svg>
