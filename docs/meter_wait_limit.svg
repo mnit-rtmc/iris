@@ -72,7 +72,7 @@
 <text style='font-size:12px'>
   <textPath xlink:href='#metering_rate'>metering rate (output)</textPath>
 </text>
-<path style='fill:none;stroke:gray;stroke-linejoin:round;stroke-width:0.25'
+<path style='fill:none;stroke:gray;stroke-width:0.25'
       d='M120 340L280 340M160 280L320 280M180 260L340 260M200 210L360 210
 	 M220 200L380 200M240 170L400 170M260 160L420 160M280 130L440 130'/>
 </svg>

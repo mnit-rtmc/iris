@@ -22,7 +22,7 @@
 	 180 270 160 300 140 310 120 350 100 380 60 420 100 380 120 370
 	 140 360 160 350 180 330 200 320 220 310 240 290 260 280 280 260
 	 300 250 320 240 340 230'/>
-<text style='font-size:24px' x='120' y='40'>Queue Storage Rate Limits</text>
+<text style='font-size:24px' x='120' y='40'>Queue Storage Rate Limit</text>
 <path id='volume_text' d='M40 320L40 60'/>
 <text style='font-size:16px'>
   <textPath xlink:href='#volume_text'>Volume (Vehicles)</textPath>
@@ -54,11 +54,11 @@
 <text style='font-size:8px' transform='translate(84,-100)'>
   <textPath xlink:href='#target_rate'>target rate (5-minute)</textPath>
 </text>
-<path id='min_rate'
+<path id='storage_limit'
       style='fill:none;stroke:#8d6666;stroke-dasharray:1,2'
       d='M340 240L480 80'/>
 <text style='font-size:8px' transform='translate(28,-20)'>
-  <textPath xlink:href='#min_rate'>storage min rate (parallel to target)</textPath>
+  <textPath xlink:href='#storage_limit'>storage rate limit (parallel to target)</textPath>
 </text>
 <path id='queue_demand'
       style='fill:none'
@@ -82,7 +82,7 @@
 </text>
 <path style='fill:none;stroke:black;stroke-dasharray:1,2'
       d='M340 230L360 217'/>
-<path style='fill:none;stroke:gray;stroke-width:0.5'
+<path style='fill:none;stroke:gray;stroke-width:0.25'
       d='M200 230L200 390M220 190L220 350M240 160L240 320 240 320 240 320
 	 M260 140L260 300M280 130C280 130 280 290 280 290M320 90L320 250'/>
 <rect style='fill:white;stroke:black'
