@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN'
+	  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+<svg id='meter_wait_limit'
+     width='560' height='480' version='1.1'
+     xmlns='http://www.w3.org/2000/svg'
+     xmlns:svg='http://www.w3.org/2000/svg'
+     xmlns:xlink='http://www.w3.org/1999/xlink'>
+<rect style='fill:#f1fff6;stroke:black;stroke-width:2'
+      x='60' y='60' width='480' height='360'/>
+<path style='fill:none;stroke:gray;stroke-width:0.25'
+      d='M500 420L500 60M460 420L460 60M420 420L420 60M380 420L380 60M340 420
+	 L340 60M300 420L300 60M260 420L260 60M220 420L220 60M180 420L180 60
+	 M140 420L140 60M100 420L100 60'/>
+<path style='fill:#dfd;stroke:#009200;stroke-dasharray:1,2'
+      d='M360 210L340 260 320 280 300 310 280 340 260 380 100 380'/>
+<path style='fill:#def;stroke:#003373'
+      d='M340 100L320 110 300 120 280 130 260 160 240 170 220 200 200 210
+	 180 260 160 280 140 310 120 340 100 380 60 420 100 380 120 370
+	 140 360 160 350 180 330 200 320 220 310 240 290 260 280 280 270
+	 300 260 320 250 340 240'/>
+<path style='fill:#fffcbb;stroke:#8f9b00;stroke-dasharray:1,2'
+      d='M340 100L340 240 360 210 380 200 400 170 420 160 440 130 460 120
+	 500 100'/>
+<text style='font-size:24px' x='120' y='40'>Meter Wait Time Rate Limit</text>
+<path id='volume_text' d='M40 320L40 60'/>
+<text style='font-size:16px'>
+  <textPath xlink:href='#volume_text'>Volume (Vehicles)</textPath>
+</text>
+<text style='font-size:16px' x='260' y='470'>Time (Steps)</text>
+<text style='font-size:12px'>
+  <tspan x='100' y='440'>t-12</tspan>
+  <tspan x='140' y='440'>t-10</tspan>
+  <tspan x='180' y='440'>t-8</tspan>
+  <tspan x='220' y='440'>t-6</tspan>
+  <tspan x='260' y='440'>t-4</tspan>
+  <tspan x='300' y='440'>t-2</tspan>
+  <tspan x='340' y='440'>t</tspan>
+  <tspan x='380' y='440'>t+2</tspan>
+  <tspan x='420' y='440'>t+4</tspan>
+  <tspan x='460' y='440'>t+6</tspan>
+  <tspan x='500' y='440'>t+8</tspan>
+</text>
+<text style='font-size:8px' x='100' y='390'>start metering</text>
+<path id='wait_time'
+      style='fill:none;stroke:black;stroke-dasharray:1,2'
+      d='M188 240L340 240'/>
+<text style='font-size:8px' transform='translate(55,-2)'>
+  <textPath xlink:href='#wait_time'>wait time</textPath>
+</text>
+<path id='max_wait'
+      style='fill:none;stroke:black;stroke-dasharray:1,2'
+      d='M340 100L500 100'/>
+<text style='font-size:8px' transform='translate(62,-2)'>
+  <textPath xlink:href='#max_wait'>max wait</textPath>
+</text>
+<path id='wait_limit'
+      style='fill:none'
+      d='M380 210L500 110'/>
+<text style='font-size:8px'>
+  <textPath xlink:href='#wait_limit'>wait time rate limit</textPath>
+</text>
+<path id='queue_demand'
+      style='fill:none'
+      d='M140 260L260 120'/>
+<text style='font-size:12px'>
+  <textPath xlink:href='#queue_demand'>queue demand (input)</textPath>
+</text>
+<path id='metering_rate'
+      style='fill:none'
+      d='M180 350L340 260'/>
+<text style='font-size:12px'>
+  <textPath xlink:href='#metering_rate'>metering rate (output)</textPath>
+</text>
+<path style='fill:none;stroke:gray;stroke-linejoin:round;stroke-width:0.25'
+      d='M120 340L280 340M160 280L320 280M180 260L340 260M200 210L360 210
+	 M220 200L380 200M240 170L400 170M260 160L420 160M280 130L440 130'/>
+</svg>
