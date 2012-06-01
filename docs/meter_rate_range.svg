@@ -25,8 +25,8 @@
       d='M200 210L360 210M220 200L380 200M240 170L400 170M260 160L420 160
          M280 130L440 130'/>
 <text style='font-size:24px' x='100' y='40'>Metering Rate Range Calculation</text>
-<path id='volume_text' d='M40 420L40 60'/>
-<text style='font-size:16px' transform='translate(0,-100)'>
+<path id='volume_text' d='M40 320L40 60'/>
+<text style='font-size:16px'>
   <textPath xlink:href='#volume_text'>Volume (Vehicles)</textPath>
 </text>
 <text style='font-size:16px' x='260' y='470'>Time (Steps)</text>
@@ -43,7 +43,7 @@
   <tspan x='460' y='440'>t+6</tspan>
   <tspan x='500' y='440'>t+8</tspan>
 </text>
-<text style='font-size:12px' x='100' y='390'>start metering</text>
+<text style='font-size:8px' x='100' y='390'>start metering</text>
 <path id='wait_time' style='fill:none;stroke:black;stroke-dasharray:1,2'
       d='M188 240L340 240'/>
 <text style='font-size:8px' transform='translate(55,-2)'>
@@ -65,9 +65,9 @@
 <text style='font-size:8px' transform='translate(100,-110)'>
   <textPath xlink:href='#target_rate'>target rate (5-minute)</textPath>
 </text>
-<path id='queue_minimum' style='fill:none' d='M380 210L500 110'/>
+<path id='wait_limit' style='fill:none' d='M380 210L500 110'/>
 <text style='font-size:8px'>
-  <textPath xlink:href='#queue_minimum'>queue minimum rate</textPath>
+  <textPath xlink:href='#wait_limit'>wait time rate limit</textPath>
 </text>
 <path id='min_rate'
       style='fill:none;stroke:#8d6666;stroke-dasharray:1,2'
