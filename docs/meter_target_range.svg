@@ -77,4 +77,12 @@
 <text style='font-size:8px' transform='translate(48,-52)'>
   <textPath xlink:href='#target_rate_p'>target rate (parallel)</textPath>
 </text>
+<rect style='fill:white;stroke:black'
+      x='320' y='330' width='200' height='70' ry='10'/>
+<text style='font-size:12px' x='340' y='350'>
+  <tspan x='340' y='350'>NOTE: the max rate is a soft</tspan>
+  <tspan x='340' y='362'>limit — it can be exceeded</tspan>
+  <tspan x='340' y='374'>by queue storage limit or</tspan>
+  <tspan x='340' y='386'>max wait time limit.</tspan>
+</text>
 </svg>
