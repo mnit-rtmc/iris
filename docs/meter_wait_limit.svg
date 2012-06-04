@@ -81,4 +81,10 @@
 <text style='font-size:12px'>
   <textPath xlink:href='#metering_rate'>metering rate (output)</textPath>
 </text>
+<rect style='fill:white;stroke:black'
+      x='320' y='355' width='200' height='45' ry='10'/>
+<text style='font-size:12px' x='340' y='375'>
+  <tspan x='340' y='375'>NOTE: the target wait time</tspan>
+  <tspan x='340' y='387'>is 75% of max wait time</tspan>
+</text>
 </svg>
