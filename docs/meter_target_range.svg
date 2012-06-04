@@ -17,11 +17,11 @@
 	 180 260 160 280 140 310 120 340 100 380 60 420 100 380 120 370
 	 140 360 160 350 180 330 200 320 220 310 240 290 260 280 280 270
 	 300 260 320 250 340 240'/>
-<path style='fill:#ecc'
-      d='M340 240L500 160 480 90'/>
-<path style='fill:#fffcbb;stroke:#8f9b00;stroke-dasharray:1,2'
-      d='M400 90L340 240 480 90Z'/>
-<text style='font-size:24px' x='135' y='40'>Target Rate Range Limits</text>
+<path style='fill:#ceffcf'
+      d='M400 90L340 240 500 160 480 90Z'/>
+<path style='fill:none;stroke:black;stroke-dasharray:1,2'
+      d='M400 90L340 240'/>
+<text style='font-size:24px' x='180' y='40'>Target Rate Limits</text>
 <path id='volume_text' d='M40 320L40 60'/>
 <text style='font-size:16px'>
   <textPath xlink:href='#volume_text'>Volume (Vehicles)</textPath>
@@ -47,12 +47,6 @@
 <text style='font-size:8px' transform='translate(100,-110)'>
   <textPath xlink:href='#target_rate'>target rate (5-minute)</textPath>
 </text>
-<path id='min_rate'
-      style='fill:none;stroke:#8d6666;stroke-dasharray:1,2'
-      d='M340 240L500 160 480 90'/>
-<text style='font-size:8px' transform='translate(40,-10)'>
-  <textPath xlink:href='#min_rate'>min rate (60% of target)</textPath>
-</text>
 <path id='queue_demand'
       style='fill:none'
       d='M140 260L260 120'/>
@@ -72,10 +66,16 @@
   <textPath xlink:href='#max_rate'>max rate (130% of target)</textPath>
 </text>
 <path id='target_rate_p'
-      style='fill:none'
+      style='fill:none;stroke:black;stroke-dasharray:1,2'
       d='M340 240L480 90'/>
-<text style='font-size:8px' transform='translate(48,-52)'>
+<text style='font-size:8px' transform='translate(46,-54)'>
   <textPath xlink:href='#target_rate_p'>target rate (parallel)</textPath>
+</text>
+<path id='min_rate'
+      style='fill:none;stroke:black;stroke-dasharray:1,2'
+      d='M340 240L500 160'/>
+<text style='font-size:8px' transform='translate(40,-10)'>
+  <textPath xlink:href='#min_rate'>min rate (60% of target)</textPath>
 </text>
 <rect style='fill:white;stroke:black'
       x='320' y='330' width='200' height='70' ry='10'/>
@@ -83,6 +83,6 @@
   <tspan x='340' y='350'>NOTE: the max rate is a soft</tspan>
   <tspan x='340' y='362'>limit — it can be exceeded</tspan>
   <tspan x='340' y='374'>by queue storage limit or</tspan>
-  <tspan x='340' y='386'>max wait time limit.</tspan>
+  <tspan x='340' y='386'>target wait limit.</tspan>
 </text>
 </svg>
