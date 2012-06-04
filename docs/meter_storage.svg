@@ -80,35 +80,28 @@
 <text style='font-size:8px'>
   <textPath xlink:href='#max_storage'>max storage</textPath>
 </text>
+<path id='v_text'
+      style='fill:none;stroke:black;stroke-dasharray:1,2'
+      d='M340 240L340 230'/>
+<text style='font-size:8px' transform='translate(-2,0)'>
+  <textPath xlink:href='#v_text'>v</textPath>
+</text>
 <path style='fill:none;stroke:black;stroke-dasharray:1,2'
       d='M340 230L360 217'/>
 <path style='fill:none;stroke:gray;stroke-width:0.25'
       d='M200 230L200 390M220 190L220 350M240 160L240 320 240 320 240 320
 	 M260 140L260 300M280 130C280 130 280 290 280 290M320 90L320 250'/>
 <rect style='fill:white;stroke:black'
-      x='340' y='280' width='180' height='120' ry='10'/>
-<text style='font-size:12px' x='360' y='300'>
-  <tspan x='360' y='300'>
-  Max storage is initially
-  </tspan>
-  <tspan x='360' y='312'>
-  based on the fixed length
-  </tspan>
-  <tspan x='360' y='324'>
-  of ramp queue.
-  </tspan>
-  <tspan x='360' y='336'/>
-  <tspan x='360' y='348'>
-  When Q occ. is above 25%
-  </tspan>
-  <tspan x='360' y='360'>
-  threshold, decrease the
-  </tspan>
-  <tspan x='360' y='372'>
-  max storage length by 1
-  </tspan>
-  <tspan x='360' y='384'>
-  vehicle every 30 seconds.
+      x='320' y='280' width='200' height='120' ry='10'/>
+<text style='font-size:12px' x='340' y='300'>
+  <tspan x='340' y='300'>When queue occupancy is</tspan>
+  <tspan x='340' y='312'>above a threshold, assume</tspan>
+  <tspan x='340' y='324'>detector is undercounting —</tspan>
+  <tspan x='340' y='336'>increase queue demand.</tspan>
+  <tspan x='340' y='348'/>
+  <tspan x='340' y='360'>r = 2 * period / max wait</tspan>
+  <tspan x='340' y='372'>v = max storage - queue len</tspan>
+  <tspan x='340' y='384'>demand += r * min(v, 1)
   </tspan>
 </text>
 </svg>
