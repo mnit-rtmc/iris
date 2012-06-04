@@ -55,7 +55,7 @@
 </text>
 <path id='metering_rate'
       style='fill:none'
-      d='M180 350L340 260'/>
+      d='M180 320L340 230'/>
 <text style='font-size:12px'>
   <textPath xlink:href='#metering_rate'>metering rate (output)</textPath>
 </text>
