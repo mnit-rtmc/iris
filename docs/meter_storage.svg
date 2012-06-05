@@ -11,7 +11,7 @@
       d='M500 420L500 60M460 420L460 60M420 420L420 60M380 420L380 60M340 420
 	 L340 60M300 420L300 60M260 420L260 60M220 420L220 60M180 420L180 60
 	 M140 420L140 60M100 420L100 60'/>
-<path style='fill:#fbffc2'
+<path style='fill:#fffcbb'
       d='M200 390L220 350 240 320 260 300 280 290 320 250 340 240 440 120
          440 80 200 270Z'/>
 <path style='fill:#ceffcf'
@@ -106,7 +106,7 @@
   <tspan x='340' y='348'/>
   <tspan x='340' y='360'>r = 2 * period / max wait</tspan>
   <tspan x='340' y='372'>v = max storage - queue len</tspan>
-  <tspan x='340' y='384'>demand += r * min(v, 1)</tspan>
+  <tspan x='340' y='384'>demand += min(r * v, 1)</tspan>
 </text>
 <path id='target_storage'
       style='fill:none'
