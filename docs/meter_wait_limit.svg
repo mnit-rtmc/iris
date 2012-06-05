@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN'
 	  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
-<svg id='target_wait_limit'
+<svg id='queue_wait_limit'
      width='560' height='480' version='1.1'
      xmlns='http://www.w3.org/2000/svg'
      xmlns:xlink='http://www.w3.org/1999/xlink'>
@@ -30,7 +30,7 @@
 <path style='fill:none;stroke:black;stroke-dasharray:1,2'
       d='M500 100L480 110 460 130 440 160 420 200 380 240 340 270 300 310
 	 280 340 260 380'/>
-<text style='font-size:24px' x='190' y='40'>Target Wait Limit</text>
+<text style='font-size:24px' x='190' y='40'>Queue Wait Limit</text>
 <path id='volume_text'
       d='M40 320L40 60'/>
 <text style='font-size:16px'>
