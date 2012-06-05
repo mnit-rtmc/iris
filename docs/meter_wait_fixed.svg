@@ -61,11 +61,11 @@
 <text style='font-size:8px'>
   <textPath xlink:href='#wait_limit'>target wait limit</textPath>
 </text>
-<path id='queue_demand'
+<path id='target_demand'
       style='fill:none'
-      d='M140 320L260 180'/>
+      d='M180 280L300 140'/>
 <text style='font-size:12px'>
-  <textPath xlink:href='#queue_demand'>fixed target demand (input)</textPath>
+  <textPath xlink:href='#target_demand'>fixed target demand (input)</textPath>
 </text>
 <path id='metering_rate'
       style='fill:none'
