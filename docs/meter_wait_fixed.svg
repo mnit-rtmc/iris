@@ -76,7 +76,7 @@
 <rect style='fill:white;stroke:black'
       x='320' y='355' width='200' height='45' ry='10'/>
 <text style='font-size:12px' x='340' y='375'>
-  <tspan x='340' y='375'>NOTE: fixed target rate used</tspan>
-  <tspan x='340' y='387'>when queue detector faulty</tspan>
+  <tspan x='340' y='375'>Fixed target demand is used</tspan>
+  <tspan x='340' y='387'>if queue detector is faulty</tspan>
 </text>
 </svg>

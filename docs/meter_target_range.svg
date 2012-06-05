@@ -83,6 +83,6 @@
   <tspan x='340' y='350'>NOTE: the max rate is a soft</tspan>
   <tspan x='340' y='362'>limit — it can be exceeded</tspan>
   <tspan x='340' y='374'>by queue storage limit or</tspan>
-  <tspan x='340' y='386'>target wait limit.</tspan>
+  <tspan x='340' y='386'>queue wait limit.</tspan>
 </text>
 </svg>
