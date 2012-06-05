@@ -15,7 +15,7 @@
       d='M200 420L480 100 440 100 200 370Z'/>
 <path style='fill:#ceffcf'
       d='M200 270L200 370 440 100 340 100'/>
-<path style='fill:none;stroke:black;stroke-dasharray:1,2'
+<path style='fill:none;stroke:#509200;stroke-dasharray:1,2'
       d='M200 370L440 100'/>
 <path style='fill:none;stroke:black;stroke-dasharray:1,2'
       d='M200 420L480 100'/>
