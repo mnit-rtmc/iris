@@ -586,39 +586,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		KPoint p4 = new KPoint(K_DES, Rmax / Rt);
 
                 // Mainline graph connection 2 points
-		double MLalpha = getAlpha(p0, p2, p4, x);
-
-		// Calculate Ramp Alpha value with Ramp WaitingTime
-		double Rampx = entrance.desiredWaitTime() - entrance.getCurrentWaitTime();
-		double RXmax = entrance.desiredWaitTime() - entrance.maxWaitTime();
-		double RXmin = entrance.desiredWaitTime();
-
-		/*
-		 * if the ramp queue detector is not available
-		 * Use Occupancy Data
-		 * Temporary - 62W53(Valley View)
-		 */
-		if(!entrance.isQueueActive) {
-			Rampx = entrance.getDesiredOcc() -
-				entrance.getCurrentOccupancy();
-			RXmax = entrance.getDesiredOcc() - entrance.getMaxOcc();
-			RXmin = entrance.getDesiredOcc();
-		}
-
-		KPoint RampP0 = new KPoint(RXmax, Rmax / Rt);
-		KPoint RampP2 = new KPoint(0, 1);
-		KPoint RampP4 = new KPoint(RXmin, Rmin / Rt);
-
-		if(Rmin >= Rt)
-			RampP4.y = RampP2.y = Rmin / Rt;
-
-		// calculate Ramp Alpha Value
-		double Rampalpha = getAlpha(RampP0, RampP2, RampP4, Rampx);
-
-		// calculate Ramp Weight (Main Line and Ramp)
-		double AlphaWeight = entrance.getAlphaWeight();
-		double alpha = (AlphaWeight * MLalpha) +
-			((1 - AlphaWeight) * Rampalpha);
+		double alpha = getAlpha(p0, p2, p4, x);
 
 		// Ramp meter rate for next time interval
 		double Rnext = Rt * alpha;
@@ -1192,25 +1160,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Ramp Occupancy Threshold for Tvalue */
 		static private final double RampOccThreshold = 20;
 
-		/** Desired Occupancy -- used to calculate Ramp Alpha using
-		 *  Occupancy (when the queue detector is not available) */
-		static private final double KDesOcc = 10;
-
-		/** Maximum Occupancy -- used to calculate Ramp Alpha using
-		 * Occupancy (when the queue detector is not available) */
-		static private final double MaxOcc = 50;
-
-		/** Desired WT coefficient -- Default Desired Waiting
-		 * Time = Max WaitTime * coefWT */
-		static private final double coefWT = 0.75;
-
-		/** Short Waiting Time */
-		static private final int shortWT = 60;
-
-		/** Alpha Weight for MainLine K */
-		static private final double AiMax = 0.5;
-		static private final double AiMin = 0.3;
-
 		/** Corresponding bottleneck */
 		private StationNode bottleneck;
 
@@ -1372,11 +1321,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/** Get the current waitting Time */
-		private double getCurrentWaitTime() {
-			return meterWaitSecs;
-		}
-
 		/** Get current occupancy */
 		private double getCurrentOccupancy() {
 			DetectorSet ds = meter.getDetectorSet();
@@ -1415,51 +1359,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				}
 			}
 			return STEP_SECONDS * cumulativeDemand.size();
-		}
-
-		/** Get the desired waitting Time */
-		private int desiredWaitTime() {
-			int DesWT = 0;
-			int HTHWAIT = RampMeterImpl.DEFAULT_MAX_WAIT / 2;
-
-			if(maxWaitTime() <= HTHWAIT)
-				DesWT = shortWT;
-			else
-				DesWT = (int)(maxWaitTime() * coefWT);
-
-			/** Hard Code - short Ramp in TH62 hwy */
-			if(meter.getName().contains("M62W52") ||
-			   meter.getName().contains("M62W53"))
-				DesWT = shortWT;
-
-			if(DesWT < 0)
-				return (int)(RampMeterImpl.DEFAULT_MAX_WAIT * coefWT);
-			else
-				return DesWT;
-		}
-
-		/** Caculate Equation
-		 * @param y1
-		 * @param y2
-		 * @param x1
-		 * @param x2
-		 * @param value
-		 * @return
-		 */
-		private float CaculateEquation(float y1,float y2, float x1,
-			float x2, float value)
-		{
-			if(value < x1)
-				return y1;
-			else if(value > x2)
-				return y2;
-			else {
-				float xd = x2 - x1;
-				if(xd != 0)
-					return (y2 - y1) / xd * (value-x1) + y1;
-				else
-					return 0;
-			}
 		}
 
 		/** Calculate minimum rate according to waiting time */
@@ -1690,38 +1589,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Return maximum metering rate */
 		private double getMaximumRate() {
 			return maximunRate;
-		}
-
-		/** Return Ramp Alpha Weight */
-		public double getAlphaWeight() {
-			double Wx = desiredWaitTime() - getCurrentWaitTime();
-			double Wmin = desiredWaitTime() - maxWaitTime();
-
-			/*
-			 * if the ramp queue detector is not available
-			 * Use the Occupancy data
-			 * Temporary - 62W53(Valley View)
-			 */
-			if(!isQueueActive) {
-				Wx = getDesiredOcc() - getCurrentOccupancy();
-				Wmin = getDesiredOcc() - getMaxOcc();
-			}
-
-			if(Wx > 0)
-				return AiMax;
-			else
-				return CaculateEquation((float)AiMin,
-					(float)AiMax, (float)Wmin, 0,(float)Wx);
-		}
-
-		/** Get desired occupancy */
-		public double getDesiredOcc() {
-			return KDesOcc;
-		}
-
-		/** Get maximum occupancy */
-		public double getMaxOcc() {
-			return MaxOcc;
 		}
 
 		/**
