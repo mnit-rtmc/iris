@@ -1337,10 +1337,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return getDefaultTarget(meter);
 		}
 
-		/** Get the previous cumulative demand. */
+		/** Get the current cumulative demand */
 		private double getCumulativeDemand() {
-			if(cumulativeDemand.size() > 0)
-				return cumulativeDemand.get(0);
+			Double d = cumulativeDemand.get(0);
+			if(d != null)
+				return d;
 			else
 				return 0;
 		}
@@ -1450,7 +1451,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double minimumR2 = 0;
 
 			double FEETFORMILE = 5280;
-			double CQtp = (cumulativeDemand.get(0) == null ? 0 : cumulativeDemand.get(0)) + getTvalue();
+			double CQtp = getCumulativeDemand() + getTvalue();
 			double Qscp = Ramp_K_JAM * meter.getStorage() * getLaneCount(meter);
 
 			if(Qscp == 0)
