@@ -70,9 +70,19 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	static protected final IDebugLog METER_LOG = new IDebugLog("meter");
 
 	/** Filter a releae rate for valid range */
-	static protected int filterRate(int r) {
-		r = Math.max(r, SystemAttributeHelper.getMeterMinRelease());
-		return Math.min(r, SystemAttributeHelper.getMeterMaxRelease());
+	static public int filterRate(int r) {
+		r = Math.max(r, getMinRelease());
+		return Math.min(r, getMaxRelease());
+	}
+
+	/** Get the absolute minimum release rate */
+	static public int getMinRelease() {
+		return SystemAttributeHelper.getMeterMinRelease();
+	}
+
+	/** Get the absolute maximum release rate */
+	static public int getMaxRelease() {
+		return SystemAttributeHelper.getMeterMaxRelease();
 	}
 
 	/** Calculate the minimum of two (possibly null) integers */

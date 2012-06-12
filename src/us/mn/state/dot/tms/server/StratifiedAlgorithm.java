@@ -36,7 +36,8 @@ import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
+import static us.mn.state.dot.tms.server.RampMeterImpl.getMinRelease;
 
 /**
  * Stratified metering algorithm
@@ -95,16 +96,6 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 
 	/** Number of minutes to flush meter before shutoff */
 	static protected final int FLUSH_MINUTES = 2;
-
-	/** Get the absolute minimum release rate */
-	static protected int getMinRelease() {
-		return SystemAttributeHelper.getMeterMinRelease();
-	}
-
-	/** Get the absolute maximum release rate */
-	static protected int getMaxRelease() {
-		return SystemAttributeHelper.getMeterMaxRelease();
-	}
 
 	/** States for all stratified zone corridors */
 	static protected HashMap<String, StratifiedAlgorithm> all_states =

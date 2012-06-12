@@ -24,8 +24,8 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.SystemAttributeHelper;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
+import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
 
 /**
  * Density-based Adaptive Metering with Variable Bottleneck
@@ -102,16 +102,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Number of trend steps for average density to check corridor state */
 	static private final int AVG_K_TREND_STEPS = steps(300);
-
-	/** Get the absolute minimum release rate */
-	static protected int getMinRelease() {
-		return SystemAttributeHelper.getMeterMinRelease();
-	}
-
-	/** Get the absolute maximum release rate */
-	static protected int getMaxRelease() {
-		return SystemAttributeHelper.getMeterMaxRelease();
-	}
 
 	/** States for all K adaptive algorithms */
 	static protected HashMap<String, KAdaptiveAlgorithm> ALL_ALGS =
@@ -1070,7 +1060,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 						continue;
 					int d = distanceFeet(en);
 					// distance to downstream entrance is less than 1 mile
-					if(d < 5280) {
+					if(d < FEET_PER_MILE) {
 						associatedEntrances.add(en);
 						en.associatedStation = this;
 					}
@@ -1153,13 +1143,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private double minimumRate = 0;
 
 		/** Maximum Rate */
-		private double maximunRate = 0;
+		private int maximunRate = 0;
 
 		/** How many time steps there's no bottleneck at downstream */
 		private int noBottleneckCount = 0;
 
-		/** Gamma Value for Max Rate - Maximum rate = target * Gv */
-		static private final double Gv = 1.3;
+		/** Ratio for max rate to target rate */
+		static private final float TARGET_MAX_RATIO = 1.3f;
 
 		/** Z value for Min Rate - Minimum rate = target * Zv */
 		static private final double Zv = 0.7;
@@ -1389,15 +1379,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate minimum rate */
 		private void calculateMinimumRate() {
-			double r1 = calculateMinRateUsingWT();
-			double r2 = calculateMinRateUsingStorage();
-
-			minimumRate = Math.max(r1, r2);
-
-			if(minimumRate < getMinRelease())
-				minimumRate = getMinRelease();
-			if(minimumRate > getMaximumRate())
-				minimumRate = getMaximumRate();
+			int r1 = (int)calculateMinRateUsingWT();
+			int r2 = (int)calculateMinRateUsingStorage();
+			minimumRate = RampMeterImpl.filterRate(
+				Math.max(r1, r2));
 		}
 
 		/**
@@ -1431,14 +1416,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double minimumR1 = 0;
 			double minimumR2 = 0;
 
-			double FEETFORMILE = 5280;
 			double CQtp = getCumulativeDemand() + getTargetDemand();
 			double Qscp = Ramp_K_JAM * meter.getStorage() * getLaneCount(meter);
 
 			if(Qscp == 0)
 				Qscp = 0;
 			else
-				Qscp = Qscp / FEETFORMILE;
+				Qscp = Qscp / FEET_PER_MILE;
 
 			double FlowStep = 3600 / STEP_SECONDS;
 
@@ -1464,12 +1448,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate maximum rate */
 		private void calculateMaximumRate() {
-			double target = getTargetDemand();
-			maximunRate =  Gv * target;
-			if(maximunRate < getMinRelease())
-				maximunRate = getMinRelease();
-			else if(maximunRate > getMaxRelease())
-				maximunRate = getMaxRelease();
+			int target = (int)getTargetDemand();
+			maximunRate =  RampMeterImpl.filterRate(Math.round(
+				target * TARGET_MAX_RATIO));
 		}
 
 		/** Get target demand rate.
@@ -1677,7 +1658,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Return maximum metering rate */
-		private double getMaximumRate() {
+		private int getMaximumRate() {
 			return maximunRate;
 		}
 
