@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
+import static us.mn.state.dot.tms.server.RampMeterImpl.filterRate;
 import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
 
 /**
@@ -1381,8 +1382,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void calculateMinimumRate() {
 			int r1 = (int)calculateMinRateUsingWT();
 			int r2 = (int)calculateMinRateUsingStorage();
-			minimumRate = RampMeterImpl.filterRate(
-				Math.max(r1, r2));
+			minimumRate = filterRate(Math.max(r1, r2));
 		}
 
 		/**
@@ -1449,7 +1449,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate maximum rate */
 		private void calculateMaximumRate() {
 			int target = (int)getTargetDemand();
-			maximunRate =  RampMeterImpl.filterRate(Math.round(
+			maximunRate =  filterRate(Math.round(
 				target * TARGET_MAX_RATIO));
 		}
 
