@@ -49,7 +49,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** Bottleneck Density */
-	static private final int K_BOTTLENECK = 25;
+	static private final int K_BOTTLENECK = 30;
 
 	/** Critical Density */
 	static private final int K_CRIT = 40;
