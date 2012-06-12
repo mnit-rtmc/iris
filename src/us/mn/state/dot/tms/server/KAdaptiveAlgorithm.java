@@ -651,18 +651,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private boolean checkStartFirst(StationNode bs, StationNode us,
 		EntranceNode en)
 	{
-		boolean satisfyDensityCondition = false;
+		boolean satisfyDensityCondition = true;
 		boolean satisfyRateCondition = false;
-
 		double segmentDensity = 0;
-		if(us != null)
-			segmentDensity = getAverageDensity(us, bs);
-		else
-			segmentDensity = bs.getAggregatedDensity();
-
-		if(segmentDensity >= bottleneckDensity())
-			satisfyDensityCondition = true;
-
+		final int DCHECKSTEP = START_STEPS - 1;
+		for(int i = 0; i < DCHECKSTEP; i++) {
+			if(en.countRateHistory() < DCHECKSTEP) {
+				satisfyDensityCondition = false;
+				break;
+			}
+			if(us != null)
+				segmentDensity = getAverageDensity(us, bs, i);
+			else
+				segmentDensity = bs.getAggregatedDensity(i);
+			if(segmentDensity < bottleneckDensity())
+				satisfyDensityCondition = false;
+		}
 		if(en.countRateHistory() >= START_STEPS) {
 			satisfyRateCondition = true;
 			for(int i = 0; i < START_STEPS; i++) {
