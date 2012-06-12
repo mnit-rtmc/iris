@@ -100,9 +100,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number of trend steps for average density to check corridor state */
 	static private final int AVG_K_TREND_STEPS = steps(300);
 
-	/** Factor to compute ramp demand from passage/merge flow */
-	static private final double PASSAGE_DEMAND_FACTOR = 1.15;
-
 	/** Get the absolute minimum release rate */
 	static protected int getMinRelease() {
 		return SystemAttributeHelper.getMeterMinRelease();
@@ -1149,9 +1146,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Is metering rate updated at current time step ? */
 		private boolean isRateUpdated = false;
 
-		/** Is queue detector activating? */
-		private boolean isQueueActive = true;
-
 		/** Minimum metering rate */
 		private double minimumRate = 0;
 
@@ -1281,8 +1275,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void updateState() {
 			isRateUpdated = false;
 
+			double demand = calculateRampDemand();
 			double p_flow = calculateRampFlow();
-			double demand = calculateRampDemand(p_flow);
 			double prevCd = getCumulativeDemand();
 
 			passageHistory.push(p_flow);
@@ -1295,13 +1289,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			/** Calcuate history */
 			rampOccupancyHistory.push(getCurrentOccupancy());
 
-			/** if the ramp queue detector is not available
-			 * Temporary - 62W53(Valley View) */
-			if(meter.getName().contains("M62W53"))
-				setQueueActive(false);
-			else
-				setQueueActive(true);
-
 			checkDetectorState();
 			calculateMinimumRate();
 			calculateMaximumRate();
@@ -1313,7 +1300,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				cumulativeDemand.clear();
 				cumulativePassage = 0;
 			}
-			if(!isQueueActive) {
+			if(!queue.isPerfect()) {
 				if(passageHistory.get(0) <= currentRate) {
 					cumulativeDemand.clear();
 					cumulativePassage = 0;
@@ -1342,16 +1329,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return 0;
 		}
 
-		/**
-		 * Calculate ramp demand
-		 */
-		private double calculateRampDemand(double p_flow) {
-			if(!isQueueActive)
-				return getDefaultTarget(meter);
+		/** Calculate ramp queue demand */
+		private int calculateRampDemand() {
 			if(queue.isPerfect())
 				return queue.getFlow();
 			else
-				return p_flow * PASSAGE_DEMAND_FACTOR;
+				return getDefaultTarget(meter);
 		}
 
 		/** Get the previous cumulative demand. */
@@ -1513,7 +1496,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 			/* If the ramp queue detector is not available
 			 * Use the fixed target value. */
-			if(!isQueueActive)
+			if(!queue.isPerfect())
 				return getDefaultTarget(meter);
 
 			// Set default Tvalue
@@ -1537,11 +1520,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return m.getTarget();
 			else
 				return getMaxRelease();
-		}
-
-		/** set Queue Active */
-		private void setQueueActive(boolean isactive) {
-			isQueueActive = isactive;
 		}
 
 		/**
