@@ -48,6 +48,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return seconds / STEP_SECONDS;
 	}
 
+	/** Get the time step index for a number of seconds */
+	static private int stepIndex(int seconds) {
+		int step_idx = steps(seconds);
+		return step_idx > 0 ? step_idx - 1 : 0;
+	}
+
 	/** Bottleneck Density */
 	static private final int K_BOTTLENECK = 30;
 
@@ -1131,6 +1137,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Associated station to metering */
 		private StationNode associatedStation;
 
+		/** Ramp flow at current time step */
+		private double currentFlow = 0;
+
 		/** Metering rate at current time step */
 		private double currentRate = 0;
 
@@ -1156,13 +1165,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		static private final double Gv = 1.3;
 
 		/** Z value for Min Rate - Minimum rate = Tvalue * Zv */
-		static private final double Zv = 0.6;
+		static private final double Zv = 0.7;
+
+		/** Waiting Time Gamma Value for MinimumRate
+		 * case1 = maxWaitTime * wtGamma */
+		static private final double wtGamma = 0.75;
+
+		/** Storage Gamma Value for MinimumRate case2 */
+		static private final double stoGamma = 0.75;
+
+		/** Ramp Jam Density */
+		static private final double Ramp_K_JAM = 140;
 
 		/** Most Recently used Tvalues */
 		private double TvalueHistory = 0;
 
-		/** Ramp Occupancy Threshold for Tvalue */
-		static private final double RampOccThreshold = 20;
+		/** Ramp Occupancy Threshold */
+		static private final double RampOccThreshold = 25;
 
 		/** Corresponding bottleneck */
 		private StationNode bottleneck;
@@ -1236,7 +1255,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			bypass.addDetectors(ds, LaneType.BYPASS);
 		}
 
-		/** Get the max wait time (seconds) */
+		/** Get the max wait time */
 		private int maxWaitTime() {
 			RampMeterImpl m = meter;
 			if(m != null)
@@ -1271,6 +1290,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			rampDemandHistory.push(demand);
 			cumulativeDemand.push(prevCd + demand);
 			meterWaitSecs = estimateTimeWaited();
+			currentFlow = p_flow;
 
 			/** Calcuate history */
 			rampOccupancyHistory.push(getCurrentOccupancy());
@@ -1282,8 +1302,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			else
 				setQueueActive(true);
 
+			checkDetectorState();
 			calculateMinimumRate();
 			calculateMaximumRate();
+		}
+
+		/** Check Detector State */
+		private void checkDetectorState() {
+			if(cumulativeDemand.get(0) < cumulativePassage) {
+				cumulativeDemand.clear();
+				cumulativePassage = 0;
+			}
+			if(!isQueueActive) {
+				if(passageHistory.get(0) <= currentRate) {
+					cumulativeDemand.clear();
+					cumulativePassage = 0;
+				}
+			}
 		}
 
 		/**
@@ -1311,6 +1346,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Calculate ramp demand
 		 */
 		private double calculateRampDemand(double p_flow) {
+			if(!isQueueActive)
+				return getDefaultTarget(meter);
 			if(queue.isPerfect())
 				return queue.getFlow();
 			else
@@ -1365,11 +1402,99 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return STEP_SECONDS * cumulativeDemand.size();
 		}
 
-		/** Calculate minimum rate according to waiting time */
+		/**
+		 * Add Curves Equation for minimumRate
+		 * y = ((1.0 * Tvalue) - (Gamma * Tvalue)) * X^2
+		 *     / Xmax^2
+		 *     + (Gamma * Tvalue)
+		 * @param Cmin
+		 * @param Cmax
+		 * @param x
+		 * @param Wmax
+		 * @return
+		 */
+		private double minimumRateEquation(double Cmin, double Cmax,
+			double x, double Xmax)
+		{
+			double E1 = (Cmax - Cmin) * Math.pow(x, 2);
+			if(E1 <= 0)
+				return Cmin;
+			return E1 / Math.pow(Xmax, 2) + Cmin;
+		}
+
+		/** Calculate minimum rate */
 		private void calculateMinimumRate() {
-			minimumRate = Zv * getTvalue();
+			double r1 = calculateMinRateUsingWT();
+			double r2 = calculateMinRateUsingStorage();
+
+			minimumRate = Math.max(r1, r2);
+
 			if(minimumRate < getMinRelease())
 				minimumRate = getMinRelease();
+			if(minimumRate > getMaximumRate())
+				minimumRate = getMaximumRate();
+		}
+
+		/**
+		 * Calculate MinimumRate using Waiting Time
+		 * @return
+		 */
+		private double calculateMinRateUsingWT() {
+			double minimumR1 = 0;
+			double minimumR2 = 0;
+			double Wt = maxWaitTime() * wtGamma;
+			double Cmax = getTvalue();
+			double Cmin = getTvalue() * Zv;
+
+			int wait_idx = stepIndex((int)Wt);
+
+			if(cumulativeDemand.size() - 1 < wait_idx) {
+				minimumR1 = currentFlow;
+				return minimumR1;
+			}
+
+			double Cd_Ago = cumulativeDemand.get(wait_idx);
+
+			minimumR1 = Cd_Ago - cumulativePassage;
+			minimumR2 = minimumRateEquation(Cmin, Cmax,
+				meterWaitSecs, Wt);
+			return Math.max(minimumR1, minimumR2);
+		}
+
+		/** Caculate MinimumRate using Ramp Storage */
+		private double calculateMinRateUsingStorage() {
+			double minimumR1 = 0;
+			double minimumR2 = 0;
+
+			double FEETFORMILE = 5280;
+			double CQtp = (cumulativeDemand.get(0) == null ? 0 : cumulativeDemand.get(0)) + getTvalue();
+			double Qscp = Ramp_K_JAM * meter.getStorage() * getLaneCount(meter);
+
+			if(Qscp == 0)
+				Qscp = 0;
+			else
+				Qscp = Qscp / FEETFORMILE;
+
+			double FlowStep = 3600 / STEP_SECONDS;
+
+			Qscp = Qscp * stoGamma;
+			minimumR1 = CQtp - cumulativePassage - Qscp * FlowStep;
+
+			double Cmax = getTvalue();
+			double Cmin = getTvalue() * Zv;
+			double Qstore = (CQtp - cumulativePassage);
+			Qstore = Qstore == 0 ? 0 : Qstore / FlowStep;
+
+			minimumR2 = minimumRateEquation(Cmin, Cmax, Qstore, Qscp);
+
+			return Math.max(minimumR1, minimumR2);
+		}
+
+		private int getLaneCount(RampMeterImpl meter) {
+			if(meter.getMeterType() > 0)
+				return 2;
+			else
+				return 1;
 		}
 
 		/** Calculate maximum rate */
@@ -1484,6 +1609,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		private void stopMetering() {
 			isMetering = false;
+			currentFlow = 0;
 			currentRate = 0;
 			cumulativeDemand.clear();
 			cumulativePassage = 0;
