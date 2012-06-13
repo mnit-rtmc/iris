@@ -1130,20 +1130,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Node to manage entrance onto corridor */
 	class EntranceNode extends Node {
 
-		/** Meter at this entrance */
-		private RampMeterImpl meter;
-
 		/** Associated station to metering */
 		private StationNode associatedStation;
 
-		/** Current metering rate (vehicles / hour) */
-		private int currentRate = 0;
+		/** Meter at this entrance */
+		private RampMeterImpl meter;
 
 		/** Is it metering? */
 		private boolean isMetering = false;
 
+		/** Has been stopped before */
+		private boolean hasBeenStoped = false;
+
 		/** Is metering rate updated at current time step? */
 		private boolean isRateUpdated = false;
+
+		/** Current metering rate (vehicles / hour) */
+		private int currentRate = 0;
 
 		/** Minimum metering rate (vehicles / hour) */
 		private int minimumRate = 0;
@@ -1153,9 +1156,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** How many time steps there's no bottleneck at downstream */
 		private int noBottleneckCount = 0;
-
-		/** Has been stopped before */
-		private boolean hasBeenStoped = false;
 
 		/** Queue detector set */
 		private final DetectorSet queue = new DetectorSet();
@@ -1176,7 +1176,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final BoundedSampleHistory demandHist =
 			new BoundedSampleHistory(steps(300));
 
-		/** Cumulative demand history */
+		/** Cumulative demand history (vehicles / hour) */
 		private final BoundedSampleHistory demandAccumHist =
 			new BoundedSampleHistory(steps(300));
 
@@ -1186,7 +1186,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Passage flow rate at current time step (vehicles / hour) */
 		private int passage_rate = 0;
 
-		/** Cumulative passage flow rate */
+		/** Cumulative passage flow rate (vehicles / hour) */
 		private int passage_accum = 0;
 
 		/** Ramp passage history (vehicles / hour) */
@@ -1202,11 +1202,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Estimated wait time at meter (seconds) */
 		private int meterWaitSecs = 0;
 
-		/** Metering rate flow history */
+		/** Metering rate flow history (vehicles / hour) */
 		private final BoundedSampleHistory rateHist =
 			new BoundedSampleHistory(MAX_STEPS);
 
-		/** Segment density history */
+		/** Segment density history (vehicles / mile) */
 		private final BoundedSampleHistory segmentDensityHist =
 			new BoundedSampleHistory(MAX_STEPS);
 
