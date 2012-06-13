@@ -1199,9 +1199,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Time queue has been empty (steps) */
 		private int queueEmptyCount = 0;
 
-		/** Estimated wait time at meter (seconds) */
-		private int meterWaitSecs = 0;
-
 		/** Metering rate flow history (vehicles / hour) */
 		private final BoundedSampleHistory rateHist =
 			new BoundedSampleHistory(MAX_STEPS);
@@ -1274,7 +1271,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			isRateUpdated = false;
 			updateDemandState();
 			updatePassageState();
-			meterWaitSecs = estimateTimeWaited();
 			updateQueueState();
 			calculateMinimumRate();
 			calculateMaximumRate();
@@ -1430,7 +1426,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate minimum rate */
 		private void calculateMinimumRate() {
-			int r1 = (int)calculateMinRateUsingWT();
+			int r1 = calculateMinRateUsingWT();
 			int r2 = (int)calculateMinRateUsingStorage();
 			minimumRate = filterRate(Math.max(r1, r2));
 		}
@@ -1439,16 +1435,24 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Calculate MinimumRate using Waiting Time
 		 * @return
 		 */
-		private double calculateMinRateUsingWT() {
-			int Wt = targetWaitTime();
-			int wait_idx = stepIndex(Wt);
-			Double Cd_Ago = demandAccumHist.get(wait_idx);
-			if(Cd_Ago == null)
-				return target_demand;
-			double m1 = (double)Cd_Ago - passage_accum;
+		private int calculateMinRateUsingWT() {
+			int wait_secs = estimateTimeWaited();
+			int wait_target = targetWaitTime();
+			int m1 = minTargetWaitRate();
 			double m2 = minimumRateEquation(targetMinRate(),
-				target_demand, meterWaitSecs, Wt);
+				target_demand, wait_secs, wait_target);
 			return (int)Math.round(Math.max(m1, m2));
+		}
+
+		/** Calculate minimum rate from target wait (vehicles / hour) */
+		private int minTargetWaitRate() {
+			int wait_target = targetWaitTime();
+			int wait_idx = stepIndex(wait_target);
+			Double Cd_Ago = demandAccumHist.get(wait_idx);
+			if(Cd_Ago != null)
+				return Cd_Ago.intValue() - passage_accum;
+			else
+				return target_demand;
 		}
 
 		/** Caculate MinimumRate using Ramp Storage */
