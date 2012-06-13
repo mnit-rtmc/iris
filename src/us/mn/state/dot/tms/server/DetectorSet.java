@@ -144,6 +144,11 @@ public class DetectorSet {
 		return isDefined();
 	}
 
+	/** Test if a set of green detectors is OK */
+	public boolean isGoodGreen() {
+		return size() > 0 && isNotBad();
+	}
+
 	/** Get the current flow rate of the detector set.
 		Note: assumes that isGood returned true. */
 	public int getFlow() {

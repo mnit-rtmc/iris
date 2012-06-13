@@ -58,6 +58,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Queue occupancy override threshold */
 	static private final int QUEUE_OCC_THRESHOLD = 25;
 
+	/** Time queue must be empty before resetting accumulators (seconds) */
+	static private final int QUEUE_EMPTY_TIMEOUT = 90;
+
 	/** Bottleneck Density */
 	static private final int K_BOTTLENECK = 30;
 
@@ -565,7 +568,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if(upstream != null)
 			Kt = getAverageDensity(upstream, bottleneck);
 
-		entrance.saveSegmentDensityHistory(Kt);
+		entrance.saveSegmentDensity(Kt);
 
 		double Rmin = entrance.getMinimumRate();
 		double Rmax = entrance.getMaximumRate();
@@ -1179,12 +1182,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Bypass detector set */
 		private final DetectorSet bypass = new DetectorSet();
 
+		/** Green count detector set */
+		private final DetectorSet green = new DetectorSet();
+
 		/** Queue demand history (vehicles / hour) */
-		private final BoundedSampleHistory demandHistory =
+		private final BoundedSampleHistory demandHist =
 			new BoundedSampleHistory(steps(300));
 
 		/** Cumulative demand history */
-		private final BoundedSampleHistory cumulativeDemand =
+		private final BoundedSampleHistory demandAccumHist =
 			new BoundedSampleHistory(steps(300));
 
 		/** Target queue demand rate (vehicles / hour) */
@@ -1194,21 +1200,27 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int passage_rate = 0;
 
 		/** Cumulative passage flow rate */
-		private int cumulativePassage = 0;
+		private int passage_accum = 0;
+
+		/** Ramp passage history (vehicles / hour) */
+		private final BoundedSampleHistory passageHist =
+			new BoundedSampleHistory(MAX_STEPS);
+
+		/** Cumulative green flow rate */
+		private int green_accum = 0;
+
+		/** Time queue has been empty (seconds) */
+		private int queueEmptySecs = 0;
 
 		/** Estimated wait time at meter (seconds) */
 		private int meterWaitSecs = 0;
 
 		/** Metering rate flow history */
-		private final BoundedSampleHistory rateHistory =
+		private final BoundedSampleHistory rateHist =
 			new BoundedSampleHistory(MAX_STEPS);
 
 		/** Segment density history */
-		private final BoundedSampleHistory segmentDensityHistory =
-			new BoundedSampleHistory(MAX_STEPS);
-
-		/** Ramp passage history */
-		private final BoundedSampleHistory passageHistory =
+		private final BoundedSampleHistory segmentDensityHist =
 			new BoundedSampleHistory(MAX_STEPS);
 
 		/**
@@ -1228,11 +1240,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			passage.clear();
 			merge.clear();
 			bypass.clear();
+			green.clear();
 			DetectorSet ds = meter.getDetectorSet();
 			queue.addDetectors(ds, LaneType.QUEUE);
 			passage.addDetectors(ds, LaneType.PASSAGE);
 			merge.addDetectors(ds, LaneType.MERGE);
 			bypass.addDetectors(ds, LaneType.BYPASS);
+			green.addDetectors(ds, LaneType.GREEN);
 		}
 
 		/**
@@ -1259,7 +1273,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get the current cumulative demand */
 		private double getCumulativeDemand() {
-			Double d = cumulativeDemand.get(0);
+			Double d = demandAccumHist.get(0);
 			if(d != null)
 				return d;
 			else
@@ -1277,7 +1291,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			updateDemandState();
 			updatePassageState();
 			meterWaitSecs = estimateTimeWaited();
-			checkDetectorState();
+			updateQueueState();
 			calculateMinimumRate();
 			calculateMaximumRate();
 		}
@@ -1285,8 +1299,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Update ramp queue demand state */
 		private void updateDemandState() {
 			int demand = calculateQueueDemand();
-			demandHistory.push((double)demand);
-			cumulativeDemand.push(getCumulativeDemand() + demand);
+			demandHist.push((double)demand);
+			demandAccumHist.push(getCumulativeDemand() + demand);
 			target_demand = calculateTargetDemand();
 		}
 
@@ -1301,7 +1315,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate target demand rate at queue detector.
 		 * @return Target demand flow rate (vehicles / hour) */
 		private int calculateTargetDemand() {
-			Double avg_demand = demandHistory.average();
+			Double avg_demand = demandHist.average();
 			if(avg_demand != null) {
 				int ad = (int)Math.round(avg_demand);
 				if(isQueueOccupancyHigh() && ad < target_demand)
@@ -1314,13 +1328,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Update ramp passage output state */
 		private void updatePassageState() {
-			passage_rate = calculateRampFlow();
-			passageHistory.push((double)passage_rate);
-			cumulativePassage += passage_rate;
+			passage_rate = calculatePassageRate();
+			passageHist.push((double)passage_rate);
+			passage_accum += passage_rate;
+			green_accum += green.getFlow();
 		}
 
 		/** Calculate passage flow rate (vehicles / hour) */
-		private int calculateRampFlow() {
+		private int calculatePassageRate() {
 			if(passage.isPerfect())
 				return passage.getFlow();
 			else {
@@ -1337,25 +1352,46 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return 0;
 		}
 
-		/** Check Detector State */
-		private void checkDetectorState() {
-			if(cumulativeDemand.get(0) < cumulativePassage) {
-				cumulativeDemand.clear();
-				cumulativePassage = 0;
-			}
-			if(!queue.isPerfect()) {
-				if(passageHistory.get(0) <= currentRate) {
-					cumulativeDemand.clear();
-					cumulativePassage = 0;
-				}
-			}
+		/** Update queue state */
+		private void updateQueueState() {
+			if(isQueueEmpty())
+				queueEmptySecs += STEP_SECONDS;
+			else
+				queueEmptySecs = 0;
+			if(queueEmptySecs > QUEUE_EMPTY_TIMEOUT)
+				resetAccumulators();
+		}
+
+		/** Check if the meter queue is empty */
+		private boolean isQueueEmpty() {
+			return !isQueueOccupancyHigh() &&
+			       (isDemandBelowPassage() ||isPassageBelowGreen());
+		}
+
+		/** Check if cumulative demand is below cumulative passage */
+		private boolean isDemandBelowPassage() {
+			return getCumulativeDemand() < passage_accum;
+		}
+
+		/** Check if cumulative passage is below cumulative green */
+		private boolean isPassageBelowGreen() {
+			return green.isGoodGreen() &&
+			       passage_accum < green_accum;
+		}
+
+		/** Reset the demand / passage accumulators */
+		private void resetAccumulators() {
+			demandAccumHist.clear();
+			passage_accum = 0;
+			green_accum = 0;
+			queueEmptySecs = 0;
 		}
 
 		/** Estimate time waited at meter (seconds) */
 		private int estimateTimeWaited() {
-			for(int i = 0; i < cumulativeDemand.size(); i++) {
-				double dem = cumulativeDemand.get(i);
-				double pex = cumulativePassage - dem;
+			for(int i = 0; i < demandAccumHist.size(); i++) {
+				double dem = demandAccumHist.get(i);
+				double pex = passage_accum - dem;
 				/* Is current cumulative passage greater than
 				 * cumulative demand at this time step? */
 				if(pex > 0) {
@@ -1363,7 +1399,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 						return 0;
 					double st = i;
 					/* Demand at next step */
-					double qd = cumulativeDemand.get(i-1) -
+					double qd = demandAccumHist.get(i-1) -
 						dem;
 					/* subtract ratio of excess passage
 					 * to demand at next step */
@@ -1376,7 +1412,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 						return 0;
 				}
 			}
-			return STEP_SECONDS * cumulativeDemand.size();
+			return STEP_SECONDS * demandAccumHist.size();
 		}
 
 		/**
@@ -1420,14 +1456,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 			int wait_idx = stepIndex(Wt);
 
-			if(cumulativeDemand.size() - 1 < wait_idx) {
+			if(demandAccumHist.size() - 1 < wait_idx) {
 				minimumR1 = passage_rate;
 				return minimumR1;
 			}
 
-			double Cd_Ago = cumulativeDemand.get(wait_idx);
+			double Cd_Ago = demandAccumHist.get(wait_idx);
 
-			minimumR1 = Cd_Ago - cumulativePassage;
+			minimumR1 = Cd_Ago - passage_accum;
 			minimumR2 = minimumRateEquation(Cmin, Cmax,
 				meterWaitSecs, Wt);
 			return Math.max(minimumR1, minimumR2);
@@ -1449,11 +1485,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double FlowStep = 3600 / STEP_SECONDS;
 
 			Qscp = Qscp * stoGamma;
-			minimumR1 = CQtp - cumulativePassage - Qscp * FlowStep;
+			minimumR1 = CQtp - passage_accum - Qscp * FlowStep;
 
 			double Cmax = target_demand;
 			double Cmin = calculateTargetMinRate();
-			double Qstore = (CQtp - cumulativePassage);
+			double Qstore = CQtp - passage_accum;
 			Qstore = Qstore == 0 ? 0 : Qstore / FlowStep;
 
 			minimumR2 = minimumRateEquation(Cmin, Cmax, Qstore, Qscp);
@@ -1562,9 +1598,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			isMetering = false;
 			passage_rate = 0;
 			currentRate = 0;
-			cumulativeDemand.clear();
-			cumulativePassage = 0;
-			rateHistory.clear();
+			resetAccumulators();
+			rateHist.clear();
 			noBottleneckCount = 0;
 			hasBeenStoped = true;
 		}
@@ -1589,7 +1624,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param Rnext
 		 */
 		private void saveRateHistory(double Rnext) {
-			rateHistory.push(Rnext);
+			rateHist.push(Rnext);
 		}
 
 		/**
@@ -1597,7 +1632,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return
 		 */
 		private int countRateHistory() {
-			return rateHistory.size();
+			return rateHist.size();
 		}
 
 		/**
@@ -1606,7 +1641,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return ramp flow at 'prevStep' time steps ago
 		 */
 		private double getFlow(int prevStep) {
-			return passageHistory.get(prevStep);
+			return passageHist.get(prevStep);
 		}
 
 		/**
@@ -1620,7 +1655,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Initial rate = average(last 90 seconds) or MAX_RATE */
 		private double getInitialRate() {
-			Double flow = passageHistory.average(0, steps(90));
+			Double flow = passageHist.average(0, steps(90));
 			if(flow != null)
 				return flow;
 			else
@@ -1632,22 +1667,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return metering rate
 		 */
 		private double getRate(int prevStep) {
-			return rateHistory.get(prevStep);
+			return rateHist.get(prevStep);
 		}
 
 		/** Start metering */
 		private void startMetering() {
 			isMetering = true;
-			cumulativeDemand.clear();
-			cumulativePassage = 0;
+			resetAccumulators();
 		}
 
 		/**
-		 * Save segment density history
+		 * Save segment density.
 		 * @param Kt
 		 */
-		private void saveSegmentDensityHistory(double Kt) {
-			segmentDensityHistory.push(Kt);
+		private void saveSegmentDensity(double Kt) {
+			segmentDensityHist.push(Kt);
 		}
 
 		/**
@@ -1656,7 +1690,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return segment density at 'prevStep' time steps ago
 		 */
 		private double getSegmentDensity(int prevStep) {
-			return segmentDensityHistory.get(prevStep);
+			return segmentDensityHist.get(prevStep);
 		}
 
 		/**
