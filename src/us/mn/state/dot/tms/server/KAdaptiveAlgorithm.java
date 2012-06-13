@@ -44,37 +44,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number of seconds for one time step */
 	static private final int STEP_SECONDS = 30;
 
-	/** Calculate the number of steps for an interval */
-	static private int steps(int seconds) {
-		return seconds / STEP_SECONDS;
-	}
-
-	/** Get the time step index for a number of seconds */
-	static private int stepIndex(int seconds) {
-		int step_idx = steps(seconds);
-		return step_idx > 0 ? step_idx - 1 : 0;
-	}
-
-	/** Queue occupancy override threshold */
-	static private final int QUEUE_OCC_THRESHOLD = 25;
-
-	/** Time queue must be empty before resetting accumulators (seconds) */
-	static private final int QUEUE_EMPTY_TIMEOUT = 90;
-
-	/** Bottleneck Density */
+	/** Bottleneck density (vehicles / mile) */
 	static private final int K_BOTTLENECK = 30;
 
-	/** Critical Density */
+	/** Critical density (vehicles / mile) */
 	static private final int K_CRIT = 40;
 
-	/** Desired Density */
+	/** Desired density (vehicles / mile) */
 	static private final double K_DES = K_CRIT * 0.8;
 
-	/** Jam Density */
+	/** Jam density (vehicles / mile) */
 	static private final int K_JAM = 180;
 
+	/** Ramp queue jam density (vehicles / mile) */
+	static private final int K_JAM_RAMP = 140;
+
 	/** Rate value for checking if metering is started */
-	static private final double K_START_THRESH = 0.8;
+	static private final double START_FLOW_RATIO = 0.8;
 
 	/** Acceleration threshold to decide bottleneck */
 	static private final int A_BOTTLENECK = 1000;
@@ -106,6 +92,35 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Number of trend steps for average density to check corridor state */
 	static private final int AVG_K_TREND_STEPS = steps(300);
+
+	/** Queue occupancy override threshold */
+	static private final int QUEUE_OCC_THRESHOLD = 25;
+
+	/** Number of steps queue must be empty before resetting accumulators */
+	static private final int QUEUE_EMPTY_STEPS = steps(90);
+
+	/** Ratio for max rate to target rate */
+	static private final float TARGET_MAX_RATIO = 1.3f;
+
+	/** Ratio for min rate to target rate */
+	static private final float TARGET_MIN_RATIO = 0.7f;
+
+	/** Ratio for target waiting time to max wait time */
+	static private final float WAIT_TARGET_RATIO = 0.75f;
+
+	/** Ratio for target storage to max storage */
+	static private final float STORAGE_TARGET_RATIO = 0.75f;
+
+	/** Calculate the number of steps for an interval */
+	static private int steps(int seconds) {
+		return seconds / STEP_SECONDS;
+	}
+
+	/** Get the time step index for a number of seconds */
+	static private int stepIndex(int seconds) {
+		int step_idx = steps(seconds);
+		return step_idx > 0 ? step_idx - 1 : 0;
+	}
 
 	/** States for all K adaptive algorithms */
 	static protected HashMap<String, KAdaptiveAlgorithm> ALL_ALGS =
@@ -672,7 +687,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			for(int i = 0; i < START_STEPS; i++) {
 				double q = en.getFlow(i);
 				double rate = en.getRate(i);
-				if(q < K_START_THRESH * rate)
+				if(q < START_FLOW_RATIO * rate)
 					satisfyRateCondition = false;
 			}
 		}
@@ -717,7 +732,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			// Start Condition 2 : Merging flow >= KstartRate
 			double q = en.getFlow(i);
 			double rate = en.getRate(i);
-			if(q < K_START_THRESH * rate)
+			if(q < START_FLOW_RATIO * rate)
 				return false;
 		}
 
@@ -1149,21 +1164,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** How many time steps there's no bottleneck at downstream */
 		private int noBottleneckCount = 0;
 
-		/** Ratio for max rate to target rate */
-		static private final float TARGET_MAX_RATIO = 1.3f;
-
-		/** Ratio for min rate to target rate */
-		static private final float TARGET_MIN_RATIO = 0.7f;
-
-		/** Ratio for target waiting time to max wait time */
-		static private final float WAIT_TARGET_RATIO = 0.75f;
-
-		/** Storage Gamma Value for MinimumRate case2 */
-		static private final double stoGamma = 0.75;
-
-		/** Ramp Jam Density */
-		static private final double Ramp_K_JAM = 140;
-
 		/** Corresponding bottleneck */
 		private StationNode bottleneck;
 
@@ -1209,8 +1209,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Cumulative green flow rate */
 		private int green_accum = 0;
 
-		/** Time queue has been empty (seconds) */
-		private int queueEmptySecs = 0;
+		/** Time queue has been empty (steps) */
+		private int queueEmptyCount = 0;
 
 		/** Estimated wait time at meter (seconds) */
 		private int meterWaitSecs = 0;
@@ -1352,10 +1352,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Update queue state */
 		private void updateQueueState() {
 			if(isQueueEmpty())
-				queueEmptySecs += STEP_SECONDS;
+				queueEmptyCount++;
 			else
-				queueEmptySecs = 0;
-			if(queueEmptySecs > QUEUE_EMPTY_TIMEOUT)
+				queueEmptyCount = 0;
+			if(queueEmptyCount > QUEUE_EMPTY_STEPS)
 				resetAccumulators();
 		}
 
@@ -1381,7 +1381,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			demandAccumHist.clear();
 			passage_accum = 0;
 			green_accum = 0;
-			queueEmptySecs = 0;
+			queueEmptyCount = 0;
 		}
 
 		/** Estimate time waited at meter (seconds) */
@@ -1472,7 +1472,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double minimumR2 = 0;
 
 			double CQtp = getCumulativeDemand() + target_demand;
-			double Qscp = Ramp_K_JAM * meter.getStorage() * getLaneCount(meter);
+			double Qscp = K_JAM_RAMP * meter.getStorage() * getLaneCount(meter);
 
 			if(Qscp == 0)
 				Qscp = 0;
@@ -1481,7 +1481,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 			double FlowStep = 3600 / STEP_SECONDS;
 
-			Qscp = Qscp * stoGamma;
+			Qscp = Qscp * STORAGE_TARGET_RATIO;
 			minimumR1 = CQtp - passage_accum - Qscp * FlowStep;
 
 			double Cmax = target_demand;
