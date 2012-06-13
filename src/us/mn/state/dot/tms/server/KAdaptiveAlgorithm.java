@@ -817,9 +817,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return 0;
 	}
 
-	/**
-	 * Class : Node State to manage station and entrance (ancestor class)
-	 */
+	/** Node to manage station or entrance */
 	abstract protected class Node {
 
 		/** R_Node reference */
@@ -869,9 +867,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		abstract protected void debug(StringBuilder sb);
 	}
 
-	/**
-	 * Class : Station State to manage station
-	 */
+	/** Node to manage station on corridor */
 	class StationNode extends Node {
 
 		/** StationImpl mapping this state */
@@ -1131,9 +1127,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/**
-	 * Class : Entrance State to manage entrance
-	 */
+	/** Node to manage entrance onto corridor */
 	class EntranceNode extends Node {
 
 		/** Meter at this entrance */
