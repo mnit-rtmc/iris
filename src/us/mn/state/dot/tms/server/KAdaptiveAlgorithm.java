@@ -1373,30 +1373,39 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Estimate time waited at meter (seconds) */
 		private int estimateTimeWaited() {
+			/* Iterate backwards through time steps */
 			for(int i = 0; i < demandAccumHist.size(); i++) {
 				double dem = demandAccumHist.get(i);
 				double pex = passage_accum - dem;
-				/* Is current cumulative passage greater than
-				 * cumulative demand at this time step? */
-				if(pex > 0) {
-					if(i == 0)
-						return 0;
-					double st = i;
-					/* Demand at next step */
-					double qd = demandAccumHist.get(i-1) -
-						dem;
-					/* subtract ratio of excess passage
-					 * to demand at next step */
-					if(qd > 0)
-						st -= pex / qd;
-					if(st > 0) {
-						return Math.round(STEP_SECONDS *
-							(float)st);
-					} else
-						return 0;
-				}
+				/* Is this time step longer than wait time? */
+				if(pex >= 0)
+					return estimateTimeWaited(i, dem, pex);
 			}
+			/* Wait time was longer than demand history... */
 			return STEP_SECONDS * demandAccumHist.size();
+		}
+
+		/** Estimate time waited from the given time step.
+		 * @param i Time step (0 for current).
+		 * @param dem Demand at time step.
+		 * @param pex Excess passage flow.
+		 * @return Estimate of time waited (seconds). */
+		private int estimateTimeWaited(int i, double dem, double pex) {
+			if(i == 0)
+				return 0;
+			/* Number of time steps waited (non-integer) */
+			double w_steps = i;
+			/* Demand from next time step */
+			double qd = demandAccumHist.get(i - 1) - dem;
+			if(qd > 0) {
+				/* fraction of time step to reduce wait time */
+				double s_frac = pex / qd;
+				w_steps -= s_frac;
+			}
+			if(w_steps > 0)
+				return (int)Math.round(STEP_SECONDS * w_steps);
+			else
+				return 0;
 		}
 
 		/**
@@ -1423,8 +1432,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void calculateMinimumRate() {
 			int r1 = (int)calculateMinRateUsingWT();
 			int r2 = (int)calculateMinRateUsingStorage();
-			int r3 = calculateTargetMinRate();
-			minimumRate = filterRate(Math.max(Math.max(r1, r2),r3));
+			minimumRate = filterRate(Math.max(r1, r2));
 		}
 
 		/**
@@ -1432,25 +1440,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return
 		 */
 		private double calculateMinRateUsingWT() {
-			double minimumR1 = 0;
-			double minimumR2 = 0;
 			int Wt = targetWaitTime();
-			double Cmax = target_demand;
-			double Cmin = calculateTargetMinRate();
-
 			int wait_idx = stepIndex(Wt);
-
-			if(demandAccumHist.size() - 1 < wait_idx) {
-				minimumR1 = passage_rate;
-				return minimumR1;
-			}
-
-			double Cd_Ago = demandAccumHist.get(wait_idx);
-
-			minimumR1 = Cd_Ago - passage_accum;
-			minimumR2 = minimumRateEquation(Cmin, Cmax,
-				meterWaitSecs, Wt);
-			return Math.max(minimumR1, minimumR2);
+			Double Cd_Ago = demandAccumHist.get(wait_idx);
+			if(Cd_Ago == null)
+				return target_demand;
+			double m1 = (double)Cd_Ago - passage_accum;
+			double m2 = minimumRateEquation(targetMinRate(),
+				target_demand, meterWaitSecs, Wt);
+			return (int)Math.round(Math.max(m1, m2));
 		}
 
 		/** Caculate MinimumRate using Ramp Storage */
@@ -1472,7 +1470,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			minimumR1 = CQtp - passage_accum - Qscp * FlowStep;
 
 			double Cmax = target_demand;
-			double Cmin = calculateTargetMinRate();
+			double Cmin = targetMinRate();
 			double Qstore = CQtp - passage_accum;
 			Qstore = Qstore == 0 ? 0 : Qstore / FlowStep;
 
@@ -1492,7 +1490,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Calculate target minimum rate.
 		 * @return Target minimum rate (vehicles / hour)
 		 */
-		private int calculateTargetMinRate() {
+		private int targetMinRate() {
 			return Math.round(target_demand * TARGET_MIN_RATIO);
 		}
 
