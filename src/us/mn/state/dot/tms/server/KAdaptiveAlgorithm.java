@@ -1131,19 +1131,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Associated station to metering */
 		private StationNode associatedStation;
 
-		/** Metering rate at current time step */
-		private double currentRate = 0;
+		/** Current metering rate (vehicles / hour) */
+		private int currentRate = 0;
 
-		/** Is it metering ? */
+		/** Is it metering? */
 		private boolean isMetering = false;
 
-		/** Is metering rate updated at current time step ? */
+		/** Is metering rate updated at current time step? */
 		private boolean isRateUpdated = false;
 
-		/** Minimum metering rate */
-		private double minimumRate = 0;
+		/** Minimum metering rate (vehicles / hour) */
+		private int minimumRate = 0;
 
-		/** Maximum Rate */
+		/** Maximum metering rate (vehicles / hour) */
 		private int maximunRate = 0;
 
 		/** How many time steps there's no bottleneck at downstream */
@@ -1223,10 +1223,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final BoundedSampleHistory segmentDensityHist =
 			new BoundedSampleHistory(MAX_STEPS);
 
-		/**
-		 * Create a new entrance node.
-		 * @param rnode
-		 */
+		/** Create a new entrance node */
 		public EntranceNode(R_NodeImpl rnode, float m, Node prev) {
 			super(rnode, m, prev);
 		}
@@ -1538,10 +1535,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void setRate(double Rnext) {
 			if(!hasMeter())
 				return;
-			currentRate = Rnext;
+			currentRate = (int)Math.round(Rnext);
 			isRateUpdated = true;
-			int releaseRate = (int) Math.round(Rnext);
-			meter.setRatePlanned(releaseRate);
+			meter.setRatePlanned(currentRate);
 		}
 
 		/**
@@ -1645,19 +1641,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/**
-		 * Return current metering rate
+		 * Get current metering rate
 		 * @return metering rate
 		 */
-		private double getRate() {
-			double r = currentRate;
+		private int getRate() {
+			int r = currentRate;
 			return r > 0 ? r : getInitialRate();
 		}
 
 		/** Initial rate = average(last 90 seconds) or MAX_RATE */
-		private double getInitialRate() {
+		private int getInitialRate() {
 			Double flow = passageHist.average(0, steps(90));
 			if(flow != null)
-				return flow;
+				return (int)Math.round(flow);
 			else
 				return getMaxRelease();  // no flow
 		}
@@ -1697,7 +1693,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Return minimum metering rate
 		 * @return minimum metering rate
 		 */
-		private double getMinimumRate() {
+		private int getMinimumRate() {
 			return minimumRate;
 		}
 
