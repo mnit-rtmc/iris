@@ -508,7 +508,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			en.saveRateHistory(Rnext);
 			if(!checkStartCondition(bottleneck, null, en))
 				continue;
-			en.setBottleneck(bottleneck);
 			en.setRate(Rnext);
 		}
 
@@ -536,7 +535,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			en.saveRateHistory(Rnext);
 			if(!checkStartCondition(bottleneck, upStation, en))
 				continue;
-			en.setBottleneck(bottleneck);
 			en.setRate(Rnext);
 		}
 	}
@@ -970,9 +968,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return increasing || high_k;
 		}
 
-		/**
-		 * Clear bottleneck state.
-		 */
+		/** Clear bottleneck state */
 		protected void clearBottleneck() {
 			isPrevBottleneck = isBottleneck;
 			isBottleneck = false;
@@ -1163,9 +1159,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** How many time steps there's no bottleneck at downstream */
 		private int noBottleneckCount = 0;
-
-		/** Corresponding bottleneck */
-		private StationNode bottleneck;
 
 		/** Has been stopped before */
 		private boolean hasBeenStoped = false;
@@ -1600,20 +1593,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			hasBeenStoped = true;
 		}
 
-		/**
-		 * Set bottleneck station
-		 * @param bottleneck
-		 */
-		private void setBottleneck(StationNode bottleneck) {
-			this.bottleneck = bottleneck;
-		}
-
-		/**
-		 * Clear bottleneck state.
-		 */
-		protected void clearBottleneck() {
-			setBottleneck(null);
-		}
+		/** Clear bottleneck state */
+		protected void clearBottleneck() { }
 
 		/**
 		 * Save metering rate history
