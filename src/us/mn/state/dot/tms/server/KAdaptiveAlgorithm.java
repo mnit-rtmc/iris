@@ -1167,7 +1167,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int minimumRate = 0;
 
 		/** Maximum metering rate (vehicles / hour) */
-		private int maximunRate = 0;
+		private int maximumRate = 0;
 
 		/** How many time steps there's no bottleneck at downstream */
 		private int noBottleneckCount = 0;
@@ -1293,7 +1293,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			updatePassageState();
 			updateQueueState();
 			minimumRate = calculateMinimumRate();
-			calculateMaximumRate();
+			maximumRate = calculateMaximumRate();
 		}
 
 		/** Update ramp queue demand state */
@@ -1545,8 +1545,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Calculate maximum rate */
-		private void calculateMaximumRate() {
-			maximunRate = filterRate(Math.round(target_demand *
+		private int calculateMaximumRate() {
+			return filterRate(Math.round(target_demand *
 				TARGET_MAX_RATIO));
 		}
 
@@ -1726,7 +1726,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Return maximum metering rate */
 		private int getMaximumRate() {
-			return maximunRate;
+			return maximumRate;
 		}
 
 		/**
