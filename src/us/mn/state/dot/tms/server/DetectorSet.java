@@ -144,9 +144,18 @@ public class DetectorSet {
 		return isDefined();
 	}
 
-	/** Test if a set of green detectors is OK */
-	public boolean isGoodGreen() {
-		return size() > 0 && isNotBad();
+	/** Get the current volume of the detector set */
+	public int getVolume() {
+		boolean defined = false;
+		int vol = 0;
+		for(DetectorImpl det: detectors) {
+			int v = det.getVolume();
+			if(v < 0)
+				return v;
+			vol += v;
+			defined = true;
+		}
+		return defined ? vol : MISSING_DATA;
 	}
 
 	/** Get the current flow rate of the detector set.

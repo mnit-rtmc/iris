@@ -380,6 +380,11 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		       super.isFailed();
 	}
 
+	/** Get the active status */
+	public boolean isActive() {
+		return lane_type == LaneType.GREEN || super.isActive();
+	}
+
 	/** Check if the detector is currently sampling data */
 	public boolean isSampling() {
 		return isActive() && !isFailed();
