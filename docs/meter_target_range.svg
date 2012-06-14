@@ -75,7 +75,7 @@
       style='fill:none;stroke:black;stroke-dasharray:1,2'
       d='M340 240L500 160'/>
 <text style='font-size:8px' transform='translate(40,-10)'>
-  <textPath xlink:href='#min_rate'>min rate (60% of target)</textPath>
+  <textPath xlink:href='#min_rate'>min rate (70% of target)</textPath>
 </text>
 <rect style='fill:white;stroke:black'
       x='320' y='330' width='200' height='70' ry='10'/>
