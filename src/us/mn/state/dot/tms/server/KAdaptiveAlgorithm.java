@@ -115,21 +115,26 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Calculate the number of steps for an interval */
 	static private int steps(int seconds) {
-		return seconds / STEP_SECONDS;
+		float secs = seconds;
+		return Math.round(secs / STEP_SECONDS);
 	}
 
-	/** Get the time step index for a number of seconds */
-	static private int stepIndex(int seconds) {
-		int step_idx = steps(seconds);
-		return step_idx > 0 ? step_idx - 1 : 0;
-	}
-
-	/** Convert volume count to flow rate (vehicles / hour) */
-	static private int flowRate(int volume) {
-		if(volume >= 0)
-			return volume * Interval.HOUR / STEP_SECONDS;
-		else
+	/** Convert step volume count to flow rate.
+	 * @param vol Volume to convert (number of vehicles).
+	 * @param n_steps Number of time steps of volume.
+	 * @return Flow rate (vehicles / hour) */
+	static private int flowRate(int vol, int n_steps) {
+		if(vol >= 0) {
+			float period = n_steps * STEP_SECONDS;
+			float hour_frac = Interval.HOUR / period;
+			return Math.round(vol * hour_frac);
+		} else
 			return MISSING_DATA;
+	}
+
+	/** Convert step volume count to flow rate (vehicles / hour) */
+	static private int flowRate(int vol) {
+		return flowRate(vol, 1);
 	}
 
 	/** States for all K adaptive algorithms */
@@ -1470,19 +1475,25 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int calculateMinRateUsingWT() {
 			int wait_secs = estimateTimeWaited();
 			int wait_target = targetWaitTime();
-			int m1 = minTargetWaitRate();
+			int m1 = queueWaitLimit();
 			double m2 = minimumRateEquation(targetMinRate(),
 				target_demand, wait_secs, wait_target);
 			return (int)Math.round(Math.max(m1, m2));
 		}
 
-		/** Calculate minimum rate from target wait (vehicles / hour) */
-		private int minTargetWaitRate() {
+		/** Calculate queue wait limit (minimum rate).
+		 * @return Queue wait limit (vehicles / hour) */
+		private int queueWaitLimit() {
+			int wait_limit = 0;
 			int wait_target = targetWaitTime();
-			int wait_idx = stepIndex(wait_target);
-			int dem = cumulativeDemand(wait_idx);
-			int pass_min = dem - passage_accum;
-			return Math.max(flowRate(pass_min), targetMinRate());
+			int wait_steps = steps(wait_target);
+			for(int i = 1; i <= wait_steps; i++) {
+				int dem = cumulativeDemand(wait_steps - i);
+				int pass_min = dem - passage_accum;
+				int limit = flowRate(pass_min, i);
+				wait_limit = Math.max(limit, wait_limit);
+			}
+			return wait_limit;
 		}
 
 		/** Caculate MinimumRate using Ramp Storage */
