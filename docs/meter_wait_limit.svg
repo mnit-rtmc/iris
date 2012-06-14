@@ -70,7 +70,7 @@
   <textPath xlink:href='#target_wait'>target wait time</textPath>
 </text>
 <path id='queue_wait'
-      style='fill:none;stroke:black;stroke-dasharray:1,2'
+      style='fill:none;stroke:#003373;stroke-dasharray:1,2'
       d='M340 240L420 130'/>
 <text style='font-size:8px' transform='translate(22,-34)'>
   <textPath xlink:href='#queue_wait'>queue wait limit</textPath>
