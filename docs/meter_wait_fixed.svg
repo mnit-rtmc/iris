@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN'
 	  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
-<svg id='target_wait_fixed'
+<svg id='queue_wait_fixed'
      width='560' height='480' version='1.1'
      xmlns='http://www.w3.org/2000/svg'
      xmlns:xlink='http://www.w3.org/1999/xlink'>
@@ -16,8 +16,8 @@
 <path style='fill:#ceffcf'
       d='M260 240L340 100 460 100 220 380 100 380'/>
 <path style='fill:#def;stroke:#003373'
-      d='M340 100L100 380 60 420 100 380 120 370 140 350 160 340 180 330
-	 200 310 220 300 260 290 280 280 300 260 340 240'/>
+      d='M340 100L100 380 60 420 100 380 120 370 140 360 160 340 220 300
+	 240 290 280 280 300 270 320 240 340 220'/>
 <path style='fill:none;stroke:#509200;stroke-dasharray:1,2'
       d='M220 380L460 100'/>
 <path style='fill:none;stroke:black;stroke-dasharray:1,2'
@@ -45,7 +45,7 @@
 <text style='font-size:8px' x='100' y='390'>start metering</text>
 <path id='wait_time'
       style='fill:none;stroke:black;stroke-dasharray:1,2'
-      d='M220 240L340 240'/>
+      d='M238 220L340 220'/>
 <text style='font-size:8px' transform='translate(32,-2)'>
   <textPath xlink:href='#wait_time'>wait time</textPath>
 </text>
@@ -53,13 +53,19 @@
       style='fill:none'
       d='M360 280L420 210'/>
 <text style='font-size:8px'>
-  <textPath xlink:href='#max_wait'>max wait</textPath>
+  <textPath xlink:href='#max_wait'>max wait time</textPath>
 </text>
-<path id='wait_limit'
+<path id='target_wait'
       style='fill:none'
       d='M320 280L380 210'/>
 <text style='font-size:8px'>
-  <textPath xlink:href='#wait_limit'>target wait limit</textPath>
+  <textPath xlink:href='#target_wait'>target wait time</textPath>
+</text>
+<path id='queue_wait'
+      style='fill:none;stroke:#003373;stroke-dasharray:1,2'
+      d='M340 220L460 100'/>
+<text style='font-size:8px' transform='translate(40,-43)'>
+  <textPath xlink:href='#queue_wait'>queue wait limit</textPath>
 </text>
 <path id='target_demand'
       style='fill:none'
@@ -69,7 +75,7 @@
 </text>
 <path id='metering_rate'
       style='fill:none'
-      d='M180 320L320 240'/>
+      d='M180 320L320 230'/>
 <text style='font-size:12px'>
   <textPath xlink:href='#metering_rate'>metering rate (output)</textPath>
 </text>
