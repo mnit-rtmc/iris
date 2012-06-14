@@ -1462,23 +1462,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(passage_failure)
 				return targetDemand();
 			else {
-				int r1 = calculateMinRateUsingWT();
+				int r1 = calculateWaitLimit();
 				int r2 = (int)calculateMinRateUsingStorage();
-				return filterRate(Math.max(r1, r2));
+				int r3 = targetMinRate();
+				return filterRate(Math.max(Math.max(r1,r2),r3));
 			}
 		}
 
-		/**
-		 * Calculate MinimumRate using Waiting Time
-		 * @return
-		 */
-		private int calculateMinRateUsingWT() {
-			int wait_secs = estimateTimeWaited();
-			int wait_target = targetWaitTime();
-			int m1 = queueWaitLimit();
-			double m2 = minimumRateEquation(targetMinRate(),
-				target_demand, wait_secs, wait_target);
-			return (int)Math.round(Math.max(m1, m2));
+		/** Calculate waiting time minimum rate limit */
+		private int calculateWaitLimit() {
+			return Math.max(queueWaitLimit(),
+				waitProportionalLimit());
 		}
 
 		/** Calculate queue wait limit (minimum rate).
@@ -1494,6 +1488,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				wait_limit = Math.max(limit, wait_limit);
 			}
 			return wait_limit;
+		}
+
+		/** Calculate minimum rate from proportion of wait time to
+		 * target wait time. */
+		private int waitProportionalLimit() {
+			int wait_secs = estimateTimeWaited();
+			int wait_target = targetWaitTime();
+			return (int)Math.round(minimumRateEquation(
+				targetMinRate(), target_demand, wait_secs,
+				wait_target));
 		}
 
 		/** Caculate MinimumRate using Ramp Storage */
