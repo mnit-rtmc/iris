@@ -63,11 +63,17 @@
 <text style='font-size:8px'>
   <textPath xlink:href='#max_wait'>max wait</textPath>
 </text>
-<path id='wait_limit'
+<path id='target_wait'
       style='fill:none'
       d='M320 270L380 220'/>
 <text style='font-size:8px'>
-  <textPath xlink:href='#wait_limit'>target wait limit</textPath>
+  <textPath xlink:href='#target_wait'>target wait time</textPath>
+</text>
+<path id='queue_wait'
+      style='fill:none;stroke:black;stroke-dasharray:1,2'
+      d='M340 240L420 130'/>
+<text style='font-size:8px' transform='translate(22,-34)'>
+  <textPath xlink:href='#queue_wait'>queue wait limit</textPath>
 </text>
 <path id='queue_demand'
       style='fill:none'
