@@ -1400,43 +1400,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			queueEmptyCount = 0;
 		}
 
-		/** Estimate time waited at meter (seconds) */
-		private int estimateTimeWaited() {
-			/* Iterate backwards through time steps */
-			for(int i = 0; i < demandAccumHist.size(); i++) {
-				int dem = cumulativeDemand(i);
-				int pex = passage_accum - dem;
-				/* Is this time step longer than wait time? */
-				if(pex >= 0)
-					return estimateTimeWaited(i, dem, pex);
-			}
-			/* Wait time was longer than demand history... */
-			return STEP_SECONDS * demandAccumHist.size();
-		}
-
-		/** Estimate time waited from the given time step.
-		 * @param i Time step (0 for current).
-		 * @param dem Demand at time step (vehicles).
-		 * @param pex Excess passage flow (vehicles).
-		 * @return Estimate of time waited (seconds). */
-		private int estimateTimeWaited(int i, int dem, int pex) {
-			if(i == 0)
-				return 0;
-			/* Number of time steps waited (non-integer) */
-			float w_steps = i;
-			/* Demand from next time step */
-			int qd = cumulativeDemand(i - 1) - dem;
-			if(qd > 0) {
-				/* fraction of time step to reduce wait time */
-				float s_frac = (float)pex / qd;
-				w_steps -= s_frac;
-			}
-			if(w_steps > 0)
-				return Math.round(STEP_SECONDS * w_steps);
-			else
-				return 0;
-		}
-
 		/**
 		 * Add Curves Equation for minimumRate
 		 * y = ((1.0 * target) - (Gamma * target)) * X^2
@@ -1498,6 +1461,43 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return (int)Math.round(minimumRateEquation(
 				targetMinRate(), target_demand, wait_secs,
 				wait_target));
+		}
+
+		/** Estimate time waited at meter (seconds) */
+		private int estimateTimeWaited() {
+			/* Iterate backwards through time steps */
+			for(int i = 0; i < demandAccumHist.size(); i++) {
+				int dem = cumulativeDemand(i);
+				int pex = passage_accum - dem;
+				/* Is this time step longer than wait time? */
+				if(pex >= 0)
+					return estimateTimeWaited(i, dem, pex);
+			}
+			/* Wait time was longer than demand history... */
+			return STEP_SECONDS * demandAccumHist.size();
+		}
+
+		/** Estimate time waited from the given time step.
+		 * @param i Time step (0 for current).
+		 * @param dem Demand at time step (vehicles).
+		 * @param pex Excess passage flow (vehicles).
+		 * @return Estimate of time waited (seconds). */
+		private int estimateTimeWaited(int i, int dem, int pex) {
+			if(i == 0)
+				return 0;
+			/* Number of time steps waited (non-integer) */
+			float w_steps = i;
+			/* Demand from next time step */
+			int qd = cumulativeDemand(i - 1) - dem;
+			if(qd > 0) {
+				/* fraction of time step to reduce wait time */
+				float s_frac = (float)pex / qd;
+				w_steps -= s_frac;
+			}
+			if(w_steps > 0)
+				return Math.round(STEP_SECONDS * w_steps);
+			else
+				return 0;
 		}
 
 		/** Caculate MinimumRate using Ramp Storage */
