@@ -1546,8 +1546,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate maximum rate */
 		private int calculateMaximumRate() {
-			return filterRate(Math.round(target_demand *
-				TARGET_MAX_RATIO));
+			int target_max = Math.round(target_demand *
+				TARGET_MAX_RATIO);
+			return filterRate(Math.max(target_max, minimumRate));
 		}
 
 		/** Check if queue occupancy is above threshold */
