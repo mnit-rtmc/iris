@@ -1265,20 +1265,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return meter != null;
 		}
 
-		/** Get the max wait time (seconds) */
-		private int maxWaitTime() {
-			RampMeterImpl m = meter;
-			if(m != null)
-				return m.getMaxWait();
-			else
-				return RampMeterImpl.DEFAULT_MAX_WAIT;
-		}
-
-		/** Get the target wait time (seconds) */
-		private int targetWaitTime() {
-			return Math.round(maxWaitTime() * WAIT_TARGET_RATIO);
-		}
-
 		/** Get the total cumulative demand (vehicles) */
 		private int cumulativeDemand(int i) {
 			Double d = demandAccumHist.get(i);
@@ -1338,6 +1324,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 					return ad;
 			}
 			return getDefaultTarget(meter);
+		}
+
+		/** Get the default target metering rate */
+		private int getDefaultTarget(RampMeterImpl m) {
+			if(m != null)
+				return m.getTarget();
+			else
+				return getMaxRelease();
 		}
 
 		/** Update ramp passage output state */
@@ -1415,7 +1409,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate minimum rate (vehicles / hour) */
 		private int calculateMinimumRate() {
 			if(passage_failure)
-				return targetDemand();
+				return target_demand;
 			else {
 				int r1 = queueStorageLimit();
 				int r2 = queueWaitLimit();
@@ -1467,15 +1461,28 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return wait_limit;
 		}
 
-		/**
-		 * Calculate target minimum rate.
-		 * @return Target minimum rate (vehicles / hour)
-		 */
+		/** Get the target wait time (seconds) */
+		private int targetWaitTime() {
+			return Math.round(maxWaitTime() * WAIT_TARGET_RATIO);
+		}
+
+		/** Get the max wait time (seconds) */
+		private int maxWaitTime() {
+			RampMeterImpl m = meter;
+			if(m != null)
+				return m.getMaxWait();
+			else
+				return RampMeterImpl.DEFAULT_MAX_WAIT;
+		}
+
+		/** Calculate target minimum rate.
+		 * @return Target minimum rate (vehicles / hour). */
 		private int targetMinRate() {
 			return Math.round(target_demand * TARGET_MIN_RATIO);
 		}
 
-		/** Calculate maximum rate */
+		/** Calculate target maximum rate.
+		 * @return Target maxumum rate (vehicles / hour). */
 		private int calculateMaximumRate() {
 			int target_max = Math.round(target_demand *
 				TARGET_MAX_RATIO);
@@ -1485,14 +1492,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if queue occupancy is above threshold */
 		private boolean isQueueOccupancyHigh() {
 			return queue.getMaxOccupancy() > QUEUE_OCC_THRESHOLD;
-		}
-
-		/** Get the default target metering rate */
-		private int getDefaultTarget(RampMeterImpl m) {
-			if(m != null)
-				return m.getTarget();
-			else
-				return getMaxRelease();
 		}
 
 		/**
