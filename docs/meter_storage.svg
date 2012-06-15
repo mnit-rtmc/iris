@@ -12,17 +12,18 @@
 	 L340 60M300 420L300 60M260 420L260 60M220 420L220 60M180 420L180 60
 	 M140 420L140 60M100 420L100 60'/>
 <path style='fill:#fffcbb'
-      d='M200 390L220 350 240 320 260 300 280 290 320 250 340 240 440 120
-	 440 80 200 270Z'/>
+      d='M200 370L220 350 240 320 260 300 280 290 320 250 340 240 500 80
+	 460 80 200 270Z'/>
 <path style='fill:#ceffcf'
-      d='M200 350L220 310 240 280 260 260 280 250 320 210 340 200 360 176
-	 440 80 340 80 340 170 200 270Z'/>
+      d='M200 330L220 310 240 280 260 260 280 250 320 210 340 200 460 80
+	 340 80 340 140 200 270Z'/>
 <path style='fill:none;stroke:#509200;stroke-dasharray:1,2'
-      d='M200 350L220 310 240 280 260 260 280 250 320 210 340 200'/>
+      d='M200 330L220 310 240 280 260 260 280 250 320 210 340 200'/>
 <path style='fill:none;stroke:black;stroke-dasharray:1,2'
-      d='M200 390L220 350 240 320 260 300 280 290 320 250 340 240 440 120'/>
+      d='M200 370L220 350 240 320 260 300 280 290 320 250 340 240 500 80'/>
 <text style='font-size:24px' x='150' y='40'>Queue Storage Limit</text>
-<path id='volume_text' d='M40 320L40 60'/>
+<path id='volume_text'
+      d='M40 320L40 60'/>
 <text style='font-size:16px'>
   <textPath xlink:href='#volume_text'>Volume (Vehicles)</textPath>
 </text>
@@ -42,26 +43,26 @@
 </text>
 <text style='font-size:8px' x='100' y='390'>start metering</text>
 <path style='fill:#def;stroke:#003373'
-      d='M340 80L320 90 300 110 280 130 260 140 240 160 220 190 200 230
-	 180 270 160 300 140 310 120 350 100 380 60 420 100 380 120 370
-	 140 350 160 320 180 310 200 290 220 270 240 260 260 240 280 230
-	 300 210 320 200 340 190'/>
+      d='M340 80L320 90 300 110 280 130 260 140 240 160 220 190 200 210
+	 180 250 160 270 140 280 120 320 100 380 60 420 100 380 120 360
+	 140 350 160 330 180 300 220 270 240 260 260 240 280 230 300 210
+	 320 200 340 180'/>
 <path id='queue_length'
       style='fill:none;stroke:black;stroke-dasharray:1,3'
-      d='M340 190L340 80'/>
-<text style='font-size:8px' transform='translate(-2,-32)'>
+      d='M340 180L340 80'/>
+<text style='font-size:8px' transform='translate(-2,-26)'>
   <textPath xlink:href='#queue_length'>queue length</textPath>
 </text>
 <path id='target_rate'
       style='fill:none;stroke:purple;stroke-width:0.5'
-      d='M140 310L340 80'/>
-<text style='font-size:8px' transform='translate(84,-100)'>
+      d='M140 280L340 80'/>
+<text style='font-size:8px' transform='translate(100,-86)'>
   <textPath xlink:href='#target_rate'>target rate (5-minute)</textPath>
 </text>
 <path id='storage_limit'
       style='fill:none;stroke:#003373;stroke-dasharray:1,2'
-      d='M340 190L440 80'/>
-<text style='font-size:8px' transform='translate(30,-36)'>
+      d='M340 180L460 80'/>
+<text style='font-size:8px' transform='translate(30,-28)'>
   <textPath xlink:href='#storage_limit'>storage limit</textPath>
 </text>
 <path id='target_storage'
@@ -72,15 +73,15 @@
 </text>
 <path id='projected_storage'
       style='fill:none;stroke:#509200;stroke-dasharray:1,2'
-      d='M340 200L440 80'/>
+      d='M340 200L460 80'/>
 <text style='font-size:8px' transform='translate(6,4)'>
   <textPath xlink:href='#projected_storage'>
-    projected storage (parallel to target)
+  projected storage (parallel to target)
   </textPath>
 </text>
 <path id='queue_demand'
       style='fill:none'
-      d='M140 270L260 120'/>
+      d='M140 270L260 130'/>
 <text style='font-size:12px'>
   <textPath xlink:href='#queue_demand'>queue demand (input)</textPath>
 </text>
@@ -97,9 +98,8 @@
   <textPath xlink:href='#max_storage'>max storage</textPath>
 </text>
 <path style='fill:none;stroke:gray;stroke-width:0.25'
-      d='M200 230L200 390M220 190L220 350M240 160L240 320 240 320 240 320
-	 M260 140L260 300M280 130C280 130 280 290 280 290M320 90L320 250
-         M340 240L340 80'/>
+      d='M200 210L200 370M220 190L220 350M240 160L240 320 240 320 240 320
+	 M260 140L260 300M280 130L280 290M320 90L320 250M340 240L340 80'/>
 <rect style='fill:white;stroke:black'
       x='320' y='355' width='200' height='45' ry='10'/>
 <text style='font-size:12px' x='340' y='375'>
