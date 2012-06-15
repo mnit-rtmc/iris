@@ -237,6 +237,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return meter_type.ordinal();
 	}
 
+	/** Get the number of lanes on the ramp */
+	public int getLaneCount() {
+		return meter_type.lanes;
+	}
+
 	/** Queue storage length (in feet) */
 	protected int storage = 1;
 

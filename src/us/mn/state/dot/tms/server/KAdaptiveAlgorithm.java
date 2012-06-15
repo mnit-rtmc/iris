@@ -1507,7 +1507,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 			// FIXME: this is messed *up*
 			double CQtp = cumulativeDemand() + target_demand;
-			double Qscp = K_JAM_RAMP * meter.getStorage() * getLaneCount(meter);
+			double Qscp = K_JAM_RAMP * meter.getStorage() * meter.getLaneCount();
 
 			if(Qscp == 0)
 				Qscp = 0;
@@ -1527,13 +1527,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			minimumR2 = minimumRateEquation(Cmin, Cmax, Qstore, Qscp);
 
 			return Math.max(minimumR1, minimumR2);
-		}
-
-		private int getLaneCount(RampMeterImpl meter) {
-			if(meter.getMeterType() > 0)
-				return 2;
-			else
-				return 1;
 		}
 
 		/**
