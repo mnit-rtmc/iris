@@ -1507,16 +1507,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 			// FIXME: this is messed *up*
 			double CQtp = cumulativeDemand() + target_demand;
-			double Qscp = K_JAM_RAMP * meter.getStorage() * meter.getLaneCount();
-
-			if(Qscp == 0)
-				Qscp = 0;
-			else
-				Qscp = Qscp / FEET_PER_MILE;
+			double Qscp = targetStorage();
 
 			double FlowStep = 3600 / STEP_SECONDS;
 
-			Qscp = Qscp * STORAGE_TARGET_RATIO;
 			minimumR1 = CQtp - passage_accum - Qscp * FlowStep;
 
 			double Cmax = target_demand;
@@ -1527,6 +1521,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			minimumR2 = minimumRateEquation(Cmin, Cmax, Qstore, Qscp);
 
 			return Math.max(minimumR1, minimumR2);
+		}
+
+		/** Calculate the target storage on the ramp (vehicles) */
+		private float targetStorage() {
+			return maxStorage() * STORAGE_TARGET_RATIO;
+		}
+
+		/** Calculate the maximum storage on the ramp (vehicles) */
+		private float maxStorage() {
+			int stor_ft = meter.getStorage() * meter.getLaneCount();
+			/* vehicles per foot (queue jam density) */
+			float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
+			return stor_ft * JAM_VPF;
 		}
 
 		/**
