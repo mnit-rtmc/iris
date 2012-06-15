@@ -137,6 +137,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return flowRate(vol, 1);
 	}
 
+	/** Convert flow rate to volume for a given period.
+	 * @param flow Flow rate to convert (vehicles / hour).
+	 * @param period Period for volume (seconds).
+	 * @return Volume over given period. */
+	static private float volumePeriod(int flow, int period) {
+		if(flow >= 0 && period > 0) {
+			float hour_frac = period / Interval.HOUR;
+			return flow * hour_frac;
+		} else
+			return MISSING_DATA;
+	}
+
 	/** States for all K adaptive algorithms */
 	static protected HashMap<String, KAdaptiveAlgorithm> ALL_ALGS =
 		new HashMap<String, KAdaptiveAlgorithm>();
@@ -1420,16 +1432,44 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return E1 / Math.pow(Xmax, 2) + Cmin;
 		}
 
-		/** Calculate minimum rate */
+		/** Calculate minimum rate (vehicles / hour) */
 		private int calculateMinimumRate() {
 			if(passage_failure)
 				return targetDemand();
 			else {
-				int r1 = calculateWaitLimit();
-				int r2 = (int)calculateMinRateUsingStorage();
+				int r1 = queueStorageLimit();
+				int r2 = calculateWaitLimit();
 				int r3 = targetMinRate();
 				return filterRate(Math.max(Math.max(r1,r2),r3));
 			}
+		}
+
+		/** Caculate queue storage limit.  Project into the future the
+		 * duration of the target wait time.  Using the target demand,
+		 * estimate the cumulative demand at that point in time.  From
+		 * there, subtract the target ramp storage volume to find the
+		 * required cumulative passage volume at that time.
+		 * @return Queue storage limit (vehicles / hour). */
+		private int queueStorageLimit() {
+			float proj_arrive = volumePeriod(target_demand,
+				targetWaitTime());
+			float demand_proj = cumulativeDemand() + proj_arrive;
+			int req = Math.round(demand_proj - targetStorage());
+			int pass_min = req - passage_accum;
+			return flowRate(pass_min, steps(targetWaitTime()));
+		}
+
+		/** Calculate the target storage on the ramp (vehicles) */
+		private float targetStorage() {
+			return maxStorage() * STORAGE_TARGET_RATIO;
+		}
+
+		/** Calculate the maximum storage on the ramp (vehicles) */
+		private float maxStorage() {
+			int stor_ft = meter.getStorage() * meter.getLaneCount();
+			/* vehicles per foot (queue jam density) */
+			float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
+			return stor_ft * JAM_VPF;
 		}
 
 		/** Calculate waiting time minimum rate limit */
@@ -1498,42 +1538,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return Math.round(STEP_SECONDS * w_steps);
 			else
 				return 0;
-		}
-
-		/** Caculate MinimumRate using Ramp Storage */
-		private double calculateMinRateUsingStorage() {
-			double minimumR1 = 0;
-			double minimumR2 = 0;
-
-			// FIXME: this is messed *up*
-			double CQtp = cumulativeDemand() + target_demand;
-			double Qscp = targetStorage();
-
-			double FlowStep = 3600 / STEP_SECONDS;
-
-			minimumR1 = CQtp - passage_accum - Qscp * FlowStep;
-
-			double Cmax = target_demand;
-			double Cmin = targetMinRate();
-			double Qstore = CQtp - passage_accum;
-			Qstore = Qstore == 0 ? 0 : Qstore / FlowStep;
-
-			minimumR2 = minimumRateEquation(Cmin, Cmax, Qstore, Qscp);
-
-			return Math.max(minimumR1, minimumR2);
-		}
-
-		/** Calculate the target storage on the ramp (vehicles) */
-		private float targetStorage() {
-			return maxStorage() * STORAGE_TARGET_RATIO;
-		}
-
-		/** Calculate the maximum storage on the ramp (vehicles) */
-		private float maxStorage() {
-			int stor_ft = meter.getStorage() * meter.getLaneCount();
-			/* vehicles per foot (queue jam density) */
-			float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
-			return stor_ft * JAM_VPF;
 		}
 
 		/**
