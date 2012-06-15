@@ -1226,6 +1226,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Time queue has been empty (steps) */
 		private int queueEmptyCount = 0;
 
+		/** Time queue has been full (steps) */
+		private int queueFullCount = 0;
+
 		/** Metering rate flow history (vehicles / hour) */
 		private final BoundedSampleHistory rateHist =
 			new BoundedSampleHistory(MAX_STEPS);
@@ -1297,17 +1300,26 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Update ramp queue demand state */
 		private void updateDemandState() {
 			float demand_vol = calculateQueueDemand();
-			double demand_accum = cumulativeDemand() + demand_vol;
 			double demand_rate = flowRate(demand_vol);
 			demandHist.push(demand_rate);
+			double demand_accum = cumulativeDemand() + demand_vol;
 			demandAccumHist.push(demand_accum);
 			target_demand = targetDemand();
 		}
 
-		/** Calculate ramp queue demand for current period (vehicles) */
+		/** Calculate ramp queue demand.  Normally, this would be an
+		 * integer value, but when estimates are used, it may need to
+		 * have a fractional part.
+		 * @return Ramp queue demand for current period (vehicles) */
 		private float calculateQueueDemand() {
-			int vol = queue.getVolume();
+			float vol = queue.getVolume();
 			if(vol >= 0) {
+				if(isQueueOccupancyHigh())
+					queueFullCount++;
+				else
+					queueFullCount = 0;
+				if(queueFullCount > 0)
+					vol += estimateQueueUndercount();
 				return vol;
 			} else {
 				int target = getDefaultTarget(meter);
@@ -1315,18 +1327,27 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 		}
 
+		/** Estimate the queue undercount (vehicles) */
+		private float estimateQueueUndercount() {
+			float full_secs = queueFullCount * STEP_SECONDS;
+			float r = Math.min(2 * full_secs / maxWaitTime(), 1);
+			float under = maxStorage() - queueLength();
+			return Math.max(r * under, 1);
+		}
+
+		/** Estimate the length of queue (vehicles) */
+		private float queueLength() {
+			return cumulativeDemand() - passage_accum;
+		}
+
 		/** Calculate target demand rate at queue detector.
 		 * @return Target demand flow rate (vehicles / hour) */
 		private int targetDemand() {
 			Double avg_demand = demandHist.average();
-			if(avg_demand != null) {
-				int ad = (int)Math.round(avg_demand);
-				if(isQueueOccupancyHigh() && ad < target_demand)
-					return target_demand;
-				else
-					return ad;
-			}
-			return getDefaultTarget(meter);
+			if(avg_demand != null)
+				return (int)Math.round(avg_demand);
+			else
+				return getDefaultTarget(meter);
 		}
 
 		/** Get the default target metering rate (vehicles / hour) */
@@ -1392,7 +1413,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if cumulative demand is below cumulative passage */
 		private boolean isDemandBelowPassage() {
-			return cumulativeDemand() < passage_accum;
+			return queueLength() < 0;
 		}
 
 		/** Check if cumulative passage is below cumulative green */
@@ -1407,6 +1428,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			passage_accum = 0;
 			green_accum = 0;
 			queueEmptyCount = 0;
+			queueFullCount = 0;
 		}
 
 		/** Calculate minimum rate (vehicles / hour) */

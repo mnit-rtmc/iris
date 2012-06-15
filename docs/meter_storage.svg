@@ -115,6 +115,6 @@
   <tspan x='340' y='348'/>
   <tspan x='340' y='360'>r = 2 * period / max wait</tspan>
   <tspan x='340' y='372'>v = max storage - queue len</tspan>
-  <tspan x='340' y='384'>demand += min(r * v, 1)</tspan>
+  <tspan x='340' y='384'>demand += max(r * v, 1)</tspan>
 </text>
 </svg>
