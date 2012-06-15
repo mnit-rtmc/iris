@@ -1412,33 +1412,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			queueEmptyCount = 0;
 		}
 
-		/**
-		 * Add Curves Equation for minimumRate
-		 * y = ((1.0 * target) - (Gamma * target)) * X^2
-		 *     / Xmax^2
-		 *     + (Gamma * target)
-		 * @param Cmin
-		 * @param Cmax
-		 * @param x
-		 * @param Wmax
-		 * @return
-		 */
-		private double minimumRateEquation(double Cmin, double Cmax,
-			double x, double Xmax)
-		{
-			double E1 = (Cmax - Cmin) * Math.pow(x, 2);
-			if(E1 <= 0)
-				return Cmin;
-			return E1 / Math.pow(Xmax, 2) + Cmin;
-		}
-
 		/** Calculate minimum rate (vehicles / hour) */
 		private int calculateMinimumRate() {
 			if(passage_failure)
 				return targetDemand();
 			else {
 				int r1 = queueStorageLimit();
-				int r2 = calculateWaitLimit();
+				int r2 = queueWaitLimit();
 				int r3 = targetMinRate();
 				return filterRate(Math.max(Math.max(r1,r2),r3));
 			}
@@ -1472,12 +1452,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return stor_ft * JAM_VPF;
 		}
 
-		/** Calculate waiting time minimum rate limit */
-		private int calculateWaitLimit() {
-			return Math.max(queueWaitLimit(),
-				waitProportionalLimit());
-		}
-
 		/** Calculate queue wait limit (minimum rate).
 		 * @return Queue wait limit (vehicles / hour) */
 		private int queueWaitLimit() {
@@ -1491,53 +1465,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				wait_limit = Math.max(limit, wait_limit);
 			}
 			return wait_limit;
-		}
-
-		/** Calculate minimum rate from proportion of wait time to
-		 * target wait time. */
-		private int waitProportionalLimit() {
-			int wait_secs = estimateTimeWaited();
-			int wait_target = targetWaitTime();
-			return (int)Math.round(minimumRateEquation(
-				targetMinRate(), target_demand, wait_secs,
-				wait_target));
-		}
-
-		/** Estimate time waited at meter (seconds) */
-		private int estimateTimeWaited() {
-			/* Iterate backwards through time steps */
-			for(int i = 0; i < demandAccumHist.size(); i++) {
-				int dem = cumulativeDemand(i);
-				int pex = passage_accum - dem;
-				/* Is this time step longer than wait time? */
-				if(pex >= 0)
-					return estimateTimeWaited(i, dem, pex);
-			}
-			/* Wait time was longer than demand history... */
-			return STEP_SECONDS * demandAccumHist.size();
-		}
-
-		/** Estimate time waited from the given time step.
-		 * @param i Time step (0 for current).
-		 * @param dem Demand at time step (vehicles).
-		 * @param pex Excess passage flow (vehicles).
-		 * @return Estimate of time waited (seconds). */
-		private int estimateTimeWaited(int i, int dem, int pex) {
-			if(i == 0)
-				return 0;
-			/* Number of time steps waited (non-integer) */
-			float w_steps = i;
-			/* Demand from next time step */
-			int qd = cumulativeDemand(i - 1) - dem;
-			if(qd > 0) {
-				/* fraction of time step to reduce wait time */
-				float s_frac = (float)pex / qd;
-				w_steps -= s_frac;
-			}
-			if(w_steps > 0)
-				return Math.round(STEP_SECONDS * w_steps);
-			else
-				return 0;
 		}
 
 		/**
