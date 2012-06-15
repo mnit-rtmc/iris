@@ -40,6 +40,14 @@ import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
  */
 public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
+	/** Enum for minimum limit control */
+	enum MinimumRateLimit {
+		pf,	/* passage failure */
+		sl,	/* storage limit */
+		wl,	/* wait limit */
+		tm	/* target minimum */
+	};
+
 	/** Algorithm debug log */
 	static private final IDebugLog ALG_LOG = new IDebugLog("kadaptive");
 
@@ -250,8 +258,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	@Override
 	public void validate(RampMeterImpl meter) {
 		EntranceNode en = getEntranceNode(meter);
-		if(en != null)
+		if(en != null) {
 			en.updateState();
+			if(ALG_LOG.isOpen())
+				log(en.toString());
+		}
 	}
 
 	/** Get the entrance node for a given ramp meter */
@@ -330,11 +341,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Debug algorithm. */
 	private void debug() {
 		log("-------- Corridor Structure --------");
-		for(Node n = head; n != null; n = n.downstream) {
-			StringBuilder sb = new StringBuilder();
-			n.debug(sb);
-			log(sb.toString());
-		}
+		for(Node n = head; n != null; n = n.downstream)
+			log(n.toString());
 	}
 
 	/** Log one message */
@@ -889,9 +897,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Clear bottleneck state */
 		abstract protected void clearBottleneck();
-
-		/** Debug an Node */
-		abstract protected void debug(StringBuilder sb);
 	}
 
 	/** Node to manage station on corridor */
@@ -1144,13 +1149,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return list;
 		}
 
-		/** Debug a StationNode */
-		protected void debug(StringBuilder sb) {
+		/** Get a string representation of a station node */
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
 			sb.append(station.getName() + " -> ");
 			for(EntranceNode en : associatedEntrances) {
 				if(en != null && en.hasMeter())
 					sb.append(en.meter.name + ", ");
 			}
+			return sb.toString();
 		}
 	}
 
@@ -1228,6 +1235,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Time queue has been full (steps) */
 		private int queueFullCount = 0;
+
+		/** Controlling minimum rate limit */
+		private MinimumRateLimit limit_control = null;
 
 		/** Metering rate flow history (vehicles / hour) */
 		private final BoundedSampleHistory rateHist =
@@ -1433,13 +1443,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate minimum rate (vehicles / hour) */
 		private int calculateMinimumRate() {
-			if(passage_failure)
+			if(passage_failure) {
+				limit_control = MinimumRateLimit.pf;
 				return target_demand;
-			else {
-				int r1 = queueStorageLimit();
-				int r2 = queueWaitLimit();
-				int r3 = targetMinRate();
-				return filterRate(Math.max(Math.max(r1,r2),r3));
+			} else {
+				int r = queueStorageLimit();
+				limit_control = MinimumRateLimit.sl;
+				int rr = queueWaitLimit();
+				if(rr > r) {
+					r = rr;
+					limit_control = MinimumRateLimit.wl;
+				}
+				rr = targetMinRate();
+				if(rr > r) {
+					r = rr;
+					limit_control = MinimumRateLimit.tm;
+				}
+				return filterRate(r);
 			}
 		}
 
@@ -1525,11 +1545,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param Rnext next metering rate
 		 */
 		private void setRate(double Rnext) {
-			if(!hasMeter())
-				return;
-			currentRate = (int)Math.round(Rnext);
-			isRateUpdated = true;
-			meter.setRatePlanned(currentRate);
+			int r = (int)Math.round(Rnext);
+			r = Math.max(r, minimumRate);
+			r = Math.min(r, maximumRate);
+			currentRate = r;
+			RampMeterImpl m = meter;
+			if(m != null) {
+				isRateUpdated = true;
+				m.setRatePlanned(currentRate);
+			}
 		}
 
 		/**
@@ -1708,12 +1732,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return noBottleneckCount;
 		}
 
-		/** Debug an EntranceNode */
-		protected void debug(StringBuilder sb) {
+		/** Get a string representation of an EntranceNode */
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
 			if(hasMeter())
-				sb.append("Ent(" + meter.name + ")");
+				sb.append(meter.name);
 			else
-				sb.append("Ent(" + rnode.name + ")");
+				sb.append(rnode.name);
+			sb.append("dem=" + cumulativeDemand());
+			sb.append("pas=" + passage_accum);
+			sb.append(",min[" + limit_control + "]=" + minimumRate);
+			sb.append(",max=" + maximumRate);
+			sb.append(",rate=" + currentRate);
+			return sb.toString();
 		}
 	}
 
