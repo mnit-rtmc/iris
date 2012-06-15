@@ -123,7 +123,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param vol Volume to convert (number of vehicles).
 	 * @param n_steps Number of time steps of volume.
 	 * @return Flow rate (vehicles / hour) */
-	static private int flowRate(int vol, int n_steps) {
+	static private int flowRate(float vol, int n_steps) {
 		if(vol >= 0) {
 			float period = n_steps * STEP_SECONDS;
 			float hour_frac = Interval.HOUR / period;
@@ -133,7 +133,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** Convert step volume count to flow rate (vehicles / hour) */
-	static private int flowRate(int vol) {
+	static private int flowRate(float vol) {
 		return flowRate(vol, 1);
 	}
 
@@ -1266,16 +1266,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get the total cumulative demand (vehicles) */
-		private int cumulativeDemand(int i) {
+		private float cumulativeDemand(int i) {
 			Double d = demandAccumHist.get(i);
 			if(d != null)
-				return d.intValue();
+				return d.floatValue();
 			else
 				return 0;
 		}
 
 		/** Get the total cumulative demand (vehicles) */
-		private int cumulativeDemand() {
+		private float cumulativeDemand() {
 			return cumulativeDemand(0);
 		}
 
@@ -1296,7 +1296,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Update ramp queue demand state */
 		private void updateDemandState() {
-			int demand_vol = calculateQueueDemand();
+			float demand_vol = calculateQueueDemand();
 			double demand_accum = cumulativeDemand() + demand_vol;
 			double demand_rate = flowRate(demand_vol);
 			demandHist.push(demand_rate);
@@ -1304,12 +1304,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			target_demand = targetDemand();
 		}
 
-		/** Calculate ramp queue demand (vehicles / hour) */
-		private int calculateQueueDemand() {
-			if(queue.isPerfect())
-				return queue.getFlow();
-			else
-				return getDefaultTarget(meter);
+		/** Calculate ramp queue demand for current period (vehicles) */
+		private float calculateQueueDemand() {
+			int vol = queue.getVolume();
+			if(vol >= 0) {
+				return vol;
+			} else {
+				int target = getDefaultTarget(meter);
+				return volumePeriod(target, STEP_SECONDS);
+			}
 		}
 
 		/** Calculate target demand rate at queue detector.
@@ -1326,7 +1329,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return getDefaultTarget(meter);
 		}
 
-		/** Get the default target metering rate */
+		/** Get the default target metering rate (vehicles / hour) */
 		private int getDefaultTarget(RampMeterImpl m) {
 			if(m != null)
 				return m.getTarget();
@@ -1453,7 +1456,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			int wait_target = targetWaitTime();
 			int wait_steps = steps(wait_target);
 			for(int i = 1; i <= wait_steps; i++) {
-				int dem = cumulativeDemand(wait_steps - i);
+				int dem = Math.round(cumulativeDemand(
+					wait_steps - i));
 				int pass_min = dem - passage_accum;
 				int limit = flowRate(pass_min, i);
 				wait_limit = Math.max(limit, wait_limit);
