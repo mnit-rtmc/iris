@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterQueue;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.RampMeterImpl.filterRate;
@@ -1407,6 +1408,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Update queue state */
 		private void updateQueueState() {
+			RampMeterImpl m = meter;
+			if(m != null)
+				m.setQueue(getQueue());
 			if(isQueueEmpty())
 				queueEmptyCount++;
 			else
@@ -1439,6 +1443,40 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			green_accum = 0;
 			queueEmptyCount = 0;
 			queueFullCount = 0;
+		}
+
+		/** Get ramp meter queue state enum value */
+		private RampMeterQueue getQueue() {
+			RampMeterImpl m = meter;
+			if(m != null && m.isOperating() && isMetering) {
+				if(isQueueEmpty())
+					return RampMeterQueue.EMPTY;
+				else if(isQueueFull())
+					return RampMeterQueue.FULL;
+				else
+					return RampMeterQueue.EXISTS;
+			}
+			return RampMeterQueue.UNKNOWN;
+		}
+
+		/** Check if the ramp meter queue is full */
+		private boolean isQueueFull() {
+			return isQueueOccupancyHigh() ||
+			       isQueueStorageFull() ||
+			       isQueueWaitAboveTarget();
+		}
+
+		/** Check if the ramp queue storage is full */
+		private boolean isQueueStorageFull() {
+			return queueLength() >= targetStorage();
+		}
+
+		/** Check if the ramp queue wait time is above target */
+		private boolean isQueueWaitAboveTarget() {
+			int wait_target = targetWaitTime();
+			int wait_steps = steps(wait_target);
+			int dem = Math.round(cumulativeDemand(wait_steps));
+			return dem > passage_accum;
 		}
 
 		/** Calculate minimum rate (vehicles / hour) */
