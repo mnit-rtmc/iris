@@ -17,7 +17,7 @@
       d='M260 240L340 100 460 100 220 380 100 380'/>
 <path style='fill:#def;stroke:#003373'
       d='M340 100L100 380 60 420 100 380 120 370 140 360 160 340 220 300
-	 240 290 280 280 300 270 320 240 340 220'/>
+	 240 290 280 270 320 240 340 220'/>
 <path style='fill:none;stroke:#509200;stroke-dasharray:1,2'
       d='M220 380L460 100'/>
 <path style='fill:none;stroke:black;stroke-dasharray:1,2'
