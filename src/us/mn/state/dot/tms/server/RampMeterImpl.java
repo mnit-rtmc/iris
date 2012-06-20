@@ -67,7 +67,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	static public final int DEFAULT_MAX_WAIT = 240;
 
 	/** Meter debug log */
-	static protected final IDebugLog METER_LOG = new IDebugLog("meter");
+	static private final IDebugLog METER_LOG = new IDebugLog("meter");
 
 	/** Filter a releae rate for valid range */
 	static public int filterRate(int r) {
@@ -559,6 +559,19 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 				alg_state = createState();
 		} else
 			alg_state = null;
+		if(METER_LOG.isOpen()) {
+			String sas = null;
+			MeterAlgorithmState as = alg_state;
+			if(as != null)
+				sas = as.getClass().getSimpleName();
+			log("set operating " + o + " (" + sas + ")");
+		}
+	}
+
+	/** Log a message to the meter debug log */
+	private void log(String msg) {
+		if(METER_LOG.isOpen())
+			METER_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Get the algorithm operating state */
@@ -751,7 +764,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 				return;
 			det.storeVolume(new PeriodicSample(stamp, 30, g));
 		} else
-			METER_LOG.log("No green det for " + getName());
+			log("No green det");
 	}
 
 	/** Update the 5-minute green count */
@@ -760,7 +773,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if(det != null)
 			det.storeVolume(new PeriodicSample(stamp, 300, g));
 		else
-			METER_LOG.log("No green det for " + getName());
+			log("No green det");
 	}
 
 	/** Get the corridor containing the ramp meter */
