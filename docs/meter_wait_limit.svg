@@ -19,8 +19,8 @@
 	 300 270 260 310 240 340 220 380 100 380'/>
 <path style='fill:#def;stroke:#003373'
       d='M340 100L320 110 300 130 280 160 260 200 220 240 180 270 140 310
-	 120 340 100 380 60 420 100 380 120 370 140 350 160 340 180 330
-	 200 310 220 300 260 290 280 280 300 260 340 240'/>
+	 120 340 100 380 60 420 100 380 120 370 140 350 160 340 200 310
+	 220 300 260 290 300 260 340 220'/>
 <path style='fill:none;stroke:gray;stroke-width:0.25'
       d='M120 340L280 340M220 240L380 240M180 270L340 270M140 310L300 310
 	 M260 200L420 200M280 160L440 160M300 130L460 130M320 110L480 110'/>
@@ -53,7 +53,7 @@
 <text style='font-size:8px' x='100' y='390'>start metering</text>
 <path id='wait_time'
       style='fill:none;stroke:black;stroke-dasharray:1,2'
-      d='M220 240L340 240'/>
+      d='M240 220L340 220'/>
 <text style='font-size:8px' transform='translate(32,-2)'>
   <textPath xlink:href='#wait_time'>wait time</textPath>
 </text>
@@ -71,8 +71,8 @@
 </text>
 <path id='queue_wait'
       style='fill:none;stroke:#003373;stroke-dasharray:1,2'
-      d='M340 240L420 130'/>
-<text style='font-size:8px' transform='translate(22,-34)'>
+      d='M340 220L420 130'/>
+<text style='font-size:8px' transform='translate(16,-22)'>
   <textPath xlink:href='#queue_wait'>queue wait limit</textPath>
 </text>
 <path id='queue_demand'
