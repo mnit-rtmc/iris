@@ -561,19 +561,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			alg_state = null;
 			setRatePlanned(null);
 		}
-		if(METER_LOG.isOpen()) {
-			String sas = null;
-			MeterAlgorithmState as = alg_state;
-			if(as != null)
-				sas = as.getClass().getSimpleName();
-			log("set operating " + o + " (" + sas + ")");
-		}
-	}
-
-	/** Log a message to the meter debug log */
-	private void log(String msg) {
-		if(METER_LOG.isOpen())
-			METER_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Get the algorithm operating state */
@@ -776,6 +763,12 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			det.storeVolume(new PeriodicSample(stamp, 300, g));
 		else
 			log("No green det");
+	}
+
+	/** Log a message to the meter debug log */
+	private void log(String msg) {
+		if(METER_LOG.isOpen())
+			METER_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Get the corridor containing the ramp meter */
