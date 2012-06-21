@@ -557,8 +557,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if(o) {
 			if(alg_state == null)
 				alg_state = createState();
-		} else
+		} else {
 			alg_state = null;
+			setRatePlanned(null);
+		}
 		if(METER_LOG.isOpen()) {
 			String sas = null;
 			MeterAlgorithmState as = alg_state;
