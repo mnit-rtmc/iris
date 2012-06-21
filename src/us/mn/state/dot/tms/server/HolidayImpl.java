@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2011  Minnesota Department of Transportation
+ * Copyright (C) 2003-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,11 +99,6 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 			return name.equals(((HolidayImpl)o).name);
 		else
 			return false;
-	}
-
-	/** Calculate a hash code */
-	public int hashCode() {
-		return name.hashCode();
 	}
 
 	/** Check if a selection of properties is valid */
