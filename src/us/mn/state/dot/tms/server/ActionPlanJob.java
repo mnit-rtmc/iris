@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
@@ -166,22 +168,31 @@ public class ActionPlanJob extends Job {
 
 	/** Perform all meter actions */
 	private void performMeterActions() {
+		final HashMap<RampMeterImpl, Boolean> meters =
+			new HashMap<RampMeterImpl, Boolean>();
 		MeterActionHelper.find(new Checker<MeterAction>() {
 			public boolean check(MeterAction ma) {
 				ActionPlan ap = ma.getActionPlan();
 				if(ap.getActive())
-					performMeterAction(ma, ap.getPhase());
+					updateMeterMap(meters,ma,ap.getPhase());
 				return false;
 			}
 		});
+		for(Map.Entry<RampMeterImpl, Boolean> e: meters.entrySet())
+			e.getKey().setOperating(e.getValue());
 	}
 
-	/** Perform a meter action */
-	private void performMeterAction(MeterAction ma, PlanPhase phase) {
+	/** Update the meter action map */
+	private void updateMeterMap(HashMap<RampMeterImpl, Boolean> meters,
+		MeterAction ma, PlanPhase phase)
+	{
 		RampMeter rm = ma.getRampMeter();
 		if(rm instanceof RampMeterImpl) {
 			RampMeterImpl meter = (RampMeterImpl)rm;
-			meter.setOperating(phase == ma.getPhase());
+			boolean o = (phase == ma.getPhase());
+			if(meters.containsKey(meter))
+				o |= meters.get(meter);
+			meters.put(meter, o);
 		}
 	}
 }
