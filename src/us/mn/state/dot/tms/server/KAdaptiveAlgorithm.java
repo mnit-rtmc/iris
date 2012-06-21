@@ -1363,10 +1363,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get the default target metering rate (vehicles / hour) */
 		private int getDefaultTarget(RampMeterImpl m) {
-			if(m != null)
-				return m.getTarget();
-			else
-				return getMaxRelease();
+			if(m != null) {
+				int t = m.getTarget();
+				if(t > 0)
+					return t;
+			}
+			return getMaxRelease();
 		}
 
 		/** Update ramp passage output state */
