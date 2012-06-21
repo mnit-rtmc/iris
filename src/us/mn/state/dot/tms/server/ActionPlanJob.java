@@ -52,6 +52,10 @@ public class ActionPlanJob extends Job {
 	/** Timer scheduler */
 	protected final Scheduler timer;
 
+	/** Mapping of ramp meter operating states */
+	private final HashMap<RampMeterImpl, Boolean> meters =
+		new HashMap<RampMeterImpl, Boolean>();
+
 	/** Create a new action plan job */
 	public ActionPlanJob(Scheduler t) {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
@@ -168,13 +172,12 @@ public class ActionPlanJob extends Job {
 
 	/** Perform all meter actions */
 	private void performMeterActions() {
-		final HashMap<RampMeterImpl, Boolean> meters =
-			new HashMap<RampMeterImpl, Boolean>();
+		meters.clear();
 		MeterActionHelper.find(new Checker<MeterAction>() {
 			public boolean check(MeterAction ma) {
 				ActionPlan ap = ma.getActionPlan();
 				if(ap.getActive())
-					updateMeterMap(meters,ma,ap.getPhase());
+					updateMeterMap(ma, ap.getPhase());
 				return false;
 			}
 		});
@@ -183,9 +186,7 @@ public class ActionPlanJob extends Job {
 	}
 
 	/** Update the meter action map */
-	private void updateMeterMap(HashMap<RampMeterImpl, Boolean> meters,
-		MeterAction ma, PlanPhase phase)
-	{
+	private void updateMeterMap(MeterAction ma, PlanPhase phase) {
 		RampMeter rm = ma.getRampMeter();
 		if(rm instanceof RampMeterImpl) {
 			RampMeterImpl meter = (RampMeterImpl)rm;
