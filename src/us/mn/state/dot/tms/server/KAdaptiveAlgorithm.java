@@ -1779,8 +1779,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				sb.append(meter.name);
 			else
 				sb.append(rnode.name);
-			sb.append("dem=" + cumulativeDemand());
-			sb.append("pas=" + passage_accum);
+			sb.append(" dem=" + cumulativeDemand());
+			sb.append(",pas=" + passage_accum);
 			sb.append(",min[" + limit_control + "]=" + minimumRate);
 			sb.append(",max=" + maximumRate);
 			sb.append(",rate=" + currentRate);
