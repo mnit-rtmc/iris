@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.event.DetFailEvent;
 
 /**
@@ -49,6 +50,11 @@ import us.mn.state.dot.tms.server.event.DetFailEvent;
  * @author Douglas Lau
  */
 public class DetectorImpl extends DeviceImpl implements Detector {
+
+	/** Is archiving enabled? */
+	static private boolean isArchiveEnabled() {
+		return SystemAttrEnum.SAMPLE_ARCHIVE_ENABLE.getBoolean();
+	}
 
 	/** Default average detector field length */
 	static private final float DEFAULT_FIELD_LENGTH = 22.0f;
@@ -779,24 +785,26 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			ev_n_speed++;
 			ev_speed += speed;
 		}
-		// FIXME: check SAMPLE_ARCHIVE_ENABLE
-		MainServer.FLUSH.addJob(new Job() {
-			public void perform() throws IOException {
-				v_log.logVehicle(stamp, duration, headway,
-					speed);
-			}
-		});
+		if(isArchiveEnabled()) {
+			FLUSH.addJob(new Job() {
+				public void perform() throws IOException {
+					v_log.logVehicle(stamp, duration,
+						headway, speed);
+				}
+			});
+		}
 	}
 
 	/** Log a gap in vehicle events.
 	 */
 	public void logGap() {
-		// FIXME: check SAMPLE_ARCHIVE_ENABLE
-		MainServer.FLUSH.addJob(new Job() {
-			public void perform() throws IOException {
-				v_log.logGap();
-			}
-		});
+		if(isArchiveEnabled()) {
+			FLUSH.addJob(new Job() {
+				public void perform() throws IOException {
+					v_log.logGap();
+				}
+			});
+		}
 	}
 
 	/** Bin 30-second sample data */
