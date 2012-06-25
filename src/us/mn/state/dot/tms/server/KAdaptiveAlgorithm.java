@@ -152,7 +152,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @return Volume over given period. */
 	static private float volumePeriod(int flow, int period) {
 		if(flow >= 0 && period > 0) {
-			float hour_frac = period / Interval.HOUR;
+			float hour_frac = (float)period / Interval.HOUR;
 			return flow * hour_frac;
 		} else
 			return MISSING_DATA;
@@ -1779,7 +1779,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				sb.append(meter.name);
 			else
 				sb.append(rnode.name);
-			sb.append(" dem=" + cumulativeDemand());
+			sb.append(" " + getQueue());
+			sb.append(",dem=" + Math.round(cumulativeDemand()));
 			sb.append(",pas=" + passage_accum);
 			sb.append(",min[" + limit_control + "]=" + minimumRate);
 			sb.append(",max=" + maximumRate);
