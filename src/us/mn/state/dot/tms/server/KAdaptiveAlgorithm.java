@@ -1436,7 +1436,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if the meter queue is empty */
 		private boolean isQueueEmpty() {
-			return !isQueueOccupancyHigh() &&
+			return (!isQueueOccupancyHigh()) &&
 			       (isDemandBelowPassage() ||isPassageBelowGreen());
 		}
 
@@ -1796,6 +1796,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append(" " + getQueue());
 			sb.append(",dem=" + Math.round(cumulativeDemand()));
 			sb.append(",pas=" + passage_accum);
+			sb.append(",grn=" + green_accum);
 			sb.append(",min[" + limit_control + "]=" + minimumRate);
 			sb.append(",max=" + maximumRate);
 			sb.append(",rate=" + currentRate);

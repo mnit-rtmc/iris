@@ -393,7 +393,8 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Check if the detector is currently sampling data */
 	public boolean isSampling() {
-		return isActive() && !isFailed();
+		return (lane_type == LaneType.GREEN) ||
+		       (isActive() && !isFailed());
 	}
 
 	/** Average detector field length */
