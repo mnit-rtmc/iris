@@ -1430,7 +1430,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				queueEmptyCount++;
 			else
 				queueEmptyCount = 0;
-			if(queueEmptyCount > QUEUE_EMPTY_STEPS)
+			if(queueEmptyCount >= QUEUE_EMPTY_STEPS)
 				resetAccumulators();
 		}
 
