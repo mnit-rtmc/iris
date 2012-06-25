@@ -1237,6 +1237,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Time queue has been full (steps) */
 		private int queueFullCount = 0;
 
+		/** Previous queue demand undercount correction */
+		private float queueCorrection = 0;
+
 		/** Controlling minimum rate limit */
 		private MinimumRateLimit limit_control = null;
 
@@ -1323,16 +1326,26 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * have a fractional part.
 		 * @return Ramp queue demand for current period (vehicles) */
 		private float calculateQueueDemand() {
-			float vol = queue.getVolume();
-			if(vol >= 0) {
-				if(isQueueOccupancyHigh())
-					queueFullCount++;
-				else
-					queueFullCount = 0;
-				if(queueFullCount > 0)
-					vol += estimateQueueUndercount();
-				return vol;
+			float vol = queueDemandVolume();
+			if(isQueueOccupancyHigh()) {
+				queueFullCount++;
+				float c = estimateQueueUndercount();
+				float v = Math.max(c - queueCorrection, 0);
+				vol += v;
+				queueCorrection = c;
 			} else {
+				queueFullCount = 0;
+				queueCorrection = 0;
+			}
+			return vol;
+		}
+
+		/** Get queue demand volume for the current period */
+		private float queueDemandVolume() {
+			float vol = queue.getVolume();
+			if(vol >= 0)
+				return vol;
+			else {
 				int target = getDefaultTarget(meter);
 				return volumePeriod(target, STEP_SECONDS);
 			}
@@ -1445,6 +1458,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			green_accum = 0;
 			queueEmptyCount = 0;
 			queueFullCount = 0;
+			queueCorrection = 0;
 		}
 
 		/** Get ramp meter queue state enum value */
