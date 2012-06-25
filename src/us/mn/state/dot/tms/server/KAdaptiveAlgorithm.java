@@ -1477,9 +1477,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if the ramp meter queue is full */
 		private boolean isQueueFull() {
-			return isQueueOccupancyHigh() ||
-			       isQueueStorageFull() ||
-			       isQueueWaitAboveTarget();
+			return isQueueOccupancyHigh() || isQueueLimitFull();
+		}
+
+		/** Check if the meter queue is full (by storage/wait limit) */
+		private boolean isQueueLimitFull() {
+			return queue.isPerfect() &&
+			      (isQueueStorageFull() ||
+			       isQueueWaitAboveTarget());
 		}
 
 		/** Check if the ramp queue storage is full */
