@@ -1805,6 +1805,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append(",min[" + limit_control + "]=" + minimumRate);
 			sb.append(",max=" + maximumRate);
 			sb.append(",rate=" + currentRate);
+			sb.append(",q(" + queueEmptyCount);
+			sb.append("," + queueFullCount);
+			sb.append("," + queueCorrection + ")");
 			return sb.toString();
 		}
 	}
