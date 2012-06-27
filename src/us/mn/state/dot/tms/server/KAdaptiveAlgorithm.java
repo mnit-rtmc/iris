@@ -110,6 +110,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number of steps queue must be empty before resetting accumulators */
 	static private final int QUEUE_EMPTY_STEPS = steps(90);
 
+	/** Threshold to determine when queue is empty */
+	static private final int QUEUE_EMPTY_THRESHOLD = -1;
+
 	/** Ratio for max rate to target rate */
 	static private final float TARGET_MAX_RATIO = 1.3f;
 
@@ -1442,12 +1445,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if cumulative demand is below cumulative passage */
 		private boolean isDemandBelowPassage() {
-			return queueLength() < 0;
+			return queueLength() < QUEUE_EMPTY_THRESHOLD;
 		}
 
 		/** Check if cumulative passage is below cumulative green */
 		private boolean isPassageBelowGreen() {
-			return passage_accum < green_accum;
+			return violationCount() < QUEUE_EMPTY_THRESHOLD;
+		}
+
+		/** Calculate violation count (passage above green count) */
+		private int violationCount() {
+			return passage_accum - green_accum;
 		}
 
 		/** Reset the demand / passage accumulators */
