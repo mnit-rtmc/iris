@@ -1240,9 +1240,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Time queue has been full (steps) */
 		private int queueFullCount = 0;
 
-		/** Previous queue demand undercount correction */
-		private float queueCorrection = 0;
-
 		/** Controlling minimum rate limit */
 		private MinimumRateLimit limit_control = null;
 
@@ -1332,14 +1329,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			float vol = queueDemandVolume();
 			if(isQueueOccupancyHigh()) {
 				queueFullCount++;
-				float c = estimateQueueUndercount();
-				float v = Math.max(c - queueCorrection, 0);
-				vol += v;
-				queueCorrection = c;
-			} else {
+				vol += estimateQueueUndercount();
+			} else
 				queueFullCount = 0;
-				queueCorrection = 0;
-			}
 			return vol;
 		}
 
@@ -1466,7 +1458,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			green_accum = 0;
 			queueEmptyCount = 0;
 			queueFullCount = 0;
-			queueCorrection = 0;
 		}
 
 		/** Get ramp meter queue state enum value */
@@ -1814,8 +1805,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append(",max=" + maximumRate);
 			sb.append(",rate=" + currentRate);
 			sb.append(",q(" + queueEmptyCount);
-			sb.append("," + queueFullCount);
-			sb.append("," + queueCorrection + ")");
+			sb.append("," + queueFullCount + ")");
 			return sb.toString();
 		}
 	}
