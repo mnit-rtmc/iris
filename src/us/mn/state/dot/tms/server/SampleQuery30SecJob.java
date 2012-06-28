@@ -183,6 +183,7 @@ public class SampleQuery30SecJob extends Job {
 		RampMeterHelper.find(new Checker<RampMeter>() {
 			public boolean check(RampMeter m) {
 				RampMeterImpl meter = (RampMeterImpl)m;
+				meter.updateQueueState();
 				meter.updateRatePlanned();
 				return false;
 			}

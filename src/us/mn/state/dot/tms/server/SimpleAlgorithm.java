@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.tms.Device;
+import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
@@ -40,5 +41,10 @@ public class SimpleAlgorithm implements MeterAlgorithmState {
 		} else
 			demand = getMaxRelease();
 		meter.setRatePlanned(demand);
+	}
+
+	/** Get the ramp meter queue state */
+	public RampMeterQueue getQueueState(RampMeterImpl meter) {
+		return RampMeterQueue.UNKNOWN;
 	}
 }

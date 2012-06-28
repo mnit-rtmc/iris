@@ -626,6 +626,15 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return queue.ordinal();
 	}
 
+	/** Update the ramp meter queue status */
+	public void updateQueueState() {
+		MeterAlgorithmState as = alg_state;
+		if(as != null)
+			setQueue(as.getQueueState(this));
+		else
+			setQueue(RampMeterQueue.UNKNOWN);
+	}
+
 	/** Is the ramp meter currently metering? */
 	public boolean isMetering() {
 		return rate != null;

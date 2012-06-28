@@ -269,6 +269,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
+	/** Get ramp meter queue state enum value */
+	public RampMeterQueue getQueueState(RampMeterImpl meter) {
+		EntranceNode en = getEntranceNode(meter);
+		if(en != null)
+			return en.getQueueState();
+		else
+			return RampMeterQueue.UNKNOWN;
+	}
+
 	/** Get the entrance node for a given ramp meter */
 	protected EntranceNode getEntranceNode(RampMeterImpl meter) {
 		if(meter.getCorridor() != corridor) {
@@ -1306,7 +1315,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			isRateUpdated = false;
 			updateDemandState();
 			updatePassageState();
-			updateQueueState();
+			checkQueueEmpty();
 			minimumRate = calculateMinimumRate();
 			maximumRate = calculateMaximumRate();
 		}
@@ -1416,11 +1425,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return MISSING_DATA;
 		}
 
-		/** Update queue state */
-		private void updateQueueState() {
-			RampMeterImpl m = meter;
-			if(m != null)
-				m.setQueue(getQueue());
+		/** Check if queue is empty */
+		private void checkQueueEmpty() {
 			if(isQueueEmpty())
 				queueEmptyCount++;
 			else
@@ -1461,9 +1467,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get ramp meter queue state enum value */
-		private RampMeterQueue getQueue() {
+		private RampMeterQueue getQueueState() {
 			RampMeterImpl m = meter;
-			if(m != null && m.isOperating() && isMetering) {
+			if(m != null && isMetering) {
 				if(isQueueEmpty())
 					return RampMeterQueue.EMPTY;
 				else if(isQueueFull())
@@ -1797,7 +1803,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				sb.append(meter.name);
 			else
 				sb.append(rnode.name);
-			sb.append(" " + getQueue());
+			sb.append(" " + getQueueState());
 			sb.append(",dem=" + Math.round(cumulativeDemand()));
 			sb.append(",pas=" + passage_accum);
 			sb.append(",grn=" + green_accum);

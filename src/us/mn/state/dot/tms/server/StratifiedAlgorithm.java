@@ -448,14 +448,9 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 				meter.setRatePlanned(release);
 		}
 
-		/** Update the ramp meter queue status */
-		protected void updateQueueStatus() {
-			meter.setQueue(getQueue());
-		}
-
-		/** Check for the existance of a queue */
-		protected RampMeterQueue getQueue() {
-			if(meter.isOperating() && metering) {
+		/** Check for the existence of a queue */
+		private RampMeterQueue getQueueState() {
+			if(metering) {
 				if(queue_backup)
 					return RampMeterQueue.FULL;
 				else if(has_queue)
@@ -1105,6 +1100,15 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 			state.validate();
 	}
 
+	/** Check for the existence of a queue */
+	public RampMeterQueue getQueueState(RampMeterImpl meter) {
+		MeterState state = getMeterState(meter);
+		if(state != null)
+			return state.getQueueState();
+		else
+			return RampMeterQueue.UNKNOWN;
+	}
+
 	/** Get the meter state for a given meter */
 	protected MeterState getMeterState(RampMeterImpl meter) {
 		if(meter.getCorridor() != corridor) {
@@ -1208,10 +1212,8 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 		Iterator<MeterState> it = states.values().iterator();
 		while(it.hasNext()) {
 			MeterState state = it.next();
-			if(!state.meter.isOperating()) {
-				state.updateQueueStatus();
+			if(!state.meter.isOperating())
 				it.remove();
-			}
 		}
 		if(states.isEmpty()) {
 			zones.clear();
@@ -1221,10 +1223,8 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 
 	/** Send new metering rates to ramp meters */
 	protected void sendMeteringRates() {
-		for(MeterState state: states.values()) {
+		for(MeterState state: states.values())
 			state.sendRate();
-			state.updateQueueStatus();
-		}
 	}
 
 	/** Print the setup information for all meters and zones */
