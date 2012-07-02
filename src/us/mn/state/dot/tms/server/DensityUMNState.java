@@ -33,16 +33,17 @@ import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
- * Density metering algorithm state 
+ * Density metering algorithm state
+ *
+ * @author Anupam
  */
 public class DensityUMNState implements MeterAlgorithmState {
-	
 
 	/** UNDEFINED used as default for all types : Congestion level, Bottleneck state, Metering Strategy
-	 * Used to catch all cases where proper values are not assigned. 
+	 * Used to catch all cases where proper values are not assigned.
 	 */
 	static protected final int UNDEFINED = -1;
-	
+
 	/** Congestion Levels at meter locations */
 	public enum CongestionLevel {
 		UNDEFINED,
@@ -50,14 +51,14 @@ public class DensityUMNState implements MeterAlgorithmState {
 		APPROACHING,
 		CONGESTED
 	}
-	
+
 	/** Bottleneck States for each meter location */
 	public enum BottleneckState {
 		UNDEFINED,
 		NON_CONTROLLING,
 		CONTROLLING
 	}
-	
+
 	/** Metering Strategy deployed at each meter location */
 	public enum MeteringStrategy {
 		UNDEFINED,
@@ -66,102 +67,102 @@ public class DensityUMNState implements MeterAlgorithmState {
 		CONTROLLING,
 		CONGESTED
 	}
-	
+
 	/** New Metering Debug Log */
 	static protected final IDebugLog NEW_LOG = new IDebugLog("newmetering");
-	
+
 	/** Debug level of detail to be used in logging */
-	static protected int DEBUG_LEVEL = 5; 
-	
+	static protected int DEBUG_LEVEL = 5;
+
 	/** Path where meter data files are stored */
 	static protected final String DATA_PATH = "/var/lib/iris/meter";
-	
+
 	/** Path to the Parameter Data XML File */
 	static protected final String XML_PATH = "/var/lib/iris/meter/Params.xml";
-	
+
 	/** Status of where the XML file path has been set or not */
 	static protected boolean isParamXMLPathSet = false;
-	
+
 	/** Global default used for critical density at all locations */
 	static protected int CRITICAL_DENSITY = 45;
-	
+
 	/** Parameter used to define the safe uncongested density */
 	static protected float LOW_DENS_MARGIN = 0.8f;
-	
+
 	/** Parameter denoting the amount of time in seconds that is considered as safe time to congestion on ramp */
 	static protected int SAFE_TIME_MAINLINE = 240;
-	
+
 	/** Parameter denoting the amount of time in seconds that is considered as safe time to congestion on ramp */
 	static protected int SAFE_TIME_RAMP = 300;
-	
+
 	/** Parameter for threshold ratio between release rate and meter rate after which max wait time is considered*/
 	static protected final float RAMP_WAIT_RATIO = 0.8f;
-	
+
 	/** Feedback adjustment to metering rate from congestion situation on mainline */
 	static protected int K1 = 100;
-	
+
 	/** Feedback adjustment to metering rate from congestion situation on ramp */
 	static protected int K2 = 100;
-	
+
 	/** Default value for capacity flow */
 	static protected int FLOW_CAPACITY = 2400;
-	
+
 	/** Critical density threshold beyond which Queue Detector is considered unreliable */
 	static protected int Q_THRESH_DENS = 30;
-	
+
 	/** Default step change when metering is controlling strategy */
 	static protected int METERING_STEP = 120;
-	
+
 	/** Metering Cycle Time */
 	static protected int METERING_CYCLE_TIME = 30;
-	
+
 	/** Threshold at which step change in meter rate is increased */
 	static protected int STEP_CHANGE_THRESHOLD = 1200;
-	
+
 	/** Value of new step change in metering rate when threshold is reached */
 	static protected int STEP_CHANGE_POST_THRESH = 300;
-	
+
 	/** No of seconds used for averaging calculations related to LWR model estimation */
 	static protected int MOVING_AVERAGE_LENGTH = 90;
-	
+
 	/** Static constant value of number of feet in a mile */
 	static final protected float FEET_IN_MILE = 5280f;
-	
+
 	/** Static constant value of number of seconds in an hour */
 	static final protected float SECONDS_IN_HOUR = 3600f;
-	
+
 	/** LWR Distance step in miles (convert read paramater to miles) / default = 250/5280 mi */
 	static protected float LWR_DIST_STEP = 250/FEET_IN_MILE;
-	
+
 	/** LWR Time step in seconds */
 	static protected int LWR_TIME_STEP = 3;
-	
+
 	/** No of steps in the MFD Model */
 	static protected int NO_STEPS_MFD = 5;
-	
-	/** Boolean for whether LWR model is to be used for mainline density calculation or not 
+
+	/** Boolean for whether LWR model is to be used for mainline density calculation or not
 	 * If LWR_SWITCH is not set on, then the nearest upstream detector approximates
 	 * the density state at the ramp merge location
 	 * */
-	static protected boolean LWR_SWITCH = true;	
-	
+	static protected boolean LWR_SWITCH = true;
+
 	/** Corridor associated with current DensityUMNState */
 	protected final Corridor corridor;
-	
+
 	/** Write the debug log using the idebuglog module and based on debug level */
 	protected static void writeDebugLog (String logline, int level) {
 		logline = "Level " + String.valueOf(level) + " log : " + logline;
 		if (level <= DEBUG_LEVEL)
 			NEW_LOG.log(logline);
 	}
-	
+
 	/** Write the debug log for an exception stack trace using the idebuglog module */
 	protected static void writeDebugLog (StackTraceElement[] st_tr, String pre_text, int level) {
 		writeDebugLog(pre_text + "Caught Exception : ", level);
 		for (int i=0; i < st_tr.length; i++)
 			writeDebugLog(pre_text + st_tr[i].toString(), level);
 	}
-	
+
 	/** Write the debug log for an exception stack trace using the idebuglog module */
 	protected static void writeDebugLog (StackTraceElement[] st_tr, String st_tr_name, String st_tr_msg, String pre_text, int level) {
 		writeDebugLog(pre_text + "Caught Exception : ", level);
@@ -171,7 +172,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		for (int i=0; i < st_tr.length; i++)
 			writeDebugLog(pre_text + st_tr[i].toString(), level);
 	}
-	
+
 	/** Get the absolute minimum release rate */
 	static protected int getMinRelease() {
 		return SystemAttributeHelper.getMeterMinRelease();
@@ -181,11 +182,11 @@ public class DensityUMNState implements MeterAlgorithmState {
 	static protected int getMaxRelease() {
 		return SystemAttributeHelper.getMeterMaxRelease();
 	}
-	
+
 	/** Hash Map maping all MeterPlanState objects to their corresponding corridors*/
 	static protected HashMap<String, DensityUMNState> all_states =
 		new HashMap<String, DensityUMNState>();
-	
+
 	/** Lookup the density meter state for one corridor */
 	static public DensityUMNState lookupCorridor(Corridor c) {
 		DensityUMNState state = all_states.get(c.getID());
@@ -196,16 +197,16 @@ public class DensityUMNState implements MeterAlgorithmState {
 		}
 		return state;
 	}
-	
+
 	/** Linked List (sorted) of all MeterState objects within the MeterPlanState for the current corridor
 	 * The list is sorted in order from downstream to upstream.
 	 */
 	protected final LinkedList<MeterState> meters =
 		new LinkedList<MeterState>();
-	
+
 	/** Boolean check for whether the list of MeterStates is sorted or not */
 	protected boolean isSortedList;
-	
+
 	/** Sorts the already populated MeterState list */
 	protected void sortMeterList () {
 		if (!isSortedList) {
@@ -215,7 +216,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		}
 		isSortedList = true;
 	}
-	
+
 	/** Add a meterState object to the list of meters associated with DensityUMNState object */
 	public void addMeterToList (MeterState new_meter) {
 		meters.add(new_meter);
@@ -223,54 +224,54 @@ public class DensityUMNState implements MeterAlgorithmState {
 				" to Plan State corridor: " + corridor.getID().toString(), 4);
 		isSortedList = false;
 	}
-	
+
 	/** Linked list for all Mainline Nodes for corridor */
 	protected LinkedList<DetectorSet> mainlines = new LinkedList<DetectorSet>();
-	
+
 	/** Linked list for all enterance ramp Nodes for corridor */
 	protected LinkedList<DetectorSet> entrances = new LinkedList<DetectorSet>();
-	
+
 	/** Linked list for all exit Nodes for corridor */
 	protected LinkedList<DetectorSet> exits = new LinkedList<DetectorSet>();
-	
+
 	/** Boolean check for whether all Nodes and Sections are loaded already */
 	protected boolean areNodesSectionsLoaded = false;
-	
+
 	/** Linked list for all Sections */
 	static protected LinkedList<SectionState> sections = new LinkedList<SectionState>();
-	
+
 	/** Boolean check for whether Sections list is currently sorted */
 	protected boolean isSortedSectionsList;
-	
+
 	/** Sort the list of sections in order from downstream to upstream */
 	protected void sortSectionsList () {
 		Collections.sort(sections);
 		isSortedSectionsList = true;
 	}
-	
+
 	/** Print the name of first detector in detector set, null if set is empty */
 	protected String printDetSetName (DetectorSet ds) {
 		if (ds.size() < 1)
 			return "null";
 		return ds.toArray()[0].getName().toString();
 	}
-	
+
 	/** Add a sectionstate object to the list of all sections in current DensityUMNState */
 	public void addSectionsToList (SectionState new_state) throws Exception {
 		if ((new_state.getMainUp().size() < 1) || (new_state.getMainDwn().size() < 1)) {
-			writeDebugLog("Skipped adding section due to null boundary ( " + 
+			writeDebugLog("Skipped adding section due to null boundary ( " +
 					printDetSetName(new_state.getMainUp()) + " - " + printDetSetName(new_state.getMainDwn()) +
 					" )", 5);
 			return;
 		}
 		sections.add(new_state);
-		writeDebugLog("Added Section: " + printDetSetName(new_state.getMainUp()) + " - " + 
-				printDetSetName(new_state.getMainDwn()) + " to Plan State corr: " 
+		writeDebugLog("Added Section: " + printDetSetName(new_state.getMainUp()) + " - " +
+				printDetSetName(new_state.getMainDwn()) + " to Plan State corr: "
 				+ corridor.getID().toString(), 5);
 		isSortedSectionsList = false;
 		areNodesSectionsLoaded = false;
 	}
-	
+
 	/** Check the existance of a SectionState defined by the set of upstream and downstream
 	 * DetectorSet objects as passed in parameter. Checks if such a SectionState object exists
 	 * in the loaded list of SectionState objects (sections) associated with corridor.
@@ -283,7 +284,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		}
 		return false;
 	}
-	
+
 	/** Uses the populated mainlines list of all station DetectorSets to create SectionStates */
 	protected void loadSectionsFromNodes () throws Exception {
 		DetectorSet down = null;
@@ -300,7 +301,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		writeDebugLog("Created sections from nodes for corridor " + corridor.getID().toString(), 5);
 		return;
 	}
-	
+
 	/** Print the list of mainline nodes obtained for the corridor */
 	protected void printMainLNodes () {
 		String log_line = null;
@@ -310,7 +311,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		}
 		writeDebugLog(log_line, 5);
 	}
-	
+
 	/** Print the list of ramp nodes obtained for the corridor */
 	protected void printRampNodes () {
 		String log_line = null;
@@ -325,7 +326,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		}
 		writeDebugLog(log_line, 5);
 	}
-	
+
 	/** Load list of all mainline and ramp nodes along the corridor */
 	protected void loadAllNodes () {
 		mainlines.clear();
@@ -351,12 +352,12 @@ public class DensityUMNState implements MeterAlgorithmState {
 		printMainLNodes();
 		printRampNodes();
 	}
-	
-	/** Add a node to the mainlines list of nodes for the corridor only 
+
+	/** Add a node to the mainlines list of nodes for the corridor only
 	 * if its not null and it doesnt already exist in list */
 	protected void addMainlineNodetoList (DetectorSet dets) {
 		boolean exists_in_list = false;
-		if ((dets.size() < 1) || (dets.toArray()[0] == null) 
+		if ((dets.size() < 1) || (dets.toArray()[0] == null)
 				|| (dets.toArray()[0].getName().toString() == "null"))
 			return;
 		for (DetectorSet temp_set : mainlines) {
@@ -367,12 +368,12 @@ public class DensityUMNState implements MeterAlgorithmState {
 			mainlines.add(dets);
 		return;
 	}
-	
-	/** Add a node to the entrance list of nodes for the corridor only 
+
+	/** Add a node to the entrance list of nodes for the corridor only
 	 * if its not null and it doesnt already exist in list */
 	protected void addEnteranceNodetoList (DetectorSet dets) {
 		boolean exists_in_list = false;
-		if ((dets.size() < 1) || (dets.toArray()[0] == null) 
+		if ((dets.size() < 1) || (dets.toArray()[0] == null)
 				|| (dets.toArray()[0].getName().toString() == "null"))
 			return;
 		for (DetectorSet temp_set : entrances) {
@@ -383,12 +384,12 @@ public class DensityUMNState implements MeterAlgorithmState {
 			entrances.add(dets);
 		return;
 	}
-	
-	/** Add a node to the exit list of nodes for the corridor only 
+
+	/** Add a node to the exit list of nodes for the corridor only
 	 * if its not null and it doesnt already exist in list */
 	protected void addExitNodetoList (DetectorSet dets) {
 		boolean exists_in_list = false;
-		if ((dets.size() < 1) || (dets.toArray()[0] == null) 
+		if ((dets.size() < 1) || (dets.toArray()[0] == null)
 				|| (dets.toArray()[0].getName().toString() == "null"))
 			return;
 		for (DetectorSet temp_set : exits) {
@@ -399,13 +400,12 @@ public class DensityUMNState implements MeterAlgorithmState {
 			exits.add(dets);
 		return;
 	}
-	
-	
-	/** Create a new Density Metering MeterPlanState */ 
+
+	/** Create a new Density Metering MeterPlanState */
 	protected DensityUMNState (Corridor c) {
 		corridor = c;
 	}
-	
+
 	/** Validate a ramp meter */
 	public void validate (RampMeterImpl meter) {
 		writeDebugLog("In validate of meter " + meter.getName(), 4);
@@ -419,7 +419,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		// FIXME
 		return RampMeterQueue.UNKNOWN;
 	}
-	
+
 	/** Get the meter state for a given ramp meter */
 	protected MeterState getMeterState (RampMeterImpl meter) {
 		if(meter.getCorridor() != corridor) {
@@ -439,7 +439,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		areNodesSectionsLoaded = false;
 		return state;
 	}
-	
+
 	/** Lookup the meter state for a specified meter */
 	protected MeterState lookupMeterState(RampMeter meter) {
 		for (MeterState meterstate: meters) {
@@ -450,12 +450,12 @@ public class DensityUMNState implements MeterAlgorithmState {
 		}
 		return null;
 	}
-	
+
 	/** Get the corridor associated with the current DensityUMNState object */
 	protected Corridor getCorridor () {
 		return corridor;
 	}
-	
+
 	/** Process all DensityUMNState objects */
 	static public void processAllStates () {
 		writeDebugLog("In ProcessAllStates", 4);
@@ -485,7 +485,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		}
 		return;
 	}
-	
+
 	/** Link all meters with their corresponding Sections on Mainline */
 	protected void linkMetersToSections () {
 		Float meterLoc, upLoc, dnLoc;
@@ -500,7 +500,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			}
 		}
 	}
-	
+
 	/** Adds all sections not corresponding directly to a meter location, as list to upstream meter */
 	protected void linkSectionsToMeters () {
 		Iterator<MeterState> it = meters.iterator();
@@ -521,8 +521,8 @@ public class DensityUMNState implements MeterAlgorithmState {
 			meter_s.addSectionStates(section_list);
 		}
 		return;
-	}	
-	
+	}
+
 	/** Link all enterance and exit ramps to the appropriate sections they fall inside */
 	protected void linkAllRampsToSections () {
 		Float rampLoc, upLoc, dnLoc;
@@ -545,13 +545,13 @@ public class DensityUMNState implements MeterAlgorithmState {
 			sect_cand.loadRampsInfo(ds.toArray(ds_arr), length_ds);
 		}
 	}
-	
+
 	/** Load the Global Variables from the XML parameter file */
 	static protected void loadGlobalVariables() {
 		writeDebugLog("Loading Global Variables", 3);
 		loadGlobalXMLParams();
 	}
- 	
+
 	/** The LWREstimatorCase defines the content of a single block
 	 * in the LWR Flow-Density relation Model.
 	 * Each case is made of a densityThreshold, an isCongested check,
@@ -562,19 +562,19 @@ public class DensityUMNState implements MeterAlgorithmState {
 	 *
 	 */
 	protected class LWREstimatorCase {
-		
+
 		/** Density Threshold defining a condition for the case */
 		protected int densityThresh;
-		
+
 		/** The congestion state requirement defining a condition for the case */
 		protected boolean isCongested;
-		
+
 		/** The flow intercept associated with the linear Flow to Density estimation */
 		protected int flowIntercept;
-		
+
 		/** The flow slope associated with the linear Flow to Density estimation */
 		protected int flowSlope;
-		
+
 		protected LWREstimatorCase (int dens, boolean isCon, int interc, int slope) {
 			//LWREstimatorCase();
 			densityThresh = dens;
@@ -582,9 +582,9 @@ public class DensityUMNState implements MeterAlgorithmState {
 			flowIntercept = interc;
 			flowSlope = slope;
 			return;
-		}	
+		}
 	}
-	
+
 	/** The LWREstimator Class builds the Flow-Density relation Model
 	 * for the LWR model. The Fundamental relationship between flow and density
 	 * for the location is approximated through a set of LWREstimatorCase objects
@@ -592,10 +592,10 @@ public class DensityUMNState implements MeterAlgorithmState {
 	 *
 	 */
 	protected class LWREstimator {
-		
+
 		/** Holds the various blocks represented as LWREstimatorCases for the LWR Model */
 		protected LWREstimatorCase[] step = new LWREstimatorCase[10];
-		
+
 		/** Calculate and return Flow calculated for given density and congestion state
 		 * using the LWR model defined.
 		 * @param isCongested : Boolean for congestion state. true means congested, false uncongested
@@ -605,7 +605,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		public int getLWRFlowEstimate (boolean isCongested, float density) {
 			float flow = 0;
 			for (int i = 1; i < NO_STEPS_MFD; i++) {
-				if ((density < step[i].densityThresh) 
+				if ((density < step[i].densityThresh)
 						&& ((!isCongested) || (step[i].isCongested))) {
 					flow = step[i].flowSlope*density;
 					flow += step[i].flowIntercept;
@@ -613,13 +613,13 @@ public class DensityUMNState implements MeterAlgorithmState {
 			}
 			return (int)flow;
 		}
-				
+
 		/** get Critical Density approximation from MFD Estimator */
 		public float getCritDens () {
 			return step[3].densityThresh;
 		}
 	}
-	
+
 	/** Process All MeterState objects for the current DensityUMNState object */
 	public void processAllLocations () {
 		// TODO : Do we need anything ? Also validate is not needed
@@ -628,98 +628,98 @@ public class DensityUMNState implements MeterAlgorithmState {
 			if (meter != null)
 				meter.process();
 		}
-		printZoning();	
+		printZoning();
 	}
-	
+
 	protected class MeterState implements Comparable<MeterState>{
-		
+
 		/** Ramp meter */
 		protected final RampMeterImpl meter;
 
 		/** Queue detector set */
 		protected DetectorSet queue;
-		
+
 		/** Passage detector set */
 		protected DetectorSet passage;
-		
+
 		/** Merge detector set */
 		protected DetectorSet merge;
-		
+
 		/** Bypass detector set */
 		protected DetectorSet bypass;
-		
+
 		/** Handle to the immediate upstream mainline detectorset */
 		protected DetectorSet upstream_det;
-		
+
 		/** Handle to the immediate upstream mainline detectorset */
 		protected DetectorSet downstream_det;
-		
+
 		/** Handle to the immediate downstream meter */
 		protected MeterState downstream_meter;
-		
+
 		/** Current wait time at the meter ramp */
 		protected float wait_time;
-		
+
 		/** Rate of Change of wait time at the ramp */
 		protected float wait_time_rate;
-		
+
 		/** Time to Congestion on the Meter Ramp */
 		protected float time2_congestion;
-		
+
 		/** Target wait time on the meter ramp */
 		protected int target_wait;
-		
+
 		/** Mainline density associated to the merge for the Meter Ramp */
 		protected float merge_mainline_density;
-		
+
 		/** Rate of change of merge density along the mainline */
 		protected float merge_mainline_dens_rate;
-		
+
 		/** Time to Congestion on mainline */
 		protected float time2_congestion_mainline;
-		
+
 		/** Target Density for congestion on mainline */
 		protected float target_dens;
-		
+
 		/** Critical density */
 		protected float crit_dens;
-		
+
 		/** Safe time allowed for congestion on ramp */
 		protected float safe_t2w;
-		
+
 		/** Safe time allowed for congestion on mainline */
 		protected float safe_t2k;
-		
+
 		/** Safest value for Time to Congestion on Ramp.
 		 * Any time computed greater than this max is considered safe and
 		 * is substituted to this value.
 		 */
 		protected  float TIME2_CONGESTION_MAX = 600f;
-		
+
 		/** Safest value for Time to Congestion for Mainline.
 		 * Any time computed greater than this max is considered safe and
 		 * is substituted to this value.
 		 */
 		protected  float TIME2_CONGESTION_MAX_MAINLINE = 1500f;
-		
+
 		/** Uncongested capacity associated with the mainline section corresponding to the ramp */
 		protected int uncongested_capacity;
-		
+
 		/** The Congestion Level for the meterState */
 		protected CongestionLevel congestion_state;
-		
+
 		/** Bottleneck Level for the MeterState */
 		protected BottleneckState bottleneck_level;
-		
+
 		/** Metering Strategy deployed for the MeterState */
 		protected MeteringStrategy metering_strategy;
-		
+
 		/** Handle to the section associated with the current ramp
-		 * ( the second parameter can be an array holding all sections between 
+		 * ( the second parameter can be an array holding all sections between
 		 * current ramp and the next downstream ramp )
 		 */
 		protected SectionState this_section;
-		
+
 		/** List of sections associated with the current meter excluding the containing section
 		 * This list has all sections between current section and the next downstream meter location
 		 */
@@ -727,13 +727,13 @@ public class DensityUMNState implements MeterAlgorithmState {
 
 		/** Final Metering Rate decided */
 		protected int metering_rate;
-		
+
 		/** Boolean denoting where the metering rate has been set or not */
 		protected boolean metering_set;
-		
+
 		/** Are the parameters for the meter loaded from the external parameters file */
 		protected boolean isParamLoaded;
-		
+
 		/** Create a new meterState object */
 		protected MeterState () {
 			meter = null;
@@ -741,12 +741,12 @@ public class DensityUMNState implements MeterAlgorithmState {
 			isParamLoaded = false;
 			return;
 		}
-		
+
 		/** Place holder for any validate code needed */
 		public void validate () {
 			return;
 		}
-		
+
 		/** Create a new MeterState object for the given set of RampMeterImpl and TimingPlan objects
 		 * and the SectionState that contains the current meter state
 		 */
@@ -754,8 +754,8 @@ public class DensityUMNState implements MeterAlgorithmState {
 			this(m);
 			this_section = sect;
 			setMainlineDetectors();
-		}		
-		
+		}
+
 		/** Create a new MeterState object for the given RampMeterImpl and TimingPlanImpl objects */
 		protected MeterState (RampMeterImpl m) {
 			writeDebugLog("Creating MeterState Obj for: " + m.getName().toString(), 4);
@@ -765,24 +765,24 @@ public class DensityUMNState implements MeterAlgorithmState {
 			wait_time = 0;
 			this.setMeterDetectors();
 		}
-		
+
 		/** Set the SectionState to be associated with the current meterstate */
 		public void setSectionState (SectionState sect) {
 			this_section = sect;
 			setMainlineDetectors();
 		}
-		
+
 		/** Get handle to the SectionState associated to current meter state.
 		 * This section contains the current meterState in location */
 		public SectionState getSectionState () {
 			return this_section;
 		}
-		
+
 		/** Get handle to the RampMeterImpl object associated with this meter state */
 		public RampMeterImpl getMeterImpl () {
 			return meter;
 		}
-		
+
 		/** Add a set of SectionStates to the section_list for the current meterstate.
 		 * This set of sections defines the set of sections immediately downstream of
 		 * the current location that dont have another meter location associated with them.
@@ -790,7 +790,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		public void addSectionStates (ArrayList<SectionState> section_list_new) {
 			section_list.addAll(section_list_new);
 		}
-		
+
 		/** Process the meterstate for current metering cycle time step */
 		public void process() {
 			writeDebugLog("Processing meter: " + meter.getName().toString(), 4);
@@ -801,7 +801,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			doSetMeteringStrategy();
 			return;
 		}
-		
+
 		/** Set Mainline Detectors (upstream and downstream) associated with the ramp */
 		protected void setMainlineDetectors() {
 			upstream_det = this_section.getMainUp();
@@ -809,7 +809,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog("Upstrm Det for MeterState: " + printDetSetName(upstream_det), 4);
 			return;
 		}
-		
+
 		/** Set the queue/passage/merge/bypass DetectorSets for the current ramp */
 		protected void setMeterDetectors() {
 			DetectorSet ds  = meter.getDetectorSet();
@@ -831,7 +831,7 @@ public class DensityUMNState implements MeterAlgorithmState {
                         else                    logline_meters = logline_meters + "NONE";
                         writeDebugLog(logline_meters, 5);
 		}
-		
+
 		/** Load the XML file and parameters for specific meter
 		 * HardRead the values and set them for the current meter */
 		public void loadMeterXML () {
@@ -882,7 +882,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- Reached end of MFD blocking XML Loading",6);
 		}
 
-		/** Calculates the length (in LWR steps) to the location of the ramp from the 
+		/** Calculates the length (in LWR steps) to the location of the ramp from the
 		 * upstream end of the containing section.
 		 */
 		protected int lengthToMergeSteps () {
@@ -894,7 +894,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- Length to merge steps " + length, 5);
 			return length;
 		}
-		
+
 		/** CompareTo method is essential for implementing 'Comparable' in MeterState class
 		 * This function allows the Comparable sorting to be invoked on any list of MeterState objects
 		 * The function uses the geolocation parameter assigned to the corresponding meters represented
@@ -907,26 +907,26 @@ public class DensityUMNState implements MeterAlgorithmState {
 			float comp_loc = corridor.calculateMilePoint(compareMetState.meter.geo_loc);
 			return (int)(orig_loc - comp_loc);
 		}
-		
+
 		/** Returns the next downstream meter encountered along the Corridor.
-		 * The function uses the sorted list of meters along the corridor that is loaded 
+		 * The function uses the sorted list of meters along the corridor that is loaded
 		 * when the TimingPlanImpl object is initialized.
 		 */
 			/** Use linked list to obtain next meter*/
 		public void findDownstreamMeter () {
 			if (meters.indexOf(this) <= 0)	{
-				writeDebugLog(" -- Downstream meter for meter: " + meter.getName().toString() + 
+				writeDebugLog(" -- Downstream meter for meter: " + meter.getName().toString() +
 					" does not exist", 5);
 				downstream_meter = meters.get(meters.indexOf(this));
 				return;
 			}
 			downstream_meter = meters.get(meters.indexOf(this)-1);
-			writeDebugLog(" -- Downstream meter for meter: " + meter.getName().toString()+ 
+			writeDebugLog(" -- Downstream meter for meter: " + meter.getName().toString()+
 					" identified as: " + downstream_meter.getMeterImpl().getName().toString(), 5);
 		}
-		
+
 		/** Calculated the mainline merge density to be used in algorithm.
-		 * Uses the LWR_SWITCH variable to either return the LWR model computed density, 
+		 * Uses the LWR_SWITCH variable to either return the LWR model computed density,
 		 * or simply the registered density at the immediate upstream mainline station
 		 * @return The average density on the mainline corresponding to the ramp.
 		 */
@@ -943,17 +943,17 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- Calculated mainline dens: " + density, 5);
 			return density;
 		}
-		
+
 		/** get the Density at the merge location on the mainline */
 		public float getMergeMainDens () {
 			return merge_mainline_density;
 		}
-		
+
 		/** set the Density at the merge location on the mainline */
 		public void setMergeMainDens (float dens) {
 			merge_mainline_density = dens;
 		}
-		
+
 		/** Compares the previous saved mergeline density with the currently computed density
 		 * to obtain the new rate of change of density for the current time step.
 		 * Sets the new density as well as rate of change to the MeterState object.
@@ -964,7 +964,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			setMergeMainDens(mergeMainDens);
 			writeDebugLog(" -- Calculated mainline dens rate of change: " + merge_mainline_dens_rate, 5);
 		}
-		
+
 		/** Based on current mainline density and rate of change of density, and using the
 		 * target density parameter, computes and sets the time to congestion on mainline.
 		 */
@@ -986,18 +986,18 @@ public class DensityUMNState implements MeterAlgorithmState {
 			time2_congestion_mainline = time2Congestion;
 			writeDebugLog(" -- Calculated mainline time 2 congestion: " + time2_congestion_mainline, 5);
 		}
-		
+
 		/** Get the current ramp wait for the ramp */
 		public float getRampWait () {
 			return wait_time;
 		}
-		
+
 		/** Set the current Ramp wait for the ramp */
 		public void setRampWait (float rate) {
 			wait_time = rate;
 			return;
 		}
-		
+
 		// DENSMETER - TODO - Use following function to update wait time calculations
 		/** Approximates the maximum wait time currently experienced by any vehicle
 		 * on the ramp
@@ -1007,7 +1007,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			float wait_time = 0;
 			writeDebugLog(" -- ==== Entering Ramp Wait Time Calculation..", 8);
 			boolean good_queue = true;
-			if (queue == null) { 
+			if (queue == null) {
 				writeDebugLog(" -- ==== Queue Detector NotFound.. ", 8);
 				good_queue = false;
 			} else {
@@ -1036,7 +1036,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 				float ratio = flow_in / flow_out;
 				ratio = ratio - 1;
 				ratio = ratio * METERING_CYCLE_TIME;
-				wait_time = getRampWait() + ratio; 
+				wait_time = getRampWait() + ratio;
 				writeDebugLog(" -- ==== Almost at the end ", 9);
 			} else {
 				writeDebugLog(" -- ==== NO Queue Detector Working .. ", 8);
@@ -1057,7 +1057,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- Calculated Ramp Wait time: " + wait_time, 5);
 			return wait_time;
 		}
-		
+
 		/** Calculates the instantaneous rate at which the maximum wait time on the
 		 * ramp is changing. The function compares the previously recorded wait time
 		 * with the current wait time experienced in order to calculate the rate of change
@@ -1068,9 +1068,9 @@ public class DensityUMNState implements MeterAlgorithmState {
 			setRampWait(current_wait);
 			writeDebugLog(" -- Calculated Ramp Wait time rate of change: " + wait_time_rate, 5);
 		}
-		
-		/** Based on the current max wait time on ramp and the rate of change of this 
-		 * value, calculates the time to congestion on ramp assuming a target wait time 
+
+		/** Based on the current max wait time on ramp and the rate of change of this
+		 * value, calculates the time to congestion on ramp assuming a target wait time
 		 * to denote onset of congestion on ramp. The target wait time can be either same
 		 * as, or very close yet slightly smaller than the maximum allowed wait time on ramp.
 		 */
@@ -1088,34 +1088,34 @@ public class DensityUMNState implements MeterAlgorithmState {
 			time2_congestion = time2Congestion;
 			writeDebugLog(" -- Calculated Ramp Wait time to congestion: " + time2_congestion, 5);
 		}
-		
+
 		/** Set Congested Capacity for the Meterstate */
 		public void setUncongestedCap (int cap) {
 			uncongested_capacity = cap;
 		}
-		
+
 		/** Get Congested Capacity associated with Meterstate */
 		public int getUncongestedCap () {
 			return uncongested_capacity;
 		}
-		
+
 		/** Set Target Ramp Wait for the Meterstate */
 		public void setTargetRampWait (int targ_wait) {
 			target_wait = targ_wait;
 		}
-		
+
 		/** Get Target Ramp Wait associated with Meterstate */
 		public int getTargetRampWait () {
 			return target_wait;
 		}
-		
+
 		/** The function calculates and sets the Congestion State for the current ramp.
 		 * The congestion states allowed are :
 		 * UNDEFINED
 		 * UNCONGESTED
 		 * APPROACHING
-		 * CONGESTED  
-		 * The decision is made based on the current ramp wait, mainline density, and 
+		 * CONGESTED
+		 * The decision is made based on the current ramp wait, mainline density, and
 		 * computed times to congestion on the ramp and the mainline.
 		 * sets 'congestion_state'
 		 */
@@ -1125,7 +1125,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			float time2w = time2_congestion;
 			float time2k = time2_congestion_mainline;
 			congestion_state = CongestionLevel.UNDEFINED;
-			if ((merge_mainline_density < LOW_DENS_MARGIN * crit_dens) 
+			if ((merge_mainline_density < LOW_DENS_MARGIN * crit_dens)
 				&& (time2w > safe_t2w) && (time2k > safe_t2k)) {
 				congestion_state = CongestionLevel.UNCONGESTED;
 			} else {
@@ -1142,17 +1142,17 @@ public class DensityUMNState implements MeterAlgorithmState {
 					+ ") set to : " + congestion_state, 5);
 			return;
 		}
-		
+
 		/** Get the Congestion level associated with current meterstate */
 		public CongestionLevel getCongestionState () {
 			return congestion_state;
 		}
-		
+
 		/** Get the bottleneck level associated with current meterstate */
 		public BottleneckState getBottleneckLevel () {
 			return bottleneck_level;
 		}
-		
+
 		/** Calculate the sectional input ahead of the meter for the given location */
 		protected int sectionalInput () {
 			int sec_input = 0;
@@ -1163,7 +1163,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- Net Sectional input calculated: " + sec_input, 6);
 			return sec_input;
 		}
-		
+
 		/** Get the demand for the ramp. */
 		protected int getDemand() {
 			if (queue.isGood())
@@ -1171,21 +1171,21 @@ public class DensityUMNState implements MeterAlgorithmState {
 					return Math.max(0, queue.getFlow());
 			return getMaxRelease();
 		}
-		
+
 		/** Get the flow at the upstream mainline location corresponding to the meter ramp */
 		protected int getUpstreamFlow () {
 			return Math.max(0, upstream_det.getFlow());
 		}
-		
-		
-		/** The function decides and sets the Bottleneck Level corresponding to 
+
+
+		/** The function decides and sets the Bottleneck Level corresponding to
 		 * the current ramp. The decision is based on the congestion state conditions
-		 * for the current ramp and the ramp downstream of the current location, 
+		 * for the current ramp and the ramp downstream of the current location,
 		 * the downstream ramp bottleneck level, and the sectional inputs for the 2 locations
 		 * The allowed Bottleneck Levels are :
 		 * UNDEFINED
-		 * NON_CONTROLLING  
-		 * CONTROLLING      
+		 * NON_CONTROLLING
+		 * CONTROLLING
 		 * sets 'bottleneck_level'
 		 */
 		public void calcBottleneckLevel () {
@@ -1217,28 +1217,28 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- BottleneckLevel (Meter:" + meter.getName().toString()
 					+ ") set to : " + bottleneck_level.toString(), 5);
 		}
-		
+
 		/** Set the metering strategy for the section */
 		public void setMeteringStrategy (MeteringStrategy strategy) {
 			metering_strategy = strategy;
 			writeDebugLog(" -- MeteringStrategy (Meter:" + meter.getName().toString()
 					+ ") set to : " + strategy.toString(), 5);
 		}
-		
+
 		/** Return the metering strategy used for the meter */
 		public MeteringStrategy getMeteringStrategy () {
 			return metering_strategy;
 		}
-		
+
 		/** The function decides and sets the Metering Strategy and computes and sets the
 		 * metering rate accordingly obtained from the decided Strategy for the current ramp.
 		 * The decision is made based on the current congestion state and downstream bottleneck level.
 		 * The following are the allowed Metering Strategies:
 		 * UNDEFINED
-		 * UNCONGESTED 
-		 * CONTROLLED  
-		 * CONTROLLING 
-		 * CONGESTED   
+		 * UNCONGESTED
+		 * CONTROLLED
+		 * CONTROLLING
+		 * CONGESTED
 		 * sets 'metering_strategy' and indirectly through setMetering function, 'metering_rate'
 		 */
 		public void doSetMeteringStrategy () {
@@ -1271,10 +1271,10 @@ public class DensityUMNState implements MeterAlgorithmState {
 			setMeteringStrategy(strategy);
 			setMetering(meter_rate);
 		}
-		
-		
+
+
 		/** Computes the meter rate according to the Uncongested Metering Strategy
-		 * 
+		 *
 		 * @return meter rate (Uncongested Metering Strategy)
 		 */
 		public int setUncongestedMetering () {
@@ -1284,9 +1284,9 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- Rate calculated from UncongMet: " + meter_rate, 5);
 			return meter_rate;
 		}
-		
+
 		/** Computes the meter rate according to the Controlled Metering Strategy
-		 * the aim of the controlled metering strategy is to balance delays at all 
+		 * the aim of the controlled metering strategy is to balance delays at all
 		 * ramps within the zone governed by the controlling ramp.
 		 * @return meter rate (Controlled Metering Strategy)
 		 */
@@ -1298,7 +1298,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			if (meters.indexOf(downstream_meter) == meters.indexOf(this)) {
 				meter_rate_i = setControllingMetering();
 				return meter_rate_i;
-			} 
+			}
 			down_demand = downstream_meter.getDemand();
 			down_meter  = downstream_meter.getMeteringRate();
 			this_delta = target_wait - wait_time;
@@ -1310,10 +1310,10 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- Rate calculated from ControlledMet: " + meter_rate, 5);
 			return (int)meter_rate;
 		}
-		
+
 		/** Computes the meter rate according to the Controlling Metering Strategy
-		 * the aim of the controlling metering strategy is to balance the 
-		 * onset of congestion at the ramp and at the mainline corresponding to the ramp 
+		 * the aim of the controlling metering strategy is to balance the
+		 * onset of congestion at the ramp and at the mainline corresponding to the ramp
 		 * @return meter rate (Controlling Metering Strategy)
 		 */
 		public int setControllingMetering () {
@@ -1333,16 +1333,16 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- Rate calculated from ControllingMet: " + meter_rate, 5);
 			return meter_rate;
 		}
-		
+
 		/** Computes the meter rate according to the Congested Metering Strategy
-		 * the aim of the congested metering strategy is to adjust the meter rate so 
+		 * the aim of the congested metering strategy is to adjust the meter rate so
 		 * as to just avoid violation of the ramp maximum delay constraint at the location.
 		 * This is done by either stepping up or down the meter rate based on the current
 		 * demand estimation conditions on the ramp and comparing it against previous meter rate
 		 * @return meter rate (Congested Metering Strategy)
 		 */
 		public int setCongestedMetering () {
-			int meter_rate;			
+			int meter_rate;
 			int prev_rate = getMeteringRate();
 			int demand = getDemand();
 			int step_cong = METERING_STEP;
@@ -1359,7 +1359,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- Rate calculated from CongMet: " + meter_rate, 5);
 			return meter_rate;
 		}
-		
+
 		/** The meter rate decided is refined based on maximum and minimum allowed
 		 * metering rates and on any other slabbing requirements.
 		 * @param meter_rate
@@ -1370,21 +1370,21 @@ public class DensityUMNState implements MeterAlgorithmState {
 			meter_rate = Math.min(meter_rate, getMaxRelease());
 			meter_rate = Math.max(meter_rate, getMinRelease());
 			if (orig_rate != meter_rate)
-				writeDebugLog(" -- Refining Metering Rate for Meter: " + meter.getName().toString() + 
+				writeDebugLog(" -- Refining Metering Rate for Meter: " + meter.getName().toString() +
 						" from " + orig_rate + " to " + meter_rate, 5);
 			return meter_rate;
 		}
-		
+
 		/** Sets the metering rate for the ramp */
 		public void setMetering (int meter_rate) {
 			metering_rate = meter_rate;
-			
+
 			// DENSMETER - TODO - This following call needs to be uncommented for actual runs
 			//meter.setRatePlanned(meter_rate);
 			writeDebugLog(" -- Setting Metering Rate for Meter : " + meter.getName().toString() +" to " + meter_rate, 3);
 			metering_set = true;
 		}
-		
+
 		/** Obtain the most recently set metering rate for the ramp */
 		public int getMeteringRate () {
 			if (metering_set)
@@ -1393,99 +1393,99 @@ public class DensityUMNState implements MeterAlgorithmState {
 		}
 	}
 
-	/** The Section State class is used to associate a mainline section, 
+	/** The Section State class is used to associate a mainline section,
 	 * bounded by mainline stations on each end (Upstream and Downstream),
 	 * to each metered ramp.
 	 */
 	protected class SectionState implements Comparable<SectionState> {
-		
+
 		/** Mainline Upstream boundary detectorset for the section */
 		protected DetectorSet mainlineUp;
-		
+
 		/** Mainline Downstream boundary detectorset for the section */
 		protected DetectorSet mainlineDown;
-		
+
 		/** Critical Density associated with the current section */
 		protected float critDens;
-		
+
 		/** Maximum capacity associated with the current section */
 		protected float max_capacity;
-		
+
 		/** Minimum density allowed in LWR model */
 		protected int MIN_DENSITY_IN_MODEL = 2;
-		
+
 		/** Maximum density allowed in LWR Model */
 		protected int MAX_DENSITY_IN_MODEL = 250;
-		
+
 		/** Minimum value of flow allowed in WLR Model. */
 		protected int MIN_FLOW_IN_MODEL = 120;
-		
+
 		/** Represents maximim flow value allowed in LWR model. Multiplier
-		 * over the known capacity in lwr model. 
+		 * over the known capacity in lwr model.
 		 */
 		protected float MAX_FLOW_RATIO_IN_MODEL = 1.5f;
-		
-		/** No of LWR Time steps within the Length of Time used for 
+
+		/** No of LWR Time steps within the Length of Time used for
 		 * Moving Average Normalization of profile */
 		protected int time_steps_movavg;
-		
-		/** No of Metering Step intervals within the Length of Time 
+
+		/** No of Metering Step intervals within the Length of Time
 		 * used for Moving Average Normalization. Used for raw profiles*/
 		protected int time_step_history;
-		
-		/** Density Profile along the section: 
+
+		/** Density Profile along the section:
 		 * First index represents LWR Time step : 0 denoting the most recent to current time
 		 * Second index represents the LWR Distance step : 0 denoting the most upstream end */
 		protected ArrayList<ArrayList<Float>> dens_profile       = new ArrayList<ArrayList<Float>>();
-		
-		/** Flow Profile along the section: 
+
+		/** Flow Profile along the section:
 		 * First index represents LWR Time step : 0 denoting the most recent to current time
 		 * Second index represents the LWR Distance step : 0 denoting the most upstream end */
 		protected ArrayList<ArrayList<Float>> flow_profile       = new ArrayList<ArrayList<Float>>();
-		
-		/** Generation Profile along the section: 
+
+		/** Generation Profile along the section:
 		 * First index represents LWR Time step : 0 denoting the most recent to current time
 		 * Second index represents the LWR Distance step : 0 denoting the most upstream end */
 		protected ArrayList<ArrayList<Float>> generation_profile = new ArrayList<ArrayList<Float>>();
-		
+
 		/** List of ramps along the section */
 		protected ArrayList<DetectorSet> ramps = new ArrayList<DetectorSet>();
-		
+
 		/** List of ramptype markers along the section. +1 for On Ramps, -1 for Off Ramps */
 		protected ArrayList<Integer> ramps_type = new ArrayList<Integer>();
-		
+
 		/** List of raw densities reported at known boundaries along the section */
 		protected ArrayList<ArrayList<Float>> raw_density = new ArrayList<ArrayList<Float>>();
-		
+
 		/** List of raw flows reported at known boundaries (upstream and downstream detectorsets
-		 * and ramp locations) along the section. 
+		 * and ramp locations) along the section.
 		 * First index represents time : 0 being most recent meter cycle
 		 * Second index represents the distance along section.
 		 */
 		protected ArrayList<ArrayList<Float>> raw_flows   = new ArrayList<ArrayList<Float>>();
-		
+
 		/** lwr model associated with the current SectionState object */
 		protected LWREstimator lwr;
-		
+
 		/** Boolean check for LWR initiation status */
 		protected boolean isInitiatedLWR;
-		
+
 		/** Boolean check for LWR parameters Load status */
 		protected boolean isLoadedLWRParams;
-		
+
 		/** Boolean chech for LWR computed status */
 		protected boolean isComputedLWR;
-		
+
 		/** The no of LWR unit steps within the current section */
 		protected int steps;
-		
+
 		/** Create a new SectionState object */
 		protected SectionState() {
 			isInitiatedLWR = false;
 			isLoadedLWRParams = false;
 			isComputedLWR = false;
 		}
-		
+
 		/** Create a new SectionState object using the upstream and downstream detectorsets
 		 * as defining parameters
 		 */
@@ -1495,7 +1495,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			mainlineDown = downstream;
 			steps = lengthSectionSteps();
 		}
-		
+
 		/** Compares the current section with the provided set of upstream and downstream
 		 * detectorsets. Returns true if there is match in the boundaries.
 		 */
@@ -1505,22 +1505,22 @@ public class DensityUMNState implements MeterAlgorithmState {
 					return true;
 			return false;
 		}
-		
+
 		/** Get the Upstream Mainline detectorset
 		 * associated with the current section
 		 */
 		public DetectorSet getMainUp () {
 			return mainlineUp;
 		}
-		
+
 		/** Get the Downstream Mainline detectorset
 		 * associated with the current section
 		 */
 		public DetectorSet getMainDwn () {
 			return mainlineDown;
 		}
-		
-		/** Sets all the ramps (on and off) within the section. The ramps are passed as an array of 
+
+		/** Sets all the ramps (on and off) within the section. The ramps are passed as an array of
 		 * Detector Set elements. This is only done while initializing the section.
 		 * @param ramps_list : List of all the ramps within the section including all on and off ramps
 		 * @param no_ramps : The number of ramps passed through the ramps_list array parameter.
@@ -1546,7 +1546,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 				}
 			}
 		}
-		
+
 		/** Updates the raw values of known detectors (mainline and ramps) within section.
 		 * The function updates the raw array maintained that has actual 30 sec data for all known detectors.
 		 * This raw set is then broken down to smaller time steps for the LWR model calculations.
@@ -1567,7 +1567,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 				}
 			}
 		}
-		
+
 		/** Update for 1 time step in LWR, the known detector values.
 		 * Updated values are : The mainline values in dens and flow profile, and the ramp values in generation profile.
 		 * This function is called while computing each iteration of the LWR model.
@@ -1588,7 +1588,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 				}
 			}
 		}
-		
+
 		/** Obtains the upstream and downstream detectors corresponding to a given ramp meter
 		 * Loads the computed capacity for the section.
 		 * @param Rmeter
@@ -1606,18 +1606,18 @@ public class DensityUMNState implements MeterAlgorithmState {
 				return true;
 			return false;
 		}
-		
+
 		/** Sets the critical density for the section */
 		public void setCritDens (float dens) {
 			critDens = dens;
 		}
-		
+
 		/** Set the Critical Density for the section.
 		 * Uses the lwr model to obtain the critical density for section */
 		public void doSetCritDensfromLWR () {
 			setCritDens(lwr.getCritDens());
 		}
-		
+
 		/** Returns length of section */
 		public int calcSizeSection () {
 			float up = corridor.calculateMilePoint(mainlineUp.detectors.first().lookupGeoLoc());
@@ -1631,14 +1631,14 @@ public class DensityUMNState implements MeterAlgorithmState {
 			size_ret = Math.abs(size_ret);
 			return size_ret;
 		}
-		
+
 		/** Helper to allow sorting of sections. */
 		public int compareTo (SectionState compState) {
 			float orig_loc = corridor.calculateMilePoint(mainlineUp.detectors.first().lookupGeoLoc());
 			float comp_loc = corridor.calculateMilePoint(compState.mainlineUp.detectors.first().lookupGeoLoc());
 			return (int)(orig_loc - comp_loc);
-		}		
-		
+		}
+
 		/** Returns the length of section (in number of LWR distance steps). */
 		protected int lengthSectionSteps () {
 			int length = calcSizeSection();
@@ -1647,8 +1647,8 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- -- Size of section: " + length, 6);
 			return length;
 		}
-		
-		/** Calculates the number of LWR distance steps that a given detector is away from the upstream end of section 
+
+		/** Calculates the number of LWR distance steps that a given detector is away from the upstream end of section
 		 * @param det : The detector whole location within section is being calculated. Usually used for ramps only
 		 * @return : Number of LWR distance steps that the location is away from the upstream end of current section
 		 */
@@ -1663,12 +1663,10 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- -- Steps from downstream (total size of section is " + steps + "): " + steps_loc, 6);
 			return steps_loc;
 		}
-		
 
-		
 		/** Calculates the LWR model density profile for the section for one LWR Time step */
 		protected void calcTimeStep () {
-			
+
 			/* Following Block creates the density profle (temp) for the new time step of 3s */
 			writeDebugLog(" -- -- ---- Calculating LWR : ", 8);
 			ArrayList<Float> dens_temp_profile = new ArrayList<Float>();
@@ -1686,16 +1684,16 @@ public class DensityUMNState implements MeterAlgorithmState {
 				density = Math.min(density, MIN_DENSITY_IN_MODEL);
 				dens_temp_profile.add(i,density);
 			}
-			
+
 			writeDebugLog(" -- -- ---- Updating LWR profile: ", 8);
-			/* Following block updates the density / flow and generation profiles by one step 
+			/* Following block updates the density / flow and generation profiles by one step
 			 * Moves all t-1 time step elements to t and frees the 0 time space.*/
 			for (int time_s = time_steps_movavg - 1; time_s > 0; time_s--) {
 				dens_profile.set(time_s, dens_profile.get(time_s-1));
 				flow_profile.set(time_s, flow_profile.get(time_s-1));
 				generation_profile.set(time_s, generation_profile.get(time_s-1));
 			}
-			
+
 			/* Updates the 0 time step profiles for all distance elements other than the 0th and last element (mainline station)
 			 * Updates the flow_profile and the dens_profile lists*/
 			float flow_temp;
@@ -1704,7 +1702,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			for (int i = 1; i < steps - 1; i++) {
 				dens_temp = dens_temp_profile.get(i);
 				dens_profile.get(0).set(i,dens_temp);
-				
+
 				for (int time_s = 1; time_s < time_steps_movavg; time_s++) {
 					dens_temp += dens_profile.get(time_s).get(i);
 				}
@@ -1712,17 +1710,17 @@ public class DensityUMNState implements MeterAlgorithmState {
 				if (dens_temp > critDens)
 					isCongestion = true;
 				else isCongestion = false;
-				
+
 				flow_temp = lwr.getLWRFlowEstimate(isCongestion, dens_profile.get(0).get(i));
 				flow_temp = Math.max(flow_temp, max_capacity);
 				flow_temp = Math.min(flow_temp, MIN_FLOW_IN_MODEL);
 				flow_profile.get(0).set(i, (float)flow_temp);
 			}
 		}
-		
+
 		/** Calculate the LWR Profile for the section for the meter cycle */
 		protected void calculateProfile () {
-			if (isComputedLWR) 
+			if (isComputedLWR)
 				return;
 			if (!isInitiatedLWR)
 				initiateLRW();
@@ -1736,12 +1734,12 @@ public class DensityUMNState implements MeterAlgorithmState {
 			}
 			isComputedLWR = true;
 		}
-		
+
 		/** Resets the isComputedLWR boolean to false. This should be called at the begining of each cycle for all sections. */
 		protected void reset_timestep() {
 			isComputedLWR = false;
 		}
-		
+
 		/** Initiates the profiles
 		 * Initiates the ArrayList elements to required size
 		 * Assumes mainline stations are loaded
@@ -1752,7 +1750,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			time_step_history = 1 + MOVING_AVERAGE_LENGTH / METERING_CYCLE_TIME;
 			steps = lengthSectionSteps();
 		}
-		
+
 		/** Initiates the LWR Model using a linear interpolation of density along the
 		 * stretch at time 0.
 		 * Initiates the linear interpolation of density and flow along the stretch for all time steps
@@ -1807,7 +1805,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		}
 
 
-		/** Returns the estimated average density over a stretch  
+		/** Returns the estimated average density over a stretch
 		 * @param location is the distance from upstream detector where avg zone begins
 		 * @param distance is the length of the zone used for averaging
 		 * @return average density computed for the stretch defined through parameters.
@@ -1831,7 +1829,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			writeDebugLog(" -- -- Avg Density obtained: " + density, 6);
 			return density;
 		}
-		
+
 		/** Computes the sectional input as the sum of all input flows entering the
 		 * section (using all exit flows as negative) through the sectional boundaries and
 		 * all ramps belonging to the section.
@@ -1842,7 +1840,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			float m_loc = corridor.calculateMilePoint(m.getGeoLoc());
 			float r_loc, r_flow;
 			for (DetectorSet ramp_cand : ramps) {
-				if (ramp_cand != null) 
+				if (ramp_cand != null)
 					r_loc = corridor.calculateMilePoint(ramp_cand.detectors.first().lookupGeoLoc());
 				else {
 					writeDebugLog(" -- -- --- No Ramp Here", 9);
@@ -1861,9 +1859,9 @@ public class DensityUMNState implements MeterAlgorithmState {
 			return 0;
 		}
 	}
-	
+
 	protected File log_name;
-	
+
 	/** Print the end of the log file */
 	protected void printEnd() {
 		try {
@@ -1902,7 +1900,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 			log_name.getCanonicalPath(), true);
 		return new PrintStream(fos);
 	}
-	
+
 	/** Print the Congestion / Bottleneck / Metering Strategy
 	 * map for the given corridor.
 	 */
@@ -1954,7 +1952,7 @@ public class DensityUMNState implements MeterAlgorithmState {
 		writeDebugLog("\tMetering Strategy -| " + strategy , 2);
 		writeDebugLog("----------------------------------", 2);
 	}
-	
+
 	/** Load the Global Parameters from the XML Parameters File */
 	protected static void loadGlobalXMLParams () {
 		try {
@@ -1985,11 +1983,10 @@ public class DensityUMNState implements MeterAlgorithmState {
 		Q_THRESH_DENS = DensMeterLoadXML.getGlobalIntP("Q_THRESH_DENS", Q_THRESH_DENS);
 		METERING_CYCLE_TIME = DensMeterLoadXML.getGlobalIntP("METERING_CYCLE_TIME", METERING_CYCLE_TIME);
 	}
-	
+
 	/** Set the XML Parameter File Path to the DensMeterLoadXML helper*/
 	static protected void setParamXMLPath () {
 		DensMeterLoadXML.setXMLFilePath(XML_PATH);
 		isParamXMLPathSet = true;
 	}
-	
 }
