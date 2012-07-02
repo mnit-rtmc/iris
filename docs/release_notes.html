@@ -9,6 +9,30 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.146.0 (2 July 2012)</dt>
+	<dd><ul>
+		<li>
+			Totally reworked queue management for K-Adaptive
+			metering algorithm, including diagrams.
+		</li>
+		<li>
+			Fixed ramp meter action plan scheduling bug.
+		</li>
+		<li>
+			Added UMN density metering algorithm.
+		</li>
+		<li>
+			Added more content to administrator guide.
+		</li>
+		<li>
+			Reserve new comm protocol IDs.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.146.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.145.0 (22 May 2012)</dt>
 	<dd><ul>
 		<li>
