@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  University of Minnesota
+ * Copyright (C) 2010-2012  University of Minnesota
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
 /**
  * Density metering algorithm state 
  */
-public class DensityMPlanState implements MeterAlgorithmState {
+public class DensityUMNState implements MeterAlgorithmState {
 	
 
 	/** UNDEFINED used as default for all types : Congestion level, Bottleneck state, Metering Strategy
@@ -145,7 +145,7 @@ public class DensityMPlanState implements MeterAlgorithmState {
 	 * */
 	static protected boolean LWR_SWITCH = true;	
 	
-	/** Corridor associated with current DensityMPlanState */
+	/** Corridor associated with current DensityUMNState */
 	protected final Corridor corridor;
 	
 	/** Write the debug log using the idebuglog module and based on debug level */
@@ -183,16 +183,16 @@ public class DensityMPlanState implements MeterAlgorithmState {
 	}
 	
 	/** Hash Map maping all MeterPlanState objects to their corresponding corridors*/
-	static protected HashMap<String, DensityMPlanState> all_states =
-		new HashMap<String, DensityMPlanState>();
+	static protected HashMap<String, DensityUMNState> all_states =
+		new HashMap<String, DensityUMNState>();
 	
 	/** Lookup the density meter state for one corridor */
-	static public DensityMPlanState lookupCorridor(Corridor c) {
-		DensityMPlanState state = all_states.get(c.getID());
+	static public DensityUMNState lookupCorridor(Corridor c) {
+		DensityUMNState state = all_states.get(c.getID());
 		if(state == null) {
-			state = new DensityMPlanState(c);
+			state = new DensityUMNState(c);
 			all_states.put(c.getID(), state);
-			writeDebugLog("Created DensityMPlanState object for corridor " + c.getID().toString(), 3);
+			writeDebugLog("Created DensityUMNState object for corridor " + c.getID().toString(), 3);
 		}
 		return state;
 	}
@@ -216,7 +216,7 @@ public class DensityMPlanState implements MeterAlgorithmState {
 		isSortedList = true;
 	}
 	
-	/** Add a meterState object to the list of meters associated with DensityMPlanState object */
+	/** Add a meterState object to the list of meters associated with DensityUMNState object */
 	public void addMeterToList (MeterState new_meter) {
 		meters.add(new_meter);
 		writeDebugLog("Adding meter: " + new_meter.getMeterImpl().getName().toString() +
@@ -255,7 +255,7 @@ public class DensityMPlanState implements MeterAlgorithmState {
 		return ds.toArray()[0].getName().toString();
 	}
 	
-	/** Add a sectionstate object to the list of all sections in current DensityMPlanState */
+	/** Add a sectionstate object to the list of all sections in current DensityUMNState */
 	public void addSectionsToList (SectionState new_state) throws Exception {
 		if ((new_state.getMainUp().size() < 1) || (new_state.getMainDwn().size() < 1)) {
 			writeDebugLog("Skipped adding section due to null boundary ( " + 
@@ -402,7 +402,7 @@ public class DensityMPlanState implements MeterAlgorithmState {
 	
 	
 	/** Create a new Density Metering MeterPlanState */ 
-	protected DensityMPlanState (Corridor c) {
+	protected DensityUMNState (Corridor c) {
 		corridor = c;
 	}
 	
@@ -451,21 +451,21 @@ public class DensityMPlanState implements MeterAlgorithmState {
 		return null;
 	}
 	
-	/** Get the corridor associated with the current DensityMPlanState object */
+	/** Get the corridor associated with the current DensityUMNState object */
 	protected Corridor getCorridor () {
 		return corridor;
 	}
 	
-	/** Process all DensityMPlanState objects */
+	/** Process all DensityUMNState objects */
 	static public void processAllStates () {
 		writeDebugLog("In ProcessAllStates", 4);
 		loadGlobalVariables();
 		for (SectionState sect : sections) {
 			sect.reset_timestep();
 		}
-		Iterator<DensityMPlanState> it = all_states.values().iterator();
+		Iterator<DensityUMNState> it = all_states.values().iterator();
 		while (it.hasNext()) {
-			DensityMPlanState state = it.next();
+			DensityUMNState state = it.next();
 			if (!state.areNodesSectionsLoaded) {
 				writeDebugLog("Processing Nodes etc for :" + state.getCorridor().getID().toString(), 5);
 				try {
@@ -620,7 +620,7 @@ public class DensityMPlanState implements MeterAlgorithmState {
 		}
 	}
 	
-	/** Process All MeterState objects for the current DensityMPlanState object */
+	/** Process All MeterState objects for the current DensityUMNState object */
 	public void processAllLocations () {
 		// TODO : Do we need anything ? Also validate is not needed
 		for (MeterState meter : meters) {
