@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.Controller;
 public class DropNumberModel extends SpinnerNumberModel {
 
 	/** Maximum allowed drop address */
-	static protected final short MAX_DROP_ID = 9999;
+	static protected final short MAX_DROP_ID = 32767;
 
 	/** Comm link */
 	protected final CommLink comm_link;
