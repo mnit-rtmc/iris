@@ -1347,6 +1347,7 @@ COPY iris.meter_algorithm (id, description) FROM stdin;
 1	Simple Metering
 2	Stratified Metering
 3	K Adaptive Metering
+4	Density UMN Metering
 \.
 
 COPY iris.meter_lock (id, description) FROM stdin;

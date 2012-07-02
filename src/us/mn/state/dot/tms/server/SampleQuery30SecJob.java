@@ -188,5 +188,8 @@ public class SampleQuery30SecJob extends Job {
 				return false;
 			}
 		});
+		/* Note: this is temporarily last in case an exception is
+		 *       thrown -- all other metering work will be complete. */
+		DensityUMNAlgorithm.processAllStates();
 	}
 }

@@ -12,3 +12,6 @@ INSERT INTO iris.comm_protocol (id, description) values (21, 'PeMS');
 INSERT INTO iris.comm_protocol (id, description) values (22, 'SSI');
 INSERT INTO iris.comm_protocol (id, description) values (23, 'CHP Incidents');
 INSERT INTO iris.comm_protocol (id, description) values (24, 'URMS');
+
+INSERT INTO iris.meter_algorithm (id, description)
+	VALUES (4, 'Density UMN Metering');

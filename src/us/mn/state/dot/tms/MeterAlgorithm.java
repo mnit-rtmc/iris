@@ -33,7 +33,10 @@ public enum MeterAlgorithm {
 	STRATIFIED("Stratified Metering"),
 
 	/** Density (K) Adaptive metering algorithm */
-	K_ADAPTIVE("K Adaptive Metering");
+	K_ADAPTIVE("K Adaptive Metering"),
+
+	/** Density UMN metering algorithm */
+	DENSITY_UMN("Density UMN Metering");
 
 	/** Create a new metering algorithm */
 	private MeterAlgorithm(String d) {
