@@ -1087,14 +1087,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *     when distance(Downstream Meter, Station) less than 1 mile
 		 */
 		private void setAssociatedEntrances() {
-			ArrayList<EntranceNode> upstreamEntrances = getUpstreamEntrances();
-			ArrayList<EntranceNode> downstreamEntrances = getDownstreamEntrances();
-
 			StationNode us = upstreamStation();
 			StationNode ds = downstreamStation();
 
 			if(us != null) {
-				for(EntranceNode en : upstreamEntrances) {
+				for(EntranceNode en : getUpstreamEntrances()) {
 					if(!en.hasMeter())
 						continue;
 					int d = distanceFeet(en);
@@ -1111,7 +1108,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 
 			if(ds != null) {
-				for(EntranceNode en : downstreamEntrances) {
+				for(EntranceNode en : getDownstreamEntrances()){
 					if(!en.hasMeter())
 						continue;
 					int d = distanceFeet(en);
