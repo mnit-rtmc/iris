@@ -713,7 +713,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		EntranceNode en)
 	{
 		boolean satisfyDensityCondition = true;
-		boolean satisfyRateCondition = false;
 		double segmentDensity = 0;
 		final int DCHECKSTEP = START_STEPS - 1;
 		for(int i = 0; i < DCHECKSTEP; i++) {
@@ -728,22 +727,33 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(segmentDensity < bottleneckDensity())
 				satisfyDensityCondition = false;
 		}
-		if(en.countRateHistory() >= START_STEPS) {
-			satisfyRateCondition = true;
-			for(int i = 0; i < START_STEPS; i++) {
-				double q = en.getFlow(i);
-				double rate = en.getRate(i);
-				if(q < START_FLOW_RATIO * rate)
-					satisfyRateCondition = false;
-			}
-		}
 
-		if(satisfyRateCondition || satisfyDensityCondition) {
+		if(checkFlowStart(en) || satisfyDensityCondition) {
 			en.startMetering();
 			isMeteringStarted = true;
 			return true;
 		} else
 			return false;
+	}
+
+	/**
+	 * Check merging flow start condition (first time -- has not stopped
+	 * previously).
+	 * Merging flow &gt;= KstartRate * Allocated Rate (for n steps)
+	 *
+	 * @return true if metering should start, based on merging flow.
+	 */
+	private boolean checkFlowStart(EntranceNode en) {
+		if(en.countRateHistory() >= START_STEPS) {
+			for(int i = 0; i < START_STEPS; i++) {
+				double q = en.getFlow(i);
+				double rate = en.getRate(i);
+				if(q < START_FLOW_RATIO * rate)
+					return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
