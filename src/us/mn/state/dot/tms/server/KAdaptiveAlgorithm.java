@@ -701,34 +701,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/**
 	 * Check start condition (first time -- has not stopped previously).
-	 * <pre>
-	 *	SegmentDensity &gt;= bottleneckDensity (just once)
-	 *	   - OR -
-	 *	Merging flow &gt;= KstartRate * Allocated Rate (for n steps)
-	 * </pre>
-	 * Segment density is the average density from the upstream station to
-	 * bottleneck.
 	 */
 	private boolean checkStartFirst(StationNode bs, StationNode us,
 		EntranceNode en)
 	{
-		boolean satisfyDensityCondition = true;
-		double segmentDensity = 0;
-		final int DCHECKSTEP = START_STEPS - 1;
-		for(int i = 0; i < DCHECKSTEP; i++) {
-			if(en.countRateHistory() < DCHECKSTEP) {
-				satisfyDensityCondition = false;
-				break;
-			}
-			if(us != null)
-				segmentDensity = getAverageDensity(us, bs, i);
-			else
-				segmentDensity = bs.getAggregatedDensity(i);
-			if(segmentDensity < bottleneckDensity())
-				satisfyDensityCondition = false;
-		}
-
-		if(checkFlowStart(en) || satisfyDensityCondition) {
+		if(checkFlowStart(en) || checkDensityStart(bs, us, en)) {
 			en.startMetering();
 			isMeteringStarted = true;
 			return true;
@@ -754,6 +731,33 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Check density start condition (first time -- has not stopped
+	 * previously).
+	 * SegmentDensity &gt;= bottleneckDensity (just once)
+	 * Segment density is the average density from the upstream station to
+	 * bottleneck.
+	 *
+	 * @return true if metering should start, based on segment density.
+	 */
+	private boolean checkDensityStart(StationNode bs, StationNode us,
+		EntranceNode en)
+	{
+		final int DCHECKSTEP = START_STEPS - 1;
+		for(int i = 0; i < DCHECKSTEP; i++) {
+			if(en.countRateHistory() < DCHECKSTEP)
+				return false;
+			double segmentDensity = 0;
+			if(us != null)
+				segmentDensity = getAverageDensity(us, bs, i);
+			else
+				segmentDensity = bs.getAggregatedDensity(i);
+			if(segmentDensity < bottleneckDensity())
+				return false;
+		}
+		return true;
 	}
 
 	/**
