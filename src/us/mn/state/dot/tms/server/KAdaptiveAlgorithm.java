@@ -826,7 +826,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
 		for(EntranceNode en : meterNodes.values()) {
-			if(en.meter != null && en.meter.isOperating())
+			RampMeterImpl meter = en.meter;
+			if(meter != null && meter.isOperating())
 				return false;
 		}
 		return true;
