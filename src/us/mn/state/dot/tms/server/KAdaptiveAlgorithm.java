@@ -621,15 +621,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * p2's x = 0
 	 * p4's x = K_DES
 	 * </pre>
-	 * @param bottleneck
-	 * @return
+	 *
+	 * @param bottleneck Bottleneck station.
+	 * @param upstream Upstream station (may be null).
+	 * @param entrance Entrance node.
+	 * @return Metering rate (vehicles per hour).
 	 */
 	private double equation(StationNode bottleneck, StationNode upstream,
 		EntranceNode entrance)
 	{
-		double Kt = bottleneck.getAggregatedDensity();
-		if(upstream != null)
-			Kt = getAverageDensity(upstream, bottleneck);
+		double Kt = calculateSegmentDensity(bottleneck, upstream);
 
 		entrance.saveSegmentDensity(Kt);
 
@@ -662,6 +663,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			Rnext = Rmax;
 
 		return Rnext;
+	}
+
+	/** Calculate the segment density from an upstream station to a
+	 * bottleneck station.
+	 * @param bottleneck Bottleneck station.
+	 * @param upstream Upstream station (may be null).
+	 * @return Aggregated density (vehicles per mile).
+	 */
+	private double calculateSegmentDensity(StationNode bottleneck,
+		StationNode upstream)
+	{
+		if(upstream != null)
+			return getAverageDensity(upstream, bottleneck);
+		else
+			return bottleneck.getAggregatedDensity();
 	}
 
 	/** Calculate Alpha Value */
