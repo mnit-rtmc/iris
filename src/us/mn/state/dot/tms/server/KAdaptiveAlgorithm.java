@@ -283,7 +283,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if(meter.getCorridor() != corridor) {
 			// Meter must have been changed to a different
 			// corridor; throw away old meter node
-			meterNodes.remove(meter.getName());
+			EntranceNode en = meterNodes.remove(meter.getName());
+			if(en != null)
+				en.setMeter(null);
 			return null;
 		}
 		EntranceNode en = lookupEntranceNode(meter);
@@ -1282,17 +1284,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		public void setMeter(RampMeterImpl mtr) {
 			meter = mtr;
+			stopMetering();
 			queue.clear();
 			passage.clear();
 			merge.clear();
 			bypass.clear();
 			green.clear();
-			DetectorSet ds = meter.getDetectorSet();
-			queue.addDetectors(ds, LaneType.QUEUE);
-			passage.addDetectors(ds, LaneType.PASSAGE);
-			merge.addDetectors(ds, LaneType.MERGE);
-			bypass.addDetectors(ds, LaneType.BYPASS);
-			green.addDetectors(ds, LaneType.GREEN);
+			if(mtr != null) {
+				DetectorSet ds = mtr.getDetectorSet();
+				queue.addDetectors(ds, LaneType.QUEUE);
+				passage.addDetectors(ds, LaneType.PASSAGE);
+				merge.addDetectors(ds, LaneType.MERGE);
+				bypass.addDetectors(ds, LaneType.BYPASS);
+				green.addDetectors(ds, LaneType.GREEN);
+			}
 		}
 
 		/**
