@@ -1097,75 +1097,66 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 */
 		private void setAssociatedEntrances() {
 			StationNode us = upstreamStation();
-			StationNode ds = downstreamStation();
-
-			if(us != null) {
-				for(EntranceNode en : getUpstreamEntrances()) {
-					if(!en.hasMeter())
-						continue;
-					int d = distanceFeet(en);
-					int ud = us.distanceFeet(en);
-
-					// very close(?) or not allocated with upstream station
-					if((d < 500 && d < ud) || en.associatedStation == null) {
-						if(en.associatedStation != null)
-							en.associatedStation.associatedEntrances.remove(en);
-						associatedEntrances.add(en);
-						en.associatedStation = this;
-					}
-				}
-			}
-
-			if(ds != null) {
-				for(EntranceNode en : getDownstreamEntrances()){
-					if(!en.hasMeter())
-						continue;
-					int d = distanceFeet(en);
-					// distance to downstream entrance is less than 1 mile
-					if(d < FEET_PER_MILE) {
-						associatedEntrances.add(en);
-						en.associatedStation = this;
-					}
-				}
-			}
+			if(us != null)
+				associateUpstreamEntrances(us);
+			associateDownstreamEntrances();
 		}
 
-		/**
-		 * Return upstream entrances up to next upstream station
-		 * @return upstream entrance list
-		 */
-		protected ArrayList<EntranceNode> getUpstreamEntrances() {
-			ArrayList<EntranceNode> list =
-				new ArrayList<EntranceNode>();
+		/** Associate upstream entrances with this station.
+		 * @param us Upstream station node. */
+		private void associateUpstreamEntrances(StationNode us) {
 			for(Node n = upstream; n != null; n = n.upstream) {
 				if(n instanceof StationNode)
 					break;
 				if(n instanceof EntranceNode) {
 					EntranceNode en = (EntranceNode)n;
-					if(en.hasMeter())
-						list.add(en);
+					if(en.hasMeter()) {
+						associateUpstreamEntrance(us,
+							en);
+					}
 				}
 			}
-			return list;
 		}
 
-		/**
-		 * Return downstream entrances up to next downstream station
-		 * @return downstream entrance list
-		 */
-		protected ArrayList<EntranceNode> getDownstreamEntrances() {
-			ArrayList<EntranceNode> list =
-				new ArrayList<EntranceNode>();
+		/** Assoicate an upstream entrance with this station.
+		 * @param us Upstream station node.
+		 * @param en Entrance node. */
+		private void associateUpstreamEntrance(StationNode us,
+			EntranceNode en)
+		{
+			int d = distanceFeet(en);
+			int ud = us.distanceFeet(en);
+
+			// very close(?) or not allocated with upstream station
+			if((d < 500 && d < ud) || en.associatedStation == null) {
+				if(en.associatedStation != null)
+					en.associatedStation.associatedEntrances.remove(en);
+				associatedEntrances.add(en);
+				en.associatedStation = this;
+			}
+		}
+
+		/** Associate downstream entrances with this station. */
+		private void associateDownstreamEntrances() {
 			for(Node n = downstream; n != null; n = n.downstream) {
 				if(n instanceof StationNode)
 					break;
 				if(n instanceof EntranceNode) {
 					EntranceNode en = (EntranceNode)n;
 					if(en.hasMeter())
-						list.add(en);
+						associateDownstreamEntrance(en);
 				}
 			}
-			return list;
+		}
+
+		/** Assoicate a downstream entrance with this station.
+		 * @param en Entrance node. */
+		private void associateDownstreamEntrance(EntranceNode en) {
+			int d = distanceFeet(en);
+			if(d < FEET_PER_MILE) {
+				associatedEntrances.add(en);
+				en.associatedStation = this;
+			}
 		}
 
 		/** Get a string representation of a station node */
