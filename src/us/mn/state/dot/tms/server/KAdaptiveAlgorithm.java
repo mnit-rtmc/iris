@@ -511,17 +511,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** Check stop condition for one station. */
-	private boolean checkStopCondition(StationNode s,
+	private boolean checkStopCondition(StationNode sn,
 		boolean hasBottleneck)
 	{
-		if(s.isBottleneck) {
-			for(EntranceNode en : s.getAssociatedEntrances())
+		if(sn.isBottleneck) {
+			for(EntranceNode en : sn.getAssociatedEntrances())
 				en.resetNoBottleneckCount();
 			return true;
+		} else {
+			for(EntranceNode en : sn.getAssociatedEntrances())
+				en.checkStopCondition(hasBottleneck);
+			return hasBottleneck;
 		}
-		for(EntranceNode en : s.getAssociatedEntrances())
-			en.checkStopCondition(hasBottleneck);
-		return hasBottleneck;
 	}
 
 	/**
