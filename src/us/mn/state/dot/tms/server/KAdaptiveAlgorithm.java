@@ -459,8 +459,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 */
 	private double calculateCorridorDensity(StationNode bottleneck) {
 		if(bottleneck != null) {
-			return calculateSegmentDensity(firstStation(),
-				bottleneck);
+			return bottleneck.calculateSegmentDensity(
+				firstStation());
 		}
 		return 0;
 	}
@@ -629,7 +629,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private double equation(StationNode bottleneck, StationNode upstream,
 		EntranceNode entrance)
 	{
-		double Kt = calculateSegmentDensity(upstream, bottleneck);
+		double Kt = bottleneck.calculateSegmentDensity(upstream);
 
 		entrance.saveSegmentDensity(Kt);
 
@@ -751,7 +751,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		for(int i = 0; i < DCHECKSTEP; i++) {
 			if(en.countRateHistory() < DCHECKSTEP)
 				return false;
-			double segK = calculateSegmentDensity(us, bs, i);
+			double segK = bs.calculateSegmentDensity(us, i);
 			if(segK < bottleneckDensity())
 				return false;
 		}
@@ -776,7 +776,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return false;
 
 		for(int i = 0; i < RESTART_STEPS; i++) {
-			double segK = calculateSegmentDensity(us, bs, i);
+			double segK = bs.calculateSegmentDensity(us, i);
 
 			// Start Condition 1 : segment density > bottleneck K
 			if(segK < bottleneckDensity())
@@ -824,55 +824,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Get average density of a mainline segment.
-	 * @param upStation upstream station of segment.
-	 * @param downStation downstream station of segment.
-	 * @return average density (distance weight).
-	 */
-	private double calculateSegmentDensity(StationNode upStation,
-		StationNode downStation)
-	{
-		return calculateSegmentDensity(upStation, downStation, 0);
-	}
-
-	/**
-	 * Get average density of a mainline segment at prevStep time steps ago.
-	 * This works by splitting each "segment" between stations into 3 equal
-	 * lengths and assigning average density to the middle sub-segment.
-	 *
-	 * @param upStation upstream station of segment.
-	 * @param downStation downstream station of segment.
-	 * @param prevStep previous time steps.
-	 * @return average density (distance weight).
-	 */
-	private double calculateSegmentDensity(StationNode upStation,
-		StationNode downStation, int prevStep)
-	{
-		if(upStation == null || upStation == downStation)
-			return downStation.getAggregatedDensity(prevStep);
-		StationNode cursor = upStation;
-		double dist_sum3 = 0;
-		double k_sum3 = 0;
-		double k_cursor = cursor.getAggregatedDensity(prevStep);
-		for(StationNode down = cursor.downstreamStation();
-		    down != null && cursor != downStation;
-		    down = down.downstreamStation())
-		{
-			double k_down = down.getAggregatedDensity(prevStep);
-			double k_middle = (k_cursor + k_down) / 2;
-			double distance = cursor.distanceMiles(down);
-			dist_sum3 += distance * 3;
-			k_sum3 += (k_cursor + k_middle + k_down) * distance;
-			cursor = down;
-			k_cursor = k_down;
-		}
-		if(dist_sum3 > 0)
-			return k_sum3 / dist_sum3;
-		else
-			return 0;
 	}
 
 	/** Node to manage station or entrance */
@@ -1028,6 +979,54 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Is a bottleneck station too close to another? */
 		protected boolean isBottleneckTooClose(StationNode sn) {
 			return distanceMiles(sn) < BOTTLENECK_SPACING_MILES;
+		}
+
+		/**
+		 * Get average density of a mainline segment ending at the
+		 * current station.
+		 * @param upStation upstream station of segment.
+		 * @return average density (distance weight).
+		 */
+		private double calculateSegmentDensity(StationNode upStation) {
+			return calculateSegmentDensity(upStation, 0);
+		}
+
+		/**
+		 * Get average density of a mainline segment ending at the
+		 * current station.  This works by splitting each "segment"
+		 * between stations into 3 equal lengths and assigning average
+		 * density to the middle sub-segment.
+		 *
+		 * @param upStation upstream station of segment.
+		 * @param prevStep previous time steps (0 for current).
+		 * @return average density (distance weight).
+		 */
+		private double calculateSegmentDensity(StationNode upStation,
+			int prevStep)
+		{
+			if(upStation == null || upStation == this)
+				return getAggregatedDensity(prevStep);
+			StationNode cursor = upStation;
+			double dist_sum3 = 0;
+			double k_sum3 = 0;
+			double k_cursor = cursor.getAggregatedDensity(prevStep);
+			for(StationNode down = cursor.downstreamStation();
+			    down != null && cursor != this;
+			    down = down.downstreamStation())
+			{
+				double k_down = down.getAggregatedDensity(
+					prevStep);
+				double k_middle = (k_cursor + k_down) / 2;
+				double distance = cursor.distanceMiles(down);
+				dist_sum3 += distance * 3;
+				k_sum3 += (k_cursor + k_middle + k_down) * distance;
+				cursor = down;
+				k_cursor = k_down;
+			}
+			if(dist_sum3 > 0)
+				return k_sum3 / dist_sum3;
+			else
+				return 0;
 		}
 
 		/**
