@@ -98,6 +98,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Spacing between two bottlenecks (soft minimum) */
 	static private final float BOTTLENECK_SPACING_MILES = 1.5f;
 
+	/** Distance threshold for upstream station to meter association */
+	static private final float UPSTREAM_STATION_MILES = 1.0f;
+
 	/** Number of steps for average density to check corridor state */
 	static private final int AVG_K_STEPS = steps(900);
 
@@ -1210,10 +1213,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get associated upstream station */
 		private StationNode getAssociatedUpstream() {
 			StationNode us = node.upstreamStation();
-			if(us != null && node.distanceMiles(us) < 1.0f)
+			if(isUpstreamStationOk(us))
 				return us;
 			else
 				return null;
+		}
+
+		/** Check if an upstream station is OK */
+		private boolean isUpstreamStationOk(StationNode us) {
+			return us != null &&
+			       node.distanceMiles(us) < UPSTREAM_STATION_MILES;
 		}
 
 		/** Test if downstream station should be associated */
