@@ -885,11 +885,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			new ArrayList<MeterState>();
 
 		/** Speed history */
-		private final BoundedSampleHistory speedHistory =
+		private final BoundedSampleHistory speedHist =
 			new BoundedSampleHistory(steps(60));
 
 		/** Density history */
-		private final BoundedSampleHistory densityHistory =
+		private final BoundedSampleHistory densityHist =
 			new BoundedSampleHistory(steps(300));
 
 		/** Is bottleneck ? */
@@ -914,8 +914,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * It must be called before finding bottleneck.
 		 */
 		public void updateState() {
-			densityHistory.push((double)station.getDensity());
-			speedHistory.push((double)station.getSpeed());
+			densityHist.push((double)station.getDensity());
+			speedHist.push((double)station.getSpeed());
 		}
 
 		/**
@@ -1020,7 +1020,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1 min density at 'prevStep' time steps ago
 		 */
 		public double getAggregatedDensity(int prevStep) {
-			Double avg = densityHistory.average(prevStep,steps(60));
+			Double avg = densityHist.average(prevStep,steps(60));
 			if(avg != null)
 				return avg;
 			else
@@ -1032,7 +1032,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1min speed
 		 */
 		public double getAggregatedSpeed() {
-			Double avg = speedHistory.average(0, steps(60));
+			Double avg = speedHist.average(0, steps(60));
 			if(avg != null)
 				return avg;
 			else
