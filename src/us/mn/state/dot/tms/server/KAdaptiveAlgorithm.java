@@ -101,6 +101,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Distance threshold for upstream station to meter association */
 	static private final float UPSTREAM_STATION_MILES = 1.0f;
 
+	/** Distance threshold for downstream station to meter association */
+	static private final int DOWNSTREAM_STATION_FEET = 500;
+
 	/** Number of steps for average density to check corridor state */
 	static private final int AVG_K_STEPS = steps(900);
 
@@ -1233,7 +1236,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return false;
 			int uf = node.distanceFeet(us);
 			int df = node.distanceFeet(ds);
-			return df < 500 && df < uf;
+			return df < DOWNSTREAM_STATION_FEET && df < uf;
 		}
 
 		/** Get the total cumulative demand (vehicles) */
