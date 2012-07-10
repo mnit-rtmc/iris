@@ -419,8 +419,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return;
 		// check avg K of corridor average density
 		for(int i = 0; i < AVG_K_TREND_STEPS; i++) {
-			Double ma_next = k_hist_corridor.average(i, AVG_K_STEPS);
-			Double ma_prev = k_hist_corridor.average(i + 1, AVG_K_STEPS);
+			Double ma_next = k_hist_corridor.average(i,
+				AVG_K_STEPS);
+			Double ma_prev = k_hist_corridor.average(i + 1,
+				AVG_K_STEPS);
 			if(ma_next == null || ma_prev == null)
 				return;
 			if(ma_next > ma_prev)
@@ -538,8 +540,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			ms.setRate(Rnext);
 		}
 
-		// calculate rates
-		// from upstream station of bottleneck to upstream boundary or next bottleneck
+		// calculate rates from upstream station of bottleneck
+		// to upstream boundary or next bottleneck
 		for(StationNode sn = bottleneck.upstreamStation(); sn != null;
 		    sn = sn.upstreamStation())
 		{
@@ -994,7 +996,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				double k_middle = (k_cursor + k_down) / 2;
 				double distance = cursor.distanceMiles(down);
 				dist_sum3 += distance * 3;
-				k_sum3 += (k_cursor + k_middle + k_down) * distance;
+				k_sum3 += (k_cursor + k_middle + k_down) *
+					distance;
 				cursor = down;
 				k_cursor = k_down;
 			}
