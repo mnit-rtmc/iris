@@ -196,16 +196,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Should check stop condition? (depends on corridor density trend) */
 	private boolean doStopChecking = false;
 
-	/** Are station-entrance associated? */
-	private boolean isAssociated = false;
-
 	/** Corridor density history for triggering metering stop */
 	private final BoundedSampleHistory k_hist_corridor =
 		new BoundedSampleHistory(AVG_K_STEPS + AVG_K_TREND_STEPS);
 
-	/** Hash map of ramp meter entrance nodes */
-	private final HashMap<String, EntranceNode> meterNodes =
-		new HashMap<String, EntranceNode>();
+	/** Hash map of ramp meter states */
+	private final HashMap<String, MeterState> meterStates =
+		new HashMap<String, MeterState>();
 
 	/** Head (furthest upstream) node on corridor */
 	private final Node head;
@@ -218,6 +215,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		corridor = c;
 		head = createNodes();
 		tail = head.tailNode();
+		if(ALG_LOG.isOpen())
+			debug();
 	}
 
 	/** Create nodes from corridor structure */
@@ -261,52 +260,50 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	@Override
 	public void validate(RampMeterImpl meter) {
-		EntranceNode en = getEntranceNode(meter);
-		if(en != null) {
-			en.updateState();
+		MeterState ms = getMeterState(meter);
+		if(ms != null) {
+			ms.updateState();
 			if(ALG_LOG.isOpen())
-				log(en.toString());
+				log(ms.toString());
 		}
 	}
 
 	/** Get ramp meter queue state enum value */
 	public RampMeterQueue getQueueState(RampMeterImpl meter) {
-		EntranceNode en = getEntranceNode(meter);
-		if(en != null)
-			return en.getQueueState();
+		MeterState ms = getMeterState(meter);
+		if(ms != null)
+			return ms.getQueueState();
 		else
 			return RampMeterQueue.UNKNOWN;
 	}
 
-	/** Get the entrance node for a given ramp meter */
-	protected EntranceNode getEntranceNode(RampMeterImpl meter) {
+	/** Get the meter state for a given ramp meter */
+	private MeterState getMeterState(RampMeterImpl meter) {
 		if(meter.getCorridor() != corridor) {
 			// Meter must have been changed to a different
 			// corridor; throw away old meter node
-			EntranceNode en = meterNodes.remove(meter.getName());
-			if(en != null)
-				en.setMeter(null);
+			meterStates.remove(meter.getName());
 			return null;
 		}
-		EntranceNode en = lookupEntranceNode(meter);
-		if(en != null)
-			return en;
-		en = findEntranceNode(meter);
+		MeterState ms = lookupMeterState(meter);
+		if(ms != null)
+			return ms;
+		EntranceNode en = findEntranceNode(meter);
 		if(en != null) {
-			en.setMeter(meter);
-			meterNodes.put(meter.getName(), en);
+			ms = new MeterState(meter, en);
+			meterStates.put(meter.getName(), ms);
 		}
-		return en;
+		return ms;
 	}
 
-	/** Lookup the entrance node for a specified meter */
-	protected EntranceNode lookupEntranceNode(RampMeter meter) {
-		return meterNodes.get(meter.getName());
+	/** Lookup the meter state for a specified meter */
+	private MeterState lookupMeterState(RampMeter meter) {
+		return meterStates.get(meter.getName());
 	}
 
-	/**
-	 * Find an entrance node matching the given ramp meter.
-	 */
+	/** Find an entrance node matching the given ramp meter.
+	 * @param meter Ramp meter to search for.
+	 * @return Entrance node matching ramp meter. */
 	private EntranceNode findEntranceNode(RampMeterImpl meter) {
 		R_NodeImpl rnode = meter.getR_Node();
 		for(Node n = head; n != null; n = n.downstream) {
@@ -321,8 +318,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Process the algorithm for the one interval */
 	protected void processInterval() {
-		if(!isAssociated)
-			doAssociateStationAndEntrance();
 		for(StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
 		{
@@ -337,23 +332,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		clearBottlenecks();
 	}
 
-	/**
-	 * Should be called after added all stations and meters
-	 */
-	private void doAssociateStationAndEntrance() {
-		for(StationNode sn = firstStation(); sn != null;
-		    sn = sn.downstreamStation())
-		{
-			sn.setAssociatedEntrances();
-		}
-		isAssociated = true;
-
-		/** for debugging of corridor structure */
-		if(ALG_LOG.isOpen())
-			debug();
-	}
-
-	/** Debug algorithm. */
+	/** Debug corridor structure. */
 	private void debug() {
 		log("-------- Corridor Structure --------");
 		for(Node n = head; n != null; n = n.downstream)
@@ -515,12 +494,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		boolean hasBottleneck)
 	{
 		if(sn.isBottleneck) {
-			for(EntranceNode en : sn.getAssociatedEntrances())
-				en.resetNoBottleneckCount();
+			for(MeterState ms : sn.getMeters())
+				ms.resetNoBottleneckCount();
 			return true;
 		} else {
-			for(EntranceNode en : sn.getAssociatedEntrances())
-				en.checkStopCondition(hasBottleneck);
+			for(MeterState ms : sn.getMeters())
+				ms.checkStopCondition(hasBottleneck);
 			return hasBottleneck;
 		}
 	}
@@ -551,14 +530,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void calculateMeteringRates(StationNode bottleneck) {
 
 		// calculate rates for entrance associated with bottleneck
-		for(EntranceNode en : bottleneck.getAssociatedEntrances()) {
-			if(!en.hasMeter())
+		for(MeterState ms : bottleneck.getMeters()) {
+			double Rnext = equation(bottleneck, ms);
+			ms.saveRateHistory(Rnext);
+			if(!checkStartCondition(bottleneck, null, ms))
 				continue;
-			double Rnext = equation(bottleneck, en);
-			en.saveRateHistory(Rnext);
-			if(!checkStartCondition(bottleneck, null, en))
-				continue;
-			en.setRate(Rnext);
+			ms.setRate(Rnext);
 		}
 
 		// calculate rates
@@ -578,25 +555,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void calculateMeteringRates(StationNode upStation,
 		StationNode bottleneck)
 	{
-		for(EntranceNode en : upStation.getAssociatedEntrances()) {
-			if(!en.hasMeter())
+		for(MeterState ms : upStation.getMeters()) {
+			double Rnext = equation(bottleneck, upStation, ms);
+			ms.saveRateHistory(Rnext);
+			if(!checkStartCondition(bottleneck, upStation, ms))
 				continue;
-			double Rnext = equation(bottleneck, upStation, en);
-			en.saveRateHistory(Rnext);
-			if(!checkStartCondition(bottleneck, upStation, en))
-				continue;
-			en.setRate(Rnext);
+			ms.setRate(Rnext);
 		}
 	}
 
 	/**
 	 * Calculate metering rates
 	 * @param stationState station state
-	 * @param entranceState entrance state
+	 * @param ms Meter state
 	 * @return next metering rate
 	 */
-	private double equation(StationNode stationState, EntranceNode entrance) {
-		return equation(stationState, null, entrance);
+	private double equation(StationNode stationState, MeterState ms) {
+		return equation(stationState, null, ms);
 	}
 
 	/**
@@ -624,19 +599,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 *
 	 * @param bottleneck Bottleneck station.
 	 * @param upstream Upstream station (may be null).
-	 * @param entrance Entrance node.
+	 * @param ms Meter state.
 	 * @return Metering rate (vehicles per hour).
 	 */
 	private double equation(StationNode bottleneck, StationNode upstream,
-		EntranceNode entrance)
+		MeterState ms)
 	{
 		double Kt = bottleneck.calculateSegmentDensity(upstream);
 
-		entrance.saveSegmentDensity(Kt);
+		ms.saveSegmentDensity(Kt);
 
-		double Rmin = entrance.getMinimumRate();
-		double Rmax = entrance.getMaximumRate();
-		double Rt = entrance.getRate();
+		double Rmin = ms.getMinimumRate();
+		double Rmax = ms.getMaximumRate();
+		double Rt = ms.getRate();
 
                 // Calculate MainLine Alpha value with MainLine Density
 		double x = K_DES - Kt;
@@ -687,29 +662,29 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * Does metering of given entrance start?
 	 * @param bs bottleneck
 	 * @param us associated station of entrance
-	 * @param en target entrance
+	 * @param ms Meter state.
 	 * @param Rnext calculated next metering rate
 	 * @return start ?
 	 */
 	private boolean checkStartCondition(StationNode bs, StationNode us,
-		EntranceNode en)
+		MeterState ms)
 	{
-		if(en.isMetering)
+		if(ms.isMetering)
 			return true;
-		if(!en.hasBeenStoped)
-			return checkStartFirst(bs, us, en);
+		if(!ms.hasBeenStoped)
+			return checkStartFirst(bs, us, ms);
 		else
-			return checkStartAfterStop(bs, us, en);
+			return checkStartAfterStop(bs, us, ms);
 	}
 
 	/**
 	 * Check start condition (first time -- has not stopped previously).
 	 */
 	private boolean checkStartFirst(StationNode bs, StationNode us,
-		EntranceNode en)
+		MeterState ms)
 	{
-		if(checkFlowStart(en) || checkDensityStart(bs, us, en)) {
-			en.startMetering();
+		if(checkFlowStart(ms) || checkDensityStart(bs, us, ms)) {
+			ms.startMetering();
 			isMeteringStarted = true;
 			return true;
 		} else
@@ -723,11 +698,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 *
 	 * @return true if metering should start, based on merging flow.
 	 */
-	private boolean checkFlowStart(EntranceNode en) {
-		if(en.countRateHistory() >= START_STEPS) {
+	private boolean checkFlowStart(MeterState ms) {
+		if(ms.countRateHistory() >= START_STEPS) {
 			for(int i = 0; i < START_STEPS; i++) {
-				double q = en.getFlow(i);
-				double rate = en.getRate(i);
+				double q = ms.getFlow(i);
+				double rate = ms.getRate(i);
 				if(q < START_FLOW_RATIO * rate)
 					return false;
 			}
@@ -746,11 +721,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @return true if metering should start, based on segment density.
 	 */
 	private boolean checkDensityStart(StationNode bs, StationNode us,
-		EntranceNode en)
+		MeterState ms)
 	{
 		final int DCHECKSTEP = START_STEPS - 1;
 		for(int i = 0; i < DCHECKSTEP; i++) {
-			if(en.countRateHistory() < DCHECKSTEP)
+			if(ms.countRateHistory() < DCHECKSTEP)
 				return false;
 			double segK = bs.calculateSegmentDensity(us, i);
 			if(segK < bottleneckDensity())
@@ -770,10 +745,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * bottleneck.
 	 */
 	private boolean checkStartAfterStop(StationNode bs, StationNode us,
-		EntranceNode en)
+		MeterState ms)
 	{
 		// if rate history is short, pass (do not start)
-		if(en.countRateHistory() < RESTART_STEPS)
+		if(ms.countRateHistory() < RESTART_STEPS)
 			return false;
 
 		for(int i = 0; i < RESTART_STEPS; i++) {
@@ -784,13 +759,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return false;
 
 			// Start Condition 2 : Merging flow >= KstartRate
-			double q = en.getFlow(i);
-			double rate = en.getRate(i);
+			double q = ms.getFlow(i);
+			double rate = ms.getRate(i);
 			if(q < START_FLOW_RATIO * rate)
 				return false;
 		}
 
-		en.startMetering();
+		ms.startMetering();
 		isMeteringStarted = true;
 		return true;
 	}
@@ -801,10 +776,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param stationState station state
 	 */
 	private void defaultMetering(StationNode stationState) {
-		for(EntranceNode e : stationState.getAssociatedEntrances()) {
-			if(e != null && e.isMetering && !e.isRateUpdated) {
-				double Rnext = equation(stationState, null, e);
-				e.setRate(Rnext);
+		for(MeterState ms : stationState.getMeters()) {
+			if(ms.isMetering && !ms.isRateUpdated) {
+				double Rnext = equation(stationState, null, ms);
+				ms.setRate(Rnext);
 			}
 		}
 	}
@@ -819,9 +794,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
-		for(EntranceNode en : meterNodes.values()) {
-			RampMeterImpl meter = en.meter;
-			if(meter != null && meter.isOperating())
+		for(MeterState ms : meterStates.values()) {
+			if(ms.meter.isOperating())
 				return false;
 		}
 		return true;
@@ -872,6 +846,30 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Clear bottleneck state */
 		abstract protected void clearBottleneck();
+
+		/**
+		 * Return next upstream station node.
+		 * @return Upstream station node.
+		 */
+		protected StationNode upstreamStation() {
+			for(Node n = upstream; n != null; n = n.upstream) {
+				if(n instanceof StationNode)
+					return (StationNode) n;
+			}
+			return null;
+		}
+
+		/**
+		 * Return next downstream station node.
+		 * @return Downstream station node.
+		 */
+		protected StationNode downstreamStation() {
+			for(Node n = downstream; n != null; n = n.downstream) {
+				if(n instanceof StationNode)
+					return (StationNode) n;
+			}
+			return null;
+		}
 	}
 
 	/** Node to manage station on corridor */
@@ -880,9 +878,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** StationImpl mapping this state */
 		protected final StationImpl station;
 
-		/** Associated entrances to metering */
-		private final ArrayList<EntranceNode> associatedEntrances =
-			new ArrayList<EntranceNode>();
+		/** Associated meters */
+		private final ArrayList<MeterState> associatedMeters =
+			new ArrayList<MeterState>();
 
 		/** Speed history */
 		private final BoundedSampleHistory speedHistory =
@@ -907,30 +905,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		{
 			super(rnode, m, up);
 			station = stat;
-		}
-
-		/**
-		 * Return next upstream station node.
-		 * @return Upstream station node.
-		 */
-		protected StationNode upstreamStation() {
-			for(Node n = upstream; n != null; n = n.upstream) {
-				if(n instanceof StationNode)
-					return (StationNode) n;
-			}
-			return null;
-		}
-
-		/**
-		 * Return next downstream station node.
-		 * @return Downstream station node.
-		 */
-		protected StationNode downstreamStation() {
-			for(Node n = downstream; n != null; n = n.downstream) {
-				if(n instanceof StationNode)
-					return (StationNode) n;
-			}
-			return null;
 		}
 
 		/**
@@ -1080,106 +1054,54 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/**
-		 * Return associated entrance
-		 * @return associated entrance
+		 * Return associated meters list.
+		 * @return associated meters list.
 		 */
-		public ArrayList<EntranceNode> getAssociatedEntrances() {
-			return associatedEntrances;
-		}
-
-		/**
-		 * Associated Meter to Station
-		 *   - Iterate from upstream to downstream
-		 *   - Upstream meter will be associated to the station
-		 *     when distance(Upstream Meter, Station) less than 500 feet
-		 *          or Meter is not associated to any station
-		 *   - Downstream meter will be associated to the station
-		 *     when distance(Downstream Meter, Station) less than 1 mile
-		 */
-		private void setAssociatedEntrances() {
-			StationNode us = upstreamStation();
-			if(us != null)
-				associateUpstreamEntrances(us);
-			associateDownstreamEntrances();
-		}
-
-		/** Associate upstream entrances with this station.
-		 * @param us Upstream station node. */
-		private void associateUpstreamEntrances(StationNode us) {
-			for(Node n = upstream; n != null; n = n.upstream) {
-				if(n instanceof StationNode)
-					break;
-				if(n instanceof EntranceNode) {
-					EntranceNode en = (EntranceNode)n;
-					if(en.hasMeter()) {
-						associateUpstreamEntrance(us,
-							en);
-					}
-				}
-			}
-		}
-
-		/** Assoicate an upstream entrance with this station.
-		 * @param us Upstream station node.
-		 * @param en Entrance node. */
-		private void associateUpstreamEntrance(StationNode us,
-			EntranceNode en)
-		{
-			int d = distanceFeet(en);
-			int ud = us.distanceFeet(en);
-
-			// very close(?) or not allocated with upstream station
-			if((d < 500 && d < ud) || en.associatedStation == null) {
-				if(en.associatedStation != null)
-					en.associatedStation.associatedEntrances.remove(en);
-				associatedEntrances.add(en);
-				en.associatedStation = this;
-			}
-		}
-
-		/** Associate downstream entrances with this station. */
-		private void associateDownstreamEntrances() {
-			for(Node n = downstream; n != null; n = n.downstream) {
-				if(n instanceof StationNode)
-					break;
-				if(n instanceof EntranceNode) {
-					EntranceNode en = (EntranceNode)n;
-					if(en.hasMeter())
-						associateDownstreamEntrance(en);
-				}
-			}
-		}
-
-		/** Assoicate a downstream entrance with this station.
-		 * @param en Entrance node. */
-		private void associateDownstreamEntrance(EntranceNode en) {
-			int d = distanceFeet(en);
-			if(d < FEET_PER_MILE) {
-				associatedEntrances.add(en);
-				en.associatedStation = this;
-			}
+		public ArrayList<MeterState> getMeters() {
+			return associatedMeters;
 		}
 
 		/** Get a string representation of a station node */
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append(station.getName() + " -> ");
-			for(EntranceNode en : associatedEntrances) {
-				if(en != null && en.hasMeter())
-					sb.append(en.meter.name + ", ");
+			sb.append(station.getName());
+			sb.append(" -> ");
+			for(MeterState ms : associatedMeters) {
+				sb.append(ms.meter.name);
+				sb.append(",");
 			}
-			return sb.toString();
+			return sb.substring(0, sb.length() - 1);
 		}
 	}
 
 	/** Node to manage entrance onto corridor */
 	class EntranceNode extends Node {
 
-		/** Associated station to metering */
-		private StationNode associatedStation;
+		/** Create a new entrance node */
+		public EntranceNode(R_NodeImpl rnode, float m, Node prev) {
+			super(rnode, m, prev);
+		}
+
+		/** Clear bottleneck state */
+		protected void clearBottleneck() { }
+
+		/** Get a string representation of an entrance node */
+		public String toString() {
+			return rnode.getName() + " entrance";
+		}
+	}
+
+	/** Ramp meter state */
+	class MeterState {
 
 		/** Meter at this entrance */
-		private RampMeterImpl meter;
+		private final RampMeterImpl meter;
+
+		/** Entrance node for the meter */
+		private final EntranceNode node;
+
+		/** Station node association */
+		private final StationNode s_node;
 
 		/** Is it metering? */
 		private boolean isMetering = false;
@@ -1258,38 +1180,48 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final BoundedSampleHistory segmentDensityHist =
 			new BoundedSampleHistory(MAX_STEPS);
 
-		/** Create a new entrance node */
-		public EntranceNode(R_NodeImpl rnode, float m, Node prev) {
-			super(rnode, m, prev);
-		}
-
-		/**
-		 * Associate a ramp meter with the entrance node.
-		 */
-		public void setMeter(RampMeterImpl mtr) {
+		/** Create a new meter state */
+		public MeterState(RampMeterImpl mtr, EntranceNode en) {
 			meter = mtr;
+			node = en;
+			DetectorSet ds = meter.getDetectorSet();
+			queue.addDetectors(ds, LaneType.QUEUE);
+			passage.addDetectors(ds, LaneType.PASSAGE);
+			merge.addDetectors(ds, LaneType.MERGE);
+			bypass.addDetectors(ds, LaneType.BYPASS);
+			green.addDetectors(ds, LaneType.GREEN);
 			stopMetering();
-			queue.clear();
-			passage.clear();
-			merge.clear();
-			bypass.clear();
-			green.clear();
-			if(mtr != null) {
-				DetectorSet ds = mtr.getDetectorSet();
-				queue.addDetectors(ds, LaneType.QUEUE);
-				passage.addDetectors(ds, LaneType.PASSAGE);
-				merge.addDetectors(ds, LaneType.MERGE);
-				bypass.addDetectors(ds, LaneType.BYPASS);
-				green.addDetectors(ds, LaneType.GREEN);
-			}
+			s_node = getAssociatedStation();
+			if(s_node != null)
+				s_node.associatedMeters.add(this);
 		}
 
-		/**
-		 * Does entrance have a meter?
-		 * @return true if has meter, else false
-		 */
-		public boolean hasMeter() {
-			return meter != null;
+		/** Get station to associate with the meter state.
+		 * @return Associated station node, or null. */
+		private StationNode getAssociatedStation() {
+			StationNode us = getAssociatedUpstream();
+			StationNode ds = node.downstreamStation();
+			return isCloser(us, ds) ? ds : us;
+		}
+
+		/** Get associated upstream station */
+		private StationNode getAssociatedUpstream() {
+			StationNode us = node.upstreamStation();
+			if(us != null && node.distanceMiles(us) < 1.0f)
+				return us;
+			else
+				return null;
+		}
+
+		/** Test if downstream station should be associated */
+		private boolean isCloser(StationNode us, StationNode ds) {
+			if(us == null)
+				return true;
+			if(ds == null)
+				return false;
+			int uf = node.distanceFeet(us);
+			int df = node.distanceFeet(ds);
+			return df < 500 && df < uf;
 		}
 
 		/** Get the total cumulative demand (vehicles) */
@@ -1680,9 +1612,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			hasBeenStoped = true;
 		}
 
-		/** Clear bottleneck state */
-		protected void clearBottleneck() { }
-
 		/**
 		 * Save metering rate history
 		 * @param Rnext
@@ -1797,13 +1726,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return noBottleneckCount;
 		}
 
-		/** Get a string representation of an EntranceNode */
+		/** Get a string representation of a meter state */
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			if(hasMeter())
-				sb.append(meter.name);
-			else
-				sb.append(rnode.name);
+			sb.append(meter.name);
 			sb.append(" " + getQueueState());
 			sb.append(",dem=" + Math.round(cumulativeDemand()));
 			sb.append(",pas=" + passage_accum);
