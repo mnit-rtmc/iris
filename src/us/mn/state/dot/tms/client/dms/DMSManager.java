@@ -278,7 +278,9 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, DMS proxy) {
-		if(DMSHelper.isLCS(proxy))
+		// Filter out LCSs for all styles except NO_CONTROLLER
+		if(DMSHelper.isLCS(proxy) &&
+		  !DMSHelper.STYLE_NO_CONTROLLER.equals(s))
 			return false;
 		else
 			return DMSHelper.checkStyle(s, proxy);
