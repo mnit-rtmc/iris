@@ -70,6 +70,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Ramp queue jam density (vehicles / mile) */
 	static private final int K_JAM_RAMP = 140;
 
+	/** Ramp queue jam density (vehicles per foot) */
+	static private final float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
+
 	/** Rate value for checking if metering is started */
 	static private final double START_FLOW_RATIO = 0.8;
 
@@ -1498,8 +1501,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate the maximum storage on the ramp (vehicles) */
 		private float maxStorage() {
 			int stor_ft = meter.getStorage() * meter.getLaneCount();
-			/* vehicles per foot (queue jam density) */
-			float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
 			return stor_ft * JAM_VPF;
 		}
 
