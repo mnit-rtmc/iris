@@ -172,6 +172,15 @@ public class DMSHelper extends BaseHelper {
 		       isScheduled(proxy);
 	}
 
+	/** Test if a DMS is part of an LCS array */
+	static public boolean isLCS(DMS proxy) {
+		// FIXME: this grabs to LCS type lock, and we probably
+		//        already have the DMS type lock.  Plus, this doesn't
+		//        work until the LCS objects have been enumerated.
+		//        There's got to be a better way...
+		return LCSHelper.lookup(proxy.getName()) != null;
+	}
+
 	/** Get the maintenance status of a DMS */
 	static public String getMaintenance(DMS proxy) {
 		Controller ctr = proxy.getController();

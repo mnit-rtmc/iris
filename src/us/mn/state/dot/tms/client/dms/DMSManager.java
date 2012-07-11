@@ -34,7 +34,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -266,10 +265,10 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Find the map geo location for a DMS */
 	public MapGeoLoc findGeoLoc(DMS proxy) {
-		if(checkStyle(DMSHelper.STYLE_ALL, proxy))
-			return super.findGeoLoc(proxy);
-		else
+		if(DMSHelper.isLCS(proxy))
 			return null;
+		else
+			return super.findGeoLoc(proxy);
 	}
 
 	/** Find the map geo location for a proxy */
@@ -279,11 +278,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, DMS proxy) {
-		// FIXME: this grabs to LCS type lock, and we probably
-		//        already have the DMS type lock.  Plus, this doesn't
-		//        work until the LCS objects have been enumerated.
-		//        There's got to be a better way...
-		if(LCSHelper.lookup(proxy.getName()) != null)
+		if(DMSHelper.isLCS(proxy))
 			return false;
 		else
 			return DMSHelper.checkStyle(s, proxy);
