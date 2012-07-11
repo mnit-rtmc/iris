@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@ public class I18N {
 	static private final String BASENAME = "messages";
 
 	/** Value returned for an undefined string */
-	static protected final String UNDEFINED = "Undefined I18N string";
+	static private final String UNDEFINED = "Undefined I18N string";
 
 	/** Value returned for error reading message */
-	static protected final String NOT_READ = "Message bundle not read";
+	static private final String NOT_READ = "Message bundle not read";
 
 	/** Key code to use for lookup failure */
 	static protected final int FAILURE_CODE = 0;
@@ -44,8 +44,14 @@ public class I18N {
 	/** Char to use for lookup failure */
 	static protected final char FAILURE_CHAR = '\0';
 
-	/** The resource bundle */
-	static private ResourceBundle m_bundle = null;
+	/** Resource bundle with language, country and variant */
+	static private ResourceBundle lcv_bundle = null;
+
+	/** Resource bundle with language and country */
+	static private ResourceBundle lc_bundle = null;
+
+	/** Resource bundle with language only */
+	static private ResourceBundle l_bundle = null;
 
 	/** Class can't be instantiated */
 	private I18N() {
@@ -63,58 +69,93 @@ public class I18N {
 		String l = props.getProperty("language");
 		String c = props.getProperty("country");
 		String v = props.getProperty("variant");
-		if(l == null || c == null || v == null) {
-			Log.severe("Error: I18N properties (language, " +
-				"country, variant) not set");
-			return;
-		}
-		Log.finest("Note: I18N: opening resources: Language=" +
-			l + ", Country=" + c + ", Variant=" + v);
+		lcv_bundle = getBundle(l, c, v);
+		lc_bundle = getBundle(l, c);
+		l_bundle = getBundle(l);
+	}
+
+	/** Get a resource bundle */
+	static private ResourceBundle getBundle(String l, String c, String v) {
+		if(l != null && c != null && v != null)
+			return getBundle(new Locale(l, c, v));
+		else
+			return null;
+	}
+
+	/** Get a resource bundle */
+	static private ResourceBundle getBundle(String l, String c) {
+		if(l != null && c != null)
+			return getBundle(new Locale(l, c));
+		else
+			return null;
+	}
+
+	/** Get a resource bundle */
+	static private ResourceBundle getBundle(String l) {
+		if(l != null)
+			return getBundle(new Locale(l));
+		else
+			return null;
+	}
+
+	/** Get a resource bundle */
+	static private ResourceBundle getBundle(Locale loc) {
 		try {
-			Locale loc = new Locale(l, c, v);
-			m_bundle = ResourceBundle.getBundle(BASENAME, loc);
+			return ResourceBundle.getBundle(BASENAME, loc);
 		}
-		catch(MissingResourceException ex) {
-			Log.severe("Error: I18N could not load message " +
-				"bundle: " + ex);
+		catch(MissingResourceException e) {
+			System.err.println("I18N could not load bundle: " +
+				loc);
+			return null;
 		}
 	}
 
 	/** Get the specified message, with no error messages returned
-	 *  if there is an error.
-	 *  @param id Name of I18N string in the bundle.
-	 *  @return The I18N string cooresponding to id, else null on error */
+	 * if there is an error.
+	 * @param id Name of I18N string in the bundle.
+	 * @return The I18N string cooresponding to id, else null on error */
 	static public String getSilent(String id) {
 		if(id == null || id.isEmpty())
 			return null;
-		if(m_bundle == null)
-			return null;
-		try {
-			return m_bundle.getString(id);
-		}
-		catch(Exception ex) {
-			return null;
-		}
+		else
+			return getString(id);
 	}
 
 	/** Get the specified message.
-	 *  @param id Name of I18N string in the bundle.
-	 *  @return The I18N string cooresponding to id, else error message */
+	 * @param id Name of I18N string in the bundle.
+	 * @return The I18N string cooresponding to id, else error message */
 	static public String get(String id) {
 		if(id == null || id.isEmpty())
 			return UNDEFINED;
-		if(m_bundle == null) {
-			Log.severe("Error: message bundle not loaded.");
-			return NOT_READ;
+		else {
+			String val = getString(id);
+			return val != null ? val : NOT_READ;
 		}
-		try {
-			return m_bundle.getString(id);
+	}
+
+	/** Get a string value from a resource bundle */
+	static private String getString(String key) {
+		if(lcv_bundle != null) {
+			try {
+				return lcv_bundle.getString(key);
+			}
+			catch(Exception e) { }	// fall through
 		}
-		catch(Exception ex) {
-			Log.warning("Error: attempting to read id (" + id +
-				") from bundle, ex=" + ex);
-			return NOT_READ;
+		if(lc_bundle != null) {
+			try {
+				return lc_bundle.getString(key);
+			}
+			catch(Exception e) { }	// fall through
 		}
+		if(l_bundle != null) {
+			try {
+				return l_bundle.getString(key);
+			}
+			catch(Exception e) { }	// fall through
+		}
+		System.err.println("I18N: failed to read (" + key +
+			") from bundle");
+		return null;
 	}
 
 	/** Return the implied key mnemonic in the specified I18N string.
