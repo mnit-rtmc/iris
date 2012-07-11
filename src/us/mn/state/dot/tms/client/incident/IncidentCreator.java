@@ -31,6 +31,7 @@ import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -98,13 +99,13 @@ public class IncidentCreator extends JPanel {
 		client = s.getDesktop().client;
 		setBorder(BorderFactory.createTitledBorder(
 			"Create new incident"));
-		crash_btn = createButton(IncidentManager.STYLE_CRASH,
+		crash_btn = createButton(DeviceStyle.CRASH,
 			EventType.INCIDENT_CRASH, theme);
-		stall_btn = createButton(IncidentManager.STYLE_STALL,
+		stall_btn = createButton(DeviceStyle.STALL,
 			EventType.INCIDENT_STALL, theme);
-		work_btn = createButton(IncidentManager.STYLE_ROADWORK,
+		work_btn = createButton(DeviceStyle.ROADWORK,
 			EventType.INCIDENT_ROADWORK, theme);
-		hazard_btn = createButton(IncidentManager.STYLE_HAZARD,
+		hazard_btn = createButton(DeviceStyle.HAZARD,
 			EventType.INCIDENT_HAZARD, theme);
 		ltype_cbox = createLaneTypeCombo();
 		Box box = Box.createHorizontalBox();
@@ -139,9 +140,10 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Create a button for creating an incident */
-	protected JToggleButton createButton(String sty, final EventType et,
+	protected JToggleButton createButton(DeviceStyle ds, final EventType et,
 		ProxyTheme<Incident> theme)
 	{
+		String sty = ds.toString();
 		Symbol sym = theme.getSymbol(sty);
 		final JToggleButton btn = new JToggleButton(sty,
 			sym.getLegend());

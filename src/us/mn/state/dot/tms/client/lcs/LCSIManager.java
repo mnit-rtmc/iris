@@ -18,6 +18,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.client.Session;
@@ -31,12 +32,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  * @author Douglas Lau
  */
 public class LCSIManager extends ProxyManager<LCSIndication> {
-
-	/** Name of "no controller" style */
-	static public final String STYLE_NO_CONTROLLER = "No controller";
-
-	/** Name of all style */
-	static public final String STYLE_ALL = "All";
 
 	/** Get the LCS indication cache */
 	static protected TypeCache<LCSIndication> getCache(Session s) {
@@ -64,18 +59,22 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	protected ProxyTheme<LCSIndication> createTheme() {
 		ProxyTheme<LCSIndication> theme = new ProxyTheme<LCSIndication>(
 			this, new LcsMarker());
-		theme.addStyle(STYLE_NO_CONTROLLER,
+		theme.addStyle(DeviceStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, LCSIndication proxy) {
-		if(STYLE_NO_CONTROLLER.equals(s))
+	public boolean checkStyle(DeviceStyle ds, LCSIndication proxy) {
+		switch(ds) {
+		case NO_CONTROLLER:
 			return proxy.getController() == null;
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Show the properties form for the selected proxy */

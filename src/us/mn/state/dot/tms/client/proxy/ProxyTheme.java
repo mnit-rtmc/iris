@@ -21,6 +21,7 @@ import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.DeviceStyle;
 
 /**
  * Theme for SONAR proxy objects on map
@@ -79,19 +80,19 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	}
 
 	/** Add a style to the theme */
-	public void addStyle(String name, Color color, Outline outline) {
-		Style style = new Style(name, outline, color);
+	public void addStyle(DeviceStyle ds, Color color, Outline outline) {
+		Style style = new Style(ds.toString(), outline, color);
 		addStyle(style);
 	}
 
 	/** Add a style to the theme */
-	public void addStyle(String name, Color color) {
-		addStyle(name, color, OUTLINE);
+	public void addStyle(DeviceStyle ds, Color color) {
+		addStyle(ds, color, OUTLINE);
 	}
 
 	/** Add a default style to the theme */
-	public void addStyle(String name) {
-		dstyle = new Style(name, null, null);
+	public void addStyle(DeviceStyle ds) {
+		dstyle = new Style(ds.toString(), null, null);
 		addStyle(dstyle);
 	}
 
@@ -108,7 +109,8 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	protected Style getStyle(T proxy) {
 		// FIXME: combine styles when it applies (locked meters)
 		for(Style st: styles) {
-			if(manager.checkStyle(st.getLabel(), proxy))
+			DeviceStyle ds = DeviceStyle.getStyle(st.getLabel());
+			if(manager.checkStyle(ds, proxy))
 				return st;
 		}
 		return dstyle;

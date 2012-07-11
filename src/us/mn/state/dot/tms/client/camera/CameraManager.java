@@ -23,6 +23,8 @@ import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -43,21 +45,6 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Camera map object marker */
 	static protected final CameraMarker MARKER = new CameraMarker();
-
-	/** Name of active style */
-	static public final String STYLE_ACTIVE = "Active";
-
-	/** Name of inactive style */
-	static public final String STYLE_INACTIVE = "Inactive";
-
-	/** Name of unpublished style */
-	static public final String STYLE_UNPUBLISHED = "Not published";
-
-	/** Name of "no controller" style */
-	static public final String STYLE_NO_CONTROLLER = "No controller";
-
-	/** Name of "playlist" style */
-	static public final String STYLE_PLAYLIST = "Playlist";
 
 	/** Color for active camera style */
 	static protected final Color COLOR_ACTIVE = new Color(0, 192, 255);
@@ -88,40 +75,44 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Create a theme for cameras */
 	protected ProxyTheme<Camera> createTheme() {
 		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this, MARKER);
-		theme.addStyle(STYLE_UNPUBLISHED, ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
+		theme.addStyle(DeviceStyle.UNPUBLISHED,
+			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(DeviceStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
-		theme.addStyle(STYLE_PLAYLIST, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(STYLE_ACTIVE, COLOR_ACTIVE);
-		theme.addStyle(STYLE_NO_CONTROLLER,
+		theme.addStyle(DeviceStyle.PLAYLIST, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(DeviceStyle.ACTIVE, COLOR_ACTIVE);
+		theme.addStyle(DeviceStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<Camera> createStyleSummary() {
 		StyleSummary<Camera> summary = super.createStyleSummary();
-		summary.setStyle(STYLE_ACTIVE);
+		summary.setStyle(DeviceStyle.ACTIVE.toString());
 		return summary;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, Camera proxy) {
-		if(STYLE_ACTIVE.equals(s)) {
-			Controller ctr = proxy.getController();
-			return ctr != null && ctr.getActive();
-		} else if(STYLE_INACTIVE.equals(s)) {
-			Controller ctr = proxy.getController();
-			return ctr == null || !ctr.getActive();
-		} else if(STYLE_UNPUBLISHED.equals(s))
+	public boolean checkStyle(DeviceStyle ds, Camera proxy) {
+		switch(ds) {
+		case ACTIVE:
+			return ControllerHelper.isActive(proxy.getController());
+		case INACTIVE:
+			return !ControllerHelper.isActive(
+				proxy.getController());
+		case UNPUBLISHED:
 			return !proxy.getPublish();
-		else if(STYLE_NO_CONTROLLER.equals(s))
+		case NO_CONTROLLER:
 			return proxy.getController() == null;
-		else if(STYLE_PLAYLIST.equals(s))
+		case PLAYLIST:
 			return inPlaylist(proxy);
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Show the properties form for the selected proxy */
@@ -193,8 +184,9 @@ public class CameraManager extends ProxyManager<Camera> {
 		synchronized(playlist) {
 			playlist.add(c);
 		}
-		StyleListModel<Camera> p_model = getStyleModel(STYLE_PLAYLIST);
-		p_model.proxyChanged(c, STYLE_PLAYLIST);
+		String st = DeviceStyle.PLAYLIST.toString();
+		StyleListModel<Camera> p_model = getStyleModel(st);
+		p_model.proxyChanged(c, st);
 	}
 
 	/** Remove a camera from the playlist */
@@ -202,8 +194,9 @@ public class CameraManager extends ProxyManager<Camera> {
 		synchronized(playlist) {
 			playlist.remove(c);
 		}
-		StyleListModel<Camera> p_model = getStyleModel(STYLE_PLAYLIST);
-		p_model.proxyChanged(c, STYLE_PLAYLIST);
+		String st = DeviceStyle.PLAYLIST.toString();
+		StyleListModel<Camera> p_model = getStyleModel(st);
+		p_model.proxyChanged(c, st);
 	}
 
 	/** Find the map geo location for a proxy */

@@ -22,6 +22,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -42,18 +43,6 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Controller map object marker */
 	static private final ControllerMarker MARKER = new ControllerMarker();
-
-	/** Name of active style */
-	static public final String STYLE_ACTIVE = "Active";
-
-	/** Name of maintenance style */
-	static public final String STYLE_MAINTENANCE = "Maintenance";
-
-	/** Name of failed style */
-	static public final String STYLE_FAILED = "Failed";
-
-	/** Name of all style */
-	static public final String STYLE_ALL = "All";
 
 	/** User session */
 	private final Session session;
@@ -86,10 +75,11 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Create a theme for controllers */
 	protected ProxyTheme<Controller> createTheme() {
 		ControllerTheme theme = new ControllerTheme(this, MARKER);
-		theme.addStyle(STYLE_ACTIVE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(DeviceStyle.MAINTENANCE,
+			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
@@ -147,15 +137,19 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, Controller proxy) {
-		if(STYLE_ACTIVE.equals(s))
+	public boolean checkStyle(DeviceStyle ds, Controller proxy) {
+		switch(ds) {
+		case ACTIVE:
 			return ControllerHelper.isActive(proxy);
-		else if(STYLE_MAINTENANCE.equals(s))
+		case MAINTENANCE:
 			return ControllerHelper.needsMaintenance(proxy);
-		else if(STYLE_FAILED.equals(s))
+		case FAILED:
 			return ControllerHelper.isFailed(proxy);
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Get the layer zoom visibility threshold */

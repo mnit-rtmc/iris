@@ -34,6 +34,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -70,15 +71,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Offset angle for default North map markers */
 	static protected final double NORTH_ANGLE = Math.PI / 2;
-
-	/** Name of "has GPS" style */
-	static public final String STYLE_GPS = "Has GPS";
-
-	/** Name of "no location" style */
-	static public final String STYLE_NO_LOC = "No Location";
-
-	/** Name of "inactive" style */
-	static public final String STYLE_INACTIVE = "Inactive";
 
 	/** Map to of corridor names to corridors */
 	protected final Map<String, CorridorBase> corridors =
@@ -245,18 +237,19 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, R_Node proxy) {
-		if(STYLE_GPS.equals(s))
+	public boolean checkStyle(DeviceStyle ds, R_Node proxy) {
+		switch(ds) {
+		case GPS:
 			return !GeoLocHelper.isNull(getGeoLoc(proxy));
-		else if(STYLE_NO_LOC.equals(s))
+		case NO_LOC:
 			return GeoLocHelper.isNull(getGeoLoc(proxy));
-		else if(STYLE_INACTIVE.equals(s))
+		case INACTIVE:
 			return !proxy.getActive();
-		else if(corridors.containsKey(s)) {
-			String c=GeoLocHelper.getCorridorName(getGeoLoc(proxy));
-			return s.equals(c);
-		} else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Create a style list model for the given symbol */
@@ -268,10 +261,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create a theme for r_nodes */
 	protected R_NodeMapTheme createTheme() {
 		R_NodeMapTheme theme = new R_NodeMapTheme(this);
-		theme.addStyle(STYLE_GPS, COLOR_GPS);
-		theme.addStyle(STYLE_NO_LOC, COLOR_NO_LOC);
-		theme.addStyle(STYLE_INACTIVE, COLOR_INACTIVE);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.GPS, COLOR_GPS);
+		theme.addStyle(DeviceStyle.NO_LOC, COLOR_NO_LOC);
+		theme.addStyle(DeviceStyle.INACTIVE, COLOR_INACTIVE);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 

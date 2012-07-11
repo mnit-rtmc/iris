@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -1573,17 +1574,17 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** get kml icon color, which is a function of the DMS state */
 	public KmlColor getKmlIconColor() {
 		// note: this is a prioritized list
-		if(DMSHelper.checkStyle(DMSHelper.STYLE_AVAILABLE, this))
+		if(DMSHelper.checkStyle(DeviceStyle.AVAILABLE, this))
 			return KmlColorImpl.Blue;
-		if(DMSHelper.checkStyle(DMSHelper.STYLE_DEPLOYED, this))
+		if(DMSHelper.checkStyle(DeviceStyle.DEPLOYED, this))
 			return KmlColorImpl.Yellow;
-		if(DMSHelper.checkStyle(DMSHelper.STYLE_AWS_DEPLOYED, this))
+		if(DMSHelper.checkStyle(DeviceStyle.AWS_DEPLOYED, this))
 			return KmlColorImpl.Red;
-		if(DMSHelper.checkStyle(DMSHelper.STYLE_SCHEDULED, this))
+		if(DMSHelper.checkStyle(DeviceStyle.SCHEDULED, this))
 			return KmlColorImpl.Orange;
-		if(DMSHelper.checkStyle(DMSHelper.STYLE_MAINTENANCE, this))
+		if(DMSHelper.checkStyle(DeviceStyle.MAINTENANCE, this))
 			return KmlColorImpl.Black;
-		if(DMSHelper.checkStyle(DMSHelper.STYLE_FAILED, this))
+		if(DMSHelper.checkStyle(DeviceStyle.FAILED, this))
 			return KmlColorImpl.Gray;
 		return KmlColorImpl.Black;
 	}

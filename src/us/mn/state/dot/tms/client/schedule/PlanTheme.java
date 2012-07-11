@@ -19,6 +19,7 @@ import java.awt.Shape;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.VectorSymbol;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
@@ -40,14 +41,14 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	}
 
 	/** Add a default style to the theme */
-	public void addStyle(String name) {
-		Style style = new Style(name, OUTLINE, COLOR);
+	public void addStyle(DeviceStyle ds) {
+		Style style = new Style(ds.toString(), OUTLINE, COLOR);
 		addStyle(style);
 	}
 
 	/** Add a new style to the theme */
-	public void addStyle(String name, Shape shp) {
-		Style style = new Style(name, OUTLINE, COLOR);
+	public void addStyle(DeviceStyle ds, Shape shp) {
+		Style style = new Style(ds.toString(), OUTLINE, COLOR);
 		styles.add(style);
 		addSymbol(new VectorSymbol(style, shp));
 	}

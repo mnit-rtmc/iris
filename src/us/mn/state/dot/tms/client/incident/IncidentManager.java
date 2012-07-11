@@ -25,6 +25,7 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
@@ -46,24 +47,6 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Incident Map object marker */
 	static protected final IncidentMarker MARKER = new IncidentMarker();
-
-	/** Name of crash style */
-	static public final String STYLE_CRASH = "Crash";
-
-	/** Name of stall style */
-	static public final String STYLE_STALL = "Stall";
-
-	/** Name of road work style */
-	static public final String STYLE_ROADWORK = "Road Work";
-
-	/** Name of hazard style */
-	static public final String STYLE_HAZARD = "Hazard";
-
-	/** Name of cleared style */
-	static public final String STYLE_CLEARED = "Cleared";
-
-	/** Name of all style */
-	static public final String STYLE_ALL = "All";
 
 	/** Get the incident cache */
 	static protected TypeCache<Incident> getCache(Session s) {
@@ -102,12 +85,12 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Create a theme for incidents */
 	protected IncidentTheme createTheme() {
 		IncidentTheme theme = new IncidentTheme(this);
-		theme.addStyle(STYLE_CLEARED, new Color(128, 255, 128));
-		theme.addStyle(STYLE_CRASH, new Color(255, 128, 128));
-		theme.addStyle(STYLE_STALL, new Color(255, 128, 255));
-		theme.addStyle(STYLE_ROADWORK, new Color(255, 208, 128));
-		theme.addStyle(STYLE_HAZARD, new Color(255, 255, 128));
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.CLEARED, new Color(128, 255, 128));
+		theme.addStyle(DeviceStyle.CRASH, new Color(255, 128, 128));
+		theme.addStyle(DeviceStyle.STALL, new Color(255, 128, 255));
+		theme.addStyle(DeviceStyle.ROADWORK, new Color(255, 208, 128));
+		theme.addStyle(DeviceStyle.HAZARD, new Color(255, 255, 128));
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
@@ -178,33 +161,37 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, Incident proxy) {
+	public boolean checkStyle(DeviceStyle ds, Incident proxy) {
 		EventType et = EventType.fromId(proxy.getEventType());
-		if(STYLE_CRASH.equals(s))
+		switch(ds) {
+		case CRASH:
 			return et == EventType.INCIDENT_CRASH;
-		else if(STYLE_STALL.equals(s))
+		case STALL:
 			return et == EventType.INCIDENT_STALL;
-		else if(STYLE_ROADWORK.equals(s))
+		case ROADWORK:
 			return et == EventType.INCIDENT_ROADWORK;
-		else if(STYLE_HAZARD.equals(s))
+		case HAZARD:
 			return et == EventType.INCIDENT_HAZARD;
-		else if(STYLE_CLEARED.equals(s))
+		case CLEARED:
 			return proxy.getCleared();
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Get the style for an event type */
 	public String getStyle(EventType et) {
 		switch(et) {
 		case INCIDENT_CRASH:
-			return STYLE_CRASH;
+			return DeviceStyle.CRASH.toString();
 		case INCIDENT_STALL:
-			return STYLE_STALL;
+			return DeviceStyle.STALL.toString();
 		case INCIDENT_ROADWORK:
-			return STYLE_ROADWORK;
+			return DeviceStyle.ROADWORK.toString();
 		case INCIDENT_HAZARD:
-			return STYLE_HAZARD;
+			return DeviceStyle.HAZARD.toString();
 		default:
 			return null;
 		}
@@ -213,7 +200,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<Incident> createStyleSummary() {
 		StyleSummary<Incident> summary = super.createStyleSummary();
-		summary.setStyle(STYLE_ALL);
+		summary.setStyle(DeviceStyle.ALL.toString());
 		return summary;
 	}
 
@@ -279,7 +266,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 			if(sym != null)
 				return sym.getLegend();
 		}
-		return getTheme().getSymbol(STYLE_CLEARED).getLegend();
+		String st = DeviceStyle.CLEARED.toString();
+		return getTheme().getSymbol(st).getLegend();
 	}
 
 	/** Get the layer zoom visibility threshold */

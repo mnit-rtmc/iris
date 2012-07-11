@@ -30,6 +30,7 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.DMSHelper;
@@ -107,36 +108,37 @@ public class DMSManager extends ProxyManager<DMS> {
 		// NOTE: the ordering of themes controls which color is used
 		//       to render the sign icon on the map
 		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this, MARKER);
-		theme.addStyle(DMSHelper.STYLE_AVAILABLE,
+		theme.addStyle(DeviceStyle.AVAILABLE,
 			ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(DMSHelper.STYLE_DEPLOYED,
+		theme.addStyle(DeviceStyle.DEPLOYED,
 			ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(DMSHelper.STYLE_SCHEDULED,
+		theme.addStyle(DeviceStyle.SCHEDULED,
 			ProxyTheme.COLOR_SCHEDULED);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
-			theme.addStyle(DMSHelper.STYLE_AWS_DEPLOYED, Color.RED);
-		theme.addStyle(DMSHelper.STYLE_MAINTENANCE,
+			theme.addStyle(DeviceStyle.AWS_DEPLOYED, Color.RED);
+		theme.addStyle(DeviceStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(DMSHelper.STYLE_FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			theme.addStyle(DMSHelper.STYLE_AWS_CONTROLLED,
+			theme.addStyle(DeviceStyle.AWS_CONTROLLED,
 				COLOR_HELIOTROPE);
 		}
-		theme.addStyle(DMSHelper.STYLE_NO_CONTROLLER,
+		theme.addStyle(DeviceStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		// NOTE: If a sign doesn't fit in one of the other themes,
-		//       it will be rendered using the STYLE_ALL theme.
-		theme.addStyle(DMSHelper.STYLE_ALL,
+		//       it will be rendered using the ALL theme.
+		theme.addStyle(DeviceStyle.ALL,
 			ProxyTheme.COLOR_INACTIVE, ProxyTheme.OUTLINE_INACTIVE);
 		return theme;
 	}
 
 	/** Get an array of all styles.  This overrides the ProxyManager
-	 * version so that STYLE_NO_CONTROLLER is filtered out. */
+	 * version so that NO_CONTROLLER is filtered out. */
 	public String[] getStyles() {
+		String no_ctr = DeviceStyle.NO_CONTROLLER.toString();
 		LinkedList<String> styles = new LinkedList<String>();
 		for(Symbol s: theme.getSymbols()) {
-			if(!DMSHelper.STYLE_NO_CONTROLLER.equals(s.getLabel()))
+			if(!no_ctr.equals(s.getLabel()))
 				styles.add(s.getLabel());
 		}
 		return (String[])styles.toArray(new String[0]);
@@ -211,7 +213,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<DMS> createStyleSummary() {
 		StyleSummary<DMS> summary = super.createStyleSummary(true);
-		summary.setStyle(DMSHelper.STYLE_DEPLOYED);
+		summary.setStyle(DeviceStyle.DEPLOYED.toString());
 		return summary;
 	}
 
@@ -277,13 +279,12 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, DMS proxy) {
+	public boolean checkStyle(DeviceStyle ds, DMS proxy) {
 		// Filter out LCSs for all styles except NO_CONTROLLER
-		if(DMSHelper.isLCS(proxy) &&
-		  !DMSHelper.STYLE_NO_CONTROLLER.equals(s))
+		if(DMSHelper.isLCS(proxy) && ds != DeviceStyle.NO_CONTROLLER)
 			return false;
 		else
-			return DMSHelper.checkStyle(s, proxy);
+			return DMSHelper.checkStyle(ds, proxy);
 	}
 
 	/** Get the layer zoom visibility threshold */

@@ -24,7 +24,9 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
@@ -44,15 +46,6 @@ public class DetectorManager extends ProxyManager<Detector> {
 
 	/** Shape for map object rendering */
 	static protected final DetectorMarker MARKER = new DetectorMarker();
-
-	/** Name of active style */
-	static public final String STYLE_ACTIVE = "Active";
-
-	/** Name of inactive style */
-	static public final String STYLE_INACTIVE = "Inactive";
-
-	/** Name of "no controller" style */
-	static public final String STYLE_NO_CONTROLLER = "No controller";
 
 	/** R_Node manager */
 	protected final R_NodeManager r_node_manager;
@@ -86,34 +79,37 @@ public class DetectorManager extends ProxyManager<Detector> {
 	protected ProxyTheme<Detector> createTheme() {
 		ProxyTheme<Detector> theme = new ProxyTheme<Detector>(this,
 			MARKER);
-		theme.addStyle(STYLE_ACTIVE, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
+		theme.addStyle(DeviceStyle.ACTIVE, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(DeviceStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
-		theme.addStyle(STYLE_NO_CONTROLLER,
+		theme.addStyle(DeviceStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<Detector> createStyleSummary() {
 		StyleSummary<Detector> summary = super.createStyleSummary();
-		summary.setStyle(STYLE_ACTIVE);
+		summary.setStyle(DeviceStyle.ACTIVE.toString());
 		return summary;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, Detector proxy) {
-		if(STYLE_ACTIVE.equals(s)) {
-			Controller ctr = proxy.getController();
-			return ctr != null && ctr.getActive();
-		} else if(STYLE_INACTIVE.equals(s)) {
-			Controller ctr = proxy.getController();
-			return ctr == null || !ctr.getActive();
-		} else if(STYLE_NO_CONTROLLER.equals(s))
+	public boolean checkStyle(DeviceStyle ds, Detector proxy) {
+		switch(ds) {
+		case ACTIVE:
+			return ControllerHelper.isActive(proxy.getController());
+		case INACTIVE:
+			return !ControllerHelper.isActive(
+				proxy.getController());
+		case NO_CONTROLLER:
 			return proxy.getController() == null;
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Show the properties form for the selected proxy */

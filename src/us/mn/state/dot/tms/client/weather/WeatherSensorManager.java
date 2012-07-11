@@ -18,6 +18,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
@@ -35,18 +36,6 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	/** Lane marking map object marker */
 	static protected final WeatherSensorMarker MARKER =
 		new WeatherSensorMarker();
-
-	/** Name of deployed style */
-	static public final String STYLE_DEPLOYED = "Deployed";
-
-	/** Name of available style */
-	static public final String STYLE_AVAILABLE = "Available";
-
-	/** Name of failed style */
-	static public final String STYLE_FAILED = "Failed";
-
-	/** Name of "no controller" style */
-	static public final String STYLE_NO_CONTROLLER = "No controller";
 
 	/** User session */
 	protected final Session session;
@@ -74,18 +63,22 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	protected ProxyTheme<WeatherSensor> createTheme() {
 		ProxyTheme<WeatherSensor> theme = new ProxyTheme<WeatherSensor>(
 			this, MARKER);
-		theme.addStyle(STYLE_NO_CONTROLLER,
+		theme.addStyle(DeviceStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, WeatherSensor proxy) {
-		if(STYLE_NO_CONTROLLER.equals(s))
+	public boolean checkStyle(DeviceStyle ds, WeatherSensor proxy) {
+		switch(ds) {
+		case NO_CONTROLLER:
 			return proxy.getController() == null;
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Show the properties form for the selected proxy */

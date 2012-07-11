@@ -33,6 +33,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -46,9 +47,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 abstract public class ProxyManager<T extends SonarObject>
 	implements ProxyListener<T>
 {
-	/** Name of list model containing all objects */
-	static public final String STYLE_ALL = "All";
-
 	/** Make a menu label */
 	static protected Box makeMenuLabel(String id) {
 		Box b = Box.createHorizontalBox();
@@ -304,7 +302,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, T proxy) {
+	public boolean checkStyle(DeviceStyle ds, T proxy) {
 		return false;
 	}
 

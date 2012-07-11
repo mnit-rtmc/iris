@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
@@ -48,14 +48,6 @@ import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.camera.CameraManager;
-import us.mn.state.dot.tms.client.detector.DetectorManager;
-import us.mn.state.dot.tms.client.dms.DMSManager;
-import us.mn.state.dot.tms.client.lcs.LCSIManager;
-import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
-import us.mn.state.dot.tms.client.meter.MeterManager;
-import us.mn.state.dot.tms.client.warning.WarningSignManager;
-import us.mn.state.dot.tms.client.weather.WeatherSensorManager;
 
 /**
  * Special table model for Controller I/O pins.
@@ -215,30 +207,23 @@ public class ControllerIOModel extends AbstractTableModel {
 		d_combo.setRenderer(new DeviceComboRenderer());
 		a_model = new WrapperComboBoxModel(state.getAvailableAlarms(),
 			 true);
+		final String st = DeviceStyle.NO_CONTROLLER.toString();
 		c_model = new WrapperComboBoxModel(
-			s.getCameraManager().getStyleModel(
-			CameraManager.STYLE_NO_CONTROLLER), true);
+			s.getCameraManager().getStyleModel(st), true);
 		dt_model = new WrapperComboBoxModel(
-			s.getDetectorManager().getStyleModel(
-			DetectorManager.STYLE_NO_CONTROLLER), true);
+			s.getDetectorManager().getStyleModel(st), true);
 		dms_model = new WrapperComboBoxModel(
-			s.getDMSManager().getStyleModel(
-			DMSHelper.STYLE_NO_CONTROLLER), true);
+			s.getDMSManager().getStyleModel(st), true);
 		lmark_model = new WrapperComboBoxModel(
-			s.getLaneMarkingManager().getStyleModel(
-			LaneMarkingManager.STYLE_NO_CONTROLLER), true);
+			s.getLaneMarkingManager().getStyleModel(st), true);
 		lcsi_model = new WrapperComboBoxModel(
-			s.getLCSIManager().getStyleModel(
-			LCSIManager.STYLE_NO_CONTROLLER), true);
+			s.getLCSIManager().getStyleModel(st), true);
 		m_model = new WrapperComboBoxModel(
-			s.getMeterManager().getStyleModel(
-			MeterManager.STYLE_NO_CONTROLLER), true);
+			s.getMeterManager().getStyleModel(st), true);
 		w_model = new WrapperComboBoxModel(
-			s.getWarnManager().getStyleModel(
-			WarningSignManager.STYLE_NO_CONTROLLER), true);
+			s.getWarnManager().getStyleModel(st), true);
 		wsensor_model = new WrapperComboBoxModel(
-			s.getWeatherSensorManager().getStyleModel(
-			WeatherSensorManager.STYLE_NO_CONTROLLER), true);
+			s.getWeatherSensorManager().getStyleModel(st), true);
 		a_watcher = new ControllerIOWatcher<Alarm>();
 		c_watcher = new ControllerIOWatcher<Camera>();
 		det_watcher = new ControllerIOWatcher<Detector>();

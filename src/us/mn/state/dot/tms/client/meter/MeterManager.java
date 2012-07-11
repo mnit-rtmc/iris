@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
@@ -45,36 +46,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Ramp meter map object marker */
 	static protected final MeterMarker MARKER = new MeterMarker();
-
-	/** Name of available style */
-	static public final String STYLE_AVAILABLE = "Available";
-
-	/** Name of queue full style */
-	static public final String STYLE_QUEUE_FULL = "Queue full";
-
-	/** Name of queue exists style */
-	static public final String STYLE_QUEUE_EXISTS = "Queue exists";
-
-	/** Name of metering style */
-	static public final String STYLE_METERING = "Metering";
-
-	/** Name of locked style */
-	static public final String STYLE_LOCKED = "Locked";
-
-	/** Name of maintenance style */
-	static public final String STYLE_MAINTENANCE = "Maintenance";
-
-	/** Name of failed style */
-	static public final String STYLE_FAILED = "Failed";
-
-	/** Name of "no controller" style */
-	static public final String STYLE_NO_CONTROLLER = "No controller";
-
-	/** Name of inactive style */
-	static public final String STYLE_INACTIVE = "Inactive";
-
-	/** Name of all style */
-	static public final String STYLE_ALL = "All";
 
 	/** Color to display available meters */
 	static protected final Color COLOR_AVAILABLE = new Color(64, 64, 192);
@@ -160,43 +131,49 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	protected ProxyTheme<RampMeter> createTheme() {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
 			MARKER);
-		theme.addStyle(STYLE_AVAILABLE, COLOR_AVAILABLE);
-		theme.addStyle(STYLE_QUEUE_FULL, COLOR_WARNING);
-		theme.addStyle(STYLE_QUEUE_EXISTS, COLOR_DEPLOYED);
-		theme.addStyle(STYLE_METERING, COLOR_METERING);
-		theme.addStyle(STYLE_LOCKED, null, ProxyTheme.OUTLINE_LOCKED);
-		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(STYLE_NO_CONTROLLER,
+		theme.addStyle(DeviceStyle.AVAILABLE, COLOR_AVAILABLE);
+		theme.addStyle(DeviceStyle.QUEUE_FULL, COLOR_WARNING);
+		theme.addStyle(DeviceStyle.QUEUE_EXISTS, COLOR_DEPLOYED);
+		theme.addStyle(DeviceStyle.METERING, COLOR_METERING);
+		theme.addStyle(DeviceStyle.LOCKED, null,
+			ProxyTheme.OUTLINE_LOCKED);
+		theme.addStyle(DeviceStyle.MAINTENANCE,
+			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(DeviceStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
+		theme.addStyle(DeviceStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, RampMeter proxy) {
-		if(STYLE_AVAILABLE.equals(s))
+	public boolean checkStyle(DeviceStyle ds, RampMeter proxy) {
+		switch(ds) {
+		case AVAILABLE:
 			return isAvailable(proxy);
-		else if(STYLE_QUEUE_FULL.equals(s))
+		case QUEUE_FULL:
 			return queueFull(proxy);
-		else if(STYLE_QUEUE_EXISTS.equals(s))
+		case QUEUE_EXISTS:
 			return queueExists(proxy);
-		else if(STYLE_METERING.equals(s))
+		case METERING:
 			return isMetering(proxy);
-		else if(STYLE_LOCKED.equals(s))
+		case LOCKED:
 			return proxy.getMLock() != null;
-		else if(STYLE_MAINTENANCE.equals(s))
+		case MAINTENANCE:
 			return needsMaintenance(proxy);
-		else if(STYLE_FAILED.equals(s))
+		case FAILED:
 			return RampMeterHelper.isFailed(proxy);
-		else if(STYLE_NO_CONTROLLER.equals(s))
+		case NO_CONTROLLER:
 			return proxy.getController() == null;
-		else if(STYLE_INACTIVE.equals(s))
+		case INACTIVE:
 			return !RampMeterHelper.isActive(proxy);
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Show the properties form for the selected proxy */

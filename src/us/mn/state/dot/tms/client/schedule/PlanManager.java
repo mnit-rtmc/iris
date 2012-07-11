@@ -21,6 +21,7 @@ import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -46,24 +47,6 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  * @author Douglas Lau
  */
 public class PlanManager extends ProxyManager<ActionPlan> {
-
-	/** Name of DMS style */
-	static public final String STYLE_DMS = "DMS";
-
-	/** Name of meter style */
-	static public final String STYLE_METER = "Meter";
-
-	/** Name of lane style */
-	static public final String STYLE_LANE = "Lane";
-
-	/** Name of time style */
-	static public final String STYLE_TIME = "Time";
-
-	/** Name of active style */
-	static public final String STYLE_ACTIVE = "Active";
-
-	/** Name of all style */
-	static public final String STYLE_ALL = "All";
 
 	/** Get the action plan cache */
 	static protected TypeCache<ActionPlan> getCache(Session s) {
@@ -98,12 +81,12 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Create a theme for action plans */
 	protected PlanTheme createTheme() {
 		PlanTheme theme = new PlanTheme(this);
-		theme.addStyle(STYLE_DMS, new DmsMarker());
-		theme.addStyle(STYLE_METER, new MeterMarker());
-		theme.addStyle(STYLE_LANE);
-		theme.addStyle(STYLE_TIME, new TimeMarker());
-		theme.addStyle(STYLE_ACTIVE);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.DMS, new DmsMarker());
+		theme.addStyle(DeviceStyle.METER, new MeterMarker());
+		theme.addStyle(DeviceStyle.LANE);
+		theme.addStyle(DeviceStyle.TIME, new TimeMarker());
+		theme.addStyle(DeviceStyle.ACTIVE);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
@@ -118,21 +101,25 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, ActionPlan proxy) {
+	public boolean checkStyle(DeviceStyle ds, ActionPlan proxy) {
 		if(!canUpdate(proxy))
 			return false;
-		if(STYLE_DMS.equals(s))
+		switch(ds) {
+		case DMS:
 			return proxy.getActive() && hasDmsAction(proxy);
-		else if(STYLE_METER.equals(s))
+		case METER:
 			return proxy.getActive() && hasMeterAction(proxy);
-		else if(STYLE_LANE.equals(s))
+		case LANE:
 			return proxy.getActive() && hasLaneAction(proxy);
-		else if(STYLE_TIME.equals(s))
+		case TIME:
 			return proxy.getActive() && hasTimeAction(proxy);
-		else if(STYLE_ACTIVE.equals(s))
+		case ACTIVE:
 			return proxy.getActive();
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Check if the user can update the given action plan */
@@ -179,7 +166,7 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<ActionPlan> createStyleSummary() {
 		StyleSummary<ActionPlan> summary = super.createStyleSummary();
-		summary.setStyle(STYLE_ALL);
+		summary.setStyle(DeviceStyle.ALL.toString());
 		return summary;
 	}
 

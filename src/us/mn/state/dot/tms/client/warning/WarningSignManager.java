@@ -19,6 +19,7 @@ import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.Session;
@@ -38,18 +39,6 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	/** Warning sign map object marker */
 	static protected final WarningSignMarker MARKER =
 		new WarningSignMarker();
-
-	/** Name of deployed style */
-	static public final String STYLE_DEPLOYED = "Deployed";
-
-	/** Name of available style */
-	static public final String STYLE_AVAILABLE = "Available";
-
-	/** Name of failed style */
-	static public final String STYLE_FAILED = "Failed";
-
-	/** Name of "no controller" style */
-	static public final String STYLE_NO_CONTROLLER = "No controller";
 
 	/** User session */
 	protected final Session session;
@@ -77,28 +66,33 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	protected ProxyTheme<WarningSign> createTheme() {
 		ProxyTheme<WarningSign> theme =new ProxyTheme<WarningSign>(this,
 			MARKER);
-		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(STYLE_NO_CONTROLLER,
+		theme.addStyle(DeviceStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(DeviceStyle.AVAILABLE,
+			ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(DeviceStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, WarningSign proxy) {
-		if(STYLE_DEPLOYED.equals(s))
+	public boolean checkStyle(DeviceStyle ds, WarningSign proxy) {
+		switch(ds) {
+		case DEPLOYED:
 			return proxy.getDeployed();
-		else if(STYLE_AVAILABLE.equals(s)) {
+		case AVAILABLE:
 			return (!ControllerHelper.isFailed(
 			       proxy.getController())) && !proxy.getDeployed();
-		} else if(STYLE_FAILED.equals(s))
+		case FAILED:
 			return ControllerHelper.isFailed(proxy.getController());
-		else if(STYLE_NO_CONTROLLER.equals(s))
+		case NO_CONTROLLER:
 			return proxy.getController() == null;
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Show the properties form for the selected proxy */

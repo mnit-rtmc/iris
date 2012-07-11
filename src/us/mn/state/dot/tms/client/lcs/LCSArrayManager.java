@@ -27,6 +27,7 @@ import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -54,24 +55,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** LCS array map object marker */
 	static protected final LcsMarker MARKER = new LcsMarker();
-
-	/** Name of available style */
-	static public final String STYLE_AVAILABLE = "Available";
-
-	/** Name of deployed style */
-	static public final String STYLE_DEPLOYED = "User Deployed";
-
-	/** Name of scheduled style */
-	static public final String STYLE_SCHEDULED = "Scheduled";
-
-	/** Name of maintenance style */
-	static public final String STYLE_MAINTENANCE = "Maintenance";
-
-	/** Name of failed style */
-	static public final String STYLE_FAILED = "Failed";
-
-	/** Name of all style */
-	static public final String STYLE_ALL = "All";
 
 	/** Test if an LCS array is active */
 	static protected boolean isActive(LCSArray proxy) {
@@ -197,12 +180,15 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	protected ProxyTheme<LCSArray> createTheme() {
 		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
 			MARKER);
-		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(STYLE_SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
-		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(STYLE_ALL);
+		theme.addStyle(DeviceStyle.AVAILABLE,
+			ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(DeviceStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(DeviceStyle.SCHEDULED,
+			ProxyTheme.COLOR_SCHEDULED);
+		theme.addStyle(DeviceStyle.MAINTENANCE,
+			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
 
@@ -271,19 +257,23 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(String s, LCSArray proxy) {
-		if(STYLE_AVAILABLE.equals(s))
+	public boolean checkStyle(DeviceStyle ds, LCSArray proxy) {
+		switch(ds) {
+		case AVAILABLE:
 			return isAvailable(proxy);
-		else if(STYLE_DEPLOYED.equals(s))
+		case DEPLOYED:
 			return isUserDeployed(proxy);
-		else if(STYLE_SCHEDULED.equals(s))
+		case SCHEDULED:
 			return isScheduleDeployed(proxy);
-		else if(STYLE_MAINTENANCE.equals(s))
+		case MAINTENANCE:
 			return needsMaintenance(proxy);
-		else if(STYLE_FAILED.equals(s))
+		case FAILED:
 			return isFailed(proxy);
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Show the properties form for the selected proxy */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.proxy;
 import javax.swing.Icon;
 import javax.swing.event.ListDataListener;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.DeviceStyle;
 
 /**
  * A list model for device styles.
@@ -61,7 +62,8 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 
 	/** Add a new proxy */
 	protected int doProxyAdded(T proxy) {
-		if(manager.checkStyle(name, proxy))
+		DeviceStyle ds = DeviceStyle.getStyle(name);
+		if(manager.checkStyle(ds, proxy))
 			return super.doProxyAdded(proxy);
 		else
 			return -1;

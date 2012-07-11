@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -32,43 +31,12 @@ public class DMSHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Name of available style */
-	static public final String STYLE_AVAILABLE = "Available";
-
-	/** Name of deployed style */
-	static public final String STYLE_DEPLOYED = "User Deployed";
-
-	/** Name of travel time style */
-	static public final String STYLE_TRAVEL_TIME = "Travel Time";
-
-	/** Name of scheduled style */
-	static public final String STYLE_SCHEDULED = "Scheduled";
-
-	/** Name of automated warning system deployed style */
-	static public final String STYLE_AWS_DEPLOYED =
-		I18N.get("dms.aws.deployed");
-
-	/** Name of maintenance style */
-	static public final String STYLE_MAINTENANCE = "Maintenance";
-
-	/** Name of failed style */
-	static public final String STYLE_FAILED = "Failed";
-
-	/** Name of automated warning system controlled style */
-	static public final String STYLE_AWS_CONTROLLED =
-		I18N.get("dms.aws.controlled");
-
-	/** Name of "no controller" style */
-	static public final String STYLE_NO_CONTROLLER = "No controller";
-
-	/** Name of all style */
-	static public final String STYLE_ALL = "All";
-
 	/** All styles */
-	static public final String[] STYLES_ALL = {
-		STYLE_AVAILABLE, STYLE_DEPLOYED, STYLE_SCHEDULED,
-		STYLE_TRAVEL_TIME, STYLE_MAINTENANCE, STYLE_FAILED,
-		STYLE_AWS_CONTROLLED, STYLE_NO_CONTROLLER
+	static private final DeviceStyle[] STYLES_ALL = {
+		DeviceStyle.AVAILABLE, DeviceStyle.DEPLOYED,
+		DeviceStyle.SCHEDULED, DeviceStyle.TRAVEL_TIME,
+		DeviceStyle.MAINTENANCE, DeviceStyle.FAILED,
+		DeviceStyle.AWS_CONTROLLED, DeviceStyle.NO_CONTROLLER
 	};
 
 	/** Test if a DMS is available */
@@ -187,7 +155,7 @@ public class DMSHelper extends BaseHelper {
 		if(ctr != null)
 			return ctr.getMaint();
 		else
-			return "No controller";
+			return DeviceStyle.NO_CONTROLLER.toString();
 	}
 
 	/** Test if a DMS needs maintenance */
@@ -209,7 +177,7 @@ public class DMSHelper extends BaseHelper {
 		if(ctr != null)
 			return ctr.getStatus();
 		else
-			return "No controller";
+			return DeviceStyle.NO_CONTROLLER.toString();
 	}
 
 	/** Test if a DMS has a critical error */
@@ -221,7 +189,7 @@ public class DMSHelper extends BaseHelper {
 	static public String getStatus(DMS proxy) {
 		Controller c = proxy.getController();
 		if(c == null)
-			return "No controller";
+			return DeviceStyle.NO_CONTROLLER.toString();
 		else
 			return c.getStatus();
 	}
@@ -232,36 +200,43 @@ public class DMSHelper extends BaseHelper {
 	}
 
 	/** Check the style of the specified proxy */
-	static public boolean checkStyle(String s, DMS proxy) {
-		if(STYLE_NO_CONTROLLER.equals(s))
+	static public boolean checkStyle(DeviceStyle ds, DMS proxy) {
+		switch(ds) {
+		case NO_CONTROLLER:
 			return proxy.getController() == null;
-		else if(STYLE_AVAILABLE.equals(s))
+		case AVAILABLE:
 			return isAvailable(proxy);
-		else if(STYLE_DEPLOYED.equals(s))
+		case DEPLOYED:
 			return isUserDeployed(proxy);
-		else if(STYLE_TRAVEL_TIME.equals(s))
+		case TRAVEL_TIME:
 			return isTravelTimeDeployed(proxy);
-		else if(STYLE_SCHEDULED.equals(s))
+		case SCHEDULED:
 			return isScheduleDeployed(proxy);
-		else if(STYLE_AWS_DEPLOYED.equals(s))
+		case AWS_DEPLOYED:
 			return isAwsMessageDeployed(proxy);
-		else if(STYLE_MAINTENANCE.equals(s))
+		case MAINTENANCE:
 			return needsMaintenance(proxy);
-		else if(STYLE_FAILED.equals(s))
+		case FAILED:
 			return isFailed(proxy);
-		else if(STYLE_AWS_CONTROLLED.equals(s))
+		case AWS_CONTROLLED:
 			return isAwsControlled(proxy);
-		else
-			return STYLE_ALL.equals(s);
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Get a string that contains all active DMS styles,
 	 *  separated by commas. */
 	static public String getAllStyles(DMS proxy) {
 		StringBuilder s = new StringBuilder();
-		for(String style: STYLES_ALL) {
-			if(checkStyle(style, proxy))
-				s.append(style).append(", ");
+		for(DeviceStyle style: STYLES_ALL) {
+			String st = style.toString();
+			if(checkStyle(style, proxy)) {
+				s.append(st);
+				s.append(", ");
+			}
 		}
 		return SString.removeTail(s.toString(), ", ");
 	}

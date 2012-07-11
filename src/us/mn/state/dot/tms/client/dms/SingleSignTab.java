@@ -163,7 +163,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		}
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			setWest();
-			final String mid = "dms.aws.controlled";
+			final String mid = "device.style.aws_controlled";
 			awsControlledCbx.setText(I18N.get(mid));
 			awsControlledCbx.setHorizontalTextPosition(
 				SwingConstants.LEFT);
