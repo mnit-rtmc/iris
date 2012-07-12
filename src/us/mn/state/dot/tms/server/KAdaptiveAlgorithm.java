@@ -529,29 +529,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			StationNode us = ms.s_node;
 			if(us != null) {
 				StationNode bs = us.bottleneckStation();
-				if(bs != null) {
-					double Rnext = equation(bs, us, ms);
-					ms.saveRateHistory(Rnext);
-					if(ms.shouldMeter(bs, us))
-						ms.setRate(Rnext);
-				} else {
-					double Rnext = equation(us, null, ms);
-					ms.saveRateHistory(Rnext);
-					if(ms.isMetering)
-						ms.setRate(Rnext);
-				}
+				double Rnext = equation(bs, us, ms);
+				ms.saveRateHistory(Rnext);
+				if(ms.shouldMeter(bs, us))
+					ms.setRate(Rnext);
 			}
 		}
-	}
-
-	/**
-	 * Calculate metering rate.
-	 * @param bottleneck bottleneck station node
-	 * @param ms Meter state
-	 * @return next metering rate
-	 */
-	private double equation(StationNode bottleneck, MeterState ms) {
-		return equation(bottleneck, null, ms);
 	}
 
 	/**
@@ -577,14 +560,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * p4's x = K_DES
 	 * </pre>
 	 *
-	 * @param bottleneck Bottleneck station.
-	 * @param upstream Upstream station (may be null).
+	 * @param bottleneck Bottleneck station (may be null).
+	 * @param upstream Upstream station.
 	 * @param ms Meter state.
 	 * @return Metering rate (vehicles per hour).
 	 */
 	private double equation(StationNode bottleneck, StationNode upstream,
 		MeterState ms)
 	{
+		if(bottleneck == null)
+			bottleneck = upstream;
 		double Kt = bottleneck.calculateSegmentDensity(upstream);
 
 		ms.saveSegmentDensity(Kt);
@@ -1420,6 +1405,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return true if metering should start.
 		 */
 		private boolean shouldStart(StationNode bs, StationNode us) {
+			if(bs == null)
+				return false;
 			if(hasBeenStoped)
 				return shouldRestart(bs, us);
 			else
