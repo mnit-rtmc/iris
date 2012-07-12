@@ -1500,7 +1500,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return false;
 		}
 
-		/** Check if initial metering should start from flow.
+		/** Check if metering should start from flow.
 		 * @param n_steps Number of steps to check.
 		 * @return true if metering should start, based on merge flow.
 		 */
@@ -1545,45 +1545,48 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		public void checkStopCondition(boolean hasBottleneck) {
 			if(!isMetering)
 				return;
-			if(countRateHistory() < STOP_STEPS)
-				return;
 			if(isSegmentDensityHigh())
 				return;
-			if(!hasBottleneck) {
+			if(hasBottleneck) {
+				resetNoBottleneckCount();
+				if(shouldStopFlow())
+					stopMetering();
+			} else {
 				addNoBottleneckCount();
 				if(getNoBottleneckCount() >= STOP_STEPS)
 					stopMetering();
-				return;
 			}
-			resetNoBottleneckCount();
-			if(satisfiesRateCondition())
-				stopMetering();
 		}
 
 		/**
 		 * Check if the segment density is high.
 		 */
 		private boolean isSegmentDensityHigh() {
-			for(int i = 0; i < STOP_STEPS; i++) {
-				Double sk = getSegmentDensity(i);
-				if(sk != null && sk > K_DES)
-					return true;
+			if(countRateHistory() >= STOP_STEPS) {
+				for(int i = 0; i < STOP_STEPS; i++) {
+					Double sk = getSegmentDensity(i);
+					if(sk != null && sk > K_DES)
+						return true;
+				}
 			}
 			return false;
 		}
 
-		/**
-		 * Check if the metering rate has been less than flow for
-		 * STOP_STEPS time intervals.
+		/** Check if metering should stop from flow.
+		 * @param n_steps Number of steps to check.
+		 * @return true if metering should stop, based on merge flow.
 		 */
-		private boolean satisfiesRateCondition() {
-			for(int i = 0; i < STOP_STEPS; i++) {
-				double q = getFlow(i);
-				double rate = getRate(i);
-				if(q > rate)
-					return false;
-			}
-			return true;
+		private boolean shouldStopFlow() {
+			if(countRateHistory() >= STOP_STEPS) {
+				for(int i = 0; i < STOP_STEPS; i++) {
+					double q = getFlow(i);
+					double rate = getRate(i);
+					if(q > rate)
+						return false;
+				}
+				return true;
+			} else
+				return false;
 		}
 
 		/**
