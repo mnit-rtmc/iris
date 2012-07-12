@@ -688,12 +688,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/**
-	 * Clear all bottleneck state.
+	/** Clear all station bottlenecks.
 	 */
 	private void clearBottlenecks() {
-		for(Node n = head; n != null; n = n.downstream)
-			n.clearBottleneck();
+		for(StationNode sn = firstStation(); sn != null;
+		    sn = sn.downstreamStation())
+		{
+			sn.clearBottleneck();
+		}
 	}
 
 	/** Is this KAdaptiveAlgorithm done? */
@@ -747,9 +749,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				n = n.downstream;
 			return n;
 		}
-
-		/** Clear bottleneck state */
-		abstract protected void clearBottleneck();
 
 		/**
 		 * Return next upstream station node.
@@ -979,9 +978,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		public EntranceNode(R_NodeImpl rnode, float m, Node prev) {
 			super(rnode, m, prev);
 		}
-
-		/** Clear bottleneck state */
-		protected void clearBottleneck() { }
 
 		/** Get a string representation of an entrance node */
 		public String toString() {
