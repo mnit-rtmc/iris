@@ -412,8 +412,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/**
-	 * Check corridor average density condition.
+	/** Check corridor average density condition.
 	 */
 	private void checkCorridorState() {
 		int bottleneckCount = 0;
@@ -431,8 +430,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			doStopChecking = true;
 	}
 
-	/**
-	 * Calculate the average density of a corridor up to a bottleneck.
+	/** Calculate the average density of a corridor up to a bottleneck.
 	 * @param bottleneck Bottleneck station.
 	 * @return Average density up to the bottleneck.
 	 */
@@ -440,8 +438,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if(bottleneck != null) {
 			return bottleneck.calculateSegmentDensity(
 				firstStation());
-		}
-		return 0;
+		} else
+			return 0;
 	}
 
 	/** Check if corridor density is trending downward */
