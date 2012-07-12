@@ -1084,7 +1084,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			merge.addDetectors(ds, LaneType.MERGE);
 			bypass.addDetectors(ds, LaneType.BYPASS);
 			green.addDetectors(ds, LaneType.GREEN);
-			stopMetering();
 			s_node = getAssociatedStation();
 			if(s_node != null)
 				s_node.associatedMeters.add(this);
