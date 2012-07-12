@@ -1075,14 +1075,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get a string representation of a station node */
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append(station.getName());
-			sb.append(" -> ");
-			for(MeterState ms : associatedMeters) {
-				sb.append(ms.meter.name);
-				sb.append(",");
-			}
-			return sb.substring(0, sb.length() - 1);
+			return "Station " + station.getName();
 		}
 	}
 
@@ -1099,7 +1092,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get a string representation of an entrance node */
 		public String toString() {
-			return rnode.getName() + " entrance";
+			return "Entrance " + rnode.getName();
 		}
 	}
 
