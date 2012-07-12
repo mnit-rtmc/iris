@@ -817,7 +817,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private double calculateSegmentDensity(StationNode upStation,
 			int prevStep)
 		{
-			if(upStation == null || upStation == this)
+			if(upStation == this)
 				return getAggregatedDensity(prevStep);
 			StationNode cursor = upStation;
 			double dist_sum3 = 0;
