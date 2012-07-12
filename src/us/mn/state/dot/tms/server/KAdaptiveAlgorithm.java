@@ -415,19 +415,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Check corridor average density condition.
 	 */
 	private void checkCorridorState() {
-		int bottleneckCount = 0;
-		StationNode downstreamBS = null;
-		for(StationNode sn = firstStation(); sn != null;
-		    sn = sn.downstreamStation())
-		{
-			if(sn.isBottleneck) {
-				downstreamBS = sn;
-				bottleneckCount++;
-			}
-		}
-		k_hist_corridor.push(calculateCorridorDensity(downstreamBS));
-		if(bottleneckCount == 0 && isDensityTrendingDown())
+		StationNode ds_bottleneck = downstreamBottleneck();
+		k_hist_corridor.push(calculateCorridorDensity(ds_bottleneck));
+		if(ds_bottleneck == null && isDensityTrendingDown())
 			doStopChecking = true;
+	}
+
+	/** Find the furthest downstream bottleneck station */
+	private StationNode downstreamBottleneck() {
+		for(StationNode sn = lastStation(); sn != null;
+		    sn = sn.upstreamStation())
+		{
+			if(sn.isBottleneck)
+				return sn;
+		}
+		return null;
 	}
 
 	/** Calculate the average density of a corridor up to a bottleneck.
