@@ -271,7 +271,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	public void validate(RampMeterImpl meter) {
 		MeterState ms = getMeterState(meter);
 		if(ms != null) {
-			ms.updateState();
+			ms.validate();
 			if(ALG_LOG.isOpen())
 				log(ms.toString());
 		}
@@ -1250,12 +1250,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/**
-		 * Update status
+		 * Validate meter state.
 		 *   - Save cumulative demand and merging flow
 		 *   - Set current demand and merging flow
 		 *   - Calculate minimum metering rate
 		 */
-		private void updateState() {
+		private void validate() {
 			isRateUpdated = false;
 			updateDemandState();
 			updatePassageState();
