@@ -530,89 +530,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(us != null) {
 				StationNode bs = us.bottleneckStation();
 				double k =  ms.calculateSegmentDensity(bs);
-				double Rnext = equation(k, ms);
+				double Rnext = ms.calculateRate(k);
 				ms.saveRateHistory(Rnext);
 				if(ms.shouldMeter(bs, us))
 					ms.setRate(Rnext);
 			}
 		}
-	}
-
-	/**
-	 * Calculate metering rates.
-	 * <pre>
-	 *                       ^
-	 *                       | k
-	 *                       |                 +
-	 *                       |
-	 *                       |
-	 *                       |             +
-	 *                       |
-	 *                       +
-	 *                       |
-	 *                       |
-	 *                 +     |
-	 *    +                  |
-	 * --p0------------p1----p2------------p3---p4-----&gt; K_DES - k
-	 *                       |
-	 *                       |
-	 * p0's x = K_DES - K_JAM
-	 * p2's x = 0
-	 * p4's x = K_DES
-	 * </pre>
-	 *
-	 * @param k Segment density.
-	 * @param ms Meter state.
-	 * @return Metering rate (vehicles per hour).
-	 */
-	private double equation(double k, MeterState ms) {
-		double Rmin = ms.getMinimumRate();
-		double Rmax = ms.getMaximumRate();
-		double Rt = ms.getRate();
-
-                // Calculate MainLine Alpha value with MainLine Density
-		double x = K_DES - k;
-
-		KPoint p0 = new KPoint(K_DES - K_JAM, Rmin / Rt);
-		KPoint p1 = new KPoint((K_DES - K_JAM) / 3,
-			Rmin / Rt + (1 - Rmin / Rt) / 3);
-		KPoint p2 = new KPoint(0, 1);
-		if(Rmin >= Rt)
-			p0.y = p1.y = p2.y = Rmin / Rt;
-		KPoint p4 = new KPoint(K_DES, Rmax / Rt);
-
-                // Mainline graph connection 2 points
-		double alpha = getAlpha(p0, p2, p4, x);
-
-		// Ramp meter rate for next time interval
-		double Rnext = Rt * alpha;
-
-		// Check minimum / max rate
-		Rnext = Math.max(Rnext, Rmin);
-		Rnext = Math.min(Rnext, Rmax);
-
-		if(Rt == 0)
-			Rnext = Rmax;
-
-		return Rnext;
-	}
-
-	/** Calculate Alpha Value */
-	private double getAlpha(KPoint P0, KPoint P2, KPoint P4, double x) {
-		KPoint start = P0, end = P2;
-		if(x >= 0) {
-			start = P2;
-			end = P4;
-		} else {
-			start = P0;
-			end = P2;
-		}
-		double yd = end.y - start.y;
-		double xd = end.x - start.x;
-		if(xd != 0)
-			return (yd / xd) * (x - start.x) + start.y;
-		else
-			return 0;
 	}
 
 	/** Clear all station bottlenecks.
@@ -1626,6 +1549,64 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/**
+		 * Calculate metering rate.
+		 * <pre>
+		 *                       ^
+		 *                       | k
+		 *                       |                 +
+		 *                       |
+		 *                       |
+		 *                       |             +
+		 *                       |
+		 *                       +
+		 *                       |
+		 *                       |
+		 *                 +     |
+		 *    +                  |
+		 * --p0------------p1----p2------------p3---p4-----&gt; K_DES-k
+		 *                       |
+		 *                       |
+		 * p0's x = K_DES - K_JAM
+		 * p2's x = 0
+		 * p4's x = K_DES
+		 * </pre>
+		 *
+		 * @param k Segment density.
+		 * @return Metering rate (vehicles per hour).
+		 */
+		private double calculateRate(double k) {
+			double Rmin = getMinimumRate();
+			double Rmax = getMaximumRate();
+			double Rt = getRate();
+
+			// Calculate MainLine Alpha value with MainLine Density
+			double x = K_DES - k;
+
+			KPoint p0 = new KPoint(K_DES - K_JAM, Rmin / Rt);
+			KPoint p1 = new KPoint((K_DES - K_JAM) / 3,
+				Rmin / Rt + (1 - Rmin / Rt) / 3);
+			KPoint p2 = new KPoint(0, 1);
+			if(Rmin >= Rt)
+				p0.y = p1.y = p2.y = Rmin / Rt;
+			KPoint p4 = new KPoint(K_DES, Rmax / Rt);
+
+			// Mainline graph connection 2 points
+			double alpha = calculateAlpha(p0, p2, p4, x);
+
+			// Ramp meter rate for next time interval
+			double Rnext = Rt * alpha;
+
+			// Check minimum / max rate
+			Rnext = Math.max(Rnext, Rmin);
+			Rnext = Math.min(Rnext, Rmax);
+
+			if(Rt == 0)
+				Rnext = Rmax;
+
+			return Rnext;
+		}
+
+		/**
 		 * Reset no bottleneck count
 		 */
 		private void resetNoBottleneckCount() {
@@ -1689,5 +1670,25 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			this.x = x;
 			this.y = y;
 		}
+	}
+
+	/** Calculate Alpha Value */
+	static private double calculateAlpha(KPoint P0, KPoint P2, KPoint P4,
+		double x)
+	{
+		KPoint start = P0, end = P2;
+		if(x >= 0) {
+			start = P2;
+			end = P4;
+		} else {
+			start = P0;
+			end = P2;
+		}
+		double yd = end.y - start.y;
+		double xd = end.x - start.x;
+		if(xd != 0)
+			return (yd / xd) * (x - start.x) + start.y;
+		else
+			return 0;
 	}
 }
