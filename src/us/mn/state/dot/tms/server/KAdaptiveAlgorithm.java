@@ -522,72 +522,36 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/**
-	 * Calculate metering rates for all bottlenecks
+	/** Calculate metering rates for all meter states.
 	 */
 	private void calculateMeteringRates() {
-		for(StationNode sn = lastStation(); sn != null;
-		    sn = sn.upstreamStation())
-		{
-			if(sn.isBottleneck)
-				calculateMeteringRates(sn);
-		}
-
-		// when meter is not in zone
-		for(StationNode sn = firstStation(); sn != null;
-		    sn = sn.downstreamStation())
-		{
-			defaultMetering(sn);
-		}
-	}
-
-	/**
-	 * Calculate metering rates for a bottleneck
-	 * @param bottleneck bottleneck station
-	 */
-	private void calculateMeteringRates(StationNode bottleneck) {
-
-		// calculate rates for entrance associated with bottleneck
-		for(MeterState ms : bottleneck.getMeters()) {
-			double Rnext = equation(bottleneck, ms);
-			ms.saveRateHistory(Rnext);
-			if(ms.shouldMeter(bottleneck, null))
-				ms.setRate(Rnext);
-		}
-
-		// calculate rates from upstream station of bottleneck
-		// to upstream boundary or next bottleneck
-		for(StationNode sn = bottleneck.upstreamStation(); sn != null;
-		    sn = sn.upstreamStation())
-		{
-			if(sn.isBottleneck)
-				break;
-			calculateMeteringRates(sn, bottleneck);
+		for(MeterState ms : meterStates.values()) {
+			StationNode us = ms.s_node;
+			if(us != null) {
+				StationNode bs = us.bottleneckStation();
+				if(bs != null) {
+					double Rnext = equation(bs, us, ms);
+					ms.saveRateHistory(Rnext);
+					if(ms.shouldMeter(bs, us))
+						ms.setRate(Rnext);
+				} else {
+					double Rnext = equation(us, null, ms);
+					ms.saveRateHistory(Rnext);
+					if(ms.isMetering)
+						ms.setRate(Rnext);
+				}
+			}
 		}
 	}
 
 	/**
-	 * Calculate metering rates from one node to a bottleneck
-	 */
-	private void calculateMeteringRates(StationNode upStation,
-		StationNode bottleneck)
-	{
-		for(MeterState ms : upStation.getMeters()) {
-			double Rnext = equation(bottleneck, upStation, ms);
-			ms.saveRateHistory(Rnext);
-			if(ms.shouldMeter(bottleneck, upStation))
-				ms.setRate(Rnext);
-		}
-	}
-
-	/**
-	 * Calculate metering rates
-	 * @param stationState station state
+	 * Calculate metering rate.
+	 * @param bottleneck bottleneck station node
 	 * @param ms Meter state
 	 * @return next metering rate
 	 */
-	private double equation(StationNode stationState, MeterState ms) {
-		return equation(stationState, null, ms);
+	private double equation(StationNode bottleneck, MeterState ms) {
+		return equation(bottleneck, null, ms);
 	}
 
 	/**
@@ -672,21 +636,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return (yd / xd) * (x - start.x) + start.y;
 		else
 			return 0;
-	}
-
-	/**
-	 * Calculate metering rates for all operating ramp but not in zone
-	 *   - do local metering
-	 * @param stationState station state
-	 */
-	private void defaultMetering(StationNode stationState) {
-		for(MeterState ms : stationState.getMeters()) {
-			if(ms.isMetering && !ms.isRateUpdated) {
-				double Rnext = equation(stationState, null, ms);
-				ms.saveRateHistory(Rnext);
-				ms.setRate(Rnext);
-			}
-		}
 	}
 
 	/** Clear all station bottlenecks.
@@ -966,6 +915,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return associatedMeters;
 		}
 
+		/** Return next downstream bottleneck station node.
+		 * @return Downstream bottleneck station node.
+		 */
+		protected StationNode bottleneckStation() {
+			for(StationNode sn = this; sn != null;
+			    sn = sn.downstreamStation())
+			{
+				if(sn.isBottleneck)
+					return sn;
+			}
+			return null;
+		}
+
 		/** Get a string representation of a station node */
 		public String toString() {
 			return "Station " + station.getName();
@@ -1003,9 +965,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Has been stopped before */
 		private boolean hasBeenStoped = false;
-
-		/** Is metering rate updated at current time step? */
-		private boolean isRateUpdated = false;
 
 		/** Current metering rate (vehicles / hour) */
 		private int currentRate = 0;
@@ -1145,7 +1104,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *   - Calculate minimum metering rate
 		 */
 		private void validate() {
-			isRateUpdated = false;
 			updateDemandState();
 			updatePassageState();
 			checkQueueEmpty();
@@ -1301,8 +1259,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get ramp meter queue state enum value */
 		private RampMeterQueue getQueueState() {
-			RampMeterImpl m = meter;
-			if(m != null && isMetering) {
+			if(isMetering) {
 				if(isQueueEmpty())
 					return RampMeterQueue.EMPTY;
 				else if(isQueueFull())
@@ -1409,11 +1366,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get the max wait time (seconds) */
 		private int maxWaitTime() {
-			RampMeterImpl m = meter;
-			if(m != null)
-				return m.getMaxWait();
-			else
-				return RampMeterImpl.DEFAULT_MAX_WAIT;
+			return meter.getMaxWait();
 		}
 
 		/** Calculate target minimum rate.
@@ -1444,11 +1397,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			r = Math.max(r, minimumRate);
 			r = Math.min(r, maximumRate);
 			currentRate = r;
-			RampMeterImpl m = meter;
-			if(m != null) {
-				isRateUpdated = true;
-				m.setRatePlanned(currentRate);
-			}
+			meter.setRatePlanned(currentRate);
 		}
 
 		/** Should metering be started?
