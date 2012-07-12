@@ -1746,15 +1746,28 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(meter.name);
-			sb.append(" " + getQueueState());
-			sb.append(",dem=" + Math.round(cumulativeDemand()));
-			sb.append(",pas=" + passage_accum);
-			sb.append(",grn=" + green_accum);
-			sb.append(",min[" + limit_control + "]=" + minimumRate);
-			sb.append(",max=" + maximumRate);
-			sb.append(",rate=" + currentRate);
-			sb.append(",q(" + queueEmptyCount);
-			sb.append("," + queueFullCount + ")");
+			sb.append(" ");
+			sb.append(getQueueState());
+			sb.append(",dem=");
+			sb.append(Math.round(cumulativeDemand()));
+			sb.append(",pas=");
+			sb.append(passage_accum);
+			sb.append(",grn=");
+			sb.append(green_accum);
+			sb.append(",min[");
+			sb.append(limit_control);
+			sb.append("]=");
+			sb.append(minimumRate);
+			sb.append(",max=");
+			sb.append(maximumRate);
+			sb.append(",rate=");
+			sb.append(currentRate);
+			sb.append(",q(");
+			sb.append(queueEmptyCount);
+			sb.append(",");
+			sb.append(queueFullCount);
+			sb.append("),");
+			sb.append(s_node);
 			return sb.toString();
 		}
 	}
