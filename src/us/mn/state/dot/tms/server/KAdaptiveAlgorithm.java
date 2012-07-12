@@ -529,7 +529,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			StationNode us = ms.s_node;
 			if(us != null) {
 				StationNode bs = us.bottleneckStation();
-				double Rnext = equation(bs, us, ms);
+				double k =  ms.calculateSegmentDensity(bs);
+				double Rnext = equation(k, ms);
 				ms.saveRateHistory(Rnext);
 				if(ms.shouldMeter(bs, us))
 					ms.setRate(Rnext);
@@ -541,7 +542,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * Calculate metering rates.
 	 * <pre>
 	 *                       ^
-	 *                       | Kt
+	 *                       | k
 	 *                       |                 +
 	 *                       |
 	 *                       |
@@ -552,7 +553,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 *                       |
 	 *                 +     |
 	 *    +                  |
-	 * --p0------------p1----p2------------p3---p4-----&gt; K_DES-Kt
+	 * --p0------------p1----p2------------p3---p4-----&gt; K_DES - k
 	 *                       |
 	 *                       |
 	 * p0's x = K_DES - K_JAM
@@ -560,26 +561,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * p4's x = K_DES
 	 * </pre>
 	 *
-	 * @param bottleneck Bottleneck station (may be null).
-	 * @param upstream Upstream station.
+	 * @param k Segment density.
 	 * @param ms Meter state.
 	 * @return Metering rate (vehicles per hour).
 	 */
-	private double equation(StationNode bottleneck, StationNode upstream,
-		MeterState ms)
-	{
-		if(bottleneck == null)
-			bottleneck = upstream;
-		double Kt = bottleneck.calculateSegmentDensity(upstream);
-
-		ms.saveSegmentDensity(Kt);
-
+	private double equation(double k, MeterState ms) {
 		double Rmin = ms.getMinimumRate();
 		double Rmax = ms.getMaximumRate();
 		double Rt = ms.getRate();
 
                 // Calculate MainLine Alpha value with MainLine Density
-		double x = K_DES - Kt;
+		double x = K_DES - k;
 
 		KPoint p0 = new KPoint(K_DES - K_JAM, Rmin / Rt);
 		KPoint p1 = new KPoint((K_DES - K_JAM) / 3,
@@ -1600,12 +1592,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			resetAccumulators();
 		}
 
-		/**
-		 * Save segment density.
-		 * @param Kt
-		 */
-		private void saveSegmentDensity(double Kt) {
-			segmentDensityHist.push(Kt);
+		/** Calculate the segment density.
+		 * @param bs Bottlneck (downstream) station node.
+		 * @return Segment density (vehicles / mile) */
+		protected double calculateSegmentDensity(StationNode bs) {
+			if(bs == null)
+				bs = s_node;
+			double k = bs.calculateSegmentDensity(s_node);
+			segmentDensityHist.push(k);
+			return k;
 		}
 
 		/**
