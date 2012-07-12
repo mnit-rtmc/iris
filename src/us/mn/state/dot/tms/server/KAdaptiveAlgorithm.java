@@ -1105,6 +1105,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			       (isDemandBelowPassage() ||isPassageBelowGreen());
 		}
 
+		/** Check if queue occupancy is above threshold */
+		private boolean isQueueOccupancyHigh() {
+			return queue.getMaxOccupancy() > QUEUE_OCC_THRESHOLD;
+		}
+
 		/** Check if cumulative demand is below cumulative passage */
 		private boolean isDemandBelowPassage() {
 			return queueLength() < QUEUE_EMPTY_THRESHOLD;
@@ -1263,27 +1268,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				StationNode bs = s_node.bottleneckStation();
 				double k =  calculateSegmentDensity(bs);
 				double r = calculateRate(k);
-				saveRateHistory(r);
+				rateHist.push(r);
 				if(shouldMeter(bs, s_node))
 					setRate(r);
 			}
 		}
 
-		/** Check if queue occupancy is above threshold */
-		private boolean isQueueOccupancyHigh() {
-			return queue.getMaxOccupancy() > QUEUE_OCC_THRESHOLD;
-		}
-
-		/**
-		 * Set metering rate
-		 * @param Rnext next metering rate
-		 */
-		private void setRate(double Rnext) {
-			int r = (int)Math.round(Rnext);
-			r = Math.max(r, minimumRate);
-			r = Math.min(r, maximumRate);
-			currentRate = r;
-			meter.setRatePlanned(currentRate);
+		/** Calculate the segment density.
+		 * @param bs Bottlneck (downstream) station node.
+		 * @return Segment density (vehicles / mile) */
+		private double calculateSegmentDensity(StationNode bs) {
+			if(bs == null)
+				bs = s_node;
+			double k = bs.calculateSegmentDensity(s_node);
+			segmentDensityHist.push(k);
+			return k;
 		}
 
 		/** Should metering be started?
@@ -1377,6 +1376,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return false;
 		}
 
+		/** Set metering rate
+		 * @param Rnext next metering rate
+		 */
+		private void setRate(double Rnext) {
+			int r = (int)Math.round(Rnext);
+			r = Math.max(r, minimumRate);
+			r = Math.min(r, maximumRate);
+			currentRate = r;
+			meter.setRatePlanned(currentRate);
+		}
+
 		/**
 		 * Check if the metering should be stopped.
 		 */
@@ -1440,14 +1450,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/**
-		 * Save metering rate history
-		 * @param Rnext
-		 */
-		private void saveRateHistory(double Rnext) {
-			rateHist.push(Rnext);
-		}
-
-		/**
 		 * Return length of metering rate history
 		 * @return
 		 */
@@ -1499,17 +1501,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void startMetering() {
 			isMetering = true;
 			resetAccumulators();
-		}
-
-		/** Calculate the segment density.
-		 * @param bs Bottlneck (downstream) station node.
-		 * @return Segment density (vehicles / mile) */
-		protected double calculateSegmentDensity(StationNode bs) {
-			if(bs == null)
-				bs = s_node;
-			double k = bs.calculateSegmentDensity(s_node);
-			segmentDensityHist.push(k);
-			return k;
 		}
 
 		/**
