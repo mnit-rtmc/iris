@@ -82,6 +82,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number fo time steps to check before start metering */
 	static private final int START_STEPS = steps(90);
 
+	/** Number fo time steps to check density before start metering */
+	static private final int START_STEPS_K = steps(60);
+
 	/** Number of time steps to check before stop metering */
 	static private final int STOP_STEPS = steps(300);
 
@@ -544,9 +547,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		for(MeterState ms : bottleneck.getMeters()) {
 			double Rnext = equation(bottleneck, ms);
 			ms.saveRateHistory(Rnext);
-			if(!checkStartCondition(bottleneck, null, ms))
-				continue;
-			ms.setRate(Rnext);
+			if(ms.shouldMeter(bottleneck, null))
+				ms.setRate(Rnext);
 		}
 
 		// calculate rates from upstream station of bottleneck
@@ -569,9 +571,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		for(MeterState ms : upStation.getMeters()) {
 			double Rnext = equation(bottleneck, upStation, ms);
 			ms.saveRateHistory(Rnext);
-			if(!checkStartCondition(bottleneck, upStation, ms))
-				continue;
-			ms.setRate(Rnext);
+			if(ms.shouldMeter(bottleneck, upStation))
+				ms.setRate(Rnext);
 		}
 	}
 
@@ -667,118 +668,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return (yd / xd) * (x - start.x) + start.y;
 		else
 			return 0;
-	}
-
-	/**
-	 * Does metering of given entrance start?
-	 * @param bs bottleneck
-	 * @param us associated station of entrance
-	 * @param ms Meter state.
-	 * @param Rnext calculated next metering rate
-	 * @return start ?
-	 */
-	private boolean checkStartCondition(StationNode bs, StationNode us,
-		MeterState ms)
-	{
-		if(ms.isMetering)
-			return true;
-		if(!ms.hasBeenStoped)
-			return checkStartFirst(bs, us, ms);
-		else
-			return checkStartAfterStop(bs, us, ms);
-	}
-
-	/**
-	 * Check start condition (first time -- has not stopped previously).
-	 */
-	private boolean checkStartFirst(StationNode bs, StationNode us,
-		MeterState ms)
-	{
-		if(checkFlowStart(ms) || checkDensityStart(bs, us, ms)) {
-			ms.startMetering();
-			isMeteringStarted = true;
-			return true;
-		} else
-			return false;
-	}
-
-	/**
-	 * Check merging flow start condition (first time -- has not stopped
-	 * previously).
-	 * Merging flow &gt;= KstartRate * Allocated Rate (for n steps)
-	 *
-	 * @return true if metering should start, based on merging flow.
-	 */
-	private boolean checkFlowStart(MeterState ms) {
-		if(ms.countRateHistory() >= START_STEPS) {
-			for(int i = 0; i < START_STEPS; i++) {
-				double q = ms.getFlow(i);
-				double rate = ms.getRate(i);
-				if(q < START_FLOW_RATIO * rate)
-					return false;
-			}
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Check density start condition (first time -- has not stopped
-	 * previously).
-	 * SegmentDensity &gt;= bottleneckDensity (just once)
-	 * Segment density is the average density from the upstream station to
-	 * bottleneck.
-	 *
-	 * @return true if metering should start, based on segment density.
-	 */
-	private boolean checkDensityStart(StationNode bs, StationNode us,
-		MeterState ms)
-	{
-		final int DCHECKSTEP = START_STEPS - 1;
-		for(int i = 0; i < DCHECKSTEP; i++) {
-			if(ms.countRateHistory() < DCHECKSTEP)
-				return false;
-			double segK = bs.calculateSegmentDensity(us, i);
-			if(segK < bottleneckDensity())
-				return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Check start condition (after stopping previously).
-	 * <pre>
-	 *	SegmentDensity &gt;= bottleneckDensity (for n steps)
-	 *	   - AND -
-	 *	Merging flow &gt;= KstartRate * Allocated Rate (for n times)
-	 * </pre>
-	 * Segment density is the average density from the upstream station to
-	 * bottleneck.
-	 */
-	private boolean checkStartAfterStop(StationNode bs, StationNode us,
-		MeterState ms)
-	{
-		// if rate history is short, pass (do not start)
-		if(ms.countRateHistory() < RESTART_STEPS)
-			return false;
-
-		for(int i = 0; i < RESTART_STEPS; i++) {
-			double segK = bs.calculateSegmentDensity(us, i);
-
-			// Start Condition 1 : segment density > bottleneck K
-			if(segK < bottleneckDensity())
-				return false;
-
-			// Start Condition 2 : Merging flow >= KstartRate
-			double q = ms.getFlow(i);
-			double rate = ms.getRate(i);
-			if(q < START_FLOW_RATIO * rate)
-				return false;
-		}
-
-		ms.startMetering();
-		isMeteringStarted = true;
-		return true;
 	}
 
 	/**
@@ -1560,6 +1449,95 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				isRateUpdated = true;
 				m.setRatePlanned(currentRate);
 			}
+		}
+
+		/** Should metering be started?
+		 * @param bs bottleneck station
+		 * @param us associated station of entrance
+		 * @return true if metering should be started.
+		 */
+		private boolean shouldMeter(StationNode bs, StationNode us) {
+			if(isMetering)
+				return true;
+			if(shouldStart(bs, us)) {
+				startMetering();
+				isMeteringStarted = true;
+				return true;
+			} else
+				return false;
+		}
+
+		/** Check if metering should start.
+		 * @return true if metering should start.
+		 */
+		private boolean shouldStart(StationNode bs, StationNode us) {
+			if(hasBeenStoped)
+				return shouldRestart(bs, us);
+			else
+				return shouldStartInitial(bs, us);
+		}
+
+		/** Check if initial metering should start.
+		 * @return true if metering should start.
+		 */
+		private boolean shouldStartInitial(StationNode bs,
+			StationNode us)
+		{
+			if(shouldStartFlow(START_STEPS) ||
+			   shouldStartDensity(bs, us, START_STEPS_K))
+				return true;
+			else
+				return false;
+		}
+
+		/** Check if metering should restart (after stopping).
+		 * @return true if metering should restart.
+		 */
+		private boolean shouldRestart(StationNode bs, StationNode us) {
+			if(shouldStartFlow(RESTART_STEPS) ||
+			   shouldStartDensity(bs, us, RESTART_STEPS))
+				return true;
+			else
+				return false;
+		}
+
+		/** Check if initial metering should start from flow.
+		 * @param n_steps Number of steps to check.
+		 * @return true if metering should start, based on merge flow.
+		 */
+		private boolean shouldStartFlow(int n_steps) {
+			if(countRateHistory() >= n_steps) {
+				for(int i = 0; i < n_steps; i++) {
+					double q = getFlow(i);
+					double rate = getRate(i);
+					if(q < START_FLOW_RATIO * rate)
+						return false;
+				}
+				return true;
+			} else
+				return false;
+		}
+
+		/** Check if metering should start from density.
+		 * @param bs Bottleneck station.
+		 * @param us Upstream station.
+		 * @param n_steps Number of steps to check.
+		 * @return true if metering should start, based on segment
+		 *         density.
+		 */
+		private boolean shouldStartDensity(StationNode bs,
+			StationNode us, int n_steps)
+		{
+			if(countRateHistory() >= n_steps) {
+				for(int i = 0; i < n_steps; i++) {
+					double k = bs.calculateSegmentDensity(
+						us, i);
+					if(k < bottleneckDensity())
+						return false;
+				}
+				return true;
+			} else
+				return false;
 		}
 
 		/**
