@@ -683,6 +683,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		for(MeterState ms : stationState.getMeters()) {
 			if(ms.isMetering && !ms.isRateUpdated) {
 				double Rnext = equation(stationState, null, ms);
+				ms.saveRateHistory(Rnext);
 				ms.setRate(Rnext);
 			}
 		}
