@@ -427,22 +427,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 		}
 		k_hist_corridor.push(calculateCorridorDensity(downstreamBS));
-		if(bottleneckCount > 1 || !k_hist_corridor.isFull())
-			return;
-		// check avg K of corridor average density
-		for(int i = 0; i < AVG_K_TREND_STEPS; i++) {
-			Double ma_next = k_hist_corridor.average(i,
-				AVG_K_STEPS);
-			Double ma_prev = k_hist_corridor.average(i + 1,
-				AVG_K_STEPS);
-			if(ma_next == null || ma_prev == null)
-				return;
-			if(ma_next > ma_prev)
-				return;
-		}
-
-		// let's check stop condition from now
-		doStopChecking = true;
+		if(bottleneckCount == 0 && isDensityTrendingDown())
+			doStopChecking = true;
 	}
 
 	/**
@@ -456,6 +442,24 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				firstStation());
 		}
 		return 0;
+	}
+
+	/** Check if corridor density is trending downward */
+	private boolean isDensityTrendingDown() {
+		if(k_hist_corridor.isFull()) {
+			for(int i = 0; i < AVG_K_TREND_STEPS; i++) {
+				Double ma_next = k_hist_corridor.average(i,
+					AVG_K_STEPS);
+				Double ma_prev = k_hist_corridor.average(i + 1,
+					AVG_K_STEPS);
+				if(ma_next == null || ma_prev == null)
+					return false;
+				if(ma_next > ma_prev)
+					return false;
+			}
+			return true;
+		} else
+			return false;
 	}
 
 	/**
