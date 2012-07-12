@@ -336,12 +336,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sn.updateState();
 		}
 		findBottlenecks();
-		calculateMeteringRates();
 		if(isMeteringStarted && !doStopChecking)
 			checkCorridorState();
 		else if(doStopChecking)
 			checkStopCondition();
-		clearBottlenecks();
 	}
 
 	/** Debug corridor structure. */
@@ -364,13 +362,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		mergeBottleneckZones();
 	}
 
-	/**
-	 * Find bottleneck candidates.
+	/** Find bottleneck candidates.
 	 */
 	private void findBottleneckCandidates() {
 		for(StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
 		{
+			sn.clearBottleneck();
 			sn.checkBottleneck();
 		}
 	}
@@ -519,32 +517,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			for(MeterState ms : sn.getMeters())
 				ms.checkStopCondition(hasBottleneck);
 			return hasBottleneck;
-		}
-	}
-
-	/** Calculate metering rates for all meter states.
-	 */
-	private void calculateMeteringRates() {
-		for(MeterState ms : meterStates.values()) {
-			StationNode us = ms.s_node;
-			if(us != null) {
-				StationNode bs = us.bottleneckStation();
-				double k =  ms.calculateSegmentDensity(bs);
-				double Rnext = ms.calculateRate(k);
-				ms.saveRateHistory(Rnext);
-				if(ms.shouldMeter(bs, us))
-					ms.setRate(Rnext);
-			}
-		}
-	}
-
-	/** Clear all station bottlenecks.
-	 */
-	private void clearBottlenecks() {
-		for(StationNode sn = firstStation(); sn != null;
-		    sn = sn.downstreamStation())
-		{
-			sn.clearBottleneck();
 		}
 	}
 
@@ -1001,7 +973,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * Validate meter state.
 		 *   - Save cumulative demand and merging flow
 		 *   - Set current demand and merging flow
-		 *   - Calculate minimum metering rate
+		 *   - Calculate metering rate
 		 */
 		private void validate() {
 			updateDemandState();
@@ -1009,6 +981,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			checkQueueEmpty();
 			minimumRate = calculateMinimumRate();
 			maximumRate = calculateMaximumRate();
+			calculateMeteringRate();
 		}
 
 		/** Update ramp queue demand state */
@@ -1281,6 +1254,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			int target_max = Math.round(target_demand *
 				TARGET_MAX_RATIO);
 			return filterRate(Math.max(target_max, minimumRate));
+		}
+
+		/** Calculate the metering rate.
+		 */
+		private void calculateMeteringRate() {
+			if(s_node != null) {
+				StationNode bs = s_node.bottleneckStation();
+				double k =  calculateSegmentDensity(bs);
+				double r = calculateRate(k);
+				saveRateHistory(r);
+				if(shouldMeter(bs, s_node))
+					setRate(r);
+			}
 		}
 
 		/** Check if queue occupancy is above threshold */

@@ -169,6 +169,7 @@ public class SampleQuery30SecJob extends Job {
 
 	/** Validate all metering algorithms */
 	protected void validateMetering() {
+		KAdaptiveAlgorithm.processAllStates();
 		RampMeterHelper.find(new Checker<RampMeter>() {
 			public boolean check(RampMeter rm) {
 				if(rm instanceof RampMeterImpl) {
@@ -179,7 +180,6 @@ public class SampleQuery30SecJob extends Job {
 			}
 		});
 		StratifiedAlgorithm.processAllStates();
-		KAdaptiveAlgorithm.processAllStates();
 		RampMeterHelper.find(new Checker<RampMeter>() {
 			public boolean check(RampMeter m) {
 				RampMeterImpl meter = (RampMeterImpl)m;
