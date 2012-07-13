@@ -306,7 +306,7 @@ public class IncidentCreator extends JPanel {
 			else
 				return 0;
 		default:
-			return cb.getLaneCount(east, north);
+			return cb.laneConfiguration(east, north).getLanes();
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -126,7 +126,8 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 					upstream.put(up, lcs_array);
 			}
 		}
-		int shift = cb.getShift(proxy.getEasting(),proxy.getNorthing());
+		int shift = cb.laneConfiguration(proxy.getEasting(),
+			proxy.getNorthing()).leftShift;
 		for(Float up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
 			int n_lanes = lcs_array.getIndicationsCurrent().length;

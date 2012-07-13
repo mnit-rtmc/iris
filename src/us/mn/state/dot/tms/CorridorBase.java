@@ -353,30 +353,6 @@ public class CorridorBase implements Iterable<R_Node> {
 		return nearest;
 	}
 
-	/** Get the lane count at the given location */
-	public int getLaneCount(int easting, int northing) {
-		R_Node last = findLastBefore(easting, northing);
-		if(last == null)
-			return 0;
-		int left = 0;
-		int right = 0;
-		for(R_Node n: r_nodes) {
-			if(n.getAttachSide())
-				left = n.getShift();
-			else
-				right = n.getShift();
-			if(n.getNodeType() == R_NodeType.STATION.ordinal()) {
-				if(n.getAttachSide())
-					right = left + n.getLanes();
-				else
-					left = right - n.getLanes();
-			}
-			if(n == last)
-				break;
-		}
-		return right - left;
-	}
-
 	/** Fint the last node before the given location */
 	public R_Node findLastBefore(int easting, int northing) {
 		R_Node nearest = null;
@@ -411,11 +387,17 @@ public class CorridorBase implements Iterable<R_Node> {
 			return n_before;
 	}
 
-	/** Get the left lane shift at the given location */
-	public int getShift(int easting, int northing) {
-		R_Node last = findLastBefore(easting, northing);
-		if(last == null)
-			return 0;
+	/** Get the lane configuration at the given location */
+	public LaneConfiguration laneConfiguration(int easting, int northing) {
+		R_Node node = findLastBefore(easting, northing);
+		if(node != null)
+			return laneConfiguration(node);
+		else
+			return new LaneConfiguration(0, 0);
+	}
+
+	/** Get the lane configuration at the given node */
+	private LaneConfiguration laneConfiguration(R_Node node) {
 		int left = 0;
 		int right = 0;
 		for(R_Node n: r_nodes) {
@@ -429,10 +411,10 @@ public class CorridorBase implements Iterable<R_Node> {
 				else
 					left = right - n.getLanes();
 			}
-			if(n == last)
-				return left;
+			if(n == node)
+				return new LaneConfiguration(left, right);
 		}
-		// This should never happen -- we didn't find last node?
-		return 0;
+		// Node not found on corridor
+		return new LaneConfiguration(0, 0);
 	}
 }
