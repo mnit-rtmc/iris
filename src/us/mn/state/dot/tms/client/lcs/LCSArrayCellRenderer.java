@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Size in pixels for each LCS in array */
-	static protected final int LCS_SIZE = 32;
+	static protected final int LCS_SIZE = 28;
 
 	/** List cell renderer (needed for colors) */
 	protected final DefaultListCellRenderer cell =
