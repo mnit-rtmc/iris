@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import java.awt.GridLayout;
+import java.awt.Dimension;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -31,6 +31,9 @@ import us.mn.state.dot.tms.LCSHelper;
  */
 public class IndicationSelector extends JPanel {
 
+	/** Pixel width of each lane */
+	private final int pixels;
+
 	/** Array of lane-use indication combo boxes (left to right) */
 	protected final JComboBox[] indications =
 		new JComboBox[LCSArray.MAX_LANES];
@@ -42,15 +45,26 @@ public class IndicationSelector extends JPanel {
 	protected int shift = 0;
 
 	/** Create a new indication selector */
-	public IndicationSelector() {
-		super(new GridLayout(1, LCSArray.MAX_LANES, 2, 2));
-		IndicationRenderer ir = new IndicationRenderer(32);
+	public IndicationSelector(int p) {
+		setLayout(null);
+		pixels = p;
+		int w = getX(LCSArray.MAX_LANES) + 3;
+		setMinimumSize(new Dimension(w, p - 18));
+		setPreferredSize(new Dimension(w, p - 18));
+		IndicationRenderer ir = new IndicationRenderer(p - 26);
 		for(int i = 0; i < indications.length; i++) {
 			JComboBox cbx = new JComboBox();
 			cbx.setRenderer(ir);
 			add(cbx);
 			indications[i] = cbx;
+			cbx.setBounds(getX(i), 1, pixels, p - 20);
 		}
+		setOpaque(false);
+	}
+
+	/** Get the X position of a lane */
+	private int getX(int l) {
+		return 6 + l * (pixels + 6);
 	}
 
 	/** Dispose of the indication selector */

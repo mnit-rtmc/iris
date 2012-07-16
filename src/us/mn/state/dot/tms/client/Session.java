@@ -149,6 +149,11 @@ public class Session {
 	/** LCS array manager */
 	protected final LCSArrayManager lcs_array_manager;
 
+	/** Get the LCS array manager */
+	public LCSArrayManager getLCSArrayManager() {
+		return lcs_array_manager;
+	}
+
 	/** LCS indication manager */
 	protected final LCSIManager lcsi_manager;
 

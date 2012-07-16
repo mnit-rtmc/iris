@@ -40,7 +40,10 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Size in pixels for each LCS in array */
-	static protected final int LCS_SIZE = 28;
+	static protected final int LCS_SIZE = 22;
+
+	/** LCS array manager */
+	private final LCSArrayManager manager;
 
 	/** List cell renderer (needed for colors) */
 	protected final DefaultListCellRenderer cell =
@@ -56,6 +59,10 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 	/** Label for the user */
 	protected final JLabel userLbl = new JLabel();
 
+	/** Lane configuration panel */
+	private final LaneConfigurationPanel lane_config =
+		new LaneConfigurationPanel(LCS_SIZE);
+
 	/** LCS array panel */
 	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(LCS_SIZE);
 
@@ -67,8 +74,9 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 	protected final JLabel locationLbl = new JLabel(" ");
 
 	/** Create a new LCS array cell renderer */
-	public LCSArrayCellRenderer() {
+	public LCSArrayCellRenderer(LCSArrayManager m) {
 		super(new BorderLayout());
+		manager = m;
 		Border b = BorderFactory.createCompoundBorder(
 		          BorderFactory.createEmptyBorder(1, 1, 1, 1),
 		          BorderFactory.createRaisedBevelBorder());
@@ -81,7 +89,8 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 		location.add(locationLbl);
 		location.add(Box.createGlue());
 		add(title, BorderLayout.NORTH);
-		add(lcsPnl, BorderLayout.CENTER);
+		lane_config.add(lcsPnl);
+		add(lane_config, BorderLayout.CENTER);
 		add(location, BorderLayout.SOUTH);
 		int w = lcsPnl.getPreferredSize().width + bi.left + bi.right;
 		int h = bi.top + bi.bottom +
@@ -118,6 +127,8 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Set the LCS array */
 	protected void setLcsArray(LCSArray lcs_array) {
+		lane_config.setConfiguration(manager.laneConfiguration(
+			lcs_array));
 		nameLbl.setText(lcs_array.getName());
 		userLbl.setText(IrisUserHelper.getNamePruned(
 			getUser(lcs_array)));

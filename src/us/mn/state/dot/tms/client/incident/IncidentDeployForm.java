@@ -89,7 +89,9 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		super.initialize();
-		list.setCellRenderer(new LCSArrayCellRenderer() {
+		list.setCellRenderer(new LCSArrayCellRenderer(
+			session.getLCSArrayManager())
+		{
 			protected User getUser(LCSArray lcs_array) {
 				return user;
 			}

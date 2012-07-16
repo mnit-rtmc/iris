@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
@@ -194,7 +195,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a list cell renderer */
 	public ListCellRenderer createCellRenderer() {
-		return new LCSArrayCellRenderer();
+		return new LCSArrayCellRenderer(this);
 	}
 
 	/** Comparator for ordering LCS arrays */
@@ -344,5 +345,17 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Get the layer zoom visibility threshold */
 	protected int getZoomThreshold() {
 		return 14;
+	}
+
+	/** Get the lane configuration at an LCS array */
+	public LaneConfiguration laneConfiguration(LCSArray proxy) {
+		GeoLoc loc = LCSArrayHelper.lookupGeoLoc(proxy);
+		CorridorBase cor = session.getR_NodeManager().lookupCorridor(
+			loc);
+		if(cor != null) {
+			return cor.laneConfiguration(loc.getEasting(),
+				loc.getNorthing());
+		} else
+			return new LaneConfiguration(0, 0);
 	}
 }

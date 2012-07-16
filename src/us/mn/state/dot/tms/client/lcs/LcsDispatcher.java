@@ -57,8 +57,14 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Font for "L" and "R" labels */
 	static protected final Font FONT = new Font(null, Font.BOLD, 24);
 
+	/** Size in pixels for each LCS in array */
+	static private final int LCS_SIZE = 48;
+
 	/** Current session */
 	protected final Session session;
+
+	/** LCS Array manager */
+	private final LCSArrayManager manager;
 
 	/** Cache of LCS array proxy objects */
 	protected final TypeCache<LCSArray> cache;
@@ -85,12 +91,16 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected final JComboBox lcs_lock = new JComboBox(
 		LCSArrayLock.getDescriptions());
 
+	/** Lane configuration panel */
+	private final LaneConfigurationPanel lane_config =
+		new LaneConfigurationPanel(LCS_SIZE);
+
 	/** Panel for drawing an LCS array */
-	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(58);
+	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(LCS_SIZE);
 
 	/** LCS indicaiton selector */
 	protected final IndicationSelector indicationSelector =
-		new IndicationSelector();
+		new IndicationSelector(LCS_SIZE);
 
 	/** Button to send new indications to the LCS array */
 	protected final JButton sendBtn = new JButton("Send");
@@ -108,9 +118,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected LCSArray watching;
 
 	/** Create a new LCS dispatcher */
-	public LcsDispatcher(Session s, LCSArrayManager manager) {
+	public LcsDispatcher(Session s, LCSArrayManager m) {
 		super(new BorderLayout());
 		session = s;
+		manager = m;
 		cache = session.getSonarState().getLcsCache().getLCSArrays();
 		user = session.getUser();
 		selectionModel = manager.getSelectionModel();
@@ -157,13 +168,11 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Build the indication selector box */
 	protected Box buildSelectorBox() {
 		Box box = Box.createHorizontalBox();
-		Box vbox = Box.createVerticalBox();
 		box.add(createLabel("L"));
 		box.add(Box.createHorizontalStrut(4));
-		vbox.add(lcsPnl);
-		vbox.add(Box.createVerticalStrut(2));
-		vbox.add(indicationSelector);
-		box.add(vbox);
+		lane_config.add(lcsPnl);
+		lane_config.add(indicationSelector);
+		box.add(lane_config);
 		box.add(Box.createHorizontalStrut(4));
 		box.add(createLabel("R"));
 		return box;
@@ -258,6 +267,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		watching = lcs_array;
 		cache.watchObject(watching);
 		boolean update = canUpdate(lcs_array);
+		lane_config.setConfiguration(manager.laneConfiguration(
+			lcs_array));
 		indicationSelector.setLCSArray(lcs_array);
 		indicationSelector.setEnabled(update);
 		if(update) {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.Icon;
@@ -78,15 +76,22 @@ public class LCSArrayPanel extends JPanel {
 	 * @param p Pixel size for each LCS.
 	 */
 	public LCSArrayPanel(int p) {
-		super(new GridLayout(1, LCSArray.MAX_LANES, 2, 2));
+		setLayout(null);
 		pixels = p;
-		int w = LCSArray.MAX_LANES * (pixels + 2);
+		int w = getX(LCSArray.MAX_LANES) + 3;
 		setMinimumSize(new Dimension(w, pixels + 2));
 		setPreferredSize(new Dimension(w, pixels + 2));
 		for(int i = 0; i < lanes.length; i++) {
 			lanes[i] = new LCSPanel();
 			add(lanes[i]);
+			lanes[i].setBounds(getX(i), 1, pixels, pixels);
 		}
+		setOpaque(false);
+	}
+
+	/** Get the X position of a lane */
+	private int getX(int l) {
+		return 6 + l * (pixels + 6);
 	}
 
 	/** Set new indications */
