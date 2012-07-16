@@ -72,6 +72,7 @@ public class G4Rec {
 
 	/** Constructor */
 	protected G4Rec() {
+		create_time = TimeSteward.currentTimeMillis();
 	}
 
 	/** Parse the records.
