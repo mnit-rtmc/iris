@@ -297,6 +297,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		sendBtn.setEnabled(false);
 		blankBtn.setEnabled(false);
 		lcsPnl.clear();
+		lane_config.clear();
 	}
 
 	/** Set the camera action */

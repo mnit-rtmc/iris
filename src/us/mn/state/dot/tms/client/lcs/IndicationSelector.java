@@ -49,15 +49,15 @@ public class IndicationSelector extends JPanel {
 		setLayout(null);
 		pixels = p;
 		int w = getX(LCSArray.MAX_LANES) + 3;
-		setMinimumSize(new Dimension(w, p - 18));
-		setPreferredSize(new Dimension(w, p - 18));
+		setMinimumSize(new Dimension(w, p - 16));
+		setPreferredSize(new Dimension(w, p - 16));
 		IndicationRenderer ir = new IndicationRenderer(p - 26);
 		for(int i = 0; i < indications.length; i++) {
 			JComboBox cbx = new JComboBox();
 			cbx.setRenderer(ir);
 			add(cbx);
 			indications[i] = cbx;
-			cbx.setBounds(getX(i), 1, pixels, p - 20);
+			cbx.setBounds(getX(i), 0, pixels, p - 18);
 		}
 		setOpaque(false);
 	}
