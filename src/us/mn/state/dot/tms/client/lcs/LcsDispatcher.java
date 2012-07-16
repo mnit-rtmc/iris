@@ -158,7 +158,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		panel.addRow("Location", locationTxt);
 		panel.addRow("Status", statusTxt);
 		panel.addRow("Operation", operationTxt);
-		panel.add("Lock", lcs_lock);
+//		panel.add("Lock", lcs_lock);
 		panel.finishRow();
 		panel.addRow(buildSelectorBox());
 		panel.addRow(buildButtonPanel());
