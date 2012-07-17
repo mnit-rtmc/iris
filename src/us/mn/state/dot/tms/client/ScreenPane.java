@@ -111,13 +111,19 @@ public class ScreenPane extends JPanel {
 	/** Get the currently selected tab's home layer */
 	private ProxyLayerState getSelectedHomeLayer() {
 		Component tab = tab_pane.getSelectedComponent();
-		if(tab instanceof MapTab) {
-			MapTab mt = (MapTab)tab;
-			LayerState ls = mt.getHomeLayer();
-			if(ls instanceof ProxyLayerState)
-				return (ProxyLayerState)ls;
-		}
-		return null;
+		if(tab instanceof MapTab)
+			return getHomeProxyLayerState((MapTab)tab);
+		else
+			return null;
+	}
+
+	/** Get the home proxy layer state for a map tab */
+	private ProxyLayerState getHomeProxyLayerState(MapTab mt) {
+		LayerState ls = mt.getHomeLayer();
+		if(ls instanceof ProxyLayerState)
+			return (ProxyLayerState)ls;
+		else
+			return null;
 	}
 
 	/** Most recently selected layer */
@@ -161,9 +167,8 @@ public class ScreenPane extends JPanel {
 	public void addTab(MapTab mt) {
 		tab_pane.addTab(mt.getName(), null, mt, mt.getTip());
 		mt.setMap(map);
-		LayerState ls = mt.getHomeLayer();
-		if(ls instanceof ProxyLayerState) {
-			ProxyLayerState pls = (ProxyLayerState)ls;
+		ProxyLayerState pls = getHomeProxyLayerState(mt);
+		if(pls != null) {
 			TabSwitcher ts = new TabSwitcher(mt,
 				pls.getSelectionModel());
 			switchers.add(ts);
