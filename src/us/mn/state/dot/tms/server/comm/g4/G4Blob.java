@@ -225,8 +225,8 @@ public class G4Blob extends ByteBlob {
 		b.add((byte)0xAA);
 		b.add((byte)QUAL_DATAREQ);
 		b.add((byte)DATALEN_DATAREQ);
-		b.add((byte)(sid >> 8) & 0x0F); // MSB
-		b.add((byte)(sid & 0x0F)); 		// LSB
+		b.add((byte)(sid >> 8) & 0xFF);		// MSB
+		b.add((byte)(sid & 0xFF));		// LSB
 		b.add((byte)0x00);
 		byte[] cs = b.calcByteChecksum(HEADER_SIZE, 
 			HEADER_SIZE + DATALEN_DATAREQ - 1);
