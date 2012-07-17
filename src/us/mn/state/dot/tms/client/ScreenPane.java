@@ -169,6 +169,8 @@ public class ScreenPane extends JPanel {
 		mt.setMap(map);
 		ProxyLayerState pls = getHomeProxyLayerState(mt);
 		if(pls != null) {
+			if(tab_pane.getTabCount() == 1)
+				setSelectedLayer(pls);
 			TabSwitcher ts = new TabSwitcher(mt,
 				pls.getSelectionModel());
 			switchers.add(ts);
