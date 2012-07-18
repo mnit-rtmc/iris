@@ -31,7 +31,22 @@ import us.mn.state.dot.tms.utils.SString;
 public class RwisRec {
 
 	/** Number of expected fields per line */
-	private static final int NUM_FIELDS = 16;
+	static private final int NUM_FIELDS = 16;
+
+	/** Convert missing values (negative) to null */
+	static private Integer nmnCheck(Integer v) {
+		return v != null && v >= 0 ? v : null;
+	}
+
+	/** Convert missing values (negative) to null */
+	static private Long nmnCheck(Long v) {
+		return v != null && v >= 0 ? v : null;
+	}
+
+	/** Convert missing values (null, -1, or empty) to null */
+	static private String nmnCheck(String v) {
+		return v == null || v.equals("-1") || v.isEmpty() ? null : v;
+	}
 
 	/** Validity indicator */
 	private final boolean valid_rec;
@@ -39,8 +54,8 @@ public class RwisRec {
 	/** Raw record, as a line of CSV text. */
 	private final String raw_rec;
 
-	/** Rwis station id */
-	private String station_id = "";
+	/** Rwis site id */
+	private String site_id = "";
 
 	/** Creation time */
 	private final long create_time;
@@ -117,7 +132,7 @@ public class RwisRec {
 			return false;
 		}
 		// FIXME: parse fields by named column order
-		station_id = SCsv.getFieldString(fs, 0);
+		site_id = SCsv.getFieldString(fs, 0);
 		obs_time = nmnCheck(SCsv.getFieldTime(fs, 1));
 		obs_air_temp = parseAirTemp(SCsv.getFieldString(fs, 2));
 		obs_dew_point = nmnCheck(SCsv.getFieldInt(fs, 3));
@@ -147,21 +162,6 @@ public class RwisRec {
 		}
 	}
 
-	/** Convert missing values (null, -1, or empty) to null */
-	private Integer nmnCheck(Integer v) {
-		return v == null || v == -1  || v.toString().isEmpty() ? null : v;
-	}
-
-	/** Convert missing values (null, -1, or empty) to null */
-	private Long nmnCheck(Long v) {
-		return v == null || v == -1 || v.toString().isEmpty() ? null : v;
-	}
-
-	/** Convert missing values (null, -1, or empty) to null */
-	private String nmnCheck(String v) {
-		return v == null || v.toString().equals("-1") || v.toString().isEmpty() ? null : v;
-	}
-
 	/** Is the row the header row? For example: Siteid, DtTm, AirTemp,
 	 * Dewpoint, Rh, SpdAvg, SpdGust, DirMin, DirAvg, DirMax, Pressure,
 	 * PcIntens, PcType, PcRate, PcAccum, Visibility. */
@@ -178,7 +178,7 @@ public class RwisRec {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("(RwisRec: ");
-		sb.append("id=").append(station_id);
+		sb.append("id=").append(site_id);
 		sb.append(", valid=").append(valid_rec);
 		sb.append(", create_time=").append(new Date(create_time));
 		sb.append(", obs_time=").append(
@@ -206,10 +206,10 @@ public class RwisRec {
 	public void store() {
 		if(!valid())
 			return;
-		WeatherSensorImpl ws = find(station_id);
+		WeatherSensorImpl ws = find(site_id);
 		if(ws == null) {
 			SsiPoller.log("No weather sensor defined " +
-				"for id=" + station_id + ", observation " +
+				"for id=" + site_id + ", observation " +
 				"ignored, rec=" + this);
 		} else {
 			SsiPoller.log("stored rec=" + this);
