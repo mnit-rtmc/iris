@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.server.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
 import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
+import us.mn.state.dot.tms.server.comm.ssi.SsiPoller;
 import us.mn.state.dot.tms.server.comm.vicon.ViconPoller;
 import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
 
@@ -107,6 +108,8 @@ public class MessagePollerFactory {
 			return createInfinovaDPoller();
 		case EIS_G4:
 			return createEisG4Poller();
+		case SSI:
+			return createSsiPoller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -192,7 +195,7 @@ public class MessagePollerFactory {
 	}
 
 	/** Create an http file messenger */
-	protected Messenger createHttpFileMessenger() throws IOException {
+	private HttpFileMessenger createHttpFileMessenger() throws IOException {
 		return new HttpFileMessenger(new URL(uri));
 	}
 
@@ -278,6 +281,11 @@ public class MessagePollerFactory {
 	protected MessagePoller createInfinovaDPoller() throws IOException {
 		return new PelcoDPoller(name, new InfinovaMessenger(
 			createSocketMessenger(TCP)));
+	}
+
+	/** Create an SSI poller */
+	protected MessagePoller createSsiPoller() throws IOException {
+		return new SsiPoller(name, createHttpFileMessenger());
 	}
 
 	/** Create an EIS G4 poller */

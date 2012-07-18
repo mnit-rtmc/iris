@@ -1427,6 +1427,10 @@ meter_min_red_secs	0.1
 meter_yellow_secs	0.7
 msg_feed_verify	true
 operation_retry_threshold	3
+rwis_high_wind_speed_kph	40
+rwis_low_visibility_distance_m	152
+rwis_obs_age_limit_secs	240
+rwis_max_valid_wind_speed_kph	282
 sample_archive_enable	true
 sample_archive_directory	/var/lib/iris/traffic
 station_xml_enable	true

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2011  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,7 @@ package us.mn.state.dot.tms;
  * rates, visibility and wind speed.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public interface WeatherSensor extends Device {
 
@@ -27,4 +29,31 @@ public interface WeatherSensor extends Device {
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();
+
+	/** Get the latest time stamp or MISSING_DATA */
+	long getStamp();
+
+	/** Get the visibility in meters or null for missing */
+	Integer getVisibility();
+
+	/** Get the wind speed in KPH or null for missing */
+	Integer getWindSpeed();
+
+	/** Get the air temp in C or null for missing */
+	Integer getAirTemp();
+
+	/** Get the average wind direction in degrees or null for missing */
+	Integer getWindDirAvg();
+
+	/** Get the precipitation rate in mm/hr or null for missing */
+	Integer getPrecipRate();
+
+	/** Get the expired state */
+	boolean getExpired();
+
+	/** Get the high wind state */
+	boolean getHighWind();
+
+	/** Get the low visibility state */
+	boolean getLowVisibility();
 }
