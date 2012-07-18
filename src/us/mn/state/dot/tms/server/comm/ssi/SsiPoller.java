@@ -15,11 +15,12 @@
  */
 package us.mn.state.dot.tms.server.comm.ssi;
 
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
+import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
-import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * SSI RWIS poller, which periodically reads SSI data via http.
@@ -52,8 +53,8 @@ public class SsiPoller extends MessagePoller {
 		return true;
 	}
 
-	/** Read the file, called periodically */
-	public void readEvent() {
-		addOperation(new OpRead());
+	/** Query current weather conditions */
+	public void queryConditions(WeatherSensorImpl ws) {
+		addOperation(new OpRead(ws));
 	}
 }

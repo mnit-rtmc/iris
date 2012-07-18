@@ -16,8 +16,9 @@
 package us.mn.state.dot.tms.server.comm.ssi;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -25,15 +26,15 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Michael Darter
  */
-public class OpRead extends Operation {
+public class OpRead extends OpDevice {
 
 	/** Create a new device operation */
-	protected OpRead() {
-		super(PriorityLevel.DATA_30_SEC);
+	protected OpRead(WeatherSensorImpl ws) {
+		super(PriorityLevel.DATA_30_SEC, ws);
 	}
 
-	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	/** Create the second phase of the operation */
+	protected Phase phaseTwo() {
 		return new PhaseRead();
 	}
 
@@ -43,9 +44,8 @@ public class OpRead extends Operation {
 		/** Execute the phase
 		 * @throws IOException received from queryProps call. */
 		protected Phase poll(CommMessage cm) throws IOException {
-			SsiProperty p = new SsiProperty();
 			SsiMessage m = (SsiMessage)cm;
-			m.add(p);
+			m.add(new SsiProperty());
 			m.queryProps();
 			return null;
 		}

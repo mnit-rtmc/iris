@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,31 +15,20 @@
  */
 package us.mn.state.dot.tms.server.comm.ssi;
 
-import java.io.FileWriter;
-import java.util.Calendar;
 import java.util.Date;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsPgTime;
-import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.Temperature;
 import us.mn.state.dot.tms.WeatherSensorHelper;
-import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.utils.SCsv;
-import us.mn.state.dot.tms.utils.SFile;
 import us.mn.state.dot.tms.utils.SString;
-import us.mn.state.dot.tms.utils.STime;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * SSI record.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class RwisRec {
-	//FIXME: write XML record to /var/www/xml/weathersensor.xml
 
 	/** Number of expected fields per line */
 	private static final int NUM_FIELDS = 16;
@@ -118,7 +108,7 @@ public class RwisRec {
 			return false;
 		String[] fs = SCsv.separate(raw_rec);
 		if(fs.length != NUM_FIELDS) {
-			SsiPoller.log("bogus number of fields read=" + 
+			SsiPoller.log("bogus number of fields read=" +
 				fs.length + ", expected=" + NUM_FIELDS);
 			return false;
 		}
@@ -173,7 +163,7 @@ public class RwisRec {
 	}
 
 	/** Is the row the header row? For example: Siteid, DtTm, AirTemp,
-	 * Dewpoint, Rh, SpdAvg, SpdGust, DirMin, DirAvg, DirMax, Pressure, 
+	 * Dewpoint, Rh, SpdAvg, SpdGust, DirMin, DirAvg, DirMax, Pressure,
 	 * PcIntens, PcType, PcRate, PcAccum, Visibility. */
 	private boolean headerRow(String[] fs) {
 		return "Siteid".equals(SCsv.getFieldString(fs, 0));
@@ -223,8 +213,8 @@ public class RwisRec {
 				"ignored, rec=" + this);
 		} else {
 			SsiPoller.log("stored rec=" + this);
-			ws.store(obs_vis, obs_wind_speed, 
-				obs_air_temp.toCInteger(), obs_dir_avg, 
+			ws.store(obs_vis, obs_wind_speed,
+				obs_air_temp.toCInteger(), obs_dir_avg,
 				obs_precip_rate);
 		}
 	}
