@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,15 +44,15 @@ abstract public class Messenger {
 	abstract public void setTimeout(int t) throws IOException;
 
 	/** Get the input stream */
-	public InputStream getInputStream() {
+	public InputStream getInputStream() throws IOException {
 		return input;
 	}
 
 	/** Get an input stream for the specified controller */
 	public InputStream getInputStream(ControllerImpl c)
-		throws EOFException
+		throws IOException
 	{
-		InputStream is = input;
+		InputStream is = getInputStream();
 		if(is == null)
 			throw new EOFException("MESSENGER CLOSED");
 		else
@@ -68,7 +68,7 @@ abstract public class Messenger {
 	public OutputStream getOutputStream(ControllerImpl c)
 		throws EOFException
 	{
-		OutputStream os = output;
+		OutputStream os = getOutputStream();
 		if(os == null)
 			throw new EOFException("MESSENGER CLOSED");
 		else

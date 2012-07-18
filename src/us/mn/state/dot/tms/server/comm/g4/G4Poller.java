@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.g4;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.DataOutputStream;
 import us.mn.state.dot.sched.Completer;
@@ -55,7 +54,7 @@ public class G4Poller extends MessagePoller implements SamplePoller {
 
 	/** Create a new message for the specified controller. Called by
  	 * MessagePoller.doPoll. */
-	public CommMessage createMessage(ControllerImpl c) throws EOFException {
+	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		G4Poller.info("G4Poller.createMessage(" + c + ")");
 		return new G4Message(
 			new DataOutputStream(messenger.getOutputStream(c)),

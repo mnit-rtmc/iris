@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.canoga;
 
-import java.io.EOFException;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
@@ -48,7 +48,7 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 	}
 
 	/** Create a new message for the specified controller */
-	public CommMessage createMessage(ControllerImpl c) throws EOFException {
+	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c), c.getDrop());
 	}

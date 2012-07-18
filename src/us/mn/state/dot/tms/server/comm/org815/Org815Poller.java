@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.org815;
 
-import java.io.EOFException;
+import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -36,7 +36,7 @@ public class Org815Poller extends MessagePoller implements WeatherPoller {
 
 	/** Create a new message for the specified controller */
 	public CommMessage createMessage(ControllerImpl c)
-		throws EOFException
+		throws IOException
 	{
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c));

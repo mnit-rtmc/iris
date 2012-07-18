@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,5 +76,13 @@ public class HttpFileMessenger extends Messenger {
 		}
 		input = null;
 		connection = null;
+	}
+
+	/** Get the input stream */
+	public InputStream getInputStream() throws IOException {
+		// make a new HTTP connection each time called
+		close();
+		open();
+		return input;
 	}
 }

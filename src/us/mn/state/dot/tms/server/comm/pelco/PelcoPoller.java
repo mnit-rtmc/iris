@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.pelco;
 
-import java.io.EOFException;
+import java.io.IOException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -40,7 +40,7 @@ public class PelcoPoller extends MessagePoller implements VideoMonitorPoller {
 	}
 
 	/** Create a new message for the specified drop address */
-	public CommMessage createMessage(ControllerImpl c) throws EOFException {
+	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c));
 	}

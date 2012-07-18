@@ -293,7 +293,7 @@ abstract public class MessagePoller extends Thread {
 
 	/** Create a message for the specified controller */
 	abstract protected CommMessage createMessage(ControllerImpl c)
-		throws EOFException;
+		throws IOException;
 
 	/** Respond to a download request from a controller */
 	protected void download(ControllerImpl c, PriorityLevel p) {

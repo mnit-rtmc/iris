@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ss105;
 
-import java.io.EOFException;
+import java.io.IOException;
 import java.io.PrintStream;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -38,7 +38,7 @@ public class SS105Poller extends MessagePoller implements SamplePoller {
 	}
 
 	/** Create a new message for the specified controller */
-	public CommMessage createMessage(ControllerImpl c) throws EOFException {
+	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(new PrintStream(
 			messenger.getOutputStream(c)),
 			messenger.getInputStream(c), c);

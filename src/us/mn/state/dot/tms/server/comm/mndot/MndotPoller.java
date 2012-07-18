@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
-import java.io.EOFException;
+import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.TimeSteward;
@@ -105,7 +105,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	}
 
 	/** Create a new message for the specified controller */
-	public CommMessage createMessage(ControllerImpl c) throws EOFException {
+	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c), c.getDrop(), protocol);
 	}

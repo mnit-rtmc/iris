@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,12 +49,9 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void queryProps() throws IOException {
-		if(prop != null) {
-			// each HTTP connection needs to be closed
-			messenger.close();
-			messenger.open();
+		if(prop != null)
 			prop.doGetRequest(messenger.getInputStream());
-		} else
+		else
 			throw new ProtocolException("No property");
 	}
 

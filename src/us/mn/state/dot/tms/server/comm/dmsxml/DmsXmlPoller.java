@@ -15,7 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.dmsxml;
 
-import java.io.EOFException;
+import java.io.IOException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -60,9 +60,9 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	 *
 	 * @param c Associated controller.
 	 * @return A newly created Message.
-	 * @throws EOFException
+	 * @throws IOException
 	 */
-	public CommMessage createMessage(ControllerImpl c) throws EOFException {
+	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(messenger.getOutputStream(c),
 				   messenger.getInputStream(c));
 	}

@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip;
 
-import java.io.EOFException;
+import java.io.IOException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
@@ -66,7 +66,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Create a new message for the specified controller */
-	public CommMessage createMessage(ControllerImpl c) throws EOFException {
+	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return snmp.new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c), c.getPassword());
 	}

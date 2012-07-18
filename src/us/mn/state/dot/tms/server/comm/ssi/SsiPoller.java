@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.ssi;
 
 import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -37,19 +36,15 @@ public class SsiPoller extends MessagePoller {
 		LOG.log(msg);
 	}
 
-	/** HTTP file messenger */
-	private final HttpFileMessenger http_messenger;
-
 	/** Create a new poller */
-	public SsiPoller(String n, HttpFileMessenger m) {
+	public SsiPoller(String n, Messenger m) {
 		super(n, m);
-		http_messenger = m;
 	}
 
 	/** Create a new message for the specified controller, 
 	 *  called by MessagePoller.doPoll(). */
 	public CommMessage createMessage(ControllerImpl c) {
-		return new SsiMessage(http_messenger);
+		return new SsiMessage(messenger);
 	}
 
 	/** Drop address is always valid */

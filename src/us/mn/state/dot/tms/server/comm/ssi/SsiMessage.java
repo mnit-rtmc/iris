@@ -18,7 +18,7 @@ package us.mn.state.dot.tms.server.comm.ssi;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
-import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
+import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -29,13 +29,13 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
 public class SsiMessage implements CommMessage {
 
 	/** Associated messenger */
-	private final HttpFileMessenger messenger;
+	private final Messenger messenger;
 
 	/** Property to parse */
 	private SsiProperty ssi_prop = null;
 
 	/** Create a new message */
-	public SsiMessage(HttpFileMessenger m) {
+	public SsiMessage(Messenger m) {
 		SsiPoller.log("creating new message");
 		messenger = m;
 	}
