@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,32 +19,33 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
  * SSI property.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class SsiProperty extends ControllerProperty {
 
+	/** Size of buffer for line reader */
+	static private final int BUFFER_SZ = 1024;
+
 	/** Perform a get request, read and parse reccords from file */
 	public void doGetRequest(InputStream is) throws IOException {
-		SsiPoller.log("called, input=" + is);
 		if(is == null) {
 			SsiPoller.log("no input stream to read");
 			throw new EOFException();
 		}
-		InputStreamReader isr = new InputStreamReader(is, 
-			"ISO-8859-1");
-		LineNumberReader lnr = new LineNumberReader(isr);
-		while(true) {
-			String line = lnr.readLine();
-			if(line == null)
-				break;
+		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
+		LineReader lr = new LineReader(isr, BUFFER_SZ);
+		String line = lr.readLine();
+		while(line != null) {
+			SsiPoller.log("parsing " + line);
 			new RwisRec(line).store();
+			line = lr.readLine();
 		}
-		SsiPoller.log("done");
 	}
 }
