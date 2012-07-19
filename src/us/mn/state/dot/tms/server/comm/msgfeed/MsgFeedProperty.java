@@ -18,6 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.FeedBucket;
 import us.mn.state.dot.tms.server.FeedMsg;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
@@ -30,8 +31,8 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  */
 public class MsgFeedProperty extends ControllerProperty {
 
-	/** Number of iterations reading from input stream */
-	static private final int BUF_READS = 100;
+	/** Size of buffer for line reader */
+	static private final int BUFFER_SZ = 1024;
 
 	/** Feed name */
 	private final String feed;
@@ -46,7 +47,9 @@ public class MsgFeedProperty extends ControllerProperty {
 		if(input == null)
 			throw new EOFException();
 		InputStreamReader isr = new InputStreamReader(input,"US-ASCII");
-		for(String line: parseReader(isr).split("\n")) {
+		LineReader lr = new LineReader(isr, BUFFER_SZ);
+		String line = lr.readLine();
+		while(line != null) {
 			MsgFeedPoller.log("parsing " + line);
 			FeedMsg msg = new FeedMsg(feed, line);
 			if(msg.isValid()) {
@@ -54,24 +57,7 @@ public class MsgFeedProperty extends ControllerProperty {
 				MsgFeedPoller.log("VALID " + msg);
 			} else
 				MsgFeedPoller.log("INVALID " + msg);
+			line = lr.readLine();
 		}
-	}
-
-	/** Parse the feed from a reader */
-	private String parseReader(InputStreamReader reader) throws IOException{
-		StringBuilder sb = new StringBuilder();
-		char[] buf = new char[1024];
-		/* We can't use something like BufferedReader.readLine, because
-		 * it will happily keep reading data from the reader until all
-		 * memory is exhausted. */
-		for(int i = 0; i < BUF_READS; i++) {
-			int n_chars = reader.read(buf, 0, buf.length);
-			if(n_chars < 0)
-				return sb.toString();
-			sb.append(buf, 0, n_chars);
-		}
-		MsgFeedPoller.log("Feed too long; stopped at " + BUF_READS +
-			"reads");
-		return sb.toString();
 	}
 }
