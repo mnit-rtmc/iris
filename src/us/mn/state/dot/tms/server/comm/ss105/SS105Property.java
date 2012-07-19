@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,9 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
@@ -89,28 +91,23 @@ abstract public class SS105Property extends ControllerProperty {
 		ps.flush();
 	}
 
-	/** Read a line of text from an input stream */
-	protected String readLine(InputStream is) throws IOException {
-		byte[] resp = new byte[MAX_RESP];
-		int n_rcv = 0;
-		while(n_rcv < MAX_RESP) {
-			int r = is.read(resp, n_rcv, MAX_RESP - n_rcv);
-			if(r <= 0)
-				throw new EOFException("END OF STREAM");
-			for(int i = 0; i < r; i++) {
-				if(resp[n_rcv + i] == 13)
-					return new String(resp, 0, n_rcv + i);
-			}
-			n_rcv += r;
-		}
-		throw new ParsingException("RANDOM NOISE");
-	}
-
 	/** Get response from the sensor */
 	protected void doResponse(InputStream is, String h, String r)
 		throws IOException
 	{
-		String response = readLine(is).trim();
+		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
+		LineReader lr = new LineReader(isr, MAX_RESP);
+		String line = lr.readLine();
+		if(line != null)
+			parseResponse(line.trim(), h, r);
+		else
+			throw new EOFException("END OF STREAM");
+	}
+
+	/** Parse a response from the sensor */
+	private void parseResponse(String response, String h, String r)
+		throws IOException
+	{
 		if(response.startsWith(h))
 			response = response.substring(h.length());
 		else
