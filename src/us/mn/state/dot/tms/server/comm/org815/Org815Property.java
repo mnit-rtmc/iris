@@ -16,8 +16,10 @@ package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.EOFException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.utils.LineReader;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -42,24 +44,13 @@ abstract public class Org815Property extends ControllerProperty {
 
 	/** Decode a QUERY response */
 	public void decodeQuery(InputStream is, int drop) throws IOException {
-		parseQuery(readLine(is));
-	}
-
-	/** Read a line of text from an input stream */
-	protected String readLine(InputStream is) throws IOException {
-		byte[] resp = new byte[MAX_RESP];
-		int n_rcv = 0;
-		while(n_rcv < MAX_RESP) {
-			int r = is.read(resp, n_rcv, MAX_RESP - n_rcv);
-			if(r <= 0)
-				throw new EOFException("END OF STREAM");
-			for(int i = 0; i < r; i++) {
-				if(resp[n_rcv + i] == 13)
-					return new String(resp, 0, n_rcv + i);
-			}
-			n_rcv += r;
-		}
-		throw new ParsingException("RANDOM NOISE");
+		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
+		LineReader lr = new LineReader(isr, MAX_RESP);
+		String line = lr.readLine();
+		if(line != null)
+			parseQuery(line);
+		else
+			throw new EOFException("END OF STREAM");
 	}
 
 	/** Parse a QUERY response */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,12 @@
  */
 package us.mn.state.dot.tms.server.comm.org815;
 
+import java.io.EOFException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -60,7 +63,13 @@ public class ResetProperty extends Org815Property {
 
 	/** Decode a STORE response */
 	public void decodeStore(InputStream is, int drop) throws IOException {
-		parseStore(readLine(is));
+		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
+		LineReader lr = new LineReader(isr, MAX_RESP);
+		String line = lr.readLine();
+		if(line != null)
+			parseStore(line);
+		else
+			throw new EOFException("END OF STREAM");
 	}
 
 	/** Parse a STORE response */
