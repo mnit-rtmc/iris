@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -248,6 +248,16 @@ public class MultiString implements Multi {
 		MultiParser.parse(toString(), new MultiAdapter() {
 			public void addSpan(String span) {
 				_b.append(span);
+			}
+			public void setPageBackground(int red, int green,
+				int blue)
+			{
+				_b.append("PB");
+			}
+			public void addColorRectangle(int x, int y, int w,
+				int h, int r, int g, int b)
+			{
+				_b.append("CR");
 			}
 			public void addGraphic(int g_num, Integer x, Integer y,
 				String g_id)
