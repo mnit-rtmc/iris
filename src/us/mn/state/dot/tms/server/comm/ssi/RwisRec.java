@@ -15,11 +15,15 @@
  */
 package us.mn.state.dot.tms.server.comm.ssi;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Temperature;
 import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
-import us.mn.state.dot.tms.utils.SCsv;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -30,182 +34,173 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class RwisRec {
 
-	/** Number of expected fields per line */
-	static private final int NUM_FIELDS = 16;
-
-	/** Convert missing values (negative) to null */
-	static private Integer nmnCheck(Integer v) {
-		return v != null && v >= 0 ? v : null;
+	/** Parse the fields of a line */
+	static private String[] parseFields(String line) {
+		String[] fs = line.split(",");
+		for(int i = 0; i < fs.length; i++)
+			fs[i] = fs[i].trim();
+		return fs;
 	}
 
-	/** Convert missing values (negative) to null */
-	static private Long nmnCheck(Long v) {
-		return v != null && v >= 0 ? v : null;
+	/** Get field as long which is a time.
+	 * @return Time or null on error. */
+	static private Long parseDateTime(String field) {
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat(
+				"MM/dd/yyyy HH:mm:ss");
+			sdf.setLenient(false);
+			sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+			Date pd = sdf.parse(field);
+			return pd.getTime();
+		}
+		catch(ParseException e) {
+			return null;
+		}
 	}
 
-	/** Convert missing values (null, -1, or empty) to null */
-	static private String nmnCheck(String v) {
-		return v == null || v.equals("-1") || v.isEmpty() ? null : v;
+	/** Parse temperature */
+	static private Temperature parseTemp(String field) {
+		Double t = parseDouble(field);
+		if(t != null)
+			return new Temperature(t / 100);
+		else
+			return new Temperature();
 	}
 
-	/** Validity indicator */
-	private final boolean valid_rec;
+	/** Parse field as int */
+	static private Integer parseInt(String field) {
+		try {
+			return Integer.parseInt(field);
+		}
+		catch(NumberFormatException ex) {
+			return null;
+		}
+	}
 
-	/** Raw record, as a line of CSV text. */
+	/** Parse field as double */
+	static private Double parseDouble(String field) {
+		try {
+			return Double.parseDouble(field);
+		}
+		catch(NumberFormatException ex) {
+			return null;
+		}
+	}
+
+	/** Raw record, as a line of CSV text */
 	private final String raw_rec;
-
-	/** Rwis site id */
-	private String site_id = "";
 
 	/** Creation time */
 	private final long create_time;
 
-	/** Observation time, read from file, null if missing */
-	private Long obs_time;
+	/** RWIS site id (Siteid) */
+	private final String site_id;
 
-	/** Visibility in ft or null if missing */
-	private Integer obs_vis;
+	/** Observation time (DtTm) */
+	private final Long obs_time;
 
-	/** Wind speed in mph or null if missing */
-	private Integer obs_wind_speed;
+	/** Air temperature (1/100th degree C) (AirTemp) */
+	private final Temperature air_temp;
 
-	/** Air temperature */
-	private Temperature obs_air_temp = new Temperature();
+	/** Dew point (1/100th degree C) (Dewpoint) */
+	private final Temperature dew_point;
 
-	/** Dew point or null if missing */
-	private Integer obs_dew_point;
+	/** Relative humidity (%) (Rh) */
+	private final Integer rel_humidity;
 
-	/** Relative humidity or null if missing */
-	private Integer obs_rel_humidity;
+	/** Average wind speed in MPH (SpdAvg) */
+	private final Integer wind_speed_avg;
 
-	/** Wind speed in MPH or null if missing */
-	private Integer obs_speed_gust;
+	/** Gust wind speed in MPH (SpdGust) */
+	private final Integer wind_speed_gust;
 
-	/** Wind direction in degrees or null if missing */
-	private Integer obs_dir_min;
+	/** Minimum wind direction in degrees (DirMin) */
+	private final Integer wind_dir_min;
 
-	/** Average wind direction in degrees or null if missing */
-	private Integer obs_dir_avg;
+	/** Average wind direction in degrees (DirAvg) */
+	private final Integer wind_dir_avg;
 
-	/** Wind direction max in degrees or null if missing  */
-	private Integer obs_dir_max;
+	/** Maximum wind direction in degrees (DirMax) */
+	private final Integer wind_dir_max;
 
-	/** Pressure or null if missing */
-	private int obs_pressure;
+	/** Air pressure (Pressure) */
+	private final Integer air_pressure;
 
-	/** Precip intensity or null if missing */
-	private String obs_precip_intens;
+	/** Precipitation intensity (PcIntens) */
+	private final String precip_intens;
 
-	/** Precipitation type or null if missing */
-	private String obs_precip_type;
+	/** Precipitation type (PcType) */
+	private final String precip_type;
 
-	/* Precipitation rate in mm/hr or null if missing */
-	private Integer obs_precip_rate;
+	/** Precipitation rate in mm/hr (PcRate) */
+	private final Integer precip_rate;
 
-	/** Precipitation accumulation or null if missing */
-	private Integer obs_precip_accum;
+	/** Precipitation accumulation  (PcAccum) */
+	private final Integer precip_accum;
 
-	/** Constructor
-	 * @param line A single text line (record) */
-	public RwisRec(String line) {
-		raw_rec = new String(line);
-		create_time = new Date().getTime();
-		valid_rec = parse();
-	}
+	/** Visibility in ft (Visibility) */
+	private final Integer visibility;
 
-	/** Parse the raw record that contains an ssi record into fields.
-	 * For example:<p>
-	 *	365000,02/09/2010 15:52:16,820,-2130,10,2,14,,5,6,
-	 *		65535,Other,Other,-1,-1,16767<p>
-	 * @return True if the record is valid else false. */
-	private boolean parse() {
-		if(raw_rec == null)
-			return false;
-		String[] fs = SCsv.separate(raw_rec);
-		if(fs.length != NUM_FIELDS) {
-			SsiPoller.log("bogus number of fields read=" +
-				fs.length + ", expected=" + NUM_FIELDS);
-			return false;
-		}
-		if(headerRow(fs)) {
-			SsiPoller.log("read header row");
-			return false;
-		}
-		// FIXME: parse fields by named column order
-		site_id = SCsv.getFieldString(fs, 0);
-		obs_time = nmnCheck(SCsv.getFieldTime(fs, 1));
-		obs_air_temp = parseAirTemp(SCsv.getFieldString(fs, 2));
-		obs_dew_point = nmnCheck(SCsv.getFieldInt(fs, 3));
-		obs_rel_humidity = nmnCheck(SCsv.getFieldInt(fs, 4));
-		obs_wind_speed = nmnCheck(SCsv.getFieldInt(fs, 5));
-		obs_speed_gust = nmnCheck(SCsv.getFieldInt(fs, 6));
-		obs_dir_min = nmnCheck(SCsv.getFieldInt(fs, 7));
-		obs_dir_avg = nmnCheck(SCsv.getFieldInt(fs, 8));
-		obs_dir_max = nmnCheck(SCsv.getFieldInt(fs, 9));
-		obs_pressure = nmnCheck(SCsv.getFieldInt(fs, 10));
-		obs_precip_intens = nmnCheck(SCsv.getFieldString(fs, 11));
-		obs_precip_type = nmnCheck(SCsv.getFieldString(fs, 12));
-		obs_precip_rate = nmnCheck(SCsv.getFieldInt(fs, 13));
-		obs_precip_accum = nmnCheck(SCsv.getFieldInt(fs, 14));
-		obs_vis = nmnCheck(SCsv.getFieldInt(fs, 15));
-		SsiPoller.log("parsed rec=" + this);
-		return true;
-	}
-
-	/** Parse air temperature */
-	private Temperature parseAirTemp(String field) {
-		if(field == null || field.isEmpty())
-			return new Temperature();
-		else {
-			double t = SString.stringToDouble(field) / 100;
-			return new Temperature(t);
-		}
-	}
-
-	/** Is the row the header row? For example: Siteid, DtTm, AirTemp,
-	 * Dewpoint, Rh, SpdAvg, SpdGust, DirMin, DirAvg, DirMax, Pressure,
-	 * PcIntens, PcType, PcRate, PcAccum, Visibility. */
-	private boolean headerRow(String[] fs) {
-		return "Siteid".equals(SCsv.getFieldString(fs, 0));
-	}
-
-	/** Is record valid? */
-	public boolean valid() {
-		return valid_rec;
+	/** Create a new RWIS record by parsing text that contains an ssi
+	 * record into fields.
+	 * @param line A single text line (record).  The fields are: Siteid,
+	 *             DtTm, AirTemp, Dewpoint, Rh, SpdAvg, SpdGust, DirMin,
+	 *             DirAvg, DirMax, Pressure, PcIntens, PcType, PcRate,
+	 *             PcAccum, Visibility.  For example:<p>
+	 *             365000,02/09/2010 15:52:16,820,-2130,10,2,14,,5,6,
+	 *             65535,Other,Other,-1,-1,16767
+	 * @throws ParsingException if record cannot be parsed.
+	 */
+	public RwisRec(String line, RwisHeader header) throws ParsingException {
+		raw_rec = line;
+		create_time = TimeSteward.currentTimeMillis();
+		String[] fs = parseFields(line);
+		site_id = header.getField(fs, "Siteid");
+		obs_time = parseDateTime(header.getField(fs, "DtTm"));
+		air_temp = parseTemp(header.getField(fs, "AirTemp"));
+		dew_point = parseTemp(header.getField(fs, "Dewpoint"));
+		rel_humidity = parseInt(header.getField(fs, "Rh"));
+		wind_speed_avg = parseInt(header.getField(fs, "SpdAvg"));
+		wind_speed_gust = parseInt(header.getField(fs, "SpdGust"));
+		wind_dir_min = parseInt(header.getField(fs, "DirMin"));
+		wind_dir_avg = parseInt(header.getField(fs, "DirAvg"));
+		wind_dir_max = parseInt(header.getField(fs, "DirMax"));
+		air_pressure = parseInt(header.getField(fs, "Pressure"));
+		precip_intens = header.getField(fs, "PcIntens");
+		precip_type = header.getField(fs, "PcType");
+		precip_rate = parseInt(header.getField(fs, "PcRate"));
+		precip_accum = parseInt(header.getField(fs, "PcAccum"));
+		visibility = parseInt(header.getField(fs, "Visibility"));
 	}
 
 	/** To string */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("(RwisRec: ");
-		sb.append("id=").append(site_id);
-		sb.append(", valid=").append(valid_rec);
-		sb.append(", create_time=").append(new Date(create_time));
+		sb.append("(RwisRec: ").append(raw_rec);
+		sb.append(" create_time=").append(new Date(create_time));
+		sb.append(", site_id=").append(site_id);
 		sb.append(", obs_time=").append(
 			obs_time == null ? "null" : new Date(obs_time));
-		sb.append(", wspd=").append(obs_wind_speed);
-		sb.append(", vis=").append(obs_vis);
-		sb.append(", airtemp_F=").append(obs_air_temp.toString());
-		sb.append(", dewp=").append(obs_dew_point);
-		sb.append(", relhum=").append(obs_rel_humidity);
-		sb.append(", wsgust=").append(obs_speed_gust);
-		sb.append(", wdirmin=").append(obs_dir_min);
-		sb.append(", wdiravg=").append(obs_dir_avg);
-		sb.append(", wdirmax=").append(obs_dir_max);
-		sb.append(", pressure=").append(obs_pressure);
-		sb.append(", precip_intens=").append(obs_precip_intens);
-		sb.append(", precip_type=").append(obs_precip_type);
-		sb.append(", precip_rate=").append(obs_precip_rate);
-		sb.append(", precip_accum=").append(obs_precip_accum);
-		sb.append(", raw_rec=").append(raw_rec);
+		sb.append(", air_temp=").append(air_temp);
+		sb.append(", dew_point=").append(dew_point);
+		sb.append(", rel_humidity=").append(rel_humidity);
+		sb.append(", wind_speed_avg=").append(wind_speed_avg);
+		sb.append(", wind_speed_gust=").append(wind_speed_gust);
+		sb.append(", wind_dir_min=").append(wind_dir_min);
+		sb.append(", wind_dir_avg=").append(wind_dir_avg);
+		sb.append(", wind_dir_max=").append(wind_dir_max);
+		sb.append(", air_pressure=").append(air_pressure);
+		sb.append(", precip_intens=").append(precip_intens);
+		sb.append(", precip_type=").append(precip_type);
+		sb.append(", precip_rate=").append(precip_rate);
+		sb.append(", precip_accum=").append(precip_accum);
+		sb.append(", visibility=").append(visibility);
 		sb.append(")");
 		return sb.toString();
 	}
 
 	/** Store the record */
 	public void store() {
-		if(!valid())
-			return;
 		WeatherSensorImpl ws = find(site_id);
 		if(ws == null) {
 			SsiPoller.log("No weather sensor defined " +
@@ -213,9 +208,9 @@ public class RwisRec {
 				"ignored, rec=" + this);
 		} else {
 			SsiPoller.log("stored rec=" + this);
-			ws.store(obs_vis, obs_wind_speed,
-				obs_air_temp.toCInteger(), obs_dir_avg,
-				obs_precip_rate);
+			ws.store(visibility, wind_speed_avg,
+				air_temp.toCInteger(), wind_dir_avg,
+				precip_rate);
 		}
 	}
 

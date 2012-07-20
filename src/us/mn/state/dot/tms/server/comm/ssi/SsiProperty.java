@@ -41,11 +41,23 @@ public class SsiProperty extends ControllerProperty {
 		}
 		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
 		LineReader lr = new LineReader(isr, BUFFER_SZ);
+		RwisHeader header = readHeader(lr);
 		String line = lr.readLine();
 		while(line != null) {
 			SsiPoller.log("parsing " + line);
-			new RwisRec(line).store();
+			RwisRec rec = new RwisRec(line, header);
+			SsiPoller.log("parsed rec=" + rec);
+			rec.store();
 			line = lr.readLine();
 		}
+	}
+
+	/** Read the header */
+	private RwisHeader readHeader(LineReader lr) throws IOException {
+		String line = lr.readLine();
+		if(line != null)
+			return new RwisHeader(line);
+		else
+			return null;
 	}
 }
