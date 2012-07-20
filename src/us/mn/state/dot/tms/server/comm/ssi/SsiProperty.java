@@ -19,6 +19,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
@@ -33,6 +34,17 @@ public class SsiProperty extends ControllerProperty {
 	/** Size of buffer for line reader */
 	static private final int BUFFER_SZ = 1024;
 
+	/** Maximum number of records in RWIS file */
+	static private final int MAX_RECORDS = 500;
+
+	/** Mapping of site_id to most recent RWIS records */
+	private final HashMap<String, RwisRec> records;
+
+	/** Create a new SSI property */
+	public SsiProperty(HashMap<String, RwisRec> recs) {
+		records = recs;
+	}
+
 	/** Perform a get request, read and parse reccords from file */
 	public void doGetRequest(InputStream is) throws IOException {
 		if(is == null) {
@@ -43,11 +55,14 @@ public class SsiProperty extends ControllerProperty {
 		LineReader lr = new LineReader(isr, BUFFER_SZ);
 		RwisHeader header = readHeader(lr);
 		String line = lr.readLine();
-		while(line != null) {
+		for(int i = 0; line != null && i < MAX_RECORDS; i++) {
 			SsiPoller.log("parsing " + line);
 			RwisRec rec = new RwisRec(line, header);
 			SsiPoller.log("parsed rec=" + rec);
-			rec.store();
+			String site_id = rec.getSiteId();
+			// Only save record if site_id is in mapping
+			if(site_id != null && records.containsKey(site_id))
+				records.put(site_id, rec);
 			line = lr.readLine();
 		}
 	}

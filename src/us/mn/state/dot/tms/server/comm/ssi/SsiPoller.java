@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ssi;
 
+import java.util.HashMap;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
@@ -37,6 +38,10 @@ public class SsiPoller extends MessagePoller {
 		LOG.log(msg);
 	}
 
+	/** Mapping of site_id to most recent RWIS records */
+	private final HashMap<String, RwisRec> records =
+		new HashMap<String, RwisRec>();
+
 	/** Create a new poller */
 	public SsiPoller(String n, Messenger m) {
 		super(n, m);
@@ -55,6 +60,6 @@ public class SsiPoller extends MessagePoller {
 
 	/** Query current weather conditions */
 	public void queryConditions(WeatherSensorImpl ws) {
-		addOperation(new OpRead(ws));
+		addOperation(new OpRead(ws, records));
 	}
 }

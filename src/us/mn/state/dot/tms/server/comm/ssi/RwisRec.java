@@ -21,10 +21,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Temperature;
-import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * SSI record.
@@ -33,6 +31,11 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  */
 public class RwisRec {
+
+	/** Get the duration of a record in milliseconds */
+	static private long durationMs() {
+		return 20 * 1000;
+	}
 
 	/** Parse the fields of a line */
 	static private String[] parseFields(String line) {
@@ -95,6 +98,11 @@ public class RwisRec {
 
 	/** RWIS site id (Siteid) */
 	private final String site_id;
+
+	/** Get the RWIS site ID */
+	public String getSiteId() {
+		return site_id;
+	}
 
 	/** Observation time (DtTm) */
 	private final Long obs_time;
@@ -199,27 +207,16 @@ public class RwisRec {
 		return sb.toString();
 	}
 
-	/** Store the record */
-	public void store() {
-		WeatherSensorImpl ws = find(site_id);
-		if(ws == null) {
-			SsiPoller.log("No weather sensor defined " +
-				"for id=" + site_id + ", observation " +
-				"ignored, rec=" + this);
-		} else {
-			SsiPoller.log("stored rec=" + this);
-			ws.store(visibility, wind_speed_avg,
-				air_temp.toCInteger(), wind_dir_avg,
-				precip_rate);
-		}
+	/** Check if the record is expired */
+	public boolean isExpired() {
+		return create_time + durationMs() <
+			TimeSteward.currentTimeMillis();
 	}
 
-	/** Find the weather station by id.
-	 * @param n Name of weather station, may be null.
-	 * @return weather station w/ specified name or null if not found. */
-	private WeatherSensorImpl find(String n) {
-		if(n == null)
-			return null;
-		return (WeatherSensorImpl)WeatherSensorHelper.lookup(n);
+	/** Store the record */
+	public void store(WeatherSensorImpl ws) {
+		SsiPoller.log("stored rec=" + this);
+		ws.store(visibility, wind_speed_avg, air_temp.toCInteger(),
+			wind_dir_avg, precip_rate);
 	}
 }

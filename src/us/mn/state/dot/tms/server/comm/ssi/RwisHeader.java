@@ -56,6 +56,13 @@ public class RwisHeader {
 			fields.put(fs[i], i);
 	}
 
+	/** Create an RWIS header containing only the Siteid */
+	public RwisHeader() {
+		raw_header = "Siteid";
+		fields = new HashMap<String, Integer>();
+		fields.put(raw_header, 0);
+	}
+
 	/** Get a named field from a record */
 	public String getField(String[] rec, String name) {
 		Integer col = fields.get(name);
