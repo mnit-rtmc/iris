@@ -104,7 +104,11 @@ public class ConditionsProperty extends Org815Property {
 
 	/** Parse a QUERY response */
 	protected void parseQuery(String line) throws IOException {
-		if(line.length() != 15)
+		// Responds with 15 or 16 characters, depending on version.
+		//   Ver. 44S (03-23-04) responds with 15 characters
+		//   ORGMR41S (11/29/2011) responds with 16 characters
+		// The extra character always seems to be a space.
+		if(line.length() < 15 || line.length() > 16)
 			throw new ParsingException("Invalid response: " + line);
 		ConditionCode cc = ConditionCode.fromCode(line.substring(0, 2));
 		if(cc == ConditionCode.unknown)
