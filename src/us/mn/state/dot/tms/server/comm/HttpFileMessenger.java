@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * A HttpFileMessenger is a class which reads a file from a URL using http.
@@ -28,13 +30,13 @@ import java.net.URLConnection;
 public class HttpFileMessenger extends Messenger {
 
 	/** URL to read */
-	protected final URL url;
+	private final URL url;
 
 	/** Receive timeout (ms) */
-	protected int timeout = 2000;
+	private int timeout = 2000;
 
 	/** URL connection */
-	protected URLConnection connection = null;
+	private URLConnection connection = null;
 
 	/** Create a new HTTP file messenger.
 	 * @param url The URL of the file to read. */
@@ -56,7 +58,17 @@ public class HttpFileMessenger extends Messenger {
 
 	/** Open the messenger */
 	public void open() throws IOException {
+		open(null);
+	}
+
+	/** Open the messenger */
+	private void open(String upass) throws IOException {
 		URLConnection c = url.openConnection();
+		if(upass != null) {
+			String auth = "Basic " + new String(Base64.encode(
+				upass.getBytes()));
+			c.setRequestProperty("Authorization", auth);
+		}
 		c.setConnectTimeout(timeout);
 		c.setReadTimeout(timeout);
 		input = c.getInputStream();
@@ -83,6 +95,16 @@ public class HttpFileMessenger extends Messenger {
 		// make a new HTTP connection each time called
 		close();
 		open();
+		return input;
+	}
+
+	/** Get an input stream for the specified controller */
+	public InputStream getInputStream(ControllerImpl c)
+		throws IOException
+	{
+		// make a new HTTP connection each time called
+		close();
+		open(c.getPassword());
 		return input;
 	}
 }
