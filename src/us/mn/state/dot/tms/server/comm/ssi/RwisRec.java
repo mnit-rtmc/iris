@@ -32,6 +32,12 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class RwisRec {
 
+	/** Feet per meter */
+	static private final float FT_PER_METER = 3.2808399f;
+
+	/** Kilometers per mile */
+	static private final float KM_PER_MILE = 1.609344f;
+
 	/** Get the duration of a record in milliseconds */
 	static private long durationMs() {
 		return 20 * 1000;
@@ -143,11 +149,11 @@ public class RwisRec {
 	/** Precipitation rate in mm/hr (PcRate) */
 	private final Integer precip_rate;
 
-	/** Precipitation accumulation  (PcAccum) */
+	/** Precipitation accumulation in mm (PcAccum) */
 	private final Integer precip_accum;
 
 	/** Visibility in ft (Visibility) */
-	private final Integer visibility;
+	private final Integer visibility_ft;
 
 	/** Create a new RWIS record by parsing text that contains an ssi
 	 * record into fields.
@@ -178,7 +184,7 @@ public class RwisRec {
 		precip_type = header.getField(fs, "PcType");
 		precip_rate = parseInt(header.getField(fs, "PcRate"));
 		precip_accum = parseInt(header.getField(fs, "PcAccum"));
-		visibility = parseInt(header.getField(fs, "Visibility"));
+		visibility_ft = parseInt(header.getField(fs, "Visibility"));
 	}
 
 	/** To string */
@@ -202,7 +208,7 @@ public class RwisRec {
 		sb.append(", precip_type=").append(precip_type);
 		sb.append(", precip_rate=").append(precip_rate);
 		sb.append(", precip_accum=").append(precip_accum);
-		sb.append(", visibility=").append(visibility);
+		sb.append(", visibility_ft=").append(visibility_ft);
 		sb.append(")");
 		return sb.toString();
 	}
@@ -215,8 +221,58 @@ public class RwisRec {
 
 	/** Store the record */
 	public void store(WeatherSensorImpl ws) {
+		updateAirTemp(ws);
+		updateWindSpeed(ws);
+		updateWindDir(ws);
+		updateAccumulation(ws);
+		updateVisibility(ws);
+		ws.setStampNotify(create_time);
 		SsiPoller.log("stored rec=" + this);
-		ws.store(visibility, wind_speed_avg, air_temp.toCInteger(),
-			wind_dir_avg, precip_rate);
+	}
+
+	/** Update the air temp */
+	private void updateAirTemp(WeatherSensorImpl ws) {
+		if(air_temp != null)
+			ws.setAirTempNotify(air_temp.toCInteger());
+		else
+			ws.setAirTempNotify(null);
+	}
+
+	/** Update the wind speed */
+	private void updateWindSpeed(WeatherSensorImpl ws) {
+		if(wind_speed_avg != null) {
+			int kph = Math.round(wind_speed_avg * KM_PER_MILE);
+			ws.setWindSpeedNotify(kph);
+		} else
+			ws.setWindSpeedNotify(null);
+	}
+
+	/** Update the wind dir */
+	private void updateWindDir(WeatherSensorImpl ws) {
+		ws.setWindDirNotify(wind_dir_avg);
+	}
+
+	/** Update the weather sensor precip accumulation */
+	private void updateAccumulation(WeatherSensorImpl ws) {
+		if(precip_accum != null && precip_accum >= 0) {
+			// Convert accumulation to micrometers
+			int acc_um = precip_accum * 1000;
+			ws.updateAccumulation(acc_um, create_time);
+		} else
+			ws.updateAccumulation(null, create_time);
+	}
+
+	/** Update the weather sensor visibility */
+	private void updateVisibility(WeatherSensorImpl ws) {
+		if(visibility_ft != null && visibility_ft >= 0) {
+			int vis_m = Math.round(feet_to_meters(visibility_ft));
+			ws.setVisibilityNotify(vis_m);
+		} else
+			ws.setVisibilityNotify(null);
+	}
+
+	/** Convert feet to meters */
+	static private float feet_to_meters(float f) {
+		return f / FT_PER_METER;
 	}
 }

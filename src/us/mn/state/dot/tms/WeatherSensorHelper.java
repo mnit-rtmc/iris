@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -43,7 +44,7 @@ public class WeatherSensorHelper extends BaseHelper {
 
 	/** Test if the sensor has triggered an AWS state (e.g. high wind) */
 	static public boolean isAwsState(WeatherSensor proxy) {
-		return proxy.getHighWind() || proxy.getLowVisibility();
+		return isHighWind(proxy) || isLowVisibility(proxy);
 	}
 
 	/** Get the high wind limit in kph */
@@ -51,28 +52,44 @@ public class WeatherSensorHelper extends BaseHelper {
 		return SystemAttrEnum.RWIS_HIGH_WIND_SPEED_KPH.getInt();
  	}
 
+	/** Is wind speed high? */
+	static public boolean isHighWind(WeatherSensor ws) {
+		if(isSampleExpired(ws))
+			return false;
+		Integer s = ws.getWindSpeed();
+		if(s == null)
+			return false;
+		int t = getHighWindLimitKph();
+		int m = getMaxValidWindSpeedKph();
+		if(m <= 0)
+			return s > t;
+		else
+			return s > t && s <= m;
+	}
+
 	/** Get the low visibility limit in meters */
 	static public int getLowVisLimitMeters() {
 		return SystemAttrEnum.RWIS_LOW_VISIBILITY_DISTANCE_M.getInt();
 	}
 
-	/** Is sensor in crazy data state? For example, wind speed is 
-	 * unreasonably high. */
-	static public boolean isCrazyState(WeatherSensor p) {
-		if(getMaxValidWindSpeedKph() <= 0)
+	/** Is visibility low? */
+	static public boolean isLowVisibility(WeatherSensor ws) {
+		if(isSampleExpired(ws))
 			return false;
-		else {
-			Integer ws = p.getWindSpeed();
-			if(ws == null)
-				return false;
-			return ws > getMaxValidWindSpeedKph();
-		}
+		Integer v = ws.getVisibility();
+		return v != null && v < getLowVisLimitMeters();
 	}
 
 	/** Get the maximum valid wind speed (kph).
 	 * @return Max valid wind speed (kph) or 0 for no maximum. */
 	static public int getMaxValidWindSpeedKph() {
 		return SystemAttrEnum.RWIS_MAX_VALID_WIND_SPEED_KPH.getInt();
+	}
+
+	/** Check if the sample data has expired */
+	static public boolean isSampleExpired(WeatherSensor ws) {
+		return ws.getStamp() + getObsAgeLimitSecs() * 1000 <
+			TimeSteward.currentTimeMillis();
 	}
 
 	/** Get the sensor observation age limit (secs).

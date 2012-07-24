@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.PrecipitationType;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -42,15 +43,21 @@ public class OpQueryConditions extends OpOrg815 {
 
 		/** Query the conditions */
 		protected Phase poll(CommMessage mess) throws IOException {
+			long now = TimeSteward.currentTimeMillis();
 			ConditionsProperty cond = new ConditionsProperty();
 			mess.add(cond);
 			mess.queryProps();
 			ORG815_LOG.log(device.getName() + ": " + cond);
-			sensor.setAccumulation(
-				(int)(cond.getAccumulation() * 1000));
+			sensor.setAirTempNotify(null);
+			sensor.setWindSpeedNotify(null);
+			sensor.setWindDirNotify(null);
+			sensor.setVisibilityNotify(null);
+			sensor.updateAccumulation(
+				Math.round(cond.getAccumulation() * 1000), now);
 			PrecipitationType pt = cond.getPrecipitationType();
 			if(pt != null)
-				sensor.setPrecipitationType(pt);
+				sensor.setPrecipitationType(pt, now);
+			sensor.setStampNotify(now);
 			if(cond.shouldReset())
 				return new ResetAccumulator();
 			else
@@ -67,7 +74,7 @@ public class OpQueryConditions extends OpOrg815 {
 			mess.add(reset);
 			ORG815_LOG.log(device.getName() + ": " + reset);
 			mess.storeProps();
-			sensor.setAccumulation(0);
+			sensor.resetAccumulation();
 			return null;
 		}
 	}

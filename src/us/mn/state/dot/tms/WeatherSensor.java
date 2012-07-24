@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,30 +30,21 @@ public interface WeatherSensor extends Device {
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 
-	/** Get the latest time stamp or MISSING_DATA */
-	long getStamp();
-
-	/** Get the visibility in meters or null for missing */
-	Integer getVisibility();
-
-	/** Get the wind speed in KPH or null for missing */
-	Integer getWindSpeed();
-
-	/** Get the air temp in C or null for missing */
+	/** Get air temp in C (null for missing) */
 	Integer getAirTemp();
 
-	/** Get the average wind direction in degrees or null for missing */
-	Integer getWindDirAvg();
+	/** Get wind speed in KPH (null for missing) */
+	Integer getWindSpeed();
 
-	/** Get the precipitation rate in mm/hr or null for missing */
+	/** Get average wind direction in degrees (null for missing) */
+	Integer getWindDir();
+
+	/** Get precipitation rate in mm/hr (null for missing) */
 	Integer getPrecipRate();
 
-	/** Get the expired state */
-	boolean getExpired();
+	/** Get visibility in meters (null for missing) */
+	Integer getVisibility();
 
-	/** Get the high wind state */
-	boolean getHighWind();
-
-	/** Get the low visibility state */
-	boolean getLowVisibility();
+	/** Get the latest sample time stamp */
+	long getStamp();
 }
