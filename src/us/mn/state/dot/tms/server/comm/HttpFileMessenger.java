@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import us.mn.state.dot.tms.Base64;
@@ -31,6 +32,22 @@ public class HttpFileMessenger extends Messenger {
 
 	/** URL to read */
 	private final URL url;
+
+	/** Relative path */
+	private String path;
+
+	/** Set the relative path */
+	public void setPath(String p) {
+		path = p;
+	}
+
+	/** Get the URL */
+	private URL getUrl() throws MalformedURLException {
+		if(path != null)
+			return new URL(url.toString() + '/' + path);
+		else
+			return url;
+	}
 
 	/** Receive timeout (ms) */
 	private int timeout = 2000;
@@ -63,7 +80,7 @@ public class HttpFileMessenger extends Messenger {
 
 	/** Open the messenger */
 	private void open(String upass) throws IOException {
-		URLConnection c = url.openConnection();
+		URLConnection c = getUrl().openConnection();
 		if(upass != null) {
 			String auth = "Basic " + new String(Base64.encode(
 				upass.getBytes()));

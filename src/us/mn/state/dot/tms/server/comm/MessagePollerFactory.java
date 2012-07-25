@@ -23,6 +23,7 @@ import java.net.URL;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.ModemImpl;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
+import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaMessenger;
 import us.mn.state.dot.tms.server.comm.g4.G4Poller;
@@ -110,6 +111,8 @@ public class MessagePollerFactory {
 			return createEisG4Poller();
 		case SSI:
 			return createSsiPoller();
+		case DIN_RELAY:
+			return createDinRelayPoller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -291,5 +294,10 @@ public class MessagePollerFactory {
 	/** Create an EIS G4 poller */
 	protected MessagePoller createEisG4Poller() throws IOException {
 		return new G4Poller(name, createSocketMessenger(TCP));
+	}
+
+	/** Create a DIN relay poller */
+	private MessagePoller createDinRelayPoller() throws IOException {
+		return new DinRelayPoller(name, createHttpFileMessenger());
 	}
 }

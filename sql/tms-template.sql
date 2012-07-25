@@ -1273,6 +1273,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 22	SSI
 23	CHP Incidents
 24	URMS
+25	DLI DIN Relay
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;

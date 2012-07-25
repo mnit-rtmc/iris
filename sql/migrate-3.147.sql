@@ -11,3 +11,5 @@ INSERT INTO iris.system_attribute (name, value) VALUES ('rwis_high_wind_speed_kp
 INSERT INTO iris.system_attribute (name, value) VALUES ('rwis_low_visibility_distance_m', 500);
 INSERT INTO iris.system_attribute (name, value) VALUES ('rwis_obs_age_limit_secs', 240);
 INSERT INTO iris.system_attribute (name, value) VALUES ('rwis_max_valid_wind_speed_kph', 282);
+
+INSERT INTO iris.comm_protocol (id, description) values (25, 'DLI DIN Relay');

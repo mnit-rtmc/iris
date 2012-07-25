@@ -99,7 +99,10 @@ public enum CommProtocol {
 	CHP_INCIDENTS("CHP Incidents"),
 
 	/** URMS (24) */
-	URMS("URMS");
+	URMS("URMS"),
+
+	/** Digital Loggers Inc DIN Relay (25) */
+	DIN_RELAY("DLI DIN Relay");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
