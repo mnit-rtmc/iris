@@ -66,6 +66,14 @@ public class DinRelayPoller extends MessagePoller implements LCSPoller {
 		addOperation(new OpQueryOutlets(c, op));
 	}
 
+	/** Command the outlet status */
+	public void commandOutlets(ControllerImpl c, boolean[] outlets,
+		OutletProperty op)
+	{
+		log("creating OpCommandOutlets: " + c);
+		addOperation(new OpCommandOutlets(c, outlets, op));
+	}
+
 	/** Send a device request */
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch(r) {
@@ -91,6 +99,6 @@ public class DinRelayPoller extends MessagePoller implements LCSPoller {
 		User o)
 	{
 		log("creating OpSendLCSIndications: " + lcs_array);
-//		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
+		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
 	}
 }

@@ -45,7 +45,6 @@ public class Message implements CommMessage {
 
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
-		DinRelayPoller.log("adding property");
 		if(cp instanceof DinRelayProperty)
 			prop = (DinRelayProperty)cp;
 	}
@@ -65,6 +64,12 @@ public class Message implements CommMessage {
 	/** Store the controller properties.
 	 * @throws IOException On any errors sending or receiving. */
 	public void storeProps() throws IOException {
-		throw new ProtocolException("STORE not supported");
+		DinRelayPoller.log("storeProps called");
+		if(prop != null) {
+			messenger.setPath(prop.path);
+			prop.decodeStore(messenger.getInputStream(controller),
+				0);
+		} else
+			throw new ProtocolException("No property");
 	}
 }
