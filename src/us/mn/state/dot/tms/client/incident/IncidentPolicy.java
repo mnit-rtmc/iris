@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,46 +58,55 @@ public class IncidentPolicy {
 
 	/** Create proposed indications for an LCS array.
 	 * @param up Distance upstream from incident (miles).
-	 * @param n_lanes Number of lanes on LCS array.
+	 * @param n_lcs Number of lanes on LCS array.
 	 * @param shift Lane shift relative to incident.
+	 * @param n_lanes Number of full lanes at LCS array.
 	 * @return Array of LaneUseIndication ordinal values. */
-	public Integer[] createIndications(float up, int n_lanes, int shift) {
-		Integer[] ind = new Integer[n_lanes];
-		for(int i = 0; i < ind.length; i++)
-			ind[i] = getIndication(up, n_lanes, shift, i).ordinal();
+	public Integer[] createIndications(float up, int n_lcs, int shift,
+		int n_lanes)
+	{
+		Integer[] ind = new Integer[n_lcs];
+		for(int i = 0; i < ind.length; i++) {
+			if(i < n_lcs - n_lanes) {
+				// Don't deploy shoulder lanes
+				ind[i] = LaneUseIndication.DARK.ordinal();
+				continue;
+			}
+			ind[i] = getIndication(up, n_lcs, shift, i).ordinal();
+		}
 		return ind;
 	}
 
 	/** Get an indication for one lane.
 	 * @param up Distance upstream from incident (miles).
-	 * @param n_lanes Number of lanes on LCS array.
+	 * @param n_lcs Number of lanes on LCS array.
 	 * @param shift Lane shift relative to incident.
 	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication(float up, int n_lanes,
+	protected LaneUseIndication getIndication(float up, int n_lcs,
 		int shift, int i)
 	{
 		if(up < 0)
 			return LaneUseIndication.DARK;
 		if(up < DIST_UPSTREAM_1_MILES)
-			return getIndication1(n_lanes, shift, i);
+			return getIndication1(n_lcs, shift, i);
 		if(up < DIST_UPSTREAM_2_MILES)
-			return getIndication2(n_lanes, shift, i);
+			return getIndication2(n_lcs, shift, i);
 		if(up < DIST_UPSTREAM_3_MILES)
-			return getIndication3(n_lanes, shift, i);
+			return getIndication3(n_lcs, shift, i);
 		else
 			return LaneUseIndication.DARK;
 	}
 
 	/** Get the first indication for one lane.
-	 * @param n_lanes Number of lanes on LCS array.
+	 * @param n_lcs Number of lanes on LCS array.
 	 * @param shift Lane shift relative to incident.
 	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication1(int n_lanes, int shift,
+	protected LaneUseIndication getIndication1(int n_lcs, int shift,
 		int i)
 	{
-		int ln = shift + n_lanes - i;
+		int ln = shift + n_lcs - i;
 		ImpactCode ic = getImpact(ln);
 		if(ic == ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
@@ -133,14 +142,14 @@ public class IncidentPolicy {
 	}
 
 	/** Get the second indication for one lane.
-	 * @param n_lanes Number of lanes in array.
+	 * @param n_lcs Number of lanes in array.
 	 * @param shift Lane shift relative to incident.
 	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication2(int n_lanes, int shift,
+	protected LaneUseIndication getIndication2(int n_lcs, int shift,
 		int i)
 	{
-		int ln = shift + n_lanes - i;
+		int ln = shift + n_lcs - i;
 		ImpactCode ic = getImpact(ln);
 		if(ic != ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
@@ -149,7 +158,7 @@ public class IncidentPolicy {
 		if(i - 1 < 0)
 			right = ImpactCode.BLOCKED;
 		ImpactCode left = getAdjacentImpact(ln - 1, def);
-		if(i + 1 >= n_lanes)
+		if(i + 1 >= n_lcs)
 			left = ImpactCode.BLOCKED;
 		if(left == ImpactCode.BLOCKED && right == ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
@@ -162,14 +171,14 @@ public class IncidentPolicy {
 	}
 
 	/** Get the third indication for one lane.
-	 * @param n_lanes Number of lanes in array.
+	 * @param n_lcs Number of lanes in array.
 	 * @param shift Lane shift relative to incident.
 	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication3(int n_lanes, int shift,
+	protected LaneUseIndication getIndication3(int n_lcs, int shift,
 		int i)
 	{
-		int ln = shift + n_lanes - i;
+		int ln = shift + n_lcs - i;
 		ImpactCode ic = getImpact(ln);
 		if(ic != ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
@@ -178,7 +187,7 @@ public class IncidentPolicy {
 		if(i - 1 < 0)
 			right = ImpactCode.BLOCKED;
 		ImpactCode left = getAdjacentImpact(ln - 1, def);
-		if(i + 1 >= n_lanes)
+		if(i + 1 >= n_lcs)
 			left = ImpactCode.BLOCKED;
 		if(left == ImpactCode.BLOCKED && right == ImpactCode.BLOCKED) {
 			// NOTE: adjacent lanes are also blocked, so find the
@@ -187,7 +196,7 @@ public class IncidentPolicy {
 			if(i - 2 < 0)
 				right = ImpactCode.BLOCKED;
 			left = getAdjacentImpact(ln - 2, def);
-			if(i + 2 >= n_lanes)
+			if(i + 2 >= n_lcs)
 				left = ImpactCode.BLOCKED;
 			if(left != ImpactCode.BLOCKED &&
 			   right != ImpactCode.BLOCKED)

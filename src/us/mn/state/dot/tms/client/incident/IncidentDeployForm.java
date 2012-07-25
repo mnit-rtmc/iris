@@ -33,6 +33,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
@@ -128,14 +129,15 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 					upstream.put(up, lcs_array);
 			}
 		}
-		int shift = cb.laneConfiguration(proxy.getEasting(),
-			proxy.getNorthing()).leftShift;
+		LaneConfiguration config = cb.laneConfiguration(
+			proxy.getEasting(), proxy.getNorthing());
+		int shift = config.leftShift;
 		for(Float up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
-			int n_lanes = lcs_array.getIndicationsCurrent().length;
+			int n_lcs = lcs_array.getIndicationsCurrent().length;
 			int l_shift = lcs_array.getShift() - shift;
-			Integer[] ind = policy.createIndications(up, n_lanes,
-				l_shift);
+			Integer[] ind = policy.createIndications(up, n_lcs,
+				l_shift, config.getLanes());
 			if(shouldDeploy(ind)) {
 				model.addElement(lcs_array);
 				indications.put(lcs_array.getName(), ind);
