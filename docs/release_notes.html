@@ -9,6 +9,61 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.147.0 (25 July 2012)</dt>
+	<dd><ul>
+		<li>
+			Added new protocol driver for low-cost DLI DIN relay.
+			Currently, it supports LCS devices only.
+		</li>
+		<li>
+			Improved LCS user interface to show lane configuration
+			at site of LCS array.
+		</li>
+		<li>
+			Add SSI protocol driver for RWIS stations.
+		</li>
+		<li>
+			Cleaned up code for K-adaptive metering algorithm,
+			fixing a couple of bugs in process.
+		</li>
+		<li>
+			Improved parsing of all text line protocols.
+		</li>
+		<li>
+			Added "Basic authorization" support to all HTTP
+			protocols, using controller password (specified as
+			name:password).
+		</li>
+		<li>
+			Fixed problem with MULTI strings with [pb..] or [cr..]
+			tags being treated as blank messages.
+		</li>
+		<li>
+			Fixed a couple of bugs in EIS G4 driver.
+		</li>
+		<li>
+			Fixed a minor client map layer rendering bug.
+		</li>
+		<li>
+			Allow i18n files to "cascade" property lookup from more
+			specific to more generic.
+			This removes a lot of duplication in English
+			localization files.
+		</li>
+		<li>
+			Replaced temp_fahrenheit_enable system attribute with
+			client_units_si.
+		</li>
+		<li>
+			Fixed problem parsing data from newer OSI ORG-815
+			sensors.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.147.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.146.0 (2 July 2012)</dt>
 	<dd><ul>
 		<li>
