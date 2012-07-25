@@ -45,13 +45,6 @@ public class OpQueryLCSIndications extends OpLCS {
 	public OpQueryLCSIndications(LCSArrayImpl l) {
 		super(PriorityLevel.DATA_30_SEC, l);
 		indications = new Integer[lcs_array.getLaneCount()];
-		setAllIndications(LaneUseIndication.DARK.ordinal());
-	}
-
-	/** Set all indications to one value */
-	private void setAllIndications(Integer value) {
-		for(int i = 0; i < indications.length; i++)
-			indications[i] = value;
 	}
 
 	/** Create the second phase of the operation */
@@ -118,9 +111,21 @@ public class OpQueryLCSIndications extends OpLCS {
 			int i = lcs.getLane() - 1;
 			// We must check bounds here in case the LCSIndication
 			// was added after the "indications" array was created
-			if(i >= 0 && i < indications.length)
+			if(i >= 0 && i < indications.length) {
+				if(indications[i] != null) {
+					setErrorStatus("Indication conflict: " +
+						lcs.getLane());
+				}
 				indications[i] = li.getIndication();
+			}
 		}
+	}
+
+	/** Cleanup the operation */
+	public void cleanup() {
+		// Defer cleanup until opComplete is called
+		//    this allows setErrorStatus to be used in callbacks
+		//    from other (slave) operations.
 	}
 
 	/** Cleanup the operation */
@@ -129,9 +134,27 @@ public class OpQueryLCSIndications extends OpLCS {
 			op_success = false;
 		n_ops--;
 		if(n_ops == 0) {
-			if(!op_success)
+			if(op_success)
+				setDarkIndications();
+			else
 				setAllIndications(null);
 			lcs_array.setIndicationsCurrent(indications, null);
 		}
+		super.cleanup();
+	}
+
+	/** Set null indications to DARK */
+	private void setDarkIndications() {
+		int v = LaneUseIndication.DARK.ordinal();
+		for(int i = 0; i < indications.length; i++) {
+			if(indications[i] == null)
+				indications[i] = v;
+		}
+	}
+
+	/** Set all indications to one value */
+	private void setAllIndications(Integer value) {
+		for(int i = 0; i < indications.length; i++)
+			indications[i] = value;
 	}
 }
