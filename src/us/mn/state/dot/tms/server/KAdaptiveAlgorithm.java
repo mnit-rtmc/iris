@@ -59,7 +59,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private final int K_BOTTLENECK = 30;
 
 	/** Critical density (vehicles / mile) */
-	static private final int K_CRIT = 40;
+	static private final int K_CRIT = 37;
 
 	/** Desired density (vehicles / mile) */
 	static private final double K_DES = K_CRIT * 0.8;
