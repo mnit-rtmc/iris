@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * An incident manager is a container for SONAR incident objects.
@@ -69,7 +70,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return "Incident";
+		return I18N.get("incident");
 	}
 
 	/** Create a list cell renderer */
@@ -109,7 +110,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 				return createSinglePopup(inc);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " Incidents"));
+		p.add(new JLabel(I18N.get("incident.plural") + ": " +
+			n_selected));
 		p.addSeparator();
 		// FIXME: add menu item to clear incident
 		return p;
@@ -244,7 +246,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	 * @return Description of incident type. */
 	protected String getTypeDesc(String sty, String ltd) {
 		if(ltd != null)
-			return sty + " on " + ltd;
+			return sty + " " + I18N.get("incident.on") + " " + ltd;
 		else
 			return sty;
 	}

@@ -20,7 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 import javax.swing.DefaultListModel;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -41,6 +40,8 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.lcs.LCSArrayCellRenderer;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * IncidentDeployForm is a dialog for deploying devices for an incident.
@@ -48,9 +49,6 @@ import us.mn.state.dot.tms.client.toast.SonarObjectForm;
  * @author Douglas Lau
  */
 public class IncidentDeployForm extends SonarObjectForm<Incident> {
-
-	/** Frame title */
-	static private final String TITLE = "Incident: ";
 
 	/** Currently logged in user */
 	protected final User user;
@@ -72,11 +70,11 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	protected final JList list = new JList(model);
 
 	/** Button to send device messages */
-	protected final JButton send_btn = new JButton("Send");
+	private final IButton send_btn = new IButton("incident.send");
 
 	/** Create a new incident deploy form */
 	public IncidentDeployForm(Session s, Incident inc, IncidentManager man){
-		super(TITLE, s, inc);
+		super(I18N.get("incident") + ": ", s, inc);
 		user = session.getUser();
 		manager = man;
 		policy = new IncidentPolicy(inc);
@@ -189,8 +187,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		lbl.setIcon(manager.getIcon(proxy));
 		FormPanel panel = new FormPanel(false);
 		panel.addRow(lbl);
-		panel.addRow("<html><p align=\"right\">Proposed" +
-			"<br/>Indications</p></html>", list);
+		panel.addRow(I18N.get("incident.deploy.proposed"), list);
 		panel.addRow(send_btn);
 		send_btn.setEnabled(model.getSize() > 0);
 		return panel;

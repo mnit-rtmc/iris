@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Tab for managing incidents.
@@ -46,7 +47,7 @@ public class IncidentTab extends MapTab {
   	public IncidentTab(Session session, IncidentManager m)
 		throws IOException
 	{
-		super(m.getProxyType(), "Manage Incidents");
+		super(m.getProxyType(), I18N.get("incident.tab"));
 		manager = m;
 		creator = new IncidentCreator(session, manager.getTheme(),
 			manager.getSelectionModel());

@@ -57,6 +57,9 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The IncidentDispatcher is a GUI component for creating incidents.
@@ -122,16 +125,17 @@ public class IncidentDispatcher extends JPanel
 	protected final ImpactPanel impact_pnl = new ImpactPanel();
 
 	/** Button to log an incident change */
-	protected final JButton log_btn = new JButton("Log");
+	private final IButton log_btn = new IButton("incident.log");
 
 	/** Button to deploy devices */
-	protected final JButton deploy_btn = new JButton("Deploy");
+	private final IButton deploy_btn = new IButton("incident.deploy");
 
 	/** Button to clear an incident */
-	protected final JCheckBox clear_btn = new JCheckBox("Clear");
+	private final JCheckBox clear_btn = new JCheckBox(I18N.get(
+		"incident.clear"));
 
 	/** Button to edit incident */
-	protected final JButton edit_btn = new JButton("Edit");
+	private final IButton edit_btn = new IButton("incident.edit");
 
 	/** Currently watching incident */
 	protected Incident watching;
@@ -169,11 +173,11 @@ public class IncidentDispatcher extends JPanel
 			EtchedBorder.LOWERED));
 		FormPanel panel = new FormPanel(true);
 		panel.setBorder(BorderFactory.createTitledBorder(
-			"Selected Incident"));
-		panel.addRow("Incident Type", type_lbl);
-		panel.addRow("Detail", detail_cbx);
-		panel.addRow("Location", location_txt);
-		panel.addRow("Camera", cam_panel);
+			I18N.get("incident.selected")));
+		panel.addRow(I18N.get("incident.type"), type_lbl);
+		panel.addRow(I18N.get("incident.detail"), detail_cbx);
+		panel.addRow(I18N.get("location"), location_txt);
+		panel.addRow(I18N.get("camera"), cam_panel);
 		panel.addRow(buildImpactBox());
 		JPanel btns = new JPanel(new FlowLayout());
 		btns.add(log_btn);
@@ -187,19 +191,19 @@ public class IncidentDispatcher extends JPanel
 	/** Build the impact box */
 	protected Box buildImpactBox() {
 		impact_pnl.setBorder(BorderFactory.createTitledBorder(
-			"Impact"));
+			I18N.get("incident.impact")));
 		Box box = Box.createHorizontalBox();
-		box.add(createLabel("L"));
+		box.add(createLabel("incident.left"));
 		box.add(Box.createHorizontalStrut(4));
 		box.add(impact_pnl);
 		box.add(Box.createHorizontalStrut(4));
-		box.add(createLabel("R"));
+		box.add(createLabel("incident.right"));
 		return box;
 	}
 
 	/** Create an "L" or "R" label */
 	protected JLabel createLabel(String t) {
-		JLabel label = new JLabel(t);
+		JLabel label = new ILabel(t);
 		label.setFont(FONT);
 		return label;
 	}

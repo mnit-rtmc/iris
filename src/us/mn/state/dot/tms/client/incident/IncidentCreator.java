@@ -19,7 +19,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
@@ -47,6 +46,8 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
+import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * GUI for creating new incidents.
@@ -98,7 +99,7 @@ public class IncidentCreator extends JPanel {
 		r_node_manager = s.getR_NodeManager();
 		client = s.getDesktop().client;
 		setBorder(BorderFactory.createTitledBorder(
-			"Create new incident"));
+			I18N.get("incident.create")));
 		crash_btn = createButton(DeviceStyle.CRASH,
 			EventType.INCIDENT_CRASH, theme);
 		stall_btn = createButton(DeviceStyle.STALL,
@@ -120,7 +121,7 @@ public class IncidentCreator extends JPanel {
 		add(Box.createVerticalStrut(4));
 		box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
-		box.add(new JLabel("Lane Type"));
+		box.add(new ILabel("incident.lane_type"));
 		box.add(Box.createHorizontalStrut(4));
 		box.add(ltype_cbox);
 		box.add(Box.createHorizontalGlue());
