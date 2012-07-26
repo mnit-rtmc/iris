@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,17 +33,11 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class DMSModel2 extends ProxyTableModel<DMS> {
 
-	/** DMS abbreviation */
-	private static final String dms_abr = I18N.get("dms.abbreviation");
-
-	/** AWS abbreviation */
-	private static final String aws_abr = I18N.get("dms.aws.abbreviation");
-
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<DMS>(dms_abr, 40) {
+		new ProxyColumn<DMS>(I18N.get("dms.abbreviation"), 40) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
 			}
@@ -56,45 +50,49 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<DMS>("Location", 200) {
+		new ProxyColumn<DMS>(I18N.get("location"), 200) {
 			public Object getValueAt(DMS d) {
 				return GeoLocHelper.getDescription(
 					d.getGeoLoc());
 			}
 		},
-		new ProxyColumn<DMS>("Dir.", 30) {
+		new ProxyColumn<DMS>(I18N.get("location.dir"), 30) {
 			public Object getValueAt(DMS d) {
 				return DMSHelper.getRoadDir(d);
 			}
 		},
-		new ProxyColumn<DMS>(aws_abr + " Allowed", 80, Boolean.class) {
+		new ProxyColumn<DMS>(I18N.get("dms.aws.allowed"), 80,
+			Boolean.class)
+		{
 			public Object getValueAt(DMS d) {
 				return d.getAwsAllowed();
 			}
 		},
-		new ProxyColumn<DMS>(aws_abr + " Controlled",80,Boolean.class){
+		new ProxyColumn<DMS>(I18N.get("device.style.aws.controlled"),
+			80, Boolean.class)
+		{
 			public Object getValueAt(DMS d) {
 				return d.getAwsControlled();
 			}
 		},
-		new ProxyColumn<DMS>("Author", 60) {
+		new ProxyColumn<DMS>(I18N.get("dms.owner"), 60) {
 			public Object getValueAt(DMS d) {
 				User u = d.getOwnerCurrent();
 				String name = (u == null ? "" : u.getName());
 				return (name == null ? "" : name);
 			}
 		},
-		new ProxyColumn<DMS>("Status", 100) {
+		new ProxyColumn<DMS>(I18N.get("dms.status"), 100) {
 			public Object getValueAt(DMS d) {
 				return DMSHelper.getAllStyles(d);
 			}
 		},
-		new ProxyColumn<DMS>("Model", 40) {
+		new ProxyColumn<DMS>(I18N.get("dms.model"), 40) {
 			public Object getValueAt(DMS d) {
 				return d.getModel();
 			}
 		},
-		new ProxyColumn<DMS>("Com Type", 140) {
+		new ProxyColumn<DMS>(I18N.get("dms.access"), 140) {
 			public Object getValueAt(DMS d) {
 				return d.getSignAccess();
 			}

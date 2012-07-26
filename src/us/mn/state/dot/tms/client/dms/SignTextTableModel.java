@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2011  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for sign text.
@@ -44,7 +45,9 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<SignText>("Line", 36, Short.class) {
+		new ProxyColumn<SignText>(I18N.get("dms.line"), 36,
+			Short.class)
+		{
 			public Object getValueAt(SignText st) {
 				return st.getLine();
 			}
@@ -58,7 +61,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				}
 			}
 		},
-		new ProxyColumn<SignText>("MULTI", 400) {
+		new ProxyColumn<SignText>(I18N.get("dms.multi"), 400) {
 			public Object getValueAt(SignText st) {
 				return st.getMulti();
 			}
@@ -79,7 +82,9 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				return RENDERER;
 			}
 		},
-		new ProxyColumn<SignText>("Priority", 48, Short.class) {
+		new ProxyColumn<SignText>(I18N.get("dms.priority"), 48,
+			Short.class)
+		{
 			public Object getValueAt(SignText st) {
 				return st.getPriority();
 			}

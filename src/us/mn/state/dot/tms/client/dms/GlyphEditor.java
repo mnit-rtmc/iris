@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,8 @@ import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.toast.TmsForm;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * GlyphEditor is a panel for editing font glyphs
@@ -67,7 +69,7 @@ public class GlyphEditor extends JPanel {
 	protected final JButton widen = new JButton(">>");
 
 	/** Apply button */
-	protected final JButton apply = new JButton("Apply Changes");
+	private final IButton apply = new IButton("font.glyph.apply");
 
 	/** Font form */
 	protected final FontForm font_form;
@@ -86,7 +88,7 @@ public class GlyphEditor extends JPanel {
 		font_form = form;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createTitledBorder(
-			"Selected Character"));
+			I18N.get("font.glyph.selected")));
 		add(Box.createGlue());
 		add(createGlueBox(gpanel));
 		add(Box.createVerticalStrut(TmsForm.VGAP));

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,9 @@ import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing DMS fonts
@@ -60,9 +62,6 @@ public class FontForm extends AbstractForm {
 		       s.canRead(Graphic.SONAR_TYPE);
 	}
 
-	/** Frame title */
-	static protected final String TITLE = "DMS Fonts";
-
 	/** Table model for fonts */
 	protected final FontModel f_model;
 
@@ -70,7 +69,7 @@ public class FontForm extends AbstractForm {
 	protected final ZTable f_table = new ZTable();
 
 	/** Button to delete the selected font */
-	protected final JButton del_font = new JButton("Delete Font");
+	private final IButton del_font = new IButton("font.delete");
 
 	/** Glyph type cache */
 	protected final TypeCache<Glyph> glyphs;
@@ -148,7 +147,7 @@ public class FontForm extends AbstractForm {
 
 	/** Create a new font form */
 	public FontForm(Session s) {
-		super(TITLE);
+		super(I18N.get("font.title"));
 		f_model = new FontModel(s);
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
 		graphics = s.getSonarState().getGraphics();
@@ -221,7 +220,7 @@ public class FontForm extends AbstractForm {
 	protected JPanel createGlyphPanel() {
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createTitledBorder(
-			"ASCII character set"));
+			I18N.get("font.ascii")));
 		new ListSelectionJob(this, glist) {
 			public void perform() {
 				if(!event.getValueIsAdjusting())

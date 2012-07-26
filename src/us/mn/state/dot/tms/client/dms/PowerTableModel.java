@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2010  Minnesota Department of Transportation
+ * Copyright (C) 2002-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * PowerTableModel is a table model for power supply status.
@@ -93,10 +94,14 @@ public class PowerTableModel extends AbstractTableModel {
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_DESCRIPTION, 120, "Description"));
-		m.addColumn(createColumn(COL_TYPE, 80, "Type"));
-		m.addColumn(createColumn(COL_STATUS, 80, "Status"));
-		m.addColumn(createColumn(COL_DETAIL, 120, "Detail"));
+		m.addColumn(createColumn(COL_DESCRIPTION, 120,
+			I18N.get("dms.power.description")));
+		m.addColumn(createColumn(COL_TYPE, 80,
+			I18N.get("dms.power.type")));
+		m.addColumn(createColumn(COL_STATUS, 80,
+			I18N.get("dms.power.status")));
+		m.addColumn(createColumn(COL_DETAIL, 120,
+			I18N.get("dms.power.detail")));
 		return m;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public class SignMenu extends JMenu {
 
 	/** Create a new sign menu */
 	public SignMenu(final Session s) {
-		super("Message Signs");
+		super(I18N.get("sign.menu"));
 		session = s;
 		desktop = s.getDesktop();
 		JMenuItem item = createDmsItem();
@@ -84,7 +84,7 @@ public class SignMenu extends JMenu {
 	protected JMenuItem createFontItem() {
 		if(!FontForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Fonts");
+		JMenuItem item = new JMenuItem(I18N.get("font.title"));
 		item.setMnemonic('F');
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -98,7 +98,7 @@ public class SignMenu extends JMenu {
 	protected JMenuItem createQuickMessageItem() {
 		if(!QuickMessageForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Quick Messages");
+		JMenuItem item = new JMenuItem(I18N.get("quick.messages"));
 		item.setMnemonic('Q');
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -112,7 +112,7 @@ public class SignMenu extends JMenu {
 	protected JMenuItem createWarningSignItem() {
 		if(!WarningSignForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Warning Signs");
+		JMenuItem item = new JMenuItem(I18N.get("warning.signs"));
 		item.setMnemonic('W');
 		new ActionJob(item) {
 			public void perform() throws Exception {

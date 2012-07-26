@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Format milimeter units for display */
 	static protected String formatMM(Integer i) {
 		if(i != null && i > 0)
-			return i + " mm";
+			return i + " " + I18N.get("units.mm");
 		else
 			return UNKNOWN;
 	}
@@ -83,9 +83,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	static protected String formatPixels(Integer i) {
 		if(i != null) {
 			if(i > 0)
-				return i + " pixels";
+				return i + " " + I18N.get("units.pixels");
 			else if(i == 0)
-				return "Variable";
+				return I18N.get("units.pixels.variable");
 		}
 		return UNKNOWN;
 	}
@@ -123,7 +123,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JComboBox camera = new JComboBox();
 
 	/** Controller button */
-	protected final JButton controllerBtn = new JButton("Controller");
+	private final IButton controllerBtn = new IButton("controller");
 
 	/** Messages tab */
 	protected final MessagesTab messagesTab;
@@ -174,7 +174,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JLabel cHeight = new JLabel();
 
 	/** Button to query configuration */
-	protected final JButton configBtn = new JButton("Query Configuration");
+	private final IButton configBtn = new IButton("dms.query.config");
 
 	/** Cabinet temperature label */
 	protected final JLabel cabinetTemp = new JLabel();
@@ -200,10 +200,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		SystemAttrEnum.DMS_RESET_ENABLE);
 
 	/** Query status button */
-	protected final JButton queryStatBtn = new JButton("Query Status");
+	private final IButton queryStatBtn = new IButton("dms.query.status");
 
 	/** Send settings button */
-	protected final JButton settingsBtn = new JButton("Send Settings");
+	private final IButton settingsBtn = new IButton("dms.send.settings");
 
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();
@@ -215,11 +215,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final SignPixelPanel stuck_on_pnl = new SignPixelPanel(true);
 
 	/** Button to query pixel failures */
-	protected final JButton queryPixelsBtn = new JButton(
-		"Query Pixel Failures");
+	private final IButton queryPixelsBtn = new IButton("dms.query.pixels");
 
 	/** Button to test pixel failures */
-	protected final JButton testPixelsBtn = new JButton("Test Pixels");
+	private final IButton testPixelsBtn = new IButton("dms.test.pixels");
 
 	/** Photocell status table */
 	protected final ZTable photocellTable = new ZTable();
@@ -228,16 +227,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JLabel lightOutput = new JLabel();
 
 	/** Current brightness low feedback button */
-	protected final JButton brightLowBtn = new JButton(
-		"Brightness Low");
+	private final IButton brightLowBtn = new IButton("dms.brightness.low");
 
 	/** Current brightness good feedback button */
-	protected final JButton brightGoodBtn = new JButton(
-		"Brightness Good");
+	private final IButton brightGoodBtn =new IButton("dms.brightness.good");
 
 	/** Current brightness high feedback button */
-	protected final JButton brightHighBtn = new JButton(
-		"Brightness High");
+	private final IButton brightHighBtn =new IButton("dms.brightness.high");
 
 	/** Card layout for manufacturer panels */
 	protected final CardLayout cards = new CardLayout();
@@ -293,16 +289,20 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Location", createLocationPanel());
-		tab.add("Messages", messagesTab);
-		tab.add("Configuration", createConfigurationPanel());
-		tab.add("Status", createStatusPanel());
+		tab.add(I18N.get("location"), createLocationPanel());
+		tab.add(I18N.get("dms.messages"), messagesTab);
+		tab.add(I18N.get("dms.config"), createConfigurationPanel());
+		tab.add(I18N.get("dms.status"), createStatusPanel());
 		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
-			tab.add("Pixels", createPixelPanel());
-		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
-			tab.add("Brightness", createBrightnessPanel());
-		if(SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean())
-			tab.add("Manufacturer", createManufacturerPanel());
+			tab.add(I18N.get("dms.pixels"), createPixelPanel());
+		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
+			tab.add(I18N.get("dms.brightness"),
+				createBrightnessPanel());
+		}
+		if(SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean()) {
+			tab.add(I18N.get("dms.manufacturer"),
+				createManufacturerPanel());
+		}
 		add(tab);
 		updateAttribute(null);
 		if(canUpdate())
@@ -455,10 +455,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected JPanel createLocationPanel() {
 		location = new LocationPanel(session, proxy.getGeoLoc());
 		location.initialize();
-		location.addRow("Notes", notes);
+		location.addRow(I18N.get("device.notes"), notes);
 		camera.setModel(new WrapperComboBoxModel(
 			state.getCamCache().getCameraModel()));
-		location.add("Camera", camera);
+		location.add(I18N.get("camera"), camera);
 		location.finishRow();
 		location.setCenter();
 		location.addRow(controllerBtn);
@@ -483,21 +483,21 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		cWidth.setForeground(OK);
 		cHeight.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Type", type);
-		panel.addRow("Technology", tech);
-		panel.addRow("Access", access);
-		panel.addRow("Legend", legend);
-		panel.addRow("Beacon", beacon);
-		panel.addRow("Face width", faceWidth);
-		panel.addRow("Face height", faceHeight);
-		panel.addRow("Horizontal border", hBorder);
-		panel.addRow("Vertical border", vBorder);
-		panel.addRow("Horizontal pitch", hPitch);
-		panel.addRow("Vertical pitch", vPitch);
-		panel.addRow("Sign width", pWidth);
-		panel.addRow("Sign height", pHeight);
-		panel.addRow("Character width", cWidth);
-		panel.addRow("Character height", cHeight);
+		panel.addRow(I18N.get("dms.type"), type);
+		panel.addRow(I18N.get("dms.technology"), tech);
+		panel.addRow(I18N.get("dms.access"), access);
+		panel.addRow(I18N.get("dms.legend"), legend);
+		panel.addRow(I18N.get("dms.beacon"), beacon);
+		panel.addRow(I18N.get("dms.face.width"), faceWidth);
+		panel.addRow(I18N.get("dms.face.height"), faceHeight);
+		panel.addRow(I18N.get("dms.border.horiz"), hBorder);
+		panel.addRow(I18N.get("dms.border.vert"), vBorder);
+		panel.addRow(I18N.get("dms.pitch.horiz"), hPitch);
+		panel.addRow(I18N.get("dms.pitch.vert"), vPitch);
+		panel.addRow(I18N.get("dms.pixel.width"), pWidth);
+		panel.addRow(I18N.get("dms.pixel.height"), pHeight);
+		panel.addRow(I18N.get("dms.char.width"), cWidth);
+		panel.addRow(I18N.get("dms.char.height"), cHeight);
 		panel.addRow(configBtn);
 		return panel;
 	}
@@ -511,11 +511,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		housingTemp.setForeground(OK);
 		operation.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Cabinet temp", cabinetTemp);
-		panel.addRow("Ambient temp", ambientTemp);
-		panel.addRow("Housing temp", housingTemp);
-		panel.addRow("Power supplies", powerTable);
-		panel.add("Operation", operation);
+		panel.addRow(I18N.get("dms.temp.cabinet"), cabinetTemp);
+		panel.addRow(I18N.get("dms.temp.ambient"), ambientTemp);
+		panel.addRow(I18N.get("dms.temp.housing"), housingTemp);
+		panel.addRow(I18N.get("dms.power.supplies"), powerTable);
+		panel.add(I18N.get("device.operation"), operation);
 		if(queryMsgBtn.getIEnabled())
 			panel.add(queryMsgBtn);
 		panel.finishRow();
@@ -533,20 +533,23 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		buttonPnl.add(testPixelsBtn);
 		badPixels.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Pixel errors", badPixels);
+		panel.addRow(I18N.get("dms.pixel.errors"), badPixels);
 		panel.setFill();
-		panel.addRow(createTitledPanel("Stuck Off", stuck_off_pnl));
+		panel.addRow(createTitledPanel("dms.pixel.errors.off",
+			stuck_off_pnl));
 		panel.setFill();
-		panel.addRow(createTitledPanel("Stuck On", stuck_on_pnl));
+		panel.addRow(createTitledPanel("dms.pixel.errors.on",
+			stuck_on_pnl));
 		panel.setCenter();
 		panel.add(buttonPnl);
 		return panel;
 	}
 
 	/** Create a panel with a titled border */
-	protected JPanel createTitledPanel(String title, JPanel p) {
+	private JPanel createTitledPanel(String text_id, JPanel p) {
 		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBorder(BorderFactory.createTitledBorder(title));
+		panel.setBorder(BorderFactory.createTitledBorder(I18N.get(
+			text_id)));
 		panel.add(p, BorderLayout.CENTER);
 		return panel;
 	}
@@ -561,9 +564,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		feedback.add(brightGoodBtn);
 		feedback.add(brightHighBtn);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Photocells", photocellTable);
-		panel.addRow("Light output", lightOutput);
-		panel.addRow("Feedback", feedback);
+		panel.addRow(I18N.get("dms.brightness.photocells"),
+			photocellTable);
+		panel.addRow(I18N.get("dms.brightness.output"), lightOutput);
+		panel.addRow(I18N.get("dms.brightness.feedback"), feedback);
 		return panel;
 	}
 
@@ -573,9 +577,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		model.setForeground(OK);
 		version.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Make", make);
-		panel.addRow("Model", model);
-		panel.addRow("Version", version);
+		panel.addRow(I18N.get("dms.make"), make);
+		panel.addRow(I18N.get("dms.model"), model);
+		panel.addRow(I18N.get("dms.version"), version);
 		panel.addRow(card_panel);
 		card_panel.add(createGenericPanel(), MAKE_GENERIC);
 		card_panel.add(createLedstarPanel(), MAKE_LEDSTAR);
@@ -586,8 +590,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Create generic manufacturer panel */
 	protected JPanel createGenericPanel() {
 		FormPanel panel = new FormPanel(true);
-		panel.setTitle("Unknown manufacturer");
-		panel.addRow(new JLabel("Nothing to see here"));
+		panel.setTitle(I18N.get("dms.manufacturer.unknown"));
+		panel.addRow(new JLabel(UNKNOWN));
 		return panel;
 	}
 
@@ -595,9 +599,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected JPanel createLedstarPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
 		panel.setTitle(MAKE_LEDSTAR);
-		panel.addRow("LDC pot base", ldcPotBaseSpn);
-		panel.addRow("Pixel current low threshold", currentLowSpn);
-		panel.addRow("Pixel current high threshold", currentHighSpn);
+		panel.addRow(I18N.get("dms.ledstar.pot.base"), ldcPotBaseSpn);
+		panel.addRow(I18N.get("dms.ledstar.current.low"),currentLowSpn);
+		panel.addRow(I18N.get("dms.ledstar.current.high"),
+			currentHighSpn);
 		return panel;
 	}
 
@@ -606,7 +611,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		heatTapeStatus.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.setTitle(MAKE_SKYLINE);
-		panel.addRow("Heat tape", heatTapeStatus);
+		panel.addRow(I18N.get("dms.skyline.heat.tape"), heatTapeStatus);
 		return panel;
 	}
 

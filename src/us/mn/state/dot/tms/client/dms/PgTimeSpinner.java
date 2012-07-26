@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ public class PgTimeSpinner extends JSpinner {
 			DmsPgTime.getDefaultOn(true).toSecs(),
 			DmsPgTime.getMinOnTime().toSecs(),
 			DmsPgTime.getMaxOnTime().toSecs(), INC_ONTIME_SECS));
-		setToolTipText(I18N.get("PgOnTimeSpinner.ToolTip"));
+		setToolTipText(I18N.get("dms.page.on.time.tooltip"));
 
 		// force the spinner to be editable
 		JFormattedTextField tf = ((JSpinner.DefaultEditor)

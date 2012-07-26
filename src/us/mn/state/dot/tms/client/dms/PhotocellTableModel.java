@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * PhotocellTableModel is a table model for photocell status.
@@ -90,9 +91,12 @@ public class PhotocellTableModel extends AbstractTableModel {
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_DESCRIPTION, 120, "Description"));
-		m.addColumn(createColumn(COL_STATUS, 80, "Status"));
-		m.addColumn(createColumn(COL_READING, 80, "Reading"));
+		m.addColumn(createColumn(COL_DESCRIPTION, 120,
+			I18N.get("dms.photocell.description")));
+		m.addColumn(createColumn(COL_STATUS, 80,
+			I18N.get("dms.photocell.status")));
+		m.addColumn(createColumn(COL_READING, 80,
+			I18N.get("dms.photocell.reading")));
 		return m;
 	}
 }

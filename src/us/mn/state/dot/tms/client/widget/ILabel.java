@@ -28,5 +28,8 @@ public class ILabel extends JLabel {
 	 * @param text_id I18N id for label text. */
 	public ILabel(String text_id) {
 		super(I18N.get(text_id));
+		int m = I18N.getKeyEvent(text_id);
+		if(m > 0)
+			setDisplayedMnemonic(m);
 	}
 }

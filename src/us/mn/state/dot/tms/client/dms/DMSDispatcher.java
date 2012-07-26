@@ -50,6 +50,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -155,8 +156,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		composer = new SignMessageComposer(session, this);
 		singleTab = new SingleSignTab(session, this);
 		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
-		tabPane.addTab("Single", singleTab);
-		tabPane.addTab("Multiple", multipleTab);
+		tabPane.addTab(I18N.get("dms.single"), singleTab);
+		tabPane.addTab(I18N.get("dms.multiple"), multipleTab);
 		add(tabPane, BorderLayout.CENTER);
 		add(createDeployBox(), BorderLayout.SOUTH);
 		clearSelected();
@@ -169,7 +170,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		durationCmb.setSelectedIndex(0);
 		FormPanel panel = new FormPanel(true);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean())
-			panel.addRow("Duration", durationCmb);
+			panel.addRow(I18N.get("dms.duration"), durationCmb);
 		panel.addRow(alert_panel);
 		alert_panel.add(new JLabel(), CARD_HIDDEN);
 		alert_panel.add(alertCbx, CARD_SHOWN);
@@ -188,11 +189,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	protected Box buildQuickMsgPanel() {
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
-		JLabel label = new JLabel();
+		ILabel label = new ILabel("dms.quick.message");
 		label.setLabelFor(qmsgCmb);
-		label.setDisplayedMnemonic('Q');
-		label.setText("<html><p align=\"right\"><u>Q</u>uick" +
-			"<br>Message</p></html>");
 		box.add(label);
 		box.add(box.createHorizontalStrut(4));
 		box.add(qmsgCmb);
@@ -265,7 +263,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		String m = buildConfirmMsg();
 		if(!m.isEmpty()) {
 			return 0 == JOptionPane.showConfirmDialog(null, m, 
-				"Send Confirmation",
+				I18N.get("dms.send.confirmation.title"),
 				JOptionPane.OK_CANCEL_OPTION);
 		} else
 			return false;
@@ -277,8 +275,10 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		String sel = buildSelectedList();
 		if(sel.isEmpty())
 			return sel;
-		else
-			return "Send message to " + sel + "?";
+		else {
+			return I18N.get("dms.send.confirmation.msg") + " " +
+				sel + "?";
+		}
 	}
 
 	/** Build a string of selected DMS */

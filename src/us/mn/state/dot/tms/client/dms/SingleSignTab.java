@@ -147,19 +147,19 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		cache.addProxyListener(this);
 		cam_sel_model = s.getCameraManager().getSelectionModel();
 		nameTxt.setMinimumSize(new Dimension(36, 20));
-		add("Name", nameTxt);
+		add(I18N.get("device.name"), nameTxt);
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
-			add("Brightness", brightnessTxt);
+			add(I18N.get("dms.brightness"), brightnessTxt);
 		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		addRow("Camera", cameraBtn);
+		addRow(I18N.get("camera"), cameraBtn);
 		locationTxt.setMinimumSize(new Dimension(260, 20));
-		addRow("Location", locationTxt);
-		addRow(I18N.get("SingleSignTab.ControllerStatus"), statusTxt);
-		addRow(I18N.get("SingleSignTab.OperationTitle"), operationTxt);
+		addRow(I18N.get("location"), locationTxt);
+		addRow(I18N.get("dms.status"), statusTxt);
+		addRow(I18N.get("device.operation"), operationTxt);
 		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean()) {
 			opStatusTxt.setColumns(10);
-			addRow("Operation Status", opStatusTxt);
+			addRow(I18N.get("device.op.status"), opStatusTxt);
 		}
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			setWest();
@@ -171,8 +171,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 				I18N.get(mid + ".tooltip"));
 			addRow(awsControlledCbx);
 		}
-		tab.add("Current", currentPnl);
-		tab.add("Preview", previewPnl);
+		tab.add(I18N.get("dms.msg.current"), currentPnl);
+		tab.add(I18N.get("dms.msg.preview"), previewPnl);
 		addRow(tab);
 		createJobs();
 	}

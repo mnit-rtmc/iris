@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,11 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class DMSModel extends ProxyTableModel<DMS> {
 
-	/** DMS abbreviation */
-	private static final String dms_abr = I18N.get("dms.abbreviation");
-
 	/** Create the columns in the model */
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<DMS>(dms_abr, 200) {
+		new ProxyColumn<DMS>(I18N.get("dms.abbreviation"), 200) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
 			}
@@ -49,7 +46,7 @@ public class DMSModel extends ProxyTableModel<DMS> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<DMS>("Location", 300) {
+		new ProxyColumn<DMS>(I18N.get("location"), 300) {
 			public Object getValueAt(DMS d) {
 				return GeoLocHelper.getDescription(
 					d.getGeoLoc());

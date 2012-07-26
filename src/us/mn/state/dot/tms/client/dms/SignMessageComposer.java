@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
@@ -40,6 +39,7 @@ import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -139,12 +139,9 @@ public class SignMessageComposer extends JPanel {
 		Box box = Box.createHorizontalBox();
 		box.add(createClearBtn());
 		if(PgTimeSpinner.getIEnabled()) {
-			JLabel label = new JLabel();
+			ILabel label = new ILabel("dms.page.on.time");
 			label.setLabelFor(timeSpin);
 			label.setHorizontalAlignment(SwingConstants.RIGHT);
-			label.setDisplayedMnemonic('P');
-			// FIXME: move to a new ISpinner class.
-			label.setText(I18N.get("PgOnTimeSpinner"));
 			label.setMaximumSize(label.getMinimumSize());
 			box.add(Box.createHorizontalGlue());
 			box.add(label);
@@ -341,9 +338,9 @@ public class SignMessageComposer extends JPanel {
 		final FontComboBox[] fc = fontCmb;	// Avoid races
 		Box box = Box.createHorizontalBox();
 		if(p < fc.length) {
-			JLabel label = new JLabel();
+			ILabel label = new ILabel("font");
 			label.setLabelFor(fc[p]);
-			box.add(new JLabel("Font"));
+			box.add(label);
 			box.add(Box.createHorizontalStrut(4));
 			box.add(fc[p]);
 		}

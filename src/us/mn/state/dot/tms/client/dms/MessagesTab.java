@@ -23,7 +23,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -46,6 +45,8 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -64,7 +65,7 @@ public class MessagesTab extends JPanel {
 	protected final ZTable group_table = new ZTable();
 
 	/** Button to delete a sign group */
-	protected final JButton delete_group = new JButton("Delete Group");
+	private final IButton delete_group = new IButton("dms.group.delete");
 
 	/** Sign text table model */
 	protected SignTextTableModel sign_text_model;
@@ -73,7 +74,7 @@ public class MessagesTab extends JPanel {
 	protected final ZTable sign_text_table = new ZTable();
 
 	/** Button to delete sign text message */
-	protected final JButton delete_text = new JButton("Delete Message");
+	private final IButton delete_text = new IButton("dms.message.delete");
 
 	/** Sign pixel panel */
 	protected final SignPixelPanel pixel_panel = new SignPixelPanel(true,
@@ -166,7 +167,7 @@ public class MessagesTab extends JPanel {
 		bag.weightx = 0;
 		bag.weighty = 0;
 		bag.anchor = GridBagConstraints.EAST;
-		add(new JLabel("Default Font"), bag);
+		add(new ILabel("dms.font.default"), bag);
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.WEST;
 		add(font_cmb, bag);
@@ -184,7 +185,7 @@ public class MessagesTab extends JPanel {
 	protected JPanel createPreviewPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createTitledBorder(
-			"Message Preview"));
+			I18N.get("dms.message.preview")));
 		panel.add(pixel_panel, BorderLayout.CENTER);
 		pixel_panel.setPreferredSize(new Dimension(390, 32));
 		return panel;

@@ -241,7 +241,8 @@ public class DMSManager extends ProxyManager<DMS> {
 				return createSinglePopup(dms);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " DMSs"));
+		p.add(new JLabel(I18N.get("dms.abbreviation.plural") + ": " +
+			n_selected));
 		p.addSeparator();
 		if(blankAction != null)
 			p.add(blankAction);

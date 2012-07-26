@@ -35,6 +35,8 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.TmsForm;
+import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A MultipleSignTab is a GUI component for sending a message to multiple signs
@@ -46,7 +48,8 @@ public class MultipleSignTab extends JPanel implements
 	ProxySelectionListener<DMS>
 {
 	/** Label to display selected sign count */
-	protected final JLabel selectedLbl = new JLabel("Selected:");
+	private final JLabel selectedLbl = new JLabel(I18N.get("dms.selected") +
+		":");
 
 	/** DMS sign group cache */
 	protected final TypeCache<DmsSignGroup> dms_sign_groups;
@@ -98,7 +101,7 @@ public class MultipleSignTab extends JPanel implements
 		bag.fill = GridBagConstraints.BOTH;
 		add(selectedLbl, bag);
 		bag.gridx = 1;
-		add(new JLabel("Groups"), bag);
+		add(new ILabel("dms.groups"), bag);
 		bag.gridx = 0;
 		bag.gridy = 1;
 		bag.weightx = 1;
@@ -169,7 +172,7 @@ public class MultipleSignTab extends JPanel implements
 
 	/** Update the selected count label */
 	protected void updateSelectedLabel() {
-		selectedLbl.setText("Selected: " +
+		selectedLbl.setText(I18N.get("dms.selected") + ": " +
 			selectionModel.getSelectedCount());
 	}
 
