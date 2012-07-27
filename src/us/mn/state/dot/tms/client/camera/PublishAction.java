@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import javax.swing.Action;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This is an action to publish a set of cameras.
@@ -34,10 +35,11 @@ public class PublishAction extends AbstractAction {
 	/** Create a new publish action */
 	public PublishAction(ProxySelectionModel<Camera> s) {
 		s_model = s;
-		putValue(Action.NAME, "Publish");
-		putValue(Action.SHORT_DESCRIPTION, "Publish selected cameras");
-		putValue(Action.LONG_DESCRIPTION, "Publish the selected " +
-			" cameras for unrestricted access");
+		putValue(Action.NAME, I18N.get("camera.publish"));
+		putValue(Action.SHORT_DESCRIPTION,
+			I18N.get("camera.publish.short"));
+		putValue(Action.LONG_DESCRIPTION,
+			I18N.get("camera.publish.long"));
 	}
 
 	/** Schedule the action to be performed */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * VideoMenu contains a menu of camera/video monitor items.
@@ -35,7 +36,7 @@ public class VideoMenu extends JMenu {
 
 	/** Create a new video menu */
 	public VideoMenu(final Session s) {
-		super("Video");
+		super(I18N.get("video"));
 		session = s;
 		desktop = s.getDesktop();
 		JMenuItem item = createCameraItem();
@@ -50,7 +51,7 @@ public class VideoMenu extends JMenu {
 	protected JMenuItem createCameraItem() {
 		if(!CameraForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Cameras");
+		JMenuItem item = new JMenuItem(I18N.get("camera.plural"));
 		item.setMnemonic('C');
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -64,7 +65,7 @@ public class VideoMenu extends JMenu {
 	protected JMenuItem createVideoMonitorItem() {
 		if(!VideoMonitorForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Monitors");
+		JMenuItem item = new JMenuItem(I18N.get("video.monitor"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new VideoMonitorForm(session));

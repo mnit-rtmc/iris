@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.BorderLayout;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Provides a GUI for the camera tab on the operator interface for IRIS.
@@ -27,7 +28,7 @@ public class CameraTab extends MapTab {
 
 	/** Create a new camera tab for the IRIS client */
 	public CameraTab(Session session, CameraManager manager) {
-		super(manager.getProxyType(), "Camera summary");
+		super(manager.getProxyType(), I18N.get("camera.summary"));
 		add(new CameraViewer(session, manager), BorderLayout.NORTH);
 		add(manager.createStyleSummary(), BorderLayout.CENTER);
 	}

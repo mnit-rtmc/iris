@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -37,6 +36,8 @@ import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This is a form for viewing and editing the properties of a camera.
@@ -45,9 +46,6 @@ import us.mn.state.dot.tms.client.toast.SonarObjectForm;
  */
 public class CameraProperties extends SonarObjectForm<Camera> {
 
-	/** Frame title */
-	static private final String TITLE = "Camera: ";
-
 	/** Location panel */
 	protected LocationPanel location;
 
@@ -55,7 +53,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Controller button */
-	protected final JButton controller = new JButton("Controller");
+	private final IButton controller = new IButton("controller");
 
 	/** Video stream encoder host (and port) */
 	protected final JTextField encoder = new JTextField("", 20);
@@ -76,7 +74,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create a new camera properties form */
 	public CameraProperties(Session s, Camera c) {
-		super(TITLE, s, c);
+		super(I18N.get("camera") + ": ", s, c);
 	}
 
 	/** Get the SONAR type cache */
@@ -88,8 +86,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Location", createLocationPanel());
-		tab.add("Setup", createSetupPanel());
+		tab.add(I18N.get("location"), createLocationPanel());
+		tab.add(I18N.get("device.setup"), createSetupPanel());
 		add(tab);
 		updateAttribute(null);
 		if(canUpdate())
@@ -108,7 +106,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	protected JPanel createLocationPanel() {
 		location = new LocationPanel(session, proxy.getGeoLoc());
 		location.initialize();
-		location.addRow("Notes", notes);
+		location.addRow(I18N.get("device.notes"), notes);
 		location.setCenter();
 		location.addRow(controller);
 		new ActionJob(this, controller) {
@@ -133,10 +131,11 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Create camera setup panel */
 	protected JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow("Encoder", encoder);
-		panel.addRow("Encoder Channel", encoder_channel);
-		panel.addRow("Encoder Type", type_cmb);
-		panel.addRow("Publish", publish);
+		panel.addRow(I18N.get("camera.encoder"), encoder);
+		panel.addRow(I18N.get("camera.encoder.channel"),
+			encoder_channel);
+		panel.addRow(I18N.get("camera.encoder.type"), type_cmb);
+		panel.addRow(I18N.get("camera.publish"), publish);
 		return panel;
 	}
 

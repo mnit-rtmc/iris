@@ -30,6 +30,7 @@ import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A JPanel that can display a video stream. It includes a progress bar and
@@ -114,7 +115,7 @@ public class StreamPanel extends JPanel {
 		if(stream != null)
 			clearStream();
 		try {
-			status_lbl.setText("Opening stream");
+			status_lbl.setText(I18N.get("camera.stream.opening"));
 			stream = createStream(req, c);
 			JComponent screen = stream.getComponent();
 			screen.setPreferredSize(screen_pnl.getPreferredSize());

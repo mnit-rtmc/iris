@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.camera;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing cameras
@@ -32,7 +33,7 @@ public class CameraForm extends ProxyTableForm<Camera> {
 
 	/** Create a new camera form */
 	public CameraForm(Session s) {
-		super("Cameras", new CameraModel(s));
+		super(I18N.get("camera.plural"), new CameraModel(s));
 	}
 
 	/** Get the visible row count */

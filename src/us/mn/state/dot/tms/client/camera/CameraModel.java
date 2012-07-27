@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for cameras
@@ -32,7 +33,7 @@ public class CameraModel extends ProxyTableModel<Camera> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Camera>("Camera", 200) {
+		new ProxyColumn<Camera>(I18N.get("camera"), 200) {
 			public Object getValueAt(Camera c) {
 				return c.getName();
 			}
@@ -45,13 +46,15 @@ public class CameraModel extends ProxyTableModel<Camera> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Camera>("Location", 300) {
+		new ProxyColumn<Camera>(I18N.get("location"), 300) {
 			public Object getValueAt(Camera c) {
 				return GeoLocHelper.getDescription(
 					c.getGeoLoc());
 			}
 		},
-		new ProxyColumn<Camera>("Publish", 120, Boolean.class) {
+		new ProxyColumn<Camera>(I18N.get("camera.publish"), 120,
+			Boolean.class)
+		{
 			public Object getValueAt(Camera c) {
 				return c.getPublish();
 			}

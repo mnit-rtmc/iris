@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import javax.swing.Action;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This is an action to remove cameras from the playlist.
@@ -40,11 +41,11 @@ public class RemovePlaylistAction extends AbstractAction {
 	{
 		manager = m;
 		s_model = s;
-		putValue(Action.NAME, "Remove from playlist");
+		putValue(Action.NAME, I18N.get("camera.playlist.remove"));
 		putValue(Action.SHORT_DESCRIPTION,
-			"Remove cameras from playlist");
-		putValue(Action.LONG_DESCRIPTION, "Remove the selected " +
-			"cameras from the playlist");
+			I18N.get("camera.playlist.remove.short"));
+		putValue(Action.LONG_DESCRIPTION,
+			I18N.get("camera.playlist.remove.long"));
 	}
 
 	/** Schedule the action to be performed */

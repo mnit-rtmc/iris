@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2011  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import java.util.Properties;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.AbstractJob;
@@ -42,6 +41,8 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * GUI for viewing camera images
@@ -148,17 +149,18 @@ public class CameraViewer extends JPanel
 		props = session.getProperties();
 		Connection c = state.lookupConnection(state.getConnection());
 		session_id = c.getSessionId();
-		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
+		setBorder(BorderFactory.createTitledBorder(
+			I18N.get("camera.selected")));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
 		bag.insets = new Insets(2, 4, 2, 4);
 		bag.anchor = GridBagConstraints.EAST;
-		add(new JLabel("ID"), bag);
+		add(new ILabel("device.name"), bag);
 		bag.gridx = 2;
-		add(new JLabel("Output"), bag);
+		add(new ILabel("camera.output"), bag);
 		bag.gridx = 0;
 		bag.gridy = 1;
-		add(new JLabel("Location"), bag);
+		add(new ILabel("location"), bag);
 		bag.gridx = 1;
 		bag.gridy = 0;
 		bag.fill = GridBagConstraints.HORIZONTAL;
@@ -187,8 +189,8 @@ public class CameraViewer extends JPanel
 		add(s_panel, bag);
 		bag.gridy = 3;
 		bag.fill = GridBagConstraints.NONE;
-		play.setToolTipText("Play");
-		stop.setToolTipText("Stop");
+		play.setToolTipText(I18N.get("camera.play.tooltip"));
+		stop.setToolTipText(I18N.get("camera.stop.tooltip"));
 		videoControls.add(play);
 		videoControls.add(stop);
 		add(videoControls, bag);

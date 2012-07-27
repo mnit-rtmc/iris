@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for video monitors
@@ -30,7 +31,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<VideoMonitor>("Video Monitor", 160) {
+		new ProxyColumn<VideoMonitor>(I18N.get("video.monitor"), 160) {
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getName();
 			}
@@ -43,7 +44,9 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<VideoMonitor>("Description", 300) {
+		new ProxyColumn<VideoMonitor>(I18N.get("device.description"),
+			300)
+		{
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getDescription();
 			}
@@ -54,7 +57,9 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				vm.setDescription(value.toString());
 			}
 		},
-		new ProxyColumn<VideoMonitor>("Restricted", 120, Boolean.class){
+		new ProxyColumn<VideoMonitor>(I18N.get("video.restricted"),
+			120, Boolean.class)
+		{
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getRestricted();
 			}

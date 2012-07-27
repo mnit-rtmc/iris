@@ -19,6 +19,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.List;
 import java.util.HashSet;
+import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
@@ -35,6 +36,7 @@ import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A camera manager is a container for SONAR camera objects.
@@ -64,7 +66,7 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return "Camera";
+		return I18N.get("camera");
 	}
 
 	/** Get the shape for a given proxy */
@@ -139,7 +141,8 @@ public class CameraManager extends ProxyManager<Camera> {
 				return createSinglePopup(cam);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new javax.swing.JLabel("" + n_selected + " Cameras"));
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("camera.plural")));
 		p.addSeparator();
 		p.add(new PublishAction(s_model));
 		p.add(new UnpublishAction(s_model));

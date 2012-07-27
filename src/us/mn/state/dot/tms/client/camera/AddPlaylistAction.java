@@ -42,9 +42,9 @@ public class AddPlaylistAction extends AbstractAction {
 		s_model = s;
 		putValue(Action.NAME, I18N.get("camera.playlist.add"));
 		putValue(Action.SHORT_DESCRIPTION, I18N.get(
-			"camera.playlist.short"));
+			"camera.playlist.add.short"));
 		putValue(Action.LONG_DESCRIPTION, I18N.get(
-			"camera.playlist.long"));
+			"camera.playlist.add.long"));
 	}
 
 	/** Schedule the action to be performed */
