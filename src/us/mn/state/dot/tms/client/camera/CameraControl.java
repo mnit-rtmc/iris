@@ -32,6 +32,7 @@ import javax.swing.event.ChangeEvent;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This class creates a Swing panel for controlling camera pan, tilt, and zoom.
@@ -40,7 +41,7 @@ import us.mn.state.dot.tms.client.widget.IButton;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class CameraControl extends JPanel implements ActionListener {
+public class CameraControl extends JPanel {
 
 	/** Number of buttons used to go to preset location */
 	static private final int NUMBER_PRESET_BUTTONS =
@@ -52,13 +53,13 @@ public class CameraControl extends JPanel implements ActionListener {
 	/** The preferred size of the slider */
 	static private final Dimension SLIDER_SIZE = new Dimension(40, 110);
 
-	/** Font to use for PTZ buttons */
+	/** Font to use for buttons */
 	static private final Font FONT = new Font(null, Font.PLAIN, 20);
 
-	/** The preferred size of PTZ buttons */
+	/** The preferred size of buttons */
 	static private final Dimension SIZE = new Dimension(30, 30);
 
-	/** The preferred insets for PTZ buttons */
+	/** The preferred insets for buttons */
 	static private final Insets INSETS = new Insets(0, 0, 0, 0);
 
 	/** Button used to pan left */
@@ -92,8 +93,8 @@ public class CameraControl extends JPanel implements ActionListener {
 	private final IButton zoom_out_btn;
 
 	/** Array of buttons used to go to preset locations */
-	private final PresetButton[] m_preset =
-		new PresetButton[NUMBER_PRESET_BUTTONS];
+	private final JButton[] preset_btn =
+		new JButton[NUMBER_PRESET_BUTTONS];
 
 	/** The slider used to select the pan-tilt-zoom speed */
 	private final JSlider m_ptzSpeed = 
@@ -103,7 +104,7 @@ public class CameraControl extends JPanel implements ActionListener {
 	private float m_speed = 0.5f;
 
 	/** The camera proxy for the current camera to control */
-	private Camera m_cameraProxy = null;
+	private Camera camera = null;
 
 	/** Create a new camera control panel */
 	public CameraControl() {
@@ -169,7 +170,9 @@ public class CameraControl extends JPanel implements ActionListener {
 		});
 		btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				m_cameraProxy.setPtz(PTZ_STOP);
+				Camera c = camera;
+				if(c != null)
+					c.setPtz(PTZ_STOP);
 			}
 		});
 		return btn;
@@ -177,13 +180,14 @@ public class CameraControl extends JPanel implements ActionListener {
 
 	/** Respond to a PTZ button pressed event */
 	private void buttonPressed(IButton btn, int pan, int tilt, int zoom) {
-		if(btn.getModel().isPressed()) {
+		Camera c = camera;
+		if(c != null && btn.getModel().isPressed()) {
 			Float[] ptz = new Float[] {
 				m_speed * pan,
 				m_speed * tilt,
 				m_speed * zoom
 			};
-			m_cameraProxy.setPtz(ptz);
+			c.setPtz(ptz);
 		}
 	}
 
@@ -232,33 +236,37 @@ public class CameraControl extends JPanel implements ActionListener {
 		c.gridheight = 1;
 		final int PRESET_BUTTONS_PER_ROW = 5;
 		for(int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
-			m_preset[i] = new PresetButton(i + 1,
-				new String("Preset " + (i + 1)));
+			preset_btn[i] = createPresetButton(i + 1);
 			c.gridx = 5 + i % PRESET_BUTTONS_PER_ROW;
 			c.gridy = 0 + i / PRESET_BUTTONS_PER_ROW;
-			jp.add(m_preset[i], c);
+			jp.add(preset_btn[i], c);
 		}
-
-		// add action listeners for button up event
-		for(PresetButton b: m_preset)
-			b.addActionListener(this);
-
 		return jp;
 	}
 
-	/** Process the button action event (button released) */
-	public void actionPerformed(ActionEvent ae) {
-		JButton button = (JButton) ae.getSource();
-		if(button instanceof PresetButton) {
-			PresetButton pbutton = (PresetButton)button;
-			m_cameraProxy.setRecallPreset(pbutton.getPreset());
-		}
+	/** Create a preset button */
+	private JButton createPresetButton(final int num) {
+		final JButton btn = new JButton(Integer.toString(num));
+		String tt = I18N.getSilent("camera.preset.tooltip");
+		if(tt != null)
+			btn.setToolTipText(tt);
+		btn.setFont(FONT);
+		btn.setPreferredSize(SIZE);
+		btn.setMinimumSize(SIZE);
+		btn.setMargin(INSETS);
+		btn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				Camera c = camera;
+				if(c != null)
+					c.setRecallPreset(num);
+			}
+		});
+		return btn;
 	}
 
 	/** Set the camera to control */
 	public void setCamera(Camera proxy) {
-		assert proxy != null;
-		m_cameraProxy = proxy;
+		camera = proxy;
 	}
 
 	/** Set the camera control enable status */
@@ -274,7 +282,7 @@ public class CameraControl extends JPanel implements ActionListener {
 		zoom_in_btn.setEnabled(enable);
 		zoom_out_btn.setEnabled(enable);
 		m_ptzSpeed.setEnabled(enable);
-		for(PresetButton b: m_preset)
+		for(JButton b: preset_btn)
 			b.setEnabled(enable);
 	}
 }
