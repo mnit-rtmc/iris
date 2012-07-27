@@ -14,46 +14,29 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * This is an action to add a camera to the playlist.
  *
  * @author Douglas Lau
  */
-public class AddPlaylistAction extends AbstractAction {
+public class AddPlaylistAction extends IAction {
 
 	/** Camera manager */
-	protected final CameraManager manager;
+	private final CameraManager manager;
 
 	/** Proxy selection model */
-	protected final ProxySelectionModel<Camera> s_model;
+	private final ProxySelectionModel<Camera> s_model;
 
 	/** Create a new add playlist action */
 	public AddPlaylistAction(CameraManager m, ProxySelectionModel<Camera> s)
 	{
+		super("camera.playlist.add");
 		manager = m;
 		s_model = s;
-		putValue(Action.NAME, I18N.get("camera.playlist.add"));
-		putValue(Action.SHORT_DESCRIPTION, I18N.get(
-			"camera.playlist.add.short"));
-		putValue(Action.LONG_DESCRIPTION, I18N.get(
-			"camera.playlist.add.long"));
-	}
-
-	/** Schedule the action to be performed */
-	public void actionPerformed(ActionEvent e) {
-		new AbstractJob() {
-			public void perform() {
-				do_perform();
-			}
-		}.addToScheduler();
 	}
 
 	/** Add the selected cameras to the playlist */

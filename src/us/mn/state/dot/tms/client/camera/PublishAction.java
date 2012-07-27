@@ -14,41 +14,24 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * This is an action to publish a set of cameras.
  *
  * @author Douglas Lau
  */
-public class PublishAction extends AbstractAction {
+public class PublishAction extends IAction {
 
 	/** Proxy selection model */
-	protected final ProxySelectionModel<Camera> s_model;
+	private final ProxySelectionModel<Camera> s_model;
 
 	/** Create a new publish action */
 	public PublishAction(ProxySelectionModel<Camera> s) {
+		super("camera.publish");
 		s_model = s;
-		putValue(Action.NAME, I18N.get("camera.publish"));
-		putValue(Action.SHORT_DESCRIPTION,
-			I18N.get("camera.publish.short"));
-		putValue(Action.LONG_DESCRIPTION,
-			I18N.get("camera.publish.long"));
-	}
-
-	/** Schedule the action to be performed */
-	public void actionPerformed(ActionEvent e) {
-		new AbstractJob() {
-			public void perform() {
-				do_perform();
-			}
-		}.addToScheduler();
 	}
 
 	/** Publish the selected cameras */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,52 +14,37 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.event.ActionEvent;
 import java.util.List;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * Action to blank all selected DMS.
  *
  * @author Douglas Lau
  */
-public class BlankDmsAction extends AbstractAction {
+public class BlankDmsAction extends IAction {
 
 	/** Selection model */
-	protected final ProxySelectionModel<DMS> selectionModel;
+	private final ProxySelectionModel<DMS> selectionModel;
 
 	/** DMS dispatcher */
-	protected final DMSDispatcher dispatcher;
+	private final DMSDispatcher dispatcher;
 
 	/** User who is sending message */
-	protected final User owner;
+	private final User owner;
 
 	/** Create a new action to blank the selected DMS */
 	public BlankDmsAction(ProxySelectionModel<DMS> s, DMSDispatcher d,
 		User o)
 	{
+		super("dms.blank");
 		selectionModel = s;
 		dispatcher = d;
 		owner = o;
-		putValue(Action.NAME, I18N.get("dms.blank"));
-		putValue(Action.SHORT_DESCRIPTION, 
-			I18N.get("dms.blank.tooltip")); 
-	}
-
-	/** Schedule the action to be performed */
-	public void actionPerformed(ActionEvent e) {
-		new AbstractJob() {
-			public void perform() {
-				do_perform();
-			}
-		}.addToScheduler();
 	}
 
 	/** Actually perform the action */
