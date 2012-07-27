@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2010 AHMCT, University of California
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +24,6 @@ import javax.swing.JButton;
  * This class defines a pan-tilt-zoom button.
  *
  * @author Stephen Donecker
- * @company University of California, Davis
- * @created June 26, 2008
  */
 public class PTZButton extends JButton {
 
@@ -48,17 +47,19 @@ public class PTZButton extends JButton {
 
 	/** Create a new PTZ button */
 	protected PTZButton(String name, String description, int[] unitVector) {
-		
 		super(name);
-		
-		// check preconditions
-		assert name != null : "PTZButton.PTZButton: The name argument is null";
-		assert description != null : "PTZButton.PTZButton: The description argument is null";
-		assert unitVector.length == 3 : "PTZButton.PTZButton: The unitVector is the wrong length";
-		assert (unitVector[0] >= -1 && unitVector[0] <= 1) : "PTZButton.PTZButton: The unitVector[0] is out of bounds";
-		assert (unitVector[1] >= -1 && unitVector[1] <= 1) : "PTZButton.PTZButton: The unitVector[0] is out of bounds";
-		assert (unitVector[2] >= -1 && unitVector[2] <= 1) : "PTZButton.PTZButton: The unitVector[0] is out of bounds";
-
+		assert name != null :
+			"PTZButton: The name argument is null";
+		assert description != null :
+			"PTZButton: The description argument is null";
+		assert unitVector.length == 3 :
+			"PTZButton: The unitVector is the wrong length";
+		assert (unitVector[0] >= -1 && unitVector[0] <= 1) :
+			"PTZButton: The unitVector[0] is out of bounds";
+		assert (unitVector[1] >= -1 && unitVector[1] <= 1) :
+			"PTZButton: The unitVector[0] is out of bounds";
+		assert (unitVector[2] >= -1 && unitVector[2] <= 1) :
+			"PTZButton: The unitVector[0] is out of bounds";
 		m_name = name;
 		m_description = description;
 		m_unitVector = unitVector;
@@ -73,7 +74,7 @@ public class PTZButton extends JButton {
 	public int[] getUnitVector() {
 		return m_unitVector;
 	}
-	
+
 	/** Get the button name */
 	public String getName() {
 		return m_name;
