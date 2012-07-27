@@ -119,8 +119,8 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		p.add(new javax.swing.JLabel("" + n_selected +
 			" Warning Signs"));
 		p.addSeparator();
-		p.add(new DeployAction(s_model, true));
-		p.add(new DeployAction(s_model, false));
+		p.add(new DeployAction(s_model));
+		p.add(new UndeployAction(s_model));
 		return p;
 	}
 
@@ -129,8 +129,8 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
-		p.add(new DeployAction(s_model, true));
-		p.add(new DeployAction(s_model, false));
+		p.add(new DeployAction(s_model));
+		p.add(new UndeployAction(s_model));
 		p.addSeparator();
 		p.add(new PropertiesAction<WarningSign>(proxy) {
 			protected void do_perform() {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,43 +14,30 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * Action to blank all selected LCS arrays.
  *
  * @author Douglas Lau
  */
-public class BlankLcsAction extends AbstractAction {
+public class BlankLcsAction extends IAction {
 
 	/** Selection model */
-	protected final ProxySelectionModel<LCSArray> selectionModel;
+	private final ProxySelectionModel<LCSArray> selectionModel;
 
 	/** User who is sending message */
-	protected final User owner;
+	private final User owner;
 
 	/** Create a new action to blank the selected LCS array */
 	public BlankLcsAction(ProxySelectionModel<LCSArray> s, User o) {
+		super("lcs.blank");
 		selectionModel = s;
 		owner = o;
-		putValue(Action.NAME, "Blank");
-		putValue(Action.SHORT_DESCRIPTION, "Blank the selected LCS");
-	}
-
-	/** Schedule the action to be performed */
-	public void actionPerformed(ActionEvent e) {
-		new AbstractJob() {
-			public void perform() {
-				do_perform();
-			}
-		}.addToScheduler();
 	}
 
 	/** Actually perform the action */

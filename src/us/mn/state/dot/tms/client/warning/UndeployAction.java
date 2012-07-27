@@ -19,25 +19,25 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
- * Action to deploy a warning sign.
+ * Action to undeploy a warning sign.
  *
  * @author Douglas Lau
  */
-public class DeployAction extends IAction {
+public class UndeployAction extends IAction {
 
 	/** Proxy selection model */
 	private final ProxySelectionModel<WarningSign> s_model;
 
-	/** Create a new deploy action */
-	public DeployAction(ProxySelectionModel<WarningSign> s) {
-		super("warning.sign.deploy");
+	/** Create a new undeploy action */
+	public UndeployAction(ProxySelectionModel<WarningSign> s) {
+		super("warning.sign.undeploy");
 		s_model = s;
 	}
 
 	/** Actually perform the action */
 	protected void do_perform() {
 		for(WarningSign s: s_model.getSelected())
-			s.setDeployed(true);
+			s.setDeployed(false);
 		s_model.clearSelection();
 	}
 }
