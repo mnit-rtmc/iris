@@ -28,7 +28,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
@@ -39,6 +38,7 @@ import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
