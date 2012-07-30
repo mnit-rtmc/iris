@@ -151,11 +151,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		bag.fill = GridBagConstraints.BOTH;
 		add(list_panel, bag);
 
-		// These sizes force the SignPixelPanel in the 
-		// dispatcher to switch sizes.
-		setMinimumSize(new Dimension(500, 200));
-		setPreferredSize(new Dimension(500, 275));
-
 		// select default button
 		setStyle(default_rbutton);
 	}
