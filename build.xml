@@ -253,6 +253,9 @@
 			<fileset dir="${i18n.dir}">
 				<include name="*.properties"/>
 			</fileset>
+			<filterset begintoken="@@" endtoken="@@">
+				<filter token="VERSION" value="${version}"/>
+			</filterset>
 		</copy>
 	</target>
 

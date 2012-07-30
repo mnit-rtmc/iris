@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.widget;
 
+import java.awt.Font;
+import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -31,5 +33,15 @@ public class ILabel extends JLabel {
 		int m = I18N.getKeyEvent(text_id);
 		if(m > 0)
 			setDisplayedMnemonic(m);
+	}
+
+	/** Create an I18N'd label.
+	 * @param text_id I18N id for label text.
+	 * @param style Font style.
+	 * @param scale Font scale. */
+	public ILabel(String text_id, int style, float scale) {
+		this(text_id);
+		setFont(getFont().deriveFont(style,
+			AffineTransform.getScaleInstance(scale, scale)));
 	}
 }

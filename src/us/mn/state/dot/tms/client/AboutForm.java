@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -31,19 +32,9 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class AboutForm extends AbstractForm {
 
-	/** 1st title line */
-	static protected final String m_title1 =
-		"IRIS -- Intelligent Roadway Information System v. @@VERSION@@";
-
-	/** 2nd title line (optional) */
-	static protected final String m_title2 = I18N.get("AboutForm.Title2");
-
-	/** 3rd title line (optional) */
-	static protected final String m_title3 = I18N.get("AboutForm.Title3");
-
 	/** Create a new About form */
 	public AboutForm() {
-		super("About IRIS");
+		super(I18N.get("iris.about"));
 	}
 
 	/** Initialize the About form */
@@ -54,28 +45,17 @@ public class AboutForm extends AbstractForm {
 		panel.addRow(new JLabel(new ImageIcon(url)));
 		panel.addRow(new JLabel(" "));
 		panel.setCenter();
-		panel.addRow(createTitle(m_title1, 18));
-		if(useTitle(m_title2)) {
-			panel.setCenter();
-			panel.addRow(createTitle(m_title2, 16));
-		}
-		if(useTitle(m_title3)) {
-			panel.setCenter();
-			panel.addRow(createTitle(m_title3, 16));
-		}
+		panel.addRow(createTitle("iris.about1", 1.8f));
+		panel.setCenter();
+		panel.addRow(createTitle("iris.about2", 1.5f));
+		panel.setCenter();
+		panel.addRow(createTitle("iris.about3", 1.5f));
 		panel.addRow(new JLabel(" "));
 		add(panel);
 	}
 
 	/** Create a title label */
-	protected JLabel createTitle(String t, int size) {
-		JLabel lbl = new JLabel(t);
-		lbl.setFont(new Font("Dialog", 1, size));
-		return lbl;
-	}
-
-	/** return true to use an optional title else false */
-	private boolean useTitle(String t) {
-		return t != null && t.length() > 0;
+	private JLabel createTitle(String text_id, float scale) {
+		return new ILabel(text_id, Font.BOLD, scale);
 	}
 }
