@@ -35,7 +35,8 @@ public class LockLcsAction extends ProxyAction<LCSArray> {
 		super(p);
 		lockCmb = c;
 		putValue(Action.NAME, I18N.get("lcs.locked"));
-		putValue(Action.SHORT_DESCRIPTION,I18N.get("lcs.locked.short"));
+		putValue(Action.SHORT_DESCRIPTION, I18N.get(
+			"lcs.locked.tooltip"));
 		putValue(Action.LONG_DESCRIPTION, I18N.get("lcs.locked.long"));
 	}
 

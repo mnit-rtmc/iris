@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Gui for opererating ramp meters.
@@ -42,7 +43,7 @@ public class RampMeterTab extends MapTab {
   	public RampMeterTab(Session session, MeterManager man)
 		throws IOException
 	{
-		super(man.getProxyType(), "Operate Ramp Meters");
+		super(man.getProxyType(), I18N.get("ramp.meter.tab"));
 		manager = man;
 		statusPanel = new MeterStatusPanel(session, manager);
 		summary = manager.createStyleSummary();

@@ -30,7 +30,7 @@ abstract public class IAction extends AbstractAction {
 	/** Create a new action */
 	protected IAction(String text_id) {
 		putValue(Action.NAME, I18N.get(text_id));
-		String s = I18N.getSilent(text_id + ".short");
+		String s = I18N.getSilent(text_id + ".tooltip");
 		if(s != null)
 			putValue(Action.SHORT_DESCRIPTION, s);
 		String l = I18N.getSilent(text_id + ".long");

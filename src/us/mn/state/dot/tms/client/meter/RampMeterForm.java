@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.meter;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying a table of ramp meters.
@@ -32,6 +33,6 @@ public class RampMeterForm extends ProxyTableForm<RampMeter> {
 
 	/** Create a new ramp meter form */
 	public RampMeterForm(Session s) {
-		super("Ramp Meters", new RampMeterModel(s));
+		super(I18N.get("ramp.meters"), new RampMeterModel(s));
 	}
 }

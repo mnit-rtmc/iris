@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.meter;
 import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
@@ -36,6 +35,8 @@ import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The MeterStatusPanel provides a GUI representation for RampMeter status
@@ -49,26 +50,28 @@ public class MeterStatusPanel extends FormPanel
 {
 	/** Format the meter release rate */
 	static public String formatRelease(Integer rate) {
-		if(rate !=  null)
-			return rate.toString() + " veh/hour";
-		else
-			return "N/A";
+		if(rate !=  null) {
+			return rate.toString() + " " +
+				I18N.get("units.vehicles.per.hour");
+		} else
+			return I18N.get("units.na");
 	}
 
 	/** Format the meter cycle time from the given release rate */
 	static public String formatCycle(Integer rate) {
 		if(rate != null) {
 			int c = Math.round(36000f / rate);
-			return "" + (c / 10) + "." + (c % 10) + " seconds";
+			return "" + (c / 10) + "." + (c % 10) + " " +
+				I18N.get("units.s");
 		} else
-			return "N/A";
+			return I18N.get("units.na");
 	}
 
 	/** Name component */
 	protected final JTextField nameTxt = createTextField();
 
 	/** Camera component */
-	protected final JButton cameraBtn = new JButton();
+	private final IButton camera_btn = new IButton("camera.select");
 
 	/** Location component */
 	protected final JTextField locationTxt = createTextField();
@@ -86,20 +89,22 @@ public class MeterStatusPanel extends FormPanel
 	protected final JTextField queueTxt = createTextField();
 
 	/** Queue shrink button */
-	protected final JButton shrinkBtn = new JButton("Shrink");
+	private final IButton shrink_btn = new IButton("ramp.meter.shrink");
 
 	/** Queue grow button */
-	protected final JButton growBtn = new JButton("Grow");
+	private final IButton grow_btn = new IButton("ramp.meter.grow");
 
 	/** Reason the meter was locked */
 	protected final JComboBox lockCmb = new JComboBox(
 		RampMeterLock.getDescriptions());
 
 	/** Metering on radio button */
-	protected final JRadioButton meterOnBtn = new JRadioButton("On");
+	private final JRadioButton on_btn = new JRadioButton(
+		I18N.get("ramp.meter.on"));
 
 	/** Metering off radio button */
-	protected final JRadioButton meterOffBtn = new JRadioButton("Off");
+	private final JRadioButton off_btn = new JRadioButton(
+		I18N.get("ramp.meter.off"));
 
 	/** Current session */
 	protected final Session session;
@@ -124,26 +129,25 @@ public class MeterStatusPanel extends FormPanel
 		selectionModel = manager.getSelectionModel();
 		cache = session.getSonarState().getRampMeters();
 		ButtonGroup group = new ButtonGroup();
-		group.add(meterOnBtn);
-		group.add(meterOffBtn);
-		setTitle("Selected Ramp Meter");
+		group.add(on_btn);
+		group.add(off_btn);
+		setTitle(I18N.get("ramp.meter.selected"));
 		setEnabled(false);
-		add("Name", nameTxt);
-		addRow("Camera", cameraBtn);
-		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
+		add(I18N.get("device.name"), nameTxt);
+		addRow(I18N.get("camera"), camera_btn);
+		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		addRow("Location", locationTxt);
-		addRow("Operation", operationTxt);
-		add("Release Rate", releaseTxt);
-		addRow("Cycle Time", cycleTxt);
-		add("Queue", queueTxt);
-		add(shrinkBtn);
-		addRow(growBtn);
-		add("Lock", lockCmb);
+		addRow(I18N.get("location"), locationTxt);
+		addRow(I18N.get("device.operation"), operationTxt);
+		add(I18N.get("ramp.meter.rate"), releaseTxt);
+		addRow(I18N.get("ramp.meter.cycle"), cycleTxt);
+		add(I18N.get("ramp.meter.queue"), queueTxt);
+		add(shrink_btn);
+		addRow(grow_btn);
+		add(I18N.get("ramp.meter.lock"), lockCmb);
 		finishRow();
-		add("Metering", meterOnBtn);
-		addRow(meterOffBtn);
-
+		add(I18N.get("ramp.meter.metering"), on_btn);
+		addRow(off_btn);
 		setSelected(null);
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
@@ -213,11 +217,11 @@ public class MeterStatusPanel extends FormPanel
 		selected = proxy;
 		setCameraAction(proxy);
 		if(proxy != null) {
-			shrinkBtn.setAction(new ShrinkQueueAction(proxy));
-			growBtn.setAction(new GrowQueueAction(proxy));
+			shrink_btn.setAction(new ShrinkQueueAction(proxy));
+			grow_btn.setAction(new GrowQueueAction(proxy));
 			lockCmb.setAction(new LockMeterAction(proxy, lockCmb));
-			meterOnBtn.setAction(new TurnOnAction(proxy));
-			meterOffBtn.setAction(new TurnOffAction(proxy));
+			on_btn.setAction(new TurnOnAction(proxy));
+			off_btn.setAction(new TurnOffAction(proxy));
 			updateAttribute(proxy, null);
 		} else {
 			nameTxt.setText("");
@@ -228,8 +232,8 @@ public class MeterStatusPanel extends FormPanel
 			releaseTxt.setText("");
 			cycleTxt.setText("");
 			queueTxt.setText("");
-			shrinkBtn.setEnabled(false);
-			growBtn.setEnabled(false);
+			shrink_btn.setEnabled(false);
+			grow_btn.setEnabled(false);
 		}
 		setEnabled(canUpdate(proxy));
 	}
@@ -238,19 +242,19 @@ public class MeterStatusPanel extends FormPanel
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		lockCmb.setEnabled(enabled);
-		meterOnBtn.setEnabled(enabled);
-		meterOffBtn.setEnabled(enabled);
+		on_btn.setEnabled(enabled);
+		off_btn.setEnabled(enabled);
 	}
 
 	/** Set the camera action */
 	protected void setCameraAction(RampMeter meter) {
 		Camera cam = RampMeterHelper.getCamera(meter);
 		if(cam != null) {
-			cameraBtn.setAction(new CameraSelectAction(cam,
+			camera_btn.setAction(new CameraSelectAction(cam,
 			    session.getCameraManager().getSelectionModel()));
 		} else
-			cameraBtn.setAction(null);
-		cameraBtn.setEnabled(cam != null);
+			camera_btn.setAction(null);
+		camera_btn.setEnabled(cam != null);
 	}
 
 	/** Update one attribute on the form */
@@ -279,11 +283,11 @@ public class MeterStatusPanel extends FormPanel
 			releaseTxt.setText(formatRelease(rate));
 			cycleTxt.setText(formatCycle(rate));
 			if(rate != null)
-				meterOnBtn.setSelected(true);
+				on_btn.setSelected(true);
 			else
-				meterOffBtn.setSelected(true);
-			shrinkBtn.setEnabled(canUpdate(meter) && rate != null);
-			growBtn.setEnabled(canUpdate(meter) && rate != null);
+				off_btn.setSelected(true);
+			shrink_btn.setEnabled(canUpdate(meter) && rate != null);
+			grow_btn.setEnabled(canUpdate(meter) && rate != null);
 		}
 		if(a == null || a.equals("queue")) {
 			RampMeterQueue q = RampMeterQueue.fromOrdinal(

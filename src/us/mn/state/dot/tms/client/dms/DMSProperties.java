@@ -203,7 +203,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	private final IButton queryStatBtn = new IButton("dms.query.status");
 
 	/** Send settings button */
-	private final IButton settingsBtn = new IButton("dms.send.settings");
+	private final IButton settingsBtn = new IButton("device.send.settings");
 
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();

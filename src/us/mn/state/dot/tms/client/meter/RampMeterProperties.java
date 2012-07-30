@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -40,6 +39,8 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This is a form for viewing and editing the properties of a ramp meter.
@@ -47,9 +48,6 @@ import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
  * @author Douglas Lau
  */
 public class RampMeterProperties extends SonarObjectForm<RampMeter> {
-
-	/** Frame title */
-	static protected final String TITLE = "Ramp Meter: ";
 
 	/** Get the controller status */
 	static protected String getControllerStatus(RampMeter proxy) {
@@ -70,7 +68,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	protected final JComboBox camera = new JComboBox();
 
 	/** Controller button */
-	protected final JButton controllerBtn = new JButton("Controller");
+	private final IButton controllerBtn = new IButton("controller");
 
 	/** Meter type combo box component */
 	protected final JComboBox meterType = new JComboBox(
@@ -112,14 +110,14 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	protected final JLabel l_status = new JLabel();
 
 	/** Send settings button */
-	protected final JButton settingsBtn = new JButton("Send Settings");
+	private final IButton settingsBtn = new IButton("device.send.settings");
 
 	/** Sonar state */
 	protected final SonarState state;
 
 	/** Create a new ramp meter properties form */
 	public RampMeterProperties(Session s, RampMeter meter) {
-		super(TITLE, s, meter);
+		super(I18N.get("ramp.meter") + ": ", s, meter);
 		state = s.getSonarState();
 	}
 
@@ -132,9 +130,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Location", createLocationPanel());
-		tab.add("Setup", createSetupPanel());
-		tab.add("Status", createStatusPanel());
+		tab.add(I18N.get("location"), createLocationPanel());
+		tab.add(I18N.get("device.setup"), createSetupPanel());
+		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		updateAttribute(null);
 		if(canUpdate())
@@ -151,10 +149,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	protected JPanel createLocationPanel() {
 		location = new LocationPanel(session, proxy.getGeoLoc());
 		location.initialize();
-		location.addRow("Notes", notes);
+		location.addRow(I18N.get("device.notes"), notes);
 		camera.setModel(new WrapperComboBoxModel(
 			state.getCamCache().getCameraModel()));
-		location.add("Camera", camera);
+		location.add(I18N.get("camera"), camera);
 		location.finishRow();
 		location.setCenter();
 		location.addRow(controllerBtn);
@@ -252,24 +250,24 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Create ramp meter setup panel */
 	protected JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow("Meter Type", meterType);
-		panel.addRow("Storage (feet)", storage);
-		panel.addRow("Max Wait (seconds)", max_wait);
-		panel.addRow("Metering Algorithm", algorithm_cbx);
-		panel.addRow("AM Target (v/h)", am_target_txt);
-		panel.addRow("PM Target (v/h)", pm_target_txt);
+		panel.addRow(I18N.get("ramp.meter.type"), meterType);
+		panel.addRow(I18N.get("ramp.meter.storage"), storage);
+		panel.addRow(I18N.get("ramp.meter.max.wait"), max_wait);
+		panel.addRow(I18N.get("ramp.meter.algorithm"), algorithm_cbx);
+		panel.addRow(I18N.get("ramp.meter.target.am"), am_target_txt);
+		panel.addRow(I18N.get("ramp.meter.target.pm"), pm_target_txt);
 		return panel;
 	}
 
 	/** Create ramp meter status panel */
 	protected JPanel createStatusPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow("Release rate", release);
-		panel.addRow("Cycle time", cycle);
-		panel.addRow("Queue", queue);
-		panel.addRow("Lock", m_lock);
-		panel.addRow("Operation", operation);
-		panel.addRow("Status", l_status);
+		panel.addRow(I18N.get("ramp.meter.rate"), release);
+		panel.addRow(I18N.get("ramp.meter.cycle"), cycle);
+		panel.addRow(I18N.get("ramp.meter.queue"), queue);
+		panel.addRow(I18N.get("ramp.meter.lock"), m_lock);
+		panel.addRow(I18N.get("device.operation"), operation);
+		panel.addRow(I18N.get("device.status"), l_status);
 		panel.addRow(settingsBtn);
 		return panel;
 	}

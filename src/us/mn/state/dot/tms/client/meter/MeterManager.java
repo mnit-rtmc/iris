@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The MeterManager class provides proxies for RampMeter objects.
@@ -114,12 +115,12 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return "Meter";
+		return I18N.get("ramp.meter.short");
 	}
 
 	/** Get longer proxy type name for display */
 	public String getLongProxyType() {
-		return "Ramp Meter";
+		return I18N.get("ramp.meter");
 	}
 
 	/** Get the shape for a given proxy */
@@ -200,7 +201,8 @@ public class MeterManager extends ProxyManager<RampMeter> {
 				return createSinglePopup(meter);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " Meters"));
+		p.add(new JLabel("" + n_selected + " " + I18N.get(
+			"ramp.meters.short")));
 		p.addSeparator();
 		// FIXME: add turn on/off all actions
 		return p;

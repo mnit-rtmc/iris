@@ -65,7 +65,9 @@ public class IButton extends JButton {
 
 	/** Init, called by constructors. */
 	private void init() {
-		setText(I18N.get(m_textid));
+		String t = getText();
+		if(t == null || t.isEmpty())
+			setText(I18N.get(m_textid));
 		// set mnemonic
 		int m = I18N.getKeyEvent(m_textid);
 		if(m != 0)

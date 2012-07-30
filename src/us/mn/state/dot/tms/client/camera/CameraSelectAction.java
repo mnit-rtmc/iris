@@ -35,9 +35,10 @@ public class CameraSelectAction extends ProxyAction<Camera> {
 		super(c);
 		sel_model = mdl;
 		putValue(Action.NAME, c.getName());
-		putValue(Action.SHORT_DESCRIPTION, I18N.get("camera.select"));
-		putValue(Action.LONG_DESCRIPTION, I18N.get("camera.select") +
-			" " + c.getName());
+		putValue(Action.SHORT_DESCRIPTION, I18N.get(
+			"camera.select.tooltip"));
+		putValue(Action.LONG_DESCRIPTION, I18N.get(
+			"camera.select.long"));
 	}
 
 	/** Actually perform the action */

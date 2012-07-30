@@ -94,7 +94,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected final JLabel operation = new JLabel();
 
 	/** Button to send settings */
-	private final IButton settings_btn = new IButton("lcs.send.settings");
+	private final IButton settings_btn =new IButton("device.send.settings");
 
 	/** Create a new lane control signal properties form */
 	public LCSArrayProperties(Session s, LCSArray proxy) {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for ramp meters.
@@ -32,7 +33,7 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<RampMeter>("Meter", 200) {
+		new ProxyColumn<RampMeter>(I18N.get("ramp.meter.short"), 200) {
 			public Object getValueAt(RampMeter rm) {
 				return rm.getName();
 			}
@@ -45,7 +46,7 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<RampMeter>("Location", 300) {
+		new ProxyColumn<RampMeter>(I18N.get("location"), 300) {
 			public Object getValueAt(RampMeter rm) {
 				return GeoLocHelper.getOnRampDescription(
 					rm.getGeoLoc());
