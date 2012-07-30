@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.marking;
 
 import java.awt.Color;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -28,6 +27,8 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * LaneMarkingProperties is a dialog for entering and editing lane markings
@@ -36,9 +37,6 @@ import us.mn.state.dot.tms.client.toast.SonarObjectForm;
  */
 public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 
-	/** Frame title */
-	static private final String TITLE = "Lane Marking: ";
-
 	/** Location panel */
 	protected LocationPanel location;
 
@@ -46,11 +44,11 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Controller button */
-	protected final JButton controllerBtn = new JButton("Controller");
+	private final IButton controllerBtn = new IButton("controller");
 
 	/** Create a new lane marking properties form */
 	public LaneMarkingProperties(Session s, LaneMarking lm) {
-		super(TITLE, s, lm);
+		super(I18N.get("lane.marking") + ": ", s, lm);
 	}
 
 	/** Get the SONAR type cache */
@@ -62,7 +60,7 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Location", createLocationPanel());
+		tab.add(I18N.get("location"), createLocationPanel());
 		add(tab);
 		updateAttribute(null);
 		if(canUpdate())
@@ -81,7 +79,7 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	protected JPanel createLocationPanel() {
 		location = new LocationPanel(session, proxy.getGeoLoc());
 		location.initialize();
-		location.addRow("Notes", notes);
+		location.addRow(I18N.get("device.notes"), notes);
 		location.setCenter();
 		location.addRow(controllerBtn);
 		return location;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for lane markings.
@@ -32,7 +33,7 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<LaneMarking>("Lane Marking", 120) {
+		new ProxyColumn<LaneMarking>(I18N.get("lane.marking"), 120) {
 			public Object getValueAt(LaneMarking lm) {
 				return lm.getName();
 			}
@@ -45,7 +46,7 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<LaneMarking>("Location", 300) {
+		new ProxyColumn<LaneMarking>(I18N.get("location"), 300) {
 			public Object getValueAt(LaneMarking lm) {
 				return GeoLocHelper.getDescription(
 					lm.getGeoLoc());
