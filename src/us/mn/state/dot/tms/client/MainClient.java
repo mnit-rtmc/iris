@@ -15,9 +15,15 @@
 package us.mn.state.dot.tms.client;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Insets;
 import java.io.IOException;
 import java.net.ProxySelector;
+import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Properties;
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.util.HTTPProxySelector;
@@ -86,6 +92,7 @@ public class MainClient {
 		Scheduler.setHandler(handler);
 		checkAssert();
 		tweakLookAndFeel();
+		scaleLookAndFeel(1f);
 		try {
 			IrisClient c = createClient(args, handler);
 			handler.setOwner(c);
@@ -113,5 +120,55 @@ public class MainClient {
 			 new javax.swing.plaf.ColorUIResource(Color.GRAY));
 		UIManager.put("TextArea.inactiveForeground",
 			 new javax.swing.plaf.ColorUIResource(Color.GRAY));
+	}
+
+	/** Scale the look-and-feel */
+	static private void scaleLookAndFeel(float scale) {
+		UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+		HashSet<Object> keys = new HashSet<Object>(defaults.keySet());
+		Iterator<Object> it = keys.iterator();
+		while(it.hasNext()) {
+			Object key = it.next();
+			Font f = scaleFont(key, scale);
+			if(f != null)
+				defaults.put(key, f);
+			Insets i = scaleInsets(key, scale);
+			if(i != null)
+				defaults.put(key, i);
+			Dimension d = scaleDimension(key, scale);
+			if(d != null)
+				defaults.put(key, d);
+		}
+	}
+
+	/** Scale a font from the look-and-feel */
+	static private Font scaleFont(Object key, float scale) {
+		Font font = UIManager.getFont(key);
+		if(font != null)
+			return font.deriveFont(scale * font.getSize2D());
+		else
+			return null;
+	}
+
+	/** Scale an insets from the look-and-feel */
+	static private Insets scaleInsets(Object key, float scale) {
+		Insets insets = UIManager.getInsets(key);
+		if(insets != null) {
+			return new Insets(Math.round(insets.top * scale),
+				Math.round(insets.left * scale),
+				Math.round(insets.bottom * scale),
+				Math.round(insets.right * scale));
+		} else
+			return null;
+	}
+
+	/** Scale a dimension from the look-and-feel */
+	static private Dimension scaleDimension(Object key, float scale) {
+		Dimension d = UIManager.getDimension(key);
+		if(d != null) {
+			return new Dimension(Math.round(d.width * scale),
+				Math.round(d.height * scale));
+		} else
+			return null;
 	}
 }
