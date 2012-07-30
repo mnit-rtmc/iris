@@ -46,6 +46,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The LCSArrayManager class provides proxies for LCSArray objects.
@@ -169,7 +170,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return "LCS";
+		return I18N.get("lcs");
 	}
 
 	/** Get the shape for a given proxy */
@@ -301,7 +302,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 				return createSinglePopup(la);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " LCS arrays"));
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("lcs.arrays")));
 		p.addSeparator();
 		return p;
 	}

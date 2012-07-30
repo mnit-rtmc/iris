@@ -155,7 +155,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		addRow(I18N.get("camera"), cameraBtn);
 		locationTxt.setMinimumSize(new Dimension(260, 20));
 		addRow(I18N.get("location"), locationTxt);
-		addRow(I18N.get("dms.status"), statusTxt);
+		addRow(I18N.get("device.status"), statusTxt);
 		addRow(I18N.get("device.operation"), operationTxt);
 		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean()) {
 			opStatusTxt.setColumns(10);

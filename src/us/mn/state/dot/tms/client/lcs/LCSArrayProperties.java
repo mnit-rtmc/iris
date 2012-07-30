@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.Color;
 import java.util.LinkedList;
 import java.util.HashMap;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -47,7 +46,9 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * LCSArrayProperties is a dialog for editing the properties of an LCS array.
@@ -55,9 +56,6 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  * @author Douglas Lau
  */
 public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
-
-	/** Frame title */
-	static private final String TITLE = "LCS Array: ";
 
 	/** SONAR state */
 	protected final SonarState state;
@@ -72,10 +70,10 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected final ZTable lcs_table = new ZTable();
 
 	/** Button to edit the selected LCS */
-	protected final JButton edit_btn = new JButton("Edit");
+	private final IButton edit_btn = new IButton("lcs.edit");
 
 	/** Button to delete the selected LCS */
-	protected final JButton delete_btn = new JButton("Delete");
+	private final IButton delete_btn = new IButton("lcs.delete");
 
 	/** Spinner for lane shift */
 	protected final JSpinner shift_spn = new JSpinner(
@@ -96,11 +94,11 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected final JLabel operation = new JLabel();
 
 	/** Button to send settings */
-	protected final JButton settingsBtn = new JButton("Send Settings");
+	private final IButton settings_btn = new IButton("lcs.send.settings");
 
 	/** Create a new lane control signal properties form */
 	public LCSArrayProperties(Session s, LCSArray proxy) {
-		super(TITLE, s, proxy);
+		super(I18N.get("lcs.array") + ": ", s, proxy);
 		state = s.getSonarState();
 		User user = s.getUser();
 		creator = new LCSIndicationCreator(state.getNamespace(),
@@ -118,8 +116,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Setup", createSetupPanel());
-		tab.add("Status", createStatusPanel());
+		tab.add(I18N.get("device.setup"), createSetupPanel());
+		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		updateAttribute(null);
 		if(canUpdate())
@@ -148,12 +146,12 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		edit_btn.setEnabled(false);
 		tpnl.addRow(delete_btn);
 		delete_btn.setEnabled(false);
-		tpnl.addRow("Lane Shift", shift_spn);
+		tpnl.addRow(I18N.get("lcs.lane.shift"), shift_spn);
 		// this panel is needed to make the widgets line up
 		panel.add(new JPanel());
 		panel.add(tpnl);
 		panel.addRow(createIndicationPanel());
-		panel.addRow("Notes", notes);
+		panel.addRow(I18N.get("device.notes"), notes);
 		return panel;
 	}
 
@@ -306,9 +304,9 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	/** Create status panel */
 	protected JPanel createStatusPanel() {
 		FormPanel panel = new FormPanel(false);
-		panel.addRow("Lock", lcs_lock);
-		panel.addRow("Operation", operation);
-		panel.addRow(settingsBtn);
+		panel.addRow(I18N.get("lcs.lock"), lcs_lock);
+		panel.addRow(I18N.get("device.operation"), operation);
+		panel.addRow(settings_btn);
 		return panel;
 	}
 
@@ -320,13 +318,13 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create request jobs */
 	protected void createRequestJobs() {
-		new ActionJob(this, settingsBtn) {
+		new ActionJob(this, settings_btn) {
 			public void perform() {
 				proxy.setDeviceRequest(DeviceRequest.
 					SEND_SETTINGS.ordinal());
 			}
 		};
-		settingsBtn.setEnabled(true);
+		settings_btn.setEnabled(true);
 	}
 
 	/** Update one attribute on the form */

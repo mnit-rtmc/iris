@@ -82,7 +82,7 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 				return (name == null ? "" : name);
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("dms.status"), 100) {
+		new ProxyColumn<DMS>(I18N.get("device.status"), 100) {
 			public Object getValueAt(DMS d) {
 				return DMSHelper.getAllStyles(d);
 			}

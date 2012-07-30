@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.lcs;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying a table of lane-use MULTI strings.
@@ -32,7 +33,7 @@ public class LaneUseMultiForm extends ProxyTableForm<LaneUseMulti> {
 
 	/** Create a new graphic form */
 	public LaneUseMultiForm(Session s) {
-		super("Lane-Use MULTI", new LaneUseMultiModel(s));
+		super(I18N.get("lane.use.multi"), new LaneUseMultiModel(s));
 	}
 
 	/** Get the row height */

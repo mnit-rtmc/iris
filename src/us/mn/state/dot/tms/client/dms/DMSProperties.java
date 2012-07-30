@@ -292,7 +292,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		tab.add(I18N.get("location"), createLocationPanel());
 		tab.add(I18N.get("dms.messages"), messagesTab);
 		tab.add(I18N.get("dms.config"), createConfigurationPanel());
-		tab.add(I18N.get("dms.status"), createStatusPanel());
+		tab.add(I18N.get("device.status"), createStatusPanel());
 		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.pixels"), createPixelPanel());
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {

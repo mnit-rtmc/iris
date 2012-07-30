@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.TreeSet;
 import javax.imageio.ImageIO;
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
@@ -36,7 +35,9 @@ import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying a table of graphics.
@@ -49,9 +50,6 @@ public class GraphicForm extends AbstractForm {
 	static public boolean isPermitted(Session s) {
 		return s.canRead(Graphic.SONAR_TYPE);
 	}
-
-	/** Frame title */
-	static protected final String TITLE = "Graphics";
 
 	/** Filename extension filter */
 	static protected final FileNameExtensionFilter FILTER =
@@ -71,10 +69,10 @@ public class GraphicForm extends AbstractForm {
 	protected final ZTable table = new ZTable();
 
 	/** Button to create a new graphic */
-	protected final JButton createBtn = new JButton("Create");
+	private final IButton create_btn = new IButton("graphic.create");
 
 	/** Button to delete the selected proxy */
-	protected final JButton del_btn = new JButton("Delete");
+	private final IButton del_btn = new IButton("graphic.delete");
 
 	/** User session */
 	protected final Session session;
@@ -84,7 +82,7 @@ public class GraphicForm extends AbstractForm {
 
 	/** Create a new graphic form */
 	public GraphicForm(Session s) {
-		super(TITLE);
+		super(I18N.get("graphics"));
 		session = s;
 		cache = s.getSonarState().getGraphics();
 		model = new GraphicModel(s);
@@ -112,7 +110,7 @@ public class GraphicForm extends AbstractForm {
 					selectProxy();
 			}
 		};
-		new ActionJob(this, createBtn) {
+		new ActionJob(this, create_btn) {
 			public void perform() throws Exception {
 				createGraphic();
 			}
@@ -130,9 +128,9 @@ public class GraphicForm extends AbstractForm {
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
 		panel.addRow(table);
-		panel.add(createBtn);
+		panel.add(create_btn);
 		panel.addRow(del_btn);
-		createBtn.setEnabled(model.canAdd());
+		create_btn.setEnabled(model.canAdd());
 		del_btn.setEnabled(false);
 		return panel;
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for lane-use MULTI.
@@ -41,12 +42,14 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<LaneUseMulti>("Name", 80) {
+		new ProxyColumn<LaneUseMulti>(I18N.get("device.name"), 80) {
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getName();
 			}
 		},
-		new ProxyColumn<LaneUseMulti>("Indication", 100) {
+		new ProxyColumn<LaneUseMulti>(I18N.get(
+			"lane.use.multi.indication"), 100)
+		{
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getIndication();
 			}
@@ -73,7 +76,9 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<LaneUseMulti>("Msg #", 80, Integer.class) {
+		new ProxyColumn<LaneUseMulti>(I18N.get("lane.use.multi.msg"),
+			80, Integer.class)
+		{
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getMsgNum();
 			}
@@ -87,7 +92,9 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					lum.setMsgNum(null);
 			}
 		},
-		new ProxyColumn<LaneUseMulti>("Width", 80, Integer.class) {
+		new ProxyColumn<LaneUseMulti>(I18N.get("graphic.width"), 80,
+			Integer.class)
+		{
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getWidth();
 			}
@@ -99,7 +106,9 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					lum.setWidth((Integer)value);
 			}
 		},
-		new ProxyColumn<LaneUseMulti>("Height", 80, Integer.class) {
+		new ProxyColumn<LaneUseMulti>(I18N.get("graphic.height"), 80,
+			Integer.class)
+		{
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getHeight();
 			}
@@ -111,7 +120,9 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					lum.setHeight((Integer)value);
 			}
 		},
-		new ProxyColumn<LaneUseMulti>("Quick Message", 160) {
+		new ProxyColumn<LaneUseMulti>(I18N.get("dms.quick.message"),
+			160)
+		{
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getQuickMessage();
 			}

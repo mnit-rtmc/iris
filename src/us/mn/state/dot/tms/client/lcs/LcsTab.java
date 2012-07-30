@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * GUI form for working with LaneControlSignal objects.
@@ -39,7 +40,7 @@ public class LcsTab extends MapTab {
 	public LcsTab(Session session, LCSArrayManager manager)
 		throws IOException
 	{
-		super(manager.getProxyType(), "Operate Lane Control Signals");
+		super(manager.getProxyType(), I18N.get("lcs.tab"));
 		dispatcher = new LcsDispatcher(session, manager);
 		summary = manager.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);

@@ -44,6 +44,8 @@ import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * GUI for controlling a LaneControlSignal object.
@@ -103,7 +105,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		new IndicationSelector(LCS_SIZE);
 
 	/** Button to send new indications to the LCS array */
-	protected final JButton sendBtn = new JButton("Send");
+	private final IButton sendBtn = new IButton("lcs.send");
 
 	/** Button to blank the LCS array indications */
 	protected final JButton blankBtn = new JButton();
@@ -150,15 +152,15 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected JPanel createMainPanel() {
 		FormPanel panel = new FormPanel(true);
 		panel.setBorder(BorderFactory.createTitledBorder(
-			"Selected Lane-Use Control Signal"));
-		panel.add("Name", nameTxt);
-		panel.addRow("Camera", cameraBtn);
+			I18N.get("lcs.selected")));
+		panel.add(I18N.get("device.name"), nameTxt);
+		panel.addRow(I18N.get("camera"), cameraBtn);
 		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		panel.addRow("Location", locationTxt);
-		panel.addRow("Status", statusTxt);
-		panel.addRow("Operation", operationTxt);
-//		panel.add("Lock", lcs_lock);
+		panel.addRow(I18N.get("location"), locationTxt);
+		panel.addRow(I18N.get("device.status"), statusTxt);
+		panel.addRow(I18N.get("device.operation"), operationTxt);
+//		panel.add(I18N.get("lcs.lock"), lcs_lock);
 		panel.finishRow();
 		panel.addRow(buildSelectorBox());
 		panel.addRow(buildButtonPanel());
@@ -168,13 +170,13 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Build the indication selector box */
 	protected Box buildSelectorBox() {
 		Box box = Box.createHorizontalBox();
-		box.add(createLabel("L"));
+		box.add(createLabel(I18N.get("location.left")));
 		box.add(Box.createHorizontalStrut(4));
 		lane_config.add(lcsPnl);
 		lane_config.add(indicationSelector);
 		box.add(lane_config);
 		box.add(Box.createHorizontalStrut(4));
-		box.add(createLabel("R"));
+		box.add(createLabel(I18N.get("location.right")));
 		return box;
 	}
 

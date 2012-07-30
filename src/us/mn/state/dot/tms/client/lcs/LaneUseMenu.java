@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * LaneUseMenu is a menu for LCS-related items.
@@ -36,7 +37,7 @@ public class LaneUseMenu extends JMenu {
 
 	/** Create a new lane use menu */
 	public LaneUseMenu(final Session s) {
-		super("Lane Use");
+		super(I18N.get("lane.use"));
 		session = s;
 		desktop = s.getDesktop();
 		JMenuItem item = createLcsItem();
@@ -57,7 +58,7 @@ public class LaneUseMenu extends JMenu {
 	protected JMenuItem createLcsItem() {
 		if(!LcsForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("LCS");
+		JMenuItem item = new JMenuItem(I18N.get("lcs"));
 		item.setMnemonic('L');
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -71,7 +72,7 @@ public class LaneUseMenu extends JMenu {
 	protected JMenuItem createGraphicItem() {
 		if(!GraphicForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Graphics");
+		JMenuItem item = new JMenuItem(I18N.get("graphics"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new GraphicForm(session));
@@ -84,7 +85,7 @@ public class LaneUseMenu extends JMenu {
 	protected JMenuItem createLaneUseMultiItem() {
 		if(!LaneUseMultiForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Lane-Use MULTI");
+		JMenuItem item = new JMenuItem(I18N.get("lane.use.multi"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new LaneUseMultiForm(session));
@@ -97,7 +98,7 @@ public class LaneUseMenu extends JMenu {
 	protected JMenuItem createLaneMarkingItem() {
 		if(!LaneMarkingForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Lane Markings");
+		JMenuItem item = new JMenuItem(I18N.get("lane.markings"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new LaneMarkingForm(session));

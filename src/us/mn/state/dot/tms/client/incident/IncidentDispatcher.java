@@ -193,11 +193,11 @@ public class IncidentDispatcher extends JPanel
 		impact_pnl.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("incident.impact")));
 		Box box = Box.createHorizontalBox();
-		box.add(createLabel("incident.left"));
+		box.add(createLabel("location.left"));
 		box.add(Box.createHorizontalStrut(4));
 		box.add(impact_pnl);
 		box.add(Box.createHorizontalStrut(4));
-		box.add(createLabel("incident.right"));
+		box.add(createLabel("location.right"));
 		return box;
 	}
 

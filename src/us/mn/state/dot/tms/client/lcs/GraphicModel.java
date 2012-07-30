@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for graphics
@@ -39,12 +40,14 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Graphic>("Name") {
+		new ProxyColumn<Graphic>(I18N.get("device.name")) {
 			public Object getValueAt(Graphic g) {
 				return g.getName();
 			}
 		},
-		new ProxyColumn<Graphic>("Number", 0, Integer.class) {
+		new ProxyColumn<Graphic>(I18N.get("graphic.number"), 0,
+			Integer.class)
+		{
 			public Object getValueAt(Graphic g) {
 				return g.getGNumber();
 			}
@@ -56,22 +59,28 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 					g.setGNumber((Integer)value);
 			}
 		},
-		new ProxyColumn<Graphic>("Bpp", 0, Integer.class) {
+		new ProxyColumn<Graphic>(I18N.get("graphic.bpp"), 0,
+			Integer.class)
+		{
 			public Object getValueAt(Graphic g) {
 				return g.getBpp();
 			}
 		},
-		new ProxyColumn<Graphic>("Width", 0, Integer.class) {
+		new ProxyColumn<Graphic>(I18N.get("graphic.width"), 0,
+			Integer.class)
+		{
 			public Object getValueAt(Graphic g) {
 				return g.getWidth();
 			}
 		},
-		new ProxyColumn<Graphic>("Height", 0, Integer.class) {
+		new ProxyColumn<Graphic>(I18N.get("graphic.height"), 0,
+			Integer.class)
+		{
 			public Object getValueAt(Graphic g) {
 				return g.getHeight();
 			}
 		},
-		new ProxyColumn<Graphic>("Image") {
+		new ProxyColumn<Graphic>(I18N.get("graphic.image")) {
 			public Object getValueAt(Graphic g) {
 				return g;
 			}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for LCS within an array.
@@ -32,12 +33,12 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<LCS>("Lane", 36, Integer.class) {
+		new ProxyColumn<LCS>(I18N.get("lcs.lane"), 36, Integer.class) {
 			public Object getValueAt(LCS lcs) {
 				return lcs.getLane();
 			}
 		},
-		new ProxyColumn<LCS>("Name", 140) {
+		new ProxyColumn<LCS>(I18N.get("device.name"), 140) {
 			public Object getValueAt(LCS lcs) {
 				return lcs.getName();
 			}
