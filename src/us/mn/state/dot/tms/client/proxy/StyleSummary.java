@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -220,8 +221,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		String label = size.m_sname;
 		JToggleButton b = new JToggleButton(label);
 		b.setMargin(new Insets(0, 0, 0, 0));
-		b.setFont(new java.awt.Font(("SansSerif"), 
-			java.awt.Font.PLAIN, 10));
+		b.setFont(new Font("SansSerif", Font.PLAIN, 10));
 		b.setToolTipText("Switch to " + size.m_name + " " + 
 			manager.getLongProxyType() + " icons.");
 		Dimension bsize = new Dimension(18, 24);

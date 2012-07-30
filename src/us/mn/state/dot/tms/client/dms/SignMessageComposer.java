@@ -161,8 +161,6 @@ public class SignMessageComposer extends JPanel {
 			}
 		};
 		clearBtn.setMargin(new Insets(0, 6, 0, 6));
-		clearBtn.setFont(new java.awt.Font(("SansSerif"), 
-			java.awt.Font.PLAIN, 12));
 		clearBtn.setMaximumSize(clearBtn.getMinimumSize());
 		panel.add(clearBtn);
 		return panel;
