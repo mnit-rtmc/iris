@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A controller manager is a container for SONAR Controller objects.
@@ -58,7 +59,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return "Controller";
+		return I18N.get("controller");
 	}
 
 	/** Get the shape for a given proxy */
@@ -107,7 +108,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 				return createSinglePopup(ctrl);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " Controllers"));
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("controller.plural")));
 		p.addSeparator();
 		return p;
 	}
