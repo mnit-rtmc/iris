@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -41,10 +42,10 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	protected final ZTable table;
 
 	/** Button to display the proxy properties */
-	protected final JButton prop_btn = new JButton("Properties");
+	private final IButton prop_btn = new IButton("device.properties");
 
 	/** Button to delete the selected proxy */
-	protected final JButton del_btn = new JButton("Delete");
+	private final IButton del_btn = new IButton("device.delete");
 
 	/** Create a new proxy table form */
 	public ProxyTableForm(String t, ProxyTableModel<T> m) {

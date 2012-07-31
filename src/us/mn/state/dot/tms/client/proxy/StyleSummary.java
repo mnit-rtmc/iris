@@ -246,7 +246,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Button click action. */
 	private void setStyleAction(String style) {
-		String t = manager.getLongProxyType() + " status: " + style;
+		String t = manager.getLongProxyType() + " " +
+			I18N.get("device.status") + ": " + style;
 		border.setTitle(t);
 		// Force the border title to be repainted
 		repaint();

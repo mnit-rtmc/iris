@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Action to access the properties of a SONAR map object.
