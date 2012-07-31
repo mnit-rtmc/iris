@@ -26,7 +26,6 @@ import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**

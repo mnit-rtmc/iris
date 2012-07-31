@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.toast;
+package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.BorderLayout;
 import us.mn.state.dot.sched.SwingRunner;
@@ -21,6 +21,8 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
  * SonarObjectForm is an abstract Swing dialog for SonarObject property forms
