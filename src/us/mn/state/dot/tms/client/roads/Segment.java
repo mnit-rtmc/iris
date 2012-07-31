@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A segment is the shape of a roadway segment on a map.
@@ -88,7 +89,8 @@ public class Segment {
 	/** Get label for a station segment */
 	protected String getStationLabel() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Station ");
+		sb.append(I18N.get("detector.station"));
+		sb.append(" ");
 		String sid = upstream.getStationID();
 		if(sid != null && sid.length() > 0) {
 			sb.append(sid);

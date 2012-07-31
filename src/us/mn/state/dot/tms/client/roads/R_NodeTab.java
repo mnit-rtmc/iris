@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.BorderLayout;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The R_NodeTab class provides the GUI for editing roadway nodes.
@@ -33,7 +34,7 @@ public class R_NodeTab extends MapTab {
 
 	/** Create a new roadway node tab */
 	public R_NodeTab(Session session, R_NodeManager man) {
-		super(man.getProxyType(), "View / edit roadway nodes");
+		super(man.getProxyType(), I18N.get("r_node.tab"));
 		panel = new R_NodePanel(session);
 		add(panel, BorderLayout.NORTH);
 		clist = new CorridorList(session, man, panel);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * SegmentLayer is a class for drawing roadway segments.
@@ -64,7 +65,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 
 	/** Create a new segment layer */
 	public SegmentLayer(R_NodeManager m, Session s) {
-		super("Segments");
+		super(I18N.get("detector.segments"));
 		manager = m;
 		session = s;
 	}

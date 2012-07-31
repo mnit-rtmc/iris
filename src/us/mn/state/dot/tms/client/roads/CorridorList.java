@@ -23,9 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -51,6 +49,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This component allows a corridor to be chosen from a list
@@ -90,10 +91,10 @@ public class CorridorList extends JPanel {
 	protected final JComboBox corridor_combo = new JComboBox();
 
 	/** Button to add a new roadway node */
-	protected JButton add_btn = new JButton("Add");
+	private final IButton add_btn = new IButton("r_node.add");
 
-	/** Button to remove the currently selected roadway node */
-	protected JButton remove_btn = new JButton("Remove");
+	/** Button to delete the currently selected roadway node */
+	private final IButton delete_btn = new IButton("r_node.delete");
 
 	/** R_Node selection model */
 	protected final ProxySelectionModel<R_Node> sel_model;
@@ -176,7 +177,7 @@ public class CorridorList extends JPanel {
 		n_list.setCellRenderer(new R_NodeCellRenderer());
 		n_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setBorder(BorderFactory.createTitledBorder(
-			"Selected Roadway Corridor"));
+			I18N.get("r_node.corridor.selected")));
 	}
 
 	/** Initialize the corridor list */
@@ -185,15 +186,15 @@ public class CorridorList extends JPanel {
 		bag.gridx = GridBagConstraints.RELATIVE;
 		bag.gridy = 0;
 		bag.insets = new Insets(2, 4, 2, 4);
-		add(new JLabel("Corridor"), bag);
+		add(new ILabel("r_node.corridor"), bag);
 		bag.weightx = 0.5f;
 		bag.fill = GridBagConstraints.BOTH;
 		add(corridor_combo, bag);
 		bag.weightx = 0;
 		bag.fill = GridBagConstraints.NONE;
-		add(new JLabel("Node"), bag);
+		add(new ILabel("r_node"), bag);
 		add(add_btn, bag);
-		add(remove_btn, bag);
+		add(delete_btn, bag);
 		bag.gridx = 0;
 		bag.gridy = 1;
 		bag.gridwidth = 5;
@@ -208,7 +209,7 @@ public class CorridorList extends JPanel {
 		createJobs();
 		updateNodeSelection(null);
 		add_btn.setEnabled(canAdd());
-		remove_btn.setEnabled(false);
+		delete_btn.setEnabled(false);
 	}
 
 	/** Create the jobs */
@@ -227,7 +228,7 @@ public class CorridorList extends JPanel {
 				doAddButton();
 			}
 		};
-		new ActionJob(this, remove_btn) {
+		new ActionJob(this, delete_btn) {
 			public void perform() {
 				doRemoveButton();
 			}
@@ -397,7 +398,7 @@ public class CorridorList extends JPanel {
 	protected void updateNodeSelection(R_Node proxy) {
 		client.setPointSelector(null);
 		panel.setR_Node(proxy);
-		remove_btn.setEnabled(canRemove(proxy));
+		delete_btn.setEnabled(canRemove(proxy));
 	}
 
 	/** Do the add button action */

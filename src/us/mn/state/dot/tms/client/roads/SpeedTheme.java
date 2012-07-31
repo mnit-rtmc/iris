@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import us.mn.state.dot.map.Style;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A theme for drawing segment objects based on speed thresholds.
@@ -25,16 +26,16 @@ public class SpeedTheme extends SegmentTheme {
 
 	/** Speed styles */
 	static protected final Style[] S_STYLES = new Style[] {
-		new Style("0-24 mph", OUTLINE, RED),
-		new Style("25-39 mph", OUTLINE, ORANGE),
-		new Style("40-54 mph", OUTLINE, YELLOW),
-		new Style("55-90 mph", OUTLINE, GREEN),
-		new Style("Over 90 mph", OUTLINE, VIOLET)
+		new Style(I18N.get("units.speed.low"), OUTLINE, RED),
+		new Style(I18N.get("units.speed.low.med"), OUTLINE, ORANGE),
+		new Style(I18N.get("units.speed.medium"), OUTLINE, YELLOW),
+		new Style(I18N.get("units.speed.med.high"), OUTLINE, GREEN),
+		new Style(I18N.get("units.speed.high"), OUTLINE, VIOLET)
 	};
 
 	/** Create a new speed theme */
 	public SpeedTheme() {
-		super("Speed");
+		super(I18N.get("units.speed"));
 		for(Style s: S_STYLES)
 			addStyle(s);
 	}

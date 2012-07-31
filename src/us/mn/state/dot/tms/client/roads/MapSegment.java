@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A segment is the shape of a roadway segment on a map.
@@ -176,17 +177,23 @@ public class MapSegment implements MapObject {
 			sb.append(label);
 		Integer flow = getFlow();
 		if(flow != null) {
-			sb.append("\n Flow = ");
+			sb.append("\n ");
+			sb.append(I18N.get("units.flow"));
+			sb.append(" = ");
 			sb.append(flow);
 		}
 		Integer density = getDensity();
 		if(density != null) {
-			sb.append("\n Density = ");
+			sb.append("\n ");
+			sb.append(I18N.get("units.density"));
+			sb.append(" = ");
 			sb.append(density);
 		}
 		Integer speed = getSpeed();
 		if(speed != null) {
-			sb.append("\n Speed = ");
+			sb.append("\n ");
+			sb.append(I18N.get("units.speed"));
+			sb.append(" = ");
 			sb.append(speed);
 		}
 		if(sb.length() > 0)

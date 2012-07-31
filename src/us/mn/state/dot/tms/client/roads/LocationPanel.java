@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2011  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.geom.Point2D;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.geokit.GeodeticDatum;
@@ -40,6 +38,8 @@ import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.ILabel;
 
 /**
  * LocationPanel is a Swing panel for viewing and editing object locations.
@@ -117,7 +117,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		new SpinnerNumberModel(0, 0, 10000000, 1));
 
 	/** Button to select a point from the map */
-	protected final JButton select_btn = new JButton("Select Point");
+	private final IButton select_btn = new IButton("location.select");
 
 	/** Create a new location panel */
 	public LocationPanel(Session s) {
@@ -135,7 +135,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 			state.getRoadModel(), true));
 		cross.setModel(new WrapperComboBoxModel(
 			state.getRoadModel(), true));
-		add("Roadway", roadway);
+		add(new ILabel("location.roadway"), roadway);
 		setWidth(2);
 		addRow(roadDir);
 		add(crossMod);
@@ -144,9 +144,9 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		add(cross);
 		setWidth(1);
 		addRow(crossDir);
-		add("Easting", easting);
+		add(new ILabel("location.easting"), easting);
 		finishRow();
-		add("Northing", northing);
+		add(new ILabel("location.northing"), northing);
 		finishRow();
 		setWidth(4);
 		updateSelectBag();

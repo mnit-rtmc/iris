@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A simple theme which uses one symbol to draw all segment objects.
@@ -53,8 +54,8 @@ abstract public class SegmentTheme extends StyledTheme {
 		new Color(0, 0, 0, 128), 0.6f);
 
 	/** Default segment style theme */
-	static protected final Style DEFAULT_STYLE = new Style("No Data",
-		OUTLINE, GRAY);
+	static protected final Style DEFAULT_STYLE = new Style(I18N.get(
+		"detector.no.data"), OUTLINE, GRAY);
 
 	/** Create a new segment theme */
 	protected SegmentTheme(String name) {

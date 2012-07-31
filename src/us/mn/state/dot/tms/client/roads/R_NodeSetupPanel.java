@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.ILabel;
 
 /**
  * A panel for editing the setup properties of an r_node.
@@ -85,17 +86,17 @@ public class R_NodeSetupPanel extends FormPanel {
 
 	/** Initialize the panel */
 	public void initialize() {
-		add("Node type", type_cmb);
-		addRow("Pickable", pick_cbx);
-		add("Transition", trans_cmb);
-		addRow("Above", above_cbx);
-		add("Lanes", lane_spn);
-		addRow("Attach side", attach_cbx);
-		add("Shift", shift_spn);
-		addRow("Active", active_cbx);
-		add("Station ID", station_txt);
+		add(new ILabel("r_node.type"), type_cmb);
+		addRow(new ILabel("r_node.pickable"), pick_cbx);
+		add(new ILabel("r_node.transition"), trans_cmb);
+		addRow(new ILabel("r_node.above"), above_cbx);
+		add(new ILabel("r_node.lanes"), lane_spn);
+		addRow(new ILabel("r_node.attach.side"), attach_cbx);
+		add(new ILabel("r_node.shift"), shift_spn);
+		addRow(new ILabel("r_node.active"), active_cbx);
+		add(new ILabel("r_node.station"), station_txt);
 		finishRow();
-		add("Speed Limit", speed_spn);
+		add(new ILabel("r_node.speed.limit"), speed_spn);
 		createJobs();
 		clear();
 	}

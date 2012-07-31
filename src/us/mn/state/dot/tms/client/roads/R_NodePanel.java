@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A panel for viewing and editing roadway node parameters.
@@ -78,7 +79,8 @@ public class R_NodePanel extends JPanel {
 		TypeCache<R_Node> cache =
 			s.getSonarState().getDetCache().getR_Nodes();
 		watcher = new ProxyWatcher<R_Node>(s, view, cache, false);
-		setBorder(BorderFactory.createTitledBorder("Selected R_Node"));
+		setBorder(BorderFactory.createTitledBorder(I18N.get(
+			"r_node.selected")));
 	}
 
 	/** Initialize the widgets on the panel */
@@ -87,9 +89,9 @@ public class R_NodePanel extends JPanel {
 		loc_pnl.initialize();
 		setup_pnl.initialize();
 		det_pnl.initialize();
-		tab.add("Location", loc_pnl);
-		tab.add("Setup", setup_pnl);
-		tab.add("Detectors", det_pnl);
+		tab.add(I18N.get("location"), loc_pnl);
+		tab.add(I18N.get("device.setup"), setup_pnl);
+		tab.add(I18N.get("detector.plural"), det_pnl);
 		add(tab, BorderLayout.CENTER);
 	}
 

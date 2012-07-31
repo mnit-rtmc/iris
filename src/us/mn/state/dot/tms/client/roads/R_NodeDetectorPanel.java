@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -32,7 +31,9 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.detector.DetectorPanel;
 import us.mn.state.dot.tms.client.toast.TmsForm;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A panel for editing the detectors of an r_node.
@@ -68,13 +69,13 @@ public class R_NodeDetectorPanel extends JPanel {
 	protected final JLabel det_lbl = new JLabel();
 
 	/** Button to create a new detector */
-	protected final JButton create_btn = new JButton("Create");
+	private final IButton create_btn = new IButton("detector.create");
 
 	/** Button to transfer a detector */
-	protected final JButton transfer_btn = new JButton("Transfer");
+	private final IButton transfer_btn = new IButton("detector.transfer");
 
 	/** Button to delete a detector */
-	protected final JButton delete_btn = new JButton("Delete");
+	private final IButton delete_btn = new IButton("detector.delete");
 
 	/** User session */
 	protected final Session session;
@@ -149,13 +150,10 @@ public class R_NodeDetectorPanel extends JPanel {
 		createJobs();
 		det_pnl.initialize();
 		det_txt.setEnabled(false);
-		det_txt.setToolTipText("Detector name");
+		det_txt.setToolTipText(I18N.get("detector.name"));
 		create_btn.setEnabled(false);
-		create_btn.setToolTipText("Create new detector");
 		transfer_btn.setEnabled(false);
-		transfer_btn.setToolTipText("Transfer detector to this r_node");
 		delete_btn.setEnabled(false);
-		delete_btn.setToolTipText("Delete selected detector");
 	}
 
 	/** Create Gui jobs */

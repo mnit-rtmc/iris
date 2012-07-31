@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A panel for viewing and editing roadway location parameters.
@@ -45,7 +46,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	/** Initialize the widgets on the panel */
 	public void initialize() {
 		super.initialize();
-		addRow("Notes", notes_txt);
+		addRow(I18N.get("device.notes"), notes_txt);
 		setCenter();
 		addRow(name_lbl);
 		clear();
@@ -100,7 +101,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	protected void doClear() {
 		super.doClear();
 		node = null;
-		name_lbl.setText("(none selected)");
+		name_lbl.setText(I18N.get("r_node.name.none"));
 		notes_txt.setEnabled(false);
 		notes_txt.setText("");
 	}

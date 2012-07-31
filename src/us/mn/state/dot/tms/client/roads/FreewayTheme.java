@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Color;
 import us.mn.state.dot.map.Style;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A theme for drawing segment objects in a dull gray color.
@@ -30,7 +31,7 @@ public class FreewayTheme extends SegmentTheme {
 
 	/** Create a new freeway theme */
 	public FreewayTheme() {
-		super("Freeway");
+		super(I18N.get("location.freeway"));
 		addStyle(CLEAR_STYLE);
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import us.mn.state.dot.map.Style;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A theme for drawing segment objects based on flow thresholds.
@@ -25,16 +26,16 @@ public class FlowTheme extends SegmentTheme {
 
 	/** Flow styles */
 	static protected final Style[] F_STYLES = new Style[] {
-		new Style("0-1500 veh/hr", OUTLINE, GREEN),
-		new Style("1501-2000 veh/hr", OUTLINE, YELLOW),
-		new Style("2001-2500 veh/hr", OUTLINE, ORANGE),
-		new Style("2501-4000 veh/hr", OUTLINE, RED),
-		new Style("Crazy data", OUTLINE, VIOLET)
+		new Style(I18N.get("units.flow.low"), OUTLINE, GREEN),
+		new Style(I18N.get("units.flow.medium"), OUTLINE, YELLOW),
+		new Style(I18N.get("units.flow.med.high"), OUTLINE, ORANGE),
+		new Style(I18N.get("units.flow.high"), OUTLINE, RED),
+		new Style(I18N.get("units.data.bad"), OUTLINE, VIOLET)
 	};
 
 	/** Create a new flow theme */
 	public FlowTheme() {
-		super("Flow");
+		super(I18N.get("units.flow"));
 		for(Style s: F_STYLES)
 			addStyle(s);
 	}

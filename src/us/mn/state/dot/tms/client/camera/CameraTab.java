@@ -28,7 +28,7 @@ public class CameraTab extends MapTab {
 
 	/** Create a new camera tab for the IRIS client */
 	public CameraTab(Session session, CameraManager manager) {
-		super(manager.getProxyType(), I18N.get("camera.summary"));
+		super(manager.getProxyType(), I18N.get("camera.tab"));
 		add(new CameraViewer(session, manager), BorderLayout.NORTH);
 		add(manager.createStyleSummary(), BorderLayout.CENTER);
 	}

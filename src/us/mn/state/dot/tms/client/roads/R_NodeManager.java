@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
 import us.mn.state.dot.map.Symbol;
@@ -48,6 +49,7 @@ import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * R_Node manager provides proxies for roadway nodes.
@@ -228,7 +230,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Get the proxy type */
 	public String getProxyType() {
-		return "R_Node";
+		return I18N.get("r_node");
 	}
 
 	/** Get a transformed marker shape */
@@ -332,7 +334,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				return createSinglePopup(n);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new javax.swing.JLabel("" + n_selected + " R_Nodes"));
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("r_node.plural")));
 		return p;
 	}
 
