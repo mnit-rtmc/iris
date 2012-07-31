@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010 AHMCT, University of California, Davis
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,37 +17,21 @@ package us.mn.state.dot.tms.client.proxy;
 
 /**
  * Cell renderer sizes.
+ *
  * @see StyleSummary
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public enum CellRendererSize {
-	SMALL("S", "Small"),
-	MEDIUM("M", "Medium"),
-	LARGE("L", "Large");
+	SMALL("cell.size.small"),
+	MEDIUM("cell.size.medium"),
+	LARGE("cell.size.large");
 
-	/** Short name */
-	public final String m_sname;
+	/** Text ID */
+	public final String text_id;
 
-	/** Name */
-	public final String m_name;
-
-	/** constructor */
-	private CellRendererSize(String shortName, String name) {
-		m_sname = shortName;
-		m_name = name;
-	}
-
-	/** Get a size given a short name */
-	public static CellRendererSize get(String sname) {
-		if(sname.equals(SMALL.m_sname))
-			return SMALL;
-		else if(sname.equals(MEDIUM.m_sname))
-			return MEDIUM;
-		else if(sname.equals(LARGE.m_sname))
-			return LARGE;
-		else {
-			assert false;
-			return LARGE;
-		}
+	/** Create a new cell renderer size */
+	private CellRendererSize(String tid) {
+		text_id = tid;
 	}
 }

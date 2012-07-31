@@ -20,6 +20,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,6 +40,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Panel to display a summary of styled objects, which contains radio
@@ -118,13 +120,13 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			add(createRadioButton(m), bag);
 		}
 
-		// add vertical space right of each column (except last)
+		// add space right of each column (except last)
 		for(int c = 1; c < STYLE_COLS; c++) {
 			bag.gridx = c * GRID_COLS - 1;
 			bag.gridy = 0;
-			bag.weightx = 1;
 			bag.fill = GridBagConstraints.HORIZONTAL;
-			bag.insets = new Insets(0, 0, 0, 0);
+			bag.weightx = 0.1f;
+			bag.insets = new Insets(2, 2, 2, 2);
 			add(new JLabel(), bag);
 		}
 
@@ -133,11 +135,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			bag.gridx = 0;
 			bag.gridwidth = 1;
 			bag.gridheight = 1;
-			bag.insets = new Insets(8, 2, 0, 0);
+			bag.insets = new Insets(8, 2, 8, 2);
 			bag.gridy = n_rows + 1;
-			bag.weightx = 1;
-			bag.weighty = 1;
-			bag.fill = GridBagConstraints.BOTH;
 			add(createCellSizePanel(), bag);
 		}
 
@@ -185,15 +184,12 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Create the optional panel that contains cell size buttons. */
 	private JPanel createCellSizePanel() {
 		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.setLayout(new GridLayout(3, 1, 0, 4));
 		AbstractButton bs = createSizeButton(CellRendererSize.SMALL);
 		AbstractButton bm = createSizeButton(CellRendererSize.MEDIUM);
 		AbstractButton bl = createSizeButton(CellRendererSize.LARGE);
 		panel.add(bs);
-		Dimension vspace = new Dimension(0,4);
-		panel.add(Box.createRigidArea(vspace));
 		panel.add(bm);
-		panel.add(Box.createRigidArea(vspace));
 		panel.add(bl);
 		ButtonGroup bgroup = new ButtonGroup();
 		bgroup.add(bs);
@@ -212,22 +208,16 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** Create a toggle button for changing cell renderer size */
-	private AbstractButton createSizeButton(CellRendererSize size) {
-		String label = size.m_sname;
+	private AbstractButton createSizeButton(final CellRendererSize size) {
+		String label = I18N.get(size.text_id);
 		JToggleButton b = new JToggleButton(label);
-		b.setMargin(new Insets(0, 0, 0, 0));
+		b.setMargin(new Insets(1, 1, 1, 1));
 		Font f = b.getFont();
 		b.setFont(f.deriveFont(0.8f * f.getSize2D()));
-		b.setToolTipText("Switch to " + size.m_name + " " + 
-			manager.getLongProxyType() + " icons.");
-		Dimension bsize = new Dimension(18, 24);
-		b.setPreferredSize(bsize);
-		b.setMaximumSize(bsize);
-		b.setMinimumSize(bsize);
+		b.setToolTipText(I18N.get(size.text_id + ".tooltip"));
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				updateRenderer(CellRendererSize.get(
-					e.getActionCommand()));
+				updateRenderer(size);
 			}
 		});
 		return b;
