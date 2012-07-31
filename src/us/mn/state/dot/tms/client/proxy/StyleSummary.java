@@ -216,7 +216,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		String label = size.m_sname;
 		JToggleButton b = new JToggleButton(label);
 		b.setMargin(new Insets(0, 0, 0, 0));
-		b.setFont(new Font("SansSerif", Font.PLAIN, 10));
+		Font f = b.getFont();
+		b.setFont(f.deriveFont(0.8f * f.getSize2D()));
 		b.setToolTipText("Switch to " + size.m_name + " " + 
 			manager.getLongProxyType() + " icons.");
 		Dimension bsize = new Dimension(18, 24);

@@ -56,9 +56,6 @@ import us.mn.state.dot.tms.utils.I18N;
 public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	ProxySelectionListener<LCSArray>
 {
-	/** Font for "L" and "R" labels */
-	static protected final Font FONT = new Font(null, Font.BOLD, 24);
-
 	/** Size in pixels for each LCS in array */
 	static private final int LCS_SIZE = 48;
 
@@ -183,7 +180,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Create an "L" or "R" label */
 	protected JLabel createLabel(String t) {
 		JLabel label = new JLabel(t);
-		label.setFont(FONT);
+		Font f = label.getFont();
+		label.setFont(f.deriveFont(2f * f.getSize2D()));
 		return label;
 	}
 

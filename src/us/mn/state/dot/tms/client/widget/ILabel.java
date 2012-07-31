@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Font;
-import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -41,7 +40,7 @@ public class ILabel extends JLabel {
 	 * @param scale Font scale. */
 	public ILabel(String text_id, int style, float scale) {
 		this(text_id);
-		setFont(getFont().deriveFont(style,
-			AffineTransform.getScaleInstance(scale, scale)));
+		Font f = getFont();
+		setFont(f.deriveFont(style, scale * f.getSize2D()));
 	}
 }

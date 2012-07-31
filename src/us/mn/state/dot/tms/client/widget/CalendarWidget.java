@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,7 +82,10 @@ public class CalendarWidget extends JPanel {
 
 	/** Get the preferred size of the calendar widget */
 	public Dimension getPreferredSize() {
-		return new Dimension(300, 200);
+		Font f = getFont();
+		int h = 2 * f.getSize();
+		int w = 3 * f.getSize();
+		return new Dimension(w * 7, h * 6);
 	}
 
 	/** Paint the calendar widget */
@@ -93,12 +96,12 @@ public class CalendarWidget extends JPanel {
 		Dimension size = getSize();
 		int hgap = size.width / 7;
 		int vgap = size.height / 7;
-		int points = Math.min(4 * vgap / 5, 2 * hgap / 5);
-		g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, points));
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(month.getTimeInMillis());
-		int wday = month.get(Calendar.DAY_OF_WEEK) -
-			month.getFirstDayOfWeek();
+		drawWeekdayLabels(g2, hgap, vgap);
+		drawDayOfMonths(g2, hgap, vgap);
+	}
+
+	/** Draw the weekday labels */
+	private void drawWeekdayLabels(Graphics2D g2, int hgap, int vgap) {
 		Calendar wcal = Calendar.getInstance();
 		wcal.set(Calendar.DAY_OF_WEEK, wcal.getFirstDayOfWeek());
 		for(int box = 0; box < 7; box++) {
@@ -106,12 +109,20 @@ public class CalendarWidget extends JPanel {
 			int h = box / 7;
 			int x = v * hgap;
 			int y = h * vgap;
-			g.setColor(Color.GRAY);
+			g2.setColor(Color.GRAY);
 			drawText(g2, WEEK_DAY.format(wcal.getTime()),
 				x + hgap / 2, y + vgap / 2);
 			wcal.add(Calendar.DATE, 1);
 		}
+	}
+
+	/** Draw the day-of-month boxes and labels */
+	private void drawDayOfMonths(Graphics2D g2, int hgap, int vgap) {
 		Calendar tcal = Calendar.getInstance();
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(month.getTimeInMillis());
+		int wday = month.get(Calendar.DAY_OF_WEEK) -
+			month.getFirstDayOfWeek();
 		while(cal.get(Calendar.MONTH) == month.get(Calendar.MONTH)) {
 			int day = cal.get(Calendar.DAY_OF_MONTH);
 			int box = day + wday + 6;
@@ -119,23 +130,23 @@ public class CalendarWidget extends JPanel {
 			int h = box / 7;
 			int x = v * hgap;
 			int y = h * vgap;
-			g.setColor(OUTLINE);
-			g.drawRect(x + 1, y + 1, hgap - 2, vgap - 2);
+			g2.setColor(OUTLINE);
+			g2.drawRect(x + 1, y + 1, hgap - 2, vgap - 2);
 			tcal.setTimeInMillis(cal.getTimeInMillis());
 			int half = hgap / 2;
 			if(highlighter.isHighlighted(tcal)) {
-				g.setColor(COL_HOLIDAY);
-				g.fillRect(x + 1, y + 1, hgap - 2, vgap - 2);
-				g.setColor(Color.BLACK);
-				g.drawLine(x + 2, y + 2, x + hgap - 2,
+				g2.setColor(COL_HOLIDAY);
+				g2.fillRect(x + 1, y + 1, hgap - 2, vgap - 2);
+				g2.setColor(Color.BLACK);
+				g2.drawLine(x + 2, y + 2, x + hgap - 2,
 					y + vgap - 2);
-				g.drawLine(x + hgap - 2, y + 2, x + 2,
+				g2.drawLine(x + hgap - 2, y + 2, x + 2,
 					y + vgap - 2);
 			} else {
-				g.setColor(COL_DAY);
-				g.fillRect(x + 1, y + 1, hgap - 2, vgap - 2);
+				g2.setColor(COL_DAY);
+				g2.fillRect(x + 1, y + 1, hgap - 2, vgap - 2);
 			}
-			g.setColor(Color.BLACK);
+			g2.setColor(Color.BLACK);
 			drawText(g2, String.valueOf(day), x + hgap / 2,
 				y + vgap / 2);
 			cal.add(Calendar.DATE, 1);
@@ -143,7 +154,7 @@ public class CalendarWidget extends JPanel {
 	}
 
 	/** Draw text centered at a given point */
-	protected void drawText(Graphics2D g2, String text, int x, int y) {
+	private void drawText(Graphics2D g2, String text, int x, int y) {
 		Font font = g2.getFont();
 		GlyphVector gv = font.createGlyphVector(
 			g2.getFontRenderContext(), text);

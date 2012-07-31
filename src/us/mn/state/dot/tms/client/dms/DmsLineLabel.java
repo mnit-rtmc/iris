@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public class DmsLineLabel extends JLabel {
 		setHorizontalAlignment(SwingConstants.CENTER);
 		setForeground(Color.YELLOW);
 		setBackground(Color.BLACK);
-		setFont(new Font("Dialog", Font.BOLD, 12));
+		setFont(getFont().deriveFont(Font.BOLD));
 	}
 
 	/** Paint the component */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
@@ -74,8 +75,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	static protected final BasicStroke LINE_BASIC2 = new BasicStroke(2);
 
 	/** Font for cross-street labels */
-	static protected final Font FONT_XSTREET =
-		new Font("Arial", Font.BOLD, 12);
+	static private final Font FONT_XSTREET = new JLabel().getFont();
 
 	/** R_node model */
 	protected R_NodeModel model;

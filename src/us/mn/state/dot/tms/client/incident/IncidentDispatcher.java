@@ -69,9 +69,6 @@ import us.mn.state.dot.tms.utils.I18N;
 public class IncidentDispatcher extends JPanel
 	implements ProxyListener<Incident>, ProxySelectionListener<Incident>
 {
-	/** Font for "L" and "R" labels */
-	static protected final Font FONT = new Font(null, Font.BOLD, 24);
-
 	/** Formatter for incident names */
 	static protected final SimpleDateFormat NAME_FMT =
 		new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -204,7 +201,8 @@ public class IncidentDispatcher extends JPanel
 	/** Create an "L" or "R" label */
 	protected JLabel createLabel(String t) {
 		JLabel label = new ILabel(t);
-		label.setFont(FONT);
+		Font f = label.getFont();
+		label.setFont(f.deriveFont(2f * f.getSize2D()));
 		return label;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import javax.swing.Icon;
+import javax.swing.JLabel;
 import us.mn.state.dot.tms.LaneUseIndication;
 
 /**
@@ -58,7 +59,7 @@ abstract public class IndicationIcon implements Icon {
 
 	/** Create a text shape */
 	static protected Shape createTextShape(String text) {
-		Font font = new Font("Serif", Font.PLAIN, 24);
+		Font font = new JLabel().getFont();
 		FontRenderContext frc = new FontRenderContext(
 			new AffineTransform(), false, false);
 		GlyphVector vec = font.createGlyphVector(frc, text);

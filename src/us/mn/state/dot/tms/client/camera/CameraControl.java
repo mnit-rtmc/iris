@@ -54,7 +54,11 @@ public class CameraControl extends JPanel {
 	static private final Dimension SLIDER_SIZE = new Dimension(40, 110);
 
 	/** Font to use for buttons */
-	static private final Font FONT = new Font(null, Font.PLAIN, 20);
+	static private final Font FONT;
+	static {
+		Font f = new JButton().getFont();
+		FONT = f.deriveFont(2f * f.getSize2D());
+	}
 
 	/** The preferred size of buttons */
 	static private final Dimension SIZE = new Dimension(30, 30);
