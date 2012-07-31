@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.toast;
+package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -112,12 +112,12 @@ public class Icons {
 
 	/** Get an icon from a string name */
 	static public ImageIcon getIcon(String key) {
-		return getImageIcon( key );
+		return getImageIcon(key);
 	}
 
 	/** Get an image from a string name */
 	static public Image getImage(String key) {
-		ImageIcon icon = getImageIcon( key );
+		ImageIcon icon = getImageIcon(key);
 		if(icon == null)
 			return null;
 		return icon.getImage();
