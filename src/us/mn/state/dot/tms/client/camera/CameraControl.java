@@ -53,16 +53,6 @@ public class CameraControl extends JPanel {
 	/** The preferred size of the slider */
 	static private final Dimension SLIDER_SIZE = new Dimension(40, 110);
 
-	/** Font to use for buttons */
-	static private final Font FONT;
-	static {
-		Font f = new JButton().getFont();
-		FONT = f.deriveFont(2f * f.getSize2D());
-	}
-
-	/** The preferred size of buttons */
-	static private final Dimension SIZE = new Dimension(30, 30);
-
 	/** The preferred insets for buttons */
 	static private final Insets INSETS = new Insets(0, 0, 0, 0);
 
@@ -158,15 +148,23 @@ public class CameraControl extends JPanel {
 		return jp;
 	}
 
+	/** Initialize a button */
+	private void initButton(JButton btn) {
+		Font f = btn.getFont();
+		btn.setFont(f.deriveFont(2f * f.getSize2D()));
+		int sz = Math.round(3f * f.getSize2D());
+		Dimension size = new Dimension(sz, sz);
+		btn.setPreferredSize(size);
+		btn.setMinimumSize(size);
+		btn.setMargin(INSETS);
+	}
+
 	/** Create a PTZ button */
 	private IButton createPtzButton(String text_id, final int pan,
 		final int tilt, final int zoom)
 	{
 		final IButton btn = new IButton(text_id);
-		btn.setFont(FONT);
-		btn.setPreferredSize(SIZE);
-		btn.setMinimumSize(SIZE);
-		btn.setMargin(INSETS);
+		initButton(btn);
 		btn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				buttonPressed(btn, pan, tilt, zoom);
@@ -254,10 +252,7 @@ public class CameraControl extends JPanel {
 		String tt = I18N.getSilent("camera.preset.tooltip");
 		if(tt != null)
 			btn.setToolTipText(tt);
-		btn.setFont(FONT);
-		btn.setPreferredSize(SIZE);
-		btn.setMinimumSize(SIZE);
-		btn.setMargin(INSETS);
+		initButton(btn);
 		btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				Camera c = camera;
