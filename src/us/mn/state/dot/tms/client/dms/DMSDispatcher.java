@@ -48,7 +48,6 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;

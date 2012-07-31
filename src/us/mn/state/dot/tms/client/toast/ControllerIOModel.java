@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
  * Special table model for Controller I/O pins.

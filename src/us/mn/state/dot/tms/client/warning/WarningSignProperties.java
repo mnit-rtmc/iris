@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
-import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
  * WarningSignProperties is a dialog for entering and editing warning signs 

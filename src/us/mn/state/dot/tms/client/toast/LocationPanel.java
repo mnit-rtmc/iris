@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.LocModifier;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
  * LocationPanel is a Swing panel for viewing and editing object locations.

@@ -49,9 +49,9 @@ import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
-import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**

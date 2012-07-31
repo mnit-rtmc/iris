@@ -37,9 +37,9 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
  * LocationPanel is a Swing panel for viewing and editing object locations.
