@@ -59,9 +59,9 @@ import us.mn.state.dot.tms.client.roads.R_NodeTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.schedule.PlanManager;
 import us.mn.state.dot.tms.client.schedule.PlanTab;
-import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 import us.mn.state.dot.tms.client.weather.WeatherSensorManager;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
 
 /**
  * A session is one IRIS login session.

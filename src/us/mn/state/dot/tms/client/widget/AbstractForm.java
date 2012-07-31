@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.toast;
+package us.mn.state.dot.tms.client.widget;
 
-import java.awt.Cursor;
-import java.net.MalformedURLException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPanel;
+import us.mn.state.dot.tms.client.toast.Help;
+import static us.mn.state.dot.tms.client.toast.TmsForm.BORDER;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-abstract public class AbstractForm extends JPanel implements TmsForm {
+abstract public class AbstractForm extends JPanel {
 
 	/** Form title */
 	protected final String title;

@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.toast;
+package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -32,6 +32,7 @@ import javax.swing.event.InternalFrameEvent;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.tms.client.IrisClient;
+import us.mn.state.dot.tms.client.toast.Help;
 import us.mn.state.dot.tms.client.widget.Screen;
 
 /**
