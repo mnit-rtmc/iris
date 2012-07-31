@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,8 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
-import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * ProxyAction is an abstract action which is associated with one type
@@ -26,26 +24,14 @@ import us.mn.state.dot.sonar.SonarObject;
  *
  * @author Douglas Lau
  */
-abstract public class ProxyAction<T extends SonarObject>
-	extends AbstractAction
-{
+abstract public class ProxyAction<T extends SonarObject> extends IAction {
+
 	/** Sonar proxy */
 	protected final T proxy;
 
 	/** Create a new proxy action */
-	protected ProxyAction(T p) {
+	protected ProxyAction(String tid, T p) {
+		super(tid);
 		proxy = p;
 	}
-
-	/** Schedule the action to be performed */
-	public void actionPerformed(ActionEvent e) {
-		new AbstractJob() {
-			public void perform() throws Exception {
-				do_perform();
-			}
-		}.addToScheduler();
-	}
-
-	/** Do the actual job (on the WORKER thread) */
-	abstract protected void do_perform() throws Exception;
 }

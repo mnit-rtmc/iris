@@ -41,12 +41,12 @@ abstract public class IAction extends AbstractAction {
 	/** Schedule the action to be performed */
 	public void actionPerformed(ActionEvent e) {
 		new AbstractJob() {
-			public void perform() {
+			public void perform() throws Exception {
 				do_perform();
 			}
 		}.addToScheduler();
 	}
 
 	/** Actually perform the action */
-	abstract protected void do_perform();
+	abstract protected void do_perform() throws Exception;
 }

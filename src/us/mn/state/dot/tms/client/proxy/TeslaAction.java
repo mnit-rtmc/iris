@@ -35,13 +35,12 @@ public class TeslaAction<T extends SonarObject> extends ProxyAction {
 
 	/** Create a new TESLA action */
 	public TeslaAction(T p) {
-		super(p);
-		putValue(Action.NAME, "Log " + p.getName());
-		putValue(Action.SHORT_DESCRIPTION, "Log a " +
-			proxy.getTypeName() + " failure.");
-		putValue(Action.LONG_DESCRIPTION, "Log a failure " +
-			"for " + proxy.getTypeName() + " " + proxy.getName() +
-			" in the TESLA system." );
+		super("device.log", p);
+		Object v = getValue(Action.NAME);
+		if(v instanceof String) {
+			String s = (String)v;
+			putValue(Action.NAME, s + " " + p.getName());
+		}
 	}
 
 	/** Actually perform the action */

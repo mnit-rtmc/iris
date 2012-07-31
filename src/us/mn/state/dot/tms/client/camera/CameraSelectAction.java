@@ -18,7 +18,6 @@ import javax.swing.Action;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Selects the specified camera.
@@ -28,17 +27,13 @@ import us.mn.state.dot.tms.utils.I18N;
 public class CameraSelectAction extends ProxyAction<Camera> {
 
 	/** Camera selection model */
-	protected final ProxySelectionModel<Camera> sel_model;
+	private final ProxySelectionModel<Camera> sel_model;
 
 	/** Create a new action to select a camera */
 	public CameraSelectAction(Camera c, ProxySelectionModel<Camera> mdl) {
-		super(c);
+		super("camera.select", c);
 		sel_model = mdl;
 		putValue(Action.NAME, c.getName());
-		putValue(Action.SHORT_DESCRIPTION, I18N.get(
-			"camera.select.tooltip"));
-		putValue(Action.LONG_DESCRIPTION, I18N.get(
-			"camera.select.long"));
 	}
 
 	/** Actually perform the action */

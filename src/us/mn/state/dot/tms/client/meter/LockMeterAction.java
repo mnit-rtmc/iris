@@ -14,11 +14,9 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
-import javax.swing.Action;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This action sets a lock on the selected meter.
@@ -29,17 +27,12 @@ import us.mn.state.dot.tms.utils.I18N;
 public class LockMeterAction extends ProxyAction<RampMeter> {
 
 	/** Lock combo box component */
-	protected final JComboBox lockCmb;
+	private final JComboBox lockCmb;
 
 	/** Create a new action to lock the selected ramp meter */
 	public LockMeterAction(RampMeter p, JComboBox c) {
-		super(p);
+		super("ramp.meter.locked", p);
 		lockCmb = c;
-		putValue(Action.NAME, I18N.get("ramp.meter.locked"));
-		putValue(Action.SHORT_DESCRIPTION, I18N.get(
-			"ramp.meter.locked.tooltip"));
-		putValue(Action.LONG_DESCRIPTION, I18N.get(
-			"ramp.meter.locked.long"));
 	}
 
 	/** Actually perform the action */

@@ -14,11 +14,9 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import javax.swing.Action;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This action sets a lock on the selected LCS array.
@@ -32,12 +30,8 @@ public class LockLcsAction extends ProxyAction<LCSArray> {
 
 	/** Create a new action to lock the selected LCS array */
 	public LockLcsAction(LCSArray p, JComboBox c) {
-		super(p);
+		super("lcs.locked", p);
 		lockCmb = c;
-		putValue(Action.NAME, I18N.get("lcs.locked"));
-		putValue(Action.SHORT_DESCRIPTION, I18N.get(
-			"lcs.locked.tooltip"));
-		putValue(Action.LONG_DESCRIPTION, I18N.get("lcs.locked.long"));
 	}
 
 	/** Actually perform the action */

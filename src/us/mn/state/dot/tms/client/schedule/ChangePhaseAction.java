@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
-import javax.swing.Action;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.PlanPhase;
@@ -32,13 +31,8 @@ public class ChangePhaseAction extends ProxyAction<ActionPlan> {
 
 	/** Create a new action to change the phase of an action plan */
 	public ChangePhaseAction(ActionPlan p, JComboBox c) {
-		super(p);
+		super("action.plan.phase", p);
 		cmb = c;
-		putValue(Action.NAME, "Change phase");
-		putValue(Action.SHORT_DESCRIPTION,
-			"Change an action plan phase.");
-		putValue(Action.LONG_DESCRIPTION,
-			"Change an action plan to a new phase.");
 	}
 
 	/** Actually perform the action */

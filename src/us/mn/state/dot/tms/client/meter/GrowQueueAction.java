@@ -14,10 +14,8 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
-import javax.swing.Action;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Increases the size of the queue at the selected ramp.
@@ -29,12 +27,7 @@ public class GrowQueueAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action to grow the queue at the selected meter */
 	public GrowQueueAction(RampMeter p) {
-		super(p);
-		putValue(Action.NAME, I18N.get("ramp.meter.grow"));
-		putValue(Action.SHORT_DESCRIPTION, I18N.get(
-			"ramp.meter.grow.tooltip"));
-		putValue(Action.LONG_DESCRIPTION, I18N.get(
-			"ramp.meter.grow.long"));
+		super("ramp.meter.grow", p);
 	}
 
 	/** Actually perform the action */

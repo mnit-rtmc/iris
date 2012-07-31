@@ -14,11 +14,9 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
-import javax.swing.Action;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Turns on the selected RampMeter.
@@ -30,12 +28,7 @@ public class TurnOnAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action to turn on the selected ramp meter */
 	public TurnOnAction(RampMeter p) {
-		super(p);
-		putValue(Action.NAME, I18N.get("ramp.meter.on"));
-		putValue(Action.SHORT_DESCRIPTION,
-			I18N.get("ramp.meter.on.tooltip"));
-		putValue(Action.LONG_DESCRIPTION,
-			I18N.get("ramp.meter.on.long"));
+		super("ramp.meter.on", p);
 	}
 
 	/** Actually perform the action */
