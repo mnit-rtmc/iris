@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,14 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
-import javax.swing.JButton;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing stations
@@ -38,11 +39,11 @@ public class StationForm extends ProxyTableForm<Station> {
 	protected final Session session;
 
 	/** Button to display the r_node */
-	protected final JButton rnode_btn = new JButton("R_Node");
+	private final IButton rnode_btn = new IButton("r_node");
 
 	/** Create a new station form */
 	public StationForm(Session s) {
-		super("Stations", new StationModel(s));
+		super(I18N.get("detector.station.plural"), new StationModel(s));
 		session = s;
 	}
 

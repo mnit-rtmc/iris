@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
@@ -34,6 +33,8 @@ import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A panel for editing the properties of a detector.
@@ -67,10 +68,10 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	protected final JTextField note_txt = new JTextField(12);
 
 	/** Button to display the controller */
-	protected final JButton ctrl_btn = new JButton("Controller");
+	private final IButton ctrl_btn = new IButton("controller");
 
 	/** Button to display the r_node */
-	protected final JButton rnode_btn = new JButton("R_Node");
+	private final IButton rnode_btn = new IButton("r_node");
 
 	/** User session */
 	protected final Session session;
@@ -101,13 +102,13 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Initialize the panel */
 	public void initialize() {
-		addRow("Lane type", type_cmb);
-		addRow("Lane #", lane_spn);
-		add("Abandoned", aband_cbx);
-		addRow("Force Fail", fail_cbx);
-		addRow("Field Len", field_spn);
-		addRow("Fake", fake_txt);
-		addRow("Notes", note_txt);
+		addRow(I18N.get("detector.lane.type"), type_cmb);
+		addRow(I18N.get("detector.lane.number"), lane_spn);
+		add(I18N.get("detector.abandoned"), aband_cbx);
+		addRow(I18N.get("detector.force.fail"), fail_cbx);
+		addRow(I18N.get("detector.field.len"), field_spn);
+		addRow(I18N.get("detector.fake"), fake_txt);
+		addRow(I18N.get("device.notes"), note_txt);
 		setWest();
 		setWidth(2);
 		bag.insets.bottom = 0;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for detectors
@@ -31,12 +32,12 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Detector>("Detector", 60) {
+		new ProxyColumn<Detector>(I18N.get("detector"), 60) {
 			public Object getValueAt(Detector d) {
 				return d.getName();
 			}
 		},
-		new ProxyColumn<Detector>("Label", 150) {
+		new ProxyColumn<Detector>(I18N.get("detector.label"), 150) {
 			public Object getValueAt(Detector d) {
 				return DetectorHelper.getLabel(d);
 			}

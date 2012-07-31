@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing detectors
@@ -36,7 +37,7 @@ public class DetectorForm extends ProxyTableForm<Detector> {
 
 	/** Create a new detector form */
 	public DetectorForm(Session s) {
-		super("Detectors", new DetectorModel(s));
+		super(I18N.get("detector.plural"), new DetectorModel(s));
 		det_pnl = new DetectorPanel(s, true);
 		det_pnl.initialize();
 	}
