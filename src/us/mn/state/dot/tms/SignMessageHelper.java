@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -138,7 +138,8 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Check if the MULTI string is blank */
 	static public boolean isMultiBlank(SignMessage m) {
-		return new MultiString(m.getMulti()).isBlank();
+		String ms = m.getMulti();
+		return ms == null || new MultiString(ms).isBlank();
 	}
 
 	/** Check if the bitmap is blank */
