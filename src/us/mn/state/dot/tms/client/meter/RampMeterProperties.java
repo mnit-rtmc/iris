@@ -35,8 +35,8 @@ import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
-import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
@@ -59,7 +59,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	}
 
 	/** Location panel */
-	protected LocationPanel location;
+	private final LocationPanel location;
 
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
@@ -119,6 +119,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	public RampMeterProperties(Session s, RampMeter meter) {
 		super(I18N.get("ramp.meter") + ": ", s, meter);
 		state = s.getSonarState();
+		location = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
@@ -147,7 +148,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
-		location = new LocationPanel(session, proxy.getGeoLoc());
+		location.setGeoLoc(proxy.getGeoLoc());
 		location.initialize();
 		location.addRow(I18N.get("device.notes"), notes);
 		camera.setModel(new WrapperComboBoxModel(

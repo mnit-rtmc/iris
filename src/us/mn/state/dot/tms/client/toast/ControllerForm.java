@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -80,7 +81,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected final JCheckBox active = new JCheckBox();
 
 	/** Location panel */
-	protected LocationPanel location;
+	private final LocationPanel location;
 
 	/** Mile point text field */
 	protected final JTextField mile = new JTextField(10);
@@ -152,6 +153,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		cabinet = proxy.getCabinet();
 		cab_listener = new CabinetListener();
 		sty_model = con_cache.getCabinetStyleModel();
+		location = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
@@ -279,7 +281,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the cabinet panel */
 	protected JPanel createCabinetPanel() {
-		location = new LocationPanel(session, cabinet.getGeoLoc());
+		location.setGeoLoc(cabinet.getGeoLoc());
 		location.initialize();
 		location.add("Milepoint", mile);
 		location.finishRow();

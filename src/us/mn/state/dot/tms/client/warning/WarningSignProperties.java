@@ -31,8 +31,8 @@ import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
-import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
@@ -47,7 +47,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	static private final String TITLE = "Warning Sign: ";
 
 	/** Location panel */
-	protected LocationPanel location;
+	private final LocationPanel location;
 
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
@@ -64,6 +64,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	/** Create a new warning sign form */
 	public WarningSignProperties(Session s, WarningSign ws) {
 		super(TITLE, s, ws);
+		location = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
@@ -93,7 +94,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
-		location = new LocationPanel(session, proxy.getGeoLoc());
+		location.setGeoLoc(proxy.getGeoLoc());
 		location.initialize();
 		location.addRow("Notes", notes);
 		location.setCenter();

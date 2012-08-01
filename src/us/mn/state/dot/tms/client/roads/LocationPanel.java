@@ -49,12 +49,12 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
 	/** Get the Integer value of a spinner */
-	static protected int getSpinnerInt(JSpinner s) {
+	static private int getSpinnerInt(JSpinner s) {
 		return (Integer)s.getValue();
 	}
 
 	/** Get the Integer value of a spinner */
-	static protected Integer getSpinnerInteger(JSpinner s) {
+	static private Integer getSpinnerInteger(JSpinner s) {
 		int i = getSpinnerInt(s);
 		if(i != 0)
 			return i;
@@ -63,7 +63,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Get an int to use for a spinner model */
-	static protected int asInt(Integer i) {
+	static private int asInt(Integer i) {
 		if(i != null)
 			return i;
 		else
@@ -74,16 +74,16 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	protected final Session session;
 
 	/** Iris client */
-	protected final IrisClient client;
+	private final IrisClient client;
 
 	/** Sonar state object */
-	protected final SonarState state;
+	private final SonarState state;
 
 	/** Proxy watcher */
-	protected final ProxyWatcher<GeoLoc> watcher;
+	private final ProxyWatcher<GeoLoc> watcher;
 
 	/** Location object */
-	protected GeoLoc loc;
+	private GeoLoc loc;
 
 	/** Set the location */
 	public void setGeoLoc(GeoLoc l) {
@@ -91,29 +91,29 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Roadway combobox */
-	protected final JComboBox roadway = new JComboBox();
+	private final JComboBox roadway = new JComboBox();
 
 	/** Roadway direction combo box */
-	protected final JComboBox roadDir = new JComboBox(
+	private final JComboBox roadDir = new JComboBox(
 		Direction.getDescriptions());
 
 	/** Cross street modifier combobox */
-	protected final JComboBox crossMod = new JComboBox(
+	private final JComboBox crossMod = new JComboBox(
 		LocModifier.values());
 
 	/** Cross street combobox */
-	protected final JComboBox cross = new JComboBox();
+	private final JComboBox cross = new JComboBox();
 
 	/** Cross street direction combobox */
-	protected final JComboBox crossDir = new JComboBox(
+	private final JComboBox crossDir = new JComboBox(
 		Direction.getAbbreviations());
 
 	/** UTM Easting */
-	protected final JSpinner easting = new JSpinner(
+	private final JSpinner easting = new JSpinner(
 		new SpinnerNumberModel(0, 0, 1000000, 1));
 
 	/** UTM Northing */
-	protected final JSpinner northing = new JSpinner(
+	private final JSpinner northing = new JSpinner(
 		new SpinnerNumberModel(0, 0, 10000000, 1));
 
 	/** Button to select a point from the map */
@@ -226,49 +226,49 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Set the roadway */
-	protected void setRoadway(Road r) {
+	private void setRoadway(Road r) {
 		GeoLoc l = loc;
 		if(l != null)
 			l.setRoadway(r);
 	}
 
 	/** Set the cross street */
-	protected void setCrossStreet(Road x) {
+	private void setCrossStreet(Road x) {
 		GeoLoc l = loc;
 		if(l != null)
 			l.setCrossStreet(x);
 	}
 
 	/** Set the road direction */
-	protected void setRoadDir(short d) {
+	private void setRoadDir(short d) {
 		GeoLoc l = loc;
 		if(l != null)
 			l.setRoadDir(d);
 	}
 
 	/** Set the cross street modifier */
-	protected void setCrossMod(short m) {
+	private void setCrossMod(short m) {
 		GeoLoc l = loc;
 		if(l != null)
 			l.setCrossMod(m);
 	}
 
 	/** Set the cross direction */
-	protected void setCrossDir(short d) {
+	private void setCrossDir(short d) {
 		GeoLoc l = loc;
 		if(l != null)
 			l.setCrossDir(d);
 	}
 
 	/** Set the easting */
-	protected void setEasting(Integer e) {
+	private void setEasting(Integer e) {
 		GeoLoc l = loc;
 		if(l != null)
 			l.setEasting(e);
 	}
 
 	/** Set the northing */
-	protected void setNorthing(Integer n) {
+	private void setNorthing(Integer n) {
 		GeoLoc l = loc;
 		if(l != null)
 			l.setNorthing(n);
