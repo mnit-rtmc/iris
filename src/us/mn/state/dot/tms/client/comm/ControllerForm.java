@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Color;
 import java.util.Date;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -42,6 +41,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -55,9 +55,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Table row height */
 	static protected final int ROW_HEIGHT = 24;
-
-	/** Frame title */
-	static protected final String TITLE = "Controller: ";
 
 	/** Comm link combo box */
 	protected final JComboBox comm_link = new JComboBox();
@@ -75,7 +72,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected final JPasswordField password = new JPasswordField(16);
 
 	/** Button to clear the access password */
-	protected final JButton clear_btn = new JButton("Clear");
+	private final IButton clear_pwd_btn = new IButton(
+		"controller.password.clear");
 
 	/** Active checkbox */
 	protected final JCheckBox active = new JCheckBox();
@@ -132,11 +130,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected final JLabel failed_lbl = new JLabel();
 
 	/** Clear error status button */
-	protected final JButton clearErrorBtn = new JButton("Clear Errors");
+	private final IButton clear_err_btn = new IButton(
+		"controller.error.clear");
 
 	/** Reset button */
-	protected final JButton reset =
-		new JButton(I18N.get("controller.reset"));
+	private final IButton reset_btn = new IButton("controller.reset");
 
 	/** Comm Link list model */
 	protected final ProxyListModel<CommLink> link_model;
@@ -146,7 +144,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create a new controller form */
 	public ControllerForm(Session s, Controller c) {
-		super(TITLE, s, c);
+		super(I18N.get("controller") + ": ", s, c);
 		ConCache con_cache = state.getConCache();
 		link_model = con_cache.getCommLinkModel();
 		cabinets = con_cache.getCabinets();
@@ -170,10 +168,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
 		cab_style.setModel(new WrapperComboBoxModel(sty_model, true));
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Setup", createSetupPanel());
-		tab.add("Cabinet", createCabinetPanel());
-		tab.add("I/O", createIOPanel());
-		tab.add("Status", createStatusPanel());
+		tab.add(I18N.get("device.setup"), createSetupPanel());
+		tab.add(I18N.get("cabinet"), createCabinetPanel());
+		tab.add(I18N.get("controller.io"), createIOPanel());
+		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		updateAttribute(null);
 		if(canUpdate())
@@ -185,8 +183,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		if(canRequest())
 			createStatusJobs();
 		else {
-			clearErrorBtn.setEnabled(false);
-			reset.setEnabled(false);
+			clear_err_btn.setEnabled(false);
+			reset_btn.setEnabled(false);
 		}
 		setBackground(Color.LIGHT_GRAY);
 	}
@@ -202,15 +200,15 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create the controller setup panel */
 	protected JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
-		panel.add("Comm Link", comm_link);
+		panel.add(I18N.get("comm.link"), comm_link);
 		panel.finishRow();
-		panel.add("Drop", drop_id);
+		panel.add(I18N.get("controller.drop"), drop_id);
 		panel.finishRow();
-		panel.add("Password", password);
+		panel.add(I18N.get("controller.password"), password);
 		panel.setEast();
-		panel.addRow(clear_btn);
-		panel.addRow("Notes", notes);
-		panel.add("Active", active);
+		panel.addRow(clear_pwd_btn);
+		panel.addRow(I18N.get("device.notes"), notes);
+		panel.add(I18N.get("controller.active"), active);
 		// Add a third column to the grid bag so the drop spinner
 		// does not extend across the whole form
 		panel.addRow(new javax.swing.JLabel());
@@ -257,7 +255,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 				}
 			}
 		};
-		new ActionJob(this, clear_btn) {
+		new ActionJob(this, clear_pwd_btn) {
 			public void perform() {
 				proxy.setPassword(null);
 			}
@@ -283,9 +281,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected JPanel createCabinetPanel() {
 		location.setGeoLoc(cabinet.getGeoLoc());
 		location.initialize();
-		location.add("Milepoint", mile);
+		location.add(I18N.get("cabinet.milepoint"), mile);
 		location.finishRow();
-		location.add("Style", cab_style);
+		location.add(I18N.get("cabinet.style"), cab_style);
 		location.finishRow();
 		return location;
 	}
@@ -341,31 +339,31 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create the status panel */
 	protected JPanel createStatusPanel() {
 		JPanel buttonPnl = new JPanel();
-		buttonPnl.add(clearErrorBtn);
-		buttonPnl.add(reset);
+		buttonPnl.add(clear_err_btn);
+		buttonPnl.add(reset_btn);
 		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow("Version:", version);
-		panel.addRow("Maint Status:", maint);
-		panel.addRow("Status:", status);
-		panel.addRow("Fail Time:", fail_time_lbl);
-		panel.addRow("Timeout Errors:", timeout_lbl);
-		panel.addRow("Checksum Errors:", checksum_lbl);
-		panel.addRow("Parsing Errors:", parsing_lbl);
-		panel.addRow("Controller Errors:", controller_lbl);
-		panel.addRow("Successful Operations:", success_lbl);
-		panel.addRow("Failed Operations:", failed_lbl);
+		panel.addRow(I18N.get("controller.version"), version);
+		panel.addRow(I18N.get("controller.maint"), maint);
+		panel.addRow(I18N.get("controller.status"), status);
+		panel.addRow(I18N.get("controller.fail"), fail_time_lbl);
+		panel.addRow(I18N.get("controller.err.timeout"), timeout_lbl);
+		panel.addRow(I18N.get("controller.err.checksum"), checksum_lbl);
+		panel.addRow(I18N.get("controller.err.parsing"), parsing_lbl);
+		panel.addRow(I18N.get("controller.err.ctrl"), controller_lbl);
+		panel.addRow(I18N.get("controller.ops.good"), success_lbl);
+		panel.addRow(I18N.get("controller.ops.bad"), failed_lbl);
 		panel.addRow(buttonPnl);
 		return panel;
 	}
 
 	/** Create the jobs for the status panel */
 	protected void createStatusJobs() {
-		new ActionJob(this, reset) {
+		new ActionJob(this, reset_btn) {
 			public void perform() {
 				proxy.setDownload(true);
 			}
 		};
-		new ActionJob(this, clearErrorBtn) {
+		new ActionJob(this, clear_err_btn) {
 			public void perform() {
 				proxy.setCounters(true);
 			}

@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for comm links
@@ -50,7 +51,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<CommLink>("Comm Link", 90) {
+		new ProxyColumn<CommLink>(I18N.get("comm.link"), 90) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getName();
 			}
@@ -63,7 +64,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<CommLink>("Description", 220) {
+		new ProxyColumn<CommLink>(I18N.get("device.description"), 220) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getDescription();
 			}
@@ -74,7 +75,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				cl.setDescription(value.toString().trim());
 			}
 		},
-		new ProxyColumn<CommLink>("URI", 280) {
+		new ProxyColumn<CommLink>(I18N.get("comm.link.uri"), 280) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getUri();
 			}
@@ -85,7 +86,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				cl.setUri(value.toString().trim());
 			}
 		},
-		new ProxyColumn<CommLink>("Status", 44) {
+		new ProxyColumn<CommLink>(I18N.get("device.status"), 44) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getStatus();
 			}
@@ -93,7 +94,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return new StatusCellRenderer();
 			}
 		},
-		new ProxyColumn<CommLink>("Protocol", 140) {
+		new ProxyColumn<CommLink>(I18N.get("comm.link.protocol"), 140) {
 			public Object getValueAt(CommLink cl) {
 				return PROTOCOLS.get(cl.getProtocol());
 			}
@@ -110,7 +111,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<CommLink>("Timeout", 60) {
+		new ProxyColumn<CommLink>(I18N.get("comm.link.timeout"), 60) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getTimeout();
 			}

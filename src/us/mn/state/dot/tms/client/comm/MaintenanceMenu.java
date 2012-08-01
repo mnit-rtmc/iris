@@ -19,6 +19,7 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * MaintenanceMenu is a menu for maintenance items.
@@ -35,7 +36,7 @@ public class MaintenanceMenu extends JMenu {
 
 	/** Create a new maintenance menu */
 	public MaintenanceMenu(final Session s) {
-		super("Maintenance");
+		super(I18N.get("maintenance"));
 		session = s;
 		desktop = s.getDesktop();
 		JMenuItem item = createCommLinkItem();
@@ -56,8 +57,7 @@ public class MaintenanceMenu extends JMenu {
 	protected JMenuItem createCommLinkItem() {
 		if(!CommLinkForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Comm Links");
-		item.setMnemonic('L');
+		JMenuItem item = new JMenuItem(I18N.get("comm.links"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new CommLinkForm(session));
@@ -70,8 +70,7 @@ public class MaintenanceMenu extends JMenu {
 	protected JMenuItem createModemItem() {
 		if(!ModemForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Modems");
-		item.setMnemonic('m');
+		JMenuItem item = new JMenuItem(I18N.get("modems"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new ModemForm(session));
@@ -84,8 +83,7 @@ public class MaintenanceMenu extends JMenu {
 	protected JMenuItem createAlarmItem() {
 		if(!AlarmForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Alarms");
-		item.setMnemonic('a');
+		JMenuItem item = new JMenuItem(I18N.get("alarm.plural"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new AlarmForm(session));
@@ -98,8 +96,7 @@ public class MaintenanceMenu extends JMenu {
 	protected JMenuItem createCabinetStyleItem() {
 		if(!CabinetStyleForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Cabinet Styles");
-		item.setMnemonic('s');
+		JMenuItem item = new JMenuItem(I18N.get("cabinet.styles"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new CabinetStyleForm(session));

@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for modems
@@ -31,7 +32,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Modem>("Modem", 80) {
+		new ProxyColumn<Modem>(I18N.get("modem"), 80) {
 			public Object getValueAt(Modem m) {
 				return m.getName();
 			}
@@ -44,7 +45,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Modem>("URI", 280) {
+		new ProxyColumn<Modem>(I18N.get("comm.link.uri"), 280) {
 			public Object getValueAt(Modem m) {
 				return m.getUri();
 			}
@@ -55,7 +56,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 				m.setUri(value.toString().trim());
 			}
 		},
-		new ProxyColumn<Modem>("Config String", 200) {
+		new ProxyColumn<Modem>(I18N.get("modem.config"), 200) {
 			public Object getValueAt(Modem m) {
 				return m.getConfig();
 			}
@@ -66,7 +67,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 				m.setConfig(value.toString().trim());
 			}
 		},
-		new ProxyColumn<Modem>("Timeout", 80) {
+		new ProxyColumn<Modem>(I18N.get("modem.timeout"), 80) {
 			public Object getValueAt(Modem m) {
 				return m.getTimeout();
 			}

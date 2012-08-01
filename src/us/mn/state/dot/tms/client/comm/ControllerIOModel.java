@@ -49,6 +49,7 @@ import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Special table model for Controller I/O pins.
@@ -360,14 +361,14 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Create the pin column */
 	protected TableColumn createPinColumn() {
 		TableColumn c = new TableColumn(COL_PIN, 44);
-		c.setHeaderValue("Pin");
+		c.setHeaderValue(I18N.get("controller.pin"));
 		return c;
 	}
 
 	/** Create the type column */
 	protected TableColumn createTypeColumn() {
 		TableColumn c = new TableColumn(COL_TYPE, 100);
-		c.setHeaderValue("Type");
+		c.setHeaderValue(I18N.get("device.type"));
 		JComboBox combo = new JComboBox(IO_TYPE.toArray());
 		c.setCellEditor(new DefaultCellEditor(combo));
 		return c;
@@ -376,7 +377,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Create the device column */
 	protected TableColumn createDeviceColumn() {
 		TableColumn c = new TableColumn(COL_DEVICE, 140);
-		c.setHeaderValue("Device");
+		c.setHeaderValue(I18N.get("device"));
 		c.setCellEditor(new DeviceCellEditor());
 		c.setCellRenderer(new DeviceCellRenderer());
 		return c;

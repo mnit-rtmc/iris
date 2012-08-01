@@ -23,7 +23,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -43,8 +42,11 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing comm links
@@ -61,9 +63,6 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Comm link table row height */
 	static protected final int ROW_HEIGHT = 24;
-
-	/** Frame title */
-	static protected final String TITLE = "Comm Links";
 
 	/** Tabbed pane */
 	protected final JTabbedPane tab = new JTabbedPane();
@@ -84,7 +83,7 @@ public class CommLinkForm extends AbstractForm {
 	protected final JLabel link_status = new JLabel();
 
 	/** Button to delete the selected comm link */
-	protected final JButton del_button = new JButton("Delete Comm Link");
+	private final IButton delete_btn = new IButton("comm.link.delete");
 
 	/** Table to hold failed controllers */
 	protected final ZTable ftable = new ZTable();
@@ -99,20 +98,20 @@ public class CommLinkForm extends AbstractForm {
 	protected final RowFilter<FailedControllerModel, Integer> filter;
 
 	/** Button to show controller properties */
-	protected final JButton ctr_props = new JButton("Properties");
+	private final IButton ctr_props = new IButton("controller");
 
 	/** Button to delete the selected controller */
-	protected final JButton del_ctr = new JButton("Delete Controller");
+	private final IButton del_ctr = new IButton("controller.delete");
 
 	/** Button to go to a failed controller */
-	protected final JButton go_button = new JButton("Go");
+	private final IButton go_btn = new IButton("controller.go");
 
 	/** User session */
 	protected final Session session;
 
 	/** Create a new comm link form */
 	public CommLinkForm(Session s) {
-		super(TITLE);
+		super(I18N.get("comm.links"));
 		session = s;
 		model = new CommLinkModel(s);
 		fmodel = new FailedControllerModel(s);
@@ -139,8 +138,9 @@ public class CommLinkForm extends AbstractForm {
 		model.initialize();
 		fmodel.initialize();
 		setLayout(new BorderLayout());
-		tab.add("All Links", createCommLinkPanel());
-		tab.add("Failed Controllers", createFailedControllerPanel());
+		tab.add(I18N.get("comm.link.all"), createCommLinkPanel());
+		tab.add(I18N.get("controller.failed"),
+			createFailedControllerPanel());
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
 	}
@@ -163,7 +163,7 @@ public class CommLinkForm extends AbstractForm {
 					selectCommLink();
 			}
 		};
-		new ActionJob(this, del_button) {
+		new ActionJob(this, delete_btn) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
 				if(row >= 0)
@@ -221,14 +221,13 @@ public class CommLinkForm extends AbstractForm {
 		bag.fill = GridBagConstraints.NONE;
 		bag.weightx = 0;
 		bag.weighty = 0;
-		panel.add(new JLabel("Selected Comm Link:"), bag);
+		panel.add(new ILabel("comm.link.selected"), bag);
 		bag.gridx = 1;
 		panel.add(link_status, bag);
 		bag.gridx = 2;
 		bag.anchor = GridBagConstraints.EAST;
-		del_button.setMnemonic('C');
-		del_button.setEnabled(false);
-		panel.add(del_button, bag);
+		delete_btn.setEnabled(false);
+		panel.add(delete_btn, bag);
 		bag.gridx = 0;
 		bag.gridy = 2;
 		bag.gridwidth = 3;
@@ -251,14 +250,12 @@ public class CommLinkForm extends AbstractForm {
 		bag.fill = GridBagConstraints.NONE;
 		bag.weightx = 0;
 		bag.weighty = 0;
-		panel.add(new JLabel("Selected Controller:"), bag);
+		panel.add(new ILabel("controller.selected"), bag);
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.EAST;
-		ctr_props.setMnemonic('P');
 		ctr_props.setEnabled(false);
 		panel.add(ctr_props, bag);
 		bag.gridx = 2;
-		del_ctr.setMnemonic('D');
 		del_ctr.setEnabled(false);
 		panel.add(del_ctr, bag);
 		return panel;
@@ -272,7 +269,7 @@ public class CommLinkForm extends AbstractForm {
 			link_status.setText(cl.getStatus());
 		else
 			link_status.setText("");
-		del_button.setEnabled(model.canRemove(cl));
+		delete_btn.setEnabled(model.canRemove(cl));
 		del_ctr.setEnabled(false);
 		ControllerModel old_model = cmodel;
 		cmodel = new ControllerModel(session, cl);
@@ -306,7 +303,7 @@ public class CommLinkForm extends AbstractForm {
 	protected JPanel createFailedControllerPanel() {
 		ListSelectionModel s = ftable.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ActionJob(this, go_button) {
+		new ActionJob(this, go_btn) {
 			public void perform() throws Exception {
 				goFailedController();
 			}
@@ -314,7 +311,7 @@ public class CommLinkForm extends AbstractForm {
 		ftable.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() > 1)
-					go_button.doClick();
+					go_btn.doClick();
 			}
 		});
 		FormPanel panel = new FormPanel(true);
@@ -325,7 +322,7 @@ public class CommLinkForm extends AbstractForm {
 		ftable.setVisibleRowCount(16);
 		ftable.setRowSorter(sorter);
 		panel.addRow(ftable);
-		panel.add(go_button);
+		panel.add(go_btn);
 		return panel;
 	}
 

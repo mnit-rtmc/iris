@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for alarms
@@ -36,7 +37,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Alarm>("Alarm", 80) {
+		new ProxyColumn<Alarm>(I18N.get("alarm"), 80) {
 			public Object getValueAt(Alarm a) {
 				return a.getName();
 			}
@@ -49,7 +50,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Alarm>("Description", 200) {
+		new ProxyColumn<Alarm>(I18N.get("device.description"), 200) {
 			public Object getValueAt(Alarm a) {
 				return a.getDescription();
 			}
@@ -61,7 +62,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 				a.setDescription(v);
 			}
 		},
-		new ProxyColumn<Alarm>("State", 60) {
+		new ProxyColumn<Alarm>(I18N.get("alarm.state"), 60) {
 			public Object getValueAt(Alarm a) {
 				return a.getState();
 			}
@@ -69,12 +70,12 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 				return new StateCellRenderer();
 			}
 		},
-		new ProxyColumn<Alarm>("Controller", 100) {
+		new ProxyColumn<Alarm>(I18N.get("controller"), 100) {
 			public Object getValueAt(Alarm a) {
 				return a.getController();
 			}
 		},
-		new ProxyColumn<Alarm>("Pin", 50) {
+		new ProxyColumn<Alarm>(I18N.get("controller.pin"), 50) {
 			public Object getValueAt(Alarm a) {
 				return a.getPin();
 			}
@@ -109,9 +110,10 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 						label.setForeground(
 							Color.WHITE);
 					}
-					label.setText("triggered");
+					label.setText(I18N.get(
+						"alarm.triggered"));
 				} else
-					label.setText("clear");
+					label.setText(I18N.get("alarm.clear"));
 			}
 			return label;
 		}

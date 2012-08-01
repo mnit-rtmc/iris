@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.comm;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing modems
@@ -32,6 +33,6 @@ public class ModemForm extends ProxyTableForm<Modem> {
 
 	/** Create a new modem form */
 	public ModemForm(Session s) {
-		super("Modems", new ModemModel(s));
+		super(I18N.get("modems"), new ModemModel(s));
 	}
 }

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.comm;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing alarms
@@ -32,6 +33,6 @@ public class AlarmForm extends ProxyTableForm<Alarm> {
 
 	/** Create a new alarm form */
 	public AlarmForm(Session s) {
-		super("Alarms", new AlarmModel(s));
+		super(I18N.get("alarm.plural"), new AlarmModel(s));
 	}
 }

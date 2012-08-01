@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.comm;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing cabinet styles
@@ -32,7 +33,7 @@ public class CabinetStyleForm extends ProxyTableForm<CabinetStyle> {
 
 	/** Create a new cabinet style form */
 	public CabinetStyleForm(Session s) {
-		super("Cabinet Styles", new CabinetStyleModel(s));
+		super(I18N.get("cabinet.styles"), new CabinetStyleModel(s));
 	}
 
 	/** Get the visible row count */
