@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * FormPanel is a panel for viewing and editing forms. It provides a simpler
@@ -65,7 +66,7 @@ public class FormPanel extends JPanel {
 
 	/** Set the default border */
 	public void setBorder() {
-		setBorder(TmsForm.BORDER);
+		setBorder(UI.border);
 	}
 
 	/** Set the form title */
@@ -77,8 +78,8 @@ public class FormPanel extends JPanel {
 	public void finishRow() {
 		bag = new GridBagConstraints();
 		bag.anchor = GridBagConstraints.EAST;
-		bag.insets.right = TmsForm.HGAP;
-		bag.insets.bottom = TmsForm.VGAP;
+		bag.insets.right = UI.hgap;
+		bag.insets.bottom = UI.vgap;
 		bag.gridx = GridBagConstraints.RELATIVE;
 		bag.gridy = row++;
 	}

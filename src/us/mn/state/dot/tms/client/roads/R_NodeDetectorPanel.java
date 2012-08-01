@@ -30,8 +30,8 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.detector.DetectorPanel;
-import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.widget.IButton;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -105,7 +105,7 @@ public class R_NodeDetectorPanel extends JPanel {
 		super(new GridBagLayout());
 		session = s;
 		det_pnl = new DetectorPanel(s, false);
-		setBorder(TmsForm.BORDER);
+		setBorder(UI.border);
 	}
 
 	/** Initialize the widgets on the form */

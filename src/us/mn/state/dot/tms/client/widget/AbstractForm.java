@@ -18,7 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.client.toast.Help;
-import static us.mn.state.dot.tms.client.toast.TmsForm.BORDER;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -39,7 +39,7 @@ abstract public class AbstractForm extends JPanel {
 	/** Create a new abstract form */
 	protected AbstractForm(String t) {
 		title = t;
-		setBorder(BORDER);
+		setBorder(UI.border);
 	}
 
 	/** Get the title of the form */

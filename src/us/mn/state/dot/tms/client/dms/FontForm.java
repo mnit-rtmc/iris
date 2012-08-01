@@ -43,11 +43,9 @@ import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
-import static us.mn.state.dot.tms.client.toast.TmsForm.BORDER;
-import static us.mn.state.dot.tms.client.toast.TmsForm.HGAP;
-import static us.mn.state.dot.tms.client.toast.TmsForm.VGAP;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IButton;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -174,13 +172,10 @@ public class FontForm extends AbstractForm {
 	/** Create font panel */
 	protected JPanel createFontPanel() {
 		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BORDER);
+		panel.setBorder(UI.border);
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridwidth = 2;
-		bag.insets.left = HGAP;
-		bag.insets.right = HGAP;
-		bag.insets.top = VGAP;
-		bag.insets.bottom = VGAP;
+		bag.insets = UI.insets();
 		final ListSelectionModel s = f_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {

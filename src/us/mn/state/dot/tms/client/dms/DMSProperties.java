@@ -49,8 +49,6 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
-import static us.mn.state.dot.tms.client.toast.TmsForm.OK;
-import static us.mn.state.dot.tms.client.toast.TmsForm.UNKNOWN;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -64,6 +62,12 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public class DMSProperties extends SonarObjectForm<DMS> {
+
+	/** Ok status label color */
+	static private final Color OK = new Color(0f, 0.5f, 0f);
+
+	/** Unknown value string */
+	static private final String UNKNOWN = "???";
 
 	/** Format a string field */
 	static protected String formatString(String s) {

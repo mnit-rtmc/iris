@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.TmsForm;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -64,7 +64,7 @@ public class CapabilityPanel extends JPanel {
 		session = s;
 		cap_model = new CapabilityModel(s);
 		p_model = new PrivilegeModel(session, null);
-		setBorder(TmsForm.BORDER);
+		setBorder(UI.border);
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets.left = 4;
 		bag.insets.right = 4;

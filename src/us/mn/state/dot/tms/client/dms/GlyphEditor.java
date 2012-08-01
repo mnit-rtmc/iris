@@ -30,8 +30,8 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.widget.IButton;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -91,7 +91,7 @@ public class GlyphEditor extends JPanel {
 			I18N.get("font.glyph.selected")));
 		add(Box.createGlue());
 		add(createGlueBox(gpanel));
-		add(Box.createVerticalStrut(TmsForm.VGAP));
+		add(Box.createVerticalStrut(UI.vgap));
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createGlue());
 		box.add(narrow);
@@ -111,7 +111,7 @@ public class GlyphEditor extends JPanel {
 		};
 		box.add(Box.createGlue());
 		add(box);
-		add(Box.createVerticalStrut(TmsForm.VGAP));
+		add(Box.createVerticalStrut(UI.vgap));
 		add(createGlueBox(apply));
 		apply.setEnabled(false);
 		new ActionJob(this, apply) {

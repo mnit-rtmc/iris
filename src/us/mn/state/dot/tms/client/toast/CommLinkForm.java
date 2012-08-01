@@ -41,9 +41,8 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.client.Session;
-import static us.mn.state.dot.tms.client.toast.TmsForm.HGAP;
-import static us.mn.state.dot.tms.client.toast.TmsForm.VGAP;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -198,10 +197,10 @@ public class CommLinkForm extends AbstractForm {
 		};
 		JPanel panel = new JPanel(new GridBagLayout());
 		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = HGAP;
-		bag.insets.right = HGAP;
-		bag.insets.top = VGAP;
-		bag.insets.bottom = VGAP;
+		bag.insets.left = UI.hgap;
+		bag.insets.right = UI.hgap;
+		bag.insets.top = UI.vgap;
+		bag.insets.bottom = UI.vgap;
 		bag.gridwidth = 3;
 		bag.fill = GridBagConstraints.BOTH;
 		bag.weightx = 1;

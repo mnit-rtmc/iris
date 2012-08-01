@@ -34,8 +34,8 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -93,9 +93,9 @@ public class MultipleSignTab extends JPanel implements
 		selectionModel = sm;
 		selectionModel.addProxySelectionListener(this);
 		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.top = TmsForm.VGAP;
-		bag.insets.left = TmsForm.HGAP;
-		bag.insets.right = TmsForm.HGAP;
+		bag.insets.top = UI.vgap;
+		bag.insets.left = UI.hgap;
+		bag.insets.right = UI.hgap;
 		bag.gridx = 0;
 		bag.gridy = 0;
 		bag.fill = GridBagConstraints.BOTH;
@@ -106,7 +106,7 @@ public class MultipleSignTab extends JPanel implements
 		bag.gridy = 1;
 		bag.weightx = 1;
 		bag.weighty = 1;
-		bag.insets.bottom = TmsForm.VGAP;
+		bag.insets.bottom = UI.vgap;
 		sel_list.setVisibleRowCount(6);
 		sel_list.setEnabled(false);
 		JScrollPane pane = new JScrollPane(sel_list);
