@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.widget;
+package us.mn.state.dot.tms.client.help;
 
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -35,6 +35,8 @@ import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.SEmail;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.widget.Screen;
+import us.mn.state.dot.tms.client.widget.TextPanel;
 
 /**
  * A swing dialog for displaying exception stack traces.
@@ -134,7 +136,7 @@ public class ExceptionDialog extends JDialog {
 			addAssistanceMessage(tpanel);
 		}
 		tpanel.addSpacing();
-		String lastLine = I18N.get("ExceptionForm.LastLine");
+		String lastLine = I18N.get("help.exception.lastline");
 		if(lastLine != null)
 			tpanel.addText(lastLine);
 		tpanel.addGlue();
