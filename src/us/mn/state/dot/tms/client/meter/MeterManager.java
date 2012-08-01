@@ -115,12 +115,12 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return I18N.get("ramp.meter.short");
+		return I18N.get("ramp.meter");
 	}
 
 	/** Get longer proxy type name for display */
 	public String getLongProxyType() {
-		return I18N.get("ramp.meter");
+		return I18N.get("ramp.meter.long");
 	}
 
 	/** Get the shape for a given proxy */

@@ -18,6 +18,7 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Super class of all tabs used in the IrisClient.
@@ -68,10 +69,10 @@ abstract public class MapTab extends JPanel {
 	}
 
 	/** Create a new map tab */
-	public MapTab(String n, String t) {
+	public MapTab(String text_id) {
 		super(new BorderLayout());
-		name = n;
-		tip = t;
+		name = I18N.get(text_id);
+		tip = I18N.getSilent(text_id + ".tab");
 	}
 
 	/** Perform any clean up necessary */

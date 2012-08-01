@@ -95,7 +95,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return I18N.get("dms.abbreviation");
+		return I18N.get("dms");
 	}
 
 	/** Get the shape for a given proxy */
@@ -241,8 +241,8 @@ public class DMSManager extends ProxyManager<DMS> {
 				return createSinglePopup(dms);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel(I18N.get("dms.abbreviation.plural") + ": " +
-			n_selected));
+		p.add(new JLabel("" + n_selected + ": " +
+			I18N.get("dms.plural")));
 		p.addSeparator();
 		if(blankAction != null)
 			p.add(blankAction);

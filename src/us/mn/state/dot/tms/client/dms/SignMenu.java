@@ -60,7 +60,7 @@ public class SignMenu extends JMenu {
 	protected JMenuItem createDmsItem() {
 		if(!DMSForm.isPermitted(session))
 			return null;
-		String dms_name = I18N.get("dms.abbreviation");
+		String dms_name = I18N.get("dms");
 		JMenuItem item = new JMenuItem(dms_name);
 		if(dms_name.length() > 0)
 			item.setMnemonic(dms_name.charAt(0));

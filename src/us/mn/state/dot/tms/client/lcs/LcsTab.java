@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * GUI form for working with LaneControlSignal objects.
@@ -40,7 +39,7 @@ public class LcsTab extends MapTab {
 	public LcsTab(Session session, LCSArrayManager manager)
 		throws IOException
 	{
-		super(manager.getProxyType(), I18N.get("lcs.tab"));
+		super("lcs");
 		dispatcher = new LcsDispatcher(session, manager);
 		summary = manager.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);

@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Tab for managing comm_links and controllers.
@@ -40,7 +39,7 @@ public class CommTab extends MapTab {
   	public CommTab(Session session, ControllerManager m)
 		throws IOException
 	{
-		super(I18N.get("comm"), I18N.get("comm.tooltip"));
+		super("comm");
 		manager = m;
 		summary = manager.createStyleSummary();
 		add(createNorthPanel(), BorderLayout.NORTH);

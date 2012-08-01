@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.BorderLayout;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Provides a GUI for the camera tab on the operator interface for IRIS.
@@ -28,7 +27,7 @@ public class CameraTab extends MapTab {
 
 	/** Create a new camera tab for the IRIS client */
 	public CameraTab(Session session, CameraManager manager) {
-		super(manager.getProxyType(), I18N.get("camera.tab"));
+		super("camera");
 		add(new CameraViewer(session, manager), BorderLayout.NORTH);
 		add(manager.createStyleSummary(), BorderLayout.CENTER);
 	}

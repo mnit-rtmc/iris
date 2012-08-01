@@ -37,7 +37,7 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<DMS>(I18N.get("dms.abbreviation"), 40) {
+		new ProxyColumn<DMS>(I18N.get("dms"), 40) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
 			}

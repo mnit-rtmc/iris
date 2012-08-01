@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The DMSTab class provides the GUI for working with DMS objects.
@@ -39,7 +38,7 @@ public class DMSTab extends MapTab {
 
 	/** Create a new DMS tab */
  	public DMSTab(Session session, DMSManager manager) {
-		super(manager.getProxyType(), I18N.get("dms.title"));
+		super("dms");
 		dispatcher = new DMSDispatcher(session, manager);
 		summary = manager.createStyleSummary(true);
 		add(dispatcher, BorderLayout.NORTH);

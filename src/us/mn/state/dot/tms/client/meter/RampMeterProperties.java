@@ -117,7 +117,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create a new ramp meter properties form */
 	public RampMeterProperties(Session s, RampMeter meter) {
-		super(I18N.get("ramp.meter") + ": ", s, meter);
+		super(I18N.get("ramp.meter.long") + ": ", s, meter);
 		state = s.getSonarState();
 		location = new LocationPanel(s);
 	}

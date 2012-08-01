@@ -33,7 +33,7 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<RampMeter>(I18N.get("ramp.meter.short"), 200) {
+		new ProxyColumn<RampMeter>(I18N.get("ramp.meter"), 200) {
 			public Object getValueAt(RampMeter rm) {
 				return rm.getName();
 			}

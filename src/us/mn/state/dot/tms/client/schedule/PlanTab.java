@@ -38,7 +38,7 @@ public class PlanTab extends MapTab {
 
 	/** Create a new action plan tab */
   	public PlanTab(Session session, PlanManager m) {
-		super("Plan", "Manage Action Plans");
+		super("action.plan");
 		manager = m;
 		dispatcher = new PlanDispatcher(session, m);
 		summary = manager.createStyleSummary();

@@ -42,7 +42,7 @@ public class AwsStatusPanel extends ToolPanel implements
 		I18N.get("dms.aws.abbreviation");
 
 	/** DMS abbreviation */
-	private static final String m_dmsAbbr = I18N.get("dms.abbreviation");
+	private static final String m_dmsAbbr = I18N.get("dms");
 
 	/** DMS cache */
 	protected final DmsCache m_dms;

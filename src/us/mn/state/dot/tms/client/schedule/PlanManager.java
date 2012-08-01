@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A plan manager is a container for SONAR action plan objects.
@@ -65,7 +66,12 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return "Action Plan";
+		return I18N.get("action.plan");
+	}
+
+	/** Get longer proxy type name for display */
+	public String getLongProxyType() {
+		return I18N.get("action.plan.long");
 	}
 
 	/** Find the map geo location for a proxy */
