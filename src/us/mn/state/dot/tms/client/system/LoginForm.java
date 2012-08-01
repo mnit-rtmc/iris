@@ -21,8 +21,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.IrisClient;
-import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
+import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 
 /**

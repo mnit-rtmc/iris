@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.lcs.LCSArrayCellRenderer;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.utils.I18N;
 

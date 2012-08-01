@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.detector;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
-import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
