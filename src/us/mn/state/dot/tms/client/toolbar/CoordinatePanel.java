@@ -23,6 +23,7 @@ import java.text.DecimalFormat;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.MapBean;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A tool panel that contains the map coordinates of the mouse pointer.
@@ -33,14 +34,23 @@ import us.mn.state.dot.map.MapBean;
  */
 public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 
+	/** Lat/lon decimal format */
+	static private final String LAT_LON_FORMAT = "0.00000";
+
+	/** Unicode degrees character */
+	static private final char DEGREES = '\u00B0';
+
+	/** Latitude label */
+	static private final String LAT = I18N.get("location.lat");
+
+	/** Longitude label */
+	static private final String LON = I18N.get("location.lon");
+
 	/** Map bean */
 	protected final MapBean map;
 
 	/** Label used for cursor coordinates */
 	protected final JLabel coord_lbl = new JLabel();
-
-	/** Lat/lon decimal format */
-	static protected final String LAT_LON_FORMAT = "0.000000";
 
 	/** Create a new coordinate panel */
 	public CoordinatePanel(MapBean m) {
@@ -48,6 +58,7 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 		map = m;
 		add(coord_lbl);
 		map.addMouseMotionListener(this);
+		coord_lbl.setText(LAT + DEGREES + " " + LON + DEGREES);
 	}
 
 	/** is this panel IRIS enabled? */
@@ -64,7 +75,8 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 		DecimalFormat df = new DecimalFormat(LAT_LON_FORMAT);
 		String lat = df.format(pos.getLatitude());
 		String lon = df.format(pos.getLongitude());
-		coord_lbl.setText("lat " + lat + "\u00B0 lon " + lon +"\u00B0");
+		coord_lbl.setText(LAT + " " + lat + DEGREES + " " +
+			LON + " " + lon + DEGREES);
 	}
 
 	/** Process the mouse dragged event */
