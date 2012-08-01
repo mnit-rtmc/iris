@@ -32,7 +32,7 @@ import javax.swing.event.InternalFrameEvent;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.tms.client.IrisClient;
-import us.mn.state.dot.tms.client.toast.Help;
+import us.mn.state.dot.tms.client.help.Help;
 import us.mn.state.dot.tms.client.widget.Screen;
 
 /**

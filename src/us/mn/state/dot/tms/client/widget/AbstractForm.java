@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.widget;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPanel;
-import us.mn.state.dot.tms.client.toast.Help;
+import us.mn.state.dot.tms.client.help.Help;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 

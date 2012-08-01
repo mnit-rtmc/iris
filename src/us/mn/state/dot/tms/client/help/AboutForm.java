@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client;
+package us.mn.state.dot.tms.client.help;
 
 import java.awt.Font;
 import java.net.URL;

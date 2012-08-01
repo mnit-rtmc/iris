@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import us.mn.state.dot.tms.client.help.HelpMenu;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 
 /**
