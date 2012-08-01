@@ -50,10 +50,10 @@ import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.camera.CamCache;
+import us.mn.state.dot.tms.client.comm.ConCache;
 import us.mn.state.dot.tms.client.detector.DetCache;
 import us.mn.state.dot.tms.client.dms.DmsCache;
 import us.mn.state.dot.tms.client.lcs.LcsCache;
-import us.mn.state.dot.tms.client.toast.ConCache;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**

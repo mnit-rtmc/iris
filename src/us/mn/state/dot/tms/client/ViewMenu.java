@@ -19,6 +19,7 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.camera.VideoMenu;
+import us.mn.state.dot.tms.client.comm.MaintenanceMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.detector.StationForm;
 import us.mn.state.dot.tms.client.dms.SignMenu;
@@ -26,7 +27,6 @@ import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.system.SystemMenu;
-import us.mn.state.dot.tms.client.toast.MaintenanceMenu;
 import us.mn.state.dot.tms.client.weather.WeatherSensorForm;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 
