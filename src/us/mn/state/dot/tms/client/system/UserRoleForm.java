@@ -58,7 +58,7 @@ public class UserRoleForm extends AbstractForm {
 	/** Create a new user role form */
 	public UserRoleForm(Session s) {
 		super(TITLE);
-		setHelpPageName("Help.UserRoleForm");
+		setHelpPageName("help.userroleform");
 		u_panel = new UserPanel(s);
 		r_panel = new RolePanel(s);
 		cap_panel = new CapabilityPanel(s);

@@ -280,7 +280,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Create a new DMS properties form */
 	public DMSProperties(Session s, DMS sign) {
 		super(TITLE, s, sign);
-		setHelpPageName("Help.DMSProperties");
+		setHelpPageName("help.dmsproperties");
 		state = s.getSonarState();
 		user = s.getUser();
 		location = new LocationPanel(s);

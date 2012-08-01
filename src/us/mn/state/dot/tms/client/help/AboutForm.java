@@ -15,11 +15,10 @@
 package us.mn.state.dot.tms.client.help;
 
 import java.awt.Font;
-import java.net.URL;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -40,9 +39,8 @@ public class AboutForm extends AbstractForm {
 	/** Initialize the About form */
 	protected void initialize() {
 		FormPanel panel = new FormPanel(true);
-		URL url = getClass().getResource("/images/iris.gif");
 		panel.setCenter();
-		panel.addRow(new JLabel(new ImageIcon(url)));
+		panel.addRow(new JLabel(Icons.getIcon("iris")));
 		panel.addRow(new JLabel(" "));
 		panel.setCenter();
 		panel.addRow(createTitle("iris.about1", 1.8f));

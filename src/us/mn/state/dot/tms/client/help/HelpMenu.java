@@ -19,6 +19,7 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.I18N;
 
 /** 
  * Menu for help information.
@@ -32,13 +33,12 @@ public class HelpMenu extends JMenu {
 	protected final SmartDesktop desktop;
 
 	/** Open trouble ticket menu item */
-	protected final JMenuItem ticket_item = new JMenuItem(
-		"Open Trouble Ticket");
+	private final JMenuItem ticket_item = new JMenuItem(
+		I18N.get("help.trouble.ticket"));
 
 	/** Create a new HelpMenu */
 	public HelpMenu(SmartDesktop sd) { 
-		super("Help");
-		setMnemonic('H');
+		super(I18N.get("help"));
 		desktop = sd;
 		addSupportItem();
 		addAboutItem();
@@ -46,8 +46,7 @@ public class HelpMenu extends JMenu {
 
 	/** Add support menu item */
 	protected void addSupportItem() {
-		JMenuItem item = new JMenuItem("Support");
-		item.setMnemonic('S');
+		JMenuItem item = new JMenuItem(I18N.get("help.support"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new SupportForm());
@@ -58,8 +57,7 @@ public class HelpMenu extends JMenu {
 
 	/** Add about menu item */
 	protected void addAboutItem() {
-		JMenuItem item = new JMenuItem("About IRIS");
-		item.setMnemonic('A');
+		JMenuItem item = new JMenuItem(I18N.get("iris.about"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new AboutForm());
@@ -83,7 +81,6 @@ public class HelpMenu extends JMenu {
 			return;
 		final String url =
 			SystemAttrEnum.HELP_TROUBLE_TICKET_URL.getString();
-		ticket_item.setMnemonic('T');
 		new ActionJob(ticket_item) {
 			public void perform() throws Exception {
 				Help.invokeHelp(url);

@@ -36,7 +36,7 @@ public class SystemAttributeForm extends ProxyTableForm<SystemAttribute> {
 	/** Create a new system attribute form */
 	public SystemAttributeForm(Session s) {
 		super("System Attributes", new SystemAttributeTableModel(s));
-		setHelpPageName("Help.SystemAttributeForm");
+		setHelpPageName("help.systemattributeform");
 	}
 
 	/** Create the table */

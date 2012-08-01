@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.client.help;
 
-import java.net.URL;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
+import us.mn.state.dot.tms.client.widget.Icons;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -33,13 +33,9 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class SupportForm extends AbstractForm {
 
-	/** Support text */
-	static protected final String support_text =
-		I18N.get("SupportForm.Text1");
-
 	/** Create a new support form */
 	public SupportForm() {
-		super("IRIS Support");
+		super(I18N.get("help.support.title"));
 	}
 
 	/** Initialize form */
@@ -54,7 +50,7 @@ public class SupportForm extends AbstractForm {
 		JPanel pnl = new JPanel();
 		pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
 		pnl.add(Box.createHorizontalStrut(10));
-		pnl.add(new JLabel(support_text));
+		pnl.add(new ILabel("help.support.text1"));
 		pnl.add(Box.createHorizontalStrut(10));
 		return pnl;
 	}
@@ -72,9 +68,7 @@ public class SupportForm extends AbstractForm {
 	/** Create logo widget */
 	protected JLabel createLogo() {
 		JLabel logo = new JLabel();
-		URL url = getClass().getResource("/images/tmc.gif");
-		if(url != null)
-			logo.setIcon(new ImageIcon(url));
+		logo.setIcon(Icons.getIcon("iris"));
 		return logo;
 	}
 }
