@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for warning signs.
@@ -32,7 +33,7 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<WarningSign>("Warning Sign", 200) {
+		new ProxyColumn<WarningSign>(I18N.get("warning.sign"), 200) {
 			public Object getValueAt(WarningSign ws) {
 				return ws.getName();
 			}
@@ -45,7 +46,7 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<WarningSign>("Location", 300) {
+		new ProxyColumn<WarningSign>(I18N.get("location"), 300) {
 			public Object getValueAt(WarningSign ws) {
 				return GeoLocHelper.getDescription(
 					ws.getGeoLoc());

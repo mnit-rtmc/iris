@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.warning;
 
 import java.awt.Color;
-import javax.swing.JButton;
 import javax.swing.ListModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -34,7 +33,9 @@ import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * WarningSignProperties is a dialog for entering and editing warning signs 
@@ -43,9 +44,6 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  */
 public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
-	/** Frame title */
-	static private final String TITLE = "Warning Sign: ";
-
 	/** Location panel */
 	private final LocationPanel location;
 
@@ -53,7 +51,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Controller button */
-	protected final JButton controllerBtn = new JButton("Controller");
+	private final IButton controllerBtn = new IButton("controller");
 
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
@@ -63,7 +61,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
 	/** Create a new warning sign form */
 	public WarningSignProperties(Session s, WarningSign ws) {
-		super(TITLE, s, ws);
+		super(I18N.get("warning.sign") + ": ", s, ws);
 		location = new LocationPanel(s);
 	}
 
@@ -76,8 +74,8 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Location", createLocationPanel());
-		tab.add("Setup", createSetupPanel());
+		tab.add(I18N.get("location"), createLocationPanel());
+		tab.add(I18N.get("device.setup"), createSetupPanel());
 		add(tab);
 		updateAttribute(null);
 		if(canUpdate())
@@ -96,7 +94,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	protected JPanel createLocationPanel() {
 		location.setGeoLoc(proxy.getGeoLoc());
 		location.initialize();
-		location.addRow("Notes", notes);
+		location.addRow(I18N.get("device.notes"), notes);
 		location.setCenter();
 		location.addRow(controllerBtn);
 		return location;
@@ -143,8 +141,8 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		FormPanel panel = new FormPanel(canUpdate());
 		ListModel m = state.getCamCache().getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(m));
-		panel.addRow("Camera", camera);
-		panel.addRow("Sign Text", message);
+		panel.addRow(I18N.get("camera"), camera);
+		panel.addRow(I18N.get("warning.sign.text"), message);
 		return panel;
 	}
 

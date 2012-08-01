@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.warning;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing warning signs
@@ -32,7 +33,7 @@ public class WarningSignForm extends ProxyTableForm<WarningSign> {
 
 	/** Create a new warning sign form */
 	public WarningSignForm(Session s) {
-		super("Warning Signs", new WarningSignModel(s));
+		super(I18N.get("warning.signs"), new WarningSignModel(s));
 	}
 
 	/** Get the visible row count */

@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.weather;
 
 import java.awt.Color;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -28,6 +27,8 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * WeatherSensorProperties is a dialog for entering and editing weather sensors
@@ -36,9 +37,6 @@ import us.mn.state.dot.tms.client.roads.LocationPanel;
  */
 public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 
-	/** Frame title */
-	static private final String TITLE = "Weather Sensor: ";
-
 	/** Location panel */
 	private final LocationPanel location;
 
@@ -46,11 +44,11 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Controller button */
-	protected final JButton controllerBtn = new JButton("Controller");
+	private final IButton controllerBtn = new IButton("controller");
 
 	/** Create a new weather sensor properties form */
 	public WeatherSensorProperties(Session s, WeatherSensor ws) {
-		super(TITLE, s, ws);
+		super(I18N.get("weather.sensor") + ": ", s, ws);
 		location = new LocationPanel(s);
 	}
 
@@ -63,7 +61,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add("Location", createLocationPanel());
+		tab.add(I18N.get("location"), createLocationPanel());
 		add(tab);
 		updateAttribute(null);
 		if(canUpdate())
@@ -82,7 +80,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	protected JPanel createLocationPanel() {
 		location.setGeoLoc(proxy.getGeoLoc());
 		location.initialize();
-		location.addRow("Notes", notes);
+		location.addRow(I18N.get("device.notes"), notes);
 		location.setCenter();
 		location.addRow(controllerBtn);
 		return location;

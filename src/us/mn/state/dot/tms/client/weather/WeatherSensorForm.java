@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.weather;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing weather sensors
@@ -32,7 +33,7 @@ public class WeatherSensorForm extends ProxyTableForm<WeatherSensor> {
 
 	/** Create a new weather sensor form */
 	public WeatherSensorForm(Session s) {
-		super("Weather Sensors", new WeatherSensorModel(s));
+		super(I18N.get("weather.sensors"), new WeatherSensorModel(s));
 	}
 
 	/** Get the visible row count */

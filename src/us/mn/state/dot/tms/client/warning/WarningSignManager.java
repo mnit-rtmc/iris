@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.warning;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -28,6 +29,7 @@ import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A warning sign manager is a container for SONAR warning sign objects.
@@ -54,7 +56,7 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return "Warning Sign";
+		return I18N.get("warning.sign");
 	}
 
 	/** Get the shape for a given proxy */
@@ -116,8 +118,8 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 				return createSinglePopup(s);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new javax.swing.JLabel("" + n_selected +
-			" Warning Signs"));
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("warning.signs")));
 		p.addSeparator();
 		p.add(new DeployAction(s_model));
 		p.add(new UndeployAction(s_model));
