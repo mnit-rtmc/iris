@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.widget;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
@@ -42,29 +43,19 @@ public class Widgets {
 	/** Initialize the widget state */
 	static public void init(float s) {
 		UI = new Widgets(s);
+		tweakLookAndFeel();
 		scaleLookAndFeel(s);
 	}
 
-	/** Horizontal gap between components */
-	public final int hgap;
-
-	/** Vertical gap between components */
-	public final int vgap;
-
-	/** Empty border to put around panels */
-	public final EmptyBorder border;
-
-	/** Create widget state */
-	private Widgets(float s) {
-		hgap = Math.round(HGAP * s);
-		vgap = Math.round(VGAP * s);
-		border = new EmptyBorder(vgap, hgap, vgap, hgap);
+	/** Tweak the look and feel */
+	static private void tweakLookAndFeel() {
+		UIManager.put("ComboBox.disabledForeground",
+			new javax.swing.plaf.ColorUIResource(Color.GRAY));
+		UIManager.put("TextField.inactiveForeground",
+			 new javax.swing.plaf.ColorUIResource(Color.GRAY));
+		UIManager.put("TextArea.inactiveForeground",
+			 new javax.swing.plaf.ColorUIResource(Color.GRAY));
 	}
-
-	/** Create insets with proper gaps */
-	public Insets insets() {
-		return new Insets(vgap, hgap, vgap, hgap);
-	};
 
 	/** Scale the look-and-feel */
 	static private void scaleLookAndFeel(float scale) {
@@ -115,4 +106,25 @@ public class Widgets {
 		} else
 			return null;
 	}
+
+	/** Horizontal gap between components */
+	public final int hgap;
+
+	/** Vertical gap between components */
+	public final int vgap;
+
+	/** Empty border to put around panels */
+	public final EmptyBorder border;
+
+	/** Create widget state */
+	private Widgets(float s) {
+		hgap = Math.round(HGAP * s);
+		vgap = Math.round(VGAP * s);
+		border = new EmptyBorder(vgap, hgap, vgap, hgap);
+	}
+
+	/** Create insets with proper gaps */
+	public Insets insets() {
+		return new Insets(vgap, hgap, vgap, hgap);
+	};
 }
