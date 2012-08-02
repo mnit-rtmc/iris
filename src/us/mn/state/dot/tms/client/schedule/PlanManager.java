@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;

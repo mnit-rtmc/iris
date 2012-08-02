@@ -44,6 +44,8 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A plan dispatcher is a GUI panel for dispatching action plans
@@ -93,9 +95,9 @@ public class PlanDispatcher extends FormPanel
 		manager = m;
 		selectionModel = manager.getSelectionModel();
 		cache = session.getSonarState().getActionPlans();
-		setTitle("Selected Action Plan");
+		setTitle(I18N.get("action.plan.selected"));
 		setEnabled(false);
-		add(new JLabel("Name"));
+		add(new ILabel("action.plan.name"));
 		bag.weightx = 0.4f;
 		bag.weighty = 0.4f;
 		setWest();
@@ -103,18 +105,18 @@ public class PlanDispatcher extends FormPanel
 		bag.weightx = 0.6f;
 		bag.weighty = 0.6f;
 		addRow(new JLabel(""));
-		add(new JLabel("Description"));
+		add(new ILabel("device.description"));
 		setFill();
 		setWidth(2);
 		add(descriptionTxt);
 		finishRow();
-		add("DMS", dmsTxt);
+		add(I18N.get("dms"), dmsTxt);
 		finishRow();
-		add("Lane Markings", laneTxt);
+		add(I18N.get("lane.markings"), laneTxt);
 		finishRow();
-		add("Ramp Meters", meterTxt);
+		add(I18N.get("ramp.meter.long.plural"), meterTxt);
 		finishRow();
-		add("Phase", phaseCmb);
+		add(I18N.get("action.plan.phase"), phaseCmb);
 		finishRow();
 		setSelected(null);
 		cache.addProxyListener(this);

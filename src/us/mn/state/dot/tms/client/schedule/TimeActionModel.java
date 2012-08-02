@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for time actions assigned to action plans
@@ -43,7 +44,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<TimeAction>("Day Plan", 100) {
+		new ProxyColumn<TimeAction>(I18N.get("action.plan.day"), 100) {
 			public Object getValueAt(TimeAction ta) {
 				if(ta != null)
 					return ta.getDayPlan();
@@ -67,7 +68,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<TimeAction>("Scheduled Date", 100) {
+		new ProxyColumn<TimeAction>(I18N.get("action.plan.date"), 100) {
 			public Object getValueAt(TimeAction ta) {
 				if(ta != null)
 					return ta.getSchedDate();
@@ -84,7 +85,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 				sched_date = TimeActionHelper.formatDate(sd);
 			}
 		},
-		new ProxyColumn<TimeAction>("Time-of-day", 80) {
+		new ProxyColumn<TimeAction>(I18N.get("action.plan.time"), 80) {
 			public Object getValueAt(TimeAction ta) {
 				if(ta != null)
 					return ta.getTimeOfDay();
@@ -104,7 +105,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 				sched_date = null;
 			}
 		},
-		new ProxyColumn<TimeAction>("Phase", 100) {
+		new ProxyColumn<TimeAction>(I18N.get("action.plan.phase"), 100){
 			public Object getValueAt(TimeAction ta) {
 				if(ta != null)
 					return ta.getPhase();

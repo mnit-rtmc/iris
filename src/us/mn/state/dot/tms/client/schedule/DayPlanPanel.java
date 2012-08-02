@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,8 +35,10 @@ import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.CalendarWidget;
+import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -71,28 +72,28 @@ public class DayPlanPanel extends JPanel {
 	protected final JComboBox day_cbox = new JComboBox();
 
 	/** Button to delete the selected day plan */
-	protected final JButton del_plan = new JButton("Delete");
+	private final IButton del_plan = new IButton("action.plan.day.delete");
 
 	/** Month to display on calendar widget */
 	protected final Calendar month = Calendar.getInstance();
 
 	/** Button to select previous month */
-	protected final JButton prev_month = new JButton("<");
+	private final IButton prev_month =new IButton("action.plan.month.prev");
 
 	/** Month label */
 	protected final JLabel month_lbl = new JLabel();
 
 	/** Button to select next month */
-	protected final JButton next_month = new JButton(">");
+	private final IButton next_month =new IButton("action.plan.month.next");
 
 	/** Button to select previous year */
-	protected final JButton prev_year = new JButton("<");
+	private final IButton prev_year = new IButton("action.plan.year.prev");
 
 	/** Year label */
 	protected final JLabel year_lbl = new JLabel();
 
 	/** Button to select next year */
-	protected final JButton next_year = new JButton(">");
+	private final IButton next_year = new IButton("action.plan.year.next");
 
 	/** Calendar widget */
 	protected final CalendarWidget cal_widget = new CalendarWidget();
@@ -104,7 +105,8 @@ public class DayPlanPanel extends JPanel {
 	protected final ZTable h_table = new ZTable();
 
 	/** Button to delete the selected holiday */
-	protected final JButton del_holiday = new JButton("Delete");
+	private final IButton del_holiday = new IButton(
+		"action.plan.holiday.delete");
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -127,7 +129,7 @@ public class DayPlanPanel extends JPanel {
 		bag.insets.bottom = 2;
 		bag.insets.left = 2;
 		bag.insets.right = 2;
-		add(new JLabel("Day Plan"), bag);
+		add(new ILabel("action.plan.day"), bag);
 		add(day_cbox, bag);
 		bag.gridx = 0;
 		bag.gridy = 1;

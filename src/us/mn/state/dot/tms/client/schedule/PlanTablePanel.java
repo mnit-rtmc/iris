@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
-import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -40,7 +40,7 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 	protected final ZTable table = new ZTable();
 
 	/** Button to delete the selected action */
-	protected final JButton del_btn = new JButton("Delete");
+	private final IButton del_btn =new IButton("action.plan.action.delete");
 
 	/** Create a new plan table panel */
 	public PlanTablePanel() {

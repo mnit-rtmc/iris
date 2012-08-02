@@ -31,7 +31,7 @@ public class ChangePhaseAction extends ProxyAction<ActionPlan> {
 
 	/** Create a new action to change the phase of an action plan */
 	public ChangePhaseAction(ActionPlan p, JComboBox c) {
-		super("action.plan.phase", p);
+		super("action.plan.phase.change", p);
 		cmb = c;
 	}
 

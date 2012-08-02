@@ -20,6 +20,7 @@ import javax.swing.border.EmptyBorder;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing action plans and schedules.
@@ -33,9 +34,6 @@ public class ScheduleForm extends AbstractForm {
 		return ActionPlanPanel.isPermitted(s) &&
 		       DayPlanPanel.isPermitted(s);
 	}
-
-	/** Frame title */
-	static protected final String TITLE = "Plans and Schedules";
 
 	/** Tabbed pane */
 	protected final JTabbedPane tab = new JTabbedPane();
@@ -51,7 +49,7 @@ public class ScheduleForm extends AbstractForm {
 
 	/** Create a new schedule form */
 	public ScheduleForm(Session s) {
-		super(TITLE);
+		super(I18N.get("action.plan.schedule.title"));
 		p_panel = new ActionPlanPanel(s);
 		d_panel = new DayPlanPanel(s);
 		pp_panel = new PlanTablePanel<PlanPhase>();
@@ -62,9 +60,9 @@ public class ScheduleForm extends AbstractForm {
 	protected void initialize() {
 		p_panel.initialize();
 		tab.setBorder(new EmptyBorder(0, 0, 24, 0));
-		tab.add("Action Plans", p_panel);
-		tab.add("Day Plans", d_panel);
-		tab.add("Plan Phases", pp_panel);
+		tab.add(I18N.get("action.plan.plural.long"), p_panel);
+		tab.add(I18N.get("action.plan.day.plural"), d_panel);
+		tab.add(I18N.get("action.plan.phase.plural"), pp_panel);
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
 	}

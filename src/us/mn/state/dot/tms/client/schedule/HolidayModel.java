@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2011  Minnesota Department of Transportation
+ * Copyright (C) 2003-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for holidays
@@ -66,12 +67,12 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	static protected final LinkedList<String> WEEKS =
 		new LinkedList<String>();
 	static {
-		WEEKS.add("Last");
+		WEEKS.add(I18N.get("action.plan.week.last"));
 		WEEKS.add(ANY);
-		WEEKS.add("First");
-		WEEKS.add("Second");
-		WEEKS.add("Third");
-		WEEKS.add("Fourth");
+		WEEKS.add(I18N.get("action.plan.week.first"));
+		WEEKS.add(I18N.get("action.plan.week.second"));
+		WEEKS.add(I18N.get("action.plan.week.third"));
+		WEEKS.add(I18N.get("action.plan.week.fourth"));
 	}
 
 	/** List of all possible weekday selections */
@@ -99,7 +100,9 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Holiday>("Assigned", 80, Boolean.class) {
+		new ProxyColumn<Holiday>(I18N.get("action.plan.assigned"), 80,
+			Boolean.class)
+		{
 			public Object getValueAt(Holiday h) {
 				return isAssigned(h);
 			}
@@ -111,7 +114,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 					setAssigned(h, (Boolean)value);
 			}
 		},
-		new ProxyColumn<Holiday>("Holiday Name", 200) {
+		new ProxyColumn<Holiday>(I18N.get("action.plan.holiday"), 200) {
 			public Object getValueAt(Holiday h) {
 				return h.getName();
 			}
@@ -124,7 +127,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Holiday>("Month", 100) {
+		new ProxyColumn<Holiday>(I18N.get("action.plan.month"), 100) {
 			public Object getValueAt(Holiday h) {
 				return MONTHS.get(h.getMonth() + 1);
 			}
@@ -140,7 +143,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Holiday>("Day", 64) {
+		new ProxyColumn<Holiday>(I18N.get("action.plan.day.name"), 64) {
 			public Object getValueAt(Holiday h) {
 				return DAYS.get(h.getDay());
 			}
@@ -155,7 +158,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Holiday>("Week", 80) {
+		new ProxyColumn<Holiday>(I18N.get("action.plan.week"), 80) {
 			public Object getValueAt(Holiday h) {
 				return WEEKS.get(h.getWeek() + 1);
 			}
@@ -171,7 +174,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Holiday>("Weekday", 100) {
+		new ProxyColumn<Holiday>(I18N.get("action.plan.weekday"), 100) {
 			public Object getValueAt(Holiday h) {
 				return WEEKDAYS.get(h.getWeekday());
 			}
@@ -187,7 +190,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Holiday>("Shift", 64) {
+		new ProxyColumn<Holiday>(I18N.get("action.play.day.shift"), 64){
 			public Object getValueAt(Holiday h) {
 				return SHIFTS.get(h.getShift() + 2);
 			}

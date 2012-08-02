@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for DMS actions assigned to action plans
@@ -54,7 +55,9 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<DmsAction>("Sign Group", 120) {
+		new ProxyColumn<DmsAction>(I18N.get("action.plan.dms.group"),
+			120)
+		{
 			public Object getValueAt(DmsAction da) {
 				return da.getSignGroup();
 			}
@@ -68,7 +71,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 					create(sg);
 			}
 		},
-		new ProxyColumn<DmsAction>("Phase", 100) {
+		new ProxyColumn<DmsAction>(I18N.get("action.plan.phase"), 100) {
 			public Object getValueAt(DmsAction da) {
 				return da.getPhase();
 			}
@@ -86,7 +89,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<DmsAction>("Quick Message", 160) {
+		new ProxyColumn<DmsAction>(I18N.get("quick.message"), 160) {
 			public Object getValueAt(DmsAction da) {
 				return da.getQuickMessage();
 			}
@@ -99,7 +102,9 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 					QuickMessageHelper.lookup(v));
 			}
 		},
-		new ProxyColumn<DmsAction>("Activation Priority", 120) {
+		new ProxyColumn<DmsAction>(I18N.get("dms.priority.activation"),
+			120)
+		{
 			public Object getValueAt(DmsAction da) {
 				return DMSMessagePriority.fromOrdinal(
 				       da.getActivationPriority());
@@ -119,7 +124,9 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<DmsAction>("Run-Time Priority", 120) {
+		new ProxyColumn<DmsAction>(I18N.get("dms.priority.run.time"),
+			120)
+		{
 			public Object getValueAt(DmsAction da) {
 				return DMSMessagePriority.fromOrdinal(
 				       da.getRunTimePriority());

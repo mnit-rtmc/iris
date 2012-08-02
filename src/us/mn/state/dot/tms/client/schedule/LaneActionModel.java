@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for lane actions assigned to action plans
@@ -40,7 +41,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<LaneAction>("Lane Marking", 160) {
+		new ProxyColumn<LaneAction>(I18N.get("lane.marking"), 160) {
 			public Object getValueAt(LaneAction la) {
 				return la.getLaneMarking();
 			}
@@ -54,7 +55,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 					create(lm);
 			}
 		},
-		new ProxyColumn<LaneAction>("Phase", 100) {
+		new ProxyColumn<LaneAction>(I18N.get("action.plan.phase"), 100){
 			public Object getValueAt(LaneAction la) {
 				return la.getPhase();
 			}

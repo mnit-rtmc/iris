@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.BorderLayout;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
@@ -30,7 +29,9 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing action plans.
@@ -59,7 +60,7 @@ public class ActionPlanPanel extends JPanel {
 	protected final ZTable p_table = new ZTable();
 
 	/** Button to delete the selected action plan */
-	protected final JButton del_p_btn = new JButton("Delete Plan");
+	private final IButton del_p_btn = new IButton("action.plan.delete");
 
 	/** Time action table panel */
 	private final PlanTablePanel<TimeAction> t_panel;
@@ -94,10 +95,10 @@ public class ActionPlanPanel extends JPanel {
 		add(createActionPlanPanel(), BorderLayout.NORTH);
 		JTabbedPane tab = new JTabbedPane();
 		tab.setBorder(new EmptyBorder(0, 12, 12, 12));
-		tab.add("Schedule", t_panel);
-		tab.add("DMS Actions", d_panel);
-		tab.add("Lane Actions", l_panel);
-		tab.add("Meter Actions", m_panel);
+		tab.add(I18N.get("action.plan.schedule"), t_panel);
+		tab.add(I18N.get("action.plan.dms"), d_panel);
+		tab.add(I18N.get("action.plan.lane"), l_panel);
+		tab.add(I18N.get("action.plan.meter"), m_panel);
 		add(tab, BorderLayout.SOUTH);
 	}
 
