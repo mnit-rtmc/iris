@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for failed controllers
@@ -38,32 +37,28 @@ public class FailedControllerModel extends ProxyTableModel2<Controller> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Controller>(I18N.get("controller"), 90) {
+		new ProxyColumn<Controller>("controller", 90) {
 			public Object getValueAt(Controller c) {
 				return c.getName();
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("location"), 200) {
+		new ProxyColumn<Controller>("location", 200) {
 			public Object getValueAt(Controller c) {
 				return GeoLocHelper.getDescription(
 					c.getCabinet().getGeoLoc());
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("comm.link"), 120) {
+		new ProxyColumn<Controller>("comm.link", 120) {
 			public Object getValueAt(Controller c) {
 				return c.getCommLink().getName();
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("controller.drop"), 60,
-			Short.class)
-		{
+		new ProxyColumn<Controller>("controller.drop", 60, Short.class){
 			public Object getValueAt(Controller c) {
 				return c.getDrop();
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("controller.fail"), 240,
-			Long.class)
-		{
+		new ProxyColumn<Controller>("controller.fail", 240, Long.class){
 			public Object getValueAt(Controller c) {
 				return c.getFailTime();
 			}

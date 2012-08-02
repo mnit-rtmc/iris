@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for map extents.
@@ -37,7 +36,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<MapExtent>(I18N.get("location.map.extent"),160){
+		new ProxyColumn<MapExtent>("location.map.extent", 160) {
 			public Object getValueAt(MapExtent me) {
 				return me.getName();
 			}
@@ -50,9 +49,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 					createExtent(v);
 			}
 		},
-		new ProxyColumn<MapExtent>(I18N.get("location.lon"), 80,
-			Float.class)
-		{
+		new ProxyColumn<MapExtent>("location.lon", 80, Float.class) {
 			public Object getValueAt(MapExtent me) {
 				return me.getLon();
 			}
@@ -64,9 +61,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 					me.setLon((Float)value);
 			}
 		},
-		new ProxyColumn<MapExtent>(I18N.get("location.lat"), 80,
-			Float.class)
-		{
+		new ProxyColumn<MapExtent>("location.lat", 80, Float.class) {
 			public Object getValueAt(MapExtent me) {
 				return me.getLat();
 			}
@@ -78,7 +73,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 					me.setLat((Float)value);
 			}
 		},
-		new ProxyColumn<MapExtent>(I18N.get("location.map.zoom"), 80,
+		new ProxyColumn<MapExtent>("location.map.zoom", 80,
 			Integer.class)
 		{
 			public Object getValueAt(MapExtent me) {

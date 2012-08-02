@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for cabinet styles
@@ -37,7 +36,7 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<CabinetStyle>(I18N.get("cabinet.style"), 90) {
+		new ProxyColumn<CabinetStyle>("cabinet.style", 90) {
 			public Object getValueAt(CabinetStyle cs) {
 				return cs.getName();
 			}
@@ -50,9 +49,7 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<CabinetStyle>(I18N.get("cabinet.style.dip"),
-			60)
-		{
+		new ProxyColumn<CabinetStyle>("cabinet.style.dip", 60) {
 			public Object getValueAt(CabinetStyle cs) {
 				return cs.getDip();
 			}

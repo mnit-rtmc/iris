@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for ramp meters.
@@ -33,7 +32,7 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<RampMeter>(I18N.get("ramp.meter"), 200) {
+		new ProxyColumn<RampMeter>("ramp.meter", 200) {
 			public Object getValueAt(RampMeter rm) {
 				return rm.getName();
 			}
@@ -46,7 +45,7 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<RampMeter>(I18N.get("location"), 300) {
+		new ProxyColumn<RampMeter>("location", 300) {
 			public Object getValueAt(RampMeter rm) {
 				return GeoLocHelper.getOnRampDescription(
 					rm.getGeoLoc());

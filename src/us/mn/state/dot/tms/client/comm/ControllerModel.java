@@ -34,7 +34,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for controllers
@@ -53,7 +52,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Controller>(I18N.get("controller"), 90) {
+		new ProxyColumn<Controller>("controller", 90) {
 			public Object getValueAt(Controller c) {
 				return c.getName();
 			}
@@ -66,13 +65,13 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 					createController(v);
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("location"), 200) {
+		new ProxyColumn<Controller>("location", 200) {
 			public Object getValueAt(Controller c) {
 				return GeoLocHelper.getDescription(
 					c.getCabinet().getGeoLoc());
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("controller.drop"), 60) {
+		new ProxyColumn<Controller>("controller.drop", 60) {
 			public Object getValueAt(Controller c) {
 				return c.getDrop();
 			}
@@ -87,7 +86,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				return new DropCellEditor();
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("controller.active"), 50,
+		new ProxyColumn<Controller>("controller.active", 50,
 			Boolean.class)
 		{
 			public Object getValueAt(Controller c) {
@@ -101,7 +100,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 					c.setActive((Boolean)value);
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("comm"), 44) {
+		new ProxyColumn<Controller>("comm", 44) {
 			public Object getValueAt(Controller c) {
 				return c;
 			}
@@ -109,14 +108,12 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				return new CommCellRenderer();
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("controller.status"), 240){
+		new ProxyColumn<Controller>("controller.status", 240) {
 			public Object getValueAt(Controller c) {
 				return c.getStatus();
 			}
 		},
-		new ProxyColumn<Controller>(I18N.get("controller.version"),
-			120)
-		{
+		new ProxyColumn<Controller>("controller.version", 120) {
 			public Object getValueAt(Controller c) {
 				return c.getVersion();
 			}

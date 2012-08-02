@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for Dynamic Message Signs.
@@ -33,7 +32,7 @@ public class DMSModel extends ProxyTableModel<DMS> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<DMS>(I18N.get("dms"), 200) {
+		new ProxyColumn<DMS>("dms", 200) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
 			}
@@ -46,7 +45,7 @@ public class DMSModel extends ProxyTableModel<DMS> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("location"), 300) {
+		new ProxyColumn<DMS>("location", 300) {
 			public Object getValueAt(DMS d) {
 				return GeoLocHelper.getDescription(
 					d.getGeoLoc());

@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for graphics
@@ -40,14 +39,12 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Graphic>(I18N.get("device.name")) {
+		new ProxyColumn<Graphic>("device.name") {
 			public Object getValueAt(Graphic g) {
 				return g.getName();
 			}
 		},
-		new ProxyColumn<Graphic>(I18N.get("graphic.number"), 0,
-			Integer.class)
-		{
+		new ProxyColumn<Graphic>("graphic.number", 0, Integer.class) {
 			public Object getValueAt(Graphic g) {
 				return g.getGNumber();
 			}
@@ -59,28 +56,22 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 					g.setGNumber((Integer)value);
 			}
 		},
-		new ProxyColumn<Graphic>(I18N.get("graphic.bpp"), 0,
-			Integer.class)
-		{
+		new ProxyColumn<Graphic>("graphic.bpp", 0, Integer.class) {
 			public Object getValueAt(Graphic g) {
 				return g.getBpp();
 			}
 		},
-		new ProxyColumn<Graphic>(I18N.get("graphic.width"), 0,
-			Integer.class)
-		{
+		new ProxyColumn<Graphic>("graphic.width", 0, Integer.class) {
 			public Object getValueAt(Graphic g) {
 				return g.getWidth();
 			}
 		},
-		new ProxyColumn<Graphic>(I18N.get("graphic.height"), 0,
-			Integer.class)
-		{
+		new ProxyColumn<Graphic>("graphic.height", 0, Integer.class) {
 			public Object getValueAt(Graphic g) {
 				return g.getHeight();
 			}
 		},
-		new ProxyColumn<Graphic>(I18N.get("graphic.image")) {
+		new ProxyColumn<Graphic>("graphic.image") {
 			public Object getValueAt(Graphic g) {
 				return g;
 			}

@@ -18,7 +18,6 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for video monitors
@@ -31,7 +30,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<VideoMonitor>(I18N.get("video.monitor"), 160) {
+		new ProxyColumn<VideoMonitor>("video.monitor", 160) {
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getName();
 			}
@@ -44,9 +43,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<VideoMonitor>(I18N.get("device.description"),
-			300)
-		{
+		new ProxyColumn<VideoMonitor>("device.description", 300) {
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getDescription();
 			}
@@ -57,8 +54,8 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				vm.setDescription(value.toString());
 			}
 		},
-		new ProxyColumn<VideoMonitor>(I18N.get("video.restricted"),
-			120, Boolean.class)
+		new ProxyColumn<VideoMonitor>("video.restricted", 120,
+			Boolean.class)
 		{
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getRestricted();

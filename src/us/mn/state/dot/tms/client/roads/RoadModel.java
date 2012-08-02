@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for roads
@@ -36,7 +35,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Road>(I18N.get("location.road"), 200) {
+		new ProxyColumn<Road>("location.road", 200) {
 			public Object getValueAt(Road r) {
 				return r.getName();
 			}
@@ -49,7 +48,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Road>(I18N.get("location.road.abbrev"), 80) {
+		new ProxyColumn<Road>("location.road.abbrev", 80) {
 			public Object getValueAt(Road r) {
 				return r.getAbbrev();
 			}
@@ -60,7 +59,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 				r.setAbbrev(value.toString());
 			}
 		},
-		new ProxyColumn<Road>(I18N.get("location.road.class"), 120) {
+		new ProxyColumn<Road>("location.road.class", 120) {
 			public Object getValueAt(Road r) {
 				return RoadClass.fromOrdinal(r.getRClass());
 			}
@@ -79,7 +78,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Road>(I18N.get("location.direction"), 120) {
+		new ProxyColumn<Road>("location.direction", 120) {
 			public Object getValueAt(Road r) {
 				return Direction.fromOrdinal(r.getDirection());
 			}
@@ -98,7 +97,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Road>(I18N.get("location.alt_dir"), 120) {
+		new ProxyColumn<Road>("location.alt_dir", 120) {
 			public Object getValueAt(Road r) {
 				return Direction.fromOrdinal(r.getAltDir());
 			}

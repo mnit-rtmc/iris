@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for weather sensors.
@@ -33,7 +32,7 @@ public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<WeatherSensor>(I18N.get("weather.sensor"), 120){
+		new ProxyColumn<WeatherSensor>("weather.sensor", 120){
 			public Object getValueAt(WeatherSensor ws) {
 				return ws.getName();
 			}
@@ -46,7 +45,7 @@ public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<WeatherSensor>(I18N.get("location"), 300) {
+		new ProxyColumn<WeatherSensor>("location", 300) {
 			public Object getValueAt(WeatherSensor ws) {
 				return GeoLocHelper.getDescription(
 					ws.getGeoLoc());

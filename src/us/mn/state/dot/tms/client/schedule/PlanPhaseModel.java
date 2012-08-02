@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for plan phases.
@@ -36,9 +35,7 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<PlanPhase>(I18N.get("action.plan.phase.name"),
-			120)
-		{
+		new ProxyColumn<PlanPhase>("action.plan.phase.name", 120) {
 			public Object getValueAt(PlanPhase p) {
 				return p.getName();
 			}
@@ -51,8 +48,8 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<PlanPhase>(I18N.get("action.plan.phase.hold"),
-			120, Integer.class)
+		new ProxyColumn<PlanPhase>("action.plan.phase.hold", 120,
+			Integer.class)
 		{
 			public Object getValueAt(PlanPhase p) {
 				return p.getHoldTime();
@@ -65,9 +62,7 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 					p.setHoldTime((Integer)value);
 			}
 		},
-		new ProxyColumn<PlanPhase>(I18N.get("action.plan.phase.next"),
-			120)
-		{
+		new ProxyColumn<PlanPhase>("action.plan.phase.next", 120) {
 			public Object getValueAt(PlanPhase p) {
 				return p.getNextPhase();
 			}

@@ -18,7 +18,6 @@ import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for incident details.
@@ -31,7 +30,7 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<IncidentDetail>(I18N.get("device.name"), 90) {
+		new ProxyColumn<IncidentDetail>("device.name", 90) {
 			public Object getValueAt(IncidentDetail dtl) {
 				return dtl.getName();
 			}
@@ -46,9 +45,7 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<IncidentDetail>(I18N.get("device.description"),
-			200)
-		{
+		new ProxyColumn<IncidentDetail>("device.description", 200) {
 			public Object getValueAt(IncidentDetail dtl) {
 				return dtl.getDescription();
 			}

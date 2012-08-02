@@ -19,7 +19,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for IRIS connections
@@ -32,12 +31,12 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Connection>(I18N.get("connection.peer"), 140) {
+		new ProxyColumn<Connection>("connection.peer", 140) {
 			public Object getValueAt(Connection c) {
 				return c.getName();
 			}
 		},
-		new ProxyColumn<Connection>(I18N.get("user"), 180) {
+		new ProxyColumn<Connection>("user", 180) {
 			public Object getValueAt(Connection c) {
 				User u = c.getUser();
 				if(u != null)

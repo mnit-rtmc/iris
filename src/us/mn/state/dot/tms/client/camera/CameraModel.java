@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for cameras
@@ -33,7 +32,7 @@ public class CameraModel extends ProxyTableModel<Camera> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Camera>(I18N.get("camera"), 200) {
+		new ProxyColumn<Camera>("camera", 200) {
 			public Object getValueAt(Camera c) {
 				return c.getName();
 			}
@@ -46,15 +45,13 @@ public class CameraModel extends ProxyTableModel<Camera> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Camera>(I18N.get("location"), 300) {
+		new ProxyColumn<Camera>("location", 300) {
 			public Object getValueAt(Camera c) {
 				return GeoLocHelper.getDescription(
 					c.getGeoLoc());
 			}
 		},
-		new ProxyColumn<Camera>(I18N.get("camera.publish"), 120,
-			Boolean.class)
-		{
+		new ProxyColumn<Camera>("camera.publish", 120, Boolean.class) {
 			public Object getValueAt(Camera c) {
 				return c.getPublish();
 			}

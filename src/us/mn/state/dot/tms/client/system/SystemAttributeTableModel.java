@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for system attributes.
@@ -41,9 +40,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<SystemAttribute>(I18N.get(
-			"system.attribute.name"), 200)
-		{
+		new ProxyColumn<SystemAttribute>("system.attribute.name", 200) {
 			public Object getValueAt(SystemAttribute sa) {
 				return sa.getName();
 			}
@@ -57,9 +54,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 				return new NameCellRenderer();
 			}
 		},
-		new ProxyColumn<SystemAttribute>(I18N.get(
-			"system.attribute.value"), 340)
-		{
+		new ProxyColumn<SystemAttribute>("system.attribute.value", 340){
 			public Object getValueAt(SystemAttribute sa) {
 				return sa.getValue();
 			}

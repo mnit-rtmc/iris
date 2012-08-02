@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for quick messages, which is for editing and creating
@@ -35,9 +34,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<QuickMessage>(I18N.get("quick.message.name"),
-			100)
-		{
+		new ProxyColumn<QuickMessage>("quick.message.name", 100) {
 			public Object getValueAt(QuickMessage qm) {
 				return qm.getName();
 			}
@@ -50,7 +47,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<QuickMessage>(I18N.get("dms.group"), 120) {
+		new ProxyColumn<QuickMessage>("dms.group", 120) {
 			public Object getValueAt(QuickMessage qm) {
 				return qm.getSignGroup();
 			}
@@ -62,9 +59,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				qm.setSignGroup(SignGroupHelper.lookup(v));
 			}
 		},
-		new ProxyColumn<QuickMessage>(I18N.get("quick.message.multi"),
-			680)
-		{
+		new ProxyColumn<QuickMessage>("quick.message.multi", 680) {
 			public Object getValueAt(QuickMessage qm) {
 				return qm.getMulti();
 			}

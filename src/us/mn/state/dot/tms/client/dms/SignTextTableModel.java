@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for sign text.
@@ -45,9 +44,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<SignText>(I18N.get("dms.line"), 36,
-			Short.class)
-		{
+		new ProxyColumn<SignText>("dms.line", 36, Short.class) {
 			public Object getValueAt(SignText st) {
 				return st.getLine();
 			}
@@ -61,7 +58,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				}
 			}
 		},
-		new ProxyColumn<SignText>(I18N.get("dms.multi"), 400) {
+		new ProxyColumn<SignText>("dms.multi", 400) {
 			public Object getValueAt(SignText st) {
 				return st.getMulti();
 			}
@@ -82,9 +79,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				return RENDERER;
 			}
 		},
-		new ProxyColumn<SignText>(I18N.get("dms.priority"), 48,
-			Short.class)
-		{
+		new ProxyColumn<SignText>("dms.priority", 48, Short.class) {
 			public Object getValueAt(SignText st) {
 				return st.getPriority();
 			}

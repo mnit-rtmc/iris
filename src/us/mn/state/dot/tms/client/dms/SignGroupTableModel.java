@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for sign groups.
@@ -37,7 +36,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<SignGroup>(I18N.get("dms.group"), 120) {
+		new ProxyColumn<SignGroup>("dms.group", 120) {
 			public Object getValueAt(SignGroup sg) {
 				return sg.getName();
 			}
@@ -50,7 +49,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 					createSignGroup(v);
 			}
 		},
-		new ProxyColumn<SignGroup>(I18N.get("dms.group.member"), 50,
+		new ProxyColumn<SignGroup>("dms.group.member", 50,
 			Boolean.class)
 		{
 			public Object getValueAt(SignGroup sg) {

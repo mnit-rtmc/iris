@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for LCS within an array.
@@ -33,12 +32,12 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<LCS>(I18N.get("lcs.lane"), 36, Integer.class) {
+		new ProxyColumn<LCS>("lcs.lane", 36, Integer.class) {
 			public Object getValueAt(LCS lcs) {
 				return lcs.getLane();
 			}
 		},
-		new ProxyColumn<LCS>(I18N.get("device.name"), 140) {
+		new ProxyColumn<LCS>("device.name", 140) {
 			public Object getValueAt(LCS lcs) {
 				return lcs.getName();
 			}

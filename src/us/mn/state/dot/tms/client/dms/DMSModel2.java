@@ -22,7 +22,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for DMS table form 2.
@@ -37,7 +36,7 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<DMS>(I18N.get("dms"), 40) {
+		new ProxyColumn<DMS>("dms", 40) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
 			}
@@ -50,49 +49,47 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("location"), 200) {
+		new ProxyColumn<DMS>("location", 200) {
 			public Object getValueAt(DMS d) {
 				return GeoLocHelper.getDescription(
 					d.getGeoLoc());
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("location.dir"), 30) {
+		new ProxyColumn<DMS>("location.dir", 30) {
 			public Object getValueAt(DMS d) {
 				return DMSHelper.getRoadDir(d);
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("dms.aws.allowed"), 80,
-			Boolean.class)
-		{
+		new ProxyColumn<DMS>("dms.aws.allowed", 80, Boolean.class) {
 			public Object getValueAt(DMS d) {
 				return d.getAwsAllowed();
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("device.style.aws.controlled"),
-			80, Boolean.class)
+		new ProxyColumn<DMS>("device.style.aws.controlled", 80,
+			Boolean.class)
 		{
 			public Object getValueAt(DMS d) {
 				return d.getAwsControlled();
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("dms.owner"), 60) {
+		new ProxyColumn<DMS>("dms.owner", 60) {
 			public Object getValueAt(DMS d) {
 				User u = d.getOwnerCurrent();
 				String name = (u == null ? "" : u.getName());
 				return (name == null ? "" : name);
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("device.status"), 100) {
+		new ProxyColumn<DMS>("device.status", 100) {
 			public Object getValueAt(DMS d) {
 				return DMSHelper.getAllStyles(d);
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("dms.model"), 40) {
+		new ProxyColumn<DMS>("dms.model", 40) {
 			public Object getValueAt(DMS d) {
 				return d.getModel();
 			}
 		},
-		new ProxyColumn<DMS>(I18N.get("dms.access"), 140) {
+		new ProxyColumn<DMS>("dms.access", 140) {
 			public Object getValueAt(DMS d) {
 				return d.getSignAccess();
 			}

@@ -18,7 +18,6 @@ import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for IRIS roles
@@ -31,7 +30,7 @@ public class RoleModel extends ProxyTableModel<Role> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Role>(I18N.get("role.name"), 160) {
+		new ProxyColumn<Role>("role.name", 160) {
 			public Object getValueAt(Role r) {
 				return r.getName();
 			}
@@ -44,9 +43,7 @@ public class RoleModel extends ProxyTableModel<Role> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Role>(I18N.get("role.enabled"), 60,
-			Boolean.class)
-		{
+		new ProxyColumn<Role>("role.enabled", 60, Boolean.class) {
 			public Object getValueAt(Role r) {
 				return r.getEnabled();
 			}

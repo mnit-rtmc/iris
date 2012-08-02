@@ -100,7 +100,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Holiday>(I18N.get("action.plan.assigned"), 80,
+		new ProxyColumn<Holiday>("action.plan.assigned", 80,
 			Boolean.class)
 		{
 			public Object getValueAt(Holiday h) {
@@ -114,7 +114,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 					setAssigned(h, (Boolean)value);
 			}
 		},
-		new ProxyColumn<Holiday>(I18N.get("action.plan.holiday"), 200) {
+		new ProxyColumn<Holiday>("action.plan.holiday", 200) {
 			public Object getValueAt(Holiday h) {
 				return h.getName();
 			}
@@ -127,7 +127,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Holiday>(I18N.get("action.plan.month"), 100) {
+		new ProxyColumn<Holiday>("action.plan.month", 100) {
 			public Object getValueAt(Holiday h) {
 				return MONTHS.get(h.getMonth() + 1);
 			}
@@ -143,7 +143,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Holiday>(I18N.get("action.plan.day.name"), 64) {
+		new ProxyColumn<Holiday>("action.plan.day.name", 64) {
 			public Object getValueAt(Holiday h) {
 				return DAYS.get(h.getDay());
 			}
@@ -158,7 +158,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Holiday>(I18N.get("action.plan.week"), 80) {
+		new ProxyColumn<Holiday>("action.plan.week", 80) {
 			public Object getValueAt(Holiday h) {
 				return WEEKS.get(h.getWeek() + 1);
 			}
@@ -174,7 +174,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Holiday>(I18N.get("action.plan.weekday"), 100) {
+		new ProxyColumn<Holiday>("action.plan.weekday", 100) {
 			public Object getValueAt(Holiday h) {
 				return WEEKDAYS.get(h.getWeekday());
 			}
@@ -190,7 +190,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<Holiday>(I18N.get("action.play.day.shift"), 64){
+		new ProxyColumn<Holiday>("action.plan.day.shift", 64) {
 			public Object getValueAt(Holiday h) {
 				return SHIFTS.get(h.getShift() + 2);
 			}

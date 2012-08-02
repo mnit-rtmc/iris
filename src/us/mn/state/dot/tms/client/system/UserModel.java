@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for IRIS users
@@ -48,7 +47,7 @@ public class UserModel extends ProxyTableModel<User> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<User>(I18N.get("user"), 100) {
+		new ProxyColumn<User>("user", 100) {
 			public Object getValueAt(User u) {
 				return u.getName();
 			}
@@ -61,7 +60,7 @@ public class UserModel extends ProxyTableModel<User> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<User>(I18N.get("user.name.full"), 180) {
+		new ProxyColumn<User>("user.name.full", 180) {
 			public Object getValueAt(User u) {
 				return u.getFullName();
 			}
@@ -72,7 +71,7 @@ public class UserModel extends ProxyTableModel<User> {
 				u.setFullName(value.toString().trim());
 			}
 		},
-		new ProxyColumn<User>(I18N.get("user.dn"), 320) {
+		new ProxyColumn<User>("user.dn", 320) {
 			public Object getValueAt(User u) {
 				return u.getDn();
 			}
@@ -83,7 +82,7 @@ public class UserModel extends ProxyTableModel<User> {
 				u.setDn(value.toString().trim());
 			}
 		},
-		new ProxyColumn<User>(I18N.get("role"), 160) {
+		new ProxyColumn<User>("role", 160) {
 			public Object getValueAt(User u) {
 				return u.getRole();
 			}
@@ -100,9 +99,7 @@ public class UserModel extends ProxyTableModel<User> {
 				return new RoleCellEditor();
 			}
 		},
-		new ProxyColumn<User>(I18N.get("user.enabled"), 60,
-			Boolean.class)
-		{
+		new ProxyColumn<User>("user.enabled", 60, Boolean.class) {
 			public Object getValueAt(User u) {
 				return u.getEnabled();
 			}

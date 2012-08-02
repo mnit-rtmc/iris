@@ -37,7 +37,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Alarm>(I18N.get("alarm"), 80) {
+		new ProxyColumn<Alarm>("alarm", 80) {
 			public Object getValueAt(Alarm a) {
 				return a.getName();
 			}
@@ -50,7 +50,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<Alarm>(I18N.get("device.description"), 200) {
+		new ProxyColumn<Alarm>("device.description", 200) {
 			public Object getValueAt(Alarm a) {
 				return a.getDescription();
 			}
@@ -62,7 +62,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 				a.setDescription(v);
 			}
 		},
-		new ProxyColumn<Alarm>(I18N.get("alarm.state"), 60) {
+		new ProxyColumn<Alarm>("alarm.state", 60) {
 			public Object getValueAt(Alarm a) {
 				return a.getState();
 			}
@@ -70,12 +70,12 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 				return new StateCellRenderer();
 			}
 		},
-		new ProxyColumn<Alarm>(I18N.get("controller"), 100) {
+		new ProxyColumn<Alarm>("controller", 100) {
 			public Object getValueAt(Alarm a) {
 				return a.getController();
 			}
 		},
-		new ProxyColumn<Alarm>(I18N.get("controller.pin"), 50) {
+		new ProxyColumn<Alarm>("controller.pin", 50) {
 			public Object getValueAt(Alarm a) {
 				return a.getPin();
 			}

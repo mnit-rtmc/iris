@@ -19,7 +19,6 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for detectors
@@ -32,12 +31,12 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Detector>(I18N.get("detector"), 60) {
+		new ProxyColumn<Detector>("detector", 60) {
 			public Object getValueAt(Detector d) {
 				return d.getName();
 			}
 		},
-		new ProxyColumn<Detector>(I18N.get("detector.label"), 150) {
+		new ProxyColumn<Detector>("detector.label", 150) {
 			public Object getValueAt(Detector d) {
 				return DetectorHelper.getLabel(d);
 			}

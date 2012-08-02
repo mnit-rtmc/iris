@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for LCS arrays.
@@ -33,7 +32,7 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<LCSArray>(I18N.get("lcs.array"), 200) {
+		new ProxyColumn<LCSArray>("lcs.array", 200) {
 			public Object getValueAt(LCSArray a) {
 				return a.getName();
 			}
@@ -46,7 +45,7 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 					cache.createObject(v);
 			}
 		},
-		new ProxyColumn<LCSArray>(I18N.get("device.location"), 300) {
+		new ProxyColumn<LCSArray>("location", 300) {
 			public Object getValueAt(LCSArray a) {
 				return LCSArrayHelper.lookupLocation(a);
 			}

@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for lane-use MULTI.
@@ -42,14 +41,12 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<LaneUseMulti>(I18N.get("device.name"), 80) {
+		new ProxyColumn<LaneUseMulti>("device.name", 80) {
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getName();
 			}
 		},
-		new ProxyColumn<LaneUseMulti>(I18N.get(
-			"lane.use.multi.indication"), 100)
-		{
+		new ProxyColumn<LaneUseMulti>("lane.use.multi.indication", 100){
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getIndication();
 			}
@@ -76,8 +73,8 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return new DefaultCellEditor(combo);
 			}
 		},
-		new ProxyColumn<LaneUseMulti>(I18N.get("lane.use.multi.msg"),
-			80, Integer.class)
+		new ProxyColumn<LaneUseMulti>("lane.use.multi.msg", 80,
+			Integer.class)
 		{
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getMsgNum();
@@ -92,7 +89,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					lum.setMsgNum(null);
 			}
 		},
-		new ProxyColumn<LaneUseMulti>(I18N.get("graphic.width"), 80,
+		new ProxyColumn<LaneUseMulti>("graphic.width", 80,
 			Integer.class)
 		{
 			public Object getValueAt(LaneUseMulti lum) {
@@ -106,7 +103,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					lum.setWidth((Integer)value);
 			}
 		},
-		new ProxyColumn<LaneUseMulti>(I18N.get("graphic.height"), 80,
+		new ProxyColumn<LaneUseMulti>("graphic.height", 80,
 			Integer.class)
 		{
 			public Object getValueAt(LaneUseMulti lum) {
@@ -120,9 +117,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					lum.setHeight((Integer)value);
 			}
 		},
-		new ProxyColumn<LaneUseMulti>(I18N.get("dms.quick.message"),
-			160)
-		{
+		new ProxyColumn<LaneUseMulti>("dms.quick.message", 160) {
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getQuickMessage();
 			}

@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for meter actions assigned to action plans
@@ -41,7 +40,7 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<MeterAction>(I18N.get("ramp.meter.long"), 160) {
+		new ProxyColumn<MeterAction>("ramp.meter.long", 160) {
 			public Object getValueAt(MeterAction ma) {
 				return ma.getRampMeter();
 			}
@@ -55,7 +54,7 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 					create(rm);
 			}
 		},
-		new ProxyColumn<MeterAction>(I18N.get("action.plan.phase"),100){
+		new ProxyColumn<MeterAction>("action.plan.phase", 100) {
 			public Object getValueAt(MeterAction ma) {
 				return ma.getPhase();
 			}

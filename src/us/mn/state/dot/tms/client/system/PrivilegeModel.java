@@ -20,7 +20,6 @@ import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for IRIS privileges
@@ -33,7 +32,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Privilege>(I18N.get("privilege.pattern"), 400) {
+		new ProxyColumn<Privilege>("privilege.pattern", 400) {
 			public Object getValueAt(Privilege p) {
 				return p.getPattern();
 			}
@@ -48,9 +47,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPattern(v);
 			}
 		},
-		new ProxyColumn<Privilege>(I18N.get("privilege.read"), 80,
-			Boolean.class)
-		{
+		new ProxyColumn<Privilege>("privilege.read", 80, Boolean.class){
 			public Object getValueAt(Privilege p) {
 				return p.getPrivR();
 			}
@@ -62,9 +59,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPrivR((Boolean)value);
 			}
 		},
-		new ProxyColumn<Privilege>(I18N.get("privilege.write"), 80,
-			Boolean.class)
-		{
+		new ProxyColumn<Privilege>("privilege.write", 80,Boolean.class){
 			public Object getValueAt(Privilege p) {
 				return p.getPrivW();
 			}
@@ -76,9 +71,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPrivW((Boolean)value);
 			}
 		},
-		new ProxyColumn<Privilege>(I18N.get("privilege.create"), 80,
-			Boolean.class)
-		{
+		new ProxyColumn<Privilege>("privilege.create",80,Boolean.class){
 			public Object getValueAt(Privilege p) {
 				return p.getPrivC();
 			}
@@ -90,9 +83,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPrivC((Boolean)value);
 			}
 		},
-		new ProxyColumn<Privilege>(I18N.get("privilege.del"), 80,
-			Boolean.class)
-		{
+		new ProxyColumn<Privilege>("privilege.del", 80, Boolean.class) {
 			public Object getValueAt(Privilege p) {
 				return p.getPrivD();
 			}

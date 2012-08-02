@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A column in the proxy table model.
@@ -37,21 +38,24 @@ abstract public class ProxyColumn<T extends SonarObject> {
 	/** Column width (pixels) */
 	protected final int width;
 
-	/** Create a new proxy column */
-	public ProxyColumn(String h, int w, Class c) {
-		header = h;
+	/** Create a new proxy column.
+	 * @param tid Text ID for column header.
+	 * @param w Width in pixels.
+	 * @param c Column class. */
+	public ProxyColumn(String tid, int w, Class c) {
+		header = I18N.get(tid);
 		width = w;
 		c_class = c;
 	}
 
 	/** Create a new proxy column */
-	public ProxyColumn(String h, int w) {
-		this(h, w, String.class);
+	public ProxyColumn(String tid, int w) {
+		this(tid, w, String.class);
 	}
 
 	/** Create a new proxy column */
-	public ProxyColumn(String h) {
-		this(h, 0, String.class);
+	public ProxyColumn(String tid) {
+		this(tid, 0, String.class);
 	}
 
 	/** Add a column to the table column model */
