@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The system attribute allows administrators to change system-wide policy
@@ -35,7 +36,8 @@ public class SystemAttributeForm extends ProxyTableForm<SystemAttribute> {
 
 	/** Create a new system attribute form */
 	public SystemAttributeForm(Session s) {
-		super("System Attributes", new SystemAttributeTableModel(s));
+		super(I18N.get("system.attributes"),
+			new SystemAttributeTableModel(s));
 		setHelpPageName("help.systemattributeform");
 	}
 

@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -22,6 +21,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -38,7 +38,7 @@ public class ConnectionPanel extends FormPanel {
 	protected final ZTable c_table = new ZTable();
 
 	/** Button to delete the selected connection */
-	protected final JButton del_conn = new JButton("Disconnect");
+	private final IButton del_conn = new IButton("connection.disconnect");
 
 	/** Create a new connection panel */
 	public ConnectionPanel(Session s) {

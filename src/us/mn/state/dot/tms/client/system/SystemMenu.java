@@ -20,6 +20,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * SystemMenu is a menu for system configuration items.
@@ -36,7 +37,7 @@ public class SystemMenu extends JMenu {
 
 	/** Create a new system menu */
 	public SystemMenu(final Session s) {
-		super("System");
+		super(I18N.get("system"));
 		session = s;
 		desktop = s.getDesktop();
 		JMenuItem item = createSystemAttributesItem();
@@ -60,8 +61,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createSystemAttributesItem() {
 		if(!SystemAttributeForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("System Attributes");
-		item.setMnemonic('S');
+		JMenuItem item = new JMenuItem(I18N.get("system.attributes"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new SystemAttributeForm(session));
@@ -74,8 +74,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createIncidentDetailItem() {
 		if(!IncidentDetailForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Incident Detail");
-		item.setMnemonic('i');
+		JMenuItem item = new JMenuItem(I18N.get("incident.details"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new IncidentDetailForm(session));
@@ -88,8 +87,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createUsersAndRolesItem() {
 		if(!UserRoleForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Users and Roles");
-		item.setMnemonic('U');
+		JMenuItem item = new JMenuItem(I18N.get("user.menu"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new UserRoleForm(session));
@@ -102,8 +100,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createMapExtentsItem() {
 		if(!MapExtentForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Map extents");
-		item.setMnemonic('e');
+		JMenuItem item =new JMenuItem(I18N.get("location.map.extents"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new MapExtentForm(session,
@@ -117,8 +114,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createRoadItem() {
 		if(!RoadForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Roads");
-		item.setMnemonic('R');
+		JMenuItem item =new JMenuItem(I18N.get("location.road.plural"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new RoadForm(session));

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for IRIS connections
@@ -31,12 +32,12 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Connection>("Host:Port", 140) {
+		new ProxyColumn<Connection>(I18N.get("connection.peer"), 140) {
 			public Object getValueAt(Connection c) {
 				return c.getName();
 			}
 		},
-		new ProxyColumn<Connection>("User", 180) {
+		new ProxyColumn<Connection>(I18N.get("user"), 180) {
 			public Object getValueAt(Connection c) {
 				User u = c.getUser();
 				if(u != null)

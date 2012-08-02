@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -22,6 +21,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -38,7 +38,7 @@ public class UserPanel extends FormPanel {
 	protected final ZTable u_table = new ZTable();
 
 	/** Button to delete the selected user */
-	protected final JButton del_user = new JButton("Delete User");
+	private final IButton del_user = new IButton("user.delete");
 
 	/** Create a new user panel */
 	public UserPanel(Session s) {
@@ -50,7 +50,6 @@ public class UserPanel extends FormPanel {
 		u_table.setVisibleRowCount(16);
 		addRow(u_table);
 		del_user.setEnabled(false);
-		del_user.setToolTipText("Delete the selected user");
 		addRow(del_user);
 	}
 

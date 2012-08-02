@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for IRIS privileges
@@ -32,7 +33,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Privilege>("Pattern", 400) {
+		new ProxyColumn<Privilege>(I18N.get("privilege.pattern"), 400) {
 			public Object getValueAt(Privilege p) {
 				return p.getPattern();
 			}
@@ -47,7 +48,9 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPattern(v);
 			}
 		},
-		new ProxyColumn<Privilege>("Read", 80, Boolean.class) {
+		new ProxyColumn<Privilege>(I18N.get("privilege.read"), 80,
+			Boolean.class)
+		{
 			public Object getValueAt(Privilege p) {
 				return p.getPrivR();
 			}
@@ -59,7 +62,9 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPrivR((Boolean)value);
 			}
 		},
-		new ProxyColumn<Privilege>("Write", 80, Boolean.class) {
+		new ProxyColumn<Privilege>(I18N.get("privilege.write"), 80,
+			Boolean.class)
+		{
 			public Object getValueAt(Privilege p) {
 				return p.getPrivW();
 			}
@@ -71,7 +76,9 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPrivW((Boolean)value);
 			}
 		},
-		new ProxyColumn<Privilege>("Create", 80, Boolean.class) {
+		new ProxyColumn<Privilege>(I18N.get("privilege.create"), 80,
+			Boolean.class)
+		{
 			public Object getValueAt(Privilege p) {
 				return p.getPrivC();
 			}
@@ -83,7 +90,9 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPrivC((Boolean)value);
 			}
 		},
-		new ProxyColumn<Privilege>("Delete", 80, Boolean.class) {
+		new ProxyColumn<Privilege>(I18N.get("privilege.del"), 80,
+			Boolean.class)
+		{
 			public Object getValueAt(Privilege p) {
 				return p.getPrivD();
 			}

@@ -21,6 +21,7 @@ import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing the users and roles
@@ -36,9 +37,6 @@ public class UserRoleForm extends AbstractForm {
 		       s.canUpdate(Capability.SONAR_TYPE) ||
 		       s.canUpdate(Privilege.SONAR_TYPE);
 	}
-
-	/** Frame title */
-	static protected final String TITLE = "Users and Roles";
 
 	/** Tabbed pane */
 	protected final JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
@@ -57,7 +55,7 @@ public class UserRoleForm extends AbstractForm {
 
 	/** Create a new user role form */
 	public UserRoleForm(Session s) {
-		super(TITLE);
+		super(I18N.get("user.menu"));
 		setHelpPageName("help.userroleform");
 		u_panel = new UserPanel(s);
 		r_panel = new RolePanel(s);
@@ -71,10 +69,10 @@ public class UserRoleForm extends AbstractForm {
 		r_panel.initialize();
 		cap_panel.initialize();
 		c_panel.initialize();
-		tab.add("Users", u_panel);
-		tab.add("Roles", r_panel);
-		tab.add("Capabilities", cap_panel);
-		tab.add("Connections", c_panel);
+		tab.add(I18N.get("user.plural"), u_panel);
+		tab.add(I18N.get("role.plural"), r_panel);
+		tab.add(I18N.get("capability.plural"), cap_panel);
+		tab.add(I18N.get("connection.plural"), c_panel);
 		add(tab);
 	}
 

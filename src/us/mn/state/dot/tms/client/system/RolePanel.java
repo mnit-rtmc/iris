@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.system;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.Box;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -26,6 +25,7 @@ import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.IButton;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -49,7 +49,7 @@ public class RolePanel extends JPanel {
 	protected final ZTable rc_table = new ZTable();
 
 	/** Button to delete the selected role */
-	protected final JButton del_role = new JButton("Delete Role");
+	private final IButton del_role = new IButton("role.delete");
 
 	/** Create a new role panel */
 	public RolePanel(Session s) {
@@ -75,7 +75,6 @@ public class RolePanel extends JPanel {
 		JScrollPane spane = new JScrollPane(rc_table);
 		add(spane, bag);
 		del_role.setEnabled(false);
-		del_role.setToolTipText("Delete the selected role");
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(del_role);

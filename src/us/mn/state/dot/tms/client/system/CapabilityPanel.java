@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -26,6 +25,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.IButton;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -49,11 +49,10 @@ public class CapabilityPanel extends JPanel {
 	protected final ZTable p_table = new ZTable();
 
 	/** Button to delete the selected capability */
-	protected final JButton del_capability =
-		new JButton("Delete Capability");
+	private final IButton del_capability = new IButton("capability.delete");
 
 	/** Button to delete the selected privilege */
-	protected final JButton del_privilege = new JButton("Delete Privilege");
+	private final IButton del_privilege = new IButton("privilege.delete");
 
 	/** User session */
 	protected final Session session;

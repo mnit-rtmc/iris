@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.system;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying and editing incident details.
@@ -32,7 +33,7 @@ public class IncidentDetailForm extends ProxyTableForm<IncidentDetail> {
 
 	/** Create a new incident detail form */
 	public IncidentDetailForm(Session s) {
-		super("Incident Details", new IncidentDetailModel(s));
+		super(I18N.get("incident.details"), new IncidentDetailModel(s));
 	}
 
 	/** Get the visible row count */

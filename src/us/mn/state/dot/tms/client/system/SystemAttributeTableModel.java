@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for system attributes.
@@ -40,7 +41,9 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<SystemAttribute>("Name", 200) {
+		new ProxyColumn<SystemAttribute>(I18N.get(
+			"system.attribute.name"), 200)
+		{
 			public Object getValueAt(SystemAttribute sa) {
 				return sa.getName();
 			}
@@ -54,7 +57,9 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 				return new NameCellRenderer();
 			}
 		},
-		new ProxyColumn<SystemAttribute>("Value", 340) {
+		new ProxyColumn<SystemAttribute>(I18N.get(
+			"system.attribute.value"), 340)
+		{
 			public Object getValueAt(SystemAttribute sa) {
 				return sa.getValue();
 			}

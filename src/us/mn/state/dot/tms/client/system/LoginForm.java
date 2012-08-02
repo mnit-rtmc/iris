@@ -16,14 +16,15 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The LoginForm is a GUI authenticaion form for logging in to IRIS.
@@ -39,7 +40,7 @@ public class LoginForm extends AbstractForm {
 	protected final JPasswordField passwd_txt = new JPasswordField();
 
 	/** Log in button */
-	protected final JButton login_btn = new JButton("Log In");
+	private final IButton login_btn = new IButton("connection.login");
 
 	/** Iris client */
 	protected final IrisClient client;
@@ -49,7 +50,7 @@ public class LoginForm extends AbstractForm {
 
 	/** Create a new login form */
 	public LoginForm(IrisClient ic, SmartDesktop sd) {
-		super("IRIS Login");
+		super(I18N.get("connection.login.form"));
 		client = ic;
 		desktop = sd;
 	}
@@ -57,8 +58,8 @@ public class LoginForm extends AbstractForm {
 	/** Initialize the form */
 	protected void initialize() {
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Username", user_txt);
-		panel.addRow("Password", passwd_txt);
+		panel.addRow(I18N.get("user.name"), user_txt);
+		panel.addRow(I18N.get("user.password"), passwd_txt);
 		new ActionJob(desktop, login_btn) {
 			public void perform() throws Exception {
 				doLogin();
