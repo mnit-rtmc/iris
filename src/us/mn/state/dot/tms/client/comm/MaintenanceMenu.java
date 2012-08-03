@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.client.comm;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -57,51 +57,43 @@ public class MaintenanceMenu extends JMenu {
 	protected JMenuItem createCommLinkItem() {
 		if(!CommLinkForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("comm.links"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("comm.links") {
+			protected void do_perform() {
 				desktop.show(new CommLinkForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the modem menu item */
 	protected JMenuItem createModemItem() {
 		if(!ModemForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("modems"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("modems") {
+			protected void do_perform() {
 				desktop.show(new ModemForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the alarm menu item */
 	protected JMenuItem createAlarmItem() {
 		if(!AlarmForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("alarm.plural"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("alarm.plural") {
+			protected void do_perform() {
 				desktop.show(new AlarmForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the cabinet style menu item */
 	protected JMenuItem createCabinetStyleItem() {
 		if(!CabinetStyleForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("cabinet.styles"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("cabinet.styles") {
+			protected void do_perform() {
 				desktop.show(new CabinetStyleForm(session));
 			}
-		};
-		return item;
+		});
 	}
 }

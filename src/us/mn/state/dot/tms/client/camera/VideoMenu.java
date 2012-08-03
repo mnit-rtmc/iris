@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.client.camera;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -51,26 +51,21 @@ public class VideoMenu extends JMenu {
 	protected JMenuItem createCameraItem() {
 		if(!CameraForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("camera.plural"));
-		item.setMnemonic('C');
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("camera.plural") {
+			protected void do_perform() {
 				desktop.show(new CameraForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the video monitor menu item */
 	protected JMenuItem createVideoMonitorItem() {
 		if(!VideoMonitorForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("video.monitor"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("video.monitor") {
+			protected void do_perform() {
 				desktop.show(new VideoMonitorForm(session));
 			}
-		};
-		return item;
+		});
 	}
 }

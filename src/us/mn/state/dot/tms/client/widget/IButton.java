@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.widget;
 
 import javax.swing.Action;
 import javax.swing.JButton;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
 

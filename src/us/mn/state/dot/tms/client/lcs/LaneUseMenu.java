@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.client.lcs;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -58,52 +58,43 @@ public class LaneUseMenu extends JMenu {
 	protected JMenuItem createLcsItem() {
 		if(!LcsForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("lcs"));
-		item.setMnemonic('L');
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("lcs") {
+			protected void do_perform() {
 				desktop.show(new LcsForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the graphics menu item */
 	protected JMenuItem createGraphicItem() {
 		if(!GraphicForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("graphics"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("graphics") {
+			protected void do_perform() {
 				desktop.show(new GraphicForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the lane-use MULTI menu item */
 	protected JMenuItem createLaneUseMultiItem() {
 		if(!LaneUseMultiForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("lane.use.multi"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("lane.use.multi") {
+			protected void do_perform() {
 				desktop.show(new LaneUseMultiForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the lane marking menu item */
 	protected JMenuItem createLaneMarkingItem() {
 		if(!LaneMarkingForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("lane.markings"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("lane.markings") {
+			protected void do_perform() {
 				desktop.show(new LaneMarkingForm(session));
 			}
-		};
-		return item;
+		});
 	}
 }

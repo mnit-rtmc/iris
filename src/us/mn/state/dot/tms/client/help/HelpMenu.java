@@ -16,15 +16,14 @@ package us.mn.state.dot.tms.client.help;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /** 
  * Menu for help information.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
 public class HelpMenu extends JMenu {
@@ -33,8 +32,14 @@ public class HelpMenu extends JMenu {
 	protected final SmartDesktop desktop;
 
 	/** Open trouble ticket menu item */
-	private final JMenuItem ticket_item = new JMenuItem(
-		I18N.get("help.trouble.ticket"));
+	private final JMenuItem ticket_item = new JMenuItem(new IAction(
+		"help.trouble.ticket")
+	{
+		protected void do_perform() throws Exception {
+			Help.invokeHelp(SystemAttrEnum.
+				HELP_TROUBLE_TICKET_URL.getString());
+		}
+	});
 
 	/** Create a new HelpMenu */
 	public HelpMenu(SmartDesktop sd) { 
@@ -46,24 +51,20 @@ public class HelpMenu extends JMenu {
 
 	/** Add support menu item */
 	protected void addSupportItem() {
-		JMenuItem item = new JMenuItem(I18N.get("help.support"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		add(new JMenuItem(new IAction("help.support") {
+			protected void do_perform() {
 				desktop.show(new SupportForm());
 			}
-		};
-		add(item);
+		}));
 	}
 
 	/** Add about menu item */
 	protected void addAboutItem() {
-		JMenuItem item = new JMenuItem(I18N.get("iris.about"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		add(new JMenuItem(new IAction("iris.about") {
+			protected void do_perform() {
 				desktop.show(new AboutForm());
 			}
-		};
-		add(item);
+		}));
 	}
 
 	/** Set the logged-in status */
@@ -76,16 +77,7 @@ public class HelpMenu extends JMenu {
 	 * is inserted at the begining of the help menu and not removed
 	 * when the user logs out. */
 	protected void addOpenTroubleTicketItem() { 
-		// it's already on the menu
-		if(isMenuComponent(ticket_item))
-			return;
-		final String url =
-			SystemAttrEnum.HELP_TROUBLE_TICKET_URL.getString();
-		new ActionJob(ticket_item) {
-			public void perform() throws Exception {
-				Help.invokeHelp(url);
-			}
-		};
-		insert(ticket_item, 0);
+		if(!isMenuComponent(ticket_item))
+			insert(ticket_item, 0);
 	}
 }

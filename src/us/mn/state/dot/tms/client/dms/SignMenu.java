@@ -16,11 +16,11 @@ package us.mn.state.dot.tms.client.dms;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.warning.WarningSignForm;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -60,16 +60,11 @@ public class SignMenu extends JMenu {
 	protected JMenuItem createDmsItem() {
 		if(!DMSForm.isPermitted(session))
 			return null;
-		String dms_name = I18N.get("dms");
-		JMenuItem item = new JMenuItem(dms_name);
-		if(dms_name.length() > 0)
-			item.setMnemonic(dms_name.charAt(0));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("dms") {
+			protected void do_perform() {
 				desktop.show(createDMSForm());
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the DMS form */
@@ -84,41 +79,32 @@ public class SignMenu extends JMenu {
 	protected JMenuItem createFontItem() {
 		if(!FontForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("font.title"));
-		item.setMnemonic('F');
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("font.title") {
+			protected void do_perform() {
 				desktop.show(new FontForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the quick message menu item */
 	protected JMenuItem createQuickMessageItem() {
 		if(!QuickMessageForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("quick.messages"));
-		item.setMnemonic('Q');
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("quick.messages") {
+			protected void do_perform() {
 				desktop.show(new QuickMessageForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the warning sign menu item */
 	protected JMenuItem createWarningSignItem() {
 		if(!WarningSignForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("warning.signs"));
-		item.setMnemonic('W');
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("warning.signs") {
+			protected void do_perform() {
 				desktop.show(new WarningSignForm(session));
 			}
-		};
-		return item;
+		});
 	}
 }

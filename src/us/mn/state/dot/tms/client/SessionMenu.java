@@ -17,50 +17,47 @@ package us.mn.state.dot.tms.client;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
-import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /** 
  * The sessoin menu contains menu items for logging in, logging out and exiting
  * the IRIS client.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
 public class SessionMenu extends JMenu {
 
-	/** Log in menu item */
-	private final JMenuItem log_in = new JMenuItem(I18N.get(
-		"connection.login"));
+	/** Log in action */
+	private final IAction log_in = new IAction("connection.login") {
+		protected void do_perform() throws Exception {
+			client.login();
+		}
+	};
 
-	/** Logout menu item */
-	private final JMenuItem log_out = new JMenuItem(I18N.get(
-		"connection.logout"));
+	/** Logout action */
+	private final IAction log_out = new IAction("connection.logout") {
+		protected void do_perform() throws Exception {
+			client.logout();
+		}
+	};
+
+	/** IRIS client */
+	private final IrisClient client;
 	
 	/** Create a new session menu */	
 	public SessionMenu(final IrisClient ic) {
 		super(I18N.get("session"));
-		new ActionJob(log_in) {
-			public void perform() throws Exception {
-				ic.login();
-			}
-		};
-		add(log_in);
-		new ActionJob(log_out) {
-			public void perform() throws Exception {
-				ic.logout();
-			}
-		};
+		client = ic;
 		log_out.setEnabled(false);
-		add(log_out);
+		add(new JMenuItem(log_in));
+		add(new JMenuItem(log_out));
 		add(new JSeparator());
-		JMenuItem item = new JMenuItem(I18N.get("session.exit"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				ic.quit();
+		add(new JMenuItem(new IAction("session.exit") {
+			protected void do_perform() throws Exception {
+				client.quit();
 			}
-		};
-		add(item);
+		}));
 	}
 
 	/** Set the logged-in status */

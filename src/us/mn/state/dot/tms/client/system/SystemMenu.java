@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.client.system;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.RoadForm;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -61,65 +61,55 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createSystemAttributesItem() {
 		if(!SystemAttributeForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("system.attributes"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("system.attributes") {
+			protected void do_perform() {
 				desktop.show(new SystemAttributeForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the incident detail menu item */
 	protected JMenuItem createIncidentDetailItem() {
 		if(!IncidentDetailForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("incident.details"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("incident.details") {
+			protected void do_perform() {
 				desktop.show(new IncidentDetailForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the users and roles menu item */
 	protected JMenuItem createUsersAndRolesItem() {
 		if(!UserRoleForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem(I18N.get("user.menu"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("user.menu") {
+			protected void do_perform() {
 				desktop.show(new UserRoleForm(session));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the map extents menu item */
 	protected JMenuItem createMapExtentsItem() {
 		if(!MapExtentForm.isPermitted(session))
 			return null;
-		JMenuItem item =new JMenuItem(I18N.get("location.map.extents"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("location.map.extents") {
+			protected void do_perform() {
 				desktop.show(new MapExtentForm(session,
 					desktop.client));
 			}
-		};
-		return item;
+		});
 	}
 
 	/** Create the road menu item */
 	protected JMenuItem createRoadItem() {
 		if(!RoadForm.isPermitted(session))
 			return null;
-		JMenuItem item =new JMenuItem(I18N.get("location.road.plural"));
-		new ActionJob(item) {
-			public void perform() throws Exception {
+		return new JMenuItem(new IAction("location.road.plural") {
+			protected void do_perform() {
 				desktop.show(new RoadForm(session));
 			}
-		};
-		return item;
+		});
 	}
 }
