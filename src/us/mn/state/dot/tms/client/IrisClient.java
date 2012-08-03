@@ -58,13 +58,6 @@ public class IrisClient extends JFrame {
 	/** Login scheduler */
 	static protected final Scheduler LOGIN = new Scheduler("LOGIN");
 
-	/** Window title login message */
-	static protected final String TITLE_NOT_LOGGED_IN = "Not logged in";
-
-	/** Window title login message */
-	static protected final String TITLE_LOGIN_IN_PROGRESS =
-		"Logging in ... please wait";
-
 	/** Create the window title */
 	static protected String createTitle(String suffix) {
 		return SystemAttrEnum.WINDOW_TITLE.getString() + suffix;
@@ -78,7 +71,7 @@ public class IrisClient extends JFrame {
 			return createTitle(u.getName() + " (" +
 				u.getFullName() + ")");
 		}
-		return createTitle(TITLE_NOT_LOGGED_IN);
+		return createTitle(I18N.get("iris.logged.out"));
 	}
 
 	/** Array of screens to display client */
@@ -113,12 +106,11 @@ public class IrisClient extends JFrame {
 
 	/** Create a new Iris client */
 	public IrisClient(Properties props, SimpleHandler h) throws IOException{
-		super(createTitle(TITLE_NOT_LOGGED_IN));
+		super(createTitle(I18N.get("iris.logged.out")));
 		this.props = props;
 		handler = h;
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
-		I18N.initialize(props);
 		user_props =  new UserProperties(
 			props.getProperty(UserProperties.FNAME_PROP_NAME));
 		user_props.read();
@@ -279,7 +271,7 @@ public class IrisClient extends JFrame {
 	/** Login a user */
 	protected void doLogin(String user, char[] pwd) throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		setTitle(createTitle(TITLE_LOGIN_IN_PROGRESS));
+		setTitle(createTitle(I18N.get("iris.logging.in")));
 		menu_bar.disableSessionMenu();
 		closeSession();
 		try {
@@ -373,7 +365,7 @@ public class IrisClient extends JFrame {
 		removeTabs();
 		closeSession();
 		updateMaps(null);
-		setTitle(createTitle(TITLE_NOT_LOGGED_IN));
+		setTitle(createTitle(I18N.get("iris.logged.out")));
 		invalidate();
 	}
 

@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.weather.WeatherSensorForm;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * ViewMenu is a JMenu which contains items to view various TMS object types.
@@ -45,10 +46,9 @@ public class ViewMenu extends JMenu {
 
 	/** Create a new view menu */
 	public ViewMenu(Session s) {
-		super("View");
+		super(I18N.get("view"));
 		session = s;
 		desktop = session.getDesktop();
-		setMnemonic('V');
 		SystemMenu s_menu = new SystemMenu(session);
 		if(s_menu.getItemCount() > 0)
 			add(s_menu);
@@ -85,8 +85,7 @@ public class ViewMenu extends JMenu {
 	protected JMenuItem createDetectorItem() {
 		if(!DetectorForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Detectors");
-		item.setMnemonic('t');
+		JMenuItem item = new JMenuItem(I18N.get("detector.plural"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new DetectorForm(session));
@@ -99,8 +98,8 @@ public class ViewMenu extends JMenu {
 	protected JMenuItem createStationItem() {
 		if(!StationForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Stations");
-		item.setMnemonic('s');
+		JMenuItem item = new JMenuItem(I18N.get(
+			"detector.station.plural"));
 		new ActionJob(item) {
 			public void perform() {
 				desktop.show(new StationForm(session));
@@ -113,8 +112,8 @@ public class ViewMenu extends JMenu {
 	protected JMenuItem createMeterItem() {
 		if(!RampMeterForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Ramp Meters");
-		item.setMnemonic('M');
+		JMenuItem item = new JMenuItem(I18N.get(
+			"ramp.meter.long.plural"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new RampMeterForm(session));
@@ -127,8 +126,8 @@ public class ViewMenu extends JMenu {
 	protected JMenuItem createScheduleItem() {
 		if(!ScheduleForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Plans and Schedules");
-		item.setMnemonic('P');
+		JMenuItem item = new JMenuItem(I18N.get(
+			"action.plan.schedule.title"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new ScheduleForm(session));
@@ -141,8 +140,7 @@ public class ViewMenu extends JMenu {
 	protected JMenuItem createWeatherItem() {
 		if(!WeatherSensorForm.isPermitted(session))
 			return null;
-		JMenuItem item = new JMenuItem("Weather Sensors");
-		item.setMnemonic('W');
+		JMenuItem item = new JMenuItem(I18N.get("weather.sensors"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new WeatherSensorForm(session));

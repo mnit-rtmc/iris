@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.tms.utils.I18N;
 
 /** 
  * The sessoin menu contains menu items for logging in, logging out and exiting
@@ -29,23 +30,22 @@ import us.mn.state.dot.sched.ActionJob;
 public class SessionMenu extends JMenu {
 
 	/** Log in menu item */
-	protected final JMenuItem log_in = new JMenuItem("Log In");
+	private final JMenuItem log_in = new JMenuItem(I18N.get(
+		"connection.login"));
 
 	/** Logout menu item */
-	protected final JMenuItem log_out = new JMenuItem("Log Out");
+	private final JMenuItem log_out = new JMenuItem(I18N.get(
+		"connection.logout"));
 	
 	/** Create a new session menu */	
 	public SessionMenu(final IrisClient ic) {
-		super("Session");
-		setMnemonic('e');
-		log_in.setMnemonic('L');
+		super(I18N.get("session"));
 		new ActionJob(log_in) {
 			public void perform() throws Exception {
 				ic.login();
 			}
 		};
 		add(log_in);
-		log_out.setMnemonic('O');
 		new ActionJob(log_out) {
 			public void perform() throws Exception {
 				ic.logout();
@@ -54,8 +54,7 @@ public class SessionMenu extends JMenu {
 		log_out.setEnabled(false);
 		add(log_out);
 		add(new JSeparator());
-		JMenuItem item = new JMenuItem("Exit");
-		item.setMnemonic('x');
+		JMenuItem item = new JMenuItem(I18N.get("session.exit"));
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				ic.quit();

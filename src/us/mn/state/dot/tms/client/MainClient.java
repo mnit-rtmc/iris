@@ -19,8 +19,9 @@ import java.net.ProxySelector;
 import java.util.Properties;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.util.HTTPProxySelector;
-import us.mn.state.dot.tms.utils.PropertyLoader;
 import us.mn.state.dot.tms.client.widget.Widgets;
+import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.PropertyLoader;
 
 /**
  * Main entry point for IrisClient.
@@ -64,6 +65,7 @@ public class MainClient {
 		Properties props = PropertyLoader.load(loc);
 		updateSystemProperties(props);
 		district = props.getProperty("district", "tms");
+		I18N.initialize(props);
 		return new IrisClient(props, handler);
 	}
 
