@@ -129,7 +129,13 @@ public class I18N {
 			return UNDEFINED;
 		else {
 			String val = getString(id);
-			return val != null ? val : NOT_READ;
+			if(val != null)
+				return val;
+			else {
+				System.err.println("I18N: failed to read (" +
+					id + ") from bundle");
+				return NOT_READ;
+			}
 		}
 	}
 
@@ -153,8 +159,6 @@ public class I18N {
 			}
 			catch(Exception e) { }	// fall through
 		}
-		System.err.println("I18N: failed to read (" + key +
-			") from bundle");
 		return null;
 	}
 
