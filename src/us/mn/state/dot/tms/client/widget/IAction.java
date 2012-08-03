@@ -33,9 +33,6 @@ abstract public class IAction extends AbstractAction {
 		String s = I18N.getSilent(text_id + ".tooltip");
 		if(s != null)
 			putValue(Action.SHORT_DESCRIPTION, s);
-		String l = I18N.getSilent(text_id + ".long");
-		if(l != null)
-			putValue(Action.LONG_DESCRIPTION, l);
 	}
 
 	/** Schedule the action to be performed */
