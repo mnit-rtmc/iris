@@ -35,7 +35,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
