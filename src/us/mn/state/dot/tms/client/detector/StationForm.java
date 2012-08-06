@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
-import us.mn.state.dot.sched.ActionJob;
+import javax.swing.JButton;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -38,23 +38,17 @@ public class StationForm extends ProxyTableForm<Station> {
 	/** User session */
 	protected final Session session;
 
-	/** Button to display the r_node */
-	private final IButton rnode_btn = new IButton("r_node");
+	/** Action to display the r_node */
+	private final IAction r_node = new IAction("r_node") {
+		protected void do_perform() {
+			showRNode();
+		}
+	};
 
 	/** Create a new station form */
 	public StationForm(Session s) {
 		super(I18N.get("detector.station.plural"), new StationModel(s));
 		session = s;
-	}
-
-	/** Create Gui jobs */
-	protected void createJobs() {
-		super.createJobs();
-		new ActionJob(this, rnode_btn) {
-			public void perform() {
-				showRNode();
-			}
-		};
 	}
 
 	/** Show the r_node for the selected station */
@@ -69,7 +63,7 @@ public class StationForm extends ProxyTableForm<Station> {
 	/** Add the table to the panel */
 	protected void addTable(FormPanel panel) {
 		panel.addRow(table);
-		panel.addRow(rnode_btn);
+		panel.addRow(new JButton(r_node));
 	}
 
 	/** Get the row height */
@@ -79,6 +73,6 @@ public class StationForm extends ProxyTableForm<Station> {
 
 	/** Select a new proxy */
 	protected void selectProxy() {
-		rnode_btn.setEnabled(getSelectedProxy() != null);
+		r_node.setEnabled(getSelectedProxy() != null);
 	}
 }

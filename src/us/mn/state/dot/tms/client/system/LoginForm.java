@@ -16,13 +16,13 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -39,8 +39,12 @@ public class LoginForm extends AbstractForm {
 	/** Password entry component */
 	protected final JPasswordField passwd_txt = new JPasswordField();
 
-	/** Log in button */
-	private final IButton login_btn = new IButton("connection.login");
+	/** Log in action */
+	private final IAction login = new IAction("connection.login") {
+		protected void do_perform() {
+			doLogin();
+		}
+	};
 
 	/** Iris client */
 	protected final IrisClient client;
@@ -60,11 +64,7 @@ public class LoginForm extends AbstractForm {
 		FormPanel panel = new FormPanel(true);
 		panel.addRow(I18N.get("user.name"), user_txt);
 		panel.addRow(I18N.get("user.password"), passwd_txt);
-		new ActionJob(desktop, login_btn) {
-			public void perform() throws Exception {
-				doLogin();
-			}
-		};
+		final JButton login_btn = new JButton(login);
 		passwd_txt.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode() == KeyEvent.VK_ENTER)

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.geom.Point2D;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -37,7 +38,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
@@ -116,8 +117,22 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	private final JSpinner northing = new JSpinner(
 		new SpinnerNumberModel(0, 0, 10000000, 1));
 
-	/** Button to select a point from the map */
-	private final IButton select_btn = new IButton("location.select");
+	/** Point selector */
+	private final PointSelector point_sel = new PointSelector() {
+		public void selectPoint(Point2D p) {
+			client.setPointSelector(null);
+			UTMPosition utm = getPosition(p);
+			easting.setValue((int)Math.round(utm.getEasting()));
+			northing.setValue((int)Math.round(utm.getNorthing()));
+		}
+	};
+
+	/** Action to select a point from the map */
+	private final IAction select_pt = new IAction("location.select") {
+		protected void do_perform() {
+			client.setPointSelector(point_sel);
+		}
+	};
 
 	/** Create a new location panel */
 	public LocationPanel(Session s) {
@@ -150,7 +165,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		finishRow();
 		setWidth(4);
 		updateSelectBag();
-		addRow(select_btn);
+		addRow(new JButton(select_pt));
 		createJobs();
 		watcher.initialize();
 	}
@@ -198,21 +213,6 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		new ChangeJob(this, northing) {
 			public void perform() {
 				setNorthing(getSpinnerInteger(northing));
-			}
-		};
-		final PointSelector ps = new PointSelector() {
-			public void selectPoint(Point2D p) {
-				client.setPointSelector(null);
-				UTMPosition utm = getPosition(p);
-				easting.setValue(
-					(int)Math.round(utm.getEasting()));
-				northing.setValue(
-					(int)Math.round(utm.getNorthing()));
-			}
-		};
-		new ActionJob(this, select_btn) {
-			public void perform() {
-				client.setPointSelector(ps);
 			}
 		};
 	}
@@ -322,13 +322,13 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 			boolean p = canUpdate(l, "easting");
 			easting.setEnabled(p);
 			easting.setValue(asInt(l.getEasting()));
-			select_btn.setEnabled(p);
+			select_pt.setEnabled(p);
 		}
 		if(a == null || a.equals("northing")) {
 			boolean p = canUpdate(l, "northing");
 			northing.setEnabled(p);
 			northing.setValue(asInt(l.getNorthing()));
-			select_btn.setEnabled(p);
+			select_pt.setEnabled(p);
 		}
 	}
 
@@ -364,6 +364,6 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		easting.setValue(0);
 		northing.setEnabled(false);
 		northing.setValue(0);
-		select_btn.setEnabled(false);
+		select_pt.setEnabled(false);
 	}
 }

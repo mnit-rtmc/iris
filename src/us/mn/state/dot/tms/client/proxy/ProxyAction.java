@@ -33,5 +33,6 @@ abstract public class ProxyAction<T extends SonarObject> extends IAction {
 	protected ProxyAction(String tid, T p) {
 		super(tid);
 		proxy = p;
+		setEnabled(p != null);
 	}
 }

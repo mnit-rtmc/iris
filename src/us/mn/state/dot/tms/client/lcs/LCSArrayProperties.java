@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.Color;
 import java.util.LinkedList;
 import java.util.HashMap;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -46,7 +47,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -69,11 +70,22 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	/** LCS table */
 	protected final ZTable lcs_table = new ZTable();
 
-	/** Button to edit the selected LCS */
-	private final IButton edit_btn = new IButton("lcs.edit");
+	/** Action to edit the selected LCS */
+	private final IAction edit_lcs = new IAction("lcs.edit") {
+		protected void do_perform() {
+			editPressed();
+		}
+	};
 
-	/** Button to delete the selected LCS */
-	private final IButton delete_btn = new IButton("lcs.delete");
+	/** Action to delete the selected LCS */
+	private final IAction delete_lcs = new IAction("lcs.delete") {
+		protected void do_perform() {
+			ListSelectionModel s = lcs_table.getSelectionModel();
+			int row = s.getMinSelectionIndex();
+			if(row >= 0)
+				table_model.deleteRow(row);
+		}
+	};
 
 	/** Spinner for lane shift */
 	protected final JSpinner shift_spn = new JSpinner(
@@ -93,8 +105,13 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	/** Operation description label */
 	protected final JLabel operation = new JLabel();
 
-	/** Button to send settings */
-	private final IButton settings_btn =new IButton("device.send.settings");
+	/** Action to send settings */
+	private final IAction settings = new IAction("device.send.settings") {
+		protected void do_perform() {
+			proxy.setDeviceRequest(DeviceRequest.
+				SEND_SETTINGS.ordinal());
+		}
+	};
 
 	/** Create a new lane control signal properties form */
 	public LCSArrayProperties(Session s, LCSArray proxy) {
@@ -124,8 +141,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 			createUpdateJobs();
 		if(canUpdate("lcsLock"))
 			createLockJob();
-		if(canUpdate("deviceRequest"))
-			createRequestJobs();
+		settings.setEnabled(canUpdate("deviceRequest"));
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -142,10 +158,10 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		FormPanel tpnl = new FormPanel(canUpdate());
 		tpnl.addRow(lcs_table);
 		lcs_table.setEnabled(true);
-		tpnl.add(edit_btn);
-		edit_btn.setEnabled(false);
-		tpnl.addRow(delete_btn);
-		delete_btn.setEnabled(false);
+		tpnl.add(new JButton(edit_lcs));
+		edit_lcs.setEnabled(false);
+		tpnl.addRow(new JButton(delete_lcs));
+		delete_lcs.setEnabled(false);
 		tpnl.addRow(I18N.get("lcs.lane.shift"), shift_spn);
 		// this panel is needed to make the widgets line up
 		panel.add(new JPanel());
@@ -172,7 +188,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Initialize the table */
 	protected void initTable() {
-		final ListSelectionModel s = lcs_table.getSelectionModel();
+		ListSelectionModel s = lcs_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
 			public void perform() {
@@ -183,18 +199,6 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		lcs_table.setColumnModel(table_model.createColumnModel());
 		lcs_table.setModel(table_model);
 		lcs_table.setVisibleRowCount(12);
-		new ActionJob(this, edit_btn) {
-			public void perform() {
-				editPressed();
-			}
-		};
-		new ActionJob(this, delete_btn) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					table_model.deleteRow(row);
-			}
-		};
 	}
 
 	/** Edit button pressed */
@@ -263,8 +267,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		if(lcs != null)
 			selectLCS(lcs);
 		else {
-			edit_btn.setEnabled(false);
-			delete_btn.setEnabled(false);
+			edit_lcs.setEnabled(false);
+			delete_lcs.setEnabled(false);
 			for(JCheckBox btn: indications) {
 				btn.setEnabled(false);
 				btn.setSelected(false);
@@ -274,7 +278,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Select an LCS in the table */
 	protected void selectLCS(LCS lcs) {
-		edit_btn.setEnabled(true);
+		edit_lcs.setEnabled(true);
 		final HashMap<Integer, LCSIndication> ind =
 			new HashMap<Integer, LCSIndication>();
 		LCSHelper.lookupIndication(lcs, new Checker<LCSIndication>() {
@@ -283,7 +287,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 				return false;
 			}
 		});
-		delete_btn.setEnabled(ind.isEmpty());
+		delete_lcs.setEnabled(ind.isEmpty());
 		String name = lcs.getName();
 		boolean can_add = creator.canAdd(name);
 		boolean can_remove = creator.canRemove(name);
@@ -306,7 +310,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		FormPanel panel = new FormPanel(false);
 		panel.addRow(I18N.get("lcs.lock"), lcs_lock);
 		panel.addRow(I18N.get("device.operation"), operation);
-		panel.addRow(settings_btn);
+		panel.addRow(new JButton(settings));
 		return panel;
 	}
 
@@ -314,17 +318,6 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected void createLockJob() {
 		lcs_lock.setAction(new LockLcsAction(proxy, lcs_lock));
 		lcs_lock.setEnabled(true);
-	}
-
-	/** Create request jobs */
-	protected void createRequestJobs() {
-		new ActionJob(this, settings_btn) {
-			public void perform() {
-				proxy.setDeviceRequest(DeviceRequest.
-					SEND_SETTINGS.ordinal());
-			}
-		};
-		settings_btn.setEnabled(true);
 	}
 
 	/** Update one attribute on the form */

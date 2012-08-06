@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Color;
 import java.util.Date;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -41,7 +42,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -71,9 +72,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Access password */
 	protected final JPasswordField password = new JPasswordField(16);
 
-	/** Button to clear the access password */
-	private final IButton clear_pwd_btn = new IButton(
-		"controller.password.clear");
+	/** Action to clear the access password */
+	private final IAction clear_pwd = new IAction(
+		"controller.password.clear")
+	{
+		protected void do_perform() {
+			proxy.setPassword(null);
+		}
+	};
 
 	/** Active checkbox */
 	protected final JCheckBox active = new JCheckBox();
@@ -129,12 +135,19 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Failed operations label */
 	protected final JLabel failed_lbl = new JLabel();
 
-	/** Clear error status button */
-	private final IButton clear_err_btn = new IButton(
-		"controller.error.clear");
+	/** Clear error status action */
+	private final IAction clear_err = new IAction("controller.error.clear"){
+		protected void do_perform() {
+			proxy.setCounters(true);
+		}
+	};
 
-	/** Reset button */
-	private final IButton reset_btn = new IButton("controller.reset");
+	/** Reset action */
+	private final IAction reset = new IAction("controller.reset") {
+		protected void do_perform() {
+			proxy.setDownload(true);
+		}
+	};
 
 	/** Comm Link list model */
 	protected final ProxyListModel<CommLink> link_model;
@@ -180,11 +193,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			createActivateJob();
 		if(canUpdateCabinet())
 			createCabinetJobs();
-		if(canRequest())
-			createStatusJobs();
-		else {
-			clear_err_btn.setEnabled(false);
-			reset_btn.setEnabled(false);
+		if(!canRequest()) {
+			clear_err.setEnabled(false);
+			reset.setEnabled(false);
 		}
 		setBackground(Color.LIGHT_GRAY);
 	}
@@ -206,7 +217,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.finishRow();
 		panel.add(I18N.get("controller.password"), password);
 		panel.setEast();
-		panel.addRow(clear_pwd_btn);
+		panel.addRow(new JButton(clear_pwd));
 		panel.addRow(I18N.get("device.notes"), notes);
 		panel.add(I18N.get("controller.active"), active);
 		// Add a third column to the grid bag so the drop spinner
@@ -253,11 +264,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 					if(pwd.length() > 0)
 						proxy.setPassword(pwd);
 				}
-			}
-		};
-		new ActionJob(this, clear_pwd_btn) {
-			public void perform() {
-				proxy.setPassword(null);
 			}
 		};
 		new FocusJob(notes) {
@@ -339,8 +345,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create the status panel */
 	protected JPanel createStatusPanel() {
 		JPanel buttonPnl = new JPanel();
-		buttonPnl.add(clear_err_btn);
-		buttonPnl.add(reset_btn);
+		buttonPnl.add(new JButton(clear_err));
+		buttonPnl.add(new JButton(reset));
 		FormPanel panel = new FormPanel(canUpdate());
 		panel.addRow(I18N.get("controller.version"), version);
 		panel.addRow(I18N.get("controller.maint"), maint);
@@ -354,20 +360,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.addRow(I18N.get("controller.ops.bad"), failed_lbl);
 		panel.addRow(buttonPnl);
 		return panel;
-	}
-
-	/** Create the jobs for the status panel */
-	protected void createStatusJobs() {
-		new ActionJob(this, reset_btn) {
-			public void perform() {
-				proxy.setDownload(true);
-			}
-		};
-		new ActionJob(this, clear_err_btn) {
-			public void perform() {
-				proxy.setCounters(true);
-			}
-		};
 	}
 
 	/** Update one attribute on the form */

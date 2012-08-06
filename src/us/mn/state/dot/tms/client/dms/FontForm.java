@@ -31,7 +31,6 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -44,7 +43,7 @@ import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -69,8 +68,15 @@ public class FontForm extends AbstractForm {
 	/** Table to hold the font list */
 	protected final ZTable f_table = new ZTable();
 
-	/** Button to delete the selected font */
-	private final IButton del_font = new IButton("font.delete");
+	/** Action to delete the selected font */
+	private final IAction del_font = new IAction("font.delete") {
+		protected void do_perform() {
+			ListSelectionModel s = f_table.getSelectionModel();
+			int row = s.getMinSelectionIndex();
+			if(row >= 0)
+				f_model.deleteRow(row);
+		}
+	};
 
 	/** Glyph type cache */
 	protected final TypeCache<Glyph> glyphs;
@@ -176,7 +182,7 @@ public class FontForm extends AbstractForm {
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridwidth = 2;
 		bag.insets = UI.insets();
-		final ListSelectionModel s = f_table.getSelectionModel();
+		ListSelectionModel s = f_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
 			public void perform() {
@@ -192,14 +198,7 @@ public class FontForm extends AbstractForm {
 		panel.add(pane, bag);
 		del_font.setEnabled(false);
 		bag.gridwidth = 1;
-		panel.add(del_font, bag);
-		new ActionJob(this, del_font) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					f_model.deleteRow(row);
-			}
-		};
+		panel.add(new JButton(del_font), bag);
 		JPanel gpanel = createGlyphPanel();
 		bag.gridwidth = 1;
 		bag.gridx = 0;

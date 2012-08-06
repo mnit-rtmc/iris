@@ -20,12 +20,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.SwingConstants;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.lcs.LCSArrayCellRenderer;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -69,8 +69,13 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	/** List of deployments for the incident */
 	protected final JList list = new JList(model);
 
-	/** Button to send device messages */
-	private final IButton send_btn = new IButton("incident.send");
+	/** Action to send device messages */
+	private final IAction send = new IAction("incident.send") {
+		protected void do_perform() {
+			sendIndications();
+			closeForm();
+		}
+	};
 
 	/** Create a new incident deploy form */
 	public IncidentDeployForm(Session s, Incident inc, IncidentManager man){
@@ -100,7 +105,6 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		});
 		populateList();
 		add(createPanel());
-		createJobs();
 	}
 
 	/** Populate the list model with LCS array indications to display */
@@ -188,19 +192,9 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		FormPanel panel = new FormPanel(false);
 		panel.addRow(lbl);
 		panel.addRow(I18N.get("incident.deploy.proposed"), list);
-		panel.addRow(send_btn);
-		send_btn.setEnabled(model.getSize() > 0);
+		panel.addRow(new JButton(send));
+		send.setEnabled(model.getSize() > 0);
 		return panel;
-	}
-
-	/** Create jobs */
-	protected void createJobs() {
-		new ActionJob(send_btn) {
-			public void perform() {
-				sendIndications();
-				closeForm();
-			}
-		};
 	}
 
 	/** Send new indications to LCS arrays for the incident */

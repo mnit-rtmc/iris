@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -36,7 +37,7 @@ import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -52,8 +53,12 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
 
-	/** Controller button */
-	private final IButton controller = new IButton("controller");
+	/** Controller action */
+	private final IAction controller = new IAction("controller") {
+		protected void do_perform() {
+			controllerPressed();
+		}
+	};
 
 	/** Video stream encoder host (and port) */
 	protected final JTextField encoder = new JTextField("", 20);
@@ -109,12 +114,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		location.initialize();
 		location.addRow(I18N.get("device.notes"), notes);
 		location.setCenter();
-		location.addRow(controller);
-		new ActionJob(this, controller) {
-			public void perform() {
-				controllerPressed();
-			}
-		};
+		location.addRow(new JButton(controller));
 		return location;
 	}
 

@@ -28,7 +28,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
@@ -48,7 +47,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -114,18 +113,26 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Combobox used to select a quick message */
 	protected final QuickMessageCBox qmsgCmb;
 
-	/** Button used to send a message to the DMS */
-	protected final IButton sendBtn = new IButton("dms.send");
-
-	/** Button used to blank the DMS */
-	protected final JButton blankBtn = new IButton("dms.blank");
+	/** Action used to send a message to the DMS */
+	private final IAction send_msg = new IAction("dms.send") {
+		protected void do_perform() {
+			removeInvalidSelections();
+			if(shouldSendMessage())
+				sendMessage();
+		}
+	};
 
 	/** Action to blank selected DMS */
-	protected final BlankDmsAction blankAction;
+	private final BlankDmsAction blank_msg;
 
-	/** Button to query the DMS message (optional) */
-	protected final IButton queryBtn = new IButton("dms.query.msg",
-		SystemAttrEnum.DMS_QUERYMSG_ENABLE);
+	/** Action to query the DMS message (optional) */
+	private final IAction query_msg = new IAction("dms.query.msg",
+		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
+	{
+		protected void do_perform() {
+			queryMessage();
+		}
+	};
 
 	/** Currently logged in user */
 	protected final User user;
@@ -148,10 +155,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		user = session.getUser();
 		creator = new SignMessageCreator(st, user);
 		selectionModel = manager.getSelectionModel();
-		blankAction = new BlankDmsAction(selectionModel, this, user);
+		blank_msg = new BlankDmsAction(selectionModel, this, user);
 		qmsgCmb = new QuickMessageCBox(this);
-		blankBtn.setAction(blankAction);
-		manager.setBlankAction(blankAction);
+		manager.setBlankAction(blank_msg);
 		composer = new SignMessageComposer(session, this);
 		singleTab = new SingleSignTab(session, this);
 		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
@@ -161,7 +167,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		add(createDeployBox(), BorderLayout.SOUTH);
 		clearSelected();
 		selectionModel.addProxySelectionListener(this);
-		createJobs();
 	}
 
 	/** Create a component to deploy signs */
@@ -200,31 +205,15 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	protected Box buildButtonPanel() {
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
-		box.add(sendBtn);
+		box.add(new JButton(send_msg));
 		box.add(Box.createHorizontalStrut(4));
-		box.add(blankBtn);
-		if(queryBtn.getIEnabled()) {
+		box.add(new JButton(blank_msg));
+		if(query_msg.getIEnabled()) {
 			box.add(Box.createHorizontalStrut(4));
-			box.add(queryBtn);
+			box.add(new JButton(query_msg));
 		}
 		box.add(Box.createHorizontalGlue());
 		return box;
-	}
-
-	/** Create the button jobs */
-	protected void createJobs() {
-		new ActionJob(sendBtn) {
-			public void perform() {
-				removeInvalidSelections();
-				if(shouldSendMessage())
-					sendMessage();
-			}
-		};
-		new ActionJob(queryBtn) {
-			public void perform() {
-				queryMessage();
-			}
-		};
 	}
 
 	/** Remove all invalid selected DMS */
@@ -517,9 +506,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		qmsgCmb.setEnabled(false);
 		qmsgCmb.setSelectedItem(null);
 		qmsgCmb.removeAllItems();
-		sendBtn.setEnabled(false);
-		blankBtn.setEnabled(false);
-		queryBtn.setEnabled(false);
+		send_msg.setEnabled(false);
+		blank_msg.setEnabled(false);
+		query_msg.setEnabled(false);
 	}
 
 	/** Enable the dispatcher widgets */
@@ -534,9 +523,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		else
 			qmsg_layout.show(qmsg_panel, CARD_HIDDEN);
 		qmsgCmb.setEnabled(send);
-		sendBtn.setEnabled(send);
-		blankBtn.setEnabled(send);
-		queryBtn.setEnabled(canRequest());
+		send_msg.setEnabled(send);
+		blank_msg.setEnabled(send);
+		query_msg.setEnabled(canRequest());
 		selectPreview(false);
 	}
 

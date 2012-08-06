@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.BorderLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -59,8 +59,15 @@ public class ActionPlanPanel extends JPanel {
 	/** Table to hold the action plans */
 	protected final ZTable p_table = new ZTable();
 
-	/** Button to delete the selected action plan */
-	private final IButton del_p_btn = new IButton("action.plan.delete");
+	/** Action to delete the selected action plan */
+	private final IAction del_plan = new IAction("action.plan.delete") {
+		protected void do_perform() {
+			ListSelectionModel sm = p_table.getSelectionModel();
+			int row = sm.getMinSelectionIndex();
+			if(row >= 0)
+				p_model.deleteRow(row);
+		}
+	};
 
 	/** Time action table panel */
 	private final PlanTablePanel<TimeAction> t_panel;
@@ -112,26 +119,19 @@ public class ActionPlanPanel extends JPanel {
 		p_table.setRowHeight(ROW_HEIGHT);
 		p_table.setVisibleRowCount(10);
 		p_panel.addRow(p_table);
-		p_panel.addRow(del_p_btn);
-		del_p_btn.setEnabled(false);
+		p_panel.addRow(new JButton(del_plan));
+		del_plan.setEnabled(false);
 		return p_panel;
 	}
 
 	/** Add jobs for action plan table */
 	protected void addActionPlanJobs() {
-		final ListSelectionModel sm = p_table.getSelectionModel();
+		ListSelectionModel sm = p_table.getSelectionModel();
 		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, sm) {
 			public void perform() {
 				if(!event.getValueIsAdjusting())
 					selectActionPlan();
-			}
-		};
-		new ActionJob(this, del_p_btn) {
-			public void perform() throws Exception {
-				int row = sm.getMinSelectionIndex();
-				if(row >= 0)
-					p_model.deleteRow(row);
 			}
 		};
 	}
@@ -148,7 +148,7 @@ public class ActionPlanPanel extends JPanel {
 	/** Change the selected action plan */
 	protected void selectActionPlan() {
 		ActionPlan ap = p_model.getProxy(p_table.getSelectedRow());
-		del_p_btn.setEnabled(p_model.canRemove(ap));
+		del_plan.setEnabled(p_model.canRemove(ap));
 		t_panel.setTableModel(new TimeActionModel(session, ap));
 		d_panel.setTableModel(new DmsActionModel(session, ap));
 		l_panel.setTableModel(new LaneActionModel(session, ap));

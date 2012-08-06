@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -37,8 +37,15 @@ public class UserPanel extends FormPanel {
 	/** Table to hold the users */
 	protected final ZTable u_table = new ZTable();
 
-	/** Button to delete the selected user */
-	private final IButton del_user = new IButton("user.delete");
+	/** Action to delete the selected user */
+	private final IAction del_user = new IAction("user.delete") {
+		protected void do_perform() {
+			ListSelectionModel s = u_table.getSelectionModel();
+			int row = s.getMinSelectionIndex();
+			if(row >= 0)
+				u_model.deleteRow(row);
+		}
+	};
 
 	/** Create a new user panel */
 	public UserPanel(Session s) {
@@ -50,13 +57,13 @@ public class UserPanel extends FormPanel {
 		u_table.setVisibleRowCount(16);
 		addRow(u_table);
 		del_user.setEnabled(false);
-		addRow(del_user);
+		addRow(new JButton(del_user));
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
 		u_model.initialize();
-		final ListSelectionModel s = u_table.getSelectionModel();
+		ListSelectionModel s = u_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
@@ -64,13 +71,6 @@ public class UserPanel extends FormPanel {
 					selectUser();
 			}
 		});
-		new ActionJob(this, del_user) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					u_model.deleteRow(row);
-			}
-		};
 	}
 
 	/** Dispose of the panel */

@@ -21,12 +21,12 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
-import us.mn.state.dot.sched.ActionJob;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -87,8 +87,12 @@ public class SignMessageComposer extends JPanel {
 	/** Page on-time spinner */
 	protected final PgTimeSpinner timeSpin;
 
-	/** Clear button */
-	protected final IButton clearBtn = new IButton("dms.clear");
+	/** Clear action */
+	private final IAction clear = new IAction("dms.clear") {
+		protected void do_perform() {
+			clearWidgets();
+		}
+	};
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
@@ -155,14 +159,10 @@ public class SignMessageComposer extends JPanel {
 	/** Create the clear button */
 	protected JPanel createClearBtn() {
 		JPanel panel = new JPanel();
-		new ActionJob(clearBtn) {
-			public void perform() {
-				clearWidgets();
-			}
-		};
-		clearBtn.setMargin(new Insets(0, 6, 0, 6));
-		clearBtn.setMaximumSize(clearBtn.getMinimumSize());
-		panel.add(clearBtn);
+		JButton btn = new JButton(clear);
+		btn.setMargin(new Insets(0, 6, 0, 6));
+		btn.setMaximumSize(btn.getMinimumSize());
+		panel.add(btn);
 		return panel;
 	}
 
@@ -370,7 +370,7 @@ public class SignMessageComposer extends JPanel {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		setTabPage(0);
-		clearBtn.setEnabled(b);
+		clear.setEnabled(b);
 		adjusting++;
 		timeSpin.setEnabled(b);
 		for(MsgComboBox cbox: cmbLine)

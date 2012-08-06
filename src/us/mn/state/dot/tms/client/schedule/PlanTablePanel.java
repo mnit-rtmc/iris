@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -39,8 +39,17 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 	/** Table to hold plan actions */
 	protected final ZTable table = new ZTable();
 
-	/** Button to delete the selected action */
-	private final IButton del_btn =new IButton("action.plan.action.delete");
+	/** Action to delete the selected action */
+	private final IAction del_action = new IAction(
+		"action.plan.action.delete")
+	{
+		protected void do_perform() {
+			ListSelectionModel sm = table.getSelectionModel();
+			int row = sm.getMinSelectionIndex();
+			if(row >= 0)
+				deleteRow(row);
+		}
+	};
 
 	/** Create a new plan table panel */
 	public PlanTablePanel() {
@@ -50,13 +59,13 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 		table.setRowHeight(ROW_HEIGHT);
 		table.setVisibleRowCount(10);
 		addRow(table);
-		addRow(del_btn);
-		del_btn.setEnabled(false);
-		addActionJobs();
+		addRow(new JButton(del_action));
+		del_action.setEnabled(false);
+		addJobs();
 	}
 
 	/** Add jobs for plan table */
-	private void addActionJobs() {
+	private void addJobs() {
 		final ListSelectionModel sm = table.getSelectionModel();
 		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, sm) {
@@ -68,13 +77,6 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 				}
 			}
 		};
-		new ActionJob(this, del_btn) {
-			public void perform() throws Exception {
-				int row = sm.getMinSelectionIndex();
-				if(row >= 0)
-					deleteRow(row);
-			}
-		};
 	}
 
 	/** Change the selected row */
@@ -82,9 +84,9 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 		ProxyTableModel<T> mdl = model;
 		if(mdl != null) {
 			T proxy = mdl.getProxy(row);
-			del_btn.setEnabled(mdl.canRemove(proxy));
+			del_action.setEnabled(mdl.canRemove(proxy));
 		} else
-			del_btn.setEnabled(false);
+			del_action.setEnabled(false);
 	}
 
 	/** Delete the plan at the specified row */
@@ -96,7 +98,7 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 
 	/** Change the selected action plan */
 	public void setTableModel(ProxyTableModel<T> mdl) {
-		del_btn.setEnabled(false);
+		del_action.setEnabled(false);
 		ProxyTableModel<T> o_model = model;
 		model = mdl;
 		model.initialize();

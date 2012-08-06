@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -48,7 +49,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -90,11 +91,19 @@ public class CorridorList extends JPanel {
 	/** Combo box to select a roadway corridor */
 	protected final JComboBox corridor_combo = new JComboBox();
 
-	/** Button to add a new roadway node */
-	private final IButton add_btn = new IButton("r_node.add");
+	/** Action to add a new roadway node */
+	private final IAction add_node = new IAction("r_node.add") {
+		protected void do_perform() {
+			doAddNode();
+		}
+	};
 
-	/** Button to delete the currently selected roadway node */
-	private final IButton delete_btn = new IButton("r_node.delete");
+	/** Action to delete the currently selected roadway node */
+	private final IAction delete_node = new IAction("r_node.delete") {
+		protected void do_perform() {
+			doDeleteNode();
+		}
+	};
 
 	/** R_Node selection model */
 	protected final ProxySelectionModel<R_Node> sel_model;
@@ -193,8 +202,8 @@ public class CorridorList extends JPanel {
 		bag.weightx = 0;
 		bag.fill = GridBagConstraints.NONE;
 		add(new ILabel("r_node"), bag);
-		add(add_btn, bag);
-		add(delete_btn, bag);
+		add(new JButton(add_node), bag);
+		add(new JButton(delete_node), bag);
 		bag.gridx = 0;
 		bag.gridy = 1;
 		bag.gridwidth = 5;
@@ -208,8 +217,8 @@ public class CorridorList extends JPanel {
 		sel_model.addProxySelectionListener(sel_listener);
 		createJobs();
 		updateNodeSelection(null);
-		add_btn.setEnabled(canAdd());
-		delete_btn.setEnabled(false);
+		add_node.setEnabled(canAdd());
+		delete_node.setEnabled(false);
 	}
 
 	/** Create the jobs */
@@ -221,16 +230,6 @@ public class CorridorList extends JPanel {
 					setCorridor((CorridorBase)s);
 				else
 					setCorridor(null);
-			}
-		};
-		new ActionJob(this, add_btn) {
-			public void perform() {
-				doAddButton();
-			}
-		};
-		new ActionJob(this, delete_btn) {
-			public void perform() {
-				doRemoveButton();
 			}
 		};
 	}
@@ -398,11 +397,11 @@ public class CorridorList extends JPanel {
 	protected void updateNodeSelection(R_Node proxy) {
 		client.setPointSelector(null);
 		panel.setR_Node(proxy);
-		delete_btn.setEnabled(canRemove(proxy));
+		delete_node.setEnabled(canRemove(proxy));
 	}
 
-	/** Do the add button action */
-	protected void doAddButton() {
+	/** Do the add node action */
+	protected void doAddNode() {
 		client.setPointSelector(new PointSelector() {
 			public void selectPoint(Point2D p) {
 				client.setPointSelector(null);
@@ -428,7 +427,7 @@ public class CorridorList extends JPanel {
 				lanes, shift);
 		} else
 			creator.create(e, n);
-		add_btn.setEnabled(canAdd());
+		add_node.setEnabled(canAdd());
 	}
 
 	/** Get a UTM position */
@@ -453,8 +452,8 @@ public class CorridorList extends JPanel {
 		return null;
 	}
 
-	/** Do the remove button action */
-	protected void doRemoveButton() {
+	/** Do the delete node action */
+	protected void doDeleteNode() {
 		R_Node proxy = getSelectedNode();
 		if(proxy != null) {
 			GeoLoc loc = proxy.getGeoLoc();

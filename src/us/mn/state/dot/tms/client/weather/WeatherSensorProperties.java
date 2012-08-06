@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.client.weather;
 
 import java.awt.Color;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -43,8 +43,12 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
 
-	/** Controller button */
-	private final IButton controllerBtn = new IButton("controller");
+	/** Controller action */
+	private final IAction controller = new IAction("controller") {
+		protected void do_perform() {
+			controllerPressed();
+		}
+	};
 
 	/** Create a new weather sensor properties form */
 	public WeatherSensorProperties(Session s, WeatherSensor ws) {
@@ -66,7 +70,6 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
-		createControllerJob();
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -82,7 +85,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 		location.initialize();
 		location.addRow(I18N.get("device.notes"), notes);
 		location.setCenter();
-		location.addRow(controllerBtn);
+		location.addRow(new JButton(controller));
 		return location;
 	}
 
@@ -91,15 +94,6 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 		new FocusJob(notes) {
 			public void perform() {
 				proxy.setNotes(notes.getText());
-			}
-		};
-	}
-
-	/** Create the controller job */
-	protected void createControllerJob() {
-		new ActionJob(this, controllerBtn) {
-			public void perform() throws Exception {
-				controllerPressed();
 			}
 		};
 	}
@@ -114,7 +108,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
-			controllerBtn.setEnabled(proxy.getController() != null);
+			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 	}

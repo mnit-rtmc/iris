@@ -16,16 +16,16 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -48,11 +48,25 @@ public class CapabilityPanel extends JPanel {
 	/** Table to hold the privilege list */
 	protected final ZTable p_table = new ZTable();
 
-	/** Button to delete the selected capability */
-	private final IButton del_capability = new IButton("capability.delete");
+	/** Action to delete the selected capability */
+	private final IAction del_capability = new IAction("capability.delete"){
+		protected void do_perform() {
+			ListSelectionModel s = cap_table.getSelectionModel();
+			int row = s.getMinSelectionIndex();
+			if(row >= 0)
+				cap_model.deleteRow(row);
+		}
+	};
 
-	/** Button to delete the selected privilege */
-	private final IButton del_privilege = new IButton("privilege.delete");
+	/** Aciton to delete the selected privilege */
+	private final IAction del_privilege = new IAction("privilege.delete") {
+		protected void do_perform() {
+			ListSelectionModel sp = p_table.getSelectionModel();
+			int row = sp.getMinSelectionIndex();
+			if(row >= 0)
+				p_model.deleteRow(row);
+		}
+	};
 
 	/** User session */
 	protected final Session session;
@@ -84,17 +98,17 @@ public class CapabilityPanel extends JPanel {
 		del_capability.setEnabled(false);
 		bag.gridx = 0;
 		bag.gridy = 1;
-		add(del_capability, bag);
+		add(new JButton(del_capability), bag);
 		del_privilege.setEnabled(false);
 		bag.gridx = 1;
-		add(del_privilege, bag);
+		add(new JButton(del_privilege), bag);
 	}
 
 	/** Initializze the panel */
 	protected void initialize() {
 		cap_model.initialize();
 		p_model.initialize();
-		final ListSelectionModel s = cap_table.getSelectionModel();
+		ListSelectionModel s = cap_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
@@ -102,14 +116,7 @@ public class CapabilityPanel extends JPanel {
 					selectCapability();
 			}
 		});
-		new ActionJob(this, del_capability) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					cap_model.deleteRow(row);
-			}
-		};
-		final ListSelectionModel sp = p_table.getSelectionModel();
+		ListSelectionModel sp = p_table.getSelectionModel();
 		sp.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		sp.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
@@ -117,13 +124,6 @@ public class CapabilityPanel extends JPanel {
 					selectPrivilege();
 			}
 		});
-		new ActionJob(this, del_privilege) {
-			public void perform() throws Exception {
-				int row = sp.getMinSelectionIndex();
-				if(row >= 0)
-					p_model.deleteRow(row);
-			}
-		};
 	}
 
 	/** Dispose of the panel */

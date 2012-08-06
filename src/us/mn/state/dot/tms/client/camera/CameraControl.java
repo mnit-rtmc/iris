@@ -31,8 +31,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.widget.IButton;
-import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * This class creates a Swing panel for controlling camera pan, tilt, and zoom.
@@ -57,34 +56,34 @@ public class CameraControl extends JPanel {
 	static private final Insets INSETS = new Insets(0, 0, 0, 0);
 
 	/** Button used to pan left */
-	private final IButton left_btn;
+	private final JButton left_btn;
 
 	/** Button used to pan right */
-	private final IButton right_btn;
+	private final JButton right_btn;
 
 	/** Button used to tilt up */
-	private final IButton up_btn;
+	private final JButton up_btn;
 
 	/** Button used to tilt down */
-	private final IButton down_btn;
+	private final JButton down_btn;
 
 	/** Button used to pan left and tilt up */
-	private final IButton up_left_btn;
+	private final JButton up_left_btn;
 
 	/** Button used to pan right and tilt up */
-	private final IButton up_right_btn;
+	private final JButton up_right_btn;
 
 	/** Button used to pan left and tilt down */
-	private final IButton down_left_btn;
+	private final JButton down_left_btn;
 
 	/** Button used to pan right and tilt down */
-	private final IButton down_right_btn;
+	private final JButton down_right_btn;
 
 	/** Button used to zoom in */
-	private final IButton zoom_in_btn;
+	private final JButton zoom_in_btn;
 
 	/** Button used to zoom out */
-	private final IButton zoom_out_btn;
+	private final JButton zoom_out_btn;
 
 	/** Array of buttons used to go to preset locations */
 	private final JButton[] preset_btn =
@@ -160,28 +159,27 @@ public class CameraControl extends JPanel {
 	}
 
 	/** Create a PTZ button */
-	private IButton createPtzButton(String text_id, final int pan,
+	private JButton createPtzButton(String text_id, final int pan,
 		final int tilt, final int zoom)
 	{
-		final IButton btn = new IButton(text_id);
+		final JButton btn = new JButton(new IAction(text_id) {
+			protected void do_perform() {
+				Camera c = camera;
+				if(c != null)
+					c.setPtz(PTZ_STOP);
+			}
+		});
 		initButton(btn);
 		btn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				buttonPressed(btn, pan, tilt, zoom);
 			}
 		});
-		btn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				Camera c = camera;
-				if(c != null)
-					c.setPtz(PTZ_STOP);
-			}
-		});
 		return btn;
 	}
 
 	/** Respond to a PTZ button pressed event */
-	private void buttonPressed(IButton btn, int pan, int tilt, int zoom) {
+	private void buttonPressed(JButton btn, int pan, int tilt, int zoom) {
 		Camera c = camera;
 		if(c != null && btn.getModel().isPressed()) {
 			Float[] ptz = new Float[] {
@@ -248,18 +246,15 @@ public class CameraControl extends JPanel {
 
 	/** Create a preset button */
 	private JButton createPresetButton(final int num) {
-		final JButton btn = new JButton(Integer.toString(num));
-		String tt = I18N.getSilent("camera.preset.tooltip");
-		if(tt != null)
-			btn.setToolTipText(tt);
-		initButton(btn);
-		btn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
+		JButton btn = new JButton(new IAction("camera.preset") {
+			protected void do_perform() {
 				Camera c = camera;
 				if(c != null)
 					c.setRecallPreset(num);
 			}
 		});
+		btn.setText(Integer.toString(num));
+		initButton(btn);
 		return btn;
 	}
 

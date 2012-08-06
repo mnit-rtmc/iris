@@ -43,7 +43,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
@@ -64,8 +64,14 @@ public class MessagesTab extends JPanel {
 	/** Sign group table component */
 	protected final ZTable group_table = new ZTable();
 
-	/** Button to delete a sign group */
-	private final IButton delete_group = new IButton("dms.group.delete");
+	/** Action to delete a sign group */
+	private final IAction delete_group = new IAction("dms.group.delete") {
+		protected void do_perform() {
+			SignGroup group = getSelectedGroup();
+			if(group != null)
+				group.destroy();
+		}
+	};
 
 	/** Sign text table model */
 	protected SignTextTableModel sign_text_model;
@@ -73,8 +79,14 @@ public class MessagesTab extends JPanel {
 	/** Sign text table component */
 	protected final ZTable sign_text_table = new ZTable();
 
-	/** Button to delete sign text message */
-	private final IButton delete_text = new IButton("dms.message.delete");
+	/** Action to delete sign text message */
+	private final IAction delete_text = new IAction("dms.message.delete") {
+		protected void do_perform() {
+			SignText sign_text = getSelectedSignText();
+			if(sign_text != null)
+				sign_text.destroy();
+		}
+	};
 
 	/** Sign pixel panel */
 	protected final SignPixelPanel pixel_panel = new SignPixelPanel(true,
@@ -146,10 +158,10 @@ public class MessagesTab extends JPanel {
 		bag.weightx = 0;
 		bag.weighty = 0;
 		delete_group.setEnabled(false);
-		add(delete_group, bag);
+		add(new JButton(delete_group), bag);
 		bag.gridx = 1;
 		delete_text.setEnabled(false);
-		add(delete_text, bag);
+		add(new JButton(delete_text), bag);
 		bag.gridx = 0;
 		bag.gridy = 2;
 		bag.gridwidth = 2;
@@ -190,20 +202,6 @@ public class MessagesTab extends JPanel {
 
 	/** Create actions for button widgets */
 	protected void createActions() {
-		new ActionJob(this, delete_group) {
-			public void perform() {
-				SignGroup group = getSelectedGroup();
-				if(group != null)
-					group.destroy();
-			}
-		};
-		new ActionJob(this, delete_text) {
-			public void perform() throws Exception {
-				SignText sign_text = getSelectedSignText();
-				if(sign_text != null)
-					sign_text.destroy();
-			}
-		};
 		new ActionJob(this, font_cmb) {
 			public void perform() {
 				proxy.setDefaultFont(

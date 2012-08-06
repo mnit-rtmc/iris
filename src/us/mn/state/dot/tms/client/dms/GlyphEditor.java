@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -68,8 +68,12 @@ public class GlyphEditor extends JPanel {
 	/** "Widen" button */
 	protected final JButton widen = new JButton(">>");
 
-	/** Apply button */
-	private final IButton apply = new IButton("font.glyph.apply");
+	/** Apply action */
+	private final IAction apply = new IAction("font.glyph.apply") {
+		protected void do_perform() {
+			applyPressed();
+		}
+	};
 
 	/** Font form */
 	protected final FontForm font_form;
@@ -112,13 +116,8 @@ public class GlyphEditor extends JPanel {
 		box.add(Box.createGlue());
 		add(box);
 		add(Box.createVerticalStrut(UI.vgap));
-		add(createGlueBox(apply));
+		add(createGlueBox(new JButton(apply)));
 		apply.setEnabled(false);
-		new ActionJob(this, apply) {
-			public void perform() {
-				applyPressed();
-			}
-		};
 		add(Box.createGlue());
 	}
 

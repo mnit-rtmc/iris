@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.client.marking;
 
 import java.awt.Color;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -43,8 +43,14 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
 
-	/** Controller button */
-	private final IButton controllerBtn = new IButton("controller");
+	/** Controller action */
+	private final IAction controller = new IAction("controller") {
+		protected void do_perform() {
+			Controller c = proxy.getController();
+			if(c != null)
+				showForm(new ControllerForm(session, c));
+		}
+	};
 
 	/** Create a new lane marking properties form */
 	public LaneMarkingProperties(Session s, LaneMarking lm) {
@@ -66,7 +72,6 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
-		createControllerJob();
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -82,7 +87,7 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 		location.initialize();
 		location.addRow(I18N.get("device.notes"), notes);
 		location.setCenter();
-		location.addRow(controllerBtn);
+		location.addRow(new JButton(controller));
 		return location;
 	}
 
@@ -95,26 +100,10 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 		};
 	}
 
-	/** Create the controller job */
-	protected void createControllerJob() {
-		new ActionJob(this, controllerBtn) {
-			public void perform() throws Exception {
-				controllerPressed();
-			}
-		};
-	}
-
-	/** Controller lookup button pressed */
-	protected void controllerPressed() {
-		Controller c = proxy.getController();
-		if(c != null)
-			showForm(new ControllerForm(session, c));
-	}
-
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
-			controllerBtn.setEnabled(proxy.getController() != null);
+			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 	}

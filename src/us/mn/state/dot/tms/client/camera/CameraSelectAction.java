@@ -33,11 +33,13 @@ public class CameraSelectAction extends ProxyAction<Camera> {
 	public CameraSelectAction(Camera c, ProxySelectionModel<Camera> mdl) {
 		super("camera.select", c);
 		sel_model = mdl;
-		putValue(Action.NAME, c.getName());
+		if(c != null)
+			putValue(Action.NAME, c.getName());
 	}
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		sel_model.setSelected(proxy);
+		if(proxy != null)
+			sel_model.setSelected(proxy);
 	}
 }

@@ -19,12 +19,11 @@ import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -41,11 +40,26 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	/** Proxy table */
 	protected final ZTable table;
 
-	/** Button to display the proxy properties */
-	private final IButton prop_btn = new IButton("device.properties");
+	/** Action to display the proxy properties */
+	private final IAction show_props = new IAction("device.properties") {
+		protected void do_perform() {
+			T proxy = getSelectedProxy();
+			if(proxy != null)
+				model.showPropertiesForm(proxy);
+		}
+	};
 
-	/** Button to delete the selected proxy */
-	private final IButton del_btn = new IButton("device.delete");
+	/** Button to display the proxy properties */
+	private final JButton prop_btn = new JButton(show_props);
+
+	/** Action to delete the selected proxy */
+	private final IAction del_obj = new IAction("device.delete") {
+		protected void do_perform() {
+			T proxy = getSelectedProxy();
+			if(proxy != null)
+				proxy.destroy();
+		}
+	};
 
 	/** Create a new proxy table form */
 	public ProxyTableForm(String t, ProxyTableModel<T> m) {
@@ -80,21 +94,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 				selectProxy();
 			}
 		};
-		new ActionJob(this, del_btn) {
-			public void perform() throws Exception {
-				T proxy = getSelectedProxy();
-				if(proxy != null)
-					proxy.destroy();
-			}
-		};
 		if(model.hasProperties()) {
-			new ActionJob(this, prop_btn) {
-				public void perform() {
-					T proxy = getSelectedProxy();
-					if(proxy != null)
-						model.showPropertiesForm(proxy);
-				}
-			};
 			table.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					if(e.getClickCount() == 2)
@@ -117,11 +117,11 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 		if(model.hasProperties())
 			panel.add(prop_btn);
 		if(model.hasDelete())
-			panel.addRow(del_btn);
+			panel.addRow(new JButton(del_obj));
 		else
 			panel.finishRow();
-		prop_btn.setEnabled(false);
-		del_btn.setEnabled(false);
+		show_props.setEnabled(false);
+		del_obj.setEnabled(false);
 		return panel;
 	}
 
@@ -148,7 +148,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	/** Select a new proxy */
 	protected void selectProxy() {
 		T proxy = getSelectedProxy();
-		prop_btn.setEnabled(proxy != null);
-		del_btn.setEnabled(model.canRemove(proxy));
+		show_props.setEnabled(proxy != null);
+		del_obj.setEnabled(model.canRemove(proxy));
 	}
 }

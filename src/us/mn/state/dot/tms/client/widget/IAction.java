@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -27,12 +28,40 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 abstract public class IAction extends AbstractAction {
 
-	/** Create a new action */
-	protected IAction(String text_id) {
+	/** System attribute to enable action */
+	private final SystemAttrEnum attr;
+
+	/** Create a new action.
+	 * @param text_id Text ID of I18N string.
+	 * @param sa Boolean attribute to determine if the action is enabled. */
+	protected IAction(String text_id, SystemAttrEnum sa) {
+		attr = sa;
 		putValue(Action.NAME, I18N.get(text_id));
-		String s = I18N.getSilent(text_id + ".tooltip");
-		if(s != null)
-			putValue(Action.SHORT_DESCRIPTION, s);
+		int m = I18N.getKeyEvent(text_id);
+		if(m != 0)
+			putValue(Action.MNEMONIC_KEY, m);
+		String tt = I18N.getSilent(text_id + ".tooltip");
+		if(tt != null) {
+			if(m != 0) {
+				char c = I18N.getKeyEventChar(text_id);
+				tt += " (alt-" + c + ")";
+			}
+			putValue(Action.SHORT_DESCRIPTION, tt);
+		}
+	}
+
+	/** Create a new action.
+	 * @param text_id Text ID of I18N string. */
+	protected IAction(String text_id) {
+		this(text_id, null);
+	}
+
+	/** Is the action enabled by system attribute? */
+	public boolean getIEnabled() {
+		if(attr != null)
+			return attr.getBoolean();
+		else
+			return true;
 	}
 
 	/** Schedule the action to be performed */

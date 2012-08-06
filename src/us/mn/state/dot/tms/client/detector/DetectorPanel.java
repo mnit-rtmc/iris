@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
@@ -33,7 +34,7 @@ import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -67,11 +68,19 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Note text field */
 	protected final JTextField note_txt = new JTextField(12);
 
-	/** Button to display the controller */
-	private final IButton ctrl_btn = new IButton("controller");
+	/** Action to display the controller */
+	private final IAction controller = new IAction("controller") {
+		protected void do_perform() {
+			showControllerForm(detector);
+		}
+	};
 
-	/** Button to display the r_node */
-	private final IButton rnode_btn = new IButton("r_node");
+	/** Action to display the r_node */
+	private final IAction r_node = new IAction("r_node") {
+		protected void do_perform() {
+			showRNode(detector);
+		}
+	};
 
 	/** User session */
 	protected final Session session;
@@ -112,9 +121,9 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		setWest();
 		setWidth(2);
 		bag.insets.bottom = 0;
-		add(ctrl_btn);
+		add(new JButton(controller));
 		if(has_r_btn)
-			add(rnode_btn);
+			add(new JButton(r_node));
 		finishRow();
 		createJobs();
 		watcher.initialize();
@@ -159,16 +168,6 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 			public void perform() {
 				if(wasLost())
 					setNotes(note_txt.getText().trim());
-			}
-		};
-		new ActionJob(this, ctrl_btn) {
-			public void perform() {
-				showControllerForm(detector);
-			}
-		};
-		new ActionJob(this, rnode_btn) {
-			public void perform() {
-				showRNode(detector);
 			}
 		};
 	}
@@ -267,9 +266,9 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	protected void doUpdate(Detector d, String a) {
 		if(a == null) {
 			detector = d;
-			ctrl_btn.setEnabled(d != null &&
-			                    d.getController() != null);
-			rnode_btn.setEnabled(d != null && d.getR_Node() !=null);
+			controller.setEnabled(d != null &&
+			                      d.getController() != null);
+			r_node.setEnabled(d != null && d.getR_Node() !=null);
 		}
 		if(a == null || a.equals("laneType")) {
 			type_cmb.setSelectedIndex(d.getLaneType());
@@ -329,7 +328,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		fake_txt.setEnabled(false);
 		note_txt.setText("");
 		note_txt.setEnabled(false);
-		ctrl_btn.setEnabled(false);
-		rnode_btn.setEnabled(false);
+		controller.setEnabled(false);
+		r_node.setEnabled(false);
 	}
 }

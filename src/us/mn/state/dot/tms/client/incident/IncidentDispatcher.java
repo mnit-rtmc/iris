@@ -56,7 +56,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -121,18 +121,48 @@ public class IncidentDispatcher extends JPanel
 	/** Impact panel */
 	protected final ImpactPanel impact_pnl = new ImpactPanel();
 
-	/** Button to log an incident change */
-	private final IButton log_btn = new IButton("incident.log");
+	/** Action to log an incident change */
+	private final IAction log_inc = new IAction("incident.log") {
+		protected void do_perform() {
+			Incident inc = getSingleSelection();
+			if(inc instanceof ClientIncident)
+				create((ClientIncident)inc);
+			else if(inc != null)
+				logUpdate(inc);
+		}
+	};
 
-	/** Button to deploy devices */
-	private final IButton deploy_btn = new IButton("incident.deploy");
+	/** Action to deploy devices */
+	private final IAction deploy_inc = new IAction("incident.deploy") {
+		protected void do_perform() {
+			Incident inc = getSingleSelection();
+			if(inc != null &&
+			   !(inc instanceof ClientIncident))
+				showDeployForm(inc);
+		}
+	};
+
+	/** Action to clear an incident */
+	private final IAction clear_inc = new IAction("incident.clear") {
+		protected void do_perform() {
+			Incident inc = getSingleSelection();
+			if(inc != null &&
+			   !(inc instanceof ClientIncident))
+				inc.setCleared(clear_btn.isSelected());
+		}
+	};
 
 	/** Button to clear an incident */
-	private final JCheckBox clear_btn = new JCheckBox(I18N.get(
-		"incident.clear"));
+	private final JCheckBox clear_btn = new JCheckBox(clear_inc);
 
-	/** Button to edit incident */
-	private final IButton edit_btn = new IButton("incident.edit");
+	/** Action to edit incident */
+	private final IAction edit_inc = new IAction("incident.edit") {
+		protected void do_perform() {
+			Incident inc = getSingleSelection();
+			if(inc != null)
+				editIncident(inc);
+		}
+	};
 
 	/** Currently watching incident */
 	protected Incident watching;
@@ -177,10 +207,10 @@ public class IncidentDispatcher extends JPanel
 		panel.addRow(I18N.get("camera"), cam_panel);
 		panel.addRow(buildImpactBox());
 		JPanel btns = new JPanel(new FlowLayout());
-		btns.add(log_btn);
-		btns.add(deploy_btn);
+		btns.add(new JButton(log_inc));
+		btns.add(new JButton(deploy_inc));
 		btns.add(clear_btn);
-		btns.add(edit_btn);
+		btns.add(new JButton(edit_inc));
 		panel.addRow(btns);
 		return panel;
 	}
@@ -215,38 +245,6 @@ public class IncidentDispatcher extends JPanel
 					enableWidgets(inc);
 			}
 		});
-		new ActionJob(log_btn) {
-			public void perform() {
-				Incident inc = getSingleSelection();
-				if(inc instanceof ClientIncident)
-					create((ClientIncident)inc);
-				else if(inc != null)
-					logUpdate(inc);
-			}
-		};
-		new ActionJob(deploy_btn) {
-			public void perform() {
-				Incident inc = getSingleSelection();
-				if(inc != null &&
-				   !(inc instanceof ClientIncident))
-					showDeployForm(inc);
-			}
-		};
-		new ActionJob(clear_btn) {
-			public void perform() {
-				Incident inc = getSingleSelection();
-				if(inc != null &&
-				   !(inc instanceof ClientIncident))
-					inc.setCleared(clear_btn.isSelected());
-			}
-		};
-		new ActionJob(edit_btn) {
-			public void perform() {
-				Incident inc = getSingleSelection();
-				if(inc != null)
-					editIncident(inc);
-			}
-		};
 	}
 
 	/** Edit (replace) an existing incident */
@@ -470,11 +468,11 @@ public class IncidentDispatcher extends JPanel
 		camera_cbx.setEnabled(false);
 		setCameraAction(null);
 		cam_cards.show(cam_panel, CAMERA_BTN);
-		log_btn.setEnabled(false);
-		deploy_btn.setEnabled(false);
-		clear_btn.setEnabled(false);
+		log_inc.setEnabled(false);
+		deploy_inc.setEnabled(false);
+		clear_inc.setEnabled(false);
 		clear_btn.setSelected(false);
-		edit_btn.setEnabled(false);
+		edit_inc.setEnabled(false);
 		impact_pnl.setImpact("");
 	}
 
@@ -500,20 +498,20 @@ public class IncidentDispatcher extends JPanel
 			detail_cbx.setEnabled(create);
 			camera_cbx.setEnabled(create);
 			cam_cards.show(cam_panel, CAMERA_CBOX);
-			log_btn.setEnabled(create);
-			deploy_btn.setEnabled(false);
-			clear_btn.setEnabled(false);
-			edit_btn.setEnabled(false);
+			log_inc.setEnabled(create);
+			deploy_inc.setEnabled(false);
+			clear_inc.setEnabled(false);
+			edit_inc.setEnabled(false);
 		} else {
 			boolean update = canUpdate(inc);
 			detail_cbx.setEnabled(false);
 			camera_cbx.setEnabled(false);
 			cam_cards.show(cam_panel, CAMERA_BTN);
-			log_btn.setEnabled(update && isImpactChanged(inc));
-			deploy_btn.setEnabled(update && canDeploy(inc) &&
+			log_inc.setEnabled(update && isImpactChanged(inc));
+			deploy_inc.setEnabled(update && canDeploy(inc) &&
 				!inc.getCleared());
-			clear_btn.setEnabled(update);
-			edit_btn.setEnabled(update && !inc.getCleared());
+			clear_inc.setEnabled(update);
+			edit_inc.setEnabled(update && !inc.getCleared());
 		}
 	}
 

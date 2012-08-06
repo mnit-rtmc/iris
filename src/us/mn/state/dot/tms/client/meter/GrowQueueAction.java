@@ -32,8 +32,10 @@ public class GrowQueueAction extends ProxyAction<RampMeter> {
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		Integer rate = proxy.getRate();
-		if(rate != null)
-			proxy.setRateNext(rate - 150);
+		if(proxy != null) {
+			Integer rate = proxy.getRate();
+			if(rate != null)
+				proxy.setRateNext(rate - 150);
+		}
 	}
 }

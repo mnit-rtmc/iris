@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.meter;
 import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
@@ -35,7 +36,6 @@ import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -71,7 +71,7 @@ public class MeterStatusPanel extends FormPanel
 	protected final JTextField nameTxt = createTextField();
 
 	/** Camera component */
-	private final IButton camera_btn = new IButton("camera.select");
+	private final JButton camera_btn = new JButton();
 
 	/** Location component */
 	protected final JTextField locationTxt = createTextField();
@@ -89,10 +89,10 @@ public class MeterStatusPanel extends FormPanel
 	protected final JTextField queueTxt = createTextField();
 
 	/** Queue shrink button */
-	private final IButton shrink_btn = new IButton("ramp.meter.shrink");
+	private final JButton shrink_btn = new JButton();
 
 	/** Queue grow button */
-	private final IButton grow_btn = new IButton("ramp.meter.grow");
+	private final JButton grow_btn = new JButton();
 
 	/** Reason the meter was locked */
 	protected final JComboBox lockCmb = new JComboBox(
@@ -216,9 +216,9 @@ public class MeterStatusPanel extends FormPanel
 			cache.watchObject(proxy);
 		selected = proxy;
 		setCameraAction(proxy);
+		shrink_btn.setAction(new ShrinkQueueAction(proxy));
+		grow_btn.setAction(new GrowQueueAction(proxy));
 		if(proxy != null) {
-			shrink_btn.setAction(new ShrinkQueueAction(proxy));
-			grow_btn.setAction(new GrowQueueAction(proxy));
 			lockCmb.setAction(new LockMeterAction(proxy, lockCmb));
 			on_btn.setAction(new TurnOnAction(proxy));
 			off_btn.setAction(new TurnOffAction(proxy));
@@ -232,8 +232,6 @@ public class MeterStatusPanel extends FormPanel
 			releaseTxt.setText("");
 			cycleTxt.setText("");
 			queueTxt.setText("");
-			shrink_btn.setEnabled(false);
-			grow_btn.setEnabled(false);
 		}
 		setEnabled(canUpdate(proxy));
 	}
@@ -249,12 +247,8 @@ public class MeterStatusPanel extends FormPanel
 	/** Set the camera action */
 	protected void setCameraAction(RampMeter meter) {
 		Camera cam = RampMeterHelper.getCamera(meter);
-		if(cam != null) {
-			camera_btn.setAction(new CameraSelectAction(cam,
-			    session.getCameraManager().getSelectionModel()));
-		} else
-			camera_btn.setAction(null);
-		camera_btn.setEnabled(cam != null);
+		camera_btn.setAction(new CameraSelectAction(cam,
+			session.getCameraManager().getSelectionModel()));
 	}
 
 	/** Update one attribute on the form */

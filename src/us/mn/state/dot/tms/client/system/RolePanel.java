@@ -17,15 +17,15 @@ package us.mn.state.dot.tms.client.system;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -48,8 +48,15 @@ public class RolePanel extends JPanel {
 	/** Table to hold the role capability list */
 	protected final ZTable rc_table = new ZTable();
 
-	/** Button to delete the selected role */
-	private final IButton del_role = new IButton("role.delete");
+	/** Action to delete the selected role */
+	private final IAction del_role = new IAction("role.delete") {
+		protected void do_perform() {
+			ListSelectionModel s = r_table.getSelectionModel();
+			int row = s.getMinSelectionIndex();
+			if(row >= 0)
+				r_model.deleteRow(row);
+		}
+	};
 
 	/** Create a new role panel */
 	public RolePanel(Session s) {
@@ -77,7 +84,7 @@ public class RolePanel extends JPanel {
 		del_role.setEnabled(false);
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
-		box.add(del_role);
+		box.add(new JButton(del_role));
 		box.add(Box.createHorizontalGlue());
 		bag.gridx = 1;
 		bag.gridy = 1;
@@ -88,7 +95,7 @@ public class RolePanel extends JPanel {
 	protected void initialize() {
 		rc_model.initialize();
 		r_model.initialize();
-		final ListSelectionModel s = r_table.getSelectionModel();
+		ListSelectionModel s = r_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
@@ -96,13 +103,6 @@ public class RolePanel extends JPanel {
 					selectRole();
 			}
 		});
-		new ActionJob(this, del_role) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					r_model.deleteRow(row);
-			}
-		};
 	}
 
 	/** Dispose of the panel */

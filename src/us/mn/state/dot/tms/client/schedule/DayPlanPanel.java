@@ -18,6 +18,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import javax.swing.JButton;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.JComboBox;
@@ -36,7 +37,7 @@ import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.CalendarWidget;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -71,29 +72,53 @@ public class DayPlanPanel extends JPanel {
 	/** Combo box for day plans */
 	protected final JComboBox day_cbox = new JComboBox();
 
-	/** Button to delete the selected day plan */
-	private final IButton del_plan = new IButton("action.plan.day.delete");
+	/** Action to delete the selected day plan */
+	private final IAction del_plan = new IAction("action.plan.day.delete") {
+		protected void do_perform() {
+			deleteSelectedPlan();
+		}
+	};
 
 	/** Month to display on calendar widget */
 	protected final Calendar month = Calendar.getInstance();
 
-	/** Button to select previous month */
-	private final IButton prev_month =new IButton("action.plan.month.prev");
+	/** Action to select previous month */
+	private final IAction prev_month =new IAction("action.plan.month.prev"){
+		protected void do_perform() {
+			month.add(Calendar.MONTH, -1);
+			updateCalendarWidget();
+		}
+	};
 
 	/** Month label */
 	protected final JLabel month_lbl = new JLabel();
 
-	/** Button to select next month */
-	private final IButton next_month =new IButton("action.plan.month.next");
+	/** Action to select next month */
+	private final IAction next_month =new IAction("action.plan.month.next"){
+		protected void do_perform() {
+			month.add(Calendar.MONTH, 1);
+			updateCalendarWidget();
+		}
+	};
 
-	/** Button to select previous year */
-	private final IButton prev_year = new IButton("action.plan.year.prev");
+	/** Action to select previous year */
+	private final IAction prev_year = new IAction("action.plan.year.prev") {
+		protected void do_perform() {
+			month.add(Calendar.YEAR, -1);
+			updateCalendarWidget();
+		}
+	};
 
 	/** Year label */
 	protected final JLabel year_lbl = new JLabel();
 
-	/** Button to select next year */
-	private final IButton next_year = new IButton("action.plan.year.next");
+	/** Action to select next year */
+	private final IAction next_year = new IAction("action.plan.year.next") {
+		protected void do_perform() {
+			month.add(Calendar.YEAR, 1);
+			updateCalendarWidget();
+		}
+	};
 
 	/** Calendar widget */
 	protected final CalendarWidget cal_widget = new CalendarWidget();
@@ -104,9 +129,14 @@ public class DayPlanPanel extends JPanel {
 	/** Table to hold the holiday list */
 	protected final ZTable h_table = new ZTable();
 
-	/** Button to delete the selected holiday */
-	private final IButton del_holiday = new IButton(
-		"action.plan.holiday.delete");
+	/** Action to delete the selected holiday */
+	private final IAction del_holiday = new IAction(
+		"action.plan.holiday.delete")
+	{
+		protected void do_perform() {
+			deleteSelectedHoliday();
+		}
+	};
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -134,36 +164,24 @@ public class DayPlanPanel extends JPanel {
 		bag.gridx = 0;
 		bag.gridy = 1;
 		bag.gridwidth = 2;
-		add(del_plan, bag);
+		add(new JButton(del_plan), bag);
 		bag.gridx = 2;
 		bag.gridy = 0;
 		bag.gridwidth = 1;
 		bag.gridheight = 1;
-		prev_month.setContentAreaFilled(false);
-		prev_month.setRolloverEnabled(true);
-		prev_month.setBorderPainted(false);
-		add(prev_month, bag);
+		add(createCalButton(prev_month), bag);
 		bag.gridx = 3;
 		setMonthLabel();
 		add(month_lbl, bag);
 		bag.gridx = 4;
-		next_month.setContentAreaFilled(false);
-		next_month.setRolloverEnabled(true);
-		next_month.setBorderPainted(false);
-		add(next_month, bag);
+		add(createCalButton(next_month), bag);
 		bag.gridx = 5;
-		prev_year.setContentAreaFilled(false);
-		prev_year.setRolloverEnabled(true);
-		prev_year.setBorderPainted(false);
-		add(prev_year, bag);
+		add(createCalButton(prev_year), bag);
 		bag.gridx = 6;
 		setYearLabel();
 		add(year_lbl, bag);
 		bag.gridx = 7;
-		next_year.setContentAreaFilled(false);
-		next_year.setRolloverEnabled(true);
-		next_year.setBorderPainted(false);
-		add(next_year, bag);
+		add(createCalButton(next_year), bag);
 		bag.gridx = 2;
 		bag.gridy = 1;
 		bag.gridwidth = 6;
@@ -189,12 +207,21 @@ public class DayPlanPanel extends JPanel {
 		bag.gridx = 2;
 		bag.gridy = 6;
 		bag.gridwidth = GridBagConstraints.REMAINDER;
-		add(del_holiday, bag);
+		add(new JButton(del_holiday), bag);
 		del_plan.setEnabled(false);
 		del_holiday.setEnabled(false);
 		createWidgetJobs();
 		listener = createDayPlanListener();
 		cache.addProxyListener(listener);
+	}
+
+	/** Create a calendar button */
+	private JButton createCalButton(IAction a) {
+		JButton btn = new JButton(a);
+		btn.setContentAreaFilled(false);
+		btn.setRolloverEnabled(true);
+		btn.setBorderPainted(false);
+		return btn;
 	}
 
 	/** Create a proxy listener to update day plan holiday model */
@@ -225,44 +252,10 @@ public class DayPlanPanel extends JPanel {
 				selectDayPlan();
 			}
 		};
-		new ActionJob(this, del_plan) {
-			public void perform() {
-				deleteSelectedPlan();
-			}
-		};
-		new ActionJob(this, prev_month) {
-			public void perform() {
-				addMonth(-1);
-				updateCalendarWidget();
-			}
-		};
-		new ActionJob(this, next_month) {
-			public void perform() {
-				addMonth(1);
-				updateCalendarWidget();
-			}
-		};
-		new ActionJob(this, prev_year) {
-			public void perform() {
-				addYear(-1);
-				updateCalendarWidget();
-			}
-		};
-		new ActionJob(this, next_year) {
-			public void perform() {
-				addYear(1);
-				updateCalendarWidget();
-			}
-		};
 		new ListSelectionJob(this, h_table.getSelectionModel()) {
 			public void perform() {
 				if(!event.getValueIsAdjusting())
 					selectHoliday();
-			}
-		};
-		new ActionJob(this, del_holiday) {
-			public void perform() throws Exception {
-				deleteSelectedHoliday();
 			}
 		};
 		cal_widget.setHighlighter(new CalendarWidget.Highlighter() {
@@ -274,16 +267,6 @@ public class DayPlanPanel extends JPanel {
 					return false;
 			}
 		});
-	}
-
-	/** Add a month to calendar widget */
-	protected void addMonth(int m) {
-		month.add(Calendar.MONTH, m);
-	}
-
-	/** Add a year to calendar widget */
-	protected void addYear(int m) {
-		month.add(Calendar.YEAR, m);
 	}
 
 	/** Update the calendar widget */

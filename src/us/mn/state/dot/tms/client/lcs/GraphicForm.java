@@ -19,11 +19,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.TreeSet;
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -68,11 +68,22 @@ public class GraphicForm extends AbstractForm {
 	/** Table to hold the Graphic list */
 	protected final ZTable table = new ZTable();
 
-	/** Button to create a new graphic */
-	private final IButton create_btn = new IButton("graphic.create");
+	/** Action to create a new graphic */
+	private final IAction create_gr = new IAction("graphic.create") {
+		protected void do_perform() throws IOException {
+			createGraphic();
+		}
+	};
 
-	/** Button to delete the selected proxy */
-	private final IButton del_btn = new IButton("graphic.delete");
+	/** Action to delete the selected proxy */
+	private final IAction del_gr = new IAction("graphic.delete") {
+		protected void do_perform() {
+			ListSelectionModel s = table.getSelectionModel();
+			int row = s.getMinSelectionIndex();
+			if(row >= 0)
+				model.deleteRow(row);
+		}
+	};
 
 	/** User session */
 	protected final Session session;
@@ -102,24 +113,12 @@ public class GraphicForm extends AbstractForm {
 
 	/** Create graphic panel */
 	protected JPanel createGraphicPanel() {
-		final ListSelectionModel s = table.getSelectionModel();
+		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
 			public void perform() {
 				if(!event.getValueIsAdjusting())
 					selectProxy();
-			}
-		};
-		new ActionJob(this, create_btn) {
-			public void perform() throws Exception {
-				createGraphic();
-			}
-		};
-		new ActionJob(this, del_btn) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					model.deleteRow(row);
 			}
 		};
 		FormPanel panel = new FormPanel(true);
@@ -128,17 +127,17 @@ public class GraphicForm extends AbstractForm {
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
 		panel.addRow(table);
-		panel.add(create_btn);
-		panel.addRow(del_btn);
-		create_btn.setEnabled(model.canAdd());
-		del_btn.setEnabled(false);
+		panel.add(new JButton(create_gr));
+		panel.addRow(new JButton(del_gr));
+		create_gr.setEnabled(model.canAdd());
+		del_gr.setEnabled(false);
 		return panel;
 	}
 
 	/** Change the selected proxy */
 	protected void selectProxy() {
 		Graphic proxy = model.getProxy(table.getSelectedRow());
-		del_btn.setEnabled(model.canRemove(proxy));
+		del_gr.setEnabled(model.canRemove(proxy));
 	}
 
 	/** Create a new graphic */

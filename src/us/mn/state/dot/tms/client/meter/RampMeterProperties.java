@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,7 +39,8 @@ import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -67,8 +69,16 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
 
-	/** Controller button */
-	private final IButton controllerBtn = new IButton("controller");
+	/** Controller action */
+	private final IAction controller = new IAction("controller") {
+		protected void do_perform() {
+			Controller c = proxy.getController();
+			if(c != null) {
+				SmartDesktop sd = session.getDesktop();
+				sd.show(new ControllerForm(session, c));
+			}
+		}
+	};
 
 	/** Meter type combo box component */
 	protected final JComboBox meterType = new JComboBox(
@@ -109,8 +119,13 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Status component */
 	protected final JLabel l_status = new JLabel();
 
-	/** Send settings button */
-	private final IButton settingsBtn = new IButton("device.send.settings");
+	/** Send settings action */
+	private final IAction settings = new IAction("device.send.settings") {
+		protected void do_perform() {
+			proxy.setDeviceRequest(DeviceRequest.
+				SEND_SETTINGS.ordinal());
+		}
+	};
 
 	/** Sonar state */
 	protected final SonarState state;
@@ -138,11 +153,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
-		createControllerJob();
-		if(canUpdate("deviceRequest"))
-			createRequestJobs();
-		else
-			disableRequestWidgets();
+		settings.setEnabled(canUpdate("deviceRequest"));
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -156,7 +167,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		location.add(I18N.get("camera"), camera);
 		location.finishRow();
 		location.setCenter();
-		location.addRow(controllerBtn);
+		location.addRow(new JButton(controller));
 		return location;
 	}
 
@@ -214,40 +225,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		m_lock.setAction(new LockMeterAction(proxy, m_lock));
 	}
 
-	/** Create the controller job */
-	protected void createControllerJob() {
-		new ActionJob(this, controllerBtn) {
-			public void perform() {
-				controllerPressed();
-			}
-		};
-	}
-
-	/** Controller lookup button pressed */
-	protected void controllerPressed() {
-		Controller c = proxy.getController();
-		if(c != null) {
-			session.getDesktop().show(
-				new ControllerForm(session, c));
-		}
-	}
-
-	/** Create the device request jobs */
-	protected void createRequestJobs() {
-		new ActionJob(this, settingsBtn) {
-			public void perform() {
-				proxy.setDeviceRequest(DeviceRequest.
-					SEND_SETTINGS.ordinal());
-			}
-		};
-		settingsBtn.setEnabled(true);
-	}
-
-	/** Disable the device request widgets */
-	protected void disableRequestWidgets() {
-		settingsBtn.setEnabled(false);
-	}
-
 	/** Create ramp meter setup panel */
 	protected JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
@@ -269,14 +246,14 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		panel.addRow(I18N.get("ramp.meter.lock"), m_lock);
 		panel.addRow(I18N.get("device.operation"), operation);
 		panel.addRow(I18N.get("device.status"), l_status);
-		panel.addRow(settingsBtn);
+		panel.addRow(new JButton(settings));
 		return panel;
 	}
 
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
-			controllerBtn.setEnabled(proxy.getController() != null);
+			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))

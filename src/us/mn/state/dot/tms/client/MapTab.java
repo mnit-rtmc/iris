@@ -72,7 +72,7 @@ abstract public class MapTab extends JPanel {
 	public MapTab(String text_id) {
 		super(new BorderLayout());
 		name = I18N.get(text_id);
-		tip = I18N.getSilent(text_id + ".tab");
+		tip = I18N.get(text_id + ".tab");
 	}
 
 	/** Perform any clean up necessary */

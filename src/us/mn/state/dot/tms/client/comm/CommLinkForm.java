@@ -23,6 +23,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -33,7 +34,6 @@ import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.table.TableRowSorter;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -82,8 +82,15 @@ public class CommLinkForm extends AbstractForm {
 	/** Comm link status */
 	protected final JLabel link_status = new JLabel();
 
-	/** Button to delete the selected comm link */
-	private final IButton delete_btn = new IButton("comm.link.delete");
+	/** Action to delete the selected comm link */
+	private final IAction delete_link = new IAction("comm.link.delete") {
+		protected void do_perform() {
+			ListSelectionModel s = table.getSelectionModel();
+			int row = s.getMinSelectionIndex();
+			if(row >= 0)
+				model.deleteRow(row);
+		}
+	};
 
 	/** Table to hold failed controllers */
 	protected final ZTable ftable = new ZTable();
@@ -97,14 +104,29 @@ public class CommLinkForm extends AbstractForm {
 	/** Table row filter */
 	protected final RowFilter<FailedControllerModel, Integer> filter;
 
-	/** Button to show controller properties */
-	private final IButton ctr_props = new IButton("controller");
+	/** Action to show controller properties */
+	private final IAction controller = new IAction("controller") {
+		protected void do_perform() {
+			doPropertiesAction();
+		}
+	};
 
-	/** Button to delete the selected controller */
-	private final IButton del_ctr = new IButton("controller.delete");
+	/** Action to delete the selected controller */
+	private final IAction del_ctr = new IAction("controller.delete") {
+		protected void do_perform() {
+			ListSelectionModel cs = ctable.getSelectionModel();
+			int row = cs.getMinSelectionIndex();
+			if(row >= 0)
+				cmodel.deleteRow(row);
+		}
+	};
 
-	/** Button to go to a failed controller */
-	private final IButton go_btn = new IButton("controller.go");
+	/** Action to go to a failed controller */
+	private final IAction go_ctrl = new IAction("controller.go") {
+		protected void do_perform() {
+			goFailedController();
+		}
+	};
 
 	/** User session */
 	protected final Session session;
@@ -155,7 +177,8 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Create comm link panel */
 	protected JPanel createCommLinkPanel() {
-		final ListSelectionModel s = table.getSelectionModel();
+		final JButton ctr_props = new JButton(controller);
+		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
 			public void perform() {
@@ -163,24 +186,12 @@ public class CommLinkForm extends AbstractForm {
 					selectCommLink();
 			}
 		};
-		new ActionJob(this, delete_btn) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					model.deleteRow(row);
-			}
-		};
-		final ListSelectionModel cs = ctable.getSelectionModel();
+		ListSelectionModel cs = ctable.getSelectionModel();
 		cs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, cs) {
 			public void perform() {
 				if(!event.getValueIsAdjusting())
 					selectController();
-			}
-		};
-		new ActionJob(this, ctr_props) {
-			public void perform() throws Exception {
-				doPropertiesAction();
 			}
 		};
 		ctable.addMouseListener(new MouseAdapter() {
@@ -189,13 +200,6 @@ public class CommLinkForm extends AbstractForm {
 					ctr_props.doClick();
 			}
 		});
-		new ActionJob(this, del_ctr) {
-			public void perform() throws Exception {
-				int row = cs.getMinSelectionIndex();
-				if(row >= 0)
-					cmodel.deleteRow(row);
-			}
-		};
 		JPanel panel = new JPanel(new GridBagLayout());
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets.left = UI.hgap;
@@ -226,8 +230,8 @@ public class CommLinkForm extends AbstractForm {
 		panel.add(link_status, bag);
 		bag.gridx = 2;
 		bag.anchor = GridBagConstraints.EAST;
-		delete_btn.setEnabled(false);
-		panel.add(delete_btn, bag);
+		delete_link.setEnabled(false);
+		panel.add(new JButton(delete_link), bag);
 		bag.gridx = 0;
 		bag.gridy = 2;
 		bag.gridwidth = 3;
@@ -253,11 +257,11 @@ public class CommLinkForm extends AbstractForm {
 		panel.add(new ILabel("controller.selected"), bag);
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.EAST;
-		ctr_props.setEnabled(false);
+		controller.setEnabled(false);
 		panel.add(ctr_props, bag);
 		bag.gridx = 2;
 		del_ctr.setEnabled(false);
-		panel.add(del_ctr, bag);
+		panel.add(new JButton(del_ctr), bag);
 		return panel;
 	}
 
@@ -269,7 +273,7 @@ public class CommLinkForm extends AbstractForm {
 			link_status.setText(cl.getStatus());
 		else
 			link_status.setText("");
-		delete_btn.setEnabled(model.canRemove(cl));
+		delete_link.setEnabled(model.canRemove(cl));
 		del_ctr.setEnabled(false);
 		ControllerModel old_model = cmodel;
 		cmodel = new ControllerModel(session, cl);
@@ -284,12 +288,12 @@ public class CommLinkForm extends AbstractForm {
 	protected void selectController() {
 		int row = ctable.getSelectedRow();
 		Controller c = cmodel.getProxy(row);
-		ctr_props.setEnabled(c != null);
+		controller.setEnabled(c != null);
 		del_ctr.setEnabled(cmodel.canRemove(c));
 	}
 
 	/** Do the action for controller properties button */
-	protected void doPropertiesAction() throws Exception {
+	protected void doPropertiesAction() {
 		ListSelectionModel cs = ctable.getSelectionModel();
 		int row = cs.getMinSelectionIndex();
 		if(row >= 0) {
@@ -301,13 +305,9 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Create the failed controller panel */
 	protected JPanel createFailedControllerPanel() {
+		final JButton go_btn = new JButton(go_ctrl);
 		ListSelectionModel s = ftable.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ActionJob(this, go_btn) {
-			public void perform() throws Exception {
-				goFailedController();
-			}
-		};
 		ftable.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() > 1)

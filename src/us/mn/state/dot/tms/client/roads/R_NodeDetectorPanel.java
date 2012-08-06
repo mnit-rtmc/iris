@@ -18,19 +18,19 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.detector.DetectorPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -68,14 +68,43 @@ public class R_NodeDetectorPanel extends JPanel {
 	/** Detector label */
 	protected final JLabel det_lbl = new JLabel();
 
+	/** Action to create a new detector */
+	private final IAction create_det = new IAction("detector.create") {
+		protected void do_perform() {
+			R_NodeDetectorModel m = det_model;
+			if(m != null)
+				m.create(getDetectorName());
+			det_txt.setText("");
+			lookupDetector();
+		}
+	};
+
 	/** Button to create a new detector */
-	private final IButton create_btn = new IButton("detector.create");
+	private final JButton create_btn = new JButton(create_det);
 
-	/** Button to transfer a detector */
-	private final IButton transfer_btn = new IButton("detector.transfer");
+	/** Action to transfer a detector */
+	private final IAction transfer_det = new IAction("detector.transfer") {
+		protected void do_perform() {
+			R_NodeDetectorModel m = det_model;
+			if(m != null) {
+				Detector det = DetectorHelper.lookup(
+					getDetectorName());
+				if(det != null)
+					m.transfer(det);
+			}
+			det_txt.setText("");
+			lookupDetector();
+		}
+	};
 
-	/** Button to delete a detector */
-	private final IButton delete_btn = new IButton("detector.delete");
+	/** Action to delete a detector */
+	private final IAction delete_det = new IAction("detector.delete") {
+		protected void do_perform() {
+			Detector det = getSelectedDetector();
+			if(det != null)
+				det.destroy();
+		}
+	};
 
 	/** User session */
 	protected final Session session;
@@ -144,16 +173,16 @@ public class R_NodeDetectorPanel extends JPanel {
 		bag.anchor = GridBagConstraints.CENTER;
 		add(create_btn, bag);
 		bag.gridx = 1;
-		add(transfer_btn, bag);
+		add(new JButton(transfer_det), bag);
 		bag.gridx = 2;
-		add(delete_btn, bag);
+		add(new JButton(delete_det), bag);
 		createJobs();
 		det_pnl.initialize();
 		det_txt.setEnabled(false);
 		det_txt.setToolTipText(I18N.get("detector.name"));
-		create_btn.setEnabled(false);
-		transfer_btn.setEnabled(false);
-		delete_btn.setEnabled(false);
+		create_det.setEnabled(false);
+		transfer_det.setEnabled(false);
+		delete_det.setEnabled(false);
 	}
 
 	/** Create Gui jobs */
@@ -175,35 +204,6 @@ public class R_NodeDetectorPanel extends JPanel {
 				lookupDetector();
 			}
 		});
-		new ActionJob(this, create_btn) {
-			public void perform() {
-				R_NodeDetectorModel m = det_model;
-				if(m != null)
-					m.create(getDetectorName());
-				det_txt.setText("");
-				lookupDetector();
-			}
-		};
-		new ActionJob(this, transfer_btn) {
-			public void perform() {
-				R_NodeDetectorModel m = det_model;
-				if(m != null) {
-					Detector det = DetectorHelper.lookup(
-						getDetectorName());
-					if(det != null)
-						m.transfer(det);
-				}
-				det_txt.setText("");
-				lookupDetector();
-			}
-		};
-		new ActionJob(this, delete_btn) {
-			public void perform() throws Exception {
-				Detector det = getSelectedDetector();
-				if(det != null)
-					det.destroy();
-			}
-		};
 	}
 
 	/** Get the entered detector name */
@@ -223,8 +223,8 @@ public class R_NodeDetectorPanel extends JPanel {
 			det_lbl.setText(lookupLabel(det));
 		else
 			det_lbl.setText("");
-		create_btn.setEnabled(det == null && canAddDetector(name));
-		transfer_btn.setEnabled(det != null && canUpdateDetector(det));
+		create_det.setEnabled(det == null && canAddDetector(name));
+		transfer_det.setEnabled(det != null && canUpdateDetector(det));
 	}
 
 	/** Lookup a detector label */
@@ -243,7 +243,7 @@ public class R_NodeDetectorPanel extends JPanel {
 			det_txt.setText("");
 			lookupDetector();
 		}
-		delete_btn.setEnabled(canRemoveDetector(det));
+		delete_det.setEnabled(canRemoveDetector(det));
 	}
 
 	/** Get the currently selected detector */

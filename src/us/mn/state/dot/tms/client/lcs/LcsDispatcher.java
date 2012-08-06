@@ -27,7 +27,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -44,7 +43,7 @@ import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IButton;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -75,7 +74,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected final JTextField nameTxt = FormPanel.createTextField();
 
 	/** Verify camera button */
-	protected final JButton cameraBtn = new JButton();
+	private final JButton camera_btn = new JButton();
 
 	/** Location of LCS array */
 	protected final JTextField locationTxt = FormPanel.createTextField();
@@ -101,8 +100,12 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected final IndicationSelector indicationSelector =
 		new IndicationSelector(LCS_SIZE);
 
-	/** Button to send new indications to the LCS array */
-	private final IButton sendBtn = new IButton("lcs.send");
+	/** Action to send new indications to the LCS array */
+	private final IAction send = new IAction("lcs.send") {
+		protected void do_perform() {
+			sendIndications();
+		}
+	};
 
 	/** Button to blank the LCS array indications */
 	protected final JButton blankBtn = new JButton();
@@ -151,8 +154,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("lcs.selected")));
 		panel.add(I18N.get("device.name"), nameTxt);
-		panel.addRow(I18N.get("camera"), cameraBtn);
-		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
+		panel.addRow(I18N.get("camera"), camera_btn);
+		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
 		panel.addRow(I18N.get("location"), locationTxt);
 		panel.addRow(I18N.get("device.status"), statusTxt);
@@ -188,12 +191,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Build the panel that holds the send and clear buttons */
 	protected Box buildButtonPanel() {
 		Box box = Box.createHorizontalBox();
-		new ActionJob(sendBtn) {
-			public void perform() {
-				sendIndications();
-			}
-		};
-		box.add(sendBtn);
+		box.add(new JButton(send));
 		box.add(Box.createHorizontalStrut(4));
 		box.add(blankBtn);
 		return box;
@@ -277,7 +275,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		} else
 			lcs_lock.setAction(null);
 		lcs_lock.setEnabled(update);
-		sendBtn.setEnabled(update);
+		send.setEnabled(update);
 		blankBtn.setEnabled(update);
 		updateAttribute(lcs_array, null);
 	}
@@ -294,7 +292,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		lcs_lock.setEnabled(false);
 		lcs_lock.setSelectedItem(null);
 		indicationSelector.setEnabled(false);
-		sendBtn.setEnabled(false);
+		send.setEnabled(false);
 		blankBtn.setEnabled(false);
 		lcsPnl.clear();
 		lane_config.clear();
@@ -303,12 +301,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Set the camera action */
 	protected void setCameraAction(LCSArray lcs_array) {
 		Camera cam = LCSArrayHelper.getCamera(lcs_array);
-		if(cam != null) {
-			cameraBtn.setAction(new CameraSelectAction(cam,
-			    session.getCameraManager().getSelectionModel()));
-		} else
-			cameraBtn.setAction(null);
-		cameraBtn.setEnabled(cam != null);
+		camera_btn.setAction(new CameraSelectAction(cam,
+			session.getCameraManager().getSelectionModel()));
 	}
 
 	/** Update one attribute on the form */
@@ -330,7 +324,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			// These operations can be very slow -- discourage
 			// users from sending multiple operations at once
 			// RE: None -- see server.DeviceImpl.getOperation()
-			sendBtn.setEnabled(canUpdate(lcs_array) &&
+			send.setEnabled(canUpdate(lcs_array) &&
 				op.equals("None"));
 		}
 		if(a == null || a.equals("lcsLock")) {
