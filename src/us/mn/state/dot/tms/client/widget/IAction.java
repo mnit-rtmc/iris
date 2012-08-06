@@ -36,7 +36,8 @@ abstract public class IAction extends AbstractAction {
 	 * @param sa Boolean attribute to determine if the action is enabled. */
 	protected IAction(String text_id, SystemAttrEnum sa) {
 		attr = sa;
-		putValue(Action.NAME, I18N.get(text_id));
+		String name = text_id != null ? I18N.get(text_id) : "";
+		putValue(Action.NAME, name);
 		int m = I18N.getKeyEvent(text_id);
 		if(m != 0)
 			putValue(Action.MNEMONIC_KEY, m);
@@ -47,7 +48,8 @@ abstract public class IAction extends AbstractAction {
 				tt += " (alt-" + c + ")";
 			}
 			putValue(Action.SHORT_DESCRIPTION, tt);
-		}
+		} else if(!name.isEmpty())
+			putValue(Action.SHORT_DESCRIPTION, name);
 	}
 
 	/** Create a new action.

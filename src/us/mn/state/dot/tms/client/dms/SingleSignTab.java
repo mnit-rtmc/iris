@@ -32,7 +32,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -50,6 +49,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -79,7 +79,17 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	protected final JTextField locationTxt = createTextField();
 
 	/** AWS controlled checkbox (optional) */
-	protected final JCheckBox awsControlledCbx = new JCheckBox();
+	private final JCheckBox aws_control_chk = new JCheckBox(
+		new IAction("device.style.aws.controlled")
+	{
+		protected void do_perform() {
+			DMS proxy = watching;
+			if(proxy != null) {
+				proxy.setAwsControlled(
+					aws_control_chk.isSelected());
+			}
+		}
+	});
 
 	/** Displays the controller status */
 	protected final JTextField statusTxt = createTextField();
@@ -163,13 +173,9 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		}
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			setWest();
-			final String mid = "device.style.aws_controlled";
-			awsControlledCbx.setText(I18N.get(mid));
-			awsControlledCbx.setHorizontalTextPosition(
+			aws_control_chk.setHorizontalTextPosition(
 				SwingConstants.LEFT);
-			awsControlledCbx.setToolTipText(
-				I18N.get(mid + ".tooltip"));
-			addRow(awsControlledCbx);
+			addRow(aws_control_chk);
 		}
 		tab.add(I18N.get("dms.msg.current"), currentPnl);
 		tab.add(I18N.get("dms.msg.preview"), previewPnl);
@@ -189,15 +195,6 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 				}
 			}
 		});
-		new ActionJob(awsControlledCbx) {
-			public void perform() {
-				DMS proxy = watching;
-				if(proxy != null) {
-					proxy.setAwsControlled(
-						awsControlledCbx.isSelected());
-				}
-			}
-		};
 		currentPnl.addMouseListener(popper);
 		previewPnl.addMouseListener(popper);
 	}
@@ -286,8 +283,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		brightnessTxt.setText(EMPTY_TXT);
 		setCameraAction(null);
 		locationTxt.setText("");
-		awsControlledCbx.setSelected(false);
-		awsControlledCbx.setEnabled(false);
+		aws_control_chk.setEnabled(false);
+		aws_control_chk.setSelected(false);
 		statusTxt.setText("");
 		statusTxt.setForeground(null);
 		statusTxt.setBackground(null);
@@ -335,11 +332,11 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			}
 		}
 		if(a == null || a.equals("awsAllowed")) {
-			awsControlledCbx.setEnabled(
+			aws_control_chk.setEnabled(
 				dispatcher.isAwsPermitted(dms));
 		}
 		if(a == null || a.equals("awsControlled"))
-			awsControlledCbx.setSelected(dms.getAwsControlled());
+			aws_control_chk.setSelected(dms.getAwsControlled());
 		if(a == null || a.equals("opStatus"))
 			opStatusTxt.setText(dms.getOpStatus());
 	}

@@ -24,7 +24,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -70,12 +69,23 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Encoder channel spinner */
 	protected final JSpinner encoder_channel = new JSpinner(num_model);
 
+	/** Encoder type action */
+	private final IAction encoder_type = new IAction("camera.encoder.type"){
+		protected void do_perform() {
+		      proxy.setEncoderType(enc_type_cbx.getSelectedIndex());
+		}
+	};
+
 	/** Encoder type combobox */
-	protected final JComboBox type_cmb =
+	private final JComboBox enc_type_cbx =
 		new JComboBox(EncoderType.getDescriptions());
 
 	/** Checkbox to allow publishing camera images */
-	protected final JCheckBox publish = new JCheckBox();
+	private final JCheckBox publish_chk = new JCheckBox(new IAction(null) {
+		protected void do_perform() {
+			proxy.setPublish(publish_chk.isSelected());
+		}
+	});
 
 	/** Create a new camera properties form */
 	public CameraProperties(Session s, Camera c) {
@@ -131,12 +141,13 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create camera setup panel */
 	protected JPanel createSetupPanel() {
+		enc_type_cbx.setAction(encoder_type);
 		FormPanel panel = new FormPanel(canUpdate());
 		panel.addRow(I18N.get("camera.encoder"), encoder);
 		panel.addRow(I18N.get("camera.encoder.channel"),
 			encoder_channel);
-		panel.addRow(I18N.get("camera.encoder.type"), type_cmb);
-		panel.addRow(I18N.get("camera.publish"), publish);
+		panel.addRow(I18N.get("camera.encoder.type"), enc_type_cbx);
+		panel.addRow(I18N.get("camera.publish"), publish_chk);
 		return panel;
 	}
 
@@ -158,16 +169,6 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 				proxy.setEncoderChannel(c.intValue());
 			}
 		};
-		new ActionJob(this, type_cmb) {
-			public void perform() {
-			      proxy.setEncoderType(type_cmb.getSelectedIndex());
-			}
-		};
-		new ActionJob(this, publish) {
-			public void perform() {
-				proxy.setPublish(publish.isSelected());
-			}
-		};
 	}
 
 	/** Update one attribute on the form */
@@ -179,8 +180,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		if(a == null || a.equals("encoderChannel"))
 			encoder_channel.setValue(proxy.getEncoderChannel());
 		if(a == null || a.equals("encoderType"))
-			type_cmb.setSelectedIndex(proxy.getEncoderType());
+			enc_type_cbx.setSelectedIndex(proxy.getEncoderType());
 		if(a == null || a.equals("publish"))
-			publish.setSelected(proxy.getPublish());
+			publish_chk.setSelected(proxy.getPublish());
 	}
 }

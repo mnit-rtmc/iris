@@ -21,7 +21,6 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -44,8 +43,28 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
+	/** Detector action */
+	abstract private class DAction extends IAction {
+		protected DAction(String text_id) {
+			super(text_id);
+		}
+		protected final void do_perform() {
+			Detector d = detector;
+			if(d != null)
+				do_perform(d);
+		}
+		abstract void do_perform(Detector d);
+	}
+
+	/** Lane type action */
+	private final DAction lane_type = new DAction("detector.lane.type") {
+		protected void do_perform(Detector d) {
+			d.setLaneType((short)type_cbx.getSelectedIndex());
+		}
+	};
+
 	/** Lane type combobox */
-	protected final JComboBox type_cmb =
+	private final JComboBox type_cbx =
 		new JComboBox(LaneType.getDescriptions());
 
 	/** Spinner for lane number */
@@ -53,10 +72,18 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		new SpinnerNumberModel(0, 0, 12, 1));
 
 	/** Abandoned check box */
-	protected final JCheckBox aband_cbx = new JCheckBox();
+	private final JCheckBox aband_chk = new JCheckBox(new DAction(null) {
+		protected void do_perform(Detector d) {
+			d.setAbandoned(aband_chk.isSelected());
+		}
+	});
 
 	/** Force fail check box */
-	protected final JCheckBox fail_cbx = new JCheckBox();
+	private final JCheckBox fail_chk = new JCheckBox(new DAction(null) {
+		protected void do_perform(Detector d) {
+			d.setForceFail(fail_chk.isSelected());
+		}
+	});
 
 	/** Spinner for field length */
 	protected final JSpinner field_spn = new JSpinner(
@@ -68,19 +95,23 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Note text field */
 	protected final JTextField note_txt = new JTextField(12);
 
-	/** Action to display the controller */
-	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
-			showControllerForm(detector);
+	/** Button to display the controller */
+	private final JButton controller_btn = new JButton(
+		new DAction("controller")
+	{
+		protected void do_perform(Detector d) {
+			showControllerForm(d);
 		}
-	};
+	});
 
 	/** Action to display the r_node */
-	private final IAction r_node = new IAction("r_node") {
-		protected void do_perform() {
-			showRNode(detector);
+	private final JButton r_node_btn = new JButton(
+		new DAction("r_node")
+	{
+		protected void do_perform(Detector d) {
+			showRNode(d);
 		}
-	};
+	});
 
 	/** User session */
 	protected final Session session;
@@ -111,19 +142,20 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Initialize the panel */
 	public void initialize() {
-		addRow(I18N.get("detector.lane.type"), type_cmb);
+		type_cbx.setAction(lane_type);
+		addRow(I18N.get("detector.lane.type"), type_cbx);
 		addRow(I18N.get("detector.lane.number"), lane_spn);
-		add(I18N.get("detector.abandoned"), aband_cbx);
-		addRow(I18N.get("detector.force.fail"), fail_cbx);
+		add(I18N.get("detector.abandoned"), aband_chk);
+		addRow(I18N.get("detector.force.fail"), fail_chk);
 		addRow(I18N.get("detector.field.len"), field_spn);
 		addRow(I18N.get("detector.fake"), fake_txt);
 		addRow(I18N.get("device.notes"), note_txt);
 		setWest();
 		setWidth(2);
 		bag.insets.bottom = 0;
-		add(new JButton(controller));
+		add(controller_btn);
 		if(has_r_btn)
-			add(new JButton(r_node));
+			add(r_node_btn);
 		finishRow();
 		createJobs();
 		watcher.initialize();
@@ -131,25 +163,10 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ActionJob(this, type_cmb) {
-			public void perform() {
-				setLaneType((short)type_cmb.getSelectedIndex());
-			}
-		};
 		new ChangeJob(this, lane_spn) {
 			public void perform() {
 				Number n = (Number)lane_spn.getValue();
 				setLaneNumber(n.shortValue());
-			}
-		};
-		new ActionJob(this, aband_cbx) {
-			public void perform() {
-				setAbandoned(aband_cbx.isSelected());
-			}
-		};
-		new ActionJob(this, fail_cbx) {
-			public void perform() {
-				setForceFail(fail_cbx.isSelected());
 			}
 		};
 		new ChangeJob(this, field_spn) {
@@ -172,32 +189,11 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		};
 	}
 
-	/** Set the detector lane type */
-	protected void setLaneType(short lt) {
-		Detector det = detector;
-		if(det != null)
-			det.setLaneType(lt);
-	}
-
 	/** Set the detector lane number */
 	protected void setLaneNumber(short n) {
 		Detector det = detector;
 		if(det != null)
 			det.setLaneNumber(n);
-	}
-
-	/** Set the detector abandoned flag */
-	protected void setAbandoned(boolean a) {
-		Detector det = detector;
-		if(det != null)
-			det.setAbandoned(a);
-	}
-
-	/** Set the detector force fail flag */
-	protected void setForceFail(boolean f) {
-		Detector det = detector;
-		if(det != null)
-			det.setForceFail(f);
 	}
 
 	/** Set the detector field length */
@@ -266,30 +262,30 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	protected void doUpdate(Detector d, String a) {
 		if(a == null) {
 			detector = d;
-			controller.setEnabled(d != null &&
-			                      d.getController() != null);
-			r_node.setEnabled(d != null && d.getR_Node() !=null);
+			controller_btn.setEnabled(d != null &&
+			                          d.getController() != null);
+			r_node_btn.setEnabled(d != null && d.getR_Node()!=null);
 		}
 		if(a == null || a.equals("laneType")) {
-			type_cmb.setSelectedIndex(d.getLaneType());
-			type_cmb.setEnabled(watcher.canUpdate(d, "laneType"));
+			type_cbx.setEnabled(watcher.canUpdate(d, "laneType"));
+			type_cbx.setSelectedIndex(d.getLaneType());
 		}
 		if(a == null || a.equals("laneNumber")) {
 			lane_spn.setValue(d.getLaneNumber());
 			lane_spn.setEnabled(watcher.canUpdate(d, "laneNumber"));
 		}
 		if(a == null || a.equals("abandoned")) {
-			aband_cbx.setSelected(d.getAbandoned());
-			aband_cbx.setEnabled(watcher.canUpdate(d, "abandoned"));
+			aband_chk.setEnabled(watcher.canUpdate(d, "abandoned"));
+			aband_chk.setSelected(d.getAbandoned());
 		}
 		if(a == null || a.equals("forceFail")) {
-			fail_cbx.setSelected(d.getForceFail());
-			fail_cbx.setEnabled(watcher.canUpdate(d, "forceFail"));
+			fail_chk.setEnabled(watcher.canUpdate(d, "forceFail"));
+			fail_chk.setSelected(d.getForceFail());
 		}
 		if(a == null || a.equals("fieldLength")) {
-			field_spn.setValue(d.getFieldLength());
 			field_spn.setEnabled(watcher.canUpdate(d,
 				"fieldLength"));
+			field_spn.setValue(d.getFieldLength());
 		}
 		if(a == null || a.equals("fake")) {
 			fake_txt.setText(d.getFake());
@@ -314,21 +310,21 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Clear all attributes */
 	protected void doClear() {
 		detector = null;
-		type_cmb.setSelectedIndex(0);
-		type_cmb.setEnabled(false);
-		lane_spn.setValue(0);
+		type_cbx.setEnabled(false);
+		type_cbx.setSelectedIndex(0);
 		lane_spn.setEnabled(false);
-		aband_cbx.setSelected(false);
-		aband_cbx.setEnabled(false);
-		fail_cbx.setSelected(false);
-		fail_cbx.setEnabled(false);
-		field_spn.setValue(22);
+		lane_spn.setValue(0);
+		aband_chk.setEnabled(false);
+		aband_chk.setSelected(false);
+		fail_chk.setEnabled(false);
+		fail_chk.setSelected(false);
 		field_spn.setEnabled(false);
-		fake_txt.setText("");
+		field_spn.setValue(22);
 		fake_txt.setEnabled(false);
-		note_txt.setText("");
+		fake_txt.setText("");
 		note_txt.setEnabled(false);
-		controller.setEnabled(false);
-		r_node.setEnabled(false);
+		note_txt.setText("");
+		controller_btn.setEnabled(false);
+		r_node_btn.setEnabled(false);
 	}
 }

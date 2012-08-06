@@ -25,7 +25,6 @@ import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
@@ -71,6 +70,19 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 			return 0;
 	}
 
+	/** GeoLoc action */
+	abstract private class LAction extends IAction {
+		protected LAction(String text_id) {
+			super(text_id);
+		}
+		protected final void do_perform() {
+			GeoLoc l = loc;
+			if(l != null)
+				do_perform(l);
+		}
+		abstract void do_perform(GeoLoc l);
+	}
+
 	/** User session */
 	protected final Session session;
 
@@ -92,21 +104,21 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Roadway combobox */
-	private final JComboBox roadway = new JComboBox();
+	private final JComboBox roadway_cbx = new JComboBox();
 
 	/** Roadway direction combo box */
-	private final JComboBox roadDir = new JComboBox(
+	private final JComboBox road_dir_cbx = new JComboBox(
 		Direction.getDescriptions());
 
 	/** Cross street modifier combobox */
-	private final JComboBox crossMod = new JComboBox(
+	private final JComboBox cross_mod_cbx = new JComboBox(
 		LocModifier.values());
 
 	/** Cross street combobox */
-	private final JComboBox cross = new JComboBox();
+	private final JComboBox cross_cbx = new JComboBox();
 
 	/** Cross street direction combobox */
-	private final JComboBox crossDir = new JComboBox(
+	private final JComboBox cross_dir_cbx = new JComboBox(
 		Direction.getAbbreviations());
 
 	/** UTM Easting */
@@ -146,19 +158,49 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
 	/** Initialize the location panel */
 	public void initialize() {
-		roadway.setModel(new WrapperComboBoxModel(
+		roadway_cbx.setAction(new LAction("location.roadway") {
+			protected void do_perform(GeoLoc l) {
+				l.setRoadway(
+					(Road)roadway_cbx.getSelectedItem());
+			}
+		});
+		roadway_cbx.setModel(new WrapperComboBoxModel(
 			state.getRoadModel(), true));
-		cross.setModel(new WrapperComboBoxModel(
+		road_dir_cbx.setAction(new LAction("location.direction") {
+			protected void do_perform(GeoLoc l) {
+				l.setRoadDir(
+					(short)road_dir_cbx.getSelectedIndex());
+			}
+		});
+		cross_mod_cbx.setAction(new LAction("location.cross.mod") {
+			protected void do_perform(GeoLoc l) {
+				short m=(short)cross_mod_cbx.getSelectedIndex();
+				l.setCrossMod(m);
+			}
+		});
+		cross_cbx.setAction(new LAction("location.cross") {
+			protected void do_perform(GeoLoc l) {
+				l.setCrossStreet(
+					(Road)cross_cbx.getSelectedItem());
+			}
+		});
+		cross_cbx.setModel(new WrapperComboBoxModel(
 			state.getRoadModel(), true));
-		add(new ILabel("location.roadway"), roadway);
+		cross_dir_cbx.setAction(new LAction("location.cross.dir") {
+			protected void do_perform(GeoLoc l) {
+				short d=(short)cross_dir_cbx.getSelectedIndex();
+				l.setCrossDir(d);
+			}
+		});
+		add(new ILabel("location.roadway"), roadway_cbx);
 		setWidth(2);
-		addRow(roadDir);
-		add(crossMod);
+		addRow(road_dir_cbx);
+		add(cross_mod_cbx);
 		setWest();
 		setWidth(2);
-		add(cross);
+		add(cross_cbx);
 		setWidth(1);
-		addRow(crossDir);
+		addRow(cross_dir_cbx);
 		add(new ILabel("location.easting"), easting);
 		finishRow();
 		add(new ILabel("location.northing"), northing);
@@ -180,31 +222,6 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ActionJob(this, roadway) {
-			public void perform() {
-				setRoadway((Road)roadway.getSelectedItem());
-			}
-		};
-		new ActionJob(this, cross) {
-			public void perform() {
-				setCrossStreet((Road)cross.getSelectedItem());
-			}
-		};
-		new ActionJob(this, roadDir) {
-			public void perform() {
-				setRoadDir((short)roadDir.getSelectedIndex());
-			}
-		};
-		new ActionJob(this, crossMod) {
-			public void perform() {
-				setCrossMod((short)crossMod.getSelectedIndex());
-			}
-		};
-		new ActionJob(this, crossDir) {
-			public void perform() {
-				setCrossDir((short)crossDir.getSelectedIndex());
-			}
-		};
 		new ChangeJob(this, easting) {
 			public void perform() {
 				setEasting(getSpinnerInteger(easting));
@@ -223,41 +240,6 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 			p.getX(), p.getY());
 		Position pos = smp.getPosition();
 		return UTMPosition.convert(GeodeticDatum.WGS_84, pos);
-	}
-
-	/** Set the roadway */
-	private void setRoadway(Road r) {
-		GeoLoc l = loc;
-		if(l != null)
-			l.setRoadway(r);
-	}
-
-	/** Set the cross street */
-	private void setCrossStreet(Road x) {
-		GeoLoc l = loc;
-		if(l != null)
-			l.setCrossStreet(x);
-	}
-
-	/** Set the road direction */
-	private void setRoadDir(short d) {
-		GeoLoc l = loc;
-		if(l != null)
-			l.setRoadDir(d);
-	}
-
-	/** Set the cross street modifier */
-	private void setCrossMod(short m) {
-		GeoLoc l = loc;
-		if(l != null)
-			l.setCrossMod(m);
-	}
-
-	/** Set the cross direction */
-	private void setCrossDir(short d) {
-		GeoLoc l = loc;
-		if(l != null)
-			l.setCrossDir(d);
 	}
 
 	/** Set the easting */
@@ -299,24 +281,24 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		if(a == null)
 			loc = l;
 		if(a == null || a.equals("roadway")) {
-			roadway.setEnabled(canUpdate(l, "roadway"));
-			roadway.setSelectedItem(l.getRoadway());
+			roadway_cbx.setEnabled(canUpdate(l, "roadway"));
+			roadway_cbx.setSelectedItem(l.getRoadway());
 		}
 		if(a == null || a.equals("roadDir")) {
-			roadDir.setEnabled(canUpdate(l, "roadDir"));
-			roadDir.setSelectedIndex(l.getRoadDir());
+			road_dir_cbx.setEnabled(canUpdate(l, "roadDir"));
+			road_dir_cbx.setSelectedIndex(l.getRoadDir());
 		}
 		if(a == null || a.equals("crossMod")) {
-			crossMod.setEnabled(canUpdate(l, "crossMod"));
-			crossMod.setSelectedIndex(l.getCrossMod());
+			cross_mod_cbx.setEnabled(canUpdate(l, "crossMod"));
+			cross_mod_cbx.setSelectedIndex(l.getCrossMod());
 		}
 		if(a == null || a.equals("crossStreet")) {
-			cross.setEnabled(canUpdate(l, "crossStreet"));
-			cross.setSelectedItem(l.getCrossStreet());
+			cross_cbx.setEnabled(canUpdate(l, "crossStreet"));
+			cross_cbx.setSelectedItem(l.getCrossStreet());
 		}
 		if(a == null || a.equals("crossDir")) {
-			crossDir.setEnabled(canUpdate(l, "crossDir"));
-			crossDir.setSelectedIndex(l.getCrossDir());
+			cross_dir_cbx.setEnabled(canUpdate(l, "crossDir"));
+			cross_dir_cbx.setSelectedIndex(l.getCrossDir());
 		}
 		if(a == null || a.equals("easting")) {
 			boolean p = canUpdate(l, "easting");
@@ -350,16 +332,16 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	/** Clear all attributes */
 	protected void doClear() {
 		loc = null;
-		roadway.setEnabled(false);
-		roadway.setSelectedIndex(0);
-		roadDir.setEnabled(false);
-		roadDir.setSelectedIndex(0);
-		crossMod.setEnabled(false);
-		crossMod.setSelectedIndex(0);
-		cross.setEnabled(false);
-		cross.setSelectedIndex(0);
-		crossDir.setEnabled(false);
-		crossDir.setSelectedIndex(0);
+		roadway_cbx.setEnabled(false);
+		roadway_cbx.setSelectedIndex(0);
+		road_dir_cbx.setEnabled(false);
+		road_dir_cbx.setSelectedIndex(0);
+		cross_mod_cbx.setEnabled(false);
+		cross_mod_cbx.setSelectedIndex(0);
+		cross_cbx.setEnabled(false);
+		cross_cbx.setSelectedIndex(0);
+		cross_dir_cbx.setEnabled(false);
+		cross_dir_cbx.setSelectedIndex(0);
 		easting.setEnabled(false);
 		easting.setValue(0);
 		northing.setEnabled(false);

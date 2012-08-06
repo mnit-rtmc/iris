@@ -20,7 +20,6 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.tms.R_Node;
@@ -28,6 +27,7 @@ import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 
 /**
@@ -37,33 +37,46 @@ import us.mn.state.dot.tms.client.widget.ILabel;
  */
 public class R_NodeSetupPanel extends FormPanel {
 
+	/** R_Node action */
+	abstract private class NAction extends IAction {
+		protected NAction(String text_id) {
+			super(text_id);
+		}
+		protected final void do_perform() {
+			R_Node n = node;
+			if(n != null)
+				do_perform(n);
+		}
+		abstract void do_perform(R_Node n);
+	}
+
 	/** Node type combobox */
-	protected final JComboBox type_cmb =
+	private final JComboBox type_cbx =
 		new JComboBox(R_NodeType.getDescriptions());
 
 	/** Pickable check box */
-	protected final JCheckBox pick_cbx = new JCheckBox();
-
-	/** Above check box */
-	protected final JCheckBox above_cbx = new JCheckBox();
+	private final JCheckBox pick_chk = new JCheckBox();
 
 	/** Transition type combobox */
-	protected final JComboBox trans_cmb =
+	private final JComboBox trans_cbx =
 		new JComboBox(R_NodeTransition.getDescriptions());
+
+	/** Above check box */
+	private final JCheckBox above_chk = new JCheckBox();
 
 	/** Component for number of lanes */
 	protected final JSpinner lane_spn = new JSpinner(
 		new SpinnerNumberModel(2, 0, 6, 1));
 
 	/** Attach side check box */
-	protected final JCheckBox attach_cbx = new JCheckBox();
+	private final JCheckBox attach_chk = new JCheckBox();
 
 	/** Component for lane shift */
 	protected final JSpinner shift_spn = new JSpinner(
 		new SpinnerNumberModel(0, 0, 12, 1));
 
 	/** Active check box */
-	protected final JCheckBox active_cbx = new JCheckBox();
+	private final JCheckBox active_chk = new JCheckBox();
 
 	/** Station ID text field */
 	protected final JTextField station_txt = new JTextField(8);
@@ -86,14 +99,44 @@ public class R_NodeSetupPanel extends FormPanel {
 
 	/** Initialize the panel */
 	public void initialize() {
-		add(new ILabel("r_node.type"), type_cmb);
-		addRow(new ILabel("r_node.pickable"), pick_cbx);
-		add(new ILabel("r_node.transition"), trans_cmb);
-		addRow(new ILabel("r_node.above"), above_cbx);
+		type_cbx.setAction(new NAction("r_node.type") {
+			protected void do_perform(R_Node n) {
+				n.setNodeType(type_cbx.getSelectedIndex());
+			}
+		});
+		pick_chk.setAction(new NAction(null) {
+			protected void do_perform(R_Node n) {
+				n.setPickable(pick_chk.isSelected());
+			}
+		});
+		trans_cbx.setAction(new NAction("r_node.transition") {
+			protected void do_perform(R_Node n) {
+				n.setTransition(trans_cbx.getSelectedIndex());
+			}
+		});
+		above_chk.setAction(new NAction(null) {
+			protected void do_perform(R_Node n) {
+				n.setAbove(above_chk.isSelected());
+			}
+		});
+		attach_chk.setAction(new NAction(null) {
+			protected void do_perform(R_Node n) {
+				n.setAttachSide(attach_chk.isSelected());
+			}
+		});
+		active_chk.setAction(new NAction(null) {
+			protected void do_perform(R_Node n) {
+				n.setActive(active_chk.isSelected());
+			}
+		});
+		add(new ILabel("r_node.type"), type_cbx);
+		addRow(new ILabel("r_node.pickable"), pick_chk);
+		add(new ILabel("r_node.transition"), trans_cbx);
+		addRow(new ILabel("r_node.above"), above_chk);
 		add(new ILabel("r_node.lanes"), lane_spn);
-		addRow(new ILabel("r_node.attach.side"), attach_cbx);
+		addRow(new ILabel("r_node.attach.side"), attach_chk);
 		add(new ILabel("r_node.shift"), shift_spn);
-		addRow(new ILabel("r_node.active"), active_cbx);
+		addRow(new ILabel("r_node.active"), active_chk);
 		add(new ILabel("r_node.station"), station_txt);
 		finishRow();
 		add(new ILabel("r_node.speed.limit"), speed_spn);
@@ -103,46 +146,16 @@ public class R_NodeSetupPanel extends FormPanel {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ActionJob(this, type_cmb) {
-			public void perform() {
-				setNodeType(type_cmb.getSelectedIndex());
-			}
-		};
-		new ActionJob(this, pick_cbx) {
-			public void perform() {
-				setPickable(pick_cbx.isSelected());
-			}
-		};
-		new ActionJob(this, above_cbx) {
-			public void perform() {
-				setAbove(above_cbx.isSelected());
-			}
-		};
-		new ActionJob(this, trans_cmb) {
-			public void perform() {
-				setTransition(trans_cmb.getSelectedIndex());
-			}
-		};
 		new ChangeJob(this, lane_spn) {
 			public void perform() {
 				Number n = (Number)lane_spn.getValue();
 				setLanes(n.intValue());
 			}
 		};
-		new ActionJob(this, attach_cbx) {
-			public void perform() {
-				setAttachSide(attach_cbx.isSelected());
-			}
-		};
 		new ChangeJob(this, shift_spn) {
 			public void perform() {
 				Number n = (Number)shift_spn.getValue();
 				setShift(n.intValue());
-			}
-		};
-		new ActionJob(this, active_cbx) {
-			public void perform() {
-				setActive(active_cbx.isSelected());
 			}
 		};
 		new FocusJob(station_txt) {
@@ -161,53 +174,11 @@ public class R_NodeSetupPanel extends FormPanel {
 		};
 	}
 
-	/** Set the node type */
-	protected void setNodeType(int t) {
-		R_Node n = node;
-		if(n != null)
-			n.setNodeType(t);
-	}
-
-	/** Set the pickable flag */
-	protected void setPickable(boolean p) {
-		R_Node n = node;
-		if(n != null)
-			n.setPickable(p);
-	}
-
-	/** Set the above flag */
-	protected void setAbove(boolean a) {
-		R_Node n = node;
-		if(n != null)
-			n.setAbove(a);
-	}
-
-	/** Set the transition */
-	protected void setTransition(int t) {
-		R_Node n = node;
-		if(n != null)
-			n.setTransition(t);
-	}
-
 	/** Set the number of lanes */
 	protected void setLanes(int l) {
 		R_Node n = node;
 		if(n != null)
 			n.setLanes(l);
-	}
-
-	/** Set the attach side */
-	protected void setAttachSide(boolean a) {
-		R_Node n = node;
-		if(n != null)
-			n.setAttachSide(a);
-	}
-
-	/** Set the active state */
-	protected void setActive(boolean a) {
-		R_Node n = node;
-		if(n != null)
-			n.setActive(a);
 	}
 
 	/** Set the lane shift */
@@ -246,36 +217,36 @@ public class R_NodeSetupPanel extends FormPanel {
 		if(a == null)
 			node = n;
 		if(a == null || a.equals("nodeType")) {
-			type_cmb.setEnabled(canUpdate(n, "nodeType"));
-			type_cmb.setSelectedIndex(n.getNodeType());
+			type_cbx.setEnabled(canUpdate(n, "nodeType"));
+			type_cbx.setSelectedIndex(n.getNodeType());
 		}
 		if(a == null || a.equals("pickable")) {
-			pick_cbx.setEnabled(canUpdate(n, "pickable"));
-			pick_cbx.setSelected(n.getPickable());
+			pick_chk.setEnabled(canUpdate(n, "pickable"));
+			pick_chk.setSelected(n.getPickable());
 		}
 		if(a == null || a.equals("above")) {
-			above_cbx.setEnabled(canUpdate(n, "above"));
-			above_cbx.setSelected(n.getAbove());
+			above_chk.setEnabled(canUpdate(n, "above"));
+			above_chk.setSelected(n.getAbove());
 		}
 		if(a == null || a.equals("transition")) {
-			trans_cmb.setEnabled(canUpdate(n, "transition"));
-			trans_cmb.setSelectedIndex(n.getTransition());
+			trans_cbx.setEnabled(canUpdate(n, "transition"));
+			trans_cbx.setSelectedIndex(n.getTransition());
 		}
 		if(a == null || a.equals("lanes")) {
 			lane_spn.setEnabled(canUpdate(n, "lanes"));
 			lane_spn.setValue(n.getLanes());
 		}
 		if(a == null || a.equals("attachSide")) {
-			attach_cbx.setEnabled(canUpdate(n, "attachSide"));
-			attach_cbx.setSelected(n.getAttachSide());
+			attach_chk.setEnabled(canUpdate(n, "attachSide"));
+			attach_chk.setSelected(n.getAttachSide());
 		}
 		if(a == null || a.equals("shift")) {
 			shift_spn.setEnabled(canUpdate(n, "shift"));
 			shift_spn.setValue(n.getShift());
 		}
 		if(a == null || a.equals("active")) {
-			active_cbx.setEnabled(canUpdate(n, "active"));
-			active_cbx.setSelected(n.getActive());
+			active_chk.setEnabled(canUpdate(n, "active"));
+			active_chk.setSelected(n.getActive());
 		}
 		if(a == null || a.equals("stationID")) {
 			station_txt.setEnabled(canUpdate(n, "stationID"));
@@ -305,22 +276,22 @@ public class R_NodeSetupPanel extends FormPanel {
 	/** Clear all attributes */
 	protected void doClear() {
 		node = null;
-		type_cmb.setEnabled(false);
-		type_cmb.setSelectedIndex(0);
-		pick_cbx.setEnabled(false);
-		pick_cbx.setSelected(false);
-		above_cbx.setEnabled(false);
-		above_cbx.setSelected(false);
-		trans_cmb.setEnabled(false);
-		trans_cmb.setSelectedIndex(0);
+		type_cbx.setEnabled(false);
+		type_cbx.setSelectedIndex(0);
+		pick_chk.setEnabled(false);
+		pick_chk.setSelected(false);
+		trans_cbx.setEnabled(false);
+		trans_cbx.setSelectedIndex(0);
+		above_chk.setEnabled(false);
+		above_chk.setSelected(false);
 		lane_spn.setEnabled(false);
 		lane_spn.setValue(0);
-		attach_cbx.setEnabled(false);
-		attach_cbx.setSelected(false);
+		attach_chk.setEnabled(false);
+		attach_chk.setSelected(false);
 		shift_spn.setEnabled(false);
 		shift_spn.setValue(0);
-		active_cbx.setEnabled(false);
-		active_cbx.setSelected(false);
+		active_chk.setEnabled(false);
+		active_chk.setSelected(false);
 		station_txt.setEnabled(false);
 		station_txt.setText("");
 		speed_spn.setEnabled(false);

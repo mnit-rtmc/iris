@@ -36,7 +36,6 @@ import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -88,8 +87,19 @@ public class CorridorList extends JPanel {
 	/** Selected roadway corridor */
 	protected CorridorBase corridor;
 
+	/** Corridor action */
+	private final IAction corr_act = new IAction("r_node.corridor") {
+		protected void do_perform() {
+			Object s = corridor_cbx.getSelectedItem();
+			if(s instanceof CorridorBase)
+				setCorridor((CorridorBase)s);
+			else
+				setCorridor(null);
+		}
+	};
+
 	/** Combo box to select a roadway corridor */
-	protected final JComboBox corridor_combo = new JComboBox();
+	private final JComboBox corridor_cbx = new JComboBox();
 
 	/** Action to add a new roadway node */
 	private final IAction add_node = new IAction("r_node.add") {
@@ -125,7 +135,7 @@ public class CorridorList extends JPanel {
 		public void selectionAdded(R_Node proxy) {
 			if(!manager.checkCorridor(proxy)) {
 				CorridorBase cb = manager.getCorridor(proxy);
-				corridor_combo.setSelectedItem(cb);
+				corridor_cbx.setSelectedItem(cb);
 			}
 			updateNodeSelection(proxy);
 			r_node = proxy;
@@ -180,7 +190,8 @@ public class CorridorList extends JPanel {
 		layer = m.getLayer();
 		r_nodes = creator.getR_Nodes();
 		geo_locs = creator.getGeoLocs();
-		corridor_combo.setModel(new WrapperComboBoxModel(
+		corridor_cbx.setAction(corr_act);
+		corridor_cbx.setModel(new WrapperComboBoxModel(
 			manager.getCorridorModel()));
 		sel_model = manager.getSelectionModel();
 		n_list.setCellRenderer(new R_NodeCellRenderer());
@@ -198,7 +209,7 @@ public class CorridorList extends JPanel {
 		add(new ILabel("r_node.corridor"), bag);
 		bag.weightx = 0.5f;
 		bag.fill = GridBagConstraints.BOTH;
-		add(corridor_combo, bag);
+		add(corridor_cbx, bag);
 		bag.weightx = 0;
 		bag.fill = GridBagConstraints.NONE;
 		add(new ILabel("r_node"), bag);
@@ -223,15 +234,6 @@ public class CorridorList extends JPanel {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ActionJob(this, corridor_combo) {
-			public void perform() {
-				Object s = corridor_combo.getSelectedItem();
-				if(s instanceof CorridorBase)
-					setCorridor((CorridorBase)s);
-				else
-					setCorridor(null);
-			}
-		};
 	}
 
 	/** Set a new selected corridor */

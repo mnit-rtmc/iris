@@ -22,7 +22,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
@@ -66,8 +65,15 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
 
+	/** Camera action */
+	private final IAction camera = new IAction("camera") {
+		protected void do_perform() {
+			proxy.setCamera((Camera)camera_cbx.getSelectedItem());
+		}
+	};
+
 	/** Camera combo box */
-	protected final JComboBox camera = new JComboBox();
+	private final JComboBox camera_cbx = new JComboBox();
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -80,8 +86,17 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		}
 	};
 
+	/** Meter type action */
+	private final IAction meter_type = new IAction("ramp.meter.type") {
+		protected void do_perform() {
+			int t = meter_type_cbx.getSelectedIndex();
+			if(t >= 0)
+				proxy.setMeterType(t);
+		}
+	};
+
 	/** Meter type combo box component */
-	protected final JComboBox meterType = new JComboBox(
+	private final JComboBox meter_type_cbx = new JComboBox(
 		RampMeterType.getDescriptions());
 
 	/** Field for Storage length (feet) */
@@ -89,6 +104,15 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Field for Maximum wait time (seconds) */
 	protected final JTextField max_wait = new JTextField();
+
+	/** Metering algorithm action */
+	private final IAction algorithm = new IAction("ramp.meter.algorithm") {
+		protected void do_perform() {
+			int a = algorithm_cbx.getSelectedIndex();
+			if(a >= 0)
+				proxy.setAlgorithm(a);
+		}
+	};
 
 	/** Combo box for metering algorithm */
 	private final JComboBox algorithm_cbx = new JComboBox(
@@ -159,12 +183,13 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
+		camera_cbx.setAction(camera);
+		camera_cbx.setModel(new WrapperComboBoxModel(
+			state.getCamCache().getCameraModel()));
 		location.setGeoLoc(proxy.getGeoLoc());
 		location.initialize();
 		location.addRow(I18N.get("device.notes"), notes);
-		camera.setModel(new WrapperComboBoxModel(
-			state.getCamCache().getCameraModel()));
-		location.add(I18N.get("camera"), camera);
+		location.add(I18N.get("camera"), camera_cbx);
 		location.finishRow();
 		location.setCenter();
 		location.addRow(new JButton(controller));
@@ -178,19 +203,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 				proxy.setNotes(notes.getText());
 			}
 		};
-		new ActionJob(this, camera) {
-			public void perform() {
-				proxy.setCamera(
-					(Camera)camera.getSelectedItem());
-			}
-		};
-		new ActionJob(this, meterType) {
-			public void perform() {
-				int t = meterType.getSelectedIndex();
-				if(t >= 0)
-					proxy.setMeterType(t);
-			}
-		};
 		new FocusJob(storage) {
 			public void perform() {
 				proxy.setStorage(Integer.parseInt(
@@ -201,13 +213,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			public void perform() {
 				proxy.setMaxWait(Integer.parseInt(
 					max_wait.getText()));
-			}
-		};
-		new ActionJob(this, algorithm_cbx) {
-			public void perform() {
-				int a = algorithm_cbx.getSelectedIndex();
-				if(a >= 0)
-					proxy.setAlgorithm(a);
 			}
 		};
 		new FocusJob(am_target_txt) {
@@ -227,8 +232,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create ramp meter setup panel */
 	protected JPanel createSetupPanel() {
+		meter_type_cbx.setAction(meter_type);
+		algorithm_cbx.setAction(algorithm);
 		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow(I18N.get("ramp.meter.type"), meterType);
+		panel.addRow(I18N.get("ramp.meter.type"), meter_type_cbx);
 		panel.addRow(I18N.get("ramp.meter.storage"), storage);
 		panel.addRow(I18N.get("ramp.meter.max.wait"), max_wait);
 		panel.addRow(I18N.get("ramp.meter.algorithm"), algorithm_cbx);
@@ -257,9 +264,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
-			camera.setSelectedItem(proxy.getCamera());
+			camera_cbx.setSelectedItem(proxy.getCamera());
 		if(a == null || a.equals("meterType"))
-			meterType.setSelectedIndex(proxy.getMeterType());
+			meter_type_cbx.setSelectedIndex(proxy.getMeterType());
 		if(a == null || a.equals("storage"))
 			storage.setText("" + proxy.getStorage());
 		if(a == null || a.equals("maxWait"))

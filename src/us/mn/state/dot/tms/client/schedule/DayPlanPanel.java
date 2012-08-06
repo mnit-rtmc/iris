@@ -25,7 +25,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
@@ -69,8 +68,15 @@ public class DayPlanPanel extends JPanel {
 	/** Proxy listener to update day plan holiday model */
 	protected final ProxyListener<DayPlan> listener;
 
+	/** Action for day plans */
+	private final IAction day = new IAction("action.plan.day") {
+		protected void do_perform() {
+			selectDayPlan();
+		}
+	};
+
 	/** Combo box for day plans */
-	protected final JComboBox day_cbox = new JComboBox();
+	private final JComboBox day_cbox = new JComboBox();
 
 	/** Action to delete the selected day plan */
 	private final IAction del_plan = new IAction("action.plan.day.delete") {
@@ -151,6 +157,7 @@ public class DayPlanPanel extends JPanel {
 		user = s.getUser();
 		cache = s.getSonarState().getDayPlans();
 		ListModel m = s.getSonarState().getDayModel();
+		day_cbox.setAction(day);
 		day_cbox.setPrototypeDisplayValue("0123456789");
 		day_cbox.setModel(new WrapperComboBoxModel(m));
 		day_cbox.setEditable(canAdd());
@@ -247,11 +254,6 @@ public class DayPlanPanel extends JPanel {
 
 	/** Create jobs for widget actions */
 	protected void createWidgetJobs() {
-		new ActionJob(this, day_cbox) {
-			public void perform() {
-				selectDayPlan();
-			}
-		};
 		new ListSelectionJob(this, h_table.getSelectionModel()) {
 			public void perform() {
 				if(!event.getValueIsAdjusting())

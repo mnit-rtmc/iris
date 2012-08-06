@@ -24,7 +24,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DmsColor;
@@ -63,17 +62,31 @@ public class GlyphEditor extends JPanel {
 	protected JToggleButton[] p_button;
 
 	/** "Narrow" button */
-	protected final JButton narrow = new JButton("<<");
+	private final JButton narrow_btn = new JButton(
+		new IAction("font.glyph.narrow")
+	{
+		protected void do_perform() {
+			narrowPressed();
+		}
+	});
 
 	/** "Widen" button */
-	protected final JButton widen = new JButton(">>");
+	private final JButton widen_btn = new JButton(
+		new IAction("font.glyph.widen")
+	{
+		protected void do_perform() {
+			widenPressed();
+		}
+	});
 
-	/** Apply action */
-	private final IAction apply = new IAction("font.glyph.apply") {
+	/** Apply button */
+	private final JButton apply_btn = new JButton(
+		new IAction("font.glyph.apply")
+	{
 		protected void do_perform() {
 			applyPressed();
 		}
-	};
+	});
 
 	/** Font form */
 	protected final FontForm font_form;
@@ -98,26 +111,16 @@ public class GlyphEditor extends JPanel {
 		add(Box.createVerticalStrut(UI.vgap));
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createGlue());
-		box.add(narrow);
-		narrow.setEnabled(false);
-		new ActionJob(this, narrow) {
-			public void perform() {
-				narrowPressed();
-			}
-		};
+		box.add(narrow_btn);
+		narrow_btn.setEnabled(false);
 		box.add(Box.createGlue());
-		box.add(widen);
-		widen.setEnabled(false);
-		new ActionJob(this, widen) {
-			public void perform() {
-				widenPressed();
-			}
-		};
+		box.add(widen_btn);
+		widen_btn.setEnabled(false);
 		box.add(Box.createGlue());
 		add(box);
 		add(Box.createVerticalStrut(UI.vgap));
-		add(createGlueBox(new JButton(apply)));
-		apply.setEnabled(false);
+		add(createGlueBox(apply_btn));
+		apply_btn.setEnabled(false);
 		add(Box.createGlue());
 	}
 
@@ -139,9 +142,9 @@ public class GlyphEditor extends JPanel {
 
 	/** Set the glyph to edit */
 	public void setGlyph(FontForm.GlyphData g) {
-		apply.setEnabled(font != null);
-		narrow.setEnabled(font != null && g != null);
-		widen.setEnabled(font != null);
+		apply_btn.setEnabled(font != null);
+		narrow_btn.setEnabled(font != null && g != null);
+		widen_btn.setEnabled(font != null);
 		if(g == gdata && bmap.getHeight() > 0)
 			return;
 		gdata = g;
@@ -161,11 +164,11 @@ public class GlyphEditor extends JPanel {
 		gpanel.removeAll();
 		bmap = b;
 		if(b.getWidth() < 1) {
-			narrow.setEnabled(false);
+			narrow_btn.setEnabled(false);
 			repaint();
 			return;
 		}
-		narrow.setEnabled(true);
+		narrow_btn.setEnabled(true);
 		gpanel.setLayout(new GridLayout(b.getHeight(), b.getWidth()));
 		p_button = new JToggleButton[b.getHeight() * b.getWidth()];
 		for(int y = 0; y < b.getHeight(); y++) {

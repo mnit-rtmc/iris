@@ -27,7 +27,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -93,15 +92,25 @@ public class MessagesTab extends JPanel {
 		new Color(0, 0, 0.4f));
 
 	/** Default font combo box */
-	protected final JComboBox font_cmb = new JComboBox();
+	private final JComboBox font_cbx = new JComboBox();
 
-	/** AWS allowed component */
-	protected final JCheckBox awsAllowed = new JCheckBox(
-		I18N.get("dms.aws.allowed"));
+	/** AWS allowed check box */
+	private final JCheckBox aws_allowed_chk = new JCheckBox(
+		new IAction("dms.aws.allowed")
+	{
+		protected void do_perform() {
+			proxy.setAwsAllowed(aws_allowed_chk.isSelected());
+		}
+	});
 
-	/** AWS controlled component */
-	protected final JCheckBox awsControlled = new JCheckBox(
-		I18N.get("device.style.aws_controlled"));
+	/** AWS controlled check box */
+	private final JCheckBox aws_control_chk = new JCheckBox(
+		new IAction("device.style.aws_controlled")
+	{
+		protected void do_perform() {
+			proxy.setAwsControlled(aws_control_chk.isSelected());
+		}
+	});
 
 	/** User session */
 	protected final Session session;
@@ -122,8 +131,13 @@ public class MessagesTab extends JPanel {
 		sign_group_model.initialize();
 		initGroupTable();
 		initSignTextTable();
-		createActions();
-		font_cmb.setModel(new WrapperComboBoxModel(
+		font_cbx.setAction(new IAction("font") {
+			protected void do_perform() {
+				proxy.setDefaultFont(
+					(Font)font_cbx.getSelectedItem());
+			}
+		});
+		font_cbx.setModel(new WrapperComboBoxModel(
 			dms_cache.getFontModel()));
 		initWidgets();
 	}
@@ -179,14 +193,14 @@ public class MessagesTab extends JPanel {
 		add(new ILabel("dms.font.default"), bag);
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.WEST;
-		add(font_cmb, bag);
+		add(font_cbx, bag);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			bag.anchor = GridBagConstraints.CENTER;
 			bag.gridy = 4;
 			bag.gridx = 0;
-			add(awsAllowed, bag);
+			add(aws_allowed_chk, bag);
 			bag.gridx = 1;
-			add(awsControlled, bag);
+			add(aws_control_chk, bag);
 		}
 	}
 
@@ -198,27 +212,6 @@ public class MessagesTab extends JPanel {
 		panel.add(pixel_panel, BorderLayout.CENTER);
 		pixel_panel.setPreferredSize(new Dimension(390, 32));
 		return panel;
-	}
-
-	/** Create actions for button widgets */
-	protected void createActions() {
-		new ActionJob(this, font_cmb) {
-			public void perform() {
-				proxy.setDefaultFont(
-					(Font)font_cmb.getSelectedItem());
-			}
-		};
-		new ActionJob(this, awsAllowed) {
-			public void perform() {
-				proxy.setAwsAllowed(awsAllowed.isSelected());
-			}
-		};
-		new ActionJob(this, awsControlled) {
-			public void perform() {
-				proxy.setAwsControlled(
-					awsControlled.isSelected());
-			}
-		};
 	}
 
 	/** Initialize the sign group table */
@@ -392,11 +385,11 @@ public class MessagesTab extends JPanel {
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
 		if(a == null || a.equals("defaultFont"))
-			font_cmb.setSelectedItem(proxy.getDefaultFont());
+			font_cbx.setSelectedItem(proxy.getDefaultFont());
 		if(a == null || a.equals("awsAllowed"))
-			awsAllowed.setSelected(proxy.getAwsAllowed());
+			aws_allowed_chk.setSelected(proxy.getAwsAllowed());
 		if(a == null || a.equals("awsControlled"))
-			awsControlled.setSelected(proxy.getAwsControlled());
+			aws_control_chk.setSelected(proxy.getAwsControlled());
 		// NOTE: messageCurrent attribute changes after all sign
 		//       dimension attributes are updated.
 		if(a == null || a.equals("messageCurrent"))

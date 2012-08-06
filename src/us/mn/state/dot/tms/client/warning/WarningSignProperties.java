@@ -22,7 +22,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
@@ -58,8 +57,15 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		}
 	};
 
+	/** Camera action */
+	private final IAction camera = new IAction("camera") {
+		protected void do_perform() {
+			proxy.setCamera((Camera)camera_cbx.getSelectedItem());
+		}
+	};
+
 	/** Camera combo box */
-	protected final JComboBox camera = new JComboBox();
+	private final JComboBox camera_cbx = new JComboBox();
 
 	/** Sign message text area */
 	protected final JTextArea message = new JTextArea(3, 24);
@@ -111,12 +117,6 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 				proxy.setNotes(notes.getText());
 			}
 		};
-		new ActionJob(this, camera) {
-			public void perform() {
-				proxy.setCamera(
-					(Camera)camera.getSelectedItem());
-			}
-		};
 		new FocusJob(message) {
 			public void perform() {
 				proxy.setMessage(message.getText());
@@ -135,8 +135,9 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	protected JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
 		ListModel m = state.getCamCache().getCameraModel();
-		camera.setModel(new WrapperComboBoxModel(m));
-		panel.addRow(I18N.get("camera"), camera);
+		camera_cbx.setAction(camera);
+		camera_cbx.setModel(new WrapperComboBoxModel(m));
+		panel.addRow(I18N.get("camera"), camera_cbx);
 		panel.addRow(I18N.get("warning.sign.text"), message);
 		return panel;
 	}
@@ -148,7 +149,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
-			camera.setSelectedItem(proxy.getCamera());
+			camera_cbx.setSelectedItem(proxy.getCamera());
 		if(a == null || a.equals("text"))
 			message.setText(proxy.getMessage());
 	}

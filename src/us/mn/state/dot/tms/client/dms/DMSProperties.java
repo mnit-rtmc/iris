@@ -28,7 +28,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.User;
@@ -123,7 +122,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Camera combo box */
-	protected final JComboBox camera = new JComboBox();
+	private final JComboBox camera_cbx = new JComboBox();
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -386,12 +385,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				proxy.setNotes(notes.getText());
 			}
 		};
-		new ActionJob(this, camera) {
-			public void perform() {
-				proxy.setCamera(
-					(Camera)camera.getSelectedItem());
-			}
-		};
 		new ChangeJob(this, ldcPotBaseSpn) {
 			public void perform() {
 				Number n = (Number)ldcPotBaseSpn.getValue();
@@ -437,12 +430,18 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
+		camera_cbx.setAction(new IAction("camera") {
+			protected void do_perform() {
+				proxy.setCamera(
+					(Camera)camera_cbx.getSelectedItem());
+			}
+		});
+		camera_cbx.setModel(new WrapperComboBoxModel(
+			state.getCamCache().getCameraModel()));
 		location.setGeoLoc(proxy.getGeoLoc());
 		location.initialize();
 		location.addRow(I18N.get("device.notes"), notes);
-		camera.setModel(new WrapperComboBoxModel(
-			state.getCamCache().getCameraModel()));
-		location.add(I18N.get("camera"), camera);
+		location.add(I18N.get("camera"), camera_cbx);
 		location.finishRow();
 		location.setCenter();
 		location.addRow(new JButton(controller));
@@ -607,7 +606,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
-			camera.setSelectedItem(proxy.getCamera());
+			camera_cbx.setSelectedItem(proxy.getCamera());
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);

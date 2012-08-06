@@ -27,7 +27,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -223,11 +222,11 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		for(LaneUseIndication i: LaneUseIndication.values()) {
 			final int ind = i.ordinal();
 			JCheckBox btn = new JCheckBox();
-			new ActionJob(btn) {
-				public void perform() {
+			btn.setAction(new IAction(null) {
+				protected void do_perform() {
 					toggleIndication(ind);
 				}
-			};
+			});
 			indications.add(btn);
 			panel.add(new JLabel(IndicationIcon.create(18, i)));
 			panel.addRow(btn, new JLabel(i.description));
