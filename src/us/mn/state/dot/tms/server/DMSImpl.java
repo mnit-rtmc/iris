@@ -1476,22 +1476,29 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			return null;
 	}
 
+	/** Log an action */
+	private void logAction(String msg) {
+		ACTION_LOG.log(getName() + ": " + msg);
+	}
+
 	/** Update the scheduled message on the sign */
 	public void updateScheduledMessage() {
 		if(!is_scheduled) {
+			logAction("no message scheduled");
 			messageSched = createBlankMessage(
 				DMSMessagePriority.SCHEDULED);
 		}
 		SignMessage sm = messageSched;
 		if(shouldActivate(sm)) {
 			try {
+				logAction("set message to " + sm.getMulti());
 				doSetMessageNext(sm, null);
 			}
 			catch(TMSException e) {
-				ACTION_LOG.log(getName() + ": " +
-					e.getMessage());
+				logAction(e.getMessage());
 			}
-		}
+		} else
+			logAction("sched msg not sent " + sm.getMulti());
 		is_scheduled = false;
 	}
 
