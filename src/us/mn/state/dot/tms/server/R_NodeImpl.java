@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -534,16 +534,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 				return true;
 		}
 		return false;
-	}
-
-	/** Get the true UTM Northing (without offset) */
-	protected Integer getTrueNorthing() {
-		return GeoLocHelper.getTrueNorthing(geo_loc);
-	}
-
-	/** Get the true UTM Easting (without offset) */
-	protected Integer getTrueEasting() {
-		return GeoLocHelper.getTrueEasting(geo_loc);
 	}
 
 	/** Downstream roadway nodes */

@@ -241,16 +241,16 @@ public class GeoLocHelper extends BaseHelper {
 			 filterDirection(l1.getRoadDir(), r1));
 	}
 
-	/** Get the true easting */
-	static public Integer getTrueEasting(GeoLoc l) {
+	/** Get the UTM easting */
+	static public Integer getEasting(GeoLoc l) {
 		if(l != null)
 			return l.getEasting();
 		else
 			return null;
 	}
 
-	/** Get the true northing */
-	static public Integer getTrueNorthing(GeoLoc l) {
+	/** Get the UTM northing */
+	static public Integer getNorthing(GeoLoc l) {
 		if(l != null)
 			return l.getNorthing();
 		else
@@ -259,16 +259,15 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Check if the UTM coordinates are null */
 	static public boolean isNull(GeoLoc l) {
-		return (getTrueEasting(l) == null) ||
-			(getTrueNorthing(l) == null);
+		return (getEasting(l) == null) || (getNorthing(l) == null);
 	}
 
 	/** Calculate the distance between two locations (in meters) */
 	static public Double metersTo(GeoLoc l0, GeoLoc l1) {
-		Integer e0 = getTrueEasting(l0);
-		Integer e1 = getTrueEasting(l1);
-		Integer n0 = getTrueNorthing(l0);
-		Integer n1 = getTrueNorthing(l1);
+		Integer e0 = getEasting(l0);
+		Integer e1 = getEasting(l1);
+		Integer n0 = getNorthing(l0);
+		Integer n1 = getNorthing(l1);
 		if(e0 == null || e1 == null || n0 == null || n1 == null)
 			return null;
 		return Math.hypot(e0 - e1, n0 - n1);
@@ -276,8 +275,8 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Calculate the distance between two locations (in meters) */
 	static public Double metersTo(GeoLoc l, int easting, int northing) {
-		Integer e = getTrueEasting(l);
-		Integer n = getTrueNorthing(l);
+		Integer e = getEasting(l);
+		Integer n = getNorthing(l);
 		if(e == null || n == null)
 			return null;
 		return Math.hypot(e - easting, n - northing);
@@ -353,8 +352,8 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Return GeoLoc as a Position in WGS84 */
 	static public Position getWgs84Position(GeoLoc p) {
-		Integer easting = getTrueEasting(p);
-		Integer northing = getTrueNorthing(p);
+		Integer easting = getEasting(p);
+		Integer northing = getNorthing(p);
 		if(easting == null || northing == null)
 			return null;
 		UTMPosition utm = new UTMPosition(getZone(), easting, northing);

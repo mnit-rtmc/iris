@@ -250,8 +250,8 @@ public class IncidentCreator extends JPanel {
 		loc = snapGeoLoc(lt, loc);
 		Road road = loc.getRoadway();
 		short dir = loc.getRoadDir();
-		int east = GeoLocHelper.getTrueEasting(loc);
-		int north = GeoLocHelper.getTrueNorthing(loc);
+		int east = GeoLocHelper.getEasting(loc);
+		int north = GeoLocHelper.getNorthing(loc);
 		int n_lanes = getLaneCount(lt, loc);
 		if(n_lanes > 0) {
 			ClientIncident ci = new ClientIncident(replaces, et.id,
@@ -266,8 +266,8 @@ public class IncidentCreator extends JPanel {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
 		if(cb == null)
 			return loc;
-		int east = GeoLocHelper.getTrueEasting(loc);
-		int north = GeoLocHelper.getTrueNorthing(loc);
+		int east = GeoLocHelper.getEasting(loc);
+		int north = GeoLocHelper.getNorthing(loc);
 		switch(lt) {
 		case EXIT:
 			R_Node n = cb.findNearest(east, north, R_NodeType.EXIT);
@@ -290,8 +290,8 @@ public class IncidentCreator extends JPanel {
 	/** Get the lane count at the incident location */
 	protected int getLaneCount(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
-		int east = GeoLocHelper.getTrueEasting(loc);
-		int north = GeoLocHelper.getTrueNorthing(loc);
+		int east = GeoLocHelper.getEasting(loc);
+		int north = GeoLocHelper.getNorthing(loc);
 		switch(lt) {
 		case EXIT:
 			R_Node n = cb.findNearest(east, north, R_NodeType.EXIT);

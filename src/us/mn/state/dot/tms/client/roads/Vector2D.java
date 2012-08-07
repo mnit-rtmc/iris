@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@ public class Vector2D {
 	/** Get the vector to a location from the origin */
 	static public Vector2D create(GeoLoc loc) {
 		if(loc != null) {
-			int x = GeoLocHelper.getTrueEasting(loc);
-			int y = GeoLocHelper.getTrueNorthing(loc);
+			int x = GeoLocHelper.getEasting(loc);
+			int y = GeoLocHelper.getNorthing(loc);
 			return new Vector2D(x, y);
 		} else
 			return new Vector2D(0, 0);

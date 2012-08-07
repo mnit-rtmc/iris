@@ -430,10 +430,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		GeoLoc l1 = n1.getGeoLoc();
 		if(GeoLocHelper.isNull(l0) || GeoLocHelper.isNull(l1))
 			return Double.POSITIVE_INFINITY;
-		int x0 = GeoLocHelper.getTrueEasting(l0);
-		int y0 = GeoLocHelper.getTrueNorthing(l0);
-		int x1 = GeoLocHelper.getTrueEasting(l1);
-		int y1 = GeoLocHelper.getTrueNorthing(l1);
+		int x0 = GeoLocHelper.getEasting(l0);
+		int y0 = GeoLocHelper.getNorthing(l0);
+		int x1 = GeoLocHelper.getEasting(l1);
+		int y1 = GeoLocHelper.getNorthing(l1);
 		LineSegment2D seg = new LineSegment2D(x0, y0, x1, y1);
 		return seg.distanceTo(e, n);
 	}
@@ -452,10 +452,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		GeoLoc l1 = n1.getGeoLoc();
 		if(GeoLocHelper.isNull(l0) || GeoLocHelper.isNull(l1))
 			return null;
-		int x0 = GeoLocHelper.getTrueEasting(l0);
-		int y0 = GeoLocHelper.getTrueNorthing(l0);
-		int x1 = GeoLocHelper.getTrueEasting(l1);
-		int y1 = GeoLocHelper.getTrueNorthing(l1);
+		int x0 = GeoLocHelper.getEasting(l0);
+		int y0 = GeoLocHelper.getNorthing(l0);
+		int x1 = GeoLocHelper.getEasting(l1);
+		int y1 = GeoLocHelper.getNorthing(l1);
 		LineSegment2D seg = new LineSegment2D(x0, y0, x1, y1);
 		Vector2D pnt = seg.snap(e, n);
 		return new ClientGeoLoc(l0.getRoadway(), l0.getRoadDir(),

@@ -53,14 +53,14 @@ public class CorridorBase implements Iterable<R_Node> {
 		return GeoLocHelper.metersTo(n.getGeoLoc(), l);
 	}
 
-	/** Get the true UTM Northing (without offset) */
-	static protected Integer getTrueNorthing(R_Node n) {
-		return GeoLocHelper.getTrueNorthing(n.getGeoLoc());
+	/** Get the UTM Easting */
+	static protected Integer getEasting(R_Node n) {
+		return GeoLocHelper.getEasting(n.getGeoLoc());
 	}
 
-	/** Get the true UTM Easting (without offset) */
-	static protected Integer getTrueEasting(R_Node n) {
-		return GeoLocHelper.getTrueEasting(n.getGeoLoc());
+	/** Get the UTM Northing */
+	static protected Integer getNorthing(R_Node n) {
+		return GeoLocHelper.getNorthing(n.getGeoLoc());
 	}
 
 	/** Check if the r_node location is valid */
@@ -210,10 +210,10 @@ public class CorridorBase implements Iterable<R_Node> {
 	protected boolean isUpstreamToDownstream() {
 		R_Node first = r_nodes.getFirst();
 		R_Node last = r_nodes.getLast();
-		Integer nf = getTrueNorthing(first);
-		Integer nl = getTrueNorthing(last);
-		Integer ef = getTrueEasting(first);
-		Integer el = getTrueEasting(last);
+		Integer nf = getNorthing(first);
+		Integer nl = getNorthing(last);
+		Integer ef = getEasting(first);
+		Integer el = getEasting(last);
 		if(nf == null || nl == null || ef == null || el == null)
 			return false;
 		switch(Direction.fromOrdinal(road_dir)) {
@@ -313,8 +313,8 @@ public class CorridorBase implements Iterable<R_Node> {
 
 	/** Find the nearest node to the given location */
 	public R_Node findNearest(GeoLoc loc) {
-		Integer easting = GeoLocHelper.getTrueEasting(loc);
-		Integer northing = GeoLocHelper.getTrueNorthing(loc);
+		Integer easting = GeoLocHelper.getEasting(loc);
+		Integer northing = GeoLocHelper.getNorthing(loc);
 		if(easting == null || northing == null)
 			return null;
 		else
