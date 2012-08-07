@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
+import us.mn.state.dot.geokit.Position;
 
 /**
  * A corridor is a collection of all R_Node objects for one roadway corridor.
@@ -210,21 +211,19 @@ public class CorridorBase implements Iterable<R_Node> {
 	protected boolean isUpstreamToDownstream() {
 		R_Node first = r_nodes.getFirst();
 		R_Node last = r_nodes.getLast();
-		Integer nf = getNorthing(first);
-		Integer nl = getNorthing(last);
-		Integer ef = getEasting(first);
-		Integer el = getEasting(last);
-		if(nf == null || nl == null || ef == null || el == null)
+		Position pf = GeoLocHelper.getWgs84Position(first.getGeoLoc());
+		Position pl = GeoLocHelper.getWgs84Position(last.getGeoLoc());
+		if(pf == null || pl == null)
 			return false;
 		switch(Direction.fromOrdinal(road_dir)) {
 		case NORTH:
-			return nf < nl;
+			return pf.getLatitude() < pl.getLatitude();
 		case SOUTH:
-			return nf > nl;
+			return pf.getLatitude() > pl.getLatitude();
 		case EAST:
-			return ef < el;
+			return pf.getLongitude() < pl.getLongitude();
 		case WEST:
-			return ef > el;
+			return pf.getLongitude() > pl.getLongitude();
 		case INNER_LOOP:
 			// FIXME: this might be tricky
 			return false;
