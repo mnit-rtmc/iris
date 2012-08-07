@@ -193,34 +193,69 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Set the tangent angles for all the nodes in a corridor */
 	protected void setTangentAngles(CorridorBase c) {
-		LinkedList<MapGeoLoc> locs = new LinkedList<MapGeoLoc>();
-		for(R_Node n: c) {
-			MapGeoLoc loc = super.findGeoLoc(n);
-			if(loc != null)
-				locs.add(loc);
-		}
-		if(locs.size() > 0) {
-			// The first and last locations need to be in the list
-			// twice to allow tangents to be calculated.
-			locs.addFirst(locs.getFirst());
-			locs.addLast(locs.getLast());
-		}
-		MapGeoLoc loc_a = null;
-		MapGeoLoc loc = null;
-		for(MapGeoLoc loc_b: locs) {
-			if(loc_a != null) {
-				Vector2D va = Vector2D.create(
-					loc_a.getGeoLoc());
-				Vector2D vb = Vector2D.create(
-					loc_b.getGeoLoc());
-				Vector2D a = vb.subtract(va);
-				double t = a.getAngle();
-				if(!Double.isInfinite(t) && !Double.isNaN(t))
-					loc.setTangent(t - NORTH_ANGLE);
-			}
+		MapGeoLoc loc_a = null;		// upstream location
+		MapGeoLoc loc = null;		// current location
+		Iterator<MapGeoLoc> it = mapLocationIterator(c);
+		while(it.hasNext()) {
+			MapGeoLoc loc_b = it.next();	// downstream location
+			MapGeoLoc lup = loc_a != null ? loc_a : loc;
+			if(lup != null)
+				setTangentAngle(loc, lup, loc_b);
 			loc_a = loc;
 			loc = loc_b;
 		}
+		// special handling for last node
+		if(loc_a != null)
+			setTangentAngle(loc, loc_a, loc);
+	}
+
+	/** Set the tangent angle for one location.
+	 * @param loc Location to set tangent.
+	 * @param loc_a Upstream location.
+	 * @param loc_b Downstream loction. */
+	private void setTangentAngle(MapGeoLoc loc, MapGeoLoc loc_a,
+		MapGeoLoc loc_b)
+	{
+		Vector2D va = Vector2D.create(loc_a.getGeoLoc());
+		Vector2D vb = Vector2D.create(loc_b.getGeoLoc());
+		Vector2D a = vb.subtract(va);
+		double t = a.getAngle();
+		if(!Double.isInfinite(t) && !Double.isNaN(t))
+			loc.setTangent(t - NORTH_ANGLE);
+	}
+
+	/** Create an iterator for MapGeoLocs on a corridor.
+	 * @param c Corridor.
+	 * @return MapGeoLoc iterator for R_Nodes on corridor. */
+	private Iterator<MapGeoLoc> mapLocationIterator(CorridorBase c) {
+		final Iterator<R_Node> it = c.iterator();
+		return new Iterator<MapGeoLoc>() {
+			private MapGeoLoc nloc = null;
+			public boolean hasNext() {
+				primeLoc();
+				return nloc != null;
+			}
+			private void primeLoc() {
+				if(nloc == null)
+					nloc = nextLoc();
+			}
+			private MapGeoLoc nextLoc() {
+				while(it.hasNext()) {
+					R_Node n = it.next();
+					MapGeoLoc l = superFindGeoLoc(n);
+					if(l != null)
+						return l;
+				}
+				return null;
+			}
+			public MapGeoLoc next() {
+				primeLoc();
+				MapGeoLoc l = nloc;
+				nloc = null;
+				return l;
+			}
+			public void remove() { }
+		};
 	}
 
 	/** Get the segment layer */
@@ -352,6 +387,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			return super.findGeoLoc(proxy);
 		else
 			return null;
+	}
+
+	/** Find the map geo location for a proxy */
+	private MapGeoLoc superFindGeoLoc(R_Node proxy) {
+		return super.findGeoLoc(proxy);
 	}
 
 	/** Get the GeoLoc for the specified proxy */
