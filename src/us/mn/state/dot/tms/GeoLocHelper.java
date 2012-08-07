@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.io.PrintWriter;
 import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.MapVector;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.geokit.UTMPosition;
@@ -399,5 +400,15 @@ public class GeoLocHelper extends BaseHelper {
 		b.append(cross.getAbbrev());
 		b.append(rd.det_dir);
 		return b.toString();
+	}
+
+	/** Get map vector to a location from the origin */
+	static public MapVector createMapVector(GeoLoc loc) {
+		Integer x = getEasting(loc);
+		Integer y = getNorthing(loc);
+		if(x != null && y != null)
+			return new MapVector(x, y);
+		else
+			return new MapVector(0, 0);
 	}
 }

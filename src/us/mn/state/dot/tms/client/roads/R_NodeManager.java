@@ -29,6 +29,8 @@ import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
+import us.mn.state.dot.geokit.MapLineSegment;
+import us.mn.state.dot.geokit.MapVector;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.Checker;
@@ -216,9 +218,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	private void setTangentAngle(MapGeoLoc loc, MapGeoLoc loc_a,
 		MapGeoLoc loc_b)
 	{
-		Vector2D va = Vector2D.create(loc_a.getGeoLoc());
-		Vector2D vb = Vector2D.create(loc_b.getGeoLoc());
-		Vector2D a = vb.subtract(va);
+		MapVector va = GeoLocHelper.createMapVector(loc_a.getGeoLoc());
+		MapVector vb = GeoLocHelper.createMapVector(loc_b.getGeoLoc());
+		MapVector a = vb.subtract(va);
 		double t = a.getAngle();
 		if(!Double.isInfinite(t) && !Double.isNaN(t))
 			loc.setTangent(t - NORTH_ANGLE);
@@ -474,7 +476,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		int y0 = GeoLocHelper.getNorthing(l0);
 		int x1 = GeoLocHelper.getEasting(l1);
 		int y1 = GeoLocHelper.getNorthing(l1);
-		LineSegment2D seg = new LineSegment2D(x0, y0, x1, y1);
+		MapLineSegment seg = new MapLineSegment(x0, y0, x1, y1);
 		return seg.distanceTo(e, n);
 	}
 
@@ -496,8 +498,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		int y0 = GeoLocHelper.getNorthing(l0);
 		int x1 = GeoLocHelper.getEasting(l1);
 		int y1 = GeoLocHelper.getNorthing(l1);
-		LineSegment2D seg = new LineSegment2D(x0, y0, x1, y1);
-		Vector2D pnt = seg.snap(e, n);
+		MapLineSegment seg = new MapLineSegment(x0, y0, x1, y1);
+		MapVector pnt = seg.snap(e, n);
 		return new ClientGeoLoc(l0.getRoadway(), l0.getRoadDir(),
 			(int)pnt.x, (int)pnt.y, dist);
 	}
