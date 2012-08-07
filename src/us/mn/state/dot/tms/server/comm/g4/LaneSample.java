@@ -26,7 +26,7 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 public class LaneSample {
 
 	/** Maximum number of lanes */
-	static public final int MAX_NUM_LANES = 8;
+	static public final int MAX_NUM_LANES = 12;
 
 	/** Lane number, 1 based */
 	public final int lane_num;

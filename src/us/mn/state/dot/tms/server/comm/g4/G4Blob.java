@@ -144,9 +144,10 @@ public class G4Blob extends ByteBlob {
 		if(size() < 18)
 			throw new ParsingException("invalid length");
 		int n = 0xF & getInt(17);
-		if(n >=0 && n <= LaneSample.MAX_NUM_LANES)
+		if(n > LaneSample.MAX_NUM_LANES)
+			return LaneSample.MAX_NUM_LANES;
+		else
 			return n;
-		throw new ParsingException("invalid #lanes=" + n);
 	}
 
 	/** Get the controller time */
