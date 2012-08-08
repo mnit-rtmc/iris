@@ -60,6 +60,9 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class R_NodeManager extends ProxyManager<R_Node> {
 
+	/** Offset angle for default North map markers */
+	static private final double NORTH_ANGLE = Math.PI / 2;
+
 	/** Background color for nodes with GPS points */
 	static public final Color COLOR_GPS = Color.GREEN;
 
@@ -72,9 +75,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Marker to draw r_nodes */
 	static protected final R_NodeMarker MARKER =
 		new R_NodeMarker();
-
-	/** Offset angle for default North map markers */
-	static protected final double NORTH_ANGLE = Math.PI / 2;
 
 	/** Map to of corridor names to corridors */
 	protected final Map<String, CorridorBase> corridors =
@@ -218,10 +218,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	private void setTangentAngle(MapGeoLoc loc, MapGeoLoc loc_a,
 		MapGeoLoc loc_b)
 	{
-		MapVector va = GeoLocHelper.createMapVector(loc_a.getGeoLoc());
-		MapVector vb = GeoLocHelper.createMapVector(loc_b.getGeoLoc());
-		MapVector a = vb.subtract(va);
-		double t = a.getAngle();
+		double t = GeoLocHelper.calculateBearing(loc_a.getGeoLoc(),
+			loc_b.getGeoLoc());
 		if(!Double.isInfinite(t) && !Double.isNaN(t))
 			loc.setTangent(t - NORTH_ANGLE);
 	}

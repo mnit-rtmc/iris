@@ -402,13 +402,31 @@ public class GeoLocHelper extends BaseHelper {
 		return b.toString();
 	}
 
-	/** Get map vector to a location from the origin */
-	static public MapVector createMapVector(GeoLoc loc) {
-		Integer x = getEasting(loc);
-		Integer y = getNorthing(loc);
-		if(x != null && y != null)
+	/** Calculate the bearing from one location to another.
+	 * @param loc_a Starting location.
+	 * @param loc_b Ending location.
+	 * @return Bearing from loc_a to loc_b (radians). */
+	static public double calculateBearing(GeoLoc loc_a, GeoLoc loc_b) {
+		MapVector va = createMapVector(loc_a);
+		MapVector vb = createMapVector(loc_b);
+		if(va != null && vb != null) {
+			MapVector a = vb.subtract(va);
+			return a.getAngle();
+		} else
+			return Double.NaN;
+	}
+
+	/** Get map vector to a location from the origin.  The units used are
+	 * spherical mercator "meters".
+	 * @param loc Location of vector.
+	 * @return Map vector from origin to specified location, or null. */
+	static private MapVector createMapVector(GeoLoc loc) {
+		SphericalMercatorPosition pos = getPosition(loc);
+		if(pos != null) {
+			double x = pos.getX();
+			double y = pos.getY();
 			return new MapVector(x, y);
-		else
-			return new MapVector(0, 0);
+		} else
+			return null;
 	}
 }
