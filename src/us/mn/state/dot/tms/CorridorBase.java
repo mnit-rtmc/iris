@@ -312,21 +312,19 @@ public class CorridorBase implements Iterable<R_Node> {
 
 	/** Find the nearest node to the given location */
 	public R_Node findNearest(GeoLoc loc) {
-		Integer easting = GeoLocHelper.getEasting(loc);
-		Integer northing = GeoLocHelper.getNorthing(loc);
-		if(easting == null || northing == null)
-			return null;
+		Position pos = GeoLocHelper.getWgs84Position(loc);
+		if(pos != null)
+			return findNearest(pos);
 		else
-			return findNearest(easting, northing);
+			return null;
 	}
 
-	/** Find the nearest node to the given location */
-	public R_Node findNearest(int easting, int northing) {
+	/** Find the nearest node to the given position */
+	public R_Node findNearest(Position pos) {
 		R_Node nearest = null;
 		double n_meters = 0;
 		for(R_Node n: r_nodes) {
-			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), easting,
-				northing);
+			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), pos);
 			if(m != null && (nearest == null || m < n_meters)) {
 				nearest = n;
 				n_meters = m;
@@ -336,14 +334,13 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Find the nearest node to the given location with given type */
-	public R_Node findNearest(int easting, int northing, R_NodeType nt) {
+	public R_Node findNearest(Position pos, R_NodeType nt) {
 		R_Node nearest = null;
 		double n_meters = 0;
 		for(R_Node n: r_nodes) {
 			if(n.getNodeType() != nt.ordinal())
 				continue;
-			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), easting,
-				northing);
+			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), pos);
 			if(m != null && (nearest == null || m < n_meters)) {
 				nearest = n;
 				n_meters = m;
@@ -353,14 +350,13 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Fint the last node before the given location */
-	public R_Node findLastBefore(int easting, int northing) {
+	public R_Node findLastBefore(Position pos) {
 		R_Node nearest = null;
 		R_Node n_before = null;
 		R_Node n_after = null;
 		double n_meters = 0;
 		for(R_Node n: r_nodes) {
-			Double m = GeoLocHelper.metersTo(n.getGeoLoc(),
-				easting, northing);
+			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), pos);
 			if(m != null) {
 				if(nearest == null || m < n_meters) {
 					n_before = nearest;
@@ -379,7 +375,7 @@ public class CorridorBase implements Iterable<R_Node> {
 			return null;
 		GeoLoc ga = n_after.getGeoLoc();
 		Double m0 = GeoLocHelper.metersTo(ga, nearest.getGeoLoc());
-		Double m1 = GeoLocHelper.metersTo(ga, easting, northing);
+		Double m1 = GeoLocHelper.metersTo(ga, pos);
 		if(m0 != null && m1 != null && m0 > m1)
 			return nearest;
 		else
@@ -387,8 +383,8 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Get the lane configuration at the given location */
-	public LaneConfiguration laneConfiguration(int easting, int northing) {
-		R_Node node = findLastBefore(easting, northing);
+	public LaneConfiguration laneConfiguration(Position pos) {
+		R_Node node = findLastBefore(pos);
 		if(node != null)
 			return laneConfiguration(node);
 		else

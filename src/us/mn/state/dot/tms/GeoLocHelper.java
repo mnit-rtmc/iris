@@ -266,22 +266,21 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Calculate the distance between two locations (in meters) */
 	static public Double metersTo(GeoLoc l0, GeoLoc l1) {
-		Integer e0 = getEasting(l0);
-		Integer e1 = getEasting(l1);
-		Integer n0 = getNorthing(l0);
-		Integer n1 = getNorthing(l1);
-		if(e0 == null || e1 == null || n0 == null || n1 == null)
+		Position p0 = getWgs84Position(l0);
+		Position p1 = getWgs84Position(l1);
+		if(p0 != null && p1 != null)
+			return p0.distanceHaversine(p1);
+		else
 			return null;
-		return Math.hypot(e0 - e1, n0 - n1);
 	}
 
 	/** Calculate the distance between two locations (in meters) */
-	static public Double metersTo(GeoLoc l, int easting, int northing) {
-		Integer e = getEasting(l);
-		Integer n = getNorthing(l);
-		if(e == null || n == null)
+	static public Double metersTo(GeoLoc l0, Position p1) {
+		Position p0 = getWgs84Position(l0);
+		if(p0 != null && p1 != null)
+			return p0.distanceHaversine(p1);
+		else
 			return null;
-		return Math.hypot(e - easting, n - northing);
 	}
 
 	/** Test if another location matches */

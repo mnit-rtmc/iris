@@ -35,6 +35,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -579,17 +580,15 @@ public class IncidentDispatcher extends JPanel
 
 	/** Inner class to find the camera nearest to an incident */
 	static protected class CameraFinder implements Checker<Camera> {
-		protected final int easting;
-		protected final int northing;
+		private final Position pos;
 		protected TreeMap<Double, Camera> cameras =
 			new TreeMap<Double, Camera>();
 		protected CameraFinder(ClientIncident inc) {
-			easting = inc.getEasting();
-			northing = inc.getNorthing();
+			pos = inc.getWgs84Position();
 		}
 		public boolean check(Camera cam) {
 			GeoLoc loc = cam.getGeoLoc();
-			Double d = GeoLocHelper.metersTo(loc, easting,northing);
+			Double d = GeoLocHelper.metersTo(loc, pos);
 			if(d != null) {
 				cameras.put(d, cam);
 				while(cameras.size() > 5)

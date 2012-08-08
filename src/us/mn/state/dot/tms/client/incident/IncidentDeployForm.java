@@ -26,11 +26,15 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.SwingConstants;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneUseIndication;
@@ -132,7 +136,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 			}
 		}
 		LaneConfiguration config = cb.laneConfiguration(
-			proxy.getEasting(), proxy.getNorthing());
+			getWgs84Position());
 		int shift = config.leftShift;
 		for(Float up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
@@ -145,6 +149,13 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 				indications.put(lcs_array.getName(), ind);
 			}
 		}
+	}
+
+	/** Get Position in WGS84 */
+	private Position getWgs84Position() {
+		UTMPosition utm = new UTMPosition(GeoLocHelper.getZone(),
+			proxy.getEasting(), proxy.getNorthing());
+		return utm.getPosition(GeodeticDatum.WGS_84);
 	}
 
 	/** Find all LCS arrays on the given corridor */

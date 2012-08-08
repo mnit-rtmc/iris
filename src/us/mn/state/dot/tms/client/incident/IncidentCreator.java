@@ -22,6 +22,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.map.Symbol;
@@ -251,22 +252,22 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Snap a location to the proper lane type */
-	protected GeoLoc snapGeoLoc(LaneType lt, GeoLoc loc) {
+	private GeoLoc snapGeoLoc(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
 		if(cb == null)
 			return loc;
-		int east = GeoLocHelper.getEasting(loc);
-		int north = GeoLocHelper.getNorthing(loc);
+		Position pos = GeoLocHelper.getWgs84Position(loc);
+		if(pos == null)
+			return loc;
 		switch(lt) {
 		case EXIT:
-			R_Node n = cb.findNearest(east, north, R_NodeType.EXIT);
+			R_Node n = cb.findNearest(pos, R_NodeType.EXIT);
 			if(n != null)
 				return n.getGeoLoc();
 			else
 				return loc;
 		case MERGE:
-			R_Node mn = cb.findNearest(east, north,
-				R_NodeType.ENTRANCE);
+			R_Node mn = cb.findNearest(pos, R_NodeType.ENTRANCE);
 			if(mn != null)
 				return mn.getGeoLoc();
 			else
@@ -277,26 +278,26 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Get the lane count at the incident location */
-	protected int getLaneCount(LaneType lt, GeoLoc loc) {
+	private int getLaneCount(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
-		int east = GeoLocHelper.getEasting(loc);
-		int north = GeoLocHelper.getNorthing(loc);
+		Position pos = GeoLocHelper.getWgs84Position(loc);
+		if(pos == null)
+			return 0;
 		switch(lt) {
 		case EXIT:
-			R_Node n = cb.findNearest(east, north, R_NodeType.EXIT);
+			R_Node n = cb.findNearest(pos, R_NodeType.EXIT);
 			if(n != null)
 				return n.getLanes();
 			else
 				return 0;
 		case MERGE:
-			R_Node mn = cb.findNearest(east, north,
-				R_NodeType.ENTRANCE);
+			R_Node mn = cb.findNearest(pos, R_NodeType.ENTRANCE);
 			if(mn != null)
 				return mn.getLanes();
 			else
 				return 0;
 		default:
-			return cb.laneConfiguration(east, north).getLanes();
+			return cb.laneConfiguration(pos).getLanes();
 		}
 	}
 

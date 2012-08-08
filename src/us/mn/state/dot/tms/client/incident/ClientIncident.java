@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,11 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneType;
@@ -154,5 +158,12 @@ public class ClientIncident implements Incident {
 	/** Destroy the object */
 	public void destroy() {
 		// do nothing
+	}
+
+	/** Get Position in WGS84 */
+	public Position getWgs84Position() {
+		UTMPosition utm = new UTMPosition(GeoLocHelper.getZone(),
+			easting, northing);
+		return utm.getPosition(GeodeticDatum.WGS_84);
 	}
 }

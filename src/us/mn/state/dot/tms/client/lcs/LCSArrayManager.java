@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -355,9 +356,10 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		CorridorBase cor = session.getR_NodeManager().lookupCorridor(
 			loc);
 		if(cor != null) {
-			return cor.laneConfiguration(loc.getEasting(),
-				loc.getNorthing());
-		} else
-			return new LaneConfiguration(0, 0);
+			Position pos = GeoLocHelper.getWgs84Position(loc);
+			if(pos != null)
+				return cor.laneConfiguration(pos);
+		}
+		return new LaneConfiguration(0, 0);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,9 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.util.HashMap;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
@@ -87,9 +90,16 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Create a new r_node */
-	public void create(Road roadway, short road_dir, int easting,
-		int northing, int lanes, int shift)
+	public void create(Road roadway, short road_dir, Position pos,
+		int lanes, int shift)
 	{
+		Integer easting = null;
+		Integer northing = null;
+		UTMPosition utm = UTMPosition.convert(GeodeticDatum.WGS_84,pos);
+		if(utm != null) {
+			easting = (int)Math.round(utm.getEasting());
+			northing = (int)Math.round(utm.getNorthing());
+		}
 		String name = createUniqueR_NodeName();
 		if(canAdd(name)) {
 			putAttrs(name, lanes, shift);
@@ -98,8 +108,8 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 			if(roadway != null)
 				attrs.put("roadway", roadway);
 			attrs.put("road_dir", new Short(road_dir));
-			attrs.put("easting", new Integer(easting));
-			attrs.put("northing", new Integer(northing));
+			attrs.put("easting", easting);
+			attrs.put("northing", northing);
 			geo_locs.createObject(name, attrs);
 		}
 	}
@@ -116,8 +126,8 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Create a new r_node (with no default corridor) */
-	public void create(int easting, int northing) {
-		create(null, (short)0, easting, northing, 2, 4);
+	public void create(Position pos) {
+		create(null, (short)0, pos, 2, 4);
 	}
 
 	/** Create a unique R_Node name */

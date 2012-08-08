@@ -30,10 +30,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.SwingRunner;
@@ -414,35 +412,32 @@ public class CorridorList extends JPanel {
 
 	/** Create a new node at a specified point */
 	protected void createNode(CorridorBase c, Point2D p) {
-		UTMPosition utm = getPosition(p);
-		int e = (int)Math.round(utm.getEasting());
-		int n = (int)Math.round(utm.getNorthing());
+		Position pos = getWgs84Position(p);
 		if(c != null) {
 			int lanes = 2;
 			int shift = 4;
-			R_NodeModel mdl = findModel(c, e, n);
+			R_NodeModel mdl = findModel(c, pos);
 			if(mdl != null) {
 				shift = mdl.getDownstreamLane(false);
 				lanes = shift - mdl.getDownstreamLane(true);
 			}
-			creator.create(c.getRoadway(), c.getRoadDir(), e, n,
+			creator.create(c.getRoadway(), c.getRoadDir(), pos,
 				lanes, shift);
 		} else
-			creator.create(e, n);
+			creator.create(pos);
 		add_node.setEnabled(canAdd());
 	}
 
-	/** Get a UTM position */
-	protected UTMPosition getPosition(Point2D p) {
+	/** Get a position */
+	private Position getWgs84Position(Point2D p) {
 		SphericalMercatorPosition smp = new SphericalMercatorPosition(
 			p.getX(), p.getY());
-		Position pos = smp.getPosition();
-		return UTMPosition.convert(GeodeticDatum.WGS_84, pos);
+		return smp.getPosition();
 	}
 
 	/** Find an r_node model near a point */
-	protected R_NodeModel findModel(CorridorBase c, int e, int n) {
-		R_Node found = c.findLastBefore(e, n);
+	private R_NodeModel findModel(CorridorBase c, Position pos) {
+		R_Node found = c.findLastBefore(pos);
 		for(int i = 0; i < n_model.getSize(); i++) {
 			Object elem = n_model.get(i);
 			if(elem instanceof R_NodeModel) {
