@@ -29,8 +29,9 @@ import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
-import us.mn.state.dot.geokit.MapLineSegment;
-import us.mn.state.dot.geokit.MapVector;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.UTMPosition;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.Checker;
@@ -400,7 +401,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create a GeoLoc snapped to nearest corridor */
-	public GeoLoc createGeoLoc(int easting, int northing, boolean cd_road) {
+	public GeoLoc createGeoLoc(SphericalMercatorPosition smp,
+		boolean cd_road)
+	{
 		GeoLoc loc = null;
 		double distance = Double.POSITIVE_INFINITY;
 		for(CorridorBase c: corridors.values()) {
@@ -408,7 +411,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				c.getRoadway().getRClass()) ==RoadClass.CD_ROAD;
 			if((cd_road && !cd) || (cd && !cd_road))
 				continue;
-			ClientGeoLoc l = createGeoLoc(c, easting, northing);
+			ClientGeoLoc l = createGeoLoc(c, smp);
 			if(l != null && l.getDistance() < distance) {
 				loc = l;
 				distance = l.getDistance();
@@ -419,11 +422,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Create the nearest GeoLoc for the given corridor.
 	 * @param c Corridor to search.
-	 * @param east Easting of selected point.
-	 * @param north Northing of selected point.
+	 * @param smp Selected point (spherical mercator position).
 	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
-	protected ClientGeoLoc createGeoLoc(CorridorBase c, int east,
-		int north)
+	private ClientGeoLoc createGeoLoc(CorridorBase c,
+		SphericalMercatorPosition smp)
 	{
 		R_Node n0 = null;
 		R_Node n1 = null;
@@ -435,7 +437,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				continue;
 			}
 			if(n_prev != null) {
-				double m = calcDistance(n_prev, n, east, north);
+				double m = calcDistance(n_prev, n, smp);
 				if(m < n_meters) {
 					n0 = n_prev;
 					n1 = n;
@@ -445,7 +447,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			n_prev = n;
 		}
 		if(n0 != null)
-			return createGeoLoc(n0, n1, east, north, n_meters);
+			return createGeoLoc(n0, n1, smp, n_meters);
 		else
 			return null;
 	}
@@ -462,44 +464,39 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Calculate the distance from a point to the given line segment.
 	 * @param n0 First r_node
 	 * @param n1 Second (adjacent) r_node.
-	 * @param e Selected Easting.
-	 * @param n Selected Northing.
-	 * @return Distance (meters) from segment to selected point. */
-	protected double calcDistance(R_Node n0, R_Node n1, int e, int n) {
+	 * @param smp Selected point (spherical mercator position).
+	 * @return Distance (spherical mercator "meters") from segment to
+	 *         selected point. */
+	private double calcDistance(R_Node n0, R_Node n1,
+		SphericalMercatorPosition smp)
+	{
 		GeoLoc l0 = n0.getGeoLoc();
 		GeoLoc l1 = n1.getGeoLoc();
-		if(GeoLocHelper.isNull(l0) || GeoLocHelper.isNull(l1))
-			return Double.POSITIVE_INFINITY;
-		int x0 = GeoLocHelper.getEasting(l0);
-		int y0 = GeoLocHelper.getNorthing(l0);
-		int x1 = GeoLocHelper.getEasting(l1);
-		int y1 = GeoLocHelper.getNorthing(l1);
-		MapLineSegment seg = new MapLineSegment(x0, y0, x1, y1);
-		return seg.distanceTo(e, n);
+		return GeoLocHelper.segmentDistance(l0, l1, smp);
 	}
 
 	/** Create a GeoLoc projected onto the line between two nodes.
 	 * @param n0 First node.
 	 * @param n1 Second (adjacent) node.
-	 * @param e Selected Easting.
-	 * @param n Selected Northing.
+	 * @param smp Selected point (spherical mercator position).
 	 * @param d Distance (meters).
 	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
-	protected ClientGeoLoc createGeoLoc(R_Node n0, R_Node n1, int e, int n,
-		double dist)
+	private ClientGeoLoc createGeoLoc(R_Node n0, R_Node n1,
+		SphericalMercatorPosition smp, double dist)
 	{
 		GeoLoc l0 = n0.getGeoLoc();
 		GeoLoc l1 = n1.getGeoLoc();
-		if(GeoLocHelper.isNull(l0) || GeoLocHelper.isNull(l1))
+		SphericalMercatorPosition pos = GeoLocHelper.segmentSnap(l0,
+			l1, smp);
+		if(pos != null) {
+			UTMPosition utm = UTMPosition.convert(
+				GeodeticDatum.WGS_84, pos.getPosition());
+			int easting = (int)Math.round(utm.getEasting());
+			int northing = (int)Math.round(utm.getNorthing());
+			return new ClientGeoLoc(l0.getRoadway(),
+				l0.getRoadDir(), easting, northing, dist);
+		} else
 			return null;
-		int x0 = GeoLocHelper.getEasting(l0);
-		int y0 = GeoLocHelper.getNorthing(l0);
-		int x1 = GeoLocHelper.getEasting(l1);
-		int y1 = GeoLocHelper.getNorthing(l1);
-		MapLineSegment seg = new MapLineSegment(x0, y0, x1, y1);
-		MapVector pnt = seg.snap(e, n);
-		return new ClientGeoLoc(l0.getRoadway(), l0.getRoadDir(),
-			(int)pnt.x, (int)pnt.y, dist);
 	}
 
 	/** Get the layer zoom visibility threshold */

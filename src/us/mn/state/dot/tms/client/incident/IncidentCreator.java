@@ -22,10 +22,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
-import us.mn.state.dot.geokit.GeodeticDatum;
-import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ChangeJob;
@@ -187,10 +184,7 @@ public class IncidentCreator extends JPanel {
 		client.setPointSelector(new PointSelector() {
 			public void selectPoint(Point2D p) {
 				client.setPointSelector(null);
-				UTMPosition utm = getPosition(p);
-				int e = (int)Math.round(utm.getEasting());
-				int n = (int)Math.round(utm.getNorthing());
-				createIncident(null, et, e, n);
+				createIncident(null, et, getPosition(p));
 				btn.setSelected(false);
 				setEnabled(true);
 			}
@@ -206,38 +200,33 @@ public class IncidentCreator extends JPanel {
 		client.setPointSelector(new PointSelector() {
 			public void selectPoint(Point2D p) {
 				client.setPointSelector(null);
-				UTMPosition utm = getPosition(p);
-				int e = (int)Math.round(utm.getEasting());
-				int n = (int)Math.round(utm.getNorthing());
-				createIncident(replaces, et, dtl, lt, e, n);
+				createIncident(replaces, et, dtl, lt,
+					getPosition(p));
 			}
 		});
 	}
 
-	/** Get a UTM position */
-	protected UTMPosition getPosition(Point2D p) {
-		SphericalMercatorPosition smp = new SphericalMercatorPosition(
-			p.getX(), p.getY());
-		Position pos = smp.getPosition();
-		return UTMPosition.convert(GeodeticDatum.WGS_84, pos);
+	/** Get a spherical mercator position */
+	private SphericalMercatorPosition getPosition(Point2D p) {
+		return new SphericalMercatorPosition(p.getX(), p.getY());
 	}
 
 	/** Create an incident */
 	private void createIncident(String replaces, EventType et,
-		int easting, int northing)
+		SphericalMercatorPosition smp)
 	{
 		LaneType lt = (LaneType)ltype_cbox.getSelectedItem();
 		if(lt != null) {
 			createIncident(replaces, et, (IncidentDetail)null, lt,
-				easting, northing);
+				smp);
 		}
 	}
 
 	/** Create an incident */
 	private void createIncident(String replaces, EventType et,
-		IncidentDetail dtl, LaneType lt, int easting, int northing)
+		IncidentDetail dtl, LaneType lt, SphericalMercatorPosition smp)
 	{
-		GeoLoc loc = r_node_manager.createGeoLoc(easting, northing,
+		GeoLoc loc = r_node_manager.createGeoLoc(smp,
 			lt == LaneType.CD_LANE);
 		if(loc != null)
 			createIncident(replaces, et, dtl, lt, loc);

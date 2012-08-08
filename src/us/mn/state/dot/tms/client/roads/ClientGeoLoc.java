@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,10 +130,10 @@ public class ClientGeoLoc implements GeoLoc {
 		return northing;
 	}
 
-	/** Distance from selected point */
-	protected final double distance;
+	/** Distance from selected point (in spherical mercator "meters") */
+	private final double distance;
 
-	/** Get distance from selected point */
+	/** Get distance from selected point (in spherical mercator "meters") */
 	public double getDistance() {
 		return distance;
 	}

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.io.PrintWriter;
 import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.MapLineSegment;
 import us.mn.state.dot.geokit.MapVector;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
@@ -428,5 +429,45 @@ public class GeoLocHelper extends BaseHelper {
 			return new MapVector(x, y);
 		} else
 			return null;
+	}
+
+	/** Calculate the distance from a point to a line segment.
+	 * @param l0 First end of line segment.
+	 * @param l1 Second end of line segment.
+	 * @param smp Selected point (spherical mercator position).
+	 * @return Distance from point to segment (spherical mercator "meters").
+	 */
+	static public double segmentDistance(GeoLoc l0, GeoLoc l1,
+		SphericalMercatorPosition smp)
+	{
+		SphericalMercatorPosition p0 = getPosition(l0);
+		SphericalMercatorPosition p1 = getPosition(l1);
+		if(p0 == null || p1 == null)
+			return Double.POSITIVE_INFINITY;
+		else {
+			MapLineSegment seg = new MapLineSegment(p0.getX(),
+				p0.getY(), p1.getX(), p1.getY());
+			return seg.distanceTo(smp.getX(), smp.getY());
+		}
+	}
+
+	/** Snap a point to a line segment on the map.
+	 * @param l0 First end of line segment.
+	 * @param l1 Second end of line segment.
+	 * @param smp Selected point (spherical mercator position).
+	 * @return Selected point snapped to line segment. */
+	static public SphericalMercatorPosition segmentSnap(GeoLoc l0,
+		GeoLoc l1, SphericalMercatorPosition smp)
+	{
+		SphericalMercatorPosition p0 = getPosition(l0);
+		SphericalMercatorPosition p1 = getPosition(l1);
+		if(p0 == null || p1 == null)
+			return null;
+		else {
+			MapLineSegment seg = new MapLineSegment(p0.getX(),
+				p0.getY(), p1.getX(), p1.getY());
+			MapVector pnt = seg.snap(smp.getX(), smp.getY());
+			return new SphericalMercatorPosition(pnt.x, pnt.y);
+		}
 	}
 }
