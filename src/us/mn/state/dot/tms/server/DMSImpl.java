@@ -1476,7 +1476,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			catch(TMSException e) {
 				logAction(e.getMessage());
 			}
-		} else
+		} else if(sm != null)
 			logAction("sched msg not sent " + sm.getMulti());
 		is_scheduled = false;
 	}
