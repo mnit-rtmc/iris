@@ -48,10 +48,10 @@ public interface Incident extends SonarObject {
 	short getDir();
 
 	/** Get the latitude */
-	float getLat();
+	double getLat();
 
 	/** Get the longitude */
-	float getLon();
+	double getLon();
 
 	/** Get the verification camera */
 	Camera getCamera();

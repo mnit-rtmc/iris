@@ -57,14 +57,14 @@ public interface GeoLoc extends SonarObject {
 	short getCrossMod();
 
 	/** Set the latitude */
-	void setLat(Float lt);
+	void setLat(Double lt);
 
 	/** Get the latitude */
-	Float getLat();
+	Double getLat();
 
 	/** Set the longitude */
-	void setLon(Float ln);
+	void setLon(Double ln);
 
 	/** Get the longitude */
-	Float getLon();
+	Double getLon();
 }

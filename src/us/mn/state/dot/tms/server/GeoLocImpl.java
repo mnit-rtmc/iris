@@ -49,8 +49,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 					row.getString(4),	// cross_street
 					row.getShort(5),	// cross_dir
 					row.getShort(6),	// cross_mod
-					(Float)row.getObject(7), // lat
-					(Float)row.getObject(8) // lon
+					(Double)row.getObject(7), // lat
+					(Double)row.getObject(8) // lon
 				));
 			}
 		});
@@ -87,7 +87,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Create a new geo location */
 	protected GeoLocImpl(String n, Road r, short rd, Road x, short xd,
-		short xm, Float lt, Float ln)
+		short xm, Double lt, Double ln)
 	{
 		this(n);
 		roadway = r;
@@ -101,7 +101,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Create a new geo location */
 	protected GeoLocImpl(Namespace ns, String n, String r, short rd,
-		String x, short xd, short xm, Float lt, Float ln)
+		String x, short xd, short xm, Double lt, Double ln)
 	{
 		this(n, (Road)ns.lookupObject(Road.SONAR_TYPE, r), rd,
 		     (Road)ns.lookupObject(Road.SONAR_TYPE, x), xd, xm, lt, ln);
@@ -219,15 +219,15 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Latitude */
-	private Float lat;
+	private Double lat;
 
 	/** Set the latitude */
-	public void setLat(Float lt) {
+	public void setLat(Double lt) {
 		lat = lt;
 	}
 
 	/** Set the latitude */
-	public void doSetLat(Float lt) throws TMSException {
+	public void doSetLat(Double lt) throws TMSException {
 		if(lt == lat)
 			return;
 		store.update(this, "lat", lt);
@@ -235,20 +235,20 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Get the latitude */
-	public Float getLat() {
+	public Double getLat() {
 		return lat;
 	}
 
 	/** Longitude */
-	private Float lon;
+	private Double lon;
 
 	/** Set the longitude */
-	public void setLon(Float ln) {
+	public void setLon(Double ln) {
 		lon = ln;
 	}
 
 	/** Set the longitude */
-	public void doSetLon(Float ln) throws TMSException {
+	public void doSetLon(Double ln) throws TMSException {
 		if(ln == lon)
 			return;
 		store.update(this, "lon", ln);
@@ -256,7 +256,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Get the longitude */
-	public Float getLon() {
+	public Double getLon() {
 		return lon;
 	}
 }

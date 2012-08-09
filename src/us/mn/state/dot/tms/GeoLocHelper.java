@@ -235,12 +235,12 @@ public class GeoLocHelper extends BaseHelper {
 	}
 
 	/** Get the latitude of a GeoLoc */
-	static public Float getLat(GeoLoc l) {
+	static public Double getLat(GeoLoc l) {
 		return l != null ? l.getLat() : null;
 	}
 
 	/** Get the longitude of a GeoLoc */
-	static public Float getLon(GeoLoc l) {
+	static public Double getLon(GeoLoc l) {
 		return l != null ? l.getLon() : null;
 	}
 
@@ -338,8 +338,8 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Return GeoLoc as a Position in WGS84 */
 	static public Position getWgs84Position(GeoLoc p) {
-		Float lat = getLat(p);
-		Float lon = getLon(p);
+		Double lat = getLat(p);
+		Double lon = getLon(p);
 		if(lat != null && lon != null)
 			return new Position(lat, lon);
 		else

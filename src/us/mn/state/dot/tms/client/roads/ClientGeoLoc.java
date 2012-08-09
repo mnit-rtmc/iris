@@ -105,28 +105,28 @@ public class ClientGeoLoc implements GeoLoc {
 	}
 
 	/** Latitude */
-	private final float lat;
+	private final double lat;
 
 	/** Set the latitude */
-	public void setLat(Float lt) {
+	public void setLat(Double lt) {
 		// part of GeoLoc interface
 	}
 
 	/** Get the latitude */
-	public Float getLat() {
+	public Double getLat() {
 		return lat;
 	}
 
 	/** Longitude */
-	private final float lon;
+	private final double lon;
 
 	/** Set the longitude */
-	public void setLon(Float ln) {
+	public void setLon(Double ln) {
 		// part of GeoLoc interface
 	}
 
 	/** Get the longitude */
-	public Float getLon() {
+	public Double getLon() {
 		return lon;
 	}
 

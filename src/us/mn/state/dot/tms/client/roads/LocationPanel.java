@@ -46,20 +46,20 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  */
 public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
-	/** Get the Float value of a spinner */
-	static private Float getSpinnerFloat(JSpinner s) {
+	/** Get the Double value of a spinner */
+	static private Double getSpinnerDouble(JSpinner s) {
 		Object v = s.getValue();
 		if(v instanceof Number) {
 			Number n = (Number)v;
-			float f = n.floatValue();
-			return f != 0 ? f : null;
+			double d = n.doubleValue();
+			return d != 0 ? d : null;
 		} else
 			return null;
 	}
 
-	/** Get a float to use for a spinner model */
-	static private float asFloat(Float f) {
-		return f != null ? f : 0;
+	/** Get a double to use for a spinner model */
+	static private double asDouble(Double d) {
+		return d != null ? d : 0;
 	}
 
 	/** GeoLoc action */
@@ -216,12 +216,12 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	protected void createJobs() {
 		new ChangeJob(this, lat_spn) {
 			public void perform() {
-				setLat(getSpinnerFloat(lat_spn));
+				setLat(getSpinnerDouble(lat_spn));
 			}
 		};
 		new ChangeJob(this, lon_spn) {
 			public void perform() {
-				setLon(getSpinnerFloat(lon_spn));
+				setLon(getSpinnerDouble(lon_spn));
 			}
 		};
 	}
@@ -234,14 +234,14 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Set the latitude */
-	private void setLat(Float lt) {
+	private void setLat(Double lt) {
 		GeoLoc l = loc;
 		if(l != null)
 			l.setLat(lt);
 	}
 
 	/** Set the longitude */
-	private void setLon(Float ln) {
+	private void setLon(Double ln) {
 		GeoLoc l = loc;
 		if(l != null)
 			l.setLon(ln);
@@ -294,13 +294,13 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		if(a == null || a.equals("lat")) {
 			boolean p = canUpdate(l, "lat");
 			lat_spn.setEnabled(p);
-			lat_spn.setValue(asFloat(l.getLat()));
+			lat_spn.setValue(asDouble(l.getLat()));
 			select_pt.setEnabled(p);
 		}
 		if(a == null || a.equals("lon")) {
 			boolean p = canUpdate(l, "lon");
 			lon_spn.setEnabled(p);
-			lon_spn.setValue(asFloat(l.getLon()));
+			lon_spn.setValue(asDouble(l.getLon()));
 			select_pt.setEnabled(p);
 		}
 	}

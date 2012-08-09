@@ -233,8 +233,8 @@ CREATE TABLE iris.geo_loc (
 	cross_street VARCHAR(20) REFERENCES iris.road(name),
 	cross_dir smallint REFERENCES iris.direction(id),
 	cross_mod smallint REFERENCES iris.road_modifier(id),
-	lat real,
-	lon real
+	lat double precision,
+	lon double precision
 );
 
 CREATE TABLE iris.map_extent (
@@ -1752,8 +1752,8 @@ CREATE TABLE event.incident (
 	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
 	road VARCHAR(20) NOT NULL,
 	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-	lat real NOT NULL,
-	lon real NOT NULL,
+	lat double precision NOT NULL,
+	lon double precision NOT NULL,
 	camera VARCHAR(10),
 	impact VARCHAR(20) NOT NULL,
 	cleared BOOLEAN NOT NULL

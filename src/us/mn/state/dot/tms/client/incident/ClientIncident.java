@@ -31,7 +31,7 @@ public class ClientIncident implements Incident {
 
 	/** Create a new client incident */
 	public ClientIncident(String rpl, int et, IncidentDetail id, short lnt,
-		Road rd, short d, float lt, float ln, String i)
+		Road rd, short d, double lt, double ln, String i)
 	{
 		replaces = rpl;
 		event_type = et;
@@ -110,18 +110,18 @@ public class ClientIncident implements Incident {
 	}
 
 	/** Latitude */
-	private final float lat;
+	private final double lat;
 
 	/** Get the latitude */
-	public float getLat() {
+	public double getLat() {
 		return lat;
 	}
 
 	/** Longitude */
-	private final float lon;
+	private final double lon;
 
 	/** Get the longitude */
-	public float getLon() {
+	public double getLon() {
 		return lon;
 	}
 

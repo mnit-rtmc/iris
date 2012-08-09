@@ -138,10 +138,10 @@ DROP VIEW roadway_station_view;
 DROP VIEW r_node_view;
 DROP VIEW geo_loc_view;
 
-ALTER TABLE iris.geo_loc ADD COLUMN lat real;
-ALTER TABLE iris.geo_loc ADD COLUMN lon real;
-ALTER TABLE event.incident ADD COLUMN lat real;
-ALTER TABLE event.incident ADD COLUMN lon real;
+ALTER TABLE iris.geo_loc ADD COLUMN lat double precision;
+ALTER TABLE iris.geo_loc ADD COLUMN lon double precision;
+ALTER TABLE event.incident ADD COLUMN lat double precision;
+ALTER TABLE event.incident ADD COLUMN lon double precision;
 
 UPDATE iris.geo_loc SET lat = utm_to_lat(
 (SELECT value::INTEGER FROM iris.system_attribute WHERE name = 'map_utm_zone'),

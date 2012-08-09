@@ -75,8 +75,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 					row.getShort(6),	// lane_type
 					row.getString(7),	// road
 					row.getShort(8),	// dir
-					row.getFloat(9),	// lat
-					row.getFloat(10),	// lon
+					row.getDouble(9),	// lat
+					row.getDouble(10),	// lon
 					row.getString(11),	// camera
 					row.getString(12),	// impact
 					row.getBoolean(13)	// cleared
@@ -121,8 +121,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Create an incident */
 	protected IncidentImpl(Namespace ns, String n, String rpl, int et,
-		Date ed, String dtl, short lnt, String r, short d, float lt,
-		float ln, String cam, String im, boolean c)
+		Date ed, String dtl, short lnt, String r, short d, double lt,
+		double ln, String cam, String im, boolean c)
 	{
 		this(n, rpl, et, ed, (IncidentDetail)ns.lookupObject(
 		     IncidentDetail.SONAR_TYPE, dtl), lnt,
@@ -132,8 +132,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Create an incident */
 	protected IncidentImpl(String n, String rpl, int et, Date ed,
-		IncidentDetail dtl, short lnt, Road r, short d, float lt,
-		float ln, Camera cam, String im, boolean c)
+		IncidentDetail dtl, short lnt, Road r, short d, double lt,
+		double ln, Camera cam, String im, boolean c)
 	{
 		super(n);
 		replaces = rpl;
@@ -216,18 +216,18 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Latitude */
-	private float lat;
+	private double lat;
 
 	/** Get the latitude */
-	public float getLat() {
+	public double getLat() {
 		return lat;
 	}
 
 	/** Longitude */
-	private float lon;
+	private double lon;
 
 	/** Get the longitude */
-	public float getLon() {
+	public double getLon() {
 		return lon;
 	}
 
