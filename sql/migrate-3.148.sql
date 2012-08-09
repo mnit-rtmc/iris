@@ -325,3 +325,4 @@ CREATE VIEW controller_report AS
 GRANT SELECT ON controller_report TO PUBLIC;
 
 DELETE FROM iris.system_attribute WHERE name = 'map_utm_zone';
+DELETE FROM iris.system_attribute WHERE name = 'map_northern_hemisphere';

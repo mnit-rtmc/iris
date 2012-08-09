@@ -1419,7 +1419,6 @@ incident_clear_secs	600
 kml_file_enable	false
 kml_filename	/var/www/html/iris-client/iris.kmz
 map_icon_size_scale_max	30
-map_northern_hemisphere	true
 map_segment_max_meters	2000
 meter_green_secs	1.3
 meter_max_red_secs	13.0

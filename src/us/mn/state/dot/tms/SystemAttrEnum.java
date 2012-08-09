@@ -75,8 +75,6 @@ public enum SystemAttrEnum {
 	KML_FILE_ENABLE(false),
 	KML_FILENAME("/var/www/html/iris-client/iris.kmz"),
 	MAP_ICON_SIZE_SCALE_MAX(30f, 0f, 1000f),
-	MAP_NORTHERN_HEMISPHERE(true),
-	MAP_UTM_ZONE(15, 1, 60),
 	MAP_SEGMENT_MAX_METERS(2000, 100, Change.RESTART_CLIENT),
 	METER_GREEN_SECS(1.3f, 0.1f, 10f),
 	METER_MAX_RED_SECS(13f, 5f, 30f),
