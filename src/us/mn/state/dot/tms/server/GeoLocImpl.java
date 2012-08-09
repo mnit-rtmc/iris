@@ -230,6 +230,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetLat(Double lt) throws TMSException {
 		if(lt == lat)
 			return;
+		if(lt != null && (lt < -85 || lt > 85))
+			throw new ChangeVetoException("Invalid latitude");
 		store.update(this, "lat", lt);
 		setLat(lt);
 	}
@@ -251,6 +253,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetLon(Double ln) throws TMSException {
 		if(ln == lon)
 			return;
+		if(ln != null && (ln < -180 || ln > 180))
+			throw new ChangeVetoException("Invalid longitude");
 		store.update(this, "lon", ln);
 		setLon(ln);
 	}
