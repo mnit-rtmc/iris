@@ -17,13 +17,12 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.geom.Point2D;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.JTextField;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.sched.ChangeJob;
+import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
@@ -46,20 +45,20 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  */
 public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
-	/** Get the Double value of a spinner */
-	static private Double getSpinnerDouble(JSpinner s) {
-		Object v = s.getValue();
-		if(v instanceof Number) {
-			Number n = (Number)v;
-			double d = n.doubleValue();
-			return d != 0 ? d : null;
-		} else
+	/** Get the Double value of a text field */
+	static private Double getTextDouble(JTextField tf) {
+		String v = tf.getText();
+		try {
+			return Double.parseDouble(v);
+		}
+		catch(NumberFormatException e) {
 			return null;
+		}
 	}
 
-	/** Get a double to use for a spinner model */
-	static private double asDouble(Double d) {
-		return d != null ? d : 0;
+	/** Get a double to use for a text field */
+	static private String asText(Double d) {
+		return d != null ? d.toString() : "";
 	}
 
 	/** GeoLoc action */
@@ -113,21 +112,19 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	private final JComboBox cross_dir_cbx = new JComboBox(
 		Direction.getAbbreviations());
 
-	/** Latitude spinner */
-	private final JSpinner lat_spn = new JSpinner(
-		new SpinnerNumberModel(0, -85.0, 85.0, 0.00001));
+	/** Latitude field */
+	private final JTextField lat_txt = new JTextField();
 
-	/** Longitude spinner */
-	private final JSpinner lon_spn = new JSpinner(
-		new SpinnerNumberModel(0, -180.0, 180.0, 0.00001));
+	/** Longitude field */
+	private final JTextField lon_txt = new JTextField();
 
 	/** Point selector */
 	private final PointSelector point_sel = new PointSelector() {
 		public void selectPoint(Point2D p) {
 			client.setPointSelector(null);
 			Position pos = getPosition(p);
-			lat_spn.setValue(pos.getLatitude());
-			lon_spn.setValue(pos.getLongitude());
+			setLat(pos.getLatitude());
+			setLon(pos.getLongitude());
 		}
 	};
 
@@ -193,9 +190,9 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		add(cross_cbx);
 		setWidth(1);
 		addRow(cross_dir_cbx);
-		add(new ILabel("location.lat"), lat_spn);
+		add(new ILabel("location.lat"), lat_txt);
 		finishRow();
-		add(new ILabel("location.lon"), lon_spn);
+		add(new ILabel("location.lon"), lon_txt);
 		finishRow();
 		setWidth(4);
 		updateSelectBag();
@@ -214,14 +211,14 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ChangeJob(this, lat_spn) {
+		new FocusJob(lat_txt) {
 			public void perform() {
-				setLat(getSpinnerDouble(lat_spn));
+				setLat(getTextDouble(lat_txt));
 			}
 		};
-		new ChangeJob(this, lon_spn) {
+		new FocusJob(lon_txt) {
 			public void perform() {
-				setLon(getSpinnerDouble(lon_spn));
+				setLon(getTextDouble(lon_txt));
 			}
 		};
 	}
@@ -293,14 +290,14 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		}
 		if(a == null || a.equals("lat")) {
 			boolean p = canUpdate(l, "lat");
-			lat_spn.setEnabled(p);
-			lat_spn.setValue(asDouble(l.getLat()));
+			lat_txt.setEnabled(p);
+			lat_txt.setText(asText(l.getLat()));
 			select_pt.setEnabled(p);
 		}
 		if(a == null || a.equals("lon")) {
 			boolean p = canUpdate(l, "lon");
-			lon_spn.setEnabled(p);
-			lon_spn.setValue(asDouble(l.getLon()));
+			lon_txt.setEnabled(p);
+			lon_txt.setText(asText(l.getLon()));
 			select_pt.setEnabled(p);
 		}
 	}
@@ -333,10 +330,10 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		cross_cbx.setSelectedIndex(0);
 		cross_dir_cbx.setEnabled(false);
 		cross_dir_cbx.setSelectedIndex(0);
-		lat_spn.setEnabled(false);
-		lat_spn.setValue(0);
-		lon_spn.setEnabled(false);
-		lon_spn.setValue(0);
+		lat_txt.setEnabled(false);
+		lat_txt.setText("");
+		lon_txt.setEnabled(false);
+		lon_txt.setText("");
 		select_pt.setEnabled(false);
 	}
 }
