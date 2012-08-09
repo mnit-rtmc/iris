@@ -115,7 +115,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
 	/** Latitude spinner */
 	private final JSpinner lat_spn = new JSpinner(
-		new SpinnerNumberModel(0, -180.0, 180.0, 0.00001));
+		new SpinnerNumberModel(0, -85.0, 85.0, 0.00001));
 
 	/** Longitude spinner */
 	private final JSpinner lon_spn = new JSpinner(
