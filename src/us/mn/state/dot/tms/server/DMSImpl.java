@@ -86,7 +86,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	static protected final IDebugLog ACTION_LOG = new IDebugLog("action");
 
 	/** DMS name, e.g. CMS or DMS */
-	static private final String DMSABBR = I18N.get("dms.abbreviation");
+	static private final String DMSABBR = I18N.get("dms");
 
 	/** Compare two (possibly-null) integers for equality */
 	static protected boolean integerEquals(Integer i0, Integer i1) {

@@ -58,7 +58,7 @@ public class DMSList implements KmlFolder {
 
 	/** get kml document name (KmlFolder interface) */
 	public String getFolderName() {
-		return I18N.get("dms.abbreviation");
+		return I18N.get("dms");
 	}
 
 	/** render to kml (KmlFolder interface) */
