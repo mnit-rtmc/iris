@@ -5,6 +5,123 @@ SET SESSION AUTHORIZATION 'tms';
 UPDATE iris.system_attribute SET value = '3.148.0'
 	WHERE name = 'database_version';
 
+CREATE OR REPLACE FUNCTION zone_meridian(zone INTEGER) RETURNS double precision
+	AS $$
+BEGIN
+	RETURN radians((zone - 1) * 6 - 180 + 3);
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION utm_to_lat(zone INTEGER, easting INTEGER,
+	northing INTEGER) RETURNS double precision AS $$
+DECLARE
+	a double precision;	-- equatorial radius
+	prad double precision;	-- polar radius
+	ecc double precision;	-- eccentricity
+	e2 double precision;	-- eccentricity squared
+	k0 double precision;	-- scale at central meridian
+	ep2 double precision;	-- eccentricity squared prime
+	e1 double precision;
+	x double precision;
+	y double precision;
+	m double precision;
+	mu double precision;
+	phi double precision;
+	n1 double precision;
+	t1 double precision;
+	t2 double precision;
+	c1 double precision;
+	c2 double precision;
+	r1 double precision;
+	d double precision;
+	lat_r double precision;	-- latitude radians
+BEGIN
+	a := 6378137.0;
+	prad := 6356752.314245;
+	ecc := sqrt(1 - prad ^ 2 / a ^ 2);
+	e2 := ecc ^ 2;
+	k0 := 0.9996;
+	ep2 := e2 / (1 - e2);
+	e1 := (1 - sqrt(1 - e2)) / (1 + sqrt(1 - e2));
+	x := easting - 500000.0;
+	y := northing;
+	m := y / k0;
+	mu := m / (a * (1 - e2 / 4 - 3 * e2 ^ 2 / 64 - 5 * e2 ^ 3 / 256));
+	phi := (mu +
+                (3 * e1 / 2 - 27 * e1 ^ 3 / 32) * sin(2 * mu) +
+                (21 * e1 ^ 2 / 16 - 55 * e1 ^ 4 / 32) * sin(4 * mu) +
+                (151 * e1 ^ 3 / 96) * sin(6 * mu)
+        );
+	n1 := a / sqrt(1 - e2 * sin(phi) ^ 2);
+	t1 := tan(phi) ^ 2;
+	t2 := t1 ^ 2;
+	c1 := ep2 * cos(phi) ^ 2;
+	c2 := c1 ^ 2;
+	r1 := a * (1 - e2) / (1 - e2 * sin(phi) ^ 2) ^ 1.5;
+	d := x / (n1 * k0);
+	lat_r := phi - (n1 * tan(phi) / r1) * (
+		d ^ 2 / 2 - (5 + 3 * t1 + 10 * c1 - 4 * c2 - 9 * ep2)
+                * d ^ 4 / 24 +
+                (61 + 90 * t1 + 298 * c1 + 45 * t2 - 252 * ep2 - 3 * c2)
+                * d ^ 6 / 720
+        );
+	RETURN degrees(lat_r);
+END
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION utm_to_lon(zone INTEGER, easting INTEGER,
+	northing INTEGER) RETURNS double precision AS $$
+DECLARE
+	a double precision;	-- equatorial radius
+	prad double precision;	-- polar radius
+	ecc double precision;	-- eccentricity
+	e2 double precision;	-- eccentricity squared
+	k0 double precision;	-- scale at central meridian
+	ep2 double precision;	-- eccentricity squared prime
+	e1 double precision;
+	x double precision;
+	y double precision;
+	m double precision;
+	mu double precision;
+	phi double precision;
+	n1 double precision;
+	t1 double precision;
+	t2 double precision;
+	c1 double precision;
+	c2 double precision;
+	d double precision;
+	lon_r double precision; -- longitude radians
+BEGIN
+	a := 6378137.0;
+	prad := 6356752.314245;
+	ecc := sqrt(1 - prad ^ 2 / a ^ 2);
+	e2 := ecc ^ 2;
+	k0 := 0.9996;
+	ep2 := e2 / (1 - e2);
+	e1 := (1 - sqrt(1 - e2)) / (1 + sqrt(1 - e2));
+	x := easting - 500000.0;
+	y := northing;
+	m := y / k0;
+	mu := m / (a * (1 - e2 / 4 - 3 * e2 ^ 2 / 64 - 5 * e2 ^ 3 / 256));
+	phi := (mu +
+                (3 * e1 / 2 - 27 * e1 ^ 3 / 32) * sin(2 * mu) +
+                (21 * e1 ^ 2 / 16 - 55 * e1 ^ 4 / 32) * sin(4 * mu) +
+                (151 * e1 ^ 3 / 96) * sin(6 * mu)
+        );
+	n1 := a / sqrt(1 - e2 * sin(phi) ^ 2);
+	t1 := tan(phi) ^ 2;
+	t2 := t1 ^ 2;
+	c1 := ep2 * cos(phi) ^ 2;
+	c2 := c1 ^ 2;
+	d := x / (n1 * k0);
+	lon_r := (d - (1 + 2 * t1 + c1) * d ^ 3 / 6 +
+                (5 - 2 * c1 + 28 * t1 - 3 * c2 + 8 * ep2 + 24 * t2)
+                * d ^ 5 / 120) / cos(phi) + zone_meridian(zone);
+	RETURN degrees(lon_r);
+END
+$$ LANGUAGE plpgsql;
+
 DROP VIEW controller_report;
 DROP VIEW controller_device_view;
 DROP VIEW detector_view;
@@ -26,7 +143,23 @@ ALTER TABLE iris.geo_loc ADD COLUMN lon real;
 ALTER TABLE event.incident ADD COLUMN lat real;
 ALTER TABLE event.incident ADD COLUMN lon real;
 
--- FIXME: convert UTM to lan/lon
+UPDATE iris.geo_loc SET lat = utm_to_lat(
+(SELECT value::INTEGER FROM iris.system_attribute WHERE name = 'map_utm_zone'),
+easting, northing);
+UPDATE iris.geo_loc SET lon = utm_to_lon(
+(SELECT value::INTEGER FROM iris.system_attribute WHERE name = 'map_utm_zone'),
+easting, northing);
+
+UPDATE event.incident SET lat = utm_to_lat(
+(SELECT value::INTEGER FROM iris.system_attribute WHERE name = 'map_utm_zone'),
+easting, northing);
+UPDATE event.incident SET lon = utm_to_lon(
+(SELECT value::INTEGER FROM iris.system_attribute WHERE name = 'map_utm_zone'),
+easting, northing);
+
+DROP FUNCTION utm_to_lat(INTEGER, INTEGER, INTEGER);
+DROP FUNCTION utm_to_lon(INTEGER, INTEGER, INTEGER);
+DROP FUNCTION zone_meridian(INTEGER);
 
 ALTER TABLE iris.geo_loc DROP COLUMN easting;
 ALTER TABLE iris.geo_loc DROP COLUMN northing;
