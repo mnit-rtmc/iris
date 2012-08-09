@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		System.err.println("Loading geo locations...");
 		namespace.registerType(SONAR_TYPE, GeoLocImpl.class);
 		store.query("SELECT name, roadway, road_dir, cross_street, " +
-			" cross_dir, cross_mod, easting, northing FROM iris." +
+			" cross_dir, cross_mod, lat, lon FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -49,8 +49,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 					row.getString(4),	// cross_street
 					row.getShort(5),	// cross_dir
 					row.getShort(6),	// cross_mod
-					(Integer)row.getObject(7), // easting
-					(Integer)row.getObject(8) // northing
+					(Float)row.getObject(7), // lat
+					(Float)row.getObject(8) // lon
 				));
 			}
 		});
@@ -65,8 +65,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		map.put("cross_street", cross_street);
 		map.put("cross_dir", cross_dir);
 		map.put("cross_mod", cross_mod);
-		map.put("easting", easting);
-		map.put("northing", northing);
+		map.put("lat", lat);
+		map.put("lon", lon);
 		return map;
 	}
 
@@ -87,7 +87,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Create a new geo location */
 	protected GeoLocImpl(String n, Road r, short rd, Road x, short xd,
-		short xm, Integer e, Integer nr)
+		short xm, Float lt, Float ln)
 	{
 		this(n);
 		roadway = r;
@@ -95,16 +95,16 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		cross_street = x;
 		cross_dir = xd;
 		cross_mod = xm;
-		easting = e;
-		northing = nr;
+		lat = lt;
+		lon = ln;
 	}
 
 	/** Create a new geo location */
 	protected GeoLocImpl(Namespace ns, String n, String r, short rd,
-		String x, short xd, short xm, Integer e, Integer nr)
+		String x, short xd, short xm, Float lt, Float ln)
 	{
 		this(n, (Road)ns.lookupObject(Road.SONAR_TYPE, r), rd,
-		     (Road)ns.lookupObject(Road.SONAR_TYPE, x), xd, xm, e, nr);
+		     (Road)ns.lookupObject(Road.SONAR_TYPE, x), xd, xm, lt, ln);
 	}
 
 	/** Roadway road */
@@ -218,49 +218,45 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return cross_mod;
 	}
 
-	/** UTM Easting */
-	protected Integer easting;
+	/** Latitude */
+	private Float lat;
 
-	/** Set the UTM Easting */
-	public void setEasting(Integer x) {
-		easting = x;
+	/** Set the latitude */
+	public void setLat(Float lt) {
+		lat = lt;
 	}
 
-	/** Set the UTM Easting */
-	public void doSetEasting(Integer x) throws TMSException {
-		if(x == easting)
+	/** Set the latitude */
+	public void doSetLat(Float lt) throws TMSException {
+		if(lt == lat)
 			return;
-		if(x != null && x.intValue() < 0)
-			throw new ChangeVetoException("Invalid Easting");
-		store.update(this, "easting", x);
-		setEasting(x);
+		store.update(this, "lat", lt);
+		setLat(lt);
 	}
 
-	/** Get the UTM Easting */
-	public Integer getEasting() {
-		return easting;
+	/** Get the latitude */
+	public Float getLat() {
+		return lat;
 	}
 
-	/** UTM Northing */
-	protected Integer northing;
+	/** Longitude */
+	private Float lon;
 
-	/** Set the UTM Northing */
-	public void setNorthing(Integer y) {
-		northing = y;
+	/** Set the longitude */
+	public void setLon(Float ln) {
+		lon = ln;
 	}
 
-	/** Set the UTM Northing */
-	public void doSetNorthing(Integer y) throws TMSException {
-		if(y == northing)
+	/** Set the longitude */
+	public void doSetLon(Float ln) throws TMSException {
+		if(ln == lon)
 			return;
-		if(y != null && y.intValue() < 0)
-			throw new ChangeVetoException("Invalid Northing");
-		store.update(this, "northing", y);
-		setNorthing(y);
+		store.update(this, "lon", ln);
+		setLon(ln);
 	}
 
-	/** Get the UTM Northing */
-	public Integer getNorthing() {
-		return northing;
+	/** Get the longitude */
+	public Float getLon() {
+		return lon;
 	}
 }

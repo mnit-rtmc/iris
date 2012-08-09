@@ -29,8 +29,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
-import us.mn.state.dot.geokit.GeodeticDatum;
-import us.mn.state.dot.geokit.UTMPosition;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
@@ -489,12 +488,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		SphericalMercatorPosition pos = GeoLocHelper.segmentSnap(l0,
 			l1, smp);
 		if(pos != null) {
-			UTMPosition utm = UTMPosition.convert(
-				GeodeticDatum.WGS_84, pos.getPosition());
-			int easting = (int)Math.round(utm.getEasting());
-			int northing = (int)Math.round(utm.getNorthing());
+			Position p = pos.getPosition();
+			float lat = (float)p.getLatitude();
+			float lon = (float)p.getLongitude();
 			return new ClientGeoLoc(l0.getRoadway(),
-				l0.getRoadDir(), easting, northing, dist);
+				l0.getRoadDir(), lat, lon, dist);
 		} else
 			return null;
 	}

@@ -14,9 +14,7 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
@@ -32,17 +30,17 @@ import us.mn.state.dot.tms.Road;
 public class ClientIncident implements Incident {
 
 	/** Create a new client incident */
-	public ClientIncident(String rpl, int et, IncidentDetail id, short lt,
-		Road rd, short d, int e, int n, String i)
+	public ClientIncident(String rpl, int et, IncidentDetail id, short lnt,
+		Road rd, short d, float lt, float ln, String i)
 	{
 		replaces = rpl;
 		event_type = et;
 		detail = id;
-		lane_type = LaneType.fromOrdinal(lt);
+		lane_type = LaneType.fromOrdinal(lnt);
 		road = rd;
 		dir = d;
-		easting = e;
-		northing = n;
+		lat = lt;
+		lon = ln;
 		impact = i;
 	}
 
@@ -111,20 +109,20 @@ public class ClientIncident implements Incident {
 		return dir;
 	}
 
-	/** UTM easting */
-	protected final int easting;
+	/** Latitude */
+	private final float lat;
 
-	/** Get the UTM Easting */
-	public int getEasting() {
-		return easting;
+	/** Get the latitude */
+	public float getLat() {
+		return lat;
 	}
 
-	/** UTM northing */
-	protected final int northing;
+	/** Longitude */
+	private final float lon;
 
-	/** Get the UTM Northing */
-	public int getNorthing() {
-		return northing;
+	/** Get the longitude */
+	public float getLon() {
+		return lon;
 	}
 
 	/** Get the verification camera */
@@ -162,8 +160,6 @@ public class ClientIncident implements Incident {
 
 	/** Get Position in WGS84 */
 	public Position getWgs84Position() {
-		UTMPosition utm = new UTMPosition(GeoLocHelper.getZone(),
-			easting, northing);
-		return utm.getPosition(GeodeticDatum.WGS_84);
+		return new Position(lat, lon);
 	}
 }

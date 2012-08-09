@@ -240,13 +240,14 @@ public class IncidentCreator extends JPanel {
 		loc = snapGeoLoc(lt, loc);
 		Road road = loc.getRoadway();
 		short dir = loc.getRoadDir();
-		int east = GeoLocHelper.getEasting(loc);
-		int north = GeoLocHelper.getNorthing(loc);
+		Position pos = GeoLocHelper.getWgs84Position(loc);
 		int n_lanes = getLaneCount(lt, loc);
-		if(n_lanes > 0) {
+		if(pos != null && n_lanes > 0) {
 			ClientIncident ci = new ClientIncident(replaces, et.id,
-				dtl, (short)lt.ordinal(), road, dir, east,
-				north, createImpact(n_lanes));
+				dtl, (short)lt.ordinal(), road, dir,
+				(float)pos.getLatitude(),
+				(float)pos.getLongitude(),
+				createImpact(n_lanes));
 			selectionModel.setSelected(ci);
 		}
 	}

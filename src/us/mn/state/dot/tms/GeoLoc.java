@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,15 +56,15 @@ public interface GeoLoc extends SonarObject {
 	/** Get the cross street modifier */
 	short getCrossMod();
 
-	/** Set the UTM Easting */
-	void setEasting(Integer x);
+	/** Set the latitude */
+	void setLat(Float lt);
 
-	/** Get the UTM Easting */
-	Integer getEasting();
+	/** Get the latitude */
+	Float getLat();
 
-	/** Set the UTM Northing */
-	void setNorthing(Integer y);
+	/** Set the longitude */
+	void setLon(Float ln);
 
-	/** Get the UTM Northing */
-	Integer getNorthing();
+	/** Get the longitude */
+	Float getLon();
 }

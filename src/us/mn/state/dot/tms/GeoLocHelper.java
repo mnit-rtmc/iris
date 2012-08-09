@@ -15,13 +15,10 @@
 package us.mn.state.dot.tms;
 
 import java.io.PrintWriter;
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.MapLineSegment;
 import us.mn.state.dot.geokit.MapVector;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.geokit.UTMPosition;
-import us.mn.state.dot.geokit.UTMZone;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -34,12 +31,6 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Future detector label */
 	static public final String FUTURE = "FUTURE";
-
-	/** Get the UTM zone for the system */
-	static public UTMZone getZone() {
-		return new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
-			SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean());
-	}
 
 	/** Don't create any instances */
 	private GeoLocHelper() {
@@ -243,25 +234,19 @@ public class GeoLocHelper extends BaseHelper {
 			 filterDirection(l1.getRoadDir(), r1));
 	}
 
-	/** Get the UTM easting */
-	static public Integer getEasting(GeoLoc l) {
-		if(l != null)
-			return l.getEasting();
-		else
-			return null;
+	/** Get the latitude of a GeoLoc */
+	static public Float getLat(GeoLoc l) {
+		return l != null ? l.getLat() : null;
 	}
 
-	/** Get the UTM northing */
-	static public Integer getNorthing(GeoLoc l) {
-		if(l != null)
-			return l.getNorthing();
-		else
-			return null;
+	/** Get the longitude of a GeoLoc */
+	static public Float getLon(GeoLoc l) {
+		return l != null ? l.getLon() : null;
 	}
 
-	/** Check if the UTM coordinates are null */
+	/** Check if the coordinates are null */
 	static public boolean isNull(GeoLoc l) {
-		return (getEasting(l) == null) || (getNorthing(l) == null);
+		return (getLat(l) == null) || (getLon(l) == null);
 	}
 
 	/** Calculate the distance between two locations (in meters) */
@@ -353,12 +338,12 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Return GeoLoc as a Position in WGS84 */
 	static public Position getWgs84Position(GeoLoc p) {
-		Integer easting = getEasting(p);
-		Integer northing = getNorthing(p);
-		if(easting == null || northing == null)
+		Float lat = getLat(p);
+		Float lon = getLon(p);
+		if(lat != null && lon != null)
+			return new Position(lat, lon);
+		else
 			return null;
-		UTMPosition utm = new UTMPosition(getZone(), easting, northing);
-		return utm.getPosition(GeodeticDatum.WGS_84);
 	}
 
 	/** Create a spherical mercator position */

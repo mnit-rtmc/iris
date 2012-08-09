@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,11 +47,11 @@ public interface Incident extends SonarObject {
 	/** Get the road direction */
 	short getDir();
 
-	/** Get the UTM Easting */
-	int getEasting();
+	/** Get the latitude */
+	float getLat();
 
-	/** Get the UTM Northing */
-	int getNorthing();
+	/** Get the longitude */
+	float getLon();
 
 	/** Get the verification camera */
 	Camera getCamera();

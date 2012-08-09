@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,24 +118,24 @@ public class IncidentLoc implements GeoLoc {
 			return 0;
 	}
 
-	/** Set the UTM Easting */
-	public void setEasting(Integer x) {
+	/** Set the latitude */
+	public void setLat(Float lt) {
 		// part of GeoLoc interface
 	}
 
-	/** Get the UTM Easting */
-	public Integer getEasting() {
-		return incident.getEasting();
+	/** Get the latitude */
+	public Float getLat() {
+		return incident.getLat();
 	}
 
-	/** Set the UTM Northing */
-	public void setNorthing(Integer y) {
+	/** Set the longitude */
+	public void setLon(Float ln) {
 		// part of GeoLoc interface
 	}
 
-	/** Get the UTM Northing */
-	public Integer getNorthing() {
-		return incident.getNorthing();
+	/** Get the longitude */
+	public Float getLon() {
+		return incident.getLon();
 	}
 
 	/** Get a description of an incident location */

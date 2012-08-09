@@ -21,9 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.Camera;
@@ -63,8 +61,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		System.err.println("Loading active incidents...");
 		namespace.registerType(SONAR_TYPE, IncidentImpl.class);
 		store.query("SELECT name, replaces, event_desc_id, " +
-			"event_date, detail, lane_type, road, dir, easting, " +
-			"northing, camera, impact, cleared FROM event." +
+			"event_date, detail, lane_type, road, dir, lat, " +
+			"lon, camera, impact, cleared FROM event." +
 			SONAR_TYPE + " WHERE cleared = 'f';",new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -77,8 +75,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 					row.getShort(6),	// lane_type
 					row.getString(7),	// road
 					row.getShort(8),	// dir
-					row.getInt(9),		// easting
-					row.getInt(10),		// northing
+					row.getFloat(9),	// lat
+					row.getFloat(10),	// lon
 					row.getString(11),	// camera
 					row.getString(12),	// impact
 					row.getBoolean(13)	// cleared
@@ -98,8 +96,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		map.put("lane_type", lane_type);
 		map.put("road", road);
 		map.put("dir", dir);
-		map.put("easting", easting);
-		map.put("northing", northing);
+		map.put("lat", lat);
+		map.put("lon", lon);
 		map.put("camera", camera);
 		map.put("impact", impact);
 		map.put("cleared", cleared);
@@ -123,30 +121,30 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Create an incident */
 	protected IncidentImpl(Namespace ns, String n, String rpl, int et,
-		Date ed, String dtl, short lt, String r, short d, int ue,
-		int un, String cam, String im, boolean c)
+		Date ed, String dtl, short lnt, String r, short d, float lt,
+		float ln, String cam, String im, boolean c)
 	{
 		this(n, rpl, et, ed, (IncidentDetail)ns.lookupObject(
-		     IncidentDetail.SONAR_TYPE, dtl), lt,
-		     (Road)ns.lookupObject(Road.SONAR_TYPE, r), d, ue, un,
+		     IncidentDetail.SONAR_TYPE, dtl), lnt,
+		     (Road)ns.lookupObject(Road.SONAR_TYPE, r), d, lt, ln,
 		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam), im, c);
 	}
 
 	/** Create an incident */
 	protected IncidentImpl(String n, String rpl, int et, Date ed,
-		IncidentDetail dtl, short lt, Road r, short d, int ue, int un,
-		Camera cam, String im, boolean c)
+		IncidentDetail dtl, short lnt, Road r, short d, float lt,
+		float ln, Camera cam, String im, boolean c)
 	{
 		super(n);
 		replaces = rpl;
 		event_desc_id = et;
 		event_date = new Date(ed.getTime());
 		detail = dtl;
-		lane_type = lt;
+		lane_type = lnt;
 		road = r;
 		dir = d;
-		easting = ue;
-		northing = un;
+		lat = lt;
+		lon = ln;
 		camera = cam;
 		impact = im;
 		cleared = c;
@@ -217,20 +215,20 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		return dir;
 	}
 
-	/** UTM Easting */
-	protected int easting;
+	/** Latitude */
+	private float lat;
 
-	/** Get the UTM Easting */
-	public int getEasting() {
-		return easting;
+	/** Get the latitude */
+	public float getLat() {
+		return lat;
 	}
 
-	/** UTM Northing */
-	protected int northing;
+	/** Longitude */
+	private float lon;
 
-	/** Get the UTM Northing */
-	public int getNorthing() {
-		return northing;
+	/** Get the longitude */
+	public float getLon() {
+		return lon;
 	}
 
 	/** Camera for verificaiton */
@@ -349,9 +347,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Get Position in WGS84 */
-	protected Position getWgs84Position() {
-		UTMPosition utm = new UTMPosition(GeoLocHelper.getZone(),
-			easting, northing);
-		return utm.getPosition(GeodeticDatum.WGS_84);
+	private Position getWgs84Position() {
+		return new Position(lat, lon);
 	}
 }

@@ -251,8 +251,8 @@ public class IncidentDispatcher extends JPanel
 	private void editIncident(Incident inc) {
 		ClientIncident ci = new ClientIncident(inc.getName(),
 			inc.getEventType(), inc.getDetail(), inc.getLaneType(),
-			inc.getRoad(), inc.getDir(), inc.getEasting(),
-			inc.getNorthing(), inc.getImpact());
+			inc.getRoad(), inc.getDir(), inc.getLat(),
+			inc.getLon(), inc.getImpact());
 		selectionModel.setSelected(ci);
 		creator.replaceIncident(inc);
 	}
@@ -279,8 +279,8 @@ public class IncidentDispatcher extends JPanel
 			attrs.put("lane_type", inc.getLaneType());
 			attrs.put("road", inc.getRoad());
 			attrs.put("dir", inc.getDir());
-			attrs.put("easting", inc.getEasting());
-			attrs.put("northing", inc.getNorthing());
+			attrs.put("lat", inc.getLat());
+			attrs.put("lon", inc.getLon());
 			attrs.put("camera", getSelectedCamera());
 			attrs.put("impact", impact_pnl.getImpact());
 			attrs.put("cleared", false);
@@ -307,8 +307,8 @@ public class IncidentDispatcher extends JPanel
 		return getSelectedDetail() != rpl.getDetail() ||
 		       inc.getRoad() != rpl.getRoad() ||
 		       inc.getDir() != rpl.getDir() ||
-		       inc.getEasting() != rpl.getEasting() ||
-		       inc.getNorthing() != rpl.getNorthing() ||
+		       inc.getLat() != rpl.getLat() ||
+		       inc.getLon() != rpl.getLon() ||
 		       getSelectedCamera() != rpl.getCamera();
 	}
 

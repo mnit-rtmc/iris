@@ -25,11 +25,11 @@ import us.mn.state.dot.tms.Road;
 public class ClientGeoLoc implements GeoLoc {
 
 	/** Create a client location */
-	public ClientGeoLoc(Road road, short rd, int e, int n, double d) {
+	public ClientGeoLoc(Road road, short rd, float lt, float ln, double d) {
 		roadway = road;
 		road_dir = rd;
-		easting = e;
-		northing = n;
+		lat = lt;
+		lon = ln;
 		distance = d;
 	}
 
@@ -104,30 +104,30 @@ public class ClientGeoLoc implements GeoLoc {
 		return 0;
 	}
 
-	/** UTM Easting */
-	protected final int easting;
+	/** Latitude */
+	private final float lat;
 
-	/** Set the UTM Easting */
-	public void setEasting(Integer x) {
+	/** Set the latitude */
+	public void setLat(Float lt) {
 		// part of GeoLoc interface
 	}
 
-	/** Get the UTM Easting */
-	public Integer getEasting() {
-		return easting;
+	/** Get the latitude */
+	public Float getLat() {
+		return lat;
 	}
 
-	/** UTM Northing */
-	protected final int northing;
+	/** Longitude */
+	private final float lon;
 
-	/** Set the UTM Northing */
-	public void setNorthing(Integer y) {
+	/** Set the longitude */
+	public void setLon(Float ln) {
 		// part of GeoLoc interface
 	}
 
-	/** Get the UTM Northing */
-	public Integer getNorthing() {
-		return northing;
+	/** Get the longitude */
+	public Float getLon() {
+		return lon;
 	}
 
 	/** Distance from selected point (in spherical mercator "meters") */

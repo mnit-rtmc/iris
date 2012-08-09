@@ -233,14 +233,14 @@ CREATE TABLE iris.geo_loc (
 	cross_street VARCHAR(20) REFERENCES iris.road(name),
 	cross_dir smallint REFERENCES iris.direction(id),
 	cross_mod smallint REFERENCES iris.road_modifier(id),
-	easting integer,
-	northing integer
+	lat real,
+	lon real
 );
 
 CREATE TABLE iris.map_extent (
 	name VARCHAR(20) PRIMARY KEY,
-	lon real NOT NULL,
 	lat real NOT NULL,
+	lon real NOT NULL,
 	zoom INTEGER NOT NULL
 );
 
@@ -919,7 +919,7 @@ CREATE VIEW geo_loc_view AS
 	r_dir.direction AS road_dir, r_dir.dir AS rdir,
 	m.modifier AS cross_mod, m.mod AS xmod, c.abbrev as xst,
 	l.cross_street, c_dir.direction AS cross_dir,
-	l.easting, l.northing
+	l.lat, l.lon
 	FROM iris.geo_loc l
 	LEFT JOIN iris.road r ON l.roadway = r.name
 	LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
@@ -958,7 +958,7 @@ CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.camera,
 	d.aws_allowed, d.aws_controlled, d.default_font,
 	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing
+	l.lat, l.lon
 	FROM iris.dms d
 	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON dms_view TO PUBLIC;
@@ -985,7 +985,7 @@ CREATE VIEW ramp_meter_view AS
 	alg.description AS algorithm, am_target, pm_target, camera,
 	ml.description AS meter_lock,
 	l.rd, l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing
+	l.lat, l.lon
 	FROM iris.ramp_meter m
 	LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
 	LEFT JOIN iris.meter_algorithm alg ON m.algorithm = alg.id
@@ -1001,7 +1001,7 @@ CREATE VIEW camera_view AS
 	SELECT c.name, c.notes, c.encoder, c.encoder_channel,
 	et.description AS encoder_type, c.publish, c.geo_loc, l.roadway,
 	l.road_dir, l.cross_mod, l.cross_street,
-	l.cross_dir, l.easting, l.northing,
+	l.cross_dir, l.lat, l.lon,
 	c.controller, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.camera c
 	JOIN iris.encoder_type et ON c.encoder_type = et.id
@@ -1012,7 +1012,7 @@ GRANT SELECT ON camera_view TO PUBLIC;
 CREATE VIEW warning_sign_view AS
 	SELECT w.name, w.notes, w.message, w.camera, w.geo_loc,
 	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing,
+	l.lat, l.lon,
 	w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.warning_sign w
 	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
@@ -1022,7 +1022,7 @@ GRANT SELECT ON warning_sign_view TO PUBLIC;
 CREATE VIEW lane_marking_view AS
 	SELECT m.name, m.notes, m.geo_loc,
 	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing,
+	l.lat, l.lon,
 	m.controller, m.pin, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.lane_marking m
 	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
@@ -1032,7 +1032,7 @@ GRANT SELECT ON lane_marking_view TO PUBLIC;
 CREATE VIEW weather_sensor_view AS
 	SELECT w.name, w.notes, w.geo_loc,
 	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing,
+	l.lat, l.lon,
 	w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.weather_sensor w
 	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
@@ -1373,7 +1373,7 @@ camera_num_preset_btns	3
 camera_ptz_panel_enable	false
 camera_stream_duration_secs	60
 client_units_si	true
-database_version	3.147.0
+database_version	3.148.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
@@ -1420,7 +1420,6 @@ kml_file_enable	false
 kml_filename	/var/www/html/iris-client/iris.kmz
 map_icon_size_scale_max	30
 map_northern_hemisphere	true
-map_utm_zone	15
 map_segment_max_meters	2000
 meter_green_secs	1.3
 meter_max_red_secs	13.0
@@ -1753,8 +1752,8 @@ CREATE TABLE event.incident (
 	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
 	road VARCHAR(20) NOT NULL,
 	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-	easting INTEGER NOT NULL,
-	northing INTEGER NOT NULL,
+	lat real NOT NULL,
+	lon real NOT NULL,
 	camera VARCHAR(10),
 	impact VARCHAR(20) NOT NULL,
 	cleared BOOLEAN NOT NULL

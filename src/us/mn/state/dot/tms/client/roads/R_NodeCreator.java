@@ -15,9 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.util.HashMap;
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
@@ -93,12 +91,11 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	public void create(Road roadway, short road_dir, Position pos,
 		int lanes, int shift)
 	{
-		Integer easting = null;
-		Integer northing = null;
-		UTMPosition utm = UTMPosition.convert(GeodeticDatum.WGS_84,pos);
-		if(utm != null) {
-			easting = (int)Math.round(utm.getEasting());
-			northing = (int)Math.round(utm.getNorthing());
+		Float lat = null;
+		Float lon = null;
+		if(pos != null) {
+			lat = (float)pos.getLatitude();
+			lon = (float)pos.getLongitude();
 		}
 		String name = createUniqueR_NodeName();
 		if(canAdd(name)) {
@@ -108,8 +105,8 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 			if(roadway != null)
 				attrs.put("roadway", roadway);
 			attrs.put("road_dir", new Short(road_dir));
-			attrs.put("easting", easting);
-			attrs.put("northing", northing);
+			attrs.put("lat", lat);
+			attrs.put("lon", lon);
 			geo_locs.createObject(name, attrs);
 		}
 	}

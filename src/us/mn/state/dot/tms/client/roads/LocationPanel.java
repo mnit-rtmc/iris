@@ -19,10 +19,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ChangeJob;
@@ -48,26 +46,20 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  */
 public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
-	/** Get the Integer value of a spinner */
-	static private int getSpinnerInt(JSpinner s) {
-		return (Integer)s.getValue();
-	}
-
-	/** Get the Integer value of a spinner */
-	static private Integer getSpinnerInteger(JSpinner s) {
-		int i = getSpinnerInt(s);
-		if(i != 0)
-			return i;
-		else
+	/** Get the Float value of a spinner */
+	static private Float getSpinnerFloat(JSpinner s) {
+		Object v = s.getValue();
+		if(v instanceof Number) {
+			Number n = (Number)v;
+			float f = n.floatValue();
+			return f != 0 ? f : null;
+		} else
 			return null;
 	}
 
-	/** Get an int to use for a spinner model */
-	static private int asInt(Integer i) {
-		if(i != null)
-			return i;
-		else
-			return 0;
+	/** Get a float to use for a spinner model */
+	static private float asFloat(Float f) {
+		return f != null ? f : 0;
 	}
 
 	/** GeoLoc action */
@@ -121,21 +113,21 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	private final JComboBox cross_dir_cbx = new JComboBox(
 		Direction.getAbbreviations());
 
-	/** UTM Easting */
-	private final JSpinner easting = new JSpinner(
-		new SpinnerNumberModel(0, 0, 1000000, 1));
+	/** Latitude spinner */
+	private final JSpinner lat_spn = new JSpinner(
+		new SpinnerNumberModel(0, -180.0, 180.0, 0.00001));
 
-	/** UTM Northing */
-	private final JSpinner northing = new JSpinner(
-		new SpinnerNumberModel(0, 0, 10000000, 1));
+	/** Longitude spinner */
+	private final JSpinner lon_spn = new JSpinner(
+		new SpinnerNumberModel(0, -180.0, 180.0, 0.00001));
 
 	/** Point selector */
 	private final PointSelector point_sel = new PointSelector() {
 		public void selectPoint(Point2D p) {
 			client.setPointSelector(null);
-			UTMPosition utm = getPosition(p);
-			easting.setValue((int)Math.round(utm.getEasting()));
-			northing.setValue((int)Math.round(utm.getNorthing()));
+			Position pos = getPosition(p);
+			lat_spn.setValue(pos.getLatitude());
+			lon_spn.setValue(pos.getLongitude());
 		}
 	};
 
@@ -201,9 +193,9 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		add(cross_cbx);
 		setWidth(1);
 		addRow(cross_dir_cbx);
-		add(new ILabel("location.easting"), easting);
+		add(new ILabel("location.lat"), lat_spn);
 		finishRow();
-		add(new ILabel("location.northing"), northing);
+		add(new ILabel("location.lon"), lon_spn);
 		finishRow();
 		setWidth(4);
 		updateSelectBag();
@@ -222,38 +214,37 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ChangeJob(this, easting) {
+		new ChangeJob(this, lat_spn) {
 			public void perform() {
-				setEasting(getSpinnerInteger(easting));
+				setLat(getSpinnerFloat(lat_spn));
 			}
 		};
-		new ChangeJob(this, northing) {
+		new ChangeJob(this, lon_spn) {
 			public void perform() {
-				setNorthing(getSpinnerInteger(northing));
+				setLon(getSpinnerFloat(lon_spn));
 			}
 		};
 	}
 
-	/** Get a UTM position */
-	protected UTMPosition getPosition(Point2D p) {
+	/** Get a position */
+	private Position getPosition(Point2D p) {
 		SphericalMercatorPosition smp = new SphericalMercatorPosition(
 			p.getX(), p.getY());
-		Position pos = smp.getPosition();
-		return UTMPosition.convert(GeodeticDatum.WGS_84, pos);
+		return smp.getPosition();
 	}
 
-	/** Set the easting */
-	private void setEasting(Integer e) {
+	/** Set the latitude */
+	private void setLat(Float lt) {
 		GeoLoc l = loc;
 		if(l != null)
-			l.setEasting(e);
+			l.setLat(lt);
 	}
 
-	/** Set the northing */
-	private void setNorthing(Integer n) {
+	/** Set the longitude */
+	private void setLon(Float ln) {
 		GeoLoc l = loc;
 		if(l != null)
-			l.setNorthing(n);
+			l.setLon(ln);
 	}
 
 	/** Dispose of the location panel */
@@ -300,16 +291,16 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 			cross_dir_cbx.setEnabled(canUpdate(l, "crossDir"));
 			cross_dir_cbx.setSelectedIndex(l.getCrossDir());
 		}
-		if(a == null || a.equals("easting")) {
-			boolean p = canUpdate(l, "easting");
-			easting.setEnabled(p);
-			easting.setValue(asInt(l.getEasting()));
+		if(a == null || a.equals("lat")) {
+			boolean p = canUpdate(l, "lat");
+			lat_spn.setEnabled(p);
+			lat_spn.setValue(asFloat(l.getLat()));
 			select_pt.setEnabled(p);
 		}
-		if(a == null || a.equals("northing")) {
-			boolean p = canUpdate(l, "northing");
-			northing.setEnabled(p);
-			northing.setValue(asInt(l.getNorthing()));
+		if(a == null || a.equals("lon")) {
+			boolean p = canUpdate(l, "lon");
+			lon_spn.setEnabled(p);
+			lon_spn.setValue(asFloat(l.getLon()));
 			select_pt.setEnabled(p);
 		}
 	}
@@ -342,10 +333,10 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 		cross_cbx.setSelectedIndex(0);
 		cross_dir_cbx.setEnabled(false);
 		cross_dir_cbx.setSelectedIndex(0);
-		easting.setEnabled(false);
-		easting.setValue(0);
-		northing.setEnabled(false);
-		northing.setValue(0);
+		lat_spn.setEnabled(false);
+		lat_spn.setValue(0);
+		lon_spn.setEnabled(false);
+		lon_spn.setValue(0);
 		select_pt.setEnabled(false);
 	}
 }

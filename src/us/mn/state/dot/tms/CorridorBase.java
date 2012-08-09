@@ -54,16 +54,6 @@ public class CorridorBase implements Iterable<R_Node> {
 		return GeoLocHelper.metersTo(n.getGeoLoc(), l);
 	}
 
-	/** Get the UTM Easting */
-	static protected Integer getEasting(R_Node n) {
-		return GeoLocHelper.getEasting(n.getGeoLoc());
-	}
-
-	/** Get the UTM Northing */
-	static protected Integer getNorthing(R_Node n) {
-		return GeoLocHelper.getNorthing(n.getGeoLoc());
-	}
-
 	/** Check if the r_node location is valid */
 	static protected boolean hasLocation(R_Node n) {
 		return !GeoLocHelper.isNull(n.getGeoLoc());

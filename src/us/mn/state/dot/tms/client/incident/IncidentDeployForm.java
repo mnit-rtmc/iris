@@ -26,9 +26,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.SwingConstants;
-import us.mn.state.dot.geokit.GeodeticDatum;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.UTMPosition;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -153,9 +151,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
 	/** Get Position in WGS84 */
 	private Position getWgs84Position() {
-		UTMPosition utm = new UTMPosition(GeoLocHelper.getZone(),
-			proxy.getEasting(), proxy.getNorthing());
-		return utm.getPosition(GeodeticDatum.WGS_84);
+		return new Position(proxy.getLat(), proxy.getLon());
 	}
 
 	/** Find all LCS arrays on the given corridor */
