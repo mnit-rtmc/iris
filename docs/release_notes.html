@@ -9,6 +9,37 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.148.0 (10 August 2012)</dt>
+	<dd><ul>
+		<li>
+			Convert all geographic locations to lat/lon (instead
+			of UTM).
+		</li>
+		<li>
+			Internationalized all (?) text strings in client user
+			interface.
+		</li>
+		<li>
+			Fixed a bug which prevented scheduled DMS messages
+			from blanking.
+		</li>
+		<li>
+			Reorganized client subpackage classes.
+		</li>
+		<li>
+			Added preliminary support for scaling entire user
+			interface.
+		</li>
+		<li>
+			Enhance G4 driver to handle up to 12 lanes.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.148.sql</code>.
+			WARNING: please backup database before upgrading.
+		</li>
+	</ul></dd>
 	<dt>3.147.0 (25 July 2012)</dt>
 	<dd><ul>
 		<li>
