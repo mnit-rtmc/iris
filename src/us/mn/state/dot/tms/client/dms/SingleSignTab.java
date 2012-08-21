@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
