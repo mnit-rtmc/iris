@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,13 +30,14 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.utils.SString;
+import us.mn.state.dot.tms.client.proxy.CellRendererSize;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * This class renders DMSs in a JList within the DMS StyleSummary.
@@ -83,7 +84,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 		/** constructor */
 		private DmsRendererMode(int w, int h, CellRendererSize cs) {
-			size = new Dimension(w, h);
+			size = UI.dimension(w, h);
 			cell_size = cs;
 		}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.RasterGraphic;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Pixel panel renders a representation of the pixels on a sign.
@@ -382,6 +383,6 @@ public class SignPixelPanel extends JPanel {
 	/** Calculate pixel panel dimensions as a function of height */
 	private Dimension calcDimsUsingHeight(int height) {
 		final double WTH_RATIO = 3.61;
-		return new Dimension((int)(height * WTH_RATIO), height);
+		return UI.dimension((int)(height * WTH_RATIO), height);
 	}
 }
