@@ -67,9 +67,6 @@ public class Widgets {
 			Font f = scaleFont(key);
 			if(f != null)
 				defaults.put(key, f);
-			Insets i = scaleInsets(key);
-			if(i != null)
-				defaults.put(key, i);
 			Dimension d = scaleDimension(key);
 			if(d != null)
 				defaults.put(key, d);
@@ -82,18 +79,6 @@ public class Widgets {
 		if(font != null)
 			return font.deriveFont(UI.scale * font.getSize2D());
 		else
-			return null;
-	}
-
-	/** Scale an insets from the look-and-feel */
-	static private Insets scaleInsets(Object key) {
-		Insets insets = UIManager.getInsets(key);
-		if(insets != null) {
-			return new Insets(Math.round(insets.top * UI.scale),
-				Math.round(insets.left * UI.scale),
-				Math.round(insets.bottom * UI.scale),
-				Math.round(insets.right * UI.scale));
-		} else
 			return null;
 	}
 
@@ -134,6 +119,6 @@ public class Widgets {
 
 	/** Create insets with proper gaps */
 	public Insets insets() {
-		return new Insets(vgap, hgap, vgap, hgap);
+		return new Insets(VGAP, HGAP, VGAP, HGAP);
 	};
 }
