@@ -44,7 +44,7 @@ public class Widgets {
 	static public void init(float s) {
 		UI = new Widgets(s);
 		tweakLookAndFeel();
-		scaleLookAndFeel(s);
+		scaleLookAndFeel();
 	}
 
 	/** Tweak the look and feel */
@@ -58,54 +58,62 @@ public class Widgets {
 	}
 
 	/** Scale the look-and-feel */
-	static private void scaleLookAndFeel(float scale) {
+	static private void scaleLookAndFeel() {
 		UIDefaults defaults = UIManager.getLookAndFeelDefaults();
 		HashSet<Object> keys = new HashSet<Object>(defaults.keySet());
 		Iterator<Object> it = keys.iterator();
 		while(it.hasNext()) {
 			Object key = it.next();
-			Font f = scaleFont(key, scale);
+			Font f = scaleFont(key);
 			if(f != null)
 				defaults.put(key, f);
-			Insets i = scaleInsets(key, scale);
+			Insets i = scaleInsets(key);
 			if(i != null)
 				defaults.put(key, i);
-			Dimension d = scaleDimension(key, scale);
+			Dimension d = scaleDimension(key);
 			if(d != null)
 				defaults.put(key, d);
 		}
 	}
 
 	/** Scale a font from the look-and-feel */
-	static private Font scaleFont(Object key, float scale) {
+	static private Font scaleFont(Object key) {
 		Font font = UIManager.getFont(key);
 		if(font != null)
-			return font.deriveFont(scale * font.getSize2D());
+			return font.deriveFont(UI.scale * font.getSize2D());
 		else
 			return null;
 	}
 
 	/** Scale an insets from the look-and-feel */
-	static private Insets scaleInsets(Object key, float scale) {
+	static private Insets scaleInsets(Object key) {
 		Insets insets = UIManager.getInsets(key);
 		if(insets != null) {
-			return new Insets(Math.round(insets.top * scale),
-				Math.round(insets.left * scale),
-				Math.round(insets.bottom * scale),
-				Math.round(insets.right * scale));
+			return new Insets(Math.round(insets.top * UI.scale),
+				Math.round(insets.left * UI.scale),
+				Math.round(insets.bottom * UI.scale),
+				Math.round(insets.right * UI.scale));
 		} else
 			return null;
 	}
 
 	/** Scale a dimension from the look-and-feel */
-	static private Dimension scaleDimension(Object key, float scale) {
+	static private Dimension scaleDimension(Object key) {
 		Dimension d = UIManager.getDimension(key);
-		if(d != null) {
-			return new Dimension(Math.round(d.width * scale),
-				Math.round(d.height * scale));
-		} else
+		if(d != null)
+			return dimension(d.width, d.height);
+		else
 			return null;
 	}
+
+	/** Scale a dimension */
+	static public Dimension dimension(int w, int h) {
+		return new Dimension(Math.round(w * UI.scale),
+			Math.round(h * UI.scale));
+	}
+
+	/** Scale factor */
+	public final float scale;
 
 	/** Horizontal gap between components */
 	public final int hgap;
@@ -118,6 +126,7 @@ public class Widgets {
 
 	/** Create widget state */
 	private Widgets(float s) {
+		scale = s;
 		hgap = Math.round(HGAP * s);
 		vgap = Math.round(VGAP * s);
 		border = new EmptyBorder(vgap, hgap, vgap, hgap);

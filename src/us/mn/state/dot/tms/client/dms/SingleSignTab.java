@@ -50,6 +50,7 @@ import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -156,14 +157,14 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		cache = s.getSonarState().getDmsCache().getDMSs();
 		cache.addProxyListener(this);
 		cam_sel_model = s.getCameraManager().getSelectionModel();
-		nameTxt.setMinimumSize(new Dimension(36, 20));
+		nameTxt.setMinimumSize(UI.dimension(36, 20));
 		add(I18N.get("device.name"), nameTxt);
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
 			add(I18N.get("dms.brightness"), brightnessTxt);
 		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
 		addRow(I18N.get("camera"), cameraBtn);
-		locationTxt.setMinimumSize(new Dimension(260, 20));
+		locationTxt.setMinimumSize(UI.dimension(260, 20));
 		addRow(I18N.get("location"), locationTxt);
 		addRow(I18N.get("device.status"), statusTxt);
 		addRow(I18N.get("device.operation"), operationTxt);

@@ -46,6 +46,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.SegmentLayerState;
 import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A screen pane is a pane which contains all components for one screen on
@@ -87,8 +88,8 @@ public class ScreenPane extends JPanel {
 	public ScreenPane() {
 		setLayout(new BorderLayout());
 		side_panel = new JPanel(new BorderLayout());
-		side_panel.setMinimumSize(new Dimension(500, 200));
-		side_panel.setPreferredSize(new Dimension(500, 200));
+		side_panel.setMinimumSize(UI.dimension(500, 200));
+		side_panel.setPreferredSize(UI.dimension(500, 200));
 		tab_pane = new JTabbedPane(JTabbedPane.TOP);
 		side_panel.add(tab_pane, BorderLayout.CENTER);
 		add(side_panel, BorderLayout.WEST);

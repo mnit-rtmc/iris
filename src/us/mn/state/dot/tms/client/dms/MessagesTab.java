@@ -161,7 +161,7 @@ public class MessagesTab extends JPanel {
 		JScrollPane scroll = new JScrollPane(group_table);
 		add(scroll, bag);
 		scroll = new JScrollPane(sign_text_table);
-		scroll.setPreferredSize(new Dimension(440, 0));
+		scroll.setPreferredSize(UI.dimension(440, 0));
 		bag.gridx = 1;
 		bag.gridy = 0;
 		bag.weightx = 1;
@@ -210,7 +210,7 @@ public class MessagesTab extends JPanel {
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("dms.message.preview")));
 		panel.add(pixel_panel, BorderLayout.CENTER);
-		pixel_panel.setPreferredSize(new Dimension(390, 32));
+		pixel_panel.setPreferredSize(UI.dimension(390, 32));
 		return panel;
 	}
 
