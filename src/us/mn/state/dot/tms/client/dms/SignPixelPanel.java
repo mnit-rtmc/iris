@@ -375,14 +375,13 @@ public class SignPixelPanel extends JPanel {
 
 	/** Set the panel size */
 	private void setSizes() {
-		setMinimumSize(calcDimsUsingHeight(54));
-		setPreferredSize(calcDimsUsingHeight(108));
-		setMaximumSize(calcDimsUsingHeight(108));
+		setMinimumSize(calcDimsUsingHeight(50));
+		setPreferredSize(calcDimsUsingHeight(100));
+		setMaximumSize(calcDimsUsingHeight(100));
 	}
 
 	/** Calculate pixel panel dimensions as a function of height */
 	private Dimension calcDimsUsingHeight(int height) {
-		final double WTH_RATIO = 3.61;
-		return UI.dimension((int)(height * WTH_RATIO), height);
+		return UI.dimension(height * 4, height);
 	}
 }
