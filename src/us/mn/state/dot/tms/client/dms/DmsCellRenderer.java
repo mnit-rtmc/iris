@@ -72,25 +72,25 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** DMS cell renderer mode */
 	private enum DmsRendererMode {
-		LARGE(190, 92, CellRendererSize.LARGE),
-		MEDIUM(46 * 2, 46, CellRendererSize.MEDIUM),
-		SMALL(64, 20, CellRendererSize.SMALL);
+		LARGE(144, 40, CellRendererSize.LARGE),
+		MEDIUM(86, 24, CellRendererSize.MEDIUM),
+		SMALL(58, 16, CellRendererSize.SMALL);
 
-		/** Fixed cell size */
-		protected final Dimension size;
+		/** Fixed pixel panel size */
+		private final Dimension pixel_panel_size;
 
 		/** Associated style summary cell renderer size */
 		protected final CellRendererSize cell_size;
 
-		/** constructor */
+		/** Create a new DMS renderer mode */
 		private DmsRendererMode(int w, int h, CellRendererSize cs) {
-			size = UI.dimension(w, h);
+			pixel_panel_size = UI.dimension(w, h);
 			cell_size = cs;
 		}
 
-		/** Get renderer size */
-		public Dimension getSize() {
-			return size;
+		/** Get preferred size of the pixel panel */
+		public Dimension pixelPanelSize() {
+			return pixel_panel_size;
 		}
 
 		/** Determine the dms renderer mode, which determines the size
@@ -113,6 +113,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	public DmsCellRenderer(CellRendererSize sz) {
 		super(new BorderLayout());
 		mode = DmsRendererMode.determine(sz);
+		Dimension psz = mode.pixelPanelSize();
+		pixelPnl.setPreferredSize(psz);
+		pixelPnl.setMaximumSize(psz);
 		switch(mode) {
 		case LARGE:
 			initLarge();
@@ -127,7 +130,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			assert false;
 			initLarge();
 		}
-		setPreferredSize(mode.getSize());
 	}
 
 	/** Initialize a small size DMS cell renderer */
@@ -137,6 +139,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		title.setLayout(new GridLayout(1, 1));
 		title.add(lblID);
 		add(title);
+		lblID.setText("V999W99X");
+		setPreferredSize(lblID.getPreferredSize());
 	}
 
 	/** Initialize a medium size DMS cell renderer */
@@ -144,12 +148,16 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		setBorder(BorderFactory.createCompoundBorder(
 			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
 			  BorderFactory.createRaisedBevelBorder()));
-		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
+		title.setLayout(new GridLayout(1, 1));
 		title.add(lblID);
-		title.add(Box.createGlue());
-		title.add(lblUser);
 		add(title, BorderLayout.NORTH);
 		add(pixelPnl, BorderLayout.CENTER);
+		// This is only needed to get preferred height
+		lblID.setText("V999W99X");
+		Dimension lsz = lblID.getPreferredSize();
+		Dimension psz = mode.pixelPanelSize();
+		setPreferredSize(new Dimension(psz.width,
+			lsz.height + psz.height));
 	}
 
 	/** Initialize a large size DMS cell renderer */
@@ -166,6 +174,12 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		add(title, BorderLayout.NORTH);
 		add(pixelPnl, BorderLayout.CENTER);
 		add(location, BorderLayout.SOUTH);
+		// This is only needed to get preferred height
+		lblID.setText("V999W99X");
+		Dimension lsz = lblID.getPreferredSize();
+		Dimension psz = mode.pixelPanelSize();
+		setPreferredSize(new Dimension(psz.width,
+			lsz.height * 2 + psz.height));
 	}
 
 	/** Check if the background is opaque */
