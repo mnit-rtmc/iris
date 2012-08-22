@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2011  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,11 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.RasterGraphic;
-import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Pager for a SignPixelPanel.  This class enables multiple page messages
  * to be displayed on a SignPixelPanel. The page on-time is passed as a
- * constructor argument and represents the on-time for all pages. The page
- * off time is determined from its system attribute.
+ * constructor argument and represents the on-time for all pages.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -49,10 +47,10 @@ public class DMSPanelPager {
 	/** Current page being displayed */
 	protected int page = 0;
 
-	/** Multipage message on time, read from system attributes */
+	/** Multipage message on time */
 	protected final DmsPgTime pgOnTime;
 
-	/** Multipage message off time, read from system attributes */
+	/** Multipage message off time */
 	protected final DmsPgTime pgOffTime;
 
 	/** Swing timer */
