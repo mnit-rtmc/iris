@@ -71,19 +71,19 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected final ProxySelectionModel<LCSArray> selectionModel;
 
 	/** Name of the selected LCS array */
-	protected final JTextField nameTxt = FormPanel.createTextField();
+	private final JLabel name_lbl = FormPanel.createValueLabel();
 
 	/** Verify camera button */
 	private final JButton camera_btn = new JButton();
 
 	/** Location of LCS array */
-	protected final JTextField locationTxt = FormPanel.createTextField();
+	private final JLabel location_lbl = FormPanel.createValueLabel();
 
 	/** Status of selected LCS array */
-	protected final JTextField statusTxt = FormPanel.createTextField();
+	private final JLabel status_lbl = FormPanel.createValueLabel();
 
 	/** Operation of selected LCS array */
-	protected final JTextField operationTxt = FormPanel.createTextField();
+	private final JLabel operation_lbl = FormPanel.createValueLabel();
 
 	/** LCS lock combo box component */
 	protected final JComboBox lcs_lock = new JComboBox(
@@ -153,13 +153,15 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		FormPanel panel = new FormPanel(true);
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("lcs.selected")));
-		panel.add(I18N.get("device.name"), nameTxt);
+		panel.add(I18N.get("device.name"), name_lbl);
 		panel.addRow(I18N.get("camera"), camera_btn);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		panel.addRow(I18N.get("location"), locationTxt);
-		panel.addRow(I18N.get("device.status"), statusTxt);
-		panel.addRow(I18N.get("device.operation"), operationTxt);
+		panel.addRow(I18N.get("location"), location_lbl);
+		panel.addRow(I18N.get("device.status"), status_lbl);
+		// Make label opaque so that we can set the background color
+		status_lbl.setOpaque(true);
+		panel.addRow(I18N.get("device.operation"), operation_lbl);
 //		panel.add(I18N.get("lcs.lock"), lcs_lock);
 		panel.finishRow();
 		panel.addRow(buildSelectorBox());
@@ -282,13 +284,13 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
-		nameTxt.setText("");
+		name_lbl.setText("");
 		setCameraAction(null);
-		locationTxt.setText("");
-		statusTxt.setText("");
-		statusTxt.setForeground(null);
-		statusTxt.setBackground(null);
-		operationTxt.setText("");
+		location_lbl.setText("");
+		status_lbl.setText("");
+		status_lbl.setForeground(null);
+		status_lbl.setBackground(null);
+		operation_lbl.setText("");
 		lcs_lock.setEnabled(false);
 		lcs_lock.setSelectedItem(null);
 		indicationSelector.setEnabled(false);
@@ -308,19 +310,19 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Update one attribute on the form */
 	protected void updateAttribute(final LCSArray lcs_array, String a) {
 		if(a == null || a.equals("name"))
-			nameTxt.setText(lcs_array.getName());
+			name_lbl.setText(lcs_array.getName());
 		if(a == null || a.equals("camera"))
 			setCameraAction(lcs_array);
 		// FIXME: this won't update when geoLoc attributes change
 		//        plus, geoLoc is not an LCSArray attribute
 		if(a == null || a.equals("geoLoc")) {
-			locationTxt.setText(LCSArrayHelper.lookupLocation(
+			location_lbl.setText(LCSArrayHelper.lookupLocation(
 				lcs_array));
 		}
 		if(a == null || a.equals("operation")) {
 			updateStatus(lcs_array);
 			String op = lcs_array.getOperation();
-			operationTxt.setText(op);
+			operation_lbl.setText(op);
 			// These operations can be very slow -- discourage
 			// users from sending multiple operations at once
 			// RE: None -- see server.DeviceImpl.getOperation()
@@ -349,9 +351,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Update the status widgets */
 	protected void updateStatus(LCSArray lcs_array) {
 		if(LCSArrayHelper.isFailed(lcs_array)) {
-			statusTxt.setForeground(Color.WHITE);
-			statusTxt.setBackground(Color.GRAY);
-			statusTxt.setText(LCSArrayHelper.getStatus(lcs_array));
+			status_lbl.setForeground(Color.WHITE);
+			status_lbl.setBackground(Color.GRAY);
+			status_lbl.setText(LCSArrayHelper.getStatus(lcs_array));
 		} else
 			updateCritical(lcs_array);
 	}
@@ -362,9 +364,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		if(critical.isEmpty())
 			updateMaintenance(lcs_array);
 		else {
-			statusTxt.setForeground(Color.WHITE);
-			statusTxt.setBackground(Color.BLACK);
-			statusTxt.setText(critical);
+			status_lbl.setForeground(Color.WHITE);
+			status_lbl.setBackground(Color.BLACK);
+			status_lbl.setText(critical);
 		}
 	}
 
@@ -372,13 +374,13 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected void updateMaintenance(LCSArray lcs_array) {
 		String maintenance = LCSArrayHelper.getMaintenance(lcs_array);
 		if(maintenance.isEmpty()) {
-			statusTxt.setForeground(null);
-			statusTxt.setBackground(null);
+			status_lbl.setForeground(null);
+			status_lbl.setBackground(null);
 		} else {
-			statusTxt.setForeground(Color.BLACK);
-			statusTxt.setBackground(Color.YELLOW);
+			status_lbl.setForeground(Color.BLACK);
+			status_lbl.setBackground(Color.YELLOW);
 		}
-		statusTxt.setText(maintenance);
+		status_lbl.setText(maintenance);
 	}
 
 	/** Select the DMS for the specified lane */

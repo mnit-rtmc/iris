@@ -30,7 +30,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
@@ -104,7 +103,7 @@ public class IncidentDispatcher extends JPanel
 	protected final JComboBox detail_cbx = new JComboBox();
 
 	/** Location of incident */
-	protected final JTextField location_txt = FormPanel.createTextField();
+	private final JLabel location_lbl = FormPanel.createValueLabel();
 
 	/** Card layout for camera widgets */
 	protected final CardLayout cam_cards = new CardLayout();
@@ -203,7 +202,7 @@ public class IncidentDispatcher extends JPanel
 			I18N.get("incident.selected")));
 		panel.addRow(I18N.get("incident.type"), type_lbl);
 		panel.addRow(I18N.get("incident.detail"), detail_cbx);
-		panel.addRow(I18N.get("location"), location_txt);
+		panel.addRow(I18N.get("location"), location_lbl);
 		panel.addRow(I18N.get("camera"), cam_panel);
 		panel.addRow(buildImpactBox());
 		JPanel btns = new JPanel(new FlowLayout());
@@ -463,7 +462,7 @@ public class IncidentDispatcher extends JPanel
 		clearEventType();
 		detail_cbx.setSelectedItem(null);
 		detail_cbx.setEnabled(false);
-		location_txt.setText("");
+		location_lbl.setText("");
 		camera_cbx.setSelectedItem(null);
 		camera_cbx.setEnabled(false);
 		setCameraAction(null);
@@ -527,7 +526,7 @@ public class IncidentDispatcher extends JPanel
 			detail_cbx.setSelectedItem(inc.getDetail());
 			type_lbl.setText(manager.getTypeDesc(inc));
 			type_lbl.setIcon(manager.getIcon(inc));
-			location_txt.setText(
+			location_lbl.setText(
 				manager.getGeoLoc(inc).getDescription());
 			if(inc instanceof ClientIncident)
 				camera_cbx.setModel(createCameraModel(inc));

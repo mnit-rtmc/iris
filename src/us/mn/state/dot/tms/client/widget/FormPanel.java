@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.widget;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
@@ -25,7 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -36,11 +38,16 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  */
 public class FormPanel extends JPanel {
 
-	/** Create a non-editable text field */
-	static public JTextField createTextField() {
-		JTextField f = new JTextField();
-		f.setEditable(false);
-		return f;
+	/** Color for value label borders */
+	static private final Color LIGHT_BLUE = new Color(200, 200, 255);
+
+	/** Create a value label */
+	static public JLabel createValueLabel() {
+		JLabel lbl = new JLabel();
+		lbl.setBorder(new LineBorder(LIGHT_BLUE));
+		// By default, labels are BOLD
+		lbl.setFont(lbl.getFont().deriveFont(Font.PLAIN));
+		return lbl;
 	}
 
 	/** Flag if components should be enabled */

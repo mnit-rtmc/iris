@@ -19,8 +19,8 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JRadioButton;
-import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -68,25 +68,25 @@ public class MeterStatusPanel extends FormPanel
 	}
 
 	/** Name component */
-	protected final JTextField nameTxt = createTextField();
+	private final JLabel name_lbl = createValueLabel();
 
 	/** Camera component */
 	private final JButton camera_btn = new JButton();
 
 	/** Location component */
-	protected final JTextField locationTxt = createTextField();
+	private final JLabel location_lbl = createValueLabel();
 
 	/** Operation component */
-	protected final JTextField operationTxt = createTextField();
+	private final JLabel operation_lbl = createValueLabel();
 
 	/** Release rate component */
-	protected final JTextField releaseTxt = createTextField();
+	private final JLabel release_lbl = createValueLabel();
 
 	/** Cycle time component */
-	protected final JTextField cycleTxt = createTextField();
+	private final JLabel cycle_lbl = createValueLabel();
 
 	/** Queue component */
-	protected final JTextField queueTxt = createTextField();
+	private final JLabel queue_lbl = createValueLabel();
 
 	/** Queue shrink button */
 	private final JButton shrink_btn = new JButton();
@@ -133,15 +133,17 @@ public class MeterStatusPanel extends FormPanel
 		group.add(off_btn);
 		setTitle(I18N.get("ramp.meter.selected"));
 		setEnabled(false);
-		add(I18N.get("device.name"), nameTxt);
+		add(I18N.get("device.name"), name_lbl);
 		addRow(I18N.get("camera"), camera_btn);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		addRow(I18N.get("location"), locationTxt);
-		addRow(I18N.get("device.operation"), operationTxt);
-		add(I18N.get("ramp.meter.rate"), releaseTxt);
-		addRow(I18N.get("ramp.meter.cycle"), cycleTxt);
-		add(I18N.get("ramp.meter.queue"), queueTxt);
+		addRow(I18N.get("location"), location_lbl);
+		addRow(I18N.get("device.operation"), operation_lbl);
+		// Make label opaque so that we can set the background color
+		operation_lbl.setOpaque(true);
+		add(I18N.get("ramp.meter.rate"), release_lbl);
+		addRow(I18N.get("ramp.meter.cycle"), cycle_lbl);
+		add(I18N.get("ramp.meter.queue"), queue_lbl);
 		add(shrink_btn);
 		addRow(grow_btn);
 		add(I18N.get("ramp.meter.lock"), lockCmb);
@@ -224,14 +226,14 @@ public class MeterStatusPanel extends FormPanel
 			off_btn.setAction(new TurnOffAction(proxy));
 			updateAttribute(proxy, null);
 		} else {
-			nameTxt.setText("");
-			locationTxt.setText("");
-			operationTxt.setText("");
-			operationTxt.setForeground(null);
-			operationTxt.setBackground(null);
-			releaseTxt.setText("");
-			cycleTxt.setText("");
-			queueTxt.setText("");
+			name_lbl.setText("");
+			location_lbl.setText("");
+			operation_lbl.setText("");
+			operation_lbl.setForeground(null);
+			operation_lbl.setBackground(null);
+			release_lbl.setText("");
+			cycle_lbl.setText("");
+			queue_lbl.setText("");
 		}
 		setEnabled(canUpdate(proxy));
 	}
@@ -254,28 +256,28 @@ public class MeterStatusPanel extends FormPanel
 	/** Update one attribute on the form */
 	protected void updateAttribute(RampMeter meter, String a) {
 		if(a == null || a.equals("name"))
-			nameTxt.setText(meter.getName());
+			name_lbl.setText(meter.getName());
 		if(a == null || a.equals("camera"))
 			setCameraAction(meter);
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
-			locationTxt.setText(GeoLocHelper.getOnRampDescription(
+			location_lbl.setText(GeoLocHelper.getOnRampDescription(
 				meter.getGeoLoc()));
 		}
 		if(a == null || a.equals("operation")) {
 			if(RampMeterHelper.isFailed(meter)) {
-				operationTxt.setForeground(Color.WHITE);
-				operationTxt.setBackground(Color.GRAY);
+				operation_lbl.setForeground(Color.WHITE);
+				operation_lbl.setBackground(Color.GRAY);
 			} else {
-				operationTxt.setForeground(null);
-				operationTxt.setBackground(null);
+				operation_lbl.setForeground(null);
+				operation_lbl.setBackground(null);
 			}
-			operationTxt.setText(meter.getOperation());
+			operation_lbl.setText(meter.getOperation());
 		}
 		if(a == null || a.equals("rate")) {
 			Integer rate = meter.getRate();
-			releaseTxt.setText(formatRelease(rate));
-			cycleTxt.setText(formatCycle(rate));
+			release_lbl.setText(formatRelease(rate));
+			cycle_lbl.setText(formatCycle(rate));
 			if(rate != null)
 				on_btn.setSelected(true);
 			else
@@ -286,7 +288,7 @@ public class MeterStatusPanel extends FormPanel
 		if(a == null || a.equals("queue")) {
 			RampMeterQueue q = RampMeterQueue.fromOrdinal(
 				meter.getQueue());
-			queueTxt.setText(q.description);
+			queue_lbl.setText(q.description);
 		}
 		if(a == null || a.equals("mLock")) {
 			Integer ml = meter.getMLock();

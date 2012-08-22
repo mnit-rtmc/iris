@@ -26,7 +26,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
@@ -67,16 +66,16 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	static protected final String EMPTY_TXT = "    ";
 
 	/** Displays the id of the DMS */
-	protected final JTextField nameTxt = createTextField();
+	private final JLabel name_lbl = createValueLabel();
 
 	/** Displays the brightness of the DMS */
-	protected final JTextField brightnessTxt = createTextField();
+	private final JLabel brightness_lbl = createValueLabel();
 
 	/** Displays the verify camera for the DMS */
 	protected final JButton cameraBtn = new JButton();
 
 	/** Displays the location of the DMS */
-	protected final JTextField locationTxt = createTextField();
+	private final JLabel location_lbl = createValueLabel();
 
 	/** AWS controlled checkbox (optional) */
 	private final JCheckBox aws_control_chk = new JCheckBox(
@@ -92,13 +91,13 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	});
 
 	/** Displays the controller status */
-	protected final JTextField statusTxt = createTextField();
+	private final JLabel status_lbl = createValueLabel();
 
 	/** Displays the current operation of the DMS */
-	protected final JTextField operationTxt = createTextField();
+	private final JLabel operation_lbl = createValueLabel();
 
 	/** Displays the controller operation status (optional) */
-	protected final JTextField opStatusTxt = createTextField();
+	private final JLabel op_status_lbl = createValueLabel();
 
 	/** Client session */
 	protected final Session session;
@@ -156,20 +155,22 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		cache = s.getSonarState().getDmsCache().getDMSs();
 		cache.addProxyListener(this);
 		cam_sel_model = s.getCameraManager().getSelectionModel();
-		nameTxt.setMinimumSize(UI.dimension(36, 20));
-		add(I18N.get("device.name"), nameTxt);
+		name_lbl.setMinimumSize(UI.dimension(36, 16));
+		add(I18N.get("device.name"), name_lbl);
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
-			add(I18N.get("dms.brightness"), brightnessTxt);
+			add(I18N.get("dms.brightness"), brightness_lbl);
 		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
 		addRow(I18N.get("camera"), cameraBtn);
-		locationTxt.setMinimumSize(UI.dimension(260, 20));
-		addRow(I18N.get("location"), locationTxt);
-		addRow(I18N.get("device.status"), statusTxt);
-		addRow(I18N.get("device.operation"), operationTxt);
+		location_lbl.setMinimumSize(UI.dimension(260, 16));
+		addRow(I18N.get("location"), location_lbl);
+		addRow(I18N.get("device.status"), status_lbl);
+		// Make label opaque so that we can set the background color
+		status_lbl.setOpaque(true);
+		addRow(I18N.get("device.operation"), operation_lbl);
 		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean()) {
-			opStatusTxt.setColumns(10);
-			addRow(I18N.get("device.op.status"), opStatusTxt);
+			op_status_lbl.setMinimumSize(UI.dimension(36, 16));
+			addRow(I18N.get("device.op.status"), op_status_lbl);
 		}
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			setWest();
@@ -279,17 +280,17 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		clearPager();
 		currentPnl.clear();
 		previewPnl.clear();
-		nameTxt.setText(EMPTY_TXT);
-		brightnessTxt.setText(EMPTY_TXT);
+		name_lbl.setText(EMPTY_TXT);
+		brightness_lbl.setText(EMPTY_TXT);
 		setCameraAction(null);
-		locationTxt.setText("");
+		location_lbl.setText("");
 		aws_control_chk.setEnabled(false);
 		aws_control_chk.setSelected(false);
-		statusTxt.setText("");
-		statusTxt.setForeground(null);
-		statusTxt.setBackground(null);
-		operationTxt.setText("");
-		opStatusTxt.setText("");
+		status_lbl.setText("");
+		status_lbl.setForeground(null);
+		status_lbl.setBackground(null);
+		operation_lbl.setText("");
+		op_status_lbl.setText("");
 	}
 
 	/** Set the camera action */
@@ -308,19 +309,19 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	 * @param a Attribute to update, null for all attributes. */
 	protected void updateAttribute(DMS dms, String a) {
 		if(a == null || a.equals("name"))
-			nameTxt.setText(dms.getName());
+			name_lbl.setText(dms.getName());
 		if(a == null || a.equals("lightOutput")) {
 			Integer o = dms.getLightOutput();
 			if(o != null)
-				brightnessTxt.setText("" + o + "%");
+				brightness_lbl.setText("" + o + "%");
 			else
-				brightnessTxt.setText("");
+				brightness_lbl.setText("");
 		}
 		if(a == null || a.equals("camera"))
 			setCameraAction(dms);
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
-			locationTxt.setText(GeoLocHelper.getDescription(
+			location_lbl.setText(GeoLocHelper.getDescription(
 				dms.getGeoLoc()));
 		}
 		if(a == null || a.equals("operation"))
@@ -338,19 +339,19 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		if(a == null || a.equals("awsControlled"))
 			aws_control_chk.setSelected(dms.getAwsControlled());
 		if(a == null || a.equals("opStatus"))
-			opStatusTxt.setText(dms.getOpStatus());
+			op_status_lbl.setText(dms.getOpStatus());
 	}
 
 	/** Update the status widgets */
 	protected void updateStatus(DMS dms) {
 		if(DMSHelper.isFailed(dms)) {
-			statusTxt.setForeground(Color.WHITE);
-			statusTxt.setBackground(Color.GRAY);
-			statusTxt.setText(DMSHelper.getStatus(dms));
+			status_lbl.setForeground(Color.WHITE);
+			status_lbl.setBackground(Color.GRAY);
+			status_lbl.setText(DMSHelper.getStatus(dms));
 		} else
 			updateCritical(dms);
-		operationTxt.setText(dms.getOperation());
-		opStatusTxt.setText(dms.getOpStatus());
+		operation_lbl.setText(dms.getOperation());
+		op_status_lbl.setText(dms.getOpStatus());
 	}
 
 	/** Update the critical error status */
@@ -359,9 +360,9 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		if(critical.isEmpty())
 			updateMaintenance(dms);
 		else {
-			statusTxt.setForeground(Color.WHITE);
-			statusTxt.setBackground(Color.BLACK);
-			statusTxt.setText(critical);
+			status_lbl.setForeground(Color.WHITE);
+			status_lbl.setBackground(Color.BLACK);
+			status_lbl.setText(critical);
 		}
 	}
 
@@ -369,13 +370,13 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	protected void updateMaintenance(DMS dms) {
 		String maintenance = DMSHelper.getMaintenance(dms);
 		if(maintenance.isEmpty()) {
-			statusTxt.setForeground(null);
-			statusTxt.setBackground(null);
+			status_lbl.setForeground(null);
+			status_lbl.setBackground(null);
 		} else {
-			statusTxt.setForeground(Color.BLACK);
-			statusTxt.setBackground(Color.YELLOW);
+			status_lbl.setForeground(Color.BLACK);
+			status_lbl.setBackground(Color.YELLOW);
 		}
-		statusTxt.setText(maintenance);
+		status_lbl.setText(maintenance);
 	}
 
 	/** Update the current panel */

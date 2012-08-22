@@ -22,7 +22,6 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -56,19 +55,19 @@ public class PlanDispatcher extends FormPanel
 	implements ProxyListener<ActionPlan>, ProxySelectionListener<ActionPlan>
 {
 	/** Name component */
-	private final JTextField nameTxt = createTextField();
+	private final JLabel name_lbl = createValueLabel();
 
 	/** Description component */
-	private final JTextField descriptionTxt = createTextField();
+	private final JLabel description_lbl = createValueLabel();
 
 	/** DMS count component */
-	private final JTextField dmsTxt = createTextField();
+	private final JLabel dms_lbl = createValueLabel();
 
 	/** Lane count component */
-	private final JTextField laneTxt = createTextField();
+	private final JLabel lane_lbl = createValueLabel();
 
 	/** Meter count component */
-	private final JTextField meterTxt = createTextField();
+	private final JLabel meter_lbl = createValueLabel();
 
 	/** Plan phase combo box */
 	private final JComboBox phaseCmb = new JComboBox();
@@ -101,20 +100,20 @@ public class PlanDispatcher extends FormPanel
 		bag.weightx = 0.4f;
 		bag.weighty = 0.4f;
 		setWest();
-		add(nameTxt);
+		add(name_lbl);
 		bag.weightx = 0.6f;
 		bag.weighty = 0.6f;
 		addRow(new JLabel(""));
 		add(new ILabel("device.description"));
 		setFill();
 		setWidth(2);
-		add(descriptionTxt);
+		add(description_lbl);
 		finishRow();
-		add(I18N.get("dms"), dmsTxt);
+		add(I18N.get("dms"), dms_lbl);
 		finishRow();
-		add(I18N.get("lane.markings"), laneTxt);
+		add(I18N.get("lane.markings"), lane_lbl);
 		finishRow();
-		add(I18N.get("ramp.meter.long.plural"), meterTxt);
+		add(I18N.get("ramp.meter.long.plural"), meter_lbl);
 		finishRow();
 		add(I18N.get("action.plan.phase"), phaseCmb);
 		finishRow();
@@ -190,11 +189,11 @@ public class PlanDispatcher extends FormPanel
 			phaseCmb.setModel(createPhaseModel(proxy));
 			updateAttribute(proxy, null);
 		} else {
-			nameTxt.setText("");
-			descriptionTxt.setText("");
-			dmsTxt.setText("");
-			laneTxt.setText("");
-			meterTxt.setText("");
+			name_lbl.setText("");
+			description_lbl.setText("");
+			dms_lbl.setText("");
+			lane_lbl.setText("");
+			meter_lbl.setText("");
 			phaseCmb.setAction(null);
 			phaseCmb.setModel(new DefaultComboBoxModel());
 			phaseCmb.setSelectedItem(null);
@@ -276,13 +275,13 @@ public class PlanDispatcher extends FormPanel
 	/** Update one attribute on the form */
 	protected void updateAttribute(ActionPlan plan, String a) {
 		if(a == null || a.equals("name"))
-			nameTxt.setText(plan.getName());
+			name_lbl.setText(plan.getName());
 		if(a == null || a.equals("description"))
-			descriptionTxt.setText(plan.getDescription());
+			description_lbl.setText(plan.getDescription());
 		if(a == null || a.equals("active")) {
-			dmsTxt.setText(Integer.toString(countDMS(plan)));
-			laneTxt.setText(Integer.toString(countLanes(plan)));
-			meterTxt.setText(Integer.toString(countMeters(plan)));
+			dms_lbl.setText(Integer.toString(countDMS(plan)));
+			lane_lbl.setText(Integer.toString(countLanes(plan)));
+			meter_lbl.setText(Integer.toString(countMeters(plan)));
 		}
 		if(a == null || a.equals("phase")) {
 			phaseCmb.setAction(null);
