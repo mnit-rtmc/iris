@@ -26,6 +26,9 @@ import us.mn.state.dot.sonar.Checker;
  */
 public class SignMessageHelper extends BaseHelper {
 
+	/** Maximum allowed pages for any message */
+	static public final int DMS_MESSAGE_MAX_PAGES = 6;
+
 	/** Do not allow objects of this class */
 	private SignMessageHelper() {
 		assert false;

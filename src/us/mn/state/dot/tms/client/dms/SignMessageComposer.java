@@ -18,18 +18,20 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
-import java.awt.Insets;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
@@ -37,13 +39,16 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
-import us.mn.state.dot.tms.utils.I18N;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
- * GUI for composing DMS messages.
+ * A sign message composer is GUI for composing DMS messages.  It uses a number
+ * of optional controls which appear or do not appear on screen as a function
+ * of system attributes.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
@@ -66,26 +71,53 @@ public class SignMessageComposer extends JPanel {
 	/** Cache of font proxy objects */
 	protected final TypeCache<Font> fonts;
 
-	/** Tab pane to hold pages */
-	protected final JTabbedPane pages = new JTabbedPane(JTabbedPane.RIGHT);
+	/** Maximum number of lines on a sign */
+	private final int max_lines;
+
+	/** Minimum number of pages for a sign message */
+	private final int min_pages;
+
+	/** Tab pane for message pages */
+	private final JTabbedPane page_tab = new JTabbedPane(JTabbedPane.RIGHT);
 
 	/** Default font number */
-	protected int default_font = FontHelper.DEFAULT_FONT_NUM;
+	private int default_font = FontHelper.DEFAULT_FONT_NUM;
 
 	/** Raster builder for the selected sign */
-	protected RasterBuilder builder;
+	private RasterBuilder builder;
 
 	/** Sign text model for the selected sign */
-	protected SignTextModel st_model;
+	private SignTextModel st_model;
 
 	/** Message combo box widgets */
-	protected MsgComboBox[] cmbLine = new MsgComboBox[0];
+	private MsgComboBox[] cmbLine = new MsgComboBox[0];
 
 	/** Font combo box widgets */
-	protected FontComboBox[] fontCmb = new FontComboBox[0];
+	private FontComboBox[] fontCmb = new FontComboBox[0];
 
-	/** Page on-time spinner */
-	protected final PgTimeSpinner timeSpin;
+	/** Quick message label */
+	private final ILabel quick_lbl = new ILabel("dms.quick.message");
+
+	/** Combobox used to select a quick message */
+	private final QuickMessageCBox quick_cbx;
+
+	/** Duration label */
+	private final ILabel dur_lbl = new ILabel("dms.duration");
+
+	/** Used to select the expires time for a message (optional) */
+	private final JComboBox dur_cbx = new JComboBox(Expiration.values());
+
+	/** Page on time label */
+	private final ILabel pg_on_lbl = new ILabel("dms.page.on.time");
+
+	/** Page on time spinner */
+	private final PgTimeSpinner pg_on_spn;
+
+	/** AMBER alert label */
+	private final ILabel alert_lbl = new ILabel("dms.alert");
+
+	/** AMBER Alert checkbox */
+	private final JCheckBox alert_chx = new JCheckBox();
 
 	/** Clear action */
 	private final IAction clear = new IAction("dms.clear") {
@@ -93,6 +125,37 @@ public class SignMessageComposer extends JPanel {
 			clearWidgets();
 		}
 	};
+
+	/** Button to clear the selected message */
+	private final JButton clear_btn = new JButton(clear);
+
+	/** Action used to send a message to the DMS */
+	private final IAction send_msg = new IAction("dms.send") {
+		protected void do_perform() {
+			dispatcher.sendSelectedMessage();
+		}
+	};
+
+	/** Button to send the selected message */
+	private final JButton send_btn = new JButton(send_msg);
+
+	/** Action to blank selected DMS */
+	private final BlankDmsAction blank_msg;
+
+	/** Button to blank the selected message */
+	private final JButton blank_btn;
+
+	/** Action to query the DMS message (optional) */
+	private final IAction query_msg = new IAction("dms.query.msg",
+		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
+	{
+		protected void do_perform() {
+			dispatcher.queryMessage();
+		}
+	};
+
+	/** Button to query the DMS message */
+	private final JButton query_btn = new JButton(query_msg);
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
@@ -117,78 +180,154 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Create a new sign message composer */
-	public SignMessageComposer(Session s, DMSDispatcher ds) {
+	public SignMessageComposer(Session s, DMSDispatcher ds,
+		DMSManager manager)
+	{
 		session = s;
 		dispatcher = ds;
 		DmsCache dc = s.getSonarState().getDmsCache();
 		dms_sign_groups = dc.getDmsSignGroups();
 		sign_text = dc.getSignText();
 		fonts = dc.getFonts();
-		timeSpin = new PgTimeSpinner();
+		max_lines = SystemAttrEnum.DMS_MAX_LINES.getInt();
+		min_pages = SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt();
+		quick_cbx = new QuickMessageCBox(dispatcher);
+		pg_on_spn = new PgTimeSpinner();
+		pg_on_spn.addChangeListener(spin_listener);
+		blank_msg = new BlankDmsAction(dispatcher);
+		manager.setBlankAction(blank_msg);
+		blank_btn = new JButton(blank_msg);
 		add(createAllWidgets());
 		initializeWidgets();
-		timeSpin.addChangeListener(spin_listener);
 	}
 
 	/** Create all widgets */
-	protected Box createAllWidgets() {
-		Box box = Box.createVerticalBox();
-		box.add(pages);
-		box.add(createLowerBox());
-		return box;
-	}
-
-	/** Create lower box */
-	protected Box createLowerBox() {
-		Box box = Box.createHorizontalBox();
-		box.add(createClearBtn());
-		if(PgTimeSpinner.getIEnabled()) {
-			ILabel label = new ILabel("dms.page.on.time");
-			label.setLabelFor(timeSpin);
-			label.setHorizontalAlignment(SwingConstants.RIGHT);
-			label.setMaximumSize(label.getMinimumSize());
-			box.add(Box.createHorizontalGlue());
-			box.add(label);
-			box.add(Box.createHorizontalStrut(4));
-			box.add(timeSpin);
-			box.add(Box.createHorizontalGlue());
-		}
-		return box;
-	}
-
-	/** Create the clear button */
-	protected JPanel createClearBtn() {
-		JPanel panel = new JPanel();
-		JButton btn = new JButton(clear);
-		btn.setMargin(new Insets(0, 6, 0, 6));
-		btn.setMaximumSize(btn.getMinimumSize());
-		panel.add(btn);
+	private JPanel createAllWidgets() {
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(page_tab, BorderLayout.CENTER);
+		Box vbox = Box.createVerticalBox();
+		vbox.add(createDeployPanel());
+		vbox.add(createButtonPanel());
+		panel.add(vbox, BorderLayout.EAST);
 		return panel;
 	}
 
+	/** Create the deploy panel */
+	private JPanel createDeployPanel() {
+		JPanel panel = new JPanel();
+		GroupLayout gl = new GroupLayout(panel);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		panel.setLayout(gl);
+		GroupLayout.ParallelGroup lg = gl.createParallelGroup(
+			GroupLayout.Alignment.TRAILING);
+		GroupLayout.ParallelGroup vg = gl.createParallelGroup(
+			GroupLayout.Alignment.LEADING);
+		// Quick message widgets
+		quick_lbl.setLabelFor(quick_cbx);
+		lg.addComponent(quick_lbl);
+		vg.addComponent(quick_cbx);
+		GroupLayout.ParallelGroup g1 = gl.createParallelGroup(
+			GroupLayout.Alignment.CENTER);
+		g1.addComponent(quick_lbl).addComponent(quick_cbx);
+		// Duraton widgets
+		dur_lbl.setLabelFor(dur_cbx);
+		lg.addComponent(dur_lbl);
+		vg.addComponent(dur_cbx);
+		GroupLayout.ParallelGroup g2 = gl.createParallelGroup(
+			GroupLayout.Alignment.CENTER);
+		g2.addComponent(dur_lbl).addComponent(dur_cbx);
+		// Page on time widgets
+		pg_on_lbl.setLabelFor(pg_on_spn);
+		lg.addComponent(pg_on_lbl);
+		vg.addComponent(pg_on_spn);
+		GroupLayout.ParallelGroup g3 = gl.createParallelGroup(
+			GroupLayout.Alignment.CENTER);
+		g3.addComponent(pg_on_lbl).addComponent(pg_on_spn);
+		// AMBER alert widgets
+		alert_lbl.setLabelFor(alert_chx);
+		lg.addComponent(alert_lbl);
+		vg.addComponent(alert_chx);
+		GroupLayout.ParallelGroup g4 = gl.createParallelGroup(
+			GroupLayout.Alignment.CENTER);
+		g4.addComponent(alert_lbl).addComponent(alert_chx);
+		// Finish group layout
+		GroupLayout.SequentialGroup horz_g = gl.createSequentialGroup();
+		horz_g.addGap(UI.hgap).addGroup(lg);
+		horz_g.addGap(UI.hgap).addGroup(vg);
+		gl.setHorizontalGroup(horz_g);
+		GroupLayout.SequentialGroup vert_g = gl.createSequentialGroup();
+		vert_g.addGap(UI.vgap).addGroup(g1).addGap(UI.vgap);
+		vert_g.addGroup(g2).addGap(UI.vgap).addGroup(g3);
+		vert_g.addGap(UI.vgap).addGroup(g4).addGap(UI.vgap);
+		gl.setVerticalGroup(vert_g);
+		return panel;
+	}
+
+	/** Create the button panel */
+	private JPanel createButtonPanel() {
+		JPanel panel = new JPanel();
+		GroupLayout gl = new GroupLayout(panel);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		panel.setLayout(gl);
+		GroupLayout.ParallelGroup bg = gl.createParallelGroup(
+			GroupLayout.Alignment.CENTER);
+		bg.addComponent(clear_btn);
+		bg.addComponent(send_btn);
+		bg.addComponent(blank_btn);
+		bg.addComponent(query_btn);
+		GroupLayout.SequentialGroup vert_g = gl.createSequentialGroup();
+		vert_g.addGroup(bg);
+		gl.setVerticalGroup(vert_g);
+		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
+		hg.addGroup(gl.createParallelGroup().addComponent(clear_btn));
+		hg.addGap(UI.hgap * 2, UI.hgap * 4, UI.hgap * 64);
+		hg.addGroup(gl.createParallelGroup().addComponent(send_btn));
+		hg.addGap(UI.hgap);
+		hg.addGroup(gl.createParallelGroup().addComponent(blank_btn));
+		hg.addGap(UI.hgap);
+		hg.addGroup(gl.createParallelGroup().addComponent(query_btn));
+		gl.setHorizontalGroup(hg);
+		return panel;
+	}
+
+	/** Set multiple sign selection mode */
+	public void setMultiple(boolean m) {
+		alert_lbl.setVisible(m);
+		alert_chx.setEnabled(m);
+		alert_chx.setVisible(m);
+		alert_chx.setSelected(false);
+		if(m)
+			quick_cbx.setSelectedItem(null);
+	}
+
 	/** Clear the widgets */
-	protected void clearWidgets() {
+	private void clearWidgets() {
 		adjusting++;
 		setTabPage(0);
 		clearFonts();
 		for(MsgComboBox cbox: cmbLine)
 			cbox.setSelectedIndex(-1);
 		dispatcher.setMessage("");
-		timeSpin.setValue("");
+		pg_on_spn.setValue("");
 		adjusting--;
 	}
 
 	/** Set tab to page specified */
 	private void setTabPage(int p) {
-		if(pages.getTabCount() > 0)
-			pages.setSelectedIndex(p);
+		if(page_tab.getTabCount() > 0)
+			page_tab.setSelectedIndex(p);
 	}
 
 	/** Dispose of the message selector */
 	public void dispose() {
 		removeAll();
 		disposeLines();
-		timeSpin.removeChangeListener(spin_listener);
+		quick_cbx.dispose();
+		pg_on_spn.removeChangeListener(spin_listener);
 		disposeEtcWidgets();
 		setSignTextModel(null);
 	}
@@ -219,6 +358,7 @@ public class SignMessageComposer extends JPanel {
 			for(short i = 1; i <= cl.length; i++)
 				cl[i - 1].setModel(stm.getLineModel(i));
 		}
+		quick_cbx.populateModel(proxy);
 	}
 
 	/** Create a new sign text model */
@@ -245,7 +385,7 @@ public class SignMessageComposer extends JPanel {
 		if(b != null)
 			return b.getLineCount();
 		else
-			return 3;
+			return max_lines;
 	}
 
 	/** Initialize the widgets */
@@ -253,14 +393,28 @@ public class SignMessageComposer extends JPanel {
 		int np = calculateSignPages();
 		initializeEtcWidgets(np);
 		initializeWidgets(getLineCount(), np);
+		dur_cbx.setSelectedIndex(0);
+		if(!SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
+			dur_lbl.setVisible(false);
+			dur_cbx.setVisible(false);
+		}
+		if(!PgTimeSpinner.getIEnabled()) {
+			pg_on_lbl.setVisible(false);
+			pg_on_spn.setVisible(false);
+		}
+		if(!query_msg.getIEnabled())
+			query_btn.setVisible(false);
+		clear_btn.setMargin(UI.buttonInsets());
+		blank_btn.setMargin(UI.buttonInsets());
+		query_btn.setMargin(UI.buttonInsets());
 	}
 
 	/** Calculate the number of pages for the selected sign */
 	protected int calculateSignPages() {
 		int ml = getLibraryLines();
 		int nl = getLineCount();
-		return Math.max(calculateSignPages(ml, nl),
-			SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt());
+		int np = calculateSignPages(ml, nl);
+		return Math.min(DMS_MESSAGE_MAX_PAGES, Math.max(np, min_pages));
 	}
 
 	/** Get the number of lines in the message library */
@@ -304,8 +458,8 @@ public class SignMessageComposer extends JPanel {
 		cmbLine = cl;
 		for(int i = 0; i < np; i++)
 			setPage(i, createPage(i, nl));
-		while(np < pages.getTabCount())
-			pages.removeTabAt(np);
+		while(np < page_tab.getTabCount())
+			page_tab.removeTabAt(np);
 	}
 
 	/** Check if the user can add messages */
@@ -320,9 +474,10 @@ public class SignMessageComposer extends JPanel {
 	/** Create a new page panel */
 	protected JPanel createPage(int p, int nl) {
 		JPanel page = new JPanel(new BorderLayout());
-		JPanel panel = new JPanel(new GridLayout(nl, 1, 6, 6));
+		JPanel panel = new JPanel(new GridLayout(nl, 1, UI.hgap / 2,
+			UI.vgap / 2));
 		panel.setBackground(Color.BLACK);
-		panel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+		panel.setBorder(UI.border);
 		for(int i = 0; i < nl; i++)
 			panel.add(cmbLine[i + p * nl]);
 		page.add(panel, BorderLayout.CENTER);
@@ -359,24 +514,38 @@ public class SignMessageComposer extends JPanel {
 	/** Set a page on one tab */
 	protected void setPage(int n, JPanel page) {
 		String title = "p." + (n + 1);
-		if(n < pages.getTabCount()) {
-			pages.setComponentAt(n, page);
-			pages.setTitleAt(n, title);
+		if(n < page_tab.getTabCount()) {
+			page_tab.setComponentAt(n, page);
+			page_tab.setTitleAt(n, title);
 		} else
-			pages.addTab(title, page);
+			page_tab.addTab(title, page);
 	}
 
 	/** Enable or Disable the message selector */
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
+		if(!b) {
+			setSign(null, null);
+			setMultiple(false);
+		}
 		setTabPage(0);
 		clear.setEnabled(b);
 		adjusting++;
-		timeSpin.setEnabled(b);
+		pg_on_spn.setEnabled(b);
 		for(MsgComboBox cbox: cmbLine)
 			cbox.setEnabled(b);
 		for(FontComboBox f: fontCmb)
 			f.setEnabled(b);
+		dur_cbx.setEnabled(b);
+		dur_cbx.setSelectedItem(0);
+		alert_chx.setEnabled(b);
+		quick_cbx.setEnabled(b);
+		boolean vis = quick_cbx.getItemCount() > 0;
+		quick_lbl.setVisible(vis);
+		quick_cbx.setVisible(vis);
+		send_msg.setEnabled(b);
+		blank_msg.setEnabled(b);
+		query_msg.setEnabled(b && dispatcher.canRequest());
 		adjusting--;
 	}
 
@@ -405,7 +574,7 @@ public class SignMessageComposer extends JPanel {
 		if(f != default_font)
 			multi.setFont(f, null);
 		if(PgTimeSpinner.getIEnabled()) {
-			int pt = timeSpin.getValuePgTime().toTenths();
+			int pt = pg_on_spn.getValuePgTime().toTenths();
 			if(pt > 0)
 				multi.setPageTimes(pt, null);
 		}
@@ -430,7 +599,8 @@ public class SignMessageComposer extends JPanel {
 	/** Set the currently selected message */
 	public void setMessage(String ms) {
 		adjusting++;
-		timeSpin.setValue(ms);
+		quick_cbx.setMessage(ms);
+		pg_on_spn.setValue(ms);
 		// Note: order here is crucial. The font cbox must be updated
 		// first because the line combobox updates (each) result in 
 		// intermediate preview updates which read the (incorrect) 
@@ -447,6 +617,23 @@ public class SignMessageComposer extends JPanel {
 				cbox.setSelectedIndex(0);
 		}
 		adjusting--;
+	}
+
+	/** Get the selected duration */
+	public Integer getDuration() {
+		Expiration e = (Expiration)dur_cbx.getSelectedItem();
+		if(e != null)
+			return e.duration;
+		else
+			return null;
+	}
+
+	/** Get the selected priority */
+	public DMSMessagePriority getPriority() {
+		if(alert_chx.isSelected())
+		       return DMSMessagePriority.ALERT;
+		else
+		       return DMSMessagePriority.OPERATOR;
 	}
 
 	/** Set all font comboboxes using the specified MultiString */

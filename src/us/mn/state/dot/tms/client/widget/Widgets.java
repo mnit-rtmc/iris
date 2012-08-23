@@ -121,4 +121,9 @@ public class Widgets {
 	public Insets insets() {
 		return new Insets(VGAP, HGAP, VGAP, HGAP);
 	};
+
+	/** Create button insets with proper gaps */
+	public Insets buttonInsets() {
+		return new Insets(0, HGAP, 0, HGAP);
+	};
 }

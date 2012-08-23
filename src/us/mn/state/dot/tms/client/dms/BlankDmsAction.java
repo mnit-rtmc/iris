@@ -14,11 +14,6 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.List;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
@@ -28,36 +23,17 @@ import us.mn.state.dot.tms.client.widget.IAction;
  */
 public class BlankDmsAction extends IAction {
 
-	/** Selection model */
-	private final ProxySelectionModel<DMS> selectionModel;
-
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
 
-	/** User who is sending message */
-	private final User owner;
-
 	/** Create a new action to blank the selected DMS */
-	public BlankDmsAction(ProxySelectionModel<DMS> s, DMSDispatcher d,
-		User o)
-	{
+	public BlankDmsAction(DMSDispatcher d) {
 		super("dms.blank");
-		selectionModel = s;
 		dispatcher = d;
-		owner = o;
 	}
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		List<DMS> sel = selectionModel.getSelected();
-		if(sel.size() > 0) {
-			SignMessage m = dispatcher.createBlankMessage();
-			if(m != null) {
-				for(DMS dms: sel) {
-					dms.setOwnerNext(owner);
-					dms.setMessageNext(m);
-				}
-			}
-		}
+		dispatcher.sendBlankMessage();
 	}
 }

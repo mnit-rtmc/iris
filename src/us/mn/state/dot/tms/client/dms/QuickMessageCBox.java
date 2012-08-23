@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -171,7 +171,17 @@ public class QuickMessageCBox extends JComboBox {
 
 	/** Populate the quick message model, with sorted quick messages */
 	public void populateModel(DMS dms) {
+-		// Add to model: can't be done inside Checker due to deadlocks.
+		TreeSet<QuickMessage> msgs = createMessageSet(dms);
+		adjusting++;
 		model.removeAllElements();
+		for(QuickMessage qm: msgs)
+			model.addElement(qm);
+		adjusting--;
+	}
+
+	/** Create a set of quick messages for the specified DMS */
+	private TreeSet<QuickMessage> createMessageSet(DMS dms) {
 		final TreeSet<QuickMessage> msgs = new TreeSet<QuickMessage>(
 			new NumericAlphaComparator<QuickMessage>());
 		for(SignGroup sg: SignGroupHelper.find(dms)) {
@@ -184,12 +194,16 @@ public class QuickMessageCBox extends JComboBox {
 				}
 			});
 		}
+		return msgs;
+	}
 
-		// Add to model: can't be done inside Checker due to deadlocks.
-		adjusting++;
-		for(QuickMessage qm: msgs)
-			model.addElement(qm);
-		adjusting--;
+	/** Set the enabled status */
+	public void setEnabled(boolean e) {
+		super.setEnabled(e);
+		if(!e) {
+			setSelectedItem(null);
+			removeAllItems();
+		}
 	}
 
 	/** Dispose */

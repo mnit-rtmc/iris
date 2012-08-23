@@ -16,15 +16,8 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Dimension;
 import java.util.Iterator;
 import java.util.List;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -46,16 +39,11 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It contains several other components and keeps their state synchronized.
- * It uses a number of optional controls which appear or do not appear on screen
- * as a function of system attributes.
  * @see SignMessage, DMSPanelPager, SignMessageComposer
  *
  * @author Erik Engstrom
@@ -64,87 +52,35 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 {
-	/** Name of hidden card for card layout */
-	static protected final String CARD_HIDDEN = "Hidden";
-
-	/** Name of shown card for card layout */
-	static protected final String CARD_SHOWN = "Shown";
-
 	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** Selection model */
-	protected final ProxySelectionModel<DMS> selectionModel;
-
-	/** Selection tab pane */
-	protected final JTabbedPane tabPane = new JTabbedPane();
-
-	/** Single sign tab */
-	protected final SingleSignTab singleTab;
-
-	/** Multiple sign tab */
-	protected final MultipleSignTab multipleTab;
-
-	/** Message composer widget */
-	protected final SignMessageComposer composer;
-
-	/** Used to select the expires time for a message (optional) */
-	protected final JComboBox durationCmb =
-		new JComboBox(Expiration.values());
-
-	/** Card layout for alert panel. This is used to hide the alert
-	 * checkbox without causing all the widgets to be revalidated. */
-	protected final CardLayout alert_layout = new CardLayout();
-
-	/** Card panel for alert panels */
-	protected final JPanel alert_panel = new JPanel(alert_layout);
-
-	/** AMBER Alert checkbox */
-	protected final JCheckBox alertCbx =
-		new JCheckBox(I18N.get("dms.alert"));
-
-	/** Card layout for quick msg panel. This is used to hide the quick
-	 * message without causing all the widgets to be revalidated. */
-	protected final CardLayout qmsg_layout = new CardLayout();
-
-	/** Card panel for quick message */
-	protected final JPanel qmsg_panel = new JPanel(qmsg_layout);
-
-	/** Combobox used to select a quick message */
-	protected final QuickMessageCBox qmsgCmb;
-
-	/** Action used to send a message to the DMS */
-	private final IAction send_msg = new IAction("dms.send") {
-		protected void do_perform() {
-			removeInvalidSelections();
-			if(shouldSendMessage())
-				sendMessage();
-		}
-	};
-
-	/** Action to blank selected DMS */
-	private final BlankDmsAction blank_msg;
-
-	/** Action to query the DMS message (optional) */
-	private final IAction query_msg = new IAction("dms.query.msg",
-		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
-	{
-		protected void do_perform() {
-			queryMessage();
-		}
-	};
+	private final Namespace namespace;
 
 	/** Currently logged in user */
-	protected final User user;
+	private final User user;
+
+	/** Selection model */
+	private final ProxySelectionModel<DMS> selectionModel;
 
 	/** Sign message creator */
-	protected final SignMessageCreator creator;
+	private final SignMessageCreator creator;
+
+	/** Selection tab pane */
+	private final JTabbedPane tabPane = new JTabbedPane();
+
+	/** Single sign tab */
+	private final SingleSignTab singleTab;
+
+	/** Multiple sign tab */
+	private final MultipleSignTab multipleTab;
+
+	/** Message composer widget */
+	private final SignMessageComposer composer;
 
 	/** Raster graphic builder */
-	protected RasterBuilder builder;
+	private RasterBuilder builder;
 
 	/** Selected message MULTI string */
-	protected String message = "";
+	private String message = "";
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(Session session, DMSManager manager) {
@@ -155,77 +91,41 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		user = session.getUser();
 		creator = new SignMessageCreator(st, user);
 		selectionModel = manager.getSelectionModel();
-		blank_msg = new BlankDmsAction(selectionModel, this, user);
-		qmsgCmb = new QuickMessageCBox(this);
-		manager.setBlankAction(blank_msg);
-		composer = new SignMessageComposer(session, this);
 		singleTab = new SingleSignTab(session, this);
 		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
+		composer = new SignMessageComposer(session, this, manager);
 		tabPane.addTab(I18N.get("dms.single"), singleTab);
 		tabPane.addTab(I18N.get("dms.multiple"), multipleTab);
 		add(tabPane, BorderLayout.CENTER);
-		add(createDeployBox(), BorderLayout.SOUTH);
+		add(composer, BorderLayout.SOUTH);
 		clearSelected();
 		selectionModel.addProxySelectionListener(this);
 	}
 
-	/** Create a component to deploy signs */
-	protected Box createDeployBox() {
-		durationCmb.setSelectedIndex(0);
-		FormPanel panel = new FormPanel(true);
-		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean())
-			panel.addRow(I18N.get("dms.duration"), durationCmb);
-		panel.addRow(alert_panel);
-		alert_panel.add(new JLabel(), CARD_HIDDEN);
-		alert_panel.add(alertCbx, CARD_SHOWN);
-		panel.addRow(qmsg_panel);
-		qmsg_panel.add(new JLabel(), CARD_HIDDEN);
-		qmsg_panel.add(buildQuickMsgPanel(), CARD_SHOWN);
-		panel.setCenter();
-		panel.addRow(buildButtonPanel());
-		Box deployBox = Box.createHorizontalBox();
-		deployBox.add(composer);
-		deployBox.add(panel);
-		return deployBox;
+	/** Dispose of the dispatcher */
+	public void dispose() {
+		selectionModel.removeProxySelectionListener(this);
+		clearSelected();
+		removeAll();
+		singleTab.dispose();
+		multipleTab.dispose();
+		composer.dispose();
 	}
 
-	/** Build the quick message panel */
-	protected Box buildQuickMsgPanel() {
-		Box box = Box.createHorizontalBox();
-		box.add(Box.createHorizontalGlue());
-		ILabel label = new ILabel("dms.quick.message");
-		label.setLabelFor(qmsgCmb);
-		box.add(label);
-		box.add(box.createHorizontalStrut(4));
-		box.add(qmsgCmb);
-		return box;
-	}
-
-	/** Build the button panel */
-	protected Box buildButtonPanel() {
-		Box box = Box.createHorizontalBox();
-		box.add(Box.createHorizontalGlue());
-		box.add(new JButton(send_msg));
-		box.add(Box.createHorizontalStrut(4));
-		box.add(new JButton(blank_msg));
-		if(query_msg.getIEnabled()) {
-			box.add(Box.createHorizontalStrut(4));
-			box.add(new JButton(query_msg));
-		}
-		box.add(Box.createHorizontalGlue());
-		return box;
-	}
-
-	/** Remove all invalid selected DMS */
-	protected void removeInvalidSelections() {
-		for(DMS dms: selectionModel.getSelected()) {
+	/** Get a list of the selected DMS */
+	private List<DMS> getSelected() {
+		List<DMS> sel = selectionModel.getSelected();
+		Iterator<DMS> it = sel.iterator();
+		while(it.hasNext()) {
+			DMS dms = it.next();
 			if(!checkDimensions(dms))
-				selectionModel.removeSelected(dms);
+				it.remove();
 		}
+		return sel;
 	}
 
 	/** Check the dimensions of a sign against the pixel map builder */
-	protected boolean checkDimensions(DMS dms) {
+	private boolean checkDimensions(DMS dms) {
 		RasterBuilder b = builder;
 		if(b != null) {
 			Integer w = dms.getWidthPixels();
@@ -236,9 +136,24 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		return false;
 	}
 
+	/** Send the currently selected message */
+	public void sendSelectedMessage() {
+		removeInvalidSelections();
+		if(shouldSendMessage())
+			sendMessage();
+	}
+
+	/** Remove all invalid selected DMS */
+	private void removeInvalidSelections() {
+		for(DMS dms: selectionModel.getSelected()) {
+			if(!checkDimensions(dms))
+				selectionModel.removeSelected(dms);
+		}
+	}
+
 	/** If enabled, prompt the user with a send confirmation.
 	 * @return True to send the message else false to cancel. */
-	protected boolean shouldSendMessage() {
+	private boolean shouldSendMessage() {
 		if(SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
 			return showConfirmDialog();
 		else
@@ -247,7 +162,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Show a message confirmation dialog.
 	 * @return True if message should be sent. */
-	protected boolean showConfirmDialog() {
+	private boolean showConfirmDialog() {
 		String m = buildConfirmMsg();
 		if(!m.isEmpty()) {
 			return 0 == JOptionPane.showConfirmDialog(null, m, 
@@ -259,7 +174,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Build a confirmation message containing all selected DMS.
 	 * @return An empty string if no DMS selected else the message. */
-	protected String buildConfirmMsg() {
+	private String buildConfirmMsg() {
 		String sel = buildSelectedList();
 		if(sel.isEmpty())
 			return sel;
@@ -270,7 +185,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Build a string of selected DMS */
-	protected String buildSelectedList() {
+	private String buildSelectedList() {
 		boolean first = true;
 		StringBuilder sb = new StringBuilder();
 		for(DMS dms: getSelected()) {
@@ -282,20 +197,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		return sb.toString();
 	}
 
-	/** Get a list of the selected DMS */
-	protected List<DMS> getSelected() {
-		List<DMS> sel = selectionModel.getSelected();
-		Iterator<DMS> it = sel.iterator();
-		while(it.hasNext()) {
-			DMS dms = it.next();
-			if(!checkDimensions(dms))
-				it.remove();
-		}
-		return sel;
-	}
-
 	/** Send a new message to the selected DMS */
-	protected void sendMessage() {
+	private void sendMessage() {
 		List<DMS> sel = getSelected();
 		if(sel.size() > 0) {
 			SignMessage sm = createMessage();
@@ -313,7 +216,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Create a new message from the widgets.
 	 * @return A newly created SignMessage else null. */
-	protected SignMessage createMessage() {
+	private SignMessage createMessage() {
 		String multi = message;	// Avoid races
 		if(multi.isEmpty())
 			return null;
@@ -322,34 +225,32 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Create a new message using the specified MULTI */
-	protected SignMessage createMessage(String multi) {
+	private SignMessage createMessage(String multi) {
 		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null) {
-			return creator.create(multi, bitmaps, getPriority(),
-				getPriority(), getDuration());
+			DMSMessagePriority p = composer.getPriority();
+			Integer d = composer.getDuration();
+			return creator.create(multi, bitmaps, p, p, d);
 		} else
 			return null;
 	}
 
-	/** Get the selected priority */
-	protected DMSMessagePriority getPriority() {
-		if(alertCbx.isSelected())
-		       return DMSMessagePriority.ALERT;
-		else
-		       return DMSMessagePriority.OPERATOR;
-	}
-
-	/** Get the selected duration */
-	protected Integer getDuration() {
-		Expiration e = (Expiration)durationCmb.getSelectedItem();
-		if(e != null)
-			return e.duration;
-		else
-			return null;
+	/** Blank the select DMS */
+	public void sendBlankMessage() {
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.size() > 0) {
+			SignMessage sm = createBlankMessage();
+			if(sm != null) {
+				for(DMS dms: sel) {
+					dms.setOwnerNext(user);
+					dms.setMessageNext(sm);
+				}
+			}
+		}
 	}
 
 	/** Create a new blank message */
-	public SignMessage createBlankMessage() {
+	private SignMessage createBlankMessage() {
 		String multi = "";
 		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null) {
@@ -361,7 +262,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Create bitmap graphics for a MULTI string */
-	protected String createBitmaps(String multi) {
+	private String createBitmaps(String multi) {
 		RasterBuilder b = builder;
 		if(b != null) {
 			MultiString ms = new MultiString(multi);
@@ -371,7 +272,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Encode the bitmaps to Base64 */
-	protected String encodeBitmaps(BitmapGraphic[] bmaps) {
+	private String encodeBitmaps(BitmapGraphic[] bmaps) {
 		int blen = bmaps[0].length();
 		byte[] bitmaps = new byte[bmaps.length * blen];
 		for(int i = 0; i < bmaps.length; i++) {
@@ -382,23 +283,12 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Query the current message on all selected signs */
-	protected void queryMessage() {
+	public void queryMessage() {
 		for(DMS dms: selectionModel.getSelected()) {
 			dms.setDeviceRequest(
 				DeviceRequest.QUERY_MESSAGE.ordinal());
 		}
 		selectPreview(false);
-	}
-
-	/** Dispose of the dispatcher */
-	public void dispose() {
-		selectionModel.removeProxySelectionListener(this);
-		clearSelected();
-		singleTab.dispose();
-		multipleTab.dispose();
-		composer.dispose();
-		qmsgCmb.dispose();
-		removeAll();
 	}
 
 	/** Called whenever a sign is added to the selection */
@@ -409,7 +299,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Create a pixel map builder */
-	protected void createBuilder(DMS dms) {
+	private void createBuilder(DMS dms) {
 		builder = DMSHelper.createRasterBuilder(dms);
 		composer.setSign(dms, builder);
 	}
@@ -427,7 +317,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Check if the builder is valid for at least one selected DMS */
-	protected boolean areBuilderAndComposerValid() {
+	private boolean areBuilderAndComposerValid() {
 		List<DMS> sel = selectionModel.getSelected();
 		// If there is only one DMS selected, then the composer needs
 		// to be updated for that sign.
@@ -441,7 +331,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Update the selected sign(s) */
-	protected void updateSelected() {
+	private void updateSelected() {
 		List<DMS> sel = selectionModel.getSelected();
 		if(sel.size() == 0)
 			clearSelected();
@@ -450,83 +340,51 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 				setSelected(dms);
 		} else {
 			singleTab.setSelected(null);
-			enableWidgets();
+			setEnabled(true);
 			selectMultipleTab();
 		}
 	}
 
 	/** Clear the selection */
-	protected void clearSelected() {
-		disableWidgets();
+	private void clearSelected() {
+		setEnabled(false);
 		setMessage("");
 		singleTab.setSelected(null);
 		selectSingleTab();
 	}
 
 	/** Set a single selected DMS */
-	protected void setSelected(DMS dms) {
+	private void setSelected(DMS dms) {
 		if(DMSHelper.isActive(dms)) {
-			qmsgCmb.populateModel(dms);
-			enableWidgets();
+			setEnabled(true);
 			SignMessage sm = dms.getMessageCurrent();
 			if(sm != null)
 				setMessage(sm.getMulti());
 		} else
-			disableWidgets();
+			setEnabled(false);
 		singleTab.setSelected(dms);
 		selectSingleTab();
 	}
 
 	/** Select the single selection tab */
-	protected void selectSingleTab() {
-		if(tabPane.getSelectedComponent() != singleTab) {
-			alertCbx.setSelected(false);
+	private void selectSingleTab() {
+		if(tabPane.getSelectedComponent() != singleTab)
 			tabPane.setSelectedComponent(singleTab);
-		}
-		alert_layout.show(alert_panel, CARD_HIDDEN);
+		composer.setMultiple(false);
 	}
 
 	/** Select the multiple selection tab */
-	protected void selectMultipleTab() {
+	private void selectMultipleTab() {
 		if(tabPane.getSelectedComponent() != multipleTab)
 			tabPane.setSelectedComponent(multipleTab);
-		alert_layout.show(alert_panel, CARD_SHOWN);
-		qmsgCmb.setSelectedItem(null);
+		composer.setMultiple(true);
 	}
 
-	/** Disable the dispatcher widgets */
-	protected void disableWidgets() {
-		composer.setSign(null, null);
-		composer.setEnabled(false);
-		durationCmb.setEnabled(false);
-		durationCmb.setSelectedItem(null);
-		alert_layout.show(alert_panel, CARD_HIDDEN);
-		alertCbx.setEnabled(false);
-		qmsg_layout.show(qmsg_panel, CARD_HIDDEN);
-		qmsgCmb.setEnabled(false);
-		qmsgCmb.setSelectedItem(null);
-		qmsgCmb.removeAllItems();
-		send_msg.setEnabled(false);
-		blank_msg.setEnabled(false);
-		query_msg.setEnabled(false);
-	}
-
-	/** Enable the dispatcher widgets */
-	protected void enableWidgets() {
-		boolean send = canSend();
-		composer.setEnabled(send);
-		durationCmb.setEnabled(send);
-		durationCmb.setSelectedIndex(0);
-		alertCbx.setEnabled(send);
-		if(qmsgCmb.getItemCount() > 0)
-			qmsg_layout.show(qmsg_panel, CARD_SHOWN);
-		else
-			qmsg_layout.show(qmsg_panel, CARD_HIDDEN);
-		qmsgCmb.setEnabled(send);
-		send_msg.setEnabled(send);
-		blank_msg.setEnabled(send);
-		query_msg.setEnabled(canRequest());
-		selectPreview(false);
+	/** Set the enabled status of the dispatcher */
+	public void setEnabled(boolean e) {
+		composer.setEnabled(e && canSend());
+		if(e)
+			selectPreview(false);
 	}
 
 	/** Set the fully composed message.  This will update all the widgets
@@ -536,7 +394,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 			message = ms;
 			singleTab.setMessage();
 			composer.setMessage(ms);
-			qmsgCmb.setMessage(ms);
 		}
 	}
 
@@ -606,10 +463,5 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	public boolean isAwsPermitted(DMS dms) {
 		Name name = new Name(dms, "awsControlled");
 		return dms.getAwsAllowed() && namespace.canUpdate(user, name);
-	}
-
-	/** The preferred size controls the maximum size. */
-	public Dimension getMaximumSize() {
-		return super.getPreferredSize();
 	}
 }
