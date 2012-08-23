@@ -171,7 +171,7 @@ public class QuickMessageCBox extends JComboBox {
 
 	/** Populate the quick message model, with sorted quick messages */
 	public void populateModel(DMS dms) {
--		// Add to model: can't be done inside Checker due to deadlocks.
+		// Add to model: can't be done inside Checker due to deadlocks.
 		TreeSet<QuickMessage> msgs = createMessageSet(dms);
 		adjusting++;
 		model.removeAllElements();
