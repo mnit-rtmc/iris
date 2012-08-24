@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
@@ -61,11 +59,11 @@ public class MsgComboBox extends JComboBox {
 	}
 
 	/** Prototype sign text */
-	static protected final SignText PROTOTYPE_SIGN_TEXT =
+	static private final SignText PROTOTYPE_SIGN_TEXT =
 		new ClientSignText("12345678901234567890");
 
 	/** Format an item as a string */
-	static protected String formatItem(Object o) {
+	static private String formatItem(Object o) {
 		String txt = "";
 		if(o instanceof SignText)
 			txt = ((SignText)o).getMulti();
@@ -75,36 +73,34 @@ public class MsgComboBox extends JComboBox {
 	}
 
 	/** Sign message composer containing the combo box */
-	protected final SignMessageComposer composer;
+	private final SignMessageComposer composer;
 
 	/** Edit mode for combo box */
-	protected final EditMode edit_mode;
+	private EditMode edit_mode = EditMode.NEVER;
 
 	/** Combo box editor */
-	protected final Editor editor;
+	private final Editor editor;
 
 	/** Key listener for key events */
-	protected final KeyListener keyListener;
+	private final KeyAdapter keyListener;
 
 	/** Focus listener for editor focus events */
-	protected final FocusListener focusListener;
+	private final FocusAdapter focusListener;
 
 	/** Action listener for editor events */
-	protected final ActionListener editorListener;
+	private final ActionListener editorListener;
 
 	/** Listener for combo box events */
-	protected final ActionListener comboListener = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
+	private final ActionListener comboListener = new ActionListener() {
+		public void actionPerformed(ActionEvent ae) {
 			composer.updateMessage();
 		}
 	};
 
 	/** Create a message combo box.
-	 * @param c Sign message composer.
-	 * @param cam Flag to indicate messages can be added. */
-	public MsgComboBox(SignMessageComposer c, boolean cam) {
+	 * @param c Sign message composer. */
+	public MsgComboBox(SignMessageComposer c) {
 		composer = c;
-		edit_mode = getEditMode(cam);
 		setMaximumRowCount(21);
 		// NOTE: We use a prototype display value so that combo boxes
 		//       are always the same size.  This prevents all the
@@ -112,105 +108,92 @@ public class MsgComboBox extends JComboBox {
 		//       selected.
 		setPrototypeDisplayValue(PROTOTYPE_SIGN_TEXT);
 		setRenderer(new SignTextCellRenderer());
-		editor = createEditor();
-		keyListener = createKeyListener();
-		focusListener = createFocusListener();
-		editorListener = createEditorListener();
+		editor = new Editor();
+		keyListener = new KeyAdapter() {
+			public void keyTyped(KeyEvent ke) {
+				doKeyTyped(ke);
+			}
+		};
+		focusListener = new FocusAdapter() {
+			public void focusGained(FocusEvent fe) {
+				doFocusGained();
+			}
+			public void focusLost(FocusEvent fe) {
+				doFocusLost();
+			}
+		};
+		editorListener = new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				if(edit_mode == EditMode.AFTERKEY)
+					setEditable(false);
+			}
+		};
 	}
 
 	/** Initialize the message combo box */
 	public void initialize() {
-		if(editor != null)
-			setEditor(editor);
+		setEditMode(false);
+		setEditor(editor);
 		addActionListener(comboListener);
-		if(keyListener != null)
-			addKeyListener(keyListener);
-		if(focusListener != null)
-			editor.addFocusListener(focusListener);
-		if(editorListener != null)
-			editor.addActionListener(editorListener);
-		if(!isEditable() && edit_mode == EditMode.ALWAYS)
-			setEditable(true);
+		addKeyListener(keyListener);
+		editor.addFocusListener(focusListener);
+		editor.addActionListener(editorListener);
 	}
 
 	/** Dispose of the message combo box */
 	public void dispose() {
-		if(editorListener != null)
-			editor.removeActionListener(editorListener);
-		if(focusListener != null)
-			editor.removeFocusListener(focusListener);
-		if(keyListener != null)
-			removeKeyListener(keyListener);
+		editor.removeActionListener(editorListener);
+		editor.removeFocusListener(focusListener);
+		removeKeyListener(keyListener);
 		removeActionListener(comboListener);
+	}
+
+	/** Set the edit mode.
+	 * @param cam Flag to indicate messages can be added. */
+	public void setEditMode(boolean cam) {
+		edit_mode = getEditMode(cam);
+		if(isEditable() && edit_mode != EditMode.ALWAYS)
+			setEditable(false);
+		if(!isEditable() && edit_mode == EditMode.ALWAYS)
+			setEditable(true);
 	}
 
 	/** Get the edit mode.
 	 * @param cam Flag to indicate the user can add messages */
-	protected EditMode getEditMode(boolean cam) {
+	private EditMode getEditMode(boolean cam) {
 		EditMode em = EditMode.getEditMode();
 		if(em == EditMode.AFTERKEY && !cam)
 			return EditMode.NEVER;
-		return em;
-	}
-
-	/** Create the editor */
-	protected Editor createEditor() {
-		switch(edit_mode) {
-		case NEVER:
-			return null;
-		default:
-			return new Editor();
-		}
+		else
+			return em;
 	}
 
 	/** Key event saved when making combobox editable */
-	protected KeyEvent key_event;
+	private KeyEvent key_event;
 
-	/** Create a key listener for AFTERKEY edit mode */
-	protected KeyListener createKeyListener() {
+	/** Respond to a key typed event */
+	private void doKeyTyped(KeyEvent ke) {
 		if(edit_mode == EditMode.AFTERKEY) {
-			return new KeyAdapter() {
-				public void keyTyped(KeyEvent ke) {
-					if(!isEditable()) {
-						setEditable(true);
-						key_event = ke;
-					}
-				}
-			};
-		} else
-			return null;
+			if(!isEditable()) {
+				setEditable(true);
+				key_event = ke;
+			}
+		}
 	}
 
-	/** Create a focus listener for the editor component */
-	protected FocusListener createFocusListener() {
-		if(editor != null) {
-			return new FocusAdapter() {
-				public void focusGained(FocusEvent e) {
-					if(key_event != null) {
-						editor.dispatchEvent(key_event);
-						key_event = null;
-					}
-				}
-				public void focusLost(FocusEvent e) {
-					if(edit_mode == EditMode.AFTERKEY)
-						setEditable(false);
-					composer.updateMessage();
-				}
-			};
-		} else
-			return null;
+	/** Respond to a focus gained event */
+	private void doFocusGained() {
+		if(key_event != null) {
+			editor.dispatchEvent(key_event);
+			key_event = null;
+		}
 	}
 
-	/** Create an action listener for the editor component */
-	protected ActionListener createEditorListener() {
-		if(edit_mode == EditMode.AFTERKEY) {
-			return new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					setEditable(false);
-				}
-			};
-		} else
-			return null;
+	/** Respond to a focus lost event */
+	private void doFocusLost() {
+		if(edit_mode == EditMode.AFTERKEY)
+			setEditable(false);
+		composer.updateMessage();
 	}
 
 	/** Get message text */
@@ -226,7 +209,7 @@ public class MsgComboBox extends JComboBox {
 	}
 
 	/** Editor for message combo box */
-	protected class Editor extends JTextField implements ComboBoxEditor {
+	private class Editor extends JTextField implements ComboBoxEditor {
 
 		/** Last set value of the editor */
 		protected Object value;

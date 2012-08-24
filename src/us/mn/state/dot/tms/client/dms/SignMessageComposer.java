@@ -452,8 +452,9 @@ public class SignMessageComposer extends JPanel {
 		boolean cam = canAddMessages();
 		MsgComboBox[] cl = new MsgComboBox[nl * np];
 		for(int i = 0; i < cl.length; i++) {
-			cl[i] = new MsgComboBox(this, cam);
+			cl[i] = new MsgComboBox(this);
 			cl[i].initialize();
+			cl[i].setEditMode(cam);
 		}
 		cmbLine = cl;
 		for(int i = 0; i < np; i++)
