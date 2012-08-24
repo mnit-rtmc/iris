@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,30 +40,30 @@ public class IncidentPolicyTest extends TestCase {
 	public void testUpstream1() {
 		float up = 0.25f;
 		IncidentPolicy p = createPolicy("....");
-		assertTrue(getIndications(p, up, 2, 0)[0] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, 1)[0] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, 1)[1] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, -1)[0] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, -1)[1] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 0, 2)[0] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 0, 2)[1] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 1, 2)[0] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 1, 2)[1] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, -1, 2)[0] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, -1, 2)[1] == LANE_OPEN);
 		p = createPolicy("...!");
-		assertTrue(getIndications(p, up, 2, 0)[0] == USE_CAUTION);
-		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, 1)[0] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, -1)[0] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, -1)[1] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 0, 2)[0] == USE_CAUTION);
+		assertTrue(getIndications(p, up, 2, 0, 2)[1] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 1, 2)[0] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, -1, 2)[0] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, -1, 2)[1] == LANE_OPEN);
 		p = createPolicy("..!.");
-		assertTrue(getIndications(p, up, 2, 0)[0] == LANE_CLOSED);
-		assertTrue(getIndications(p, up, 2, 0)[1] == USE_CAUTION);
+		assertTrue(getIndications(p, up, 2, 0, 2)[0] == LANE_CLOSED);
+		assertTrue(getIndications(p, up, 2, 0, 2)[1] == USE_CAUTION);
 		p = createPolicy(".!..");
-		assertTrue(getIndications(p, up, 2, 0)[0] == USE_CAUTION);
-		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_CLOSED);
+		assertTrue(getIndications(p, up, 2, 0, 2)[0] == USE_CAUTION);
+		assertTrue(getIndications(p, up, 2, 0, 2)[1] == LANE_CLOSED);
 	}
 
 	protected Integer[] getIndications(IncidentPolicy p, float up,
-		int n_lanes, int shift)
+		int n_lcs, int shift, int n_lanes)
 	{
-		return p.createIndications(up, n_lanes, shift);
+		return p.createIndications(up, n_lcs, shift, n_lanes);
 	}
 
 	protected IncidentPolicy createPolicy(String impact) {
