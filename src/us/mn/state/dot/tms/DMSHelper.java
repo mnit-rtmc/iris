@@ -303,11 +303,12 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms DMS to check.
 	 * @return Number of text lines on the DMS. */
 	static public int getLineCount(DMS dms) {
-		RasterBuilder rb = createRasterBuilder(dms);
-		if(rb != null)
-			return rb.getLineCount();
-		else
-			return SystemAttrEnum.DMS_MAX_LINES.getInt();
+		if(dms != null) {
+			RasterBuilder rb = createRasterBuilder(dms);
+			if(rb != null)
+				return rb.getLineCount();
+		}
+		return SystemAttrEnum.DMS_MAX_LINES.getInt();
 	}
 
 	/** Create a raster builder for a DMS.
