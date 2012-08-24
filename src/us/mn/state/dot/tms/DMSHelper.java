@@ -299,6 +299,17 @@ public class DMSHelper extends BaseHelper {
 		return FontHelper.DEFAULT_FONT_NUM;
 	}
 
+	/** Get the number of lines on a DMS.
+	 * @param dms DMS to check.
+	 * @return Number of text lines on the DMS. */
+	static public int getLineCount(DMS dms) {
+		RasterBuilder rb = createRasterBuilder(dms);
+		if(rb != null)
+			return rb.getLineCount();
+		else
+			return SystemAttrEnum.DMS_MAX_LINES.getInt();
+	}
+
 	/** Create a raster builder for a DMS.
 	 * @param dms DMS with proper dimensions for the builder.
 	 * @return A pixel map builder, or null is dimensions are invalid. */
