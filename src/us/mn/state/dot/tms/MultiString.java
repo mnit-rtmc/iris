@@ -381,16 +381,15 @@ public class MultiString implements Multi {
 		return ms.toString();
 	}
 
-	/** Get message lines text as an array of strings. See the test
-	 *  cases for further information.
-	 * @return A string array containing text spans for each line. */
-	public String[] getText() {
+	/** Get message text as an array of strings (with no tags).
+	 * Every n_lines elements in the returned array represent one page.
+	 * @param n_lines Number of lines per page.
+	 * @return A string array containing text for each line. */
+	public String[] getText(final int n_lines) {
 		final LinkedList<String> ls = new LinkedList<String>();
 		MultiParser.parse(toString(), new MultiAdapter() {
-			private int n_lines = 0;
 			public void addSpan(String span) {
 				// note: fields in span use ms prefix
-				n_lines = Math.max(n_lines, ms_line + 1);
 				while(ls.size() < (ms_page + 1) * n_lines)
 					ls.add("");
 				int i = ms_page * n_lines + ms_line;
@@ -398,19 +397,17 @@ public class MultiString implements Multi {
 				ls.set(i, SString.trimJoin(v, span));
 			}
 		});
+		while("".equals(ls.peekLast()))
+			ls.removeLast();
 		return ls.toArray(new String[0]);
 	}
 
-	/** Get message lines text as an array of strings. See the test
-	 *  cases for further information.
-	 * @return A string array containing text spans for each line. */
-	public String[] getLines() {
+	/** Get message lines as an array of strings (with tags).
+	 * Every n_lines elements in the returned array represent one page.
+	 * @param n_lines Number of lines per page.
+	 * @return A string array containing text for each line. */
+	public String[] getLines(int n_lines) {
 		String[] pages = multi.toString().split("\\[np\\]");
-		int n_lines = 0;
-		for(String pg: pages) {
-			String[] lns = pg.split("\\[nl.?\\]");
-			n_lines = Math.max(n_lines, lns.length);
-		}
 		String[] lines = new String[n_lines * pages.length];
 		for(int i = 0; i < lines.length; i++)
 			lines[i] = "";

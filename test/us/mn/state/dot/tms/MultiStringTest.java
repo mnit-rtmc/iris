@@ -18,7 +18,7 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 import us.mn.state.dot.tms.utils.SString;
 
-/** 
+/**
  * MultiString test cases
  * @author Michael Darter
  * @author Douglas Lau
@@ -341,52 +341,45 @@ public class MultiStringTest extends TestCase {
 
 	/** getText */
 	private void getText() {
-		String[] s;
-
-		s = new MultiString("").getText();
-		assertTrue(s.length == 0);
-
-		s = new MultiString("ABC").getText();
-		assertTrue(s.length == 1);
-		assertTrue(s[0].equals("ABC"));
-
-		s = new MultiString("ABC[nl]").getText();
-		assertTrue(s.length == 1);
-		assertTrue(s[0].equals("ABC"));
-
-		s = new MultiString("ABC[nl]DEF").getText();
-		assertTrue(s.length == 2);
-		assertTrue(s[0].equals("ABC"));
-		assertTrue(s[1].equals("DEF"));
-
-		s = new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123").getText();
-		assertFalse(Arrays.equals(
-			new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123").
-			getText(), new String[] {"ABC", "DEF", "GHI", "", "123"}));
-
+		// Single page tests
+		assertTrue(Arrays.equals(new String[0],
+			new MultiString("").getText(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+			new MultiString("ABC").getText(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+			new MultiString("ABC[nl]").getText(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+			new MultiString("ABC[nl][nl]").getText(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "DEF" },
+			new MultiString("ABC[nl]DEF").getText(3)));
+		assertTrue(Arrays.equals(new String[] {"ABC", "DEF", "GHI"},
+			new MultiString("ABC[nl]DEF[nl]GHI").getText(3)));
+		// Multi-page tests
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+			new MultiString("ABC[np]").getText(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC" },
+			new MultiString("ABC[np][nl]").getText(3)));
+		assertTrue(Arrays.equals(new String[] {"ABC", "", "DEF"},
+			new MultiString("ABC[nl][nl]DEF[np][nl]").getText(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "", "", "DEF" },
+			new MultiString("ABC[np]DEF").getText(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "", "", "DEF" },
+			new MultiString("ABC[nl][np]DEF").getText(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "", "", "DEF" },
+			new MultiString("ABC[nl][np]DEF[np]").getText(3)));
 		assertTrue(Arrays.equals(
-			new MultiString("1[nl][nl]4[nl][nl]").getText(), 
-			new String[] {"1", "", "4"}));
-		assertTrue(Arrays.equals(
-			new MultiString("1[nl][nl]4[nl][nl]").getText(), 
-			new String[] {"1", "", "4"}));
-		assertTrue(Arrays.equals(
-			new MultiString("1[nl][nl]4[nl][nl]").getText(), 
-			new String[] {"1", "", "4"}));
-		assertTrue(Arrays.equals(
-			new MultiString("1[nl][nl]4[nl][nl]").getText(), 
-			new String[] {"1", "", "4"}));
-		assertTrue(Arrays.equals(
-			new MultiString("1[nl][nl]4[nl][nl]").getText(), 
-			new String[] {"1", "", "4"}));
-		assertTrue(Arrays.equals(
-			new MultiString("1[nl]2[nl]3").getText(), 
-			new String[] {"1", "2", "3"}));
-
-		// tag in the middle of a span
-		assertTrue(Arrays.equals(
-			new MultiString("ABC[nl]D[j1x]E[j1x]FGH[nl]IJK[nl]").
-			getText(), new String[] {"ABC", "D E FGH", "IJK"}));
+			new String[] { "ABC", "DEF", "", "GHI", "", "123" },
+			new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123")
+			.getText(3)));
+		// tags contained in a span
+		assertTrue(Arrays.equals(new String[] {"ABC", "D E F", "GHI"},
+			new MultiString("ABC[nl]D[j1x]E[j1x]F[nl]GHI")
+			.getText(3)));
+		assertTrue(Arrays.equals(new String[] {"ABC", "D E F", "GHI"},
+			new MultiString("ABC[nl][jl2]D[jl3]E[jl4]F[nl]GHI")
+			.getText(3)));
+		assertTrue(Arrays.equals(new String[] {"ABC" },
+			new MultiString("[fo1]ABC").getText(3)));
 	}
 
 	/** getNumPages */
@@ -409,44 +402,53 @@ public class MultiStringTest extends TestCase {
 
 	/** getLines */
 	private void getLines() {
-		assertTrue(Arrays.equals(new String[] { "" },
-			new MultiString("").getLines()));
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-			new MultiString("ABC").getLines()));
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-			new MultiString("ABC[nl][nl]").getLines()));
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-			new MultiString("ABC[nl][np]").getLines()));
-		assertTrue(Arrays.equals(new String[] { "ABC", "DEF" },
-			new MultiString("ABC[nl][np]DEF").getLines()));
-		assertTrue(Arrays.equals(new String[] { "ABC", "DEF" },
-			new MultiString("ABC[nl][np]DEF[np]").getLines()));
+		assertTrue(Arrays.equals(new String[] { "", "", "" },
+			new MultiString("").getLines(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "", "" },
+			new MultiString("ABC").getLines(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "", "" },
+			new MultiString("ABC[nl][nl]").getLines(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "", "" },
+			new MultiString("ABC[nl][np]").getLines(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "", "", "DEF",
+			"", "" }, new MultiString("ABC[nl][np]DEF")
+			.getLines(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "", "", "DEF",
+			"", "" }, new MultiString("ABC[nl][np]DEF[np]")
+			.getLines(3)));
 		assertTrue(Arrays.equals(new String[] { "ABC", "DEF", "GHI" },
-			new MultiString("ABC[nl]DEF[nl2]GHI").getLines()));
-		assertTrue(Arrays.equals(new String[]
-			{ "ABC", "DEF", "GHI", "JKL" },
-		       new MultiString("ABC[nl]DEF[np]GHI[nl]JKL").getLines()));
+			new MultiString("ABC[nl]DEF[nl2]GHI").getLines(3)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "DEF", "GHI",
+			"JKL" }, new MultiString("ABC[nl]DEF[np]GHI[nl]JKL")
+			.getLines(2)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "DEF", "",
+			"GHI", "JKL", "" }, new MultiString(
+			"ABC[nl]DEF[np]GHI[nl]JKL").getLines(3)));
 		assertTrue(Arrays.equals(new String[] { "ABC", "DEF", "GHI",""},
-			new MultiString("ABC[nl]DEF[np]GHI").getLines()));
-		assertTrue(Arrays.equals(new String[] { "[jl2]ABC", "DE[fo1]F"},
-			new MultiString("[jl2]ABC[nl]DE[fo1]F").getLines()));
-		assertTrue(Arrays.equals(new String[]
-			{ "[cf0,0,0]ABC", "DE[sc5]F" },
-		       new MultiString("[cf0,0,0]ABC[nl]DE[sc5]F").getLines()));
+			new MultiString("ABC[nl]DEF[np]GHI").getLines(2)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "DEF", "",
+			"GHI", "", ""}, new MultiString("ABC[nl]DEF[np]GHI")
+			.getLines(3)));
+		assertTrue(Arrays.equals(new String[]{"[jl2]ABC","DE[fo1]F",""},
+			new MultiString("[jl2]ABC[nl]DE[fo1]F").getLines(3)));
+		assertTrue(Arrays.equals(new String[] { "[cf0,0,0]ABC",
+			"DE[sc5]F"},new MultiString("[cf0,0,0]ABC[nl]DE[sc5]F")
+			.getLines(2)));
+		// Test for non-line tags being stripped
+		assertTrue(Arrays.equals(new String[] { "ABC", "" },
+		       new MultiString("[pb0,0,0]ABC").getLines(2)));
+		assertTrue(Arrays.equals(new String[] { "ABC", "" },
+		       new MultiString("[cr255,0,0]ABC").getLines(2)));
 		assertTrue(Arrays.equals(new String[] { "ABC" },
-		       new MultiString("[pb0,0,0]ABC").getLines()));
+		       new MultiString("[g1,0,0]ABC").getLines(1)));
 		assertTrue(Arrays.equals(new String[] { "ABC" },
-		       new MultiString("[cr255,0,0]ABC").getLines()));
+		       new MultiString("[jp3]ABC").getLines(1)));
 		assertTrue(Arrays.equals(new String[] { "ABC" },
-		       new MultiString("[g1,0,0]ABC").getLines()));
+		       new MultiString("[pt50o0]ABC").getLines(1)));
 		assertTrue(Arrays.equals(new String[] { "ABC" },
-		       new MultiString("[jp3]ABC").getLines()));
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-		       new MultiString("[pt50o0]ABC").getLines()));
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-		       new MultiString("[tr0,0,5,5]ABC").getLines()));
+		       new MultiString("[tr0,0,5,5]ABC").getLines(1)));
 		assertTrue(Arrays.equals(new String[] { "ABC [fo1]DEF" },
-		       new MultiString("[jp3]ABC [fo1]DEF").getLines()));
+		       new MultiString("[jp3]ABC [fo1]DEF").getLines(1)));
 	}
 
 	/** asText */

@@ -126,14 +126,6 @@ public class SignMessageHelper extends BaseHelper {
 		return m.getFonts(f_num);
 	}
 
-	/** Create an array of lines from the given message */
-	static public String[] createTextLines(SignMessage m) {
-		if(m != null)
-			return new MultiString(m.getMulti()).getText();
-		else
-			return new String[0];
-	}
-
 	/** Check if a sign message is blank */
 	static public boolean isBlank(SignMessage m) {
 		return isMultiBlank(m) && isBitmapBlank(m);

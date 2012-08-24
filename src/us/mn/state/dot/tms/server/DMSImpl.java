@@ -1534,7 +1534,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			DMSHelper.getAllStyles(this)));
 
 		SignMessage sm = getMessageCurrent();
-		String[] ml = SignMessageHelper.createTextLines(sm);
+		String[] ml = createTextLines(sm);
 		if(ml == null || ml.length <= 0)
 			desc.append(Kml.descItem("Messages Lines", "none"));
 		else {
@@ -1560,6 +1560,15 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		desc.append("<br>");
 
 		return Kml.htmlDesc(desc.toString());
+	}
+
+	/** Create an array of lines from the given message */
+	private String[] createTextLines(SignMessage sm) {
+		if(sm != null) {
+			int n_lines = DMSHelper.getLineCount(this);
+			return new MultiString(sm.getMulti()).getText(n_lines);
+		} else
+			return new String[0];
 	}
 
 	/** get kml style selector (KmlFolder interface) */

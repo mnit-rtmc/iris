@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignTextHelper;
@@ -34,6 +35,9 @@ public class FeedCallback extends MultiString {
 	/** DMS ID */
 	private final String did;
 
+	/** Number of lines on sign */
+	private final int n_lines;
+
 	/** Sign group */
 	private final SignGroup group;
 
@@ -43,6 +47,7 @@ public class FeedCallback extends MultiString {
 	/** Create a new feed callback */
 	public FeedCallback(DMSImpl dms, SignGroup sg) {
 		did = dms.getName();
+		n_lines = DMSHelper.getLineCount(dms);
 		group = sg;
 	}
 
@@ -71,7 +76,7 @@ public class FeedCallback extends MultiString {
 
 	/** Test if the feed message is valid */
 	private boolean isFeedMsgValid() {
-		String[] lines = msg.getMulti().getLines();
+		String[] lines = msg.getMulti().getLines(n_lines);
 		for(int i = 0; i < lines.length; i++) {
 			if(!isValidSignText((short)(i + 1), lines[i]))
 				return false;

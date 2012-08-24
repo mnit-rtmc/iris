@@ -340,13 +340,15 @@ public class DMSHelper extends BaseHelper {
 		return ret.toString();
 	}
 
-	/** Get current sign message text as an array of strings. */
+	/** Get current sign message text as an array of strings */
 	static private String[] getText(DMS proxy) {
 		SignMessage sm = proxy.getMessageCurrent();
 		if(sm != null) {
 			String multi = sm.getMulti();
-			if(multi != null)
-				return new MultiString(multi).getText();
+			if(multi != null) {
+				int n_lines = getLineCount(proxy);
+				return new MultiString(multi).getText(n_lines);
+			}
 		}
 		return new String[0];
 	}
