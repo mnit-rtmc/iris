@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2011  Minnesota Department of Transportation
+ * Copyright (C) 2003-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Dimension;
 import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +25,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.StreamType;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A video stream which reads an MJPEG source.
@@ -43,7 +45,7 @@ public class MJPEGStream implements VideoStream {
 	private final URL url;
 
 	/** Requested video size */
-	private final VideoRequest.Size size;
+	private final Dimension size;
 
 	/** Input stream to read */
 	private final InputStream stream;
@@ -66,7 +68,7 @@ public class MJPEGStream implements VideoStream {
 	/** Create a new MJPEG stream */
 	public MJPEGStream(VideoRequest req, Camera c) throws IOException {
 		url = new URL(req.getUrl(c));
-		size = req.getSize();
+		size = UI.dimension(req.getSize().width, req.getSize().height);
 		stream = createInputStream();
 		thread.start();
 	}

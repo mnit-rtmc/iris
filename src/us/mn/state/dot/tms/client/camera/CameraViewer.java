@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * GUI for viewing camera images
@@ -140,8 +141,7 @@ public class CameraViewer extends JPanel
 	/** Create a new camera viewer */
 	public CameraViewer(Session session, CameraManager man) {
 		super(new GridBagLayout());
-		s_panel = new StreamPanel(new Dimension(SIZE.width,
-			SIZE.height));
+		s_panel = new StreamPanel(UI.dimension(SIZE.width,SIZE.height));
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
 		state = session.getSonarState();
