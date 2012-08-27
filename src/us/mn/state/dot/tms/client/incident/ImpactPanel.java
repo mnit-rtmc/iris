@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Panel for incident impact.
@@ -67,10 +68,10 @@ public class ImpactPanel extends JPanel {
 	}
 
 	/** Width of one lane */
-	static protected final int LANE_WIDTH = 32;
+	static private final int LANE_WIDTH = UI.scaled(32);
 
 	/** Height of one lane */
-	static protected final int LANE_HEIGHT = 20;
+	static private final int LANE_HEIGHT = UI.scaled(20);
 
 	/** Solid stroke line */
 	static protected final BasicStroke LINE_SOLID = new BasicStroke(4,

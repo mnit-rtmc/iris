@@ -93,8 +93,12 @@ public class Widgets {
 
 	/** Scale a dimension */
 	static public Dimension dimension(int w, int h) {
-		return new Dimension(Math.round(w * UI.scale),
-			Math.round(h * UI.scale));
+		return new Dimension(UI.scaled(w), UI.scaled(h));
+	}
+
+	/** Get a scaled value */
+	public int scaled(int d) {
+		return Math.round(d * scale);
 	}
 
 	/** Scale factor */
@@ -112,8 +116,8 @@ public class Widgets {
 	/** Create widget state */
 	private Widgets(float s) {
 		scale = s;
-		hgap = Math.round(HGAP * s);
-		vgap = Math.round(VGAP * s);
+		hgap = scaled(HGAP);
+		vgap = scaled(VGAP);
 		border = new EmptyBorder(vgap, hgap, vgap, hgap);
 	}
 
