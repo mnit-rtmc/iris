@@ -543,11 +543,8 @@ public class IncidentDispatcher extends JPanel
 	/** Set the camera action */
 	protected void setCameraAction(Incident inc) {
 		Camera cam = IncidentHelper.getCamera(inc);
-		if(cam != null) {
-			camera_btn.setAction(new CameraSelectAction(cam,
-			    session.getCameraManager().getSelectionModel()));
-		} else
-			camera_btn.setAction(null);
+		camera_btn.setAction(new CameraSelectAction(cam,
+		    session.getCameraManager().getSelectionModel()));
 		camera_btn.setEnabled(cam != null);
 	}
 

@@ -296,11 +296,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	/** Set the camera action */
 	protected void setCameraAction(DMS dms) {
 		Camera cam = DMSHelper.getCamera(dms);
-		if(cam != null) {
-			cameraBtn.setAction(new CameraSelectAction(cam,
-				cam_sel_model));
-		} else
-			cameraBtn.setAction(null);
+		cameraBtn.setAction(new CameraSelectAction(cam, cam_sel_model));
 		cameraBtn.setEnabled(cam != null);
 	}
 

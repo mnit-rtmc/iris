@@ -18,6 +18,7 @@ import javax.swing.Action;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Selects the specified camera.
@@ -35,6 +36,8 @@ public class CameraSelectAction extends ProxyAction<Camera> {
 		sel_model = mdl;
 		if(c != null)
 			putValue(Action.NAME, c.getName());
+		else
+			putValue(Action.NAME, I18N.get("camera.none"));
 	}
 
 	/** Actually perform the action */
