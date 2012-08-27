@@ -62,6 +62,11 @@ public class MultiString implements Multi {
 			throw new NullPointerException();
 	}
 
+	/** Append another MULTI string. */
+	public void append(MultiString ms) {
+		multi.append(ms.multi);
+	}
+
 	/** Add a span of text */
 	public void addSpan(String s) {
 		if(s.length() > 0)

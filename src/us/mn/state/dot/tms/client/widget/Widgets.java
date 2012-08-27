@@ -126,4 +126,14 @@ public class Widgets {
 	public Insets buttonInsets() {
 		return new Insets(0, HGAP, 0, HGAP);
 	};
+
+	/** Create a panel border */
+	public EmptyBorder panelBorder() {
+		return new EmptyBorder(VGAP, HGAP, VGAP, HGAP);
+	}
+
+	/** Create a panel border */
+	public EmptyBorder noTopBorder() {
+		return new EmptyBorder(0, HGAP, VGAP, HGAP);
+	}
 }

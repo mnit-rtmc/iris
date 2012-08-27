@@ -429,8 +429,8 @@ public class MultiStringTest extends TestCase {
 		assertTrue(Arrays.equals(new String[] { "ABC", "DEF", "",
 			"GHI", "", ""}, new MultiString("ABC[nl]DEF[np]GHI")
 			.getLines(3)));
-		assertTrue(Arrays.equals(new String[]{"[jl2]ABC","DE[fo1]F",""},
-			new MultiString("[jl2]ABC[nl]DE[fo1]F").getLines(3)));
+		assertTrue(Arrays.equals(new String[]{"[jl2]ABC","DEF",""},
+			new MultiString("[jl2]ABC[nl]DEF[g1,1,1]").getLines(3)));
 		assertTrue(Arrays.equals(new String[] { "[cf0,0,0]ABC",
 			"DE[sc5]F"},new MultiString("[cf0,0,0]ABC[nl]DE[sc5]F")
 			.getLines(2)));
@@ -447,8 +447,8 @@ public class MultiStringTest extends TestCase {
 		       new MultiString("[pt50o0]ABC").getLines(1)));
 		assertTrue(Arrays.equals(new String[] { "ABC" },
 		       new MultiString("[tr0,0,5,5]ABC").getLines(1)));
-		assertTrue(Arrays.equals(new String[] { "ABC [fo1]DEF" },
-		       new MultiString("[jp3]ABC [fo1]DEF").getLines(1)));
+		assertTrue(Arrays.equals(new String[] { "ABC [jl4]DEF" },
+		       new MultiString("[jp3]ABC [jl4]DEF").getLines(1)));
 	}
 
 	/** asText */

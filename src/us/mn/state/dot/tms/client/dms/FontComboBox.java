@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
@@ -36,7 +37,7 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	protected final TypeCache<Font> m_fonts;
 
 	/** Font combo box model */
-	private final FontComboBoxModel m_fontModel;
+	private FontComboBoxModel m_fontModel;
 
 	/** Sign message composer */
 	private final SignMessageComposer composer;
@@ -47,15 +48,22 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	protected int adjusting = 0;
 
 	/** Create a new font combo box */
-	public FontComboBox(TypeCache<Font> fonts, RasterBuilder builder, 
-		SignMessageComposer c) 
-	{
+	public FontComboBox(TypeCache<Font> fonts, SignMessageComposer c) {
 		m_fonts = fonts;
 		composer = c;
 		setToolTipText(I18N.get("dms.font.tooltip"));
-		m_fontModel = new FontComboBoxModel(fonts, builder);
-		setModel(m_fontModel);
 		addActionListener(this);
+	}
+
+	/** Set the raster builder */
+	public void setBuilder(RasterBuilder rb) {
+		if(m_fontModel != null)
+			m_fontModel.dispose();
+		if(rb != null) {
+			m_fontModel = new FontComboBoxModel(m_fonts, rb);
+			setModel(m_fontModel);
+		} else
+			setModel(new DefaultComboBoxModel());
 	}
 
 	/** Set the selected font number */
@@ -76,7 +84,7 @@ public class FontComboBox extends JComboBox implements ActionListener {
 
 	/** Dispose of the font combo box */
 	public void dispose() {
-		m_fontModel.dispose();
+		setBuilder(null);
 		removeActionListener(this);
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -269,6 +269,11 @@ public class MultiParser {
 				int h, int r, int g, int b) {}
 			public void addGraphic(int g_num, Integer x, Integer y,
 				String g_id) {}
+			public void setFont(int f_num, String f_id) {
+				// including font tags in line text interferes
+				// with the font-per-page interface in
+				// SignMessageComposer, so strip them
+			}
 			public void setJustificationPage(
 				Multi.JustificationPage jp) {}
 			public void addLine(Integer spacing) {}
