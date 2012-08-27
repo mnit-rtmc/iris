@@ -62,8 +62,8 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
-	/** Empty text field */
-	static protected final String EMPTY_TXT = "    ";
+	/** Empty text field to prevent labels from changing size */
+	static private final String EMPTY_TXT = "    ";
 
 	/** Displays the id of the DMS */
 	private final JLabel name_lbl = createValueLabel();
@@ -283,14 +283,14 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		name_lbl.setText(EMPTY_TXT);
 		brightness_lbl.setText(EMPTY_TXT);
 		setCameraAction(null);
-		location_lbl.setText("");
+		location_lbl.setText(EMPTY_TXT);
 		aws_control_chk.setEnabled(false);
 		aws_control_chk.setSelected(false);
-		status_lbl.setText("");
+		status_lbl.setText(EMPTY_TXT);
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
-		operation_lbl.setText("");
-		op_status_lbl.setText("");
+		operation_lbl.setText(EMPTY_TXT);
+		op_status_lbl.setText(EMPTY_TXT);
 	}
 
 	/** Set the camera action */
@@ -311,7 +311,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			if(o != null)
 				brightness_lbl.setText("" + o + "%");
 			else
-				brightness_lbl.setText("");
+				brightness_lbl.setText(EMPTY_TXT);
 		}
 		if(a == null || a.equals("camera"))
 			setCameraAction(dms);
@@ -368,11 +368,12 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		if(maintenance.isEmpty()) {
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
+			status_lbl.setText(EMPTY_TXT);
 		} else {
 			status_lbl.setForeground(Color.BLACK);
 			status_lbl.setBackground(Color.YELLOW);
+			status_lbl.setText(maintenance);
 		}
-		status_lbl.setText(maintenance);
 	}
 
 	/** Update the current panel */
