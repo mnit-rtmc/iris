@@ -22,6 +22,7 @@ import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.DeviceStyle;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Theme for SONAR proxy objects on map
@@ -67,6 +68,9 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	/** Color to display scheduled devices */
 	static public final Color COLOR_SCHEDULED = new Color(240, 128, 0);
 
+	/** Size of legend icons */
+	static private final int lsize = UI.scaled(22);
+
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
@@ -75,7 +79,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Create a new SONAR proxy theme */
 	public ProxyTheme(ProxyManager<T> m, Shape s) {
-		super(m.getProxyType(), s);
+		super(m.getProxyType(), s, lsize);
 		manager = m;
 	}
 

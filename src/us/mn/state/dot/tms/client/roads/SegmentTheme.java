@@ -22,6 +22,7 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -57,9 +58,12 @@ abstract public class SegmentTheme extends StyledTheme {
 	static protected final Style DEFAULT_STYLE = new Style(I18N.get(
 		"detector.no.data"), OUTLINE, GRAY);
 
+	/** Size of legend icons */
+	static private final int lsize = UI.scaled(22);
+
 	/** Create a new segment theme */
 	protected SegmentTheme(String name) {
-		super(name, new Rectangle(0, 0, 200, 200));
+		super(name, new Rectangle(0, 0, 200, 200), lsize);
 		addStyle(DEFAULT_STYLE);
 	}
 
