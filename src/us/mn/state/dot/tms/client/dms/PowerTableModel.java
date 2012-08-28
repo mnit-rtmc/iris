@@ -19,6 +19,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.tms.utils.I18N;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * PowerTableModel is a table model for power supply status.
@@ -46,7 +47,7 @@ public class PowerTableModel extends AbstractTableModel {
 	static protected TableColumn createColumn(int column, int width,
 		String header)
 	{
-		TableColumn c = new TableColumn(column, width);
+		TableColumn c = new TableColumn(column, UI.scaled(width));
 		c.setHeaderValue(header);
 		return c;
 	}

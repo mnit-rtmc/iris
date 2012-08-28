@@ -36,15 +36,6 @@ import us.mn.state.dot.tms.client.Session;
 abstract public class ProxyTableModel2<T extends SonarObject>
 	extends AbstractTableModel
 {
-	/** Create a table column */
-	static protected TableColumn createColumn(int column, int width,
-		String header)
-	{
-		TableColumn c = new TableColumn(column, width);
-		c.setHeaderValue(header);
-		return c;
-	}
-
 	/** User session */
 	protected final Session session;
 

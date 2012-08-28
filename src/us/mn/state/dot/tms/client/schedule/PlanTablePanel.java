@@ -21,6 +21,7 @@ import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -31,7 +32,7 @@ import us.mn.state.dot.tms.client.widget.ZTable;
 public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 
 	/** Table row height */
-	static protected final int ROW_HEIGHT = 22;
+	static private final int ROW_HEIGHT = UI.scaled(22);
 
 	/** Table model for plan actions */
 	protected ProxyTableModel<T> model;

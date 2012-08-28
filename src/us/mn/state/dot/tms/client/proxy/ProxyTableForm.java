@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -109,7 +110,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
 		table.setModel(model);
-		table.setRowHeight(getRowHeight());
+		table.setRowHeight(UI.scaled(getRowHeight()));
 		table.setVisibleRowCount(getVisibleRowCount());
 		FormPanel panel = new FormPanel(true);
 		panel.setBorder();

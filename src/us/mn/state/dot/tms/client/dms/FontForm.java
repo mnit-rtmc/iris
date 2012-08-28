@@ -228,8 +228,8 @@ public class FontForm extends AbstractForm {
 		glist.setModel(model);
 		glist.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		glist.setVisibleRowCount(12);
-		glist.setFixedCellHeight(32);
-		glist.setFixedCellWidth(48);
+		glist.setFixedCellHeight(UI.scaled(24));
+		glist.setFixedCellWidth(UI.scaled(32));
 		for(int i = 32; i < 127; i++)
 			model.addElement(String.valueOf((char)i));
 		panel.add(glist);

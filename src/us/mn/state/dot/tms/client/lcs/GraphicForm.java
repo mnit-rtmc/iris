@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -122,7 +123,7 @@ public class GraphicForm extends AbstractForm {
 			}
 		};
 		FormPanel panel = new FormPanel(true);
-		table.setRowHeight(64);
+		table.setRowHeight(UI.scaled(64));
 		table.setModel(model);
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());

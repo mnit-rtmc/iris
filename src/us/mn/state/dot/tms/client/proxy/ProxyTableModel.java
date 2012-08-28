@@ -36,15 +36,6 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 abstract public class ProxyTableModel<T extends SonarObject>
 	extends AbstractTableModel implements ProxyListener<T>
 {
-	/** Create a table column */
-	static protected TableColumn createColumn(int column, int width,
-		String header)
-	{
-		TableColumn c = new TableColumn(column, width);
-		c.setHeaderValue(header);
-		return c;
-	}
-
 	/** User session */
 	protected final Session session;
 

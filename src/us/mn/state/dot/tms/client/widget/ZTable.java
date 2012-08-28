@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,11 @@ import javax.swing.JTable;
  * @author Douglas Lau
  */
 public class ZTable extends JTable {
+
+	/** Create a new ZTable */
+	public ZTable() {
+		setRowHeight(Widgets.UI.scaled(18));
+	}
 
 	/** Set the visible row count */
 	public void setVisibleRowCount(int c) {

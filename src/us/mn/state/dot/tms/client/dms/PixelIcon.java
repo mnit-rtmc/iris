@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
 import javax.swing.Icon;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A pixel icon draws a lit or unlit pixel as an icon.
@@ -30,7 +31,7 @@ import javax.swing.Icon;
 public class PixelIcon implements Icon {
 
 	/** Diameter of pixel */
-	static protected final int SIZE = 18;
+	static private final int SIZE = UI.scaled(16);
 
 	/** On/off state of the pixel */
 	protected final boolean state;

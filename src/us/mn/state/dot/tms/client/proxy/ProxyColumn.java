@@ -20,6 +20,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.utils.I18N;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A column in the proxy table model.
@@ -44,7 +45,7 @@ abstract public class ProxyColumn<T extends SonarObject> {
 	 * @param c Column class. */
 	public ProxyColumn(String tid, int w, Class c) {
 		header = I18N.get(tid);
-		width = w;
+		width = UI.scaled(w);
 		c_class = c;
 	}
 

@@ -62,7 +62,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Comm link table row height */
-	static protected final int ROW_HEIGHT = 24;
+	static private final int ROW_HEIGHT = UI.scaled(24);
 
 	/** Tabbed pane */
 	protected final JTabbedPane tab = new JTabbedPane();

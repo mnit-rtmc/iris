@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.client.widget.CalendarWidget;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -47,6 +48,9 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  * @author Douglas Lau
  */
 public class DayPlanPanel extends JPanel {
+
+	/** Table row height */
+	static private final int ROW_HEIGHT = UI.scaled(22);
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -201,7 +205,7 @@ public class DayPlanPanel extends JPanel {
 		h_table.setModel(h_model);
 		h_table.setAutoCreateColumnsFromModel(false);
 		h_table.setColumnModel(h_model.createColumnModel());
-		h_table.setRowHeight(22);
+		h_table.setRowHeight(ROW_HEIGHT);
 		h_table.setVisibleRowCount(12);
 		bag.gridx = 0;
 		bag.gridy = 2;

@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -51,7 +52,7 @@ public class ActionPlanPanel extends JPanel {
 	}
 
 	/** Table row height */
-	static protected final int ROW_HEIGHT = 22;
+	static private final int ROW_HEIGHT = UI.scaled(22);
 
 	/** Table model for action plans */
 	protected final ActionPlanModel p_model;
