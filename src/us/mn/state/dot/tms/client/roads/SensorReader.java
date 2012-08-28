@@ -15,25 +15,49 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * XmlClient reads an xml document at a specified interval and parses it to java
- * classes that can be used by listeners who are alerted when new data is
- * available.
+ * SensorReader reads and parses an XML document at a 30-second interval.
+ * SensorSample objects are created for each sample element, and reported
+ * to any registered listeners.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
-abstract public class XmlClient implements Runnable {
+public class SensorReader implements Runnable {
+
+	/** Entity declaration */
+	static private final String ENTITY_DECL =
+		"<?xml version='1.0' encoding='UTF-8'?>";
+
+	/** Parse an attribute as an integer value */
+	static private Integer parseInt(String v) {
+		try {
+			if(v != null)
+				return Integer.parseInt(v);
+		}
+		catch(NumberFormatException e) {
+			// Invalid value
+		}
+		return null;
+	}
 
 	/** The URL of the xml document */
-	protected final URL url;
+	private final URL url;
 
 	/** The thread the client runs in */
 	private Thread thread = null;
@@ -47,17 +71,27 @@ abstract public class XmlClient implements Runnable {
 	/** Time to wait till re-reading data */
 	private int sleepTime = 30000;
 
+	/** SAX parser */
+	private final SAXParser parser;
+
+	/** Time stamp from previous read */
+	private String last_stamp = "";
+
+	/** Flag to indicate the time stamp changed since last time */
+	private boolean time_changed = false;
+
 	/** List of listeners */
-	protected List<SensorListener> listeners =
+	private List<SensorListener> listeners =
 		new LinkedList<SensorListener>();
 
-	/** Create a new XmlClient */
-	protected XmlClient(URL u, Logger l) throws SAXException,
+	/** Create a new sensor reader */
+	public SensorReader(URL u, Logger l) throws SAXException,
 		ParserConfigurationException
 	{
-		super();
 		url = u;
 		logger = l;
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		parser = factory.newSAXParser();
 	}
 
 	/**
@@ -76,9 +110,6 @@ abstract public class XmlClient implements Runnable {
 			}
 		}
 	}
-
-	/** Read and parse an XML file */
-	abstract protected void readXmlFile() throws Exception;
 
 	/** Read the data from the xml file */
 	protected void readData() {
@@ -160,19 +191,19 @@ abstract public class XmlClient implements Runnable {
 		listeners = new LinkedList<SensorListener>();
 	}
 
-	/** Notifier for TDXML listeners */
-	abstract protected class Notifier {
+	/** Notifier for listeners */
+	abstract private class Notifier {
 		abstract void notify(SensorListener l);
 	}
 
 	/** Notify all listeners of an update */
-	protected void doNotify(Notifier n) {
+	private void doNotify(Notifier n) {
 		for(SensorListener l: listeners)
 			n.notify(l);
 	}
 
 	/** Notify listeners of the start of new data */
-	protected void notifyStart() {
+	private void notifyStart() {
 		doNotify(new Notifier() {
 			void notify(SensorListener l) {
 				l.update(false);
@@ -181,7 +212,7 @@ abstract public class XmlClient implements Runnable {
 	}
 
 	/** Notify listeners that new data is finished */
-	protected void notifyFinish() {
+	private void notifyFinish() {
 		doNotify(new Notifier() {
 			void notify(SensorListener l) {
 				l.update(true);
@@ -190,11 +221,81 @@ abstract public class XmlClient implements Runnable {
 	}
 
 	/** Notify listeners of a sensor data sample */
-	protected void notifySample(final SensorSample s) {
+	private void notifySample(final SensorSample s) {
 		doNotify(new Notifier() {
 			void notify(SensorListener l) {
 				l.update(s);
 			}
 		});
+	}
+
+	/** Read and parse an XML file */
+	private void readXmlFile() throws Exception {
+		logger.info("Openning connection to " + url);
+		URLConnection conn = url.openConnection();
+		logger.info("Setting connect timeout on " + url);
+		conn.setConnectTimeout(60000);
+		logger.info("Setting read timeout on " + url);
+		conn.setReadTimeout(60000);
+		logger.info("Getting input stream from " + url);
+		InputStream in = new GZIPInputStream(conn.getInputStream());
+		logger.info("Parsing XML for " + url);
+		parse(in);
+		logger.info("Parse complete for " + url);
+	}
+
+	/** Parse the XML document and notify clients */
+	protected void parse(InputStream in) throws IOException, SAXException {
+		notifyStart();
+		try {
+			SensorHandler h = new SensorHandler();
+			parser.parse(in, h);
+		}
+		finally {
+			notifyFinish();
+		}
+	}
+
+	/** Inner class to handle parsing sensor elements */
+	protected class SensorHandler extends DefaultHandler {
+		public InputSource resolveEntity(String publicId,
+			String systemId) throws IOException, SAXException
+		{
+			return new InputSource(new StringReader(ENTITY_DECL));
+		}
+		public void startElement(String uri, String localName,
+			String qname, Attributes attrs)
+		{
+			if(qname.equals("traffic_sample"))
+				handleTrafficSample(attrs);
+			if(qname.equals("sample"))
+				handleSample(attrs);
+		}
+	}
+
+	/** Handle a traffic_sample element */
+	protected void handleTrafficSample(Attributes attrs) {
+		String stamp = attrs.getValue("time_stamp");
+		time_changed = !stamp.equals(last_stamp);
+		last_stamp = stamp;
+	}
+
+	/** Notify listeners of one sensor sample */
+	protected void notifySensorSample(String sensor, String f, String s) {
+		Integer flow = parseInt(f);
+		Integer speed = parseInt(s);
+		if(flow != null || speed != null)
+			notifySample(new SensorSample(sensor, flow, speed));
+	}
+
+	/** Handle one sensor sample element */
+	protected void handleSample(Attributes attrs) {
+		if(time_changed) {
+			String sensor = attrs.getValue("sensor");
+			String flow = attrs.getValue("flow");
+			String speed = attrs.getValue("speed");
+			if(sensor != null)
+				notifySensorSample(sensor, flow, speed);
+		}
 	}
 }

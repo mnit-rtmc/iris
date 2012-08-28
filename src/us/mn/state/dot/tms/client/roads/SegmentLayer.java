@@ -73,19 +73,19 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		SAXException, ParserConfigurationException
 	{
 		String loc = props.getProperty("tdxml.detector.url");
-		XmlSensorClient sc = createSensorClient(loc, logger);
-		if(sc != null)
-			sc.start();
+		SensorReader sr = createSensorReader(loc, logger);
+		if(sr != null)
+			sr.start();
 	}
 
-	/** Create a sensor client */
-	protected XmlSensorClient createSensorClient(String loc, Logger l)
+	/** Create a sensor reader */
+	protected SensorReader createSensorReader(String loc, Logger l)
 		throws IOException, SAXException, ParserConfigurationException
 	{
 		if(loc == null)
 			return null;
-		XmlSensorClient sc = new XmlSensorClient(new URL(loc), l);
-		sc.addSensorListener(new SensorListener() {
+		SensorReader sr = new SensorReader(new URL(loc), l);
+		sr.addSensorListener(new SensorListener() {
 			public void update(boolean finish) {
 				if(finish) {
 					samples.swapSamples();
@@ -97,7 +97,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 				samples.updateSample(s);
 			}
 		});
-		return sc;
+		return sr;
 	}
 
 	/** Notify listeners that the layer has changed status */
