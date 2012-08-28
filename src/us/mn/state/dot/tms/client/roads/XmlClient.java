@@ -19,6 +19,8 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 
 /**
  * XmlClient reads an xml document at a specified interval and parses it to java
@@ -50,7 +52,9 @@ abstract public class XmlClient implements Runnable {
 		new LinkedList<SensorListener>();
 
 	/** Create a new XmlClient */
-	protected XmlClient(URL u, Logger l) throws TdxmlException {
+	protected XmlClient(URL u, Logger l) throws SAXException,
+		ParserConfigurationException
+	{
 		super();
 		url = u;
 		logger = l;

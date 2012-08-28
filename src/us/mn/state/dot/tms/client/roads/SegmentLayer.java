@@ -24,6 +24,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentSkipListMap;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerChange;
 import us.mn.state.dot.map.LayerChangedEvent;
@@ -68,7 +70,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 
 	/** Start reading sensor data */
 	public void start(Properties props, Logger logger) throws IOException,
-		TdxmlException
+		SAXException, ParserConfigurationException
 	{
 		String loc = props.getProperty("tdxml.detector.url");
 		XmlSensorClient sc = createSensorClient(loc, logger);
@@ -78,7 +80,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 
 	/** Create a sensor client */
 	protected XmlSensorClient createSensorClient(String loc, Logger l)
-		throws IOException, TdxmlException
+		throws IOException, SAXException, ParserConfigurationException
 	{
 		if(loc == null)
 			return null;

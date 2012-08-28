@@ -39,7 +39,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.roads.TdxmlException;
 import us.mn.state.dot.tms.client.system.LoginForm;
 import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.ScreenLayout;
@@ -290,10 +289,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Create a new session */
-	protected Session createSession(String user, char[] pwd)
-		throws IOException, TdxmlException, SonarException,
-		NoSuchFieldException, IllegalAccessException
-	{
+	private Session createSession(String user, char[] pwd) throws Exception{
 		SonarState state = createSonarState();
 		state.login(user, new String(pwd));
 		if(state.isLoggedIn()) {

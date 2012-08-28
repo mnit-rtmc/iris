@@ -19,6 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.map.TileLayer;
@@ -56,7 +58,6 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.R_NodeTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
-import us.mn.state.dot.tms.client.roads.TdxmlException;
 import us.mn.state.dot.tms.client.schedule.PlanManager;
 import us.mn.state.dot.tms.client.schedule.PlanTab;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
@@ -264,7 +265,9 @@ public class Session {
 	}
 
 	/** Initialize the session */
-	public void initialize() throws IOException, TdxmlException {
+	public void initialize() throws IOException, SAXException,
+		ParserConfigurationException
+	{
 		initializeManagers();
 		addTabs();
 		seg_layer.start(props, logger);

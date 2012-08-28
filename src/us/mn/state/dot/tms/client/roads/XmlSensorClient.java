@@ -64,19 +64,12 @@ public class XmlSensorClient extends XmlClient {
 	protected boolean time_changed = false;
 
 	/** Create a new XmlSensorClient */
-	public XmlSensorClient(URL url, Logger l) throws TdxmlException {
+	public XmlSensorClient(URL url, Logger l) throws SAXException,
+		ParserConfigurationException
+	{
 		super(url, l);
-		try {
-			SAXParserFactory factory =
-				SAXParserFactory.newInstance();
-			parser = factory.newSAXParser();
-		}
-		catch(ParserConfigurationException e) {
-			throw new TdxmlException(e);
-		}
-		catch(SAXException e) {
-			throw new TdxmlException(e);
-		}
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		parser = factory.newSAXParser();
 	}
 
 	/** Read and parse an XML file */
