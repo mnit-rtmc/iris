@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Renderer for roadway node cells in a list.
@@ -45,19 +46,13 @@ import us.mn.state.dot.tms.R_NodeType;
 public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Width of one lane */
-	static protected final int LANE_WIDTH = 20;
+	static private final int LANE_WIDTH = UI.scaled(20);
 
 	/** Height of one lane */
-	static protected final int LANE_HEIGHT = 18;
+	static private final int LANE_HEIGHT = UI.scaled(18);
 
 	/** Total width of roadway node renderers */
 	static protected final int WIDTH = LANE_WIDTH * 22;
-
-	/** Width of a detector */
-	static protected final int DET_WIDTH = LANE_WIDTH - 9;
-
-	/** Height of a detector */
-	static protected final int DET_HEIGHT = LANE_HEIGHT - 6;
 
 	/** Solid stroke line */
 	static protected final BasicStroke LINE_SOLID = new BasicStroke(8,
@@ -448,16 +443,17 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Draw a detector */
 	protected void drawDetector(Graphics2D g, int x, int y, String label) {
-		Rectangle2D detector = new Rectangle2D.Double(x, y,
-			DET_WIDTH, DET_HEIGHT);
-		g.setColor(Color.DARK_GRAY);
-		g.fill(detector);
-		g.setColor(Color.WHITE);
 		GlyphVector gv = FONT_XSTREET.createGlyphVector(
 			g.getFontRenderContext(), label);
 		Rectangle2D rect = gv.getVisualBounds();
-		int tx = (DET_WIDTH - (int)rect.getWidth()) / 2;
-		int ty = 1 + (DET_HEIGHT + (int)rect.getHeight()) / 2;
+		Rectangle2D detector = new Rectangle2D.Double(x, y,
+			rect.getWidth() + UI.hgap * 2,
+			rect.getHeight() + UI.vgap * 2);
+		g.setColor(Color.DARK_GRAY);
+		g.fill(detector);
+		g.setColor(Color.WHITE);
+		int tx = UI.hgap;
+		int ty = 1 + (int)rect.getHeight() + UI.vgap;
 		g.drawGlyphVector(gv, x + tx, y + ty);
 	}
 
@@ -465,20 +461,23 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	protected void drawSpeedLimit(Graphics2D g, int height) {
 		switch(node_type) {
 		case STATION:
+			int x = getDownstreamLine(false) + LANE_WIDTH;
+			int y = 2;
 			String slim = String.valueOf(r_node.getSpeedLimit());
 			GlyphVector gv = FONT_XSTREET.createGlyphVector(
 				g.getFontRenderContext(), slim);
 			Rectangle2D rect = gv.getVisualBounds();
-			int x = getDownstreamLine(false) + LANE_WIDTH;
-			int y = (height + (int)rect.getHeight()) / 2;
-			Rectangle2D face = new Rectangle2D.Double(x - 4, y - 11,
-				rect.getWidth() + 10, rect.getHeight() + 5);
+			Rectangle2D face = new Rectangle2D.Double(x, y,
+				rect.getWidth() + UI.hgap * 2,
+				rect.getHeight() + UI.vgap * 2);
 			g.setColor(Color.WHITE);
 			g.fill(face);
 			g.setColor(Color.BLACK);
 			g.setStroke(LINE_BASIC);
 			g.draw(face);
-			g.drawGlyphVector(gv, x, y);
+			int tx = UI.hgap;
+			int ty = 1 + (int)rect.getHeight() + UI.vgap;
+			g.drawGlyphVector(gv, x + tx, y + ty);
 			break;
 		}
 	}
