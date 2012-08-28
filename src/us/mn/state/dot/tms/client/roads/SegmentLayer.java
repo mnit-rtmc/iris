@@ -60,6 +60,9 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	/** Sample data set */
 	protected final SampleDataSet samples = new SampleDataSet();
 
+	/** Sensor reader */
+	private SensorReader reader;
+
 	/** Create a new segment layer */
 	public SegmentLayer(R_NodeManager m, Session s) {
 		super(I18N.get("detector.segments"));
@@ -72,15 +75,22 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		ParserConfigurationException
 	{
 		String loc = props.getProperty("tdxml.detector.url");
-		createSensorReader(loc);
+		if(loc != null)
+			reader = createSensorReader(loc);
+	}
+
+	/** Dispose of the segment layer */
+	public void dispose() {
+		SensorReader sr = reader;
+		if(sr != null)
+			sr.dispose();
+		reader = null;
 	}
 
 	/** Create a sensor reader */
 	private SensorReader createSensorReader(String loc) throws IOException,
 		SAXException, ParserConfigurationException
 	{
-		if(loc == null)
-			return null;
 		SensorReader sr = new SensorReader(new URL(loc));
 		sr.addSensorListener(new SensorListener() {
 			public void update(boolean finish) {

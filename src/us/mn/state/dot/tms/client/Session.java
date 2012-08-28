@@ -315,8 +315,7 @@ public class Session {
 	public void createLayers(MapBean mb, MapModel mm) {
 		if(tile_layer != null)
 			mm.addLayer(tile_layer.createState(mb));
-		if(seg_layer != null)
-			mm.addLayer(seg_layer.createState(mb));
+		mm.addLayer(seg_layer.createState(mb));
 		if(canRead(Controller.SONAR_TYPE)) {
 			mm.addLayer(controller_manager.getLayer().createState(
 				mb));
@@ -390,6 +389,7 @@ public class Session {
 
 	/** Dispose of the session */
 	public void dispose() {
+		seg_layer.dispose();
 		desktop.closeFrames();
 		for(MapTab tab: tabs)
 			tab.dispose();

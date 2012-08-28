@@ -80,6 +80,15 @@ public class SensorReader {
 	private List<SensorListener> listeners =
 		new LinkedList<SensorListener>();
 
+	/** Job to perform */
+	private final Job job = new Job(Calendar.SECOND, 30, Calendar.SECOND,
+		OFFSET_SECS)
+	{
+		public void perform() throws Exception {
+			readXmlFile();
+		}
+	};
+
 	/** Create a new sensor reader */
 	public SensorReader(URL u) throws SAXException,
 		ParserConfigurationException
@@ -94,13 +103,12 @@ public class SensorReader {
 			}
 		});
 		// Read the sensor data every 30 seconds
-		READER.addJob(new Job(Calendar.SECOND, 30, Calendar.SECOND,
-			OFFSET_SECS)
-		{
-			public void perform() throws Exception {
-				readXmlFile();
-			}
-		});
+		READER.addJob(job);
+	}
+
+	/** Dispose of the sensor listener */
+	public void dispose() {
+		READER.removeJob(job);
 	}
 
 	/** Add a sensor listener */
