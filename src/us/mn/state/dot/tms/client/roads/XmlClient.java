@@ -134,49 +134,9 @@ abstract public class XmlClient implements Runnable {
 		}
 	}
 
-	/**
-	 * Will this client run in a daemon thread?
-	 *
-	 * @return true if this client runs as a daemon.
-	 */
-	public boolean isDaemon() {
-		return daemon;
-	}
-
-	/**
-	 * Set whether this client will run as a daemon thread.
-	 *
-	 * @param daemon if true the thread this client is run in will be set as
-	 * a daemon thread.
-	 */
-	public void setDaemon(boolean daemon) {
-		this.daemon = daemon;
-	}
-
-	/** Get the URL */
-	public URL getURL() {
-		return url;
-	}
-
 	/** Check if the client is running */
-	public boolean isRunning() {
+	private boolean isRunning() {
 		return thread != null;
-	}
-
-	/**
-	 * Returns the sleepTime.
-	 * @return int
-	 */
-	public int getUpdateInterval() {
-		return sleepTime;
-	}
-
-	/**
-	 * Sets the sleepTime.
-	 * @param sleepTime The sleepTime to set
-	 */
-	public void setUpdateInterval(int sleepTime) {
-		this.sleepTime = sleepTime;
 	}
 
 	/** Add a TDXML listener */
