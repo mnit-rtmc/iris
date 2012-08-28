@@ -20,8 +20,6 @@ import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -36,7 +34,7 @@ import us.mn.state.dot.sched.Scheduler;
 /**
  * SensorReader reads and parses an XML document at a 30-second interval.
  * SensorSample objects are created for each sample element, and reported
- * to any registered listeners.
+ * to the segment layer.
  *
  * @author Douglas Lau
  */
@@ -76,9 +74,8 @@ public class SensorReader {
 	/** Flag to indicate the time stamp changed since last time */
 	private boolean time_changed = false;
 
-	/** List of listeners */
-	private List<SensorListener> listeners =
-		new LinkedList<SensorListener>();
+	/** Segment layer */
+	private final SegmentLayer seg_layer;
 
 	/** Job to perform */
 	private final Job job = new Job(Calendar.SECOND, 30, Calendar.SECOND,
@@ -90,10 +87,11 @@ public class SensorReader {
 	};
 
 	/** Create a new sensor reader */
-	public SensorReader(URL u) throws SAXException,
+	public SensorReader(URL u, SegmentLayer sl) throws SAXException,
 		ParserConfigurationException
 	{
 		url = u;
+		seg_layer = sl;
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		parser = factory.newSAXParser();
 		// Read the sensor data right away
@@ -111,65 +109,6 @@ public class SensorReader {
 		READER.removeJob(job);
 	}
 
-	/** Add a sensor listener */
-	public void addSensorListener(SensorListener l) {
-		LinkedList<SensorListener> lsnr =
-			new LinkedList<SensorListener>(listeners);
-		lsnr.add(l);
-		listeners = lsnr;
-	}
-
-	/** Remove a sensor listener */
-	public void removeSensorListener(SensorListener l) {
-		LinkedList<SensorListener> lsnr =
-			new LinkedList<SensorListener>(listeners);
-		lsnr.remove(l);
-		listeners = lsnr;
-	}
-
-	/** Remove all of the registered data listeners */
-	public void removeAllSensorListeners() {
-		listeners = new LinkedList<SensorListener>();
-	}
-
-	/** Notifier for listeners */
-	abstract private class Notifier {
-		abstract void notify(SensorListener l);
-	}
-
-	/** Notify all listeners of an update */
-	private void doNotify(Notifier n) {
-		for(SensorListener l: listeners)
-			n.notify(l);
-	}
-
-	/** Notify listeners of the start of new data */
-	private void notifyStart() {
-		doNotify(new Notifier() {
-			void notify(SensorListener l) {
-				l.update(false);
-			}
-		});
-	}
-
-	/** Notify listeners that new data is finished */
-	private void notifyFinish() {
-		doNotify(new Notifier() {
-			void notify(SensorListener l) {
-				l.update(true);
-			}
-		});
-	}
-
-	/** Notify listeners of a sensor data sample */
-	private void notifySample(final SensorSample s) {
-		doNotify(new Notifier() {
-			void notify(SensorListener l) {
-				l.update(s);
-			}
-		});
-	}
-
 	/** Read and parse an XML file */
 	private void readXmlFile() throws Exception {
 		URLConnection conn = url.openConnection();
@@ -181,13 +120,12 @@ public class SensorReader {
 
 	/** Parse the XML document and notify clients */
 	private void parse(InputStream in) throws IOException, SAXException {
-		notifyStart();
 		try {
 			SensorHandler h = new SensorHandler();
 			parser.parse(in, h);
 		}
 		finally {
-			notifyFinish();
+			seg_layer.completeSamples();
 		}
 	}
 
@@ -215,12 +153,12 @@ public class SensorReader {
 		last_stamp = stamp;
 	}
 
-	/** Notify listeners of one sensor sample */
+	/** Notify segment layer of one sensor sample */
 	protected void notifySensorSample(String sensor, String f, String s) {
 		Integer flow = parseInt(f);
 		Integer speed = parseInt(s);
 		if(flow != null || speed != null)
-			notifySample(new SensorSample(sensor, flow, speed));
+			seg_layer.update(new SensorSample(sensor, flow, speed));
 	}
 
 	/** Handle one sensor sample element */
