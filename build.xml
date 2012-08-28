@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2011  Minnesota Department of Transportation
+     Copyright (C) 2007-2012  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -64,7 +64,6 @@
 	<property name="mapbean.jar" value="mapbean-${mapbean.version}.jar"/>
 	<property name="tms-log.jar" value="tms-log-${tms-log.version}.jar"/>
 	<property name="geokit.jar" value="geokit-${geokit.version}.jar"/>
-	<property name="tdxml.jar" value="tdxml-${tdxml.version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="common.jar" value="${name}-common-${version}.jar"/>
 	<property name="client.jar" value="${name}-client-${version}.jar"/>
@@ -79,7 +78,6 @@
 			<include name="${scheduler.jar}"/>
 			<include name="${sonar.server.jar}"/>
 			<include name="${sonar.client.jar}"/>
-			<include name="${tdxml.jar}"/>
 			<include name="${tms-log.jar}"/>
 		</fileset>
 	</path>
@@ -175,11 +173,6 @@
 			<param name="repo.version" value="${geokit.version}"/>
 		</antcall>
 		<antcall target="check-subproject">
-			<param name="file.dep" value="${tdxml.jar}"/>
-			<param name="repo.name" value="tdxml"/>
-			<param name="repo.version" value="${tdxml.version}"/>
-		</antcall>
-		<antcall target="check-subproject">
 			<param name="file.dep" value="${mapbean.jar}"/>
 			<param name="repo.name" value="mapbean"/>
 			<param name="repo.version" value="${mapbean.version}"/>
@@ -203,8 +196,6 @@
 					value="${tms-log.version}"/>
 				<filter token="GEOKIT.VERSION"
 				        value="${geokit.version}"/>
-				<filter token="TDXML.VERSION"
-					value="${tdxml.version}"/>
 				<filter token="MAPBEAN.VERSION"
 					value="${mapbean.version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
@@ -367,7 +358,6 @@
 				<include name="mail.jar"/>
 				<include name="${scheduler.jar}"/>
 				<include name="${geokit.jar}"/>
-				<include name="${tdxml.jar}"/>
 				<include name="${mapbean.jar}"/>
 				<include name="${sonar.client.jar}"/>
 				<include name="${tms-log.jar}"/>
@@ -530,7 +520,6 @@
 			<fileset dir="${lib.dir}">
 				<include name="${scheduler.jar}"/>
 				<include name="${geokit.jar}"/>
-				<include name="${tdxml.jar}"/>
 				<include name="${mapbean.jar}"/>
 				<include name="${sonar.client.jar}"/>
 				<include name="${sonar.server.jar}"/>

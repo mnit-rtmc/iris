@@ -26,7 +26,6 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
@@ -57,6 +56,7 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.R_NodeTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
+import us.mn.state.dot.tms.client.roads.TdxmlException;
 import us.mn.state.dot.tms.client.schedule.PlanManager;
 import us.mn.state.dot.tms.client.schedule.PlanTab;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
@@ -107,11 +107,6 @@ public class Session {
 
 	/** Message logger */
 	protected final Logger logger;
-
-	/** Get the logger */
-	public Logger getLogger() {
-		return logger;
-	}
 
 	/** Tile layer */
 	protected final TileLayer tile_layer;

@@ -23,7 +23,6 @@
 	<jar href="lib/mapbean-@@MAPBEAN.VERSION@@.jar"/>
 	<jar href="lib/tms-log-@@TMSLOG.VERSION@@.jar"/>
 	<jar href="lib/geokit-@@GEOKIT.VERSION@@.jar"/>
-	<jar href="lib/tdxml-@@TDXML.VERSION@@.jar"/>
 	<extension name="mail" href="mail.jnlp"/>
     </resources>
     <security>

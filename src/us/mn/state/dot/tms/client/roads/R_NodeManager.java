@@ -35,7 +35,6 @@ import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;

@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.roads;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import us.mn.state.dot.tdxml.SensorSample;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
