@@ -31,6 +31,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Renderer for LCS array objects in a list.
@@ -40,7 +41,7 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Size in pixels for each LCS in array */
-	static protected final int LCS_SIZE = 22;
+	static private final int LCS_SIZE = UI.scaled(22);
 
 	/** LCS array manager */
 	private final LCSArrayManager manager;

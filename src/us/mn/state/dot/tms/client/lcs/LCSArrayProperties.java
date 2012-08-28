@@ -47,6 +47,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -56,6 +57,9 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
+
+	/** Size in pixels for each indication icon */
+	static private final int LCS_SIZE = UI.scaled(18);
 
 	/** SONAR state */
 	protected final SonarState state;
@@ -228,7 +232,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 				}
 			});
 			indications.add(btn);
-			panel.add(new JLabel(IndicationIcon.create(18, i)));
+			panel.add(new JLabel(IndicationIcon.create(LCS_SIZE,
+				i)));
 			panel.addRow(btn, new JLabel(i.description));
 			btn.setEnabled(false);
 		}

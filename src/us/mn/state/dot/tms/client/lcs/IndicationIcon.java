@@ -31,6 +31,7 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.LaneUseIndication;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Renderer for LaneUseIndication
@@ -186,6 +187,13 @@ abstract public class IndicationIcon implements Icon {
 	/** Stroke for thin symbols */
 	protected final BasicStroke thin;
 
+	/** Create a stroke */
+	private BasicStroke createStroke(int w) {
+		float s = w * UI.scale;
+		return new BasicStroke(s / pixels, BasicStroke.CAP_ROUND,
+			BasicStroke.JOIN_MITER);
+	}
+
 	/**
 	 * Create a new IndicationIcon.
 	 *
@@ -193,12 +201,9 @@ abstract public class IndicationIcon implements Icon {
 	 */
 	private IndicationIcon(int p) {
 		pixels = p;
-		shadow = new BasicStroke(5f / pixels, BasicStroke.CAP_ROUND,
-			BasicStroke.JOIN_MITER);
-		stroke = new BasicStroke(3f / pixels, BasicStroke.CAP_ROUND,
-			BasicStroke.JOIN_MITER);
-		thin = new BasicStroke(1f / pixels, BasicStroke.CAP_ROUND,
-			BasicStroke.JOIN_MITER);
+		shadow = createStroke(5);
+		stroke = createStroke(3);
+		thin = createStroke(1);
 	}
 
 	/** Get the icon height */

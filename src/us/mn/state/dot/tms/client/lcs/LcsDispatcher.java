@@ -44,6 +44,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -56,7 +57,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	ProxySelectionListener<LCSArray>
 {
 	/** Size in pixels for each LCS in array */
-	static private final int LCS_SIZE = 48;
+	static private final int LCS_SIZE = UI.scaled(48);
 
 	/** Current session */
 	protected final Session session;
