@@ -153,7 +153,7 @@ public class SensorReader implements Runnable {
 		return thread != null;
 	}
 
-	/** Add a TDXML listener */
+	/** Add a sensor listener */
 	public void addSensorListener(SensorListener l) {
 		LinkedList<SensorListener> lsnr =
 			new LinkedList<SensorListener>(listeners);
@@ -161,7 +161,7 @@ public class SensorReader implements Runnable {
 		listeners = lsnr;
 	}
 
-	/** Remove a TDXML listener */
+	/** Remove a sensor listener */
 	public void removeSensorListener(SensorListener l) {
 		LinkedList<SensorListener> lsnr =
 			new LinkedList<SensorListener>(listeners);
@@ -222,7 +222,7 @@ public class SensorReader implements Runnable {
 	}
 
 	/** Parse the XML document and notify clients */
-	protected void parse(InputStream in) throws IOException, SAXException {
+	private void parse(InputStream in) throws IOException, SAXException {
 		notifyStart();
 		try {
 			SensorHandler h = new SensorHandler();
