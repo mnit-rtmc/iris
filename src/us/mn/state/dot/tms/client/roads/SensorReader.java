@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -29,6 +30,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 
 /**
  * SensorReader reads and parses an XML document at a 30-second interval.
@@ -37,7 +40,13 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * @author Douglas Lau
  */
-public class SensorReader implements Runnable {
+public class SensorReader {
+
+	/** Reader worker thread */
+	static private final Scheduler READER = new Scheduler("READER");
+
+	/** Seconds to offset each read from start of interval */
+	static private final int OFFSET_SECS = 4;
 
 	/** Entity declaration */
 	static private final String ENTITY_DECL =
@@ -57,15 +66,6 @@ public class SensorReader implements Runnable {
 
 	/** The URL of the xml document */
 	private final URL url;
-
-	/** The thread the client runs in */
-	private Thread thread = null;
-
-	/** Should this run as a daemon? */
-	private boolean daemon = true;
-
-	/** Time to wait till re-reading data */
-	private int sleepTime = 30000;
 
 	/** SAX parser */
 	private final SAXParser parser;
@@ -87,70 +87,20 @@ public class SensorReader implements Runnable {
 		url = u;
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		parser = factory.newSAXParser();
-	}
-
-	/**
-	 * @see java.lang.Runnable#run()
-	 */
-	public void run() {
-		while(isRunning()) {
-			readData();
-			try {
-				Thread.sleep(sleepTime);
+		// Read the sensor data right away
+		READER.addJob(new Job() {
+			public void perform() throws Exception {
+				readXmlFile();
 			}
-			catch(InterruptedException ie) {
-				ie.printStackTrace();
-				break;
+		});
+		// Read the sensor data every 30 seconds
+		READER.addJob(new Job(Calendar.SECOND, 30, Calendar.SECOND,
+			OFFSET_SECS)
+		{
+			public void perform() throws Exception {
+				readXmlFile();
 			}
-		}
-	}
-
-	/** Read the data from the xml file */
-	protected void readData() {
-		try {
-			readXmlFile();
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Starts a new thread running that reads the xml file and fires update
-	 * events to registered listeners when new data arrives.
-	 */
-	public void start() {
-		synchronized(this) {
-			if(!isRunning()) {
-				thread = new Thread(this);
-				thread.setDaemon(daemon);
-				thread.start();
-			}
-		}
-	}
-
-	/**
-	 * Stops the running thread
-	 */
-	public void stop() {
-		synchronized(this) {
-			Thread t = thread;
-			thread = null;
-			if(t != null) {
-				try {
-					t.interrupt();
-					t.join();
-				}
-				catch(InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	/** Check if the client is running */
-	private boolean isRunning() {
-		return thread != null;
+		});
 	}
 
 	/** Add a sensor listener */
@@ -215,8 +165,8 @@ public class SensorReader implements Runnable {
 	/** Read and parse an XML file */
 	private void readXmlFile() throws Exception {
 		URLConnection conn = url.openConnection();
-		conn.setConnectTimeout(60000);
-		conn.setReadTimeout(60000);
+		conn.setConnectTimeout(6000);
+		conn.setReadTimeout(6000);
 		InputStream in = new GZIPInputStream(conn.getInputStream());
 		parse(in);
 	}

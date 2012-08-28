@@ -72,9 +72,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		ParserConfigurationException
 	{
 		String loc = props.getProperty("tdxml.detector.url");
-		SensorReader sr = createSensorReader(loc);
-		if(sr != null)
-			sr.start();
+		createSensorReader(loc);
 	}
 
 	/** Create a sensor reader */
