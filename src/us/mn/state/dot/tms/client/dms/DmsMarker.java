@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import us.mn.state.dot.map.AbstractMarker;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Marker used to paint DMS.
@@ -27,7 +28,7 @@ import us.mn.state.dot.map.AbstractMarker;
 public class DmsMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
-	static protected final int MARKER_SIZE_PIX = 32;
+	static private final int MARKER_SIZE_PIX = UI.scaled(32);
 
 	/** Create a new DMS marker */
 	public DmsMarker() {

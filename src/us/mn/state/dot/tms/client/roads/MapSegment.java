@@ -22,6 +22,7 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -91,7 +92,7 @@ public class MapSegment implements MapObject {
 	protected float roadClassScale() {
 		Road r = segment.getModel().r_node.getGeoLoc().getRoadway();
 		RoadClass rc = RoadClass.fromOrdinal(r.getRClass());
-		return roadClassScale(rc);
+		return roadClassScale(rc) * UI.scale;
 	}
 
 	/** Get the scale factor for the road class */

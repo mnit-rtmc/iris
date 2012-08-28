@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,17 +16,17 @@
 package us.mn.state.dot.tms.client.camera;
 
 import us.mn.state.dot.map.AbstractMarker;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Marker used to paint cameras.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class CameraMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
-	static protected final int MARKER_SIZE_PIX = 24;
+	static private final int MARKER_SIZE_PIX = UI.scaled(24);
 
 	/** Create a new camera marker */
 	public CameraMarker() {
