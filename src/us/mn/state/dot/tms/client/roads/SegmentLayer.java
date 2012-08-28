@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentSkipListMap;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
@@ -69,22 +68,22 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	}
 
 	/** Start reading sensor data */
-	public void start(Properties props, Logger logger) throws IOException,
-		SAXException, ParserConfigurationException
+	public void start(Properties props) throws IOException, SAXException,
+		ParserConfigurationException
 	{
 		String loc = props.getProperty("tdxml.detector.url");
-		SensorReader sr = createSensorReader(loc, logger);
+		SensorReader sr = createSensorReader(loc);
 		if(sr != null)
 			sr.start();
 	}
 
 	/** Create a sensor reader */
-	protected SensorReader createSensorReader(String loc, Logger l)
-		throws IOException, SAXException, ParserConfigurationException
+	private SensorReader createSensorReader(String loc) throws IOException,
+		SAXException, ParserConfigurationException
 	{
 		if(loc == null)
 			return null;
-		SensorReader sr = new SensorReader(new URL(loc), l);
+		SensorReader sr = new SensorReader(new URL(loc));
 		sr.addSensorListener(new SensorListener() {
 			public void update(boolean finish) {
 				if(finish) {

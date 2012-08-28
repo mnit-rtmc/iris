@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -13,18 +13,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.util.LinkedList;
-import us.mn.state.dot.tms.utils.Log;
 
 /**
  * A container for multiple XmlElem objects.
  *
  * @author      Michael Darter
- * @created     10/09/09
  */
 class XmlElems
 {

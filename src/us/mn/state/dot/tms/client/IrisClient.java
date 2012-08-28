@@ -23,12 +23,9 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.log.TmsLogFactory;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.map.PointSelector;
@@ -85,9 +82,6 @@ public class IrisClient extends JFrame {
 	/** Screen layout for desktop pane */
 	protected final ScreenLayout layout;
 
-	/** Message logger */
-	protected final Logger logger;
-
 	/** Client properties */
 	protected final Properties props;
 
@@ -108,8 +102,6 @@ public class IrisClient extends JFrame {
 		super(createTitle(I18N.get("iris.logged.out")));
 		this.props = props;
 		handler = h;
-		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
-			null);
 		user_props =  new UserProperties(
 			props.getProperty(UserProperties.FNAME_PROP_NAME));
 		user_props.read();
@@ -294,7 +286,7 @@ public class IrisClient extends JFrame {
 		state.login(user, new String(pwd));
 		if(state.isLoggedIn()) {
 			state.populateCaches();
-			Session s = new Session(state, desktop, props, logger);
+			Session s = new Session(state, desktop, props);
 			s.initialize();
 			return s;
 		} else

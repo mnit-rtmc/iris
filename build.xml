@@ -62,7 +62,6 @@
 	<property name="sonar.client.jar"
 		  value="sonar-client-${sonar.version}.jar"/>
 	<property name="mapbean.jar" value="mapbean-${mapbean.version}.jar"/>
-	<property name="tms-log.jar" value="tms-log-${tms-log.version}.jar"/>
 	<property name="geokit.jar" value="geokit-${geokit.version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="common.jar" value="${name}-common-${version}.jar"/>
@@ -78,7 +77,6 @@
 			<include name="${scheduler.jar}"/>
 			<include name="${sonar.server.jar}"/>
 			<include name="${sonar.client.jar}"/>
-			<include name="${tms-log.jar}"/>
 		</fileset>
 	</path>
 
@@ -147,11 +145,6 @@
 			<param name="file.dep" value="mail.jar"/>
 		</antcall>
 		<antcall target="check-subproject">
-			<param name="file.dep" value="${tms-log.jar}"/>
-			<param name="repo.name" value="log"/>
-			<param name="repo.version" value="${tms-log.version}"/>
-		</antcall>
-		<antcall target="check-subproject">
 			<param name="file.dep" value="${scheduler.jar}"/>
 			<param name="repo.name" value="scheduler"/>
 			<param name="repo.version"
@@ -192,8 +185,6 @@
 				        value="${scheduler.version}"/>
 				<filter token="SONAR.VERSION"
 					value="${sonar.version}"/>
-				<filter token="TMSLOG.VERSION"
-					value="${tms-log.version}"/>
 				<filter token="GEOKIT.VERSION"
 				        value="${geokit.version}"/>
 				<filter token="MAPBEAN.VERSION"
@@ -293,7 +284,6 @@
 				<include name="${scheduler.jar}"/>
 				<include name="${geokit.jar}"/>
 				<include name="${sonar.server.jar}"/>
-				<include name="${tms-log.jar}"/>
 			</fileset>
 		</copy>
 	</target>
@@ -360,7 +350,6 @@
 				<include name="${geokit.jar}"/>
 				<include name="${mapbean.jar}"/>
 				<include name="${sonar.client.jar}"/>
-				<include name="${tms-log.jar}"/>
 			</fileset>
 			<fileset dir="${build.lib}">
 				<include name="${common.jar}"/>
@@ -523,7 +512,6 @@
 				<include name="${mapbean.jar}"/>
 				<include name="${sonar.client.jar}"/>
 				<include name="${sonar.server.jar}"/>
-				<include name="${tms-log.jar}"/>
 			</fileset>
 		</delete>
 	</target>

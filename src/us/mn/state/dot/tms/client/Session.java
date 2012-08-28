@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import us.mn.state.dot.map.MapBean;
@@ -105,9 +104,6 @@ public class Session {
 	public Properties getProperties() {
 		return props;
 	}
-
-	/** Message logger */
-	protected final Logger logger;
 
 	/** Tile layer */
 	protected final TileLayer tile_layer;
@@ -221,13 +217,12 @@ public class Session {
 	}
 
 	/** Create a new session */
-	public Session(SonarState st, SmartDesktop d, Properties p, Logger l) {
+	public Session(SonarState st, SmartDesktop d, Properties p) {
 		state = st;
 		user = state.getUser();
 		namespace = state.getNamespace();
 		desktop = d;
 		props = p;
-		logger = l;
 		loc_manager = new GeoLocManager(state.getGeoLocs());
 		r_node_manager = new R_NodeManager(this,
 			state.getDetCache().getR_Nodes(), loc_manager);
@@ -270,7 +265,7 @@ public class Session {
 	{
 		initializeManagers();
 		addTabs();
-		seg_layer.start(props, logger);
+		seg_layer.start(props);
 		if(tile_layer != null)
 			tile_layer.initialize();
 	}

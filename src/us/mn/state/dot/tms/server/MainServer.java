@@ -31,9 +31,9 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
+import us.mn.state.dot.tms.utils.HTTPProxySelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
-import us.mn.state.dot.util.HTTPProxySelector;
 
 /**
  * This is the main class to start the IRIS server.

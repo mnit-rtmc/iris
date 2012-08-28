@@ -21,7 +21,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -62,9 +61,6 @@ public class SensorReader implements Runnable {
 	/** The thread the client runs in */
 	private Thread thread = null;
 
-	/** Logger to use */
-	protected final Logger logger;
-
 	/** Should this run as a daemon? */
 	private boolean daemon = true;
 
@@ -85,11 +81,10 @@ public class SensorReader implements Runnable {
 		new LinkedList<SensorListener>();
 
 	/** Create a new sensor reader */
-	public SensorReader(URL u, Logger l) throws SAXException,
+	public SensorReader(URL u) throws SAXException,
 		ParserConfigurationException
 	{
 		url = u;
-		logger = l;
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		parser = factory.newSAXParser();
 	}
@@ -104,8 +99,7 @@ public class SensorReader implements Runnable {
 				Thread.sleep(sleepTime);
 			}
 			catch(InterruptedException ie) {
-				logger.info("Interrupted: " + url);
-				logger.fine(ie.getMessage());
+				ie.printStackTrace();
 				break;
 			}
 		}
@@ -113,18 +107,10 @@ public class SensorReader implements Runnable {
 
 	/** Read the data from the xml file */
 	protected void readData() {
-		logger.info("Reading data from " + url);
 		try {
 			readXmlFile();
 		}
-		catch(IOException ioe) {
-			logger.warning("IOException reading data from " + url);
-			logger.warning(ioe.getMessage());
-		}
 		catch(Exception e) {
-			logger.warning("Error reading xml from " + url +
-				"(" + e + "), " + "will retry in " +
-				(sleepTime / 1000) + " seconds.");
 			e.printStackTrace();
 		}
 	}
@@ -134,7 +120,6 @@ public class SensorReader implements Runnable {
 	 * events to registered listeners when new data arrives.
 	 */
 	public void start() {
-		logger.info("start() " + url);
 		synchronized(this) {
 			if(!isRunning()) {
 				thread = new Thread(this);
@@ -148,7 +133,6 @@ public class SensorReader implements Runnable {
 	 * Stops the running thread
 	 */
 	public void stop() {
-		logger.info("stop() " + url);
 		synchronized(this) {
 			Thread t = thread;
 			thread = null;
@@ -158,8 +142,7 @@ public class SensorReader implements Runnable {
 					t.join();
 				}
 				catch(InterruptedException e) {
-					logger.info("Join interrupted: " +
-						e.getMessage());
+					e.printStackTrace();
 				}
 			}
 		}
@@ -231,17 +214,11 @@ public class SensorReader implements Runnable {
 
 	/** Read and parse an XML file */
 	private void readXmlFile() throws Exception {
-		logger.info("Openning connection to " + url);
 		URLConnection conn = url.openConnection();
-		logger.info("Setting connect timeout on " + url);
 		conn.setConnectTimeout(60000);
-		logger.info("Setting read timeout on " + url);
 		conn.setReadTimeout(60000);
-		logger.info("Getting input stream from " + url);
 		InputStream in = new GZIPInputStream(conn.getInputStream());
-		logger.info("Parsing XML for " + url);
 		parse(in);
-		logger.info("Parse complete for " + url);
 	}
 
 	/** Parse the XML document and notify clients */
