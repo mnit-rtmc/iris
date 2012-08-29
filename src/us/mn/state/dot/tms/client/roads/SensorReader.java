@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Calendar;
@@ -25,8 +24,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
@@ -45,10 +44,6 @@ public class SensorReader {
 
 	/** Seconds to offset each read from start of interval */
 	static private final int OFFSET_SECS = 4;
-
-	/** Entity declaration */
-	static private final String ENTITY_DECL =
-		"<?xml version='1.0' encoding='UTF-8'?>";
 
 	/** Parse an attribute as an integer value */
 	static private Integer parseInt(String v) {
@@ -110,7 +105,7 @@ public class SensorReader {
 	}
 
 	/** Read and parse an XML file */
-	private void readXmlFile() throws Exception {
+	private void readXmlFile() throws IOException, SAXException {
 		URLConnection conn = url.openConnection();
 		conn.setConnectTimeout(6000);
 		conn.setReadTimeout(6000);
@@ -125,17 +120,13 @@ public class SensorReader {
 			parser.parse(in, h);
 		}
 		finally {
-			seg_layer.completeSamples();
+			if(time_changed)
+				seg_layer.completeSamples();
 		}
 	}
 
 	/** Inner class to handle parsing sensor elements */
-	protected class SensorHandler extends DefaultHandler {
-		public InputSource resolveEntity(String publicId,
-			String systemId) throws IOException, SAXException
-		{
-			return new InputSource(new StringReader(ENTITY_DECL));
-		}
+	private class SensorHandler extends DefaultHandler {
 		public void startElement(String uri, String localName,
 			String qname, Attributes attrs)
 		{
@@ -147,14 +138,14 @@ public class SensorReader {
 	}
 
 	/** Handle a traffic_sample element */
-	protected void handleTrafficSample(Attributes attrs) {
+	private void handleTrafficSample(Attributes attrs) {
 		String stamp = attrs.getValue("time_stamp");
 		time_changed = !stamp.equals(last_stamp);
 		last_stamp = stamp;
 	}
 
 	/** Notify segment layer of one sensor sample */
-	protected void notifySensorSample(String sensor, String f, String s) {
+	private void notifySensorSample(String sensor, String f, String s) {
 		Integer flow = parseInt(f);
 		Integer speed = parseInt(s);
 		if(flow != null || speed != null)
@@ -162,7 +153,7 @@ public class SensorReader {
 	}
 
 	/** Handle one sensor sample element */
-	protected void handleSample(Attributes attrs) {
+	private void handleSample(Attributes attrs) {
 		if(time_changed) {
 			String sensor = attrs.getValue("sensor");
 			String flow = attrs.getValue("flow");
