@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010 AHMCT, University of California
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,161 +17,118 @@ package us.mn.state.dot.tms.client;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 import javax.swing.JFrame;
-import us.mn.state.dot.tms.utils.SFile;
 
 /**
  * Persistent mutable user properties stored in a java properties file
- * on the client workstation. If the properties file name is not specified
- * or is null, properties are not used, and the user properties file is not
- * written.
+ * on the client workstation.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class UserProperties {
 
-	/** Name of property in the client property file, which specifies
-	 *  the name of the user property file on the client workstation. */
-	public static final String FNAME_PROP_NAME = 
-		"client.userpropsfile.name";
-
 	/** Property names */
-	final String WIN_EXTSTATE = "win.extstate";
-	final String WIN_X = "win.x";
-	final String WIN_Y = "win.y";
-	final String WIN_WIDTH = "win.width";
-	final String WIN_HEIGHT = "win.height";
-	final String TAB_SEL = "tab.selected";
+	static private final String WIN_EXTSTATE = "win.extstate";
+	static private final String WIN_X = "win.x";
+	static private final String WIN_Y = "win.y";
+	static private final String WIN_WIDTH = "win.width";
+	static private final String WIN_HEIGHT = "win.height";
+	static private final String TAB_SEL = "tab.selected";
 
-	/** Props file name. Null or empty flags user props not used. */
-	private String file_name = "";
+	/** Get the directory to store user properties */
+	static private File getDir() {
+		String home = System.getProperty("user.home");
+		return new File(home, "iris");
+	}
 
-	/** User properties, never null */
-	private Properties user_props = new Properties();
+	/** Get the file to store user properties */
+	static private File getFile() {
+		return new File(getDir(), "user.properties");
+	}
 
-	/** Flag if properties have changed */
-	private boolean props_changed = false;
+	/** User properties */
+	private final Properties props = new Properties();
 
-	/** Constructor
-	 * @param fn Properties file name. If empty or null, client
-	 *	  props not used, which means they are not written. */
-	public UserProperties(String fn) {
+	/** Create the user properties */
+	public UserProperties() {
 		try {
-			file_name = SFile.getAbsolutePath(fn);
-		} catch(SecurityException ex) {
-			System.err.println("User properties: can't read " +
-				"specified file (" + fn + "): " + ex);
+			read();
+		}
+		catch(FileNotFoundException e) {
+			System.err.println("User properties: " +e.getMessage());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
 		}
 	}
 
-	/** Are properties used? */
-	public boolean getUsed() {
-		return file_name == null || !file_name.isEmpty();
-	}
-
-	/** Read properties. The properties file name must already 
-	 *  have been specified. */
-	public void read() {
-		FileInputStream in = getFileInputStream(file_name);
-		if(in == null)
-			return;
+	/** Read user properties */
+	private void read() throws IOException {
+		FileInputStream in = new FileInputStream(getFile());
 		try {
-			user_props = new Properties();
-			user_props.load(in);
-			System.err.println("User properties: read " + 
-				file_name);
-			props_changed = false;
-		} catch(IOException ex) {
-			System.err.println("UserProperties: " + ex);
-			return;
-		} finally {
-			try {
-				in.close();
-			} catch(Exception ex) {}
+			props.load(in);
 		}
-	}
-
-	/** Get properties file input stream. 
-	 * @param fname File name, may be null.
-	 * @return File input stream, else null if the file doesn't exist. */
-	private static FileInputStream getFileInputStream(String fname) {
-		if(fname == null || fname.isEmpty()) {
-			System.err.println("User properties: file " + 
-				"not specifed.");
-			return null;
+		finally {
+			in.close();
 		}
-		FileInputStream in = null;
-		try {
-			in = new FileInputStream(fname);
-		} catch(FileNotFoundException ex) {
-			System.err.println("User properties: specified " +
-				"file not found (" + fname + "): " + ex);
-		}
-		return in;
 	}
 
 	/** Write properties */
-	public void write() {
-		final String comment = "IRIS Client properties file";
-		if(getUsed() && props_changed) {
-			if(!write(file_name, user_props, comment))
-				props_changed = false;
-			System.err.println("Wrote props file: " + file_name);
+	public void write() throws IOException {
+		File f = getFile();
+		if(!f.canWrite())
+			getDir().mkdirs();
+		FileOutputStream fos = new FileOutputStream(f);
+		try {
+			props.store(fos, "IRIS Client user properties");
 		}
-	}
-
-	/** Does the specified property exist? */
-	private boolean propExists(String name) {
-		return user_props.getProperty(name) != null;
+		finally {
+			fos.close();
+		}
 	}
 
 	/** Set a property */
 	private void setProp(String name, int i) {
-		user_props.setProperty(name, 
-			new Integer(i).toString());
+		props.setProperty(name, new Integer(i).toString());
 	}
 
-	/** Get a property */
-	private int getPropInt(String name) {
-		if(propExists(name)) {
-			String p = user_props.getProperty(name).trim();
-			return Integer.parseInt(p);
-		} else
-			return 0;
-	}
-
-	/** Is the window position avaiable? */
-	public boolean haveWindowPosition() {
-		boolean hwp = getUsed() && 
-			propExists(WIN_X) && propExists(WIN_Y) && 
-			propExists(WIN_WIDTH) && propExists(WIN_HEIGHT) && 
-			propExists(WIN_EXTSTATE);
-		return hwp;
+	/** Get an integer property */
+	private Integer getPropInt(String name) {
+		String p = props.getProperty(name);
+		if(p != null)
+			return Integer.parseInt(p.trim());
+		else
+			return null;
 	}
 
 	/** Get window position from properties.
 	 * @return Null on error else a rectangle for the window position. */
 	public Rectangle getWindowPosition() {
-		if(!haveWindowPosition())
+		Integer x = getPropInt(WIN_X);
+		Integer y = getPropInt(WIN_Y);
+		Integer w = getPropInt(WIN_WIDTH);
+		Integer h = getPropInt(WIN_HEIGHT);
+		if(x != null && y != null && w != null && h != null)
+			return new Rectangle(x, y, w, h);
+		else
 			return null;
-		return new Rectangle(getPropInt(WIN_X), getPropInt(WIN_Y), 
-			getPropInt(WIN_WIDTH), getPropInt(WIN_HEIGHT));
 	}
 
 	/** Get window state from properties.
 	 * @return Window extended state. */
-	public int getWindowState() {
-		if(getUsed()) {
-			int s = getPropInt(WIN_EXTSTATE);
-			if(s == JFrame.NORMAL || s == JFrame.MAXIMIZED_BOTH)
-				return s;
-		}
-		return JFrame.NORMAL;
+	public Integer getWindowState() {
+		Integer st = getPropInt(WIN_EXTSTATE);
+		if(st != null && st == JFrame.MAXIMIZED_BOTH)
+			return JFrame.MAXIMIZED_BOTH;
+		else
+			return null;
 	}
 
 	/** Return the name of a selected tab prop name */
@@ -181,68 +139,28 @@ public class UserProperties {
 	/** Get array of currently selected tabs (as Integers) in each pane */
 	public Object[] getSelectedTabs() {
 		ArrayList<Integer> sti = new ArrayList<Integer>();
-		final int MAX_SCREEN_PANES = 16;
-		for(int i = 0; i < MAX_SCREEN_PANES; ++i) {
+		for(int i = 0; ; i++) {
 			String pn = getTabPropName(i);
-			if(!propExists(pn))
+			Integer t = getPropInt(pn);
+			if(t != null)
+				sti.add(t);
+			else
 				break;
-			sti.add(getPropInt(pn));
 		}
 		return sti.toArray();
 	}
 
-	/** Update user properties associated with JFrame. */
+	/** Update user properties associated with JFrame */
 	public void setWindowProperties(IrisClient frame) {
-		if(frame == null)
-			return;
-		props_changed = true;
-
-		// window extended state
 		int es = frame.getExtendedState();
 		setProp(WIN_EXTSTATE, es);
-
-		// update window position and size only if the window
-		// is in the normal state.
-		if(es == JFrame.NORMAL) {
-			Rectangle r = frame.getBounds();
-			setProp(WIN_X, r.x);
-			setProp(WIN_Y, r.y);
-			setProp(WIN_WIDTH, r.width);
-			setProp(WIN_HEIGHT, r.height);
-		}
-
-		// currently selected tabs in multiple screen panes
+		Rectangle r = frame.getBounds();
+		setProp(WIN_X, r.x);
+		setProp(WIN_Y, r.y);
+		setProp(WIN_WIDTH, r.width);
+		setProp(WIN_HEIGHT, r.height);
 		int[] sti = frame.getSelectedTabIndex();
 		for(int i = 0; i < sti.length; ++i)
 			setProp(getTabPropName(i), sti[i]);
-	}
-
-	/** Write properties file. 
-	 * @param fname File name to write properties to.
-	 * @param props Properties to write.
-	 * @param comment Comment inside file. 
-	 * @return False if error else true. */
-	static private boolean write(String fname, Properties props, 
-		String comment) 
-	{
-		FileOutputStream o = null;
-		try {
-			o = new FileOutputStream(fname);
-			props.store(o, comment);
-		} catch(IOException ex) {
-			System.err.println("UserProperties, unable to " + 
-				"write file (" + fname + "), ex=" + ex);
-			return false;
-		} finally {
-			try {
-				if(o != null)
-					o.close();
-				return true;
-			} catch(IOException ex) {
-				System.err.println("UserProperties: " + 
-					"PropertyLoader: " + ex);
-				return false;
-			}
-		}
 	}
 }

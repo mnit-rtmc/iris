@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.client;
 
 import java.awt.Cursor;
+import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
@@ -87,23 +88,23 @@ public class IrisClient extends JFrame {
 	/** Exception handler */
 	protected final SimpleHandler handler;
 
+	/** Mutable user properties stored on client workstation */
+	private final UserProperties user_props;
+
 	/** Menu bar */
 	private final IMenuBar menu_bar;
 
 	/** Login session information */
 	protected Session session;
 
-	/** Mutable user properties stored on client workstation */
-	private UserProperties user_props;
-
 	/** Create a new Iris client */
-	public IrisClient(Properties props, SimpleHandler h) throws IOException{
+	public IrisClient(Properties props, SimpleHandler h, UserProperties up)
+		throws IOException
+	{
 		super(createTitle(I18N.get("iris.logged.out")));
 		this.props = props;
 		handler = h;
-		user_props =  new UserProperties(
-			props.getProperty(UserProperties.FNAME_PROP_NAME));
-		user_props.read();
+		user_props = up;
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
@@ -140,12 +141,6 @@ public class IrisClient extends JFrame {
 		return sti;
 	}
 
-	/** Update and write user properties file */
-	private void writeUserProperties() {
-		user_props.setWindowProperties(this);
-		user_props.write();
-	}
-
 	/** Initialize the screen panes */
 	protected void initializeScreenPanes() {
 		for(int s = 0; s < s_panes.length; s++)
@@ -169,16 +164,16 @@ public class IrisClient extends JFrame {
 		setPosition();
 	}
 
-	/** Set position of frame window using properties values. */
+	/** Set position of frame window using properties values */
 	private void setPosition() {
-		if(user_props.getUsed() && user_props.haveWindowPosition()) {
-			setBounds(user_props.getWindowPosition());
-			setExtendedState(user_props.getWindowState());
-		} else {
-			setBounds(Screen.getMaximizedBounds());
-			if(screens.length < 2)
-				setExtendedState(MAXIMIZED_BOTH);
-		}
+		Rectangle r = user_props.getWindowPosition();
+		if(r == null)
+			r = Screen.getMaximizedBounds();
+		setBounds(r);
+		Integer ext = user_props.getWindowState();
+		if(ext != null)
+			setExtendedState(ext);
+		getContentPane().validate();
 	}
 
 	/** Auto-login the user if enabled */
@@ -338,7 +333,6 @@ public class IrisClient extends JFrame {
 
 	/** Clean up when the user logs out */
 	protected void doLogout() {
-		writeUserProperties();
 		menu_bar.setSession(null);
 		removeTabs();
 		closeSession();

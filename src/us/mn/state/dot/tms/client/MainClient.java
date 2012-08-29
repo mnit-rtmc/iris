@@ -61,14 +61,14 @@ public class MainClient {
 
 	/** Create the IRIS client */
 	static protected IrisClient createClient(String[] args,
-		SimpleHandler handler) throws IOException
+		SimpleHandler handler, UserProperties up) throws IOException
 	{
 		String loc = getPropertyFile(args);
 		Properties props = PropertyLoader.load(loc);
 		updateSystemProperties(props);
 		district = props.getProperty("district", "tms");
 		I18N.initialize(props);
-		return new IrisClient(props, handler);
+		return new IrisClient(props, handler, up);
 	}
 
 	/** Agency district property */
@@ -88,12 +88,14 @@ public class MainClient {
 		DialogHandler handler = new DialogHandler();
 		Scheduler.setHandler(handler);
 		checkAssert();
-		Widgets.init(1f);
 		try {
-			IrisClient c = createClient(args, handler);
+			final UserProperties user_props = new UserProperties();
+			Widgets.init(1f);
+			final IrisClient c = createClient(args, handler,
+				user_props);
 			c.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
-					quit();
+					quit(c, user_props);
 				}
 			});
 			handler.setOwner(c);
@@ -114,7 +116,14 @@ public class MainClient {
 	}
 
 	/** Quit the client application */
-	static private void quit() {
+	static private void quit(IrisClient c, UserProperties user_props) {
+		user_props.setWindowProperties(c);
+		try {
+			user_props.write();
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
 		System.exit(0);
 	}
 }
