@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.client;
 import java.awt.Cursor;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -29,7 +28,7 @@ import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.map.PointSelector;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
@@ -52,7 +51,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class IrisClient extends JFrame {
 
 	/** Login scheduler */
-	static protected final Scheduler LOGIN = new Scheduler("LOGIN");
+	static private final Scheduler LOGIN = new Scheduler("LOGIN");
 
 	/** Create the window title */
 	static protected String createTitle(String suffix) {
@@ -110,11 +109,6 @@ public class IrisClient extends JFrame {
 		s_panes = new ScreenPane[screens.length];
 		desktop = new SmartDesktop(screens[0], this);
 		initializeScreenPanes();
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent evt) {
-				quit();
-			}
-		});
 		layout = new ScreenLayout(desktop);
 		getContentPane().add(desktop);
 		menu_bar = new IMenuBar(this, desktop);
@@ -122,14 +116,10 @@ public class IrisClient extends JFrame {
 		autoLogin();
 	}
 
-	/** Log out the current session and quit the client */
+	/** Quit the IRIS client */
 	public void quit() {
-		logout();
-		new AbstractJob(LOGIN) {
-			public void perform() {
-				System.exit(0);
-			}
-		}.addToScheduler();
+		dispatchEvent(new WindowEvent(this,
+			WindowEvent.WINDOW_CLOSING));
 	}
 
 	/** Set the currently selected tab in each screen pane, using the
@@ -252,11 +242,11 @@ public class IrisClient extends JFrame {
 
 	/** Login a user */
 	public void login(final String user, final char[] pwd) {
-		new AbstractJob(LOGIN) {
+		LOGIN.addJob(new Job() {
 			public void perform() throws Exception {
 				doLogin(user, pwd);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Login a user */
@@ -339,11 +329,11 @@ public class IrisClient extends JFrame {
 
 	/** Logout of the current session */
 	public void logout() {
-		new AbstractJob(LOGIN) {
+		LOGIN.addJob(new Job() {
 			public void perform() {
 				doLogout();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Clean up when the user logs out */

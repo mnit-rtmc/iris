@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.util.Properties;
@@ -89,6 +91,11 @@ public class MainClient {
 		Widgets.init(1f);
 		try {
 			IrisClient c = createClient(args, handler);
+			c.addWindowListener(new WindowAdapter() {
+				public void windowClosing(WindowEvent e) {
+					quit();
+				}
+			});
 			handler.setOwner(c);
 			c.setVisible(true);
 		}
@@ -104,5 +111,10 @@ public class MainClient {
 		assert assertsEnabled = true;
 		System.err.println("Assertions are turned " +
 			(assertsEnabled ? "on" : "off") + ".");
+	}
+
+	/** Quit the client application */
+	static private void quit() {
+		System.exit(0);
 	}
 }
