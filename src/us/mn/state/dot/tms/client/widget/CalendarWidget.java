@@ -24,7 +24,6 @@ import java.awt.geom.Rectangle2D;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.JPanel;
-import javax.swing.JFrame;
 
 /**
  * ZTable is a simple JTable extension which adds a setVisibleRowCount method
