@@ -41,6 +41,7 @@ public class UserProperties {
 	static private final String WIN_WIDTH = "win.width";
 	static private final String WIN_HEIGHT = "win.height";
 	static private final String TAB_SEL = "tab.selected";
+	static private final String SCALE = "scale";
 
 	/** Get the directory to store user properties */
 	static private File getDir() {
@@ -99,11 +100,25 @@ public class UserProperties {
 		props.setProperty(name, new Integer(i).toString());
 	}
 
+	/** Set a property */
+	private void setProp(String name, float f) {
+		props.setProperty(name, new Float(f).toString());
+	}
+
 	/** Get an integer property */
 	private Integer getPropInt(String name) {
 		String p = props.getProperty(name);
 		if(p != null)
 			return Integer.parseInt(p.trim());
+		else
+			return null;
+	}
+
+	/** Get a float property */
+	private Float getPropFloat(String name) {
+		String p = props.getProperty(name);
+		if(p != null)
+			return Float.parseFloat(p.trim());
 		else
 			return null;
 	}
@@ -148,6 +163,15 @@ public class UserProperties {
 				break;
 		}
 		return sti.toArray();
+	}
+
+	/** Get the user interface scale factor */
+	public float getScale() {
+		Float s = getPropFloat(SCALE);
+		if(s != null && s >= 0.25f && s <= 4.0f)
+			return s;
+		else
+			return 1f;
 	}
 
 	/** Update user properties associated with JFrame */

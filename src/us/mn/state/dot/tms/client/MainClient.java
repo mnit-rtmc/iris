@@ -90,7 +90,7 @@ public class MainClient {
 		checkAssert();
 		try {
 			final UserProperties user_props = new UserProperties();
-			Widgets.init(1f);
+			Widgets.init(user_props.getScale());
 			final IrisClient c = createClient(args, handler,
 				user_props);
 			c.addWindowListener(new WindowAdapter() {
