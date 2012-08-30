@@ -218,22 +218,13 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** A proxy has been changed */
 	public void proxyChanged(final LCSArray proxy, final String a) {
-		if(proxy == getSingleSelection()) {
+		if(proxy == selectionModel.getSingleSelection()) {
 			SwingRunner.invoke(new Runnable() {
 				public void run() {
 					updateAttribute(proxy, a);
 				}
 			});
 		}
-	}
-
-	/** Get the selected LCS array (if a single array is selected) */
-	protected LCSArray getSingleSelection() {
-		if(selectionModel.getSelectedCount() == 1) {
-			for(LCSArray lcs_array: selectionModel.getSelected())
-				return lcs_array;
-		}
-		return null;
 	}
 
 	/** Called whenever a sign is added to the selection */

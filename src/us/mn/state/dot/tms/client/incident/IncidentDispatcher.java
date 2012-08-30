@@ -123,7 +123,7 @@ public class IncidentDispatcher extends JPanel
 	/** Action to log an incident change */
 	private final IAction log_inc = new IAction("incident.log") {
 		protected void do_perform() {
-			Incident inc = getSingleSelection();
+			Incident inc = selectionModel.getSingleSelection();
 			if(inc instanceof ClientIncident)
 				create((ClientIncident)inc);
 			else if(inc != null)
@@ -134,7 +134,7 @@ public class IncidentDispatcher extends JPanel
 	/** Action to deploy devices */
 	private final IAction deploy_inc = new IAction("incident.deploy") {
 		protected void do_perform() {
-			Incident inc = getSingleSelection();
+			Incident inc = selectionModel.getSingleSelection();
 			if(inc != null &&
 			   !(inc instanceof ClientIncident))
 				showDeployForm(inc);
@@ -144,7 +144,7 @@ public class IncidentDispatcher extends JPanel
 	/** Action to clear an incident */
 	private final IAction clear_inc = new IAction("incident.clear") {
 		protected void do_perform() {
-			Incident inc = getSingleSelection();
+			Incident inc = selectionModel.getSingleSelection();
 			if(inc != null &&
 			   !(inc instanceof ClientIncident))
 				inc.setCleared(clear_btn.isSelected());
@@ -157,7 +157,7 @@ public class IncidentDispatcher extends JPanel
 	/** Action to edit incident */
 	private final IAction edit_inc = new IAction("incident.edit") {
 		protected void do_perform() {
-			Incident inc = getSingleSelection();
+			Incident inc = selectionModel.getSingleSelection();
 			if(inc != null)
 				editIncident(inc);
 		}
@@ -396,7 +396,7 @@ public class IncidentDispatcher extends JPanel
 
 	/** A proxy has been changed */
 	public void proxyChanged(Incident proxy, String a) {
-		if(proxy == getSingleSelection())
+		if(proxy == selectionModel.getSingleSelection())
 			updateAttribute(proxy, a);
 	}
 
@@ -408,15 +408,6 @@ public class IncidentDispatcher extends JPanel
 				doUpdateAttribute(proxy, a);
 			}
 		});
-	}
-
-	/** Get the selected incident (if only one is selected) */
-	protected Incident getSingleSelection() {
-		if(selectionModel.getSelectedCount() == 1) {
-			for(Incident inc: selectionModel.getSelected())
-				return inc;
-		}
-		return null;
 	}
 
 	/** Dispose of the dispatcher */
@@ -445,7 +436,7 @@ public class IncidentDispatcher extends JPanel
 
 	/** Update the selected object(s) */
 	protected void updateSelected() {
-		Incident inc = getSingleSelection();
+		Incident inc = selectionModel.getSingleSelection();
 		if(inc != null)
 			setSelected(inc);
 		else
