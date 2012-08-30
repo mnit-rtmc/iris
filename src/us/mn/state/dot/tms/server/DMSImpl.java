@@ -1370,6 +1370,21 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Current scheduled message */
 	private transient SignMessage messageSched = null;
 
+	/** Get the scheduled sign messasge.
+	 * @return Scheduled sign message */
+	public SignMessage getMessageSched() {
+		return messageSched;
+	}
+
+	/** Set the scheduled sign message.
+	 * @param sm New scheduled sign message */
+	private void setMessageSched(SignMessage sm) {
+		if(!SignMessageHelper.isEquivalent(messageSched, sm)) {
+			messageSched = sm;
+			notifyAttribute("messageSched");
+		}
+	}
+
 	/** Check if a DMS action is deployable */
 	public boolean isDeployable(DmsAction da) {
 		if(hasError())
@@ -1388,7 +1403,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		SignMessage sm = createMessage(da);
 		if(sm != null) {
 			if(shouldReplaceScheduled(sm)) {
-				messageSched = sm;
+				setMessageSched(sm);
 				is_scheduled = true;
 			}
 		}
@@ -1465,7 +1480,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public void updateScheduledMessage() {
 		if(!is_scheduled) {
 			logAction("no message scheduled");
-			messageSched = createBlankScheduledMessage();
+			setMessageSched(createBlankScheduledMessage());
 		}
 		SignMessage sm = messageSched;
 		if(shouldActivate(sm)) {

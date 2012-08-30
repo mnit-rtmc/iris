@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -168,6 +168,9 @@ public interface DMS extends Device {
 
 	/** Get the current sign message */
 	SignMessage getMessageCurrent();
+
+	/** Get the scheduled sign message */
+	SignMessage getMessageSched();
 
 	/** Get the message deploy time.
 	 * @return Time message was deployed (ms since epoch).
