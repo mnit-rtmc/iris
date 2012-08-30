@@ -38,8 +38,21 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  */
 public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
-	/** Allowed priorities */
-	static protected final DMSMessagePriority[] PRIORITIES = {
+	/** Allowed activation priorities */
+	static private final DMSMessagePriority[] A_PRIORITIES = {
+		DMSMessagePriority.PSA,
+		DMSMessagePriority.TRAVEL_TIME,
+		DMSMessagePriority.SPEED_LIMIT,
+		DMSMessagePriority.SCHEDULED,
+		DMSMessagePriority.OTHER_SYSTEM,
+		DMSMessagePriority.INCIDENT_LOW,
+		DMSMessagePriority.INCIDENT_MED,
+		DMSMessagePriority.INCIDENT_HIGH,
+		DMSMessagePriority.PREFIX_PAGE
+	};
+
+	/** Allowed run-time priorities */
+	static private final DMSMessagePriority[] R_PRIORITIES = {
 		DMSMessagePriority.PSA,
 		DMSMessagePriority.TRAVEL_TIME,
 		DMSMessagePriority.SPEED_LIMIT,
@@ -117,7 +130,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(PRIORITIES);
+				JComboBox combo = new JComboBox(A_PRIORITIES);
 				return new DefaultCellEditor(combo);
 			}
 		},
@@ -137,7 +150,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(PRIORITIES);
+				JComboBox combo = new JComboBox(R_PRIORITIES);
 				return new DefaultCellEditor(combo);
 			}
 		}

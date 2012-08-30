@@ -457,11 +457,12 @@ public class SignMessageComposer extends JPanel {
 
 	/** Return a MULTI string using the contents of the widgets */
 	public String getMessage() {
+		String prefix = dispatcher.getPagePrefix();
 		MultiString[] mess = new MultiString[n_pages];
 		int fn = default_font;
 		int p = 0;
 		for(int i = 0; i < n_pages; i++) {
-			mess[i] = pages[i].getMulti(fn);
+			mess[i] = pages[i].getMulti(fn, prefix);
 			if(!mess[i].isBlank())
 				p = i + 1;
 			fn = pages[i].getFontNumber();
@@ -687,9 +688,12 @@ public class SignMessageComposer extends JPanel {
 			}
 		}
 
-		/** Get a MULTI string for the page */
-		private MultiString getMulti(int n_font) {
-			MultiString multi = new MultiString();
+		/** Get a MULTI string for the page.
+		 * @param n_font Current font number.
+		 * @param prefix MULTI prefix for each page.
+		 * @return MULTI string for the page. */
+		private MultiString getMulti(int n_font, String prefix) {
+			MultiString multi = new MultiString(prefix);
 			String[] mess = new String[n_lines];
 			int m = 0;
 			for(int i = 0; i < mess.length; i++) {

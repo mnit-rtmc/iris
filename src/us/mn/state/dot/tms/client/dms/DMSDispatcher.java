@@ -197,6 +197,18 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		return sb.toString();
 	}
 
+	/** Get page prefix MULTI string from scheduled message (if any) */
+	public String getPagePrefix() {
+		DMS dms = selectionModel.getSingleSelection();
+		if(dms != null) {
+			SignMessage sm = dms.getMessageSched();
+			if(sm != null && sm.getActivationPriority() ==
+			   DMSMessagePriority.PREFIX_PAGE.ordinal())
+				return sm.getMulti();
+		}
+		return "";
+	}
+
 	/** Send a new message to the selected DMS */
 	private void sendMessage() {
 		List<DMS> sel = getSelected();

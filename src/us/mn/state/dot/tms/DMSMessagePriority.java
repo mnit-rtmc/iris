@@ -37,7 +37,8 @@ public enum DMSMessagePriority {
 	INCIDENT_MED,	/* 10: medium-priority incident */
 	INCIDENT_HIGH,	/* 11: high-priority incident */
 	AWS,		/* 12: automated warning system */
-	OVERRIDE;	/* 13: override priority */
+	PREFIX_PAGE,	/* 13: prefix page combining (activation only) */
+	OVERRIDE;	/* 14: override priority */
 
 	/** Get a DMSMessagePriority from an ordinal value */
 	public static DMSMessagePriority fromOrdinal(int o) {
