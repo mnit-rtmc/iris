@@ -9,6 +9,38 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.149.0 (31 August 2012)</dt>
+	<dd><ul>
+		<li>
+			Added PREFIX_PAGE activation priority for scheduled
+			DMS actions.  Scheduled messages using this will be
+			"prepended" to each page of all user deployed messages.
+		</li>
+		<li>
+			Fixed a bug which caused traffic map "segment layer" to
+			sporadically turn all gray for 30 seconds or more.
+		</li>
+		<li>
+			Refined DMS "message composer" user interface.
+		</li>
+		<li>
+			Changed user properties file to always be located at
+			~/iris/user.properties (also works in Windows).
+		</li>
+		<li>
+			Added "scale" property to user.properties file -- it
+			allows client user interface to be scaled from 0.25 to
+			4.0 scale.
+		</li>
+		<li>
+			Removed dependencies for tms-log and tdxml projects.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.149.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.148.0 (10 August 2012)</dt>
 	<dd><ul>
 		<li>
