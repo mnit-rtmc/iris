@@ -40,6 +40,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Allowed activation priorities */
 	static private final DMSMessagePriority[] A_PRIORITIES = {
+		DMSMessagePriority.PREFIX_PAGE,
 		DMSMessagePriority.PSA,
 		DMSMessagePriority.TRAVEL_TIME,
 		DMSMessagePriority.SPEED_LIMIT,
@@ -47,8 +48,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		DMSMessagePriority.OTHER_SYSTEM,
 		DMSMessagePriority.INCIDENT_LOW,
 		DMSMessagePriority.INCIDENT_MED,
-		DMSMessagePriority.INCIDENT_HIGH,
-		DMSMessagePriority.PREFIX_PAGE
+		DMSMessagePriority.INCIDENT_HIGH
 	};
 
 	/** Allowed run-time priorities */
