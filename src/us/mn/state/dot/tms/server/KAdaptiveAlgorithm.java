@@ -1266,7 +1266,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void calculateMeteringRate() {
 			if(s_node != null) {
 				StationNode bs = s_node.bottleneckStation();
-				double k =  calculateSegmentDensity(bs);
+				double k = calculateSegmentDensity(bs);
 				double r = calculateRate(k);
 				rateHist.push(r);
 				if(shouldMeter(bs, s_node))
@@ -1631,6 +1631,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append(queueFullCount);
 			sb.append("),");
 			sb.append(s_node);
+			if(s_node != null) {
+				StationNode bs = s_node.bottleneckStation();
+				if(bs != null) {
+					boolean sm = shouldMeter(bs, s_node);
+					sb.append(",bs=");
+					sb.append(bs);
+					sb.append(",sm=");
+					sb.append(sm);
+				}
+			}
 			return sb.toString();
 		}
 	}
