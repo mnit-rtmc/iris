@@ -743,7 +743,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1 min density at 'prevStep' time steps ago
 		 */
 		public double getAggregatedDensity(int prevStep) {
-			Double avg = densityHist.average(prevStep,steps(60));
+			Double avg = densityHist.average(prevStep, steps(60));
 			if(avg != null)
 				return avg;
 			else
@@ -802,7 +802,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get a string representation of a station node */
 		public String toString() {
-			return "Station " + station.getName();
+			return "SN:" + station.getName();
 		}
 	}
 
@@ -816,7 +816,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get a string representation of an entrance node */
 		public String toString() {
-			return "Entrance " + rnode.getName();
+			return "EN:" + rnode.getName();
 		}
 	}
 
