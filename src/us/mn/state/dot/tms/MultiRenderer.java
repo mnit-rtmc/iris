@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -452,8 +452,10 @@ public class MultiRenderer extends MultiAdapter {
 			Integer cs = char_spacing;
 			if(cs != null)
 				return cs;
-			else
+			else if(font != null)
 				return font.getCharSpacing();
+			else
+				return 1;
 		}
 		int getCharSpacing(Span other) {
 			if(other == null)
