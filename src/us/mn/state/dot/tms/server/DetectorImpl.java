@@ -504,7 +504,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	protected transient int last_volume = MISSING_DATA;
 
 	/** Scans from the last 30-second sample period.  FIXME: use
-	 * scn_cache to get "last"scans" value. */
+	 * scn_cache to get "last_scans" value. */
 	protected transient int last_scans = MISSING_DATA;
 
 	/** Speed from the last 30-second sample period.  FIXME: use
