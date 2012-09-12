@@ -72,11 +72,14 @@ public class SensorReader {
 	/** Segment layer */
 	private final SegmentLayer seg_layer;
 
+	/** Sensor handler */
+	private final SensorHandler handler = new SensorHandler();
+
 	/** Job to perform */
 	private final Job job = new Job(Calendar.SECOND, 30, Calendar.SECOND,
 		OFFSET_SECS)
 	{
-		public void perform() throws Exception {
+		public void perform() {
 			readXmlFile();
 		}
 	};
@@ -91,7 +94,7 @@ public class SensorReader {
 		parser = factory.newSAXParser();
 		// Read the sensor data right away
 		READER.addJob(new Job() {
-			public void perform() throws Exception {
+			public void perform() {
 				readXmlFile();
 			}
 		});
@@ -105,24 +108,30 @@ public class SensorReader {
 	}
 
 	/** Read and parse an XML file */
-	private void readXmlFile() throws IOException, SAXException {
-		URLConnection conn = url.openConnection();
-		conn.setConnectTimeout(6000);
-		conn.setReadTimeout(6000);
-		InputStream in = new GZIPInputStream(conn.getInputStream());
-		parse(in);
-	}
-
-	/** Parse the XML document and notify clients */
-	private void parse(InputStream in) throws IOException, SAXException {
+	private void readXmlFile() {
 		try {
-			SensorHandler h = new SensorHandler();
-			parser.parse(in, h);
+			time_changed = false;
+			parse();
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		catch(SAXException e) {
+			e.printStackTrace();
 		}
 		finally {
 			if(time_changed)
 				seg_layer.completeSamples();
 		}
+	}
+
+	/** Parse the XML document and notify clients */
+	private void parse() throws IOException, SAXException {
+		URLConnection conn = url.openConnection();
+		conn.setConnectTimeout(6000);
+		conn.setReadTimeout(6000);
+		InputStream in = new GZIPInputStream(conn.getInputStream());
+		parser.parse(in, handler);
 	}
 
 	/** Inner class to handle parsing sensor elements */
