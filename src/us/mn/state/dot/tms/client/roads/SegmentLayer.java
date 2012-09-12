@@ -98,6 +98,12 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		notifyLayerChanged();
 	}
 
+	/** Clear all sample data */
+	public void clearSamples() {
+		samples.clearSamples();
+		notifyLayerChanged();
+	}
+
 	/** Notify listeners that the layer has changed status */
 	private void notifyLayerChanged() {
 		LayerChangedEvent ev = new LayerChangedEvent(this,

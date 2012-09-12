@@ -45,6 +45,9 @@ public class SensorReader {
 	/** Seconds to offset each read from start of interval */
 	static private final int OFFSET_SECS = 4;
 
+	/** Time (ms) to consider sample data valid */
+	static private final long SAMPLE_VALID_MS = 5 * 60 * 1000;
+
 	/** Parse an attribute as an integer value */
 	static private Integer parseInt(String v) {
 		try {
@@ -65,6 +68,9 @@ public class SensorReader {
 
 	/** Time stamp from previous read */
 	private String last_stamp = "";
+
+	/** Time when most recent sensor data was received */
+	private long receive_stamp = 0;
 
 	/** Flag to indicate the time stamp changed since last time */
 	private boolean time_changed = false;
@@ -120,8 +126,12 @@ public class SensorReader {
 			e.printStackTrace();
 		}
 		finally {
-			if(time_changed)
+			long now = System.currentTimeMillis();
+			if(time_changed) {
+				receive_stamp = now;
 				seg_layer.completeSamples();
+			} else if(now - receive_stamp > SAMPLE_VALID_MS)
+				seg_layer.clearSamples();
 		}
 	}
 

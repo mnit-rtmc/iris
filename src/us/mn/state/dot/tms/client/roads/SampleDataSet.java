@@ -43,6 +43,12 @@ public class SampleDataSet {
 		next_samples.clear();
 	}
 
+	/** Clear the samples */
+	public synchronized void clearSamples() {
+		samples.clear();
+		next_samples.clear();
+	}
+
 	/** Get a sample for the given sensor ID */
 	public synchronized SensorSample getSample(String sid) {
 		return samples.get(sid);
