@@ -48,6 +48,9 @@ public class SensorReader {
 	/** Time (ms) to consider sample data valid */
 	static private final long SAMPLE_VALID_MS = 5 * 60 * 1000;
 
+	/** Timeout for direct URL Connections */
+	static private final int URL_TIMEOUT_MS = 5 * 1000;
+
 	/** Parse an attribute as an integer value */
 	static private Integer parseInt(String v) {
 		try {
@@ -138,8 +141,8 @@ public class SensorReader {
 	/** Parse the XML document and notify clients */
 	private void parse() throws IOException, SAXException {
 		URLConnection conn = url.openConnection();
-		conn.setConnectTimeout(6000);
-		conn.setReadTimeout(6000);
+		conn.setConnectTimeout(URL_TIMEOUT_MS);
+		conn.setReadTimeout(URL_TIMEOUT_MS);
 		InputStream in = new GZIPInputStream(conn.getInputStream());
 		parser.parse(in, handler);
 	}
