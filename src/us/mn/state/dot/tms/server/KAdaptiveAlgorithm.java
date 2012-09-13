@@ -1634,11 +1634,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(s_node != null) {
 				StationNode bs = s_node.bottleneckStation();
 				if(bs != null) {
-					boolean sm = shouldMeter(bs, s_node);
+					// copied from shouldStartInitial...
+					boolean sf = shouldStartFlow(
+						START_STEPS);
+					boolean sd = shouldStartDensity(bs,
+						s_node, START_STEPS_K);
 					sb.append(",bs=");
 					sb.append(bs);
-					sb.append(",sm=");
-					sb.append(sm);
+					sb.append(",");
+					if(sf)
+						sb.append("flow");
+					sb.append(",");
+					if(sd)
+						sb.append("density");
 				}
 			}
 			return sb.toString();
