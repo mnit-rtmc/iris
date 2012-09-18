@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,6 +130,8 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	public void doSetBpp(int b) throws TMSException {
 		if(b == bpp)
 			return;
+		if(b != 1 && b != 8 && b != 24)
+			throw new ChangeVetoException("Invalid bpp");
 		store.update(this, "bpp", b);
 		setBpp(b);
 	}
