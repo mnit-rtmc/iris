@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.IOException;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -47,5 +48,34 @@ public class GraphicHelper extends BaseHelper {
 	/** Lookup the graphic with the specified name */
 	static public Graphic lookup(String name) {
 		return (Graphic)namespace.lookupObject(Graphic.SONAR_TYPE,name);
+	}
+
+	/** Create a raster graphic */
+	static public RasterGraphic createRaster(Graphic g) {
+		try {
+			switch(g.getBpp()) {
+			case 1:
+				return createBitmap(g);
+			case 24:
+			default:
+				return null;
+			}
+		}
+		catch(IndexOutOfBoundsException e) {
+			// pixel data was wrong length
+			return null;
+		}
+		catch(IOException e) {
+			// pixel data Base64 decode failed
+			return null;
+		}
+	}
+
+	/** Create a bitmap graphic */
+	static private RasterGraphic createBitmap(Graphic g) throws IOException{
+		BitmapGraphic bg = new BitmapGraphic(g.getWidth(),
+			g.getHeight());
+		bg.setPixels(Base64.decode(g.getPixels()));
+		return bg;
 	}
 }

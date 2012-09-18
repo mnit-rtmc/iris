@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
 /**
@@ -233,23 +232,26 @@ public class MultiRenderer extends MultiAdapter {
 	protected void renderGraphic(Graphic g, DmsColor fg, int x, int y) {
 		x--;
 		y--;
-		int w = g.getWidth();
-		int h = g.getHeight();
-		try {
-			byte[] pixels = Base64.decode(g.getPixels());
-			BitmapGraphic bg = new BitmapGraphic(w, h);
-			bg.setPixels(pixels);
-			for(int yy = 0; yy < h; yy++) {
-				for(int xx = 0; xx < w; xx++) {
-					if(bg.getPixel(xx, yy).isLit())
-						raster.setPixel(x+xx, y+yy, fg);
-				}
+		RasterGraphic rg = GraphicHelper.createRaster(g);
+		if(rg instanceof BitmapGraphic)
+			renderBitmap((BitmapGraphic)rg, fg, x, y);
+		else
+			syntax_err = MultiSyntaxError.graphicNotDefined;
+	}
+
+	/** Render a bitmap graphic onto the raster.
+	 * @param bg BitmapGraphic to render.
+	 * @param fg Foreground color.
+	 * @param x X-position on raster (0-based)
+	 * @param y Y-position on raster (0-based) */
+	private void renderBitmap(BitmapGraphic bg, DmsColor fg, int x, int y) {
+		int w = bg.getWidth();
+		int h = bg.getHeight();
+		for(int yy = 0; yy < h; yy++) {
+			for(int xx = 0; xx < w; xx++) {
+				if(bg.getPixel(xx, yy).isLit())
+					raster.setPixel(x + xx, y + yy, fg);
 			}
-		}
-		catch(IOException e) {
-			// This happens if the graphic contains
-			// invalid Base64 pixel data.
-			syntax_err = MultiSyntaxError.other;
 		}
 	}
 

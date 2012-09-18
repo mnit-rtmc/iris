@@ -16,14 +16,13 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Component;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.tms.Base64;
-import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -101,21 +100,14 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	/** Create an image */
 	static protected BufferedImage createImage(Object value) {
 		if(value instanceof Graphic) {
-			Graphic g = (Graphic)value;
-			BitmapGraphic bg = new BitmapGraphic(g.getWidth(),
-				g.getHeight());
-			try {
-				bg.setPixels(Base64.decode(g.getPixels()));
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
-			BufferedImage im = new BufferedImage(g.getWidth(),
-				g.getHeight(), BufferedImage.TYPE_INT_RGB);
+			RasterGraphic rg = GraphicHelper.createRaster(
+				(Graphic)value);
+			BufferedImage im = new BufferedImage(rg.getWidth(),
+				rg.getHeight(), BufferedImage.TYPE_INT_RGB);
 			final int rgb = 0xFFFFFF;
-			for(int y = 0; y < g.getHeight(); y++) {
-				for(int x = 0; x < g.getWidth(); x++) {
-					if(bg.getPixel(x, y).isLit())
+			for(int y = 0; y < rg.getHeight(); y++) {
+				for(int x = 0; x < rg.getWidth(); x++) {
+					if(rg.getPixel(x, y).isLit())
 						im.setRGB(x, y, rgb);
 				}
 			}

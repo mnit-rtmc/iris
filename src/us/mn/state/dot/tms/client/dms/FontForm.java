@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +40,8 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -249,13 +250,10 @@ public class FontForm extends AbstractForm {
 		}
 
 		protected void updateBitmap() {
-			bmap = new BitmapGraphic(graphic.getWidth(),
-				graphic.getHeight());
-			try {
-				bmap.setPixels(Base64.decode(
-					graphic.getPixels()));
-			}
-			catch(Exception e) {
+			RasterGraphic rg = GraphicHelper.createRaster(graphic);
+			if(rg instanceof BitmapGraphic)
+				bmap = (BitmapGraphic)rg;
+			else {
 				// Oh well, the Graphic is invalid
 				// Should we throw up an error dialog?
 			}
