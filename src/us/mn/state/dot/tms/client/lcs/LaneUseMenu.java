@@ -43,9 +43,6 @@ public class LaneUseMenu extends JMenu {
 		JMenuItem item = createLcsItem();
 		if(item != null)
 			add(item);
-		item = createGraphicItem();
-		if(item != null)
-			add(item);
 		item = createLaneUseMultiItem();
 		if(item != null)
 			add(item);
@@ -61,17 +58,6 @@ public class LaneUseMenu extends JMenu {
 		return new JMenuItem(new IAction("lcs") {
 			protected void do_perform() {
 				desktop.show(new LcsForm(session));
-			}
-		});
-	}
-
-	/** Create the graphics menu item */
-	protected JMenuItem createGraphicItem() {
-		if(!GraphicForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("graphics") {
-			protected void do_perform() {
-				desktop.show(new GraphicForm(session));
 			}
 		});
 	}

@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.lcs;
+package us.mn.state.dot.tms.client.dms;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;

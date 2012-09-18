@@ -48,6 +48,9 @@ public class SignMenu extends JMenu {
 		item = createFontItem();
 		if(item != null)
 			add(item);
+		item = createGraphicItem();
+		if(item != null)
+			add(item);
 		item = createQuickMessageItem();
 		if(item != null)
 			add(item);
@@ -82,6 +85,17 @@ public class SignMenu extends JMenu {
 		return new JMenuItem(new IAction("font.title") {
 			protected void do_perform() {
 				desktop.show(new FontForm(session));
+			}
+		});
+	}
+
+	/** Create the graphics menu item */
+	private JMenuItem createGraphicItem() {
+		if(!GraphicForm.isPermitted(session))
+			return null;
+		return new JMenuItem(new IAction("graphics") {
+			protected void do_perform() {
+				desktop.show(new GraphicForm(session));
 			}
 		});
 	}
