@@ -245,7 +245,7 @@ public class GraphicForm extends AbstractForm {
 	/** Create a unique Graphic name */
 	protected String createUniqueName() {
 		for(int uid = 1; uid <= 256; uid++) {
-			String n = "LUG_" + uid;
+			String n = "G_" + uid;
 			if(GraphicHelper.lookup(n) == null)
 				return n;
 		}
