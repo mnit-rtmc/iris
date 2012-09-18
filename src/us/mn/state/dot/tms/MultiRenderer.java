@@ -235,6 +235,8 @@ public class MultiRenderer extends MultiAdapter {
 		RasterGraphic rg = GraphicHelper.createRaster(g);
 		if(rg instanceof BitmapGraphic)
 			renderBitmap((BitmapGraphic)rg, fg, x, y);
+		else if(rg instanceof PixmapGraphic)
+			renderPixmap((PixmapGraphic)rg, x, y);
 		else
 			syntax_err = MultiSyntaxError.graphicNotDefined;
 	}
@@ -251,6 +253,21 @@ public class MultiRenderer extends MultiAdapter {
 			for(int xx = 0; xx < w; xx++) {
 				if(bg.getPixel(xx, yy).isLit())
 					raster.setPixel(x + xx, y + yy, fg);
+			}
+		}
+	}
+
+	/** Render a pixmap graphic onto the raster.
+	 * @param pg PixmapGraphic to render.
+	 * @param x X-position on raster (0-based)
+	 * @param y Y-position on raster (0-based) */
+	private void renderPixmap(PixmapGraphic pg, int x, int y) {
+		int w = pg.getWidth();
+		int h = pg.getHeight();
+		for(int yy = 0; yy < h; yy++) {
+			for(int xx = 0; xx < w; xx++) {
+				DmsColor c = pg.getPixel(xx, yy);
+				raster.setPixel(x + xx, y + yy, c);
 			}
 		}
 	}

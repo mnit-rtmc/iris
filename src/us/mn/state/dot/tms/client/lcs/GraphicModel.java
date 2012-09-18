@@ -20,8 +20,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
+import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
+import us.mn.state.dot.tms.PixmapGraphic;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -102,18 +104,37 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 		if(value instanceof Graphic) {
 			RasterGraphic rg = GraphicHelper.createRaster(
 				(Graphic)value);
-			BufferedImage im = new BufferedImage(rg.getWidth(),
-				rg.getHeight(), BufferedImage.TYPE_INT_RGB);
-			final int rgb = 0xFFFFFF;
-			for(int y = 0; y < rg.getHeight(); y++) {
-				for(int x = 0; x < rg.getWidth(); x++) {
-					if(rg.getPixel(x, y).isLit())
-						im.setRGB(x, y, rgb);
-				}
+			if(rg instanceof BitmapGraphic)
+				return createBitmapImage((BitmapGraphic)rg);
+			if(rg instanceof PixmapGraphic)
+				return createPixmapImage((PixmapGraphic)rg);
+		}
+		return null;
+	}
+
+	/** Create a bitmap image */
+	static private BufferedImage createBitmapImage(BitmapGraphic bg) {
+		BufferedImage im = new BufferedImage(bg.getWidth(),
+			bg.getHeight(), BufferedImage.TYPE_INT_RGB);
+		final int rgb = 0xFFFFFF;
+		for(int y = 0; y < bg.getHeight(); y++) {
+			for(int x = 0; x < bg.getWidth(); x++) {
+				if(bg.getPixel(x, y).isLit())
+					im.setRGB(x, y, rgb);
 			}
-			return im;
-		} else
-			return null;
+		}
+		return im;
+	}
+
+	/** Create a pixmap image */
+	static private BufferedImage createPixmapImage(PixmapGraphic pg) {
+		BufferedImage im = new BufferedImage(pg.getWidth(),
+			pg.getHeight(), BufferedImage.TYPE_INT_RGB);
+		for(int y = 0; y < pg.getHeight(); y++) {
+			for(int x = 0; x < pg.getWidth(); x++)
+				im.setRGB(x, y, pg.getPixel(x, y).rgb());
+		}
+		return im;
 	}
 
 	/** Create a new graphic table model */

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.TreeSet;
@@ -32,6 +33,8 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
+import us.mn.state.dot.tms.PixmapGraphic;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
@@ -58,10 +61,34 @@ public class GraphicForm extends AbstractForm {
 		"png", "gif", "bmp");
 
 	/** Maximum allowed graphic height */
-	static protected final int MAX_GRAPHIC_HEIGHT = 144;
+	static private final int MAX_GRAPHIC_HEIGHT = 144;
 
 	/** Maximum allowed graphic width */
-	static protected final int MAX_GRAPHIC_WIDTH = 200;
+	static private final int MAX_GRAPHIC_WIDTH = 200;
+
+	/** Check if an image can be a valid graphic */
+	static private boolean isImageValid(BufferedImage im) {
+		return isImageSizeValid(im) && isImageColorModelValid(im);
+	}
+
+	/** Check if an image size is valid for a graphic */
+	static private boolean isImageSizeValid(BufferedImage im) {
+		return im.getHeight() <= MAX_GRAPHIC_HEIGHT &&
+		       im.getWidth() <= MAX_GRAPHIC_WIDTH;
+	}
+
+	/** Check if an image color model is valid for a graphic */
+	static private boolean isImageColorModelValid(BufferedImage im) {
+		ColorModel cm = im.getColorModel();
+		int bpp = cm.getPixelSize();
+		return (bpp == 1 || bpp == 24) && !cm.hasAlpha();
+	}
+
+	/** Get the bits-per-pixel of an image */
+	static private int imageBpp(BufferedImage im) {
+		ColorModel cm = im.getColorModel();
+		return cm.getPixelSize();
+	}
 
 	/** Table model for graphics */
 	protected final GraphicModel model;
@@ -148,8 +175,7 @@ public class GraphicForm extends AbstractForm {
 		int r = jfc.showOpenDialog(null);
 		if(r == JFileChooser.APPROVE_OPTION) {
 			BufferedImage im = ImageIO.read(jfc.getSelectedFile());
-			if(im.getHeight() <= MAX_GRAPHIC_HEIGHT &&
-			   im.getWidth() <= MAX_GRAPHIC_WIDTH)
+			if(isImageValid(im))
 				createGraphic(im);
 		}
 	}
@@ -162,16 +188,31 @@ public class GraphicForm extends AbstractForm {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("g_number", g_number);
-			attrs.put("bpp", 1);
+			attrs.put("bpp", imageBpp(im));
 			attrs.put("width", im.getWidth());
 			attrs.put("height", im.getHeight());
-			attrs.put("pixels", encodePixels(im));
-			cache.createObject(name, attrs);
+			RasterGraphic rg = createRaster(im);
+			if(rg != null) {
+				attrs.put("pixels", encodePixels(rg));
+				cache.createObject(name, attrs);
+			}
 		}
 	}
 
-	/** Encode the pixel data for an image */
-	protected String encodePixels(BufferedImage im) {
+	/** Create a raster graphic from a buffered image */
+	private RasterGraphic createRaster(BufferedImage im) {
+		switch(imageBpp(im)) {
+		case 1:
+			return createBitmap(im);
+		case 24:
+			return createPixmap(im);
+		default:
+			return null;
+		}
+	}
+
+	/** Create a bitmap graphic from a buffered image */
+	private RasterGraphic createBitmap(BufferedImage im) {
 		BitmapGraphic bg = new BitmapGraphic(im.getWidth(),
 			im.getHeight());
 		for(int y = 0; y < im.getHeight(); y++) {
@@ -180,7 +221,25 @@ public class GraphicForm extends AbstractForm {
 					bg.setPixel(x, y, DmsColor.AMBER);
 			}
 		}
-		return Base64.encode(bg.getPixels());
+		return bg;
+	}
+
+	/** Create a pixmap graphic from a buffered image */
+	private RasterGraphic createPixmap(BufferedImage im) {
+		PixmapGraphic pg = new PixmapGraphic(im.getWidth(),
+			im.getHeight());
+		for(int y = 0; y < im.getHeight(); y++) {
+			for(int x = 0; x < im.getWidth(); x++) {
+				DmsColor c = new DmsColor(im.getRGB(x, y));
+				pg.setPixel(x, y, c);
+			}
+		}
+		return pg;
+	}
+
+	/** Enocde the pixels of a raster to Base64 */
+	private String encodePixels(RasterGraphic rg) {
+		return Base64.encode(rg.getPixels());
 	}
 
 	/** Create a unique Graphic name */

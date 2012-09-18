@@ -57,6 +57,7 @@ public class GraphicHelper extends BaseHelper {
 			case 1:
 				return createBitmap(g);
 			case 24:
+				return createPixmap(g);
 			default:
 				return null;
 			}
@@ -77,5 +78,13 @@ public class GraphicHelper extends BaseHelper {
 			g.getHeight());
 		bg.setPixels(Base64.decode(g.getPixels()));
 		return bg;
+	}
+
+	/** Create a pixmap graphic */
+	static private RasterGraphic createPixmap(Graphic g) throws IOException{
+		PixmapGraphic pg = new PixmapGraphic(g.getWidth(),
+			g.getHeight());
+		pg.setPixels(Base64.decode(g.getPixels()));
+		return pg;
 	}
 }
