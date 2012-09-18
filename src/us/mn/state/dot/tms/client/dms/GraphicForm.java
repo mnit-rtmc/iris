@@ -131,7 +131,7 @@ public class GraphicForm extends AbstractForm {
 	protected void initialize() {
 		model.initialize();
 		add(createGraphicPanel());
-		table.setVisibleRowCount(6);
+		table.setVisibleRowCount(5);
 	}
 
 	/** Dispose of the form */
@@ -150,7 +150,7 @@ public class GraphicForm extends AbstractForm {
 			}
 		};
 		FormPanel panel = new FormPanel(true);
-		table.setRowHeight(UI.scaled(64));
+		table.setRowHeight(UI.scaled(MAX_GRAPHIC_HEIGHT / 2));
 		table.setModel(model);
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());

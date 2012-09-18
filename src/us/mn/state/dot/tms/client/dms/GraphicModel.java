@@ -40,12 +40,12 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Graphic>("device.name") {
+		new ProxyColumn<Graphic>("device.name", 60) {
 			public Object getValueAt(Graphic g) {
 				return g.getName();
 			}
 		},
-		new ProxyColumn<Graphic>("graphic.number", 0, Integer.class) {
+		new ProxyColumn<Graphic>("graphic.number", 60, Integer.class) {
 			public Object getValueAt(Graphic g) {
 				return g.getGNumber();
 			}
@@ -57,22 +57,22 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 					g.setGNumber((Integer)value);
 			}
 		},
-		new ProxyColumn<Graphic>("graphic.bpp", 0, Integer.class) {
+		new ProxyColumn<Graphic>("graphic.bpp", 30, Integer.class) {
 			public Object getValueAt(Graphic g) {
 				return g.getBpp();
 			}
 		},
-		new ProxyColumn<Graphic>("graphic.width", 0, Integer.class) {
+		new ProxyColumn<Graphic>("graphic.width", 44, Integer.class) {
 			public Object getValueAt(Graphic g) {
 				return g.getWidth();
 			}
 		},
-		new ProxyColumn<Graphic>("graphic.height", 0, Integer.class) {
+		new ProxyColumn<Graphic>("graphic.height", 44, Integer.class) {
 			public Object getValueAt(Graphic g) {
 				return g.getHeight();
 			}
 		},
-		new ProxyColumn<Graphic>("graphic.image") {
+		new ProxyColumn<Graphic>("graphic.image", 200) {
 			public Object getValueAt(Graphic g) {
 				return g;
 			}
@@ -148,6 +148,11 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
+	}
+
+	/** Get the count of rows in the table */
+	public int getRowCount() {
+		return super.getRowCount() - 1;
 	}
 
 	/** Get the SONAR type name */
