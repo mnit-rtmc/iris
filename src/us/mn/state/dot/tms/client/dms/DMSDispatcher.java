@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -278,9 +279,14 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		RasterBuilder b = builder;
 		if(b != null) {
 			MultiString ms = new MultiString(multi);
-			return encodeBitmaps(b.createBitmaps(ms));
-		} else
-			return null;
+			try {
+				return encodeBitmaps(b.createBitmaps(ms));
+			}
+			catch(InvalidMessageException e) {
+				// Message is not valid
+			}
+		}
+		return null;
 	}
 
 	/** Encode the bitmaps to Base64 */
@@ -428,7 +434,10 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 				return b.createPixmaps(multi);
 			}
 			catch(IndexOutOfBoundsException e) {
-				// oh well, no graphic to display
+				// pixmap too small for message
+			}
+			catch(InvalidMessageException e) {
+				// most likely a MultiSyntaxError ...
 			}
 		}
 		return null;

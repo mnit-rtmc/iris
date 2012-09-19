@@ -1261,13 +1261,18 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	protected SignMessage createMessage(String m, DMSMessagePriority ap,
 		DMSMessagePriority rp, boolean s, Integer d)
 	{
-		RasterBuilder builder = DMSHelper.createRasterBuilder(this);
-		if(builder != null) {
+		RasterBuilder rb = DMSHelper.createRasterBuilder(this);
+		if(rb != null) {
 			MultiString ms = new MultiString(m);
-			BitmapGraphic[] pages = builder.createBitmaps(ms);
-			return createMessageB(m, pages, ap, rp, s, d);
-		} else
-			return null;
+			try {
+				BitmapGraphic[] pages = rb.createBitmaps(ms);
+				return createMessageB(m, pages, ap, rp, s, d);
+			}
+			catch(InvalidMessageException e) {
+				// probably a MultiSyntaxError ...
+			}
+		}
+		return null;
 	}
 
 	/** Create a message for the sign.

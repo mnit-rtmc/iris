@@ -412,21 +412,57 @@ public class DMSHelper extends BaseHelper {
 	 * @return RasterGraphic array, one for each page, or null on error.
 	 */
 	static public RasterGraphic[] getRasters(DMS dms) {
-		if(dms == null)
+		if(dms != null) {
+			SignMessage sm = dms.getMessageCurrent();
+			if(sm != null)
+				return getRasters(dms, sm);
+		}
+		return null;
+	}
+
+	/** Get the current raster graphics for all pages of the specified DMS.
+	 * @param dms Sign in question.
+	 * @param sm Sign message.
+	 * @return RasterGraphic array, one for each page, or null on error.
+	 */
+	static private RasterGraphic[] getRasters(DMS dms, SignMessage sm) {
+		BitmapGraphic[] bitmaps =
+			SignMessageHelper.getBitmaps(sm, dms);
+		if(bitmaps == null)
 			return null;
-		SignMessage sm = dms.getMessageCurrent();
-		if(sm == null)
+		RasterGraphic[] rasters = createRasters(dms, sm);
+		if(rasters == null)
 			return null;
-		RasterBuilder rb = createRasterBuilder(dms);
-		if(rb == null)
-			return null;
-		RasterGraphic[] rasters = rb.createPixmaps(new MultiString(
-			sm.getMulti()));
-		BitmapGraphic[] bitmaps = SignMessageHelper.getBitmaps(sm, dms);
 		if(graphicsMatch(rasters, bitmaps) || bitmaps.length == 0)
 			return rasters;
 		else
 			return bitmaps;
+	}
+
+	/** Create raster graphics for all pages of the specified DMS.
+	 * @param dms Sign in question.
+	 * @return RasterGraphic array, one for each page, or null on error.
+	 */
+	static private RasterGraphic[] createRasters(DMS dms, SignMessage sm) {
+		RasterBuilder rb = createRasterBuilder(dms);
+		if(rb != null)
+			return createRasters(rb, sm.getMulti());
+		else
+			return null;
+	}
+
+	/** Create raster graphics using a raster builder and multi string.
+	 * @return RasterGraphic array, one for each page, or null on error.
+	 */
+	static private RasterGraphic[] createRasters(RasterBuilder rb,
+		String multi)
+	{
+		try {
+			return rb.createPixmaps(new MultiString(multi));
+		}
+		catch(InvalidMessageException e) {
+			return null;
+		}
 	}
 
 	/** Check if an array of raster graphics match another */

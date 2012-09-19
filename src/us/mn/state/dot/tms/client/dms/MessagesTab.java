@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -354,7 +355,7 @@ public class MessagesTab extends JPanel {
 	protected RasterGraphic renderMessage(SignText st) {
 		MultiString multi = new MultiString(st.getMulti());
 		RasterGraphic[] pages = renderPages(multi);
-		if(pages.length > 0)
+		if(pages != null && pages.length > 0)
 			return pages[0];
 		else
 			return null;
@@ -367,10 +368,15 @@ public class MessagesTab extends JPanel {
 		Integer cw = proxy.getCharWidthPixels();
 		Integer ch = proxy.getCharHeightPixels();
 		if(w == null || h == null || cw == null || ch == null)
-			return new BitmapGraphic[0];
+			return null;
 		int df = DMSHelper.getDefaultFontNumber(proxy);
 		RasterBuilder b = new RasterBuilder(w, h, cw, ch, df);
-		return b.createPixmaps(ms);
+		try {
+			return b.createPixmaps(ms);
+		}
+		catch(InvalidMessageException e) {
+			return null;
+		}
 	}
 
 	/** Get the selected sign text message */

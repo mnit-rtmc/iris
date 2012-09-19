@@ -142,7 +142,9 @@ public class RasterBuilder {
 	}
 
 	/** Render a BitmapGraphic for each page */
-	public BitmapGraphic[] createBitmaps(MultiString ms) {
+	public BitmapGraphic[] createBitmaps(MultiString ms)
+		throws InvalidMessageException
+	{
 		int n_pages = ms.getNumPages();
 		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
 		for(int p = 0; p < n_pages; p++) {
@@ -153,7 +155,9 @@ public class RasterBuilder {
 	}
 
 	/** Render a PixmapGraphic for each page */
-	public RasterGraphic[] createPixmaps(MultiString ms) {
+	public RasterGraphic[] createPixmaps(MultiString ms)
+		throws InvalidMessageException
+	{
 		int n_pages = ms.getNumPages();
 		RasterGraphic[] pixmaps = new RasterGraphic[n_pages];
 		for(int p = 0; p < n_pages; p++) {
@@ -164,12 +168,16 @@ public class RasterBuilder {
 	}
 
 	/** Render to a RasterGraphic for the specified page number */
-	protected void render(MultiString ms, int p, RasterGraphic rg) {
+	private void render(MultiString ms, int p, RasterGraphic rg)
+		throws InvalidMessageException
+	{
 		MultiRenderer mr = new MultiRenderer(rg, p, c_width, c_height,
 			default_font);
 		String multi = DMSHelper.ignoreFilter(ms).toString();
 		MultiParser.parse(multi, mr);
 		mr.complete();
-		// FIXME: check MultiRenderer.syntax_err
+		MultiSyntaxError err = mr.getSyntaxError();
+		if(err != MultiSyntaxError.none)
+			throw new InvalidMessageException(err.toString());
 	}
 }

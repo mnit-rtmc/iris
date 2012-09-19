@@ -38,7 +38,7 @@ public class MultiRenderer extends MultiAdapter {
 	protected final int c_height;
 
 	/** MULTI syntax error */
-	protected MultiSyntaxError syntax_err = MultiSyntaxError.none;
+	private MultiSyntaxError syntax_err = MultiSyntaxError.none;
 
 	/** X position of text rectangle (1-based) */
 	protected int tr_x;
@@ -187,6 +187,11 @@ public class MultiRenderer extends MultiAdapter {
 	/** Complete the rendering */
 	public void complete() {
 		renderText();
+	}
+
+	/** Get the syntax error state */
+	public MultiSyntaxError getSyntaxError() {
+		return syntax_err;
 	}
 
 	/** Render the current text rectangle */
