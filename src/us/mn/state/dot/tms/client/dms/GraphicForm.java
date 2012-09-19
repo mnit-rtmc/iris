@@ -30,6 +30,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
@@ -67,21 +68,34 @@ public class GraphicForm extends AbstractForm {
 	static private final int MAX_GRAPHIC_WIDTH = 200;
 
 	/** Check if an image can be a valid graphic */
-	static private boolean isImageValid(BufferedImage im) {
-		return isImageSizeValid(im) && isImageColorModelValid(im);
+	static private void checkImageValid(BufferedImage im)
+		throws ChangeVetoException
+	{
+		checkImageSizeValid(im);
+		checkImageColorModelValid(im);
 	}
 
 	/** Check if an image size is valid for a graphic */
-	static private boolean isImageSizeValid(BufferedImage im) {
-		return im.getHeight() <= MAX_GRAPHIC_HEIGHT &&
-		       im.getWidth() <= MAX_GRAPHIC_WIDTH;
+	static private void checkImageSizeValid(BufferedImage im)
+		throws ChangeVetoException
+	{
+		if(im.getHeight() > MAX_GRAPHIC_HEIGHT ||
+		   im.getWidth() > MAX_GRAPHIC_WIDTH)
+			throw new ChangeVetoException("Image too large");
 	}
 
 	/** Check if an image color model is valid for a graphic */
-	static private boolean isImageColorModelValid(BufferedImage im) {
+	static private void checkImageColorModelValid(BufferedImage im)
+		throws ChangeVetoException
+	{
 		ColorModel cm = im.getColorModel();
 		int bpp = cm.getPixelSize();
-		return (bpp == 1 || bpp == 24) && !cm.hasAlpha();
+		if(bpp != 1 && bpp != 24)
+			throw new ChangeVetoException("Must have 1 or 24 bpp");
+		if(cm.hasAlpha()) {
+			throw new ChangeVetoException(
+				"Image must not contain transparency");
+		}
 	}
 
 	/** Get the bits-per-pixel of an image */
@@ -98,7 +112,7 @@ public class GraphicForm extends AbstractForm {
 
 	/** Action to create a new graphic */
 	private final IAction create_gr = new IAction("graphic.create") {
-		protected void do_perform() throws IOException {
+		protected void do_perform() throws Exception {
 			createGraphic();
 		}
 	};
@@ -169,45 +183,70 @@ public class GraphicForm extends AbstractForm {
 	}
 
 	/** Create a new graphic */
-	protected void createGraphic() throws IOException {
+	private void createGraphic() throws IOException, ChangeVetoException {
 		JFileChooser jfc = new JFileChooser();
 		jfc.setFileFilter(FILTER);
 		int r = jfc.showOpenDialog(null);
 		if(r == JFileChooser.APPROVE_OPTION) {
 			BufferedImage im = ImageIO.read(jfc.getSelectedFile());
-			if(isImageValid(im))
-				createGraphic(im);
+			checkImageValid(im);
+			createGraphic(im);
 		}
 	}
 
 	/** Create a new graphic */
-	protected void createGraphic(BufferedImage im) {
+	private void createGraphic(BufferedImage im) throws ChangeVetoException{
 		String name = createUniqueName();
 		Integer g_number = getGNumber();
-		if(name != null) {
-			HashMap<String, Object> attrs =
-				new HashMap<String, Object>();
-			attrs.put("g_number", g_number);
-			attrs.put("bpp", imageBpp(im));
-			attrs.put("width", im.getWidth());
-			attrs.put("height", im.getHeight());
-			RasterGraphic rg = createRaster(im);
-			if(rg != null) {
-				attrs.put("pixels", encodePixels(rg));
-				cache.createObject(name, attrs);
-			}
+		RasterGraphic rg = createRaster(im);
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("g_number", g_number);
+		attrs.put("bpp", imageBpp(im));
+		attrs.put("width", im.getWidth());
+		attrs.put("height", im.getHeight());
+		attrs.put("pixels", encodePixels(rg));
+		cache.createObject(name, attrs);
+	}
+
+	/** Create a unique Graphic name */
+	private String createUniqueName() throws ChangeVetoException {
+		for(int uid = 1; uid <= 256; uid++) {
+			String n = "G_" + uid;
+			if(GraphicHelper.lookup(n) == null)
+				return n;
 		}
+		throw new ChangeVetoException("Too many graphics");
+	}
+
+	/** Get the next available graphic number */
+	private Integer getGNumber() throws ChangeVetoException {
+		final TreeSet<Integer> gnums = new TreeSet<Integer>();
+		GraphicHelper.find(new Checker<Graphic>() {
+			public boolean check(Graphic g) {
+				Integer gn = g.getGNumber();
+				if(gn != null)
+					gnums.add(gn);
+				return false;
+			}
+		});
+		for(int i = 1; i < 256; i++) {
+			if(!gnums.contains(i))
+				return i;
+		}
+		throw new ChangeVetoException("Too many graphic numbers");
 	}
 
 	/** Create a raster graphic from a buffered image */
-	private RasterGraphic createRaster(BufferedImage im) {
+	private RasterGraphic createRaster(BufferedImage im)
+		throws ChangeVetoException
+	{
 		switch(imageBpp(im)) {
 		case 1:
 			return createBitmap(im);
 		case 24:
 			return createPixmap(im);
 		default:
-			return null;
+			throw new ChangeVetoException("Invalid bpp");
 		}
 	}
 
@@ -240,34 +279,5 @@ public class GraphicForm extends AbstractForm {
 	/** Enocde the pixels of a raster to Base64 */
 	private String encodePixels(RasterGraphic rg) {
 		return Base64.encode(rg.getPixels());
-	}
-
-	/** Create a unique Graphic name */
-	protected String createUniqueName() {
-		for(int uid = 1; uid <= 256; uid++) {
-			String n = "G_" + uid;
-			if(GraphicHelper.lookup(n) == null)
-				return n;
-		}
-		assert false;
-		return null;
-	}
-
-	/** Get the next available graphic number */
-	protected Integer getGNumber() {
-		final TreeSet<Integer> gnums = new TreeSet<Integer>();
-		GraphicHelper.find(new Checker<Graphic>() {
-			public boolean check(Graphic g) {
-				Integer gn = g.getGNumber();
-				if(gn != null)
-					gnums.add(gn);
-				return false;
-			}
-		});
-		for(int i = 1; i < 256; i++) {
-			if(!gnums.contains(i))
-				return i;
-		}
-		return null;
 	}
 }

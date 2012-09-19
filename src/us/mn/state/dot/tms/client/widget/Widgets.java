@@ -49,6 +49,7 @@ public class Widgets {
 
 	/** Tweak the look and feel */
 	static private void tweakLookAndFeel() {
+		UIManager.put("FileChooser.readOnly", Boolean.TRUE);
 		UIManager.put("ComboBox.disabledForeground",
 			new javax.swing.plaf.ColorUIResource(Color.GRAY));
 		UIManager.put("TextField.inactiveForeground",
