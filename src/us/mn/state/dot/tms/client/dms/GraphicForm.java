@@ -57,8 +57,8 @@ public class GraphicForm extends AbstractForm {
 	}
 
 	/** Filename extension filter */
-	static protected final FileNameExtensionFilter FILTER =
-		new FileNameExtensionFilter("PNG, GIF and BMP Images",
+	static private final FileNameExtensionFilter FILTER =
+		new FileNameExtensionFilter(I18N.get("graphic.image.filter"),
 		"png", "gif", "bmp");
 
 	/** Maximum allowed graphic height */
@@ -81,7 +81,10 @@ public class GraphicForm extends AbstractForm {
 	{
 		if(im.getHeight() > MAX_GRAPHIC_HEIGHT ||
 		   im.getWidth() > MAX_GRAPHIC_WIDTH)
-			throw new ChangeVetoException("Image too large");
+		{
+			throw new ChangeVetoException(I18N.get(
+				"graphic.image.too.large"));
+		}
 	}
 
 	/** Check if an image color model is valid for a graphic */
@@ -90,11 +93,13 @@ public class GraphicForm extends AbstractForm {
 	{
 		ColorModel cm = im.getColorModel();
 		int bpp = cm.getPixelSize();
-		if(bpp != 1 && bpp != 24)
-			throw new ChangeVetoException("Must have 1 or 24 bpp");
+		if(bpp != 1 && bpp != 24) {
+			throw new ChangeVetoException(I18N.get(
+				"graphic.image.wrong.bpp"));
+		}
 		if(cm.hasAlpha()) {
-			throw new ChangeVetoException(
-				"Image must not contain transparency");
+			throw new ChangeVetoException(I18N.get(
+				"graphic.image.no.transparency"));
 		}
 	}
 
@@ -215,7 +220,7 @@ public class GraphicForm extends AbstractForm {
 			if(GraphicHelper.lookup(n) == null)
 				return n;
 		}
-		throw new ChangeVetoException("Too many graphics");
+		throw new ChangeVetoException(I18N.get("graphic.too.many"));
 	}
 
 	/** Get the next available graphic number */
@@ -233,7 +238,7 @@ public class GraphicForm extends AbstractForm {
 			if(!gnums.contains(i))
 				return i;
 		}
-		throw new ChangeVetoException("Too many graphic numbers");
+		throw new ChangeVetoException(I18N.get("graphic.too.many"));
 	}
 
 	/** Create a raster graphic from a buffered image */
@@ -246,7 +251,8 @@ public class GraphicForm extends AbstractForm {
 		case 24:
 			return createPixmap(im);
 		default:
-			throw new ChangeVetoException("Invalid bpp");
+			throw new ChangeVetoException(I18N.get(
+				"graphic.image.wrong.bpp"));
 		}
 	}
 
