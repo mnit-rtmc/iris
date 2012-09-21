@@ -41,13 +41,6 @@ public class IrisProvider implements AuthProvider {
 	/** Number of bits for key (encoded as 44 chars in Base64) */
 	static private final int KEY_BITS = 256;
 
-	/** Calculate the length of a number of bits encoded in Base64 */
-	static private int b64len(int n_bits) {
-		int n_bytes = (n_bits + 7) / 8;
-		int n_chunks = (n_bytes + 2) / 3;
-		return n_chunks * 4;
-	}
-
 	/** Check if a string blank or null */
 	static private boolean isBlank(String dn) {
 		return dn == null || dn.isEmpty();
@@ -100,8 +93,8 @@ public class IrisProvider implements AuthProvider {
 		InvalidKeySpecException
 	{
 		String stored = user.getPassword();
-		int s_len = b64len(SALT_BITS);
-		int k_len = b64len(KEY_BITS);
+		int s_len = Base64.numCharacters(SALT_BITS);
+		int k_len = Base64.numCharacters(KEY_BITS);
 		if(stored.length() == s_len + k_len) {
 			String s = stored.substring(0, s_len);
 			String p = stored.substring(s_len);

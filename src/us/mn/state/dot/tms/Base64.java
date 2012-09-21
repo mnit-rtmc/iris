@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,5 +152,14 @@ public class Base64 {
 			bos.write(c, 0, c.length);
 		}
 		return bos.toByteArray();
+	}
+
+	/** Calculate the number of characters needed to encode data.
+	 * @param n_bits Number of bits to encode.
+	 * @return Number of characters for Base64 encoding. */
+	static public int numCharacters(int n_bits) {
+		int n_bytes = (n_bits + 7) / 8;
+		int n_chunks = (n_bytes + 2) / 3;
+		return n_chunks * 4;
 	}
 }
