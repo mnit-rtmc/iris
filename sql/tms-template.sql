@@ -32,7 +32,7 @@ CREATE TABLE iris.role (
 CREATE TABLE iris.i_user (
 	name VARCHAR(15) PRIMARY KEY,
 	full_name VARCHAR(31) NOT NULL,
-	pwd_hash VARCHAR(64) NOT NULL,
+	password VARCHAR(64) NOT NULL,
 	dn VARCHAR(64) NOT NULL,
 	role VARCHAR(15) REFERENCES iris.role,
 	enabled BOOLEAN NOT NULL

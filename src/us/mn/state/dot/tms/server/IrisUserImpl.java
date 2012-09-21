@@ -39,14 +39,14 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		throws TMSException
 	{
 		store = c;
-		store.query("SELECT name, full_name, pwd_hash, dn, role, "+
+		store.query("SELECT name, full_name, password, dn, role, "+
 			"enabled FROM iris.i_user;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				ns.addObject(new IrisUserImpl(ns,
 					row.getString(1),	// name
 					row.getString(2),	// full_name
-					row.getString(3),	// pwd_hash
+					row.getString(3),	// password 
 					row.getString(4),	// dn
 					row.getString(5),	// role
 					row.getBoolean(6)	// enabled
@@ -60,7 +60,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("full_name", fullName);
-		map.put("pwd_hash", passwordHash);
+		map.put("password", password);
 		map.put("dn", dn);
 		map.put("role", role);
 		map.put("enabled", enabled);
@@ -82,7 +82,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		super(n);
 		// FIXME: validate for SQL injections
 		fullName = "";
-		passwordHash = "";
+		password = "";
 		dn = "";
 		role = null;
 		enabled = false;
@@ -90,19 +90,19 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Create an IRIS user from database lookup */
 	protected IrisUserImpl(ServerNamespace ns, String n, String fn,
-		String ph, String d, String r, boolean e) throws TMSException
+		String pwd, String d, String r, boolean e) throws TMSException
 	{
-		this(n, fn, ph, d,
+		this(n, fn, pwd, d,
 		     (IrisRoleImpl)ns.lookupObject(Role.SONAR_TYPE,r), e);
 	}
 
 	/** Create an IRIS user from database lookup */
-	protected IrisUserImpl(String n, String fn, String ph, String d,
+	protected IrisUserImpl(String n, String fn, String pwd, String d,
 		IrisRoleImpl r, boolean e)
 	{
 		super(n);
 		fullName = fn;
-		passwordHash = ph;
+		password = pwd;
 		dn = d;
 		role = r;
 		enabled = e;
@@ -142,15 +142,13 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	{
 		String ph = MainServer.auth_provider.createHash(
 			pwd.toCharArray());
-		store.update(this, "pwd_hash", ph);
+		store.update(this, "password", ph);
 		setPassword(pwd);
-		notifyAttribute("passwordHash");
 	}
 
-	/** Notify SONAR clients of a change to an attribute */
-	private void notifyAttribute(String aname) {
-		if(MainServer.server != null)
-			MainServer.server.setAttribute(this, aname);
+	/** Get the password */
+	public String getPassword() {
+		return password;
 	}
 
 	/** Set the LDAP distinguished name */

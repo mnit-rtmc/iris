@@ -86,7 +86,8 @@ public class IrisProvider implements AuthProvider {
 	public boolean authenticate(UserImpl user, char[] pwd) {
 		try {
 			return isBlank(user.getDn()) &&
-			       check(pwd, user.getPasswordHash());
+			       user instanceof IrisUserImpl &&
+			       check((IrisUserImpl)user, pwd);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -95,9 +96,10 @@ public class IrisProvider implements AuthProvider {
 	}
 
 	/** Check a password against a stored hash */
-	private boolean check(char[] pwd, String stored) throws IOException,
+	private boolean check(IrisUserImpl user, char[] pwd) throws IOException,
 		InvalidKeySpecException
 	{
+		String stored = user.getPassword();
 		int s_len = b64len(SALT_BITS);
 		int k_len = b64len(KEY_BITS);
 		if(stored.length() == s_len + k_len) {
