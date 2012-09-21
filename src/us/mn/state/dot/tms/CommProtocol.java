@@ -102,7 +102,10 @@ public enum CommProtocol {
 	URMS("URMS"),
 
 	/** Digital Loggers Inc DIN Relay (25) */
-	DIN_RELAY("DLI DIN Relay");
+	DIN_RELAY("DLI DIN Relay"),
+
+	/** Axis 292 Video Decoder (26) */
+	AXIS_292("Axis 292");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

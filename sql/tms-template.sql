@@ -1275,6 +1275,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 23	CHP Incidents
 24	URMS
 25	DLI DIN Relay
+26	Axis 292
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;

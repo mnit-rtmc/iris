@@ -8,3 +8,5 @@ UPDATE iris.system_attribute SET value = '3.150.0'
 ALTER TABLE iris.i_user ADD COLUMN password VARCHAR(64);
 UPDATE iris.i_user SET password = '';
 ALTER TABLE iris.i_user ALTER COLUMN password SET NOT NULL;
+
+INSERT INTO iris.comm_protocol (id, description) VALUES (26, 'Axis 292');
