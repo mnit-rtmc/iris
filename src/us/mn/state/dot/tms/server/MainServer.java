@@ -66,6 +66,9 @@ public class MainServer {
 	/** SONAR server */
 	static public Server server;
 
+	/** Authentication provider */
+	static public IrisProvider auth_provider;
+
 	/** SQL connection */
 	static protected SQLConnection store;
 
@@ -96,6 +99,8 @@ public class MainServer {
 			scheduleTimerJobs();
 			scheduleFlushJobs();
 			server = new Server(ns, props, new AccessLogger());
+			auth_provider = new IrisProvider();
+			server.addProvider(auth_provider);
 			System.err.println("IRIS Server active");
 			server.join();
 		}

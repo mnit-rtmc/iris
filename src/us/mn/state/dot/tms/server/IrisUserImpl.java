@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.security.spec.InvalidKeySpecException;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,16 +39,17 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		throws TMSException
 	{
 		store = c;
-		store.query("SELECT name, full_name, dn, role, enabled FROM " +
-			"iris.i_user;", new ResultFactory()
+		store.query("SELECT name, full_name, pwd_hash, dn, role, "+
+			"enabled FROM iris.i_user;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				ns.addObject(new IrisUserImpl(ns,
 					row.getString(1),	// name
 					row.getString(2),	// full_name
-					row.getString(3),	// dn
-					row.getString(4),	// role
-					row.getBoolean(5)	// enabled
+					row.getString(3),	// pwd_hash
+					row.getString(4),	// dn
+					row.getString(5),	// role
+					row.getBoolean(6)	// enabled
 				));
 			}
 		});
@@ -58,6 +60,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("full_name", fullName);
+		map.put("pwd_hash", passwordHash);
 		map.put("dn", dn);
 		map.put("role", role);
 		map.put("enabled", enabled);
@@ -79,6 +82,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		super(n);
 		// FIXME: validate for SQL injections
 		fullName = "";
+		passwordHash = "";
 		dn = "";
 		role = null;
 		enabled = false;
@@ -86,18 +90,19 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Create an IRIS user from database lookup */
 	protected IrisUserImpl(ServerNamespace ns, String n, String fn,
-		String d, String r, boolean e) throws TMSException
+		String ph, String d, String r, boolean e) throws TMSException
 	{
-		this(n, fn, d, (IrisRoleImpl)ns.lookupObject(Role.SONAR_TYPE,r),
-		     e);
+		this(n, fn, ph, d,
+		     (IrisRoleImpl)ns.lookupObject(Role.SONAR_TYPE,r), e);
 	}
 
 	/** Create an IRIS user from database lookup */
-	protected IrisUserImpl(String n, String fn, String d, IrisRoleImpl r,
-		boolean e)
+	protected IrisUserImpl(String n, String fn, String ph, String d,
+		IrisRoleImpl r, boolean e)
 	{
 		super(n);
 		fullName = fn;
+		passwordHash = ph;
 		dn = d;
 		role = r;
 		enabled = e;
@@ -129,6 +134,23 @@ public class IrisUserImpl extends UserImpl implements Storable {
 			return;
 		store.update(this, "full_name", n);
 		super.setFullName(n);
+	}
+
+	/** Set the password */
+	public void doSetPassword(String pwd) throws TMSException,
+		InvalidKeySpecException
+	{
+		String ph = MainServer.auth_provider.createHash(
+			pwd.toCharArray());
+		store.update(this, "pwd_hash", ph);
+		setPassword(pwd);
+		notifyAttribute("passwordHash");
+	}
+
+	/** Notify SONAR clients of a change to an attribute */
+	private void notifyAttribute(String aname) {
+		if(MainServer.server != null)
+			MainServer.server.setAttribute(this, aname);
 	}
 
 	/** Set the LDAP distinguished name */
