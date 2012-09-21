@@ -42,6 +42,13 @@ public class SessionMenu extends JMenu {
 		}
 	};
 
+	/** Change password action */
+	private final IAction pwd_change = new IAction("user.password.change") {
+		protected void do_perform() throws Exception {
+			client.changePassword();
+		}
+	};
+
 	/** IRIS client */
 	private final IrisClient client;
 	
@@ -52,6 +59,8 @@ public class SessionMenu extends JMenu {
 		log_out.setEnabled(false);
 		add(new JMenuItem(log_in));
 		add(new JMenuItem(log_out));
+		add(new JSeparator());
+		add(new JMenuItem(pwd_change));
 		add(new JSeparator());
 		add(new JMenuItem(new IAction("session.exit") {
 			protected void do_perform() throws Exception {
@@ -64,5 +73,6 @@ public class SessionMenu extends JMenu {
 	public void setLoggedIn(boolean in) {
 		log_in.setEnabled(!in);
 		log_out.setEnabled(in);
+		pwd_change.setEnabled(in);
 	}
 }
