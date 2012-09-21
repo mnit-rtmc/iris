@@ -56,7 +56,7 @@ public class SessionMenu extends JMenu {
 	public SessionMenu(final IrisClient ic) {
 		super(I18N.get("session"));
 		client = ic;
-		log_out.setEnabled(false);
+		setLoggedIn(false);
 		add(new JMenuItem(log_in));
 		add(new JMenuItem(log_out));
 		add(new JSeparator());

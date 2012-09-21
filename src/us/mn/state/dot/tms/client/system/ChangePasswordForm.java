@@ -33,13 +33,13 @@ import us.mn.state.dot.tms.utils.I18N;
 public class ChangePasswordForm extends AbstractForm {
 
 	/** Old password entry component */
-	private final JPasswordField o_pwd_txt = new JPasswordField();
+	private final JPasswordField o_pwd_txt = new JPasswordField(16);
 
 	/** New password entry component */
-	private final JPasswordField n_pwd_txt = new JPasswordField();
+	private final JPasswordField n_pwd_txt = new JPasswordField(16);
 
 	/** Verify password entry component */
-	private final JPasswordField v_pwd_txt = new JPasswordField();
+	private final JPasswordField v_pwd_txt = new JPasswordField(16);
 
 	/** Password change action */
 	private final IAction change = new IAction("user.password.change") {

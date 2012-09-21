@@ -37,7 +37,7 @@ public class LoginForm extends AbstractForm {
 	protected final JTextField user_txt = new JTextField(12);
 
 	/** Password entry component */
-	protected final JPasswordField passwd_txt = new JPasswordField();
+	private final JPasswordField passwd_txt = new JPasswordField(16);
 
 	/** Log in action */
 	private final IAction login = new IAction("connection.login") {
