@@ -143,7 +143,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		String ph = MainServer.auth_provider.createHash(
 			pwd.toCharArray());
 		store.update(this, "password", ph);
-		setPassword(pwd);
+		setPassword(ph);
 	}
 
 	/** Get the password */
