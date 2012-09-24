@@ -23,7 +23,7 @@
     <h3><a href="#operating_system">Operating System</a></h3>
     <h3><a href="#install_dependencies">Install Dependencies</a></h3>
     <h3><a href="#install_iris">Install IRIS</a></h3>
-    <h3><a href="#authentication_setup">Authentication Setup</a></h3>
+    <h3><a href="#server_properties">Server Properties</a></h3>
     <h3><a href="#database_setup">Database Setup</a></h3>
     <h3><a href="#service_configuration">Service Configuration</a></h3>
     <h3><a href="#start_services">Start Services</a></h3>
@@ -85,7 +85,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">23 August 2012</div>
+<div id="stamp">24 September 2012</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -316,45 +316,64 @@
 </p>
 <pre class="code">service iris init</pre>
 
-<h3 id="authentication_setup">Authentication Setup</h3>
+<h3 id="server_properties">Server Properties</h3>
 <p>
-	Setup an LDAP server for user authentication.
+	The IRIS server has a configuration file which controls some of its
+	basic settings &mdash; <i>/etc/iris/iris-server.properties</i>.
+	The file can be changed using a text editor.
+</p>
+<h4>Internationalization</h4>
+<p>
+	There are three properties which control internationalization (i18n).
+	They are <i>language</i>, <i>country</i> and <i>variant</i>.
+	These should only be changed if the IRIS software has been localized
+	for a specific locale.
+</p>
+<h4 id="district">District</h4>
+<p>
+	This property is used when multiple IRIS servers are running within the
+	same organization.
+</p>
+<h4>HTTP Proxy</h4>
+<p>
+	These properties can be used when IRIS must connect to HTTP servers
+	using a proxy server, due to organization firewall policies.
+</p>
+<h4 id="db_connection">Database Connection</h4>
+<p>
+	The <i>db.url</i>, <i>db.user</i> and <i>db.password</i> properties
+	control how the IRIS server connects to the PostgreSQL database.
+	The first two should not need to be changed, but a good password must
+	be selected and configured here.
+</p>
+<h4>SONAR Configuration</h4>
+<p>
+	The <i>sonar.ldap.urls</i> property can be used to let IRIS pass user
+	authentication requests to one or more LDAP servers.
+	Multiple URLs must be separated by a space.
+	IRIS can manage user accounts and passwords without an LDAP server, but
+	this feature allows operators to log into IRIS without requiring them to
+	remember an additional user name and password.
 	If your organization already has an LDAP server, such as Active
 	Directory, you should use that.
-	This will allow operators to log into IRIS without requiring them to
-	remember an additional user name and password.
-	Otherwise, you can install and configure
-	<a href="http://www.openldap.org">OpenLDAP</a>.
-	For testing, IRIS also has an option to bypass all authentication
-	(no LDAP server required).
 </p>
 <p>
-	IRIS can also be configured to use multiple LDAP servers at once.
-	When a user attempts to log in, each defined LDAP server will be
-	checked, in order, until authentication succeeds.
-	If authentication fails on all LDAP servers, then login will fail.
-</p>
-<p>
-	Using a text editor, open the <i>/etc/iris/iris-server.properties</i>
-	file.
-	Locate the line which starts with <i>sonar.ldap.urls</i>.
-	Change the value of this property to the URL(s) of your LDAP server(s).
-	Multiple URLs must be separated by a space.
 	The URL protocol is normally <i>ldap:</i>, but must be <i>ldaps:</i>
 	for encrypted communication over SSL.
-	For testing and debugging only, the <i>sonar.ldap.urls</i> property
-	may be set to bypass_authentication.
-	This allows anyone to connect to the IRIS server without a password.
-	WARNING: Do not use this option on a production system.
-</p>
-<p>
-	(Optional)
-	If your LDAP server is configured to use SSL for authentication, then
-	you must import the certificate into the IRIS keystore.
-	Once you have obtained the SSL certificate, save it as <i>ldap.cert</i>.
+	To use ldaps, you must first import the SSL certificate into the IRIS
+	keystore.
+	Once you have obtained the SSL certificate for the LDAP server, save it
+	as <i>ldap.cert</i>.
 	Now you can import it with the following command (as root):
 </p>
 <pre class="code">keytool -import -alias ldap-cert -keystore /etc/iris/iris-server.keystore -file ldap.cert</pre>
+<p>
+	The <i>keystore.password</i> is used for accessing keys in
+	<i>/etc/iris/iris-server.keystore</i>.
+	This password is automatically generated when the IRIS service is
+	initialized (earlier step).
+	It will not need to be changed.
+</p>
 
 <h3 id="database_setup">Database Setup</h3>
 <p>
@@ -395,11 +414,8 @@ createuser -S -D -R -W tms
 exit</pre>
 <p>
 	You will be prompted for a password when running createuser.
-	This same password must also be entered in the
-	<i>/etc/iris/iris-server.properties</i> file.
-	Open the file in a text editor and locate the line starting with
-	#db.password.
-	Remove the <i>#</i> and change the password to match.
+	The password must match the <a href="#db_connection">db.password</a>
+	server property.
 </p>
 <p>
 	A database template must now be loaded with all the table definitions
@@ -1562,9 +1578,9 @@ FIXME
 	</tr>
 	<tr>
 	    <td>tms_config.xml.gz</td>
-	    <td>Configuration data for IRIS system.  If the district property
-	        is changed in /etc/iris/iris-server.properties, the filename
-	        will be changed to match {district}_config.xml.gz.</td>
+	    <td>Configuration data for IRIS system.  If the
+		<a href="#district">district</a> server property is changed, the
+		filename will be changed to match {district}_config.xml.gz.</td>
 	    <td>24 hours</td>
 	</tr>
 	<tr>
