@@ -156,12 +156,13 @@
         <tspan x="40" y="60">IRIS Server</tspan>
       </text>
     </g>
-    <g transform="translate(464,208)">
-      <rect x="0" y="0" width="160" height="88" ry="8"
+    <g transform="translate(464,188)">
+      <rect x="0" y="0" width="160" height="108" ry="8"
         style="fill:#d0ffc4;stroke:#000;stroke-width:2"/>
       <text>
         <tspan x="16" y="40">Authentication</tspan>
         <tspan x="16" y="60">Server (LDAP)</tspan>
+        <tspan x="32" y="80" style="font-style:italic">(Optional)</tspan>
       </text>
     </g>
     <g transform="translate(96,360)">
@@ -208,9 +209,9 @@
 	web server, using Java Web Start.
 	All communication between the server and clients is encrypted using
 	secure socket layer (SSL).
-	The server passes authentication requests off to an external LDAP
-	server, allowing IRIS to integrate into an existing authentication
-	system.
+	The server may be configured to pass authentication requests off to an
+	external LDAP server, allowing IRIS to integrate into an existing
+	authentication system.
 </p>
 
 <h3 id="device_types">Device Types</h3>
@@ -321,7 +322,8 @@
 <p>
 	The IRIS server has a configuration file which controls some of its
 	basic settings &mdash; <i>/etc/iris/iris-server.properties</i>.
-	The file can be changed using a text editor.
+	The file can be modified using a text editor, such as <i>gedit</i> or
+	<i>vi</i>.
 </p>
 <h4>Internationalization</h4>
 <p>
