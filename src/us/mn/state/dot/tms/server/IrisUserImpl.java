@@ -18,6 +18,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
@@ -140,10 +141,25 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	public void doSetPassword(String pwd) throws TMSException,
 		InvalidKeySpecException
 	{
+		checkPassword(pwd);
 		String ph = MainServer.auth_provider.createHash(
 			pwd.toCharArray());
 		store.update(this, "password", ph);
 		setPassword(ph);
+	}
+
+	/** Check a password */
+	private void checkPassword(String pwd) throws ChangeVetoException {
+		if(pwd.length() < 6) {
+			throw new ChangeVetoException(
+				"Password must be at least 6 characters");
+		}
+		if(name.equalsIgnoreCase(pwd)) {
+			throw new ChangeVetoException(
+				"Password must be different than user name");
+		}
+		if("password".equalsIgnoreCase(pwd))
+			throw new ChangeVetoException("Not funny. Try again.");
 	}
 
 	/** Get the password */
