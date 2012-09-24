@@ -106,7 +106,7 @@ public class MessagesTab extends JPanel {
 
 	/** AWS controlled check box */
 	private final JCheckBox aws_control_chk = new JCheckBox(
-		new IAction("device.style.aws_controlled")
+		new IAction("device.style.aws.controlled")
 	{
 		protected void do_perform() {
 			proxy.setAwsControlled(aws_control_chk.isSelected());
