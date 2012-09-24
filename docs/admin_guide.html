@@ -27,6 +27,7 @@
     <h3><a href="#database_setup">Database Setup</a></h3>
     <h3><a href="#service_configuration">Service Configuration</a></h3>
     <h3><a href="#start_services">Start Services</a></h3>
+    <h3><a href="#initial_login">Initial Login</a></h3>
   </div>
   <h2><a id="basic_setup_link" href="#basic_setup">Basic Setup</a></h2>
   <div id="basic_setup_div">
@@ -346,7 +347,7 @@
 	The first two should not need to be changed, but a good password must
 	be selected and configured here.
 </p>
-<h4>SONAR Configuration</h4>
+<h4 id="sonar_config">SONAR Configuration</h4>
 <p>
 	The <i>sonar.ldap.urls</i> property can be used to let IRIS pass user
 	authentication requests to one or more LDAP servers.
@@ -427,20 +428,6 @@ exit</pre>
 createdb tms
 psql tms -f /var/lib/iris/sql/tms-template.sql
 exit</pre>
-<p>
-	A valid LDAP user must be added to the database to allow an initial
-	administrator login.
-	Run the following commands, replacing the bold values with the user's
-	information:
-</p>
-<pre class="code">su tms
-psql tms
-INSERT INTO iris.i_user (name, full_name, dn, role, enabled)
-	VALUES('<b>name</b>', '<b>full_name</b>', '<b>dn</b>',
-	'administrator', true);
-\q
-exit
-</pre>
 
 <h3 id="service_configuration">Service Configuration</h3>
 <p>
@@ -463,11 +450,19 @@ service iris start</pre>
 	Check that everything started OK:
 </p>
 <pre class="code">tail -f -n 40 /var/log/iris/iris.stderr</pre>
+
+<h3 id="initial_login">Initial Login</h3>
 <p>
 	From a client computer with Java installed, point your web browser at
 	http://YOUR_SERVER_NAME/iris-client/.
 	From there, you should be able to launch the IRIS client Web Start
 	application and log in.
+</p>
+<p>
+	Enter "admin" as the username and "atms_242" as the password for the
+	initial login.
+	After <a href="#users_and_roles">creating</a> and logging in with a
+	real administrator account, the "admin" user account should be disabled.
 </p>
 
 <h2 id="basic_setup">Basic Setup</h2>
@@ -495,10 +490,13 @@ service iris start</pre>
 
 <h3 id="users_and_roles">Users and Roles</h3>
 <p>
-	When a user logs into the IRIS system, the login credentials are
-	first checked against an LDAP server for authentication.
-	The user must have an enabled account, and be assigned to an
-	enabled <b>role</b> for a log in to succeed.
+	When a user logs into the IRIS system, the user is checked for validity.
+	The user account must be enabled, and be assigned to an enabled
+	<b>role</b> for a log in to succeed.
+	If the user has a "distinguished name" (dn), then authentication is
+	performed using <a href="#sonar_config">LDAP</a>.
+	Otherwise, IRIS checks the password against the stored password hash
+	for that user account.
 	Select the <span class="menu">View ➔ System ➔ Users and Roles</span>
 	menu item to display the <b>Users and Roles</b> form.
 </p>

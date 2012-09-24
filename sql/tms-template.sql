@@ -1670,6 +1670,10 @@ operator	plan_tab
 operator	detection
 \.
 
+COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
+admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=		administrator	t
+\.
+
 SET search_path = event, public, pg_catalog;
 
 CREATE SEQUENCE event.event_id_seq;
