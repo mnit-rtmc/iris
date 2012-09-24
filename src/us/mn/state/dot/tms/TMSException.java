@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ public class TMSException extends Exception {
 	 */
 	public void printStackTrace(PrintStream ps) {
 		synchronized(ps) {
+			ps.println("TMSException:");
 			if(stack_trace != null) {
 				ps.println(this);
 				ps.print(stack_trace);
@@ -70,6 +71,7 @@ public class TMSException extends Exception {
 	 */
 	public void printStackTrace(PrintWriter pw) {
 		synchronized(pw) {
+			pw.println("TMSException:");
 			if(stack_trace != null) {
 				pw.println(this);
 				pw.print(stack_trace);
