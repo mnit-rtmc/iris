@@ -37,7 +37,7 @@ URL:		@@RPM.URL@@
 Buildroot:	%{buildroot}
 Vendor:		@@RPM.PACKAGER@@
 Packager:	@@RPM.PACKAGER@@
-Requires:	java-1.6.0-openjdk, postgresql-server, httpd
+Requires:	java-1.7.0-openjdk, postgresql-server, httpd
 
 %Description
 @@RPM.DESCRIPTION@@
