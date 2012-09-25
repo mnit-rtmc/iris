@@ -55,7 +55,8 @@ public enum DeviceStyle {
 
 	/** Get a string representation of the device style */
 	public String toString() {
-		return I18N.get("device.style." + name().toLowerCase());
+		return I18N.get("device.style." +
+			name().toLowerCase().replace('_', '.'));
 	}
 
 	/** Hash map of all styles */
