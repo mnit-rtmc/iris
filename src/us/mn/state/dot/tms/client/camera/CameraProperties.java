@@ -108,7 +108,6 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		updateAttribute(null);
 		if(canUpdate())
 			createJobs();
-		controller.setEnabled(true);
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -131,9 +130,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Controller lookup button pressed */
 	protected void controllerPressed() {
 		Controller c = proxy.getController();
-		if(c == null)
-			controller.setEnabled(false);
-		else {
+		if(c != null) {
 			session.getDesktop().show(
 				new ControllerForm(session, c));
 		}
@@ -173,6 +170,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
+		if(a == null || a.equals("controller"))
+			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("encoder"))
