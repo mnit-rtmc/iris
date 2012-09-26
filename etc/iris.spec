@@ -93,6 +93,7 @@ fi
 # /usr/bin
 %defattr(0755,root,root)
 /usr/bin/iris_service
+/usr/bin/iris_ctl
 
 # /etc/rc.d/init.d
 %defattr(0755,root,root)

@@ -1,0 +1,90 @@
+#!/bin/bash
+#
+# /usr/bin/iris_ctl -- Script for initializing and updating IRIS
+#
+# Copyright (C) 2012  Minnesota Department of Transportation
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+function check_initialized() {
+	if [ -r /etc/iris/iris-server.keystore ]
+	then
+		echo "/etc/iris/iris-server.keystore already exists."
+		exit 1
+	fi
+	if [ -r /etc/iris/iris-client.keystore ]
+	then
+		echo "/etc/iris/iris-client.keystore already exists."
+		exit 1
+	fi
+	return 0
+}
+
+function update_client_properties() {
+	echo "Updating client properties"
+	host=`hostname -f`
+	p_client=/etc/iris/iris-client.properties
+	sed -i ''s,.*keystore.file=.*,keystore.file=http://$host/iris-client/iris-client.keystore,'' $p_client
+	sed -i ''s,.*sonar.host=.*,sonar.host=$host,'' $p_client
+}
+
+function create_keystores() {
+	echo "Creating IRIS keystores"
+	k_pws=`head -c8 < /dev/random | base64`
+	k_pwc=`head -c8 < /dev/random | base64`
+	k_opts="-noprompt -alias iris-sonar"
+	k_cert=/etc/iris/iris-sonar-public.cert
+	k_server=/etc/iris/iris-server.keystore
+	k_client=/etc/iris/iris-client.keystore
+	k_sopts="$k_opts -keystore $k_server -storepass $k_pws -keypass $k_pws"
+	k_copts="$k_opts -keystore $k_client -storepass $k_pwc -keypass $k_pwc"
+	d_name="CN=iris_ctl, OU=RTMC, O=MnDOT, L=Roseville, ST=MN, C=US"
+	umask 0037
+	keytool $k_sopts -genkeypair -dname "$d_name"
+	keytool $k_sopts -export -file $k_cert
+	keytool $k_copts -import -file $k_cert
+	chown tms.tms $k_server $k_cert $k_client
+	p_server=/etc/iris/iris-server.properties
+	p_client=/etc/iris/iris-client.properties
+	sed_s="s:.*keystore.password=.*:keystore.password=$k_pws:"
+	sed_c="s:.*keystore.password=.*:keystore.password=$k_pwc:"
+	sed -i ''$sed_s'' $p_server
+	sed -i ''$sed_c'' $p_client
+}
+
+function create_links() {
+	echo "Creating IRIS links for verion @@VERSION@@"
+	host=`hostname -f`
+	ln -snf /usr/share/java/iris-server-@@VERSION@@ /usr/share/java/iris-server
+	ln -snf /var/www/html/iris-client-@@VERSION@@ /var/www/html/iris-client
+	sed -i ''s,@@WEBSTART.HOST@@,$host,'' /var/www/html/iris-client/*.jnlp
+}
+
+function update_database() {
+	echo
+	# FIXME: run required SQL migrate scripts
+}
+
+case "$1" in
+	init)
+		check_initialized
+		update_client_properties
+		create_keystores
+		create_links
+		;;
+	update)
+		create_links
+		update_database
+		;;
+	*)
+		echo $"Usage: $0 {init|update}"
+		exit 1
+esac

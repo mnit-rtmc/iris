@@ -401,8 +401,10 @@
 
 		<copy todir="${install.dir}/usr/bin">
 			<fileset file="${build.bin}/iris_service"/>
+			<fileset file="${build.bin}/iris_ctl"/>
 		</copy>
 		<chmod file="${install.dir}/usr/bin/iris_service" perm="755"/>
+		<chmod file="${install.dir}/usr/bin/iris_ctl" perm="755"/>
 
 		<mkdir dir="${install.dir}/var/lib/iris/sql"/>
 		<copy todir="${install.dir}/var/lib/iris/sql">

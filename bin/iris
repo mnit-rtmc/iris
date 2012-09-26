@@ -25,47 +25,6 @@ else
 	SU=su
 fi
 
-function create_keystores() {
-	echo "Creating IRIS keystores"
-	echo
-	echo "Distinguished Name needed for self-signed certificate:"
-	k_pws=`head -c8 < /dev/random | base64`
-	k_pwc=`head -c8 < /dev/random | base64`
-	k_opts="-noprompt -alias iris-sonar"
-	k_cert=/etc/iris/iris-sonar-public.cert
-	k_server=/etc/iris/iris-server.keystore
-	k_client=/etc/iris/iris-client.keystore
-	k_sopts="$k_opts -keystore $k_server -storepass $k_pws -keypass $k_pws"
-	k_copts="$k_opts -keystore $k_client -storepass $k_pwc -keypass $k_pwc"
-	umask 0037
-	keytool $k_sopts -genkeypair
-	keytool $k_sopts -export -file $k_cert
-	keytool $k_copts -import -file $k_cert
-	chown tms.tms $k_server $k_cert $k_client
-	p_server=/etc/iris/iris-server.properties
-	p_client=/etc/iris/iris-client.properties
-	sed_s="s:.*keystore.password=.*:keystore.password=$k_pws:"
-	sed_c="s:.*keystore.password=.*:keystore.password=$k_pwc:"
-	sed -i ''$sed_s'' $p_server
-	sed -i ''$sed_c'' $p_client
-}
-
-function update_hostname() {
-	host=`hostname -f`
-	p_client=/etc/iris/iris-client.properties
-	sed -i ''s,.*keystore.file=.*,keystore.file=http://$host/iris-client/iris-client.keystore,'' $p_client
-	sed -i ''s,.*sonar.host=.*,sonar.host=$host,'' $p_client
-}
-
-function create_links() {
-	host=`hostname -f`
-	version=`ls -d -1 /usr/share/java/iris-server-* | head -n 1 | cut -f 3 -d-`
-	echo "Creating IRIS links for verion $version"
-	ln -snf /usr/share/java/iris-server-$version /usr/share/java/iris-server
-	ln -snf /var/www/html/iris-client-$version /var/www/html/iris-client
-	sed -i ''s,@@WEBSTART.HOST@@,$host,'' /var/www/html/iris-client/*.jnlp
-}
-
 function start() {
 	pid=`pidof -s $PROG`
 	if [ $pid ]
@@ -75,7 +34,7 @@ function start() {
 		check_initialized
 		if [ "$?" != "0" ]
 		then
-			echo "Have you tried 'service iris init'?"
+			echo "Have you tried 'iris_ctl init'?"
 			exit 1
 		fi
 		prepare_client
@@ -121,14 +80,6 @@ function clean_client() {
 }
 
 case "$1" in
-	init)
-		create_keystores
-		update_hostname
-		create_links
-		;;
-	links)
-		create_links
-		;;
 	start)
 		start
 		;;
@@ -145,7 +96,7 @@ case "$1" in
 		RETVAL=$?
 		;;
 	*)
-		echo $"Usage: $0 {init|links|start|stop|restart|status}"
+		echo $"Usage: $0 {start|stop|restart|status}"
 		RETVAL=1
 esac
 
