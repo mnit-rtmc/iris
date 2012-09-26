@@ -24,7 +24,6 @@
     <h3><a href="#install_dependencies">Install Dependencies</a></h3>
     <h3><a href="#install_iris">Install IRIS</a></h3>
     <h3><a href="#server_properties">Server Properties</a></h3>
-    <h3><a href="#database_setup">Database Setup</a></h3>
     <h3><a href="#service_configuration">Service Configuration</a></h3>
     <h3><a href="#start_services">Start Services</a></h3>
     <h3><a href="#initial_login">Initial Login</a></h3>
@@ -336,12 +335,15 @@
 		available to the IRIS server.
 	</li>
 	<li>
-		Create the database cluster and start the PostgreSQL server
-		(using systemd).
+		Create the database cluster and start the PostgreSQL server.
 	</li>
 	<li>
 		Create the "tms" PostgreSQL user, which IRIS uses to connect
 		to the database.
+	</li>
+	<li>
+		Create the "tms" database and populate it using a template
+		SQL script.
 	</li>
 	<li>
 		Configure the apache (httpd) and IRIS services to start
@@ -351,6 +353,10 @@
 		Create symbolic links to the current IRIS software version.
 	</li>
 </ol>
+<p>
+	The command should finish with the following message:
+</p>
+<pre>Successfully initialized the IRIS server</pre>
 
 <h3 id="server_properties">Server Properties</h3>
 <p>
@@ -413,18 +419,6 @@
 	script.
 	It will not need to be changed.
 </p>
-
-<h3 id="database_setup">Database Setup</h3>
-<p>
-	A database template must now be loaded with all the table definitions
-	that IRIS needs.
-	The following commands will create the <i>tms</i> database and
-	populate it with the template:
-</p>
-<pre class="code">su postgres
-createdb tms
-psql tms -f /var/lib/iris/sql/tms-template.sql
-exit</pre>
 
 <h3 id="service_configuration">Service Configuration</h3>
 <p>

@@ -73,7 +73,7 @@ function init_db() {
 	echo $pg_pwd > $pwd_file
 	echo "*:*:*:postgres:$pg_pwd" >> $pwd_file
 	chown postgres.postgres $pwd_file
-	su postgres -c "initdb -A password --pwfile $pwd_file"
+	su postgres -l -c "initdb -A password --pwfile $pwd_file"
 	systemctl enable postgresql.service
 	systemctl start postgresql.service
 }
@@ -88,10 +88,22 @@ function create_tms_user() {
 	su postgres -l -c "$create_user"
 }
 
+function create_database() {
+	echo "Creating tms database"
+	create_db="createdb tms; psql tms -f /var/lib/iris/sql/tms-template.sql"
+	su postgres -l -c "$create_db"
+}
+
 function configure_services() {
 	echo "Configuring services"
 	systemctl enable httpd.service
 	systemctl start httpd.service
+}
+
+function echo_success() {
+	echo
+	echo "Successfully initialized the IRIS server"
+	echo
 }
 
 function create_links() {
@@ -115,8 +127,10 @@ case "$1" in
 		install_jdbc
 		init_db
 		create_tms_user
+		create_database
 		configure_services
 		create_links
+		echo_success
 		;;
 	update)
 		create_links
