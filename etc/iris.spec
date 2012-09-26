@@ -75,11 +75,6 @@ if [ $1 == 1 ]; then
 	fi
 fi
 
-%post
-if [ $1 == 1 ]; then
-	chkconfig --add iris
-fi
-
 # All files that will be placed in the RPM are listed
 # here. This includes both the client and server
 %files
@@ -92,12 +87,11 @@ fi
 
 # /usr/bin
 %defattr(0755,root,root)
-/usr/bin/iris_service
 /usr/bin/iris_ctl
 
-# /etc/rc.d/init.d
+# /usr/lib/systemd/system
 %defattr(0755,root,root)
-/etc/rc.d/init.d/iris
+/usr/lib/systemd/system/iris.service
 
 # /usr/share/java/iris-server-x.x.x
 %dir %attr(0755,tms,tms) %{_serverdir}

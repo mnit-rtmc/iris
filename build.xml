@@ -372,39 +372,26 @@
 		</signjar>
 	</target>
 
-	<!-- Compile the service binary -->
-	<target name="compile-service"
-	        depends="prepare"
-	        description="Compile the iris_service binary">
-		<exec executable="gcc" dir="${build.bin}" failonerror="true">
-			<arg value="iris_service.c"/>
-			<arg value="-oiris_service"/>
-		</exec>
-	</target>
-
 	<!-- Install iris client and server -->
 	<target name="install"
-	        depends="dist,compile-service"
+	        depends="dist"
 	        description="Install the full iris distribution">
+
+		<copy todir="${install.dir}/usr/lib/systemd/system">
+			<fileset file="${build.bin}/iris.service"/>
+		</copy>
+		<chmod file="${install.dir}/usr/lib/systemd/system" perm="660"/>
+
+		<copy todir="${install.dir}/usr/bin">
+			<fileset file="${build.bin}/iris_ctl"/>
+		</copy>
+		<chmod file="${install.dir}/usr/bin/iris_ctl" perm="755"/>
 
 		<copy todir="${install.dir}/etc/iris">
 			<fileset file="${etc.dir}/iris-client.properties"/>
 			<fileset file="${etc.dir}/iris-server.properties"/>
 		</copy>
 		<chmod file="${install.dir}/etc/iris/*" perm="660"/>
-
-		<copy todir="${install.dir}/etc/rc.d/init.d">
-			<fileset file="${build.bin}/${name}"/>
-		</copy>
-		<chmod file="${install.dir}/etc/rc.d/init.d/${name}"
-		       perm="755"/>
-
-		<copy todir="${install.dir}/usr/bin">
-			<fileset file="${build.bin}/iris_service"/>
-			<fileset file="${build.bin}/iris_ctl"/>
-		</copy>
-		<chmod file="${install.dir}/usr/bin/iris_service" perm="755"/>
-		<chmod file="${install.dir}/usr/bin/iris_ctl" perm="755"/>
 
 		<mkdir dir="${install.dir}/var/lib/iris/sql"/>
 		<copy todir="${install.dir}/var/lib/iris/sql">
