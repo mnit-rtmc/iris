@@ -60,6 +60,40 @@ function create_keystores() {
 	sed -i ''$sed_c'' $p_client
 }
 
+function install_jdbc() { 
+	echo "Creating link to JDBC driver"
+	ln -snf /usr/share/java/postgresql-jdbc.jar /usr/lib/jvm/jre/lib/ext/
+}
+
+function init_db() {
+	echo "Initializing PostgreSQL database"
+	umask 0077
+	pwd_file=/var/lib/pgsql/.pgpass
+	pg_pwd=`head -c8 < /dev/random | base64`
+	echo $pg_pwd > $pwd_file
+	echo "*:*:*:postgres:$pg_pwd" >> $pwd_file
+	chown postgres.postgres $pwd_file
+	su postgres -c "initdb -A password --pwfile $pwd_file"
+	systemctl enable postgresql.service
+	systemctl start postgresql.service
+}
+
+function create_tms_user() {
+	echo "Creating the tms db user"
+	tms_pwd=`head -c8 < /dev/random | base64`
+	p_server=/etc/iris/iris-server.properties
+	sed_p="s:.*db.password=.*:db.password=$tms_pwd:"
+	sed -i ''$sed_p'' $p_server
+	create_user='echo "CREATE USER tms NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD '\'$tms_pwd\''" | psql'
+	su postgres -l -c "$create_user"
+}
+
+function configure_services() {
+	echo "Configuring services"
+	systemctl enable httpd.service
+	systemctl start httpd.service
+}
+
 function create_links() {
 	echo "Creating IRIS links for verion @@VERSION@@"
 	host=`hostname -f`
@@ -78,6 +112,10 @@ case "$1" in
 		check_initialized
 		update_client_properties
 		create_keystores
+		install_jdbc
+		init_db
+		create_tms_user
+		configure_services
 		create_links
 		;;
 	update)
