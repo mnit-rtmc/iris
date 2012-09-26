@@ -98,6 +98,7 @@ function configure_services() {
 	echo "Configuring services"
 	systemctl enable httpd.service
 	systemctl start httpd.service
+	systemctl enable iris.service
 }
 
 function echo_success() {

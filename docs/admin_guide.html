@@ -24,7 +24,6 @@
     <h3><a href="#install_dependencies">Install Dependencies</a></h3>
     <h3><a href="#install_iris">Install IRIS</a></h3>
     <h3><a href="#server_properties">Server Properties</a></h3>
-    <h3><a href="#service_configuration">Service Configuration</a></h3>
     <h3><a href="#start_services">Start Services</a></h3>
     <h3><a href="#initial_login">Initial Login</a></h3>
   </div>
@@ -302,11 +301,11 @@
 	<b>iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.<i>{arch}</i>.rpm</b>.
 	The <i>{major}</i>, <i>{minor}</i>, and <i>{micro}</i> version numbers
 	and the <i>{build}</i> number can change with each release.
-	The system architecture, <i>{arch}</i>, will be either <i>i386</i>
-	(32-bit) or <i>x86_64</i> (64-bit).
+	The system architecture, <i>{arch}</i>, will be <i>noarch</i>,
+	since Java is architecture independent.
 	It can be installed with the following command (as root):
 </p>
-<pre class="code">rpm -i iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.<i>{arch}</i>.rpm</pre>
+<pre class="code">rpm -i iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm</pre>
 <p>
 	Next, you must initialize the IRIS server installation.
 	Run the following command (as root):
@@ -420,19 +419,11 @@
 	It will not need to be changed.
 </p>
 
-<h3 id="service_configuration">Service Configuration</h3>
-<p>
-	The IRIS service should be configured to start when the operating
-	system is rebooted.
-	To do this, run following commands (as root):
-</p>
-<pre class="code">chkconfig iris on</pre>
-
 <h3 id="start_services">Start Services</h3>
 <p>
 	Finally, the IRIS server can now be started with the following command:
 </p>
-<pre class="code">service iris start</pre>
+<pre class="code">systemctl start iris.service</pre>
 <p>
 	Check that everything started OK:
 </p>
@@ -1642,9 +1633,9 @@ zcat tms-20120523.sql.gz | pgsql tms</pre>
 	With the new rpm file available, a stable upgrade can be accomplished
 	with the following commands (as root):
 </p>
-<pre class="code">rpm -U iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.<i>{arch}</i>.rpm
+<pre class="code">rpm -U iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
 iris_ctl links
-service iris restart</pre>
+systemctl restart iris.service</pre>
 <p>
 	An unstable upgrade is when either the major or minor IRIS version
 	numbers change.
@@ -1655,10 +1646,10 @@ service iris restart</pre>
 	The following commands can be used to perform an unstable upgrade
 	(as root):
 </p>
-<pre class="code">rpm -U iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.<i>{arch}</i>.rpm
+<pre class="code">rpm -U iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
 psql tms -f /var/lib/iris/sql/migrate-<i>{major}</i>.<i>{minor}</i>.sql
 iris_ctl links
-service iris restart</pre>
+systemctl iris.service restart</pre>
 <p>
 	Note: when skipping one or more minor versions in an upgrade, <b>all</b>
 	migrate scripts must be run.
@@ -1736,8 +1727,7 @@ hgbase.url=http://iris.dot.state.mn.us/hg/index.cgi/
 <pre class="code">ant rpm</pre>
 <p>
 	If there are no errors, the new rpm file should be in the
-	<code>build/rpm/RPMS/i386/</code> or
-	<code>build/rpm/RPMS/x86_64/</code> directory.
+	<code>build/rpm/RPMS/noarch/</code> directory.
 </p>
 
 <h3 id="history">History</h3>

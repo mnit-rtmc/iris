@@ -34,6 +34,7 @@ Group:		Applications/Engineering
 Provides:	%{name}
 Source:		%{name}-%{version}.tar.gz
 URL:		@@RPM.URL@@
+BuildArch:	noarch
 Buildroot:	%{buildroot}
 Vendor:		@@RPM.PACKAGER@@
 Packager:	@@RPM.PACKAGER@@
