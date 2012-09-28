@@ -354,12 +354,26 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		ALG_LOG.log(corridor.getName() + ": " + msg);
 	}
 
+	/** Debug bottlenecks */
+	private void debugBottlenecks() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Bottlenecks: ");
+		for(StationNode sn = firstStation(); sn != null;
+		    sn = sn.downstreamStation())
+		{
+			if(sn.isBottleneck)
+				sb.append(sn.toString());
+		}
+		log(sb.toString());
+	}
+
 	/**
 	 * Find bottlenecks.
 	 */
 	private void findBottlenecks() {
 		findBottleneckCandidates();
 		mergeBottleneckZones();
+		debugBottlenecks();
 	}
 
 	/** Find bottleneck candidates.
