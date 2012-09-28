@@ -361,8 +361,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		for(StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
 		{
-			if(sn.isBottleneck)
+			if(sn.isBottleneck) {
 				sb.append(sn.toString());
+				sb.append(',');
+			}
 		}
 		log(sb.toString());
 	}
