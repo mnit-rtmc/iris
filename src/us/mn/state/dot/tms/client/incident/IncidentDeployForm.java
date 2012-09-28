@@ -199,8 +199,12 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		FormPanel panel = new FormPanel(false);
 		panel.addRow(lbl);
 		panel.addRow(I18N.get("incident.deploy.proposed"), list);
-		panel.addRow(new JButton(send));
+		JButton btn = new JButton(send);
+		panel.addRow(btn);
 		send.setEnabled(model.getSize() > 0);
+		// Need to call setEnabled on JButton,
+		// since FormPanel disables it
+		btn.setEnabled(model.getSize() > 0);
 		return panel;
 	}
 
