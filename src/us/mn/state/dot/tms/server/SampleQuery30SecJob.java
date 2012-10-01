@@ -14,21 +14,15 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.Detector;
-import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
@@ -38,14 +32,6 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  * @author Douglas Lau
  */
 public class SampleQuery30SecJob extends Job {
-
-	/** Check if obsolete station.xml output is enabled */
-	static protected boolean isStationXmlEnabled() {
-		return SystemAttrEnum.STATION_XML_ENABLE.getBoolean();
-	}
-
-	/** Detector sample file */
-	static protected final String SAMPLE_XML = "det_sample.xml";
 
 	/** Seconds to offset each poll from start of interval */
 	static protected final int OFFSET_SECS = 8;
@@ -57,14 +43,11 @@ public class SampleQuery30SecJob extends Job {
 	protected final Completer comp;
 
 	/** Job to be performed on completion */
-	protected final Job complete_job = new Job() {
+	private final Job complete_job = new Job() {
 		public void perform() {
 			try {
 				station_manager.calculateData();
-				station_manager.writeSampleXml();
-				if(isStationXmlEnabled())
-					station_manager.writeStationXml();
-				writeSampleXml();
+				flush.addJob(flush_job);
 				BaseObjectImpl.corridors.findBottlenecks();
 			}
 			finally {
@@ -73,11 +56,19 @@ public class SampleQuery30SecJob extends Job {
 		}
 	};
 
+	/** Job to be performed after data has been processed */
+	private final FlushXmlJob flush_job;
+
+	/** FLUSH Scheduler for writing XML (I/O to disk) */
+	private final Scheduler flush;
+
 	/** Create a new 30-second timer job */
-	public SampleQuery30SecJob(Scheduler flush) {
+	public SampleQuery30SecJob(Scheduler timer, Scheduler f) {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
+		flush = f;
 		station_manager = new StationManager();
-		comp = new Completer("30-Second", flush, complete_job);
+		flush_job = new FlushXmlJob(station_manager);
+		comp = new Completer("30-Second", timer, complete_job);
 	}
 
 	/** Perform the 30-second timer job */
@@ -111,60 +102,6 @@ public class SampleQuery30SecJob extends Job {
 				sp.querySamples(c, 30, comp);
 			}
 		}
-	}
-
-	/** Write the sample data out as XML */
-	protected void writeSampleXml() {
-		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
-			public void print(PrintWriter out) {
-				printSampleXmlHead(out);
-				printSampleXmlBody(out);
-				printSampleXmlTail(out);
-			}
-		};
-		w.write();
-	}
-
-	/** Print the header of the detector sample XML file */
-	protected void printSampleXmlHead(PrintWriter out) {
-		out.println(XmlWriter.XML_DECLARATION);
-		printDtd(out);
-		out.println("<traffic_sample time_stamp='" +
-			TimeSteward.getDateInstance() + "' period='30'>");
-	}
-
-	/** Print the DTD */
-	protected void printDtd(PrintWriter out) {
-		out.println("<!DOCTYPE traffic_sample [");
-		out.println("<!ELEMENT traffic_sample (sample)*>");
-		out.println("<!ATTLIST traffic_sample time_stamp " +
-			"CDATA #REQUIRED>");
-		out.println("<!ATTLIST traffic_sample period CDATA #REQUIRED>");
-		out.println("<!ELEMENT sample EMPTY>");
-		out.println("<!ATTLIST sample sensor CDATA #REQUIRED>");
-		out.println("<!ATTLIST sample flow CDATA 'UNKNOWN'>");
-		out.println("<!ATTLIST sample speed CDATA 'UNKNOWN'>");
-		out.println("<!ATTLIST sample occ CDATA 'UNKNOWN'>");
-		out.println("]>");
-	}
-
-	/** Print the body of the detector sample XML file */
-	protected void printSampleXmlBody(final PrintWriter out) {
-		DetectorHelper.find(new Checker<Detector>() {
-			public boolean check(Detector d) {
-				if(d instanceof DetectorImpl) {
-					DetectorImpl det = (DetectorImpl)d;
-					det.calculateFakeData();
-					det.printSampleXml(out);
-				}
-				return false;
-			}
-		});
-	}
-
-	/** Print the tail of the detector sample XML file */
-	protected void printSampleXmlTail(PrintWriter out) {
-		out.println("</traffic_sample>");
 	}
 
 	/** Validate all metering algorithms */
