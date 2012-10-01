@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2011  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
 import java.util.Date;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Station;
@@ -29,10 +30,22 @@ import us.mn.state.dot.tms.StationHelper;
 class StationManager {
 
 	/** Location of station sample XML file */
-	static protected final String SAMPLE_XML = "stat_sample.xml";
+	static private final String SAMPLE_XML = "stat_sample.xml";
 
 	/** Location of old, deprecated station XML file */
-	static protected final String STATION_XML = "station.xml";
+	static private final String STATION_XML = "station.xml";
+
+	/** FLUSH Scheduler for writing XML (I/O to disk) */
+	private final Scheduler flush;
+
+	/** Job to be performed after data has been processed */
+	private final FlushXmlJob flush_job;
+
+	/** Create a new station manager */
+	public StationManager(Scheduler f) {
+		flush = f;
+		flush_job = new FlushXmlJob(this);
+	}
 
 	/** Calculate the current data for all stations */
 	public void calculateData() {
@@ -45,6 +58,7 @@ class StationManager {
 				return false;
 			}
 		});
+		flush.addJob(flush_job);
 	}
 
 	/** Write the station sample data out as XML */

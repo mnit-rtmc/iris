@@ -34,20 +34,19 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class SampleQuery30SecJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static protected final int OFFSET_SECS = 8;
+	static private final int OFFSET_SECS = 8;
 
 	/** Station manager */
-	protected final StationManager station_manager;
+	private final StationManager station_manager;
 
 	/** Job completer */
-	protected final Completer comp;
+	private final Completer comp;
 
 	/** Job to be performed on completion */
 	private final Job complete_job = new Job() {
 		public void perform() {
 			try {
 				station_manager.calculateData();
-				flush.addJob(flush_job);
 				BaseObjectImpl.corridors.findBottlenecks();
 			}
 			finally {
@@ -56,18 +55,10 @@ public class SampleQuery30SecJob extends Job {
 		}
 	};
 
-	/** Job to be performed after data has been processed */
-	private final FlushXmlJob flush_job;
-
-	/** FLUSH Scheduler for writing XML (I/O to disk) */
-	private final Scheduler flush;
-
 	/** Create a new 30-second timer job */
 	public SampleQuery30SecJob(Scheduler timer, Scheduler f) {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
-		flush = f;
-		station_manager = new StationManager();
-		flush_job = new FlushXmlJob(station_manager);
+		station_manager = new StationManager(f);
 		comp = new Completer("30-Second", timer, complete_job);
 	}
 
@@ -83,7 +74,7 @@ public class SampleQuery30SecJob extends Job {
 	}
 
 	/** Poll all sampling controllers 30-second interval */
-	protected void querySample30Sec() {
+	private void querySample30Sec() {
 		ControllerHelper.find(new Checker<Controller>() {
 			public boolean check(Controller c) {
 				if(c instanceof ControllerImpl)
@@ -94,7 +85,7 @@ public class SampleQuery30SecJob extends Job {
 	}
 
 	/** Query 30-second sample data from one controller */
-	protected void querySample30Sec(ControllerImpl c) {
+	private void querySample30Sec(ControllerImpl c) {
 		if(c.hasActiveDetector()) {
 			MessagePoller p = c.getPoller();
 			if(p instanceof SamplePoller) {
@@ -105,7 +96,7 @@ public class SampleQuery30SecJob extends Job {
 	}
 
 	/** Validate all metering algorithms */
-	protected void validateMetering() {
+	private void validateMetering() {
 		KAdaptiveAlgorithm.processAllStates();
 		RampMeterHelper.find(new Checker<RampMeter>() {
 			public boolean check(RampMeter rm) {
