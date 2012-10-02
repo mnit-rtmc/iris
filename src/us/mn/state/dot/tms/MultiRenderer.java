@@ -238,12 +238,18 @@ public class MultiRenderer extends MultiAdapter {
 		x--;
 		y--;
 		RasterGraphic rg = GraphicHelper.createRaster(g);
-		if(rg instanceof BitmapGraphic)
-			renderBitmap((BitmapGraphic)rg, fg, x, y);
-		else if(rg instanceof PixmapGraphic)
-			renderPixmap((PixmapGraphic)rg, x, y);
-		else
-			syntax_err = MultiSyntaxError.graphicNotDefined;
+		try {
+			if(rg instanceof BitmapGraphic)
+				renderBitmap((BitmapGraphic)rg, fg, x, y);
+			else if(rg instanceof PixmapGraphic)
+				renderPixmap((PixmapGraphic)rg, x, y);
+			else
+				syntax_err = MultiSyntaxError.graphicNotDefined;
+		}
+		catch(IndexOutOfBoundsException e) {
+			// No MULTI syntax error for graphic too big
+			syntax_err = MultiSyntaxError.other;
+		}
 	}
 
 	/** Render a bitmap graphic onto the raster.
