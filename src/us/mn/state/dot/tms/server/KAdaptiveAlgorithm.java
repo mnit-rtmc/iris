@@ -177,11 +177,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static protected HashMap<String, KAdaptiveAlgorithm> ALL_ALGS =
 		new HashMap<String, KAdaptiveAlgorithm>();
 
-	/** Lookup the K adaptive algorithm state for one corridor */
-	static public KAdaptiveAlgorithm lookupCorridor(Corridor c) {
+	/** Get the K adaptive algorithm state for a meter */
+	static public KAdaptiveAlgorithm meterState(RampMeterImpl meter) {
+		Corridor c = meter.getCorridor();
+		if(c != null) {
+			KAdaptiveAlgorithm alg = lookupAlgorithm(c);
+			if(alg.createMeterState(meter))
+				return alg;
+		}
+		return null;
+	}
+
+	/** Lookup an algorithm for a corridor */
+	static private KAdaptiveAlgorithm lookupAlgorithm(Corridor c) {
 		KAdaptiveAlgorithm alg = ALL_ALGS.get(c.getID());
 		if(alg == null) {
 			alg = new KAdaptiveAlgorithm(c);
+			alg.log("adding");
 			ALL_ALGS.put(c.getID(), alg);
 		}
 		return alg;
@@ -194,8 +206,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		while(it.hasNext()) {
 			KAdaptiveAlgorithm alg = it.next();
 			alg.processInterval();
-			if(alg.isDone())
+			if(alg.isDone()) {
+				alg.log("isDone: removing");
 				it.remove();
+			}
 		}
 	}
 
@@ -291,26 +305,25 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Get the meter state for a given ramp meter */
 	private MeterState getMeterState(RampMeterImpl meter) {
-		if(meter.getCorridor() != corridor) {
+		if(meter.getCorridor() == corridor)
+			return meterStates.get(meter.getName());
+		else {
 			// Meter must have been changed to a different
-			// corridor; throw away old meter node
+			// corridor; throw away old meter state
 			meterStates.remove(meter.getName());
 			return null;
 		}
-		MeterState ms = lookupMeterState(meter);
-		if(ms != null)
-			return ms;
-		EntranceNode en = findEntranceNode(meter);
-		if(en != null) {
-			ms = new MeterState(meter, en);
-			meterStates.put(meter.getName(), ms);
-		}
-		return ms;
 	}
 
-	/** Lookup the meter state for a specified meter */
-	private MeterState lookupMeterState(RampMeter meter) {
-		return meterStates.get(meter.getName());
+	/** Create the meter state for a given ramp meter */
+	private boolean createMeterState(RampMeterImpl meter) {
+		EntranceNode en = findEntranceNode(meter);
+		if(en != null) {
+			MeterState ms = new MeterState(meter, en);
+			meterStates.put(meter.getName(), ms);
+			return true;
+		} else
+			return false;
 	}
 
 	/** Find an entrance node matching the given ramp meter.
