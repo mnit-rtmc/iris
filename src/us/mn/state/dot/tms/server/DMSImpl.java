@@ -1268,10 +1268,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				BitmapGraphic[] pages = rb.createBitmaps(ms);
 				return createMessageB(m, pages, ap, rp, s, d);
 			}
-			catch(ArrayIndexOutOfBoundsException e) {
-				System.err.println("DMSImpl.createMessage");
-				e.printStackTrace();
-			}
 			catch(InvalidMessageException e) {
 				// probably a MultiSyntaxError ...
 			}
