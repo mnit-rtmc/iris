@@ -1324,22 +1324,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
 		Integer d)
 	{
-		try {
-			int blen = pages[0].length();
-			byte[] bitmap = new byte[pages.length * blen];
-			for(int i = 0; i < pages.length; i++) {
-				byte[] page = pages[i].getPixels();
-				System.arraycopy(page, 0, bitmap, i*blen, blen);
-			}
-			String bitmaps = Base64.encode(bitmap);
-			return createMessage(m, bitmaps, ap, rp, s, d);
+		int blen = pages[0].length();
+		byte[] bitmap = new byte[pages.length * blen];
+		for(int i = 0; i < pages.length; i++) {
+			byte[] page = pages[i].getPixels();
+			System.arraycopy(page, 0, bitmap, i * blen, blen);
 		}
-		catch(ArrayIndexOutOfBoundsException e) {
-			System.err.println("DMSImpl.createMessageB: " +
-				pages.length);
-			e.printStackTrace();
-			return null;
-		}
+		String bitmaps = Base64.encode(bitmap);
+		return createMessage(m, bitmaps, ap, rp, s, d);
 	}
 
 	/** Create a sign message */

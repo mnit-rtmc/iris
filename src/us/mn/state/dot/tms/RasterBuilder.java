@@ -147,15 +147,9 @@ public class RasterBuilder {
 	{
 		int n_pages = ms.getNumPages();
 		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
-		try {
-			for(int p = 0; p < n_pages; p++) {
-				bitmaps[p] = new BitmapGraphic(width, height);
-				render(ms, p, bitmaps[p]);
-			}
-		}
-		catch(ArrayIndexOutOfBoundsException e) {
-			System.err.println("RasterBuilder.createBitmaps");
-			e.printStackTrace();
+		for(int p = 0; p < n_pages; p++) {
+			bitmaps[p] = new BitmapGraphic(width, height);
+			render(ms, p, bitmaps[p]);
 		}
 		return bitmaps;
 	}
