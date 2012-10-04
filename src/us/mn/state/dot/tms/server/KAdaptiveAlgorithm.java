@@ -58,6 +58,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Bottleneck density (vehicles / mile) */
 	static private final int K_BOTTLENECK = 30;
 
+	/** Bottleneck density stop (vehicles / mile) */
+	static private final int K_BOTTLENECK_STOP = 2;
+
 	/** Critical density (vehicles / mile) */
 	static private final int K_CRIT = 37;
 
@@ -513,7 +516,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Get the density for determining a bottleneck */
 	private double bottleneckDensity() {
-		return doStopChecking ? K_DES : K_BOTTLENECK;
+		return doStopChecking
+		     ? K_BOTTLENECK + K_BOTTLENECK_STOP
+		     : K_BOTTLENECK;
 	}
 
 	/** Get number of time steps to check for bottleneck */
