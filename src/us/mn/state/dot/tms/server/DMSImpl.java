@@ -880,6 +880,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		SignMessage smn = validateMessage(sm);
 		if(smn != sm)
 			o = null;
+		// FIXME: there should be a better way to clear cached routes
+		//        in travel time estimator
 		int ap = smn.getActivationPriority();
 		if(ap == DMSMessagePriority.OVERRIDE.ordinal())
 			travel_est.clear();
