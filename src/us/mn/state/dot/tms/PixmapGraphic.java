@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ public class PixmapGraphic extends RasterGraphic {
 	/** Get the pixel color at the specified location */
 	public DmsColor getPixel(int x, int y) {
 		int p = pixelIndex(x, y);
+		// FIXME: should be BGR to match NTCIP 1203
 		int red = pixels[p] & 0xFF;
 		int green = pixels[p + 1] & 0xFF;
 		int blue = pixels[p + 2] & 0xFF;
@@ -56,6 +57,7 @@ public class PixmapGraphic extends RasterGraphic {
 	/** Set the pixel color at the specified location */
 	public void setPixel(int x, int y, DmsColor clr) {
 		int p = pixelIndex(x, y);
+		// FIXME: should be BGR to match NTCIP 1203
 		pixels[p] = (byte)clr.red;
 		pixels[p + 1] = (byte)clr.green;
 		pixels[p + 2] = (byte)clr.blue;
