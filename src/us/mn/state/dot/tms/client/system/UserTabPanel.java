@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  *
  * @author Douglas Lau
  */
-public class UserPanel extends FormPanel {
+public class UserTabPanel extends FormPanel {
 
 	/** Table model for users */
 	protected final UserModel u_model;
@@ -47,8 +47,8 @@ public class UserPanel extends FormPanel {
 		}
 	};
 
-	/** Create a new user panel */
-	public UserPanel(Session s) {
+	/** Create a new user tab panel */
+	public UserTabPanel(Session s) {
 		super(true);
 		u_model = new UserModel(s);
 		u_table.setModel(u_model);

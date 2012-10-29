@@ -41,8 +41,8 @@ public class UserRoleForm extends AbstractForm {
 	/** Tabbed pane */
 	protected final JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 
-	/** User panel */
-	protected final UserPanel u_panel;
+	/** User tab panel */
+	protected final UserTabPanel u_panel;
 
 	/** Role panel */
 	protected final RolePanel r_panel;
@@ -57,7 +57,7 @@ public class UserRoleForm extends AbstractForm {
 	public UserRoleForm(Session s) {
 		super(I18N.get("user.menu"));
 		setHelpPageName("help.userroleform");
-		u_panel = new UserPanel(s);
+		u_panel = new UserTabPanel(s);
 		r_panel = new RolePanel(s);
 		cap_panel = new CapabilityPanel(s);
 		c_panel = new ConnectionPanel(s);
