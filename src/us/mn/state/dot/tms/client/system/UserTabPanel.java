@@ -35,7 +35,10 @@ public class UserTabPanel extends FormPanel {
 	protected final UserModel u_model;
 
 	/** Table to hold the users */
-	protected final ZTable u_table = new ZTable();
+	private final ZTable u_table = new ZTable();
+
+	/** User panel */
+	private final UserPanel user_pnl;
 
 	/** Action to delete the selected user */
 	private final IAction del_user = new IAction("user.delete") {
@@ -51,11 +54,16 @@ public class UserTabPanel extends FormPanel {
 	public UserTabPanel(Session s) {
 		super(true);
 		u_model = new UserModel(s);
+		user_pnl = new UserPanel(s);
 		u_table.setModel(u_model);
 		u_table.setAutoCreateColumnsFromModel(false);
 		u_table.setColumnModel(u_model.createColumnModel());
 		u_table.setVisibleRowCount(16);
-		addRow(u_table);
+		setFill();
+		setWidth(1);
+		add(u_table);
+//		setFill();
+		addRow(user_pnl);
 		del_user.setEnabled(false);
 		addRow(new JButton(del_user));
 	}
@@ -63,6 +71,7 @@ public class UserTabPanel extends FormPanel {
 	/** Initializze the widgets in the form */
 	protected void initialize() {
 		u_model.initialize();
+		user_pnl.initialize();
 		ListSelectionModel s = u_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionListener() {
@@ -76,13 +85,15 @@ public class UserTabPanel extends FormPanel {
 	/** Dispose of the panel */
 	public void dispose() {
 		u_model.dispose();
+		user_pnl.dispose();
 		super.dispose();
 	}
 
 	/** Change the selected user */
-	protected void selectUser() {
+	private void selectUser() {
 		ListSelectionModel s = u_table.getSelectionModel();
 		User u = u_model.getProxy(s.getMinSelectionIndex());
+		user_pnl.setUser(u);
 		del_user.setEnabled(u_model.canRemove(u));
 	}
 }
