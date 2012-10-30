@@ -32,7 +32,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Privilege>("privilege.pattern", 400) {
+		new ProxyColumn<Privilege>("privilege.pattern", 300) {
 			public Object getValueAt(Privilege p) {
 				return p.getPattern();
 			}
@@ -47,7 +47,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPattern(v);
 			}
 		},
-		new ProxyColumn<Privilege>("privilege.read", 80, Boolean.class){
+		new ProxyColumn<Privilege>("privilege.read", 60, Boolean.class){
 			public Object getValueAt(Privilege p) {
 				return p.getPrivR();
 			}
@@ -59,7 +59,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPrivR((Boolean)value);
 			}
 		},
-		new ProxyColumn<Privilege>("privilege.write", 80,Boolean.class){
+		new ProxyColumn<Privilege>("privilege.write", 60,Boolean.class){
 			public Object getValueAt(Privilege p) {
 				return p.getPrivW();
 			}
@@ -71,7 +71,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPrivW((Boolean)value);
 			}
 		},
-		new ProxyColumn<Privilege>("privilege.create",80,Boolean.class){
+		new ProxyColumn<Privilege>("privilege.create",60,Boolean.class){
 			public Object getValueAt(Privilege p) {
 				return p.getPrivC();
 			}
@@ -83,7 +83,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 					p.setPrivC((Boolean)value);
 			}
 		},
-		new ProxyColumn<Privilege>("privilege.del", 80, Boolean.class) {
+		new ProxyColumn<Privilege>("privilege.del", 60, Boolean.class) {
 			public Object getValueAt(Privilege p) {
 				return p.getPrivD();
 			}

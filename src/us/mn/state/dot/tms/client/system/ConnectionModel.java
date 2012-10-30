@@ -36,7 +36,7 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 				return c.getName();
 			}
 		},
-		new ProxyColumn<Connection>("user", 180) {
+		new ProxyColumn<Connection>("user", 80) {
 			public Object getValueAt(Connection c) {
 				User u = c.getUser();
 				if(u != null)

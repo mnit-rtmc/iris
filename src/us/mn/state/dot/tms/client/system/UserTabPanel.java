@@ -59,10 +59,7 @@ public class UserTabPanel extends FormPanel {
 		u_table.setAutoCreateColumnsFromModel(false);
 		u_table.setColumnModel(u_model.createColumnModel());
 		u_table.setVisibleRowCount(16);
-		setFill();
-		setWidth(1);
 		add(u_table);
-//		setFill();
 		addRow(user_pnl);
 		del_user.setEnabled(false);
 		addRow(new JButton(del_user));

@@ -14,8 +14,11 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.FocusJob;
@@ -68,8 +71,22 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	/** Full name text field */
 	private final JTextField f_name_txt = new JTextField(30);
 
+	/** Password entry component */
+	private final JPasswordField passwd_txt = new JPasswordField(16);
+
+	/** Action to change the password */
+	private final UAction change_pwd = new UAction(
+		"user.password.change")
+	{
+		protected void do_perform(User u) {
+			String p = new String(passwd_txt.getPassword()).trim();
+			passwd_txt.setText("");
+			u.setPassword(p);
+		}
+	};
+
 	/** Dn (distinguished name) field */
-	private final JTextField dn_txt = new JTextField(64);
+	private final JTextField dn_txt = new JTextField(48);
 
 	/** Role list model */
 	private final ProxyListModel<Role> r_list;
@@ -111,13 +128,22 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 
 	/** Initialize the panel */
 	public void initialize() {
-		addRow(I18N.get("user.name.full"), f_name_txt);
+		add(new JLabel(I18N.get("user.name.full")));
+		setWidth(3);
+		add(f_name_txt);
+		addRow(new JLabel());
+		add(I18N.get("user.password"), passwd_txt);
+		add(new JLabel());
+		add(new JButton(change_pwd));
+		addRow(new JLabel());
 		addRow(I18N.get("user.dn"), dn_txt);
-		addRow(I18N.get("role"), role_cbx);
+		add(I18N.get("role"), role_cbx);
+		addRow(new JLabel());
 		addRow(I18N.get("user.enabled"), enabled_chk);
 		createJobs();
 		watcher.initialize();
 		r_list.initialize();
+		doClear();
 	}
 
 	/** Dispose of the panel */
@@ -178,6 +204,12 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 			f_name_txt.setEnabled(watcher.canUpdate(u, "fullName"));
 			f_name_txt.setText(u.getFullName());
 		}
+		if(a == null || a.equals("password")) {
+			boolean cu = watcher.canUpdate(u, "password");
+			passwd_txt.setEnabled(cu);
+			passwd_txt.setText("");
+			change_pwd.setEnabled(cu);
+		}
 		if(a == null || a.equals("dn")) {
 			dn_txt.setEnabled(watcher.canUpdate(u, "dn"));
 			dn_txt.setText(u.getDn());
@@ -208,6 +240,9 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 		user = null;
 		f_name_txt.setEnabled(false);
 		f_name_txt.setText("");
+		passwd_txt.setEnabled(false);
+		passwd_txt.setText("");
+		change_pwd.setEnabled(false);
 		dn_txt.setEnabled(false);
 		dn_txt.setText("");
 		role_cbx.setEnabled(false);

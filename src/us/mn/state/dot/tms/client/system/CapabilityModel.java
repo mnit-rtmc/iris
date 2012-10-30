@@ -30,7 +30,7 @@ public class CapabilityModel extends ProxyTableModel<Capability> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Capability>("capability.name", 160) {
+		new ProxyColumn<Capability>("capability.name", 120) {
 			public Object getValueAt(Capability c) {
 				return c.getName();
 			}
