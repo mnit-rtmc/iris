@@ -74,6 +74,9 @@ public class CameraViewer extends JPanel
 	static protected final VideoRequest.Size SIZE =
 		VideoRequest.Size.MEDIUM;
 
+	/** User session */
+	private final Session session;
+
 	/** Sonar state */
 	protected final SonarState state;
 
@@ -139,11 +142,12 @@ public class CameraViewer extends JPanel
 	};
 
 	/** Create a new camera viewer */
-	public CameraViewer(Session session, CameraManager man) {
+	public CameraViewer(Session s, CameraManager man) {
 		super(new GridBagLayout());
 		s_panel = new StreamPanel(UI.dimension(SIZE.width,SIZE.height));
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
+		session = s;
 		state = session.getSonarState();
 		user = session.getUser();
 		props = session.getProperties();
@@ -243,7 +247,7 @@ public class CameraViewer extends JPanel
 	/** Poll the joystick and send PTZ command to server */
 	protected void pollJoystick() {
 		Camera proxy = selected;	// Avoid race
-		if(proxy != null) {
+		if(canControlPtz(proxy)) {
 			float p = filter_deadzone(joystick.getPan());
 			float t = -filter_deadzone(joystick.getTilt());
 			float z = filter_deadzone(joystick.getZoom());
@@ -354,7 +358,7 @@ public class CameraViewer extends JPanel
 		play.setEnabled(true);
 		stop.setEnabled(true);
 		ptz_panel.setCamera(camera);
-		ptz_panel.setEnabled(true);
+		ptz_panel.setEnabled(canControlPtz(camera));
 	}
 
 	/** Disable the monitor panel */
@@ -414,5 +418,15 @@ public class CameraViewer extends JPanel
 		if(m.getSize() > 1)
 			box.setSelectedIndex(1);
 		return box;
+	}
+
+	/** Check if the user can update an attribute */
+	private boolean canUpdate(Camera c, String aname) {
+		return session.canUpdate(c, aname);
+	}
+
+	/** Can a ptz control be made */
+	private boolean canControlPtz(Camera c) {
+		return canUpdate(c, "ptz");
 	}
 }
