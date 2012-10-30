@@ -291,8 +291,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the cabinet panel */
 	protected JPanel createCabinetPanel() {
-		location.setGeoLoc(cabinet.getGeoLoc());
 		location.initialize();
+		location.setGeoLoc(cabinet.getGeoLoc());
 		location.add(I18N.get("cabinet.milepoint"), mile);
 		location.finishRow();
 		location.add(I18N.get("cabinet.style"), cab_style_cbx);
@@ -418,6 +418,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 				proxy.getFailedOps()));
 		}
 		if(a == null || a.equals("mile")) {
+			mile.setEnabled(canUpdateCabinet());
 			Float m = cabinet.getMile();
 			if(m == null)
 				mile.setText("");
