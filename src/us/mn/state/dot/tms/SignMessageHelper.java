@@ -179,13 +179,17 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Decode the bitmaps on a sign message */
 	static private byte[] decodeBitmaps(SignMessage sm) {
-		if(sm == null)
-			return null;
-		try {
-			return Base64.decode(sm.getBitmaps());
+		if(sm != null) {
+			String bmaps = sm.getBitmaps();
+			if(bmaps != null) {
+				try {
+					return Base64.decode(bmaps);
+				}
+				catch(IOException e) {
+					// fall through
+				}
+			}
 		}
-		catch(IOException e) {
-			return null;
-		}
+		return null;
 	}
 }
