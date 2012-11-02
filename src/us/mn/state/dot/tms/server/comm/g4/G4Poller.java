@@ -92,11 +92,4 @@ public class G4Poller extends MessagePoller implements SamplePoller {
 		} else
 			G4Poller.info("interval=" + intvl + " not supported");
 	}
-
-	/** Sleep */
-	static protected void sleepy(int ms) {
-		try {
-			Thread.sleep(ms);
-		} catch(Exception e) {}
-	}
 }
