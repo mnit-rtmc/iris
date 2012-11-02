@@ -34,12 +34,6 @@ import us.mn.state.dot.tms.server.IDebugLog;
  */
 abstract public class MessagePoller extends Thread {
 
-	/** Messenger open modes */
-	public enum OpenMode {PERSISTENT, PER_OP};
-
-	/** Messenger open mode */
-	protected final OpenMode open_mode;
-
 	/** Create a message poller */
 	static public MessagePoller create(String name, CommProtocol protocol,
 		String uri) throws IOException
@@ -110,16 +104,10 @@ abstract public class MessagePoller extends Thread {
 	}
 
 	/** Create a new message poller with the open mode specified */
-	protected MessagePoller(String name, Messenger m, OpenMode om) {
+	protected MessagePoller(String name, Messenger m) {
 		super(GROUP, "Poller: " + name);
 		setDaemon(true);
 		messenger = m;
-		open_mode = om;
-	}
-
-	/** Create a new message poller with a persistent open mode */
-	protected MessagePoller(String name, Messenger m) {
-		this(name, m, OpenMode.PERSISTENT);
 	}
 
 	/** Set the receive timeout */
@@ -143,8 +131,7 @@ abstract public class MessagePoller extends Thread {
 		status = "STARTING";
 		plog("STARTING");
 		try {
-			if(open_mode == OpenMode.PERSISTENT)
-				messenger.open();
+			messenger.open();
 			status = "";
 			performOperations();
 			status = "CLOSING";
@@ -160,8 +147,7 @@ abstract public class MessagePoller extends Thread {
 			e.printStackTrace();
 		}
 		finally {
-			if(open_mode == OpenMode.PERSISTENT)
-				messenger.close();
+			messenger.close();
 			drainQueue();
 			plog("STOPPING");
 		}
@@ -195,11 +181,7 @@ abstract public class MessagePoller extends Thread {
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {
-			if(open_mode == OpenMode.PER_OP)
-				messenger.open();
 			o.poll(createMessage(o.getController()));
-			if(open_mode == OpenMode.PER_OP)
-				messenger.close();
 		}
 		catch(DeviceContentionException e) {
 			handleContention(o, e);

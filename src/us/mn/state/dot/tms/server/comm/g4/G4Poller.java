@@ -38,7 +38,7 @@ public class G4Poller extends MessagePoller implements SamplePoller {
 
 	/** Create a new G4 poller */
 	public G4Poller(String n, Messenger m) {
-		super(n, m, OpenMode.PER_OP);
+		super(n, m);
 		G4Poller.info("G4Poller.G4Poller("+n+","+m+")");
 	}
 
