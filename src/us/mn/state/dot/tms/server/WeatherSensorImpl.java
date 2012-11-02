@@ -24,7 +24,6 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Angle;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.Length;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
