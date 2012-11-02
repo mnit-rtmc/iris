@@ -126,7 +126,7 @@ public class G4Rec {
 		msg_period = b.getMsgPeriod();
 		field_ctrl_time = b.getControllerTime();
 
-		if(msg_period != 30)
+		if(msg_period != SAMPLE_PERIOD_SEC)
 			throw new ParsingException("Invalid period");
 
 		G4Poller.info("sid=" + sensor_id);
