@@ -25,11 +25,12 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 public class LaneSamples {
 
 	/** A missing sample for all possible lanes */
-	static protected final int[] MISSING_SAMPLE = {
-		MISSING_DATA, MISSING_DATA,
-		MISSING_DATA, MISSING_DATA,
-		MISSING_DATA, MISSING_DATA,
-		MISSING_DATA, MISSING_DATA};
+	static protected final int[] MISSING_SAMPLE;
+	static {
+		MISSING_SAMPLE = new int[LaneSample.MAX_NUM_LANES];
+		for(int i = 0; i < LaneSample.MAX_NUM_LANES; ++i)
+			MISSING_SAMPLE[i] = MISSING_DATA;
+	}
 
 	/** Units */
 	private final boolean si_unit;
