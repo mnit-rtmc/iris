@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -29,10 +30,10 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 public class CameraModel extends ProxyTableModel<Camera> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Camera>("camera", 200) {
+	protected ArrayList<ProxyColumn<Camera>> createColumns() {
+		ArrayList<ProxyColumn<Camera>> cols =
+			new ArrayList<ProxyColumn<Camera>>(3);
+		cols.add(new ProxyColumn<Camera>("camera", 200) {
 			public Object getValueAt(Camera c) {
 				return c.getName();
 			}
@@ -44,14 +45,16 @@ public class CameraModel extends ProxyTableModel<Camera> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<Camera>("location", 300) {
+		});
+		cols.add(new ProxyColumn<Camera>("location", 300) {
 			public Object getValueAt(Camera c) {
 				return GeoLocHelper.getDescription(
 					c.getGeoLoc());
 			}
-		},
-		new ProxyColumn<Camera>("camera.publish", 120, Boolean.class) {
+		});
+		cols.add(new ProxyColumn<Camera>("camera.publish", 120,
+			Boolean.class)
+		{
 			public Object getValueAt(Camera c) {
 				return c.getPublish();
 			}
@@ -62,8 +65,8 @@ public class CameraModel extends ProxyTableModel<Camera> {
 				if(value instanceof Boolean)
 					c.setPublish((Boolean)value);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new camera table model */

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -27,10 +28,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<IncidentDetail>("device.name", 90) {
+	protected ArrayList<ProxyColumn<IncidentDetail>> createColumns() {
+		ArrayList<ProxyColumn<IncidentDetail>> cols =
+			new ArrayList<ProxyColumn<IncidentDetail>>(2);
+		cols.add(new ProxyColumn<IncidentDetail>("device.name", 90) {
 			public Object getValueAt(IncidentDetail dtl) {
 				return dtl.getName();
 			}
@@ -44,8 +45,10 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<IncidentDetail>("device.description", 200) {
+		});
+		cols.add(new ProxyColumn<IncidentDetail>("device.description",
+			200)
+		{
 			public Object getValueAt(IncidentDetail dtl) {
 				return dtl.getDescription();
 			}
@@ -57,8 +60,8 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 			{
 				dtl.setDescription(value.toString());
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new incident detail table model */

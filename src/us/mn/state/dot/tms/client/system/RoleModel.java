@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.util.ArrayList;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -27,10 +28,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class RoleModel extends ProxyTableModel<Role> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Role>("role.name", 160) {
+	protected ArrayList<ProxyColumn<Role>> createColumns() {
+		ArrayList<ProxyColumn<Role>> cols =
+			new ArrayList<ProxyColumn<Role>>(2);
+		cols.add(new ProxyColumn<Role>("role.name", 160) {
 			public Object getValueAt(Role r) {
 				return r.getName();
 			}
@@ -42,8 +43,10 @@ public class RoleModel extends ProxyTableModel<Role> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<Role>("role.enabled", 60, Boolean.class) {
+		});
+		cols.add(new ProxyColumn<Role>("role.enabled", 60,
+			Boolean.class)
+		{
 			public Object getValueAt(Role r) {
 				return r.getEnabled();
 			}
@@ -54,8 +57,8 @@ public class RoleModel extends ProxyTableModel<Role> {
 				if(value instanceof Boolean)
 					r.setEnabled((Boolean)value);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Role capability model */

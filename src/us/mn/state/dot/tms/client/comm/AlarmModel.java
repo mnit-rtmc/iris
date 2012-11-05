@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -34,10 +35,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class AlarmModel extends ProxyTableModel<Alarm> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Alarm>("alarm", 80) {
+	protected ArrayList<ProxyColumn<Alarm>> createColumns() {
+		ArrayList<ProxyColumn<Alarm>> cols =
+			new ArrayList<ProxyColumn<Alarm>>(5);
+		cols.add(new ProxyColumn<Alarm>("alarm", 80) {
 			public Object getValueAt(Alarm a) {
 				return a.getName();
 			}
@@ -49,8 +50,8 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<Alarm>("device.description", 200) {
+		});
+		cols.add(new ProxyColumn<Alarm>("device.description", 200) {
 			public Object getValueAt(Alarm a) {
 				return a.getDescription();
 			}
@@ -61,26 +62,26 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 				String v = value.toString().trim();
 				a.setDescription(v);
 			}
-		},
-		new ProxyColumn<Alarm>("alarm.state", 60) {
+		});
+		cols.add(new ProxyColumn<Alarm>("alarm.state", 60) {
 			public Object getValueAt(Alarm a) {
 				return a.getState();
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new StateCellRenderer();
 			}
-		},
-		new ProxyColumn<Alarm>("controller", 100) {
+		});
+		cols.add(new ProxyColumn<Alarm>("controller", 100) {
 			public Object getValueAt(Alarm a) {
 				return a.getController();
 			}
-		},
-		new ProxyColumn<Alarm>("controller.pin", 50) {
+		});
+		cols.add(new ProxyColumn<Alarm>("controller.pin", 50) {
 			public Object getValueAt(Alarm a) {
 				return a.getPin();
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new alarm table model */

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.weather;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -29,10 +30,10 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<WeatherSensor>("weather.sensor", 120){
+	protected ArrayList<ProxyColumn<WeatherSensor>> createColumns() {
+		ArrayList<ProxyColumn<WeatherSensor>> cols =
+			new ArrayList<ProxyColumn<WeatherSensor>>(2);
+		cols.add(new ProxyColumn<WeatherSensor>("weather.sensor", 120) {
 			public Object getValueAt(WeatherSensor ws) {
 				return ws.getName();
 			}
@@ -44,14 +45,14 @@ public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<WeatherSensor>("location", 300) {
+		});
+		cols.add(new ProxyColumn<WeatherSensor>("location", 300) {
 			public Object getValueAt(WeatherSensor ws) {
 				return GeoLocHelper.getDescription(
 					ws.getGeoLoc());
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new weather sensor table model */

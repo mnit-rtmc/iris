@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -33,10 +34,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<SignGroup>("dms.group", 120) {
+	protected ArrayList<ProxyColumn<SignGroup>> createColumns() {
+		ArrayList<ProxyColumn<SignGroup>> cols =
+			new ArrayList<ProxyColumn<SignGroup>>(2);
+		cols.add(new ProxyColumn<SignGroup>("dms.group", 120) {
 			public Object getValueAt(SignGroup sg) {
 				return sg.getName();
 			}
@@ -48,8 +49,8 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 				if(v.length() > 0)
 					createSignGroup(v);
 			}
-		},
-		new ProxyColumn<SignGroup>("dms.group.member", 50,
+		});
+		cols.add(new ProxyColumn<SignGroup>("dms.group.member", 50,
 			Boolean.class)
 		{
 			public Object getValueAt(SignGroup sg) {
@@ -67,8 +68,8 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 						destroyDmsSignGroup(sg);
 				}
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Lookup a DMS sign group */

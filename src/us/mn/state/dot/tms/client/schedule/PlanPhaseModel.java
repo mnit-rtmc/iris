@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import java.util.ArrayList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
@@ -32,10 +33,12 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<PlanPhase>("action.plan.phase.name", 120) {
+	protected ArrayList<ProxyColumn<PlanPhase>> createColumns() {
+		ArrayList<ProxyColumn<PlanPhase>> cols =
+			new ArrayList<ProxyColumn<PlanPhase>>(3);
+		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.name",
+			120)
+		{
 			public Object getValueAt(PlanPhase p) {
 				return p.getName();
 			}
@@ -47,9 +50,9 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<PlanPhase>("action.plan.phase.hold", 120,
-			Integer.class)
+		});
+		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.hold",
+			120, Integer.class)
 		{
 			public Object getValueAt(PlanPhase p) {
 				return p.getHoldTime();
@@ -61,8 +64,10 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 				if(value instanceof Integer)
 					p.setHoldTime((Integer)value);
 			}
-		},
-		new ProxyColumn<PlanPhase>("action.plan.phase.next", 120) {
+		});
+		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.next",
+			120)
+		{
 			public Object getValueAt(PlanPhase p) {
 				return p.getNextPhase();
 			}
@@ -81,8 +86,8 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 					phase_model));
 				return new DefaultCellEditor(combo);
 			}
-		},
-	    };
+		});
+		return cols;
 	}
 
 	/** Plan phase model */

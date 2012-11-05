@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
@@ -34,10 +35,10 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<ActionPlan>("action.plan.name", 120) {
+	protected ArrayList<ProxyColumn<ActionPlan>> createColumns() {
+		ArrayList<ProxyColumn<ActionPlan>> cols =
+			new ArrayList<ProxyColumn<ActionPlan>>(6);
+		cols.add(new ProxyColumn<ActionPlan>("action.plan.name", 120) {
 			public Object getValueAt(ActionPlan ap) {
 				if(ap != null)
 					return ap.getName();
@@ -53,8 +54,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				if(v.length() > 0)
 					create(v);
 			}
-		},
-		new ProxyColumn<ActionPlan>("device.description", 380) {
+		});
+		cols.add(new ProxyColumn<ActionPlan>("device.description", 380){
 			public Object getValueAt(ActionPlan ap) {
 				if(ap != null)
 					return ap.getDescription();
@@ -68,9 +69,9 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				String v = value.toString().trim();
 				ap.setDescription(v);
 			}
-		},
-		new ProxyColumn<ActionPlan>("action.plan.sync.actions", 80,
-			Boolean.class)
+		});
+		cols.add(new ProxyColumn<ActionPlan>("action.plan.sync.actions",
+			80, Boolean.class)
 		{
 			public Object getValueAt(ActionPlan ap) {
 				if(ap != null)
@@ -85,8 +86,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				if(value instanceof Boolean)
 					ap.setSyncActions((Boolean)value);
 			}
-		},
-		new ProxyColumn<ActionPlan>("action.plan.sticky", 80,
+		});
+		cols.add(new ProxyColumn<ActionPlan>("action.plan.sticky", 80,
 			Boolean.class)
 		{
 			public Object getValueAt(ActionPlan ap) {
@@ -102,8 +103,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				if(value instanceof Boolean)
 					ap.setSticky((Boolean)value);
 			}
-		},
-		new ProxyColumn<ActionPlan>("action.plan.active", 80,
+		});
+		cols.add(new ProxyColumn<ActionPlan>("action.plan.active", 80,
 			Boolean.class)
 		{
 			public Object getValueAt(ActionPlan ap) {
@@ -119,8 +120,10 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				if(value instanceof Boolean)
 					ap.setActive((Boolean)value);
 			}
-		},
-		new ProxyColumn<ActionPlan>("action.plan.default.phase", 100) {
+		});
+		cols.add(new ProxyColumn<ActionPlan>(
+			"action.plan.default.phase", 100)
+		{
 			public Object getValueAt(ActionPlan ap) {
 				if(ap != null)
 					return ap.getDefaultPhase();
@@ -145,8 +148,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 					phase_model));
 				return new DefaultCellEditor(combo);
 			}
-		},
-	    };
+		});
+		return cols;
 	}
 
 	/** Get the value at the specified cell.  Note: this overrides the

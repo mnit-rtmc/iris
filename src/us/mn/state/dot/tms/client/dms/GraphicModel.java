@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Component;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -37,15 +38,17 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class GraphicModel extends ProxyTableModel<Graphic> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Graphic>("device.name", 60) {
+	protected ArrayList<ProxyColumn<Graphic>> createColumns() {
+		ArrayList<ProxyColumn<Graphic>> cols =
+			new ArrayList<ProxyColumn<Graphic>>(6);
+		cols.add(new ProxyColumn<Graphic>("device.name", 60) {
 			public Object getValueAt(Graphic g) {
 				return g.getName();
 			}
-		},
-		new ProxyColumn<Graphic>("graphic.number", 60, Integer.class) {
+		});
+		cols.add(new ProxyColumn<Graphic>("graphic.number", 60,
+			Integer.class)
+		{
 			public Object getValueAt(Graphic g) {
 				return g.getGNumber();
 			}
@@ -56,31 +59,37 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 				if(value instanceof Integer)
 					g.setGNumber((Integer)value);
 			}
-		},
-		new ProxyColumn<Graphic>("graphic.bpp", 30, Integer.class) {
+		});
+		cols.add(new ProxyColumn<Graphic>("graphic.bpp", 30,
+			Integer.class)
+		{
 			public Object getValueAt(Graphic g) {
 				return g.getBpp();
 			}
-		},
-		new ProxyColumn<Graphic>("graphic.width", 44, Integer.class) {
+		});
+		cols.add(new ProxyColumn<Graphic>("graphic.width", 44,
+			Integer.class)
+		{
 			public Object getValueAt(Graphic g) {
 				return g.getWidth();
 			}
-		},
-		new ProxyColumn<Graphic>("graphic.height", 44, Integer.class) {
+		});
+		cols.add(new ProxyColumn<Graphic>("graphic.height", 44,
+			Integer.class)
+		{
 			public Object getValueAt(Graphic g) {
 				return g.getHeight();
 			}
-		},
-		new ProxyColumn<Graphic>("graphic.image", 200) {
+		});
+		cols.add(new ProxyColumn<Graphic>("graphic.image", 200) {
 			public Object getValueAt(Graphic g) {
 				return g;
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new ImageCellRenderer();
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create the image column */

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
@@ -38,15 +39,17 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<LaneUseMulti>("device.name", 80) {
+	protected ArrayList<ProxyColumn<LaneUseMulti>> createColumns() {
+		ArrayList<ProxyColumn<LaneUseMulti>> cols =
+			new ArrayList<ProxyColumn<LaneUseMulti>>(6);
+		cols.add(new ProxyColumn<LaneUseMulti>("device.name", 80) {
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getName();
 			}
-		},
-		new ProxyColumn<LaneUseMulti>("lane.use.multi.indication", 100){
+		});
+		cols.add(new ProxyColumn<LaneUseMulti>(
+			"lane.use.multi.indication", 100)
+		{
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getIndication();
 			}
@@ -72,8 +75,8 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					LaneUseIndication.getDescriptions());
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<LaneUseMulti>("lane.use.multi.msg", 80,
+		});
+		cols.add(new ProxyColumn<LaneUseMulti>("lane.use.multi.msg", 80,
 			Integer.class)
 		{
 			public Object getValueAt(LaneUseMulti lum) {
@@ -88,8 +91,8 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				else
 					lum.setMsgNum(null);
 			}
-		},
-		new ProxyColumn<LaneUseMulti>("graphic.width", 80,
+		});
+		cols.add(new ProxyColumn<LaneUseMulti>("graphic.width", 80,
 			Integer.class)
 		{
 			public Object getValueAt(LaneUseMulti lum) {
@@ -102,8 +105,8 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				if(value instanceof Integer)
 					lum.setWidth((Integer)value);
 			}
-		},
-		new ProxyColumn<LaneUseMulti>("graphic.height", 80,
+		});
+		cols.add(new ProxyColumn<LaneUseMulti>("graphic.height", 80,
 			Integer.class)
 		{
 			public Object getValueAt(LaneUseMulti lum) {
@@ -116,8 +119,8 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				if(value instanceof Integer)
 					lum.setHeight((Integer)value);
 			}
-		},
-		new ProxyColumn<LaneUseMulti>("dms.quick.message", 160) {
+		});
+		cols.add(new ProxyColumn<LaneUseMulti>("dms.quick.message",160){
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getQuickMessage();
 			}
@@ -128,8 +131,8 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				lum.setQuickMessage(QuickMessageHelper.lookup(
 					value.toString()));
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new graphic table model */

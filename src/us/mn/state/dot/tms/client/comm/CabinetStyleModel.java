@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Component;
+import java.util.ArrayList;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -33,10 +34,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<CabinetStyle>("cabinet.style", 90) {
+	protected ArrayList<ProxyColumn<CabinetStyle>> createColumns() {
+		ArrayList<ProxyColumn<CabinetStyle>> cols =
+			new ArrayList<ProxyColumn<CabinetStyle>>(2);
+		cols.add(new ProxyColumn<CabinetStyle>("cabinet.style", 90) {
 			public Object getValueAt(CabinetStyle cs) {
 				return cs.getName();
 			}
@@ -48,8 +49,8 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<CabinetStyle>("cabinet.style.dip", 60) {
+		});
+		cols.add(new ProxyColumn<CabinetStyle>("cabinet.style.dip", 60){
 			public Object getValueAt(CabinetStyle cs) {
 				return cs.getDip();
 			}
@@ -63,8 +64,8 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 			protected TableCellEditor createCellEditor() {
 				return new DipEditor();
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new cabinet style table model */

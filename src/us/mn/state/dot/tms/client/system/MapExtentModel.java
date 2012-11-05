@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.system;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.HashMap;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
@@ -33,10 +34,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class MapExtentModel extends ProxyTableModel<MapExtent> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<MapExtent>("location.map.extent", 160) {
+	protected ArrayList<ProxyColumn<MapExtent>> createColumns() {
+		ArrayList<ProxyColumn<MapExtent>> cols =
+			new ArrayList<ProxyColumn<MapExtent>>(4);
+		cols.add(new ProxyColumn<MapExtent>("location.map.extent", 160){
 			public Object getValueAt(MapExtent me) {
 				return me.getName();
 			}
@@ -48,8 +49,10 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 				if(v.length() > 0)
 					createExtent(v);
 			}
-		},
-		new ProxyColumn<MapExtent>("location.lon", 80, Float.class) {
+		});
+		cols.add(new ProxyColumn<MapExtent>("location.lon", 80,
+			Float.class)
+		{
 			public Object getValueAt(MapExtent me) {
 				return me.getLon();
 			}
@@ -60,8 +63,10 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 				if(value instanceof Float)
 					me.setLon((Float)value);
 			}
-		},
-		new ProxyColumn<MapExtent>("location.lat", 80, Float.class) {
+		});
+		cols.add(new ProxyColumn<MapExtent>("location.lat", 80,
+			Float.class)
+		{
 			public Object getValueAt(MapExtent me) {
 				return me.getLat();
 			}
@@ -72,8 +77,8 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 				if(value instanceof Float)
 					me.setLat((Float)value);
 			}
-		},
-		new ProxyColumn<MapExtent>("location.map.zoom", 80,
+		});
+		cols.add(new ProxyColumn<MapExtent>("location.map.zoom", 80,
 			Integer.class)
 		{
 			public Object getValueAt(MapExtent me) {
@@ -86,8 +91,8 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 				if(value instanceof Integer)
 					me.setZoom((Integer)value);
 			}
-		},
-	    };
+		});
+		return cols;
 	}
 
 	/** Iris client */

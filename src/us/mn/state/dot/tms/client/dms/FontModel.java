@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -27,10 +28,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class FontModel extends ProxyTableModel<Font> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Font>("font", 140) {
+	protected ArrayList<ProxyColumn<Font>> createColumns() {
+		ArrayList<ProxyColumn<Font>> cols =
+			new ArrayList<ProxyColumn<Font>>(7);
+		cols.add(new ProxyColumn<Font>("font", 140) {
 			public Object getValueAt(Font f) {
 				return f.getName();
 			}
@@ -42,8 +43,8 @@ public class FontModel extends ProxyTableModel<Font> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<Font>("font.number", 70,
+		});
+		cols.add(new ProxyColumn<Font>("font.number", 70,
 			Integer.class)
 		{
 			public Object getValueAt(Font f) {
@@ -56,8 +57,8 @@ public class FontModel extends ProxyTableModel<Font> {
 				if(value instanceof Integer)
 					f.setNumber((Integer)value);
 			}
-		},
-		new ProxyColumn<Font>("font.height", 70, Integer.class) {
+		});
+		cols.add(new ProxyColumn<Font>("font.height", 70,Integer.class){
 			public Object getValueAt(Font f) {
 				return f.getHeight();
 			}
@@ -68,8 +69,8 @@ public class FontModel extends ProxyTableModel<Font> {
 				if(value instanceof Integer)
 					f.setHeight((Integer)value);
 			}
-		},
-		new ProxyColumn<Font>("font.width", 70, Integer.class) {
+		});
+		cols.add(new ProxyColumn<Font>("font.width", 70, Integer.class){
 			public Object getValueAt(Font f) {
 				return f.getWidth();
 			}
@@ -80,8 +81,10 @@ public class FontModel extends ProxyTableModel<Font> {
 				if(value instanceof Integer)
 					f.setWidth((Integer)value);
 			}
-		},
-		new ProxyColumn<Font>("font.spacing.line", 90, Integer.class) {
+		});
+		cols.add(new ProxyColumn<Font>("font.spacing.line", 90,
+			Integer.class)
+		{
 			public Object getValueAt(Font f) {
 				return f.getLineSpacing();
 			}
@@ -92,8 +95,10 @@ public class FontModel extends ProxyTableModel<Font> {
 				if(value instanceof Integer)
 					f.setLineSpacing((Integer)value);
 			}
-		},
-		new ProxyColumn<Font>("font.spacing.char", 90, Integer.class) {
+		});
+		cols.add(new ProxyColumn<Font>("font.spacing.char", 90,
+			Integer.class)
+		{
 			public Object getValueAt(Font f) {
 				return f.getCharSpacing();
 			}
@@ -104,8 +109,8 @@ public class FontModel extends ProxyTableModel<Font> {
 				if(value instanceof Integer)
 					f.setCharSpacing((Integer)value);
 			}
-		},
-		new ProxyColumn<Font>("font.version", 74, Integer.class) {
+		});
+		cols.add(new ProxyColumn<Font>("font.version",74,Integer.class){
 			public Object getValueAt(Font f) {
 				return f.getVersionID();
 			}
@@ -116,8 +121,8 @@ public class FontModel extends ProxyTableModel<Font> {
 				if(value instanceof Integer)
 					f.setVersionID((Integer)value);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new font table model */

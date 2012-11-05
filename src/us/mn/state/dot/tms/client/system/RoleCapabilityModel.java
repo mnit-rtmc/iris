@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.util.ArrayList;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Role;
@@ -29,15 +30,15 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Capability>("capability", 120) {
+	protected ArrayList<ProxyColumn<Capability>> createColumns() {
+		ArrayList<ProxyColumn<Capability>> cols =
+			new ArrayList<ProxyColumn<Capability>>(2);
+		cols.add(new ProxyColumn<Capability>("capability", 120) {
 			public Object getValueAt(Capability c) {
 				return c.getName();
 			}
-		},
-		new ProxyColumn<Capability>("capability.assigned", 80,
+		});
+		cols.add(new ProxyColumn<Capability>("capability.assigned", 80,
 			Boolean.class)
 		{
 			public Object getValueAt(Capability c) {
@@ -50,8 +51,8 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 				if(value instanceof Boolean)
 					setAssigned(c, (Boolean)value);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Check if the given capability is assigned to the selected role */

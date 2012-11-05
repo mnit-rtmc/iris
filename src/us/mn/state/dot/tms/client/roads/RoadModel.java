@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.util.ArrayList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
@@ -32,10 +33,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class RoadModel extends ProxyTableModel<Road> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Road>("location.road", 200) {
+	protected ArrayList<ProxyColumn<Road>> createColumns() {
+		ArrayList<ProxyColumn<Road>> cols =
+			new ArrayList<ProxyColumn<Road>>(5);
+		cols.add(new ProxyColumn<Road>("location.road", 200) {
 			public Object getValueAt(Road r) {
 				return r.getName();
 			}
@@ -47,8 +48,8 @@ public class RoadModel extends ProxyTableModel<Road> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<Road>("location.road.abbrev", 80) {
+		});
+		cols.add(new ProxyColumn<Road>("location.road.abbrev", 80) {
 			public Object getValueAt(Road r) {
 				return r.getAbbrev();
 			}
@@ -58,8 +59,8 @@ public class RoadModel extends ProxyTableModel<Road> {
 			public void setValueAt(Road r, Object value) {
 				r.setAbbrev(value.toString());
 			}
-		},
-		new ProxyColumn<Road>("location.road.class", 120) {
+		});
+		cols.add(new ProxyColumn<Road>("location.road.class", 120) {
 			public Object getValueAt(Road r) {
 				return RoadClass.fromOrdinal(r.getRClass());
 			}
@@ -77,8 +78,8 @@ public class RoadModel extends ProxyTableModel<Road> {
 					RoadClass.values());
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<Road>("location.direction", 120) {
+		});
+		cols.add(new ProxyColumn<Road>("location.direction", 120) {
 			public Object getValueAt(Road r) {
 				return Direction.fromOrdinal(r.getDirection());
 			}
@@ -96,8 +97,8 @@ public class RoadModel extends ProxyTableModel<Road> {
 					Direction.values());
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<Road>("location.alt_dir", 120) {
+		});
+		cols.add(new ProxyColumn<Road>("location.alt_dir", 120) {
 			public Object getValueAt(Road r) {
 				return Direction.fromOrdinal(r.getAltDir());
 			}
@@ -115,8 +116,8 @@ public class RoadModel extends ProxyTableModel<Road> {
 					Direction.values());
 				return new DefaultCellEditor(combo);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new road table model */

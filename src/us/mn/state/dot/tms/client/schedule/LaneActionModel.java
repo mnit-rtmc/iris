@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
@@ -37,10 +38,10 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 public class LaneActionModel extends ProxyTableModel<LaneAction> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<LaneAction>("lane.marking", 160) {
+	protected ArrayList<ProxyColumn<LaneAction>> createColumns() {
+		ArrayList<ProxyColumn<LaneAction>> cols =
+			new ArrayList<ProxyColumn<LaneAction>>(2);
+		cols.add(new ProxyColumn<LaneAction>("lane.marking", 160) {
 			public Object getValueAt(LaneAction la) {
 				return la.getLaneMarking();
 			}
@@ -53,8 +54,8 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 				if(lm != null && action_plan != null)
 					create(lm);
 			}
-		},
-		new ProxyColumn<LaneAction>("action.plan.phase", 100) {
+		});
+		cols.add(new ProxyColumn<LaneAction>("action.plan.phase", 100) {
 			public Object getValueAt(LaneAction la) {
 				return la.getPhase();
 			}
@@ -71,8 +72,8 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 					phase_model));
 				return new DefaultCellEditor(combo);
 			}
-		},
-	    };
+		});
+		return cols;
 	}
 
 	/** Currently selected action plan */

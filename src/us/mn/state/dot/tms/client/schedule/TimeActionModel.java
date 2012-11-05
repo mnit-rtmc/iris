@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,10 +41,10 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 public class TimeActionModel extends ProxyTableModel<TimeAction> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<TimeAction>("action.plan.day", 100) {
+	protected ArrayList<ProxyColumn<TimeAction>> createColumns() {
+		ArrayList<ProxyColumn<TimeAction>> cols =
+			new ArrayList<ProxyColumn<TimeAction>>(4);
+		cols.add(new ProxyColumn<TimeAction>("action.plan.day", 100) {
 			public Object getValueAt(TimeAction ta) {
 				if(ta != null)
 					return ta.getDayPlan();
@@ -66,8 +67,8 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 					day_model));
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<TimeAction>("action.plan.date", 100) {
+		});
+		cols.add(new ProxyColumn<TimeAction>("action.plan.date", 100) {
 			public Object getValueAt(TimeAction ta) {
 				if(ta != null)
 					return ta.getSchedDate();
@@ -83,8 +84,8 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 					value.toString());
 				sched_date = TimeActionHelper.formatDate(sd);
 			}
-		},
-		new ProxyColumn<TimeAction>("action.plan.time", 80) {
+		});
+		cols.add(new ProxyColumn<TimeAction>("action.plan.time", 80) {
 			public Object getValueAt(TimeAction ta) {
 				if(ta != null)
 					return ta.getTimeOfDay();
@@ -103,8 +104,8 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 				day_plan = null;
 				sched_date = null;
 			}
-		},
-		new ProxyColumn<TimeAction>("action.plan.phase", 100) {
+		});
+		cols.add(new ProxyColumn<TimeAction>("action.plan.phase", 100) {
 			public Object getValueAt(TimeAction ta) {
 				if(ta != null)
 					return ta.getPhase();
@@ -124,8 +125,8 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 					phase_model));
 				return new DefaultCellEditor(combo);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Get the value at the specified cell.  Note: this overrides the

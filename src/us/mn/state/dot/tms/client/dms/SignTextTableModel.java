@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.util.ArrayList;
 import java.util.TreeSet;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -41,10 +42,10 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	}
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<SignText>("dms.line", 36, Short.class) {
+	protected ArrayList<ProxyColumn<SignText>> createColumns() {
+		ArrayList<ProxyColumn<SignText>> cols =
+			new ArrayList<ProxyColumn<SignText>>(3);
+		cols.add(new ProxyColumn<SignText>("dms.line", 36, Short.class){
 			public Object getValueAt(SignText st) {
 				return st.getLine();
 			}
@@ -57,8 +58,8 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 					st.setLine(n.shortValue());
 				}
 			}
-		},
-		new ProxyColumn<SignText>("dms.multi", 400) {
+		});
+		cols.add(new ProxyColumn<SignText>("dms.multi", 400) {
 			public Object getValueAt(SignText st) {
 				return st.getMulti();
 			}
@@ -78,8 +79,10 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 			protected TableCellRenderer createCellRenderer() {
 				return RENDERER;
 			}
-		},
-		new ProxyColumn<SignText>("dms.priority", 48, Short.class) {
+		});
+		cols.add(new ProxyColumn<SignText>("dms.priority", 48,
+			Short.class)
+		{
 			public Object getValueAt(SignText st) {
 				return st.getPriority();
 			}
@@ -95,8 +98,8 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 			protected TableCellEditor createCellEditor() {
 				return new PriorityCellEditor();
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Format MULTI string */

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.TreeSet;
@@ -49,10 +50,10 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	static protected final Color COLOR_AVAILABLE = new Color(96, 96, 255);
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Controller>("controller", 90) {
+	protected ArrayList<ProxyColumn<Controller>> createColumns() {
+		ArrayList<ProxyColumn<Controller>> cols =
+			new ArrayList<ProxyColumn<Controller>>(7);
+		cols.add(new ProxyColumn<Controller>("controller", 90) {
 			public Object getValueAt(Controller c) {
 				return c.getName();
 			}
@@ -64,14 +65,14 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				if(v.length() > 0)
 					createController(v);
 			}
-		},
-		new ProxyColumn<Controller>("location", 200) {
+		});
+		cols.add(new ProxyColumn<Controller>("location", 200) {
 			public Object getValueAt(Controller c) {
 				return GeoLocHelper.getDescription(
 					c.getCabinet().getGeoLoc());
 			}
-		},
-		new ProxyColumn<Controller>("controller.drop", 60) {
+		});
+		cols.add(new ProxyColumn<Controller>("controller.drop", 60) {
 			public Object getValueAt(Controller c) {
 				return c.getDrop();
 			}
@@ -85,8 +86,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 			protected TableCellEditor createCellEditor() {
 				return new DropCellEditor();
 			}
-		},
-		new ProxyColumn<Controller>("controller.active", 50,
+		});
+		cols.add(new ProxyColumn<Controller>("controller.active", 50,
 			Boolean.class)
 		{
 			public Object getValueAt(Controller c) {
@@ -99,26 +100,26 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				if(value instanceof Boolean)
 					c.setActive((Boolean)value);
 			}
-		},
-		new ProxyColumn<Controller>("comm", 44) {
+		});
+		cols.add(new ProxyColumn<Controller>("comm", 44) {
 			public Object getValueAt(Controller c) {
 				return c;
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new CommCellRenderer();
 			}
-		},
-		new ProxyColumn<Controller>("controller.status", 240) {
+		});
+		cols.add(new ProxyColumn<Controller>("controller.status", 240) {
 			public Object getValueAt(Controller c) {
 				return c.getStatus();
 			}
-		},
-		new ProxyColumn<Controller>("controller.version", 120) {
+		});
+		cols.add(new ProxyColumn<Controller>("controller.version", 120){
 			public Object getValueAt(Controller c) {
 				return c.getVersion();
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Comm link to match controllers */

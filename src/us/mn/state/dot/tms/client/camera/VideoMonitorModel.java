@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -27,10 +28,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<VideoMonitor>("video.monitor", 160) {
+	protected ArrayList<ProxyColumn<VideoMonitor>> createColumns() {
+		ArrayList<ProxyColumn<VideoMonitor>> cols =
+			new ArrayList<ProxyColumn<VideoMonitor>>(3);
+		cols.add(new ProxyColumn<VideoMonitor>("video.monitor", 160) {
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getName();
 			}
@@ -42,8 +43,10 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<VideoMonitor>("device.description", 300) {
+		});
+		cols.add(new ProxyColumn<VideoMonitor>("device.description",
+			300)
+		{
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getDescription();
 			}
@@ -53,8 +56,8 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 			public void setValueAt(VideoMonitor vm, Object value) {
 				vm.setDescription(value.toString());
 			}
-		},
-		new ProxyColumn<VideoMonitor>("video.restricted", 120,
+		});
+		cols.add(new ProxyColumn<VideoMonitor>("video.restricted", 120,
 			Boolean.class)
 		{
 			public Object getValueAt(VideoMonitor vm) {
@@ -67,8 +70,8 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				if(value instanceof Boolean)
 					vm.setRestricted((Boolean)value);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new video monitor table model */

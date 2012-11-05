@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.util.ArrayList;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
@@ -28,15 +29,15 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class ConnectionModel extends ProxyTableModel<Connection> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Connection>("connection.peer", 140) {
+	protected ArrayList<ProxyColumn<Connection>> createColumns() {
+		ArrayList<ProxyColumn<Connection>> cols =
+			new ArrayList<ProxyColumn<Connection>>(2);
+		cols.add(new ProxyColumn<Connection>("connection.peer", 140) {
 			public Object getValueAt(Connection c) {
 				return c.getName();
 			}
-		},
-		new ProxyColumn<Connection>("user", 80) {
+		});
+		cols.add(new ProxyColumn<Connection>("user", 80) {
 			public Object getValueAt(Connection c) {
 				User u = c.getUser();
 				if(u != null)
@@ -44,8 +45,8 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 				else
 					return null;
 			}
-		},
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new connection table model */

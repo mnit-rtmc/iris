@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.Icon;
@@ -47,10 +48,10 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	}
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<CommLink>("comm.link", 90) {
+	protected ArrayList<ProxyColumn<CommLink>> createColumns() {
+		ArrayList<ProxyColumn<CommLink>> cols =
+			new ArrayList<ProxyColumn<CommLink>>(6);
+		cols.add(new ProxyColumn<CommLink>("comm.link", 90) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getName();
 			}
@@ -62,8 +63,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<CommLink>("device.description", 220) {
+		});
+		cols.add(new ProxyColumn<CommLink>("device.description", 220) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getDescription();
 			}
@@ -73,8 +74,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 			public void setValueAt(CommLink cl, Object value) {
 				cl.setDescription(value.toString().trim());
 			}
-		},
-		new ProxyColumn<CommLink>("comm.link.uri", 280) {
+		});
+		cols.add(new ProxyColumn<CommLink>("comm.link.uri", 280) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getUri();
 			}
@@ -84,16 +85,16 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 			public void setValueAt(CommLink cl, Object value) {
 				cl.setUri(value.toString().trim());
 			}
-		},
-		new ProxyColumn<CommLink>("device.status", 44) {
+		});
+		cols.add(new ProxyColumn<CommLink>("device.status", 44) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getStatus();
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new StatusCellRenderer();
 			}
-		},
-		new ProxyColumn<CommLink>("comm.link.protocol", 140) {
+		});
+		cols.add(new ProxyColumn<CommLink>("comm.link.protocol", 140) {
 			public Object getValueAt(CommLink cl) {
 				return PROTOCOLS.get(cl.getProtocol());
 			}
@@ -109,8 +110,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 					PROTOCOLS.toArray());
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<CommLink>("comm.link.timeout", 60) {
+		});
+		cols.add(new ProxyColumn<CommLink>("comm.link.timeout", 60) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getTimeout();
 			}
@@ -124,8 +125,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 			protected TableCellEditor createCellEditor() {
 				return new TimeoutCellEditor(8000);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new comm link table model */

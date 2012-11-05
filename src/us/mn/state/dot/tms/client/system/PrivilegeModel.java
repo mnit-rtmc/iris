@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
@@ -29,10 +30,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class PrivilegeModel extends ProxyTableModel<Privilege> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Privilege>("privilege.pattern", 300) {
+	protected ArrayList<ProxyColumn<Privilege>> createColumns() {
+		ArrayList<ProxyColumn<Privilege>> cols =
+			new ArrayList<ProxyColumn<Privilege>>(5);
+		cols.add(new ProxyColumn<Privilege>("privilege.pattern", 300) {
 			public Object getValueAt(Privilege p) {
 				return p.getPattern();
 			}
@@ -46,8 +47,10 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				else
 					p.setPattern(v);
 			}
-		},
-		new ProxyColumn<Privilege>("privilege.read", 60, Boolean.class){
+		});
+		cols.add(new ProxyColumn<Privilege>("privilege.read", 60,
+			Boolean.class)
+		{
 			public Object getValueAt(Privilege p) {
 				return p.getPrivR();
 			}
@@ -58,8 +61,10 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				if(value instanceof Boolean)
 					p.setPrivR((Boolean)value);
 			}
-		},
-		new ProxyColumn<Privilege>("privilege.write", 60,Boolean.class){
+		});
+		cols.add(new ProxyColumn<Privilege>("privilege.write", 60,
+			Boolean.class)
+		{
 			public Object getValueAt(Privilege p) {
 				return p.getPrivW();
 			}
@@ -70,8 +75,10 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				if(value instanceof Boolean)
 					p.setPrivW((Boolean)value);
 			}
-		},
-		new ProxyColumn<Privilege>("privilege.create",60,Boolean.class){
+		});
+		cols.add(new ProxyColumn<Privilege>("privilege.create", 60,
+			Boolean.class)
+		{
 			public Object getValueAt(Privilege p) {
 				return p.getPrivC();
 			}
@@ -82,8 +89,10 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				if(value instanceof Boolean)
 					p.setPrivC((Boolean)value);
 			}
-		},
-		new ProxyColumn<Privilege>("privilege.del", 60, Boolean.class) {
+		});
+		cols.add(new ProxyColumn<Privilege>("privilege.del", 60,
+			Boolean.class)
+		{
 			public Object getValueAt(Privilege p) {
 				return p.getPrivD();
 			}
@@ -94,8 +103,8 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				if(value instanceof Boolean)
 					p.setPrivD((Boolean)value);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Capability associated with privileges */

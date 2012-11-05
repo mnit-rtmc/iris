@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.system;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -37,10 +38,12 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<SystemAttribute>("system.attribute.name", 200) {
+	protected ArrayList<ProxyColumn<SystemAttribute>> createColumns() {
+		ArrayList<ProxyColumn<SystemAttribute>> cols =
+			new ArrayList<ProxyColumn<SystemAttribute>>(2);
+		cols.add(new ProxyColumn<SystemAttribute>(
+			"system.attribute.name", 200)
+		{
 			public Object getValueAt(SystemAttribute sa) {
 				return sa.getName();
 			}
@@ -53,8 +56,10 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 			protected TableCellRenderer createCellRenderer() {
 				return new NameCellRenderer();
 			}
-		},
-		new ProxyColumn<SystemAttribute>("system.attribute.value", 340){
+		});
+		cols.add(new ProxyColumn<SystemAttribute>(
+			"system.attribute.value", 340)
+		{
 			public Object getValueAt(SystemAttribute sa) {
 				return sa.getValue();
 			}
@@ -72,8 +77,8 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 			protected TableCellRenderer createCellRenderer() {
 				return new ValueCellRenderer();
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new table model */

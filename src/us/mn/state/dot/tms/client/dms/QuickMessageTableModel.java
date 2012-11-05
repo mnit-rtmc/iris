@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroupHelper;
@@ -31,10 +32,12 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<QuickMessage>("quick.message.name", 100) {
+	protected ArrayList<ProxyColumn<QuickMessage>> createColumns() {
+		ArrayList<ProxyColumn<QuickMessage>> cols =
+			new ArrayList<ProxyColumn<QuickMessage>>(3);
+		cols.add(new ProxyColumn<QuickMessage>("quick.message.name",
+			100)
+		{
 			public Object getValueAt(QuickMessage qm) {
 				return qm.getName();
 			}
@@ -46,8 +49,8 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<QuickMessage>("dms.group", 120) {
+		});
+		cols.add(new ProxyColumn<QuickMessage>("dms.group", 120) {
 			public Object getValueAt(QuickMessage qm) {
 				return qm.getSignGroup();
 			}
@@ -58,8 +61,10 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				String v = value.toString().trim();
 				qm.setSignGroup(SignGroupHelper.lookup(v));
 			}
-		},
-		new ProxyColumn<QuickMessage>("quick.message.multi", 680) {
+		});
+		cols.add(new ProxyColumn<QuickMessage>("quick.message.multi",
+			680)
+		{
 			public Object getValueAt(QuickMessage qm) {
 				return qm.getMulti();
 			}
@@ -70,8 +75,8 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				qm.setMulti(MultiParser.normalize(
 					value.toString()));
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new table model.

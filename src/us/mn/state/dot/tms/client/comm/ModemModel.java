@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
+import java.util.ArrayList;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.client.Session;
@@ -28,10 +29,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class ModemModel extends ProxyTableModel<Modem> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Modem>("modem", 80) {
+	protected ArrayList<ProxyColumn<Modem>> createColumns() {
+		ArrayList<ProxyColumn<Modem>> cols =
+			new ArrayList<ProxyColumn<Modem>>(4);
+		cols.add(new ProxyColumn<Modem>("modem", 80) {
 			public Object getValueAt(Modem m) {
 				return m.getName();
 			}
@@ -43,8 +44,8 @@ public class ModemModel extends ProxyTableModel<Modem> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<Modem>("comm.link.uri", 280) {
+		});
+		cols.add(new ProxyColumn<Modem>("comm.link.uri", 280) {
 			public Object getValueAt(Modem m) {
 				return m.getUri();
 			}
@@ -54,8 +55,8 @@ public class ModemModel extends ProxyTableModel<Modem> {
 			public void setValueAt(Modem m, Object value) {
 				m.setUri(value.toString().trim());
 			}
-		},
-		new ProxyColumn<Modem>("modem.config", 200) {
+		});
+		cols.add(new ProxyColumn<Modem>("modem.config", 200) {
 			public Object getValueAt(Modem m) {
 				return m.getConfig();
 			}
@@ -65,8 +66,8 @@ public class ModemModel extends ProxyTableModel<Modem> {
 			public void setValueAt(Modem m, Object value) {
 				m.setConfig(value.toString().trim());
 			}
-		},
-		new ProxyColumn<Modem>("modem.timeout", 80) {
+		});
+		cols.add(new ProxyColumn<Modem>("modem.timeout", 80) {
 			public Object getValueAt(Modem m) {
 				return m.getTimeout();
 			}
@@ -80,8 +81,8 @@ public class ModemModel extends ProxyTableModel<Modem> {
 			protected TableCellEditor createCellEditor() {
 				return new TimeoutCellEditor(60000);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new modem table model */

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCS;
@@ -29,15 +30,15 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class LCSTableModel extends ProxyTableModel<LCS> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<LCS>("lcs.lane", 36, Integer.class) {
+	protected ArrayList<ProxyColumn<LCS>> createColumns() {
+		ArrayList<ProxyColumn<LCS>> cols =
+			new ArrayList<ProxyColumn<LCS>>(2);
+		cols.add(new ProxyColumn<LCS>("lcs.lane", 36, Integer.class) {
 			public Object getValueAt(LCS lcs) {
 				return lcs.getLane();
 			}
-		},
-		new ProxyColumn<LCS>("device.name", 140) {
+		});
+		cols.add(new ProxyColumn<LCS>("device.name", 140) {
 			public Object getValueAt(LCS lcs) {
 				return lcs.getName();
 			}
@@ -49,8 +50,8 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 				if(v.length() > 0)
 					createLCS(v, getRowCount());
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new LCS */

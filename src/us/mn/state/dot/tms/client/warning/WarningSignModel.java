@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.warning;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -29,10 +30,10 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 public class WarningSignModel extends ProxyTableModel<WarningSign> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<WarningSign>("warning.sign", 200) {
+	protected ArrayList<ProxyColumn<WarningSign>> createColumns() {
+		ArrayList<ProxyColumn<WarningSign>> cols =
+			new ArrayList<ProxyColumn<WarningSign>>(2);
+		cols.add(new ProxyColumn<WarningSign>("warning.sign", 200) {
 			public Object getValueAt(WarningSign ws) {
 				return ws.getName();
 			}
@@ -44,14 +45,14 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<WarningSign>("location", 300) {
+		});
+		cols.add(new ProxyColumn<WarningSign>("location", 300) {
 			public Object getValueAt(WarningSign ws) {
 				return GeoLocHelper.getDescription(
 					ws.getGeoLoc());
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new warning sign table model */

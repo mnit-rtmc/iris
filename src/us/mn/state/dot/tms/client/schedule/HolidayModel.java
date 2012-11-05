@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.Component;
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.TreeSet;
@@ -97,10 +98,10 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	}
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Holiday>("action.plan.assigned", 80,
+	protected ArrayList<ProxyColumn<Holiday>> createColumns() {
+		ArrayList<ProxyColumn<Holiday>> cols =
+			new ArrayList<ProxyColumn<Holiday>>(7);
+		cols.add(new ProxyColumn<Holiday>("action.plan.assigned", 80,
 			Boolean.class)
 		{
 			public Object getValueAt(Holiday h) {
@@ -113,8 +114,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				if(value instanceof Boolean)
 					setAssigned(h, (Boolean)value);
 			}
-		},
-		new ProxyColumn<Holiday>("action.plan.holiday", 200) {
+		});
+		cols.add(new ProxyColumn<Holiday>("action.plan.holiday", 200) {
 			public Object getValueAt(Holiday h) {
 				return h.getName();
 			}
@@ -126,8 +127,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<Holiday>("action.plan.month", 100) {
+		});
+		cols.add(new ProxyColumn<Holiday>("action.plan.month", 100) {
 			public Object getValueAt(Holiday h) {
 				return MONTHS.get(h.getMonth() + 1);
 			}
@@ -142,8 +143,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 					MONTHS.toArray());
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<Holiday>("action.plan.day.name", 64) {
+		});
+		cols.add(new ProxyColumn<Holiday>("action.plan.day.name", 64) {
 			public Object getValueAt(Holiday h) {
 				return DAYS.get(h.getDay());
 			}
@@ -157,8 +158,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				JComboBox combo = new JComboBox(DAYS.toArray());
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<Holiday>("action.plan.week", 80) {
+		});
+		cols.add(new ProxyColumn<Holiday>("action.plan.week", 80) {
 			public Object getValueAt(Holiday h) {
 				return WEEKS.get(h.getWeek() + 1);
 			}
@@ -173,8 +174,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 					WEEKS.toArray());
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<Holiday>("action.plan.weekday", 100) {
+		});
+		cols.add(new ProxyColumn<Holiday>("action.plan.weekday", 100) {
 			public Object getValueAt(Holiday h) {
 				return WEEKDAYS.get(h.getWeekday());
 			}
@@ -189,8 +190,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 					WEEKDAYS.toArray());
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<Holiday>("action.plan.day.shift", 64) {
+		});
+		cols.add(new ProxyColumn<Holiday>("action.plan.day.shift", 64) {
 			public Object getValueAt(Holiday h) {
 				return SHIFTS.get(h.getShift() + 2);
 			}
@@ -205,8 +206,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 					SHIFTS.toArray());
 				return new DefaultCellEditor(combo);
 			}
-		},
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new holiday table model */

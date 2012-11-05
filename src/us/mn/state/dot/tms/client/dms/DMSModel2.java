@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.util.ArrayList;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -33,10 +34,10 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 public class DMSModel2 extends ProxyTableModel<DMS> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<DMS>("dms", 40) {
+	protected ArrayList<ProxyColumn<DMS>> createColumns() {
+		ArrayList<ProxyColumn<DMS>> cols =
+			new ArrayList<ProxyColumn<DMS>>(9);
+		cols.add(new ProxyColumn<DMS>("dms", 40) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
 			}
@@ -48,53 +49,55 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<DMS>("location", 200) {
+		});
+		cols.add(new ProxyColumn<DMS>("location", 200) {
 			public Object getValueAt(DMS d) {
 				return GeoLocHelper.getDescription(
 					d.getGeoLoc());
 			}
-		},
-		new ProxyColumn<DMS>("location.dir", 30) {
+		});
+		cols.add(new ProxyColumn<DMS>("location.dir", 30) {
 			public Object getValueAt(DMS d) {
 				return DMSHelper.getRoadDir(d);
 			}
-		},
-		new ProxyColumn<DMS>("dms.aws.allowed", 80, Boolean.class) {
+		});
+		cols.add(new ProxyColumn<DMS>("dms.aws.allowed", 80,
+			Boolean.class)
+		{
 			public Object getValueAt(DMS d) {
 				return d.getAwsAllowed();
 			}
-		},
-		new ProxyColumn<DMS>("device.style.aws.controlled", 80,
+		});
+		cols.add(new ProxyColumn<DMS>("device.style.aws.controlled", 80,
 			Boolean.class)
 		{
 			public Object getValueAt(DMS d) {
 				return d.getAwsControlled();
 			}
-		},
-		new ProxyColumn<DMS>("dms.owner", 60) {
+		});
+		cols.add(new ProxyColumn<DMS>("dms.owner", 60) {
 			public Object getValueAt(DMS d) {
 				User u = d.getOwnerCurrent();
 				String name = (u == null ? "" : u.getName());
 				return (name == null ? "" : name);
 			}
-		},
-		new ProxyColumn<DMS>("device.status", 100) {
+		});
+		cols.add(new ProxyColumn<DMS>("device.status", 100) {
 			public Object getValueAt(DMS d) {
 				return DMSHelper.getAllStyles(d);
 			}
-		},
-		new ProxyColumn<DMS>("dms.model", 40) {
+		});
+		cols.add(new ProxyColumn<DMS>("dms.model", 40) {
 			public Object getValueAt(DMS d) {
 				return d.getModel();
 			}
-		},
-		new ProxyColumn<DMS>("dms.access", 140) {
+		});
+		cols.add(new ProxyColumn<DMS>("dms.access", 140) {
 			public Object getValueAt(DMS d) {
 				return d.getSignAccess();
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new DMS table model */

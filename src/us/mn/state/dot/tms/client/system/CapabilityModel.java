@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.util.ArrayList;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -27,10 +28,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class CapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Capability>("capability.name", 120) {
+	protected ArrayList<ProxyColumn<Capability>> createColumns() {
+		ArrayList<ProxyColumn<Capability>> cols =
+			new ArrayList<ProxyColumn<Capability>>(2);
+		cols.add(new ProxyColumn<Capability>("capability.name", 120) {
 			public Object getValueAt(Capability c) {
 				return c.getName();
 			}
@@ -42,8 +43,8 @@ public class CapabilityModel extends ProxyTableModel<Capability> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<Capability>("capability.enabled", 60,
+		});
+		cols.add(new ProxyColumn<Capability>("capability.enabled", 60,
 			Boolean.class)
 		{
 			public Object getValueAt(Capability c) {
@@ -56,8 +57,8 @@ public class CapabilityModel extends ProxyTableModel<Capability> {
 				if(value instanceof Boolean)
 					c.setEnabled((Boolean)value);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new capability table model */

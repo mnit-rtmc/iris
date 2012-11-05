@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.util.ArrayList;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -27,10 +28,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class UserModel extends ProxyTableModel<User> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<User>("user", 100) {
+	protected ArrayList<ProxyColumn<User>> createColumns() {
+		ArrayList<ProxyColumn<User>> cols =
+			new ArrayList<ProxyColumn<User>>(1);
+		cols.add(new ProxyColumn<User>("user", 100) {
 			public Object getValueAt(User u) {
 				return u.getName();
 			}
@@ -42,8 +43,8 @@ public class UserModel extends ProxyTableModel<User> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new user table model */

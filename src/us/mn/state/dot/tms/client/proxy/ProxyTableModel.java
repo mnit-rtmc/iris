@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.table.AbstractTableModel;
@@ -43,7 +44,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	protected final TypeCache<T> cache;
 
 	/** Proxy columns */
-	protected final ProxyColumn<T>[] columns;
+	private final ArrayList<ProxyColumn<T>> columns;
 
 	/** Create an empty set of proxies */
 	protected TreeSet<T> createProxySet() {
@@ -73,17 +74,17 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Create the columns in the model via method, which is called
 	 * prior to subclass init blocks and constructors. */
-	abstract protected ProxyColumn<T>[] createColumns();
+	abstract protected ArrayList<ProxyColumn<T>> createColumns();
 
 	/** Get the count of columns in the table */
 	public int getColumnCount() {
-		return columns.length;
+		return columns.size();
 	}
 
 	/** Get the proxy column at the given column index */
-	public ProxyColumn getProxyColumn(int col) {
-		if(col >= 0 && col < columns.length)
-			return columns[col];
+	public ProxyColumn<T> getProxyColumn(int col) {
+		if(col >= 0 && col < columns.size())
+			return columns.get(col);
 		else
 			return null;
 	}
@@ -124,8 +125,8 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		for(int i = 0; i < columns.length; ++i)
-			columns[i].addColumn(m, i);
+		for(int i = 0; i < columns.size(); ++i)
+			columns.get(i).addColumn(m, i);
 		return m;
 	}
 

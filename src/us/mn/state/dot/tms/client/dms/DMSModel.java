@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -29,10 +30,10 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 public class DMSModel extends ProxyTableModel<DMS> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<DMS>("dms", 200) {
+	protected ArrayList<ProxyColumn<DMS>> createColumns() {
+		ArrayList<ProxyColumn<DMS>> cols =
+			new ArrayList<ProxyColumn<DMS>>(2);
+		cols.add(new ProxyColumn<DMS>("dms", 200) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
 			}
@@ -44,14 +45,14 @@ public class DMSModel extends ProxyTableModel<DMS> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<DMS>("location", 300) {
+		});
+		cols.add(new ProxyColumn<DMS>("location", 300) {
 			public Object getValueAt(DMS d) {
 				return GeoLocHelper.getDescription(
 					d.getGeoLoc());
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new DMS table model */

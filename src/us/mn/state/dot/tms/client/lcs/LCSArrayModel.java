@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -29,10 +30,10 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<LCSArray>("lcs.array", 200) {
+	protected ArrayList<ProxyColumn<LCSArray>> createColumns() {
+		ArrayList<ProxyColumn<LCSArray>> cols =
+			new ArrayList<ProxyColumn<LCSArray>>(2);
+		cols.add(new ProxyColumn<LCSArray>("lcs.array", 200) {
 			public Object getValueAt(LCSArray a) {
 				return a.getName();
 			}
@@ -44,13 +45,13 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<LCSArray>("location", 300) {
+		});
+		cols.add(new ProxyColumn<LCSArray>("location", 300) {
 			public Object getValueAt(LCSArray a) {
 				return LCSArrayHelper.lookupLocation(a);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new LCS array table model */

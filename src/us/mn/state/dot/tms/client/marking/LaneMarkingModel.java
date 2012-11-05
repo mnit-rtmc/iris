@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.marking;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -29,10 +30,10 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<LaneMarking>("lane.marking", 120) {
+	protected ArrayList<ProxyColumn<LaneMarking>> createColumns() {
+		ArrayList<ProxyColumn<LaneMarking>> cols =
+			new ArrayList<ProxyColumn<LaneMarking>>(2);
+		cols.add(new ProxyColumn<LaneMarking>("lane.marking", 120) {
 			public Object getValueAt(LaneMarking lm) {
 				return lm.getName();
 			}
@@ -44,14 +45,14 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 				if(v.length() > 0)
 					cache.createObject(v);
 			}
-		},
-		new ProxyColumn<LaneMarking>("location", 300) {
+		});
+		cols.add(new ProxyColumn<LaneMarking>("location", 300) {
 			public Object getValueAt(LaneMarking lm) {
 				return GeoLocHelper.getDescription(
 					lm.getGeoLoc());
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new lane marking table model */

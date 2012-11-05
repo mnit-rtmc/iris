@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
@@ -37,10 +38,10 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 public class MeterActionModel extends ProxyTableModel<MeterAction> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<MeterAction>("ramp.meter.long", 160) {
+	protected ArrayList<ProxyColumn<MeterAction>> createColumns() {
+		ArrayList<ProxyColumn<MeterAction>> cols =
+			new ArrayList<ProxyColumn<MeterAction>>(2);
+		cols.add(new ProxyColumn<MeterAction>("ramp.meter.long", 160) {
 			public Object getValueAt(MeterAction ma) {
 				return ma.getRampMeter();
 			}
@@ -53,8 +54,8 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 				if(rm != null && action_plan != null)
 					create(rm);
 			}
-		},
-		new ProxyColumn<MeterAction>("action.plan.phase", 100) {
+		});
+		cols.add(new ProxyColumn<MeterAction>("action.plan.phase", 100){
 			public Object getValueAt(MeterAction ma) {
 				return ma.getPhase();
 			}
@@ -71,8 +72,8 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 					phase_model));
 				return new DefaultCellEditor(combo);
 			}
-		},
-	    };
+		});
+		return cols;
 	}
 
 	/** Currently selected action plan */

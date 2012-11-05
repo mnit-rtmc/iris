@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -28,20 +29,20 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class StationModel extends ProxyTableModel<Station> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Station>("detector.station", 60) {
+	protected ArrayList<ProxyColumn<Station>> createColumns() {
+		ArrayList<ProxyColumn<Station>> cols =
+			new ArrayList<ProxyColumn<Station>>(2);
+		cols.add(new ProxyColumn<Station>("detector.station", 60) {
 			public Object getValueAt(Station s) {
 				return s.getName();
 			}
-		},
-		new ProxyColumn<Station>("detector.label", 150) {
+		});
+		cols.add(new ProxyColumn<Station>("detector.label", 150) {
 			public Object getValueAt(Station s) {
 				return StationHelper.getLabel(s);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Create a new station table model */

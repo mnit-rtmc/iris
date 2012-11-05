@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
@@ -64,10 +65,12 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	};
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<DmsAction>("action.plan.dms.group", 120) {
+	protected ArrayList<ProxyColumn<DmsAction>> createColumns() {
+		ArrayList<ProxyColumn<DmsAction>> cols =
+			new ArrayList<ProxyColumn<DmsAction>>(5);
+		cols.add(new ProxyColumn<DmsAction>("action.plan.dms.group",
+			120)
+		{
 			public Object getValueAt(DmsAction da) {
 				return da.getSignGroup();
 			}
@@ -80,8 +83,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				if(sg != null && action_plan != null)
 					create(sg);
 			}
-		},
-		new ProxyColumn<DmsAction>("action.plan.phase", 100) {
+		});
+		cols.add(new ProxyColumn<DmsAction>("action.plan.phase", 100) {
 			public Object getValueAt(DmsAction da) {
 				return da.getPhase();
 			}
@@ -98,8 +101,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 					phase_model));
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<DmsAction>("quick.message", 160) {
+		});
+		cols.add(new ProxyColumn<DmsAction>("quick.message", 160) {
 			public Object getValueAt(DmsAction da) {
 				return da.getQuickMessage();
 			}
@@ -111,8 +114,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				da.setQuickMessage(
 					QuickMessageHelper.lookup(v));
 			}
-		},
-		new ProxyColumn<DmsAction>("dms.priority.activation",
+		});
+		cols.add(new ProxyColumn<DmsAction>("dms.priority.activation",
 			120)
 		{
 			public Object getValueAt(DmsAction da) {
@@ -133,8 +136,10 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				JComboBox combo = new JComboBox(A_PRIORITIES);
 				return new DefaultCellEditor(combo);
 			}
-		},
-		new ProxyColumn<DmsAction>("dms.priority.run.time", 120) {
+		});
+		cols.add(new ProxyColumn<DmsAction>("dms.priority.run.time",
+			120)
+		{
 			public Object getValueAt(DmsAction da) {
 				return DMSMessagePriority.fromOrdinal(
 				       da.getRunTimePriority());
@@ -153,8 +158,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				JComboBox combo = new JComboBox(R_PRIORITIES);
 				return new DefaultCellEditor(combo);
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Currently selected action plan */
