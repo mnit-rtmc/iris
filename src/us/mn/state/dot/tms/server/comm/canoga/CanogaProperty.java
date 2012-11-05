@@ -152,8 +152,11 @@ abstract public class CanogaProperty extends ControllerProperty {
 		request = req;
 	}
 
+	/** Get the expected number of octets in response */
+	abstract protected int expectedResponseOctets();
+
 	/** Get a response from an input stream */
-	protected byte[] getResponse(InputStream is) throws IOException {
+	private byte[] getResponse(InputStream is) throws IOException {
 		byte[] buf = new byte[expectedResponseOctets()];
 		for(int i = 0, tries = 0; i < buf.length; tries++) {
 			if(tries > MAX_TRIES)
@@ -167,15 +170,17 @@ abstract public class CanogaProperty extends ControllerProperty {
 	}
 
 	/** Validate a response message */
-	protected void validateResponse(byte[] req, byte[] res)
+	private void validateResponse(byte[] req, byte[] res)
 		throws ParsingException
 	{
+		if(res.length < 8)
+			throw new ParsingException("MESSAGE TOO SHORT");
 		if(res[OFF_HEADER] != '<')
 			throw new ParsingException("INVALID HEADER");
+		if(res.length != parse_hex(res, OFF_LENGTH))
+			throw new ParsingException("INVALID LENGTH");
 		if(res[res.length - 1] != '>')
 			throw new ParsingException("INVALID TERMINATOR");
-		if(res.length < 8 || res.length != parse_hex(res, OFF_LENGTH))
-			throw new ParsingException("INVALID LENGTH");
 		if(res[OFF_ADDRESS] != req[OFF_ADDRESS])
 			throw new ParsingException("DROP ADDRESS MISMATCH");
 		if(res[OFF_MTYPE] != req[OFF_MTYPE])
@@ -183,13 +188,8 @@ abstract public class CanogaProperty extends ControllerProperty {
 		validateChecksum(res);
 	}
 
-	/** Get the message payload */
-	protected String getPayload(byte[] res) {
-		return new String(res, OFF_PAYLOAD, res.length - 8);
-	}
-
 	/** Get response from the detector card */
-	protected byte[] doResponse(InputStream is, byte[] req)
+	private byte[] doResponse(InputStream is, byte[] req)
 		throws IOException
 	{
 		byte[] res = getResponse(is);
@@ -197,8 +197,11 @@ abstract public class CanogaProperty extends ControllerProperty {
 		return res;
 	}
 
-	/** Get the expected number of octets in response */
-	abstract protected int expectedResponseOctets();
+	/** Get the message payload */
+	protected String getPayload(byte[] res) {
+		assert res.length >= 8;
+		return new String(res, OFF_PAYLOAD, res.length - 8);
+	}
 
 	/** Encode a QUERY request */
 	public void encodeQuery(OutputStream os, int drop) throws IOException {
