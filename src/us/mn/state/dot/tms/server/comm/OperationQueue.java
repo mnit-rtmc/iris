@@ -22,14 +22,14 @@ import java.io.PrintStream;
  *
  * @author Douglas Lau
  */
-public final class OperationQueue {
+public final class OperationQueue<T extends ControllerProperty> {
 
 	/** Front node in the queue */
-	private Node front = null;
+	private Node<T> front = null;
 
 	/** Current working operation.  This is needed so that an "equal"
 	 * operation cannot be added while work is in progress. */
-	private Operation work = null;
+	private Operation<T> work = null;
 
 	/** Flag to tell when the poller is closing */
 	private boolean closing = false;
@@ -40,7 +40,7 @@ public final class OperationQueue {
 	}
 
 	/** Enqueue a new operation */
-	public synchronized boolean enqueue(Operation op) {
+	public synchronized boolean enqueue(Operation<T> op) {
 		if(shouldAdd(op) && op.begin()) {
 			add(op);
 			return true;
@@ -49,17 +49,17 @@ public final class OperationQueue {
 	}
 
 	/** Check if an operation should be added to the queue */
-	private boolean shouldAdd(Operation op) {
+	private boolean shouldAdd(Operation<T> op) {
 		return !closing && !contains(op);
 	}
 
 	/** Check if the queue contains a given operation */
-	private boolean contains(Operation op) {
+	private boolean contains(Operation<T> op) {
 		if(op.equals(work))
 			return true;
-		Node node = front;
+		Node<T> node = front;
 		while(node != null) {
-			Operation nop = node.operation;
+			Operation<T> nop = node.operation;
 			if(op.equals(nop) && !nop.isDone())
 				return true;
 			node = node.next;
@@ -68,17 +68,17 @@ public final class OperationQueue {
 	}
 
 	/** Add an operation to the queue */
-	private void add(Operation op) {
+	private void add(Operation<T> op) {
 		PriorityLevel priority = op.getPriority();
-		Node prev = null;
-		Node node = front;
+		Node<T> prev = null;
+		Node<T> node = front;
 		while(node != null) {
 			if(priority.ordinal() < node.priority.ordinal())
 				break;
 			prev = node;
 			node = node.next;
 		}
-		node = new Node(op, node);
+		node = new Node<T>(op, node);
 		if(prev == null)
 			front = node;
 		else
@@ -87,7 +87,7 @@ public final class OperationQueue {
 	}
 
 	/** Requeue an in-progress operation */
-	public synchronized boolean requeue(Operation op) {
+	public synchronized boolean requeue(Operation<T> op) {
 		if((remove(op) == op) && !closing) {
 			add(op);
 			return true;
@@ -96,13 +96,13 @@ public final class OperationQueue {
 	}
 
 	/** Remove an operation from the queue */
-	private Operation remove(Operation op) {
+	private Operation<T> remove(Operation<T> op) {
 		if(op == work) {
 			work = null;
 			return op;
 		}
-		Node prev = null;
-		Node node = front;
+		Node<T> prev = null;
+		Node<T> node = front;
 		while(node != null) {
 			if(node.operation == op) {
 				if(prev == null)
@@ -123,7 +123,7 @@ public final class OperationQueue {
 	}
 
 	/** Get the next operation from the queue (and remove it) */
-	public synchronized Operation next() {
+	public synchronized Operation<T> next() {
 		work = null;
 		while(!hasNext()) {
 			try {
@@ -139,11 +139,11 @@ public final class OperationQueue {
 	}
 
 	/** Inner class for nodes in the queue */
-	static protected final class Node {
-		final Operation operation;
+	static protected final class Node<T extends ControllerProperty> {
+		final Operation<T> operation;
 		final PriorityLevel priority;
-		Node next;
-		Node(Operation op, Node n) {
+		Node<T> next;
+		Node(Operation<T> op, Node<T> n) {
 			operation = op;
 			priority = op.getPriority();
 			next = n;
@@ -152,7 +152,7 @@ public final class OperationQueue {
 
 	/** Do something to each operation in the queue */
 	public synchronized void forEach(OperationHandler handler) {
-		Node node = front;
+		Node<T> node = front;
 		while(node != null) {
 			handler.handle(node.priority, node.operation);
 			node = node.next;
@@ -161,8 +161,8 @@ public final class OperationQueue {
 
 	/** Print the contents of the queue to the given stream */
 	public void print(final PrintStream ps) {
-		forEach(new OperationHandler() {
-			public void handle(PriorityLevel prio, Operation op) {
+		forEach(new OperationHandler<T>() {
+			public void handle(PriorityLevel prio, Operation<T> op){
 				ps.println("\t" + prio + "\t" + op);
 			}
 		});

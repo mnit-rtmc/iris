@@ -117,7 +117,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Add an operation to the message poller */
-	protected void addOperation(Operation op) {
+	protected void addOperation(Operation<T> op) {
 		if(!queue.enqueue(op))
 			plog("DROPPING " + op);
 	}
@@ -158,7 +158,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	protected void drainQueue() {
 		queue.close();
 		while(queue.hasNext()) {
-			Operation o = queue.next();
+			Operation<T> o = queue.next();
 			o.handleCommError(EventType.QUEUE_DRAINED, status);
 			if(hung_up)
 				o.setSucceeded();
@@ -169,7 +169,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Perform operations on the poll queue */
 	protected void performOperations() throws IOException {
 		while(true) {
-			Operation o = queue.next();
+			Operation<T> o = queue.next();
 			if(o instanceof KillThread)
 				break;
 			if(o instanceof OpController)
@@ -222,8 +222,10 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Handle device contention.  Another operation has the device lock.
 	 * Ensure that we don't have a priority inversion problem. */
-	private void handleContention(Operation op,DeviceContentionException e){
-		Operation oc = e.operation;
+	private void handleContention(Operation<T> op,
+		DeviceContentionException e)
+	{
+		Operation<T> oc = e.operation;
 		if(oc.getPriority().ordinal() > op.getPriority().ordinal()) {
 			oc.setPriority(op.getPriority());
 			// If, for some crazy reason, the operation is
@@ -236,7 +238,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Requeue an in-progress operation */
-	protected boolean requeueOperation(Operation op) {
+	protected boolean requeueOperation(Operation<T> op) {
 		if(queue.requeue(op))
 			return true;
 		else {

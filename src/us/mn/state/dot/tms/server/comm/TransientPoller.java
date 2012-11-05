@@ -21,17 +21,18 @@ package us.mn.state.dot.tms.server.comm;
  *
  * @author Douglas Lau
  */
-abstract public class TransientPoller extends MessagePoller {
-
+abstract public class TransientPoller<T extends ControllerProperty>
+	extends MessagePoller<T>
+{
 	/** Create a new transient poller */
 	protected TransientPoller(String name, Messenger m) {
 		super(name, m);
 	}
 
 	/** Add an operation to the transient poller */
-	protected void addOperation(final Operation op) {
-		queue.forEach(new OperationHandler() {
-			public void handle(PriorityLevel prio, Operation o) {
+	protected void addOperation(final Operation<T> op) {
+		queue.forEach(new OperationHandler<T>() {
+			public void handle(PriorityLevel prio, Operation<T> o) {
 				if(o.equals(op))
 					o.setSucceeded();
 			}
