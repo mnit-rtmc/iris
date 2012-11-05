@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * Canoga property.
- * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
@@ -98,10 +97,13 @@ abstract public class CanogaProperty extends ControllerProperty {
 		return xsum;
 	}
 
-	/** Poll the Canoga card */
-	protected void doPoll(OutputStream os, byte[] req) throws IOException {
+	/** Most recent request */
+	private byte[] request = new byte[0];
+
+	/** Perform a property request */
+	private void doRequest(OutputStream os, byte[] req) throws IOException {
 		os.write(req);
-		os.flush();
+		request = req;
 	}
 
 	/** Get a response from an input stream */
@@ -198,24 +200,23 @@ abstract public class CanogaProperty extends ControllerProperty {
 	/** Get the expected number of octets in response */
 	abstract protected int expectedResponseOctets();
 
-	/** Perform a "GET" request */
-	public void doGetRequest(OutputStream os, InputStream is, int drop)
-		throws IOException
-	{
-		byte[] req = format((byte)drop, formatPayloadGet());
-		is.skip(is.available());
-		doPoll(os, req);
-		byte[] res = doResponse(is, req);
-		setValue(res);
+	/** Encode a QUERY request */
+	public void encodeQuery(OutputStream os, int drop) throws IOException {
+		doRequest(os, format((byte)drop, formatPayloadGet()));
 	}
 
-	/** Perform a "SET" request */
-	public void doSetRequest(OutputStream os, InputStream is, int drop)
-		throws IOException
-	{
-		byte[] req = format((byte)drop, formatPayloadSet());
-		is.skip(is.available());
-		doPoll(os, req);
-		doResponse(is, req);
+	/** Decode a QUERY response */
+	public void decodeQuery(InputStream is, int drop) throws IOException {
+		setValue(doResponse(is, request));
+	}
+
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		doRequest(os, format((byte)drop, formatPayloadSet()));
+	}
+
+	/** Decode a STORE response */
+	public void decodeStore(InputStream is, int drop) throws IOException {
+		doResponse(is, request);
 	}
 }

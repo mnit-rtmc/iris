@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -31,8 +32,9 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  *
  * @author Douglas Lau
  */
-public class CanogaPoller extends MessagePoller implements SamplePoller {
-
+public class CanogaPoller extends MessagePoller<CanogaProperty>
+	implements SamplePoller
+{
 	/** Maximum address allowed for backplane addressing */
 	static protected final int ADDRESS_MAX_BACKPLANE = 15;
 
@@ -48,8 +50,11 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 	}
 
 	/** Create a new message for the specified controller */
-	public CommMessage createMessage(ControllerImpl c) throws IOException {
-		return new Message(messenger.getOutputStream(c),
+	public CommMessage<CanogaProperty> createMessage(ControllerImpl c)
+		throws IOException
+	{
+		return new CommMessageImpl<CanogaProperty>(
+			messenger.getOutputStream(c),
 			messenger.getInputStream(c), c.getDrop());
 	}
 
