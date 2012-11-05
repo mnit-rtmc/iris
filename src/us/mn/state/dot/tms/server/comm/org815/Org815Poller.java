@@ -42,7 +42,7 @@ public class Org815Poller extends MessagePoller<Org815Property>
 	{
 		return new CommMessageImpl<Org815Property>(
 			messenger.getOutputStream(c),
-			messenger.getInputStream(c));
+			messenger.getInputStream(c), c.getDrop());
 	}
 
 	/** Check if a drop address is valid */

@@ -33,15 +33,20 @@ public class CommMessageImpl<T extends ControllerProperty>
 	/** Comm input stream */
 	private final InputStream input;
 
+	/** Drop address */
+	private final int drop;
+
 	/** Controller properties */
 	private final LinkedList<T> props;
 
 	/** Create a new comm message.
 	 * @param out Output stream to write message data.
-	 * @param is Input stream to read message responses. */
-	public CommMessageImpl(OutputStream out, InputStream is) {
+	 * @param is Input stream to read message responses.
+	 * @param d Drop address. */
+	public CommMessageImpl(OutputStream out, InputStream is, int d) {
 		output = out;
 		input = is;
+		drop = d;
 		props = new LinkedList<T>();
 	}
 
@@ -56,9 +61,9 @@ public class CommMessageImpl<T extends ControllerProperty>
 	public void queryProps() throws IOException {
 		for(T p: props) {
 			input.skip(input.available());
-			p.encodeQuery(output, 0);
+			p.encodeQuery(output, drop);
 			output.flush();
-			p.decodeQuery(input, 0);
+			p.decodeQuery(input, drop);
 		}
 	}
 
@@ -68,9 +73,9 @@ public class CommMessageImpl<T extends ControllerProperty>
 	public void storeProps() throws IOException {
 		for(T p: props) {
 			input.skip(input.available());
-			p.encodeStore(output, 0);
+			p.encodeStore(output, drop);
 			output.flush();
-			p.decodeStore(input, 0);
+			p.decodeStore(input, drop);
 		}
 	}
 }
