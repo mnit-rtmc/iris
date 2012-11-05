@@ -32,15 +32,17 @@ public class OpQuerySettings extends OpOrg815 {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<Org815Property> phaseTwo() {
 		return new QueryVersion();
 	}
 
 	/** Phase to query the version */
-	protected class QueryVersion extends Phase {
+	protected class QueryVersion extends Phase<Org815Property> {
 
 		/** Query the version */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<Org815Property> poll(
+			CommMessage<Org815Property> mess) throws IOException
+		{
 			VersionProperty version = new VersionProperty();
 			mess.add(version);
 			mess.queryProps();

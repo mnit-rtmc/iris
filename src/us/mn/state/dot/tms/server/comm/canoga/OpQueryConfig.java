@@ -39,15 +39,17 @@ public class OpQueryConfig extends OpCanoga {
 	}
 
 	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<CanogaProperty> phaseOne() {
 		return new QuerySerialNumber();
 	}
 
 	/** Phase to query the serial number */
-	protected class QuerySerialNumber extends Phase {
+	protected class QuerySerialNumber extends Phase<CanogaProperty> {
 
 		/** Query the serial number */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<CanogaProperty> poll(
+			CommMessage<CanogaProperty> mess) throws IOException
+		{
 			mess.add(serial_number);
 			mess.queryProps();
 			CANOGA_LOG.log(controller.getName() + " " +
@@ -57,10 +59,12 @@ public class OpQueryConfig extends OpCanoga {
 	}
 
 	/** Phase to query the firmware version */
-	protected class QueryVersion extends Phase {
+	protected class QueryVersion extends Phase<CanogaProperty> {
 
 		/** Query the firmware version */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<CanogaProperty> poll(
+			CommMessage<CanogaProperty> mess) throws IOException
+		{
 			mess.add(version);
 			mess.queryProps();
 			CANOGA_LOG.log(controller.getName() + " " + version);
