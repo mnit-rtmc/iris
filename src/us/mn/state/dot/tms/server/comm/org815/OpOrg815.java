@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-abstract public class OpOrg815 extends OpDevice {
+abstract public class OpOrg815 extends OpDevice<Org815Property> {
 
 	/** ORG-815 debug log */
 	static protected final IDebugLog ORG815_LOG = new IDebugLog("org815");

@@ -26,8 +26,9 @@ import us.mn.state.dot.tms.utils.SString;
  *
  * @author Douglas Lau
  */
-abstract public class OpController extends Operation {
-
+abstract public class OpController<T extends ControllerProperty>
+	extends Operation<T>
+{
 	/** Comm error log */
 	static protected final IDebugLog COMM_LOG = new IDebugLog("comm");
 

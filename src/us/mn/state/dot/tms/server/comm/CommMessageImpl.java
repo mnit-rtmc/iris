@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,63 +12,65 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.org815;
+package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import java.util.LinkedList;
 
 /**
- * ORG-815 message
+ * Comm message implementation.
  *
  * @author Douglas Lau
  */
-public class Message implements CommMessage {
+public class CommMessageImpl<T extends ControllerProperty>
+	implements CommMessage<T>
+{
+	/** Comm output stream */
+	private final OutputStream output;
 
-	/** Serial output stream */
-	protected final OutputStream output;
+	/** Comm input stream */
+	private final InputStream input;
 
-	/** Serial input stream */
-	protected final InputStream input;
+	/** Controller properties */
+	private final LinkedList<T> props;
 
-	/** Controller property */
-	protected Org815Property prop;
-
-	/** Create a new ORG-815 message.
+	/** Create a new comm message.
 	 * @param out Output stream to write message data.
 	 * @param is Input stream to read message responses. */
-	public Message(OutputStream out, InputStream is) {
+	public CommMessageImpl(OutputStream out, InputStream is) {
 		output = out;
 		input = is;
+		props = new LinkedList<T>();
 	}
 
 	/** Add a controller property */
-	public void add(ControllerProperty cp) {
-		if(cp instanceof Org815Property)
-			prop = (Org815Property)cp;
+	public void add(T cp) {
+		props.add(cp);
 	}
 
 	/** Query the controller properties.
 	 * @throws IOException On any errors sending message or receiving
 	 *         response */
 	public void queryProps() throws IOException {
-		assert prop != null;
-		input.skip(input.available());
-		prop.encodeQuery(output, 0);
-		output.flush();
-		prop.decodeQuery(input, 0);
+		for(T p: props) {
+			input.skip(input.available());
+			p.encodeQuery(output, 0);
+			output.flush();
+			p.decodeQuery(input, 0);
+		}
 	}
 
 	/** Store the controller properties.
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void storeProps() throws IOException {
-		assert prop != null;
-		input.skip(input.available());
-		prop.encodeStore(output, 0);
-		output.flush();
-		prop.decodeStore(input, 0);
+		for(T p: props) {
+			input.skip(input.available());
+			p.encodeStore(output, 0);
+			output.flush();
+			p.decodeStore(input, 0);
+		}
 	}
 }

@@ -22,10 +22,11 @@ import us.mn.state.dot.tms.server.DeviceImpl;
  *
  * @author Douglas Lau
  */
-abstract public class OpDevice extends OpController {
-
+abstract public class OpDevice<T extends ControllerProperty>
+	extends OpController<T>
+{
 	/** This operation; needed for inner Phase classes */
-	protected final OpDevice operation;
+	protected final OpDevice<T> operation;
 
 	/** Device on which to perform operation */
 	protected final DeviceImpl device;
@@ -45,10 +46,10 @@ abstract public class OpDevice extends OpController {
 	}
 
 	/** Phase to acquire exclusive ownership of the device */
-	protected class AcquireDevice extends Phase {
+	protected class AcquireDevice extends Phase<T> {
 
 		/** Perform the acquire device phase */
-		protected Phase poll(CommMessage mess)
+		protected Phase<T> poll(CommMessage<T> mess)
 			throws DeviceContentionException
 		{
 			OpDevice owner = device.acquire(operation);
@@ -59,12 +60,12 @@ abstract public class OpDevice extends OpController {
 	}
 
 	/** Create the first phase of the operation */
-	protected final Phase phaseOne() {
+	protected final Phase<T> phaseOne() {
 		return new AcquireDevice();
 	}
 
 	/** Create the second phase of the operation */
-	abstract protected Phase phaseTwo();
+	abstract protected Phase<T> phaseTwo();
 
 	/** Cleanup the operation */
 	public void cleanup() {

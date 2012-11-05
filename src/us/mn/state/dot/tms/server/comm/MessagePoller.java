@@ -32,8 +32,9 @@ import us.mn.state.dot.tms.server.IDebugLog;
  * @author Douglas Lau
  * @author Michael Darter
  */
-abstract public class MessagePoller extends Thread {
-
+abstract public class MessagePoller<T extends ControllerProperty>
+	extends Thread
+{
 	/** Create a message poller */
 	static public MessagePoller create(String name, CommProtocol protocol,
 		String uri) throws IOException
@@ -274,7 +275,7 @@ abstract public class MessagePoller extends Thread {
 	abstract public boolean isAddressValid(int drop);
 
 	/** Create a message for the specified controller */
-	abstract protected CommMessage createMessage(ControllerImpl c)
+	abstract protected CommMessage<T> createMessage(ControllerImpl c)
 		throws IOException;
 
 	/** Respond to a download request from a controller */

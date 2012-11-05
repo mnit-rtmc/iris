@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
@@ -27,18 +28,20 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  *
  * @author Douglas Lau
  */
-public class Org815Poller extends MessagePoller implements WeatherPoller {
-
+public class Org815Poller extends MessagePoller<Org815Property>
+	implements WeatherPoller
+{
 	/** Create a new ORG-815 poller */
 	public Org815Poller(String n, Messenger m) {
 		super(n, m);
 	}
 
 	/** Create a new message for the specified controller */
-	public CommMessage createMessage(ControllerImpl c)
+	public CommMessage<Org815Property> createMessage(ControllerImpl c)
 		throws IOException
 	{
-		return new Message(messenger.getOutputStream(c),
+		return new CommMessageImpl<Org815Property>(
+			messenger.getOutputStream(c),
 			messenger.getInputStream(c));
 	}
 

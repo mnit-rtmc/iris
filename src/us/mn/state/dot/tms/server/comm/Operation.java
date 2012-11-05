@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.IDebugLog;
  *
  * @author Douglas Lau
  */
-abstract public class Operation {
+abstract public class Operation<T extends ControllerProperty> {
 
 	/** Operation error log */
 	static protected final IDebugLog OP_LOG = new IDebugLog("operation");
@@ -78,7 +78,7 @@ abstract public class Operation {
 	}
 
 	/** Current phase of the operation */
-	private Phase phase;
+	private Phase<T> phase;
 
 	/** Create a new I/O operation */
 	public Operation(PriorityLevel prio) {
@@ -89,7 +89,7 @@ abstract public class Operation {
 	/** Create the first phase of the operation.  This method cannot be
 	 * called in the Operation constructor, because the object may not
 	 * have been fully constructed yet (subclass initialization). */
-	abstract protected Phase phaseOne();
+	abstract protected Phase<T> phaseOne();
 
 	/** Operation equality test */
 	public boolean equals(Object o) {
@@ -99,7 +99,7 @@ abstract public class Operation {
 	/** Get a string description of the operation */
 	public String toString() {
 		String name;
-		Phase p = phase;
+		Phase<T> p = phase;
 		if(p != null)
 			name = p.getClass().getName();
 		else
@@ -176,12 +176,12 @@ abstract public class Operation {
 	 * assigned null.
 	 * @see MessagePoller.performOperations
 	 */
-	public void poll(CommMessage mess) throws IOException,
+	public void poll(CommMessage<T> mess) throws IOException,
 		DeviceContentionException
 	{
-		final Phase p = phase;
+		final Phase<T> p = phase;
 		if(p != null) {
-			Phase np = p.poll(mess);
+			Phase<T> np = p.poll(mess);
 			// Need to synchronize against setFailed / setSucceeded
 			synchronized(this) {
 				if(!isDone())
@@ -191,11 +191,11 @@ abstract public class Operation {
 	}
 
 	/** Base class for operation phases */
-	abstract protected class Phase {
+	abstract protected class Phase<T extends ControllerProperty> {
 
 		/** Perform a poll.
 		 * @return The next phase of the operation */
-		abstract protected Phase poll(CommMessage mess)
+		abstract protected Phase<T> poll(CommMessage<T> mess)
 			throws IOException, DeviceContentionException;
 	}
 

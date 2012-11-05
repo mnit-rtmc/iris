@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2010  Minnesota Department of Transportation
+ * Copyright (C) 2002-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,10 @@ import java.io.IOException;
  *
  * @author Douglas Lau
  */
-public interface CommMessage {
+public interface CommMessage<T extends ControllerProperty> {
 
 	/** Add a controller property */
-	void add(ControllerProperty cp);
+	void add(T cp);
 
 	/** Query the controller properties.
 	 * @throws IOException On any errors sending a request or receiving

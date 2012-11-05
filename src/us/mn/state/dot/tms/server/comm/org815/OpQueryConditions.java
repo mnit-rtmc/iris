@@ -34,15 +34,17 @@ public class OpQueryConditions extends OpOrg815 {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<Org815Property> phaseTwo() {
 		return new QueryConditions();
 	}
 
 	/** Phase to query the conditions */
-	protected class QueryConditions extends Phase {
+	protected class QueryConditions extends Phase<Org815Property> {
 
 		/** Query the conditions */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<Org815Property> poll(
+			CommMessage<Org815Property> mess) throws IOException
+		{
 			long now = TimeSteward.currentTimeMillis();
 			ConditionsProperty cond = new ConditionsProperty();
 			mess.add(cond);
@@ -66,10 +68,12 @@ public class OpQueryConditions extends OpOrg815 {
 	}
 
 	/** Phase to reset the precipitation accumulator */
-	protected class ResetAccumulator extends Phase {
+	protected class ResetAccumulator extends Phase<Org815Property> {
 
 		/** Reset the accumulator */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<Org815Property> poll(
+			CommMessage<Org815Property> mess) throws IOException
+		{
 			ResetProperty reset = new ResetProperty();
 			mess.add(reset);
 			ORG815_LOG.log(device.getName() + ": " + reset);
