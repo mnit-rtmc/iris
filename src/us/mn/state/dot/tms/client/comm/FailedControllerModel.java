@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -34,39 +35,43 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 public class FailedControllerModel extends ProxyTableModel2<Controller> {
 
 	/** Create the columns in the model */
-	protected ProxyColumn[] createColumns() {
-	    // NOTE: half-indent to declare array
-	    return new ProxyColumn[] {
-		new ProxyColumn<Controller>("controller", 90) {
+	protected ArrayList<ProxyColumn<Controller>> createColumns() {
+		ArrayList<ProxyColumn<Controller>> cols =
+			new ArrayList<ProxyColumn<Controller>>(5);
+		cols.add(new ProxyColumn<Controller>("controller", 90) {
 			public Object getValueAt(Controller c) {
 				return c.getName();
 			}
-		},
-		new ProxyColumn<Controller>("location", 200) {
+		});
+		cols.add(new ProxyColumn<Controller>("location", 200) {
 			public Object getValueAt(Controller c) {
 				return GeoLocHelper.getDescription(
 					c.getCabinet().getGeoLoc());
 			}
-		},
-		new ProxyColumn<Controller>("comm.link", 120) {
+		});
+		cols.add(new ProxyColumn<Controller>("comm.link", 120) {
 			public Object getValueAt(Controller c) {
 				return c.getCommLink().getName();
 			}
-		},
-		new ProxyColumn<Controller>("controller.drop", 60, Short.class){
+		});
+		cols.add(new ProxyColumn<Controller>("controller.drop", 60,
+			Short.class)
+		{
 			public Object getValueAt(Controller c) {
 				return c.getDrop();
 			}
-		},
-		new ProxyColumn<Controller>("controller.fail", 240, Long.class){
+		});
+		cols.add(new ProxyColumn<Controller>("controller.fail", 240,
+			Long.class)
+		{
 			public Object getValueAt(Controller c) {
 				return c.getFailTime();
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new FailTimeCellRenderer();
 			}
-		}
-	    };
+		});
+		return cols;
 	}
 
 	/** Renderer for fail time in a table cell */
