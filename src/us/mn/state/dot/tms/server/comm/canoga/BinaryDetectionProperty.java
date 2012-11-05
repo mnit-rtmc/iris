@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * Binary Detection Property
@@ -62,7 +63,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 
 	/** Format a basic "SET" request */
 	protected byte[] formatPayloadSet() throws IOException {
-		throw new CanogaError("Binary detection is read-only");
+		throw new ProtocolException("Binary detection is read-only");
 	}
 
 	/** Validate a response message */

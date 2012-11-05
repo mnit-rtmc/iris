@@ -29,8 +29,99 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 abstract public class CanogaProperty extends ControllerProperty {
 
+	/** Offset for message header */
+	static private final int OFF_HEADER = 0;
+
+	/** Offset for message length field */
+	static private final int OFF_LENGTH = 1;
+
+	/** Offset for message address field */
+	static private final int OFF_ADDRESS  = 3;
+
+	/** Offset for message type field */
+	static private final int OFF_MTYPE = 4;
+
+	/** Offset for message payload field */
+	static private final int OFF_PAYLOAD = 5;
+
 	/** Maximum number of tries when reading a message response */
-	static protected final int MAX_TRIES = 5;
+	static private final int MAX_TRIES = 5;
+
+	/** Get the ASCII hex digit for the given nybble */
+	static private byte hex_digit(byte b) {
+		b &= 0x0F;
+		if(b < 10)
+			return (byte)('0' + b);
+		else
+			return (byte)('A' + b - 10);
+	}
+
+	/** Get the MSN ASCII hex digit */
+	static private byte hex_msn(byte b) {
+		return hex_digit((byte)(b >> 4));
+	}
+
+	/** Get the LSN ASCII hex digit */
+	static private byte hex_lsn(byte b) {
+		return hex_digit(b);
+	}
+
+	/** Parse one ASCII hex digit */
+	static private byte parse_hex_digit(byte n) throws ParsingException {
+		if(n >= (byte)'0' && n <= (byte)'9')
+			return (byte)(n - '0');
+		if(n >= (byte)'A' && n <= (byte)'F')
+			return (byte)(10 + n - 'A');
+		throw new ParsingException("INVALID HEX DIGIT: " + n);
+	}
+
+	/** Parse an ASCII hexadecimal field in a byte array */
+	static private byte parse_hex(byte[] res, int offset)
+		throws ParsingException
+	{
+		byte msn = parse_hex_digit(res[offset]);
+		byte lsn = parse_hex_digit(res[offset + 1]);
+		return (byte)(msn << 4 | lsn);
+	}
+
+	/** Calculate the checksum of a buffer */
+	static protected byte checksum(byte[] buf) {
+		byte xsum = 0;
+		for(int i = 0; i < buf.length; i++)
+			xsum ^= buf[i];
+		return xsum;
+	}
+
+	/** Format a request message */
+	static private byte[] formatRequest(byte drop, byte[] payload) {
+		byte len = (byte)(payload.length + 7);
+		byte[] req = new byte[len];
+		req[OFF_HEADER] = '<';
+		req[OFF_LENGTH] = hex_msn(len);
+		req[OFF_LENGTH + 1] = hex_lsn(len);
+		req[OFF_ADDRESS] = drop;
+		System.arraycopy(payload, 0, req, OFF_MTYPE, payload.length);
+		byte xsum = checksum(req);
+		req[req.length - 3] = hex_msn(xsum);
+		req[req.length - 2] = hex_lsn(xsum);
+		req[req.length - 1] = '>';
+		return req;
+	}
+
+	/** Validate the response with its trailing checksum */
+	static private void validateChecksum(byte[] res)
+		throws ParsingException
+	{
+		int rl = res.length;
+		byte paysum = parse_hex(res, rl - 3);
+		// Clear received checksum for comparison
+		res[rl - 1] = 0;
+		res[rl - 2] = 0;
+		res[rl - 3] = 0;
+		byte hexsum = checksum(res);
+		if(paysum != hexsum)
+			throw new ChecksumException(""+ paysum +" != "+ hexsum);
+	}
 
 	/** Format a basic "GET" request */
 	abstract protected byte[] formatPayloadGet() throws IOException;
@@ -50,51 +141,6 @@ abstract public class CanogaProperty extends ControllerProperty {
 	/** Get a string representation of the property */
 	public String toString() {
 		return getName() + ": " + getValue();
-	}
-
-	/** Get the ASCII hex digit for the given nybble */
-	static protected byte hex_digit(byte b) {
-		b &= 0x0F;
-		if(b < 10)
-			return (byte)('0' + b);
-		else
-			return (byte)('A' + b - 10);
-	}
-
-	/** Get the MSN ASCII hex digit */
-	static protected byte hex_msn(byte b) {
-		return hex_digit((byte)(b >> 4));
-	}
-
-	/** Get the LSN ASCII hex digit */
-	static protected byte hex_lsn(byte b) {
-		return hex_digit(b);
-	}
-
-	/** Parse one ASCII hex digit */
-	static protected byte parse_hex_digit(byte n) throws ParsingException {
-		if(n >= (byte)'0' && n <= (byte)'9')
-			return (byte)(n - '0');
-		if(n >= (byte)'A' && n <= (byte)'F')
-			return (byte)(10 + n - 'A');
-		throw new ParsingException("INVALID HEX DIGIT: " + n);
-	}
-
-	/** Parse an ASCII hexadecimal field in a byte array */
-	static protected byte parse_hex(byte[] res, int offset)
-		throws ParsingException
-	{
-		byte msn = parse_hex_digit(res[offset]);
-		byte lsn = parse_hex_digit(res[offset + 1]);
-		return (byte)(msn << 4 | lsn);
-	}
-
-	/** Calculate the checksum of a buffer */
-	static protected byte checksum(byte[] buf) {
-		byte xsum = 0;
-		for(int i = 0; i < buf.length; i++)
-			xsum ^= buf[i];
-		return xsum;
 	}
 
 	/** Most recent request */
@@ -120,21 +166,6 @@ abstract public class CanogaProperty extends ControllerProperty {
 		return buf;
 	}
 
-	/** Offset for message header */
-	static protected final int OFF_HEADER = 0;
-
-	/** Offset for message length field */
-	static protected final int OFF_LENGTH = 1;
-
-	/** Offset for message address field */
-	static protected final int OFF_ADDRESS  = 3;
-
-	/** Offset for message type field */
-	static protected final int OFF_MTYPE = 4;
-
-	/** Offset for message payload field */
-	static protected final int OFF_PAYLOAD = 5;
-
 	/** Validate a response message */
 	protected void validateResponse(byte[] req, byte[] res)
 		throws ParsingException
@@ -152,21 +183,6 @@ abstract public class CanogaProperty extends ControllerProperty {
 		validateChecksum(res);
 	}
 
-	/** Compare the response with its trailing checksum */
-	protected void validateChecksum(byte[] res) throws ChecksumException,
-		ParsingException
-	{
-		int rl = res.length;
-		byte paysum = parse_hex(res, rl - 3);
-		// Clear received checksum for comparison
-		res[rl - 1] = 0;
-		res[rl - 2] = 0;
-		res[rl - 3] = 0;
-		byte hexsum = checksum(res);
-		if(paysum != hexsum)
-			throw new ChecksumException(""+ paysum +" != "+ hexsum);
-	}
-
 	/** Get the message payload */
 	protected String getPayload(byte[] res) {
 		return new String(res, OFF_PAYLOAD, res.length - 8);
@@ -181,28 +197,12 @@ abstract public class CanogaProperty extends ControllerProperty {
 		return res;
 	}
 
-	/** Format a request message */
-	protected byte[] format(byte drop, byte[] payload) {
-		byte len = (byte)(payload.length + 7);
-		byte[] req = new byte[len];
-		req[OFF_HEADER] = '<';
-		req[OFF_LENGTH] = hex_msn(len);
-		req[OFF_LENGTH + 1] = hex_lsn(len);
-		req[OFF_ADDRESS] = drop;
-		System.arraycopy(payload, 0, req, OFF_MTYPE, payload.length);
-		byte xsum = checksum(req);
-		req[req.length - 3] = hex_msn(xsum);
-		req[req.length - 2] = hex_lsn(xsum);
-		req[req.length - 1] = '>';
-		return req;
-	}
-
 	/** Get the expected number of octets in response */
 	abstract protected int expectedResponseOctets();
 
 	/** Encode a QUERY request */
 	public void encodeQuery(OutputStream os, int drop) throws IOException {
-		doRequest(os, format((byte)drop, formatPayloadGet()));
+		doRequest(os, formatRequest((byte)drop, formatPayloadGet()));
 	}
 
 	/** Decode a QUERY response */
@@ -212,7 +212,7 @@ abstract public class CanogaProperty extends ControllerProperty {
 
 	/** Encode a STORE request */
 	public void encodeStore(OutputStream os, int drop) throws IOException {
-		doRequest(os, format((byte)drop, formatPayloadSet()));
+		doRequest(os, formatRequest((byte)drop, formatPayloadSet()));
 	}
 
 	/** Decode a STORE response */
