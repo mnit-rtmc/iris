@@ -14,10 +14,11 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.EOFException;
+import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
@@ -28,8 +29,9 @@ import us.mn.state.dot.tms.server.comm.TransientPoller;
  *
  * @author Douglas Lau
  */
-public class ViconPTZPoller extends TransientPoller implements CameraPoller {
-
+public class ViconPTZPoller extends TransientPoller<ViconPTZProperty>
+	implements CameraPoller
+{
 	/** Highest allowed address for Vicon protocol */
 	static public final int ADDRESS_MAX = 254;
 
@@ -38,9 +40,13 @@ public class ViconPTZPoller extends TransientPoller implements CameraPoller {
 		super(n, m);
 	}
 
-	/** Create a new message for the specified drop address */
-	public CommMessage createMessage(ControllerImpl c) throws EOFException {
-		return new Message(messenger.getOutputStream(c), c.getDrop());
+	/** Create a new message for the specified controller */
+	public CommMessage<ViconPTZProperty> createMessage(ControllerImpl c)
+		throws IOException
+	{
+		return new CommMessageImpl<ViconPTZProperty>(
+			messenger.getOutputStream(c),
+			messenger.getInputStream(c), c.getDrop());
 	}
 
 	/** Check if a drop address is valid */

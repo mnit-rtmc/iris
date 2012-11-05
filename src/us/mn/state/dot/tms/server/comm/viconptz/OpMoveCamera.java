@@ -17,15 +17,13 @@ package us.mn.state.dot.tms.server.comm.viconptz;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Vicon operation to move a camera.
  *
  * @author Douglas Lau
  */
-public class OpMoveCamera extends OpDevice {
+public class OpMoveCamera extends OpViconPTZ {
 
 	/** Range of PTZ values */
 	static protected final int PTZ_RANGE = 1023;
@@ -51,22 +49,24 @@ public class OpMoveCamera extends OpDevice {
 
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
-		super(PriorityLevel.COMMAND, c);
+		super(c);
 		pan = map_float(p, PTZ_RANGE);
 		tilt = map_float(t, PTZ_RANGE);
 		zoom = map_float(z, PTZ_RANGE);
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<ViconPTZProperty> phaseTwo() {
 		return new Move();
 	}
 
 	/** Phase to move the camera */
-	protected class Move extends Phase {
+	protected class Move extends Phase<ViconPTZProperty> {
 
 		/** Command controller to move the camera */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<ViconPTZProperty> poll(
+			CommMessage<ViconPTZProperty> mess) throws IOException
+		{
 			mess.add(new CommandProperty(pan, tilt, zoom));
 			mess.storeProps();
 			return null;

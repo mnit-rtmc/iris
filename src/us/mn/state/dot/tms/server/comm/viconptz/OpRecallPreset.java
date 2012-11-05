@@ -17,35 +17,36 @@ package us.mn.state.dot.tms.server.comm.viconptz;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Vicon operation to recall a camera preset.
  *
  * @author Stephen Donecker
+ * @author Douglas Lau
  */
-public class OpRecallPreset extends OpDevice {
+public class OpRecallPreset extends OpViconPTZ {
 
 	/** The camera preset to recall */
 	private final int m_preset;
 
 	/** Create a new operation to recall a camera preset */
 	public OpRecallPreset(CameraImpl c, int preset) {
-		super(PriorityLevel.COMMAND, c);
+		super(c);
 		m_preset = preset;
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<ViconPTZProperty> phaseTwo() {
 		return new RecallPreset();
 	}
 
 	/** Phase to recall the camera preset */
-	protected class RecallPreset extends Phase {
+	protected class RecallPreset extends Phase<ViconPTZProperty> {
 
 		/** Command controller to recall the camera preset */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<ViconPTZProperty> poll(
+			CommMessage<ViconPTZProperty> mess) throws IOException
+		{
 			mess.add(new RecallPresetProperty(m_preset));
 			mess.storeProps();
 			return null;

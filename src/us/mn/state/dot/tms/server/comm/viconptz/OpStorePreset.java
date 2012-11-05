@@ -17,35 +17,36 @@ package us.mn.state.dot.tms.server.comm.viconptz;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Vicon operation to store a camera preset.
  *
  * @author Stephen Donecker
+ * @author Douglas Lau
  */
-public class OpStorePreset extends OpDevice {
+public class OpStorePreset extends OpViconPTZ {
 
 	/** The camera preset to store */
 	private final int m_preset;
 
 	/** Create a new operation to store a camera preset */
 	public OpStorePreset(CameraImpl c, int preset) {
-		super(PriorityLevel.COMMAND, c);
+		super(c);
 		m_preset = preset;
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<ViconPTZProperty> phaseTwo() {
 		return new StorePreset();
 	}
 
 	/** Phase to store a camera preset */
-	protected class StorePreset extends Phase {
+	protected class StorePreset extends Phase<ViconPTZProperty> {
 
 		/** Command controller to store a camera preset */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<ViconPTZProperty> poll(
+			CommMessage<ViconPTZProperty> mess) throws IOException
+		{
 			mess.add(new StorePresetProperty(m_preset));
 			mess.storeProps();
 			return null;
