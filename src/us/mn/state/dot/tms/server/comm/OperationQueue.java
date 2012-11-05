@@ -151,7 +151,7 @@ public final class OperationQueue<T extends ControllerProperty> {
 	}
 
 	/** Do something to each operation in the queue */
-	public synchronized void forEach(OperationHandler handler) {
+	public synchronized void forEach(OperationHandler<T> handler) {
 		Node<T> node = front;
 		while(node != null) {
 			handler.handle(node.priority, node.operation);

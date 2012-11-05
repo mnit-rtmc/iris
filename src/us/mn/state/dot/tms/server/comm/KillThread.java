@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm;
  *
  * @author Douglas Lau
  */
-public class KillThread extends Operation {
+public class KillThread<T extends ControllerProperty> extends Operation<T> {
 
 	/** Create a new operation to kill the message poller thread */
 	public KillThread() {
@@ -27,7 +27,7 @@ public class KillThread extends Operation {
 	}
 
 	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<T> phaseOne() {
 		return null;
 	}
 }

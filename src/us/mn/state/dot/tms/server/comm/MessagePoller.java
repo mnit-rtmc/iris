@@ -69,7 +69,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Operation queue */
-	protected final OperationQueue queue = new OperationQueue();
+	protected final OperationQueue<T> queue = new OperationQueue<T>();
 
 	/** Messenger for poll/response streams */
 	protected final Messenger messenger;
@@ -124,7 +124,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Stop polling on this thread */
 	public void stopPolling() {
-		addOperation(new KillThread());
+		addOperation(new KillThread<T>());
 	}
 
 	/** MessagePoller is a subclass of Thread.  This is the run method. */
@@ -173,12 +173,12 @@ abstract public class MessagePoller<T extends ControllerProperty>
 			if(o instanceof KillThread)
 				break;
 			if(o instanceof OpController)
-				doPoll((OpController)o);
+				doPoll((OpController<T>)o);
 		}
 	}
 
 	/** Perform one poll for an operation */
-	protected void doPoll(final OpController o) throws IOException {
+	protected void doPoll(final OpController<T> o) throws IOException {
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {
