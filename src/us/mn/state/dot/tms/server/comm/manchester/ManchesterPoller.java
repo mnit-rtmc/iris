@@ -14,10 +14,11 @@
  */
 package us.mn.state.dot.tms.server.comm.manchester;
 
-import java.io.EOFException;
+import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
@@ -28,8 +29,9 @@ import us.mn.state.dot.tms.server.comm.TransientPoller;
  *
  * @author Douglas Lau
  */
-public class ManchesterPoller extends TransientPoller implements CameraPoller {
-	
+public class ManchesterPoller extends TransientPoller<ManchesterProperty>
+	implements CameraPoller
+{
 	/** Highest allowed address for Manchester protocol */
 	static protected final int ADDRESS_MAX = 1024;
 
@@ -39,8 +41,12 @@ public class ManchesterPoller extends TransientPoller implements CameraPoller {
 	}
 
 	/** Create a new message for the specified drop address */
-	public CommMessage createMessage(ControllerImpl c) throws EOFException {
-		return new Message(messenger.getOutputStream(c), c.getDrop());
+	public CommMessage<ManchesterProperty> createMessage(ControllerImpl c)
+		throws IOException
+	{
+		return new CommMessageImpl<ManchesterProperty>(
+			messenger.getOutputStream(c),
+			messenger.getInputStream(c), c.getDrop());
 	}
 
 	/** Check if a drop address is valid */

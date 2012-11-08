@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,25 +16,29 @@ package us.mn.state.dot.tms.server.comm.manchester;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
  * A property to command a camera
  *
  * @author Douglas Lau
  */
-public class CommandProperty extends ControllerProperty {
+public class CommandProperty extends ManchesterProperty {
 
-	static protected final int EX_TILT_DOWN_FULL = 0;
-	static protected final int EX_IRIS_OPEN = 1;
-	static protected final int EX_FOCUS_FAR = 2;
-	static protected final int EX_ZOOM_IN = 3;
-	static protected final int EX_IRIS_CLOSE = 4;
-	static protected final int EX_FOCUS_NEAR = 5;
-	static protected final int EX_ZOOM_OUT = 6;
-	static protected final int EX_PAN_LEFT_FULL = 7;
-	static protected final int EX_TILT_UP_FULL = 8;
-	static protected final int EX_PAN_RIGHT_FULL = 9;
+	static private final int EX_TILT_DOWN_FULL = 0;
+	static private final int EX_IRIS_OPEN = 1;
+	static private final int EX_FOCUS_FAR = 2;
+	static private final int EX_ZOOM_IN = 3;
+	static private final int EX_IRIS_CLOSE = 4;
+	static private final int EX_FOCUS_NEAR = 5;
+	static private final int EX_ZOOM_OUT = 6;
+	static private final int EX_PAN_LEFT_FULL = 7;
+	static private final int EX_TILT_UP_FULL = 8;
+	static private final int EX_PAN_RIGHT_FULL = 9;
+
+	/** Encode a speed value for pan/tilt command */
+	static private byte encodeSpeed(int v) {
+		return (byte)((Math.abs(v) - 1) << 1);
+	}
 
 	/** Pan value (-7 to 7) (8 means turbo) */
 	protected final int pan;
@@ -52,33 +56,8 @@ public class CommandProperty extends ControllerProperty {
 		zoom = z;
 	}
 
-	/** Get a packet with the receiver address encoded */
-	protected byte[] getAddressedPacket(int drop) {
-		byte[] packet = new byte[3];
-		packet[0] = (byte)(0x80 | (drop >> 6));
-		packet[1] = (byte)((drop >> 5) & 0x01);
-		packet[2] = (byte)((drop & 0x1f) << 2);
-		return packet;
-	}
-
-	/** Encode a speed value for pan/tilt command */
-	static byte encodeSpeed(int v) {
-		return (byte)((Math.abs(v) - 1) << 1);
-	}
-
-	/** Encode a STORE request */
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-		drop--;		// receiver address is zero-relative
-		if(pan != 0)
-			os.write(encodePanPacket(drop));
-		if(tilt != 0)
-			os.write(encodeTiltPacket(drop));
-		if(zoom != 0)
-			os.write(encodeZoomPacket(drop));
-	}
-
 	/** Encode a pan command packet */
-	protected byte[] encodePanPacket(int drop) {
+	private byte[] encodePanPacket(int drop) {
 		byte[] packet = getAddressedPacket(drop);
 		if(Math.abs(pan) < 8) {
 			if(pan < 0)
@@ -97,7 +76,7 @@ public class CommandProperty extends ControllerProperty {
 	}
 
 	/** Encode a tilt command packet */
-	protected byte[] encodeTiltPacket(int drop) {
+	private byte[] encodeTiltPacket(int drop) {
 		byte[] packet = getAddressedPacket(drop);
 		if(Math.abs(tilt) < 8) {
 			if(tilt > 0)
@@ -114,12 +93,23 @@ public class CommandProperty extends ControllerProperty {
 	}
 
 	/** Encode a zoom command packet */
-	protected byte[] encodeZoomPacket(int drop) {
+	private byte[] encodeZoomPacket(int drop) {
 		byte[] packet = getAddressedPacket(drop);
 		if(zoom < 0)
 			packet[1] |= EX_ZOOM_OUT << 1;
 		else
 			packet[1] |= EX_ZOOM_IN << 1;
 		return packet;
+	}
+
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		drop--;		// receiver address is zero-relative
+		if(pan != 0)
+			os.write(encodePanPacket(drop));
+		if(tilt != 0)
+			os.write(encodeTiltPacket(drop));
+		if(zoom != 0)
+			os.write(encodeZoomPacket(drop));
 	}
 }
