@@ -46,13 +46,13 @@ abstract public class OpManchester extends OpDevice<ManchesterProperty> {
 		expire = TimeSteward.currentTimeMillis() + OP_TIMEOUT_MS;
 	}
 
-	/** Time stamp to send phase */
-	private long stamp = TimeSteward.currentTimeMillis();
+	/** Time stamp when ready to send */
+	private long ready = TimeSteward.currentTimeMillis();
 
 	/** Sleep until we're ready to send */
 	protected void sleepUntilReady() {
 		long now = TimeSteward.currentTimeMillis();
-		long ms = stamp - now;
+		long ms = Math.min(ready - now, CMD_INTERVAL_MS);
 		if(ms > 0) {
 			try {
 				Thread.sleep(ms);
@@ -61,6 +61,6 @@ abstract public class OpManchester extends OpDevice<ManchesterProperty> {
 				// Nothing to do here
 			}
 		}
-		stamp = now + CMD_INTERVAL_MS;
+		ready = now + CMD_INTERVAL_MS;
 	}
 }
