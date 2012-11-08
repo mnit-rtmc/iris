@@ -75,11 +75,7 @@ public class OpMoveCamera extends OpManchester {
 		protected Phase<ManchesterProperty> poll(
 			CommMessage<ManchesterProperty> mess) throws IOException
 		{
-			if(!shouldSend()) {
-				delay();
-				if(!shouldSend())
-					return this;
-			}
+			sleepUntilReady();
 			mess.add(new CommandProperty(pan, tilt, zoom));
 			mess.storeProps();
 			if(isStopCmd() || isExpired())

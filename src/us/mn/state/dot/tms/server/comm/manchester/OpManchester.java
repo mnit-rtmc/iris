@@ -30,7 +30,7 @@ abstract public class OpManchester extends OpDevice<ManchesterProperty> {
 	static private final int OP_TIMEOUT_MS = 30000;
 
 	/** The number of milliseconds between commands */
-	static private final int CMD_INTERVAL_MS = 60;
+	static private final int CMD_INTERVAL_MS = 50;
 
 	/** Time stamp when operation will expire */
 	private final long expire;
@@ -49,35 +49,10 @@ abstract public class OpManchester extends OpDevice<ManchesterProperty> {
 	/** Time stamp to send phase */
 	private long stamp = TimeSteward.currentTimeMillis();
 
-	/** Check if operaton should be sent */
-	protected boolean shouldSend() {
+	/** Sleep until we're ready to send */
+	protected void sleepUntilReady() {
 		long now = TimeSteward.currentTimeMillis();
-		if(stamp < now)
-			return false;
-		else {
-			stamp = now + CMD_INTERVAL_MS;
-			should_sleep = false;
-			return true;
-		}
-	}
-
-	/** Flag to enable sleeping */
-	private boolean should_sleep = false;
-
-	/** Delay a bit.  We only sleep if this is called twice without sending.
-	 * This forces the operation to cycle through the queue twice, allowing
-	 * any other operatons to run. */
-	protected void delay() {
-		if(should_sleep)
-			sleepBriefly();
-		else
-			should_sleep = true;
-	}
-
-	/** Sleep briefly */
-	private void sleepBriefly() {
-		long now = TimeSteward.currentTimeMillis();
-		long ms = Math.min(stamp - now, 10);
+		long ms = stamp - now;
 		if(ms > 0) {
 			try {
 				Thread.sleep(ms);
@@ -86,5 +61,6 @@ abstract public class OpManchester extends OpDevice<ManchesterProperty> {
 				// Nothing to do here
 			}
 		}
+		stamp = now + CMD_INTERVAL_MS;
 	}
 }
