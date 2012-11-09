@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,4 +26,10 @@ abstract public class PelcoProperty extends ControllerProperty {
 
 	/** Value to indicate no selected camera */
 	static protected final int CAMERA_NONE = -1;
+
+	/** Acknowledge response */
+	static protected final String ACK = "AK";
+
+	/** Negative Acknowledge response */
+	static protected final String NO_ACK = "NA";
 }
