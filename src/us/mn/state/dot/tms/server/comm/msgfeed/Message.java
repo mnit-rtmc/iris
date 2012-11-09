@@ -49,9 +49,10 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void queryProps() throws IOException {
-		if(prop != null)
-			prop.doGetRequest(messenger.getInputStream());
-		else
+		if(prop != null) {
+			prop.doGetRequest(messenger.getInputStream(
+				prop.getPath()));
+		} else
 			throw new ProtocolException("No property");
 	}
 

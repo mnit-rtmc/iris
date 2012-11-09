@@ -64,7 +64,7 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	 */
 	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(messenger.getOutputStream(c),
-				   messenger.getInputStream(c));
+				   messenger.getInputStream("", c));
 	}
 
 	/** Check if a drop address is valid */

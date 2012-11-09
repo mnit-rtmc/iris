@@ -31,7 +31,7 @@ public class OpSendLCSSettings extends OpLCS {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<DinRelayProperty> phaseTwo() {
 		for(DMSImpl dms: dmss) {
 			if(dms != null)
 				setSignDimensions(dms);

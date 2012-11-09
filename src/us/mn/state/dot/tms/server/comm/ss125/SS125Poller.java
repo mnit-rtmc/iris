@@ -41,7 +41,7 @@ public class SS125Poller extends MessagePoller implements SamplePoller {
 		throws IOException
 	{
 		return new Message(messenger.getOutputStream(c),
-			messenger.getInputStream(c), c);
+			messenger.getInputStream("", c), c);
 	}
 
 	/** Check if a drop address is valid */

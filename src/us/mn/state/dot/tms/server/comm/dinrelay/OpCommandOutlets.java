@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.dinrelay;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -25,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpCommandOutlets extends OpController {
+public class OpCommandOutlets extends OpDinRelay {
 
 	/** Outlet command state */
 	private final boolean[] outlets;
@@ -43,15 +42,17 @@ public class OpCommandOutlets extends OpController {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<DinRelayProperty> phaseOne() {
 		return new QueryOutlets();
 	}
 
 	/** Phase to query the DIN relay outlet status */
-	private class QueryOutlets extends Phase {
+	private class QueryOutlets extends Phase<DinRelayProperty> {
 
 		/** Query the outlet status */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<DinRelayProperty> poll(
+			CommMessage<DinRelayProperty> mess) throws IOException
+		{
 			mess.add(property);
 			mess.queryProps();
 			return new TurnOffOutlets();
@@ -59,13 +60,15 @@ public class OpCommandOutlets extends OpController {
 	}
 
 	/** Turn off outlets which are commanded OFF */
-	private class TurnOffOutlets extends Phase {
+	private class TurnOffOutlets extends Phase<DinRelayProperty> {
 
 		/** Current outlet number */
 		private int o_num = 0;
 
 		/** Command next outlet OFF */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<DinRelayProperty> poll(
+			CommMessage<DinRelayProperty> mess) throws IOException
+		{
 			while(o_num < outlets.length) {
 				if(shouldTurnOff(o_num)) {
 					o_num++;
@@ -90,13 +93,15 @@ public class OpCommandOutlets extends OpController {
 	}
 
 	/** Turn on outlets which are commanded ON */
-	private class TurnOnOutlets extends Phase {
+	private class TurnOnOutlets extends Phase<DinRelayProperty> {
 
 		/** Current outlet number */
 		private int o_num = 0;
 
 		/** Command next outlet ON */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<DinRelayProperty> poll(
+			CommMessage<DinRelayProperty> mess) throws IOException
+		{
 			while(o_num < outlets.length) {
 				if(shouldTurnOn(o_num)) {
 					o_num++;

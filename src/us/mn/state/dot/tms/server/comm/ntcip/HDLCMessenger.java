@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public class HDLCMessenger extends Messenger {
 	public void open() throws IOException {
 		wrapped.open();
 		output = new HDLC.FrameOutputStream(wrapped.getOutputStream());
-		input = new HDLC.FrameInputStream(wrapped.getInputStream());
+		input = new HDLC.FrameInputStream(wrapped.getInputStream(""));
 	}
 
 	/** Close the messenger */
@@ -56,7 +56,7 @@ public class HDLCMessenger extends Messenger {
 	}
 
 	/** Get an input stream for the specified controller */
-	public InputStream getInputStream(ControllerImpl c)
+	public InputStream getInputStream(String path, ControllerImpl c)
 		throws EOFException
 	{
 		InputStream _input = input;	// Avoid races

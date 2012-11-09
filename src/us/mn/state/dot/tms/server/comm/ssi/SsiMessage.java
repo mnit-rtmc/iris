@@ -52,9 +52,10 @@ public class SsiMessage implements CommMessage {
 	 * @throws IOException On any errors sending or receiving. */
 	public void queryProps() throws IOException {
 		SsiPoller.log("queryProps called");
-		if(ssi_prop != null)
-			ssi_prop.doGetRequest(messenger.getInputStream());
-		else
+		if(ssi_prop != null) {
+			ssi_prop.doGetRequest(messenger.getInputStream(
+				ssi_prop.getPath()));
+		} else
 			throw new ProtocolException("No property");
 	}
 

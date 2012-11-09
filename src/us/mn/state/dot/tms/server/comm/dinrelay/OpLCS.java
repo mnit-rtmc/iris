@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-abstract public class OpLCS extends OpDevice {
+abstract public class OpLCS extends OpDevice<DinRelayProperty> {
 
 	/** LCS array to query */
 	protected final LCSArrayImpl lcs_array;

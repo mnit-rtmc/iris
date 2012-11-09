@@ -14,25 +14,19 @@
  */
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.comm.OpController;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * DIN relay property.
+ * Operation for DIN relay controller.
  *
  * @author Douglas Lau
  */
-public class DinRelayProperty extends ControllerProperty {
+abstract public class OpDinRelay extends OpController<DinRelayProperty> {
 
-	/** Relative path */
-	private final String path;
-
-	/** Get the path for a property */
-	public String getPath() {
-		return path;
-	}
-
-	/** Create a new DIN relay property */
-	public DinRelayProperty(String p) {
-		path = p;
+	/** Create a new DIN relay operation */
+	protected OpDinRelay(PriorityLevel p, ControllerImpl c) {
+		super(p, c);
 	}
 }

@@ -99,7 +99,7 @@ public class ModemMessenger extends Messenger {
 			throw e;
 		}
 		output = wrapped.getOutputStream();
-		input = new ModemInputStream(wrapped.getInputStream());
+		input = new ModemInputStream(wrapped.getInputStream(""));
 		try {
 			connectModemRetry();
 			modem.setStateNotify(ModemState.online);

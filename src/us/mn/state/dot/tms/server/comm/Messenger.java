@@ -44,15 +44,15 @@ abstract public class Messenger {
 	abstract public void setTimeout(int t) throws IOException;
 
 	/** Get the input stream */
-	public InputStream getInputStream() throws IOException {
+	public InputStream getInputStream(String path) throws IOException {
 		return input;
 	}
 
 	/** Get an input stream for the specified controller */
-	public InputStream getInputStream(ControllerImpl c)
+	public InputStream getInputStream(String path, ControllerImpl c)
 		throws IOException
 	{
-		InputStream is = getInputStream();
+		InputStream is = getInputStream(path);
 		if(is == null)
 			throw new EOFException("MESSENGER CLOSED");
 		else

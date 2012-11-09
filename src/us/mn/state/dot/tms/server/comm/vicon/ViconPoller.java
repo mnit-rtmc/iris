@@ -42,7 +42,7 @@ public class ViconPoller extends MessagePoller implements VideoMonitorPoller {
 	/** Create a new message for the specified drop address */
 	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(messenger.getOutputStream(c),
-			messenger.getInputStream(c));
+			messenger.getInputStream("", c));
 	}
 
 	/** Check if a drop address is valid */

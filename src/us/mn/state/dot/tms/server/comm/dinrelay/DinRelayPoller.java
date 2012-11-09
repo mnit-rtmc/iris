@@ -19,18 +19,18 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
-import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
+import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
  * Poller to control Digital Loggers Inc DIN Relay devices.
  *
  * @author Douglas Lau
  */
-public class DinRelayPoller extends MessagePoller implements LCSPoller {
-
+public class DinRelayPoller extends MessagePoller<DinRelayProperty>
+	implements LCSPoller
+{
 	/** DIN relay debug log */
 	static private final IDebugLog DIN_LOG = new IDebugLog("dinrelay");
 
@@ -39,20 +39,10 @@ public class DinRelayPoller extends MessagePoller implements LCSPoller {
 		DIN_LOG.log(msg);
 	}
 
-	/** HTTP messenger */
-	private final HttpFileMessenger http_mess;
-
 	/** Create a new DIN relay poller */
-	public DinRelayPoller(String n, HttpFileMessenger m) {
+	public DinRelayPoller(String n, Messenger m) {
 		super(n, m);
 		log("creating DIN relay poller");
-		http_mess = m;
-	}
-
-	/** Create a new message for the specified controller, 
-	 *  called by MessagePoller.doPoll(). */
-	public CommMessage createMessage(ControllerImpl c) {
-		return new Message(http_mess, c);
 	}
 
 	/** Check if a drop address is valid */

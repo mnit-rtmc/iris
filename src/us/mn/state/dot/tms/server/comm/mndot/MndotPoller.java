@@ -107,7 +107,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	/** Create a new message for the specified controller */
 	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(messenger.getOutputStream(c),
-			messenger.getInputStream(c), c.getDrop(), protocol);
+			messenger.getInputStream("", c), c.getDrop(), protocol);
 	}
 
 	/** Check if a drop address is valid */

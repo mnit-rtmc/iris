@@ -36,11 +36,6 @@ public class HttpFileMessenger extends Messenger {
 	/** Relative path */
 	private String path;
 
-	/** Set the relative path */
-	public void setPath(String p) {
-		path = p;
-	}
-
 	/** Get the URL */
 	private URL getUrl() throws MalformedURLException {
 		if(path != null)
@@ -108,7 +103,8 @@ public class HttpFileMessenger extends Messenger {
 	}
 
 	/** Get the input stream */
-	public InputStream getInputStream() throws IOException {
+	public InputStream getInputStream(String p) throws IOException {
+		path = p;
 		// make a new HTTP connection each time called
 		close();
 		open();
@@ -116,9 +112,10 @@ public class HttpFileMessenger extends Messenger {
 	}
 
 	/** Get an input stream for the specified controller */
-	public InputStream getInputStream(ControllerImpl c)
+	public InputStream getInputStream(String p, ControllerImpl c)
 		throws IOException
 	{
+		path = p;
 		// make a new HTTP connection each time called
 		close();
 		open(c.getPassword());

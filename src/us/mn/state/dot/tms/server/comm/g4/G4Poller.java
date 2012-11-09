@@ -58,7 +58,7 @@ public class G4Poller extends MessagePoller implements SamplePoller {
 		G4Poller.info("G4Poller.createMessage(" + c + ")");
 		return new G4Message(
 			new DataOutputStream(messenger.getOutputStream(c)),
-			messenger.getInputStream(c), c, messenger);
+			messenger.getInputStream("", c), c, messenger);
 	}
 
 	/** Check if a sensor id is valid */

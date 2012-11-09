@@ -48,15 +48,17 @@ public class OpQueryLCSIndications extends OpLCS {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<DinRelayProperty> phaseTwo() {
 		return new CreateOutletQueries();
 	}
 
 	/** Phase to create operations to query outlet status */
-	private class CreateOutletQueries extends Phase {
+	private class CreateOutletQueries extends Phase<DinRelayProperty> {
 
 		/** Create the outlet query operations */
-		protected Phase poll(CommMessage mess) {
+		protected Phase<DinRelayProperty> poll(
+			CommMessage<DinRelayProperty> mess)
+		{
 			Iterator<ControllerImpl> it = controllers.iterator();
 			synchronized(this) {
 				while(it.hasNext())

@@ -68,7 +68,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	/** Create a new message for the specified controller */
 	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return snmp.new Message(messenger.getOutputStream(c),
-			messenger.getInputStream(c), c.getPassword());
+			messenger.getInputStream("", c), c.getPassword());
 	}
 
 	/** Check if a drop address is valid */

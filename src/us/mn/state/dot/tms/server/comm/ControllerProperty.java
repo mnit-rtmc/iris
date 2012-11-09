@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,11 @@ import java.io.OutputStream;
  * @author Douglas Lau
  */
 abstract public class ControllerProperty {
+
+	/** Get the path for a property */
+	public String getPath() {
+		return "";
+	}
 
 	/** Encode a QUERY request */
 	public void encodeQuery(OutputStream os, int drop) throws IOException {

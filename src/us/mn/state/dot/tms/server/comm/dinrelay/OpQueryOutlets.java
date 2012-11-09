@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.dinrelay;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -25,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpQueryOutlets extends OpController {
+public class OpQueryOutlets extends OpDinRelay {
 
 	/** Outlet property */
 	private final OutletProperty property;
@@ -37,15 +36,17 @@ public class OpQueryOutlets extends OpController {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<DinRelayProperty> phaseOne() {
 		return new QueryOutlets();
 	}
 
 	/** Phase to query the DIN relay outlet status */
-	private class QueryOutlets extends Phase {
+	private class QueryOutlets extends Phase<DinRelayProperty> {
 
 		/** Query the outlet status */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<DinRelayProperty> poll(
+			CommMessage<DinRelayProperty> mess) throws IOException
+		{
 			mess.add(property);
 			mess.queryProps();
 			return null;

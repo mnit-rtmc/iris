@@ -55,29 +55,35 @@ public class CommMessageImpl<T extends ControllerProperty>
 	 * @throws IOException On any errors sending message or receiving
 	 *         response */
 	public void queryProps() throws IOException {
-		InputStream is = messenger.getInputStream(controller);
+		messenger.drain();
 		OutputStream os = messenger.getOutputStream(controller);
 		int drop  = controller.getDrop();
-		messenger.drain();
-		for(T p: props)
-			p.encodeQuery(os, drop);
-		os.flush();
-		for(T p: props)
-			p.decodeQuery(is, drop);
+		if(os != null) {
+			for(T p: props)
+				p.encodeQuery(os, drop);
+			os.flush();
+		}
+		for(T p: props) {
+			p.decodeQuery(messenger.getInputStream(p.getPath(),
+				controller), drop);
+		}
 	}
 
 	/** Store the controller properties.
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void storeProps() throws IOException {
-		InputStream is = messenger.getInputStream(controller);
+		messenger.drain();
 		OutputStream os = messenger.getOutputStream(controller);
 		int drop  = controller.getDrop();
-		messenger.drain();
-		for(T p: props)
-			p.encodeStore(os, drop);
-		os.flush();
-		for(T p: props)
-			p.decodeStore(is, drop);
+		if(os != null) {
+			for(T p: props)
+				p.encodeStore(os, drop);
+			os.flush();
+		}
+		for(T p: props) {
+			p.decodeStore(messenger.getInputStream(p.getPath(),
+				controller), drop);
+		}
 	}
 }
