@@ -59,23 +59,23 @@ public class CommMessageImpl<T extends ControllerProperty>
 	 * @throws IOException On any errors sending message or receiving
 	 *         response */
 	public void queryProps() throws IOException {
-		for(T p: props) {
-			input.skip(input.available());
+		input.skip(input.available());
+		for(T p: props)
 			p.encodeQuery(output, drop);
-			output.flush();
+		output.flush();
+		for(T p: props)
 			p.decodeQuery(input, drop);
-		}
 	}
 
 	/** Store the controller properties.
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void storeProps() throws IOException {
-		for(T p: props) {
-			input.skip(input.available());
+		input.skip(input.available());
+		for(T p: props)
 			p.encodeStore(output, drop);
-			output.flush();
+		output.flush();
+		for(T p: props)
 			p.decodeStore(input, drop);
-		}
 	}
 }
