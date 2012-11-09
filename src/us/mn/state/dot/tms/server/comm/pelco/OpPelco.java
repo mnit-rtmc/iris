@@ -29,7 +29,15 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpPelco extends OpController {
 
 	/** Pelco debug log */
-	static protected final IDebugLog PELCO_LOG = new IDebugLog("pelco");
+	static private final IDebugLog PELCO_LOG = new IDebugLog("pelco");
+
+	/** Debug switch requests */
+	protected void debug(String desc) {
+		if(PELCO_LOG.isOpen()) {
+			PELCO_LOG.log(desc + " " + monitor.getName() + " -> " +
+				camera);
+		}
+	}
 
 	/** Video monitor to select camera on */
 	protected final VideoMonitor monitor;

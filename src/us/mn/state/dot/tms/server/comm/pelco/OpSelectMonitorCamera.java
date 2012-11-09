@@ -77,12 +77,4 @@ public class OpSelectMonitorCamera extends OpPelco {
 			return null;
 		}
 	}
-
-	/** Debug switch requests */
-	protected void debug(String desc) {
-		if(PELCO_LOG.isOpen()) {
-			PELCO_LOG.log(desc + " " + monitor.getName() + " -> " +
-				camera);
-		}
-	}
 }
