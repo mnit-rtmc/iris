@@ -26,15 +26,4 @@ abstract public class PelcoProperty extends ControllerProperty {
 
 	/** Value to indicate no selected camera */
 	static protected final int CAMERA_NONE = -1;
-
-	/** Minimum value allowed for a request */
-	static protected final int MIN_VALUE = -256;
-
-	/** Maximum value allowed for a request */
-	static protected final int MAX_VALUE = 256;
-
-	/** Clamp a value to within the allowed range */
-	static protected int clampValue(int v) {
-		return Math.max(Math.min(v, MAX_VALUE), MIN_VALUE);
-	}
 }
