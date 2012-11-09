@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-abstract public class OpPelco extends OpController {
+abstract public class OpPelco extends OpController<PelcoProperty> {
 
 	/** Pelco debug log */
 	static private final IDebugLog PELCO_LOG = new IDebugLog("pelco");
@@ -46,10 +46,8 @@ abstract public class OpPelco extends OpController {
 	protected final String camera;
 
 	/** Create a new Pelco operation */
-	public OpPelco(PriorityLevel p, ControllerImpl c, VideoMonitor m,
-		String cam)
-	{
-		super(p, c);
+	public OpPelco(ControllerImpl c, VideoMonitor m, String cam) {
+		super(PriorityLevel.COMMAND, c);
 		monitor = m;
 		camera = cam;
 	}

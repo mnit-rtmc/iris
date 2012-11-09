@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.pelco;
 
+import java.io.EOFException;
+import java.io.InputStream;
+import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -25,11 +28,37 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 abstract public class PelcoProperty extends ControllerProperty {
 
 	/** Value to indicate no selected camera */
-	static protected final int CAMERA_NONE = -1;
+	static private final int CAMERA_NONE = -1;
 
 	/** Acknowledge response */
-	static protected final String ACK = "AK";
+	static private final String ACK = "AK";
 
 	/** Negative Acknowledge response */
-	static protected final String NO_ACK = "NA";
+	static private final String NAK = "NA";
+
+	/** End of Response byte */
+	static private final int EOR = 'a';
+
+	/** Maximum size (in bytes) of a response from switcher */
+	static private final int MAX_RESPONSE = 80;
+
+	/** Get a response from the switcher */
+	protected String getResponse(InputStream is) throws IOException {
+		StringBuilder resp = new StringBuilder();
+		while(resp.length() <= MAX_RESPONSE) {
+			int value = is.read();
+			if(value < 0)
+				throw new EOFException("END OF STREAM");
+			if(value == EOR)
+				break;
+			resp.append((char)value);
+		}
+		return resp.toString();
+	}
+
+	/** Decode a STORE response */
+	public void decodeStore(InputStream is, int drop) throws IOException {
+		// FIXME: what to do if NAK is returned?
+		getResponse(is);
+	}
 }

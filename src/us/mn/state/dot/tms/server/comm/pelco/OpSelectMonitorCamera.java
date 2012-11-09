@@ -18,7 +18,6 @@ import java.io.IOException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Pelco operation to select the camera for one monitor.
@@ -45,7 +44,7 @@ public class OpSelectMonitorCamera extends OpPelco {
 	public OpSelectMonitorCamera(ControllerImpl c, VideoMonitor m,
 		String cam)
 	{
-		super(PriorityLevel.COMMAND, c, m, cam);
+		super(c, m, cam);
 		debug("BEGIN monitor");
 	}
 
@@ -60,15 +59,17 @@ public class OpSelectMonitorCamera extends OpPelco {
 	}
 
 	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<PelcoProperty> phaseOne() {
 		return new Select();
 	}
 
 	/** Phase to select the monitor and camera */
-	protected class Select extends Phase {
+	protected class Select extends Phase<PelcoProperty> {
 
 		/** Command controller to move the camera */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<PelcoProperty> poll(
+			CommMessage<PelcoProperty> mess) throws IOException
+		{
 			mess.add(new SelectMonitorProperty(parseUID(
 				monitor.getName())));
 			mess.add(new SelectCameraProperty(parseUID(camera)));
