@@ -14,13 +14,10 @@
  */
 package us.mn.state.dot.tms.server.comm.canoga;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -47,15 +44,6 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	/** Create a new Canoga poller */
 	public CanogaPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Create a new message for the specified controller */
-	public CommMessage<CanogaProperty> createMessage(ControllerImpl c)
-		throws IOException
-	{
-		return new CommMessageImpl<CanogaProperty>(
-			messenger.getOutputStream(c),
-			messenger.getInputStream(c), c.getDrop());
 	}
 
 	/** Check if a drop address is valid */

@@ -14,11 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.manchester;
 
-import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
@@ -38,15 +34,6 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 	/** Create a new Manchester poller */
 	public ManchesterPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Create a new message for the specified drop address */
-	public CommMessage<ManchesterProperty> createMessage(ControllerImpl c)
-		throws IOException
-	{
-		return new CommMessageImpl<ManchesterProperty>(
-			messenger.getOutputStream(c),
-			messenger.getInputStream(c), c.getDrop());
 	}
 
 	/** Check if a drop address is valid */

@@ -14,12 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.pelco;
 
-import java.io.IOException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
@@ -43,15 +40,6 @@ public class PelcoPoller extends MessagePoller<PelcoProperty>
 	/** Create a new Pelco line */
 	public PelcoPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Create a new message for the specified drop address */
-	public CommMessage<PelcoProperty> createMessage(ControllerImpl c)
-		throws IOException
-	{
-		return new CommMessageImpl<PelcoProperty>(
-			messenger.getOutputStream(c),
-			messenger.getInputStream(c), c.getDrop());
 	}
 
 	/** Check if a drop address is valid */

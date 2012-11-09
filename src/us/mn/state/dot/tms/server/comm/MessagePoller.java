@@ -277,8 +277,13 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	abstract public boolean isAddressValid(int drop);
 
 	/** Create a message for the specified controller */
-	abstract protected CommMessage<T> createMessage(ControllerImpl c)
-		throws IOException;
+	protected CommMessage<T> createMessage(ControllerImpl c)
+		throws IOException
+	{
+		return new CommMessageImpl<T>(
+			messenger.getOutputStream(c),
+			messenger.getInputStream(c), c.getDrop());
+	}
 
 	/** Respond to a download request from a controller */
 	protected void download(ControllerImpl c, PriorityLevel p) {

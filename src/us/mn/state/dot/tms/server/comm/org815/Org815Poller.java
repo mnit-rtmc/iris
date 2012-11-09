@@ -14,11 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.org815;
 
-import java.io.IOException;
-import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
@@ -34,15 +30,6 @@ public class Org815Poller extends MessagePoller<Org815Property>
 	/** Create a new ORG-815 poller */
 	public Org815Poller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Create a new message for the specified controller */
-	public CommMessage<Org815Property> createMessage(ControllerImpl c)
-		throws IOException
-	{
-		return new CommMessageImpl<Org815Property>(
-			messenger.getOutputStream(c),
-			messenger.getInputStream(c), c.getDrop());
 	}
 
 	/** Check if a drop address is valid */
