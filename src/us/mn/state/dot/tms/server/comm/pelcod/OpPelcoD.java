@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,27 +14,19 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcod;
 
-import java.io.InputStream;
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.CameraImpl;
+import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Pelco D Property
+ * Pelco D operation.
  *
  * @author Douglas Lau
  */
-abstract public class PelcoDProperty extends ControllerProperty {
+abstract public class OpPelcoD extends OpDevice<PelcoDProperty> {
 
-	/** Calculate the checksum */
-	protected byte calculateChecksum(byte[] message) {
-		int i;
-		byte checksum = 0;
-		for(i = 1; i < 6; i++)
-			checksum += message[i];
-		return checksum;
-	}
-
-	/** Decode a STORE response */
-	public void decodeStore(InputStream is, int drop) {
-		// do not expect any response
+	/** Create a new Pelco D operation */
+	protected OpPelcoD(CameraImpl c) {
+		super(PriorityLevel.COMMAND, c);
 	}
 }

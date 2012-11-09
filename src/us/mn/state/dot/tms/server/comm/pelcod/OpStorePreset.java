@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.server.comm.pelcod;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Pelco operation to store a camera preset.
@@ -26,27 +24,29 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Stephen Donecker
  * @author Douglas Lau
  */
-public class OpStorePreset extends OpDevice {
+public class OpStorePreset extends OpPelcoD {
 
 	/** The camera preset to set */
 	private final int preset;
 
 	/** Create a new operation to store a camera preset */
 	public OpStorePreset(CameraImpl c, int p) {
-		super(PriorityLevel.COMMAND, c);
+		super(c);
 		preset = p;
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<PelcoDProperty> phaseTwo() {
 		return new StorePreset();
 	}
 
 	/** Phase to store a camera preset */
-	protected class StorePreset extends Phase {
+	protected class StorePreset extends Phase<PelcoDProperty> {
 
 		/** Command controller to store the camera preset */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<PelcoDProperty> poll(
+			CommMessage<PelcoDProperty> mess) throws IOException
+		{
 			mess.add(new StorePresetProperty(preset));
 			mess.storeProps();
 			return null;

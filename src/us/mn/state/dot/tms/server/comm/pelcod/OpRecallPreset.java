@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.server.comm.pelcod;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Pelco operation to recall a camera preset.
@@ -26,27 +24,29 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Stephen Donecker
  * @author Douglas Lau
  */
-public class OpRecallPreset extends OpDevice {
+public class OpRecallPreset extends OpPelcoD {
 
 	/** The camera preset to goto */
 	private final int preset;
 
 	/** Create a new operation to recall a camera preset */
 	public OpRecallPreset(CameraImpl c, int p) {
-		super(PriorityLevel.COMMAND, c);
+		super(c);
 		preset = p;
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<PelcoDProperty> phaseTwo() {
 		return new RecallPreset();
 	}
 
 	/** Phase to recall a camera preset */
-	protected class RecallPreset extends Phase {
+	protected class RecallPreset extends Phase<PelcoDProperty> {
 
 		/** Command controller to set the camera preset */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<PelcoDProperty> poll(
+			CommMessage<PelcoDProperty> mess) throws IOException
+		{
 			mess.add(new RecallPresetProperty(preset));
 			mess.storeProps();
 			return null;

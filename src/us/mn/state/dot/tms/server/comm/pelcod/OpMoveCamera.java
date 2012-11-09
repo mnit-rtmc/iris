@@ -17,56 +17,56 @@ package us.mn.state.dot.tms.server.comm.pelcod;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Pelco operation to move a camera.
  *
  * @author Douglas Lau
  */
-public class OpMoveCamera extends OpDevice {
+public class OpMoveCamera extends OpPelcoD {
 
 	/** Range of PTZ values */
-	static protected final int PTZ_RANGE = 64;
+	static private final int PTZ_RANGE = 64;
 
 	/** Clamp a float value to the range of (-1, 1) */
-	static protected float clamp_float(float value) {
+	static private float clamp_float(float value) {
 		return Math.max(-1, Math.min(value, 1));
 	}
 
 	/** Map a float value to an integer range */
-	static protected int map_float(float value, int range) {
+	static private int map_float(float value, int range) {
 		return Math.round(clamp_float(value) * (range - 1));
 	}
 
 	/** The direction (and speed) to pan the camera */
-	protected final int pan;
+	private final int pan;
 
 	/** The direction (and speed) to tilt the camera */
-	protected final int tilt;
+	private final int tilt;
 
 	/** The direction to zoom the camera */
-	protected final int zoom;
+	private final int zoom;
 
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
-		super(PriorityLevel.COMMAND, c);
+		super(c);
 		pan = map_float(p, PTZ_RANGE);
 		tilt = map_float(t, PTZ_RANGE);
 		zoom = map_float(z, PTZ_RANGE);
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	protected Phase<PelcoDProperty> phaseTwo() {
 		return new Move();
 	}
 
 	/** Phase to move the camera */
-	protected class Move extends Phase {
+	protected class Move extends Phase<PelcoDProperty> {
 
 		/** Command controller to move the camera */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<PelcoDProperty> poll(
+			CommMessage<PelcoDProperty> mess) throws IOException
+		{
 			mess.add(new CommandProperty(pan, tilt, zoom));
 			mess.storeProps();
 			return null;
