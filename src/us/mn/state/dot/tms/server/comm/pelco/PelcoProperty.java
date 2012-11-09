@@ -18,6 +18,7 @@ import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import static us.mn.state.dot.tms.server.comm.pelco.PelcoPoller.PELCO_LOG;
 
 /**
  * Pelco Property
@@ -59,6 +60,7 @@ abstract public class PelcoProperty extends ControllerProperty {
 	/** Decode a STORE response */
 	public void decodeStore(InputStream is, int drop) throws IOException {
 		// FIXME: what to do if NAK is returned?
-		getResponse(is);
+		String resp = getResponse(is);
+		PELCO_LOG.log("decodeStore: " + resp);
 	}
 }

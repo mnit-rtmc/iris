@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.server.comm.pelco;
 
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import static us.mn.state.dot.tms.server.comm.pelco.PelcoPoller.PELCO_LOG;
 
 /**
  * OpPelco is the base class for the Pelco comm protocol.
@@ -27,9 +27,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpPelco extends OpController<PelcoProperty> {
-
-	/** Pelco debug log */
-	static private final IDebugLog PELCO_LOG = new IDebugLog("pelco");
 
 	/** Debug switch requests */
 	protected void debug(String desc) {

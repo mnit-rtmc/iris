@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
 import java.io.IOException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -35,6 +36,9 @@ public class PelcoPoller extends MessagePoller<PelcoProperty>
 {
 	/** Dummy drop value for creating addressed messages */
 	static private final int PELCO_DROP = 1;
+
+	/** Pelco debug log */
+	static public final IDebugLog PELCO_LOG = new IDebugLog("pelco");
 
 	/** Create a new Pelco line */
 	public PelcoPoller(String n, Messenger m) {
