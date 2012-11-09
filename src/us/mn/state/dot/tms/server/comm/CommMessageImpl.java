@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.util.LinkedList;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * Comm message implementation.
@@ -27,26 +28,21 @@ import java.util.LinkedList;
 public class CommMessageImpl<T extends ControllerProperty>
 	implements CommMessage<T>
 {
-	/** Comm output stream */
-	private final OutputStream output;
+	/** Messenger object */
+	private final Messenger messenger;
 
-	/** Comm input stream */
-	private final InputStream input;
-
-	/** Drop address */
-	private final int drop;
+	/** Controller to send message */
+	private final ControllerImpl controller;
 
 	/** Controller properties */
 	private final LinkedList<T> props;
 
 	/** Create a new comm message.
-	 * @param out Output stream to write message data.
-	 * @param is Input stream to read message responses.
-	 * @param d Drop address. */
-	public CommMessageImpl(OutputStream out, InputStream is, int d) {
-		output = out;
-		input = is;
-		drop = d;
+	 * @param m Messenger to use for communication.
+	 * @param c Controller to send message. */
+	public CommMessageImpl(Messenger m, ControllerImpl c) {
+		messenger = m;
+		controller = c;
 		props = new LinkedList<T>();
 	}
 
@@ -59,23 +55,29 @@ public class CommMessageImpl<T extends ControllerProperty>
 	 * @throws IOException On any errors sending message or receiving
 	 *         response */
 	public void queryProps() throws IOException {
-		input.skip(input.available());
+		InputStream is = messenger.getInputStream(controller);
+		OutputStream os = messenger.getOutputStream(controller);
+		int drop  = controller.getDrop();
+		messenger.drain();
 		for(T p: props)
-			p.encodeQuery(output, drop);
-		output.flush();
+			p.encodeQuery(os, drop);
+		os.flush();
 		for(T p: props)
-			p.decodeQuery(input, drop);
+			p.decodeQuery(is, drop);
 	}
 
 	/** Store the controller properties.
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void storeProps() throws IOException {
-		input.skip(input.available());
+		InputStream is = messenger.getInputStream(controller);
+		OutputStream os = messenger.getOutputStream(controller);
+		int drop  = controller.getDrop();
+		messenger.drain();
 		for(T p: props)
-			p.encodeStore(output, drop);
-		output.flush();
+			p.encodeStore(os, drop);
+		os.flush();
 		for(T p: props)
-			p.decodeStore(input, drop);
+			p.decodeStore(is, drop);
 	}
 }

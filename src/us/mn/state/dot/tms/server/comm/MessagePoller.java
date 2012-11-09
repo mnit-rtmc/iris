@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.SocketTimeoutException;
@@ -280,9 +279,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	protected CommMessage<T> createMessage(ControllerImpl c)
 		throws IOException
 	{
-		return new CommMessageImpl<T>(
-			messenger.getOutputStream(c),
-			messenger.getInputStream(c), c.getDrop());
+		return new CommMessageImpl<T>(messenger, c);
 	}
 
 	/** Respond to a download request from a controller */
