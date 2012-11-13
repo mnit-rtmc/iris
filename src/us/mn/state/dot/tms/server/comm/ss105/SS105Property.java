@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.OutputStream;
 import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * SS105 Property
- * FIXME: convert to use ControllerProperty encode/decode methods.
  *
  * @author Douglas Lau
  */
@@ -40,7 +39,7 @@ abstract public class SS105Property extends ControllerProperty {
 	static private final boolean MULTIDROP = true;
 
 	/** Maximum number of bytes in a response */
-	static protected final int MAX_RESP = 256;
+	static private final int MAX_RESP = 256;
 
 	/** Convert an integer to a hexadecimal number padded to d digits */
 	static protected String hex(int n, int d) {
@@ -99,25 +98,13 @@ abstract public class SS105Property extends ControllerProperty {
 	/** Set the response to the request */
 	abstract protected void setResponse(String r) throws IOException;
 
-	/** Poll the sensor */
-	protected void doPoll(PrintStream ps, String h, String r)
-		throws IOException
-	{
-		ps.print(h);
-		ps.print(r);
-		ps.print('\r');
-		ps.flush();
-	}
-
 	/** Get response from the sensor */
-	protected void doResponse(InputStream is, String h, String r)
-		throws IOException
-	{
+	private String getResponse(InputStream is) throws IOException {
 		InputStreamReader isr = new InputStreamReader(is, ASCII);
 		LineReader lr = new LineReader(isr, MAX_RESP);
 		String line = lr.readLine();
 		if(line != null)
-			parseResponse(line.trim(), h, r);
+			return line.trim();
 		else
 			throw new EOFException("END OF STREAM");
 	}
@@ -149,25 +136,33 @@ abstract public class SS105Property extends ControllerProperty {
 		setResponse(response);
 	}
 
-	/** Perform a "GET" request */
-	public void doGetRequest(PrintStream ps, InputStream is, int drop)
-		throws IOException
-	{
+	/** Encode a QUERY request */
+	public void encodeQuery(OutputStream os, int drop) throws IOException {
 		String h = formatHeader(drop);
 		String req = formatGetRequest();
-		is.skip(is.available());
-		doPoll(ps, h, req);
-		doResponse(is, h, req);
+		os.write(new String(h + req + '\r').getBytes(ASCII));
 	}
 
-	/** Perform a "SET" request */
-	public void doSetRequest(PrintStream ps, InputStream is, int drop)
-		throws IOException
-	{
+	/** Decode a QUERY response */
+	public void decodeQuery(InputStream is, int drop) throws IOException {
+		String line = getResponse(is);
+		String h = formatHeader(drop);
+		String req = formatGetRequest();
+		parseResponse(line, h, req);
+	}
+
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
 		String h = formatHeader(drop);
 		String req = formatSetRequest();
-		is.skip(is.available());
-		doPoll(ps, h, req);
-		doResponse(is, h, req);
+		os.write(new String(h + req + '\r').getBytes(ASCII));
+	}
+
+	/** Decode a STORE response */
+	public void decodeStore(InputStream is, int drop) throws IOException {
+		String line = getResponse(is);
+		String h = formatHeader(drop);
+		String req = formatSetRequest();
+		parseResponse(line, h, req);
 	}
 }
