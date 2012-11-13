@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class TimeProperty extends SS105Property {
 
-	/** Is this a SET request */
-	protected boolean is_set = false;
-
 	/** Time stamp */
 	protected long stamp = TimeSteward.currentTimeMillis();
 
@@ -40,33 +37,26 @@ public class TimeProperty extends SS105Property {
 
 	/** Format a basic "GET" request */
 	protected String formatGetRequest() {
-		is_set = false;
 		return "SB";
 	}
 
 	/** Format a basic "SET" request */
 	protected String formatSetRequest() {
-		is_set = true;
 		stamp = TimeSteward.currentTimeMillis();
 		int seconds = TimeStamp.secondsSinceEpoch(new Date(stamp));
 		return "S4" + hex(seconds, 8);
 	}
 
-	/** Set the response to the request */
-	protected void setResponse(String r) throws IOException {
-		if(is_set) {
-			if(r.equals("Success"))
-				return;
-			else
-				throw new ControllerException("Time set error");
-		} else
-			parseGetResponse(r);
+	/** Parse the response to a QUERY */
+	protected void parseQuery(String res) throws IOException {
+		Date date = TimeStamp.parse(res);
+		stamp = date.getTime();
 	}
 
-	/** Parse the response to a GET request */
-	protected void parseGetResponse(String r) throws IOException {
-		Date date = TimeStamp.parse(r);
-		stamp = date.getTime();
+	/** Parse the response to a STORE */
+	protected void parseStore(String res) throws IOException {
+		if(!res.equals("Success"))
+			throw new ControllerException("Time set error");
 	}
 
 	/** Get the sensor time */

@@ -109,8 +109,8 @@ public class BinnedSampleProperty extends SS105Property {
 		}
 	}
 
-	/** Set the response to the request */
-	protected void setResponse(String r) throws IOException {
+	/** Parse the response to a QUERY */
+	protected void parseQuery(String r) throws IOException {
 		timestamp = TimeStamp.parse(r.substring(0, 8));
 		String payload = r.substring(8);
 		if(payload.length() % LANE_SAMPLE_BYTES != 0)

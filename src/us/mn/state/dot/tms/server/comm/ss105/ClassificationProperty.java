@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,15 +77,8 @@ public class ClassificationProperty extends MemoryProperty {
 			hex(long_min, 4) + hex(long_max, 4);
 	}
 
-	/** Set the response to the request */
-	protected void setResponse(String r) throws IOException {
-		super.setResponse(r);
-		if(!is_set)
-			parseGetResponse(r);
-	}
-
-	/** Parse the response to a GET request */
-	protected void parseGetResponse(String r) throws IOException {
+	/** Parse the response to a QUERY request */
+	protected void parseQuery(String r) throws IOException {
 		try {
 			short_min = Integer.parseInt(r.substring(0, 4), 16);
 			short_max = Integer.parseInt(r.substring(4, 8), 16);

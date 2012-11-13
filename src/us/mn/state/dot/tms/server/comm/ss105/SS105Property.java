@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * SS105 Property
@@ -63,7 +64,7 @@ abstract public class SS105Property extends ControllerProperty {
 	}
 
 	/** Compare the response with its trailing checksum */
-	static protected String compareChecksum(String r) throws IOException {
+	static private String compareChecksum(String r) throws IOException {
 		if(r.length() < 4)
 			throw new ParsingException("INCOMPLETE RESPONSE");
 		String payload = r.substring(0, r.length() - 4);
@@ -89,15 +90,6 @@ abstract public class SS105Property extends ControllerProperty {
 	/** Check if the request has a checksum */
 	abstract protected boolean hasChecksum();
 
-	/** Format a basic "GET" request */
-	abstract protected String formatGetRequest() throws IOException;
-
-	/** Format a basic "SET" request */
-	abstract protected String formatSetRequest() throws IOException;
-
-	/** Set the response to the request */
-	abstract protected void setResponse(String r) throws IOException;
-
 	/** Get response from the sensor */
 	private String getResponse(InputStream is) throws IOException {
 		InputStreamReader isr = new InputStreamReader(is, ASCII);
@@ -110,30 +102,36 @@ abstract public class SS105Property extends ControllerProperty {
 	}
 
 	/** Parse a response from the sensor */
-	private void parseResponse(String response, String h, String r)
+	private String parseResponse(String res, String h, String req)
 		throws IOException
 	{
-		if(response.startsWith(h))
-			response = response.substring(h.length());
+		if(res.startsWith(h))
+			res = res.substring(h.length());
 		else
 			throw new ParsingException("INVALID RESPONSE HEADER");
-		if(response.startsWith(r.substring(0, 2)))
-			response = response.substring(2);
+		if(res.startsWith(req.substring(0, 2)))
+			res = res.substring(2);
 		else
 			throw new ParsingException("INVALID RESPONSE");
-		if(response.endsWith("~"))
-			response = response.substring(0, response.length() - 1);
+		if(res.endsWith("~"))
+			res = res.substring(0, res.length() - 1);
 		else
 			throw new ParsingException("INVALID RESPONSE TAIL");
-		if(response.equals("Failure") ||
-		   response.equals("Invalid") ||
-		   response.equals("Empty"))
+		if(res.equals("Failure") ||
+		   res.equals("Invalid") ||
+		   res.equals("Empty"))
 		{
-			throw new ControllerException(response);
+			throw new ControllerException(res);
 		}
 		if(hasChecksum())
-			response = compareChecksum(response);
-		setResponse(response);
+			return compareChecksum(res);
+		else
+			return res;
+	}
+
+	/** Format a basic "GET" request */
+	protected String formatGetRequest() throws IOException {
+		throw new ProtocolException("GET request not supported");
 	}
 
 	/** Encode a QUERY request */
@@ -143,12 +141,22 @@ abstract public class SS105Property extends ControllerProperty {
 		os.write(new String(h + req + '\r').getBytes(ASCII));
 	}
 
+	/** Parse the response to a QUERY */
+	protected void parseQuery(String res) throws IOException {
+		// Sub-classes can override
+	}
+
 	/** Decode a QUERY response */
 	public void decodeQuery(InputStream is, int drop) throws IOException {
 		String line = getResponse(is);
 		String h = formatHeader(drop);
 		String req = formatGetRequest();
-		parseResponse(line, h, req);
+		parseQuery(parseResponse(line, h, req));
+	}
+
+	/** Format a basic "SET" request */
+	protected String formatSetRequest() throws IOException {
+		throw new ProtocolException("SET request not supported");
 	}
 
 	/** Encode a STORE request */
@@ -158,11 +166,16 @@ abstract public class SS105Property extends ControllerProperty {
 		os.write(new String(h + req + '\r').getBytes(ASCII));
 	}
 
+	/** Parse the response to a STORE */
+	protected void parseStore(String res) throws IOException {
+		// Sub-classes can override
+	}
+
 	/** Decode a STORE response */
 	public void decodeStore(InputStream is, int drop) throws IOException {
 		String line = getResponse(is);
 		String h = formatHeader(drop);
 		String req = formatSetRequest();
-		parseResponse(line, h, req);
+		parseStore(parseResponse(line, h, req));
 	}
 }

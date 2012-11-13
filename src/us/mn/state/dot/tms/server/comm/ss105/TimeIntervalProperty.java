@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,21 +52,14 @@ public class TimeIntervalProperty extends MemoryProperty {
 		return hex(value, 8);
 	}
 
-	/** Set the response to the request */
-	protected void setResponse(String r) throws IOException {
-		super.setResponse(r);
-		if(!is_set)
-			parseGetResponse(r);
-	}
-
-	/** Parse the response to a GET request */
-	protected void parseGetResponse(String r) throws IOException {
+	/** Parse the response to a QUERY */
+	protected void parseQuery(String res) throws IOException {
 		try {
-			value = Integer.parseInt(r, 16);
+			value = Integer.parseInt(res, 16);
 		}
 		catch(NumberFormatException e) {
 			throw new ParsingException(
-				"Invalid time interval: " + r);
+				"Invalid time interval: " + res);
 		}
 	}
 

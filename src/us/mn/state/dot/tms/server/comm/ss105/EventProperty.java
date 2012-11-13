@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * Event Data Property
@@ -37,13 +36,8 @@ public class EventProperty extends SS105Property {
 		return "XA";
 	}
 
-	/** Format a basic "SET" request */
-	protected String formatSetRequest() throws IOException {
-		throw new ProtocolException("Event data is read-only");
-	}
-
 	/** Set the response to the request */
-	protected void setResponse(String r) {
+	protected void parseQuery(String r) {
 		events = r;
 	}
 

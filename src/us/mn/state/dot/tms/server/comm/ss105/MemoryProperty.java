@@ -75,14 +75,11 @@ abstract public class MemoryProperty extends SS105Property {
 		super.decodeStore(is, drop);
 	}
 
-	/** Set the response to the request */
-	protected void setResponse(String r) throws IOException {
-		if(is_set) {
-			if(r.equals("Success"))
-				return;
-			else
-				throw new ControllerException(
-					"Error writing SS105 memory");
+	/** Parse the response to a STORE */
+	protected void parseStore(String res) throws IOException {
+		if(!res.equals("Success")) {
+			throw new ControllerException(
+				"Error writing SS105 memory");
 		}
 	}
 }
