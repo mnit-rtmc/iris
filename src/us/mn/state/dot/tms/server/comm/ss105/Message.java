@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,6 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  */
 public class Message implements CommMessage {
 
-	/** Multidrop SS105 protocol */
-	static protected final boolean MULTIDROP = true;
-
 	/** Serial output print stream */
 	protected final PrintStream ps;
 
@@ -51,18 +48,6 @@ public class Message implements CommMessage {
 		drop = c.getDrop();
 	}
 
-	/** Format a request header */
-	protected String formatHeader() {
-		StringBuilder sb = new StringBuilder();
-		if(MULTIDROP) {
-			sb.append("Z0");
-			sb.append(Integer.toString(drop));
-			while(sb.length() < 6)
-				sb.insert(2, '0');
-		}
-		return sb.toString();
-	}
-
 	/** Add a controller property */
 	public void add(ControllerProperty cp) {
 		if(cp instanceof SS105Property)
@@ -74,7 +59,7 @@ public class Message implements CommMessage {
 	 *         response */
 	public void queryProps() throws IOException {
 		if(prop != null)
-			prop.doGetRequest(ps, is, formatHeader());
+			prop.doGetRequest(ps, is, drop);
 		else
 			throw new ProtocolException("No property");
 	}
@@ -84,7 +69,7 @@ public class Message implements CommMessage {
 	 *         response */
 	public void storeProps() throws IOException {
 		if(prop != null)
-			prop.doSetRequest(ps, is, formatHeader());
+			prop.doSetRequest(ps, is, drop);
 		else
 			throw new ProtocolException("No property");
 	}

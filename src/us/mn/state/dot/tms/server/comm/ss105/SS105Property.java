@@ -33,6 +33,9 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 abstract public class SS105Property extends ControllerProperty {
 
+	/** Multidrop SS105 protocol */
+	static private final boolean MULTIDROP = true;
+
 	/** Maximum number of bytes in a response */
 	static protected final int MAX_RESP = 256;
 
@@ -79,6 +82,18 @@ abstract public class SS105Property extends ControllerProperty {
 			return payload;
 		else
 			throw new ChecksumException();
+	}
+
+	/** Format a request header */
+	static private String formatHeader(int drop) {
+		StringBuilder sb = new StringBuilder();
+		if(MULTIDROP) {
+			sb.append("Z0");
+			sb.append(Integer.toString(drop));
+			while(sb.length() < 6)
+				sb.insert(2, '0');
+		}
+		return sb.toString();
 	}
 
 	/** Poll the sensor */
@@ -132,9 +147,10 @@ abstract public class SS105Property extends ControllerProperty {
 	}
 
 	/** Perform a "GET" request */
-	public void doGetRequest(PrintStream ps, InputStream is, String h)
+	public void doGetRequest(PrintStream ps, InputStream is, int drop)
 		throws IOException
 	{
+		String h = formatHeader(drop);
 		String req = formatGetRequest();
 		is.skip(is.available());
 		doPoll(ps, h, req);
@@ -142,9 +158,10 @@ abstract public class SS105Property extends ControllerProperty {
 	}
 
 	/** Perform a "SET" request */
-	public void doSetRequest(PrintStream ps, InputStream is, String h)
+	public void doSetRequest(PrintStream ps, InputStream is, int drop)
 		throws IOException
 	{
+		String h = formatHeader(drop);
 		String req = formatSetRequest();
 		is.skip(is.available());
 		doPoll(ps, h, req);
