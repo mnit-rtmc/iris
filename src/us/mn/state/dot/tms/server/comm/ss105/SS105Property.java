@@ -33,23 +33,14 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 abstract public class SS105Property extends ControllerProperty {
 
+	/** Charset name for ASCII */
+	static private final String ASCII = "US-ASCII";
+
 	/** Multidrop SS105 protocol */
 	static private final boolean MULTIDROP = true;
 
 	/** Maximum number of bytes in a response */
 	static protected final int MAX_RESP = 256;
-
-	/** Check if the request has a checksum */
-	abstract protected boolean hasChecksum();
-
-	/** Format a basic "GET" request */
-	abstract protected String formatGetRequest() throws IOException;
-
-	/** Format a basic "SET" request */
-	abstract protected String formatSetRequest() throws IOException;
-
-	/** Set the response to the request */
-	abstract protected void setResponse(String r) throws IOException;
 
 	/** Convert an integer to a hexadecimal number padded to d digits */
 	static protected String hex(int n, int d) {
@@ -96,6 +87,18 @@ abstract public class SS105Property extends ControllerProperty {
 		return sb.toString();
 	}
 
+	/** Check if the request has a checksum */
+	abstract protected boolean hasChecksum();
+
+	/** Format a basic "GET" request */
+	abstract protected String formatGetRequest() throws IOException;
+
+	/** Format a basic "SET" request */
+	abstract protected String formatSetRequest() throws IOException;
+
+	/** Set the response to the request */
+	abstract protected void setResponse(String r) throws IOException;
+
 	/** Poll the sensor */
 	protected void doPoll(PrintStream ps, String h, String r)
 		throws IOException
@@ -110,7 +113,7 @@ abstract public class SS105Property extends ControllerProperty {
 	protected void doResponse(InputStream is, String h, String r)
 		throws IOException
 	{
-		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
+		InputStreamReader isr = new InputStreamReader(is, ASCII);
 		LineReader lr = new LineReader(isr, MAX_RESP);
 		String line = lr.readLine();
 		if(line != null)
