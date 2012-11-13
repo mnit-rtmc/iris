@@ -40,7 +40,7 @@ public class OpSendSensorSettings extends OpSS105 {
 	}
 
 	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<SS105Property> phaseOne() {
 		if(restart)
 			return new GetTimeInterval();
 		else
@@ -48,10 +48,12 @@ public class OpSendSensorSettings extends OpSS105 {
 	}
 
 	/** Phase to get the time interval (for binning) */
-	protected class GetTimeInterval extends Phase {
+	protected class GetTimeInterval extends Phase<SS105Property> {
 
 		/** Get the time interval (for binning) */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS105Property> poll(
+			CommMessage<SS105Property> mess) throws IOException
+		{
 			TimeIntervalProperty ti = new TimeIntervalProperty();
 			mess.add(ti);
 			mess.queryProps();
@@ -64,10 +66,12 @@ public class OpSendSensorSettings extends OpSS105 {
 	}
 
 	/** Phase to set the time interval (for binning) */
-	protected class SetTimeInterval extends Phase {
+	protected class SetTimeInterval extends Phase<SS105Property> {
 
 		/** Set the time interval (for binning) */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS105Property> poll(
+			CommMessage<SS105Property> mess) throws IOException
+		{
 			TimeIntervalProperty ti = new TimeIntervalProperty(
 				BINNING_INTERVAL);
 			mess.add(ti);
@@ -78,10 +82,12 @@ public class OpSendSensorSettings extends OpSS105 {
 	}
 
 	/** Phase to get the classification lengths */
-	protected class GetClassification extends Phase {
+	protected class GetClassification extends Phase<SS105Property> {
 
 		/** Get the classification lengths */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS105Property> poll(
+			CommMessage<SS105Property> mess) throws IOException
+		{
 			ClassificationProperty c = new ClassificationProperty();
 			mess.add(c);
 			mess.queryProps();
@@ -94,10 +100,12 @@ public class OpSendSensorSettings extends OpSS105 {
 	}
 
 	/** Phase to set the classification lengths */
-	protected class SetClassification extends Phase {
+	protected class SetClassification extends Phase<SS105Property> {
 
 		/** Set the classification lengths */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS105Property> poll(
+			CommMessage<SS105Property> mess) throws IOException
+		{
 			ClassificationProperty c = new ClassificationProperty();
 			mess.add(c);
 			SS105_LOG.log(controller.getName() + ":= " + c);
@@ -107,10 +115,12 @@ public class OpSendSensorSettings extends OpSS105 {
 	}
 
 	/** Phase to query the firmware version */
-	protected class QueryVersion extends Phase {
+	protected class QueryVersion extends Phase<SS105Property> {
 
 		/** Query the firmware version */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS105Property> poll(
+			CommMessage<SS105Property> mess) throws IOException
+		{
 			VersionProperty vr = new VersionProperty();
 			mess.add(vr);
 			try {
@@ -126,10 +136,12 @@ public class OpSendSensorSettings extends OpSS105 {
 	}
 
 	/** Phase to synchronize the clock */
-	protected class SynchronizeClock extends Phase {
+	protected class SynchronizeClock extends Phase<SS105Property> {
 
 		/** Synchronize the clock */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS105Property> poll(
+			CommMessage<SS105Property> mess) throws IOException
+		{
 			TimeProperty tr = new TimeProperty();
 			mess.add(tr);
 			SS105_LOG.log(controller.getName() + ":= " + tr);

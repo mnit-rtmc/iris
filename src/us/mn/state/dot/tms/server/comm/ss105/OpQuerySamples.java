@@ -80,15 +80,17 @@ public class OpQuerySamples extends OpSS105 {
 	}
 
 	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<SS105Property> phaseOne() {
 		return new GetCurrentSamples();
 	}
 
 	/** Phase to get the most recent binned samples */
-	protected class GetCurrentSamples extends Phase {
+	protected class GetCurrentSamples extends Phase<SS105Property> {
 
 		/** Get the most recent binned samples */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS105Property> poll(
+			CommMessage<SS105Property> mess) throws IOException
+		{
 			BinnedSampleProperty bs = new BinnedSampleProperty();
 			mess.add(bs);
 			mess.queryProps();

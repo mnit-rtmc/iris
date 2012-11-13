@@ -27,8 +27,9 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  *
  * @author Douglas Lau
  */
-public class SS105Poller extends MessagePoller implements SamplePoller {
-
+public class SS105Poller extends MessagePoller<SS105Property>
+	implements SamplePoller
+{
 	/** Create a new SS105 poller */
 	public SS105Poller(String n, Messenger m) {
 		super(n, m);
