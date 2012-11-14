@@ -9,6 +9,37 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.0.0 (14 November 2012)</dt>
+	<dd><ul>
+		<li>
+			Updated to use SystemD instead of old SysV init.
+		</li>
+		<li>
+			Server now depends on OpenJDK 1.7
+		</li>
+		<li>
+			Initial configuration of server now is performed by
+			iris_ctl script (see administrator guide).
+		</li>
+		<li>
+			RPM is now "noarch", and can be used on either 32-bit
+			or 64-bit systems.
+		</li>
+		<li>
+			Fixed connection problems with G4 driver.
+		</li>
+		<li>
+			Started major cleanup of protocol drivers.
+		</li>
+		<li>
+			Fixed a couple of minor bugs.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.0.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.150.0 (24 September 2012)</dt>
 	<dd><ul>
 		<li>
