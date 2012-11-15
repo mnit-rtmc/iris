@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ public class SignGroupImpl extends BaseObjectImpl implements SignGroup {
 
 	/** Load all the sign groups */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading sign groups...");
 		namespace.registerType(SONAR_TYPE, SignGroupImpl.class);
 		store.query("SELECT name, local FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

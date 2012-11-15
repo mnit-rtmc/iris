@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 
 	/** Load all the time actions */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading time actions...");
 		namespace.registerType(SONAR_TYPE, TimeActionImpl.class);
 		store.query("SELECT name, action_plan, day_plan, sched_date, " +
 			"time_of_day, phase FROM iris." + SONAR_TYPE  +";",

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,6 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 
 	/** Load all the video monitors */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading video monitors...");
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
 		store.query("SELECT name, description, restricted " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()

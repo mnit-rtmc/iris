@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2011  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,6 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 
 	/** Load all the sign text */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading sign text...");
 		namespace.registerType(SONAR_TYPE, SignTextImpl.class);
 		store.query("SELECT name, sign_group, line, multi, priority" +
 			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()

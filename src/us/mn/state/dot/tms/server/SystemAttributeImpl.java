@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ public class SystemAttributeImpl extends BaseObjectImpl
 {
 	/** Load all */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading system attributes...");
 		namespace.registerType(SONAR_TYPE, SystemAttributeImpl.class);
 		store.query("SELECT name, value FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

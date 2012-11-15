@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 
 	/** Load all the cabinets */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading cabinets...");
 		namespace.registerType(SONAR_TYPE, CabinetImpl.class);
 		store.query("SELECT name, style, geo_loc, mile FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()

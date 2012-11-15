@@ -60,7 +60,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Load all the r_nodes */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading r_nodes...");
 		namespace.registerType(SONAR_TYPE, R_NodeImpl.class);
 		store.query("SELECT name, geo_loc, node_type, pickable, " +
 			"above, transition, lanes, attach_side, shift, " +

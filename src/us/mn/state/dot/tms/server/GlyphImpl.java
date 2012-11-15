@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 
 	/** Load all the glyphs */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading DMS glyphs...");
 		namespace.registerType(SONAR_TYPE, GlyphImpl.class);
 		store.query("SELECT name, font, code_point, graphic " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()

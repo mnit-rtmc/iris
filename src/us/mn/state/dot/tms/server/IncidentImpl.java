@@ -58,7 +58,6 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Load all the incidents */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading active incidents...");
 		namespace.registerType(SONAR_TYPE, IncidentImpl.class);
 		store.query("SELECT name, replaces, event_desc_id, " +
 			"event_date, detail, lane_type, road, dir, lat, " +

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Load all the sign messages */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading sign messages...");
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
 		store.query("SELECT name, multi, bitmaps, a_priority, " +
 			"r_priority, scheduled, duration FROM " +

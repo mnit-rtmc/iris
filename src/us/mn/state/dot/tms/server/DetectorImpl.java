@@ -82,7 +82,6 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Load all the detectors */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading detectors...");
 		namespace.registerType(SONAR_TYPE, DetectorImpl.class);
 		store.query("SELECT name, controller, pin, r_node, lane_type, "+
 			"lane_number, abandoned, force_fail, field_length, " +

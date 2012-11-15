@@ -40,7 +40,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Load all the comm links */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading comm links...");
 		namespace.registerType(SONAR_TYPE, CommLinkImpl.class);
 		store.query("SELECT name, description, uri, protocol, " +
 			"timeout FROM iris." + SONAR_TYPE  + ";",

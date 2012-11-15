@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,6 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Load all the LCS arrays */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading LCS arrays...");
 		namespace.registerType(SONAR_TYPE, LCSArrayImpl.class);
 		store.query("SELECT name, controller, pin, notes, shift, " +
 			"lcs_lock FROM iris." + SONAR_TYPE  + ";",

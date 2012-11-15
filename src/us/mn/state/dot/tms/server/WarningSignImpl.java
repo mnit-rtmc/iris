@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,6 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 
 	/** Load all the warning signs */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading warning signs...");
 		namespace.registerType(SONAR_TYPE, WarningSignImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"camera, message FROM iris." + SONAR_TYPE + ";",

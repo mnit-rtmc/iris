@@ -32,7 +32,6 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 {
 	/** Load all the holidays */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading holidays...");
 		namespace.registerType(SONAR_TYPE, HolidayImpl.class);
 		store.query("SELECT name, month, day, week, weekday, " +
 			"shift FROM iris." + SONAR_TYPE  + ";",

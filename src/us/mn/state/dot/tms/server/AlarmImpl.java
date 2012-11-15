@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2010  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,6 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 
 	/** Load all the alarms */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading alarms...");
 		namespace.registerType(SONAR_TYPE, AlarmImpl.class);
 		store.query("SELECT name, description, controller, pin, state" +
 			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()

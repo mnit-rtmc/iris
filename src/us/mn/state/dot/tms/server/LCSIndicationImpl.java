@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 
 	/** Load all the LCS indications */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading LCS indications...");
 		namespace.registerType(SONAR_TYPE, LCSIndicationImpl.class);
 		store.query("SELECT name, controller, pin, lcs, indication " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()

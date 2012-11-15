@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 
 	/** Load all the day plans */
 	static public void loadAll() throws TMSException {
-		System.err.println("Loading day plans...");
 		namespace.registerType(SONAR_TYPE, DayPlanImpl.class);
 		mapping = new TableMapping(store, "iris", "day_plan","holiday");
 		store.query("SELECT name FROM iris." + SONAR_TYPE + ";",

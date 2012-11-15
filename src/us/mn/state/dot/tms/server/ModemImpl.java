@@ -32,7 +32,6 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 
 	/** Load all the modems */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading modems...");
 		namespace.registerType(SONAR_TYPE, ModemImpl.class);
 		store.query("SELECT name, uri, config, timeout FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()

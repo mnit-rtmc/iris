@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 
 	/** Load all the lane-use MULTIs */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading lane-use MULTIs...");
 		namespace.registerType(SONAR_TYPE, LaneUseMultiImpl.class);
 		store.query("SELECT name, indication, msg_num, width, height, "+
 			"quick_message FROM iris." + SONAR_TYPE + ";",

@@ -52,7 +52,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Load all the controllers */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading controllers...");
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
 		store.query("SELECT name, cabinet, comm_link, drop_id, " +
 			"active, password, notes, fail_time FROM iris." +

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@ public class IncidentDetailImpl extends BaseObjectImpl
 {
 	/** Load all the incident details */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading incident details...");
 		namespace.registerType(SONAR_TYPE, IncidentDetailImpl.class);
 		store.query("SELECT name, description FROM event." +
 			SONAR_TYPE + ";", new ResultFactory()

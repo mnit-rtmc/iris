@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 
 	/** Load all the lane actions */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading lane actions...");
 		namespace.registerType(SONAR_TYPE, LaneActionImpl.class);
 		store.query("SELECT name, action_plan, lane_marking, phase " +
 			"FROM iris." + SONAR_TYPE  +";", new ResultFactory()

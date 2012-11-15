@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 
 	/** Load all the map extents */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading map extents...");
 		namespace.registerType(SONAR_TYPE, MapExtentImpl.class);
 		store.query("SELECT name, lon, lat, zoom FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()

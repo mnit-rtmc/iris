@@ -98,7 +98,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading DMS...");
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"camera, aws_allowed, aws_controlled, default_font " +

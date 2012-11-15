@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 
 	/** Load all the DMS actions */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading DMS actions...");
 		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
 		store.query("SELECT name, action_plan, sign_group, " +
 			"phase, quick_message, a_priority, r_priority " +
