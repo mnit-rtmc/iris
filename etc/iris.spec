@@ -91,8 +91,12 @@ fi
 /usr/bin/iris_ctl
 
 # /usr/lib/systemd/system
-%defattr(0755,root,root)
+%defattr(0644,root,root)
 /usr/lib/systemd/system/iris.service
+
+# /etc/httpd/conf.d
+%defattr(0644,root,root)
+/etc/httpd/conf.d/iris.conf
 
 # /usr/share/java/iris-server-x.x.x
 %dir %attr(0755,tms,tms) %{_serverdir}

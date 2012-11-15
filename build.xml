@@ -412,6 +412,10 @@
 			<fileset dir="${dist.server}"/>
 		</copy>
 
+		<copy todir="${install.dir}/etc/httpd/conf.d">
+			<fileset file="${build.etc}/iris.conf"/>
+		</copy>
+
 		<copy todir="${install.dir}/var/www/html/${dist.client}">
 			<fileset dir="${dist.client}"
 			         excludes="iris.bat,iris.sh"/>
