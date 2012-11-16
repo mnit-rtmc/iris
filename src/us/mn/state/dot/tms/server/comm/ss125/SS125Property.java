@@ -32,6 +32,14 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Charset name for ASCII */
 	static private final String ASCII = "US-ASCII";
 
+	/** Byte offsets from beginning of packet */
+	static protected final int OFF_DEST_SUB_ID = 2;
+	static protected final int OFF_DEST_ID = 3;
+	static protected final int OFF_SOURCE_SUB_ID = 5;
+	static protected final int OFF_SOURCE_ID = 6;
+	static protected final int OFF_SEQUENCE = 8;
+	static protected final int OFF_BODY_SIZE = 9;
+
 	/** Maximum number of octets in message body */
 	static private final int MAX_BODY_OCTETS = 244;
 
@@ -104,12 +112,12 @@ abstract public class SS125Property extends ControllerProperty {
 		byte[] header = new byte[10];
 		header[0] = 'Z';			// Sentinel
 		header[1] = '1';			// Protocol version
-		format8(SUB_ID, header, 2);		// Dest Sub ID
-		format16(drop, header, 3);		// Dest ID
-		format8(0, header, 5);			// Source Sub ID
-		format16(0, header, 6);			// Source ID
-		format8(0, header, 8);			// Sequence # FIXME?
-		format8(body.length, header, 9);	// Body length
+		format8(SUB_ID, header, OFF_DEST_SUB_ID);
+		format16(drop, header, OFF_DEST_ID);
+		format8(0, header, OFF_SOURCE_SUB_ID);
+		format16(0, header, OFF_SOURCE_ID);
+		format8(0, header, OFF_SEQUENCE);	// FIXME?
+		format8(body.length, header, OFF_BODY_SIZE);
 		return header;
 	}
 
