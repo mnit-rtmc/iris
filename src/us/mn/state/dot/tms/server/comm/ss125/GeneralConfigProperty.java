@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,11 +42,11 @@ public class GeneralConfigProperty extends SS125Property {
 		body[0] = MSG_ID;
 		body[1] = SUB_ID_DONT_CARE;
 		body[2] = REQ_WRITE;
-		formatString(orientation, body, 3, 2);
-		formatString(location, body, 5, 32);
-		formatString(description, body, 37, 32);
-		formatString(serialNumber, body, 69, 16);
-		body[85] = (byte)(metric ? 1 : 0);
+		formatString(body, 3, 2, orientation);
+		formatString(body, 5, 32, location);
+		formatString(body, 37, 32, description);
+		formatString(body, 69, 16, serialNumber);
+		formatBool(body, 85, metric);
 		return body;
 	}
 

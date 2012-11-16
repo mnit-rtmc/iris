@@ -55,52 +55,76 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Message write request */
 	static protected final byte REQ_WRITE = 1;
 
-	/** Format a string to a byte array */
-	static protected void formatString(String str, byte[] buf, int pos,
-		int max_len) throws IOException
-	{
-		byte[] src = str.getBytes(ASCII);
-		int len = Math.min(max_len, src.length);
-		System.arraycopy(src, 0, buf, pos, len);
-	}
-
-	/** Format a boolean value */
-	static protected void formatBool(boolean value, byte[] buf, int pos) {
+	/** Format a boolean value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void formatBool(byte[] buf, int pos, boolean value) {
 		buf[pos] = value ? (byte)1 : (byte)0;
 	}
 
-	/** Format an 8-bit value */
-	static protected void format8(int value, byte[] buf, int pos) {
+	/** Format an 8-bit value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void format8(byte[] buf, int pos, int value) {
 		buf[pos] = (byte)value;
 	}
 
-	/** Format a 16-bit value */
-	static protected void format16(int value, byte[] buf, int pos) {
+	/** Format a 16-bit value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void format16(byte[] buf, int pos, int value) {
 		buf[pos] = (byte)((value >> 8) & 0xFF);
 		buf[pos + 1] = (byte)(value & 0xFF);
 	}
 
-	/** Format a 16-bit fixed-point value */
-	static protected void format16Fixed(float value, byte[] buf, int pos) {
+	/** Format a 16-bit fixed-point value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void format16Fixed(byte[] buf, int pos, float value) {
 		int intg = (int)value;
 		int frac = (int)(256 * (value - intg));
 		buf[pos] = (byte)intg;
 		buf[pos + 1] = (byte)frac;
 	}
 
-	/** Format a 24-bit value */
-	static protected void format24(int value, byte[] buf, int pos) {
+	/** Format a 24-bit value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void format24(byte[] buf, int pos, int value) {
 		buf[pos] = (byte)((value >> 16) & 0xFF);
 		buf[pos + 1] = (byte)((value >> 8) & 0xFF);
 		buf[pos + 2] = (byte)(value & 0xFF);
 	}
 
-	/** Format a 32-bit value */
-	static protected void format32(int value, byte[] buf, int pos) {
+	/** Format a 32-bit value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void format32(byte[] buf, int pos, int value) {
 		buf[pos] = (byte)((value >> 24) & 0xFF);
 		buf[pos + 1] = (byte)((value >> 16) & 0xFF);
 		buf[pos + 2] = (byte)((value >> 8) & 0xFF);
 		buf[pos + 3] = (byte)(value & 0xFF);
+	}
+
+	/** Format a string to a byte array.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param len Length of field in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void formatString(byte[] buf, int pos,
+		int len, String value) throws IOException
+	{
+		byte[] src = value.getBytes(ASCII);
+		int vlen = Math.min(len, src.length);
+		System.arraycopy(src, 0, buf, pos, vlen);
+		for(int i = vlen; i < len; i++)
+			buf[pos + i] = 0;
 	}
 
 	/** Format a request header.
@@ -112,12 +136,12 @@ abstract public class SS125Property extends ControllerProperty {
 		byte[] header = new byte[10];
 		header[0] = 'Z';			// Sentinel
 		header[1] = '1';			// Protocol version
-		format8(SUB_ID, header, OFF_DEST_SUB_ID);
-		format16(drop, header, OFF_DEST_ID);
-		format8(0, header, OFF_SOURCE_SUB_ID);
-		format16(0, header, OFF_SOURCE_ID);
-		format8(0, header, OFF_SEQUENCE);	// FIXME?
-		format8(body.length, header, OFF_BODY_SIZE);
+		format8(header, OFF_DEST_SUB_ID, SUB_ID);
+		format16(header, OFF_DEST_ID, drop);
+		format8(header, OFF_SOURCE_SUB_ID, 0);
+		format16(header, OFF_SOURCE_ID, 0);
+		format8(header, OFF_SEQUENCE, 0);	// FIXME?
+		format8(header, OFF_BODY_SIZE, body.length);
 		return header;
 	}
 

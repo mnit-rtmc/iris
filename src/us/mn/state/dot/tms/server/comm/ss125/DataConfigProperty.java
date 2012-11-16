@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,14 +42,14 @@ public class DataConfigProperty extends SS125Property {
 		body[0] = MSG_ID;
 		body[1] = SUB_ID_DONT_CARE;
 		body[2] = REQ_WRITE;
-		format16(interval, body, 3);
+		format16(body, 3, interval);
 		if(mode != null)
-			format8(mode.ordinal(), body, 5);
+			format8(body, 5, mode.ordinal());
 		event_push.format(body, 6);
 		interval_push.format(body, 12);
 		presence_push.format(body, 18);
-		format16Fixed(default_sep, body, 24);
-		format16Fixed(default_size, body, 26);
+		format16Fixed(body, 24, default_sep);
+		format16Fixed(body, 26, default_size);
 		return body;
 	}
 
@@ -127,12 +127,12 @@ public class DataConfigProperty extends SS125Property {
 
 		void format(byte[] body, int pos) {
 			if(port != null)
-				format8(port.ordinal(), body, pos);
+				format8(body, pos, port.ordinal());
 			if(protocol != null)
-				format8(protocol.ordinal(), body, pos + 1);
-			formatBool(enable, body, pos + 2);
-			format8(dest_sub_id, body, pos + 3);
-			format16(dest_id, body, pos + 4);
+				format8(body, pos + 1, protocol.ordinal());
+			formatBool(body, pos + 2, enable);
+			format8(body, pos + 3, dest_sub_id);
+			format16(body, pos + 4, dest_id);
 		}
 	}
 

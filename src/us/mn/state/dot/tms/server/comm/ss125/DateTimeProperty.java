@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ public class DateTimeProperty extends SS125Property {
 		int ms = cal.get(Calendar.MILLISECOND);
 		int date = (year << 9) | (month << 5) | day;
 		int time = (hour << 22) | (minute << 16) | (second << 10) | ms;
-		format32(date, body, 3);
-		format32(time, body, 7);
+		format32(body, 3, date);
+		format32(body, 7, time);
 	}
 }

@@ -38,7 +38,7 @@ public class IntervalDataProperty extends SS125Property {
 		body[0] = MSG_ID;
 		body[1] = SUB_ID_DONT_CARE;
 		body[2] = REQ_READ;
-		format24(0, body, 3);
+		format24(body, 3, 0);
 		return body;
 	}
 
