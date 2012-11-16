@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 abstract public class SS125Property extends ControllerProperty {
 
-	/** Charset encoding for character strings */
-	static protected final String CHARSET = "US-ASCII";
+	/** Charset name for ASCII */
+	static private final String ASCII = "US-ASCII";
 
 	/** Message sub ID "don't care" */
 	static protected final byte SUB_ID_DONT_CARE = 0;
@@ -45,7 +45,7 @@ abstract public class SS125Property extends ControllerProperty {
 	static protected void formatString(String str, byte[] dest, int destPos,
 		int max_len) throws IOException
 	{
-		byte[] src = str.getBytes(CHARSET);
+		byte[] src = str.getBytes(ASCII);
 		int len = Math.min(max_len, src.length);
 		System.arraycopy(src, 0, dest, destPos, len);
 	}
@@ -99,7 +99,7 @@ abstract public class SS125Property extends ControllerProperty {
 	static protected String parseString(byte[] body, int pos, int len)
 		throws IOException
 	{
-		return new String(body, pos, len, CHARSET).trim();
+		return new String(body, pos, len, ASCII).trim();
 	}
 
 	/** Parse a boolean value */
