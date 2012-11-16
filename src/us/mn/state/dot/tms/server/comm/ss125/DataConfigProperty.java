@@ -43,8 +43,7 @@ public class DataConfigProperty extends SS125Property {
 		body[1] = SUB_ID_DONT_CARE;
 		body[2] = REQ_WRITE;
 		format16(body, 3, interval);
-		if(mode != null)
-			format8(body, 5, mode.ordinal());
+		format8(body, 5, mode.ordinal());
 		event_push.format(body, 6);
 		interval_push.format(body, 12);
 		presence_push.format(body, 18);
@@ -88,12 +87,12 @@ public class DataConfigProperty extends SS125Property {
 				if(sm.ordinal() == o)
 					return sm;
 			}
-			return null;
+			return DISABLED;
 		}
 	}
 
 	/** Interval storage mode */
-	protected StorageMode mode;
+	protected StorageMode mode = StorageMode.DISABLED;
 
 	/** Get the interval storage mode */
 	public StorageMode getMode() {
@@ -107,8 +106,8 @@ public class DataConfigProperty extends SS125Property {
 
 	/** Data push configuration */
 	static public class PushConfig {
-		public PushPort port;
-		public PushProtocol protocol;
+		public PushPort port = PushPort.RS485;
+		public PushProtocol protocol = PushProtocol.Z1;
 		public boolean enable;
 		public int dest_sub_id;
 		public int dest_id;
@@ -126,10 +125,8 @@ public class DataConfigProperty extends SS125Property {
 		}
 
 		void format(byte[] body, int pos) {
-			if(port != null)
-				format8(body, pos, port.ordinal());
-			if(protocol != null)
-				format8(body, pos + 1, protocol.ordinal());
+			format8(body, pos, port.ordinal());
+			format8(body, pos + 1, protocol.ordinal());
 			formatBool(body, pos + 2, enable);
 			format8(body, pos + 3, dest_sub_id);
 			format16(body, pos + 4, dest_id);
@@ -168,7 +165,7 @@ public class DataConfigProperty extends SS125Property {
 				if(p.ordinal() == o)
 					return p;
 			}
-			return null;
+			return RS485;
 		}
 	}
 
@@ -180,7 +177,7 @@ public class DataConfigProperty extends SS125Property {
 				if(p.ordinal() == o)
 					return p;
 			}
-			return null;
+			return Z1;
 		}
 	}
 
