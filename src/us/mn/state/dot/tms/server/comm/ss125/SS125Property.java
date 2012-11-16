@@ -32,6 +32,12 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Charset name for ASCII */
 	static private final String ASCII = "US-ASCII";
 
+	/** Maximum number of octets in message body */
+	static private final int MAX_BODY_OCTETS = 244;
+
+	/** Sub ID must be configured to zero */
+	static private final int SUB_ID = 0;
+
 	/** Message sub ID "don't care" */
 	static protected final byte SUB_ID_DONT_CARE = 0;
 
@@ -42,51 +48,69 @@ abstract public class SS125Property extends ControllerProperty {
 	static protected final byte REQ_WRITE = 1;
 
 	/** Format a string to a byte array */
-	static protected void formatString(String str, byte[] dest, int destPos,
+	static protected void formatString(String str, byte[] buf, int pos,
 		int max_len) throws IOException
 	{
 		byte[] src = str.getBytes(ASCII);
 		int len = Math.min(max_len, src.length);
-		System.arraycopy(src, 0, dest, destPos, len);
+		System.arraycopy(src, 0, buf, pos, len);
 	}
 
 	/** Format a boolean value */
-	static protected void formatBool(boolean value, byte[] body, int pos) {
-		body[pos] = value ? (byte)1 : (byte)0;
+	static protected void formatBool(boolean value, byte[] buf, int pos) {
+		buf[pos] = value ? (byte)1 : (byte)0;
 	}
 
 	/** Format an 8-bit value */
-	static protected void format8(int value, byte[] body, int pos) {
-		body[pos] = (byte)value;
+	static protected void format8(int value, byte[] buf, int pos) {
+		buf[pos] = (byte)value;
 	}
 
 	/** Format a 16-bit value */
-	static protected void format16(int value, byte[] body, int pos) {
-		body[pos] = (byte)((value >> 8) & 0xFF);
-		body[pos + 1] = (byte)(value & 0xFF);
+	static protected void format16(int value, byte[] buf, int pos) {
+		buf[pos] = (byte)((value >> 8) & 0xFF);
+		buf[pos + 1] = (byte)(value & 0xFF);
 	}
 
 	/** Format a 16-bit fixed-point value */
-	static protected void format16Fixed(float value, byte[] body, int pos) {
+	static protected void format16Fixed(float value, byte[] buf, int pos) {
 		int intg = (int)value;
 		int frac = (int)(256 * (value - intg));
-		body[pos] = (byte)intg;
-		body[pos + 1] = (byte)frac;
+		buf[pos] = (byte)intg;
+		buf[pos + 1] = (byte)frac;
 	}
 
 	/** Format a 24-bit value */
-	static protected void format24(int value, byte[] body, int pos) {
-		body[pos] = (byte)((value >> 16) & 0xFF);
-		body[pos + 1] = (byte)((value >> 8) & 0xFF);
-		body[pos + 2] = (byte)(value & 0xFF);
+	static protected void format24(int value, byte[] buf, int pos) {
+		buf[pos] = (byte)((value >> 16) & 0xFF);
+		buf[pos + 1] = (byte)((value >> 8) & 0xFF);
+		buf[pos + 2] = (byte)(value & 0xFF);
 	}
 
 	/** Format a 32-bit value */
-	static protected void format32(int value, byte[] body, int pos) {
-		body[pos] = (byte)((value >> 24) & 0xFF);
-		body[pos + 1] = (byte)((value >> 16) & 0xFF);
-		body[pos + 2] = (byte)((value >> 8) & 0xFF);
-		body[pos + 3] = (byte)(value & 0xFF);
+	static protected void format32(int value, byte[] buf, int pos) {
+		buf[pos] = (byte)((value >> 24) & 0xFF);
+		buf[pos + 1] = (byte)((value >> 16) & 0xFF);
+		buf[pos + 2] = (byte)((value >> 8) & 0xFF);
+		buf[pos + 3] = (byte)(value & 0xFF);
+	}
+
+	/** Format a request header.
+	 * @param body Body of message to send.
+	 * @param drop Destination ID (drop address).
+	 * @return Header appropriate for polling message. */
+	protected byte[] formatHeader(byte[] body, int drop) {
+		assert body.length <= MAX_BODY_OCTETS;
+		byte[] header = new byte[10];
+		header[0] = 'Z';			// Sentinel
+		header[1] = '1';			// Protocol version
+		format8(SUB_ID, header, 2);		// Dest Sub ID
+		format16(drop, header, 3);		// Dest ID
+		format8(0, header, 5);			// Source Sub ID
+		format16(0, header, 6);			// Source ID
+		format8(0, header, 8);			// Sequence # FIXME?
+		format8(body.length, header, 9);	// Body length
+		return header;
 	}
 
 	/** Format the body of a GET request */

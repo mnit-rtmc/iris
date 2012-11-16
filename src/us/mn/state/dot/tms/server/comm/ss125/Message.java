@@ -63,9 +63,6 @@ public class Message implements CommMessage {
 		return (byte)crc;
 	}
 
-	/** Sub ID must be configured to zero */
-	static protected final byte SUB_ID = (byte)0;
-
 	/** Maximum number of octets in message body */
 	static protected final int MAX_BODY_OCTETS = 244;
 
@@ -107,7 +104,7 @@ public class Message implements CommMessage {
 	public void queryProps() throws IOException {
 		assert prop != null;
 		byte[] body = prop.formatBodyGet();
-		byte[] header = formatHeader(body);
+		byte[] header = prop.formatHeader(body, dest_id);
 		doPoll(header, body);
 		while(!prop.isComplete()) {
 			try {
@@ -131,28 +128,9 @@ public class Message implements CommMessage {
 	public void storeProps() throws IOException {
 		assert prop != null;
 		byte[] body = prop.formatBodySet();
-		byte[] header = formatHeader(body);
+		byte[] header = prop.formatHeader(body, dest_id);
 		doPoll(header, body);
 		prop.parseResult(doResponse(header, body));
-	}
-
-	/** Format a request header.
-	 * @param body Body of message to send.
-	 * @return Header appropriate for polling message. */
-	protected byte[] formatHeader(byte[] body) {
-		assert body.length <= MAX_BODY_OCTETS;
-		byte[] header = new byte[10];
-		header[0] = 'Z';			// Sentinel
-		header[1] = '1';			// Protocol version
-		header[2] = SUB_ID;			// Dest Sub ID
-		header[3] = (byte)((dest_id >> 8) & 0xFF); // Dest ID (hi)
-		header[4] = (byte)(dest_id & 0xFF);	// Dest ID (low)
-		header[5] = (byte)0;			// Source Sub ID
-		header[6] = (byte)0;			// Source ID (hi)
-		header[7] = (byte)0;			// Source ID (low)
-		header[8] = (byte)0;			// Sequence # FIXME?
-		header[9] = (byte)body.length;		// Body length
-		return header;
 	}
 
 	/** Perform a message poll.
