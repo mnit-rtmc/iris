@@ -128,7 +128,7 @@ public class Message implements CommMessage {
 		prop.delayResponse();
 		byte[] rhead = recvResponse(10);
 		byte h_crc = recvResponse(1)[0];
-		int n_body = parseHead(rhead, h_crc, shead);
+		int n_body = prop.parseHead(rhead, h_crc, shead);
 		byte[] rbody = recvResponse(n_body);
 		byte b_crc = recvResponse(1)[0];
 		parseBody(rbody, b_crc, sbody);
@@ -149,43 +149,6 @@ public class Message implements CommMessage {
 			n_rcv += r;
 		}
 		return resp;
-	}
-
-	/** Parse a message response header.
-	 * @param rhead Received response header.
-	 * @param crc Received header crc.
-	 * @param shead Sent message header.
-	 * @return Number of bytes in response body.
-	 * @throws ParsingException On any errors parsing response header. */
-	protected int parseHead(byte[] rhead, byte crc, byte[] shead)
-		throws ParsingException
-	{
-		assert rhead.length == 10;
-		assert shead.length == 10;
-		if(crc != SS125Property.crc8(rhead))
-			throw new ChecksumException("HEADER");
-		if(rhead[0] != 'Z')
-			throw new ParsingException("SENTINEL");
-		if(rhead[1] != '1')
-			throw new ParsingException("VERSION");
-		if(rhead[2] != shead[5])
-			throw new ParsingException("DEST SUB ID");
-		if(rhead[3] != shead[6])
-			throw new ParsingException("DEST ID");
-		if(rhead[4] != shead[7])
-			throw new ParsingException("DEST ID");
-		if(rhead[5] != shead[2])
-			throw new ParsingException("SRC SUB ID");
-		if(rhead[6] != shead[3])
-			throw new ParsingException("SRC ID");
-		if(rhead[7] != shead[4])
-			throw new ParsingException("SRC ID");
-		if(rhead[8] != shead[8] + 1)
-			throw new ParsingException("SEQUENCE");
-		int n_body = rhead[9] & 0xFF;
-		if(n_body < 3 || n_body > MAX_BODY_OCTETS)
-			throw new ParsingException("BODY SIZE");
-		return n_body;
 	}
 
 	/** Parse a message response body.

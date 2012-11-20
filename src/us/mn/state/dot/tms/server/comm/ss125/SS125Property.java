@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
+import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -345,5 +346,42 @@ abstract public class SS125Property extends ControllerProperty {
 	void delayResponse() {
 		// Only needed if flash is being reprogrammed
 		// see FlashConfigProperty
+	}
+
+	/** Parse a message response header.
+	 * @param rhead Received response header.
+	 * @param crc Received header crc.
+	 * @param shead Sent message header.
+	 * @return Number of bytes in response body.
+	 * @throws ParsingException On any errors parsing response header. */
+	public int parseHead(byte[] rhead, byte crc, byte[] shead)
+		throws ParsingException
+	{
+		assert rhead.length == 10;
+		assert shead.length == 10;
+		if(crc != SS125Property.crc8(rhead))
+			throw new ChecksumException("HEADER");
+		if(rhead[0] != 'Z')
+			throw new ParsingException("SENTINEL");
+		if(rhead[1] != '1')
+			throw new ParsingException("VERSION");
+		if(rhead[2] != shead[5])
+			throw new ParsingException("DEST SUB ID");
+		if(rhead[3] != shead[6])
+			throw new ParsingException("DEST ID");
+		if(rhead[4] != shead[7])
+			throw new ParsingException("DEST ID");
+		if(rhead[5] != shead[2])
+			throw new ParsingException("SRC SUB ID");
+		if(rhead[6] != shead[3])
+			throw new ParsingException("SRC ID");
+		if(rhead[7] != shead[4])
+			throw new ParsingException("SRC ID");
+		if(rhead[8] != shead[8] + 1)
+			throw new ParsingException("SEQUENCE");
+		int n_body = rhead[9] & 0xFF;
+		if(n_body < 3 || n_body > MAX_BODY_OCTETS)
+			throw new ParsingException("BODY SIZE");
+		return n_body;
 	}
 }
