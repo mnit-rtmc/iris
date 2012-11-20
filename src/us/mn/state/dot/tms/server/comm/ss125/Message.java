@@ -106,9 +106,9 @@ public class Message implements CommMessage {
 		input.skip(input.available());
 		BufferedOutputStream bos = new BufferedOutputStream(output,256);
 		bos.write(header);
-		bos.write(SS125Property.crc8(header));
+		bos.write(SS125Property.CRC.calculate(header));
 		bos.write(body);
-		bos.write(SS125Property.crc8(body));
+		bos.write(SS125Property.CRC.calculate(body));
 		bos.flush();
 	}
 
