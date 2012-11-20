@@ -28,24 +28,26 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class DateTimeProperty extends SS125Property {
 
-	/** Date / time request ID */
-	static protected final byte MSG_ID = 0x0E;
+	/** Message ID for date / time request */
+	protected int msgId() {
+		return MSG_ID_DATE_TIME;
+	}
 
 	/** Format the body of a GET request */
 	byte[] formatBodyGet() throws IOException {
 		byte[] body = new byte[3];
-		body[0] = MSG_ID;
-		body[1] = SUB_ID_DONT_CARE;
-		body[2] = REQ_READ;
+		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_SUB_ID, SUB_ID_DONT_CARE);
+		format8(body, OFF_READ_WRITE, REQ_READ);
 		return body;
 	}
 
 	/** Format the body of a SET request */
 	byte[] formatBodySet() throws IOException {
 		byte[] body = new byte[11];
-		body[0] = MSG_ID;
-		body[1] = SUB_ID_DONT_CARE;
-		body[2] = REQ_WRITE;
+		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_SUB_ID, SUB_ID_DONT_CARE);
+		format8(body, OFF_READ_WRITE, REQ_WRITE);
 		formatDate(body, 3);
 		return body;
 	}

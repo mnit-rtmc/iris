@@ -26,18 +26,17 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class IntervalDataProperty extends SS125Property {
 
-	/** Interval data request ID (from non-volatile memory) */
-	static protected final byte MSG_ID_NV = 0x70;
-
-	/** Interval data request ID (from volatile memory) */
-	static protected final byte MSG_ID = 0x71;
+	/** Message ID for interval data request */
+	protected int msgId() {
+		return MSG_ID_INTERVAL;
+	}
 
 	/** Format the body of a GET request */
 	byte[] formatBodyGet() throws IOException {
 		byte[] body = new byte[6];
-		body[0] = MSG_ID;
-		body[1] = SUB_ID_DONT_CARE;
-		body[2] = REQ_READ;
+		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_SUB_ID, SUB_ID_DONT_CARE);
+		format8(body, OFF_READ_WRITE, REQ_READ);
 		format24(body, 3, 0);
 		return body;
 	}

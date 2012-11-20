@@ -44,9 +44,9 @@ abstract public class SS125Property extends ControllerProperty {
 	static private final int OFF_BODY_SIZE = 9;
 
 	/** Byte offsets from beginning of body packet */
-	static private final int OFF_MSG_ID = 0;
-	static private final int OFF_MSG_SUB_ID = 1;
-	static private final int OFF_READ_WRITE = 2;
+	static protected final int OFF_MSG_ID = 0;
+	static protected final int OFF_MSG_SUB_ID = 1;
+	static protected final int OFF_READ_WRITE = 2;
 
 	/** Maximum number of octets in message body */
 	static private final int MAX_BODY_OCTETS = 244;
@@ -62,6 +62,24 @@ abstract public class SS125Property extends ControllerProperty {
 
 	/** Message write request */
 	static protected final byte REQ_WRITE = 1;
+
+	/** Message ID codes */
+	static protected final int MSG_ID_GENERAL_CONFIG = 0x00;
+	static protected final int MSG_ID_DATA_CONFIG = 0x03;
+	static protected final int MSG_ID_FLASH_CONFIG = 0x08;
+	static protected final int MSG_ID_PUSH_ENABLE = 0x0D;
+	static protected final int MSG_ID_DATE_TIME = 0x0E;
+	static protected final int MSG_ID_APPROACH_INFO = 0x11;
+	static protected final int MSG_ID_LANE_INFO = 0x12;
+	static protected final int MSG_ID_LANE_PUSH = 0x62;
+	static protected final int MSG_ID_CLEAR_NV = 0x64;
+	static protected final int MSG_ID_EVENT_PUSH = 0x65;
+	static protected final int MSG_ID_ACTIVE_EVENTS = 0x67;
+	static protected final int MSG_ID_PRESENCE = 0x68;
+	static protected final int MSG_ID_PRESENCE_PUSH = 0x69;
+	static protected final int MSG_ID_CLEAR_EVENT_FIFO = 0x6D;
+	static protected final int MSG_ID_INTERVAL_NV = 0x70;
+	static protected final int MSG_ID_INTERVAL = 0x71;
 
 	/** CRC calculator */
 	static public final Crc8 CRC = new Crc8();
@@ -266,15 +284,6 @@ abstract public class SS125Property extends ControllerProperty {
 		return header;
 	}
 
-	/** Format the body of a GET request */
-	abstract byte[] formatBodyGet() throws IOException;
-
-	/** Format the body of a SET request */
-	abstract byte[] formatBodySet() throws IOException;
-
-	/** Parse the payload of a GET response */
-	abstract void parsePayload(byte[] body) throws IOException;
-
 	/** Flag to indicate the request is complete */
 	protected boolean complete = false;
 
@@ -350,4 +359,16 @@ abstract public class SS125Property extends ControllerProperty {
 		if(rbody[OFF_READ_WRITE] != sbody[OFF_READ_WRITE])
 			throw new ParsingException("READ OR WRITE");
 	}
+
+	/** Get the message ID */
+	abstract protected int msgId();
+
+	/** Format the body of a GET request */
+	abstract byte[] formatBodyGet() throws IOException;
+
+	/** Format the body of a SET request */
+	abstract byte[] formatBodySet() throws IOException;
+
+	/** Parse the payload of a GET response */
+	abstract void parsePayload(byte[] body) throws IOException;
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,10 @@ import java.io.IOException;
  */
 public class FlashConfigProperty extends SS125Property {
 
-	/** Flash config request ID */
-	static protected final byte MSG_ID = 0x08;
+	/** Message ID for flash config request */
+	protected int msgId() {
+		return MSG_ID_FLASH_CONFIG;
+	}
 
 	/** Format the body of a GET request */
 	byte[] formatBodyGet() throws IOException {
@@ -35,9 +37,9 @@ public class FlashConfigProperty extends SS125Property {
 	/** Format the body of a SET request */
 	byte[] formatBodySet() throws IOException {
 		byte[] body = new byte[3];
-		body[0] = MSG_ID;
-		body[1] = SUB_ID_DONT_CARE;
-		body[2] = REQ_WRITE;
+		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_SUB_ID, SUB_ID_DONT_CARE);
+		format8(body, OFF_READ_WRITE, REQ_WRITE);
 		return body;
 	}
 
