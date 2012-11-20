@@ -34,12 +34,14 @@ abstract public class SS125Property extends ControllerProperty {
 	static private final String ASCII = "US-ASCII";
 
 	/** Byte offsets from beginning of packet */
-	static protected final int OFF_DEST_SUB_ID = 2;
-	static protected final int OFF_DEST_ID = 3;
-	static protected final int OFF_SOURCE_SUB_ID = 5;
-	static protected final int OFF_SOURCE_ID = 6;
-	static protected final int OFF_SEQUENCE = 8;
-	static protected final int OFF_BODY_SIZE = 9;
+	static private final int OFF_SENTINEL = 0;
+	static private final int OFF_PROTOCOL_VER = 1;
+	static private final int OFF_DEST_SUB_ID = 2;
+	static private final int OFF_DEST_ID = 3;
+	static private final int OFF_SOURCE_SUB_ID = 5;
+	static private final int OFF_SOURCE_ID = 6;
+	static private final int OFF_SEQUENCE = 8;
+	static private final int OFF_BODY_SIZE = 9;
 
 	/** Maximum number of octets in message body */
 	static private final int MAX_BODY_OCTETS = 244;
@@ -316,8 +318,8 @@ abstract public class SS125Property extends ControllerProperty {
 	protected byte[] formatHeader(byte[] body, int drop) {
 		assert body.length <= MAX_BODY_OCTETS;
 		byte[] header = new byte[10];
-		header[0] = 'Z';			// Sentinel
-		header[1] = '1';			// Protocol version
+		header[OFF_SENTINEL] = 'Z';
+		header[OFF_PROTOCOL_VER] = '1';
 		format8(header, OFF_DEST_SUB_ID, dest_sub_id);
 		format16(header, OFF_DEST_ID, drop);
 		format8(header, OFF_SOURCE_SUB_ID, source_sub_id);
@@ -372,9 +374,9 @@ abstract public class SS125Property extends ControllerProperty {
 		assert rhead.length == 10;
 		if(crc != SS125Property.crc8(rhead))
 			throw new ChecksumException("HEADER");
-		if(rhead[0] != 'Z')
+		if(rhead[OFF_SENTINEL] != 'Z')
 			throw new ParsingException("SENTINEL");
-		if(rhead[1] != '1')
+		if(rhead[OFF_PROTOCOL_VER] != '1')
 			throw new ParsingException("VERSION");
 		if(parse8(rhead, OFF_DEST_SUB_ID) != source_sub_id)
 			throw new ParsingException("DEST SUB ID");
