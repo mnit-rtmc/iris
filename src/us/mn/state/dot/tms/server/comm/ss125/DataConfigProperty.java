@@ -34,7 +34,7 @@ public class DataConfigProperty extends SS125Property {
 		byte[] body = new byte[3];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		format8(body, OFF_READ_WRITE, REQ_READ);
+		formatBool(body, OFF_READ_WRITE, false);
 		return body;
 	}
 
@@ -43,7 +43,7 @@ public class DataConfigProperty extends SS125Property {
 		byte[] body = new byte[28];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		format8(body, OFF_READ_WRITE, REQ_WRITE);
+		formatBool(body, OFF_READ_WRITE, true);
 		format16(body, 3, interval);
 		format8(body, 5, mode.ordinal());
 		event_push.format(body, 6);
@@ -118,9 +118,10 @@ public class DataConfigProperty extends SS125Property {
 			throws IOException
 		{
 			PushConfig pc = new PushConfig();
-			pc.port = PushPort.fromOrdinal(rbody[pos]);
-			pc.protocol = PushProtocol.fromOrdinal(rbody[pos + 1]);
-			pc.enable = parseBoolean(rbody[pos + 2]);
+			pc.port = PushPort.fromOrdinal(parse8(rbody, pos));
+			pc.protocol = PushProtocol.fromOrdinal(parse8(rbody,
+				pos + 1));
+			pc.enable = parseBool(rbody, pos + 2);
 			pc.dest_sub_id = parse8(rbody, pos + 3);
 			pc.dest_id = parse16(rbody, pos + 4);
 			return pc;

@@ -36,7 +36,7 @@ public class IntervalDataProperty extends SS125Property {
 		byte[] body = new byte[6];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		format8(body, OFF_READ_WRITE, REQ_READ);
+		formatBool(body, OFF_READ_WRITE, false);
 		format24(body, 3, 0);
 		return body;
 	}

@@ -39,7 +39,7 @@ public class FlashConfigProperty extends SS125Property {
 		byte[] body = new byte[3];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		format8(body, OFF_READ_WRITE, REQ_WRITE);
+		formatBool(body, OFF_READ_WRITE, true);
 		return body;
 	}
 

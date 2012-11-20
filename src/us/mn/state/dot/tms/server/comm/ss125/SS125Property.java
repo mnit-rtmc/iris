@@ -57,12 +57,6 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Message sub ID "don't care" */
 	static protected final byte SUB_ID_DONT_CARE = 0;
 
-	/** Message read request */
-	static protected final byte REQ_READ = 0;
-
-	/** Message write request */
-	static protected final byte REQ_WRITE = 1;
-
 	/** Message ID codes */
 	static protected final int MSG_ID_GENERAL_CONFIG = 0x00;
 	static protected final int MSG_ID_DATA_CONFIG = 0x03;
@@ -156,15 +150,11 @@ abstract public class SS125Property extends ControllerProperty {
 			buf[pos + i] = 0;
 	}
 
-	/** Parse a string value */
-	static protected String parseString(byte[] body, int pos, int len)
-		throws IOException
-	{
-		return new String(body, pos, len, ASCII).trim();
-	}
-
 	/** Parse a boolean value */
-	static protected boolean parseBoolean(byte b) throws IOException {
+	static protected boolean parseBool(byte[] body, int pos)
+		throws ParsingException
+	{
+		int b = body[pos];
 		if(b == 0)
 			return false;
 		else if(b == 1)
@@ -221,6 +211,13 @@ abstract public class SS125Property extends ControllerProperty {
 		int b1 = body[pos + 2] & 0xFF;
 		int b0 = body[pos + 3] & 0xFF;
 		return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
+	}
+
+	/** Parse a string value */
+	static protected String parseString(byte[] body, int pos, int len)
+		throws IOException
+	{
+		return new String(body, pos, len, ASCII).trim();
 	}
 
 	/** Parse a date / time stamp */
@@ -343,20 +340,19 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Parse a message response body.
 	 * @param rbody Received response body.
 	 * @param crc Received body crc.
-	 * @param sbody Send message body.
+	 * @param store Flag to indicate property STORE.
 	 * @throws ParsingException On any errors parsing response body. */
-	public void parseBody(byte[] rbody, byte crc, byte[] sbody)
+	public void parseBody(byte[] rbody, byte crc, boolean store)
 		throws ParsingException
 	{
 		assert rbody.length >= 3;
-		assert sbody.length >= 3;
 		if(crc != CRC.calculate(rbody))
 			throw new ChecksumException("BODY");
 		if(parse8(rbody, OFF_MSG_ID) != msgId())
 			throw new ParsingException("MESSAGE ID");
 		if(parse8(rbody, OFF_MSG_SUB_ID) != msgSubId())
 			throw new ParsingException("MESSAGE SUB ID");
-		if(rbody[OFF_READ_WRITE] != sbody[OFF_READ_WRITE])
+		if(parseBool(rbody, OFF_READ_WRITE) != store)
 			throw new ParsingException("READ OR WRITE");
 	}
 

@@ -34,7 +34,7 @@ public class GeneralConfigProperty extends SS125Property {
 		byte[] body = new byte[3];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		format8(body, OFF_READ_WRITE, REQ_READ);
+		formatBool(body, OFF_READ_WRITE, false);
 		return body;
 	}
 
@@ -43,7 +43,7 @@ public class GeneralConfigProperty extends SS125Property {
 		byte[] body = new byte[86];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		format8(body, OFF_READ_WRITE, REQ_WRITE);
+		formatBool(body, OFF_READ_WRITE, true);
 		formatString(body, 3, 2, orientation);
 		formatString(body, 5, 32, location);
 		formatString(body, 37, 32, description);
@@ -60,7 +60,7 @@ public class GeneralConfigProperty extends SS125Property {
 		location = parseString(body, 5, 32);
 		description = parseString(body, 37, 32);
 		serialNumber = parseString(body, 69, 16);
-		metric = parseBoolean(body[85]);
+		metric = parseBool(body, 85);
 		setComplete(true);
 	}
 
