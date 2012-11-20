@@ -37,7 +37,7 @@ public class DateTimeProperty extends SS125Property {
 	byte[] formatBodyGet() throws IOException {
 		byte[] body = new byte[3];
 		format8(body, OFF_MSG_ID, msgId());
-		format8(body, OFF_MSG_SUB_ID, SUB_ID_DONT_CARE);
+		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		format8(body, OFF_READ_WRITE, REQ_READ);
 		return body;
 	}
@@ -46,7 +46,7 @@ public class DateTimeProperty extends SS125Property {
 	byte[] formatBodySet() throws IOException {
 		byte[] body = new byte[11];
 		format8(body, OFF_MSG_ID, msgId());
-		format8(body, OFF_MSG_SUB_ID, SUB_ID_DONT_CARE);
+		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		format8(body, OFF_READ_WRITE, REQ_WRITE);
 		formatDate(body, 3);
 		return body;

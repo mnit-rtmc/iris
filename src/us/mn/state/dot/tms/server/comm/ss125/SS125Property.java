@@ -352,9 +352,9 @@ abstract public class SS125Property extends ControllerProperty {
 		assert sbody.length >= 3;
 		if(crc != CRC.calculate(rbody))
 			throw new ChecksumException("BODY");
-		if(rbody[OFF_MSG_ID] != sbody[OFF_MSG_ID])
+		if(parse8(rbody, OFF_MSG_ID) != msgId())
 			throw new ParsingException("MESSAGE ID");
-		if(rbody[OFF_MSG_SUB_ID] != sbody[OFF_MSG_SUB_ID])
+		if(parse8(rbody, OFF_MSG_SUB_ID) != msgSubId())
 			throw new ParsingException("MESSAGE SUB ID");
 		if(rbody[OFF_READ_WRITE] != sbody[OFF_READ_WRITE])
 			throw new ParsingException("READ OR WRITE");
@@ -362,6 +362,11 @@ abstract public class SS125Property extends ControllerProperty {
 
 	/** Get the message ID */
 	abstract protected int msgId();
+
+	/** Get the message sub-ID */
+	protected int msgSubId() {
+		return SUB_ID_DONT_CARE;
+	}
 
 	/** Format the body of a GET request */
 	abstract byte[] formatBodyGet() throws IOException;
