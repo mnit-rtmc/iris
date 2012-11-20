@@ -55,6 +55,36 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Message write request */
 	static protected final byte REQ_WRITE = 1;
 
+	/** Polynomial for CRC */
+	static private final int POLYNOMIAL = 0x1c;
+
+	/** Look-up table for CRC calculations */
+	static private final byte[] CRC_TABLE = new byte[256];
+
+	/** Initialize the lookup table */
+	static {
+		for(int i = 0; i < CRC_TABLE.length; i++) {
+			int v = i;
+		        for(int j = 0; j < 8; j++) {
+				if((v & 0x80) != 0)
+					v = (v << 1) ^ POLYNOMIAL;
+				else
+					v = v << 1;
+			}
+			CRC_TABLE[i] = (byte)v;
+		}
+	}
+
+	/** Calculate the CRC-8 of a buffer.
+	 * @param buffer Buffer to be checked.
+	 * @return CRC-8 of the buffer. */
+	static public byte crc8(byte[] buffer) {
+		int crc = 0;
+		for(byte b: buffer)
+			crc = CRC_TABLE[(crc ^ b) & 0xFF];
+		return (byte)crc;
+	}
+
 	/** Format a boolean value.
 	 * @param buf Buffer to store formatted value.
 	 * @param pos Starting position in buffer.

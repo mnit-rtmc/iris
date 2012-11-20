@@ -33,36 +33,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class Message implements CommMessage {
 
-	/** Polynomial for CRC */
-	static protected final int POLYNOMIAL = 0x1c;
-
-	/** Look-up table for CRC calculations */
-	static protected final byte[] CRC_TABLE = new byte[256];
-
-	/** Initialize the lookup table */
-	static {
-		for(int i = 0; i < CRC_TABLE.length; i++) {
-			int v = i;
-		        for(int j = 0; j < 8; j++) {
-				if((v & 0x80) != 0)
-					v = (v << 1) ^ POLYNOMIAL;
-				else
-					v = v << 1;
-			}
-			CRC_TABLE[i] = (byte)v;
-		}
-	}
-
-	/** Calculate the CRC-8 of a buffer.
-	 * @param buffer Buffer to be checked.
-	 * @return CRC-8 of the buffer. */
-	static protected byte crc8(byte[] buffer) {
-		int crc = 0;
-		for(byte b: buffer)
-			crc = CRC_TABLE[(crc ^ b) & 0xFF];
-		return (byte)crc;
-	}
-
 	/** Maximum number of octets in message body */
 	static protected final int MAX_BODY_OCTETS = 244;
 
@@ -141,9 +111,9 @@ public class Message implements CommMessage {
 		input.skip(input.available());
 		BufferedOutputStream bos = new BufferedOutputStream(output,256);
 		bos.write(header);
-		bos.write(crc8(header));
+		bos.write(SS125Property.crc8(header));
 		bos.write(body);
-		bos.write(crc8(body));
+		bos.write(SS125Property.crc8(body));
 		bos.flush();
 	}
 
@@ -192,7 +162,7 @@ public class Message implements CommMessage {
 	{
 		assert rhead.length == 10;
 		assert shead.length == 10;
-		if(crc != crc8(rhead))
+		if(crc != SS125Property.crc8(rhead))
 			throw new ChecksumException("HEADER");
 		if(rhead[0] != 'Z')
 			throw new ParsingException("SENTINEL");
@@ -228,7 +198,7 @@ public class Message implements CommMessage {
 	{
 		assert rbody.length >= 3;
 		assert sbody.length >= 3;
-		if(crc != crc8(rbody))
+		if(crc != SS125Property.crc8(rbody))
 			throw new ChecksumException("BODY");
 		if(rbody[0] != sbody[0])
 			throw new ParsingException("MESSAGE ID");
