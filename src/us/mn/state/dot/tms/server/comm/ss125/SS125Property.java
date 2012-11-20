@@ -157,30 +157,6 @@ abstract public class SS125Property extends ControllerProperty {
 			buf[pos + i] = 0;
 	}
 
-	/** Format a request header.
-	 * @param body Body of message to send.
-	 * @param drop Destination ID (drop address).
-	 * @return Header appropriate for polling message. */
-	protected byte[] formatHeader(byte[] body, int drop) {
-		assert body.length <= MAX_BODY_OCTETS;
-		byte[] header = new byte[10];
-		header[0] = 'Z';			// Sentinel
-		header[1] = '1';			// Protocol version
-		format8(header, OFF_DEST_SUB_ID, SUB_ID);
-		format16(header, OFF_DEST_ID, drop);
-		format8(header, OFF_SOURCE_SUB_ID, 0);
-		format16(header, OFF_SOURCE_ID, 0);
-		format8(header, OFF_SEQUENCE, 0);	// FIXME?
-		format8(header, OFF_BODY_SIZE, body.length);
-		return header;
-	}
-
-	/** Format the body of a GET request */
-	abstract byte[] formatBodyGet() throws IOException;
-
-	/** Format the body of a SET request */
-	abstract byte[] formatBodySet() throws IOException;
-
 	/** Parse a string value */
 	static protected String parseString(byte[] body, int pos, int len)
 		throws IOException
@@ -249,7 +225,7 @@ abstract public class SS125Property extends ControllerProperty {
 	}
 
 	/** Parse a date / time stamp */
-	protected long parseDate(byte[] body, int pos) {
+	static protected long parseDate(byte[] body, int pos) {
 		int date = parse32(body, pos);
 		int time = parse32(body, pos + 4);
 		int year = (date >> 9) & 0x0FFF;
@@ -270,7 +246,7 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param rbody Received response body.
 	 * @throws ParsingException On any errors parsing result code.
 	 * @throws ControllerException If result indicates an error. */
-	void parseResult(byte[] rbody) throws IOException {
+	static void parseResult(byte[] rbody) throws IOException {
 		if(rbody.length != 5)
 			throw new ParsingException("RESULT LENGTH");
 		int result = parse16(rbody, 3);
@@ -319,6 +295,30 @@ abstract public class SS125Property extends ControllerProperty {
 			return "UNKNOWN ERROR";
 		}
 	}
+
+	/** Format a request header.
+	 * @param body Body of message to send.
+	 * @param drop Destination ID (drop address).
+	 * @return Header appropriate for polling message. */
+	protected byte[] formatHeader(byte[] body, int drop) {
+		assert body.length <= MAX_BODY_OCTETS;
+		byte[] header = new byte[10];
+		header[0] = 'Z';			// Sentinel
+		header[1] = '1';			// Protocol version
+		format8(header, OFF_DEST_SUB_ID, SUB_ID);
+		format16(header, OFF_DEST_ID, drop);
+		format8(header, OFF_SOURCE_SUB_ID, 0);
+		format16(header, OFF_SOURCE_ID, 0);
+		format8(header, OFF_SEQUENCE, 0);	// FIXME?
+		format8(header, OFF_BODY_SIZE, body.length);
+		return header;
+	}
+
+	/** Format the body of a GET request */
+	abstract byte[] formatBodyGet() throws IOException;
+
+	/** Format the body of a SET request */
+	abstract byte[] formatBodySet() throws IOException;
 
 	/** Parse the payload of a GET response */
 	abstract void parsePayload(byte[] body) throws IOException;
