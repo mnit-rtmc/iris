@@ -33,7 +33,7 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Charset name for ASCII */
 	static private final String ASCII = "US-ASCII";
 
-	/** Byte offsets from beginning of packet */
+	/** Byte offsets from beginning of header packet */
 	static private final int OFF_SENTINEL = 0;
 	static private final int OFF_PROTOCOL_VER = 1;
 	static private final int OFF_DEST_SUB_ID = 2;
@@ -42,6 +42,11 @@ abstract public class SS125Property extends ControllerProperty {
 	static private final int OFF_SOURCE_ID = 6;
 	static private final int OFF_SEQUENCE = 8;
 	static private final int OFF_BODY_SIZE = 9;
+
+	/** Byte offsets from beginning of body packet */
+	static private final int OFF_MSG_ID = 0;
+	static private final int OFF_MSG_SUB_ID = 1;
+	static private final int OFF_READ_WRITE = 2;
 
 	/** Maximum number of octets in message body */
 	static private final int MAX_BODY_OCTETS = 244;
@@ -406,11 +411,11 @@ abstract public class SS125Property extends ControllerProperty {
 		assert sbody.length >= 3;
 		if(crc != SS125Property.crc8(rbody))
 			throw new ChecksumException("BODY");
-		if(rbody[0] != sbody[0])
+		if(rbody[OFF_MSG_ID] != sbody[OFF_MSG_ID])
 			throw new ParsingException("MESSAGE ID");
-		if(rbody[1] != sbody[1])
+		if(rbody[OFF_MSG_SUB_ID] != sbody[OFF_MSG_SUB_ID])
 			throw new ParsingException("MESSAGE SUB ID");
-		if(rbody[2] != sbody[2])
+		if(rbody[OFF_READ_WRITE] != sbody[OFF_READ_WRITE])
 			throw new ParsingException("READ OR WRITE");
 	}
 }
