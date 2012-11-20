@@ -78,7 +78,7 @@ public class Message implements CommMessage {
 		doPoll(header, body);
 		while(!prop.isComplete()) {
 			try {
-				prop.parsePayload(doResponse(header, body));
+				prop.parsePayload(doResponse(body));
 			}
 			catch(SocketTimeoutException e) {
 				if(prop.hasData()) {
@@ -100,7 +100,7 @@ public class Message implements CommMessage {
 		byte[] body = prop.formatBodySet();
 		byte[] header = prop.formatHeader(body, dest_id);
 		doPoll(header, body);
-		prop.parseResult(doResponse(header, body));
+		prop.parseResult(doResponse(body));
 	}
 
 	/** Perform a message poll.
@@ -118,17 +118,14 @@ public class Message implements CommMessage {
 	}
 
 	/** Receive a message response.
-	 * @param shead Header of message sent.
 	 * @param sbody Body of message sent.
 	 * @return Body of message received.
 	 * @throws IOException On any errors receiving response. */
-	protected byte[] doResponse(byte[] shead, byte[] sbody)
-		throws IOException
-	{
+	protected byte[] doResponse(byte[] sbody) throws IOException {
 		prop.delayResponse();
 		byte[] rhead = recvResponse(10);
 		byte h_crc = recvResponse(1)[0];
-		int n_body = prop.parseHead(rhead, h_crc, shead);
+		int n_body = prop.parseHead(rhead, h_crc, dest_id);
 		byte[] rbody = recvResponse(n_body);
 		byte b_crc = recvResponse(1)[0];
 		parseBody(rbody, b_crc, sbody);

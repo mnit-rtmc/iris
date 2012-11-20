@@ -297,6 +297,18 @@ abstract public class SS125Property extends ControllerProperty {
 		}
 	}
 
+	/** Source sub ID */
+	private final int source_sub_id = SUB_ID;
+
+	/** Source ID */
+	private final int source_id = 0;
+
+	/** Destination sub ID */
+	private final int dest_sub_id = SUB_ID;
+
+	/** Packet sequence number (FIXME?) */
+	private byte seq_num = 0;
+
 	/** Format a request header.
 	 * @param body Body of message to send.
 	 * @param drop Destination ID (drop address).
@@ -306,11 +318,11 @@ abstract public class SS125Property extends ControllerProperty {
 		byte[] header = new byte[10];
 		header[0] = 'Z';			// Sentinel
 		header[1] = '1';			// Protocol version
-		format8(header, OFF_DEST_SUB_ID, SUB_ID);
+		format8(header, OFF_DEST_SUB_ID, dest_sub_id);
 		format16(header, OFF_DEST_ID, drop);
-		format8(header, OFF_SOURCE_SUB_ID, 0);
-		format16(header, OFF_SOURCE_ID, 0);
-		format8(header, OFF_SEQUENCE, 0);	// FIXME?
+		format8(header, OFF_SOURCE_SUB_ID, source_sub_id);
+		format16(header, OFF_SOURCE_ID, source_id);
+		format8(header, OFF_SEQUENCE, seq_num);
 		format8(header, OFF_BODY_SIZE, body.length);
 		return header;
 	}
@@ -351,31 +363,28 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Parse a message response header.
 	 * @param rhead Received response header.
 	 * @param crc Received header crc.
-	 * @param shead Sent message header.
+	 * @param drop Destination ID (drop address).
 	 * @return Number of bytes in response body.
 	 * @throws ParsingException On any errors parsing response header. */
-	public int parseHead(byte[] rhead, byte crc, byte[] shead)
+	public int parseHead(byte[] rhead, byte crc, int drop)
 		throws ParsingException
 	{
 		assert rhead.length == 10;
-		assert shead.length == 10;
 		if(crc != SS125Property.crc8(rhead))
 			throw new ChecksumException("HEADER");
 		if(rhead[0] != 'Z')
 			throw new ParsingException("SENTINEL");
 		if(rhead[1] != '1')
 			throw new ParsingException("VERSION");
-		if(parse8(rhead, OFF_DEST_SUB_ID) !=
-		   parse8(shead, OFF_SOURCE_SUB_ID))
+		if(parse8(rhead, OFF_DEST_SUB_ID) != source_sub_id)
 			throw new ParsingException("DEST SUB ID");
-		if(parse16(rhead, OFF_DEST_ID) != parse16(shead, OFF_SOURCE_ID))
+		if(parse16(rhead, OFF_DEST_ID) != source_id)
 			throw new ParsingException("DEST ID");
-		if(parse8(rhead, OFF_SOURCE_SUB_ID) !=
-		   parse8(shead, OFF_DEST_SUB_ID))
+		if(parse8(rhead, OFF_SOURCE_SUB_ID) != dest_sub_id)
 			throw new ParsingException("SRC SUB ID");
-		if(parse16(rhead, OFF_SOURCE_ID) != parse16(shead, OFF_DEST_ID))
+		if(parse16(rhead, OFF_SOURCE_ID) != drop)
 			throw new ParsingException("SRC ID");
-		if(parse8(rhead, OFF_SEQUENCE) != parse8(shead,OFF_SEQUENCE +1))
+		if(parse8(rhead, OFF_SEQUENCE) != seq_num + 1)
 			throw new ParsingException("SEQUENCE");
 		int n_body = parse8(rhead, OFF_BODY_SIZE);
 		if(n_body < 3 || n_body > MAX_BODY_OCTETS)
