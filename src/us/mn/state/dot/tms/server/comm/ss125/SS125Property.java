@@ -365,21 +365,19 @@ abstract public class SS125Property extends ControllerProperty {
 			throw new ParsingException("SENTINEL");
 		if(rhead[1] != '1')
 			throw new ParsingException("VERSION");
-		if(rhead[2] != shead[5])
+		if(parse8(rhead, OFF_DEST_SUB_ID) !=
+		   parse8(shead, OFF_SOURCE_SUB_ID))
 			throw new ParsingException("DEST SUB ID");
-		if(rhead[3] != shead[6])
+		if(parse16(rhead, OFF_DEST_ID) != parse16(shead, OFF_SOURCE_ID))
 			throw new ParsingException("DEST ID");
-		if(rhead[4] != shead[7])
-			throw new ParsingException("DEST ID");
-		if(rhead[5] != shead[2])
+		if(parse8(rhead, OFF_SOURCE_SUB_ID) !=
+		   parse8(shead, OFF_DEST_SUB_ID))
 			throw new ParsingException("SRC SUB ID");
-		if(rhead[6] != shead[3])
+		if(parse16(rhead, OFF_SOURCE_ID) != parse16(shead, OFF_DEST_ID))
 			throw new ParsingException("SRC ID");
-		if(rhead[7] != shead[4])
-			throw new ParsingException("SRC ID");
-		if(rhead[8] != shead[8] + 1)
+		if(parse8(rhead, OFF_SEQUENCE) != parse8(shead,OFF_SEQUENCE +1))
 			throw new ParsingException("SEQUENCE");
-		int n_body = rhead[9] & 0xFF;
+		int n_body = parse8(rhead, OFF_BODY_SIZE);
 		if(n_body < 3 || n_body > MAX_BODY_OCTETS)
 			throw new ParsingException("BODY SIZE");
 		return n_body;
