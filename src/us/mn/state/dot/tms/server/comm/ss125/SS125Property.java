@@ -391,4 +391,24 @@ abstract public class SS125Property extends ControllerProperty {
 			throw new ParsingException("BODY SIZE");
 		return n_body;
 	}
+
+	/** Parse a message response body.
+	 * @param rbody Received response body.
+	 * @param crc Received body crc.
+	 * @param sbody Send message body.
+	 * @throws ParsingException On any errors parsing response body. */
+	public void parseBody(byte[] rbody, byte crc, byte[] sbody)
+		throws ParsingException
+	{
+		assert rbody.length >= 3;
+		assert sbody.length >= 3;
+		if(crc != SS125Property.crc8(rbody))
+			throw new ChecksumException("BODY");
+		if(rbody[0] != sbody[0])
+			throw new ParsingException("MESSAGE ID");
+		if(rbody[1] != sbody[1])
+			throw new ParsingException("MESSAGE SUB ID");
+		if(rbody[2] != sbody[2])
+			throw new ParsingException("READ OR WRITE");
+	}
 }

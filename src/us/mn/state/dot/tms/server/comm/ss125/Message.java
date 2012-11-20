@@ -21,10 +21,8 @@ import java.io.OutputStream;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
-import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * SS125 message
@@ -32,9 +30,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * @author Douglas Lau
  */
 public class Message implements CommMessage {
-
-	/** Maximum number of octets in message body */
-	static protected final int MAX_BODY_OCTETS = 244;
 
 	/** Serial output stream */
 	protected final OutputStream output;
@@ -128,7 +123,7 @@ public class Message implements CommMessage {
 		int n_body = prop.parseHead(rhead, h_crc, dest_id);
 		byte[] rbody = recvResponse(n_body);
 		byte b_crc = recvResponse(1)[0];
-		parseBody(rbody, b_crc, sbody);
+		prop.parseBody(rbody, b_crc, sbody);
 		return rbody;
 	}
 
@@ -146,25 +141,5 @@ public class Message implements CommMessage {
 			n_rcv += r;
 		}
 		return resp;
-	}
-
-	/** Parse a message response body.
-	 * @param rbody Received response body.
-	 * @param crc Received body crc.
-	 * @param sbody Send message body.
-	 * @throws ParsingException On any errors parsing response body. */
-	protected void parseBody(byte[] rbody, byte crc, byte[] sbody)
-		throws ParsingException
-	{
-		assert rbody.length >= 3;
-		assert sbody.length >= 3;
-		if(crc != SS125Property.crc8(rbody))
-			throw new ChecksumException("BODY");
-		if(rbody[0] != sbody[0])
-			throw new ParsingException("MESSAGE ID");
-		if(rbody[1] != sbody[1])
-			throw new ParsingException("MESSAGE SUB ID");
-		if(rbody[2] != sbody[2])
-			throw new ParsingException("READ OR WRITE");
 	}
 }
