@@ -258,50 +258,9 @@ abstract public class SS125Property extends ControllerProperty {
 		if(rbody.length != 5)
 			throw new ParsingException("RESULT LENGTH");
 		int result = parse16(rbody, 3);
-		if(result > 0)
-			throw new ControllerException(lookupResult(result));
-	}
-
-	/** Lookup a result code */
-	static protected String lookupResult(int result) {
-		switch(result) {
-		case 1:
-			return "PAYLOAD SIZE";
-		case 2:
-			return "BODY CRC";
-		case 3:
-			return "READ ONLY";
-		case 15:
-			return "INTERVAL NONEXISTANT";
-		case 16:
-			return "LANE NONEXISTANT";
-		case 17:
-			return "FLASH BUSY (A)";
-		case 19:
-			return "INVALID PUSH STATE";
-		case 20:
-			return "ERROR SETTING RTC";
-		case 21:
-			return "RTC SYNC ERROR";
-		case 22:
-			return "FLASH ERASE ERROR";
-		case 23:
-			return "FLASH BUSY (B)";
-		case 24:
-			return "INVALID PROTOCOL STATE";
-		case 25:
-			return "TOO MANY APPROACHES";
-		case 26:
-			return "TOO MANY LANES";
-		case 30:
-			return "AUTOMATIC LANE";
-		case 31:
-			return "WRONG LANE COUNT";
-		case 33:
-			return "INVALID BAUD RATE";
-		default:
-			return "UNKNOWN ERROR";
-		}
+		ResponseCode rc = ResponseCode.fromCode(result);
+		if(rc != ResponseCode.NO_ERRORS)
+			throw new ControllerException(rc.toString());
 	}
 
 	/** Source sub ID */
