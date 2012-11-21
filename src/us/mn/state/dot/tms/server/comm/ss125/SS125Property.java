@@ -164,7 +164,7 @@ abstract public class SS125Property extends ControllerProperty {
 		else if(b == 1)
 			return true;
 		else
-			throw new ParsingException("Invalid boolean value");
+			throw new ParsingException("INVALID BOOLEAN");
 	}
 
 	/** Parse an 8-bit value */
