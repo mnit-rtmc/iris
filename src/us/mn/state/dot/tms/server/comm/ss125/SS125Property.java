@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.ss125;
 
+import java.io.EOFException;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -303,6 +305,25 @@ abstract public class SS125Property extends ControllerProperty {
 	void delayResponse() {
 		// Only needed if flash is being reprogrammed
 		// see FlashConfigProperty
+	}
+
+	/** Receive part of a response.
+	 * @param input Input stream to read.
+	 * @param n_bytes Number of bytes to receive.
+	 * @return Response received.
+	 * @throws IOException On any errors receiving response. */
+	public byte[] recvResponse(InputStream input, int n_bytes)
+		throws IOException
+	{
+		byte[] resp = new byte[n_bytes];
+		int n_rcv = 0;
+		while(n_rcv < n_bytes) {
+			int r = input.read(resp, n_rcv, n_bytes - n_rcv);
+			if(r <= 0)
+				throw new EOFException("END OF STREAM");
+			n_rcv += r;
+		}
+		return resp;
 	}
 
 	/** Parse a message response header.

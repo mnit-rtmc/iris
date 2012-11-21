@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.BufferedOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
@@ -118,28 +117,12 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors receiving response. */
 	protected byte[] doResponse(boolean store) throws IOException {
 		prop.delayResponse();
-		byte[] rhead = recvResponse(10);
-		byte h_crc = recvResponse(1)[0];
+		byte[] rhead = prop.recvResponse(input, 10);
+		byte h_crc = prop.recvResponse(input, 1)[0];
 		int n_body = prop.parseHead(rhead, h_crc, dest_id);
-		byte[] rbody = recvResponse(n_body);
-		byte b_crc = recvResponse(1)[0];
+		byte[] rbody = prop.recvResponse(input, n_body);
+		byte b_crc = prop.recvResponse(input, 1)[0];
 		prop.parseBody(rbody, b_crc, store);
 		return rbody;
-	}
-
-	/** Receive part of a response.
-	 * @param n_bytes Number of bytes to receive.
-	 * @return Response received.
-	 * @throws IOException On any errors receiving response. */
-	protected byte[] recvResponse(int n_bytes) throws IOException {
-		byte[] resp = new byte[n_bytes];
-		int n_rcv = 0;
-		while(n_rcv < n_bytes) {
-			int r = input.read(resp, n_rcv, n_bytes - n_rcv);
-			if(r <= 0)
-				throw new EOFException("END OF STREAM");
-			n_rcv += r;
-		}
-		return resp;
 	}
 }
