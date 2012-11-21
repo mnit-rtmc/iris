@@ -46,8 +46,8 @@ public class Crc8 {
 	 * @return CRC-8 of the buffer. */
 	public byte calculate(byte[] buffer) {
 		int crc = 0;
-		for(byte b: buffer)
-			crc = table[(crc ^ b) & 0xFF];
+		for(int i = 0; i < buffer.length - 1; i++)
+			crc = table[(crc ^ buffer[i]) & 0xFF];
 		return (byte)crc;
 	}
 }

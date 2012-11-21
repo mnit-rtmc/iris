@@ -31,7 +31,7 @@ public class DataConfigProperty extends SS125Property {
 
 	/** Format a QUERY request */
 	protected byte[] formatQuery() throws IOException {
-		byte[] body = new byte[3];
+		byte[] body = new byte[4];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		formatBool(body, OFF_READ_WRITE, false);
@@ -40,7 +40,7 @@ public class DataConfigProperty extends SS125Property {
 
 	/** Format a STORE request */
 	protected byte[] formatStore() throws IOException {
-		byte[] body = new byte[28];
+		byte[] body = new byte[29];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		formatBool(body, OFF_READ_WRITE, true);
@@ -56,7 +56,7 @@ public class DataConfigProperty extends SS125Property {
 
 	/** Parse a QUERY response */
 	protected void parseQuery(byte[] rbody) throws IOException {
-		if(rbody.length != 28)
+		if(rbody.length != 29)
 			throw new ParsingException("BODY LENGTH");
 		interval = parse16(rbody, 3);
 		mode = StorageMode.fromOrdinal(rbody[5]);

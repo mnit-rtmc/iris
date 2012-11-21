@@ -34,7 +34,7 @@ public class IntervalDataProperty extends SS125Property {
 
 	/** Format a QUERY request */
 	protected byte[] formatQuery() throws IOException {
-		byte[] body = new byte[6];
+		byte[] body = new byte[7];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		formatBool(body, OFF_READ_WRITE, false);
@@ -65,9 +65,9 @@ public class IntervalDataProperty extends SS125Property {
 
 	/** Parse a QUERY response */
 	protected void parseQuery(byte[] body) throws IOException {
-		if(body.length == 5)
+		if(body.length == 6)
 			parseResult(body);
-		if(body.length != 45)
+		if(body.length != 46)
 			throw new ParsingException("BODY LENGTH");
 		int n_packet = parse8(body, OFF_MSG_SUB_ID);
 		if(n_packet < 0 || n_packet > n_lanes + n_approaches)

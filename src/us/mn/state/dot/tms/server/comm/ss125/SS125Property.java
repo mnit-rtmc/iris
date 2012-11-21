@@ -45,6 +45,7 @@ abstract public class SS125Property extends ControllerProperty {
 	static private final int OFF_SOURCE_ID = 6;
 	static private final int OFF_SEQUENCE = 8;
 	static private final int OFF_BODY_SIZE = 9;
+	static private final int OFF_CRC = 10;
 
 	/** Byte offsets from beginning of body packet */
 	static protected final int OFF_MSG_ID = 0;
@@ -246,7 +247,7 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @throws ParsingException On any errors parsing result code.
 	 * @throws ControllerException If result indicates an error. */
 	static void parseResult(byte[] rbody) throws IOException {
-		if(rbody.length != 5)
+		if(rbody.length != 6)
 			throw new ParsingException("RESULT LENGTH");
 		int result = parse16(rbody, 3);
 		ResponseCode rc = ResponseCode.fromCode(result);
@@ -274,8 +275,8 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param drop Destination ID (drop address).
 	 * @return Header appropriate for polling message. */
 	protected byte[] formatHeader(byte[] body, int drop) {
-		assert body.length <= MAX_BODY_OCTETS;
-		byte[] header = new byte[10];
+		assert (body.length - 1) <= MAX_BODY_OCTETS;
+		byte[] header = new byte[11];
 		header[OFF_SENTINEL] = 'Z';
 		header[OFF_PROTOCOL_VER] = '1';
 		format8(header, OFF_DEST_SUB_ID, dest_sub_id);
@@ -283,7 +284,8 @@ abstract public class SS125Property extends ControllerProperty {
 		format8(header, OFF_SOURCE_SUB_ID, source_sub_id);
 		format16(header, OFF_SOURCE_ID, source_id);
 		format8(header, OFF_SEQUENCE, seq_num);
-		format8(header, OFF_BODY_SIZE, body.length);
+		format8(header, OFF_BODY_SIZE, body.length - 1);
+		format8(header, OFF_CRC, CRC.calculate(header));
 		return header;
 	}
 
@@ -317,9 +319,8 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @return Number of bytes in response body.
 	 * @throws IOException on error. */
 	private int decodeHead(InputStream is, int drop) throws IOException {
-		byte[] rhead = recvResponse(is, 10);
-		byte h_crc = recvResponse(is, 1)[0];
-		if(h_crc != CRC.calculate(rhead))
+		byte[] rhead = recvResponse(is, 11);
+		if(parse8(rhead, OFF_CRC) != CRC.calculate(rhead))
 			throw new ChecksumException("HEADER");
 		if(rhead[OFF_SENTINEL] != 'Z')
 			throw new ParsingException("SENTINEL");
@@ -346,34 +347,22 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param is Input stream to decode from.
 	 * @param n_body Number of bytes in response body.
 	 * @param store Flag to indicate property STORE.
-	 * @throws IOException. */
+	 * @throws IOException on error. */
 	private byte[] decodeBody(InputStream is, int n_body, boolean store)
 		throws IOException
 	{
-		byte[] rbody = recvResponse(is, n_body);
-		byte b_crc = recvResponse(is, 1)[0];
-		parseBody(rbody, b_crc, store);
-		return rbody;
-	}
-
-	/** Parse a message response body.
-	 * @param rbody Received response body.
-	 * @param crc Received body crc.
-	 * @param store Flag to indicate property STORE.
-	 * @throws ParsingException On any errors parsing response body. */
-	private void parseBody(byte[] rbody, byte crc, boolean store)
-		throws ParsingException
-	{
-		if(rbody.length < 3)
+		byte[] rbody = recvResponse(is, n_body + 1);
+		if(rbody.length < 4)
 			throw new ParsingException("BODY SIZE");
-		if(crc != CRC.calculate(rbody))
-			throw new ChecksumException("BODY");
+		if(parse8(rbody, rbody.length - 1) != CRC.calculate(rbody))
+			throw new ChecksumException("BODY CRC");
 		if(parse8(rbody, OFF_MSG_ID) != msgId())
 			throw new ParsingException("MESSAGE ID");
 		if(parse8(rbody, OFF_MSG_SUB_ID) != msgSubId())
 			throw new ParsingException("MESSAGE SUB ID");
 		if(parseBool(rbody, OFF_READ_WRITE) != store)
 			throw new ParsingException("READ OR WRITE");
+		return rbody;
 	}
 
 	/** Get the message ID */
@@ -388,10 +377,9 @@ abstract public class SS125Property extends ControllerProperty {
 	public void encodeQuery(OutputStream os, int drop) throws IOException {
 		byte[] body = formatQuery();
 		byte[] header = formatHeader(body, drop);
+		format8(body, body.length - 1, CRC.calculate(body));
 		os.write(header);
-		os.write(CRC.calculate(header));
 		os.write(body);
-		os.write(CRC.calculate(body));
 	}
 
 	/** Format a QUERY request */
@@ -415,10 +403,9 @@ abstract public class SS125Property extends ControllerProperty {
 	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] body = formatStore();
 		byte[] header = formatHeader(body, drop);
+		format8(body, body.length - 1, CRC.calculate(body));
 		os.write(header);
-		os.write(CRC.calculate(header));
 		os.write(body);
-		os.write(CRC.calculate(body));
 	}
 
 	/** Format a STORE request */

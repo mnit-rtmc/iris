@@ -31,7 +31,7 @@ public class GeneralConfigProperty extends SS125Property {
 
 	/** Format a QUERY request */
 	protected byte[] formatQuery() throws IOException {
-		byte[] body = new byte[3];
+		byte[] body = new byte[4];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		formatBool(body, OFF_READ_WRITE, false);
@@ -40,7 +40,7 @@ public class GeneralConfigProperty extends SS125Property {
 
 	/** Format a STORE request */
 	protected byte[] formatStore() throws IOException {
-		byte[] body = new byte[86];
+		byte[] body = new byte[87];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		formatBool(body, OFF_READ_WRITE, true);
@@ -54,7 +54,7 @@ public class GeneralConfigProperty extends SS125Property {
 
 	/** Parse a QUERY response */
 	protected void parseQuery(byte[] body) throws IOException {
-		if(body.length != 86)
+		if(body.length != 87)
 			throw new ParsingException("BODY LENGTH");
 		orientation = parseString(body, 3, 2);
 		location = parseString(body, 5, 32);
