@@ -170,7 +170,7 @@ abstract public class CanogaProperty extends ControllerProperty {
 	}
 
 	/** Validate a response message */
-	private void validateResponse(byte[] req, byte[] res)
+	protected void validateResponse(byte[] req, byte[] res)
 		throws ParsingException
 	{
 		if(res.length < 8)

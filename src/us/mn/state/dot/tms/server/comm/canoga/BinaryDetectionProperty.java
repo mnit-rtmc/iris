@@ -67,7 +67,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Validate a response message */
-	protected void validateResponse(byte[] req, byte[] res)
+	@Override protected void validateResponse(byte[] req, byte[] res)
 		throws ChecksumException
 	{
 		byte paysum = res[OFF_CHECKSUM];
