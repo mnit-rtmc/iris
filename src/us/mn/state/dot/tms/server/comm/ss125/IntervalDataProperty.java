@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ss125;
 
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Date;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
@@ -31,8 +32,8 @@ public class IntervalDataProperty extends SS125Property {
 		return MSG_ID_INTERVAL;
 	}
 
-	/** Format the body of a GET request */
-	byte[] formatBodyGet() throws IOException {
+	/** Format a QUERY request */
+	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[6];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
@@ -41,19 +42,34 @@ public class IntervalDataProperty extends SS125Property {
 		return body;
 	}
 
-	/** Format the body of a SET request */
-	byte[] formatBodySet() throws IOException {
-		assert false;
-		return null;
+	/** Flag to indicate the request is complete */
+	private boolean complete = false;
+
+	/** Test if the request is complete */
+	protected boolean isComplete() {
+		return complete;
 	}
 
-	/** Parse the payload of a GET response */
-	void parsePayload(byte[] body) throws IOException {
+	/** Set the complete flag */
+	protected void setComplete(boolean c) {
+		complete = c;
+	}
+
+	/** Decode a QUERY response */
+	public void decodeQuery(InputStream is, int drop) throws IOException {
+		while(!isComplete()) {
+			super.decodeQuery(is, drop);
+			msg_sub_id++;
+		}
+	}
+
+	/** Parse a QUERY response */
+	protected void parseQuery(byte[] body) throws IOException {
 		if(body.length == 5)
 			parseResult(body);
 		if(body.length != 45)
 			throw new ParsingException("BODY LENGTH");
-		int n_packet = body[1];
+		int n_packet = parse8(body, OFF_MSG_SUB_ID);
 		if(n_packet < 0 || n_packet > n_lanes + n_approaches)
 			throw new ParsingException("PACKET #");
 		if(stamp > 0) {

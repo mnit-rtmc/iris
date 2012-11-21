@@ -29,8 +29,8 @@ public class DataConfigProperty extends SS125Property {
 		return MSG_ID_DATA_CONFIG;
 	}
 
-	/** Format the body of a GET request */
-	byte[] formatBodyGet() throws IOException {
+	/** Format a QUERY request */
+	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[3];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
@@ -38,8 +38,8 @@ public class DataConfigProperty extends SS125Property {
 		return body;
 	}
 
-	/** Format the body of a SET request */
-	byte[] formatBodySet() throws IOException {
+	/** Format a STORE request */
+	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[28];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
@@ -54,8 +54,8 @@ public class DataConfigProperty extends SS125Property {
 		return body;
 	}
 
-	/** Parse the payload of a GET response */
-	void parsePayload(byte[] rbody) throws IOException {
+	/** Parse a QUERY response */
+	protected void parseQuery(byte[] rbody) throws IOException {
 		if(rbody.length != 28)
 			throw new ParsingException("BODY LENGTH");
 		interval = parse16(rbody, 3);
@@ -65,7 +65,6 @@ public class DataConfigProperty extends SS125Property {
 		presence_push = PushConfig.parse(rbody, 18);
 		default_sep = parse16Fixed(rbody, 24);
 		default_size = parse16Fixed(rbody, 26);
-		setComplete(true);
 	}
 
 	/** Data interval (seconds) */

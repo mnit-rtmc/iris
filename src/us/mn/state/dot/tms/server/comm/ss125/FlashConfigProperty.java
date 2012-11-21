@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ss125;
 
+import java.io.InputStream;
 import java.io.IOException;
 
 /**
@@ -23,19 +24,16 @@ import java.io.IOException;
  */
 public class FlashConfigProperty extends SS125Property {
 
+	/** Delay time to wait for FLASH memory to be written */
+	static private final int FLASH_WRITE_MS = 4000;
+
 	/** Message ID for flash config request */
 	protected int msgId() {
 		return MSG_ID_FLASH_CONFIG;
 	}
 
-	/** Format the body of a GET request */
-	byte[] formatBodyGet() throws IOException {
-		assert false;
-		return null;
-	}
-
-	/** Format the body of a SET request */
-	byte[] formatBodySet() throws IOException {
+	/** Format a STORE request */
+	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[3];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
@@ -43,19 +41,14 @@ public class FlashConfigProperty extends SS125Property {
 		return body;
 	}
 
-	/** Parse the payload of a GET response */
-	void parsePayload(byte[] body) throws IOException {
-		assert false;
-	}
-
-	/** Delay before checking for response */
-	void delayResponse() {
-		// NOTE: wait 4 extra seconds for flash memory update
+	/** Decode a STORE response */
+	public void decodeStore(InputStream is, int drop) throws IOException {
 		try {
-			Thread.sleep(4000);
+			Thread.sleep(FLASH_WRITE_MS);
 		}
 		catch(InterruptedException e) {
 			// not sleepy?
 		}
+		super.decodeStore(is, drop);
 	}
 }

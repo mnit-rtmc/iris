@@ -17,16 +17,17 @@ package us.mn.state.dot.tms.server.comm.ss125;
 import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.TimeZone;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * SS125 property
- * FIXME: convert to use ControllerProperty encode/decode methods.
+ * SS125 property.
  *
  * @author Douglas Lau
  */
@@ -57,7 +58,7 @@ abstract public class SS125Property extends ControllerProperty {
 	static private final int SUB_ID = 0;
 
 	/** Message sub ID "don't care" */
-	static protected final byte SUB_ID_DONT_CARE = 0;
+	static private final byte MSG_SUB_ID = 0;
 
 	/** Message ID codes */
 	static protected final int MSG_ID_GENERAL_CONFIG = 0x00;
@@ -78,7 +79,7 @@ abstract public class SS125Property extends ControllerProperty {
 	static protected final int MSG_ID_INTERVAL = 0x71;
 
 	/** CRC calculator */
-	static public final Crc8 CRC = new Crc8();
+	static private final Crc8 CRC = new Crc8();
 
 	/** Format a boolean value.
 	 * @param buf Buffer to store formatted value.
@@ -262,8 +263,11 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Destination sub ID */
 	private final int dest_sub_id = SUB_ID;
 
-	/** Packet sequence number (FIXME?) */
+	/** Packet sequence number */
 	private byte seq_num = 0;
+
+	/** Message sub ID */
+	protected byte msg_sub_id = MSG_SUB_ID;
 
 	/** Format a request header.
 	 * @param body Body of message to send.
@@ -283,28 +287,9 @@ abstract public class SS125Property extends ControllerProperty {
 		return header;
 	}
 
-	/** Flag to indicate the request is complete */
-	protected boolean complete = false;
-
-	/** Test if the request is complete */
-	public boolean isComplete() {
-		return complete;
-	}
-
-	/** Set the complete flag */
-	protected void setComplete(boolean c) {
-		complete = c;
-	}
-
 	/** Test the if property has some data */
 	public boolean hasData() {
 		return false;
-	}
-
-	/** Delay before checking for response */
-	void delayResponse() {
-		// Only needed if flash is being reprogrammed
-		// see FlashConfigProperty
 	}
 
 	/** Receive part of a response.
@@ -330,24 +315,11 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param is Input stream to decode from.
 	 * @param drop Destination ID (drop address).
 	 * @return Number of bytes in response body.
-	 * @throws IOException. */
-	public int decodeHead(InputStream is, int drop) throws IOException {
+	 * @throws IOException on error. */
+	private int decodeHead(InputStream is, int drop) throws IOException {
 		byte[] rhead = recvResponse(is, 10);
 		byte h_crc = recvResponse(is, 1)[0];
-		return parseHead(rhead, h_crc, drop);
-	}
-
-	/** Parse a message response header.
-	 * @param rhead Received response header.
-	 * @param crc Received header crc.
-	 * @param drop Destination ID (drop address).
-	 * @return Number of bytes in response body.
-	 * @throws ParsingException On any errors parsing response header. */
-	private int parseHead(byte[] rhead, byte crc, int drop)
-		throws ParsingException
-	{
-		assert rhead.length == 10;
-		if(crc != CRC.calculate(rhead))
+		if(h_crc != CRC.calculate(rhead))
 			throw new ChecksumException("HEADER");
 		if(rhead[OFF_SENTINEL] != 'Z')
 			throw new ParsingException("SENTINEL");
@@ -361,7 +333,8 @@ abstract public class SS125Property extends ControllerProperty {
 			throw new ParsingException("SRC SUB ID");
 		if(parse16(rhead, OFF_SOURCE_ID) != drop)
 			throw new ParsingException("SRC ID");
-		if(parse8(rhead, OFF_SEQUENCE) != seq_num + 1)
+		seq_num++;
+		if(parse8(rhead, OFF_SEQUENCE) != seq_num)
 			throw new ParsingException("SEQUENCE");
 		int n_body = parse8(rhead, OFF_BODY_SIZE);
 		if(n_body < 3 || n_body > MAX_BODY_OCTETS)
@@ -374,7 +347,7 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param n_body Number of bytes in response body.
 	 * @param store Flag to indicate property STORE.
 	 * @throws IOException. */
-	public byte[] decodeBody(InputStream is, int n_body, boolean store)
+	private byte[] decodeBody(InputStream is, int n_body, boolean store)
 		throws IOException
 	{
 		byte[] rbody = recvResponse(is, n_body);
@@ -391,7 +364,8 @@ abstract public class SS125Property extends ControllerProperty {
 	private void parseBody(byte[] rbody, byte crc, boolean store)
 		throws ParsingException
 	{
-		assert rbody.length >= 3;
+		if(rbody.length < 3)
+			throw new ParsingException("BODY SIZE");
 		if(crc != CRC.calculate(rbody))
 			throw new ChecksumException("BODY");
 		if(parse8(rbody, OFF_MSG_ID) != msgId())
@@ -407,15 +381,55 @@ abstract public class SS125Property extends ControllerProperty {
 
 	/** Get the message sub-ID */
 	protected int msgSubId() {
-		return SUB_ID_DONT_CARE;
+		return msg_sub_id;
 	}
 
-	/** Format the body of a GET request */
-	abstract byte[] formatBodyGet() throws IOException;
+	/** Encode a QUERY request */
+	public void encodeQuery(OutputStream os, int drop) throws IOException {
+		byte[] body = formatQuery();
+		byte[] header = formatHeader(body, drop);
+		os.write(header);
+		os.write(CRC.calculate(header));
+		os.write(body);
+		os.write(CRC.calculate(body));
+	}
 
-	/** Format the body of a SET request */
-	abstract byte[] formatBodySet() throws IOException;
+	/** Format a QUERY request */
+	protected byte[] formatQuery() throws IOException {
+		throw new ProtocolException("QUERY not supported");
+	}
 
-	/** Parse the payload of a GET response */
-	abstract void parsePayload(byte[] body) throws IOException;
+	/** Decode a QUERY response */
+	public void decodeQuery(InputStream is, int drop) throws IOException {
+		int n_body = decodeHead(is, drop);
+		byte[] body = decodeBody(is, n_body, false);
+		parseQuery(body);
+	}
+
+	/** Parse a QUERY response */
+	protected void parseQuery(byte[] body) throws IOException {
+		throw new ProtocolException("QUERY not supported");
+	}
+
+	/** Encode a STORE request */
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		byte[] body = formatStore();
+		byte[] header = formatHeader(body, drop);
+		os.write(header);
+		os.write(CRC.calculate(header));
+		os.write(body);
+		os.write(CRC.calculate(body));
+	}
+
+	/** Format a STORE request */
+	protected byte[] formatStore() throws IOException {
+		throw new ProtocolException("STORE not supported");
+	}
+
+	/** Decode a STORE response */
+	public void decodeStore(InputStream is, int drop) throws IOException {
+		int n_body = decodeHead(is, drop);
+		byte[] body = decodeBody(is, n_body, true);
+		parseResult(body);
+	}
 }

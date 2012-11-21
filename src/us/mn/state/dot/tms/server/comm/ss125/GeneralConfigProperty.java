@@ -29,8 +29,8 @@ public class GeneralConfigProperty extends SS125Property {
 		return MSG_ID_GENERAL_CONFIG;
 	}
 
-	/** Format the body of a GET request */
-	byte[] formatBodyGet() throws IOException {
+	/** Format a QUERY request */
+	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[3];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
@@ -38,8 +38,8 @@ public class GeneralConfigProperty extends SS125Property {
 		return body;
 	}
 
-	/** Format the body of a SET request */
-	byte[] formatBodySet() throws IOException {
+	/** Format a STORE request */
+	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[86];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
@@ -52,8 +52,8 @@ public class GeneralConfigProperty extends SS125Property {
 		return body;
 	}
 
-	/** Parse the payload of a GET response */
-	void parsePayload(byte[] body) throws IOException {
+	/** Parse a QUERY response */
+	protected void parseQuery(byte[] body) throws IOException {
 		if(body.length != 86)
 			throw new ParsingException("BODY LENGTH");
 		orientation = parseString(body, 3, 2);
@@ -61,7 +61,6 @@ public class GeneralConfigProperty extends SS125Property {
 		description = parseString(body, 37, 32);
 		serialNumber = parseString(body, 69, 16);
 		metric = parseBool(body, 85);
-		setComplete(true);
 	}
 
 	/** Sensor orientation */

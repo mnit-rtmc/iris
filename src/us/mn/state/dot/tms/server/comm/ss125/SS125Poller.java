@@ -14,10 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.ss125;
 
-import java.io.IOException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -34,14 +32,6 @@ public class SS125Poller extends MessagePoller implements SamplePoller {
 	/** Create a new SS125 poller */
 	public SS125Poller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Create a new message for the specified controller */
-	public CommMessage createMessage(ControllerImpl c)
-		throws IOException
-	{
-		return new Message(messenger.getOutputStream(c),
-			messenger.getInputStream("", c), c);
 	}
 
 	/** Check if a drop address is valid */

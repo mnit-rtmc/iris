@@ -33,8 +33,8 @@ public class DateTimeProperty extends SS125Property {
 		return MSG_ID_DATE_TIME;
 	}
 
-	/** Format the body of a GET request */
-	byte[] formatBodyGet() throws IOException {
+	/** Format a QUERY request */
+	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[3];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
@@ -42,8 +42,8 @@ public class DateTimeProperty extends SS125Property {
 		return body;
 	}
 
-	/** Format the body of a SET request */
-	byte[] formatBodySet() throws IOException {
+	/** Format a STORE request */
+	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[11];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
@@ -52,12 +52,11 @@ public class DateTimeProperty extends SS125Property {
 		return body;
 	}
 
-	/** Parse the payload of a GET response */
-	void parsePayload(byte[] body) throws IOException {
+	/** Parse a QUERY response */
+	protected void parseQuery(byte[] body) throws IOException {
 		if(body.length != 11)
 			throw new ParsingException("BODY LENGTH");
 		stamp.setTime(parseDate(body, 3));
-		setComplete(true);
 	}
 
 	/** Date / time stamp */
