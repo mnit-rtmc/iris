@@ -52,8 +52,7 @@ public class OpQueryConfig extends OpCanoga {
 		{
 			mess.add(serial_number);
 			mess.queryProps();
-			CANOGA_LOG.log(controller.getName() + " " +
-				serial_number);
+			CANOGA_LOG.log(controller + ": " + serial_number);
 			return new QueryVersion();
 		}
 	}
@@ -67,7 +66,7 @@ public class OpQueryConfig extends OpCanoga {
 		{
 			mess.add(version);
 			mess.queryProps();
-			CANOGA_LOG.log(controller.getName() + " " + version);
+			CANOGA_LOG.log(controller + ": " + version);
 			return null;
 		}
 	}
