@@ -118,9 +118,6 @@ public class Message implements CommMessage {
 	protected byte[] doResponse(boolean store) throws IOException {
 		prop.delayResponse();
 		int n_body = prop.decodeHead(input, dest_id);
-		byte[] rbody = prop.recvResponse(input, n_body);
-		byte b_crc = prop.recvResponse(input, 1)[0];
-		prop.parseBody(rbody, b_crc, store);
-		return rbody;
+		return prop.decodeBody(input, n_body, store);
 	}
 }

@@ -312,7 +312,7 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param n_bytes Number of bytes to receive.
 	 * @return Response received.
 	 * @throws IOException On any errors receiving response. */
-	public byte[] recvResponse(InputStream input, int n_bytes)
+	private byte[] recvResponse(InputStream input, int n_bytes)
 		throws IOException
 	{
 		byte[] resp = new byte[n_bytes];
@@ -369,12 +369,26 @@ abstract public class SS125Property extends ControllerProperty {
 		return n_body;
 	}
 
+	/** Decode a message response body.
+	 * @param is Input stream to decode from.
+	 * @param n_body Number of bytes in response body.
+	 * @param store Flag to indicate property STORE.
+	 * @throws IOException. */
+	public byte[] decodeBody(InputStream is, int n_body, boolean store)
+		throws IOException
+	{
+		byte[] rbody = recvResponse(is, n_body);
+		byte b_crc = recvResponse(is, 1)[0];
+		parseBody(rbody, b_crc, store);
+		return rbody;
+	}
+
 	/** Parse a message response body.
 	 * @param rbody Received response body.
 	 * @param crc Received body crc.
 	 * @param store Flag to indicate property STORE.
 	 * @throws ParsingException On any errors parsing response body. */
-	public void parseBody(byte[] rbody, byte crc, boolean store)
+	private void parseBody(byte[] rbody, byte crc, boolean store)
 		throws ParsingException
 	{
 		assert rbody.length >= 3;
