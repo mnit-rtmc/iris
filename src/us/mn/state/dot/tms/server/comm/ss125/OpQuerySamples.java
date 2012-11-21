@@ -74,15 +74,17 @@ public class OpQuerySamples extends OpSS125 {
 	}
 
 	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<SS125Property> phaseOne() {
 		return new GetCurrentSamples();
 	}
 
 	/** Phase to get the most recent sample interval */
-	protected class GetCurrentSamples extends Phase {
+	protected class GetCurrentSamples extends Phase<SS125Property> {
 
 		/** Get the most recent sample interval */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
 			mess.add(sample_data);
 			mess.queryProps();
 			stamp = sample_data.getTime();

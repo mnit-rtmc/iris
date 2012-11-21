@@ -55,15 +55,17 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<SS125Property> phaseOne() {
 		return new QueryGenConfig();
 	}
 
 	/** Phase to query the general config  */
-	protected class QueryGenConfig extends Phase {
+	protected class QueryGenConfig extends Phase<SS125Property> {
 
 		/** Query the general config */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
 			mess.add(gen_config);
 			mess.queryProps();
 			log(controller, ": orientation " +
@@ -91,10 +93,12 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Phase to send the general config */
-	protected class SendGenConfig extends Phase {
+	protected class SendGenConfig extends Phase<SS125Property> {
 
 		/** Send the general config */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
 			gen_config.setLocation(ControllerHelper.getLocation(
 				controller));
 			gen_config.setMetric(false);
@@ -109,10 +113,12 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Phase to query the data config  */
-	protected class QueryDataConfig extends Phase {
+	protected class QueryDataConfig extends Phase<SS125Property> {
 
 		/** Query the data config */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
 			mess.add(data_config);
 			mess.queryProps();
 			if(SS125_LOG.isOpen())
@@ -170,10 +176,12 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Phase to send the data config */
-	protected class SendDataConfig extends Phase {
+	protected class SendDataConfig extends Phase<SS125Property> {
 
 		/** Send the data config */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
 			data_config.setInterval(BINNING_INTERVAL);
 			data_config.setMode(
 				DataConfigProperty.StorageMode.CIRCULAR);
@@ -197,10 +205,12 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Phase to store config to flash */
-	protected class StoreConfigFlash extends Phase {
+	protected class StoreConfigFlash extends Phase<SS125Property> {
 
 		/** Store the config to flash */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
 			FlashConfigProperty flash = new FlashConfigProperty();
 			mess.add(flash);
 			log(controller, ":= flash config");
@@ -210,10 +220,12 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Phase to query the date and time */
-	protected class QueryDateTime extends Phase {
+	protected class QueryDateTime extends Phase<SS125Property> {
 
 		/** Query the date and time */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.queryProps();
@@ -233,10 +245,12 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Phase to send the date and time */
-	protected class SendDateTime extends Phase {
+	protected class SendDateTime extends Phase<SS125Property> {
 
 		/** Send the date and time */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.storeProps();
