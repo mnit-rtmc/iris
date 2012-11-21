@@ -44,10 +44,10 @@ public class Crc8 {
 	/** Calculate the CRC-8 of a buffer.
 	 * @param buffer Buffer to be checked.
 	 * @return CRC-8 of the buffer. */
-	public byte calculate(byte[] buffer) {
+	public int calculate(byte[] buffer) {
 		int crc = 0;
 		for(int i = 0; i < buffer.length - 1; i++)
 			crc = table[(crc ^ buffer[i]) & 0xFF];
-		return (byte)crc;
+		return crc & 0xFF;
 	}
 }
