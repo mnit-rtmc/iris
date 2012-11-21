@@ -117,9 +117,7 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors receiving response. */
 	protected byte[] doResponse(boolean store) throws IOException {
 		prop.delayResponse();
-		byte[] rhead = prop.recvResponse(input, 10);
-		byte h_crc = prop.recvResponse(input, 1)[0];
-		int n_body = prop.parseHead(rhead, h_crc, dest_id);
+		int n_body = prop.decodeHead(input, dest_id);
 		byte[] rbody = prop.recvResponse(input, n_body);
 		byte b_crc = prop.recvResponse(input, 1)[0];
 		prop.parseBody(rbody, b_crc, store);

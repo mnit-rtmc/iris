@@ -326,13 +326,24 @@ abstract public class SS125Property extends ControllerProperty {
 		return resp;
 	}
 
+	/** Decode a message header.
+	 * @param is Input stream to decode from.
+	 * @param drop Destination ID (drop address).
+	 * @return Number of bytes in response body.
+	 * @throws IOException. */
+	public int decodeHead(InputStream is, int drop) throws IOException {
+		byte[] rhead = recvResponse(is, 10);
+		byte h_crc = recvResponse(is, 1)[0];
+		return parseHead(rhead, h_crc, drop);
+	}
+
 	/** Parse a message response header.
 	 * @param rhead Received response header.
 	 * @param crc Received header crc.
 	 * @param drop Destination ID (drop address).
 	 * @return Number of bytes in response body.
 	 * @throws ParsingException On any errors parsing response header. */
-	public int parseHead(byte[] rhead, byte crc, int drop)
+	private int parseHead(byte[] rhead, byte crc, int drop)
 		throws ParsingException
 	{
 		assert rhead.length == 10;
