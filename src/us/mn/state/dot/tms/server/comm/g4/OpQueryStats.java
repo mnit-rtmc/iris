@@ -33,24 +33,6 @@ public class OpQueryStats extends OpG4 {
 	/** 30-Second interval completer */
 	protected final Completer completer;
 
-	/** Time stamp of sample data */
-	protected long stamp;
-
-	/** Oldest time stamp to accept from controller */
-	protected final long oldest = 0;
-
-	/** Newest timestamp to accept from controller */
-	protected final long newest = 0;
-
-	/** Volume data for each detector */
-	protected int[] volume = new int[LaneSample.MAX_NUM_LANES];
-
-	/** Scan data for each detector */
-	protected int[] scans = new int[LaneSample.MAX_NUM_LANES];
-
-	/** Speed data for each detector */
-	protected int[] speed = new int[LaneSample.MAX_NUM_LANES];
-
 	/** Create a new "query binned samples" operation */
 	public OpQueryStats(ControllerImpl c, Completer comp) {
 		super(PriorityLevel.DATA_30_SEC, c);
