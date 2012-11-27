@@ -45,8 +45,8 @@ abstract public class G4Property extends ControllerProperty {
 	/** Sensor id */
 	final int sensor_id;
 
-	/** Constructor */
-	G4Property(ControllerImpl c, G4Rec r) {
+	/** Create a new G4 property */
+	protected G4Property(ControllerImpl c, G4Rec r) {
 		controller = c;
 		g4_rec = r;
 		sensor_id = c.getDrop();
