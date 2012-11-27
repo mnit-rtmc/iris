@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +15,9 @@
  */
 package us.mn.state.dot.tms.server.comm.g4;
 
-import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
@@ -31,7 +32,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
 public class G4Message implements CommMessage {
 
 	/** Output stream */
-	protected final DataOutputStream out_stream;
+	protected final OutputStream out_stream;
 
 	/** Input stream */
 	protected final InputStream inp_stream;
@@ -46,8 +47,8 @@ public class G4Message implements CommMessage {
 	Messenger messenger;
 
 	/** Create a new G4 message */
-	public G4Message(DataOutputStream os, InputStream is, 
-		ControllerImpl c, Messenger m) 
+	public G4Message(OutputStream os, InputStream is, ControllerImpl c,
+		Messenger m)
 	{
 		out_stream = os;
 		inp_stream = is;

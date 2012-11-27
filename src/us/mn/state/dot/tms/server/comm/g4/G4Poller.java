@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
-import java.io.DataOutputStream;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
@@ -57,7 +57,7 @@ public class G4Poller extends MessagePoller implements SamplePoller {
 	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		G4Poller.info("G4Poller.createMessage(" + c + ")");
 		return new G4Message(
-			new DataOutputStream(messenger.getOutputStream(c)),
+			messenger.getOutputStream(c),
 			messenger.getInputStream("", c), c, messenger);
 	}
 
@@ -65,9 +65,6 @@ public class G4Poller extends MessagePoller implements SamplePoller {
 	public boolean isAddressValid(int drop) {
 		return drop >= 0 && drop < 65536;
 	}
-
-	/** Perform a controller download */
-	protected void download(ControllerImpl c, PriorityLevel p) {}
 
 	/** Perform a controller reset */
 	public void resetController(ControllerImpl c) {}
@@ -80,16 +77,10 @@ public class G4Poller extends MessagePoller implements SamplePoller {
  	 * @param intvl Query interval in seconds.
  	 * @param comp Job completer.  */
 	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
-		G4Poller.info("G4Poller.querySamples(" + c + "," + intvl + ") called");
-		G4Poller.info("G4Poller.querySamples(): activeDet=" + 
-			c.hasActiveDetector() + ", id=" + c.getDrop());
-		if(!c.hasActiveDetector())
-			return;
-		if(intvl == 30) {
-			G4Poller.info("G4Poller.querySamples(): " +
-				"creating new OpQueryStats");
-			addOperation(new OpQueryStats(c, comp));
-		} else
-			G4Poller.info("interval=" + intvl + " not supported");
+		if(c.hasActiveDetector()) {
+			if(intvl == 30) {
+				addOperation(new OpQueryStats(c, comp));
+			}
+		}
 	}
 }
