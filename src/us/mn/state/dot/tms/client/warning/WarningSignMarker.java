@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.warning;
 
 import java.awt.geom.Ellipse2D;
 import us.mn.state.dot.map.AbstractMarker;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Marker used to paint warning signs.
@@ -25,7 +26,7 @@ import us.mn.state.dot.map.AbstractMarker;
 public class WarningSignMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
-	static protected final int MARKER_SIZE_PIX = 20;
+	static private final int MARKER_SIZE_PIX = UI.scaled(20);
 
 	/** Create a new warning sign marker */
 	public WarningSignMarker() {
