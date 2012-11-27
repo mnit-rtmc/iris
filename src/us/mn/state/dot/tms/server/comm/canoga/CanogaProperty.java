@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.canoga;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,9 +42,6 @@ abstract public class CanogaProperty extends ControllerProperty {
 
 	/** Offset for message payload field */
 	static private final int OFF_PAYLOAD = 5;
-
-	/** Maximum number of tries when reading a message response */
-	static private final int MAX_TRIES = 5;
 
 	/** Get the ASCII hex digit for the given nybble */
 	static private byte hex_digit(byte b) {
@@ -155,20 +151,6 @@ abstract public class CanogaProperty extends ControllerProperty {
 	/** Get the expected number of octets in response */
 	abstract protected int expectedResponseOctets();
 
-	/** Get a response from an input stream */
-	private byte[] getResponse(InputStream is) throws IOException {
-		byte[] buf = new byte[expectedResponseOctets()];
-		for(int i = 0, tries = 0; i < buf.length; tries++) {
-			if(tries > MAX_TRIES)
-				throw new ParsingException("TOO MANY TRIES");
-			int b = is.read(buf, i, buf.length - i);
-			if(b < 0)
-				throw new EOFException("END OF STREAM");
-			i += b;
-		}
-		return buf;
-	}
-
 	/** Validate a response message */
 	protected void validateResponse(byte[] req, byte[] res)
 		throws ParsingException
@@ -192,7 +174,7 @@ abstract public class CanogaProperty extends ControllerProperty {
 	private byte[] doResponse(InputStream is, byte[] req)
 		throws IOException
 	{
-		byte[] res = getResponse(is);
+		byte[] res = recvResponse(is, expectedResponseOctets());
 		validateResponse(req, res);
 		return res;
 	}

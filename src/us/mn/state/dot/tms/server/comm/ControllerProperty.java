@@ -27,6 +27,9 @@ import java.io.OutputStream;
  */
 abstract public class ControllerProperty {
 
+	/** Maximum number of tries when reading a response */
+	static private final int MAX_TRIES = 5;
+
 	/** Get the path for a property */
 	public String getPath() {
 		return "";
@@ -61,12 +64,16 @@ abstract public class ControllerProperty {
 		throws IOException
 	{
 		byte[] buf = new byte[n_bytes];
+		int n_tries = 0;
 		int n_rcv = 0;
 		while(n_rcv < n_bytes) {
-			int r = is.read(buf, n_rcv, n_bytes - n_rcv);
-			if(r <= 0)
+			if(n_tries > MAX_TRIES)
+				throw new ParsingException("TOO MANY TRIES");
+			int b = is.read(buf, n_rcv, n_bytes - n_rcv);
+			if(b <= 0)
 				throw new EOFException("END OF STREAM");
-			n_rcv += r;
+			n_rcv += b;
+			n_tries++;
 		}
 		return buf;
 	}
