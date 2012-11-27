@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * This is an operation to query G4 statistics.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class OpQueryStats extends OpG4 {
 
@@ -33,11 +35,15 @@ public class OpQueryStats extends OpG4 {
 	/** 30-Second interval completer */
 	protected final Completer completer;
 
+	/** Binning interval (seconds) */
+	private final int intvl;
+
 	/** Create a new "query binned samples" operation */
-	public OpQueryStats(ControllerImpl c, Completer comp) {
+	public OpQueryStats(ControllerImpl c, Completer comp, int intvl) {
 		super(PriorityLevel.DATA_30_SEC, c);
 		G4Poller.info("OpQueryStats("+c+","+comp+") called.");
 		completer = comp;
+		this.intvl = intvl;
 	}
 
 	/** Begin the operation */
@@ -58,7 +64,7 @@ public class OpQueryStats extends OpG4 {
 		/** Get the most recent binned samples */
 		protected Phase poll(CommMessage mess) throws IOException {
 			G4Poller.info("OpQueryStats.poll() called");
-			StatProperty bs = 
+			StatProperty bs =
 				new StatProperty(controller, g4_rec);
 			mess.add(bs);
 			mess.queryProps();

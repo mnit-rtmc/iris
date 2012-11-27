@@ -77,10 +77,7 @@ public class G4Poller extends MessagePoller implements SamplePoller {
  	 * @param intvl Query interval in seconds.
  	 * @param comp Job completer.  */
 	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
-		if(c.hasActiveDetector()) {
-			if(intvl == 30) {
-				addOperation(new OpQueryStats(c, comp));
-			}
-		}
+		if(c.hasActiveDetector())
+			addOperation(new OpQueryStats(c, comp, intvl));
 	}
 }
