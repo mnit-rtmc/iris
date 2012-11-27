@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,5 +50,24 @@ abstract public class ControllerProperty {
 	/** Decode a STORE response */
 	public void decodeStore(InputStream is, int drop) throws IOException {
 		throw new ProtocolException("STORE not supported");
+	}
+
+	/** Receive a response.
+	 * @param is Input stream to read.
+	 * @param n_bytes Number of bytes to receive.
+	 * @return Array of bytes received.
+	 * @throws IOException On any errors receiving response. */
+	protected final byte[] recvResponse(InputStream is, int n_bytes)
+		throws IOException
+	{
+		byte[] buf = new byte[n_bytes];
+		int n_rcv = 0;
+		while(n_rcv < n_bytes) {
+			int r = is.read(buf, n_rcv, n_bytes - n_rcv);
+			if(r <= 0)
+				throw new EOFException("END OF STREAM");
+			n_rcv += r;
+		}
+		return buf;
 	}
 }

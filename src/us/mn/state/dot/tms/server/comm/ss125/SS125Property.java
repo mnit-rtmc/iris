@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.ss125;
 
-import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -292,25 +291,6 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Test the if property has some data */
 	public boolean hasData() {
 		return false;
-	}
-
-	/** Receive part of a response.
-	 * @param input Input stream to read.
-	 * @param n_bytes Number of bytes to receive.
-	 * @return Response received.
-	 * @throws IOException On any errors receiving response. */
-	private byte[] recvResponse(InputStream input, int n_bytes)
-		throws IOException
-	{
-		byte[] resp = new byte[n_bytes];
-		int n_rcv = 0;
-		while(n_rcv < n_bytes) {
-			int r = input.read(resp, n_rcv, n_bytes - n_rcv);
-			if(r <= 0)
-				throw new EOFException("END OF STREAM");
-			n_rcv += r;
-		}
-		return resp;
 	}
 
 	/** Decode a message header.
