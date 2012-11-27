@@ -52,11 +52,11 @@ abstract public class G4Property extends ControllerProperty {
 		sensor_id = c.getDrop();
 	}
 
-	/** Perform a get request, which consists of sending a request to 
+	/** Perform a get request, which consists of sending a request to
 	 * the sensor and reading the reply. Called by G4Message.
 	 * @throws IOException */
-	protected void doGetRequest(OutputStream os, InputStream is) 
-		throws IOException 
+	protected void doGetRequest(OutputStream os, InputStream is)
+		throws IOException
 	{
 		G4Poller.info("G4Property.sendRequest(): called");
 		is.skip(is.available());
@@ -78,13 +78,13 @@ abstract public class G4Property extends ControllerProperty {
 	private void getResponse(InputStream is) throws IOException {
 		G4Poller.info("G4Property.getResponse() called");
 		G4Blob b = read(is);
-		G4Poller.info("G4Property.getResponse() read done, #bytes=" + 
+		G4Poller.info("G4Property.getResponse() read done, #bytes=" +
 			b.size());
 		g4_rec.parse(b);
 	}
 
 	/** Read bytes from input stream, blocking until a timeout, a complete
-	 * message is read, or an exception is thrown. The first 2 bytes read 
+	 * message is read, or an exception is thrown. The first 2 bytes read
 	 * must match the expected leader bytes or an exception is thrown.
 	 * @param is Input stream to read from.
 	 * @return Bytes read from the field device.
