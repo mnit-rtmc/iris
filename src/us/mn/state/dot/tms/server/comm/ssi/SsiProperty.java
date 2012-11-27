@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.ssi;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
@@ -31,8 +30,8 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  */
 public class SsiProperty extends ControllerProperty {
 
-	/** Size of buffer for line reader */
-	static private final int BUFFER_SZ = 1024;
+	/** Maximum number of chars in response for line reader */
+	static private final int MAX_RESP = 1024;
 
 	/** Maximum number of records in RWIS file */
 	static private final int MAX_RECORDS = 500;
@@ -51,8 +50,7 @@ public class SsiProperty extends ControllerProperty {
 			SsiPoller.log("no input stream to read");
 			throw new EOFException();
 		}
-		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
-		LineReader lr = new LineReader(isr, BUFFER_SZ);
+		LineReader lr = new LineReader(is, MAX_RESP);
 		RwisHeader header = readHeader(lr);
 		String line = lr.readLine();
 		for(int i = 0; line != null && i < MAX_RECORDS; i++) {

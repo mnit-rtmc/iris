@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.EOFException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.utils.LineReader;
@@ -63,8 +62,7 @@ public class ResetProperty extends Org815Property {
 
 	/** Decode a STORE response */
 	public void decodeStore(InputStream is, int drop) throws IOException {
-		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
-		LineReader lr = new LineReader(isr, MAX_RESP);
+		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		if(line != null)
 			parseStore(line);

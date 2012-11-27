@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.utils;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 
@@ -26,6 +28,9 @@ import java.io.Reader;
  * @author Douglas Lau
  */
 public class LineReader {
+
+	/** Charset name for ASCII */
+	static private final String ASCII = "US-ASCII";
 
 	/** Test if a character is a line seperator */
 	static private boolean isLineSeperator(char c) {
@@ -44,10 +49,19 @@ public class LineReader {
 	/** Seperator char for most recent line */
 	private char sep = 0;
 
-	/** Create a new line reader */
-	public LineReader(Reader r, int max_line) {
+	/** Create a new line reader.
+	 * @param r Reader to read.
+	 * @param max_chars Maximum number of characters on a line. */
+	public LineReader(Reader r, int max_chars) {
 		reader = r;
-		buffer = new char[max_line];
+		buffer = new char[max_chars];
+	}
+
+	/** Create a new line reader.
+	 * @param is Input stream to read.
+	 * @param max_chars Maximum number of characters on a line. */
+	public LineReader(InputStream is, int max_chars) throws IOException {
+		this(new InputStreamReader(is, ASCII), max_chars);
 	}
 
 	/** Read a line of text */

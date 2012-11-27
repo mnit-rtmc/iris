@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.org815;
 
 import java.io.EOFException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.utils.LineReader;
@@ -44,8 +43,7 @@ abstract public class Org815Property extends ControllerProperty {
 
 	/** Decode a QUERY response */
 	public void decodeQuery(InputStream is, int drop) throws IOException {
-		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
-		LineReader lr = new LineReader(isr, MAX_RESP);
+		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		if(line != null)
 			parseQuery(line);

@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import us.mn.state.dot.tms.utils.LineReader;
@@ -34,8 +33,8 @@ public class OutletProperty extends DinRelayProperty {
 		void complete(boolean success);
 	}
 
-	/** Size of buffer for line reader */
-	static private final int BUFFER_SZ = 1024;
+	/** Maximum number of chars in response for line reader */
+	static private final int MAX_RESP = 1024;
 
 	/** Maximum number of lines to read */
 	static private final int MAX_LINES = 500;
@@ -66,8 +65,7 @@ public class OutletProperty extends DinRelayProperty {
 
 	/** Decode a QUERY response */
 	public void decodeQuery(InputStream is, int drop) throws IOException {
-		InputStreamReader isr = new InputStreamReader(is, "US-ASCII");
-		LineReader lr = new LineReader(isr, BUFFER_SZ);
+		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		for(int i = 0; line != null && i < MAX_LINES; i++) {
 			DinRelayPoller.log("parsing " + line);

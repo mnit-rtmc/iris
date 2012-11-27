@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
@@ -92,8 +91,7 @@ abstract public class SS105Property extends ControllerProperty {
 
 	/** Get response from the sensor */
 	private String getResponse(InputStream is) throws IOException {
-		InputStreamReader isr = new InputStreamReader(is, ASCII);
-		LineReader lr = new LineReader(isr, MAX_RESP);
+		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		if(line != null)
 			return line.trim();
