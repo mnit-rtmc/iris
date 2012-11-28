@@ -59,15 +59,17 @@ public class OpQueryStats extends OpG4 {
 	}
 
 	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<G4Property> phaseOne() {
 		return new GetCurrentSamples();
 	}
 
 	/** Phase to get the most recent binned samples */
-	protected class GetCurrentSamples extends Phase {
+	protected class GetCurrentSamples extends Phase<G4Property> {
 
 		/** Get the most recent binned samples */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<G4Property> poll(CommMessage<G4Property> mess)
+			throws IOException
+		{
 			mess.add(stat);
 			mess.queryProps();
 			return null;

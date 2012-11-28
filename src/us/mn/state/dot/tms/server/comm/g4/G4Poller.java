@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class G4Poller extends MessagePoller implements SamplePoller {
+public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 
 	/** Debug log */
 	static private final IDebugLog G4_LOG = new IDebugLog("g4");
