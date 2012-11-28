@@ -41,6 +41,12 @@ public class StatProperty extends G4Property {
 	/** Maximum speed for one statistical sample (kph or mph) */
 	static private final int MAX_SPEED = 200;
 
+	/** Maximum gap for one statistical sample (tenths of second) */
+	static private final int MAX_GAP = 36000;
+
+	/** Maximum headway for one statistical sample (tenths of second) */
+	static private final int MAX_HEADWAY = MAX_GAP;
+
 	/** Byte offsets from beginning of stat header data */
 	static private final int OFF_MSG_NUM = 0;
 	static private final int OFF_PAGE_NUM = 1;
@@ -96,7 +102,7 @@ public class StatProperty extends G4Property {
 	/** Gap data (tenths of second) */
 	private final int[] gap = new int[MAX_LANES];
 
-	/** Get the gap data for all lanes */
+	/** Get the gap data for all lanes (tenths of second) */
 	public int[] getGap() {
 		return gap;
 	}
@@ -236,6 +242,9 @@ public class StatProperty extends G4Property {
 		case SPEED:
 			parseSpeed(data);
 			break;
+		case GAP:
+			parseGap(data);
+			break;
 		case C1:
 			parseC(VehicleClass.REGULAR, data);
 			break;
@@ -250,6 +259,12 @@ public class StatProperty extends G4Property {
 			break;
 		case C5:
 			parseC(VehicleClass.EXTRA_LARGE, data);
+			break;
+		case HEADWAY:
+			parseHeadway(data);
+			break;
+		case SPEED_85:
+			parseSpeed85(data);
 			break;
 		case STAT_FOOTER:
 			parseStatFooter(data);
@@ -310,6 +325,17 @@ public class StatProperty extends G4Property {
 		}
 	}
 
+	/** Parse statistical gap data */
+	private void parseGap(byte[] data) throws ParsingException {
+		if(data.length != n_zones * 2)
+			throw new ParsingException("INVALID GAP LENGTH");
+		for(int i = 0; i < n_zones; i++) {
+			int val = parse16(data, i * 2);
+			if(val >= 0 && val <= MAX_GAP)
+				gap[i] = val;
+		}
+	}
+
 	/** Get a speed sample in mph units */
 	private int asMph(int val) {
 		if(stat_flags < 0)
@@ -331,6 +357,28 @@ public class StatProperty extends G4Property {
 			int val = parse16(data, i * 2);
 			if(val >= 0 && val <= MAX_VOLUME)
 				vol_class[i][j] = val;
+		}
+	}
+
+	/** Parse statistical headway data */
+	private void parseHeadway(byte[] data) throws ParsingException {
+		if(data.length != n_zones * 2)
+			throw new ParsingException("INVALID HEADWAY LENGTH");
+		for(int i = 0; i < n_zones; i++) {
+			int val = parse16(data, i * 2);
+			if(val >= 0 && val <= MAX_HEADWAY)
+				headway[i] = val;
+		}
+	}
+
+	/** Parse statistical speed 85 data */
+	private void parseSpeed85(byte[] data) throws ParsingException {
+		if(data.length != n_zones * 2)
+			throw new ParsingException("INVALID SPEED_85 LENGTH");
+		for(int i = 0; i < n_zones; i++) {
+			int val = parse16(data, i * 2);
+			if(val >= 0 && val <= MAX_SPEED)
+				speed85[i] = asMph(val);
 		}
 	}
 
