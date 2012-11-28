@@ -57,7 +57,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			TimeIntervalProperty ti = new TimeIntervalProperty();
 			mess.add(ti);
 			mess.queryProps();
-			SS105_LOG.log(controller.getName() + ": " + ti);
+			log(": " + ti);
 			if(ti.value == BINNING_INTERVAL)
 				return new GetClassification();
 			else
@@ -76,7 +76,7 @@ public class OpSendSensorSettings extends OpSS105 {
 				BINNING_INTERVAL);
 			mess.add(ti);
 			mess.storeProps();
-			SS105_LOG.log(controller.getName() + ":= " + ti);
+			log(":= " + ti);
 			return new GetClassification();
 		}
 	}
@@ -91,7 +91,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			ClassificationProperty c = new ClassificationProperty();
 			mess.add(c);
 			mess.queryProps();
-			SS105_LOG.log(controller.getName() + ": " + c);
+			log(": " + c);
 			if(c.isDefault())
 				return new QueryVersion();
 			else
@@ -108,7 +108,7 @@ public class OpSendSensorSettings extends OpSS105 {
 		{
 			ClassificationProperty c = new ClassificationProperty();
 			mess.add(c);
-			SS105_LOG.log(controller.getName() + ":= " + c);
+			log(":= " + c);
 			mess.storeProps();
 			return new QueryVersion();
 		}
@@ -125,7 +125,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			mess.add(vr);
 			try {
 				mess.queryProps();
-				SS105_LOG.log(controller.getName() + "= " + vr);
+				log(": " + vr);
 				controller.setVersion(vr.getVersion());
 			}
 			catch(SocketTimeoutException e) {
@@ -144,7 +144,7 @@ public class OpSendSensorSettings extends OpSS105 {
 		{
 			TimeProperty tr = new TimeProperty();
 			mess.add(tr);
-			SS105_LOG.log(controller.getName() + ":= " + tr);
+			log(":= " + tr);
 			mess.storeProps();
 			return null;
 		}

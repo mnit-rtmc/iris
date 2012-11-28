@@ -27,7 +27,13 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpSS105 extends OpController<SS105Property> {
 
 	/** SS 105 debug log */
-	static protected final IDebugLog SS105_LOG = new IDebugLog("ss105");
+	static private final IDebugLog SS105_LOG = new IDebugLog("ss105");
+
+	/** Log a debug message */
+	protected void log(String msg) {
+		if(SS105_LOG.isOpen())
+			SS105_LOG.log(controller.getName() + msg);
+	}
 
 	/** Create a new SS105 operation */
 	protected OpSS105(PriorityLevel p, ControllerImpl c) {
