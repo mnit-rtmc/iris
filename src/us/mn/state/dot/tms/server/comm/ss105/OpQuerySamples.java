@@ -31,8 +31,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySamples extends OpSS105 {
 
-	/** Sample period (seconds) */
-	static private final int SAMPLE_PERIOD_SEC = 30;
+	/** Starting pin for controller I/O */
+	static private final int START_PIN = 1;
+
+	/** Binning period (seconds) */
+	private final int period;
 
 	/** 30-Second interval completer */
 	protected final Completer completer;
@@ -56,8 +59,9 @@ public class OpQuerySamples extends OpSS105 {
 	protected int[] speed = new int[8];
 
 	/** Create a new "query binned samples" operation */
-	public OpQuerySamples(ControllerImpl c, Completer comp) {
+	public OpQuerySamples(ControllerImpl c, int p, Completer comp) {
 		super(PriorityLevel.DATA_30_SEC, c);
+		period = p;
 		completer = comp;
 		stamp = comp.getStamp();
 		Calendar cal = Calendar.getInstance();
@@ -112,10 +116,10 @@ public class OpQuerySamples extends OpSS105 {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		controller.storeVolume(stamp, SAMPLE_PERIOD_SEC, 1, volume);
-		controller.storeOccupancy(stamp, SAMPLE_PERIOD_SEC, 1, scans,
+		controller.storeVolume(stamp, period, START_PIN, volume);
+		controller.storeOccupancy(stamp, period, START_PIN, scans,
 			BinnedSampleProperty.MAX_PERCENT);
-		controller.storeSpeed(stamp, SAMPLE_PERIOD_SEC, 1, speed);
+		controller.storeSpeed(stamp, period, START_PIN, speed);
 		completer.completeTask(getKey());
 		super.cleanup();
 	}

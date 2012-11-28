@@ -157,9 +157,12 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 			addOperation(new OpSendSampleSettings(c));
 	}
 
-	/** Query sample data */
-	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
-		switch(intvl) {
+	/** Query sample data.
+ 	 * @param c Controller to poll.
+ 	 * @param p Sample period in seconds.
+ 	 * @param comp Job completer.  */
+	public void querySamples(ControllerImpl c, int p, Completer comp) {
+		switch(p) {
 		case 30:
 			if(c.hasActiveDetector())
 				addOperation(new OpQuerySamples30Sec(c, comp));

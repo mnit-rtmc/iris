@@ -62,11 +62,14 @@ public class SS125Poller extends MessagePoller<SS125Property>
 			addOperation(new OpSendSensorSettings(c, false));
 	}
 
-	/** Query sample data */
-	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
-		if(intvl == 30) {
+	/** Query sample data.
+ 	 * @param c Controller to poll.
+ 	 * @param p Sample period in seconds.
+ 	 * @param comp Job completer.  */
+	public void querySamples(ControllerImpl c, int p, Completer comp) {
+		if(p == 30) {
 			if(c.hasActiveDetector())
-				addOperation(new OpQuerySamples(c, comp));
+				addOperation(new OpQuerySamples(c, p, comp));
 		}
 	}
 }

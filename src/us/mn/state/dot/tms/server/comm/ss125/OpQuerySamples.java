@@ -30,13 +30,16 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySamples extends OpSS125 {
 
-	/** Sample period (seconds) */
-	static private final int SAMPLE_PERIOD_SEC = 30;
+	/** Starting pin for controller I/O */
+	static private final int START_PIN = 1;
 
 	/** Maximum scan count for occupancy calculation.  Scans are in 16-bit
 	 * fixed-point format, with 8-bit integer value (0-100) and 8-bit
 	 * fractional part. */
 	static private final int MAX_SCANS = 100 << 8;
+
+	/** Binning period (seconds) */
+	private final int period;
 
 	/** 30-Second interval completer */
 	protected final Completer completer;
@@ -55,8 +58,9 @@ public class OpQuerySamples extends OpSS125 {
 		new IntervalDataProperty();
 
 	/** Create a new "query binned samples" operation */
-	public OpQuerySamples(ControllerImpl c, Completer comp) {
+	public OpQuerySamples(ControllerImpl c, int p, Completer comp) {
 		super(PriorityLevel.DATA_30_SEC, c);
+		period = p;
 		completer = comp;
 		stamp = comp.getStamp();
 		Calendar cal = Calendar.getInstance();
@@ -102,11 +106,11 @@ public class OpQuerySamples extends OpSS125 {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		controller.storeVolume(stamp, SAMPLE_PERIOD_SEC, 1,
+		controller.storeVolume(stamp, period, START_PIN,
 			sample_data.getVolume());
-		controller.storeOccupancy(stamp, SAMPLE_PERIOD_SEC, 1,
+		controller.storeOccupancy(stamp, period, START_PIN,
 			sample_data.getScans(), MAX_SCANS);
-		controller.storeSpeed(stamp, SAMPLE_PERIOD_SEC, 1,
+		controller.storeSpeed(stamp, period, START_PIN,
 			sample_data.getSpeed());
 		completer.completeTask(getKey());
 		super.cleanup();

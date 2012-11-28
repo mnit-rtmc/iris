@@ -105,11 +105,14 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 			addOperation(new OpQueryConfig(c));
 	}
 
-	/** Query sample data */
-	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
+	/** Query sample data.
+ 	 * @param c Controller to poll.
+ 	 * @param p Sample period in seconds.
+ 	 * @param comp Job completer.  */
+	public void querySamples(ControllerImpl c, int p, Completer comp) {
 		if(c.hasActiveDetector()) {
 			OpQueryEventSamples qes = getEventCollector(c);
-			if(intvl == 30)
+			if(p == 30)
 				qes.binSamples();
 		}
 	}
