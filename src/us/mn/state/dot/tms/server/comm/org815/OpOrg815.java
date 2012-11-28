@@ -27,7 +27,13 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpOrg815 extends OpDevice<Org815Property> {
 
 	/** ORG-815 debug log */
-	static protected final IDebugLog ORG815_LOG = new IDebugLog("org815");
+	static private final IDebugLog ORG815_LOG = new IDebugLog("org815");
+
+	/** Log a debug message */
+	protected void log(String msg) {
+		if(ORG815_LOG.isOpen())
+			ORG815_LOG.log(device.getName() + msg);
+	}
 
 	/** Weather sensor device */
 	protected final WeatherSensorImpl sensor;
