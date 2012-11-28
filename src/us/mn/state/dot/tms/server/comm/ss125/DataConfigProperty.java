@@ -46,9 +46,9 @@ public class DataConfigProperty extends SS125Property {
 		formatBool(body, OFF_READ_WRITE, true);
 		format16(body, 3, interval);
 		format8(body, 5, mode.ordinal());
-		event_push.format(body, 6);
-		interval_push.format(body, 12);
-		presence_push.format(body, 18);
+		formatPushConfig(body, 6, event_push);
+		formatPushConfig(body, 12, interval_push);
+		formatPushConfig(body, 18, presence_push);
 		format16Fixed(body, 24, default_sep);
 		format16Fixed(body, 26, default_size);
 		return body;
@@ -60,9 +60,9 @@ public class DataConfigProperty extends SS125Property {
 			throw new ParsingException("BODY LENGTH");
 		interval = parse16(rbody, 3);
 		mode = StorageMode.fromOrdinal(rbody[5]);
-		event_push = PushConfig.parse(rbody, 6);
-		interval_push = PushConfig.parse(rbody, 12);
-		presence_push = PushConfig.parse(rbody, 18);
+		event_push = parsePushConfig(rbody, 6);
+		interval_push = parsePushConfig(rbody, 12);
+		presence_push = parsePushConfig(rbody, 18);
 		default_sep = parse16Fixed(rbody, 24);
 		default_size = parse16Fixed(rbody, 26);
 	}
@@ -105,34 +105,30 @@ public class DataConfigProperty extends SS125Property {
 		mode = m;
 	}
 
-	/** Data push configuration */
-	static public class PushConfig {
-		public PushPort port = PushPort.RS485;
-		public PushProtocol protocol = PushProtocol.Z1;
-		public boolean enable;
-		public int dest_sub_id;
-		public int dest_id;
+	/** Parse one push configuration */
+	static private PushConfig parsePushConfig(byte[] rbody, int pos)
+		throws IOException
+	{
+		PushConfig.Port port = PushConfig.Port.fromOrdinal(
+			parse8(rbody, pos));
+		PushConfig.Protocol protocol = PushConfig.Protocol.fromOrdinal(
+			parse8(rbody, pos + 1));
+		boolean enable = parseBool(rbody, pos + 2);
+		int dest_sub_id = parse8(rbody, pos + 3);
+		int dest_id = parse16(rbody, pos + 4);
+		return new PushConfig(port, protocol, enable, dest_sub_id,
+			dest_id);
+	}
 
-		static protected PushConfig parse(byte[] rbody, int pos)
-			throws IOException
-		{
-			PushConfig pc = new PushConfig();
-			pc.port = PushPort.fromOrdinal(parse8(rbody, pos));
-			pc.protocol = PushProtocol.fromOrdinal(parse8(rbody,
-				pos + 1));
-			pc.enable = parseBool(rbody, pos + 2);
-			pc.dest_sub_id = parse8(rbody, pos + 3);
-			pc.dest_id = parse16(rbody, pos + 4);
-			return pc;
-		}
-
-		void format(byte[] body, int pos) {
-			format8(body, pos, port.ordinal());
-			format8(body, pos + 1, protocol.ordinal());
-			formatBool(body, pos + 2, enable);
-			format8(body, pos + 3, dest_sub_id);
-			format16(body, pos + 4, dest_id);
-		}
+	/** Format one push configuration */
+	static private void formatPushConfig(byte[] body, int pos,
+		PushConfig pc)
+	{
+		format8(body, pos, pc.getPort().ordinal());
+		format8(body, pos + 1, pc.getProtocol().ordinal());
+		formatBool(body, pos + 2, pc.getEnable());
+		format8(body, pos + 3, pc.getDestSubID());
+		format16(body, pos + 4, pc.getDestID());
 	}
 
 	/** Config for event data push */
@@ -157,30 +153,6 @@ public class DataConfigProperty extends SS125Property {
 	/** Get the presence push config */
 	public PushConfig getPresencePush() {
 		return presence_push;
-	}
-
-	/** Port to send push data */
-	static public enum PushPort {
-		RS485, RS232, EXP1, EXP2;
-		static public PushPort fromOrdinal(int o) {
-			for(PushPort p: PushPort.values()) {
-				if(p.ordinal() == o)
-					return p;
-			}
-			return RS485;
-		}
-	}
-
-	/** Protocol to send push data */
-	static public enum PushProtocol {
-		Z1, SS105, SS105_MULTI, RTMS;
-		static public PushProtocol fromOrdinal(int o) {
-			for(PushProtocol p: PushProtocol.values()) {
-				if(p.ordinal() == o)
-					return p;
-			}
-			return Z1;
-		}
 	}
 
 	/** Default loop separation */

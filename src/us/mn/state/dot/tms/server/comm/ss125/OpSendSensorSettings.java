@@ -144,18 +144,16 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Log push config for one data type */
-	protected void logPushConfig(DataConfigProperty.PushConfig pc,
-		String dtype)
-	{
-		log(controller, ": " + dtype + " enable " + pc.enable);
-		if(pc.enable) {
-			log(controller, ": " + dtype + " port " + pc.port);
-			log(controller, ": " + dtype +
-				" protocol " + pc.protocol);
-			log(controller, ": " + dtype +
-				" dest_sub_id " + pc.dest_sub_id);
-			log(controller, ": " + dtype +
-				" dest_id " + pc.dest_id);
+	protected void logPushConfig(PushConfig pc, String dtype) {
+		log(controller, ": " + dtype + " enable " + pc.getEnable());
+		if(pc.getEnable()) {
+			log(controller, ": " + dtype + " port " + pc.getPort());
+			log(controller, ": " + dtype + " protocol " +
+				pc.getProtocol());
+			log(controller, ": " + dtype + " dest_sub_id " +
+				pc.getDestSubID());
+			log(controller, ": " + dtype + " dest_id " +
+				pc.getDestID());
 		}
 	}
 
@@ -166,11 +164,11 @@ public class OpSendSensorSettings extends OpSS125 {
 		if(data_config.getMode() !=
 		   DataConfigProperty.StorageMode.CIRCULAR)
 			return true;
-		if(data_config.getEventPush().enable)
+		if(data_config.getEventPush().getEnable())
 			return true;
-		if(data_config.getIntervalPush().enable)
+		if(data_config.getIntervalPush().getEnable())
 			return true;
-		if(data_config.getPresencePush().enable)
+		if(data_config.getPresencePush().getEnable())
 			return true;
 		return false;
 	}
@@ -185,9 +183,9 @@ public class OpSendSensorSettings extends OpSS125 {
 			data_config.setInterval(BINNING_INTERVAL);
 			data_config.setMode(
 				DataConfigProperty.StorageMode.CIRCULAR);
-			data_config.getEventPush().enable = false;
-			data_config.getIntervalPush().enable = false;
-			data_config.getPresencePush().enable = false;
+			data_config.getEventPush().setEnable(false);
+			data_config.getIntervalPush().setEnable(false);
+			data_config.getPresencePush().setEnable(false);
 			mess.add(data_config);
 			log(controller, ":= data config");
 			mess.storeProps();
