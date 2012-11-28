@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,37 +24,42 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 /**
  * This is an operation to query G4 statistics.
  *
- * @author Michael Darter
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class OpQueryStats extends OpG4 {
 
-	/** Bytes read from field controller */
-	protected final G4Rec g4_rec = new G4Rec();
+	/** Starting pin for controller I/O */
+	static private final int START_PIN = 1;
+
+	/** Statistical property */
+	private final StatProperty stat;
 
 	/** 30-Second interval completer */
-	protected final Completer completer;
+	private final Completer completer;
 
-	/** Binning interval (seconds) */
-	private final int intvl;
+	/** Time stamp of sample data */
+	private final long stamp;
+
+	/** Binning period (seconds) */
+	private final int period;
 
 	/** Create a new "query binned samples" operation */
-	public OpQueryStats(ControllerImpl c, Completer comp, int intvl) {
+	public OpQueryStats(ControllerImpl c, int p, Completer comp) {
 		super(PriorityLevel.DATA_30_SEC, c);
-		G4Poller.info("OpQueryStats("+c+","+comp+") called.");
+		period = p;
 		completer = comp;
-		this.intvl = intvl;
+		stamp = comp.getStamp();
+		stat = new StatProperty(p);
 	}
 
 	/** Begin the operation */
 	public boolean begin() {
-		G4Poller.info("OpQueryStats.begin() called");
 		return completer.beginTask(getKey()) && super.begin();
 	}
 
 	/** Create the first phase of the operation */
 	protected Phase phaseOne() {
-		G4Poller.info("OpQueryStats.phaseOne() called.");
 		return new GetCurrentSamples();
 	}
 
@@ -63,21 +68,20 @@ public class OpQueryStats extends OpG4 {
 
 		/** Get the most recent binned samples */
 		protected Phase poll(CommMessage mess) throws IOException {
-			G4Poller.info("OpQueryStats.poll() called");
-			StatProperty bs =
-				new StatProperty(controller, g4_rec);
-			mess.add(bs);
+			mess.add(stat);
 			mess.queryProps();
-			G4Poller.info("OpQueryStats.GetCurrentSamples." +
-				"poll(): success=" + isSuccess());
 			return null;
 		}
 	}
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		G4Poller.info("OpQueryStats.GetCurrentSamples.cleanup()");
-		g4_rec.store(controller);
+		controller.storeVolume(stamp, period, START_PIN,
+			stat.getVolume());
+		controller.storeOccupancy(stamp, period, START_PIN,
+			stat.getScans(), StatProperty.MAX_SCANS);
+		controller.storeSpeed(stamp, period, START_PIN,
+			stat.getSpeed());
 		completer.completeTask(getKey());
 		super.cleanup();
 	}

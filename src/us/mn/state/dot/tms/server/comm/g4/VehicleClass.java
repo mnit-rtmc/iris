@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009 - 2010  AHMCT, University of California
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,24 +12,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.utils;
-
-import java.io.File;
+package us.mn.state.dot.tms.server.comm.g4;
 
 /**
- * File convienence methods.
- * @author Michael Darter
+ * Vehicle class (size).
+ *
+ * @author Douglas Lau
  */
-public class SFile {
+public enum VehicleClass {
+	SMALL,		/* C0 */
+	REGULAR,	/* C1 */
+	MEDIUM,		/* C2 */
+	LARGE,		/* C3 */
+	TRUCK,		/* C4 */
+	EXTRA_LARGE;	/* C5 */
 
-	/** Return an absolute file path.
-	 * @param fn File name. Can be null. If "", then "" is returned.
-	 * @throws SecurityException */
-	public static String getAbsolutePath(String fn) {
-		// on Windows, getAbsolutePath("") returns "C:\"
-		if(fn == null || fn.isEmpty())
-			return "";
-		File fh = new File(fn);
-		return fh.getAbsolutePath();
-	}
+	static public final int size = values().length;
 }

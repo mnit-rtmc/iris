@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,94 +15,92 @@
  */
 package us.mn.state.dot.tms.server.comm.g4;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * A property which can be sent or received from a controller.
  *
- * @author Michael Darter
  * @author Douglas Lau
+ * @author Michael Darter
  */
 abstract public class G4Property extends ControllerProperty {
 
-	/** Maximum number of bytes in a response */
-	static protected final int MAX_RESP = 512;
+	/** Frame sentinel value */
+	static private final int SENTINEL = 0xFFAA;
 
-	/** Controller associated with property */
-	private final ControllerImpl controller;
+	/** Byte offsets from beginning of frame */
+	static private final int OFF_SENTINEL = 0;
+	static private final int OFF_QUAL = 2;
+	static private final int OFF_LENGTH = 3;
+	static private final int OFF_SENSOR_ID = 4;
+	static private final int OFF_DATA = 6;
 
-	/** Record read from field controller */
-	private final G4Rec g4_rec;
+	/** Minimum data length */
+	static private final int MIN_DATA_LEN = 3;
 
-	/** Format a get request */
-	abstract protected G4Blob formatGetRequest() throws IOException;
-
-	/** Sensor id */
-	final int sensor_id;
-
-	/** Create a new G4 property */
-	protected G4Property(ControllerImpl c, G4Rec r) {
-		controller = c;
-		g4_rec = r;
-		sensor_id = c.getDrop();
+	/** Calculate a checksum */
+	static private int checksum(byte[] buf, int pos, int len) {
+		int c = 0;
+		for(int i = pos; i < pos + len; i++)
+			c += buf[i] & 0xFF;
+		return c;
 	}
 
-	/** Perform a get request, which consists of sending a request to
-	 * the sensor and reading the reply. Called by G4Message.
-	 * @throws IOException */
-	protected void doGetRequest(OutputStream os, InputStream is)
-		throws IOException
+	/** Format a request frame */
+	static protected final byte[] formatRequest(QualCode qual, int drop,
+		byte[] data)
 	{
-		G4Poller.info("G4Property.sendRequest(): called");
-		is.skip(is.available());
-		sendRequest(os, formatGetRequest());
-		getResponse(is);
+		byte[] req = new byte[OFF_DATA + data.length + 2];
+		format16(req, OFF_SENTINEL, SENTINEL);
+		format8(req, OFF_QUAL, qual.code);
+		format8(req, OFF_LENGTH, data.length + 2);
+		format16(req, OFF_SENSOR_ID, drop);
+		System.arraycopy(data, 0, req, OFF_DATA, data.length);
+		format16(req, OFF_DATA + data.length,
+			checksum(req, OFF_SENSOR_ID, data.length + 2));
+		return req;
 	}
 
-	/** Write a request to the sensor */
-	protected void sendRequest(OutputStream os, G4Blob req)
-		throws IOException
-	{
-		G4Poller.info("G4Property.sendRequest() called: req=" + req);
-		os.write(req.toArray());
-		os.flush();
-		G4Poller.info("G4Property.sendRequest(): wrote to G4");
-	}
-
-	/** Read response from the sensor */
-	private void getResponse(InputStream is) throws IOException {
-		G4Poller.info("G4Property.getResponse() called");
-		G4Blob b = read(is);
-		G4Poller.info("G4Property.getResponse() read done, #bytes=" +
-			b.size());
-		g4_rec.parse(b);
-	}
-
-	/** Read bytes from input stream, blocking until a timeout, a complete
-	 * message is read, or an exception is thrown. The first 2 bytes read
-	 * must match the expected leader bytes or an exception is thrown.
+	/** Parse one frame.
 	 * @param is Input stream to read from.
-	 * @return Bytes read from the field device.
-	 * @throws IOException, e.g. on timeout */
-	static private G4Blob read(InputStream is) throws IOException {
-		G4Blob blob = new G4Blob();
-		while(blob.size() < MAX_RESP) {
-			int b = is.read(); // throws IOException
-			if(b >= 0 && b <= 255) {
-				blob.add(b);
-				// first 2 bytes received must be the header
-				if(blob.size() == 2 && !blob.validLeader(0))
-					throw new IOException("bad header");
-				if(blob.readComplete())
-					return blob;
-			} else
-				throw new EOFException("END OF STREAM");
+	 * @param drop Sensor ID (drop address). */
+	protected void parseFrame(InputStream is, int drop) throws IOException {
+		byte[] header = recvResponse(is, OFF_SENSOR_ID);
+		if(parse16(header, OFF_SENTINEL) != SENTINEL)
+			throw new ParsingException("INVALID SENTINEL");
+		QualCode qual = QualCode.fromCode(parse8(header, OFF_QUAL));
+		int length = parse8(header, OFF_LENGTH);
+		if(length < MIN_DATA_LEN)
+			throw new ParsingException("INVALID LENGTH");
+		byte[] body = recvResponse(is, 2 + length); // 2 byte sensor ID
+		int sid = parse16(body, 0);
+		if(sid != drop)
+			throw new ParsingException("INVALID ID");
+		int cs = parse16(body, body.length - 2);
+		if(cs != checksum(body, 0, body.length - 2))
+			throw new ChecksumException(body);
+		// Copy everything but sensor ID and checksum (4 bytes)
+		byte[] data = new byte[body.length - 4];
+		System.arraycopy(body, 2, data, 0, data.length);
+		parseData(qual, data);
+	}
+
+	/** Parse the data from one frame.
+	 * @param qual Qualifier code.
+	 * @param data Data packet. */
+	protected void parseData(QualCode qual, byte[] data) throws IOException{
+		switch(qual) {
+		case ACK:
+			return;
+		case NAK:
+			throw new ControllerException("NAK");
+		default:
+			throw new ParsingException("UNEXPECTED QUAL: " + qual);
 		}
-		throw new IOException("G4 buffer full");
 	}
 }

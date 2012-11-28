@@ -30,6 +30,35 @@ abstract public class ControllerProperty {
 	/** Maximum number of tries when reading a response */
 	static private final int MAX_TRIES = 5;
 
+	/** Format an 8-bit value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void format8(byte[] buf, int pos, int value) {
+		buf[pos] = (byte)value;
+	}
+
+	/** Format a 16-bit value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void format16(byte[] buf, int pos, int value) {
+		buf[pos] = (byte)((value >> 8) & 0xFF);
+		buf[pos + 1] = (byte)(value & 0xFF);
+	}
+
+	/** Parse an 8-bit value */
+	static protected int parse8(byte[] body, int pos) {
+		return body[pos] & 0xFF;
+	}
+
+	/** Parse a 16-bit value */
+	static protected int parse16(byte[] body, int pos) {
+		int hi = body[pos] & 0xFF;
+		int lo = body[pos + 1] & 0xFF;
+		return (hi << 8) | lo;
+	}
+
 	/** Get the path for a property */
 	public String getPath() {
 		return "";

@@ -19,10 +19,8 @@ import java.io.IOException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IDebugLog;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
@@ -30,6 +28,7 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  * serial data communication protocol.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class G4Poller extends MessagePoller implements SamplePoller {
 
@@ -39,26 +38,6 @@ public class G4Poller extends MessagePoller implements SamplePoller {
 	/** Create a new G4 poller */
 	public G4Poller(String n, Messenger m) {
 		super(n, m);
-		G4Poller.info("G4Poller.G4Poller("+n+","+m+")");
-	}
-
-	/** Log a message */
-	static protected void info(String m) {
-		G4_LOG.log("info: " + m);
-	}
-
-	/** Log a message */
-	static protected void warn(String m) {
-		G4_LOG.log("WARN: " + m);
-	}
-
-	/** Create a new message for the specified controller. Called by
- 	 * MessagePoller.doPoll. */
-	public CommMessage createMessage(ControllerImpl c) throws IOException {
-		G4Poller.info("G4Poller.createMessage(" + c + ")");
-		return new G4Message(
-			messenger.getOutputStream(c),
-			messenger.getInputStream("", c), c, messenger);
 	}
 
 	/** Check if a sensor id is valid */
@@ -69,15 +48,15 @@ public class G4Poller extends MessagePoller implements SamplePoller {
 	/** Perform a controller reset */
 	public void resetController(ControllerImpl c) {}
 
-	/** Send sample settings to a controller. Called on startup. */
+	/** Send sample settings to a controller. */
 	public void sendSettings(ControllerImpl c) {}
 
-	/** Query sample data, called every 30 seconds.
- 	 * @param c Controller, may not be null.
- 	 * @param intvl Query interval in seconds.
+	/** Query sample data.
+ 	 * @param c Controller to poll.
+ 	 * @param p Sample period in seconds.
  	 * @param comp Job completer.  */
-	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
+	public void querySamples(ControllerImpl c, int p, Completer comp) {
 		if(c.hasActiveDetector())
-			addOperation(new OpQueryStats(c, comp, intvl));
+			addOperation(new OpQueryStats(c, p, comp));
 	}
 }

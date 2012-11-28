@@ -89,23 +89,6 @@ abstract public class SS125Property extends ControllerProperty {
 		buf[pos] = value ? (byte)1 : (byte)0;
 	}
 
-	/** Format an 8-bit value.
-	 * @param buf Buffer to store formatted value.
-	 * @param pos Starting position in buffer.
-	 * @param value Value to store in buffer. */
-	static protected void format8(byte[] buf, int pos, int value) {
-		buf[pos] = (byte)value;
-	}
-
-	/** Format a 16-bit value.
-	 * @param buf Buffer to store formatted value.
-	 * @param pos Starting position in buffer.
-	 * @param value Value to store in buffer. */
-	static protected void format16(byte[] buf, int pos, int value) {
-		buf[pos] = (byte)((value >> 8) & 0xFF);
-		buf[pos + 1] = (byte)(value & 0xFF);
-	}
-
 	/** Format a 16-bit fixed-point value.
 	 * @param buf Buffer to store formatted value.
 	 * @param pos Starting position in buffer.
@@ -164,18 +147,6 @@ abstract public class SS125Property extends ControllerProperty {
 			return true;
 		else
 			throw new ParsingException("INVALID BOOLEAN");
-	}
-
-	/** Parse an 8-bit value */
-	static protected int parse8(byte[] body, int pos) {
-		return body[pos] & 0xFF;
-	}
-
-	/** Parse a 16-bit value */
-	static protected int parse16(byte[] body, int pos) {
-		int hi = body[pos] & 0xFF;
-		int lo = body[pos + 1] & 0xFF;
-		return (hi << 8) | lo;
 	}
 
 	/** Parse a 16-bit fixed-point value */
