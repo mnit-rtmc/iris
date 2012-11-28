@@ -24,8 +24,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
- * G4Poller is a java implementation of the EIS G4 MVDS protocol.
- * serial data communication protocol.
+ * G4Poller is a java implementation of the RTMS G4 VDS protocol.
  *
  * @author Michael Darter
  * @author Douglas Lau

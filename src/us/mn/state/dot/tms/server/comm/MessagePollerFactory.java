@@ -107,8 +107,8 @@ public class MessagePollerFactory {
 			return createOrg815Poller();
 		case INFINOVA_D_PTZ:
 			return createInfinovaDPoller();
-		case EIS_G4:
-			return createEisG4Poller();
+		case RTMS_G4:
+			return createRtmsG4Poller();
 		case SSI:
 			return createSsiPoller();
 		case DIN_RELAY:
@@ -291,8 +291,8 @@ public class MessagePollerFactory {
 		return new SsiPoller(name, createHttpFileMessenger());
 	}
 
-	/** Create an EIS G4 poller */
-	protected MessagePoller createEisG4Poller() throws IOException {
+	/** Create an RTMS G4 poller */
+	protected MessagePoller createRtmsG4Poller() throws IOException {
 		return new G4Poller(name, createSocketMessenger(TCP));
 	}
 

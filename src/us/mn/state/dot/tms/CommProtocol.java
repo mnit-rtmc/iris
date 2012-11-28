@@ -77,11 +77,11 @@ public enum CommProtocol {
 	/** Infinova wrapping Pelco D camera control (16) */
 	INFINOVA_D_PTZ("Infinova D PTZ"),
 
-	/** EIS G4 (17) */
-	EIS_G4("EIS G4"),
+	/** RTMS G4 (17) */
+	RTMS_G4("RTMS G4"),
 
-	/** EIS RTMS (18) */
-	EIS_RTMS("EIS RTMS"),
+	/** RTMS (18) */
+	RTMS("RTMS"),
 
 	/** Infotek Wizard (19) */
 	INFOTEK_WIZARD("Infotek Wizard"),
