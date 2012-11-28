@@ -29,6 +29,12 @@ abstract public class OpCanoga extends OpController<CanogaProperty> {
 	/** Canoga debug log */
 	static protected final IDebugLog CANOGA_LOG = new IDebugLog("canoga");
 
+	/** Log a debug message */
+	protected void log(String msg) {
+		if(CANOGA_LOG.isOpen())
+			CANOGA_LOG.log(controller.getName() + msg);
+	}
+
 	/** Create a new canoga operation */
 	public OpCanoga(PriorityLevel pl, ControllerImpl c) {
 		super(pl, c);
