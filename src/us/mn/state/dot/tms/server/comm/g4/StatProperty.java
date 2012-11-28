@@ -390,4 +390,49 @@ public class StatProperty extends G4Property {
 			throw new ParsingException("INVALID FOOTER MSG #");
 		footer = true;
 	}
+
+	/** Get a string representation of the statistical property */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(arrayStr("volume", volume));
+		sb.append(',');
+		sb.append(arrayStr("scans", scans));
+		sb.append(',');
+		sb.append(arrayStr("speed", speed));
+		sb.append(',');
+		sb.append(arrayStr("gap", gap));
+		sb.append(',');
+		sb.append(arrayStr("headway", headway));
+		sb.append(',');
+		sb.append(arrayStr("speed85", speed85));
+		sb.append(',');
+		sb.append(arrayStr("c1", getVolClass(VehicleClass.REGULAR)));
+		sb.append(',');
+		sb.append(arrayStr("c2", getVolClass(VehicleClass.MEDIUM)));
+		sb.append(',');
+		sb.append(arrayStr("c3", getVolClass(VehicleClass.LARGE)));
+		sb.append(',');
+		sb.append(arrayStr("c4", getVolClass(VehicleClass.TRUCK)));
+		sb.append(',');
+		sb.append(arrayStr("c5", getVolClass(VehicleClass.EXTRA_LARGE)));
+		while(sb.length() > 0 && sb.charAt(sb.length() - 1) == ',')
+			sb.deleteCharAt(sb.length() - 1);
+		return sb.toString();
+	}
+
+	/** Get a string representation of a data array */
+	static private String arrayStr(String lbl, int[] a) {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < MAX_LANES; i++) {
+			if(a[i] != MISSING_DATA)
+				sb.append(a[i]);
+			sb.append(',');
+		}
+		while(sb.length() > 0 && sb.charAt(sb.length() - 1) == ',')
+			sb.deleteCharAt(sb.length() - 1);
+		if(sb.length() > 0)
+			return lbl + ":" + sb.toString();
+		else
+			return "";
+	}
 }

@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.g4;
 import java.io.IOException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -30,9 +29,6 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  * @author Douglas Lau
  */
 public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
-
-	/** Debug log */
-	static private final IDebugLog G4_LOG = new IDebugLog("g4");
 
 	/** Create a new G4 poller */
 	public G4Poller(String n, Messenger m) {

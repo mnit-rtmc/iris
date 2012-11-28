@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.g4;
 
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -26,6 +27,15 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpG4 extends OpController<G4Property> {
+
+	/** Debug log */
+	static private final IDebugLog G4_LOG = new IDebugLog("g4");
+
+	/** Log a debug message */
+	protected void log(String msg) {
+		if(G4_LOG.isOpen())
+			G4_LOG.log(controller.getName() + msg);
+	}
 
 	/** Create a new G4 operation */
 	protected OpG4(PriorityLevel p, ControllerImpl c) {
