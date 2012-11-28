@@ -30,9 +30,9 @@ abstract public class OpSS125 extends OpController<SS125Property> {
 	static protected final IDebugLog SS125_LOG = new IDebugLog("ss125");
 
 	/** Log a debug message */
-	static public void log(ControllerImpl ctrl, String msg) {
+	protected void log(String msg) {
 		if(SS125_LOG.isOpen())
-			SS125_LOG.log(ctrl.getName() + msg);
+			SS125_LOG.log(controller.getName() + msg);
 	}
 
 	/** Create a new SS125 operation */

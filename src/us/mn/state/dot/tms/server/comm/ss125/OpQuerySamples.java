@@ -92,10 +92,9 @@ public class OpQuerySamples extends OpSS125 {
 			mess.add(sample_data);
 			mess.queryProps();
 			stamp = sample_data.getTime();
-			log(controller, ": " + sample_data);
+			log(": " + sample_data);
 			if(stamp < oldest || stamp > newest) {
-				log(controller, " BAD TIMESTAMP: " +
-					new Date(stamp));
+				log(" BAD TIMESTAMP: " + new Date(stamp));
 				setFailed();
 				throw new DownloadRequestException(
 					controller.toString());

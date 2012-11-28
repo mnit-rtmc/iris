@@ -68,15 +68,11 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(gen_config);
 			mess.queryProps();
-			log(controller, ": orientation " +
-				gen_config.getOrientation());
-			log(controller, ": location " +
-				gen_config.getLocation());
-			log(controller, ": description " +
-				gen_config.getDescription());
-			log(controller, ": serial # " +
-				gen_config.getSerialNumber());
-			log(controller, ": metric " + gen_config.isMetric());
+			log(": orientation " + gen_config.getOrientation());
+			log(": location " + gen_config.getLocation());
+			log(": description " + gen_config.getDescription());
+			log(": serial # " + gen_config.getSerialNumber());
+			log(": metric " + gen_config.isMetric());
 			if(shouldUpdateGenConfig())
 				return new SendGenConfig();
 			else
@@ -103,9 +99,8 @@ public class OpSendSensorSettings extends OpSS125 {
 				controller));
 			gen_config.setMetric(false);
 			mess.add(gen_config);
-			log(controller, ":= location " +
-				gen_config.getLocation());
-			log(controller, ":= metric " + gen_config.isMetric());
+			log(":= location " + gen_config.getLocation());
+			log(":= metric " + gen_config.isMetric());
 			mess.storeProps();
 			config_updated = true;
 			return new QueryDataConfig();
@@ -132,28 +127,24 @@ public class OpSendSensorSettings extends OpSS125 {
 
 	/** Log data configuration */
 	protected void logDataConfig() {
-		log(controller, ": interval " + data_config.getInterval());
-		log(controller, ": mode " + data_config.getMode());
+		log(": interval " + data_config.getInterval());
+		log(": mode " + data_config.getMode());
 		logPushConfig(data_config.getEventPush(), "event");
 		logPushConfig(data_config.getIntervalPush(), "interval");
 		logPushConfig(data_config.getPresencePush(), "presence");
-		log(controller, ": default separation " +
+		log(": default separation " +
 			data_config.getDefaultSeparation());
-		log(controller, ": default size " +
-			data_config.getDefaultSize());
+		log(": default size " + data_config.getDefaultSize());
 	}
 
 	/** Log push config for one data type */
 	protected void logPushConfig(PushConfig pc, String dtype) {
-		log(controller, ": " + dtype + " enable " + pc.getEnable());
+		log(": " + dtype + " enable " + pc.getEnable());
 		if(pc.getEnable()) {
-			log(controller, ": " + dtype + " port " + pc.getPort());
-			log(controller, ": " + dtype + " protocol " +
-				pc.getProtocol());
-			log(controller, ": " + dtype + " dest_sub_id " +
-				pc.getDestSubID());
-			log(controller, ": " + dtype + " dest_id " +
-				pc.getDestID());
+			log(": " + dtype + " port " + pc.getPort());
+			log(": " + dtype + " protocol " + pc.getProtocol());
+			log(": " + dtype + " dest_sub_id " + pc.getDestSubID());
+			log(": " + dtype + " dest_id " + pc.getDestID());
 		}
 	}
 
@@ -187,7 +178,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			data_config.getIntervalPush().setEnable(false);
 			data_config.getPresencePush().setEnable(false);
 			mess.add(data_config);
-			log(controller, ":= data config");
+			log(":= data config");
 			mess.storeProps();
 			config_updated = true;
 			return configDonePhase();
@@ -211,7 +202,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			FlashConfigProperty flash = new FlashConfigProperty();
 			mess.add(flash);
-			log(controller, ":= flash config");
+			log(":= flash config");
 			mess.storeProps();
 			return new QueryDateTime();
 		}
@@ -227,7 +218,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.queryProps();
-			log(controller, ": date/time " + date_time.getStamp());
+			log(": date/time " + date_time.getStamp());
 			if(shouldUpdateDateTime(date_time.getStamp().getTime()))
 				return new SendDateTime();
 			else
@@ -252,7 +243,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.storeProps();
-			log(controller, ":= date/time " + date_time.getStamp());
+			log(":= date/time " + date_time.getStamp());
 			return null;
 		}
 	}
