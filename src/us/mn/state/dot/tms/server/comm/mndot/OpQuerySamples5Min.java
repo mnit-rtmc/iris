@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpQuerySamples5Min extends OpQuerySamples {
 
 	/** Sample period (seconds) */
-	static private final int SAMPLE_PERIOD_SEC = 300;
+	static public final int SAMPLE_PERIOD_SEC = 300;
 
 	/** Maximum number of scans in 5 minutes */
 	static private final int MAX_SCANS = 18000;

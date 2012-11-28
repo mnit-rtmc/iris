@@ -163,7 +163,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
  	 * @param comp Job completer.  */
 	public void querySamples(ControllerImpl c, int p, Completer comp) {
 		switch(p) {
-		case 30:
+		case OpQuerySamples30Sec.SAMPLE_PERIOD_SEC:
 			if(c.hasActiveDetector())
 				addOperation(new OpQuerySamples30Sec(c, comp));
 			// This should happen on a meter QUERY_STATUS, but
@@ -171,7 +171,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 			if(c.hasActiveMeter())
 				addOperation(new OpQueryMeterStatus(c, comp));
 			break;
-		case 300:
+		case OpQuerySamples5Min.SAMPLE_PERIOD_SEC:
 			if(c.hasActiveDetector() || c.hasActiveMeter())
 				addOperation(new OpQuerySamples5Min(c, comp));
 			break;
