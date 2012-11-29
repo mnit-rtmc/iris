@@ -47,6 +47,29 @@ public class StatComposition {
 		comp = c;
 	}
 
+	/** Create a new statistical composition code */
+	public StatComposition(boolean g, boolean h, boolean s85, int vc) {
+		int c = 0;
+		if(g)
+			c |= FLAG_GAP;
+		if(h)
+			c |= FLAG_HEADWAY;
+		if(s85)
+			c |= FLAG_SPEED85;
+		switch(vc) {
+		case 2:
+			c |= CLASSES_2;
+			break;
+		case 4:
+			c |= CLASSES_4;
+			break;
+		case 6:
+			c |= CLASSES_6;
+			break;
+		}
+		comp = c;
+	}
+
 	/** Test if a flag is set */
 	private boolean isFlagSet(int flag) {
 		return (comp & flag) == flag;
