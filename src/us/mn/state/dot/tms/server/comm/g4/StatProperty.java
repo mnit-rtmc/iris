@@ -65,16 +65,6 @@ public class StatProperty extends G4Property {
 		return (int)Math.round(.621371192 * (double)kph);
 	}
 
-	/** Status flags for statistical data header */
-	static private final int STAT_FLAG_MPH = 1 << 0;
-	static private final int STAT_FLAG_CLOSURE = 1 << 1;
-	static private final int STAT_FLAG_STAMP = 1 << 2;
-	static private final int STAT_FLAG_MEMORY = 1 << 3;
-	static private final int STAT_FLAG_HIGH_Z = 1 << 4;
-	static private final int STAT_FLAG_6_FT = 1 << 5;
-	static private final int STAT_FLAG_DUAL_LOOP = 1 << 6;
-	static private final int STAT_FLAG_FIFO = 1 << 7;
-
 	/** Binning period (seconds) */
 	private final int period;
 
@@ -191,12 +181,7 @@ public class StatProperty extends G4Property {
 	private int page_num = MISSING_DATA;
 
 	/** Status flags */
-	private int stat_flags = MISSING_DATA;
-
-	/** Test if a status flag is set */
-	private boolean isStatFlagSet(int flag) {
-		return (stat_flags & flag) == flag;
-	}
+	private StatusFlags stat_flags = new StatusFlags(0);
 
 	/** Time stamp */
 	private long stamp = TimeSteward.currentTimeMillis();
@@ -290,7 +275,7 @@ public class StatProperty extends G4Property {
 			throw new ParsingException("INVALID HEADER LENGTH");
 		msg_num = parse8(data, OFF_MSG_NUM);
 		page_num = parse16(data, OFF_PAGE_NUM);
-		stat_flags = parse8(data, OFF_STAT_FLAGS);
+		stat_flags = new StatusFlags(parse8(data, OFF_STAT_FLAGS));
 		stamp = parseStamp(data, OFF_STAMP);
 		n_zones = parse8(data, OFF_ZONES);
 		msg_comp = new StatComposition(parse8(data, OFF_COMP));
@@ -350,9 +335,7 @@ public class StatProperty extends G4Property {
 
 	/** Get a speed sample in mph units */
 	private int asMph(int val) {
-		if(stat_flags < 0)
-			return MISSING_DATA;
-		if(isStatFlagSet(STAT_FLAG_MPH))
+		if(stat_flags.isMph())
 			return val;
 		else
 			return kphToMph(val);
@@ -408,22 +391,8 @@ public class StatProperty extends G4Property {
 		StringBuilder sb = new StringBuilder();
 		sb.append("msg#:");
 		sb.append(msg_num);
-		sb.append(" fifo:");
-		sb.append(isStatFlagSet(STAT_FLAG_FIFO));
-		sb.append(" 2loop:");
-		sb.append(isStatFlagSet(STAT_FLAG_DUAL_LOOP));
-		sb.append(" 6ft:");
-		sb.append(isStatFlagSet(STAT_FLAG_6_FT));
-		sb.append(" hiZ:");
-		sb.append(isStatFlagSet(STAT_FLAG_HIGH_Z));
-		sb.append(" mem:");
-		sb.append(isStatFlagSet(STAT_FLAG_MEMORY));
-		sb.append(" stmp:");
-		sb.append(isStatFlagSet(STAT_FLAG_STAMP));
-		sb.append(" closure:");
-		sb.append(isStatFlagSet(STAT_FLAG_CLOSURE));
-		sb.append(" mph:");
-		sb.append(isStatFlagSet(STAT_FLAG_MPH));
+		sb.append(" stat_flags:");
+		sb.append(stat_flags);
 		sb.append(" stamp:");
 		sb.append(new Date(stamp));
 		sb.append(" zones:");
