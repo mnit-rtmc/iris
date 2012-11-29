@@ -41,7 +41,7 @@ abstract public class G4Property extends ControllerProperty {
 	static private final int OFF_DATA = 6;
 
 	/** Minimum data length */
-	static private final int MIN_DATA_LEN = 3;
+	static private final int MIN_DATA_LEN = 2;
 
 	/** Calculate a checksum */
 	static private int checksum(byte[] buf, int pos, int len) {
@@ -76,7 +76,7 @@ abstract public class G4Property extends ControllerProperty {
 		QualCode qual = QualCode.fromCode(parse8(header, OFF_QUAL));
 		int length = parse8(header, OFF_LENGTH);
 		if(length < MIN_DATA_LEN)
-			throw new ParsingException("INVALID LENGTH");
+			throw new ParsingException("INVALID LENGTH: " + length);
 		byte[] body = recvResponse(is, 2 + length); // 2 byte sensor ID
 		int sid = parse16(body, 0);
 		if(sid != drop)
