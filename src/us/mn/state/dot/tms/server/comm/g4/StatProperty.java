@@ -199,7 +199,7 @@ public class StatProperty extends G4Property {
 	}
 
 	/** Time stamp */
-	private Date stamp = TimeSteward.getDateInstance();
+	private long stamp = TimeSteward.currentTimeMillis();
 
 	/** Low 4 bits are zone count; bit 6 is mounting (0: side-fired,
 	 * 1: forward) */
@@ -425,7 +425,7 @@ public class StatProperty extends G4Property {
 		sb.append(" mph:");
 		sb.append(isStatFlagSet(STAT_FLAG_MPH));
 		sb.append(" stamp:");
-		sb.append(stamp);
+		sb.append(new Date(stamp));
 		sb.append(" zones:");
 		sb.append(getZones());
 		sb.append(" comp:");
