@@ -394,6 +394,33 @@ public class StatProperty extends G4Property {
 	/** Get a string representation of the statistical property */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("msg#:");
+		sb.append(msg_num);
+		sb.append(" fifo:");
+		sb.append(isStatFlagSet(STAT_FLAG_FIFO));
+		sb.append(" 2loop:");
+		sb.append(isStatFlagSet(STAT_FLAG_DUAL_LOOP));
+		sb.append(" 6ft:");
+		sb.append(isStatFlagSet(STAT_FLAG_6_FT));
+		sb.append(" hiZ:");
+		sb.append(isStatFlagSet(STAT_FLAG_HIGH_Z));
+		sb.append(" mem:");
+		sb.append(isStatFlagSet(STAT_FLAG_MEMORY));
+		sb.append(" stamp:");
+		sb.append(isStatFlagSet(STAT_FLAG_STAMP));
+		sb.append(" closure:");
+		sb.append(isStatFlagSet(STAT_FLAG_CLOSURE));
+		sb.append(" mph:");
+		sb.append(isStatFlagSet(STAT_FLAG_MPH));
+		sb.append(" zones:");
+		sb.append(n_zones);
+		sb.append(" comp:");
+		sb.append(Integer.toHexString(msg_comp));
+		sb.append(" period:");
+		sb.append(msg_period);
+		sb.append(" volts:");
+		sb.append(volt);
+		sb.append(' ');
 		sb.append(arrayStr("volume", volume));
 		sb.append(arrayStr("scans", scans));
 		sb.append(arrayStr("speed", speed));
