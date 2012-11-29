@@ -29,24 +29,23 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpSendSensorSettings extends OpSS125 {
 
 	/** Time interval for data binning */
-	static protected final int BINNING_INTERVAL = 30;
+	static private final int BINNING_INTERVAL = 30;
 
 	/** Error threshold for setting date / time */
-	static protected final int TIME_THRESHOLD = 5000;
+	static private final int TIME_THRESHOLD = 5000;
 
 	/** Flag to perform a controller restart */
-	protected final boolean restart;
+	private final boolean restart;
 
 	/** General config property */
-	protected final GeneralConfigProperty gen_config =
+	private final GeneralConfigProperty gen_config =
 		new GeneralConfigProperty();
 
-	/** General config property */
-	protected final DataConfigProperty data_config =
-		new DataConfigProperty();
+	/** Data config property */
+	private final DataConfigProperty data_config = new DataConfigProperty();
 
 	/** Flag to indicate config has been updated */
-	protected boolean config_updated = false;
+	private boolean config_updated = false;
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
