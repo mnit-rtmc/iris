@@ -391,7 +391,7 @@ public class StatProperty extends G4Property {
 		StringBuilder sb = new StringBuilder();
 		sb.append("msg#:");
 		sb.append(msg_num);
-		sb.append(" stat_flags:");
+		sb.append(" flags:");
 		sb.append(stat_flags);
 		sb.append(" stamp:");
 		sb.append(new Date(stamp));
