@@ -39,6 +39,30 @@ public class StatusFlags {
 		flags = f;
 	}
 
+	/** Create status flags */
+	public StatusFlags(boolean f, boolean dl, boolean sf, boolean z,
+		boolean m, boolean ts, boolean c, boolean mph)
+	{
+		int fs = 0;
+		if(f)
+			fs |= FLAG_FIFO;
+		if(dl)
+			fs |= FLAG_DUAL_LOOP;
+		if(sf)
+			fs |= FLAG_6_FT;
+		if(z)
+			fs |= FLAG_HIGH_Z;
+		if(m)
+			fs |= FLAG_MEMORY;
+		if(ts)
+			fs |= FLAG_STAMP;
+		if(c)
+			fs |= FLAG_CLOSURE;
+		if(mph)
+			fs |= FLAG_MPH;
+		flags = fs;
+	}
+
 	/** Test if a flag is set */
 	private boolean isFlagSet(int f) {
 		return (flags & f) == f;
@@ -98,7 +122,7 @@ public class StatusFlags {
 		if(isMemory())
 			sb.append("mem,");
 		if(isStamp())
-			sb.append("stmp,");
+			sb.append("stamp,");
 		if(isClosure())
 			sb.append("closure,");
 		if(isMph())

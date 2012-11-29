@@ -393,7 +393,7 @@ public class StatProperty extends G4Property {
 		sb.append(msg_num);
 		sb.append(" flags:");
 		sb.append(stat_flags);
-		sb.append(" stamp:");
+		sb.append(" ");
 		sb.append(new Date(stamp));
 		sb.append(" zones:");
 		sb.append(getZones());
