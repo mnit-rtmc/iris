@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Date;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
@@ -102,5 +104,23 @@ abstract public class G4Property extends ControllerProperty {
 		default:
 			throw new ParsingException("UNEXPECTED QUAL: " + qual);
 		}
+	}
+
+	/** Parse a time stamp */
+	protected Date parseStamp(byte[] data, int pos) throws ParsingException{
+		int sec = parseBCD2(data, pos);
+		int min = parseBCD2(data, pos + 1);
+		int hour = parseBCD2(data, pos + 2);
+		int weekday = parseBCD2(data, pos + 3);
+		int day = parseBCD2(data, pos + 4);
+		int month = parseBCD2(data, pos + 5) - 1;
+		// NOTE: year is last 2 digits only.  Seriously.  In a protocol
+		//       designed after Y2K.  Why couldn't you leave out
+		//       weekday, since it contains no additional information?
+		//       Or simply add one more byte, ffs!
+		int year = 2000 + parseBCD2(data, pos + 6);
+		Calendar cal = Calendar.getInstance();
+		cal.set(year, month, day, hour, min, sec);
+		return cal.getTime();
 	}
 }

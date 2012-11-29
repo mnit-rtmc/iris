@@ -59,6 +59,19 @@ abstract public class ControllerProperty {
 		return (hi << 8) | lo;
 	}
 
+	/** Parse a 2-digit BCD value */
+	static protected int parseBCD2(byte[] body, int pos)
+		throws ParsingException
+	{
+		int bcd = body[pos];
+		int hi = (bcd >> 4) & 0x0F;
+		int lo = bcd & 0x0F;
+		if(hi >= 0 && hi < 10 && lo >= 0 && lo < 10)
+			return hi * 10 + lo;
+		else
+			throw new ParsingException("Invalid BCD: " + bcd);
+	}
+
 	/** Get the path for a property */
 	public String getPath() {
 		return "";

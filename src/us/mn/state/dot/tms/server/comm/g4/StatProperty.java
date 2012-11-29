@@ -18,6 +18,8 @@ package us.mn.state.dot.tms.server.comm.g4;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
+import us.mn.state.dot.sched.TimeSteward;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -51,6 +53,7 @@ public class StatProperty extends G4Property {
 	static private final int OFF_MSG_NUM = 0;
 	static private final int OFF_PAGE_NUM = 1;
 	static private final int OFF_STAT_FLAGS = 3;
+	static private final int OFF_STAMP = 4;
 	static private final int OFF_ZONES = 11;
 	static private final int OFF_COMP = 12;
 	static private final int OFF_PERIOD = 13;
@@ -195,6 +198,9 @@ public class StatProperty extends G4Property {
 		return (stat_flags & flag) == flag;
 	}
 
+	/** Time stamp */
+	private Date stamp = TimeSteward.getDateInstance();
+
 	/** Low 4 bits are zone count; bit 6 is mounting (0: side-fired,
 	 * 1: forward) */
 	private int n_zones = MISSING_DATA;
@@ -285,7 +291,7 @@ public class StatProperty extends G4Property {
 		msg_num = parse8(data, OFF_MSG_NUM);
 		page_num = parse16(data, OFF_PAGE_NUM);
 		stat_flags = parse8(data, OFF_STAT_FLAGS);
-		// NOTE: time stamp consumes 7 bytes here
+		stamp = parseStamp(data, OFF_STAMP);
 		n_zones = parse8(data, OFF_ZONES);
 		msg_comp = new StatComposition(parse8(data, OFF_COMP));
 		if(msg_comp.getClassCount() == 0)
@@ -412,12 +418,14 @@ public class StatProperty extends G4Property {
 		sb.append(isStatFlagSet(STAT_FLAG_HIGH_Z));
 		sb.append(" mem:");
 		sb.append(isStatFlagSet(STAT_FLAG_MEMORY));
-		sb.append(" stamp:");
+		sb.append(" stmp:");
 		sb.append(isStatFlagSet(STAT_FLAG_STAMP));
 		sb.append(" closure:");
 		sb.append(isStatFlagSet(STAT_FLAG_CLOSURE));
 		sb.append(" mph:");
 		sb.append(isStatFlagSet(STAT_FLAG_MPH));
+		sb.append(" stamp:");
+		sb.append(stamp);
 		sb.append(" zones:");
 		sb.append(getZones());
 		sb.append(" comp:");
