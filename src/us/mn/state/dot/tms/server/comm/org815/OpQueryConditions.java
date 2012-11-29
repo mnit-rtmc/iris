@@ -49,7 +49,7 @@ public class OpQueryConditions extends OpOrg815 {
 			ConditionsProperty cond = new ConditionsProperty();
 			mess.add(cond);
 			mess.queryProps();
-			log(": " + cond);
+			logQuery(cond);
 			sensor.setAirTempNotify(null);
 			sensor.setWindSpeedNotify(null);
 			sensor.setWindDirNotify(null);
@@ -76,7 +76,7 @@ public class OpQueryConditions extends OpOrg815 {
 		{
 			ResetProperty reset = new ResetProperty();
 			mess.add(reset);
-			log(": " + reset);
+			logQuery(reset);
 			mess.storeProps();
 			sensor.resetAccumulation();
 			return null;

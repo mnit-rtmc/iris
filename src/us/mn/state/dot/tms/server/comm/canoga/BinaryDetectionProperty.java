@@ -162,7 +162,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 			DetectionEvent pe = p_events[i];
 			DetectionEvent ce = c_events[i];
 			if(ce != null && !ce.equals(pe))
-				op.log(" event:" + i + "," + ce);
+				op.logQuery(" event:" + i + "," + ce);
 		}
 	}
 }

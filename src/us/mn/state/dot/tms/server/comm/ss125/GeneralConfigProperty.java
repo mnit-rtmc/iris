@@ -112,4 +112,20 @@ public class GeneralConfigProperty extends SS125Property {
 	public void setMetric(boolean m) {
 		metric = m;
 	}
+
+	/** Get a string representation of the property */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("orientation:");
+		sb.append(getOrientation());
+		sb.append(",location:");
+		sb.append(getLocation());
+		sb.append(",description:");
+		sb.append(getDescription());
+		sb.append(",serial#:");
+		sb.append(getSerialNumber());
+		sb.append(",metric:");
+		sb.append(isMetric());
+		return sb.toString();
+	}
 }

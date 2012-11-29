@@ -85,4 +85,12 @@ public class DateTimeProperty extends SS125Property {
 		format32(body, 3, date);
 		format32(body, 7, time);
 	}
+
+	/** Get a string representation of the property */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("date/time:");
+		sb.append(getStamp().toString());
+		return sb.toString();
+	}
 }

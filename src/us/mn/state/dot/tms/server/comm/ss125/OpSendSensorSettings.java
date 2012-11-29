@@ -68,11 +68,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(gen_config);
 			mess.queryProps();
-			log(": orientation " + gen_config.getOrientation());
-			log(": location " + gen_config.getLocation());
-			log(": description " + gen_config.getDescription());
-			log(": serial # " + gen_config.getSerialNumber());
-			log(": metric " + gen_config.isMetric());
+			logQuery(gen_config);
 			if(shouldUpdateGenConfig())
 				return new SendGenConfig();
 			else
@@ -99,8 +95,7 @@ public class OpSendSensorSettings extends OpSS125 {
 				controller));
 			gen_config.setMetric(false);
 			mess.add(gen_config);
-			log(":= location " + gen_config.getLocation());
-			log(":= metric " + gen_config.isMetric());
+			logStore(gen_config);
 			mess.storeProps();
 			config_updated = true;
 			return new QueryDataConfig();
@@ -116,35 +111,11 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(data_config);
 			mess.queryProps();
-			if(SS125_LOG.isOpen())
-				logDataConfig();
+			logQuery(data_config);
 			if(shouldUpdateDataConfig())
 				return new SendDataConfig();
 			else
 				return configDonePhase();
-		}
-	}
-
-	/** Log data configuration */
-	protected void logDataConfig() {
-		log(": interval " + data_config.getInterval());
-		log(": mode " + data_config.getMode());
-		logPushConfig(data_config.getEventPush(), "event");
-		logPushConfig(data_config.getIntervalPush(), "interval");
-		logPushConfig(data_config.getPresencePush(), "presence");
-		log(": default separation " +
-			data_config.getDefaultSeparation());
-		log(": default size " + data_config.getDefaultSize());
-	}
-
-	/** Log push config for one data type */
-	protected void logPushConfig(PushConfig pc, String dtype) {
-		log(": " + dtype + " enable " + pc.getEnable());
-		if(pc.getEnable()) {
-			log(": " + dtype + " port " + pc.getPort());
-			log(": " + dtype + " protocol " + pc.getProtocol());
-			log(": " + dtype + " dest_sub_id " + pc.getDestSubID());
-			log(": " + dtype + " dest_id " + pc.getDestID());
 		}
 	}
 
@@ -178,7 +149,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			data_config.getIntervalPush().setEnable(false);
 			data_config.getPresencePush().setEnable(false);
 			mess.add(data_config);
-			log(":= data config");
+			logStore(data_config);
 			mess.storeProps();
 			config_updated = true;
 			return configDonePhase();
@@ -202,7 +173,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			FlashConfigProperty flash = new FlashConfigProperty();
 			mess.add(flash);
-			log(":= flash config");
+			logStore(flash);
 			mess.storeProps();
 			return new QueryDateTime();
 		}
@@ -218,7 +189,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.queryProps();
-			log(": date/time " + date_time.getStamp());
+			logQuery(date_time);
 			if(shouldUpdateDateTime(date_time.getStamp().getTime()))
 				return new SendDateTime();
 			else
@@ -243,7 +214,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.storeProps();
-			log(":= date/time " + date_time.getStamp());
+			logStore(date_time);
 			return null;
 		}
 	}

@@ -29,10 +29,22 @@ abstract public class OpSS125 extends OpController<SS125Property> {
 	/** SS 125 debug log */
 	static protected final IDebugLog SS125_LOG = new IDebugLog("ss125");
 
-	/** Log a debug message */
-	protected void log(String msg) {
+	/** Log an error msg */
+	protected void logError(String msg) {
 		if(SS125_LOG.isOpen())
-			SS125_LOG.log(controller.getName() + msg);
+			SS125_LOG.log(controller.getName() + "! " + msg);
+	}
+
+	/** Log a property query */
+	protected void logQuery(SS125Property prop) {
+		if(SS125_LOG.isOpen())
+			SS125_LOG.log(controller.getName() + ": " + prop);
+	}
+
+	/** Log a property store */
+	protected void logStore(SS125Property prop) {
+		if(SS125_LOG.isOpen())
+			SS125_LOG.log(controller.getName() + ":= " + prop);
 	}
 
 	/** Create a new SS125 operation */

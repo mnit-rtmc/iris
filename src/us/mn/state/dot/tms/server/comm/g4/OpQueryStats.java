@@ -72,7 +72,7 @@ public class OpQueryStats extends OpG4 {
 		{
 			mess.add(stat);
 			mess.queryProps();
-			log(": " + stat);
+			logQuery(stat);
 			return null;
 		}
 	}

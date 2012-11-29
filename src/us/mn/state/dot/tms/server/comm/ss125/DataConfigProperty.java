@@ -170,4 +170,24 @@ public class DataConfigProperty extends SS125Property {
 	public float getDefaultSize() {
 		return default_size;
 	}
+
+	/** Get a string representation of the property */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("interval:");
+		sb.append(getInterval());
+		sb.append(",mode:");
+		sb.append(getMode());
+		sb.append(",event_push:");
+		sb.append(getEventPush());
+		sb.append(",interval_push:");
+		sb.append(getIntervalPush());
+		sb.append(",presence_push:");
+		sb.append(getPresencePush());
+		sb.append(",def_sep:");
+		sb.append(getDefaultSeparation());
+		sb.append(",def_size:");
+		sb.append(getDefaultSize());
+		return sb.toString();
+	}
 }

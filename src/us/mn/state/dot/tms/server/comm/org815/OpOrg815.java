@@ -29,10 +29,10 @@ abstract public class OpOrg815 extends OpDevice<Org815Property> {
 	/** ORG-815 debug log */
 	static private final IDebugLog ORG815_LOG = new IDebugLog("org815");
 
-	/** Log a debug message */
-	protected void log(String msg) {
+	/** Log a property query */
+	protected void logQuery(Org815Property prop) {
 		if(ORG815_LOG.isOpen())
-			ORG815_LOG.log(device.getName() + msg);
+			ORG815_LOG.log(device.getName() + ": " + prop);
 	}
 
 	/** Weather sensor device */

@@ -52,7 +52,7 @@ public class OpQueryConfig extends OpCanoga {
 		{
 			mess.add(serial_number);
 			mess.queryProps();
-			log(": " + serial_number);
+			logQuery(serial_number);
 			return new QueryVersion();
 		}
 	}
@@ -66,7 +66,7 @@ public class OpQueryConfig extends OpCanoga {
 		{
 			mess.add(version);
 			mess.queryProps();
-			log(": " + version);
+			logQuery(version);
 			return null;
 		}
 	}

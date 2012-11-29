@@ -31,10 +31,10 @@ abstract public class OpG4 extends OpController<G4Property> {
 	/** Debug log */
 	static private final IDebugLog G4_LOG = new IDebugLog("g4");
 
-	/** Log a debug message */
-	protected void log(String msg) {
+	/** Log a property query */
+	protected void logQuery(G4Property prop) {
 		if(G4_LOG.isOpen())
-			G4_LOG.log(controller.getName() + msg);
+			G4_LOG.log(controller.getName() + ": " + prop);
 	}
 
 	/** Create a new G4 operation */

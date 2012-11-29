@@ -29,10 +29,16 @@ abstract public class OpCanoga extends OpController<CanogaProperty> {
 	/** Canoga debug log */
 	static protected final IDebugLog CANOGA_LOG = new IDebugLog("canoga");
 
-	/** Log a debug message */
-	protected void log(String msg) {
+	/** Log a property query */
+	protected void logQuery(CanogaProperty prop) {
 		if(CANOGA_LOG.isOpen())
-			CANOGA_LOG.log(controller.getName() + msg);
+			CANOGA_LOG.log(controller.getName() + ": " + prop);
+	}
+
+	/** Log a property query */
+	protected void logQuery(String msg) {
+		if(CANOGA_LOG.isOpen())
+			CANOGA_LOG.log(controller.getName() + ": " + msg);
 	}
 
 	/** Create a new canoga operation */

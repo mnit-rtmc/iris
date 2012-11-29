@@ -102,9 +102,9 @@ public class OpQuerySamples extends OpSS105 {
 			volume = bs.getVolume();
 			scans = bs.getScans();
 			speed = bs.getSpeed();
-			log(": " + bs);
+			logQuery(bs);
 			if(stamp < oldest || stamp > newest) {
-				log("BAD TIMESTAMP: " + new Date(stamp));
+				logError("BAD TIMESTAMP: " + new Date(stamp));
 				setFailed();
 				throw new DownloadRequestException(
 					controller.toString());

@@ -98,4 +98,22 @@ public class PushConfig {
 		dest_sub_id = dsid;
 		dest_id = did;
 	}
+
+	/** Get a string representation of the push config */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("enable:");
+		sb.append(getEnable());
+		if(getEnable()) {
+			sb.append(",port:");
+			sb.append(getPort());
+			sb.append(",protocol:");
+			sb.append(getProtocol());
+			sb.append(",dest_sub_id:");
+			sb.append(getDestSubID());
+			sb.append(",dest_id:");
+			sb.append(getDestID());
+		}
+		return sb.toString();
+	}
 }

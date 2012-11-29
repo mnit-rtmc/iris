@@ -51,4 +51,9 @@ public class FlashConfigProperty extends SS125Property {
 		}
 		super.decodeStore(is, drop);
 	}
+
+	/** Get a string representation of the property */
+	public String toString() {
+		return "flash_config";
+	}
 }

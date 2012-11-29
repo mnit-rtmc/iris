@@ -29,10 +29,22 @@ abstract public class OpSS105 extends OpController<SS105Property> {
 	/** SS 105 debug log */
 	static private final IDebugLog SS105_LOG = new IDebugLog("ss105");
 
-	/** Log a debug message */
-	protected void log(String msg) {
+	/** Log an error msg */
+	protected void logError(String msg) {
 		if(SS105_LOG.isOpen())
-			SS105_LOG.log(controller.getName() + msg);
+			SS105_LOG.log(controller.getName() + "! " + msg);
+	}
+
+	/** Log a property query */
+	protected void logQuery(SS105Property prop) {
+		if(SS105_LOG.isOpen())
+			SS105_LOG.log(controller.getName() + ": " + prop);
+	}
+
+	/** Log a property store */
+	protected void logStore(SS105Property prop) {
+		if(SS105_LOG.isOpen())
+			SS105_LOG.log(controller.getName() + ":= " + prop);
 	}
 
 	/** Create a new SS105 operation */

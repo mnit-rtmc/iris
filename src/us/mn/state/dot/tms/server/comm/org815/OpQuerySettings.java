@@ -46,7 +46,7 @@ public class OpQuerySettings extends OpOrg815 {
 			VersionProperty version = new VersionProperty();
 			mess.add(version);
 			mess.queryProps();
-			log(": " + version);
+			logQuery(version);
 			controller.setVersion(version.toString());
 			return null;
 		}
