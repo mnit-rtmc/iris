@@ -16,9 +16,12 @@
 package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
+import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.PeriodicSample;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -38,8 +41,8 @@ public class OpQueryStats extends OpG4 {
 	/** 30-Second interval completer */
 	private final Completer completer;
 
-	/** Time stamp of sample data */
-	private final long stamp;
+	/** Sample of completer */
+	private final PeriodicSample comp_sample;
 
 	/** Binning period (seconds) */
 	private final int period;
@@ -49,7 +52,7 @@ public class OpQueryStats extends OpG4 {
 		super(PriorityLevel.DATA_30_SEC, c);
 		period = p;
 		completer = comp;
-		stamp = comp.getStamp();
+		comp_sample = new PeriodicSample(comp.getStamp(), period, 0);
 		stat = new StatProperty(p);
 	}
 
@@ -73,12 +76,21 @@ public class OpQueryStats extends OpG4 {
 			mess.add(stat);
 			mess.queryProps();
 			logQuery(stat);
+			long stamp = stat.getStamp();
+			PeriodicSample ps = new PeriodicSample(stamp, period,0);
+			if(ps.end() != comp_sample.end()) {
+				logError("BAD TIMESTAMP: " + new Date(stamp));
+				setFailed();
+				throw new DownloadRequestException(
+					controller.toString());
+			}
 			return null;
 		}
 	}
 
 	/** Cleanup the operation */
 	public void cleanup() {
+		long stamp = stat.getStamp();
 		controller.storeVolume(stamp, period, START_PIN,
 			stat.getVolume());
 		controller.storeOccupancy(stamp, period, START_PIN,

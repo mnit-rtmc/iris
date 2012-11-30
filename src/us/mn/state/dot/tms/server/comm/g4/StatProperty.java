@@ -188,6 +188,11 @@ public class StatProperty extends G4Property {
 	/** Time stamp */
 	private long stamp = TimeSteward.currentTimeMillis();
 
+	/** Time stamp */
+	public long getStamp() {
+		return stamp;
+	}
+
 	/** Low 4 bits are zone count; bit 6 is mounting (0: side-fired,
 	 * 1: forward) */
 	private int n_zones = MISSING_DATA;
