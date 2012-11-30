@@ -168,7 +168,9 @@ public class StatProperty extends G4Property {
 	}
 
 	/** Encode a QUERY request */
-	public void encodeQuery(OutputStream os, int drop) throws IOException {
+	@Override public void encodeQuery(OutputStream os, int drop)
+		throws IOException
+	{
 		byte[] data = new byte[1];
 		data[0] = 0;	// reserved for future use
 		os.write(formatRequest(QualCode.STAT_POLL, drop, data));

@@ -34,6 +34,11 @@ public class StatusFlags {
 	/** Status flags */
 	private final int flags;
 
+	/** Get the status flags */
+	public int getFlags() {
+		return flags;
+	}
+
 	/** Create status flags */
 	public StatusFlags(int f) {
 		flags = f;

@@ -42,6 +42,11 @@ public class StatComposition {
 	/** Statistical message composition code */
 	private final int comp;
 
+	/** Get composition code */
+	public int getCode() {
+		return comp;
+	}
+
 	/** Create a new statistical composition code */
 	public StatComposition(int c) {
 		comp = c;

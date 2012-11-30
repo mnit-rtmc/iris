@@ -37,6 +37,12 @@ abstract public class OpG4 extends OpController<G4Property> {
 			G4_LOG.log(controller.getName() + ": " + prop);
 	}
 
+	/** Log a property store */
+	protected void logStore(G4Property prop) {
+		if(G4_LOG.isOpen())
+			G4_LOG.log(controller.getName() + ":= " + prop);
+	}
+
 	/** Create a new G4 operation */
 	protected OpG4(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
