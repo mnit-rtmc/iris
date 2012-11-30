@@ -28,4 +28,11 @@ public enum VehicleClass {
 	EXTRA_LARGE;	/* C5 */
 
 	static public final int size = values().length;
+	static public VehicleClass fromOrdinal(int o) {
+		for(VehicleClass vc: VehicleClass.values()) {
+			if(vc.ordinal() == o)
+				return vc;
+		}
+		return SMALL;
+	}
 }

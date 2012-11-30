@@ -47,6 +47,16 @@ abstract public class ControllerProperty {
 		buf[pos + 1] = (byte)(value & 0xFF);
 	}
 
+	/** Format a 2-digit BCD value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer. */
+	static protected void formatBCD2(byte[] buf, int pos, int value) {
+		int lo = value % 10;
+		int hi = (value / 10) % 10;
+		buf[pos] = (byte)((hi << 4) | lo);
+	}
+
 	/** Parse an 8-bit value */
 	static protected int parse8(byte[] body, int pos) {
 		return body[pos] & 0xFF;

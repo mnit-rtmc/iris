@@ -68,6 +68,20 @@ abstract public class G4Property extends ControllerProperty {
 		return req;
 	}
 
+	/** Format time stamp */
+	protected void formatStamp(byte[] data, int pos, long st) {
+		TimeZone utc = TimeZone.getTimeZone("GMT");
+		Calendar cal = Calendar.getInstance(utc);
+		cal.setTimeInMillis(st);
+		formatBCD2(data, pos, cal.get(Calendar.SECOND));
+		formatBCD2(data, pos + 1, cal.get(Calendar.MINUTE));
+		formatBCD2(data, pos + 2, cal.get(Calendar.HOUR_OF_DAY));
+		formatBCD2(data, pos + 3, cal.get(Calendar.DAY_OF_WEEK));
+		formatBCD2(data, pos + 4, cal.get(Calendar.DATE));
+		formatBCD2(data, pos + 5, cal.get(Calendar.MONTH) + 1);
+		formatBCD2(data, pos + 6, cal.get(Calendar.YEAR) % 100);
+	}
+
 	/** Parse one frame.
 	 * @param is Input stream to read from.
 	 * @param drop Sensor ID (drop address). */

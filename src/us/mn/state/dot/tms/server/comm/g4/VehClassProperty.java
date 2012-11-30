@@ -1,0 +1,113 @@
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2012  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+package us.mn.state.dot.tms.server.comm.g4;
+
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import us.mn.state.dot.tms.server.comm.ParsingException;
+
+/**
+ * Vehicle classification property.
+ *
+ * @author Douglas Lau
+ */
+public class VehClassProperty extends G4Property {
+
+	/** Encode a QUERY request */
+	@Override public void encodeQuery(OutputStream os, int drop)
+		throws IOException
+	{
+		byte[] data = new byte[0];
+		os.write(formatRequest(QualCode.CLASS_QUERY, drop, data));
+	}
+
+	/** Decode a QUERY response */
+	@Override public void decodeQuery(InputStream is, int drop)
+		throws IOException
+	{
+		parseFrame(is, drop);
+	}
+
+	/** Parse the data from one frame.
+	 * @param qual Qualifier code.
+	 * @param data Data packet. */
+	@Override protected void parseData(QualCode qual, byte[] data)
+		throws IOException
+	{
+		switch(qual) {
+		case CLASSIFICATION:
+			parseClassification(data);
+			break;
+		default:
+			super.parseData(qual, data);
+		}
+	}
+
+	/** Encode a STORE request */
+	@Override public void encodeStore(OutputStream os, int drop)
+		throws IOException
+	{
+		byte[] data = new byte[VehicleClass.size];
+		for(int i = 0; i < data.length; i++) {
+			VehicleClass vc = VehicleClass.fromOrdinal(i + 1);
+			format8(data, i, getClassLen(vc));
+		}
+		os.write(formatRequest(QualCode.CLASSIFICATION, drop, data));
+	}
+
+	/** Decode a STORE response */
+	@Override public void decodeStore(InputStream is, int drop)
+		throws IOException
+	{
+		parseFrame(is, drop);
+	}
+
+	/** Vehicle classificaiton lengths (meters) */
+	private int[] class_len = new int[VehicleClass.size];
+
+	/** Get the length of a vehicle class */
+	public int getClassLen(VehicleClass vc) {
+		return class_len[vc.ordinal()];
+	}
+
+	/** Set the length of a vehicle class */
+	public void setClassLen(VehicleClass vc, int l) {
+		class_len[vc.ordinal()] = l;
+	}
+
+	/** Parse classification data */
+	private void parseClassification(byte[] data) throws ParsingException {
+		if(data.length != VehicleClass.size)
+			throw new ParsingException("INVALID CLASS LENGTH");
+		for(int i = 0; i < data.length; i++) {
+			VehicleClass vc = VehicleClass.fromOrdinal(i + 1);
+			setClassLen(vc, parse8(data, i));
+		}
+	}
+
+	/** Get a string representation of the vehicle classifications */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for(VehicleClass vc: VehicleClass.values()) {
+			if(sb.length() > 0)
+				sb.append(' ');
+			sb.append(vc);
+			sb.append(':');
+			sb.append(getClassLen(vc));
+		}
+		return sb.toString();
+	}
+}

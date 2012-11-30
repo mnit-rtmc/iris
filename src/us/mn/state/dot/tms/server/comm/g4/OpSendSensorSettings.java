@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -41,6 +42,12 @@ public class OpSendSensorSettings extends OpG4 {
 
 	/** Setup information property */
 	private final SetupInfoProperty setup_info = new SetupInfoProperty();
+
+	/** Vehicle classification property */
+	private final VehClassProperty veh_class = new VehClassProperty();
+
+	/** RTC property */
+	private final RTCProperty rtc = new RTCProperty();
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
@@ -81,7 +88,7 @@ public class OpSendSensorSettings extends OpG4 {
 			if(shouldUpdateSetupInfo())
 				return new StoreSetupInfo();
 			else
-				return null;
+				return new QueryVehClasses();
 		}
 	}
 
@@ -152,6 +159,65 @@ public class OpSendSensorSettings extends OpG4 {
 			updateSetupInfo();
 			mess.add(setup_info);
 			logStore(setup_info);
+			mess.storeProps();
+			return new QueryVehClasses();
+		}
+	}
+
+	/** Phase to query the vehicle classifications */
+	private class QueryVehClasses extends Phase<G4Property> {
+
+		/** Query the vehicle classifications */
+		protected Phase<G4Property> poll(
+			CommMessage<G4Property> mess) throws IOException
+		{
+			mess.add(veh_class);
+			mess.queryProps();
+			logQuery(veh_class);
+			return new QueryRTC();
+		}
+	}
+
+	/** Phase to query RTC */
+	private class QueryRTC extends Phase<G4Property> {
+
+		/** Query the RTC */
+		protected Phase<G4Property> poll(
+			CommMessage<G4Property> mess) throws IOException
+		{
+			mess.add(rtc);
+			mess.queryProps();
+			logQuery(rtc);
+			if(shouldUpdateRTC())
+				return new StoreRTC();
+			else
+				return null;
+		}
+	}
+
+	/** Check if the RTC should be updated */
+	private boolean shouldUpdateRTC() {
+		long stamp = rtc.getStamp();
+		long now = TimeSteward.currentTimeMillis();
+		return stamp < (now - TIME_THRESHOLD) ||
+		       stamp > (now + TIME_THRESHOLD);
+	}
+
+	/** Update the RTC */
+	private void updateRTC() {
+		rtc.setStamp(TimeSteward.currentTimeMillis());
+	}
+
+	/** Phase to store the RTC */
+	private class StoreRTC extends Phase<G4Property> {
+
+		/** Store the RTC */
+		protected Phase<G4Property> poll(
+			CommMessage<G4Property> mess) throws IOException
+		{
+			updateRTC();
+			mess.add(rtc);
+			logStore(rtc);
 			mess.storeProps();
 			return null;
 		}

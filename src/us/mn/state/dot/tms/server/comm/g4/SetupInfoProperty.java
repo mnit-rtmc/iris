@@ -208,7 +208,7 @@ public class SetupInfoProperty extends G4Property {
 		int year = 2000 + parse8(data, pos + 2);
 		Calendar cal = Calendar.getInstance();
 		cal.set(year, month - 1, day);
-		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
