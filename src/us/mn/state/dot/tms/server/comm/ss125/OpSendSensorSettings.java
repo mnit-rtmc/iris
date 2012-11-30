@@ -212,8 +212,8 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
-			mess.storeProps();
 			logStore(date_time);
+			mess.storeProps();
 			return null;
 		}
 	}
