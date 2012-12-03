@@ -65,6 +65,18 @@ span.func {
 	color: white;
 	overflow: auto;
 }
+.green {
+	background: #222222;
+	color: #00ff00;
+}
+.yellow {
+	background: #222222;
+	color: #ffff00;
+}
+.red {
+	background: #222222;
+	color: #ff0000;
+}
 span.inblock {
 	display: inline-block;
 }

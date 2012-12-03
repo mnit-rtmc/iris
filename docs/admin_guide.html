@@ -84,7 +84,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">28 November 2012</div>
+<div id="stamp">3 December 2012</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -253,6 +253,7 @@
 	<li>Vicon Video Switcher</li>
 	<li>Optical Scientific ORG-815 (precipitation)</li>
 	<li>SSI RWIS sensor</li>
+	<li>DLI DIN Relay (LCS)</li>
 </ul>
 <h3 id="advanced_features">Advanced Features</h3>
 <p>
@@ -882,17 +883,21 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 	<tr>
 	    <td>NTCIP Class A</td>
-	    <td><a href="#dms_control">DMS control</a> (no HDLC)</td>
+	    <td><a href="#dms_control">DMS control</a>,
+	        <a href="#ilcs">ILCS</a> (no HDLC)
+	    </td>
 	    <td>UDP</td>
 	</tr>
 	<tr>
 	    <td>NTCIP Class B</td>
-	    <td><a href="#dms_control">DMS control</a> over serial (HDLC)</td>
+	    <td><a href="#dms_control">DMS control</a>,
+	        <a href="#ilcs">ILCS</a> over serial (HDLC)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>NTCIP Class C</td>
-	    <td><a href="#dms_control">DMS control</a> (no HDLC)</td>
+	    <td><a href="#dms_control">DMS control</a>
+	        <a href="#ilcs">ILCS</a> (no HDLC)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
@@ -908,14 +913,16 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<tr>
 	    <td>MnDOT 170 4</td>
 	    <td><a href="#vds">VDS</a>,
-	        <a href="#meter_protocols">metering</a>
+	        <a href="#meter_protocols">metering</a>,
+	        <a href="#dlcs">DLCS</a>
 	    </td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>MnDOT 170 5</td>
 	    <td><a href="#vds">VDS</a>,
-	        <a href="#meter_protocols">metering</a>
+	        <a href="#meter_protocols">metering</a>,
+	        <a href="#dlcs">DLCS</a>
 	    </td>
 	    <td>TCP</td>
 	</tr>
@@ -979,6 +986,11 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	    <td><a href="#rwis_protocol">RWIS</a> (SSI RWIS sensor)</td>
 	    <td>TCP / HTTP</td>
 	</tr>
+	<tr>
+	    <td><a href="#din_relay">DLI DIN Relay</a></td>
+	    <td><a href="#dlcs">DLCS</a></td>
+	    <td>TCP / HTTP</td>
+	</tr>
 </table>
 <p/>
 
@@ -995,6 +1007,27 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<li>Querying currently displayed message</li>
 	<li>Displaying new messages</li>
 </ul>
+
+<h4 id="ilcs">ILCS ("Intelligent" Lane-use Control Signals</h4>
+<p>
+	An "intelligent" LCS device is a color graphical DMS which is mounted
+	directly over a lane of traffic.
+	It can display many different lane-use indications, as well as
+	<i>variable speed advisories</i>, or any operator-defined message as
+	a regular DMS.
+</p>
+
+<h4 id="dlcs">DLCS ("Dumb" Lane-use Control Signals</h4>
+<p>
+	A "dumb" LCS device is a basic DMS which is mounted directly over a
+	lane of traffic.
+	It can display one of a fixed set of indications &mdash; typically a
+	<i>green arrow</i> <span class="green">&nbsp;↓&nbsp;</span>, a
+	<i>yellow arrow</i> <span class="yellow">&nbsp;↓&nbsp;</span> or a
+	<i>red X</i> <span class="red">&nbsp;X&nbsp;</span>).
+	Each indication must be assigned to a separate I/O pin on a controller,
+	as well as the DMS which represents the LCS.
+</p>
 
 <h4 id="msg_feed">DMS Msg Feed Protocol</h4>
 <p>
@@ -1148,6 +1181,14 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	precipitation rate, road surface temperature, wind speed, etc.
 	These protocols allows IRIS to collect and store this type of
 	information.
+</p>
+
+<h4 id="din_relay">DIN Relay</h4>
+<p>
+	DIN relay is is product by DLI which allows simple devices to be turned
+	on of off through an HTTP (web) interface.
+	Each device can control up to 8 outlets, which for a
+	<a href="#dlcs">DLCS</A> means 2 lanes with 3 indications each.
 </p>
 
 <h3 id="controllers">Controllers</h3>
