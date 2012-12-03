@@ -45,11 +45,11 @@ public class ChecksumException extends ParsingException {
 
 	/** Create a new checksum exception with the specified message */
 	public ChecksumException(String m) {
-		super("CHECKSUM ERROR: " + m);
+		super(m);
 	}
 
 	/** Create a new checksum exception with scanned data */
 	public ChecksumException(byte[] data) {
-		super("CHECKSUM ERROR: " + formatScannedData(data));
+		super(formatScannedData(data));
 	}
 }
