@@ -314,7 +314,9 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		FormPanel panel = new FormPanel(false);
 		panel.addRow(I18N.get("lcs.lock"), lcs_lock);
 		panel.addRow(I18N.get("device.operation"), operation);
-		panel.addRow(new JButton(settings));
+		JButton btn = new JButton(settings);
+		panel.addRow(btn);
+		btn.setEnabled(true);
 		return panel;
 	}
 
