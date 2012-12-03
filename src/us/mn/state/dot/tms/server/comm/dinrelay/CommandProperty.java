@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * DIN relay outlet command property.
@@ -33,8 +34,13 @@ public class CommandProperty extends DinRelayProperty {
 		super(requestString(outlet, on));
 	}
 
+	/** Get a string representation of the property */
+	public String toString() {
+		return "command: " + getPath();
+	}
+
 	/** Decode a STORE response */
-	public void decodeStore(InputStream is, int drop) {
+	@Override public void decodeStore(InputStream is, int drop) {
 		// ignore response
 	}
 }

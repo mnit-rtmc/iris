@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.dinrelay;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -31,18 +30,9 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	implements LCSPoller
 {
-	/** DIN relay debug log */
-	static private final IDebugLog DIN_LOG = new IDebugLog("dinrelay");
-
-	/** Log a message to the debug log */
-	static public void log(String msg) {
-		DIN_LOG.log(msg);
-	}
-
 	/** Create a new DIN relay poller */
 	public DinRelayPoller(String n, Messenger m) {
 		super(n, m);
-		log("creating DIN relay poller");
 	}
 
 	/** Check if a drop address is valid */
@@ -52,7 +42,6 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 
 	/** Query the outlet status */
 	public void queryOutlets(ControllerImpl c, OutletProperty op) {
-		log("creating OpQueryOutlets: " + c);
 		addOperation(new OpQueryOutlets(c, op));
 	}
 
@@ -60,7 +49,6 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	public void commandOutlets(ControllerImpl c, boolean[] outlets,
 		OutletProperty op)
 	{
-		log("creating OpCommandOutlets: " + c);
 		addOperation(new OpCommandOutlets(c, outlets, op));
 	}
 
@@ -68,11 +56,9 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
-			log("creating OpSendLCSSettings: " + lcs_array);
 			addOperation(new OpSendLCSSettings(lcs_array));
 			break;
 		case QUERY_MESSAGE:
-			log("creating OpQueryLCSIndications: " + lcs_array);
 			addOperation(new OpQueryLCSIndications(lcs_array));
 			break;
 		default:
@@ -88,7 +74,6 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
-		log("creating OpSendLCSIndications: " + lcs_array);
 		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
 	}
 }

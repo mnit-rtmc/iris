@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
+import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -24,6 +25,21 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpDinRelay extends OpController<DinRelayProperty> {
+
+	/** DIN relay debug log */
+	static private final IDebugLog DIN_LOG = new IDebugLog("dinrelay");
+
+	/** Log a property query */
+	protected void logQuery(DinRelayProperty prop) {
+		if(DIN_LOG.isOpen())
+			DIN_LOG.log(controller.getName() + ": " + prop);
+	}
+
+	/** Log a property store */
+	protected void logStore(DinRelayProperty prop) {
+		if(DIN_LOG.isOpen())
+			DIN_LOG.log(controller.getName() + ":= " + prop);
+	}
 
 	/** Create a new DIN relay operation */
 	protected OpDinRelay(PriorityLevel p, ControllerImpl c) {

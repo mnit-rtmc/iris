@@ -14,8 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -103,7 +104,8 @@ public class HttpFileMessenger extends Messenger {
 	}
 
 	/** Get the input stream */
-	public InputStream getInputStream(String p) throws IOException {
+	@Override public InputStream getInputStream(String p) throws IOException
+	{
 		path = p;
 		// make a new HTTP connection each time called
 		close();
@@ -112,7 +114,7 @@ public class HttpFileMessenger extends Messenger {
 	}
 
 	/** Get an input stream for the specified controller */
-	public InputStream getInputStream(String p, ControllerImpl c)
+	@Override public InputStream getInputStream(String p, ControllerImpl c)
 		throws IOException
 	{
 		path = p;
@@ -120,5 +122,11 @@ public class HttpFileMessenger extends Messenger {
 		close();
 		open(c.getPassword());
 		return input;
+	}
+
+	/** Get an output stream for the specified controller */
+	@Override public OutputStream getOutputStream(ControllerImpl c) {
+		// HTTP messengers don't have output streams
+		return null;
 	}
 }

@@ -14,8 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import us.mn.state.dot.tms.utils.LineReader;
@@ -57,6 +58,18 @@ public class OutletProperty extends DinRelayProperty {
 		return outlets;
 	}
 
+	/** Get a string representation of the property */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("outlets:");
+		for(int i = 0; i < outlets.length; i++) {
+			if(i > 0)
+				sb.append(' ');
+			sb.append(outlets[i]);
+		}
+		return sb.toString();
+	}
+
 	/** Create a new outlet property */
 	public OutletProperty(OutletCallback oc) {
 		super("index.htm");
@@ -64,11 +77,12 @@ public class OutletProperty extends DinRelayProperty {
 	}
 
 	/** Decode a QUERY response */
-	public void decodeQuery(InputStream is, int drop) throws IOException {
+	@Override public void decodeQuery(InputStream is, int drop)
+		throws IOException
+	{
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		for(int i = 0; line != null && i < MAX_LINES; i++) {
-			DinRelayPoller.log("parsing " + line);
 			Matcher m = STATE.matcher(line);
 			if(m.find()) {
 				setOutlets(m.group(1));

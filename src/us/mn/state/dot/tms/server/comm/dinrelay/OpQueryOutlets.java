@@ -49,6 +49,7 @@ public class OpQueryOutlets extends OpDinRelay {
 		{
 			mess.add(property);
 			mess.queryProps();
+			logQuery(property);
 			return null;
 		}
 	}
