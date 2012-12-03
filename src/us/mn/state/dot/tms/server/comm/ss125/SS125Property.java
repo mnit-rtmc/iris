@@ -50,6 +50,7 @@ abstract public class SS125Property extends ControllerProperty {
 	static protected final int OFF_MSG_ID = 0;
 	static protected final int OFF_MSG_SUB_ID = 1;
 	static protected final int OFF_READ_WRITE = 2;
+	static private final int OFF_RESULT = 3;
 
 	/** Maximum number of octets in message body */
 	static private final int MAX_BODY_OCTETS = 244;
@@ -219,7 +220,7 @@ abstract public class SS125Property extends ControllerProperty {
 	static void parseResult(byte[] rbody) throws IOException {
 		if(rbody.length != 6)
 			throw new ParsingException("RESULT LENGTH");
-		int result = parse16(rbody, 3);
+		int result = parse16(rbody, OFF_RESULT);
 		ResponseCode rc = ResponseCode.fromCode(result);
 		if(rc != ResponseCode.NO_ERRORS)
 			throw new ControllerException(rc.toString());
@@ -311,9 +312,28 @@ abstract public class SS125Property extends ControllerProperty {
 			throw new ParsingException("MESSAGE ID");
 		if(parse8(rbody, OFF_MSG_SUB_ID) != msgSubId())
 			throw new ParsingException("MESSAGE SUB ID");
-		if(parseBool(rbody, OFF_READ_WRITE) != store)
-			throw new ParsingException("READ OR WRITE");
+		if(!isUndocumentedReadOrWrite(rbody)) {
+			if(parseBool(rbody, OFF_READ_WRITE) != store)
+				throw new ParsingException("READ OR WRITE");
+		}
 		return rbody;
+	}
+
+	/** Test if the response is an undocumented result message.  The "read
+	 * or write" field has been observed to have a value of 0x02 in error
+	 * responses (INTERVAL_DOES_NOT_EXIST).  According to the spec., it
+	 * should always be 0 (read) or 1 (write).  If this condition happens,
+	 * we will get an error trying to parse it as a boolean. */
+	private boolean isUndocumentedReadOrWrite(byte[] rbody) {
+		if(rbody.length == 6) {
+			if(parse8(rbody, OFF_READ_WRITE) == 0x02) {
+				int result = parse16(rbody, OFF_RESULT);
+				ResponseCode rc = ResponseCode.fromCode(result);
+				if(rc != ResponseCode.NO_ERRORS)
+					return true;
+			}
+		}
+		return false;
 	}
 
 	/** Get the message ID */
