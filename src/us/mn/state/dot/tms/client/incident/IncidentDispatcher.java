@@ -414,10 +414,6 @@ public class IncidentDispatcher extends JPanel
 	public void dispose() {
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
-		if(watching != null) {
-			cache.ignoreObject(watching);
-			watching = null;
-		}
 		clearSelected();
 		removeAll();
 	}
@@ -445,6 +441,11 @@ public class IncidentDispatcher extends JPanel
 
 	/** Clear the selection */
 	protected void clearSelected() {
+		Incident w = watching;
+		if(w != null) {
+			cache.ignoreObject(w);
+			watching = null;
+		}
 		disableWidgets();
 	}
 
@@ -468,14 +469,15 @@ public class IncidentDispatcher extends JPanel
 
 	/** Set a single selected incident */
 	protected void setSelected(Incident inc) {
-		if(watching != null)
-			cache.ignoreObject(watching);
+		Incident w = watching;
+		if(w != null)
+			cache.ignoreObject(w);
 		impact_pnl.setImpact(inc.getImpact());
 		if(inc instanceof ClientIncident)
 			watching = null;
 		else {
 			watching = inc;
-			cache.watchObject(watching);
+			cache.watchObject(inc);
 		}
 		updateAttribute(inc, null);
 		enableWidgets(inc);
