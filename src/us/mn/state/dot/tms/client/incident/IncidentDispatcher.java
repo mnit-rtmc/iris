@@ -164,7 +164,17 @@ public class IncidentDispatcher extends JPanel
 	};
 
 	/** Currently watching incident */
-	protected Incident watching;
+	private Incident watching;
+
+	/** Watch an incident */
+	private void watch(final Incident nw) {
+		final Incident ow = watching;
+		if(ow != null)
+			cache.ignoreObject(ow);
+		watching = nw;
+		if(nw != null)
+			cache.watchObject(nw);
+	}
 
 	/** Create a new incident dispatcher */
 	public IncidentDispatcher(Session s, IncidentManager man,
@@ -441,11 +451,7 @@ public class IncidentDispatcher extends JPanel
 
 	/** Clear the selection */
 	protected void clearSelected() {
-		Incident w = watching;
-		if(w != null) {
-			cache.ignoreObject(w);
-			watching = null;
-		}
+		watch(null);
 		disableWidgets();
 	}
 
@@ -469,16 +475,11 @@ public class IncidentDispatcher extends JPanel
 
 	/** Set a single selected incident */
 	protected void setSelected(Incident inc) {
-		Incident w = watching;
-		if(w != null)
-			cache.ignoreObject(w);
-		impact_pnl.setImpact(inc.getImpact());
 		if(inc instanceof ClientIncident)
-			watching = null;
-		else {
-			watching = inc;
-			cache.watchObject(inc);
-		}
+			watch(null);
+		else
+			watch(inc);
+		impact_pnl.setImpact(inc.getImpact());
 		updateAttribute(inc, null);
 		enableWidgets(inc);
 	}

@@ -118,7 +118,17 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected final User user;
 
 	/** Currently watching LCS */
-	protected LCSArray watching;
+	private LCSArray watching;
+
+	/** Watch an LCS array */
+	private void watch(final LCSArray nw) {
+		final LCSArray ow = watching;
+		if(ow != null)
+			cache.ignoreObject(ow);
+		watching = nw;
+		if(nw != null)
+			cache.watchObject(nw);
+	}
 
 	/** Create a new LCS dispatcher */
 	public LcsDispatcher(Session s, LCSArrayManager m) {
@@ -142,10 +152,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
 		indicationSelector.dispose();
-		if(watching != null) {
-			cache.ignoreObject(watching);
-			watching = null;
-		}
+		clearSelected();
 		removeAll();
 	}
 
@@ -249,15 +256,13 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Clear the selection */
 	protected void clearSelected() {
+		watch(null);
 		disableWidgets();
 	}
 
 	/** Set the selected LCS array */
 	public void setSelected(LCSArray lcs_array) {
-		if(watching != null)
-			cache.ignoreObject(watching);
-		watching = lcs_array;
-		cache.watchObject(watching);
+		watch(lcs_array);
 		boolean update = canUpdate(lcs_array);
 		lane_config.setConfiguration(manager.laneConfiguration(
 			lcs_array));

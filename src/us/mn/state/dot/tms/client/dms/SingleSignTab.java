@@ -137,7 +137,17 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Currently selected DMS.  This will be null if there are zero or
 	 * multiple DMS selected. */
-	protected DMS watching;
+	private DMS watching;
+
+	/** Watch a DMS */
+	private void watch(final DMS nw) {
+		final DMS ow = watching;
+		if(ow != null)
+			cache.ignoreObject(ow);
+		watching = nw;
+		if(nw != null)
+			cache.watchObject(nw);
+	}
 
 	/** Preview mode */
 	protected boolean preview;
@@ -264,11 +274,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Set a single selected DMS */
 	public void setSelected(DMS dms) {
-		if(watching != null)
-			cache.ignoreObject(watching);
-		if(dms != null)
-			cache.watchObject(dms);
-		watching = dms;
+		watch(dms);
 		if(dms != null)
 			updateAttribute(dms, null);
 		else
