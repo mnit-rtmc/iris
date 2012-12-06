@@ -74,7 +74,7 @@ public class BinnedSampleProperty extends SS105Property {
 		public final int det;
 		public final int volume;
 		public final int speed;		// Miles per Hour
-		public final int scans;		// 0-1024 (perentage)
+		public final int scans;		// 0-1024 (percentage)
 		public final int small;		// 0-1024 (percentage)
 		public final int medium;	// 0-1024 (percentage)
 		public final int large;		// 0-1024 (percentage)
