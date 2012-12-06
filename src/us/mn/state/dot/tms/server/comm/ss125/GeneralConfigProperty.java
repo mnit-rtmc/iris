@@ -34,7 +34,7 @@ public class GeneralConfigProperty extends SS125Property {
 		byte[] body = new byte[4];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		formatBool(body, OFF_READ_WRITE, false);
+		format8(body, OFF_MSG_TYPE, MessageType.READ.code);
 		return body;
 	}
 
@@ -43,7 +43,7 @@ public class GeneralConfigProperty extends SS125Property {
 		byte[] body = new byte[87];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		formatBool(body, OFF_READ_WRITE, true);
+		format8(body, OFF_MSG_TYPE, MessageType.WRITE.code);
 		formatString(body, 3, 2, orientation);
 		formatString(body, 5, 32, location);
 		formatString(body, 37, 32, description);

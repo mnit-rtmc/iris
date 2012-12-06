@@ -49,7 +49,7 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Byte offsets from beginning of body packet */
 	static protected final int OFF_MSG_ID = 0;
 	static protected final int OFF_MSG_SUB_ID = 1;
-	static protected final int OFF_READ_WRITE = 2;
+	static protected final int OFF_MSG_TYPE = 2;
 	static private final int OFF_RESULT = 3;
 
 	/** Maximum number of octets in message body */
@@ -301,9 +301,9 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Decode a message response body.
 	 * @param is Input stream to decode from.
 	 * @param n_body Number of bytes in response body.
-	 * @param store Flag to indicate property STORE.
+	 * @param mt Message type of request.
 	 * @throws IOException on error. */
-	private byte[] decodeBody(InputStream is, int n_body, boolean store)
+	private byte[] decodeBody(InputStream is, int n_body, MessageType mt)
 		throws IOException
 	{
 		byte[] rbody = recvResponse(is, n_body + 1);
@@ -315,28 +315,14 @@ abstract public class SS125Property extends ControllerProperty {
 			throw new ParsingException("MESSAGE ID");
 		if(parse8(rbody, OFF_MSG_SUB_ID) != msgSubId())
 			throw new ParsingException("MESSAGE SUB ID");
-		if(!isUndocumentedReadOrWrite(rbody)) {
-			if(parseBool(rbody, OFF_READ_WRITE) != store)
-				throw new ParsingException("READ OR WRITE");
-		}
+		MessageType rmt = MessageType.fromCode(parse8(rbody,
+			OFF_MSG_TYPE));
+		if(rmt == MessageType.RESULT) {
+			if(rbody.length != 6)
+				throw new ParsingException("RESULT SIZE");
+		} else if(rmt != mt)
+			throw new ParsingException("MESSAGE TYPE");
 		return rbody;
-	}
-
-	/** Test if the response is an undocumented result message.  The "read
-	 * or write" field has been observed to have a value of 0x02 in error
-	 * responses (INTERVAL_DOES_NOT_EXIST).  According to the spec., it
-	 * should always be 0 (read) or 1 (write).  If this condition happens,
-	 * we will get an error trying to parse it as a boolean. */
-	private boolean isUndocumentedReadOrWrite(byte[] rbody) {
-		if(rbody.length == 6) {
-			if(parse8(rbody, OFF_READ_WRITE) == 0x02) {
-				int result = parse16(rbody, OFF_RESULT);
-				ResponseCode rc = ResponseCode.fromCode(result);
-				if(rc != ResponseCode.NO_ERRORS)
-					return true;
-			}
-		}
-		return false;
 	}
 
 	/** Get the message ID */
@@ -364,7 +350,7 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Decode a QUERY response */
 	public void decodeQuery(InputStream is, int drop) throws IOException {
 		int n_body = decodeHead(is, drop);
-		byte[] body = decodeBody(is, n_body, false);
+		byte[] body = decodeBody(is, n_body, MessageType.READ);
 		parseQuery(body);
 	}
 
@@ -390,7 +376,7 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Decode a STORE response */
 	public void decodeStore(InputStream is, int drop) throws IOException {
 		int n_body = decodeHead(is, drop);
-		byte[] body = decodeBody(is, n_body, true);
+		byte[] body = decodeBody(is, n_body, MessageType.WRITE);
 		parseResult(body);
 	}
 }

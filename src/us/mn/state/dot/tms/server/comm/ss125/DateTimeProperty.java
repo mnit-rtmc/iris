@@ -38,7 +38,7 @@ public class DateTimeProperty extends SS125Property {
 		byte[] body = new byte[4];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		formatBool(body, OFF_READ_WRITE, false);
+		format8(body, OFF_MSG_TYPE, MessageType.READ.code);
 		return body;
 	}
 
@@ -47,7 +47,7 @@ public class DateTimeProperty extends SS125Property {
 		byte[] body = new byte[12];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		formatBool(body, OFF_READ_WRITE, true);
+		format8(body, OFF_MSG_TYPE, MessageType.WRITE.code);
 		formatDate(body, 3);
 		return body;
 	}

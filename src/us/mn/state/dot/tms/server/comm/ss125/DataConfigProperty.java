@@ -34,7 +34,7 @@ public class DataConfigProperty extends SS125Property {
 		byte[] body = new byte[4];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		formatBool(body, OFF_READ_WRITE, false);
+		format8(body, OFF_MSG_TYPE, MessageType.READ.code);
 		return body;
 	}
 
@@ -43,7 +43,7 @@ public class DataConfigProperty extends SS125Property {
 		byte[] body = new byte[29];
 		format8(body, OFF_MSG_ID, msgId());
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		formatBool(body, OFF_READ_WRITE, true);
+		format8(body, OFF_MSG_TYPE, MessageType.WRITE.code);
 		format16(body, 3, interval);
 		format8(body, 5, mode.ordinal());
 		formatPushConfig(body, 6, event_push);
