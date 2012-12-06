@@ -35,9 +35,7 @@ public class FlashConfigProperty extends SS125Property {
 	/** Format a STORE request */
 	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[4];
-		format8(body, OFF_MSG_ID, msgId().id);
-		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		format8(body, OFF_MSG_TYPE, MessageType.WRITE.code);
+		formatBody(body, MessageType.WRITE);
 		return body;
 	}
 

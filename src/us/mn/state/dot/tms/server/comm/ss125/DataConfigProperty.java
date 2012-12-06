@@ -32,18 +32,14 @@ public class DataConfigProperty extends SS125Property {
 	/** Format a QUERY request */
 	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[4];
-		format8(body, OFF_MSG_ID, msgId().id);
-		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		format8(body, OFF_MSG_TYPE, MessageType.READ.code);
+		formatBody(body, MessageType.READ);
 		return body;
 	}
 
 	/** Format a STORE request */
 	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[29];
-		format8(body, OFF_MSG_ID, msgId().id);
-		format8(body, OFF_MSG_SUB_ID, msgSubId());
-		format8(body, OFF_MSG_TYPE, MessageType.WRITE.code);
+		formatBody(body, MessageType.WRITE);
 		format16(body, 3, interval);
 		format8(body, 5, mode.ordinal());
 		formatPushConfig(body, 6, event_push);

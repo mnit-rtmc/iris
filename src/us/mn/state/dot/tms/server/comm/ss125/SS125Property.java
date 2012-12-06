@@ -47,9 +47,9 @@ abstract public class SS125Property extends ControllerProperty {
 	static private final int OFF_CRC = 10;
 
 	/** Byte offsets from beginning of body packet */
-	static protected final int OFF_MSG_ID = 0;
+	static private final int OFF_MSG_ID = 0;
 	static protected final int OFF_MSG_SUB_ID = 1;
-	static protected final int OFF_MSG_TYPE = 2;
+	static private final int OFF_MSG_TYPE = 2;
 	static private final int OFF_RESULT = 3;
 
 	/** Maximum number of octets in message body */
@@ -275,6 +275,15 @@ abstract public class SS125Property extends ControllerProperty {
 		if(n_body < 3 || n_body > MAX_BODY_OCTETS)
 			throw new ParsingException("BODY SIZE");
 		return n_body;
+	}
+
+	/** Format a message body.
+	 * @param body Body buffer.
+	 * @param mt Message type. */
+	protected void formatBody(byte[] body, MessageType mt) {
+		format8(body, OFF_MSG_ID, msgId().id);
+		format8(body, OFF_MSG_SUB_ID, msgSubId());
+		format8(body, OFF_MSG_TYPE, mt.code);
 	}
 
 	/** Decode a message response body.
