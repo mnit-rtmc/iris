@@ -29,14 +29,14 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class DateTimeProperty extends SS125Property {
 
 	/** Message ID for date / time request */
-	protected int msgId() {
-		return MSG_ID_DATE_TIME;
+	protected MessageID msgId() {
+		return MessageID.DATE_TIME;
 	}
 
 	/** Format a QUERY request */
 	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[4];
-		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_ID, msgId().id);
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		format8(body, OFF_MSG_TYPE, MessageType.READ.code);
 		return body;
@@ -45,7 +45,7 @@ public class DateTimeProperty extends SS125Property {
 	/** Format a STORE request */
 	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[12];
-		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_ID, msgId().id);
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		format8(body, OFF_MSG_TYPE, MessageType.WRITE.code);
 		formatDate(body, 3);

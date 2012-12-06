@@ -28,14 +28,14 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class IntervalDataProperty extends SS125Property {
 
 	/** Message ID for interval data request */
-	protected int msgId() {
-		return MSG_ID_INTERVAL;
+	protected MessageID msgId() {
+		return MessageID.INTERVAL;
 	}
 
 	/** Format a QUERY request */
 	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[7];
-		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_ID, msgId().id);
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		format8(body, OFF_MSG_TYPE, MessageType.READ.code);
 		format24(body, 3, 0);

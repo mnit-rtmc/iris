@@ -61,27 +61,6 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Message sub ID "don't care" */
 	static private final byte MSG_SUB_ID = 0;
 
-	/** Message ID codes */
-	static protected final int MSG_ID_GENERAL_CONFIG = 0x00;
-	static protected final int MSG_ID_DATA_CONFIG = 0x03;
-	static protected final int MSG_ID_FLASH_CONFIG = 0x08;
-	static protected final int MSG_ID_PUSH_ENABLE = 0x0D;
-	static protected final int MSG_ID_DATE_TIME = 0x0E;
-	static protected final int MSG_ID_APPROACH_INFO = 0x11;
-	static protected final int MSG_ID_CLASS_CONFIG = 0x13;
-	static protected final int MSG_ID_LANE_INFO = 0x17;
-	static protected final int MSG_ID_ALL_PUSH_ENABLE = 0x1C;
-	static protected final int MSG_ID_LANE_PUSH = 0x62;
-	static protected final int MSG_ID_EVENT_BULK = 0x63;
-	static protected final int MSG_ID_CLEAR_NV = 0x64;
-	static protected final int MSG_ID_EVENT_PUSH = 0x65;
-	static protected final int MSG_ID_ACTIVE_EVENTS = 0x67;
-	static protected final int MSG_ID_PRESENCE = 0x68;
-	static protected final int MSG_ID_PRESENCE_PUSH = 0x69;
-	static protected final int MSG_ID_CLEAR_EVENT_FIFO = 0x6D;
-	static protected final int MSG_ID_INTERVAL_NV = 0x70;
-	static protected final int MSG_ID_INTERVAL = 0x71;
-
 	/** CRC calculator */
 	static private final Crc8 CRC = new Crc8();
 
@@ -311,7 +290,8 @@ abstract public class SS125Property extends ControllerProperty {
 			throw new ParsingException("BODY SIZE");
 		if(parse8(rbody, rbody.length - 1) != CRC.calculate(rbody))
 			throw new ChecksumException("BODY CRC");
-		if(parse8(rbody, OFF_MSG_ID) != msgId())
+		MessageID mid = MessageID.fromCode(parse8(rbody, OFF_MSG_ID));
+		if(mid != msgId())
 			throw new ParsingException("MESSAGE ID");
 		if(parse8(rbody, OFF_MSG_SUB_ID) != msgSubId())
 			throw new ParsingException("MESSAGE SUB ID");
@@ -326,7 +306,7 @@ abstract public class SS125Property extends ControllerProperty {
 	}
 
 	/** Get the message ID */
-	abstract protected int msgId();
+	abstract protected MessageID msgId();
 
 	/** Get the message sub-ID */
 	protected int msgSubId() {

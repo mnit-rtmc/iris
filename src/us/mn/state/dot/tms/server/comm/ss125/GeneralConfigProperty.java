@@ -25,14 +25,14 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class GeneralConfigProperty extends SS125Property {
 
 	/** Message ID for general config request */
-	protected int msgId() {
-		return MSG_ID_GENERAL_CONFIG;
+	protected MessageID msgId() {
+		return MessageID.GENERAL_CONFIG;
 	}
 
 	/** Format a QUERY request */
 	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[4];
-		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_ID, msgId().id);
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		format8(body, OFF_MSG_TYPE, MessageType.READ.code);
 		return body;
@@ -41,7 +41,7 @@ public class GeneralConfigProperty extends SS125Property {
 	/** Format a STORE request */
 	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[87];
-		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_ID, msgId().id);
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		format8(body, OFF_MSG_TYPE, MessageType.WRITE.code);
 		formatString(body, 3, 2, orientation);

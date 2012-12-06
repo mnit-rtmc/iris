@@ -28,14 +28,14 @@ public class FlashConfigProperty extends SS125Property {
 	static private final int FLASH_WRITE_MS = 4000;
 
 	/** Message ID for flash config request */
-	protected int msgId() {
-		return MSG_ID_FLASH_CONFIG;
+	protected MessageID msgId() {
+		return MessageID.FLASH_CONFIG;
 	}
 
 	/** Format a STORE request */
 	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[4];
-		format8(body, OFF_MSG_ID, msgId());
+		format8(body, OFF_MSG_ID, msgId().id);
 		format8(body, OFF_MSG_SUB_ID, msgSubId());
 		format8(body, OFF_MSG_TYPE, MessageType.WRITE.code);
 		return body;
