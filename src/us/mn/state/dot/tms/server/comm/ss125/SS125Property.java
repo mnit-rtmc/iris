@@ -68,8 +68,11 @@ abstract public class SS125Property extends ControllerProperty {
 	static protected final int MSG_ID_PUSH_ENABLE = 0x0D;
 	static protected final int MSG_ID_DATE_TIME = 0x0E;
 	static protected final int MSG_ID_APPROACH_INFO = 0x11;
-	static protected final int MSG_ID_LANE_INFO = 0x12;
+	static protected final int MSG_ID_CLASS_CONFIG = 0x13;
+	static protected final int MSG_ID_LANE_INFO = 0x17;
+	static protected final int MSG_ID_ALL_PUSH_ENABLE = 0x1C;
 	static protected final int MSG_ID_LANE_PUSH = 0x62;
+	static protected final int MSG_ID_EVENT_BULK = 0x63;
 	static protected final int MSG_ID_CLEAR_NV = 0x64;
 	static protected final int MSG_ID_EVENT_PUSH = 0x65;
 	static protected final int MSG_ID_ACTIVE_EVENTS = 0x67;
