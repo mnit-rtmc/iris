@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.VehLengthClass;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
@@ -149,6 +150,14 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		vol_cache = new PeriodicSampleCache(PeriodicSampleType.VOLUME);
 		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
 		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
+		vol_mc_cache = new PeriodicSampleCache(
+			PeriodicSampleType.MOTORCYCLE);
+		vol_s_cache = new PeriodicSampleCache(
+			PeriodicSampleType.SHORT);
+		vol_m_cache = new PeriodicSampleCache(
+			PeriodicSampleType.MEDIUM);
+		vol_l_cache = new PeriodicSampleCache(
+			PeriodicSampleType.LONG);
 		v_log = new VehicleEventLog(n);
 		initTransients();
 	}
@@ -169,6 +178,14 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		vol_cache = new PeriodicSampleCache(PeriodicSampleType.VOLUME);
 		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
 		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
+		vol_mc_cache = new PeriodicSampleCache(
+			PeriodicSampleType.MOTORCYCLE);
+		vol_s_cache = new PeriodicSampleCache(
+			PeriodicSampleType.SHORT);
+		vol_m_cache = new PeriodicSampleCache(
+			PeriodicSampleType.MEDIUM);
+		vol_l_cache = new PeriodicSampleCache(
+			PeriodicSampleType.LONG);
 		v_log = new VehicleEventLog(n);
 	}
 
@@ -492,6 +509,18 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Periodic speed sample cache */
 	private transient final PeriodicSampleCache spd_cache;
 
+	/** Periodic volume sample cache (MOTORCYCLE class) */
+	private transient final PeriodicSampleCache vol_mc_cache;
+
+	/** Periodic volume sample cache (SHORT class) */
+	private transient final PeriodicSampleCache vol_s_cache;
+
+	/** Periodic volume sample cache (MEDIUM class) */
+	private transient final PeriodicSampleCache vol_m_cache;
+
+	/** Periodic volume sample cache (LONG class) */
+	private transient final PeriodicSampleCache vol_l_cache;
+
 	/** Volume from the last 30-second sample period.  FIXME: use
 	 * vol_cache to get "last_volume" value. */
 	protected transient int last_volume = MISSING_DATA;
@@ -647,6 +676,30 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	}
 
 	/** Store one volume sample for this detector.
+	 * @param vol PeriodicSample containing volume data.
+	 * @param vc Vehicle class. */
+	public void storeVolume(PeriodicSample vol, VehLengthClass vc) {
+		if(vc == null)
+			storeVolume(vol);
+		else {
+			switch(vc) {
+			case MOTORCYCLE:
+				vol_mc_cache.add(vol);
+				break;
+			case SHORT:
+				vol_s_cache.add(vol);
+				break;
+			case MEDIUM:
+				vol_m_cache.add(vol);
+				break;
+			case LONG:
+				vol_l_cache.add(vol);
+				break;
+			}
+		}
+	}
+
+	/** Store one volume sample for this detector.
 	 * @param vol PeriodicSample containing volume data. */
 	public void storeVolume(PeriodicSample vol) {
 		if(lane_type != LaneType.GREEN &&
@@ -737,6 +790,10 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			writer.flush(vol_cache, name);
 			writer.flush(scn_cache, name);
 			writer.flush(spd_cache, name);
+			writer.flush(vol_mc_cache, name);
+			writer.flush(vol_s_cache, name);
+			writer.flush(vol_m_cache, name);
+			writer.flush(vol_l_cache, name);
 		}
 		catch(IOException e) {
 			e.printStackTrace();
@@ -748,6 +805,10 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		vol_cache.purge(before);
 		scn_cache.purge(before);
 		spd_cache.purge(before);
+		vol_mc_cache.purge(before);
+		vol_s_cache.purge(before);
+		vol_m_cache.purge(before);
+		vol_l_cache.purge(before);
 	}
 
 	/** Vehicle event log */

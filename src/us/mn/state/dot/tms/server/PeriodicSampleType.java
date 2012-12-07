@@ -36,6 +36,18 @@ public enum PeriodicSampleType {
 	/** Speed (mph) */
 	SPEED("s", 1, Byte.MAX_VALUE, Aggregation.AVERAGE),
 
+	/** Motorcycle volume (count of MOTORCYCLE vehicle class) */
+	MOTORCYCLE("vmc", 1, Byte.MAX_VALUE, Aggregation.SUM),
+
+	/** Short volume (count of SHORT vehicle class) */
+	SHORT("vs", 1, Byte.MAX_VALUE, Aggregation.SUM),
+
+	/** Medium volume (count of MEDIUM vehicle class) */
+	MEDIUM("vm", 1, Byte.MAX_VALUE, Aggregation.SUM),
+
+	/** Long volume (count of LONG vehicle class) */
+	LONG("vl", 1, Byte.MAX_VALUE, Aggregation.SUM),
+
 	/** Precipitation rate (um; micrometers) */
 	PRECIP_RATE("pr", 2, Short.MAX_VALUE, Aggregation.SUM),
 

@@ -111,6 +111,10 @@ public class OpQuerySamples extends OpSS125 {
 			sample_data.getScans(), MAX_SCANS);
 		controller.storeSpeed(stamp, period, START_PIN,
 			sample_data.getSpeed());
+		for(SS125VehClass vc: SS125VehClass.values()) {
+			controller.storeVolume(stamp, period, START_PIN,
+				sample_data.getVolume(vc), vc.v_class);
+		}
 		completer.completeTask(getKey());
 		super.cleanup();
 	}

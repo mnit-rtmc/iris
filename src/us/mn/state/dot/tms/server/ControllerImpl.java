@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.VehLengthClass;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -475,6 +476,18 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public void storeVolume(long stamp, int period, int start_pin,
 		int[] volume)
 	{
+		storeVolume(stamp, period, start_pin, volume, null);
+	}
+
+	/** Store volume sample data.
+	 * @param stamp Timestamp in milliseconds since epoch.
+	 * @param period Sampling period in seconds.
+	 * @param start_pin Start pin on controller I/O.
+	 * @param volume Array of volume samples.
+	 * @param vc Vehicle class. */
+	public void storeVolume(long stamp, int period, int start_pin,
+		int[] volume, VehLengthClass vc)
+	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
 		for(Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
@@ -482,7 +495,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			int v = sampleValue(volume, i);
 			if(v >= 0) {
 				det.storeVolume(new PeriodicSample(stamp,
-					period, v));
+					period, v), vc);
 			}
 		}
 	}
