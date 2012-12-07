@@ -251,6 +251,7 @@ public class IntervalDataProperty extends SS125Property {
 		for(int s: getHeadway())
 			sb.append("" + s + ",");
 		sb.setLength(sb.length() - 1);
+		sb.append("]");
 		for(SS125VehClass vc: SS125VehClass.values()) {
 			sb.append(", ");
 			sb.append(vc);
