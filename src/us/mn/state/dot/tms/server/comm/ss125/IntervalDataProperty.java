@@ -122,10 +122,7 @@ public class IntervalDataProperty extends SS125Property {
 		public final Float speed;
 		public final int volume;
 		public final int scan;
-		public final int vol_a;
-		public final int vol_b;
-		public final int vol_c;
-		public final int vol_d;
+		public final int[] vol_c = new int[SS125VehClass.size];
 		public final Float speed_85;
 		public final int headway;
 		public final int gap;
@@ -133,10 +130,10 @@ public class IntervalDataProperty extends SS125Property {
 			speed = parse24Fixed(body, 14);
 			volume = parse24(body, 17);
 			scan = parse16(body, 20);
-			vol_a = parse24(body, 22);
-			vol_b = parse24(body, 25);
-			vol_c = parse24(body, 28);
-			vol_d = parse24(body, 31);
+			vol_c[0] = parse24(body, 22);
+			vol_c[1] = parse24(body, 25);
+			vol_c[2] = parse24(body, 28);
+			vol_c[3] = parse24(body, 31);
 			speed_85 = parse24Fixed(body, 34);
 			headway = parse24(body, 37);
 			gap = parse24(body, 40);
@@ -150,6 +147,21 @@ public class IntervalDataProperty extends SS125Property {
 			LaneInterval li = lanes[i];
 			if(li != null)
 				vol[i] = li.volume;
+			else
+				vol[i] = MISSING_DATA;
+		}
+		return vol;
+	}
+
+	/** Get the vehicle class volume for all lanes.
+	 * @param vc Vehicle class.
+	 * @return Array of volumes, one for each lane. */
+	public int[] getVolume(SS125VehClass vc) {
+		int[] vol = new int[lanes.length];
+		for(int i = 0; i < vol.length; i++) {
+			LaneInterval li = lanes[i];
+			if(li != null)
+				vol[i] = li.vol_c[vc.ordinal()];
 			else
 				vol[i] = MISSING_DATA;
 		}
@@ -230,14 +242,24 @@ public class IntervalDataProperty extends SS125Property {
 		sb.append("], speed: [");
 		for(int s: getSpeed())
 			sb.append("" + s + ",");
+		sb.setLength(sb.length() - 1);
 		sb.append("], speed85: [");
 		for(int s: getSpeed85())
 			sb.append("" + s + ",");
+		sb.setLength(sb.length() - 1);
 		sb.append("], headway: [");
 		for(int s: getHeadway())
 			sb.append("" + s + ",");
 		sb.setLength(sb.length() - 1);
-		sb.append("]");
+		for(SS125VehClass vc: SS125VehClass.values()) {
+			sb.append(", ");
+			sb.append(vc);
+			sb.append(": [");
+			for(int v: getVolume(vc))
+				sb.append("" + v + ",");
+			sb.setLength(sb.length() - 1);
+			sb.append("]");
+		}
 		return sb.toString();
 	}
 }
