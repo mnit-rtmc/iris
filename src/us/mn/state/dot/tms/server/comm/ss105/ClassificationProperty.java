@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.VehLengthClass;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -24,41 +25,23 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class ClassificationProperty extends MemoryProperty {
 
-	/** Default minimum length for SHORT vehicle classification */
-	static protected final int SHORT_MIN = 0;
-
-	/** Default maximum length for SHORT vehicle classification */
-	static protected final int SHORT_MAX = 21;
-
-	/** Default minimum length for MEDIUM vehicle classification */
-	static protected final int MEDIUM_MIN = SHORT_MAX;
-
-	/** Default maximum length for MEDIUM vehicle classification */
-	static protected final int MEDIUM_MAX = 35;
-
-	/** Default minimum length for LONG vehicle classification */
-	static protected final int LONG_MIN = MEDIUM_MAX;
-
-	/** Default maximum length for LONG vehicle classification */
-	static protected final int LONG_MAX = 328;
-
 	/** Minimum length for SHORT vehicle classification */
-	int short_min = SHORT_MIN;
+	private int short_min = VehLengthClass.MOTORCYCLE.bound + 1;
 
 	/** Maximum length for SHORT vehicle classification */
-	int short_max = SHORT_MAX;
+	private int short_max = VehLengthClass.SHORT.bound;
 
 	/** Minimum length for MEDIUM vehicle classification */
-	int medium_min = MEDIUM_MIN;
+	private int medium_min = VehLengthClass.SHORT.bound + 1;
 
 	/** Maximum length for MEDIUM vehicle classification */
-	int medium_max = MEDIUM_MAX;
+	private int medium_max = VehLengthClass.MEDIUM.bound;
 
 	/** Minimum length for LONG vehicle classification */
-	int long_min = LONG_MIN;
+	private int long_min = VehLengthClass.MEDIUM.bound + 1;
 
 	/** Maximum length for LONG vehicle classification */
-	int long_max = LONG_MAX;
+	private int long_max = VehLengthClass.LONG.bound;
 
 	/** Get the SS105 memory buffer address */
 	protected int memoryAddress() {
@@ -73,8 +56,8 @@ public class ClassificationProperty extends MemoryProperty {
 	/** Format the buffer to write to SS105 memory */
 	protected String formatBuffer() {
 		return hex(short_min, 4) + hex(short_max, 4) + hex(0, 8) +
-			hex(medium_min, 4) + hex(medium_max, 4) + hex(0, 8) +
-			hex(long_min, 4) + hex(long_max, 4);
+		       hex(medium_min, 4) + hex(medium_max, 4) + hex(0, 8) +
+		       hex(long_min, 4) + hex(long_max, 4);
 	}
 
 	/** Parse the response to a QUERY request */
@@ -95,9 +78,12 @@ public class ClassificationProperty extends MemoryProperty {
 
 	/** Is the classification set to the default values? */
 	public boolean isDefault() {
-		return short_min == SHORT_MIN && short_max == SHORT_MAX &&
-			medium_min == MEDIUM_MIN && medium_max == MEDIUM_MAX &&
-			long_min == LONG_MIN && long_max == LONG_MAX;
+		return short_min == VehLengthClass.MOTORCYCLE.bound + 1 &&
+		       short_max == VehLengthClass.SHORT.bound &&
+		       medium_min == VehLengthClass.SHORT.bound + 1 &&
+		       medium_max == VehLengthClass.MEDIUM.bound &&
+		       long_min == VehLengthClass.MEDIUM.bound + 1 &&
+		       long_max == VehLengthClass.LONG.bound;
 	}
 
 	/** Get a string representation */

@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
 import java.util.Date;
+import us.mn.state.dot.tms.VehLengthClass;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -78,6 +80,7 @@ public class BinnedSampleProperty extends SS105Property {
 		public final int small;		// 0-1024 (percentage)
 		public final int medium;	// 0-1024 (percentage)
 		public final int large;		// 0-1024 (percentage)
+		public final int[] vol_c = new int[VehLengthClass.size];
 
 		protected LaneSample(String s) throws ParsingException {
 			det = parseInt(s.substring(0, 1));
@@ -87,6 +90,14 @@ public class BinnedSampleProperty extends SS105Property {
 			small = parseInt(s.substring(17, 21));
 			medium = parseInt(s.substring(21, 25));
 			large = parseInt(s.substring(25, 29));
+			vol_c[VehLengthClass.SHORT.ordinal()] =
+				volPercent(small);
+			vol_c[VehLengthClass.MEDIUM.ordinal()] =
+				volPercent(medium);
+			vol_c[VehLengthClass.LONG.ordinal()] =
+				volPercent(large);
+			vol_c[VehLengthClass.MOTORCYCLE.ordinal()] =
+				calculateMotorcycleVolume();
 		}
 		static int parseInt(String s) throws ParsingException {
 			try {
@@ -102,10 +113,38 @@ public class BinnedSampleProperty extends SS105Property {
 		static float percent(int i) {
 			return 100 * i / (float)MAX_PERCENT;
 		}
+		private int volPercent(int i) {
+			float p = i / (float)MAX_PERCENT;
+			return Math.round(p * volume);
+		}
+		private int calculateMotorcycleVolume() {
+			int v = volume;
+			for(VehLengthClass vc: VehLengthClass.values())
+				v -= vol_c[vc.ordinal()];
+			return v >= 0 ? v : MISSING_DATA;
+		}
 		public String toString() {
-			return det + ": " + volume + ", " + speed + ", " +
-				percent(scans) + ", " + small + ", " +
-				medium + ", " + large;
+			StringBuilder sb = new StringBuilder();
+			sb.append(det);
+			sb.append(": ");
+			sb.append(volume);
+			sb.append(", ");
+			sb.append(speed);
+			sb.append(", ");
+			sb.append(percent(scans));
+			sb.append("%, ");
+			sb.append(small);
+			sb.append(", ");
+			sb.append(medium);
+			sb.append(", ");
+			sb.append(large);
+			for(VehLengthClass vc: VehLengthClass.values()) {
+				sb.append(", ");
+				sb.append(vc);
+				sb.append(":");
+				sb.append(vol_c[vc.ordinal()]);
+			}
+			return sb.toString();
 		}
 	}
 
@@ -136,8 +175,16 @@ public class BinnedSampleProperty extends SS105Property {
 		return sb.toString();
 	}
 
+	/** Create a set of sample data */
+	private int[] createSamples() {
+		int[] data = new int[maxDetNumber()];
+		for(int i = 0; i < data.length; i++)
+			data[i] = MISSING_DATA;
+		return data;
+	}
+
 	/** Get the highest detector sample number */
-	protected int maxDetNumber() {
+	private int maxDetNumber() {
 		int dets = 0;
 		for(LaneSample ls: samples)
 			dets = Math.max(dets, ls.det);
@@ -146,15 +193,25 @@ public class BinnedSampleProperty extends SS105Property {
 
 	/** Get the volume array */
 	public int[] getVolume() {
-		int[] volume = new int[maxDetNumber()];
+		int[] volume = createSamples();
 		for(LaneSample ls: samples)
 			volume[ls.det - 1] = ls.volume;
 		return volume;
 	}
 
+	/** Get the vehicle class volume for all lanes.
+	 * @param vc Vehicle class.
+	 * @return Array of volumes, one for each lane. */
+	public int[] getVolume(VehLengthClass vc) {
+		int[] vol = createSamples();
+		for(LaneSample ls: samples)
+			vol[ls.det - 1] = ls.vol_c[vc.ordinal()];
+		return vol;
+	}
+
 	/** Get the scan count array */
 	public int[] getScans() {
-		int[] scans = new int[maxDetNumber()];
+		int[] scans = createSamples();
 		for(LaneSample ls: samples)
 			scans[ls.det - 1] = ls.getScans();
 		return scans;
@@ -162,7 +219,7 @@ public class BinnedSampleProperty extends SS105Property {
 
 	/** Get the speed array */
 	public int[] getSpeed() {
-		int[] speed = new int[maxDetNumber()];
+		int[] speed = createSamples();
 		for(LaneSample ls: samples)
 			speed[ls.det - 1] = ls.speed;
 		return speed;

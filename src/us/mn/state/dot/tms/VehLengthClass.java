@@ -33,6 +33,9 @@ public enum VehLengthClass {
 		bound = b;
 	}
 
+	/** Size of enum */
+	static public final int size = values().length;
+
 	/** Get a vehicle length class from an ordinal */
 	static public VehLengthClass fromOrdinal(int o) {
 		for(VehLengthClass vc: VehLengthClass.values()) {

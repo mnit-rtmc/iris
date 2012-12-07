@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.tms.VehLengthClass;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -49,14 +50,8 @@ public class OpQuerySamples extends OpSS105 {
 	/** Newest timestamp to accept from controller */
 	protected final long newest;
 
-	/** Volume data for each detector */
-	protected int[] volume = new int[8];
-
-	/** Scan data for each detector */
-	protected int[] scans = new int[8];
-
-	/** Speed data for each detector */
-	protected int[] speed = new int[8];
+	/** Binned sample property */
+	private final BinnedSampleProperty samples = new BinnedSampleProperty();
 
 	/** Create a new "query binned samples" operation */
 	public OpQuerySamples(ControllerImpl c, int p, Completer comp) {
@@ -71,11 +66,6 @@ public class OpQuerySamples extends OpSS105 {
 		cal.setTimeInMillis(stamp);
 		cal.add(Calendar.MINUTE, 5);
 		newest = cal.getTimeInMillis();
-		for(int i = 0; i < 8; i++) {
-			volume[i] = MISSING_DATA;
-			scans[i] = MISSING_DATA;
-			speed[i] = MISSING_DATA;
-		}
 	}
 
 	/** Begin the operation */
@@ -95,14 +85,10 @@ public class OpQuerySamples extends OpSS105 {
 		protected Phase<SS105Property> poll(
 			CommMessage<SS105Property> mess) throws IOException
 		{
-			BinnedSampleProperty bs = new BinnedSampleProperty();
-			mess.add(bs);
+			mess.add(samples);
 			mess.queryProps();
-			stamp = bs.timestamp.getTime();
-			volume = bs.getVolume();
-			scans = bs.getScans();
-			speed = bs.getSpeed();
-			logQuery(bs);
+			logQuery(samples);
+			stamp = samples.timestamp.getTime();
 			if(stamp < oldest || stamp > newest) {
 				logError("BAD TIMESTAMP: " + new Date(stamp));
 				setFailed();
@@ -115,10 +101,16 @@ public class OpQuerySamples extends OpSS105 {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		controller.storeVolume(stamp, period, START_PIN, volume);
-		controller.storeOccupancy(stamp, period, START_PIN, scans,
-			BinnedSampleProperty.MAX_PERCENT);
-		controller.storeSpeed(stamp, period, START_PIN, speed);
+		controller.storeVolume(stamp, period, START_PIN,
+			samples.getVolume());
+		controller.storeOccupancy(stamp, period, START_PIN,
+			samples.getScans(), BinnedSampleProperty.MAX_PERCENT);
+		controller.storeSpeed(stamp, period, START_PIN,
+			samples.getSpeed());
+		for(VehLengthClass vc: VehLengthClass.values()) {
+			controller.storeVolume(stamp, period, START_PIN,
+				samples.getVolume(vc), vc);
+		}
 		completer.completeTask(getKey());
 		super.cleanup();
 	}
