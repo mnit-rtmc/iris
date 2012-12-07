@@ -107,9 +107,6 @@ public class PeriodicSampleCache {
 		return vals;
 	}
 
-	/** Sensor ID */
-	public final String sensor_id;
-
 	/** Sample type */
 	public final PeriodicSampleType sample_type;
 
@@ -119,11 +116,9 @@ public class PeriodicSampleCache {
 		new ConcurrentSkipListSet<PeriodicSample>();
 
 	/** Create a new periodic sample cache.
-	 * @param tp Sample type.
-	 * @param sid Sensor ID. */
-	public PeriodicSampleCache(PeriodicSampleType tp, String sid) {
+	 * @param tp Sample type. */
+	public PeriodicSampleCache(PeriodicSampleType tp) {
 		sample_type = tp;
-		sensor_id = sid;
 	}
 
 	/** Add a periodic sample to the cache.

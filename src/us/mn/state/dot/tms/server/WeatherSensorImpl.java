@@ -104,10 +104,9 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		GeoLocImpl g = new GeoLocImpl(name);
 		MainServer.server.createObject(g);
 		geo_loc = g;
-		cache = new PeriodicSampleCache(
-			PeriodicSampleType.PRECIP_RATE, n);
+		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
 		pt_cache = new PeriodicSampleCache(
-			PeriodicSampleType.PRECIP_TYPE, n);
+			PeriodicSampleType.PRECIP_TYPE);
 	}
 
 	/** Create a weather sensor */
@@ -116,10 +115,9 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
-		cache = new PeriodicSampleCache(
-			PeriodicSampleType.PRECIP_RATE, n);
+		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
 		pt_cache = new PeriodicSampleCache(
-			PeriodicSampleType.PRECIP_TYPE, n);
+			PeriodicSampleType.PRECIP_TYPE);
 		initTransients();
 	}
 
@@ -326,8 +324,8 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Flush buffered sample data to disk */
 	public void flush(PeriodicSampleWriter writer) {
 		try {
-			writer.flush(cache);
-			writer.flush(pt_cache);
+			writer.flush(cache, name);
+			writer.flush(pt_cache, name);
 		}
 		catch(IOException e) {
 			e.printStackTrace();

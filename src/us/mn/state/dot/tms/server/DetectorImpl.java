@@ -146,12 +146,9 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Create a new detector */
 	public DetectorImpl(String n) throws TMSException, SonarException {
 		super(n);
-		vol_cache = new PeriodicSampleCache(
-			PeriodicSampleType.VOLUME, n);
-		scn_cache = new PeriodicSampleCache(
-			PeriodicSampleType.SCAN, n);
-		spd_cache = new PeriodicSampleCache(
-			PeriodicSampleType.SPEED, n);
+		vol_cache = new PeriodicSampleCache(PeriodicSampleType.VOLUME);
+		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
+		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
 		v_log = new VehicleEventLog(n);
 		initTransients();
 	}
@@ -169,12 +166,9 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		force_fail = ff;
 		field_length = fl;
 		fake = f;
-		vol_cache = new PeriodicSampleCache(
-			PeriodicSampleType.VOLUME, n);
-		scn_cache = new PeriodicSampleCache(
-			PeriodicSampleType.SCAN, n);
-		spd_cache = new PeriodicSampleCache(
-			PeriodicSampleType.SPEED, n);
+		vol_cache = new PeriodicSampleCache(PeriodicSampleType.VOLUME);
+		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
+		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
 		v_log = new VehicleEventLog(n);
 	}
 
@@ -740,9 +734,9 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Flush buffered data to disk */
 	public void flush(PeriodicSampleWriter writer) {
 		try {
-			writer.flush(vol_cache);
-			writer.flush(scn_cache);
-			writer.flush(spd_cache);
+			writer.flush(vol_cache, name);
+			writer.flush(scn_cache, name);
+			writer.flush(spd_cache, name);
 		}
 		catch(IOException e) {
 			e.printStackTrace();

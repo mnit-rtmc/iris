@@ -68,12 +68,14 @@ public class PeriodicSampleWriter {
 	}
 
 	/** Flush samples from a cache to files */
-	public void flush(PeriodicSampleCache cache) throws IOException {
+	public void flush(PeriodicSampleCache cache, String sensor_id)
+		throws IOException
+	{
 		period = 0;
 		file = null;
 		channel = null;
 		buffer.clear();
-		flush(cache.iterator(), cache.sensor_id, cache.sample_type);
+		flush(cache.iterator(), sensor_id, cache.sample_type);
 	}
 
 	/** Flush an iterator of samples to files */
