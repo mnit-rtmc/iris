@@ -15,11 +15,12 @@
 package us.mn.state.dot.tms.server.comm.g4;
 
 /**
- * Vehicle class (size).
+ * G4 protocol vehicle class enumeration.  Provides a mapping to the general
+ * vehicle length classification enumeration values.
  *
  * @author Douglas Lau
  */
-public enum VehicleClass {
+public enum G4VehClass {
 	SMALL,		/* C0 */
 	REGULAR,	/* C1 */
 	MEDIUM,		/* C2 */
@@ -28,8 +29,8 @@ public enum VehicleClass {
 	EXTRA_LARGE;	/* C5 */
 
 	static public final int size = values().length;
-	static public VehicleClass fromOrdinal(int o) {
-		for(VehicleClass vc: VehicleClass.values()) {
+	static public G4VehClass fromOrdinal(int o) {
+		for(G4VehClass vc: G4VehClass.values()) {
 			if(vc.ordinal() == o)
 				return vc;
 		}

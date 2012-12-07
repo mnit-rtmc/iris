@@ -60,9 +60,9 @@ public class VehClassProperty extends G4Property {
 	@Override public void encodeStore(OutputStream os, int drop)
 		throws IOException
 	{
-		byte[] data = new byte[VehicleClass.size];
+		byte[] data = new byte[G4VehClass.size];
 		for(int i = 0; i < data.length; i++) {
-			VehicleClass vc = VehicleClass.fromOrdinal(i + 1);
+			G4VehClass vc = G4VehClass.fromOrdinal(i + 1);
 			format8(data, i, getClassLen(vc));
 		}
 		os.write(formatRequest(QualCode.CLASSIFICATION, drop, data));
@@ -76,24 +76,24 @@ public class VehClassProperty extends G4Property {
 	}
 
 	/** Vehicle classificaiton lengths (meters) */
-	private int[] class_len = new int[VehicleClass.size];
+	private int[] class_len = new int[G4VehClass.size];
 
 	/** Get the length of a vehicle class */
-	public int getClassLen(VehicleClass vc) {
+	public int getClassLen(G4VehClass vc) {
 		return class_len[vc.ordinal()];
 	}
 
 	/** Set the length of a vehicle class */
-	public void setClassLen(VehicleClass vc, int l) {
+	public void setClassLen(G4VehClass vc, int l) {
 		class_len[vc.ordinal()] = l;
 	}
 
 	/** Parse classification data */
 	private void parseClassification(byte[] data) throws ParsingException {
-		if(data.length != VehicleClass.size)
+		if(data.length != G4VehClass.size)
 			throw new ParsingException("INVALID CLASS LENGTH");
 		for(int i = 0; i < data.length; i++) {
-			VehicleClass vc = VehicleClass.fromOrdinal(i + 1);
+			G4VehClass vc = G4VehClass.fromOrdinal(i + 1);
 			setClassLen(vc, parse8(data, i));
 		}
 	}
@@ -101,7 +101,7 @@ public class VehClassProperty extends G4Property {
 	/** Get a string representation of the vehicle classifications */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for(VehicleClass vc: VehicleClass.values()) {
+		for(G4VehClass vc: G4VehClass.values()) {
 			if(sb.length() > 0)
 				sb.append(' ');
 			sb.append(vc);

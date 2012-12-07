@@ -118,12 +118,12 @@ public class StatProperty extends G4Property {
 	}
 
 	/** Volume data for class (regular vehicles) */
-	private final int[][] vol_class = new int[MAX_LANES][VehicleClass.size];
+	private final int[][] vol_class = new int[MAX_LANES][G4VehClass.size];
 
 	/** Get the volume for the specified vehicle class.
 	 * @param vcls Vehicle class. */
-	public int[] getVolClass(VehicleClass vcls) {
-		if(vcls != VehicleClass.SMALL) {
+	public int[] getVolClass(G4VehClass vcls) {
+		if(vcls != G4VehClass.SMALL) {
 			int[] vol = new int[MAX_LANES];
 			for(int i = 0; i < MAX_LANES; i++)
 				vol[i] = vol_class[i][vcls.ordinal()];
@@ -138,7 +138,7 @@ public class StatProperty extends G4Property {
 		int[] vol = new int[MAX_LANES];
 		for(int i = 0; i < MAX_LANES; i++) {
 			int v = volume[i];
-			for(int j = 1; j < VehicleClass.size; j++) {
+			for(int j = 1; j < G4VehClass.size; j++) {
 				int vc = vol_class[i][j];
 				if(vc > 0)
 					v -= vc;
@@ -162,7 +162,7 @@ public class StatProperty extends G4Property {
 			gap[i] = MISSING_DATA;
 			headway[i] = MISSING_DATA;
 			speed85[i] = MISSING_DATA;
-			for(int j = 0; j < VehicleClass.size; j++)
+			for(int j = 0; j < G4VehClass.size; j++)
 				vol_class[i][j] = MISSING_DATA;
 		}
 	}
@@ -248,19 +248,19 @@ public class StatProperty extends G4Property {
 			parseGap(data);
 			break;
 		case C1:
-			parseC(VehicleClass.REGULAR, data);
+			parseC(G4VehClass.REGULAR, data);
 			break;
 		case C2:
-			parseC(VehicleClass.MEDIUM, data);
+			parseC(G4VehClass.MEDIUM, data);
 			break;
 		case C3:
-			parseC(VehicleClass.LARGE, data);
+			parseC(G4VehClass.LARGE, data);
 			break;
 		case C4:
-			parseC(VehicleClass.TRUCK, data);
+			parseC(G4VehClass.TRUCK, data);
 			break;
 		case C5:
-			parseC(VehicleClass.EXTRA_LARGE, data);
+			parseC(G4VehClass.EXTRA_LARGE, data);
 			break;
 		case HEADWAY:
 			parseHeadway(data);
@@ -349,7 +349,7 @@ public class StatProperty extends G4Property {
 	}
 
 	/** Parse statistical vehicle class data */
-	private void parseC(VehicleClass vcls, byte[] data)
+	private void parseC(G4VehClass vcls, byte[] data)
 		throws ParsingException
 	{
 		if(data.length != getZones() * 2)
@@ -417,11 +417,11 @@ public class StatProperty extends G4Property {
 		sb.append(arrayStr("gap", gap));
 		sb.append(arrayStr("headway", headway));
 		sb.append(arrayStr("speed85", speed85));
-		sb.append(arrayStr("c1", getVolClass(VehicleClass.REGULAR)));
-		sb.append(arrayStr("c2", getVolClass(VehicleClass.MEDIUM)));
-		sb.append(arrayStr("c3", getVolClass(VehicleClass.LARGE)));
-		sb.append(arrayStr("c4", getVolClass(VehicleClass.TRUCK)));
-		sb.append(arrayStr("c5", getVolClass(VehicleClass.EXTRA_LARGE)));
+		sb.append(arrayStr("c1", getVolClass(G4VehClass.REGULAR)));
+		sb.append(arrayStr("c2", getVolClass(G4VehClass.MEDIUM)));
+		sb.append(arrayStr("c3", getVolClass(G4VehClass.LARGE)));
+		sb.append(arrayStr("c4", getVolClass(G4VehClass.TRUCK)));
+		sb.append(arrayStr("c5", getVolClass(G4VehClass.EXTRA_LARGE)));
 		return sb.toString().trim();
 	}
 
