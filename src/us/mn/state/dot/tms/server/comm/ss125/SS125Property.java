@@ -221,7 +221,7 @@ abstract public class SS125Property extends ControllerProperty {
 	private byte seq_num = 0;
 
 	/** Message sub ID */
-	protected byte msg_sub_id = MSG_SUB_ID;
+	protected int msg_sub_id = MSG_SUB_ID;
 
 	/** Format a request header.
 	 * @param body Body of message to send.
@@ -302,8 +302,9 @@ abstract public class SS125Property extends ControllerProperty {
 		MessageID mid = MessageID.fromCode(parse8(rbody, OFF_MSG_ID));
 		if(mid != msgId())
 			throw new ParsingException("MESSAGE ID");
-		if(parse8(rbody, OFF_MSG_SUB_ID) != msgSubId())
-			throw new ParsingException("MESSAGE SUB ID");
+		int sid = parse8(rbody, OFF_MSG_SUB_ID);
+		if(sid != msgSubId())
+			throw new ParsingException("MESSAGE SUB ID: " + sid);
 		MessageType rmt = MessageType.fromCode(parse8(rbody,
 			OFF_MSG_TYPE));
 		if(rmt == MessageType.RESULT) {

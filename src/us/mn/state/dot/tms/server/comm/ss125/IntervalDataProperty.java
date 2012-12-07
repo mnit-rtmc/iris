@@ -57,7 +57,7 @@ public class IntervalDataProperty extends SS125Property {
 	public void decodeQuery(InputStream is, int drop) throws IOException {
 		while(!isComplete()) {
 			super.decodeQuery(is, drop);
-			msg_sub_id++;
+			msg_sub_id = (byte)(msg_sub_id + 1);
 		}
 	}
 

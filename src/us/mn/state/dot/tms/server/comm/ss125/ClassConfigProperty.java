@@ -26,7 +26,7 @@ public class ClassConfigProperty extends SS125Property {
 
 	/** Message sub ID for the older fixed 4-class format.  Any other
 	 * sub ID will trigger a variable (0-8) class format response. */
-	static private final byte FIXED_4_CLASS_FORMAT = (byte)0xFF;
+	static private final int FIXED_4_CLASS_FORMAT = 0xFF;
 
 	/** Message ID for vehicle class configuration */
 	protected MessageID msgId() {
@@ -47,7 +47,7 @@ public class ClassConfigProperty extends SS125Property {
 		formatBody(body, MessageType.WRITE);
 		for(SS125VehClass vc: SS125VehClass.values()) {
 			int pos = 3 + vc.ordinal() * 2;
-			format16(body, pos, getClassLen(vc));
+			format16Fixed(body, pos, getClassLen(vc));
 		}
 		return body;
 	}
@@ -58,20 +58,20 @@ public class ClassConfigProperty extends SS125Property {
 			throw new ParsingException("BODY LENGTH");
 		for(SS125VehClass vc: SS125VehClass.values()) {
 			int pos = 3 + vc.ordinal() * 2;
-			setClassLen(vc, parse16(body, pos));
+			setClassLen(vc, parse16Fixed(body, pos));
 		}
 	}
 
 	/** Vehicle classificaiton lengths (feet) */
-	private int[] class_len = new int[SS125VehClass.size];
+	private float[] class_len = new float[SS125VehClass.size];
 
 	/** Get the length of a vehicle class */
-	public int getClassLen(SS125VehClass vc) {
+	public float getClassLen(SS125VehClass vc) {
 		return class_len[vc.ordinal()];
 	}
 
 	/** Set the length of a vehicle class */
-	public void setClassLen(SS125VehClass vc, int l) {
+	public void setClassLen(SS125VehClass vc, float l) {
 		class_len[vc.ordinal()] = l;
 	}
 
