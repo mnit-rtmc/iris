@@ -44,6 +44,10 @@ public class OpSendSensorSettings extends OpSS125 {
 	/** Data config property */
 	private final DataConfigProperty data_config = new DataConfigProperty();
 
+	/** Class config property */
+	private final ClassConfigProperty class_config =
+		new ClassConfigProperty();
+
 	/** Flag to indicate config has been updated */
 	private boolean config_updated = false;
 
@@ -69,24 +73,24 @@ public class OpSendSensorSettings extends OpSS125 {
 			mess.queryProps();
 			logQuery(gen_config);
 			if(shouldUpdateGenConfig())
-				return new SendGenConfig();
+				return new StoreGenConfig();
 			else
 				return new QueryDataConfig();
 		}
 	}
 
 	/** Check if the general config should be updated */
-	protected boolean shouldUpdateGenConfig() {
+	private boolean shouldUpdateGenConfig() {
 		String loc = ControllerHelper.getLocation(controller);
 		if(!loc.equals(gen_config.getLocation()))
 			return true;
 		return gen_config.isMetric();
 	}
 
-	/** Phase to send the general config */
-	protected class SendGenConfig extends Phase<SS125Property> {
+	/** Phase to store the general config */
+	protected class StoreGenConfig extends Phase<SS125Property> {
 
-		/** Send the general config */
+		/** Store the general config */
 		protected Phase<SS125Property> poll(
 			CommMessage<SS125Property> mess) throws IOException
 		{
@@ -112,14 +116,14 @@ public class OpSendSensorSettings extends OpSS125 {
 			mess.queryProps();
 			logQuery(data_config);
 			if(shouldUpdateDataConfig())
-				return new SendDataConfig();
+				return new StoreDataConfig();
 			else
-				return configDonePhase();
+				return new QueryClassConfig();
 		}
 	}
 
 	/** Check if the data config should be updated */
-	protected boolean shouldUpdateDataConfig() {
+	private boolean shouldUpdateDataConfig() {
 		if(data_config.getInterval() != BINNING_INTERVAL)
 			return true;
 		if(data_config.getMode() !=
@@ -134,10 +138,10 @@ public class OpSendSensorSettings extends OpSS125 {
 		return false;
 	}
 
-	/** Phase to send the data config */
-	protected class SendDataConfig extends Phase<SS125Property> {
+	/** Phase to store the data config */
+	protected class StoreDataConfig extends Phase<SS125Property> {
 
-		/** Send the data config */
+		/** Store the data config */
 		protected Phase<SS125Property> poll(
 			CommMessage<SS125Property> mess) throws IOException
 		{
@@ -151,31 +155,57 @@ public class OpSendSensorSettings extends OpSS125 {
 			logStore(data_config);
 			mess.storeProps();
 			config_updated = true;
-			return configDonePhase();
+			return new QueryClassConfig();
 		}
 	}
 
-	/** Phase after configuration is done */
-	protected Phase configDonePhase() {
-		if(config_updated)
-			return new StoreConfigFlash();
-		else
-			return new QueryDateTime();
-	}
+	/** Phase to query the vehicle class config  */
+	protected class QueryClassConfig extends Phase<SS125Property> {
 
-	/** Phase to store config to flash */
-	protected class StoreConfigFlash extends Phase<SS125Property> {
-
-		/** Store the config to flash */
+		/** Query the vehicle class config */
 		protected Phase<SS125Property> poll(
 			CommMessage<SS125Property> mess) throws IOException
 		{
-			FlashConfigProperty flash = new FlashConfigProperty();
-			mess.add(flash);
-			logStore(flash);
+			mess.add(class_config);
+			mess.queryProps();
+			logQuery(class_config);
+			if(shouldUpdateClassConfig())
+				return new StoreClassConfig();
+			else
+				return new QueryDateTime();
+		}
+	}
+
+	/** Check if the vehicle class config should be updated */
+	private boolean shouldUpdateClassConfig() {
+		for(SS125VehClass vc: SS125VehClass.values()) {
+			int l = class_config.getClassLen(vc);
+			if(l != vc.v_class.bound)
+				return true;
+		}
+		return false;
+	}
+
+	/** Phase to store the vehicle class config */
+	protected class StoreClassConfig extends Phase<SS125Property> {
+
+		/** Store the vehicle class config */
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
+			updateClassConfig();
+			mess.add(class_config);
+			logStore(class_config);
 			mess.storeProps();
+			config_updated = true;
 			return new QueryDateTime();
 		}
+	}
+
+	/** Update the vehicle class config bounds */
+	private void updateClassConfig() {
+		for(SS125VehClass vc: SS125VehClass.values())
+			class_config.setClassLen(vc, vc.v_class.bound);
 	}
 
 	/** Phase to query the date and time */
@@ -192,7 +222,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			if(shouldUpdateDateTime(date_time.getStamp().getTime()))
 				return new SendDateTime();
 			else
-				return null;
+				return configDonePhase();
 		}
 	}
 
@@ -213,6 +243,29 @@ public class OpSendSensorSettings extends OpSS125 {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			logStore(date_time);
+			mess.storeProps();
+			return configDonePhase();
+		}
+	}
+
+	/** Phase after configuration is done */
+	protected Phase configDonePhase() {
+		if(config_updated)
+			return new StoreConfigFlash();
+		else
+			return null;
+	}
+
+	/** Phase to store config to flash */
+	protected class StoreConfigFlash extends Phase<SS125Property> {
+
+		/** Store the config to flash */
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
+			FlashConfigProperty flash = new FlashConfigProperty();
+			mess.add(flash);
+			logStore(flash);
 			mess.storeProps();
 			return null;
 		}
