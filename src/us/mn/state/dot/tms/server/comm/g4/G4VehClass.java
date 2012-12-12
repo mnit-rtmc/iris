@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.g4;
 
+import us.mn.state.dot.tms.VehLengthClass;
+
 /**
  * G4 protocol vehicle class enumeration.  Provides a mapping to the general
  * vehicle length classification enumeration values.
@@ -21,14 +23,25 @@ package us.mn.state.dot.tms.server.comm.g4;
  * @author Douglas Lau
  */
 public enum G4VehClass {
-	SMALL,		/* C0 */
-	REGULAR,	/* C1 */
-	MEDIUM,		/* C2 */
-	LARGE,		/* C3 */
-	TRUCK,		/* C4 */
-	EXTRA_LARGE;	/* C5 */
+	SMALL (VehLengthClass.MOTORCYCLE),	/* C0 */
+	REGULAR (VehLengthClass.SHORT),		/* C1 (reporting) */
+	MEDIUM (VehLengthClass.SHORT),		/* C2 */
+	LARGE (VehLengthClass.MEDIUM),		/* C3 (reporting) */
+	TRUCK (VehLengthClass.LONG),		/* C4 */
+	EXTRA_LARGE (VehLengthClass.LONG);	/* C5 (reporting) */
 
+	/** Vehicle length class */
+	public final VehLengthClass v_class;
+
+	/** Create a new G4 vehicle class */
+	private G4VehClass(VehLengthClass vlc) {
+		v_class = vlc;
+	}
+
+	/** Get the count of G4 vehicle classes */
 	static public final int size = values().length;
+
+	/** Get an RTMS G4 vehicle class from an ordinal */
 	static public G4VehClass fromOrdinal(int o) {
 		for(G4VehClass vc: G4VehClass.values()) {
 			if(vc.ordinal() == o)

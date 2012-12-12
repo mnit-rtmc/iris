@@ -75,15 +75,15 @@ public class VehClassProperty extends G4Property {
 		parseFrame(is, drop);
 	}
 
-	/** Vehicle classificaiton lengths (meters) */
+	/** Vehicle classificaiton lengths (decimeters) */
 	private int[] class_len = new int[G4VehClass.size];
 
-	/** Get the length of a vehicle class */
+	/** Get the lower-bound length of a vehicle class (decimeters) */
 	public int getClassLen(G4VehClass vc) {
 		return class_len[vc.ordinal()];
 	}
 
-	/** Set the length of a vehicle class */
+	/** Set the lower-bound length of a vehicle class (decimeters) */
 	public void setClassLen(G4VehClass vc, int l) {
 		class_len[vc.ordinal()] = l;
 	}

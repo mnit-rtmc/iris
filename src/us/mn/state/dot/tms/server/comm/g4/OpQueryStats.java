@@ -97,6 +97,18 @@ public class OpQueryStats extends OpG4 {
 			stat.getScans(), StatProperty.MAX_SCANS);
 		controller.storeSpeed(stamp, period, START_PIN,
 			stat.getSpeed());
+		controller.storeVolume(stamp, period, START_PIN,
+			stat.getVolume(G4VehClass.SMALL),
+			G4VehClass.SMALL.v_class);
+		controller.storeVolume(stamp, period, START_PIN,
+			stat.getVolume(G4VehClass.REGULAR),
+			G4VehClass.REGULAR.v_class);
+		controller.storeVolume(stamp, period, START_PIN,
+			stat.getVolume(G4VehClass.LARGE),
+			G4VehClass.LARGE.v_class);
+		controller.storeVolume(stamp, period, START_PIN,
+			stat.getVolume(G4VehClass.EXTRA_LARGE),
+			G4VehClass.EXTRA_LARGE.v_class);
 		completer.completeTask(getKey());
 		super.cleanup();
 	}

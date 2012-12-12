@@ -34,6 +34,14 @@ public class OpSendSensorSettings extends OpG4 {
 	/** Error threshold for setting date / time */
 	static private final int TIME_THRESHOLD = 5000;
 
+	/** Feet per meter */
+	static private final float FT_PER_METER = 3.2808399f;
+
+	/** Convert feet to meters */
+	static private float feet_to_meters(float f) {
+		return f / FT_PER_METER;
+	}
+
 	/** Flag to perform a controller restart */
 	private final boolean restart;
 
@@ -44,7 +52,7 @@ public class OpSendSensorSettings extends OpG4 {
 	private final SetupInfoProperty setup_info = new SetupInfoProperty();
 
 	/** Vehicle classification property */
-	private final VehClassProperty veh_class = new VehClassProperty();
+	private final VehClassProperty class_config = new VehClassProperty();
 
 	/** RTC property */
 	private final RTCProperty rtc = new RTCProperty();
@@ -88,7 +96,7 @@ public class OpSendSensorSettings extends OpG4 {
 			if(shouldUpdateSetupInfo())
 				return new StoreSetupInfo();
 			else
-				return new QueryVehClasses();
+				return new QueryClassConfig();
 		}
 	}
 
@@ -120,7 +128,7 @@ public class OpSendSensorSettings extends OpG4 {
 	private boolean isCompWrong() {
 		StatComposition comp = setup_info.getComp();
 		return comp.hasGap() || comp.hasHeadway() ||
-		       comp.hasSpeed85() || comp.getClassCount() != 2;
+		       comp.hasSpeed85() || comp.getClassCount() != 4;
 	}
 
 	/** Check if status flags are wrong */
@@ -135,7 +143,7 @@ public class OpSendSensorSettings extends OpG4 {
 		setup_info.setPort1(updatePortConfig(setup_info.getPort1()));
 		setup_info.setPort2(updatePortConfig(setup_info.getPort2()));
 		setup_info.setPeriod(BINNING_PERIOD);
-		setup_info.setComp(new StatComposition(false, false, false, 2));
+		setup_info.setComp(new StatComposition(false, false, false, 4));
 		StatusFlags f = setup_info.getStatusFlags();
 		setup_info.setStatusFlags(new StatusFlags(true, f.isDualLoop(),
 			f.isSixFoot(), f.isHighZ(), f.isMemory(), true,
@@ -160,21 +168,60 @@ public class OpSendSensorSettings extends OpG4 {
 			mess.add(setup_info);
 			logStore(setup_info);
 			mess.storeProps();
-			return new QueryVehClasses();
+			return new QueryClassConfig();
 		}
 	}
 
-	/** Phase to query the vehicle classifications */
-	private class QueryVehClasses extends Phase<G4Property> {
+	/** Phase to query the vehicle class config */
+	private class QueryClassConfig extends Phase<G4Property> {
 
-		/** Query the vehicle classifications */
+		/** Query the vehicle class config */
 		protected Phase<G4Property> poll(
 			CommMessage<G4Property> mess) throws IOException
 		{
-			mess.add(veh_class);
+			mess.add(class_config);
 			mess.queryProps();
-			logQuery(veh_class);
+			logQuery(class_config);
+			if(shouldUpdateClassConfig())
+				return new StoreClassConfig();
+			else
+				return new QueryRTC();
+		}
+	}
+
+	/** Check if the vehicle class config should be updated */
+	private boolean shouldUpdateClassConfig() {
+		for(G4VehClass vc: G4VehClass.values()) {
+			int dm = class_config.getClassLen(vc);
+			int b = Math.round(10 * feet_to_meters(
+				vc.v_class.lower_bound));
+			if(dm != b)
+				return true;
+		}
+		return false;
+	}
+
+	/** Phase to store the vehicle class config */
+	protected class StoreClassConfig extends Phase<G4Property> {
+
+		/** Store the vehicle classes */
+		protected Phase<G4Property> poll(
+			CommMessage<G4Property> mess) throws IOException
+		{
+			updateClassConfig();
+			mess.add(class_config);
+			logStore(class_config);
+			mess.storeProps();
 			return new QueryRTC();
+		}
+	}
+
+	/** Update the vehicle class config bounds */
+	private void updateClassConfig() {
+		for(G4VehClass vc: G4VehClass.values()) {
+			int b = Math.round(10 * feet_to_meters(
+				vc.v_class.lower_bound));
+			class_config.setClassLen(vc, b);
 		}
 	}
 

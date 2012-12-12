@@ -122,7 +122,7 @@ public class StatProperty extends G4Property {
 
 	/** Get the volume for the specified vehicle class.
 	 * @param vcls Vehicle class. */
-	public int[] getVolClass(G4VehClass vcls) {
+	public int[] getVolume(G4VehClass vcls) {
 		if(vcls != G4VehClass.SMALL) {
 			int[] vol = new int[MAX_LANES];
 			for(int i = 0; i < MAX_LANES; i++)
@@ -417,11 +417,11 @@ public class StatProperty extends G4Property {
 		sb.append(arrayStr("gap", gap));
 		sb.append(arrayStr("headway", headway));
 		sb.append(arrayStr("speed85", speed85));
-		sb.append(arrayStr("c1", getVolClass(G4VehClass.REGULAR)));
-		sb.append(arrayStr("c2", getVolClass(G4VehClass.MEDIUM)));
-		sb.append(arrayStr("c3", getVolClass(G4VehClass.LARGE)));
-		sb.append(arrayStr("c4", getVolClass(G4VehClass.TRUCK)));
-		sb.append(arrayStr("c5", getVolClass(G4VehClass.EXTRA_LARGE)));
+		sb.append(arrayStr("c1", getVolume(G4VehClass.REGULAR)));
+		sb.append(arrayStr("c2", getVolume(G4VehClass.MEDIUM)));
+		sb.append(arrayStr("c3", getVolume(G4VehClass.LARGE)));
+		sb.append(arrayStr("c4", getVolume(G4VehClass.TRUCK)));
+		sb.append(arrayStr("c5", getVolume(G4VehClass.EXTRA_LARGE)));
 		return sb.toString().trim();
 	}
 

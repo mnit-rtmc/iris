@@ -20,16 +20,20 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum VehLengthClass {
-	MOTORCYCLE(7),	/* 0 to 7 feet */
-	SHORT(20),	/* 7 to 20 feet */
-	MEDIUM(43),	/* 20 to 43 feet */
-	LONG(255);	/* 43+ feet */
+	MOTORCYCLE(0, 7),	/* 0 to 7 feet */
+	SHORT(7, 20),		/* 7 to 20 feet */
+	MEDIUM(20, 43),		/* 20 to 43 feet */
+	LONG(43, 255);		/* 43+ feet */
+
+	/** Lower bound of vehicle length (feet) */
+	public final int lower_bound;
 
 	/** Upper bound of vehicle length (feet) */
 	public final int bound;
 
 	/** Create a new vehicle length class */
-	private VehLengthClass(int b) {
+	private VehLengthClass(int lb, int b) {
+		lower_bound = lb;
 		bound = b;
 	}
 
