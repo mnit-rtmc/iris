@@ -297,6 +297,8 @@
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/*.class"/>
 			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/units/*.class"/>
+			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/utils/*.class"/>
 			<fileset dir="${build.i18n}"/>
 		</jar>
