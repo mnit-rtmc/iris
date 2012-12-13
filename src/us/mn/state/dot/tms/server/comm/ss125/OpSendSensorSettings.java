@@ -59,7 +59,23 @@ public class OpSendSensorSettings extends OpSS125 {
 
 	/** Create the first phase of the operation */
 	protected Phase<SS125Property> phaseOne() {
-		return new QueryGenConfig();
+		return new QueryVersion();
+	}
+
+	/** Phase to query the firmware version */
+	protected class QueryVersion extends Phase<SS125Property> {
+
+		/** Query the firmware version */
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
+			VersionProperty vr = new VersionProperty();
+			mess.add(vr);
+			mess.queryProps();
+			logQuery(vr);
+			controller.setVersion(vr.getVersion());
+			return new QueryGenConfig();
+		}
 	}
 
 	/** Phase to query the general config  */

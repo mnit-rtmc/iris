@@ -161,15 +161,6 @@ abstract public class SS125Property extends ControllerProperty {
 		return intg + fr / 256f;
 	}
 
-	/** Parse a 32-bit value */
-	static protected int parse32(byte[] body, int pos) {
-		int b3 = body[pos] & 0xFF;
-		int b2 = body[pos + 1] & 0xFF;
-		int b1 = body[pos + 2] & 0xFF;
-		int b0 = body[pos + 3] & 0xFF;
-		return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
-	}
-
 	/** Parse a string value */
 	static protected String parseString(byte[] body, int pos, int len)
 		throws IOException

@@ -69,6 +69,15 @@ abstract public class ControllerProperty {
 		return (hi << 8) | lo;
 	}
 
+	/** Parse a 32-bit value */
+	static protected int parse32(byte[] body, int pos) {
+		int b3 = body[pos] & 0xFF;
+		int b2 = body[pos + 1] & 0xFF;
+		int b1 = body[pos + 2] & 0xFF;
+		int b0 = body[pos + 3] & 0xFF;
+		return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
+	}
+
 	/** Parse a 2-digit BCD value */
 	static protected int parseBCD2(byte[] body, int pos)
 		throws ParsingException
