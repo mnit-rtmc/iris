@@ -56,7 +56,7 @@ abstract public class Org815Property extends ControllerProperty {
 
 	/** Parse the accumulated precipitation since last reset.
 	 * @param a 7-character accumulation to parse.
-	 * @return Accumulation since last reset in milimeters. */
+	 * @return Accumulation since last reset in millimeters. */
 	protected float parseAccumulation(String a) throws IOException {
 		if("---.---".equals(a))
 			return MISSING_DATA;

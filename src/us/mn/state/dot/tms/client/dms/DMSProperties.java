@@ -76,7 +76,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			return UNKNOWN;
 	}
 
-	/** Format milimeter units for display */
+	/** Format millimeter units for display */
 	static protected String formatMM(Integer i) {
 		if(i != null && i > 0)
 			return i + " " + I18N.get("units.mm");
