@@ -34,7 +34,7 @@ public class PeriodicSampleWriterTest extends TestCase {
 
 	public void testWriter() {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
-			PeriodicSampleType.VOLUME, "TEST");
+			PeriodicSampleType.VOLUME);
 		Calendar cal = Calendar.getInstance();
 		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
 		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 1));
@@ -60,7 +60,7 @@ public class PeriodicSampleWriterTest extends TestCase {
 		try {
 			File file = new File("/tmp/TEST.v30");
 			file.delete();
-			writer.flush(cache);
+			writer.flush(cache, "TEST");
 			FileChannel channel = new RandomAccessFile(file,
 				"rw").getChannel();
 			ByteBuffer buf = ByteBuffer.allocate(2880);

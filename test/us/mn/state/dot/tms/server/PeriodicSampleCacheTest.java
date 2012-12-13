@@ -30,7 +30,7 @@ public class PeriodicSampleCacheTest extends TestCase {
 
 	public void testVolume() {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
-			PeriodicSampleType.VOLUME, "TEST");
+			PeriodicSampleType.VOLUME);
 		assertTrue(isEmpty(cache));
 		Calendar cal = Calendar.getInstance();
 		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
@@ -44,7 +44,7 @@ public class PeriodicSampleCacheTest extends TestCase {
 
 	public void testOccupancy() {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
-			PeriodicSampleType.OCCUPANCY, "TEST");
+			PeriodicSampleType.OCCUPANCY);
 		assertTrue(isEmpty(cache));
 		Calendar cal = Calendar.getInstance();
 		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
@@ -58,7 +58,7 @@ public class PeriodicSampleCacheTest extends TestCase {
 
 	public void testSpeed() {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
-			PeriodicSampleType.SPEED, "TEST");
+			PeriodicSampleType.SPEED);
 		assertTrue(isEmpty(cache));
 		Calendar cal = Calendar.getInstance();
 		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
@@ -108,7 +108,7 @@ public class PeriodicSampleCacheTest extends TestCase {
 
 	public void testScan() {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
-			PeriodicSampleType.SCAN, "TEST");
+			PeriodicSampleType.SCAN);
 		assertTrue(isEmpty(cache));
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(0);
