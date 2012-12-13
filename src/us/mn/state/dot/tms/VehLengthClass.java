@@ -14,27 +14,30 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.FEET;
+
 /**
  * Vehicle length class.
  *
  * @author Douglas Lau
  */
 public enum VehLengthClass {
-	MOTORCYCLE(0, 7),	/* 0 to 7 feet */
-	SHORT(7, 20),		/* 7 to 20 feet */
-	MEDIUM(20, 43),		/* 20 to 43 feet */
-	LONG(43, 255);		/* 43+ feet */
+	MOTORCYCLE(new Distance(0, FEET), new Distance(7, FEET)),
+	SHORT(new Distance(7, FEET), new Distance(20, FEET)),
+	MEDIUM(new Distance(20, FEET), new Distance(43, FEET)),
+	LONG(new Distance(43, FEET), new Distance(255, FEET));
 
-	/** Lower bound of vehicle length (feet) */
-	public final int lower_bound;
+	/** Lower bound of vehicle length */
+	public final Distance lower_bound;
 
-	/** Upper bound of vehicle length (feet) */
-	public final int bound;
+	/** Upper bound of vehicle length */
+	public final Distance upper_bound;
 
 	/** Create a new vehicle length class */
-	private VehLengthClass(int lb, int b) {
+	private VehLengthClass(Distance lb, Distance ub) {
 		lower_bound = lb;
-		bound = b;
+		upper_bound = ub;
 	}
 
 	/** Size of enum */

@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.server.comm.g4;
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.DECIMETERS;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -33,14 +35,6 @@ public class OpSendSensorSettings extends OpG4 {
 
 	/** Error threshold for setting date / time */
 	static private final int TIME_THRESHOLD = 5000;
-
-	/** Feet per meter */
-	static private final float FT_PER_METER = 3.2808399f;
-
-	/** Convert feet to meters */
-	static private float feet_to_meters(float f) {
-		return f / FT_PER_METER;
-	}
 
 	/** Flag to perform a controller restart */
 	private final boolean restart;
@@ -193,9 +187,8 @@ public class OpSendSensorSettings extends OpG4 {
 	private boolean shouldUpdateClassConfig() {
 		for(G4VehClass vc: G4VehClass.values()) {
 			int dm = class_config.getClassLen(vc);
-			int b = Math.round(10 * feet_to_meters(
-				vc.v_class.lower_bound));
-			if(dm != b)
+			int lb = vc.v_class.lower_bound.round(DECIMETERS);
+			if(dm != lb)
 				return true;
 		}
 		return false;
@@ -219,9 +212,8 @@ public class OpSendSensorSettings extends OpG4 {
 	/** Update the vehicle class config bounds */
 	private void updateClassConfig() {
 		for(G4VehClass vc: G4VehClass.values()) {
-			int b = Math.round(10 * feet_to_meters(
-				vc.v_class.lower_bound));
-			class_config.setClassLen(vc, b);
+			int lb = vc.v_class.lower_bound.round(DECIMETERS);
+			class_config.setClassLen(vc, lb);
 		}
 	}
 

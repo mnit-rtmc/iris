@@ -179,8 +179,8 @@ public class OpSendSensorSettings extends OpSS125 {
 	/** Check if the vehicle class config should be updated */
 	private boolean shouldUpdateClassConfig() {
 		for(SS125VehClass vc: SS125VehClass.values()) {
-			float l = class_config.getClassLen(vc);
-			if(l != vc.v_class.bound)
+			if(!vc.v_class.upper_bound.equals(
+			    class_config.getClassLen(vc)))
 				return true;
 		}
 		return false;
@@ -205,7 +205,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	/** Update the vehicle class config bounds */
 	private void updateClassConfig() {
 		for(SS125VehClass vc: SS125VehClass.values())
-			class_config.setClassLen(vc, vc.v_class.bound);
+			class_config.setClassLen(vc, vc.v_class.upper_bound);
 	}
 
 	/** Phase to query the date and time */

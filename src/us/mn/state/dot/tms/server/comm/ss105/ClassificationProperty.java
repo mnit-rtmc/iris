@@ -15,7 +15,11 @@
 package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.VehLengthClass;
+import static us.mn.state.dot.tms.VehLengthClass.SHORT;
+import static us.mn.state.dot.tms.VehLengthClass.MEDIUM;
+import static us.mn.state.dot.tms.VehLengthClass.LONG;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.FEET;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -26,22 +30,43 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class ClassificationProperty extends MemoryProperty {
 
 	/** Minimum length for SHORT vehicle classification */
-	private int short_min = VehLengthClass.MOTORCYCLE.bound + 1;
+	static private final Distance SHORT_MIN = new Distance(
+		SHORT.lower_bound.round(FEET) + 1, FEET);
 
 	/** Maximum length for SHORT vehicle classification */
-	private int short_max = VehLengthClass.SHORT.bound;
+	static private final Distance SHORT_MAX = SHORT.upper_bound;
 
 	/** Minimum length for MEDIUM vehicle classification */
-	private int medium_min = VehLengthClass.SHORT.bound + 1;
+	static private final Distance MEDIUM_MIN = new Distance(
+		MEDIUM.lower_bound.round(FEET) + 1, FEET);
 
 	/** Maximum length for MEDIUM vehicle classification */
-	private int medium_max = VehLengthClass.MEDIUM.bound;
+	static private final Distance MEDIUM_MAX = MEDIUM.upper_bound;
 
 	/** Minimum length for LONG vehicle classification */
-	private int long_min = VehLengthClass.MEDIUM.bound + 1;
+	static private final Distance LONG_MIN = new Distance(
+		LONG.lower_bound.round(FEET) + 1, FEET);
 
 	/** Maximum length for LONG vehicle classification */
-	private int long_max = VehLengthClass.LONG.bound;
+	static private final Distance LONG_MAX = LONG.upper_bound;
+
+	/** Minimum length for SHORT vehicle classification */
+	private Distance short_min = SHORT_MIN;
+
+	/** Maximum length for SHORT vehicle classification */
+	private Distance short_max = SHORT_MAX;
+
+	/** Minimum length for MEDIUM vehicle classification */
+	private Distance medium_min = MEDIUM_MIN;
+
+	/** Maximum length for MEDIUM vehicle classification */
+	private Distance medium_max = MEDIUM_MAX;
+
+	/** Minimum length for LONG vehicle classification */
+	private Distance long_min = LONG_MIN;
+
+	/** Maximum length for LONG vehicle classification */
+	private Distance long_max = LONG_MAX;
 
 	/** Get the SS105 memory buffer address */
 	protected int memoryAddress() {
@@ -55,20 +80,23 @@ public class ClassificationProperty extends MemoryProperty {
 
 	/** Format the buffer to write to SS105 memory */
 	protected String formatBuffer() {
-		return hex(short_min, 4) + hex(short_max, 4) + hex(0, 8) +
-		       hex(medium_min, 4) + hex(medium_max, 4) + hex(0, 8) +
-		       hex(long_min, 4) + hex(long_max, 4);
+		return hex(short_min.round(FEET), 4) +
+		       hex(short_max.round(FEET), 4) + hex(0, 8) +
+		       hex(medium_min.round(FEET), 4) +
+		       hex(medium_max.round(FEET), 4) + hex(0, 8) +
+		       hex(long_min.round(FEET), 4) +
+		       hex(long_max.round(FEET), 4);
 	}
 
 	/** Parse the response to a QUERY request */
 	protected void parseQuery(String r) throws IOException {
 		try {
-			short_min = Integer.parseInt(r.substring(0, 4), 16);
-			short_max = Integer.parseInt(r.substring(4, 8), 16);
-			medium_min = Integer.parseInt(r.substring(16, 20), 16);
-			medium_max = Integer.parseInt(r.substring(20, 24), 16);
-			long_min = Integer.parseInt(r.substring(32, 36), 16);
-			long_max = Integer.parseInt(r.substring(36, 40), 16);
+			short_min = parseFeet(r, 0);
+			short_max = parseFeet(r, 4);
+			medium_min = parseFeet(r, 16);
+			medium_max = parseFeet(r, 20);
+			long_min = parseFeet(r, 32);
+			long_max = parseFeet(r, 36);
 		}
 		catch(NumberFormatException e) {
 			throw new ParsingException(
@@ -76,31 +104,40 @@ public class ClassificationProperty extends MemoryProperty {
 		}
 	}
 
+	/** Parse length (distance) in feet. */
+	static private Distance parseFeet(String r, int pos)
+		throws NumberFormatException
+	{
+		return new Distance(Integer.parseInt(r.substring(pos, pos + 4),
+			16), FEET);
+	}
+
 	/** Is the classification set to the default values? */
 	public boolean isDefault() {
-		return short_min == VehLengthClass.MOTORCYCLE.bound + 1 &&
-		       short_max == VehLengthClass.SHORT.bound &&
-		       medium_min == VehLengthClass.SHORT.bound + 1 &&
-		       medium_max == VehLengthClass.MEDIUM.bound &&
-		       long_min == VehLengthClass.MEDIUM.bound + 1 &&
-		       long_max == VehLengthClass.LONG.bound;
+		return short_min.equals(SHORT_MIN) &&
+		       short_max.equals(SHORT_MAX) &&
+		       medium_min.equals(MEDIUM_MIN) &&
+		       medium_max.equals(MEDIUM_MAX) &&
+		       long_min.equals(LONG_MIN) &&
+		       long_max.equals(LONG_MAX);
 	}
 
 	/** Get a string representation */
 	public String toString() {
+		Distance.Formatter df = new Distance.Formatter(0);
 		StringBuilder sb = new StringBuilder();
 		sb.append("Classification: ");
-		sb.append(short_min);
+		sb.append(df.format(short_min));
 		sb.append('-');
-		sb.append(short_max);
+		sb.append(df.format(short_max));
 		sb.append(',');
-		sb.append(medium_min);
+		sb.append(df.format(medium_min));
 		sb.append('-');
-		sb.append(medium_max);
+		sb.append(df.format(medium_max));
 		sb.append(',');
-		sb.append(long_min);
+		sb.append(df.format(long_min));
 		sb.append('-');
-		sb.append(long_max);
+		sb.append(df.format(long_max));
 		return sb.toString();
 	}
 }

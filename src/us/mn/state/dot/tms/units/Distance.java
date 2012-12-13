@@ -77,13 +77,32 @@ public final class Distance {
 	 * @param u Units to convert to.
 	 * @return Distance in specified units. */
 	public Distance convert(Units u) {
-		double v = m();
-		return new Distance(v / u.meters, u);
+		if(u == units)
+			return this;
+		else {
+			double v = m();
+			return new Distance(v / u.meters, u);
+		}
 	}
 
-	/** Round a distance to nearest whole unit. */
-	public Distance round() {
-		return new Distance(Math.round(value), units);
+	/** Get a distance as a float in specified units.
+	 * @param u Units to return.
+	 * @return Distance as a float value. */
+	public float asFloat(Units u) {
+		if(u == units)
+			return (float)value;
+		else
+			return (float)(m() / u.meters);
+	}
+
+	/** Round a distance to nearest whole unit.
+	 * @param u Units to return.
+	 * @return Distance rounded to nearest whole unit. */
+	public int round(Units u) {
+		if(u == units)
+			return (int)Math.round(value);
+		else
+			return (int)Math.round(m() / u.meters);
 	}
 
 	/** Compare for equality */

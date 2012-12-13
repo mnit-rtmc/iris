@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.FEET;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -47,7 +49,7 @@ public class ClassConfigProperty extends SS125Property {
 		formatBody(body, MessageType.WRITE);
 		for(SS125VehClass vc: SS125VehClass.values()) {
 			int pos = 3 + vc.ordinal() * 2;
-			format16Fixed(body, pos, getClassLen(vc));
+			format16Fixed(body, pos, getClassLen(vc).asFloat(FEET));
 		}
 		return body;
 	}
@@ -58,20 +60,21 @@ public class ClassConfigProperty extends SS125Property {
 			throw new ParsingException("BODY LENGTH");
 		for(SS125VehClass vc: SS125VehClass.values()) {
 			int pos = 3 + vc.ordinal() * 2;
-			setClassLen(vc, parse16Fixed(body, pos));
+			setClassLen(vc, new Distance(parse16Fixed(body, pos),
+				FEET));
 		}
 	}
 
-	/** Vehicle classificaiton lengths (feet) */
-	private float[] class_len = new float[SS125VehClass.size];
+	/** Vehicle classificaiton lengths */
+	private Distance[] class_len = new Distance[SS125VehClass.size];
 
 	/** Get the length of a vehicle class */
-	public float getClassLen(SS125VehClass vc) {
+	public Distance getClassLen(SS125VehClass vc) {
 		return class_len[vc.ordinal()];
 	}
 
 	/** Set the length of a vehicle class */
-	public void setClassLen(SS125VehClass vc, float l) {
+	public void setClassLen(SS125VehClass vc, Distance l) {
 		class_len[vc.ordinal()] = l;
 	}
 
