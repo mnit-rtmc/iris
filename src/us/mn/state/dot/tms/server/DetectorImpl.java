@@ -40,9 +40,11 @@ import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
-import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.FEET;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.server.event.DetFailEvent;
 
 /**
@@ -57,8 +59,8 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		return SystemAttrEnum.SAMPLE_ARCHIVE_ENABLE.getBoolean();
 	}
 
-	/** Default average detector field length */
-	static private final float DEFAULT_FIELD_LENGTH = 22.0f;
+	/** Default average detector field length (feet) */
+	static private final float DEFAULT_FIELD_FT = 22.0f;
 
 	/** Valid density threshold for speed calculation */
 	static private final float DENSITY_THRESHOLD = 1.2f;
@@ -407,15 +409,15 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		       (isActive() && !isFailed());
 	}
 
-	/** Average detector field length */
-	protected float field_length = DEFAULT_FIELD_LENGTH;
+	/** Average detector field length (feet) */
+	protected float field_length = DEFAULT_FIELD_FT;
 
-	/** Set the average field length */
+	/** Set the average field length (feet) */
 	public void setFieldLength(float f) {
 		field_length = f;
 	}
 
-	/** Set the average field length */
+	/** Set the average field length (feet) */
 	public void doSetFieldLength(float f) throws TMSException {
 		if(f == field_length)
 			return;
@@ -423,7 +425,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		setFieldLength(f);
 	}
 
-	/** Get the average field length */
+	/** Get the average field length (feet) */
 	public float getFieldLength() {
 		return field_length;
 	}
@@ -599,9 +601,11 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Get the density from occupancy (vehicles per mile) */
 	protected float getDensityFromOccupancy() {
 		float occ = getOccupancy();
-		if(occ == MISSING_DATA || field_length <= 0)
+		if(occ >= 0 && field_length > 0) {
+			Distance fl = new Distance(field_length, FEET);
+			return occ / (fl.asFloat(MILES) * MAX_OCCUPANCY);
+		} else
 			return MISSING_DATA;
-		return occ * FEET_PER_MILE / field_length / MAX_OCCUPANCY;
 	}
 
 	/** Get the current speed (miles per hour) */
@@ -901,7 +905,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		}
 		if(lane > 0)
 			out.print(XmlWriter.createAttribute("lane", lane));
-		if(field != DEFAULT_FIELD_LENGTH)
+		if(field != DEFAULT_FIELD_FT)
 			out.print(XmlWriter.createAttribute("field", field));
 		Controller c = getController();
 		if(c != null) 
