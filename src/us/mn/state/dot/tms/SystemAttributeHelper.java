@@ -15,6 +15,8 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.tms.units.Interval;
+
 /**
  * Static System Attribute convenience methods accessible from
  * the client and server. These methods are used to retrieve
@@ -78,8 +80,8 @@ public class SystemAttributeHelper extends BaseHelper {
 	static protected int calculateReleaseRate(float red) {
 		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
 		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
-		Interval cycle = Interval.second(green + yellow + red);
-		return cycle.per_hour();
+		Interval cycle = new Interval(green + yellow + red);
+		return Math.round(cycle.per(Interval.HOUR));
 	}
 
 	/** Is the specified attribute and enum the same? */

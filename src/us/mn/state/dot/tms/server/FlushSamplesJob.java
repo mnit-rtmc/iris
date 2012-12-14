@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
-import static us.mn.state.dot.tms.Interval.MINUTE;
+import us.mn.state.dot.tms.units.Interval;
 
 /**
  * Job to flush sample data to disk.
@@ -40,11 +40,9 @@ public class FlushSamplesJob extends Job {
 		return SystemAttrEnum.SAMPLE_ARCHIVE_ENABLE.getBoolean();
 	}
 
-	/** Number of seconds to cache periodic sample data */
-	static private final long SAMPLE_CACHE_SEC = 10 * MINUTE;
-
 	/** Number of milliseconds to cache periodic sample data */
-	static private final long SAMPLE_CACHE_MS = SAMPLE_CACHE_SEC * 1000;
+	static private final long SAMPLE_CACHE_MS = new Interval(10,
+		Interval.Units.MINUTES).ms();
 
 	/** Calculate a time stamp to purge samples */
 	static private long calculatePurgeStamp() {

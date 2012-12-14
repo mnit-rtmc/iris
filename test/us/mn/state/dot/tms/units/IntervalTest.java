@@ -48,8 +48,9 @@ public class IntervalTest extends TestCase {
 			Interval.Units.SECONDS) == 0);
 		assertTrue(new Interval(500, Interval.Units.MILLISECONDS).round(
 			Interval.Units.SECONDS) == 1);
-		assertTrue(new Interval(30, Interval.Units.SECONDS).per_hour()
-			== 120);
+		assertTrue(new Interval(30, Interval.Units.SECONDS).per(
+			Interval.HOUR) == 120);
+		assertTrue(Interval.HOUR.divide(30) == 120);
 		assertTrue(new Interval(60).equals(new Interval(1,
 			Interval.Units.MINUTES)));
 	}

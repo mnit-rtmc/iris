@@ -567,9 +567,10 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Get the current raw flow rate (vehicles per hour) */
 	protected int getFlowRaw() {
 		int volume = getVolume();
-		if(volume >= 0)
-			return volume * SAMPLE_INTERVAL.per_hour();
-		else
+		if(volume >= 0) {
+			return Math.round(volume *
+				SAMPLE_INTERVAL.per(Interval.HOUR));
+		} else
 			return MISSING_DATA;
 	}
 

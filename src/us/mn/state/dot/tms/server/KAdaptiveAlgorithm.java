@@ -20,12 +20,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterQueue;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.HOUR;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.RampMeterImpl.filterRate;
@@ -152,8 +153,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @return Flow rate (vehicles / hour) */
 	static private int flowRate(float vol, int n_steps) {
 		if(vol >= 0) {
-			float period = n_steps * STEP_SECONDS;
-			float hour_frac = Interval.HOUR / period;
+			Interval period = new Interval(n_steps * STEP_SECONDS);
+			float hour_frac = period.per(HOUR);
 			return Math.round(vol * hour_frac);
 		} else
 			return MISSING_DATA;
@@ -170,7 +171,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @return Volume over given period. */
 	static private float volumePeriod(int flow, int period) {
 		if(flow >= 0 && period > 0) {
-			float hour_frac = (float)period / Interval.HOUR;
+			float hour_frac = HOUR.per(new Interval(period));
 			return flow * hour_frac;
 		} else
 			return MISSING_DATA;

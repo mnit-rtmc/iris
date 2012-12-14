@@ -45,6 +45,12 @@ public final class Interval {
 		}
 	}
 
+	/** 1 Hour interval */
+	static public final Interval HOUR = new Interval(1, Units.HOURS);
+
+	/** 1 Day interval */
+	static public final Interval DAY = new Interval(1, Units.DAYS);
+
 	/** Interval value */
 	public final double value;
 
@@ -105,9 +111,18 @@ public final class Interval {
 			return (int)Math.round(seconds() / u.seconds);
 	}
 
-	/** Get the number of intervals per hour */
-	public int per_hour() {
-		return (int)Math.round(Units.HOURS.seconds / seconds());
+	/** Divide into another interval */
+	public float per(Interval i) {
+		double s = seconds();
+		if(s > 0)
+			return (float)(i.seconds() / s);
+		else
+			return 0;
+	}
+
+	/** Divide into equal parts */
+	public float divide(int i) {
+		return (float)(seconds() / i);
 	}
 
 	/** Compare for equality */

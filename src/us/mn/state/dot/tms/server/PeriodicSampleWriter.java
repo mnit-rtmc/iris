@@ -21,7 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
-import static us.mn.state.dot.tms.Interval.DAY;
+import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
@@ -39,11 +39,11 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 public class PeriodicSampleWriter {
 
 	/** Minimum sample period (seconds) */
-	static private final int MIN_PERIOD = 5;
+	static private final Interval MIN_PERIOD = new Interval(5);
 
 	/** Get the number of samples per day */
-	static private int samplesPerDay(int period) {
-		return DAY / period;
+	static private int samplesPerDay(Interval period) {
+		return (int)period.per(Interval.DAY);
 	}
 
 	/** Sample archive factory */
@@ -53,8 +53,8 @@ public class PeriodicSampleWriter {
 	private final ByteBuffer buffer = ByteBuffer.allocate(
 		samplesPerDay(MIN_PERIOD) * PeriodicSampleType.MAX_BYTES);
 
-	/** Sample period (seconds) for current cache */
-	private transient int period;
+	/** Sample period for current cache */
+	private transient Interval period;
 
 	/** Current file */
 	private transient File file;
@@ -71,7 +71,7 @@ public class PeriodicSampleWriter {
 	public void flush(PeriodicSampleCache cache, String sensor_id)
 		throws IOException
 	{
-		period = 0;
+		period = new Interval(0);
 		file = null;
 		channel = null;
 		buffer.clear();
@@ -85,7 +85,7 @@ public class PeriodicSampleWriter {
 		try {
 			while(it.hasNext()) {
 				PeriodicSample ps = it.next();
-				period = ps.period;
+				period = new Interval(ps.period);
 				File f = factory.createFile(sensor_id, s_type,
 					ps);
 				if(!f.equals(file)) {

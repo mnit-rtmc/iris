@@ -28,7 +28,6 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import static us.mn.state.dot.tms.Interval.HOUR;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeTransition;
@@ -38,6 +37,7 @@ import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.FEET;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
+import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
 import static us.mn.state.dot.tms.server.RampMeterImpl.getMinRelease;
 
@@ -383,8 +383,9 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 				DENSITY_Y_INTERCEPT;
 			Distance storage = computeStorage();
 			max_stored = density * storage.asFloat(MILES);
-			float max_cycle = meter.getMaxWait() / max_stored;
-			minimum = (int)(HOUR / max_cycle);
+			Interval max_cycle = new Interval(meter.getMaxWait() /
+				max_stored);
+			minimum = (int)max_cycle.per(Interval.HOUR);
 			int p_demand = calculatePassageDemand();
 			int t_demand = demand;
 			q_prob = Math.min(p_flow / rate_accum, 1.0f);
