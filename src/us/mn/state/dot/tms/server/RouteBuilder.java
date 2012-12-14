@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.units.Distance;
 
 /**
  * A route builder builds a set of routes
@@ -39,7 +40,7 @@ public class RouteBuilder {
 	}
 
 	/** Maximum distance from origin to a corridor node (in meters) */
-	static protected final float MAX_ORIGIN_DISTANCE = 1000;
+	static private final float MAX_ORIGIN_M = 1000;
 
 	/** Maximum number of R_Nodes to follow on a corridor */
 	static protected final int MAX_R_NODE_LIMIT = 100;
@@ -83,8 +84,8 @@ public class RouteBuilder {
 			return;
 		}
 		R_NodeImpl r_node = c.findDownstreamNode(origin);
-		Double m = Corridor.metersTo(r_node, origin);
-		if(m == null || m > MAX_ORIGIN_DISTANCE) {
+		Distance m = Corridor.nodeDistance(r_node, origin);
+		if(m == null || m.m() > MAX_ORIGIN_M) {
 			throw new BadRouteException("ORIGIN OFF MAINLINE: " +
 				GeoLocHelper.getDescription(origin));
 		}

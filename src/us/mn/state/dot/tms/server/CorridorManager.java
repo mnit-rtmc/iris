@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
+import us.mn.state.dot.tms.units.Distance;
 
 /**
  * This is a class to manage roadway network corridors.
@@ -96,12 +97,12 @@ public class CorridorManager {
 		List<R_NodeImpl> others)
 	{
 		R_NodeImpl nearest = null;
-		double distance = 0;
+		Distance d = new Distance(0);
 		for(R_NodeImpl other: others) {
-			Double m = Corridor.metersTo(r_node, other);
-			if(m != null && (nearest == null || m < distance)) {
+			Distance m = Corridor.nodeDistance(r_node, other);
+			if(m != null && (nearest == null || m.m() < d.m())) {
 				nearest = other;
-				distance = m;
+				d = m;
 			}
 		}
 		return nearest;

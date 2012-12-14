@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
@@ -578,9 +579,9 @@ public class IncidentDispatcher extends JPanel
 		}
 		public boolean check(Camera cam) {
 			GeoLoc loc = cam.getGeoLoc();
-			Double d = GeoLocHelper.metersTo(loc, pos);
+			Distance d = GeoLocHelper.distanceTo(loc, pos);
 			if(d != null) {
-				cameras.put(d, cam);
+				cameras.put(d.m(), cam);
 				while(cameras.size() > 5)
 					cameras.pollLastEntry();
 			}

@@ -20,6 +20,7 @@ import us.mn.state.dot.geokit.MapVector;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.tms.units.Distance;
 
 /**
  * GeoLocHelper has static methods for dealing with geo locations.
@@ -249,21 +250,21 @@ public class GeoLocHelper extends BaseHelper {
 		return (getLat(l) == null) || (getLon(l) == null);
 	}
 
-	/** Calculate the distance between two locations (in meters) */
-	static public Double metersTo(GeoLoc l0, GeoLoc l1) {
+	/** Calculate the distance between two locations */
+	static public Distance distanceTo(GeoLoc l0, GeoLoc l1) {
 		Position p0 = getWgs84Position(l0);
 		Position p1 = getWgs84Position(l1);
 		if(p0 != null && p1 != null)
-			return p0.distanceHaversine(p1);
+			return new Distance(p0.distanceHaversine(p1));
 		else
 			return null;
 	}
 
-	/** Calculate the distance between two locations (in meters) */
-	static public Double metersTo(GeoLoc l0, Position p1) {
+	/** Calculate the distance between two locations */
+	static public Distance distanceTo(GeoLoc l0, Position p1) {
 		Position p0 = getWgs84Position(l0);
 		if(p0 != null && p1 != null)
-			return p0.distanceHaversine(p1);
+			return new Distance(p0.distanceHaversine(p1));
 		else
 			return null;
 	}

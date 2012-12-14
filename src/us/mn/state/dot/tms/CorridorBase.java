@@ -20,6 +20,9 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
 import us.mn.state.dot.geokit.Position;
+import static us.mn.state.dot.tms.GeoLocHelper.distanceTo;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
  * A corridor is a collection of all R_Node objects for one roadway corridor.
@@ -27,14 +30,6 @@ import us.mn.state.dot.geokit.Position;
  * @author Douglas Lau
  */
 public class CorridorBase implements Iterable<R_Node> {
-
-	/** Conversion value from meter to mile length units */
-	static protected final float METERS_PER_MILE = 1609.344f;
-
-	/** Convert meters to miles */
-	static protected float metersToMiles(double meters) {
-		return (float)(meters / METERS_PER_MILE);
-	}
 
 	/** Adjustment for r_node milepoints falling on exact same spot */
 	static protected float calculateEpsilon(float v) {
@@ -44,14 +39,14 @@ public class CorridorBase implements Iterable<R_Node> {
 			return 0.0000001f;
 	}
 
-	/** Calculate the distance to another roadway node (in meters) */
-	static public Double metersTo(R_Node a, R_Node b) {
-		return GeoLocHelper.metersTo(a.getGeoLoc(), b.getGeoLoc());
+	/** Calculate the distance to another roadway node */
+	static public Distance nodeDistance(R_Node a, R_Node b) {
+		return distanceTo(a.getGeoLoc(), b.getGeoLoc());
 	}
 
-	/** Calculate the distance to a location (in meters) */
-	static public Double metersTo(R_Node n, GeoLoc l) {
-		return GeoLocHelper.metersTo(n.getGeoLoc(), l);
+	/** Calculate the distance to a location */
+	static public Distance nodeDistance(R_Node n, GeoLoc l) {
+		return distanceTo(n.getGeoLoc(), l);
 	}
 
 	/** Check if the r_node location is valid */
@@ -185,9 +180,9 @@ public class CorridorBase implements Iterable<R_Node> {
 	protected NodeDistance findNearest(R_Node end) {
 		NodeDistance near = null;
 		for(R_Node r_node: unsorted) {
-			Double m = metersTo(r_node, end);
-			if(m != null && (near == null || m < near.meters))
-				near = new NodeDistance(m, r_node);
+			Distance m = nodeDistance(r_node, end);
+			if(m != null && (near == null || m.m() < near.meters))
+				near = new NodeDistance(m.m(), r_node);
 		}
 		return near;
 	}
@@ -239,10 +234,10 @@ public class CorridorBase implements Iterable<R_Node> {
 		R_Node previous = null;
 		for(R_Node n: r_nodes) {
 			if(previous != null) {
-				Double m = metersTo(previous, n);
+				Distance m = nodeDistance(previous, n);
 				if(m == null)
 					continue;
-				miles += metersToMiles(m);
+				miles += m.asFloat(MILES);
 			}
 			while(n_points.containsKey(miles))
 				miles += calculateEpsilon(miles);
@@ -263,23 +258,24 @@ public class CorridorBase implements Iterable<R_Node> {
 		double n_meters = 0;
 		for(Float mile: n_points.keySet()) {
 			R_Node n = n_points.get(mile);
-			Double m = metersTo(n, loc);
+			Distance m = nodeDistance(n, loc);
 			if(m != null) {
-				if(nearest == null || m < n_meters) {
+				double ms = m.m();
+				if(nearest == null || ms < n_meters) {
 					nearest = n;
 					n_after = n;
 					n_mile = mile;
-					n_meters = m;
+					n_meters = ms;
 				} else if(n_after == nearest)
 					n_after = n;
 			}
 		}
 		if(nearest == null || n_after == null)
 			return null;
-		float mi = metersToMiles(n_meters);
-		Double m0 = metersTo(n_after, nearest);
-		Double m1 = metersTo(n_after, loc);
-		if(m0 != null && m1 != null && m0 > m1)
+		float mi = new Distance(n_meters).asFloat(MILES);
+		Distance m0 = nodeDistance(n_after, nearest);
+		Distance m1 = nodeDistance(n_after, loc);
+		if(m0 != null && m1 != null && m0.m() > m1.m())
 			return n_mile + mi;
 		else
 			return n_mile - mi;
@@ -314,10 +310,10 @@ public class CorridorBase implements Iterable<R_Node> {
 		R_Node nearest = null;
 		double n_meters = 0;
 		for(R_Node n: r_nodes) {
-			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), pos);
-			if(m != null && (nearest == null || m < n_meters)) {
+			Distance m = distanceTo(n.getGeoLoc(), pos);
+			if(m != null && (nearest == null || m.m() < n_meters)) {
 				nearest = n;
-				n_meters = m;
+				n_meters = m.m();
 			}
 		}
 		return nearest;
@@ -330,10 +326,10 @@ public class CorridorBase implements Iterable<R_Node> {
 		for(R_Node n: r_nodes) {
 			if(n.getNodeType() != nt.ordinal())
 				continue;
-			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), pos);
-			if(m != null && (nearest == null || m < n_meters)) {
+			Distance m = distanceTo(n.getGeoLoc(), pos);
+			if(m != null && (nearest == null || m.m() < n_meters)) {
 				nearest = n;
-				n_meters = m;
+				n_meters = m.m();
 			}
 		}
 		return nearest;
@@ -346,14 +342,15 @@ public class CorridorBase implements Iterable<R_Node> {
 		R_Node n_after = null;
 		double n_meters = 0;
 		for(R_Node n: r_nodes) {
-			Double m = GeoLocHelper.metersTo(n.getGeoLoc(), pos);
+			Distance m = distanceTo(n.getGeoLoc(), pos);
 			if(m != null) {
-				if(nearest == null || m < n_meters) {
+				double ms = m.m();
+				if(nearest == null || ms < n_meters) {
 					n_before = nearest;
 					nearest = n;
 					n_after = n;
-					n_meters = m;
-				} else if(m == n_meters) {
+					n_meters = ms;
+				} else if(ms == n_meters) {
 					// coincident points
 					nearest = n;
 					n_after = n;
@@ -364,9 +361,9 @@ public class CorridorBase implements Iterable<R_Node> {
 		if(nearest == null)
 			return null;
 		GeoLoc ga = n_after.getGeoLoc();
-		Double m0 = GeoLocHelper.metersTo(ga, nearest.getGeoLoc());
-		Double m1 = GeoLocHelper.metersTo(ga, pos);
-		if(m0 != null && m1 != null && m0 > m1)
+		Distance m0 = distanceTo(ga, nearest.getGeoLoc());
+		Distance m1 = distanceTo(ga, pos);
+		if(m0 != null && m1 != null && m0.m() > m1.m())
 			return nearest;
 		else
 			return n_before;

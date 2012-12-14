@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.utils.I18N;
@@ -158,10 +159,11 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	}
 
 	/** Check if two locations are too distant */
-	static protected boolean isTooDistant(MapGeoLoc l0, MapGeoLoc l1) {
-		Double m = GeoLocHelper.metersTo(l0.getGeoLoc(),l1.getGeoLoc());
+	static private boolean isTooDistant(MapGeoLoc l0, MapGeoLoc l1) {
+		Distance m = GeoLocHelper.distanceTo(l0.getGeoLoc(),
+			l1.getGeoLoc());
 		return m == null ||
-		       m > SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
+		       m.m() > SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
 	}
 
 	/** Create a new layer state */
