@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
-import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -36,6 +35,9 @@ import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.FEET;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
 import static us.mn.state.dot.tms.server.RampMeterImpl.getMinRelease;
 
@@ -67,8 +69,8 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 	/** Queue override demand increment */
 	static protected final int QUEUE_OVERRIDE_INCREMENT = 150;
 
-	/** Distance of queue from detector at queue occ threshold */
-	static protected final int QUEUE_THRESHOLD_DISTANCE = 100;
+	/** Distance of queue from detector at queue occ threshold (feet) */
+	static private final int QUEUE_THRESHOLD_FT = 100;
 
 	/** Factor to determine whether a queue exists */
 	static protected final float QUEUE_EXISTS_FACTOR = 0.8f;
@@ -379,11 +381,8 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 			rate_accum += K_RATE_ACCUM * (r - rate_accum);
 			density = DENSITY_SLOPE * rate_accum +
 				DENSITY_Y_INTERCEPT;
-			int storage = meter.getStorage();
-			int lanes = getMeteringLanes(meter);
-			storage -= QUEUE_THRESHOLD_DISTANCE * lanes;
-			storage = Math.max(storage, 1);
-			max_stored = density * storage / FEET_PER_MILE;
+			Distance storage = computeStorage();
+			max_stored = density * storage.asFloat(MILES);
 			float max_cycle = meter.getMaxWait() / max_stored;
 			minimum = (int)(HOUR / max_cycle);
 			int p_demand = calculatePassageDemand();
@@ -410,6 +409,14 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 				minimum = getMaxRelease();
 			has_queue = q_prob > QUEUE_EXISTS_FACTOR;
 			demand = t_demand;
+		}
+
+		/** Compute the storage distance of a meter */
+		private Distance computeStorage() {
+			int s = meter.getStorage();
+			s -= QUEUE_THRESHOLD_FT * getMeteringLanes(meter);
+			s = Math.max(s, 1);
+			return new Distance(s, FEET);
 		}
 
 		/** Get the most recent release rate from the meter */
