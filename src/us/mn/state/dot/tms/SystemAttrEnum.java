@@ -318,7 +318,7 @@ public enum SystemAttrEnum {
 	}
 
 	/** Get the value of a system attribute */
-	protected Object getValue(SystemAttribute attr) {
+	private Object getValue(SystemAttribute attr) {
 		if(attr == null) {
 			System.err.println(warningDefault());
 			return def_value;

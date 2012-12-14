@@ -45,23 +45,12 @@ public class SystemAttributeHelper extends BaseHelper {
 	/** Lookup a SystemAttribute in the SONAR namespace. 
 	 *  @return The specified system attribute, or null if the it does not
 	 *  exist in the namespace. */
-	static protected SystemAttribute lookup(String aname) {
-		// assume that if the namespace is null junit test cases 
-		// are running and we're not connected to a live server.
-		if(namespace == null) {
-			System.err.println("SONAR namespace is null during " +
-				"lookup of " + aname + ".");
-			SystemAttrEnum sa = SystemAttrEnum.lookup(aname);
-			SystemAttribute ret = null;
-			if(sa != null)
-				ret = new SystemAttrFake(sa.getDefault());
-			return ret;
-		}
-		assert aname != null && aname.length() > 0;
-		if(namespace == null || aname == null)
+	static private SystemAttribute lookup(String aname) {
+		if(namespace != null) {
+			return (SystemAttribute)namespace.lookupObject(
+				SystemAttribute.SONAR_TYPE, aname);
+		} else
 			return null;
-		return (SystemAttribute)namespace.lookupObject(
-			SystemAttribute.SONAR_TYPE, aname);
 	}
 
 	/** Get the meter minimum release rate (vehicles per hour) */
