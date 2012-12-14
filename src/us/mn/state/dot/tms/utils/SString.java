@@ -186,16 +186,6 @@ public class SString {
 		return (ret);
 	}
 
-	/**
-	 *   return a hexstring given an integer. This method is like the Java
-	 *   method but converts the string to upper case.
-	 */
-	static public String toHexString(int i) {
-		String hex = Integer.toHexString(i);
-		hex = hex.toUpperCase();
-		return (hex);
-	}
-
 	/** convert string to int. This method suppresses all number format
 	 *  exceptions, returning 0 if a NumberFormatException is caught. */
 	public static int stringToInt(String s) {
