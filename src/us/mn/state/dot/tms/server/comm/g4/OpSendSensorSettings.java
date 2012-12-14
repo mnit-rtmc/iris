@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.g4;
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.DECIMETERS;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
