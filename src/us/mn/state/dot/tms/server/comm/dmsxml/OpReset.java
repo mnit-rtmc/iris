@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.Log;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Operation to reset the DMS.

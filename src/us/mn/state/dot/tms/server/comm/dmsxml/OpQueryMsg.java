@@ -34,8 +34,6 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
-import us.mn.state.dot.tms.utils.SString;
-import us.mn.state.dot.tms.utils.STime;
 
 /**
  * Operation to query the current message on a DMS.

@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A sign message represents a message which can be displayed on a dynamic

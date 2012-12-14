@@ -19,7 +19,6 @@ import java.io.IOException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Operation to query the configuration of a DMS.
