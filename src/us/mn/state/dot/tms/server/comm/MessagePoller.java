@@ -52,7 +52,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 			return e.getClass().getSimpleName();
 	}
 
-	/** Interval time for load calculation is 30,000 miliseconds */
+	/** Interval time for load calculation is 30,000 milliseconds */
 	static protected final long INTERVAL_TIME = 30000;
 
 	/** Message polling log */

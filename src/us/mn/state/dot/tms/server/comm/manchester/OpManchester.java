@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 abstract public class OpManchester extends OpDevice<ManchesterProperty> {
 
-	/** Operation timeout in miliseconds */
+	/** Operation timeout in milliseconds */
 	static private final int OP_TIMEOUT_MS = 30000;
 
 	/** The number of milliseconds between commands */
