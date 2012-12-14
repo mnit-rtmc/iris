@@ -15,8 +15,9 @@
 package us.mn.state.dot.tms;
 
 import java.util.LinkedList;
-import static us.mn.state.dot.tms.Interval.hour;
-import static us.mn.state.dot.tms.Interval.minute;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
+import static us.mn.state.dot.tms.units.Interval.Units.HOURS;
 
 /**
  * Road lane type enumeration.   The ordinal values correspond to the records
@@ -27,55 +28,63 @@ import static us.mn.state.dot.tms.Interval.minute;
 public enum LaneType {
 
 	/** Undefined lane type (0) */
-	NONE(" ", "", minute(0), minute(0)),
+	NONE(" ", "", new Interval(0), new Interval(0)),
 
 	/** Mainline lane type (1) */
-	MAINLINE("Mainline", "", hour(4), minute(3)),
+	MAINLINE("Mainline", "", new Interval(4,HOURS),new Interval(3,MINUTES)),
 
 	/** Auxiliary lane type (2) */
-	AUXILIARY("Auxiliary", "A", hour(24), minute(3)),
+	AUXILIARY("Auxiliary", "A", new Interval(24, HOURS), new Interval(3,
+		MINUTES)),
 
 	/** Collector/Distributor lane type (3) */
-	CD_LANE("CD Lane", "CD", hour(4), minute(3)),
+	CD_LANE("CD Lane", "CD", new Interval(4, HOURS), new Interval(3,
+		MINUTES)),
 
 	/** Reversible lane type (4) */
-	REVERSIBLE("Reversible", "R", hour(72), minute(3)),
+	REVERSIBLE("Reversible", "R", new Interval(72, HOURS), new Interval(3,
+		MINUTES)),
 
 	/** Merge lane type (5) */
-	MERGE("Merge", "M", hour(12), minute(20)),
+	MERGE("Merge", "M", new Interval(12, HOURS), new Interval(20, MINUTES)),
 
 	/** Queue detector lane type (6) */
-	QUEUE("Queue", "Q", hour(12), minute(30)),
+	QUEUE("Queue", "Q", new Interval(12, HOURS), new Interval(30, MINUTES)),
 
 	/** Exit lane type (7) */
-	EXIT("Exit", "X", hour(8), minute(20)),
+	EXIT("Exit", "X", new Interval(8, HOURS), new Interval(20, MINUTES)),
 
 	/** Meter bypass (HOV) lane type (8) */
-	BYPASS("Bypass", "B", hour(72), minute(20)),
+	BYPASS("Bypass", "B", new Interval(72,HOURS), new Interval(20,MINUTES)),
 
 	/** Passage lane type (9) */
-	PASSAGE("Passage", "P", hour(12), minute(20)),
+	PASSAGE("Passage", "P", new Interval(12, HOURS), new Interval(20,
+		MINUTES)),
 
 	/** Velocity (mainline) lane type (10) */
-	VELOCITY("Velocity", "V", hour(4), minute(3)),
+	VELOCITY("Velocity", "V", new Interval(4, HOURS), new Interval(3,
+		MINUTES)),
 
 	/** Omnibus (ok, bus) lane type (11) */
-	OMNIBUS("Omnibus", "O", hour(72), minute(20)),
+	OMNIBUS("Omnibus", "O", new Interval(72, HOURS), new Interval(20,
+		MINUTES)),
 
 	/** Green count lane type (12) */
-	GREEN("Green", "G", hour(72), minute(20)),
+	GREEN("Green", "G", new Interval(72, HOURS), new Interval(20, MINUTES)),
 
 	/** Wrong way (exit) lane type (13) */
-	WRONG_WAY("Wrong Way", "Y", hour(8), minute(20)),
+	WRONG_WAY("Wrong Way", "Y", new Interval(8, HOURS), new Interval(20,
+		MINUTES)),
 
 	/** High-Occupancy-Vehicle (HOV) lane type (14) */
-	HOV("HOV", "H", hour(8), minute(3)),
+	HOV("HOV", "H", new Interval(8, HOURS), new Interval(3, MINUTES)),
 
 	/** High Occupancy / Toll (HOT) lane type (15) */
-	HOT("HOT", "HT", hour(8), minute(3)),
+	HOT("HOT", "HT", new Interval(8, HOURS), new Interval(3, MINUTES)),
 
 	/** Dynamic shoulder lane type (16) */
-	SHOULDER("Shoulder", "D", hour(72), minute(3));
+	SHOULDER("Shoulder", "D", new Interval(72, HOURS), new Interval(3,
+		MINUTES));
 
 	/** Create a new lane type */
 	private LaneType(String d, String s, Interval nht, Interval lot) {

@@ -33,13 +33,13 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
+import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.units.Distance;
@@ -78,10 +78,14 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
 
 	/** Sample period for detectors (seconds) */
-	static protected final int SAMPLE_PERIOD_SEC = 30;
+	static private final int SAMPLE_PERIOD_SEC = 30;
 
 	/** Sample period for detectors (ms) */
-	static protected final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
+	static private final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
+
+	/** Time interval for sample period */
+	static private final Interval SAMPLE_INTERVAL = new Interval(
+		SAMPLE_PERIOD_SEC);
 
 	/** Load all the detectors */
 	static protected void loadAll() throws TMSException {
@@ -564,7 +568,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	protected int getFlowRaw() {
 		int volume = getVolume();
 		if(volume >= 0)
-			return volume * Interval.HOUR / SAMPLE_PERIOD_SEC;
+			return volume * SAMPLE_INTERVAL.per_hour();
 		else
 			return MISSING_DATA;
 	}
@@ -734,7 +738,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		if(isRamp()) {
 			GeoLoc loc = lookupGeoLoc();
 			if(loc != null && isReversibleLocationHack(loc))
-				return Interval.hour(72);
+				return new Interval(72, Interval.Units.HOURS);
 		}
 		return lane_type.no_hit_threshold;
 	}
