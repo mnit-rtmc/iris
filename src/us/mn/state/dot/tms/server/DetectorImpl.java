@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
@@ -75,7 +76,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	static private final int MAX_C30 = 1800;
 
 	/** Detector debug log */
-	static protected final IDebugLog DET_LOG = new IDebugLog("detector");
+	static private final DebugLog DET_LOG = new DebugLog("detector");
 
 	/** Sample period for detectors (seconds) */
 	static private final int SAMPLE_PERIOD_SEC = 30;

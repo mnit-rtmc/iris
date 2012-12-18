@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
@@ -67,7 +68,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	static public final int DEFAULT_MAX_WAIT = 240;
 
 	/** Meter debug log */
-	static private final IDebugLog METER_LOG = new IDebugLog("meter");
+	static private final DebugLog METER_LOG = new DebugLog("meter");
 
 	/** Filter a releae rate for valid range */
 	static public int filterRate(int r) {

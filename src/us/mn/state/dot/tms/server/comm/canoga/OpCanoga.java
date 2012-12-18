@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.canoga;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpCanoga extends OpController<CanogaProperty> {
 
 	/** Canoga debug log */
-	static protected final IDebugLog CANOGA_LOG = new IDebugLog("canoga");
+	static protected final DebugLog CANOGA_LOG = new DebugLog("canoga");
 
 	/** Log a property query */
 	protected void logQuery(CanogaProperty prop) {

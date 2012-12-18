@@ -15,12 +15,14 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.ProxySelector;
 import java.util.Date;
 import java.util.Properties;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.server.ServerNamespace;
@@ -47,13 +49,13 @@ public class MainServer {
 		"/etc/iris/iris-server.properties";
 
 	/** Directory to store IRIS log files */
-	static protected final String LOG_FILE_DIR = "/var/log/iris/";
+	static private final String LOG_FILE_DIR = "/var/log/iris/";
 
 	/** File to log standard out stream */
-	static protected final String STD_OUT = LOG_FILE_DIR + "iris.stdout";
+	static private final String STD_OUT = LOG_FILE_DIR + "iris.stdout";
 
 	/** File to log standard error stream */
-	static protected final String STD_ERR = LOG_FILE_DIR + "iris.stderr";
+	static private final String STD_ERR = LOG_FILE_DIR + "iris.stderr";
 
 	/** Timer thread for repeating jobs */
 	static protected final Scheduler TIMER =
@@ -112,6 +114,8 @@ public class MainServer {
 	/** Initialize the server process */
 	static protected void initialize() throws IOException {
 		redirectStdStreams();
+		DebugLog.init(new File(LOG_FILE_DIR),
+			"IRIS @@VERSION@@ restarted");
 		checkAssert();
 	}
 

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.NavigableMap;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -30,8 +31,8 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 public class StationImpl implements Station {
 
 	/** Bottleneck debug log */
-	static protected final IDebugLog BOTTLENECK_LOG =
-		new IDebugLog("bottleneck");
+	static private final DebugLog BOTTLENECK_LOG =
+		new DebugLog("bottleneck");
 
 	/** Density ranks for calculating rolling sample count */
 	static protected enum DensityRank {

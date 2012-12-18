@@ -15,13 +15,13 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.util.Arrays;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpLCS extends OpDevice {
 
 	/** LCS debug log */
-	static protected final IDebugLog LCS_LOG = new IDebugLog("lcs");
+	static protected final DebugLog LCS_LOG = new DebugLog("lcs");
 
 	/** LCS array to query */
 	protected final LCSArrayImpl lcs_array;

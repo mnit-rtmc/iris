@@ -18,11 +18,11 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.SocketTimeoutException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 
 /**
  * MessagePoller is an abstract class which represents a communication channel 
@@ -56,7 +56,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	static protected final long INTERVAL_TIME = 30000;
 
 	/** Message polling log */
-	static protected final IDebugLog POLL_LOG = new IDebugLog("polling");
+	static private final DebugLog POLL_LOG = new DebugLog("polling");
 
 	/** Thread group for all message poller threads */
 	static protected final ThreadGroup GROUP = new ThreadGroup("Poller");

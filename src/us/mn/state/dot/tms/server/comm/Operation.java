@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.server.IDebugLog;
 
 /**
  * An operation to be performed on a field controller.  Each message
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.IDebugLog;
 abstract public class Operation<T extends ControllerProperty> {
 
 	/** Operation error log */
-	static protected final IDebugLog OP_LOG = new IDebugLog("operation");
+	static private final DebugLog OP_LOG = new DebugLog("operation");
 
 	/** Systemwide count of operations */
 	static private int n_operations = 0;

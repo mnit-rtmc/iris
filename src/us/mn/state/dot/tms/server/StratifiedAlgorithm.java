@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeSet;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLoc;
@@ -49,7 +50,7 @@ import static us.mn.state.dot.tms.server.RampMeterImpl.getMinRelease;
 public class StratifiedAlgorithm implements MeterAlgorithmState {
 
 	/** Zone debug log */
-	static protected final IDebugLog SZM_LOG = new IDebugLog("szm");
+	static private final DebugLog SZM_LOG = new DebugLog("szm");
 
 	/** Path where meter data files are stored */
 	static protected final String DATA_PATH = "/var/lib/iris/meter";

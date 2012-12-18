@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
@@ -83,7 +84,7 @@ import us.mn.state.dot.tms.utils.SString;
 public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Action debug log */
-	static protected final IDebugLog ACTION_LOG = new IDebugLog("action");
+	static private final DebugLog ACTION_LOG = new DebugLog("action");
 
 	/** DMS name, e.g. CMS or DMS */
 	static private final String DMSABBR = I18N.get("dms");

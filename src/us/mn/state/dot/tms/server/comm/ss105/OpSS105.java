@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.ss105;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpSS105 extends OpController<SS105Property> {
 
 	/** SS 105 debug log */
-	static private final IDebugLog SS105_LOG = new IDebugLog("ss105");
+	static private final DebugLog SS105_LOG = new DebugLog("ss105");
 
 	/** Log an error msg */
 	protected void logError(String msg) {

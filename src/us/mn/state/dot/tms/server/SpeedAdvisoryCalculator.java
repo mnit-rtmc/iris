@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiParser;
@@ -28,7 +29,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 public class SpeedAdvisoryCalculator {
 
 	/** VSA debug log */
-	static private final IDebugLog VSA_LOG = new IDebugLog("vsa");
+	static private final DebugLog VSA_LOG = new DebugLog("vsa");
 
 	/** Get the minimum speed to display for advisory */
 	static private int getMinDisplay() {

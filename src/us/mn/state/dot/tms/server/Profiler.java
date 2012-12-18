@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.text.NumberFormat;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Namespace;
@@ -40,7 +41,7 @@ public class Profiler {
 	static private final double MIB = 1024.0 * 1024.0;
 
 	/** Profile debug log */
-	private final IDebugLog PROFILE_LOG = new IDebugLog("profile");
+	private final DebugLog PROFILE_LOG = new DebugLog("profile");
 
 	/** Runtime used to get memory information */
 	private final Runtime jvm = Runtime.getRuntime();

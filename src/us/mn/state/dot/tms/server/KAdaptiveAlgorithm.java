@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -51,7 +52,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	};
 
 	/** Algorithm debug log */
-	static private final IDebugLog ALG_LOG = new IDebugLog("kadaptive");
+	static private final DebugLog ALG_LOG = new DebugLog("kadaptive");
 
 	/** Number of seconds for one time step */
 	static private final int STEP_SECONDS = 30;

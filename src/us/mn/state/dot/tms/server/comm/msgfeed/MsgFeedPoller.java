@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.msgfeed;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 public class MsgFeedPoller extends MessagePoller {
 
 	/** Feed debug log */
-	static protected final IDebugLog FEED_LOG = new IDebugLog("feed");
+	static private final DebugLog FEED_LOG = new DebugLog("feed");
 
 	/** Log a message to the debug log */
 	static public void log(String msg) {

@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -30,7 +30,7 @@ abstract public class OpController<T extends ControllerProperty>
 	extends Operation<T>
 {
 	/** Comm error log */
-	static protected final IDebugLog COMM_LOG = new IDebugLog("comm");
+	static protected final DebugLog COMM_LOG = new DebugLog("comm");
 
 	/** Filter a message */
 	static protected String filterMessage(String m) {

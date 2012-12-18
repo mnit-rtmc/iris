@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.org815;
 
-import us.mn.state.dot.tms.server.IDebugLog;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpOrg815 extends OpDevice<Org815Property> {
 
 	/** ORG-815 debug log */
-	static private final IDebugLog ORG815_LOG = new IDebugLog("org815");
+	static private final DebugLog ORG815_LOG = new DebugLog("org815");
 
 	/** Log a property query */
 	protected void logQuery(Org815Property prop) {

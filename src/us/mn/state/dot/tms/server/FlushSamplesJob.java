@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
@@ -33,7 +34,7 @@ import us.mn.state.dot.tms.units.Interval;
 public class FlushSamplesJob extends Job {
 
 	/** Flush debug log */
-	static protected final IDebugLog FLUSH_LOG = new IDebugLog("flush");
+	static private final DebugLog FLUSH_LOG = new DebugLog("flush");
 
 	/** Is archiving enabled? */
 	static private boolean isArchiveEnabled() {

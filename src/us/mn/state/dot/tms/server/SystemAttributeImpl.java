@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TMSException;
@@ -31,7 +32,7 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	implements SystemAttribute
 {
 	/** System attribute debug log */
-	static private final IDebugLog SYS_LOG = new IDebugLog("sys_attr");
+	static private final DebugLog SYS_LOG = new DebugLog("sys_attr");
 
 	/** Load all */
 	static protected void loadAll() throws TMSException {

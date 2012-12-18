@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.SocketTimeoutException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.ModemHelper;
 import us.mn.state.dot.tms.ModemState;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.ModemImpl;
 
 /**
@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.server.ModemImpl;
 public class ModemMessenger extends Messenger {
 
 	/** Modem debug log */
-	static protected final IDebugLog MODEM_LOG = new IDebugLog("modem");
+	static private final DebugLog MODEM_LOG = new DebugLog("modem");
 
 	/** Get the first available modem */
 	static public ModemImpl getModem() {

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
@@ -112,7 +113,7 @@ public class VSStationFinder implements Corridor.StationFinder {
 	}
 
 	/** Debug the finder */
-	public void debug(IDebugLog VSA_LOG) {
+	public void debug(DebugLog VSA_LOG) {
 		Float a = calculateSpeedAdvisory();
 		VSA_LOG.log("adv: " + a +
 		            ", upstream: " + su +

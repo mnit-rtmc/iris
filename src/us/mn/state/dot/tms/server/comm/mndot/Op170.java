@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class Op170 extends OpController {
 
 	/** MnDOT 170 debug log */
-	static protected final IDebugLog MNDOT_LOG = new IDebugLog("mndot170");
+	static protected final DebugLog MNDOT_LOG = new DebugLog("mndot170");
 
 	/** I/O pin for first traffic device */
 	static protected final int DEVICE_1_PIN = 2;

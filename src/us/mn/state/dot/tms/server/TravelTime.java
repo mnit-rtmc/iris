@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.sched.DebugLog;
+
 /**
  * A utility class to controll travel time logging.
  *
@@ -25,7 +27,7 @@ public class TravelTime {
 	private TravelTime() { }
 
 	/** Travel time debug log */
-	static private final IDebugLog TRAVEL_LOG = new IDebugLog("travel");
+	static private final DebugLog TRAVEL_LOG = new DebugLog("travel");
 
 	/** Check if we're logging */
 	static public boolean isLogging() {

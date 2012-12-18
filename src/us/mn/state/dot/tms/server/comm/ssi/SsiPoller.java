@@ -16,8 +16,8 @@
 package us.mn.state.dot.tms.server.comm.ssi;
 
 import java.util.HashMap;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IDebugLog;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 public class SsiPoller extends MessagePoller {
 
 	/** SSI logger */
-	static public final IDebugLog LOG = new IDebugLog("ssi");
+	static public final DebugLog LOG = new DebugLog("ssi");
 
 	/** Log an SSI message */
 	static public void log(String msg) {

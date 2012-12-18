@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_NodeType;
@@ -69,7 +70,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** UMN Density Metering Debug Log */
-	static protected final IDebugLog DENS_LOG = new IDebugLog("dens_umn");
+	static private final DebugLog DENS_LOG = new DebugLog("dens_umn");
 
 	/** Debug level of detail to be used in logging */
 	static protected int DEBUG_LEVEL = 5;
