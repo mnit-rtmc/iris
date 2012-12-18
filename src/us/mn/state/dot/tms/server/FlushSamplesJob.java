@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.io.IOException;
 import java.util.Calendar;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
@@ -32,9 +32,6 @@ import us.mn.state.dot.tms.units.Interval;
  * @author Douglas Lau
  */
 public class FlushSamplesJob extends Job {
-
-	/** Flush debug log */
-	static private final DebugLog FLUSH_LOG = new DebugLog("flush");
 
 	/** Is archiving enabled? */
 	static private boolean isArchiveEnabled() {
@@ -62,10 +59,8 @@ public class FlushSamplesJob extends Job {
 	/** Perform the flush samples job */
 	public void perform() {
 		long before = calculatePurgeStamp();
-		FLUSH_LOG.log("Starting FLUSH");
 		flushDetectorSamples(before);
 		flushWeatherSamples(before);
-		FLUSH_LOG.log("Finished FLUSH");
 	}
 
 	/** Flush detector sample data to disk */
@@ -76,12 +71,23 @@ public class FlushSamplesJob extends Job {
 				if(d instanceof DetectorImpl) {
 					DetectorImpl det = (DetectorImpl)d;
 					if(do_flush)
-						det.flush(writer);
+						flushDetectorSamples(det);
 					det.purge(before);
 				}
 				return false;
 			}
 		});
+	}
+
+	/** Flush the samples for one detector */
+	private void flushDetectorSamples(DetectorImpl det) {
+		try {
+			det.flush(writer);
+		}
+		catch(IOException e) {
+			// FIXME: should propogate out of Job
+			e.printStackTrace();
+		}
 	}
 
 	/** Flush weather sample data to disk */
@@ -93,11 +99,22 @@ public class FlushSamplesJob extends Job {
 					WeatherSensorImpl ws =
 						(WeatherSensorImpl)w;
 					if(do_flush)
-						ws.flush(writer);
+						flushWeatherSamples(ws);
 					ws.purge(before);
 				}
 				return false;
 			}
 		});
+	}
+
+	/** Flush the samples for one weather sensor */
+	private void flushWeatherSamples(WeatherSensorImpl ws) {
+		try {
+			ws.flush(writer);
+		}
+		catch(IOException e) {
+			// FIXME: should propogate out of Job
+			e.printStackTrace();
+		}
 	}
 }

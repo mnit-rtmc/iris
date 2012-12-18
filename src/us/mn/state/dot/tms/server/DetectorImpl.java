@@ -795,19 +795,14 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	}
 
 	/** Flush buffered data to disk */
-	public void flush(PeriodicSampleWriter writer) {
-		try {
-			writer.flush(vol_cache, name);
-			writer.flush(scn_cache, name);
-			writer.flush(spd_cache, name);
-			writer.flush(vol_mc_cache, name);
-			writer.flush(vol_s_cache, name);
-			writer.flush(vol_m_cache, name);
-			writer.flush(vol_l_cache, name);
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
+	public void flush(PeriodicSampleWriter writer) throws IOException {
+		writer.flush(vol_cache, name);
+		writer.flush(scn_cache, name);
+		writer.flush(spd_cache, name);
+		writer.flush(vol_mc_cache, name);
+		writer.flush(vol_s_cache, name);
+		writer.flush(vol_m_cache, name);
+		writer.flush(vol_l_cache, name);
 	}
 
 	/** Purge all samples before a given stamp. */

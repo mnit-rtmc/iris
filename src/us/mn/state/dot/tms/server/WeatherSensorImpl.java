@@ -322,14 +322,9 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Flush buffered sample data to disk */
-	public void flush(PeriodicSampleWriter writer) {
-		try {
-			writer.flush(cache, name);
-			writer.flush(pt_cache, name);
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
+	public void flush(PeriodicSampleWriter writer) throws IOException {
+		writer.flush(cache, name);
+		writer.flush(pt_cache, name);
 	}
 
 	/** Purge all samples before a given stamp. */
