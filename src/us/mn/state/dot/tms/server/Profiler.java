@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,12 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.text.NumberFormat;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.STime;
 
 /**
  * The server profiler is used to periodically write interesting server 
@@ -37,16 +38,16 @@ import us.mn.state.dot.tms.utils.STime;
 public class Profiler {
 
 	/** Constant value of one megabyte */
-	static protected final float MIB = 1024.0f * 1024.0f;
+	static private final double MIB = 1024.0 * 1024.0;
 
 	/** Profile debug log */
-	protected final IDebugLog PROFILE_LOG = new IDebugLog("profile");
+	private final IDebugLog PROFILE_LOG = new IDebugLog("profile");
 
 	/** Runtime used to get memory information */
-	protected final Runtime jvm = Runtime.getRuntime();
+	private final Runtime jvm = Runtime.getRuntime();
 
 	/** OS bean */
-	protected final OperatingSystemMXBean osbean = 
+	private final OperatingSystemMXBean osbean = 
 		ManagementFactory.getOperatingSystemMXBean();
 
 	/** Debug memory profiling information */
@@ -54,9 +55,16 @@ public class Profiler {
 		if(PROFILE_LOG.isOpen()) {
 			long free = jvm.freeMemory();
 			long total = jvm.totalMemory();
-			PROFILE_LOG.log("Free memory: " + free / MIB + "MiB");
-			PROFILE_LOG.log("Total memory: " + total / MIB + "MiB");
+			PROFILE_LOG.log("Free memory: " + formatMem(free));
+			PROFILE_LOG.log("Total memory: " + formatMem(total));
 		}
+	}
+
+	/** Format a memory value */
+	private String formatMem(long mem) {
+		NumberFormat nf = NumberFormat.getNumberInstance();
+		nf.setMaximumFractionDigits(2);
+		return nf.format(mem / MIB) + " MiB";
 	}
 
 	/** Debug thread profiling information for all threads */
@@ -70,56 +78,78 @@ public class Profiler {
 	}
 
 	/** Print thread profiling information for the specified group */
-	protected void debugThreads(ThreadGroup group, int deep) {
-		Thread[] thread = new Thread[group.activeCount() + 1];
-		int count = group.enumerate(thread, false);
-		StringBuilder g = new StringBuilder();
-		while(g.length() < deep)
-			g.append(" ");
-		g.append(group.getName());
-		g.append(" thread group: ");
-		g.append(count);
-		while(g.length() < 66)
-			g.append(" ");
-		g.append(group.getMaxPriority());
-		while(g.length() < 68)
-			g.insert(66, " ");
-		PROFILE_LOG.log(g.toString());
-		for(int i = 0; i < count; i++) {
-			StringBuilder t = new StringBuilder();
-			while(t.length() < 4 + deep)
-				t.insert(0, " ");
-			t.append(thread[i].getName());
-			if(!thread[i].isAlive())
-				t.append(" (dead)");
-			if(thread[i].isDaemon())
-				t.append(" (daemon)");
-			while(t.length() < 66)
-				t.append(" ");
-			t.append(thread[i].getPriority());
-			while(t.length() < 68)
-				t.insert(66, " ");
-			PROFILE_LOG.log(t.toString());
-		}
+	private void debugThreads(ThreadGroup group, int deep) {
+		debugThreadGroup(group, deep);
 		ThreadGroup[] groups =
 			new ThreadGroup[group.activeGroupCount() + 1];
-		count = group.enumerate(groups, false);
+		int count = group.enumerate(groups, false);
 		for(int i = 0; i < count; i++)
 			debugThreads(groups[i], deep + 2);
 	}
 
+	/** Debug one thread group */
+	private void debugThreadGroup(ThreadGroup group, int deep) {
+		Thread[] thread = new Thread[group.activeCount() + 1];
+		int count = group.enumerate(thread, false);
+		StringBuilder sb = new StringBuilder();
+		while(sb.length() < deep)
+			sb.append(" ");
+		sb.append(group.getName());
+		sb.append(" thread group: ");
+		sb.append(count);
+		while(sb.length() < 66)
+			sb.append(" ");
+		sb.append(group.getMaxPriority());
+		while(sb.length() < 68)
+			sb.insert(66, " ");
+		PROFILE_LOG.log(sb.toString());
+		for(int i = 0; i < count; i++)
+			debugThread(thread[i], deep);
+	}
+
+	/** Add one thread to debug log */
+	private void debugThread(Thread t, int deep) {
+		StringBuilder sb = new StringBuilder();
+		while(sb.length() < 4 + deep)
+			sb.insert(0, " ");
+		sb.append(t.getName());
+		if(!t.isAlive())
+			sb.append(" (dead)");
+		if(t.isDaemon())
+			sb.append(" (daemon)");
+		while(sb.length() < 66)
+			sb.append(" ");
+		sb.append(t.getPriority());
+		while(sb.length() < 68)
+			sb.insert(66, " ");
+		PROFILE_LOG.log(sb.toString());
+	}
+
 	/** Append to uptime log */
 	public void appendUptimeLog() throws IOException {
+		File f = getUptimeLogFile();
+		if(f != null)
+			appendUptimeLog(f);
+	}
+
+	/** Get the uptime log file */
+	private File getUptimeLogFile() {
 		String fn = SystemAttrEnum.UPTIME_LOG_FILENAME.getString();
-		if(fn == null || fn.length() <= 0 ) {
+		if(fn != null && fn.length() > 0)
+			return new File(fn);
+		else {
 			PROFILE_LOG.log("warning: bogus file name: " + fn);
-			return;
+			return null;
 		}
-		File f = new File(fn);
+	}
+
+	/** Append to uptime log file */
+	private void appendUptimeLog(File f) throws IOException {
 		FileOutputStream fos = new FileOutputStream(f, true);
 		try {
 			PrintWriter pw = new PrintWriter(fos);
 			pw.println(createLogEntry());
+			pw.close();
 		}
 		finally {
 			fos.close();
@@ -127,30 +157,30 @@ public class Profiler {
 	}
 
 	/** Create a log entry */
-	protected String createLogEntry() {
+	private String createLogEntry() {
 		StringBuilder sb = new StringBuilder();
-
-		// date and time in UTC
-		sb.append(STime.getCurDateTimeString(false));
+		sb.append(TimeSteward.currentDateTimeString(false));
 		sb.append(',');
-
-		// cpu utilization in last 60 seconds as int, e.g. 13 is 13%
-		sb.append((int)Math.round(100 * osbean.getSystemLoadAverage()));
+		sb.append(getLoadAvg());
 		sb.append(',');
-
-		// heap size
-		long heapsize = jvm.totalMemory() - jvm.freeMemory();
-		sb.append(heapsize);
+		sb.append(getHeapSize());
 		sb.append(',');
-
-		// number of user connections
 		sb.append(getConnectionCount());
-
 		return sb.toString();
 	}
 
+	/** Get the current load average */
+	private int getLoadAvg() {
+		return (int)Math.round(100 * osbean.getSystemLoadAverage());
+	}
+
+	/** Get the size of the heap */
+	private long getHeapSize() {
+		return jvm.totalMemory() - jvm.freeMemory();
+	}
+
 	/** Get the current connection count */
-	protected int getConnectionCount() {
+	private int getConnectionCount() {
 		Namespace ns = BaseHelper.namespace;
 		if(ns != null)
 			return ns.getCount(Connection.SONAR_TYPE);
