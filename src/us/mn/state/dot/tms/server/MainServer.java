@@ -58,12 +58,10 @@ public class MainServer {
 	static private final String STD_ERR = LOG_FILE_DIR + "iris.stderr";
 
 	/** Timer thread for repeating jobs */
-	static protected final Scheduler TIMER =
-		new Scheduler("Scheduler: TIMER");
+	static private final Scheduler TIMER = new Scheduler("timer");
 
 	/** Flush thread for disk writing jobs */
-	static public final Scheduler FLUSH =
-		new Scheduler("Scheduler: FLUSH");
+	static public final Scheduler FLUSH = new Scheduler("flush");
 
 	/** SONAR server */
 	static public Server server;

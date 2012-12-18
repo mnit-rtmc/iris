@@ -68,7 +68,7 @@ public class CameraViewer extends JPanel
 	static protected final int BUTTON_NEXT = 11;
 
 	/** Network worker thread */
-	static protected final Scheduler NETWORKER = new Scheduler("NETWORKER");
+	static private final Scheduler NETWORKER = new Scheduler("networker");
 
 	/** Video size */
 	static protected final VideoRequest.Size SIZE =

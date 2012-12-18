@@ -53,7 +53,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class IrisClient extends JFrame {
 
 	/** Login scheduler */
-	static private final Scheduler LOGIN = new Scheduler("LOGIN");
+	static private final Scheduler LOGIN = new Scheduler("login");
 
 	/** Create the window title */
 	static protected String createTitle(String suffix) {

@@ -40,7 +40,7 @@ import us.mn.state.dot.sched.Scheduler;
 public class SensorReader {
 
 	/** Reader worker thread */
-	static private final Scheduler READER = new Scheduler("READER");
+	static private final Scheduler READER = new Scheduler("reader");
 
 	/** Seconds to offset each read from start of interval */
 	static private final int OFFSET_SECS = 4;
