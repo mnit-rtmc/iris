@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,15 +27,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import us.mn.state.dot.tms.utils.Log;
-import us.mn.state.dot.tms.utils.Pair;
 
 /**
  * Convenience class for writing Xml.
  *
  * @author      Michael Darter
- * @version     1.0, 03/12/08
- * @since       1.0
- * @see
  */
 final class Xml {
 

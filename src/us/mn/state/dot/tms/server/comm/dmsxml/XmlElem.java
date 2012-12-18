@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
-import us.mn.state.dot.tms.utils.Pair;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
