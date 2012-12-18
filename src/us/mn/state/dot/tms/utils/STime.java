@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,13 +39,6 @@ public final class STime {
 		return TimeSteward.currentTimeMillis() - startInUTC;
 	}
 
-	/** Calc time difference between now (UTC since 1970)
-	 *  and given start time, in seconds. */
-	static public long calcTimeDeltaS(long startInUTC) {
-		double d = calcTimeDeltaMS(startInUTC);
-		return Math.round(d / 1000L);
-	}
-
 	/** Get current time as short string in local time. */
 	static public String getCurTimeShortString() {
 		return getCurTimeShortString(true);
@@ -57,14 +50,6 @@ public final class STime {
 	 */
 	static public String getCurTimeShortString(boolean local) {
 		return formatDate("HH:mm:ss", local);
-	}
-
-	/**
-	 * Get current date as string in either UTC or local time.
-	 * e.g. '2007-02-13 17:11:25.338'
-	 */
-	static public String getCurDateTimeMSString(boolean local) {
-		return formatDate("yyyy-MM-dd HH:mm:ss.SSS", local);
 	}
 
 	/**
