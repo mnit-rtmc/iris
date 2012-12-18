@@ -20,7 +20,6 @@ import java.util.Map;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.STime;
 
 /**
  * A system attribute is a name mapped to a string value.
@@ -28,9 +27,12 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SystemAttributeImpl extends BaseObjectImpl 
-	implements SystemAttribute 
+public class SystemAttributeImpl extends BaseObjectImpl
+	implements SystemAttribute
 {
+	/** System attribute debug log */
+	static private final IDebugLog SYS_LOG = new IDebugLog("sys_attr");
+
 	/** Load all */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SystemAttributeImpl.class);
@@ -120,13 +122,13 @@ public class SystemAttributeImpl extends BaseObjectImpl
 
 	/** Log system attribute change. */
 	private void logChange(String newval) {
-		if(!value.equals(newval))
-			System.err.println("System attribute changed: name=" +
-				name + ", old=" + value + ", new=" + newval + 
-				", date=" + STime.getCurDateTimeString(true));
+		if(!value.equals(newval)) {
+			SYS_LOG.log("System attribute changed: " + name +
+				", old=" + value + ", new=" + newval);
+		}
 	}
 
-	/** Set the attribute value, doSet is required for 
+	/** Set the attribute value, doSet is required for
 	 *  database backed sonar objects
 	 */
 	public void doSetValue(String arg_value) throws TMSException {
