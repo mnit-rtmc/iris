@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -145,15 +144,9 @@ public class Profiler {
 
 	/** Append to uptime log file */
 	private void appendUptimeLog(File f) throws IOException {
-		FileOutputStream fos = new FileOutputStream(f, true);
-		try {
-			PrintWriter pw = new PrintWriter(fos);
-			pw.println(createLogEntry());
-			pw.close();
-		}
-		finally {
-			fos.close();
-		}
+		PrintWriter pw = new PrintWriter(f);
+		pw.println(createLogEntry());
+		pw.close();
 	}
 
 	/** Create a log entry */
