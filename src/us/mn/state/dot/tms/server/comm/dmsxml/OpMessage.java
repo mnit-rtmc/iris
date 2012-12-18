@@ -30,7 +30,6 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
-import us.mn.state.dot.tms.utils.STime;
 
 /**
  * Operation to send a new message to a DMS.
@@ -173,8 +172,7 @@ class OpMessage extends OpDms {
 
 		// OnTime
 		Calendar ontime = calcMsgOnTime();
-		xrr.addReq("OnTime", 
-			STime.CalendarToXML(ontime));
+		xrr.addReq("OnTime", STime.CalendarToXML(ontime));
 
 		// UseOffTime
 		boolean useofftime = (m_sm.getDuration() != null);

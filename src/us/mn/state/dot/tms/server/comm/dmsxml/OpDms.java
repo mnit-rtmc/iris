@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
-import us.mn.state.dot.tms.utils.STime;
 
 /**
  * Operation to be performed on a dynamic message sign

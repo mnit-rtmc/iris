@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.utils;
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
