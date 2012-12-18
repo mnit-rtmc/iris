@@ -37,11 +37,7 @@ public class XmlConfigJob extends Job {
 
 	/** Perform the XML config job */
 	public void perform() {
-		System.err.println("Starting XMLDUMP @ " +
-			TimeSteward.getDateInstance());
 		writeXmlConfiguration();
-		System.err.println("Finished XMLDUMP @ " +
-			TimeSteward.getDateInstance());
 	}
 
 	/** Write the TMS xml configuration files */

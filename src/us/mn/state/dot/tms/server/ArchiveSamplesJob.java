@@ -51,11 +51,7 @@ public class ArchiveSamplesJob extends Job {
 
 	/** Perform the archive samples job */
 	public void perform() throws IOException {
-		System.err.println("Starting ARCHIVE @ " +
-			TimeSteward.getDateInstance());
 		archiveSamples();
-		System.err.println("Finished ARCHIVE @ " +
-			TimeSteward.getDateInstance());
 	}
 
 	/** Archive data samples */
