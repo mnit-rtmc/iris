@@ -98,7 +98,7 @@ public class MainServer {
 			BaseEvent.store = store;
 			scheduleTimerJobs();
 			scheduleFlushJobs();
-			server = new Server(ns, props, new AccessLogger());
+			server = new Server(ns, props, new AccessLogger(FLUSH));
 			auth_provider = new IrisProvider();
 			server.addProvider(auth_provider);
 			System.err.println("IRIS Server active");

@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.AccessMonitor;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
@@ -25,6 +27,14 @@ import us.mn.state.dot.tms.server.event.ClientEvent;
  * @author Douglas Lau
  */
 public class AccessLogger implements AccessMonitor {
+
+	/** FLUSH Scheduler for I/O jobs */
+	private final Scheduler flush;
+
+	/** Create a new access logger */
+	public AccessLogger(Scheduler f) {
+		flush = f;
+	}
 
 	/** Log a connect event */
 	public void connect(String hostport) {
@@ -48,12 +58,11 @@ public class AccessLogger implements AccessMonitor {
 
 	/** Log an event */
 	private void log_event(EventType event, String hostport, String user) {
-		ClientEvent ev = new ClientEvent(event, hostport, user);
-		try {
-			ev.doStore();
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		};
+		final ClientEvent ev = new ClientEvent(event, hostport, user);
+		flush.addJob(new Job() {
+			public void perform() throws TMSException {
+				ev.doStore();
+			}
+		});
 	}
 }
