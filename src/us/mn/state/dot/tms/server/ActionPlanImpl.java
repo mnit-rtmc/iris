@@ -251,14 +251,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Set the deployed phase (and notify clients) */
-	public void setPhaseNotify(PlanPhase p) {
-		try {
-			if(p != phase)
-				doSetPhaseNotify(p);
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		}
+	public void setPhaseNotify(PlanPhase p) throws TMSException {
+		if(p != phase)
+			doSetPhaseNotify(p);
 	}
 
 	/** Set the deployed phase with notification */
@@ -344,7 +339,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Update the plan phase */
-	public void updatePhase() {
+	public void updatePhase() throws TMSException {
 		PlanPhase p = phase;
 		if(p != null) {
 			PlanPhase np = p.getNextPhase();

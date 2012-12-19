@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
+import us.mn.state.dot.tms.TMSException;
 
 /**
  * Job to update action plans
@@ -76,10 +77,21 @@ public class ActionPlanJob extends Job {
 		ActionPlanHelper.find(new Checker<ActionPlan>() {
 			public boolean check(ActionPlan ap) {
 				if(ap instanceof ActionPlanImpl)
-					((ActionPlanImpl)ap).updatePhase();
+					updatePlanPhase((ActionPlanImpl)ap);
 				return false;
 			}
 		});
+	}
+
+	/** Update the phase for an action plan */
+	private void updatePlanPhase(ActionPlanImpl ap) {
+		try {
+			ap.updatePhase();
+		}
+		catch(TMSException e) {
+			// FIXME: should propogate out of Job
+			e.printStackTrace();
+		}
 	}
 
 	/** Perform time actions */
@@ -88,11 +100,26 @@ public class ActionPlanJob extends Job {
 		final int min = TimeSteward.currentMinuteOfDayInt();
 		TimeActionHelper.find(new Checker<TimeAction>() {
 			public boolean check(TimeAction ta) {
-				if(ta instanceof TimeActionImpl)
-					((TimeActionImpl)ta).perform(cal, min);
+				if(ta instanceof TimeActionImpl) {
+					performAction((TimeActionImpl)ta, cal,
+						min);
+				}
 				return false;
 			}
 		});
+	}
+
+	/** Perform a time action */
+	private void performAction(TimeActionImpl ta, Calendar cal,
+		int min)
+	{
+		try {
+			ta.perform(cal, min);
+		}
+		catch(TMSException e) {
+			// FIXME: should propogate out of Job
+			e.printStackTrace();
+		}
 	}
 
 	/** Perform DMS actions */

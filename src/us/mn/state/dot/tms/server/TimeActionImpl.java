@@ -158,7 +158,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Perform action if date and time is right */
-	public void perform(Calendar cal, int min) {
+	public void perform(Calendar cal, int min) throws TMSException {
 		if(TimeActionHelper.getMinute(this) == min && isDayValid(cal))
 			perform();
 	}
@@ -186,7 +186,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Perform the time action */
-	protected void perform() {
+	protected void perform() throws TMSException {
 		ActionPlan ap = action_plan;	// Avoid race
 		if(ap instanceof ActionPlanImpl) {
 			ActionPlanImpl api = (ActionPlanImpl)ap;
