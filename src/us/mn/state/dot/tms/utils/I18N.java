@@ -185,10 +185,29 @@ public class I18N {
 		String s = getSilent(id);
 		if(s == null)
 			return FAILURE_CHAR;
-		String utext = SXml.extractUnderline(s);
+		String utext = extractUnderline(s);
 		if(utext == null || utext.isEmpty())
 			return FAILURE_CHAR;
 		return Character.toUpperCase(utext.charAt(0));
+	}
+
+	/** Extract underlined text from the argument.
+	 *  @return Null on failure or if no underline text exists,
+	 *	    else the underlined text, which might have length 0. */
+	static public String extractUnderline(String xml) {
+		final String TAG_OPEN = "<u>";
+		final String TAG_CLOSE = "</u>";
+		if(xml == null || xml.isEmpty())
+			return null;
+		int s = xml.indexOf(TAG_OPEN);
+		if(s < 0)
+			return null;
+		int e = xml.indexOf(TAG_CLOSE, s);
+		if(e < 0)
+			return null;
+		if(s >= e)
+			return "";
+		return xml.substring(s + TAG_OPEN.length(), e);
 	}
 
 	/** Return KeyEvent representation of specified character */

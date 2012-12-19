@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -13,21 +13,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.utils;
+package us.mn.state.dot.tms.kml;
 
-import java.lang.StringBuilder;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * Static XML convenience methods.
  *
  * @author Michael Darter
  * @author Douglas Lau
- * @see SXmlTest
  */
 public class SXml {
 
@@ -92,25 +91,6 @@ public class SXml {
 		if(url == null || desc == null)
 			return "";
 		return "<a href=\"" + url + "\">" + desc + "</a>";
-	}
-
-	/** Extract underlined text from the argument.
-	 *  @return Null on failure or if no underline text exists,
-	 *	    else the underlined text, which might have length 0. */
-	static public String extractUnderline(String xml) {
-		final String TAG_OPEN = "<u>";
-		final String TAG_CLOSE = "</u>";
-		if(xml == null || xml.isEmpty())
-			return null;
-		int s = xml.indexOf(TAG_OPEN);
-		if(s < 0)
-			return null;
-		int e = xml.indexOf(TAG_CLOSE, s);
-		if(e < 0)
-			return null;
-		if(s >= e)
-			return "";
-		return xml.substring(s + TAG_OPEN.length(), e);
 	}
 
 	/** Check if the node is an element */
