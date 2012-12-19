@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
 
@@ -32,6 +33,9 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class SQLConnection {
+
+	/** SQL debug log */
+	static private final DebugLog SQL_LOG = new DebugLog("sql");
 
 	/** Pattern to match for a SQL identifier */
 	static private final Pattern SQL_IDENTIFIER =
@@ -128,12 +132,13 @@ public class SQLConnection {
 			return _createStatement();
 		}
 		catch(SQLException e) {
-			e.printStackTrace();
+			SQL_LOG.log("createStatement -> " + e);
 			try {
 				close();
 				return _createStatement();
 			}
 			catch(SQLException e2) {
+				SQL_LOG.log("createStatement.2 -> " + e2);
 				throw new TMSException(e2);
 			}
 		}
@@ -181,8 +186,7 @@ public class SQLConnection {
 			putStatement(s);
 		}
 		catch(SQLException e) {
-			System.err.println("SQLConnection.update(): e=" +
-				e + ", sql=" + sql);
+			SQL_LOG.log(sql + " -> " + e);
 			throw new TMSException(e);
 		}
 	}
@@ -263,6 +267,7 @@ public class SQLConnection {
 			putStatement(s);
 		}
 		catch(SQLException e) {
+			SQL_LOG.log("batch -> " + e);
 			throw new TMSException(e);
 		}
 	}
