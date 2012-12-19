@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2011  Minnesota Department of Transportation
+ * Copyright (C) 2005-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ abstract public class XmlWriter {
 	}
 
 	/** Create the underlying output stream */
-	protected OutputStream createOutputStream() throws IOException {
+	private OutputStream createOutputStream() throws IOException {
 		OutputStream os = new FileOutputStream(temp);
 		if(gzip)
 			return new GZIPOutputStream(os);
@@ -96,24 +96,12 @@ abstract public class XmlWriter {
 	}
 
 	/** Write the XML file */
-	public void write() {
-		try {
-			PrintWriter out = new PrintWriter(createOutputStream());
-			try {
-				print(out);
-			}
-			finally {
-				out.close();
-			}
-			if(!temp.renameTo(file)) {
-				System.err.println("Error renaming " + file +
-					" @ " + TimeSteward.getDateInstance());
-			}
-		}
-		catch(IOException e) {
-			System.err.println("I/O Error: " + e.getMessage() +
-				" @ " + TimeSteward.getDateInstance());
-		}
+	public void write() throws IOException {
+		PrintWriter out = new PrintWriter(createOutputStream());
+		print(out);
+		out.close();
+		if(!temp.renameTo(file))
+			throw new IOException("Rename failed: " + file);
 	}
 
 	/** Print the XML to a print writer */

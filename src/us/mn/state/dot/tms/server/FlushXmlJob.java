@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
@@ -46,7 +47,7 @@ public class FlushXmlJob extends Job {
 	}
 
 	/** Perform flush XML data to disk */
-	public void perform() {
+	public void perform() throws IOException {
 		writeSampleXml();
 		station_manager.writeSampleXml();
 		if(isStationXmlEnabled())
@@ -54,7 +55,7 @@ public class FlushXmlJob extends Job {
 	}
 
 	/** Write the sample data out as XML */
-	private void writeSampleXml() {
+	private void writeSampleXml() throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			public void print(PrintWriter out) {
 				printSampleXmlHead(out);
