@@ -56,6 +56,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
@@ -1100,7 +1101,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Log a sign status event */
 	private void logEvent(final SignStatusEvent ev) {
-		MainServer.FLUSH.addJob(new Job() {
+		FLUSH.addJob(new Job() {
 			public void perform() throws TMSException {
 				ev.doStore();
 			}
@@ -1204,7 +1205,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Log a brightness sample */
 	private void logBrightnessSample(final BrightnessSample bs) {
-		MainServer.FLUSH.addJob(new Job() {
+		FLUSH.addJob(new Job() {
 			public void perform() throws TMSException {
 				bs.purgeConflicting();
 				bs.doStore();
