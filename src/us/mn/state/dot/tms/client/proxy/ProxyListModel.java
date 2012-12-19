@@ -20,7 +20,6 @@ import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.SwingRunner;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
