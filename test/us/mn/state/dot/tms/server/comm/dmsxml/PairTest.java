@@ -12,13 +12,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.utils;
+package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import junit.framework.TestCase;
 import java.io.IOException;
 import java.util.Arrays;
 
-/** 
+/**
  * Pair test cases
  * @author Michael Darter
  */
@@ -34,7 +34,7 @@ public class PairTest extends TestCase {
 
 		boolean ok = true;
 
-		assertTrue(((Integer)(new Pair(new Integer(1), 
+		assertTrue(((Integer)(new Pair(new Integer(1),
 			new Double(3.25)).car())).compareTo(
 			new Integer(1)) == 0);
 		ok = ok && ((Integer) (new Pair(new Integer(1), new Double(
