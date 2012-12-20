@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.Checker;
 import java.util.TreeMap;
 
 /**
