@@ -20,15 +20,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -171,7 +172,6 @@ public class QuickMessageCBox extends JComboBox {
 
 	/** Populate the quick message model, with sorted quick messages */
 	public void populateModel(DMS dms) {
-		// Add to model: can't be done inside Checker due to deadlocks.
 		TreeSet<QuickMessage> msgs = createMessageSet(dms);
 		adjusting++;
 		model.removeAllElements();
@@ -182,17 +182,21 @@ public class QuickMessageCBox extends JComboBox {
 
 	/** Create a set of quick messages for the specified DMS */
 	private TreeSet<QuickMessage> createMessageSet(DMS dms) {
-		final TreeSet<QuickMessage> msgs = new TreeSet<QuickMessage>(
+		TreeSet<QuickMessage> msgs = new TreeSet<QuickMessage>(
 			new NumericAlphaComparator<QuickMessage>());
-		for(SignGroup sg: SignGroupHelper.find(dms)) {
-			final SignGroup group = sg;
-			QuickMessageHelper.find(new Checker<QuickMessage>() {
-				public boolean check(QuickMessage qm) {
-					if(qm.getSignGroup() == group)
+		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
+		while(it.hasNext()) {
+			DmsSignGroup dsg = it.next();
+			if(dsg.getDms() == dms) {
+				SignGroup sg = dsg.getSignGroup();
+				Iterator<QuickMessage> qit =
+					QuickMessageHelper.iterator();
+				while(qit.hasNext()) {
+					QuickMessage qm = qit.next();
+					if(qm.getSignGroup() == sg)
 						msgs.add(qm);
-					return false;
 				}
-			});
+			}
 		}
 		return msgs;
 	}

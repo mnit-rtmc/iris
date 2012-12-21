@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
@@ -34,6 +35,12 @@ public class LCSArrayHelper extends BaseHelper {
 	static public LCSArray find(Checker<LCSArray> checker) {
 		return (LCSArray)namespace.findObject(LCSArray.SONAR_TYPE,
 			checker);
+	}
+
+	/** Get an LCS array iterator */
+	static public Iterator<LCSArray> iterator() {
+		return new IteratorWrapper<LCSArray>(namespace.iterator(
+			LCSArray.SONAR_TYPE));
 	}
 
 	/** Lookup the LCS objects for an array */

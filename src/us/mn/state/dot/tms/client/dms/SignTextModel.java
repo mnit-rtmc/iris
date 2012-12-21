@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -43,10 +42,10 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	protected final DMS dms;
 
 	/** DMS sign group type cache, relates dms to sign groups */
-	protected final TypeCache<DmsSignGroup> dms_sign_groups;
+	private final TypeCache<DmsSignGroup> dms_sign_groups;
 
 	/** Sign text type cache, list of all sign text lines */
-	protected final TypeCache<SignText> sign_text;
+	private final TypeCache<SignText> sign_text;
 
 	/** Listener for sign text proxies */
 	protected final ProxyListener<SignText> listener;
@@ -128,22 +127,16 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	 * Get the local SignGroup for the DMS.
 	 * @return local SignGroup if it exists, otherwise null
 	 */
-	protected SignGroup getLocalSignGroup() {
-		DmsSignGroup dsg = dms_sign_groups.findObject(
-			new Checker<DmsSignGroup>()
-		{
-			public boolean check(DmsSignGroup g) {
-				return isLocalSignGroup(g);
-			}
-		});
-		if(dsg != null)
-			return dsg.getSignGroup();
-		else
-			return null;
+	private SignGroup getLocalSignGroup() {
+		for(DmsSignGroup g: dms_sign_groups) {
+			if(isLocalSignGroup(g))
+				return g.getSignGroup();
+		}
+		return null;
 	}
 
 	/** Check if the given sign group is a local group for the DMS */
-	protected boolean isLocalSignGroup(DmsSignGroup g) {
+	private boolean isLocalSignGroup(DmsSignGroup g) {
 		return g.getDms() == dms && g.getSignGroup().getLocal();
 	}
 
@@ -172,59 +165,30 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	}
 
 	/** 
-	 * Lookup a SignText in the namespace.
-	 * @param line Message line number (1 based)
-	 * @return the matching SignText else null if it doesn't exist.
-	 */
-	protected SignText lookupSignText(final short line, final String multi,
-		final SignGroup sg)
-	{
-		if(sign_text == null || multi == null || sg == null || line < 1)
-			return null;
-		return sign_text.findObject(new Checker<SignText>() {
-			public boolean check(SignText st) {
-				if(st.getLine() != line)
-					return false;
-				if(st.getSignGroup() != sg)
-					return false;
-				if(!st.getMulti().equals(multi))
-					return false;
-				return true;
-			}
-		});
-	}
-
-	/** 
 	 * Called when the DMS associated with this object is added to a
 	 * new sign group. New SignText lines from the new sign group are
 	 * added to each SignTextComboBoxModel.
 	 */
-	protected void addGroup(final SignGroup g) {
+	private void addGroup(SignGroup g) {
 		groups.add(g.getName());
 		// add new sign text lines in new group to combobox models
-		sign_text.findObject(new Checker<SignText>() {
-			public boolean check(SignText st) {
-				if(st.getSignGroup() == g)
-					addSignText(st);
-				return false;
-			}
-		});
+		for(SignText st: sign_text) {
+			if(st.getSignGroup() == g)
+				addSignText(st);
+		}
 	}
 
 	/** 
 	 * Called when the DMS associated with this object is removed
 	 * from a sign group. 
 	 */
-	protected void removeGroup(final SignGroup g) {
+	private void removeGroup(SignGroup g) {
 		groups.remove(g.getName());
 		// delete lines from combobox models associated with sign group
-		sign_text.findObject(new Checker<SignText>() {
-			public boolean check(SignText st) {
-				if(st.getSignGroup() == g)
-					removeSignText(st);
-				return false;
-			}
-		});
+		for(SignText st: sign_text) {
+			if(st.getSignGroup() == g)
+				removeSignText(st);
+		}
 	}
 
 	/** Mapping of line numbers to combo box models */
@@ -253,7 +217,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
 	/** Add a sign message to the model, called by listener when sign_text
 	 * changes */
-	protected void addSignText(SignText t) {
+	private void addSignText(SignText t) {
 		short line = t.getLine();
 		SignTextComboBoxModel m = getLineModel(line);
 		m.add(t);
@@ -261,7 +225,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
 	/** Remove a sign message from the model, called by listener when
 	 * sign_text changes */
-	protected void removeSignText(SignText t) {
+	private void removeSignText(SignText t) {
 		short line = t.getLine();
 		SignTextComboBoxModel m = getLineModel(line);
 		m.remove(t);

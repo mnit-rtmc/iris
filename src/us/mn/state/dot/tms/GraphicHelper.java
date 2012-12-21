@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
+import java.util.Iterator;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -43,6 +44,12 @@ public class GraphicHelper extends BaseHelper {
 				return gn != null && gn == g_num;
 			}
 		});
+	}
+
+	/** Get a graphic iterator */
+	static public Iterator<Graphic> iterator() {
+		return new IteratorWrapper<Graphic>(namespace.iterator(
+			Graphic.SONAR_TYPE));
 	}
 
 	/** Lookup the graphic with the specified name */

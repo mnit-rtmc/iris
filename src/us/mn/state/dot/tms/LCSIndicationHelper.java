@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,22 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 
 /**
- * Helper class for DMS sign groups.
+ * Helper for LCS indications.
  *
  * @author Douglas Lau
  */
-public class DmsSignGroupHelper extends BaseHelper {
+public class LCSIndicationHelper extends BaseHelper {
 
-	/** Prevent object creation */
-	private DmsSignGroupHelper() {
+	/** Disallow instantiation */
+	private LCSIndicationHelper() {
 		assert false;
 	}
 
-	/** Find DMS sign groups using a Checker */
-	static public DmsSignGroup find(final Checker<DmsSignGroup> checker) {
-		return (DmsSignGroup)namespace.findObject(
-			DmsSignGroup.SONAR_TYPE, checker);
-	}
-
-	/** Get a DMS sign group iterator */
-	static public Iterator<DmsSignGroup> iterator() {
-		return new IteratorWrapper<DmsSignGroup>(namespace.iterator(
-			DmsSignGroup.SONAR_TYPE));
+	/** Get an LCS indication iterator */
+	static public Iterator<LCSIndication> iterator() {
+		return new IteratorWrapper<LCSIndication>(namespace.iterator(
+			LCSIndication.SONAR_TYPE));
 	}
 }

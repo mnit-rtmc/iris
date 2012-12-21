@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
@@ -73,13 +72,12 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	}
 
 	/** Lookup a DMS sign group */
-	protected DmsSignGroup lookupDmsSignGroup(final SignGroup group) {
-		return dms_sign_groups.findObject(new Checker<DmsSignGroup>() {
-			public boolean check(DmsSignGroup g) {
-				return g.getSignGroup() == group &&
-				       g.getDms() == dms;
-			}
-		});
+	private DmsSignGroup lookupDmsSignGroup(SignGroup group) {
+		for(DmsSignGroup g: dms_sign_groups) {
+			if(g.getSignGroup() == group && g.getDms() == dms)
+				return g;
+		}
+		return null;
 	}
 
 	/** Test if the DMS is a member of a sign group */
@@ -107,7 +105,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	protected final DMS dms;
 
 	/** DMS sign group type cache */
-	protected final TypeCache<DmsSignGroup> dms_sign_groups;
+	private final TypeCache<DmsSignGroup> dms_sign_groups;
 
 	/** Listener for DMS sign group proxies */
 	protected final ProxyListener<DmsSignGroup> listener;

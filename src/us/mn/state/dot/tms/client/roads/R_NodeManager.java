@@ -33,7 +33,6 @@ import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.DeviceStyle;
@@ -315,26 +314,12 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Create a set of roadway nodes for the current corridor */
 	public Set<R_Node> createSet() {
-		final HashSet<R_Node> nodes = new HashSet<R_Node>();
-		findCorridor(new Checker<R_Node>() {
-			public boolean check(R_Node n) {
+		HashSet<R_Node> nodes = new HashSet<R_Node>();
+		for(R_Node n: cache) {
+			if(checkCorridor(n))
 				nodes.add(n);
-				return false;
-			}
-		});
+		}
 		return nodes;
-	}
-
-	/** Find all r_nodes on the specified corridor */
-	public R_Node findCorridor(final Checker<R_Node> ch) {
-		return cache.findObject(new Checker<R_Node>() {
-			public boolean check(R_Node n) {
-				if(checkCorridor(n))
-					return ch.check(n);
-				else
-					return false;
-			}
-		});
 	}
 
 	/** Check the corridor of an r_node */

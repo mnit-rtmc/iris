@@ -16,8 +16,6 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -27,7 +25,6 @@ import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.SwingConstants;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -122,17 +119,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
 	/** Populate the list model with LCS array indications to display */
 	protected void populateList(CorridorBase cb, float mp) {
-		TreeMap<Float, LCSArray> upstream =
-			new TreeMap<Float, LCSArray>();
-		for(LCSArray lcs_array: findLCS(cb)) {
-			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_array);
-			Float lp = cb.calculateMilePoint(loc);
-			if(lp != null) {
-				float up = mp - lp;
-				if(up > 0)
-					upstream.put(up, lcs_array);
-			}
-		}
+		TreeMap<Float, LCSArray> upstream = findUpstream(cb, mp);
 		LaneConfiguration config = cb.laneConfiguration(
 			getWgs84Position());
 		int shift = config.leftShift;
@@ -154,25 +141,28 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		return new Position(proxy.getLat(), proxy.getLon());
 	}
 
-	/** Find all LCS arrays on the given corridor */
-	protected List<LCSArray> findLCS(CorridorBase cb) {
-		final LinkedList<LCSArray> lcss = new LinkedList<LCSArray>();
-		LCSArrayHelper.find(new Checker<LCSArray>() {
-			public boolean check(LCSArray lcs_array) {
-				lcss.add(lcs_array);
-				return false;
+	/** Find all LCS arrays upstream of a given point on a corridor */
+	private TreeMap<Float, LCSArray> findUpstream(CorridorBase cb,
+		float mp)
+	{
+		TreeMap<Float, LCSArray> upstream =
+			new TreeMap<Float, LCSArray>();
+		Iterator<LCSArray> lit = LCSArrayHelper.iterator();
+		while(lit.hasNext()) {
+			LCSArray lcs_array = lit.next();
+			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_array);
+			if(loc != null && loc.getRoadway() == cb.getRoadway() &&
+			   loc.getRoadDir() == cb.getRoadDir())
+			{
+				Float lp = cb.calculateMilePoint(loc);
+				if(lp != null) {
+					float up = mp - lp;
+					if(up > 0)
+						upstream.put(up, lcs_array);
+				}
 			}
-		});
-		// Corridor filtering cannot be done within Checker because
-		// of TypeCache deadlock problems.
-		Iterator<LCSArray> it = lcss.iterator();
-		while(it.hasNext()) {
-			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(it.next());
-			if(loc == null || loc.getRoadway() != cb.getRoadway() ||
-			   loc.getRoadDir() != cb.getRoadDir())
-				it.remove();
 		}
-		return lcss;
+		return upstream;
 	}
 
 	/** Check if a set of indications should be deployed */

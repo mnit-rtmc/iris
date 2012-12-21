@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sonar.Checker;
 
@@ -67,5 +68,11 @@ public class SignGroupHelper extends BaseHelper {
 			}
 		});
 		return groups;
+	}
+
+	/** Get a sign group iterator */
+	static public Iterator<SignGroup> iterator() {
+		return new IteratorWrapper<SignGroup>(namespace.iterator(
+			SignGroup.SONAR_TYPE));
 	}
 }

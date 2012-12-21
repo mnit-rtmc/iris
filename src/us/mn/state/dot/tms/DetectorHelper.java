@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -57,6 +58,12 @@ public class DetectorHelper extends BaseHelper {
 	static public Detector find(Checker<Detector> checker) {
 		return (Detector)namespace.findObject(Detector.SONAR_TYPE,
 			checker);
+	}
+
+	/** Get a detector iterator */
+	static public Iterator<Detector> iterator() {
+		return new IteratorWrapper<Detector>(namespace.iterator(
+			Detector.SONAR_TYPE));
 	}
 
 	/** Lookup the detector with the specified name */

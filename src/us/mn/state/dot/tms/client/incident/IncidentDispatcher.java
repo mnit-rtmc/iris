@@ -20,8 +20,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
@@ -36,19 +34,15 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.SwingRunner;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
@@ -553,10 +547,9 @@ public class IncidentDispatcher extends JPanel
 	protected DefaultComboBoxModel createCameraModel(Incident inc) {
 		DefaultComboBoxModel model = new DefaultComboBoxModel();
 		if(inc instanceof ClientIncident) {
-			CameraFinder finder = new CameraFinder(
-				(ClientIncident)inc);
-			CameraHelper.find(finder);
-			for(Camera cam: finder.getNearest()) {
+			ClientIncident ci = (ClientIncident)inc;
+			Position pos = ci.getWgs84Position();
+			for(Camera cam: CameraHelper.findNearest(pos, 5)) {
 				model.addElement(cam);
 				if(model.getSelectedItem() == null)
 					model.setSelectedItem(cam);
@@ -567,30 +560,6 @@ public class IncidentDispatcher extends JPanel
 			model.setSelectedItem(inc.getCamera());
 		}
 		return model;
-	}
-
-	/** Inner class to find the camera nearest to an incident */
-	static protected class CameraFinder implements Checker<Camera> {
-		private final Position pos;
-		protected TreeMap<Double, Camera> cameras =
-			new TreeMap<Double, Camera>();
-		protected CameraFinder(ClientIncident inc) {
-			pos = inc.getWgs84Position();
-		}
-		public boolean check(Camera cam) {
-			GeoLoc loc = cam.getGeoLoc();
-			Distance d = GeoLocHelper.distanceTo(loc, pos);
-			if(d != null) {
-				cameras.put(d.m(), cam);
-				while(cameras.size() > 5)
-					cameras.pollLastEntry();
-			}
-			return false;
-		}
-		protected Camera[] getNearest() {
-			return (Camera [])cameras.values().toArray(
-			       new Camera[0]);
-		}
 	}
 
 	/** Check if the user can add the named incident */

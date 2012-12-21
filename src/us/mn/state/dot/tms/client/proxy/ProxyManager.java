@@ -29,7 +29,6 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -330,24 +329,17 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Iterate through all proxy objects */
-	protected MapObject forEach(final MapSearcher ms,
-		final AffineTransform at)
-	{
-		final Shape shp = getShape(at);
-		T result = cache.findObject(new Checker<T>() {
-			public boolean check(T proxy) {
-				MapGeoLoc loc = findGeoLoc(proxy);
-				if(isLocationSet(loc)) {
-					loc.setShape(shp);
-					return ms.next(loc);
-				}
-				return false;
+	private MapObject forEach(MapSearcher ms, AffineTransform at) {
+		Shape shp = getShape(at);
+		for(T proxy: cache) {
+			MapGeoLoc loc = findGeoLoc(proxy);
+			if(isLocationSet(loc)) {
+				loc.setShape(shp);
+				if(ms.next(loc))
+					return loc;
 			}
-		});
-		if(result != null)
-			return findGeoLoc(result);
-		else
-			return null;
+		}
+		return null;
 	}
 
 	/** Check if the location is set */

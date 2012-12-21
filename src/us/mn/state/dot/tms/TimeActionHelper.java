@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -37,6 +38,12 @@ public class TimeActionHelper extends BaseHelper {
 	static public TimeAction find(final Checker<TimeAction> checker) {
 		return (TimeAction)namespace.findObject(TimeAction.SONAR_TYPE, 
 			checker);
+	}
+
+	/** Get a time action iterator */
+	static public Iterator<TimeAction> iterator() {
+		return new IteratorWrapper<TimeAction>(namespace.iterator(
+			TimeAction.SONAR_TYPE));
 	}
 
 	/** Lookup the time action with the specified name */

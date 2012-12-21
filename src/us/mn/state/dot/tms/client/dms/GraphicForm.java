@@ -18,6 +18,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.TreeSet;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -26,7 +27,6 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -225,15 +225,14 @@ public class GraphicForm extends AbstractForm {
 
 	/** Get the next available graphic number */
 	private Integer getGNumber() throws ChangeVetoException {
-		final TreeSet<Integer> gnums = new TreeSet<Integer>();
-		GraphicHelper.find(new Checker<Graphic>() {
-			public boolean check(Graphic g) {
-				Integer gn = g.getGNumber();
-				if(gn != null)
-					gnums.add(gn);
-				return false;
-			}
-		});
+		TreeSet<Integer> gnums = new TreeSet<Integer>();
+		Iterator<Graphic> it = GraphicHelper.iterator();
+		while(it.hasNext()) {
+			Graphic g = it.next();
+			Integer gn = g.getGNumber();
+			if(gn != null)
+				gnums.add(gn);
+		}
 		for(int i = 1; i < 256; i++) {
 			if(!gnums.contains(i))
 				return i;

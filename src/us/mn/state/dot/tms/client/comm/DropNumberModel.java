@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
+import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
@@ -29,13 +29,13 @@ import us.mn.state.dot.tms.Controller;
 public class DropNumberModel extends SpinnerNumberModel {
 
 	/** Maximum allowed drop address */
-	static protected final short MAX_DROP_ID = 32767;
+	static private final short MAX_DROP_ID = 32767;
 
 	/** Comm link */
-	protected final CommLink comm_link;
+	private final CommLink comm_link;
 
 	/** Controller cache */
-	protected final TypeCache<Controller> cache;
+	private final TypeCache<Controller> cache;
 
 	/** Create a new drop number model */
 	public DropNumberModel(CommLink cl, TypeCache<Controller> cc, int d) {
@@ -44,57 +44,55 @@ public class DropNumberModel extends SpinnerNumberModel {
 		cache = cc;
 	}
 
-	/** Class to find next/previous available drop address */
-	protected class DropFinder implements Checker<Controller> {
+	/** Get a set of all used drops on the comm_link */
+	private Set<Short> getUsedDrops() {
 		TreeSet<Short> used = new TreeSet<Short>();
-		public boolean check(Controller c) {
+		for(Controller c: cache) {
 			if(c.getCommLink() == comm_link)
 				used.add(c.getDrop());
-			return false;
 		}
-		public Short getNextDrop() {
-			short value = getNumber().shortValue();
-			for(short d = ++value; d < MAX_DROP_ID; d++) {
-				if(!used.contains(d))
-					return d;
-			}
-			return null;
-		}
-		public Short getPreviousDrop() {
-			short value = getNumber().shortValue();
-			for(short d = --value; d > 0; d--) {
-				if(!used.contains(d))
-					return d;
-			}
-			return null;
-		}
-		public Short getNextAvailable() {
-			for(short d = 1; d < MAX_DROP_ID; d++) {
-				if(!used.contains(d))
-					return d;
-			}
-			return null;
-		}
+		return used;
 	}
 
 	/** Get the next value */
-	public Object getNextValue() {
-		DropFinder drop_finder = new DropFinder();
-		cache.findObject(drop_finder);
-		return drop_finder.getNextDrop();
+	@Override public Object getNextValue() {
+		return getNextDrop();
+	}
+
+	/** Get the next drop */
+	private Short getNextDrop() {
+		Set<Short> used = getUsedDrops();
+		short value = getNumber().shortValue();
+		for(short d = ++value; d < MAX_DROP_ID; d++) {
+			if(!used.contains(d))
+				return d;
+		}
+		return null;
 	}
 
 	/** Get the previous value */
-	public Object getPreviousValue() {
-		DropFinder drop_finder = new DropFinder();
-		cache.findObject(drop_finder);
-		return drop_finder.getPreviousDrop();
+	@Override public Object getPreviousValue() {
+		return getPreviousDrop();
+	}
+
+	/** Get the previous drop */
+	private Short getPreviousDrop() {
+		Set<Short> used = getUsedDrops();
+		short value = getNumber().shortValue();
+		for(short d = --value; d > 0; d--) {
+			if(!used.contains(d))
+				return d;
+		}
+		return null;
 	}
 
 	/** Get the next available value */
 	public Short getNextAvailable() {
-		DropFinder drop_finder = new DropFinder();
-		cache.findObject(drop_finder);
-		return drop_finder.getNextAvailable();
+		Set<Short> used = getUsedDrops();
+		for(short d = 1; d < MAX_DROP_ID; d++) {
+			if(!used.contains(d))
+				return d;
+		}
+		return null;
 	}
 }

@@ -28,8 +28,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -262,26 +260,21 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Check if a sign group has any members */
-	protected boolean hasMembers(final SignGroup group) {
-		TypeCache<DmsSignGroup> dms_sign_groups =
-			dms_cache.getDmsSignGroups();
-		return null != dms_sign_groups.findObject(
-			new Checker<DmsSignGroup>()
-		{
-			public boolean check(DmsSignGroup g) {
-				return g.getSignGroup() == group;
-			}
-		});
+	private boolean hasMembers(SignGroup group) {
+		for(DmsSignGroup g: dms_cache.getDmsSignGroups()) {
+			if(g.getSignGroup() == group)
+				return true;
+		}
+		return false;
 	}
 
 	/** Check if a sign group has any sign text messages */
-	protected boolean hasSignText(final SignGroup group) {
-		TypeCache<SignText> sign_text = dms_cache.getSignText();
-		return null != sign_text.findObject(new Checker<SignText>() {
-			public boolean check(SignText t) {
-				return t.getSignGroup() == group;
-			}
-		});
+	private boolean hasSignText(SignGroup group) {
+		for(SignText t: dms_cache.getSignText()) {
+			if(t.getSignGroup() == group)
+				return true;
+		}
+		return false;
 	}
 
 	/** Check if the user can remove the specified sign group */

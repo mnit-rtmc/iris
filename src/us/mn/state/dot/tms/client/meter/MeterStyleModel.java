@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
+import java.util.Iterator;
 import javax.swing.Icon;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
@@ -79,14 +79,12 @@ public class MeterStyleModel extends StyleListModel<RampMeter> {
 	}
 
 	/** Respond to a controller changed event */
-	protected void controllerChanged(final Controller c) {
-		// FIXME: a controller can have more than one ramp meter
-		RampMeter proxy = RampMeterHelper.find(new Checker<RampMeter>(){
-			public boolean check(RampMeter proxy) {
-				return proxy.getController() == c;
-			}
-		});
-		if(proxy != null)
-			proxyChangedSlow(proxy, "controller");
+	private void controllerChanged(Controller c) {
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while(it.hasNext()) {
+			RampMeter proxy = it.next();
+			if(proxy.getController() == c)
+				proxyChangedSlow(proxy, "controller");
+		}
 	}
 }

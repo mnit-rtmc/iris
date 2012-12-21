@@ -36,7 +36,6 @@ import us.mn.state.dot.geokit.ZoomLevel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapToolBar;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MapExtent;
@@ -234,13 +233,10 @@ public class ScreenPane extends JPanel {
 
 	/** Create the tool panels */
 	public void createToolPanels(Session s) {
-		TypeCache<MapExtent> c = s.getSonarState().getMapExtents();
-		c.findObject(new Checker<MapExtent>() {
-			public boolean check(MapExtent me) {
-				map_bar.addButton(createMapButton(me));
-				return false;
-			}
-		});
+		TypeCache<MapExtent> tc = s.getSonarState().getMapExtents();
+		for(MapExtent me: tc) {
+			map_bar.addButton(createMapButton(me));
+		}
 		tool_bar.createToolPanels(s);
 	}
 

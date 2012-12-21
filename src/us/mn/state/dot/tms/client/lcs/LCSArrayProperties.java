@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.HashMap;
 import javax.swing.JButton;
@@ -30,7 +31,6 @@ import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -40,8 +40,8 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayLock;
-import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.LCSIndicationHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -253,16 +253,15 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Destroy the specified LCS indication */
-	protected void destroyLCSIndication(LCS lcs, final int ind) {
-		LCSIndication li = LCSHelper.lookupIndication(lcs,
-			new Checker<LCSIndication>()
-		{
-			public boolean check(LCSIndication li) {
-				return li.getIndication() == ind;
+	private void destroyLCSIndication(LCS lcs, int ind) {
+		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
+		while(it.hasNext()) {
+			LCSIndication li = it.next();
+			if(li.getLcs() == lcs && li.getIndication() == ind) {
+				li.destroy();
+				return;
 			}
-		});
-		if(li != null)
-			li.destroy();
+		}
 	}
 
 	/** Select an LCS in the table */
@@ -283,14 +282,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	/** Select an LCS in the table */
 	protected void selectLCS(LCS lcs) {
 		edit_lcs.setEnabled(true);
-		final HashMap<Integer, LCSIndication> ind =
-			new HashMap<Integer, LCSIndication>();
-		LCSHelper.lookupIndication(lcs, new Checker<LCSIndication>() {
-			public boolean check(LCSIndication li) {
-				ind.put(li.getIndication(), li);
-				return false;
-			}
-		});
+		HashMap<Integer, LCSIndication> ind = lookupIndications(lcs);
 		delete_lcs.setEnabled(ind.isEmpty());
 		String name = lcs.getName();
 		boolean can_add = creator.canAdd(name);
@@ -307,6 +299,19 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 				btn.setSelected(false);
 			}
 		}
+	}
+
+	/** Lookup the indications for the specified LCS */
+	private HashMap<Integer, LCSIndication> lookupIndications(LCS lcs) {
+		HashMap<Integer, LCSIndication> ind =
+			new HashMap<Integer, LCSIndication>();
+		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
+		while(it.hasNext()) {
+			LCSIndication li = it.next();
+			if(li.getLcs() == lcs)
+				ind.put(li.getIndication(), li);
+		}
+		return ind;
 	}
 
 	/** Create status panel */

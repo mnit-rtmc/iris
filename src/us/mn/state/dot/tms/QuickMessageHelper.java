@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -52,5 +53,11 @@ public class QuickMessageHelper extends BaseHelper {
 				return multi.equals(qm.getMulti());
 			}
 		});
+	}
+
+	/** Get a quick message iterator */
+	static public Iterator<QuickMessage> iterator() {
+		return new IteratorWrapper<QuickMessage>(namespace.iterator(
+			QuickMessage.SONAR_TYPE));
 	}
 }

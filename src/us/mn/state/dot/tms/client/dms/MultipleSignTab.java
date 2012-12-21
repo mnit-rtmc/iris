@@ -26,7 +26,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sched.SwingRunner;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
@@ -52,7 +51,7 @@ public class MultipleSignTab extends JPanel implements
 		":");
 
 	/** DMS sign group cache */
-	protected final TypeCache<DmsSignGroup> dms_sign_groups;
+	private final TypeCache<DmsSignGroup> dms_sign_groups;
 
 	/** Selected list model */
 	protected final DefaultListModel sel_model = new DefaultListModel();
@@ -177,27 +176,21 @@ public class MultipleSignTab extends JPanel implements
 	}
 
 	/** Check if a sign is a member of the specified group */
-	protected boolean isGroupMember(final DMS dms, final SignGroup group) {
-		return null != dms_sign_groups.findObject(
-			new Checker<DmsSignGroup>()
-		{
-			public boolean check(DmsSignGroup g) {
-				return dms == g.getDms() &&
-				       group == g.getSignGroup();
-			}
-		});
+	private boolean isGroupMember(DMS dms, SignGroup group) {
+		for(DmsSignGroup g: dms_sign_groups) {
+			if(dms == g.getDms() && group == g.getSignGroup())
+				return true;
+		}
+		return false;
 	}
 
 	/** Create a list of all signs in a group */
-	protected List<DMS> createGroupList(final SignGroup group) {
-		final LinkedList<DMS> signs = new LinkedList<DMS>();
-		dms_sign_groups.findObject(new Checker<DmsSignGroup>() {
-			public boolean check(DmsSignGroup g) {
-				if(group == g.getSignGroup())
-					signs.add(g.getDms());
-				return false;
-			}
-		});
+	private List<DMS> createGroupList(SignGroup group) {
+		LinkedList<DMS> signs = new LinkedList<DMS>();
+		for(DmsSignGroup g: dms_sign_groups) {
+			if(group == g.getSignGroup())
+				signs.add(g.getDms());
+		}
 		return signs;
 	}
 }

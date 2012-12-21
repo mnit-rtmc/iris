@@ -21,9 +21,9 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.util.HashSet;
+import java.util.Iterator;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
@@ -101,35 +101,29 @@ public class ControllerTheme extends ProxyTheme<Controller> {
 	}
 
 	/** Add ramp meter locations for a controller */
-	private void addRampMeterLocs(final Controller c,
-		final HashSet<GeoLoc> locs)
-	{
-		RampMeterHelper.find(new Checker<RampMeter>() {
-			public boolean check(RampMeter rm) {
-				if(rm.getController() == c) {
-					GeoLoc l = rm.getGeoLoc();
-					if(l != null)
-						locs.add(l);
-				}
-				return false;
+	private void addRampMeterLocs(Controller c, HashSet<GeoLoc> locs) {
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while(it.hasNext()) {
+			RampMeter rm = it.next();
+			if(rm.getController() == c) {
+				GeoLoc l = rm.getGeoLoc();
+				if(l != null)
+					locs.add(l);
 			}
-		});
+		}
 	}
 
 	/** Add detector locations for a controller */
-	private void addDetectorLocs(final Controller c,
-		final HashSet<GeoLoc> locs)
-	{
-		DetectorHelper.find(new Checker<Detector>() {
-			public boolean check(Detector det) {
-				if(det.getController() == c) {
-					GeoLoc l = det.getR_Node().getGeoLoc();
-					if(l != null)
-						locs.add(l);
-				}
-				return false;
+	private void addDetectorLocs(Controller c, HashSet<GeoLoc> locs) {
+		Iterator<Detector> it = DetectorHelper.iterator();
+		while(it.hasNext()) {
+			Detector det = it.next();
+			if(det.getController() == c) {
+				GeoLoc l = det.getR_Node().getGeoLoc();
+				if(l != null)
+					locs.add(l);
 			}
-		});
+		}
 	}
 
 	/** Draw spider webs from the controller to devices */

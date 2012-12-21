@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -267,6 +268,12 @@ public class DMSHelper extends BaseHelper {
 			return dsg.getDms();
 		else
 			return null;
+	}
+
+	/** Get a DMS iterator */
+	static public Iterator<DMS> iterator() {
+		return new IteratorWrapper<DMS>(namespace.iterator(
+			DMS.SONAR_TYPE));
 	}
 
 	/** Lookup the camera for a DMS */

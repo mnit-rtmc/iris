@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -32,6 +33,12 @@ public class MeterActionHelper extends BaseHelper {
 	static public MeterAction find(final Checker<MeterAction> checker) {
 		return (MeterAction)namespace.findObject(MeterAction.SONAR_TYPE,
 			checker);
+	}
+
+	/** Get a meter action iterator */
+	static public Iterator<MeterAction> iterator() {
+		return new IteratorWrapper<MeterAction>(namespace.iterator(
+			MeterAction.SONAR_TYPE));
 	}
 
 	/** Lookup the meter action with the specified name */

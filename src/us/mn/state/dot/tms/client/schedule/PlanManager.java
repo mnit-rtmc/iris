@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.util.Iterator;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DeviceStyle;
@@ -133,39 +133,47 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Test if an action plan has time actions */
-	private boolean hasTimeAction(final ActionPlan p) {
-		return null != TimeActionHelper.find(new Checker<TimeAction>() {
-			public boolean check(TimeAction ta) {
-				return ta.getActionPlan() == p;
-			}
-		});
+	private boolean hasTimeAction(ActionPlan p) {
+		Iterator<TimeAction> it = TimeActionHelper.iterator();
+		while(it.hasNext()) {
+			TimeAction ta = it.next();
+			if(ta.getActionPlan() == p)
+				return true;
+		}
+		return false;
 	}
 
 	/** Test if an action plan has DMS actions */
-	private boolean hasDmsAction(final ActionPlan p) {
-		return null != DmsActionHelper.find(new Checker<DmsAction>() {
-			public boolean check(DmsAction da) {
-				return da.getActionPlan() == p;
-			}
-		});
+	private boolean hasDmsAction(ActionPlan p) {
+		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		while(it.hasNext()) {
+			DmsAction da = it.next();
+			if(da.getActionPlan() == p)
+				return true;
+		}
+		return false;
 	}
 
 	/** Test if an action plan has lane actions */
-	private boolean hasLaneAction(final ActionPlan p) {
-		return null != LaneActionHelper.find(new Checker<LaneAction>() {
-			public boolean check(LaneAction la) {
-				return la.getActionPlan() == p;
-			}
-		});
+	private boolean hasLaneAction(ActionPlan p) {
+		Iterator<LaneAction> it = LaneActionHelper.iterator();
+		while(it.hasNext()) {
+			LaneAction la = it.next();
+			if(la.getActionPlan() == p)
+				return true;
+		}
+		return false;
 	}
 
 	/** Test if an action plan has meter actions */
-	private boolean hasMeterAction(final ActionPlan p) {
-		return null !=MeterActionHelper.find(new Checker<MeterAction>(){
-			public boolean check(MeterAction ma) {
-				return ma.getActionPlan() == p;
-			}
-		});
+	private boolean hasMeterAction(ActionPlan p) {
+		Iterator<MeterAction> it = MeterActionHelper.iterator();
+		while(it.hasNext()) {
+			MeterAction ma = it.next();
+			if(ma.getActionPlan() == p)
+				return true;
+		}
+		return false;
 	}
 
 	/** Create a new style summary for this proxy type */

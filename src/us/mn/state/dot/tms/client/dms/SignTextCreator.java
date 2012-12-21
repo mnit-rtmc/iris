@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
@@ -43,7 +42,7 @@ public class SignTextCreator {
 	}
 
 	/** Sign text type cache, list of all sign text lines */
-	protected final TypeCache<SignText> sign_text;
+	private final TypeCache<SignText> sign_text;
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -125,15 +124,12 @@ public class SignTextCreator {
 	 * @param sg Sign group to search
 	 * @return A HashSet with entries as SignText names, e.g. V1_23
 	 */
-	protected HashSet<String> createSignTextNameSet(final SignGroup sg) {
-		final HashSet<String> names = new HashSet<String>();
-		sign_text.findObject(new Checker<SignText>() {
-			public boolean check(SignText st) {
-				if(st.getSignGroup() == sg)
-					names.add(st.getName());
-				return false;
-			}
-		});
+	private HashSet<String> createSignTextNameSet(SignGroup sg) {
+		HashSet<String> names = new HashSet<String>();
+		for(SignText st: sign_text) {
+			if(st.getSignGroup() == sg)
+				names.add(st.getName());
+		}
 		return names;
 	}
 }

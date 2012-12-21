@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,12 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.TreeMap;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.tms.units.Distance;
 
 /**
  * Helper class for cameras.
@@ -33,6 +38,12 @@ public class CameraHelper extends BaseHelper {
 		return (Camera)namespace.findObject(Camera.SONAR_TYPE, checker);
 	}
 
+	/** Get a camera iterator */
+	static public Iterator<Camera> iterator() {
+		return new IteratorWrapper<Camera>(namespace.iterator(
+			Camera.SONAR_TYPE));
+	}
+
 	/** Lookup the camera with the specified name */
 	static public Camera lookup(String name) {
 		return (Camera)namespace.lookupObject(Camera.SONAR_TYPE,
@@ -46,5 +57,22 @@ public class CameraHelper extends BaseHelper {
 			return enc.substring(0, enc.indexOf(':'));
 		else
 			return enc.trim();
+	}
+
+	/** Find the nearest cameras to a position */
+	static public Collection<Camera> findNearest(Position pos, int n_count){
+		TreeMap<Double, Camera> cams = new TreeMap<Double, Camera>();
+		Iterator<Camera> it = iterator();
+		while(it.hasNext()) {
+			Camera cam = it.next();
+			GeoLoc loc = cam.getGeoLoc();
+			Distance d = GeoLocHelper.distanceTo(loc, pos);
+			if(d != null) {
+				cams.put(d.m(), cam);
+				while(cams.size() > n_count)
+					cams.pollLastEntry();
+			}
+		}
+		return cams.values();
 	}
 }

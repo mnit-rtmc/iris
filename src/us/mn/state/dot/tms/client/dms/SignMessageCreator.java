@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
@@ -37,7 +36,7 @@ public class SignMessageCreator {
 	static protected final int EXTRA_MSG_IDS = 5;
 
 	/** Sign message type cache */
-	protected final TypeCache<SignMessage> sign_messages;
+	private final TypeCache<SignMessage> sign_messages;
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -165,16 +164,13 @@ public class SignMessageCreator {
 	 * Create a HashSet containing all SignMessage names for the user.
 	 * @return A HashSet with entries as SignMessage names.
 	 */
-	protected HashSet<String> createSignMessageNameSet() {
-		final String name = user.getName();
-		final HashSet<String> names = new HashSet<String>();
-		sign_messages.findObject(new Checker<SignMessage>() {
-			public boolean check(SignMessage sm) {
-				if(sm.getName().startsWith(name))
-					names.add(sm.getName());
-				return false;
-			}
-		});
+	private HashSet<String> createSignMessageNameSet() {
+		String name = user.getName();
+		HashSet<String> names = new HashSet<String>();
+		for(SignMessage sm: sign_messages) {
+			if(sm.getName().startsWith(name))
+				names.add(sm.getName());
+		}
 		return names;
 	}
 }
