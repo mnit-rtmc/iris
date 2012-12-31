@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.DMSHelper;
 public class DmsQueryMsgJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static protected final int OFFSET_SECS = 4;
+	static private final int OFFSET_SECS = 4;
 
 	/** Create a new job to query DMS messages */
 	public DmsQueryMsgJob(int i_secs) {
@@ -38,16 +38,15 @@ public class DmsQueryMsgJob extends Job {
 
 	/** Perform the DMS query messages job */
 	public void perform() {
-		final int req = DeviceRequest.QUERY_MESSAGE.ordinal();
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS d) {
-				if(d instanceof DMSImpl) {
-					DMSImpl dms = (DMSImpl)d;
-					if(dms.isPeriodicallyQueriable())
-						dms.setDeviceRequest(req);
-				}
-				return false;
+		int req = DeviceRequest.QUERY_MESSAGE.ordinal();
+		Iterator<DMS> it = DMSHelper.iterator();
+		while(it.hasNext()) {
+			DMS d = it.next();
+			if(d instanceof DMSImpl) {
+				DMSImpl dms = (DMSImpl)d;
+				if(dms.isPeriodicallyQueriable())
+					dms.setDeviceRequest(req);
 			}
-		});
+		}
 	}
 }

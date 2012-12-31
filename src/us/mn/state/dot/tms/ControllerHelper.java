@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.geokit.Position;
 
@@ -31,24 +32,16 @@ public class ControllerHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Get a controller iterator */
+	static public Iterator<Controller> iterator() {
+		return new IteratorWrapper<Controller>(namespace.iterator(
+			Controller.SONAR_TYPE));
+	}
+
 	/** Find a controller using a Checker */
 	static public Controller find(final Checker<Controller> checker) {
 		return (Controller)namespace.findObject(Controller.SONAR_TYPE,
 			checker);
-	}
-
-	/** Find a controller associated with the comm link that uses the
-	 * specified protocol.
-	 * @return The controller or null if one is not defined. */
-	static public Controller getController(final CommProtocol proto) {
-		final CommLink cl = CommLinkHelper.getCommLink(proto);
-		if(cl == null)
-			return null;
-		return find(new Checker<Controller>() {
-			public boolean check(Controller c) {
-				return c.getCommLink() == cl;
-			}
-		});
 	}
 
 	/** Get the geo location of a controller or null */

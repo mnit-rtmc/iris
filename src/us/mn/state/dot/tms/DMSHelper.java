@@ -40,6 +40,22 @@ public class DMSHelper extends BaseHelper {
 		DeviceStyle.AWS_CONTROLLED, DeviceStyle.NO_CONTROLLER
 	};
 
+	/** Lookup the DMS with the specified name */
+	static public DMS lookup(String name) {
+		return (DMS)namespace.lookupObject(DMS.SONAR_TYPE, name);
+	}
+
+	/** Find DMS using a Checker */
+	static public DMS find(final Checker<DMS> checker) {
+		return (DMS)namespace.findObject(DMS.SONAR_TYPE, checker);
+	}
+
+	/** Get a DMS iterator */
+	static public Iterator<DMS> iterator() {
+		return new IteratorWrapper<DMS>(namespace.iterator(
+			DMS.SONAR_TYPE));
+	}
+
 	/** Test if a DMS is available */
 	static public boolean isAvailable(DMS proxy) {
 		return isActive(proxy) &&
@@ -240,22 +256,6 @@ public class DMSHelper extends BaseHelper {
 			}
 		}
 		return SString.removeTail(s.toString(), ", ");
-	}
-
-	/** Lookup the DMS with the specified name */
-	static public DMS lookup(String name) {
-		return (DMS)namespace.lookupObject(DMS.SONAR_TYPE, name);
-	}
-
-	/** Find DMS using a Checker */
-	static public DMS find(final Checker<DMS> checker) {
-		return (DMS)namespace.findObject(DMS.SONAR_TYPE, checker);
-	}
-
-	/** Get a DMS iterator */
-	static public Iterator<DMS> iterator() {
-		return new IteratorWrapper<DMS>(namespace.iterator(
-			DMS.SONAR_TYPE));
 	}
 
 	/** Lookup the camera for a DMS */

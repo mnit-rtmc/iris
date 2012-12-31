@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * R_NodeHelper has static methods for dealing with r_nodes.
@@ -29,9 +28,10 @@ public class R_NodeHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find r_nodes using a Checker */
-	static public R_Node find(final Checker<R_Node> checker) {
-		return (R_Node)namespace.findObject(R_Node.SONAR_TYPE, checker);
+	/** Get an r_node iterator */
+	static public Iterator<R_Node> iterator() {
+		return new IteratorWrapper<R_Node>(namespace.iterator(
+			R_Node.SONAR_TYPE));
 	}
 
 	/** Check if an r_node is a station */
@@ -89,7 +89,7 @@ public class R_NodeHelper extends BaseHelper {
 	}
 
 	/** Check if an R_Node has detection (not abandoned) */
-	static public boolean hasDetection(final R_Node r_node) {
+	static public boolean hasDetection(R_Node r_node) {
 		Iterator<Detector> it = DetectorHelper.iterator();
 		while(it.hasNext()) {
 			Detector d = it.next();

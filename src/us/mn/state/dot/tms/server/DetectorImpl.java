@@ -20,10 +20,10 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -112,14 +112,18 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 				));
 			}
 		});
-		// Transients need to be initialized after all detectors are
-		// loaded (for resolving fake detectors).
-		namespace.findObject(SONAR_TYPE, new Checker<DetectorImpl>() {
-			public boolean check(DetectorImpl d) {
-				d.initTransients();
-				return false;
-			}
-		});
+		initAllTransients();
+	}
+
+	/** Initialize transients for all detectors.  This needs to happen after
+	 * all detectors are loaded (for resolving fake detectors). */
+	static private void initAllTransients() {
+		Iterator<Detector> it = DetectorHelper.iterator();
+		while(it.hasNext()) {
+			Detector d = it.next();
+			if(d instanceof DetectorImpl)
+				((DetectorImpl)d).initTransients();
+		}
 	}
 
 	/** Get a mapping of the columns */

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 
@@ -23,18 +24,18 @@ import us.mn.state.dot.tms.ControllerHelper;
  * This class writes the state of all controllers to an XML file.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class ControllerXmlWriter {
 
 	/** Print the body of the controller list XML file */
 	public void print(final PrintWriter out) {
-		ControllerHelper.find(new Checker<Controller>() {
-			public boolean check(Controller c) {
-				if(c instanceof ControllerImpl)
-					((ControllerImpl)c).printXml(out);
-				return false;
-			}
-		});
+		Iterator<Controller> it = ControllerHelper.iterator();
+		while(it.hasNext()) {
+			Controller c = it.next();
+			if(c instanceof ControllerImpl)
+				((ControllerImpl)c).printXml(out);
+		}
 	}
 
 }

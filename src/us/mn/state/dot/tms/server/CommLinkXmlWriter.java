@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
 
@@ -23,18 +24,18 @@ import us.mn.state.dot.tms.CommLinkHelper;
  * This class writes the state of all comm links to an XML file.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class CommLinkXmlWriter {
 
 	/** Print the body of the controller list XML file */
 	public void print(final PrintWriter out) {
-		CommLinkHelper.find(new Checker<CommLink>() {
-			public boolean check(CommLink cl) {
-				if(cl instanceof CommLinkImpl)
-					((CommLinkImpl)cl).printXml(out);
-				return false;
-			}
-		});
+		Iterator<CommLink> it = CommLinkHelper.iterator();
+		while(it.hasNext()) {
+			CommLink cl = it.next();
+			if(cl instanceof CommLinkImpl)
+				((CommLinkImpl)cl).printXml(out);
+		}
 	}
 
 }

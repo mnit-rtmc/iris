@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.units.Distance;
@@ -38,26 +38,25 @@ public class CorridorManager {
 	/** Create all corridors from the existing r_nodes */
 	public synchronized void createCorridors() {
 		corridors.clear();
-		R_NodeHelper.find(new Checker<R_Node>() {
-			public boolean check(R_Node r_node) {
-				findDownstreamLinks((R_NodeImpl)r_node);
-				addCorridorNode(r_node);
-				return false;
-			}
-		});
+		Iterator<R_Node> it = R_NodeHelper.iterator();
+		while(it.hasNext()) {
+			R_Node r_node = it.next();
+			findDownstreamLinks((R_NodeImpl)r_node);
+			addCorridorNode(r_node);
+		}
 		for(Corridor c: corridors.values())
 			c.arrangeNodes();
 	}
 
 	/** Add an r_node to the proper corridor */
-	protected void addCorridorNode(R_Node r_node) {
+	private void addCorridorNode(R_Node r_node) {
 		String cid = R_NodeHelper.getCorridorName(r_node);
 		if(cid != null)
 			addCorridorNode(cid, r_node);
 	}
 
 	/** Add an r_node to the specified corridor */
-	protected void addCorridorNode(String cid, R_Node r_node) {
+	private void addCorridorNode(String cid, R_Node r_node) {
 		Corridor c = corridors.get(cid);
 		if(c == null) {
 			c = new Corridor(r_node.getGeoLoc());
@@ -67,7 +66,7 @@ public class CorridorManager {
 	}
 
 	/** Find downstream links (not in corridor) for the given node */
-	protected void findDownstreamLinks(R_NodeImpl r_node) {
+	private void findDownstreamLinks(R_NodeImpl r_node) {
 		r_node.clearDownstream();
 		if(r_node.isExit())
 			linkExitToEntrance(r_node);
@@ -77,16 +76,14 @@ public class CorridorManager {
 	}
 
 	/** Link an exit node with a corresponding entrance node */
-	protected void linkExitToEntrance(final R_NodeImpl r_node) {
-		final LinkedList<R_NodeImpl> links =
-			new LinkedList<R_NodeImpl>();
-		R_NodeHelper.find(new Checker<R_Node>() {
-			public boolean check(R_Node other) {
-				if(R_NodeHelper.isExitLink(r_node, other))
-					links.add((R_NodeImpl)other);
-				return false;
-			}
-		});
+	private void linkExitToEntrance(R_NodeImpl r_node) {
+		LinkedList<R_NodeImpl> links = new LinkedList<R_NodeImpl>();
+		Iterator<R_Node> it = R_NodeHelper.iterator();
+		while(it.hasNext()) {
+			R_Node other = it.next();
+			if(R_NodeHelper.isExitLink(r_node, other))
+				links.add((R_NodeImpl)other);
+		}
 		R_NodeImpl link = findNearest(r_node, links);
 		if(link != null)
 			r_node.addDownstream(link);
@@ -109,14 +106,13 @@ public class CorridorManager {
 	}
 
 	/** Link an access node with all corresponding entrance nodes */
-	protected void linkAccessToEntrance(final R_NodeImpl r_node) {
-		R_NodeHelper.find(new Checker<R_Node>() {
-			public boolean check(R_Node n) {
-				if(R_NodeHelper.isAccessLink(r_node, n))
-					r_node.addDownstream((R_NodeImpl)n);
-				return false;
-			}
-		});
+	private void linkAccessToEntrance(R_NodeImpl r_node) {
+		Iterator<R_Node> it = R_NodeHelper.iterator();
+		while(it.hasNext()) {
+			R_Node n = it.next();
+			if(R_NodeHelper.isAccessLink(r_node, n))
+				r_node.addDownstream((R_NodeImpl)n);
+		}
 	}
 
 	/** Lookup the named corridor */

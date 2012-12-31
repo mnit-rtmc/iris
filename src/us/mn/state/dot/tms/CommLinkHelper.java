@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -29,20 +30,15 @@ public class CommLinkHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Get a comm link iterator */
+	static public Iterator<CommLink> iterator() {
+		return new IteratorWrapper<CommLink>(namespace.iterator(
+			CommLink.SONAR_TYPE));
+	}
+
 	/** Find a comm link using a Checker */
 	static public CommLink find(final Checker<CommLink> checker) {
 		return (CommLink)namespace.findObject(CommLink.SONAR_TYPE,
 			checker);
-	}
-
-	/** Get the first comm link associated with the specified protocol.
-	 * @return The first comm link of the specified protocol or null if 
-	 *	   one is not defined. */
-	static public CommLink getCommLink(final CommProtocol proto) {
-		return find(new Checker<CommLink>() {
-			public boolean check(CommLink c) {
-				return c.getProtocol() == proto.ordinal();
-			}
-		});
 	}
 }

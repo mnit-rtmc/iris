@@ -167,7 +167,6 @@ public class MainServer {
 	static protected ServerNamespace createNamespace() {
 		ServerNamespace ns = new ServerNamespace();
 		// FIXME: static namespace hacks
-		DMSList.namespace = ns;
 		BaseHelper.namespace = ns;
 		ns.registerType(Station.SONAR_TYPE, StationImpl.class);
 		return ns;

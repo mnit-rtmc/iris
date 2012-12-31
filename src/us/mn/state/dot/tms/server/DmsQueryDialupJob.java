@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -65,16 +65,15 @@ public class DmsQueryDialupJob extends Job {
 
 	/** Queue all dialup signs to be queried */
 	private void queueAllDialupSigns() {
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS d) {
-				if(d instanceof DMSImpl) {
-					DMSImpl dms = (DMSImpl)d;
-					if(dms.isActiveDialup())
-						signs.offer(dms);
-				}
-				return false;
+		Iterator<DMS> it = DMSHelper.iterator();
+		while(it.hasNext()) {
+			DMS d = it.next();
+			if(d instanceof DMSImpl) {
+				DMSImpl dms = (DMSImpl)d;
+				if(dms.isActiveDialup())
+					signs.offer(dms);
 			}
-		});
+		}
 		stamp = periodStamp();
 	}
 

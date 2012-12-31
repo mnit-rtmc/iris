@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@ package us.mn.state.dot.tms;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 
@@ -35,6 +37,18 @@ public class FontHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Lookup a Font in the SONAR namespace. 
+	 * @return The specified font or null if it does not exist. */
+	static public Font lookup(String name) {
+		return (Font)namespace.lookupObject(Font.SONAR_TYPE, name);
+	}
+
+	/** Get a font iterator */
+	static public Iterator<Font> iterator() {
+		return new IteratorWrapper<Font>(namespace.iterator(
+			Font.SONAR_TYPE));
+	}
+
 	/** Find a font using a checker */
 	static public Font find(Checker<Font> checker) {
 		return (Font)namespace.findObject(Font.SONAR_TYPE, checker);
@@ -49,10 +63,20 @@ public class FontHelper extends BaseHelper {
 		});
 	}
 
-	/** Lookup a Font in the SONAR namespace. 
-	 * @return The specified font or null if it does not exist. */
-	static public Font lookup(String name) {
-		return (Font)namespace.lookupObject(Font.SONAR_TYPE, name);
+	/** Fint the lowest unused font number */
+	static public int findUnusedFontNumber() {
+		HashSet<Integer> numbers = new HashSet<Integer>();
+		Iterator<Font> it = iterator();
+		while(it.hasNext()) {
+			Font f = it.next();
+			numbers.add(f.getNumber());
+		}
+		for(int i = 1; i < 256; i++) {
+			if(!numbers.contains(i))
+				return i;
+		}
+		// This can only happen if we already have 255 fonts defined
+		return 0;
 	}
 
 	/** Lookup the glyphs in the specified font */

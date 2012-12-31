@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,12 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.ArrayList;
-import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.server.ServerNamespace;
+import java.util.Iterator;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.kml.Kml;
-import us.mn.state.dot.tms.kml.KmlColor;
-import us.mn.state.dot.tms.kml.KmlColorImpl;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.kml.KmlFeature;
 import us.mn.state.dot.tms.kml.KmlFolder;
-import us.mn.state.dot.tms.kml.KmlIconStyle;
-import us.mn.state.dot.tms.kml.KmlIconStyleImpl;
-import us.mn.state.dot.tms.kml.KmlPlacemark;
 import us.mn.state.dot.tms.kml.KmlRenderer;
-import us.mn.state.dot.tms.kml.KmlStyle;
-import us.mn.state.dot.tms.kml.KmlStyleImpl;
 import us.mn.state.dot.tms.kml.KmlStyleSelector;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -38,9 +30,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public class DMSList implements KmlFolder {
-
-	/** server namespace (assigned in MainServer) */
-	static public ServerNamespace namespace;
 
 	/** disallow external instantiation */
 	private DMSList() {
@@ -77,17 +66,13 @@ public class DMSList implements KmlFolder {
 	}
 
 	/** return the kml document features (KmlFolder interface) */
-	public ArrayList<KmlFeature> getKmlFeatures()
-	{
-		final ArrayList<KmlFeature> list = new ArrayList<KmlFeature>();
-		if(namespace == null)
-			return list;
-		namespace.findObject(DMS.SONAR_TYPE, new Checker<DMS>() {
-			public boolean check(DMS d) {
-				list.add((KmlFeature)d);
-				return false;
-			}
-		});
+	public ArrayList<KmlFeature> getKmlFeatures() {
+		ArrayList<KmlFeature> list = new ArrayList<KmlFeature>();
+		Iterator<DMS> it = DMSHelper.iterator();
+		while(it.hasNext()) {
+			DMS d = it.next();
+			list.add((KmlFeature)d);
+		}
 		return list;
 	}
 }

@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.MessagePoller;
 public class AlarmQueryStatusJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static protected final int OFFSET_SECS = 1;
+	static private final int OFFSET_SECS = 1;
 
 	/** Create a new job to query alarm status */
 	public AlarmQueryStatusJob() {
@@ -39,17 +39,16 @@ public class AlarmQueryStatusJob extends Job {
 
 	/** Perform the alarm query status timer job */
 	public void perform() {
-		ControllerHelper.find(new Checker<Controller>() {
-			public boolean check(Controller c) {
-				if(c instanceof ControllerImpl)
-					queryAlarms((ControllerImpl)c);
-				return false;
-			}
-		});
+		Iterator<Controller> it = ControllerHelper.iterator();
+		while(it.hasNext()) {
+			Controller c = it.next();
+			if(c instanceof ControllerImpl)
+				queryAlarms((ControllerImpl)c);
+		}
 	}
 
 	/** Query alarm status from one controller */
-	protected void queryAlarms(ControllerImpl c) {
+	private void queryAlarms(ControllerImpl c) {
 		if(c.hasAlarm()) {
 			MessagePoller p = c.getPoller();
 			if(p instanceof AlarmPoller) {

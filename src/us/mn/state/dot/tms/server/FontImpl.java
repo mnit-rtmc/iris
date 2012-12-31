@@ -17,11 +17,10 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -32,23 +31,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class FontImpl extends BaseObjectImpl implements Font {
-
-	/** Fint the lowest unused font number */
-	static protected int findUnusedFontNumber() {
-		final HashSet<Integer> numbers = new HashSet<Integer>();
-		namespace.findObject(Font.SONAR_TYPE, new Checker<Font>() {
-			public boolean check(Font f) {
-				numbers.add(f.getNumber());
-				return false;
-			}
-		});
-		for(int i = 1; i < 256; i++) {
-			if(!numbers.contains(i))
-				return i;
-		}
-		// This can only happen if we already have 255 fonts defined
-		return 0;
-	}
 
 	/** Load all the fonts */
 	static protected void loadAll() throws TMSException {
@@ -97,7 +79,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Create a new font */
 	public FontImpl(String n) {
 		super(n);
-		f_number = findUnusedFontNumber();
+		f_number = FontHelper.findUnusedFontNumber();
 	}
 
 	/** Create a new font */

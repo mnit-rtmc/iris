@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 
@@ -77,13 +77,12 @@ public class IncidentXmlWriter extends XmlWriter {
 
 	/** Print the body of the incident XML file */
 	protected void printBody(final PrintWriter out) {
-		IncidentHelper.find(new Checker<Incident>() {
-			public boolean check(Incident inc) {
-				if(inc instanceof IncidentImpl)
-					((IncidentImpl)inc).printXml(out);
-				return false;
-			}
-		});
+		Iterator<Incident> it = IncidentHelper.iterator();
+		while(it.hasNext()) {
+			Incident inc = it.next();
+			if(inc instanceof IncidentImpl)
+				((IncidentImpl)inc).printXml(out);
+		}
 	}
 
 	/** Print the tail of the incident XML file */
