@@ -15,8 +15,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for weather sensors.
@@ -30,16 +30,16 @@ public class WeatherSensorHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find weather sensors using a Checker */
-	static public WeatherSensor find(Checker<WeatherSensor> checker) {
-		return (WeatherSensor)namespace.findObject(
-			WeatherSensor.SONAR_TYPE, checker);
-	}
-
 	/** Lookup the weather sensor with the specified name */
 	static public WeatherSensor lookup(String name) {
 		return (WeatherSensor)namespace.lookupObject(
 			WeatherSensor.SONAR_TYPE, name);
+	}
+
+	/** Get a weather sensor iterator */
+	static public Iterator<WeatherSensor> iterator() {
+		return new IteratorWrapper<WeatherSensor>(namespace.iterator(
+			WeatherSensor.SONAR_TYPE));
 	}
 
 	/** Test if the sensor has triggered an AWS state (e.g. high wind) */

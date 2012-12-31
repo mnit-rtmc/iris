@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -264,16 +264,13 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Validate that all DMS actions are deployable */
 	private void validateDmsActions() throws ChangeVetoException {
-		final ActionPlan ap = this;
-		DmsAction da = DmsActionHelper.find(new Checker<DmsAction>() {
-			public boolean check(DmsAction da) {
-				return da.getActionPlan() == ap &&
-				       !isDeployable(da);
+		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		while(it.hasNext()) {
+			DmsAction da = it.next();
+			if(da.getActionPlan() == this && !isDeployable(da)) {
+				throw new ChangeVetoException("DMS action " +
+					da.getName() + " not deployable");
 			}
-		});
-		if(da != null) {
-			throw new ChangeVetoException("DMS action " +
-				da.getName() + " not deployable");
 		}
 	}
 
@@ -290,16 +287,13 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Validate that all lane actions are deployable */
 	private void validateLaneActions() throws ChangeVetoException {
-		final ActionPlan ap = this;
-		LaneAction la = LaneActionHelper.find(new Checker<LaneAction>(){
-			public boolean check(LaneAction la) {
-				return la.getActionPlan() == ap &&
-				       !isDeployable(la);
+		Iterator<LaneAction> it = LaneActionHelper.iterator();
+		while(it.hasNext()) {
+			LaneAction la = it.next();
+			if(la.getActionPlan() == this && !isDeployable(la)) {
+				throw new ChangeVetoException("Lane action " +
+					la.getName() + " not deployable");
 			}
-		});
-		if(la != null) {
-			throw new ChangeVetoException("Lane action " +
-				la.getName() + " not deployable");
 		}
 	}
 
@@ -314,18 +308,13 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Validate that all meter actions are deployable */
 	private void validateMeterActions() throws ChangeVetoException {
-		final ActionPlan ap = this;
-		MeterAction ma = MeterActionHelper.find(
-			new Checker<MeterAction>()
-		{
-			public boolean check(MeterAction ma) {
-				return ma.getActionPlan() == ap &&
-				       !isDeployable(ma);
+		Iterator<MeterAction> it = MeterActionHelper.iterator();
+		while(it.hasNext()) {
+			MeterAction ma = it.next();
+			if(ma.getActionPlan() == this && !isDeployable(ma)) {
+				throw new ChangeVetoException("Meter action " +
+					ma.getName() + " not deployable");
 			}
-		});
-		if(ma != null) {
-			throw new ChangeVetoException("Meter action " +
-				ma.getName() + " not deployable");
 		}
 	}
 

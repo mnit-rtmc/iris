@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2011  Minnesota Department of Transportation
+ * Copyright (C) 2010-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
@@ -38,13 +38,12 @@ public class WeatherQueryJob extends Job {
 
 	/** Perform the job */
 	public void perform() {
-		WeatherSensorHelper.find(new Checker<WeatherSensor>() {
-			public boolean check(WeatherSensor ws) {
-				if(ws instanceof WeatherSensorImpl)
-					queryWeather((WeatherSensorImpl)ws);
-				return false;
-			}
-		});
+		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
+		while(it.hasNext()) {
+			WeatherSensor ws = it.next();
+			if(ws instanceof WeatherSensorImpl)
+				queryWeather((WeatherSensorImpl)ws);
+		}
 	}
 
 	/** Query weather sample data from one sensor */

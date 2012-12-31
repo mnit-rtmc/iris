@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 
 /**
  * Helper class for action plans.
@@ -28,15 +28,15 @@ public class ActionPlanHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find lane actions using a Checker */
-	static public ActionPlan find(final Checker<ActionPlan> checker) {
-		return (ActionPlan)namespace.findObject(ActionPlan.SONAR_TYPE, 
-			checker);
-	}
-
 	/** Lookup the action plan with the specified name */
 	static public ActionPlan lookup(String name) {
 		return (ActionPlan)namespace.lookupObject(ActionPlan.SONAR_TYPE,
 			name);
+	}
+
+	/** Get an action plan iterator */
+	static public Iterator<ActionPlan> iterator() {
+		return new IteratorWrapper<ActionPlan>(namespace.iterator(
+			ActionPlan.SONAR_TYPE));
 	}
 }

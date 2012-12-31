@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 
 /**
  * Warning sign helper methods.
@@ -28,9 +28,9 @@ public class WarningSignHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find warning signs using a Checker */
-	static public WarningSign find(final Checker<WarningSign> checker) {
-		return (WarningSign)namespace.findObject(WarningSign.SONAR_TYPE,
-			checker);
+	/** Get a warning sign iterator */
+	static public Iterator<WarningSign> iterator() {
+		return new IteratorWrapper<WarningSign>(namespace.iterator(
+			WarningSign.SONAR_TYPE));
 	}
 }

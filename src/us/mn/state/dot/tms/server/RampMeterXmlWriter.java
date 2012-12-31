@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.PrintWriter;
 import java.util.HashMap;
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 
@@ -29,19 +28,18 @@ public class RampMeterXmlWriter {
 
 	/** Get a mapping of r_node names to meters */
 	public HashMap<String, RampMeterImpl> getNodeMapping() {
-		final HashMap<String, RampMeterImpl> m_nodes =
+		HashMap<String, RampMeterImpl> m_nodes =
 			new HashMap<String, RampMeterImpl>();
-		RampMeterHelper.find(new Checker<RampMeter>() {
-			public boolean check(RampMeter m) {
-				if(m instanceof RampMeterImpl) {
-					RampMeterImpl meter = (RampMeterImpl)m;
-					R_NodeImpl n = meter.getR_Node();
-					if(n != null) 
-						m_nodes.put(n.getName(), meter);
-				}
-				return false;
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while(it.hasNext()) {
+			RampMeter m = it.next();
+			if(m instanceof RampMeterImpl) {
+				RampMeterImpl meter = (RampMeterImpl)m;
+				R_NodeImpl n = meter.getR_Node();
+				if(n != null) 
+					m_nodes.put(n.getName(), meter);
 			}
-		});
+		}
 		return m_nodes;
 	}
 }

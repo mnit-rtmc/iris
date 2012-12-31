@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WarningSignHelper;
@@ -38,12 +38,11 @@ public class WarnQueryStatusJob extends Job {
 
 	/** Perform the warning sign query status job */
 	public void perform() {
-		final int req = DeviceRequest.QUERY_STATUS.ordinal();
-		WarningSignHelper.find(new Checker<WarningSign>() {
-			public boolean check(WarningSign sign) {
-				sign.setDeviceRequest(req);
-				return false;
-			}
-		});
+		int req = DeviceRequest.QUERY_STATUS.ordinal();
+		Iterator<WarningSign> it = WarningSignHelper.iterator();
+		while(it.hasNext()) {
+			WarningSign sign = it.next();
+			sign.setDeviceRequest(req);
+		}
 	}
 }

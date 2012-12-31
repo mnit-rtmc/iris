@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Checker;
@@ -77,17 +78,25 @@ public class SendSettingsJob extends Job {
 				return false;
 			}
 		});
-		RampMeterHelper.find(new Checker<RampMeter>() {
-			public boolean check(RampMeter meter) {
-				meter.setDeviceRequest(req);
-				return false;
-			}
-		});
-		WarningSignHelper.find(new Checker<WarningSign>() {
-			public boolean check(WarningSign sign) {
-				sign.setDeviceRequest(req);
-				return false;
-			}
-		});
+		requestRampMeters(DeviceRequest.SEND_SETTINGS);
+		requestWarningSigns(DeviceRequest.SEND_SETTINGS);
+	}
+
+	/** Send a request to all ramp meters */
+	private void requestRampMeters(DeviceRequest req) {
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while(it.hasNext()) {
+			RampMeter meter = it.next();
+			meter.setDeviceRequest(req.ordinal());
+		}
+	}
+
+	/** Send a request to all warning signs */
+	private void requestWarningSigns(DeviceRequest req) {
+		Iterator<WarningSign> it = WarningSignHelper.iterator();
+		while(it.hasNext()) {
+			WarningSign sign = it.next();
+			sign.setDeviceRequest(req.ordinal());
+		}
 	}
 }

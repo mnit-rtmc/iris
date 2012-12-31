@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for detectors.
@@ -27,6 +26,18 @@ public class DetectorHelper extends BaseHelper {
 	/** Don't allow instances to be created */
 	private DetectorHelper() {
 		assert false;
+	}
+
+	/** Lookup the detector with the specified name */
+	static public Detector lookup(String name) {
+		return (Detector)namespace.lookupObject(Detector.SONAR_TYPE,
+			name);
+	}
+
+	/** Get a detector iterator */
+	static public Iterator<Detector> iterator() {
+		return new IteratorWrapper<Detector>(namespace.iterator(
+			Detector.SONAR_TYPE));
 	}
 
 	/** Get the geo location of a detector */
@@ -52,24 +63,6 @@ public class DetectorHelper extends BaseHelper {
 		if(det.getAbandoned())
 			b.append("-ABND");
 		return b.toString();
-	}
-
-	/** Find detectors using a Checker */
-	static public Detector find(Checker<Detector> checker) {
-		return (Detector)namespace.findObject(Detector.SONAR_TYPE,
-			checker);
-	}
-
-	/** Get a detector iterator */
-	static public Iterator<Detector> iterator() {
-		return new IteratorWrapper<Detector>(namespace.iterator(
-			Detector.SONAR_TYPE));
-	}
-
-	/** Lookup the detector with the specified name */
-	static public Detector lookup(String name) {
-		return (Detector)namespace.lookupObject(Detector.SONAR_TYPE,
-			name);
 	}
 
 	/** Test if a detector is active */

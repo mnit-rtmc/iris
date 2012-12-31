@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
@@ -98,24 +99,24 @@ public class SampleQuery30SecJob extends Job {
 	/** Validate all metering algorithms */
 	private void validateMetering() {
 		KAdaptiveAlgorithm.processAllStates();
-		RampMeterHelper.find(new Checker<RampMeter>() {
-			public boolean check(RampMeter rm) {
-				if(rm instanceof RampMeterImpl) {
-					RampMeterImpl meter = (RampMeterImpl)rm;
-					meter.validateAlgorithm();
-				}
-				return false;
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while(it.hasNext()) {
+			RampMeter rm = it.next();
+			if(rm instanceof RampMeterImpl) {
+				RampMeterImpl meter = (RampMeterImpl)rm;
+				meter.validateAlgorithm();
 			}
-		});
+		}
 		StratifiedAlgorithm.processAllStates();
-		RampMeterHelper.find(new Checker<RampMeter>() {
-			public boolean check(RampMeter m) {
-				RampMeterImpl meter = (RampMeterImpl)m;
+		it = RampMeterHelper.iterator();
+		while(it.hasNext()) {
+			RampMeter rm = it.next();
+			if(rm instanceof RampMeterImpl) {
+				RampMeterImpl meter = (RampMeterImpl)rm;
 				meter.updateQueueState();
 				meter.updateRatePlanned();
-				return false;
 			}
-		});
+		}
 		/* Note: this is temporarily last in case an exception is
 		 *       thrown -- all other metering work will be complete. */
 		DensityUMNAlgorithm.processAllStates();

@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -64,19 +64,18 @@ public class FlushSamplesJob extends Job {
 	}
 
 	/** Flush detector sample data to disk */
-	protected void flushDetectorSamples(final long before) {
-		final boolean do_flush = isArchiveEnabled();
-		DetectorHelper.find(new Checker<Detector>() {
-			public boolean check(Detector d) {
-				if(d instanceof DetectorImpl) {
-					DetectorImpl det = (DetectorImpl)d;
-					if(do_flush)
-						flushDetectorSamples(det);
-					det.purge(before);
-				}
-				return false;
+	private void flushDetectorSamples(long before) {
+		boolean do_flush = isArchiveEnabled();
+		Iterator<Detector> it = DetectorHelper.iterator();
+		while(it.hasNext()) {
+			Detector d = it.next();
+			if(d instanceof DetectorImpl) {
+				DetectorImpl det = (DetectorImpl)d;
+				if(do_flush)
+					flushDetectorSamples(det);
+				det.purge(before);
 			}
-		});
+		}
 	}
 
 	/** Flush the samples for one detector */
@@ -91,20 +90,18 @@ public class FlushSamplesJob extends Job {
 	}
 
 	/** Flush weather sample data to disk */
-	protected void flushWeatherSamples(final long before) {
-		final boolean do_flush = isArchiveEnabled();
-		WeatherSensorHelper.find(new Checker<WeatherSensor>() {
-			public boolean check(WeatherSensor w) {
-				if(w instanceof WeatherSensorImpl) {
-					WeatherSensorImpl ws =
-						(WeatherSensorImpl)w;
-					if(do_flush)
-						flushWeatherSamples(ws);
-					ws.purge(before);
-				}
-				return false;
+	private void flushWeatherSamples(long before) {
+		boolean do_flush = isArchiveEnabled();
+		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
+		while(it.hasNext()) {
+			WeatherSensor w = it.next();
+			if(w instanceof WeatherSensorImpl) {
+				WeatherSensorImpl ws = (WeatherSensorImpl)w;
+				if(do_flush)
+					flushWeatherSamples(ws);
+				ws.purge(before);
 			}
-		});
+		}
 	}
 
 	/** Flush the samples for one weather sensor */

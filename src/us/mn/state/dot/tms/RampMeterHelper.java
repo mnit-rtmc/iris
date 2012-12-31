@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Ramp meter helper methods.
@@ -33,12 +32,6 @@ public class RampMeterHelper extends BaseHelper {
 	static public RampMeter lookup(String name) {
 		return (RampMeter)namespace.lookupObject(RampMeter.SONAR_TYPE,
 			name);
-	}
-
-	/** Find ramp meters using a Checker */
-	static public RampMeter find(final Checker<RampMeter> checker) {
-		return (RampMeter)namespace.findObject(RampMeter.SONAR_TYPE,
-			checker);
 	}
 
 	/** Get a ramp meter iterator */

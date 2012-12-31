@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -91,16 +91,15 @@ public class FlushXmlJob extends Job {
 
 	/** Print the body of the detector sample XML file */
 	private void printSampleXmlBody(final PrintWriter out) {
-		DetectorHelper.find(new Checker<Detector>() {
-			public boolean check(Detector d) {
-				if(d instanceof DetectorImpl) {
-					DetectorImpl det = (DetectorImpl)d;
-					det.calculateFakeData();
-					det.printSampleXml(out);
-				}
-				return false;
+		Iterator<Detector> it = DetectorHelper.iterator();
+		while(it.hasNext()) {
+			Detector d = it.next();
+			if(d instanceof DetectorImpl) {
+				DetectorImpl det = (DetectorImpl)d;
+				det.calculateFakeData();
+				det.printSampleXml(out);
 			}
-		});
+		}
 	}
 
 	/** Print the tail of the detector sample XML file */

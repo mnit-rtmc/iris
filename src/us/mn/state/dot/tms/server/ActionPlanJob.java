@@ -16,18 +16,18 @@ package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
-import us.mn.state.dot.tms.HolidayHelper;
+import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
@@ -50,144 +50,101 @@ public class ActionPlanJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static protected final int OFFSET_SECS = 29;
 
-	/** Timer scheduler */
-	protected final Scheduler timer;
-
 	/** Mapping of ramp meter operating states */
 	private final HashMap<RampMeterImpl, Boolean> meters =
 		new HashMap<RampMeterImpl, Boolean>();
 
 	/** Create a new action plan job */
-	public ActionPlanJob(Scheduler t) {
+	public ActionPlanJob() {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
-		timer = t;
 	}
 
 	/** Perform the action plan job */
-	public void perform() {
+	public void perform() throws TMSException {
 		updateActionPlanPhases();
 		performTimeActions();
 		performDmsActions();
+		updateDmsMessages();
 		performLaneActions();
 		performMeterActions();
 	}
 
 	/** Update the action plan phases */
-	protected void updateActionPlanPhases() {
-		ActionPlanHelper.find(new Checker<ActionPlan>() {
-			public boolean check(ActionPlan ap) {
-				if(ap instanceof ActionPlanImpl)
-					updatePlanPhase((ActionPlanImpl)ap);
-				return false;
+	private void updateActionPlanPhases() throws TMSException {
+		Iterator<ActionPlan> it = ActionPlanHelper.iterator();
+		while(it.hasNext()) {
+			ActionPlan ap = it.next();
+			if(ap instanceof ActionPlanImpl) {
+				ActionPlanImpl api = (ActionPlanImpl)ap;
+				api.updatePhase();
 			}
-		});
-	}
-
-	/** Update the phase for an action plan */
-	private void updatePlanPhase(ActionPlanImpl ap) {
-		try {
-			ap.updatePhase();
-		}
-		catch(TMSException e) {
-			// FIXME: should propogate out of Job
-			e.printStackTrace();
 		}
 	}
 
 	/** Perform time actions */
-	protected void performTimeActions() {
-		final Calendar cal = TimeSteward.getCalendarInstance();
-		final int min = TimeSteward.currentMinuteOfDayInt();
-		TimeActionHelper.find(new Checker<TimeAction>() {
-			public boolean check(TimeAction ta) {
-				if(ta instanceof TimeActionImpl) {
-					performAction((TimeActionImpl)ta, cal,
-						min);
-				}
-				return false;
+	private void performTimeActions() throws TMSException {
+		Calendar cal = TimeSteward.getCalendarInstance();
+		int min = TimeSteward.currentMinuteOfDayInt();
+		Iterator<TimeAction> it = TimeActionHelper.iterator();
+		while(it.hasNext()) {
+			TimeAction ta = it.next();
+			if(ta instanceof TimeActionImpl) {
+				TimeActionImpl tai = (TimeActionImpl)ta;
+				tai.perform(cal, min);
 			}
-		});
-	}
-
-	/** Perform a time action */
-	private void performAction(TimeActionImpl ta, Calendar cal,
-		int min)
-	{
-		try {
-			ta.perform(cal, min);
-		}
-		catch(TMSException e) {
-			// FIXME: should propogate out of Job
-			e.printStackTrace();
 		}
 	}
 
 	/** Perform DMS actions */
-	protected void performDmsActions() {
-		DmsActionHelper.find(new Checker<DmsAction>() {
-			public boolean check(DmsAction da) {
-				ActionPlan ap = da.getActionPlan();
-				if(ap.getActive()) {
-					if(ap.getPhase() == da.getPhase())
-						performDmsAction(da);
-				}
-				return false;
+	private void performDmsActions() {
+		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		while(it.hasNext()) {
+			DmsAction da = it.next();
+			ActionPlan ap = da.getActionPlan();
+			if(ap.getActive()) {
+				if(ap.getPhase() == da.getPhase())
+					performDmsAction(da);
 			}
-		});
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(dms instanceof DMSImpl)
-					updateMessage((DMSImpl)dms);
-				return false;
-			}
-		});
+		}
 	}
 
 	/** Perform a DMS action */
-	protected void performDmsAction(final DmsAction da) {
+	private void performDmsAction(DmsAction da) {
 		SignGroup sg = da.getSignGroup();
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(dms instanceof DMSImpl)
-					performDmsAction((DMSImpl)dms, da);
-				return false;
+		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
+		while(it.hasNext()) {
+			DmsSignGroup dsg = it.next();
+			if(dsg.getSignGroup() == sg) {
+				DMS dms = dsg.getDms();
+				if(dms instanceof DMSImpl) {
+					DMSImpl dmsi = (DMSImpl)dms;
+					dmsi.performAction(da);
+				}
 			}
-		}, sg);
+		}
 	}
 
-	/** Perform a DMS action */
-	protected void performDmsAction(final DMSImpl dms, final DmsAction da) {
-		// We need to create a new Job here so that when performAction
-		// is called, we're not holding the SONAR TypeNode locks for
-		// DMS and DmsAction.
-		timer.addJob(new Job() {
-			public void perform() {
-				dms.performAction(da);
+	/** Update the DMS messages */
+	private void updateDmsMessages() {
+		Iterator<DMS> it = DMSHelper.iterator();
+		while(it.hasNext()) {
+			DMS dms = it.next();
+			if(dms instanceof DMSImpl) {
+				DMSImpl dmsi = (DMSImpl)dms;
+				dmsi.updateScheduledMessage();
 			}
-		});
-	}
-
-	/** Update the scheduled message for a DMS */
-	protected void updateMessage(final DMSImpl dms) {
-		// This needs to be in another Job so that it happens after any
-		// performDmsAction jobs which might be queued
-		timer.addJob(new Job() {
-			public void perform() {
-				dms.updateScheduledMessage();
-			}
-		});
+		}
 	}
 
 	/** Perform all lane actions */
-	protected void performLaneActions() {
-		LaneActionHelper.find(new Checker<LaneAction>() {
-			public boolean check(LaneAction la) {
-				ActionPlan ap = la.getActionPlan();
-				if(ap.getActive())
-					performLaneAction(la, ap.getPhase());
-				return false;
-			}
-		});
+	private void performLaneActions() {
+		Iterator<LaneAction> it = LaneActionHelper.iterator();
+		while(it.hasNext()) {
+			LaneAction la = it.next();
+			ActionPlan ap = la.getActionPlan();
+			if(ap.getActive())
+				performLaneAction(la, ap.getPhase());
+		}
 	}
 
 	/** Perform a lane action */
@@ -200,14 +157,13 @@ public class ActionPlanJob extends Job {
 	/** Perform all meter actions */
 	private void performMeterActions() {
 		meters.clear();
-		MeterActionHelper.find(new Checker<MeterAction>() {
-			public boolean check(MeterAction ma) {
-				ActionPlan ap = ma.getActionPlan();
-				if(ap.getActive())
-					updateMeterMap(ma, ap.getPhase());
-				return false;
-			}
-		});
+		Iterator<MeterAction> it = MeterActionHelper.iterator();
+		while(it.hasNext()) {
+			MeterAction ma = it.next();
+			ActionPlan ap = ma.getActionPlan();
+			if(ap.getActive())
+				updateMeterMap(ma, ap.getPhase());
+		}
 		for(Map.Entry<RampMeterImpl, Boolean> e: meters.entrySet())
 			e.getKey().setOperating(e.getValue());
 	}
