@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.SocketTimeoutException;
 import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
@@ -140,23 +140,21 @@ public class ModemMessenger extends Messenger {
 	protected void connectModem() throws IOException {
 		OutputStreamWriter osw = new OutputStreamWriter(output,
 			"US-ASCII");
-		PrintWriter pw = new PrintWriter(osw, true);
 		InputStreamReader isr = new InputStreamReader(input,"US-ASCII");
 		String config = modem.getConfig();
 		if(config != null && config.length() > 0)
-			configureModem(pw, isr, config);
+			configureModem(osw, isr, config);
 		if(phone_number != null && phone_number.length() > 0)
-			dialModem(pw, isr);
+			dialModem(osw, isr);
 		setConnected();
     	}
 
 	/** Configure the modem */
-	protected void configureModem(PrintWriter pw, InputStreamReader isr,
+	private void configureModem(Writer w, InputStreamReader isr,
 		String config) throws IOException
 	{
 		log("configure: " + config);
-		pw.print(config + "\r\n");
-		pw.flush();
+		w.write(config + "\r\n");
 		try {
 			String resp = readResponse(isr).trim();
 			if(!resp.toUpperCase().contains("OK")) {
@@ -170,11 +168,11 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Dial the modem */
-	protected void dialModem(PrintWriter pw, InputStreamReader isr)
+	private void dialModem(Writer w, InputStreamReader isr)
 		throws IOException
 	{
 		log("dial: " + phone_number);
-		pw.println("ATDT" + phone_number + "\r\n");
+		w.write("ATDT" + phone_number + "\r\n\n");
 		try {
 			wrapped.setTimeout(modem.getTimeout());
 			waitForConnect(isr);
