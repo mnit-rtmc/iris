@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.msgfeed;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.FeedBucket;
 import us.mn.state.dot.tms.server.FeedMsg;
@@ -41,10 +41,10 @@ public class MsgFeedProperty extends ControllerProperty {
 		feed = fd;
 	}
 
-	/** Perform a get request, parsing all feed messages */
-	public void doGetRequest(InputStream is) throws IOException {
-		if(is == null)
-			throw new EOFException();
+	/** Decode a QUERY response */
+	@Override public void decodeQuery(InputStream is, int drop)
+		throws IOException
+	{
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		while(line != null) {

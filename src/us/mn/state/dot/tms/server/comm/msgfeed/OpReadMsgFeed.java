@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2012  Minnesota Department of Transportation
+ * Copyright (C) 2002-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class OpReadMsgFeed extends OpController {
+public class OpReadMsgFeed extends OpController<MsgFeedProperty> {
 
 	/** Feed name */
 	protected final String feed;
@@ -40,20 +40,19 @@ public class OpReadMsgFeed extends OpController {
 	}
 
 	/** Create the first phase of the operation */
-	protected Phase phaseOne() {
+	protected Phase<MsgFeedProperty> phaseOne() {
 		return new PhaseReadMsgFeed();
 	}
 
 	/** Phase to read the message feed */
-	protected class PhaseReadMsgFeed extends Phase {
+	protected class PhaseReadMsgFeed extends Phase<MsgFeedProperty> {
 
 		/** Execute the phase */
-		protected Phase poll(CommMessage m) throws IOException {
-			if(m instanceof Message) {
-				Message mess = (Message)m;
-				mess.add(new MsgFeedProperty(feed));
-				mess.queryProps();
-			}
+		protected Phase<MsgFeedProperty> poll(
+			CommMessage<MsgFeedProperty> mess) throws IOException
+		{
+			mess.add(new MsgFeedProperty(feed));
+			mess.queryProps();
 			return null;
 		}
 	}

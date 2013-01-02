@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.msgfeed;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
@@ -27,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class MsgFeedPoller extends MessagePoller {
+public class MsgFeedPoller extends MessagePoller<MsgFeedProperty> {
 
 	/** Feed debug log */
 	static private final DebugLog FEED_LOG = new DebugLog("feed");
@@ -44,12 +43,6 @@ public class MsgFeedPoller extends MessagePoller {
 	public MsgFeedPoller(String n, Messenger m) {
 		super(n, m);
 		feed_id = n;
-	}
-
-	/** Create a new message for the specified controller, 
-	 *  called by MessagePoller.doPoll(). */
-	public CommMessage createMessage(ControllerImpl c) {
-		return new Message(messenger);
 	}
 
 	/** Check if a drop address is valid */
