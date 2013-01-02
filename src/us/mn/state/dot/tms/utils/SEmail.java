@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.utils;
 
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -85,18 +84,21 @@ public class SEmail {
 	}
 
 	/** Build message text */
-	protected String buildText() {
-		StringWriter writer = new StringWriter();
-		PrintWriter print = new PrintWriter(writer);
-		print.print(new Date().toString() + ": ");
+	private String buildText() {
+		StringWriter w = new StringWriter();
+		w.write(new Date().toString() + ": ");
+		w.write("Host: " + getHostName() + '\n');
+		w.write(text + '\n');
+		return w.toString();
+	}
+
+	/** Get the local host name */
+	private String getHostName() {
 		try {
-			print.println("Host: " +
-			InetAddress.getLocalHost().getHostName());
+			return InetAddress.getLocalHost().getHostName();
 		}
-		catch(UnknownHostException ee) {
-			print.println("Host unknown");
+		catch(UnknownHostException e) {
+			return "unknown";
 		}
-		print.println(text);
-		return writer.toString();
 	}
 }
