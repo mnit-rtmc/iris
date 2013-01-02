@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,14 +57,14 @@ public class FlushSamplesJob extends Job {
 	}
 
 	/** Perform the flush samples job */
-	public void perform() {
+	public void perform() throws IOException {
 		long before = calculatePurgeStamp();
 		flushDetectorSamples(before);
 		flushWeatherSamples(before);
 	}
 
 	/** Flush detector sample data to disk */
-	private void flushDetectorSamples(long before) {
+	private void flushDetectorSamples(long before) throws IOException {
 		boolean do_flush = isArchiveEnabled();
 		Iterator<Detector> it = DetectorHelper.iterator();
 		while(it.hasNext()) {
@@ -72,25 +72,14 @@ public class FlushSamplesJob extends Job {
 			if(d instanceof DetectorImpl) {
 				DetectorImpl det = (DetectorImpl)d;
 				if(do_flush)
-					flushDetectorSamples(det);
+					det.flush(writer);
 				det.purge(before);
 			}
 		}
 	}
 
-	/** Flush the samples for one detector */
-	private void flushDetectorSamples(DetectorImpl det) {
-		try {
-			det.flush(writer);
-		}
-		catch(IOException e) {
-			// FIXME: should propogate out of Job
-			e.printStackTrace();
-		}
-	}
-
 	/** Flush weather sample data to disk */
-	private void flushWeatherSamples(long before) {
+	private void flushWeatherSamples(long before) throws IOException {
 		boolean do_flush = isArchiveEnabled();
 		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
 		while(it.hasNext()) {
@@ -98,20 +87,9 @@ public class FlushSamplesJob extends Job {
 			if(w instanceof WeatherSensorImpl) {
 				WeatherSensorImpl ws = (WeatherSensorImpl)w;
 				if(do_flush)
-					flushWeatherSamples(ws);
+					ws.flush(writer);
 				ws.purge(before);
 			}
-		}
-	}
-
-	/** Flush the samples for one weather sensor */
-	private void flushWeatherSamples(WeatherSensorImpl ws) {
-		try {
-			ws.flush(writer);
-		}
-		catch(IOException e) {
-			// FIXME: should propogate out of Job
-			e.printStackTrace();
 		}
 	}
 }
