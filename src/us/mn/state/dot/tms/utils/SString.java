@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008 - 2011  AHMCT, University of California
+ * Copyright (C) 2008-2011  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,9 +13,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms.utils;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 /**
  * String convenience methods.
@@ -354,15 +351,6 @@ public class SString {
 			return i;
 		}
 		return len;
-	}
-
-	/** Return an exception stack trace as a string */
-	public static String getStackTrace(Exception ex) {
-		if(ex == null)
-			return "";
-		StringWriter writer = new StringWriter(256);
-		ex.printStackTrace(new PrintWriter(writer));
-		return writer.toString();
 	}
 
 	/** String comparison: starts with ignoring case */
