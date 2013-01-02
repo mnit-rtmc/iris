@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.VehLengthClass;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.FEET;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
@@ -892,49 +893,46 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			return MISSING_DATA;
 	}
 
-	/** Print a single detector as an XML element */
-	public void printXmlElement(PrintWriter out) {
+	/** Write a single detector as an XML element */
+	public void writeXmlElement(Writer w) throws IOException {
 		LaneType lt = lane_type;
 		short lane = getLaneNumber();
 		float field = getFieldLength();
 		String l = DetectorHelper.getLabel(this);
-		out.print("<detector");
-		out.print(XmlWriter.createAttribute("name", name));
+		w.write("<detector");
+		w.write(createAttribute("name", name));
 		if(!l.equals("FUTURE"))
-			out.print(XmlWriter.createAttribute("label", l));
+			w.write(createAttribute("label", l));
 		if(abandoned)
-			out.print(XmlWriter.createAttribute("abandoned", "t"));
-		if(lt != LaneType.NONE && lt != LaneType.MAINLINE) {
-			out.print(XmlWriter.createAttribute("category",
-				lt.suffix));
-		}
+			w.write(createAttribute("abandoned", "t"));
+		if(lt != LaneType.NONE && lt != LaneType.MAINLINE)
+			w.write(createAttribute("category", lt.suffix));
 		if(lane > 0)
-			out.print(XmlWriter.createAttribute("lane", lane));
+			w.write(createAttribute("lane", lane));
 		if(field != DEFAULT_FIELD_FT)
-			out.print(XmlWriter.createAttribute("field", field));
+			w.write(createAttribute("field", field));
 		Controller c = getController();
 		if(c != null) 
-			out.print(XmlWriter.createAttribute("controller", c.getName()));
-		out.println("/>");
+			w.write(createAttribute("controller", c.getName()));
+		w.write("/>\n");
 	}
 
 	/** Print the current sample as an XML element */
-	public void printSampleXml(PrintWriter out) {
+	public void writeSampleXml(Writer w) throws IOException {
 		if(abandoned || !isSampling())
 			return;
 		int flow = getFlowRaw();
 		int speed = Math.round(getSpeed());
 		float occ = getOccupancy();
-		out.print("\t<sample");
-		out.print(XmlWriter.createAttribute("sensor", name));
+		w.write("\t<sample");
+		w.write(createAttribute("sensor", name));
 		if(flow != MISSING_DATA)
-			out.print(XmlWriter.createAttribute("flow", flow));
+			w.write(createAttribute("flow", flow));
 		if(isMainline() && speed > 0)
-			out.print(XmlWriter.createAttribute("speed", speed));
+			w.write(createAttribute("speed", speed));
 		if(occ >= 0) {
-			out.print(XmlWriter.createAttribute("occ",
-				formatFloat(occ, 2)));
+			w.write(createAttribute("occ", formatFloat(occ, 2)));
 		}
-		out.println("/>");
+		w.write("/>\n");
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,13 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.zip.GZIPOutputStream;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -32,7 +34,7 @@ abstract public class XmlWriter {
 
 	/** XML version and encoding declaration */
 	static protected final String XML_DECLARATION =
-		"<?xml version='1.0' encoding='UTF-8'?>";
+		"<?xml version='1.0' encoding='UTF-8'?>\n";
 
 	/** Validate an xml element name */
 	static public String validateElementName(String e) {
@@ -97,13 +99,20 @@ abstract public class XmlWriter {
 
 	/** Write the XML file */
 	public void write() throws IOException {
-		PrintWriter out = new PrintWriter(createOutputStream());
-		print(out);
-		out.close();
+		OutputStream os = createOutputStream();
+		try {
+			BufferedWriter bw = new BufferedWriter(
+				new OutputStreamWriter(os));
+			write(bw);
+			bw.flush();
+		}
+		finally {
+			os.close();
+		}
 		if(!temp.renameTo(file))
 			throw new IOException("Rename failed: " + file);
 	}
 
-	/** Print the XML to a print writer */
-	abstract public void print(PrintWriter out);
+	/** Write the XML to a writer */
+	abstract protected void write(Writer w) throws IOException;
 }

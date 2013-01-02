@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -49,6 +49,7 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 
@@ -781,22 +782,22 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return corridors.getCorridor(cid);
 	}
 
-	/** Print meter as an XML element */
-	public void printXml(PrintWriter out) {
-		out.print("<meter");
-		out.print(XmlWriter.createAttribute("name", getName()));
+	/** Write meter as an XML element */
+	public void writeXml(Writer w) throws IOException {
+		w.write("<meter");
+		w.write(createAttribute("name", getName()));
 		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
 		if(pos != null) {
-			out.print(XmlWriter.createAttribute("lon",
+			w.write(createAttribute("lon",
 				formatDouble(pos.getLongitude())));
-			out.print(XmlWriter.createAttribute("lat",
+			w.write(createAttribute("lat",
 				formatDouble(pos.getLatitude())));
 		}
-		out.print(" storage='" + getStorage() + "'");
-		int w = getMaxWait();
-		if(w != DEFAULT_MAX_WAIT)
-			out.print(" max_wait='" + w + "'");
-		out.println("/>");
+		w.write(" storage='" + getStorage() + "'");
+		int mw = getMaxWait();
+		if(mw != DEFAULT_MAX_WAIT)
+			w.write(" max_wait='" + mw + "'");
+		w.write("/>\n");
 	}
 
 	/** Get the r_node associated with the ramp meter */

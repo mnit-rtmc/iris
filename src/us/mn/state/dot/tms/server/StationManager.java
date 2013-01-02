@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Date;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Scheduler;
@@ -64,53 +64,55 @@ class StationManager {
 	/** Write the station sample data out as XML */
 	public void writeSampleXml() throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
-			public void print(PrintWriter out) {
-				printSampleXmlHead(out);
-				printSampleXmlBody(out);
-				printSampleXmlTail(out);
+			@Override protected void write(Writer w)
+				throws IOException
+			{
+				writeSampleXmlHead(w);
+				writeSampleXmlBody(w);
+				writeSampleXmlTail(w);
 			}
 		};
 		w.write();
 	}
 
 	/** Print the header of the station sample XML file */
-	private void printSampleXmlHead(PrintWriter out) {
-		out.println(XmlWriter.XML_DECLARATION);
-		printDtd(out);
-		out.println("<traffic_sample time_stamp='" +
-			TimeSteward.getDateInstance() + "' period='30'>");
+	private void writeSampleXmlHead(Writer w) throws IOException {
+		w.write(XmlWriter.XML_DECLARATION);
+		writeDtd(w);
+		w.write("<traffic_sample time_stamp='" +
+			TimeSteward.getDateInstance() + "' period='30'>\n");
 	}
 
 	/** Print the DTD */
-	private void printDtd(PrintWriter out) {
-		out.println("<!DOCTYPE traffic_sample [");
-		out.println("<!ELEMENT traffic_sample (sample)*>");
-		out.println("<!ATTLIST traffic_sample time_stamp " +
-			"CDATA #REQUIRED>");
-		out.println("<!ATTLIST traffic_sample period CDATA #REQUIRED>");
-		out.println("<!ELEMENT sample EMPTY>");
-		out.println("<!ATTLIST sample sensor CDATA #REQUIRED>");
-		out.println("<!ATTLIST sample flow CDATA 'UNKNOWN'>");
-		out.println("<!ATTLIST sample speed CDATA 'UNKNOWN'>");
-		out.println("<!ATTLIST sample occ CDATA 'UNKNOWN'>");
-		out.println("]>");
+	private void writeDtd(Writer w) throws IOException {
+		w.write("<!DOCTYPE traffic_sample [\n");
+		w.write("<!ELEMENT traffic_sample (sample)*>\n");
+		w.write("<!ATTLIST traffic_sample time_stamp " +
+			"CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST traffic_sample period CDATA #REQUIRED>\n");
+		w.write("<!ELEMENT sample EMPTY>\n");
+		w.write("<!ATTLIST sample sensor CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST sample flow CDATA 'UNKNOWN'>\n");
+		w.write("<!ATTLIST sample speed CDATA 'UNKNOWN'>\n");
+		w.write("<!ATTLIST sample occ CDATA 'UNKNOWN'>\n");
+		w.write("]>\n");
 	}
 
 	/** Print the body of the station sample XML file */
-	private void printSampleXmlBody(PrintWriter out) {
+	private void writeSampleXmlBody(Writer w) throws IOException {
 		Iterator<Station> it = StationHelper.iterator();
 		while(it.hasNext()) {
 			Station s = it.next();
 			if(s instanceof StationImpl) {
 				StationImpl si = (StationImpl)s;
-				si.printSampleXml(out);
+				si.writeSampleXml(w);
 			}
 		}
 	}
 
 	/** Print the tail of the station sample XML file */
-	private void printSampleXmlTail(PrintWriter out) {
-		out.println("</traffic_sample>");
+	private void writeSampleXmlTail(Writer w) throws IOException {
+		w.write("</traffic_sample>\n");
 	}
 
 	/** Write the station data out as XML.  This is retained for backwards
@@ -118,36 +120,39 @@ class StationManager {
 	 * software, since it may be removed in the future. */
 	public void writeStationXml() throws IOException {
 		XmlWriter w = new XmlWriter(STATION_XML, false) {
-			public void print(PrintWriter out) {
-				printStationXmlHead(out);
-				printStationXmlBody(out);
-				printStationXmlTail(out);
+			@Override protected void write(Writer w)
+				throws IOException
+			{
+				writeStationXmlHead(w);
+				writeStationXmlBody(w);
+				writeStationXmlTail(w);
 			}
 		};
 		w.write();
 	}
 
 	/** Print the header of the station sample XML file */
-	private void printStationXmlHead(PrintWriter out) {
-		out.println("<?xml version='1.0'?>");
-		out.println("<station_data time_stamp='" +
-			TimeSteward.getDateInstance() +"' sample_period='30'>");
+	private void writeStationXmlHead(Writer w) throws IOException {
+		w.write("<?xml version='1.0'?>\n");
+		w.write("<station_data time_stamp='" +
+			TimeSteward.getDateInstance() +
+			"' sample_period='30'>\n");
 	}
 
 	/** Print the body of the station sample XML file */
-	private void printStationXmlBody(PrintWriter out) {
+	private void writeStationXmlBody(Writer w) throws IOException {
 		Iterator<Station> it = StationHelper.iterator();
 		while(it.hasNext()) {
 			Station s = it.next();
 			if(s instanceof StationImpl) {
 				StationImpl si = (StationImpl)s;
-				si.printStationXmlElement(out);
+				si.writeStationXmlElement(w);
 			}
 		}
 	}
 
 	/** Print the tail of the station sample XML file */
-	private void printStationXmlTail(PrintWriter out) {
-		out.println("</station_data>");
+	private void writeStationXmlTail(Writer w) throws IOException {
+		w.write("</station_data>\n");
 	}
 }

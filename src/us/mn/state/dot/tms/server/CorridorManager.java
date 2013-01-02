@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -128,12 +129,12 @@ public class CorridorManager {
 		return getCorridor(od.getCorridorName());
 	}
 
-	/** Print the body of the r_node configuration XML file */
-	public synchronized void printXmlBody(PrintWriter out,
-		Map<String, RampMeterImpl> m_nodes)
+	/** Write the body of the r_node configuration XML file */
+	public synchronized void writeXmlBody(Writer w,
+		Map<String, RampMeterImpl> m_nodes) throws IOException
 	{
 		for(Corridor c: corridors.values())
-			c.printXml(out, m_nodes);
+			c.writeXml(w, m_nodes);
 	}
 
 	/** Find the current bottlenecks for all corridors */

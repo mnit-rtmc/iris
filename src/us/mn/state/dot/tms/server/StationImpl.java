@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Map;
 import java.util.NavigableMap;
 import us.mn.state.dot.sched.DebugLog;
@@ -22,6 +23,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
 /**
  * A station is a group of related detectors.
@@ -388,45 +390,44 @@ public class StationImpl implements Station {
 		updateLowSpeed(low);
 	}
 
-	/** Print the current sample as an XML element */
-	public void printSampleXml(PrintWriter out) {
+	/** Write the current sample as an XML element */
+	public void writeSampleXml(Writer w) throws IOException {
 		if(!getActive())
 			return;
 		int f = getFlow();
 		int s = Math.round(getSpeed());
 		float o = occupancy;
-		out.print("\t<sample");
-		out.print(XmlWriter.createAttribute("sensor", name));
+		w.write("\t<sample");
+		w.write(createAttribute("sensor", name));
 		if(f > MISSING_DATA)
-			out.print(XmlWriter.createAttribute("flow", f));
+			w.write(createAttribute("flow", f));
 		if(s > 0)
-			out.print(XmlWriter.createAttribute("speed", s));
+			w.write(createAttribute("speed", s));
 		if(o >= 0) {
-			out.print(XmlWriter.createAttribute("occ",
+			w.write(createAttribute("occ",
 				BaseObjectImpl.formatFloat(o, 2)));
 		}
-		out.println("/>");
+		w.write("/>\n");
 	}
 
-	/** Print the current sample as an XML element.  This is used for the
+	/** Write the current sample as an XML element.  This is used for the
 	 * old station.xml file, which should be removed at some point.  */
-	public void printStationXmlElement(PrintWriter out) {
+	public void writeStationXmlElement(Writer w) throws IOException {
 		if(!getActive())
 			return;
 		String n = getIndex();
 		if(n.length() < 1)
 			return;
-		if(volume == MISSING_DATA) {
-			out.println("\t<station id='" + n +
-				"' status='fail'/>");
-		} else {
-			out.println("\t<station id='" + n + "' status='ok'>");
-			out.println("\t\t<volume>" + volume + "</volume>");
-			out.println("\t\t<occupancy>" + occupancy +
-				"</occupancy>");
-			out.println("\t\t<flow>" + flow + "</flow>");
-			out.println("\t\t<speed>" + speed + "</speed>");
-			out.println("\t</station>");
+		if(volume == MISSING_DATA)
+			w.write("\t<station id='" + n + "' status='fail'/>\n");
+		else {
+			w.write("\t<station id='" + n + "' status='ok'>\n");
+			w.write("\t\t<volume>" + volume + "</volume>\n");
+			w.write("\t\t<occupancy>" + occupancy +
+				"</occupancy>\n");
+			w.write("\t\t<flow>" + flow + "</flow>\n");
+			w.write("\t\t<speed>" + speed + "</speed>\n");
+			w.write("\t</station>\n");
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
@@ -885,29 +886,29 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return false;
 	}
 
-	/** Print the controller as an XML element */
-	public void printXml(PrintWriter out) {
-		out.print("<controller");
-		out.print(XmlWriter.createAttribute("name", getName()));
-		out.print(XmlWriter.createAttribute("active", getActive()));
-		out.print(XmlWriter.createAttribute("drop", getDrop()));
+	/** Write the controller as an XML element */
+	public void writeXml(Writer w) throws IOException {
+		w.write("<controller");
+		w.write(createAttribute("name", getName()));
+		w.write(createAttribute("active", getActive()));
+		w.write(createAttribute("drop", getDrop()));
 		CommLink cl = getCommLink();
 		if(cl != null)
-			out.print(XmlWriter.createAttribute("commlink", cl.getName()));
+			w.write(createAttribute("commlink", cl.getName()));
 		Position pos = ControllerHelper.getPosition(this);
 		if(pos != null) {
-			out.print(XmlWriter.createAttribute("lon",
+			w.write(createAttribute("lon",
 				formatDouble(pos.getLongitude())));
-			out.print(XmlWriter.createAttribute("lat",
+			w.write(createAttribute("lat",
 				formatDouble(pos.getLatitude())));
 		}
-		out.print(XmlWriter.createAttribute("location", 
+		w.write(createAttribute("location", 
 			ControllerHelper.getLocation(this)));
 		Cabinet cab = getCabinet();
 		if(cab != null && cab.toString().length() > 0)
-			out.print(XmlWriter.createAttribute("cabinet", getCabinet()));
+			w.write(createAttribute("cabinet", getCabinet()));
 		if(getNotes().length() > 0)
-			out.print(XmlWriter.createAttribute("notes", getNotes()));
-		out.println("/>");
+			w.write(createAttribute("notes", getNotes()));
+		w.write("/>\n");
 	}
 }

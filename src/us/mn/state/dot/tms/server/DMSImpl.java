@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -17,7 +17,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,6 +57,7 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
@@ -1625,31 +1626,29 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return KmlColorImpl.Black;
 	}
 
-	/** Print DMS as an XML element */
-	public void printXml(PrintWriter out) {
-		out.print("<dms");
-		out.print(XmlWriter.createAttribute("name", getName()));
-		out.print(XmlWriter.createAttribute("description",
+	/** Write DMS as an XML element */
+	public void writeXml(Writer w) throws IOException {
+		w.write("<dms");
+		w.write(createAttribute("name", getName()));
+		w.write(createAttribute("description",
 			GeoLocHelper.getDescription(geo_loc)));
 		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
 		if(pos != null) {
-			out.print(XmlWriter.createAttribute("lon",
+			w.write(createAttribute("lon",
 				formatDouble(pos.getLongitude())));
-			out.print(XmlWriter.createAttribute("lat",
+			w.write(createAttribute("lat",
 				formatDouble(pos.getLatitude())));
 		}
-		out.print(XmlWriter.createAttribute("width_pixels",
-			getWidthPixels()));
-		out.print(XmlWriter.createAttribute("height_pixels",
-			getHeightPixels()));
-		out.println("/>");
+		w.write(createAttribute("width_pixels", getWidthPixels()));
+		w.write(createAttribute("height_pixels", getHeightPixels()));
+		w.write("/>\n");
 	}
 
-	/** Render the sign message as xml */
-	public void printSignMessageXml(PrintWriter out) {
+	/** Write the sign message as xml */
+	public void writeSignMessageXml(Writer w) throws IOException {
 		SignMessage msg = getMessageCurrent();
 		if(msg instanceof SignMessageImpl)
-			((SignMessageImpl)msg).printXml(out, this);
+			((SignMessageImpl)msg).writeXml(w, this);
 	}
 
 	/** Check if the sign is an active dialup sign */

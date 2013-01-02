@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,8 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DMS;
@@ -38,57 +39,50 @@ public class SignMessageXmlWriter extends XmlWriter {
 		super(SIGN_MESSAGE_XML, true);
 	}
 
-	/** Print the sign message XML file */
-	public void print(final PrintWriter out) {
-		printHead(out);
-		printBody(out);
-		printTail(out);
+	/** Write the sign message XML file */
+	@Override protected void write(Writer w) throws IOException {
+		writeHead(w);
+		writeBody(w);
+		writeTail(w);
 	}
 
-	/** Print the head of the sign message XML file */
-	private void printHead(PrintWriter out) {
-		out.println(XML_DECLARATION);
-		printDtd(out);
-		out.println("<sign_messages time_stamp='" +
-			TimeSteward.getDateInstance() + "'>");
+	/** Write the head of the sign message XML file */
+	private void writeHead(Writer w) throws IOException {
+		w.write(XML_DECLARATION);
+		writeDtd(w);
+		w.write("<sign_messages time_stamp='" +
+			TimeSteward.getDateInstance() + "'>\n");
 	}
 
-	/** Print the DTD */
-	private void printDtd(PrintWriter out) {
-		out.println("<!DOCTYPE sign_messages [");
-		out.println("<!ELEMENT sign_messages (sign_message)*>");
-		out.println("<!ATTLIST sign_messages time_stamp " +
-			"CDATA #REQUIRED>");
-		out.println("<!ELEMENT sign_message EMPTY>");
-		out.println("<!ATTLIST sign_message dms CDATA #REQUIRED>");
-		out.println("<!ATTLIST sign_message status CDATA #REQUIRED>");
-		out.println("<!ATTLIST sign_message run_priority " + 
-			"CDATA #IMPLIED>");
-		out.println("<!ATTLIST sign_message act_priority " + 
-			"CDATA #IMPLIED>");
-		out.println("<!ATTLIST sign_message scheduled " + 
-			"CDATA #IMPLIED>");
-		out.println("<!ATTLIST sign_message duration " + 
-			"CDATA #IMPLIED>");
-		out.println("<!ATTLIST sign_message multi " + 
-			"CDATA #REQUIRED>");
-		out.println("<!ATTLIST sign_message bitmaps " + 
-			"CDATA #IMPLIED>");
-		out.println("]>");
+	/** Write the DTD */
+	private void writeDtd(Writer w) throws IOException {
+		w.write("<!DOCTYPE sign_messages [\n");
+		w.write("<!ELEMENT sign_messages (sign_message)*>\n");
+		w.write("<!ATTLIST sign_messages time_stamp CDATA #REQUIRED>\n");
+		w.write("<!ELEMENT sign_message EMPTY>\n");
+		w.write("<!ATTLIST sign_message dms CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST sign_message status CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST sign_message run_priority CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST sign_message act_priority CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST sign_message scheduled CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST sign_message duration CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST sign_message multi CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST sign_message bitmaps CDATA #IMPLIED>\n");
+		w.write("]>\n");
 	}
 
-	/** Print the body of the sign message XML file */
-	private void printBody(final PrintWriter out) {
+	/** Write the body of the sign message XML file */
+	private void writeBody(Writer w) throws IOException {
 		Iterator<DMS> it = DMSHelper.iterator();
 		while(it.hasNext()) {
 			DMS dms = it.next();
 			if(dms instanceof DMSImpl)
-				((DMSImpl)dms).printSignMessageXml(out);
+				((DMSImpl)dms).writeSignMessageXml(w);
 		}
 	}
 
-	/** Print the tail of the sign message XML file */
-	private void printTail(PrintWriter out) {
-		out.println("</sign_messages>");
+	/** Write the tail of the sign message XML file */
+	private void writeTail(Writer w) throws IOException {
+		w.write("</sign_messages>\n");
 	}
 }

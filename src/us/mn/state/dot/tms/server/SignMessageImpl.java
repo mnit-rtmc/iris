@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
 /**
  * A sign message represents a message which can be displayed on a dynamic
@@ -189,23 +190,18 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return duration;
 	}
 
-	/** Render the SignMessage object as xml */
-	public void printXml(PrintWriter out, DMSImpl dms) {
-		out.print("<sign_message");
-		out.print(XmlWriter.createAttribute("dms", dms.getName()));
-		out.print(XmlWriter.createAttribute("status",
-			DMSHelper.getAllStyles(dms)));
-		out.print(XmlWriter.createAttribute("run_priority", 
-			getRunTimePriority()));
-		out.print(XmlWriter.createAttribute("act_priority", 
+	/** Write the SignMessage object as xml */
+	public void writeXml(Writer w, DMSImpl dms) throws IOException {
+		w.write("<sign_message");
+		w.write(createAttribute("dms", dms.getName()));
+		w.write(createAttribute("status", DMSHelper.getAllStyles(dms)));
+		w.write(createAttribute("run_priority", getRunTimePriority()));
+		w.write(createAttribute("act_priority", 
 			getActivationPriority()));
-		out.print(XmlWriter.createAttribute("scheduled", 
-			getScheduled()));
-		out.print(XmlWriter.createAttribute("duration", 
-			getDuration()));
-		out.print(XmlWriter.createAttribute("multi", multi));
-		out.print(XmlWriter.createAttribute("bitmaps", 
-			getBitmaps()));
-		out.println("/>");
+		w.write(createAttribute("scheduled", getScheduled()));
+		w.write(createAttribute("duration", getDuration()));
+		w.write(createAttribute("multi", multi));
+		w.write(createAttribute("bitmaps", getBitmaps()));
+		w.write("/>\n");
 	}
 }

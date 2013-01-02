@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 
 /**
@@ -338,13 +339,13 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return p != null && p.isAlive();
 	}
 
-	/** Print the comm link as an XML element */
-	public void printXml(PrintWriter out) {
-		out.print("<commlink");
-		out.print(XmlWriter.createAttribute("name", getName()));
-		out.print(XmlWriter.createAttribute("description", getDescription()));
+	/** Write the comm link as an XML element */
+	public void writeXml(Writer w) throws IOException {
+		w.write("<commlink");
+		w.write(createAttribute("name", getName()));
+		w.write(createAttribute("description", getDescription()));
 		String p = CommProtocol.fromOrdinal(getProtocol()).toString();
-		out.print(XmlWriter.createAttribute("protocol", p));
-		out.println("/>");
+		w.write(createAttribute("protocol", p));
+		w.write("/>\n");
 	}
 }

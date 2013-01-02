@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
 /**
  * An incident is an event (crash, stall, etc.) which has an effect on traffic.
@@ -291,41 +293,39 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		return clear_time;
 	}
 
-	/** Render the incident as xml */
-	public void printXml(PrintWriter out) {
+	/** Write the incident as xml */
+	public void writeXml(Writer w) throws IOException {
 		String dtl = lookupDetail();
 		String loc = lookupLocation();
-		out.print("<incident");
-		out.print(XmlWriter.createAttribute("name", getName()));
-		if(replaces != null) {
-			out.print(XmlWriter.createAttribute("replaces",
-				replaces));
-		}
-		out.print(XmlWriter.createAttribute("event_type",
+		w.write("<incident");
+		w.write(createAttribute("name", getName()));
+		if(replaces != null)
+			w.write(createAttribute("replaces", replaces));
+		w.write(createAttribute("event_type",
 			EventType.fromId(event_desc_id)));
-		out.print(XmlWriter.createAttribute("event_date", event_date));
+		w.write(createAttribute("event_date", event_date));
 		if(dtl != null)
-			out.print(XmlWriter.createAttribute("detail", dtl));
-		out.print(XmlWriter.createAttribute("lane_type",
+			w.write(createAttribute("detail", dtl));
+		w.write(createAttribute("lane_type",
 			LaneType.fromOrdinal(lane_type)));
-		out.print(XmlWriter.createAttribute("road", road));
-		out.print(XmlWriter.createAttribute("dir",
+		w.write(createAttribute("road", road));
+		w.write(createAttribute("dir",
 			Direction.fromOrdinal(dir).abbrev));
 		if(loc != null)
-			out.print(XmlWriter.createAttribute("location", loc));
+			w.write(createAttribute("location", loc));
 		Position pos = getWgs84Position();
-		out.print(XmlWriter.createAttribute("lon",
+		w.write(createAttribute("lon",
 			formatDouble(pos.getLongitude())));
-		out.print(XmlWriter.createAttribute("lat",
+		w.write(createAttribute("lat",
 			formatDouble(pos.getLatitude())));
-		out.print(XmlWriter.createAttribute("camera", camera));
-		out.print(XmlWriter.createAttribute("impact", impact));
-		out.print(XmlWriter.createAttribute("cleared", cleared));
-		out.println("/>");
+		w.write(createAttribute("camera", camera));
+		w.write(createAttribute("impact", impact));
+		w.write(createAttribute("cleared", cleared));
+		w.write("/>\n");
 	}
 
 	/** Lookup the detail description */
-	protected String lookupDetail() {
+	private String lookupDetail() {
 		IncidentDetail dtl = detail;
 		if(dtl != null)
 			return dtl.getDescription();
@@ -334,7 +334,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Lookup the incident location */
-	protected String lookupLocation() {
+	private String lookupLocation() {
 		Corridor cor = corridors.getCorridor(
 			GeoLocHelper.getCorridorName(road, dir));
 		if(cor == null)

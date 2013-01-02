@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -31,6 +32,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
 /**
  * R_NodeImpl is an implementation of the R_Node interface. Each
@@ -570,73 +572,73 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return corridors.getCorridor(c);
 	}
 
-	/** Print the r_node as an XML element */
-	public void printXml(PrintWriter out,
-		Map<String, RampMeterImpl> m_nodes)
+	/** Write the r_node as an XML element */
+	public void writeXml(Writer w, Map<String, RampMeterImpl> m_nodes)
+		throws IOException
 	{
-		out.print("  <r_node");
-		out.print(XmlWriter.createAttribute("name", name));
+		w.write("  <r_node");
+		w.write(createAttribute("name", name));
 		if(node_type != R_NodeType.STATION)
-			out.print(" n_type='" + node_type.description + "'");
+			w.write(" n_type='" + node_type.description + "'");
 		if(pickable)
-			out.print(" pickable='t'");
+			w.write(" pickable='t'");
 		if(above)
-			out.print(" above='t'");
+			w.write(" above='t'");
 		if(transition != R_NodeTransition.NONE)
-			out.print(" transition='" + transition.description+"'");
+			w.write(" transition='" + transition.description+"'");
 		String sid = station_id;
 		if(sid != null)
-			out.print(XmlWriter.createAttribute("station_id", sid));
+			w.write(createAttribute("station_id", sid));
 		GeoLoc loc = geo_loc;
 		if(loc != null) {
 			String mod = GeoLocHelper.getModifier(loc);
 			if(loc.getCrossMod() == 0)
 				mod = "";
 			String lbl = GeoLocHelper.getCrossDescription(loc, mod);
-			out.print(XmlWriter.createAttribute("label", lbl));
+			w.write(createAttribute("label", lbl));
 			Position pos = GeoLocHelper.getWgs84Position(loc);
 			if(pos != null) {
-				out.print(XmlWriter.createAttribute("lon",
+				w.write(createAttribute("lon",
 					formatDouble(pos.getLongitude())));
-				out.print(XmlWriter.createAttribute("lat",
+				w.write(createAttribute("lat",
 					formatDouble(pos.getLatitude())));
 			}
 		}
 		int l = getLanes();
 		if(l != 0)
-			out.print(" lanes='" + l + "'");
+			w.write(" lanes='" + l + "'");
 		if(getAttachSide())
-			out.print(" attach_side='left'");
+			w.write(" attach_side='left'");
 		int s = getShift();
 		if(s != 0)
-			out.print(" shift='" + s + "'");
+			w.write(" shift='" + s + "'");
 		if(!getActive())
-			out.print(" active='f'");
+			w.write(" active='f'");
 		int slim = getSpeedLimit();
 		if(slim != DEFAULT_SPEED_LIMIT)
-			out.print(" s_limit='" + slim + "'");
+			w.write(" s_limit='" + slim + "'");
 		List<R_NodeImpl> forks = getForks();
 		if(forks.size() > 0) {
-			out.print(" forks='");
+			w.write(" forks='");
 			StringBuilder b = new StringBuilder();
 			for(R_NodeImpl f: forks)
 				b.append(f.getName() + " ");
-			out.print(b.toString().trim() + "'");
+			w.write(b.toString().trim() + "'");
 		}
 		DetectorImpl[] dets = detectors.toArray();
 		if(dets.length > 0 || m_nodes.containsKey(name)) {
-			out.println(">");
+			w.write(">\n");
 			for(DetectorImpl det: dets) {
-				out.print("    ");
-				det.printXmlElement(out);
+				w.write("    ");
+				det.writeXmlElement(w);
 			}
 			if(m_nodes.containsKey(name)) {
 				RampMeterImpl meter = m_nodes.get(name);
-				out.print("    ");
-				meter.printXml(out);
+				w.write("    ");
+				meter.writeXml(w);
 			}
-			out.println("  </r_node>");
+			w.write("  </r_node>\n");
 		} else
-			out.println("/>");
+			w.write("/>\n");
 	}
 }

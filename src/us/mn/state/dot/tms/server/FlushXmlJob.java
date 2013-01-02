@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
@@ -57,53 +57,55 @@ public class FlushXmlJob extends Job {
 	/** Write the sample data out as XML */
 	private void writeSampleXml() throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
-			public void print(PrintWriter out) {
-				printSampleXmlHead(out);
-				printSampleXmlBody(out);
-				printSampleXmlTail(out);
+			@Override protected void write(Writer w)
+				throws IOException
+			{
+				writeSampleXmlHead(w);
+				writeSampleXmlBody(w);
+				writeSampleXmlTail(w);
 			}
 		};
 		w.write();
 	}
 
-	/** Print the header of the detector sample XML file */
-	private void printSampleXmlHead(PrintWriter out) {
-		out.println(XmlWriter.XML_DECLARATION);
-		printDtd(out);
-		out.println("<traffic_sample time_stamp='" +
-			TimeSteward.getDateInstance() + "' period='30'>");
+	/** Write the header of the detector sample XML file */
+	private void writeSampleXmlHead(Writer w) throws IOException {
+		w.write(XmlWriter.XML_DECLARATION);
+		writeDtd(w);
+		w.write("<traffic_sample time_stamp='" +
+			TimeSteward.getDateInstance() + "' period='30'>\n");
 	}
 
-	/** Print the DTD */
-	private void printDtd(PrintWriter out) {
-		out.println("<!DOCTYPE traffic_sample [");
-		out.println("<!ELEMENT traffic_sample (sample)*>");
-		out.println("<!ATTLIST traffic_sample time_stamp " +
-			"CDATA #REQUIRED>");
-		out.println("<!ATTLIST traffic_sample period CDATA #REQUIRED>");
-		out.println("<!ELEMENT sample EMPTY>");
-		out.println("<!ATTLIST sample sensor CDATA #REQUIRED>");
-		out.println("<!ATTLIST sample flow CDATA 'UNKNOWN'>");
-		out.println("<!ATTLIST sample speed CDATA 'UNKNOWN'>");
-		out.println("<!ATTLIST sample occ CDATA 'UNKNOWN'>");
-		out.println("]>");
+	/** Write the DTD */
+	private void writeDtd(Writer w) throws IOException {
+		w.write("<!DOCTYPE traffic_sample [\n");
+		w.write("<!ELEMENT traffic_sample (sample)*>\n");
+		w.write("<!ATTLIST traffic_sample time_stamp " +
+			"CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST traffic_sample period CDATA #REQUIRED>\n");
+		w.write("<!ELEMENT sample EMPTY>\n");
+		w.write("<!ATTLIST sample sensor CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST sample flow CDATA 'UNKNOWN'>\n");
+		w.write("<!ATTLIST sample speed CDATA 'UNKNOWN'>\n");
+		w.write("<!ATTLIST sample occ CDATA 'UNKNOWN'>\n");
+		w.write("]>\n");
 	}
 
-	/** Print the body of the detector sample XML file */
-	private void printSampleXmlBody(final PrintWriter out) {
+	/** Write the body of the detector sample XML file */
+	private void writeSampleXmlBody(Writer w) throws IOException {
 		Iterator<Detector> it = DetectorHelper.iterator();
 		while(it.hasNext()) {
 			Detector d = it.next();
 			if(d instanceof DetectorImpl) {
 				DetectorImpl det = (DetectorImpl)d;
 				det.calculateFakeData();
-				det.printSampleXml(out);
+				det.writeSampleXml(w);
 			}
 		}
 	}
 
-	/** Print the tail of the detector sample XML file */
-	private void printSampleXmlTail(PrintWriter out) {
-		out.println("</traffic_sample>");
+	/** Write the tail of the detector sample XML file */
+	private void writeSampleXmlTail(Writer w) throws IOException {
+		w.write("</traffic_sample>\n");
 	}
 }

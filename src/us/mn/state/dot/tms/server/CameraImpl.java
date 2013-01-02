@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,6 +31,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 
@@ -287,18 +289,18 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Print camera as an XML element */
-	public void printXml(PrintWriter out) {
-		out.print("<camera");
-		out.print(XmlWriter.createAttribute("name", getName()));
-		out.print(XmlWriter.createAttribute("description",
+	public void writeXml(Writer w) throws IOException {
+		w.write("<camera");
+		w.write(createAttribute("name", getName()));
+		w.write(createAttribute("description",
 			GeoLocHelper.getDescription(geo_loc)));
 		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
 		if(pos != null) {
-			out.print(XmlWriter.createAttribute("lon",
+			w.write(createAttribute("lon",
 				formatDouble(pos.getLongitude())));
-			out.print(XmlWriter.createAttribute("lat",
+			w.write(createAttribute("lat",
 				formatDouble(pos.getLatitude())));
 		}
-		out.println("/>");
+		w.write("/>\n");
 	}
 }

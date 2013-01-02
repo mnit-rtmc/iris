@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Date;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
@@ -29,64 +30,64 @@ import us.mn.state.dot.tms.IncidentHelper;
 public class IncidentXmlWriter extends XmlWriter {
 
 	/** Incident XML file */
-	static protected final String XML_FILE = "incident.xml";
+	static private final String XML_FILE = "incident.xml";
 
 	/** Create a new incident XML writer */
 	public IncidentXmlWriter() {
 		super(XML_FILE, true);
 	}
 
-	/** Print the incident XML file */
-	public void print(final PrintWriter out) {
-		printHead(out);
-		printBody(out);
-		printTail(out);
+	/** Write the incident XML file */
+	@Override protected void write(Writer w) throws IOException {
+		writeHead(w);
+		writeBody(w);
+		writeTail(w);
 	}
 
-	/** Print the head of the incident XML file */
-	protected void printHead(PrintWriter out) {
-		out.println(XML_DECLARATION);
-		printDtd(out);
-		out.println("<active_incidents time_stamp='" +
-			TimeSteward.getDateInstance() + "'>");
+	/** Write the head of the incident XML file */
+	private void writeHead(Writer w) throws IOException {
+		w.write(XML_DECLARATION);
+		writeDtd(w);
+		w.write("<active_incidents time_stamp='" +
+			TimeSteward.getDateInstance() + "'>\n");
 	}
 
-	/** Print the DTD */
-	protected void printDtd(PrintWriter out) {
-		out.println("<!DOCTYPE active_incidents [");
-		out.println("<!ELEMENT active_incidents (incident)*>");
-		out.println("<!ATTLIST active_incidents time_stamp " +
-			"CDATA #REQUIRED>");
-		out.println("<!ELEMENT incident EMPTY>");
-		out.println("<!ATTLIST incident name CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident replaces CDATA #IMPLIED>");
-		out.println("<!ATTLIST incident event_type CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident event_date CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident detail CDATA #IMPLIED>");
-		out.println("<!ATTLIST incident lane_type CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident road CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident dir CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident location CDATA #IMPLIED>");
-		out.println("<!ATTLIST incident lon CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident lat CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident camera CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident impact CDATA #REQUIRED>");
-		out.println("<!ATTLIST incident cleared CDATA #REQUIRED>");
-		out.println("]>");
+	/** Write the DTD */
+	private void writeDtd(Writer w) throws IOException {
+		w.write("<!DOCTYPE active_incidents [\n");
+		w.write("<!ELEMENT active_incidents (incident)*>\n");
+		w.write("<!ATTLIST active_incidents time_stamp " +
+			"CDATA #REQUIRED>\n");
+		w.write("<!ELEMENT incident EMPTY>\n");
+		w.write("<!ATTLIST incident name CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident replaces CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST incident event_type CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident event_date CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident detail CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST incident lane_type CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident road CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident dir CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident location CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST incident lon CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident lat CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident camera CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident impact CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident cleared CDATA #REQUIRED>\n");
+		w.write("]>\n");
 	}
 
-	/** Print the body of the incident XML file */
-	protected void printBody(final PrintWriter out) {
+	/** Write the body of the incident XML file */
+	private void writeBody(Writer w) throws IOException {
 		Iterator<Incident> it = IncidentHelper.iterator();
 		while(it.hasNext()) {
 			Incident inc = it.next();
 			if(inc instanceof IncidentImpl)
-				((IncidentImpl)inc).printXml(out);
+				((IncidentImpl)inc).writeXml(w);
 		}
 	}
 
-	/** Print the tail of the incident XML file */
-	protected void printTail(PrintWriter out) {
-		out.println("</active_incidents>");
+	/** Write the tail of the incident XML file */
+	private void writeTail(Writer w) throws IOException {
+		w.write("</active_incidents>\n");
 	}
 }

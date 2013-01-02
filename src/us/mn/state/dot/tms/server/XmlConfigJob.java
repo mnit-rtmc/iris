@@ -43,8 +43,9 @@ public class XmlConfigJob extends Job {
 
 	/** Write the TMS xml configuration files */
 	private void writeXmlConfiguration() throws IOException {
-		BaseObjectImpl.corridors.createCorridors();
-		TmsConfigXmlWriter xml_writer = new TmsConfigXmlWriter();
+		CorridorManager cm = BaseObjectImpl.corridors;
+		cm.createCorridors();
+		TmsConfigXmlWriter xml_writer = new TmsConfigXmlWriter(cm);
 		xml_writer.write();
 	}
 }
