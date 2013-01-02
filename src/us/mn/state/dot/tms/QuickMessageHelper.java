@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for quick messages.
@@ -35,29 +34,25 @@ public class QuickMessageHelper extends BaseHelper {
 			QuickMessage.SONAR_TYPE, name);
 	}
 
-	/** Find a quick message using a Checker */
-	static public QuickMessage find(Checker<QuickMessage> checker) {
-		return (QuickMessage)namespace.findObject(
-			QuickMessage.SONAR_TYPE, checker);
+	/** Get a quick message iterator */
+	static public Iterator<QuickMessage> iterator() {
+		return new IteratorWrapper<QuickMessage>(namespace.iterator(
+			QuickMessage.SONAR_TYPE));
 	}
 
 	/** Find a quick message with the specified MULTI string.
 	 * @param ms MULTI string.
 	 * @return A matching quick message or null if no match is found. */
-	static public QuickMessage find(final String ms) {
-		if(ms == null)
-			return null;
-		final MultiString multi = new MultiString(ms);
-		return find(new Checker<QuickMessage>() {
-			public boolean check(QuickMessage qm) {
-				return multi.equals(qm.getMulti());
+	static public QuickMessage find(String ms) {
+		if(ms != null) {
+			MultiString multi = new MultiString(ms);
+			Iterator<QuickMessage> it = iterator();
+			while(it.hasNext()) {
+				QuickMessage qm = it.next();
+				if(multi.equals(qm.getMulti()))
+					return qm;
 			}
-		});
-	}
-
-	/** Get a quick message iterator */
-	static public Iterator<QuickMessage> iterator() {
-		return new IteratorWrapper<QuickMessage>(namespace.iterator(
-			QuickMessage.SONAR_TYPE));
+		}
+		return null;
 	}
 }

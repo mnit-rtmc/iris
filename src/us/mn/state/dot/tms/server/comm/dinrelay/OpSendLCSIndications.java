@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.LCSIndicationHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -105,15 +105,16 @@ public class OpSendLCSIndications extends OpLCS {
 	/** Get the outlet command state for one controller.
 	 * @param c Controller being updated.
 	 * @return outlets Outlet state to command for controller. */
-	private boolean[] getOutlets(final ControllerImpl c) {
-		final boolean[] outlets = new boolean[8];
-		lcs_array.findIndications(new Checker<LCSIndication>() {
-			public boolean check(LCSIndication li) {
+	private boolean[] getOutlets(ControllerImpl c) {
+		boolean[] outlets = new boolean[8];
+		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
+		while(it.hasNext()) {
+			LCSIndication li = it.next();
+			if(li.getLcs().getArray() == lcs_array) {
 				if(li.getController() == c)
 					updateIndication(li, outlets);
-				return false;
 			}
-		});
+		}
 		return outlets;
 	}
 

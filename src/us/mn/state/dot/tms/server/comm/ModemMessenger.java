@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.SocketTimeoutException;
+import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.ModemHelper;
 import us.mn.state.dot.tms.ModemState;
@@ -40,19 +40,16 @@ public class ModemMessenger extends Messenger {
 
 	/** Get the first available modem */
 	static public ModemImpl getModem() {
-		Modem mdm = ModemHelper.find(new Checker<Modem>() {
-			public boolean check(Modem m) {
-				if(m instanceof ModemImpl) {
-					ModemImpl mdm = (ModemImpl)m;
-					return mdm.acquire();
-				} else
-					return false;
+		Iterator<Modem> it = ModemHelper.iterator();
+		while(it.hasNext()) {
+			Modem m = it.next();
+			if(m instanceof ModemImpl) {
+				ModemImpl mdm = (ModemImpl)m;
+				if(mdm.acquire())
+					return mdm;
 			}
-		});
-		if(mdm instanceof ModemImpl)
-			return (ModemImpl)mdm;
-		else
-			return null;
+		}
+		return null;
 	}
 
 	/** Wrapped messenger */

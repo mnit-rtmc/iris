@@ -14,13 +14,10 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -56,30 +53,35 @@ public class SendSettingsJob extends Job {
 	}
 
 	/** Send settings to all controllers */
-	protected void sendSettings() {
-		ControllerHelper.find(new Checker<Controller>() {
-			public boolean check(Controller c) {
-				c.setDownload(false);
-				return false;
-			}
-		});
-		final int req = DeviceRequest.SEND_SETTINGS.ordinal();
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				dms.setDeviceRequest(req);
-				dms.setDeviceRequest(DeviceRequest.
-					QUERY_PIXEL_FAILURES.ordinal());
-				return false;
-			}
-		});
-		LCSArrayHelper.find(new Checker<LCSArray>() {
-			public boolean check(LCSArray lcs_array) {
-				lcs_array.setDeviceRequest(req);
-				return false;
-			}
-		});
+	private void sendSettings() {
+		Iterator<Controller> it = ControllerHelper.iterator();
+		while(it.hasNext()) {
+			Controller c = it.next();
+			c.setDownload(false);
+		}
+		requestDMS(DeviceRequest.SEND_SETTINGS);
+		requestDMS(DeviceRequest.QUERY_PIXEL_FAILURES);
+		requestLCS(DeviceRequest.SEND_SETTINGS);
 		requestRampMeters(DeviceRequest.SEND_SETTINGS);
 		requestWarningSigns(DeviceRequest.SEND_SETTINGS);
+	}
+
+	/** Send a request to all DMS */
+	private void requestDMS(DeviceRequest req) {
+		Iterator<DMS> it = DMSHelper.iterator();
+		while(it.hasNext()) {
+			DMS dms = it.next();
+			dms.setDeviceRequest(req.ordinal());
+		}
+	}
+
+	/** Send a request to all LCS */
+	private void requestLCS(DeviceRequest req) {
+		Iterator<LCSArray> it = LCSArrayHelper.iterator();
+		while(it.hasNext()) {
+			LCSArray lcs_array = it.next();
+			lcs_array.setDeviceRequest(req.ordinal());
+		}
 	}
 
 	/** Send a request to all ramp meters */

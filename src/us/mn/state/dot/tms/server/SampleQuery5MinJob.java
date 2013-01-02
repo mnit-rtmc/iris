@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -62,18 +62,17 @@ public class SampleQuery5MinJob extends Job {
 	}
 
 	/** Poll all controllers 5 minute interval */
-	protected void querySample5Min() {
-		ControllerHelper.find(new Checker<Controller>() {
-			public boolean check(Controller c) {
-				if(c instanceof ControllerImpl)
-					querySample5Min((ControllerImpl)c);
-				return false;
-			}
-		});
+	private void querySample5Min() {
+		Iterator<Controller> it = ControllerHelper.iterator();
+		while(it.hasNext()) {
+			Controller c = it.next();
+			if(c instanceof ControllerImpl)
+				querySample5Min((ControllerImpl)c);
+		}
 	}
 
 	/** Query 5-minute sample data from one controller */
-	protected void querySample5Min(ControllerImpl c) {
+	private void querySample5Min(ControllerImpl c) {
 		if(c.hasActiveDetector()) {
 			MessagePoller p = c.getPoller();
 			if(p instanceof SamplePoller) {

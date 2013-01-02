@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 
 /**
  * Helper for modems.
@@ -28,8 +28,9 @@ public class ModemHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find a modem using a Checker */
-	static public Modem find(final Checker<Modem> checker) {
-		return (Modem)namespace.findObject(Modem.SONAR_TYPE, checker);
+	/** Get a modem iterator */
+	static public Iterator<Modem> iterator() {
+		return new IteratorWrapper<Modem>(namespace.iterator(
+			Modem.SONAR_TYPE));
 	}
 }

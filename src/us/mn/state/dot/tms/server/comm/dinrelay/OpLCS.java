@@ -15,14 +15,15 @@
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.LCSIndicationHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -67,16 +68,16 @@ abstract public class OpLCS extends OpDevice<DinRelayProperty> {
 
 	/** Lookup the set of controllers for an LCS array */
 	private Set<ControllerImpl> lookupControllers() {
-		final HashSet<ControllerImpl> set =
-			new HashSet<ControllerImpl>();
-		lcs_array.findIndications(new Checker<LCSIndication>() {
-			public boolean check(LCSIndication li) {
+		HashSet<ControllerImpl> set = new HashSet<ControllerImpl>();
+		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
+		while(it.hasNext()) {
+			LCSIndication li = it.next();
+			if(li.getLcs().getArray() == lcs_array) {
 				Controller c = li.getController();
 				if(c instanceof ControllerImpl)
 					set.add((ControllerImpl)c);
-				return false;
 			}
-		});
+		}
 		return set;
 	}
 }

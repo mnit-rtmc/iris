@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.LinkedList;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
@@ -95,32 +95,26 @@ public class OpSendMeterSettings extends OpDevice {
 	}
 
 	/** Update the timing table with active timing plans */
-	protected void updateTimingTable() {
-		final LinkedList<MeterAction> act =
-			new LinkedList<MeterAction>();
-		MeterActionHelper.find(new Checker<MeterAction>() {
-			public boolean check(MeterAction ma) {
-				if(ma.getRampMeter() == meter)
-				   act.add(ma);
-				return false;
-			}
-		});
-		for(MeterAction ma: act) {
-			if(ma.getActionPlan().getActive())
-				updateTable(ma);
+	private void updateTimingTable() {
+		Iterator<MeterAction> it = MeterActionHelper.iterator();
+		while(it.hasNext()) {
+			MeterAction ma = it.next();
+			if(ma.getRampMeter() == meter)
+			   updateTable(ma);
 		}
 	}
 
 	/** Update one timing table with a meter action */
-	protected void updateTable(final MeterAction ma) {
-		final ActionPlan ap = ma.getActionPlan();
-		TimeActionHelper.find(new Checker<TimeAction>() {
-			public boolean check(TimeAction ta) {
+	private void updateTable(MeterAction ma) {
+		ActionPlan ap = ma.getActionPlan();
+		if(ap.getActive()) {
+			Iterator<TimeAction> it = TimeActionHelper.iterator();
+			while(it.hasNext()) {
+				TimeAction ta = it.next();
 				if(ta.getActionPlan() == ap)
 					updateTable(ma, ta);
-				return false;
 			}
-		});
+		}
 	}
 
 	/** Update one timing table with a time action */

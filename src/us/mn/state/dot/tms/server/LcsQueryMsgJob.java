@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 public class LcsQueryMsgJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static protected final int OFFSET_SECS = 19;
+	static private final int OFFSET_SECS = 19;
 
 	/** Create a new job to query LCS messages */
 	public LcsQueryMsgJob(int i_secs) {
@@ -38,12 +38,11 @@ public class LcsQueryMsgJob extends Job {
 
 	/** Perform the LCS query messages job */
 	public void perform() {
-		final int req = DeviceRequest.QUERY_MESSAGE.ordinal();
-		LCSArrayHelper.find(new Checker<LCSArray>() {
-			public boolean check(LCSArray lcs_array) {
-				lcs_array.setDeviceRequest(req);
-				return false;
-			}
-		});
+		int req = DeviceRequest.QUERY_MESSAGE.ordinal();
+		Iterator<LCSArray> it = LCSArrayHelper.iterator();
+		while(it.hasNext()) {
+			LCSArray lcs_array = it.next();
+			lcs_array.setDeviceRequest(req);
+		}
 	}
 }

@@ -19,12 +19,12 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
@@ -372,38 +372,32 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Get the minute for a matching time action */
-	private int getTimeActionMinute(final boolean start) {
-		final int period = currentPeriod();
-		final LinkedList<MeterAction> act = getMeterActions();
-		TimeAction t = TimeActionHelper.find(new Checker<TimeAction>() {
-			public boolean check(TimeAction ta) {
-				if(TimeActionHelper.getPeriod(ta) == period)
-					return checkTimeAction(ta, start, act);
-				else
-					return false;
+	private int getTimeActionMinute(boolean start) {
+		int period = currentPeriod();
+		LinkedList<MeterAction> act = getMeterActions();
+		Iterator<TimeAction> it = TimeActionHelper.iterator();
+		while(it.hasNext()) {
+			TimeAction ta = it.next();
+			if(TimeActionHelper.getPeriod(ta) == period) {
+				if(checkTimeAction(ta, start, act))
+					return TimeActionHelper.getMinute(ta);
 			}
-		});
-		if(t != null)
-			return TimeActionHelper.getMinute(t);
-		else
-			return TimeActionHelper.NOON;
+		}
+		return TimeActionHelper.NOON;
 	}
 
 	/** Get a list of all meter actions which control the meter */
 	private LinkedList<MeterAction> getMeterActions() {
-		final RampMeterImpl meter = this;
-		final LinkedList<MeterAction> act =
-			new LinkedList<MeterAction>();
-		MeterActionHelper.find(new Checker<MeterAction>() {
-			public boolean check(MeterAction ma) {
-				if(ma.getRampMeter() == meter) {
-					ActionPlan ap = ma.getActionPlan();
-					if(ap.getActive())
-						act.add(ma);
-				}
-				return false;
+		LinkedList<MeterAction> act = new LinkedList<MeterAction>();
+		Iterator<MeterAction> it = MeterActionHelper.iterator();
+		while(it.hasNext()) {
+			MeterAction ma = it.next();
+			if(ma.getRampMeter() == this) {
+				ActionPlan ap = ma.getActionPlan();
+				if(ap.getActive())
+					act.add(ma);
 			}
-		});
+		}
 		return act;
 	}
 

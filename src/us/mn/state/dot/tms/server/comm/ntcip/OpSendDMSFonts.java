@@ -22,7 +22,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Font;

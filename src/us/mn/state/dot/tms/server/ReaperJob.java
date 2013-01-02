@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
@@ -54,18 +53,17 @@ public class ReaperJob extends Job {
 	}
 
 	/** Reap incidents which have been cleared for awhile */
-	protected void reapIncidents() {
-		IncidentHelper.find(new Checker<Incident>() {
-			public boolean check(Incident inc) {
-				if(inc instanceof IncidentImpl)
-					reapIncident((IncidentImpl)inc);
-				return false;
-			}
-		});
+	private void reapIncidents() {
+		Iterator<Incident> it = IncidentHelper.iterator();
+		while(it.hasNext()) {
+			Incident inc = it.next();
+			if(inc instanceof IncidentImpl)
+				reapIncident((IncidentImpl)inc);
+		}
 	}
 
 	/** Reap an incident */
-	protected void reapIncident(IncidentImpl inc) {
+	private void reapIncident(IncidentImpl inc) {
 		if(inc.getCleared()) {
 			if(inc.getClearTime() + getIncidentClearThreshold() <
 			   TimeSteward.currentTimeMillis())
@@ -74,13 +72,13 @@ public class ReaperJob extends Job {
 	}
 
 	/** Get the incident clear time threshold (ms) */
-	protected long getIncidentClearThreshold() {
+	private long getIncidentClearThreshold() {
 		int secs = SystemAttrEnum.INCIDENT_CLEAR_SECS.getInt();
 		return secs * (long)1000;
 	}
 
 	/** Reap sign messages which have been unused for awhile */
-	protected void reapSignMessages() {
+	private void reapSignMessages() {
 		// NOTE: there is a small race where a client could send a
 		// message to a DMS just after isReferenced is called.  It can
 		// only happen during a very short window about one minute
@@ -103,14 +101,13 @@ public class ReaperJob extends Job {
 	}
 
 	/** Find all reapable sign messages */
-	protected void findReapableMessages() {
-		SignMessageHelper.find(new Checker<SignMessage>() {
-			public boolean check(SignMessage sm) {
-				reapable.add(sm);
-				return false;
-			}
-		});
-		Iterator<SignMessage> it = reapable.iterator();
+	private void findReapableMessages() {
+		Iterator<SignMessage> it = SignMessageHelper.iterator();
+		while(it.hasNext()) {
+			SignMessage sm = it.next();
+			reapable.add(sm);
+		}
+		it = reapable.iterator();
 		while(it.hasNext()) {
 			SignMessage sm = it.next();
 			if(isReferenced(sm))
@@ -119,14 +116,16 @@ public class ReaperJob extends Job {
 	}
 
 	/** Check if a sign message is referenced by any DMS */
-	protected boolean isReferenced(final SignMessage sm) {
-		return null != DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(dms instanceof DMSImpl)
-					return ((DMSImpl)dms).hasReference(sm);
-				else
-					return false;
+	private boolean isReferenced(SignMessage sm) {
+		Iterator<DMS> it = DMSHelper.iterator();
+		while(it.hasNext()) {
+			DMS dms = it.next();
+			if(dms instanceof DMSImpl) {
+				DMSImpl dmsi = (DMSImpl)dms;
+				if(dmsi.hasReference(sm))
+					return true;
 			}
-		});
+		}
+		return false;
 	}
 }

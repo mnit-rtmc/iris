@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -31,7 +31,7 @@ public class MsgFeedQueryJob extends Job {
 
 	/** Seconds to offset each poll from start of interval.  This should be
 	 * 5 seconds before performing the ActionPlanJob. */
-	static protected final int OFFSET_SECS =
+	static private final int OFFSET_SECS =
 		(ActionPlanJob.OFFSET_SECS + 30 - 5) % 30;
 
 	/** Create a new message feed query job */
@@ -42,17 +42,16 @@ public class MsgFeedQueryJob extends Job {
 	/** Perform the message feed query job */
 	public void perform() {
 		FeedBucket.purgeExpired();
-		ControllerHelper.find(new Checker<Controller>() {
-			public boolean check(Controller c) {
-				if(c instanceof ControllerImpl)
-					queryMsgFeed((ControllerImpl)c);
-				return false;
-			}
-		});
+		Iterator<Controller> it = ControllerHelper.iterator();
+		while(it.hasNext()) {
+			Controller c = it.next();
+			if(c instanceof ControllerImpl)
+				queryMsgFeed((ControllerImpl)c);
+		}
 	}
 
 	/** Query message feed from one controller */
-	protected void queryMsgFeed(ControllerImpl c) {
+	private void queryMsgFeed(ControllerImpl c) {
 		if(c.isMsgFeed()) {
 			MessagePoller p = c.getPoller();
 			if(p instanceof MsgFeedPoller) {

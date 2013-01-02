@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -17,8 +17,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
+import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 
@@ -31,24 +31,24 @@ import us.mn.state.dot.tms.DMSHelper;
 public class TmsConfigXmlWriter extends XmlWriter {
 
 	/** TMS config XML file */
-	static protected final String CONFIG_XML = "_config.xml";
+	static private final String CONFIG_XML = "_config.xml";
 
 	/** R_Node XML writer */
-	protected final R_NodeXmlWriter node_writer = new R_NodeXmlWriter();
+	private final R_NodeXmlWriter node_writer = new R_NodeXmlWriter();
 
 	/** Ramp meter XML writer */
-	protected final RampMeterXmlWriter meter_writer =
+	private final RampMeterXmlWriter meter_writer =
 		new RampMeterXmlWriter();
 
 	/** Camera XML writer */
-	protected final CameraXmlWriter cam_writer = new CameraXmlWriter();
+	private final CameraXmlWriter cam_writer = new CameraXmlWriter();
 
 	/** Controller XML writer */
-	protected final ControllerXmlWriter controller_writer = 
+	private final ControllerXmlWriter controller_writer =
 		new ControllerXmlWriter();
 
 	/** Commlink XML writer */
-	protected final CommLinkXmlWriter commlink_writer = new CommLinkXmlWriter();
+	private final CommLinkXmlWriter commlink_writer = new CommLinkXmlWriter();
 
 	/** Create a new TMS config XML writer */
 	public TmsConfigXmlWriter() {
@@ -63,7 +63,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	}
 
 	/** Print the head of the TMS config XML file */
-	protected void printHead(PrintWriter out) {
+	private void printHead(PrintWriter out) {
 		out.println(XML_DECLARATION);
 		printDtd(out);
 		out.println("<tms_config time_stamp='" +
@@ -71,7 +71,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	}
 
 	/** Print the DTD */
-	protected void printDtd(PrintWriter out) {
+	private void printDtd(PrintWriter out) {
 		out.println("<!DOCTYPE tms_config [");
 		out.println("<!ELEMENT tms_config (corridor | camera | commlink | " +
 			"controller | dms)*>");
@@ -85,7 +85,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	}
 
 	/** Print the DTD for camera elements */
-	protected void printCameraDtd(PrintWriter out) {
+	private void printCameraDtd(PrintWriter out) {
 		out.println("<!ELEMENT camera EMPTY>");
 		out.println("<!ATTLIST camera name CDATA #REQUIRED>");
 		out.println("<!ATTLIST camera description CDATA #REQUIRED>");
@@ -94,7 +94,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	}
 
 	/** Print the DTD for comm link elements */
-	protected void printCommLinkDtd(PrintWriter out) {
+	private void printCommLinkDtd(PrintWriter out) {
 		out.println("<!ELEMENT commlink EMPTY>");
 		out.println("<!ATTLIST commlink name CDATA #REQUIRED>");
 		out.println("<!ATTLIST commlink description CDATA #REQUIRED>");
@@ -102,7 +102,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	}
 
 	/** Print the DTD for controlleri elements */
-	protected void printControllerDtd(PrintWriter out) {
+	private void printControllerDtd(PrintWriter out) {
 		out.println("<!ELEMENT controller EMPTY>");
 		out.println("<!ATTLIST controller name CDATA #REQUIRED>");
 		out.println("<!ATTLIST controller active CDATA #REQUIRED>");
@@ -116,7 +116,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	}
 
 	/** Print the DTD for DMS elements */
-	protected void printDmsDtd(PrintWriter out) {
+	private void printDmsDtd(PrintWriter out) {
 		out.println("<!ELEMENT dms EMPTY>");
 		out.println("<!ATTLIST dms name CDATA #REQUIRED>");
 		out.println("<!ATTLIST dms description CDATA #REQUIRED>");
@@ -127,7 +127,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	}
 
 	/** Print the body of the TMS config XML file */
-	protected void printBody(PrintWriter out) {
+	private void printBody(PrintWriter out) {
 		node_writer.print(out, meter_writer.getNodeMapping());
 		cam_writer.print(out);
 		commlink_writer.print(out);
@@ -136,18 +136,17 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	}
 
 	/** Print the DMS elements */
-	protected void printDmsBody(final PrintWriter out) {
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(dms instanceof DMSImpl)
-					((DMSImpl)dms).printXml(out);
-				return false;
-			}
-		});
+	private void printDmsBody(final PrintWriter out) {
+		Iterator<DMS> it = DMSHelper.iterator();
+		while(it.hasNext()) {
+			DMS dms = it.next();
+			if(dms instanceof DMSImpl)
+				((DMSImpl)dms).printXml(out);
+		}
 	}
 
 	/** Print the tail of the TMS config XML file */
-	protected void printTail(PrintWriter out) {
+	private void printTail(PrintWriter out) {
 		out.println("</tms_config>");
 	}
 }

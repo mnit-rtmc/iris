@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -166,14 +166,13 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	}
 
 	/** Select a camera for the video monitor */
-	private void selectCamera(final String cam) {
-		ControllerHelper.find(new Checker<Controller>() {
-			public boolean check(Controller c) {
-				if(c instanceof ControllerImpl)
-					selectCamera((ControllerImpl)c, cam);
-				return false;
-			}
-		});
+	private void selectCamera(String cam) {
+		Iterator<Controller> it = ControllerHelper.iterator();
+		while(it.hasNext()) {
+			Controller c = it.next();
+			if(c instanceof ControllerImpl)
+				selectCamera((ControllerImpl)c, cam);
+		}
 	}
 
 	/** Select a camera for the video monitor */

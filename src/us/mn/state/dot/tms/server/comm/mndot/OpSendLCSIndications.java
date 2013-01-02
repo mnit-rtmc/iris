@@ -16,10 +16,11 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import java.util.Arrays;
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.LCSIndicationHelper;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -125,14 +126,15 @@ public class OpSendLCSIndications extends OpLCS {
 
 	/** Create a special function output buffer for the indications */
 	protected byte[] createSpecialFunctionBuffer() {
-		final byte[] buffer = new byte[2];
-		lcs_array.findIndications(new Checker<LCSIndication>() {
-			public boolean check(LCSIndication li) {
+		byte[] buffer = new byte[2];
+		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
+		while(it.hasNext()) {
+			LCSIndication li = it.next();
+			if(li.getLcs().getArray() == lcs_array) {
 				if(li.getController() == controller)
 					checkIndication(li, buffer);
-				return false;
 			}
-		});
+		}
 		return buffer;
 	}
 

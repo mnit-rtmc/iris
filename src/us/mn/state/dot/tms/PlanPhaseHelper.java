@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
-
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for plan phases.
@@ -32,11 +30,5 @@ public class PlanPhaseHelper extends BaseHelper {
 	static public PlanPhase lookup(String name) {
 		return (PlanPhase)namespace.lookupObject(PlanPhase.SONAR_TYPE,
 			name);
-	}
-
-	/** Find plan phase using a Checker */
-	static public PlanPhase find(final Checker<PlanPhase> checker) {
-		return (PlanPhase)namespace.findObject(PlanPhase.SONAR_TYPE, 
-			checker);
 	}
 }

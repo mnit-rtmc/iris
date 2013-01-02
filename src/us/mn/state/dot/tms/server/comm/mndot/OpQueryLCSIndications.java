@@ -15,10 +15,11 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.LCSIndicationHelper;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -87,17 +88,19 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Get the displayed indications */
 	protected Integer[] getIndications() {
-		final Integer[] ind = new Integer[lcs_array.getLaneCount()];
+		Integer[] ind = new Integer[lcs_array.getLaneCount()];
 		for(int i = 0; i < ind.length; i++)
 			ind[i] = LaneUseIndication.DARK.ordinal();
 		if(isTurnedOn()) {
-			lcs_array.findIndications(new Checker<LCSIndication>() {
-				public boolean check(LCSIndication li) {
+			Iterator<LCSIndication> it =
+				LCSIndicationHelper.iterator();
+			while(it.hasNext()) {
+				LCSIndication li = it.next();
+				if(li.getLcs().getArray() == lcs_array) {
 					if(li.getController() == controller)
 						checkIndication(li, ind);
-					return false;
 				}
-			});
+			}
 		}
 		return ind;
 	}

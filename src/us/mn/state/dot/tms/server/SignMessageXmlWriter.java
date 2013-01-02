@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,8 +16,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
+import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.DMSHelper;
 public class SignMessageXmlWriter extends XmlWriter {
 
 	/** XML file */
-	static protected final String SIGN_MESSAGE_XML = "sign_message.xml";
+	static private final String SIGN_MESSAGE_XML = "sign_message.xml";
 
 	/** Create a new sign message XML writer */
 	public SignMessageXmlWriter() {
@@ -46,7 +46,7 @@ public class SignMessageXmlWriter extends XmlWriter {
 	}
 
 	/** Print the head of the sign message XML file */
-	protected void printHead(PrintWriter out) {
+	private void printHead(PrintWriter out) {
 		out.println(XML_DECLARATION);
 		printDtd(out);
 		out.println("<sign_messages time_stamp='" +
@@ -54,7 +54,7 @@ public class SignMessageXmlWriter extends XmlWriter {
 	}
 
 	/** Print the DTD */
-	protected void printDtd(PrintWriter out) {
+	private void printDtd(PrintWriter out) {
 		out.println("<!DOCTYPE sign_messages [");
 		out.println("<!ELEMENT sign_messages (sign_message)*>");
 		out.println("<!ATTLIST sign_messages time_stamp " +
@@ -78,18 +78,17 @@ public class SignMessageXmlWriter extends XmlWriter {
 	}
 
 	/** Print the body of the sign message XML file */
-	protected void printBody(final PrintWriter out) {
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(dms instanceof DMSImpl)
-					((DMSImpl)dms).printSignMessageXml(out);
-				return false;
-			}
-		});
+	private void printBody(final PrintWriter out) {
+		Iterator<DMS> it = DMSHelper.iterator();
+		while(it.hasNext()) {
+			DMS dms = it.next();
+			if(dms instanceof DMSImpl)
+				((DMSImpl)dms).printSignMessageXml(out);
+		}
 	}
 
 	/** Print the tail of the sign message XML file */
-	protected void printTail(PrintWriter out) {
+	private void printTail(PrintWriter out) {
 		out.println("</sign_messages>");
 	}
 }

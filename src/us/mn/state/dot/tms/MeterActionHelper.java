@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for meter actions.
@@ -29,21 +28,15 @@ public class MeterActionHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find meter actions using a Checker */
-	static public MeterAction find(final Checker<MeterAction> checker) {
-		return (MeterAction)namespace.findObject(MeterAction.SONAR_TYPE,
-			checker);
+	/** Lookup the meter action with the specified name */
+	static public MeterAction lookup(String name) {
+		return (MeterAction)namespace.lookupObject(
+			MeterAction.SONAR_TYPE, name);
 	}
 
 	/** Get a meter action iterator */
 	static public Iterator<MeterAction> iterator() {
 		return new IteratorWrapper<MeterAction>(namespace.iterator(
 			MeterAction.SONAR_TYPE));
-	}
-
-	/** Lookup the meter action with the specified name */
-	static public MeterAction lookup(String name) {
-		return (MeterAction)namespace.lookupObject(
-			MeterAction.SONAR_TYPE, name);
 	}
 }

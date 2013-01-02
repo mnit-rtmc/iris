@@ -17,9 +17,9 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 
@@ -50,15 +50,14 @@ class StationManager {
 
 	/** Calculate the current data for all stations */
 	public void calculateData() {
-		StationHelper.find(new Checker<Station>() {
-			public boolean check(Station s) {
-				if(s instanceof StationImpl) {
-					StationImpl si = (StationImpl)s;
-					si.calculateData();
-				}
-				return false;
+		Iterator<Station> it = StationHelper.iterator();
+		while(it.hasNext()) {
+			Station s = it.next();
+			if(s instanceof StationImpl) {
+				StationImpl si = (StationImpl)s;
+				si.calculateData();
 			}
-		});
+		}
 		flush.addJob(flush_job);
 	}
 
@@ -75,7 +74,7 @@ class StationManager {
 	}
 
 	/** Print the header of the station sample XML file */
-	protected void printSampleXmlHead(PrintWriter out) {
+	private void printSampleXmlHead(PrintWriter out) {
 		out.println(XmlWriter.XML_DECLARATION);
 		printDtd(out);
 		out.println("<traffic_sample time_stamp='" +
@@ -83,7 +82,7 @@ class StationManager {
 	}
 
 	/** Print the DTD */
-	protected void printDtd(PrintWriter out) {
+	private void printDtd(PrintWriter out) {
 		out.println("<!DOCTYPE traffic_sample [");
 		out.println("<!ELEMENT traffic_sample (sample)*>");
 		out.println("<!ATTLIST traffic_sample time_stamp " +
@@ -98,20 +97,19 @@ class StationManager {
 	}
 
 	/** Print the body of the station sample XML file */
-	protected void printSampleXmlBody(final PrintWriter out) {
-		StationHelper.find(new Checker<Station>() {
-			public boolean check(Station s) {
-				if(s instanceof StationImpl) {
-					StationImpl si = (StationImpl)s;
-					si.printSampleXml(out);
-				}
-				return false;
+	private void printSampleXmlBody(PrintWriter out) {
+		Iterator<Station> it = StationHelper.iterator();
+		while(it.hasNext()) {
+			Station s = it.next();
+			if(s instanceof StationImpl) {
+				StationImpl si = (StationImpl)s;
+				si.printSampleXml(out);
 			}
-		});
+		}
 	}
 
 	/** Print the tail of the station sample XML file */
-	protected void printSampleXmlTail(PrintWriter out) {
+	private void printSampleXmlTail(PrintWriter out) {
 		out.println("</traffic_sample>");
 	}
 
@@ -130,27 +128,26 @@ class StationManager {
 	}
 
 	/** Print the header of the station sample XML file */
-	protected void printStationXmlHead(PrintWriter out) {
+	private void printStationXmlHead(PrintWriter out) {
 		out.println("<?xml version='1.0'?>");
 		out.println("<station_data time_stamp='" +
 			TimeSteward.getDateInstance() +"' sample_period='30'>");
 	}
 
 	/** Print the body of the station sample XML file */
-	protected void printStationXmlBody(final PrintWriter out) {
-		StationHelper.find(new Checker<Station>() {
-			public boolean check(Station s) {
-				if(s instanceof StationImpl) {
-					StationImpl si = (StationImpl)s;
-					si.printStationXmlElement(out);
-				}
-				return false;
+	private void printStationXmlBody(PrintWriter out) {
+		Iterator<Station> it = StationHelper.iterator();
+		while(it.hasNext()) {
+			Station s = it.next();
+			if(s instanceof StationImpl) {
+				StationImpl si = (StationImpl)s;
+				si.printStationXmlElement(out);
 			}
-		});
+		}
 	}
 
 	/** Print the tail of the station sample XML file */
-	protected void printStationXmlTail(PrintWriter out) {
+	private void printStationXmlTail(PrintWriter out) {
 		out.println("</station_data>");
 	}
 }

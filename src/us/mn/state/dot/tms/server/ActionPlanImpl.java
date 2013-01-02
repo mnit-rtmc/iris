@@ -25,6 +25,8 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
+import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
@@ -32,7 +34,7 @@ import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.SignGroupHelper;
+import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -275,11 +277,17 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Check if a DMS action is deployable */
-	private boolean isDeployable(final DmsAction da) {
-		for(DMS dms: SignGroupHelper.find(da.getSignGroup())) {
-			if(dms instanceof DMSImpl) {
-				if(!((DMSImpl)dms).isDeployable(da))
-					return false;
+	private boolean isDeployable(DmsAction da) {
+		SignGroup sg = da.getSignGroup();
+		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
+		while(it.hasNext()) {
+			DmsSignGroup dsg = it.next();
+			if(dsg.getSignGroup() == sg) {
+				DMS dms = dsg.getDms();
+				if(dms instanceof DMSImpl) {
+					if(!((DMSImpl)dms).isDeployable(da))
+						return false;
+				}
 			}
 		}
 		return true;

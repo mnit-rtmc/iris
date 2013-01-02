@@ -19,7 +19,6 @@ import java.util.Iterator;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.RampMeter;
@@ -76,13 +75,12 @@ public class SampleQuery30SecJob extends Job {
 
 	/** Poll all sampling controllers 30-second interval */
 	private void querySample30Sec() {
-		ControllerHelper.find(new Checker<Controller>() {
-			public boolean check(Controller c) {
-				if(c instanceof ControllerImpl)
-					querySample30Sec((ControllerImpl)c);
-				return false;
-			}
-		});
+		Iterator<Controller> it = ControllerHelper.iterator();
+		while(it.hasNext()) {
+			Controller c = it.next();
+			if(c instanceof ControllerImpl)
+				querySample30Sec((ControllerImpl)c);
+		}
 	}
 
 	/** Query 30-second sample data from one controller */

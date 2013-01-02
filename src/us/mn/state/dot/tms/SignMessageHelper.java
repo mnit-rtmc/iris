@@ -16,7 +16,7 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 
 /**
  * Helper for dealing with sign messages.
@@ -40,29 +40,31 @@ public class SignMessageHelper extends BaseHelper {
 			SignMessage.SONAR_TYPE, name);
 	}
 
-	/** Find a sign message using a Checker */
-	static public SignMessage find(Checker<SignMessage> checker) {
-		return (SignMessage)namespace.findObject(SignMessage.SONAR_TYPE,
-			checker);
+	/** Get a sign message iterator */
+	static public Iterator<SignMessage> iterator() {
+		return new IteratorWrapper<SignMessage>(namespace.iterator(
+			SignMessage.SONAR_TYPE));
 	}
 
 	/** Find a sign message with matching attributes */
-	static public SignMessage find(final String multi, final String bitmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, final boolean s,
-		final Integer d)
+	static public SignMessage find(String multi, String bitmaps,
+		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
+		Integer d)
 	{
-		final int api = ap.ordinal();
-		final int rpi = rp.ordinal();
-		return find(new Checker<SignMessage>() {
-			public boolean check(SignMessage sm) {
-				return multi.equals(sm.getMulti()) &&
-				       bitmaps.equals(sm.getBitmaps()) &&
-				       api == sm.getActivationPriority() &&
-				       rpi == sm.getRunTimePriority() &&
-				       s == sm.getScheduled() &&
-				       integerEquals(d, sm.getDuration());
-			}
-		});
+		int api = ap.ordinal();
+		int rpi = rp.ordinal();
+		Iterator<SignMessage> it = iterator();
+		while(it.hasNext()) {
+			SignMessage sm = it.next();
+			if(multi.equals(sm.getMulti()) &&
+			   bitmaps.equals(sm.getBitmaps()) &&
+			   api == sm.getActivationPriority() &&
+			   rpi == sm.getRunTimePriority() &&
+			   s == sm.getScheduled() &&
+			   integerEquals(d, sm.getDuration()))
+				return sm;
+		}
+		return null;
 	}
 
 	/** Compare two (possibly-null) integers for equality */

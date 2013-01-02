@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
@@ -119,18 +118,17 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Lookup all graphics which have the proper color scheme */
-	protected void lookupGraphics() {
-		final LinkedList<Graphic> graphics = new LinkedList<Graphic>();
-		GraphicHelper.find(new Checker<Graphic>() {
-			public boolean check(Graphic g) {
-				Integer g_num = g.getGNumber();
-				if(shouldSend(g_num, g)) {
-					graphics.add(g);
-					num_2_row.put(g_num, null);
-				}
-				return false;
+	private void lookupGraphics() {
+		LinkedList<Graphic> graphics = new LinkedList<Graphic>();
+		Iterator<Graphic> it = GraphicHelper.iterator();
+		while(it.hasNext()) {
+			Graphic g = it.next();
+			Integer g_num = g.getGNumber();
+			if(shouldSend(g_num, g)) {
+				graphics.add(g);
+				num_2_row.put(g_num, null);
 			}
-		});
+		}
 		graphic_iterator = graphics.iterator();
 	}
 

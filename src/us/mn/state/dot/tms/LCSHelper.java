@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import java.util.TreeSet;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for LCS.
@@ -29,39 +29,30 @@ public class LCSHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Lookup the lane-use indications for an LCS */
-	static public LaneUseIndication[] lookupIndications(LCS lcs) {
-		final TreeSet<LaneUseIndication> indications =
-			new TreeSet<LaneUseIndication>();
-		lookupIndication(lcs, new Checker<LCSIndication>() {
-			public boolean check(LCSIndication li) {
-				indications.add(LaneUseIndication.fromOrdinal(
-					li.getIndication()));
-				return false;
-			}
-		});
-		return indications.toArray(new LaneUseIndication[0]);
-	}
-
-	/** Lookup the indications for an LCS */
-	static public LCSIndication lookupIndication(final LCS lcs,
-		final Checker<LCSIndication> checker)
-	{
-		return (LCSIndication)namespace.findObject(
-			LCSIndication.SONAR_TYPE, new Checker<LCSIndication>()
-		{
-			public boolean check(LCSIndication li) {
-				if(li.getLcs() == lcs)
-					return checker.check(li);
-				else
-					return false;
-			}
-		});
-	}
-
 	/** Lookup the LCS with the specified name */
 	static public LCS lookup(String name) {
 		return (LCS)namespace.lookupObject(LCS.SONAR_TYPE, name);
+	}
+
+	/** Get a LCS iterator */
+	static public Iterator<LCS> iterator() {
+		return new IteratorWrapper<LCS>(namespace.iterator(
+			LCS.SONAR_TYPE));
+	}
+
+	/** Lookup the lane-use indications for an LCS */
+	static public LaneUseIndication[] lookupIndications(LCS lcs) {
+		TreeSet<LaneUseIndication> indications =
+			new TreeSet<LaneUseIndication>();
+		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
+		while(it.hasNext()) {
+			LCSIndication li = it.next();
+			if(li.getLcs() == lcs) {
+				indications.add(LaneUseIndication.fromOrdinal(
+					li.getIndication()));
+			}
+		}
+		return indications.toArray(new LaneUseIndication[0]);
 	}
 
 	/** Check if an LCS needs maintenance */

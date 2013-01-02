@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper for comm links.
@@ -34,11 +33,5 @@ public class CommLinkHelper extends BaseHelper {
 	static public Iterator<CommLink> iterator() {
 		return new IteratorWrapper<CommLink>(namespace.iterator(
 			CommLink.SONAR_TYPE));
-	}
-
-	/** Find a comm link using a Checker */
-	static public CommLink find(final Checker<CommLink> checker) {
-		return (CommLink)namespace.findObject(CommLink.SONAR_TYPE,
-			checker);
 	}
 }

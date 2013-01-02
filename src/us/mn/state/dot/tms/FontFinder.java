@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sonar.Checker;
 
@@ -25,8 +25,8 @@ import us.mn.state.dot.sonar.Checker;
  */
 public class FontFinder {
 
-	/** Collection of all sign groups for the DMS */
-	private final Collection<SignGroup> groups;
+	/** List of all sign groups for the DMS */
+	private final LinkedList<SignGroup> groups;
 
 	/** List of fonts numbers found */
 	private final LinkedList<Integer> fonts = new LinkedList<Integer>();
@@ -44,7 +44,7 @@ public class FontFinder {
 		Font df = dms.getDefaultFont();
 		if(df != null)
 			fonts.add(df.getNumber());
-		groups = SignGroupHelper.find(dms);
+		groups = findGroups(dms);
 		findQuickMessageTags();
 		findSignTextTags();
 		findDmsActionTags();
@@ -61,27 +61,37 @@ public class FontFinder {
 		return _fonts;
 	}
 
+	/** Find all sign groups for the DMS */
+	private LinkedList<SignGroup> findGroups(DMS dms) {
+		LinkedList<SignGroup> g = new LinkedList<SignGroup>();
+		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
+		while(it.hasNext()) {
+			DmsSignGroup dsg = it.next();
+			if(dsg.getDms() == dms)
+				g.add(dsg.getSignGroup());
+		}
+		return g;
+	}
+
 	/** Find font tags in all quick messages for the sign's groups */
 	private void findQuickMessageTags() {
-		QuickMessageHelper.find(new Checker<QuickMessage>() {
-			public boolean check(QuickMessage qm) {
-				SignGroup sg = qm.getSignGroup();
-				if(sg != null && groups.contains(sg))
-					findFontTags(qm.getMulti());
-				return false;
-			}
-		});
+		Iterator<QuickMessage> it = QuickMessageHelper.iterator();
+		while(it.hasNext()) {
+			QuickMessage qm = it.next();
+			SignGroup sg = qm.getSignGroup();
+			if(sg != null && groups.contains(sg))
+				findFontTags(qm.getMulti());
+		}
 	}
 
 	/** Find font tags in all SignText for the sign's groups */
 	private void findSignTextTags() {
-		SignTextHelper.find(new Checker<SignText>() {
-			public boolean check(SignText st) {
-				if(groups.contains(st.getSignGroup()))
-					findFontTags(st.getMulti());
-				return false;
-			}
-		});
+		Iterator<SignText> it = SignTextHelper.iterator();
+		while(it.hasNext()) {
+			SignText st = it.next();
+			if(groups.contains(st.getSignGroup()))
+				findFontTags(st.getMulti());
+		}
 	}
 
 	/** Find font tags in all DMS actions for the sign's groups */

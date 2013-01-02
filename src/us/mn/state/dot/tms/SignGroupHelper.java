@@ -14,10 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for sign groups.
@@ -35,39 +32,6 @@ public class SignGroupHelper extends BaseHelper {
 	static public SignGroup lookup(String name) {
 		return (SignGroup)namespace.lookupObject(SignGroup.SONAR_TYPE,
 			name);
-	}
-
-	/** Find sign groups using a Checker */
-	static public SignGroup find(final Checker<SignGroup> checker) {
-		return (SignGroup)namespace.findObject(SignGroup.SONAR_TYPE,
-			checker);
-	}
-
-	/** Find all the DMS in a sign group */
-	static public Collection<DMS> find(final SignGroup sg) {
-		final LinkedList<DMS> dmss = new LinkedList<DMS>();
-		DmsSignGroupHelper.find(new Checker<DmsSignGroup>() {
-			public boolean check(DmsSignGroup g) {
-				if(g.getSignGroup() == sg)
-					dmss.add(g.getDms());
-				return false;
-			}
-		});
-		return dmss;
-	}
-
-	/** Find all the sign groups for a DMS */
-	static public Collection<SignGroup> find(final DMS dms) {
-		final LinkedList<SignGroup> groups =
-			new LinkedList<SignGroup>();
-		DmsSignGroupHelper.find(new Checker<DmsSignGroup>() {
-			public boolean check(DmsSignGroup g) {
-				if(g.getDms() == dms)
-					groups.add(g.getSignGroup());
-				return false;
-			}
-		});
-		return groups;
 	}
 
 	/** Get a sign group iterator */

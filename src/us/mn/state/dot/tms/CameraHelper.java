@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeMap;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
@@ -33,21 +32,16 @@ public class CameraHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find camera using a Checker */
-	static public Camera find(final Checker<Camera> checker) {
-		return (Camera)namespace.findObject(Camera.SONAR_TYPE, checker);
+	/** Lookup the camera with the specified name */
+	static public Camera lookup(String name) {
+		return (Camera)namespace.lookupObject(Camera.SONAR_TYPE,
+			name);
 	}
 
 	/** Get a camera iterator */
 	static public Iterator<Camera> iterator() {
 		return new IteratorWrapper<Camera>(namespace.iterator(
 			Camera.SONAR_TYPE));
-	}
-
-	/** Lookup the camera with the specified name */
-	static public Camera lookup(String name) {
-		return (Camera)namespace.lookupObject(Camera.SONAR_TYPE,
-			name);
 	}
 
 	/** Get the host ip for the camera's encoder */

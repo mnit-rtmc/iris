@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
@@ -431,21 +430,5 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			}
 		}
 		return signs;
-	}
-
-	/** Find the indications for this LCS array */
-	public void findIndications(final Checker<LCSIndication> checker) {
-		final LCSArrayImpl lcs_array = this;
-		namespace.findObject(LCSIndication.SONAR_TYPE,
-			new Checker<LCSIndication>()
-		{
-			public boolean check(LCSIndication li) {
-				LCS lcs = li.getLcs();
-				if(lcs.getArray() == lcs_array)
-					return checker.check(li);
-				else
-					return false;
-			}
-		});
 	}
 }

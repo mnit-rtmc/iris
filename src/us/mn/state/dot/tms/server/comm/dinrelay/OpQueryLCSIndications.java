@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.LCSIndicationHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -91,16 +91,15 @@ public class OpQueryLCSIndications extends OpLCS {
 	/** Update the indications from one controller.
 	 * @param c Controller being updated.
 	 * @param outlets Current outlet state for controller. */
-	private void opUpdateOutlets(final ControllerImpl c,
-		final boolean[] outlets)
-	{
-		lcs_array.findIndications(new Checker<LCSIndication>() {
-			public boolean check(LCSIndication li) {
+	private void opUpdateOutlets(ControllerImpl c, boolean[] outlets) {
+		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
+		while(it.hasNext()) {
+			LCSIndication li = it.next();
+			if(li.getLcs().getArray() == lcs_array) {
 				if(li.getController() == c)
 					updateIndication(li, outlets);
-				return false;
 			}
-		});
+		}
 	}
 
 	/** Update one indication value (if set).

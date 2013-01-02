@@ -30,6 +30,8 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
+import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
@@ -37,7 +39,6 @@ import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -306,8 +307,12 @@ public class PlanDispatcher extends FormPanel
 				plan_groups.add(da.getSignGroup());
 		}
 		HashSet<DMS> plan_signs = new HashSet<DMS>();
-		for(SignGroup sg: plan_groups)
-			plan_signs.addAll(SignGroupHelper.find(sg));
+		Iterator<DmsSignGroup> git = DmsSignGroupHelper.iterator();
+		while(git.hasNext()) {
+			DmsSignGroup dsg = git.next();
+			if(plan_groups.contains(dsg.getSignGroup()))
+				plan_signs.add(dsg.getDms());
+		}
 		return plan_signs.size();
 	}
 

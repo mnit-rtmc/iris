@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sonar.Namespace;
@@ -215,10 +216,18 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Blank restricted video monitors viewing the camera */
-	protected void blankRestrictedMonitors() throws TMSException {
-		for(VideoMonitor m: VideoMonitorHelper.findRestricted(this)) {
-			if(m instanceof VideoMonitorImpl)
-				((VideoMonitorImpl)m).setCameraNotify(null);
+	private void blankRestrictedMonitors() throws TMSException {
+		Iterator<VideoMonitor> it = VideoMonitorHelper.iterator();
+		while(it.hasNext()) {
+			VideoMonitor m = it.next();
+			if(m instanceof VideoMonitorImpl) {
+				VideoMonitorImpl vm = (VideoMonitorImpl)m;
+				if(vm.getRestricted()) {
+					Camera c = vm.getCamera();
+					if(c == this || c == null)
+						vm.setCameraNotify(null);
+				}
+			}
 		}
 	}
 

@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for time actions.
@@ -34,22 +33,16 @@ public class TimeActionHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find time actions using a Checker */
-	static public TimeAction find(final Checker<TimeAction> checker) {
-		return (TimeAction)namespace.findObject(TimeAction.SONAR_TYPE, 
-			checker);
+	/** Lookup the time action with the specified name */
+	static public TimeAction lookup(String name) {
+		return (TimeAction)namespace.lookupObject(TimeAction.SONAR_TYPE,
+			name);
 	}
 
 	/** Get a time action iterator */
 	static public Iterator<TimeAction> iterator() {
 		return new IteratorWrapper<TimeAction>(namespace.iterator(
 			TimeAction.SONAR_TYPE));
-	}
-
-	/** Lookup the time action with the specified name */
-	static public TimeAction lookup(String name) {
-		return (TimeAction)namespace.lookupObject(TimeAction.SONAR_TYPE,
-			name);
 	}
 
 	/** Minute of 12 Noon in day */

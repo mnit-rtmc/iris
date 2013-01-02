@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for LCSArrays.
@@ -31,12 +30,6 @@ public class LCSArrayHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find LCS arrays using a Checker */
-	static public LCSArray find(Checker<LCSArray> checker) {
-		return (LCSArray)namespace.findObject(LCSArray.SONAR_TYPE,
-			checker);
-	}
-
 	/** Get an LCS array iterator */
 	static public Iterator<LCSArray> iterator() {
 		return new IteratorWrapper<LCSArray>(namespace.iterator(
@@ -45,13 +38,13 @@ public class LCSArrayHelper extends BaseHelper {
 
 	/** Lookup the LCS objects for an array */
 	static public LCS[] lookupLCSs(LCSArray lcs_array) {
-		final TreeMap<Integer, LCS> lanes = new TreeMap<Integer, LCS>();
-		lookupLCS(lcs_array, new Checker<LCS>() {
-			public boolean check(LCS lcs) {
+		TreeMap<Integer, LCS> lanes = new TreeMap<Integer, LCS>();
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			if(lcs.getArray() == lcs_array)
 				lanes.put(lcs.getLane(), lcs);
-				return false;
-			}
-		});
+		}
 		int n_lanes = 0;
 		if(lanes.size() > 0)
 			n_lanes = lanes.lastKey();
@@ -62,12 +55,15 @@ public class LCSArrayHelper extends BaseHelper {
 	}
 
 	/** Lookup the LCS in the specified lane */
-	static public LCS lookupLCS(LCSArray lcs_array, final int lane) {
-		return lookupLCS(lcs_array, new Checker<LCS>() {
-			public boolean check(LCS lcs) {
-				return lcs.getLane() == lane;
-			}
-		});
+	static public LCS lookupLCS(LCSArray lcs_array, int lane) {
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			if(lcs.getArray() == lcs_array &&
+			   lcs.getLane() == lane)
+				return lcs;
+		}
+		return null;
 	}
 
 	/** Lookup the DMS for the LCS in the specified lane */
@@ -87,41 +83,6 @@ public class LCSArrayHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Lookup the LCS objects for an array */
-	static public LCS lookupLCS(final LCSArray lcs_array,
-		final Checker<LCS> checker)
-	{
-		return (LCS)namespace.findObject(LCS.SONAR_TYPE,
-			new Checker<LCS>()
-		{
-			public boolean check(LCS lcs) {
-				if(lcs.getArray() == lcs_array)
-					return checker.check(lcs);
-				else
-					return false;
-			}
-		});
-	}
-
-	/** Lookup the DMS objects for an array */
-	static public DMS lookupDMS(final LCSArray lcs_array,
-		final Checker<DMS> checker)
-	{
-		final LinkedList<LCS> lcss = new LinkedList<LCS>();
-		lookupLCS(lcs_array, new Checker<LCS>() {
-			public boolean check(LCS lcs) {
-				lcss.add(lcs);
-				return false;
-			}
-		});
-		for(LCS lcs: lcss) {
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null && checker.check(dms))
-				return dms;
-		}
-		return null;
-	}
-
 	/** Lookup the location of the LCS array */
 	static public String lookupLocation(LCSArray lcs_array) {
 		return GeoLocHelper.getDescription(lookupGeoLoc(lcs_array));
@@ -138,45 +99,66 @@ public class LCSArrayHelper extends BaseHelper {
 
 	/** Get the controller status */
 	static public String getStatus(LCSArray lcs_array) {
-		final String[] status = { "???" };
-		lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				String s = DMSHelper.getStatus(dms);
-				if(s.isEmpty())
-					status[0] = s;
-				else
-					status[0] = dms.getName() + ": " + s;
-				return !s.isEmpty();
+		String st = "???";
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			if(lcs.getArray() == lcs_array) {
+				String s = getStatus(lcs);
+				if(s != null) {
+					if(s.isEmpty())
+						st = "";
+					else
+						return lcs.getName() + ": " + s;
+				}
 			}
-		});
-		return status[0];
+		}
+		return st;
+	}
+
+	/** Get the status of one LCS */
+	static private String getStatus(LCS lcs) {
+		DMS dms = DMSHelper.lookup(lcs.getName());
+		if(dms != null)
+			return DMSHelper.getStatus(dms);
+		else
+			return null;
 	}
 
 	/** Check if an LCS array is active */
 	static public boolean isActive(final LCSArray lcs_array) {
-		return lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				return DMSHelper.isActive(dms);
-			}
-		}) != null;
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null && DMSHelper.isActive(dms))
+				return true;
+		}
+		return false;
 	}
 
 	/** Check if an LCS array is failed */
-	static public boolean isFailed(final LCSArray lcs_array) {
-		return lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				return DMSHelper.isFailed(dms);
-			}
-		}) != null;
+	static public boolean isFailed(LCSArray lcs_array) {
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null && DMSHelper.isFailed(dms))
+				return true;
+		}
+		return false;
 	}
 
 	/** Check if all LCSs in an array are failed */
-	static public boolean isAllFailed(final LCSArray lcs_array) {
-		return lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				return !DMSHelper.isFailed(dms);
-			}
-		}) == null;
+	static public boolean isAllFailed(LCSArray lcs_array) {
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null && !DMSHelper.isFailed(dms))
+				return false;
+		}
+		return true;
 	}
 
 	/** Check if an LCS array is deployed */
@@ -189,11 +171,14 @@ public class LCSArrayHelper extends BaseHelper {
 		}
 		// There might be something else on the sign that is not
 		// a lane use indication -- check DMS deployed states
-		return lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				return DMSHelper.isDeployed(dms);
-			}
-		}) != null;
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null && DMSHelper.isDeployed(dms))
+				return true;
+		}
+		return false;
 	}
 
 	/** Check if an LCS array is user deployed */
@@ -214,51 +199,77 @@ public class LCSArrayHelper extends BaseHelper {
 
 	/** Check if an LCS array is schedule deployed */
 	static public boolean isScheduleDeployed(final LCSArray lcs_array) {
-		return lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				return DMSHelper.isScheduleDeployed(dms);
-			}
-		}) != null;
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null && DMSHelper.isScheduleDeployed(dms))
+				return true;
+		}
+		return false;
 	}
 
 	/** Check if any LCSs in an array need maintenance */
 	static public boolean needsMaintenance(final LCSArray lcs_array) {
-		return lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				return DMSHelper.needsMaintenance(dms);
-			}
-		}) != null;
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null && DMSHelper.needsMaintenance(dms))
+				return true;
+		}
+		return false;
 	}
 
 	/** Get controller critical error */
 	static public String getCriticalError(LCSArray lcs_array) {
-		final String[] status = { "???" };
-		lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				String s = DMSHelper.getCriticalError(dms);
-				if(s.isEmpty())
-					status[0] = s;
+		String s = "???";
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			String ce = getCriticalError(lcs);
+			if(ce != null) {
+				if(ce.isEmpty())
+					s = "";
 				else
-					status[0] = dms.getName() + ": " + s;
-				return !s.isEmpty();
+					return lcs.getName() + ": " + ce;
 			}
-		});
-		return status[0];
+		}
+		return s;
+	}
+
+	/** Get LCS critical error */
+	static private String getCriticalError(LCS lcs) {
+		DMS dms = DMSHelper.lookup(lcs.getName());
+		if(dms != null)
+			return DMSHelper.getCriticalError(dms);
+		else
+			return null;
 	}
 
 	/** Get controller maintenance */
 	static public String getMaintenance(LCSArray lcs_array) {
-		final String[] status = { "???" };
-		lookupDMS(lcs_array, new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				String s = DMSHelper.getMaintenance(dms);
-				if(s.isEmpty())
-					status[0] = s;
+		String m = "???";
+		Iterator<LCS> it = LCSHelper.iterator();
+		while(it.hasNext()) {
+			LCS lcs = it.next();
+			String me = getMaintenance(lcs);
+			if(me != null) {
+				if(me.isEmpty())
+					m = "";
 				else
-					status[0] = dms.getName() + ": " + s;
-				return !s.isEmpty();
+					return lcs.getName() + ": " + me;
 			}
-		});
-		return status[0];
+		}
+		return m;
+	}
+
+	/** Get LCS maintenance */
+	static private String getMaintenance(LCS lcs) {
+		DMS dms = DMSHelper.lookup(lcs.getName());
+		if(dms != null)
+			return DMSHelper.getMaintenance(dms);
+		else
+			return null;
 	}
 }

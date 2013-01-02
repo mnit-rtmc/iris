@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import us.mn.state.dot.sonar.Checker;
+import java.util.Iterator;
 
 /**
  * Video monitor helper methods.
@@ -26,30 +24,13 @@ import us.mn.state.dot.sonar.Checker;
 public class VideoMonitorHelper extends BaseHelper {
 
 	/** Disallow instantiation */
-	protected VideoMonitorHelper() {
+	private VideoMonitorHelper() {
 		assert false;
 	}
 
-	/** Find video monitors using a Checker */
-	static public VideoMonitor find(final Checker<VideoMonitor> checker) {
-		return (VideoMonitor)namespace.findObject(
-			VideoMonitor.SONAR_TYPE, checker);
-	}
-
-	/** Find restricted video montiros displaying a given camera */
-	static public Collection<VideoMonitor> findRestricted(final Camera cam){
-		final LinkedList<VideoMonitor> restricted =
-			new LinkedList<VideoMonitor>();
-		find(new Checker<VideoMonitor>() {
-			public boolean check(VideoMonitor m) {
-				if(m.getRestricted()) {
-					Camera c = m.getCamera();
-					if(c == cam || c == null)
-						restricted.add(m);
-				}
-				return false;
-			}
-		});
-		return restricted;
+	/** Get a video monitor iterator */
+	static public Iterator<VideoMonitor> iterator() {
+		return new IteratorWrapper<VideoMonitor>(namespace.iterator(
+			VideoMonitor.SONAR_TYPE));
 	}
 }
