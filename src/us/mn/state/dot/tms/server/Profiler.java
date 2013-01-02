@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.FileWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.text.NumberFormat;
@@ -145,9 +145,13 @@ public class Profiler {
 
 	/** Append to uptime log file */
 	private void appendUptimeLog(File f) throws IOException {
-		PrintWriter pw = new PrintWriter(f);
-		pw.println(createLogEntry());
-		pw.close();
+		FileWriter fw = new FileWriter(f, true);
+		try {
+			fw.write(createLogEntry());
+		}
+		finally {
+			fw.close();
+		}
 	}
 
 	/** Create a log entry */
@@ -160,6 +164,7 @@ public class Profiler {
 		sb.append(getHeapSize());
 		sb.append(',');
 		sb.append(getConnectionCount());
+		sb.append('\n');
 		return sb.toString();
 	}
 
