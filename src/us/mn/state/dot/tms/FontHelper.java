@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeMap;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Font helper methods.
@@ -49,18 +48,15 @@ public class FontHelper extends BaseHelper {
 			Font.SONAR_TYPE));
 	}
 
-	/** Find a font using a checker */
-	static public Font find(Checker<Font> checker) {
-		return (Font)namespace.findObject(Font.SONAR_TYPE, checker);
-	}
-
 	/** Find a font using a font number */
-	static public Font find(final int f_num) {
-		return find(new Checker<Font>() {
-			public boolean check(Font f) {
-				return f.getNumber() == f_num;
-			}
-		});
+	static public Font find(int f_num) {
+		Iterator<Font> it = iterator();
+		while(it.hasNext()) {
+			Font f = it.next();
+			if(f.getNumber() == f_num)
+				return f;
+		}
+		return null;
 	}
 
 	/** Fint the lowest unused font number */
@@ -80,29 +76,26 @@ public class FontHelper extends BaseHelper {
 	}
 
 	/** Lookup the glyphs in the specified font */
-	static public Collection<Glyph> lookupGlyphs(final Font font) {
-		final TreeMap<Integer, Glyph> glyphs =
-			new TreeMap<Integer, Glyph>();
-		namespace.findObject(Glyph.SONAR_TYPE, new Checker<Glyph>() {
-			public boolean check(Glyph g) {
-				if(g.getFont() == font)
-					glyphs.put(g.getCodePoint(), g);
-				return false;
-			}
-		});
+	static public Collection<Glyph> lookupGlyphs(Font font) {
+		TreeMap<Integer, Glyph> glyphs = new TreeMap<Integer, Glyph>();
+		Iterator<Glyph> it = GlyphHelper.iterator();
+		while(it.hasNext()) {
+			Glyph g = it.next();
+			if(g.getFont() == font)
+				glyphs.put(g.getCodePoint(), g);
+		}
 		return glyphs.values();
 	}
 
 	/** Lookup a glyph in the specified font */
-	static public Glyph lookupGlyph(final Font font, final int cp) {
-		return (Glyph)namespace.findObject(Glyph.SONAR_TYPE,
-			new Checker<Glyph>()
-		{
-			public boolean check(Glyph g) {
-				return g.getFont() == font &&
-				       g.getCodePoint() == cp;
-			}
-		});
+	static public Glyph lookupGlyph(Font font, int cp) {
+		Iterator<Glyph> it = GlyphHelper.iterator();
+		while(it.hasNext()) {
+			Glyph g = it.next();
+			if(g.getFont() == font && g.getCodePoint() == cp)
+				return g;
+		}
+		return null;
 	}
 
 	/** Look up a code point in the specified font */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Graphic helper methods.
@@ -26,24 +25,13 @@ import us.mn.state.dot.sonar.Checker;
 public class GraphicHelper extends BaseHelper {
 
 	/** Disallow instantiation */
-	protected GraphicHelper() {
+	private GraphicHelper() {
 		assert false;
 	}
 
-	/** Find the graphic using a Checker */
-	static public Graphic find(final Checker<Graphic> checker) {
-		return (Graphic)namespace.findObject(Graphic.SONAR_TYPE, 
-			checker);
-	}
-
-	/** Find a graphic using a graphic number */
-	static public Graphic find(final int g_num) {
-		return find(new Checker<Graphic>() {
-			public boolean check(Graphic g) {
-				Integer gn = g.getGNumber();
-				return gn != null && gn == g_num;
-			}
-		});
+	/** Lookup the graphic with the specified name */
+	static public Graphic lookup(String name) {
+		return (Graphic)namespace.lookupObject(Graphic.SONAR_TYPE,name);
 	}
 
 	/** Get a graphic iterator */
@@ -52,9 +40,16 @@ public class GraphicHelper extends BaseHelper {
 			Graphic.SONAR_TYPE));
 	}
 
-	/** Lookup the graphic with the specified name */
-	static public Graphic lookup(String name) {
-		return (Graphic)namespace.lookupObject(Graphic.SONAR_TYPE,name);
+	/** Find a graphic using a graphic number */
+	static public Graphic find(int g_num) {
+		Iterator<Graphic> it = iterator();
+		while(it.hasNext()) {
+			Graphic g = it.next();
+			Integer gn = g.getGNumber();
+			if(gn != null && gn == g_num)
+				return g;
+		}
+		return null;
 	}
 
 	/** Create a raster graphic */

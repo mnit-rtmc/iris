@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for finding fonts for DMS.
@@ -96,16 +95,14 @@ public class FontFinder {
 
 	/** Find font tags in all DMS actions for the sign's groups */
 	private void findDmsActionTags() {
-		DmsActionHelper.find(new Checker<DmsAction>() {
-			public boolean check(DmsAction da) {
-				SignGroup sg = da.getSignGroup();
-				QuickMessage qm = da.getQuickMessage();
-				if(sg != null && qm != null &&
-				   groups.contains(sg))
-					findFontTags(qm.getMulti());
-				return false;
-			}
-		});
+		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		while(it.hasNext()) {
+			DmsAction da = it.next();
+			SignGroup sg = da.getSignGroup();
+			QuickMessage qm = da.getQuickMessage();
+			if(sg != null && qm != null && groups.contains(sg))
+				findFontTags(qm.getMulti());
+		}
 	}
 
 	/** Find font tags in a MULTI string */

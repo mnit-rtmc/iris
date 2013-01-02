@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -43,11 +42,6 @@ public class DMSHelper extends BaseHelper {
 	/** Lookup the DMS with the specified name */
 	static public DMS lookup(String name) {
 		return (DMS)namespace.lookupObject(DMS.SONAR_TYPE, name);
-	}
-
-	/** Find DMS using a Checker */
-	static public DMS find(final Checker<DMS> checker) {
-		return (DMS)namespace.findObject(DMS.SONAR_TYPE, checker);
 	}
 
 	/** Get a DMS iterator */

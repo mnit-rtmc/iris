@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
 import java.util.regex.Pattern;
-import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for LaneUseMulti.
@@ -29,10 +29,16 @@ public class LaneUseMultiHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find LaneUseMulti using a Checker */
-	static public LaneUseMulti find(Checker<LaneUseMulti> checker) {
-		return (LaneUseMulti)namespace.findObject(
-			LaneUseMulti.SONAR_TYPE, checker);
+	/** Lookup the lane-use MULTI with the specified name */
+	static public LaneUseMulti lookup(String name) {
+		return (LaneUseMulti)namespace.lookupObject(
+			LaneUseMulti.SONAR_TYPE, name);
+	}
+
+	/** Get a lane-use MULTI iterator */
+	static public Iterator<LaneUseMulti> iterator() {
+		return new IteratorWrapper<LaneUseMulti>(namespace.iterator(
+			LaneUseMulti.SONAR_TYPE));
 	}
 
 	/** Get a lane-use MULTI for a given indication.
@@ -40,42 +46,37 @@ public class LaneUseMultiHelper extends BaseHelper {
 	 * @param w Sign width (pixels).
 	 * @param h Sign height (pixels).
 	 * @return A lane-use MULTI. */
-	static public LaneUseMulti find(final int ind, final int w,
-		final int h)
-	{
-		return find(new Checker<LaneUseMulti>() {
-			public boolean check(LaneUseMulti lum) {
-				return lum.getIndication() == ind &&
-				       lum.getWidth() == w &&
-				       lum.getHeight() == h;
-			}
-		});
-	}
-
-	/** Lookup the lane-use MULTI with the specified name */
-	static public LaneUseMulti lookup(String name) {
-		return (LaneUseMulti)namespace.lookupObject(
-			LaneUseMulti.SONAR_TYPE, name);
+	static public LaneUseMulti find(int ind, int w, int h) {
+		Iterator<LaneUseMulti> it = iterator();
+		while(it.hasNext()) {
+			LaneUseMulti lum = it.next();
+			if(lum.getIndication() == ind &&
+			   lum.getWidth() == w &&
+			   lum.getHeight() == h)
+				return lum;
+		}
+		return null;
 	}
 
 	/** Find a lane-use MULTI which matches a MULTI string */
-	static public LaneUseMulti find(final String multi) {
-		return find(new Checker<LaneUseMulti>() {
-			public boolean check(LaneUseMulti lum) {
-				QuickMessage qm = lum.getQuickMessage();
-				return qm != null &&
-				       match(qm.getMulti(), multi);
-			}
-		});
+	static public LaneUseMulti find(String multi) {
+		Iterator<LaneUseMulti> it = iterator();
+		while(it.hasNext()) {
+			LaneUseMulti lum = it.next();
+			QuickMessage qm = lum.getQuickMessage();
+			if(qm != null && match(qm.getMulti(), multi))
+				return lum;
+		}
+		return null;
 	}
 
 	/** Test if a quick message matches a multi string */
-	static protected boolean match(String qm, String multi) {
+	static private boolean match(String qm, String multi) {
 		return Pattern.matches(createRegex(qm), multi);
 	}
 
 	/** Create a regex which matches any speed advisory values */
-	static protected String createRegex(String qm) {
+	static private String createRegex(String qm) {
 		MultiString re = new MultiString() {
 			public void addSpeedAdvisory() {
 				// Add unquoted regex to match 2 digits

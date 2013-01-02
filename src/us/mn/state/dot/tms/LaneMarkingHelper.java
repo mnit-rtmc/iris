@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.Checker;
-
 /**
  * Lane marking helper methods.
  *
@@ -24,14 +22,8 @@ import us.mn.state.dot.sonar.Checker;
 public class LaneMarkingHelper extends BaseHelper {
 
 	/** Disallow instantiation */
-	protected LaneMarkingHelper() {
+	private LaneMarkingHelper() {
 		assert false;
-	}
-
-	/** Find lane markings using a Checker */
-	static public LaneMarking find(final Checker<LaneMarking> checker) {
-		return (LaneMarking)namespace.findObject(LaneMarking.SONAR_TYPE,
-			checker);
 	}
 
 	/** Lookup the lane marking with the specified name */

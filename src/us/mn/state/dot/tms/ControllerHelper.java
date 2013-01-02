@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.geokit.Position;
 
 /**
@@ -36,12 +35,6 @@ public class ControllerHelper extends BaseHelper {
 	static public Iterator<Controller> iterator() {
 		return new IteratorWrapper<Controller>(namespace.iterator(
 			Controller.SONAR_TYPE));
-	}
-
-	/** Find a controller using a Checker */
-	static public Controller find(final Checker<Controller> checker) {
-		return (Controller)namespace.findObject(Controller.SONAR_TYPE,
-			checker);
 	}
 
 	/** Get the geo location of a controller or null */

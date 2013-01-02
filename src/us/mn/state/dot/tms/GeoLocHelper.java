@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,10 @@
  */
 package us.mn.state.dot.tms;
 
-import java.io.PrintWriter;
 import us.mn.state.dot.geokit.MapLineSegment;
 import us.mn.state.dot.geokit.MapVector;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
@@ -36,6 +34,12 @@ public class GeoLocHelper extends BaseHelper {
 	/** Don't create any instances */
 	private GeoLocHelper() {
 		assert false;
+	}
+
+	/** Lookup a geo location */
+	static public GeoLoc lookup(String name) {
+		return (GeoLoc)namespace.lookupObject(GeoLoc.SONAR_TYPE,
+			name);
 	}
 
 	/** Get a description of the location */
@@ -354,17 +358,6 @@ public class GeoLocHelper extends BaseHelper {
 			return SphericalMercatorPosition.convert(pos);
 		else
 			return null;
-	}
-
-	/** Find geo-locs using a Checker */
-	static public GeoLoc find(Checker<GeoLoc> checker) {
-		return (GeoLoc)namespace.findObject(GeoLoc.SONAR_TYPE, checker);
-	}
-
-	/** Lookup a geo location */
-	static public GeoLoc lookup(String name) {
-		return (GeoLoc)namespace.lookupObject(GeoLoc.SONAR_TYPE,
-			name);
 	}
 
 	/** Get the root label (for a detector or a station) */
