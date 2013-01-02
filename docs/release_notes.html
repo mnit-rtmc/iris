@@ -9,6 +9,42 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.1.0 (2 January 2013)</dt>
+	<dd><ul>
+		<li>
+			Store vehicle classification data for ss105, ss125 and
+			g4 drivers.
+		</li>
+		<li>
+			Updated Wavetronix HD driver for newer firmware.
+		</li>
+		<li>
+			Fixed whole class of NullPointerException problems
+			caused by deleted SONAR objects.
+		</li>
+		<li>
+			Fixed client JNLP problem with proxy servers.
+		</li>
+		<li>
+			Use concurrent data structure for sonar object caches;
+			no locking needed in most cases.
+			This should improve client responsiveness.
+		</li>
+		<li>
+			Added debug logs for each scheduler (thread).
+		</li>
+		<li>
+			Continued major cleanup of comm protocol drivers.
+		</li>
+		<li>
+			Lots of other code cleanups and improvements.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.1.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>4.0.0 (14 November 2012)</dt>
 	<dd><ul>
 		<li>
