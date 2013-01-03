@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -126,13 +126,15 @@ public class LCSArrayHelper extends BaseHelper {
 	}
 
 	/** Check if an LCS array is active */
-	static public boolean isActive(final LCSArray lcs_array) {
+	static public boolean isActive(LCSArray lcs_array) {
 		Iterator<LCS> it = LCSHelper.iterator();
 		while(it.hasNext()) {
 			LCS lcs = it.next();
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null && DMSHelper.isActive(dms))
-				return true;
+			if(lcs.getArray() == lcs_array) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms != null && DMSHelper.isActive(dms))
+					return true;
+			}
 		}
 		return false;
 	}
@@ -142,9 +144,11 @@ public class LCSArrayHelper extends BaseHelper {
 		Iterator<LCS> it = LCSHelper.iterator();
 		while(it.hasNext()) {
 			LCS lcs = it.next();
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null && DMSHelper.isFailed(dms))
-				return true;
+			if(lcs.getArray() == lcs_array) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms != null && DMSHelper.isFailed(dms))
+					return true;
+			}
 		}
 		return false;
 	}
@@ -154,15 +158,17 @@ public class LCSArrayHelper extends BaseHelper {
 		Iterator<LCS> it = LCSHelper.iterator();
 		while(it.hasNext()) {
 			LCS lcs = it.next();
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null && !DMSHelper.isFailed(dms))
-				return false;
+			if(lcs.getArray() == lcs_array) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms != null && !DMSHelper.isFailed(dms))
+					return false;
+			}
 		}
 		return true;
 	}
 
 	/** Check if an LCS array is deployed */
-	static public boolean isDeployed(final LCSArray lcs_array) {
+	static public boolean isDeployed(LCSArray lcs_array) {
 		// First, check the indications
 		Integer[] ind = lcs_array.getIndicationsCurrent();
 		for(Integer i: ind) {
@@ -174,15 +180,17 @@ public class LCSArrayHelper extends BaseHelper {
 		Iterator<LCS> it = LCSHelper.iterator();
 		while(it.hasNext()) {
 			LCS lcs = it.next();
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null && DMSHelper.isDeployed(dms))
-				return true;
+			if(lcs.getArray() == lcs_array) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms != null && DMSHelper.isDeployed(dms))
+					return true;
+			}
 		}
 		return false;
 	}
 
 	/** Check if an LCS array is user deployed */
-	static public boolean isUserDeployed(final LCSArray lcs_array) {
+	static public boolean isUserDeployed(LCSArray lcs_array) {
 		Integer[] ind = lcs_array.getIndicationsCurrent();
 		for(int n = 0; n < ind.length; n++) {
 			Integer i = ind[n];
@@ -198,25 +206,31 @@ public class LCSArrayHelper extends BaseHelper {
 	}
 
 	/** Check if an LCS array is schedule deployed */
-	static public boolean isScheduleDeployed(final LCSArray lcs_array) {
+	static public boolean isScheduleDeployed(LCSArray lcs_array) {
 		Iterator<LCS> it = LCSHelper.iterator();
 		while(it.hasNext()) {
 			LCS lcs = it.next();
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null && DMSHelper.isScheduleDeployed(dms))
-				return true;
+			if(lcs.getArray() == lcs_array) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms != null &&
+				   DMSHelper.isScheduleDeployed(dms))
+					return true;
+			}
 		}
 		return false;
 	}
 
 	/** Check if any LCSs in an array need maintenance */
-	static public boolean needsMaintenance(final LCSArray lcs_array) {
+	static public boolean needsMaintenance(LCSArray lcs_array) {
 		Iterator<LCS> it = LCSHelper.iterator();
 		while(it.hasNext()) {
 			LCS lcs = it.next();
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null && DMSHelper.needsMaintenance(dms))
-				return true;
+			if(lcs.getArray() == lcs_array) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms != null &&
+				   DMSHelper.needsMaintenance(dms))
+					return true;
+			}
 		}
 		return false;
 	}
@@ -227,12 +241,14 @@ public class LCSArrayHelper extends BaseHelper {
 		Iterator<LCS> it = LCSHelper.iterator();
 		while(it.hasNext()) {
 			LCS lcs = it.next();
-			String ce = getCriticalError(lcs);
-			if(ce != null) {
-				if(ce.isEmpty())
-					s = "";
-				else
-					return lcs.getName() + ": " + ce;
+			if(lcs.getArray() == lcs_array) {
+				String ce = getCriticalError(lcs);
+				if(ce != null) {
+					if(ce.isEmpty())
+						s = "";
+					else
+						return lcs.getName() + ": " +ce;
+				}
 			}
 		}
 		return s;
@@ -253,12 +269,14 @@ public class LCSArrayHelper extends BaseHelper {
 		Iterator<LCS> it = LCSHelper.iterator();
 		while(it.hasNext()) {
 			LCS lcs = it.next();
-			String me = getMaintenance(lcs);
-			if(me != null) {
-				if(me.isEmpty())
-					m = "";
-				else
-					return lcs.getName() + ": " + me;
+			if(lcs.getArray() == lcs_array) {
+				String me = getMaintenance(lcs);
+				if(me != null) {
+					if(me.isEmpty())
+						m = "";
+					else
+						return lcs.getName() + ": " +me;
+				}
 			}
 		}
 		return m;
