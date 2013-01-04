@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,12 +89,8 @@ public class Icons {
 	}
 
 	/** Lookup an image resource */
-	static protected URL lookupImageResource(String key) {
-		URL url = lookupResource("/images/" + key + ".gif");
-		if(url != null)
-			return url;
-		else
-			return lookupResource("/images/" + key + ".png");
+	static private URL lookupImageResource(String key) {
+		return lookupResource("/images/" + key + ".png");
 	}
 
 	/** Get a requested ImageIcon resource */
