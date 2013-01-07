@@ -80,12 +80,16 @@ public class StreamPanel extends JPanel {
 	/** Stream progress timer */
 	private final Timer timer = new Timer(STATUS_DELAY, stat_updater);
 
+	/** Camera PTZ control */
+	private final CameraPTZ cam_ptz;
+
 	/** Current video stream */
 	private VideoStream stream = null;
 
 	/** Create a new stream panel */
-	public StreamPanel(VideoRequest req) {
+	public StreamPanel(CameraPTZ cptz, VideoRequest req) {
 		super(new GridBagLayout());
+		cam_ptz = cptz;
 		VideoRequest.Size vsz = req.getSize();
 		Dimension sz = UI.dimension(vsz.width, vsz.height);
 		video_req = req;
@@ -142,7 +146,7 @@ public class StreamPanel extends JPanel {
 		}
 		public void mouseMoved(MouseEvent e) { }
 		private void updatePanTilt(MouseEvent e) {
-			sendPtz(calculatePan(e), calculateTilt(e), 0);
+			cam_ptz.sendPtz(calculatePan(e), calculateTilt(e), 0);
 		}
 		private float calculatePan(MouseEvent e) {
 			float x = e.getX();
@@ -165,19 +169,7 @@ public class StreamPanel extends JPanel {
 				return 0;
 		}
 		private void cancelPanTilt() {
-			sendPtz(0, 0, 0);
-		}
-	}
-
-	/** Send PTZ command to camera */
-	private void sendPtz(float p, float t, float z) {
-		VideoStream vs = stream;
-		if(vs != null) {
-			Float[] ptz = new Float[3];
-			ptz[0] = new Float(p);
-			ptz[1] = new Float(t);
-			ptz[2] = new Float(z);
-			vs.getCamera().setPtz(ptz);
+			cam_ptz.clearPtz();
 		}
 	}
 

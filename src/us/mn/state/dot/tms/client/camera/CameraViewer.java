@@ -86,11 +86,14 @@ public class CameraViewer extends JPanel
 	/** Video monitor output */
 	protected VideoMonitor video_monitor;
 
+	/** Camera PTZ control */
+	private final CameraPTZ cam_ptz;
+
 	/** Streaming video panel */
 	private final StreamPanel s_panel;
 
 	/** Panel for controlling camera PTZ */
-	protected final CameraControl ptz_panel = new CameraControl();
+	private final CameraControl ptz_panel;
 
 	/** Proxy manager for camera devices */
 	protected final CameraManager manager;
@@ -122,13 +125,15 @@ public class CameraViewer extends JPanel
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
 		session = s;
+		cam_ptz = new CameraPTZ(s);
+		ptz_panel = new CameraControl(cam_ptz);
 		state = session.getSonarState();
 		user = session.getUser();
 		video_req = new VideoRequest(session.getProperties(), SIZE);
 		Connection c = state.lookupConnection(state.getConnection());
 		video_req.setSonarSessionId(c.getSessionId());
 		video_req.setRate(30);
-		s_panel = new StreamPanel(video_req);
+		s_panel = new StreamPanel(cam_ptz, video_req);
 		setBorder(BorderFactory.createTitledBorder(
 			I18N.get("camera.selected")));
 		GridBagConstraints bag = new GridBagConstraints();
@@ -195,34 +200,13 @@ public class CameraViewer extends JPanel
 			return 0;
 	}
 
-	/** Pan value from last poll */
-	protected float pan;
-
-	/** Tilt value from last poll */
-	protected float tilt;
-
-	/** Zoom value from last poll */
-	protected float zoom;
-
 	/** Poll the joystick and send PTZ command to server */
-	protected void pollJoystick() {
-		Camera proxy = selected;	// Avoid race
-		if(canControlPtz(proxy)) {
+	private void pollJoystick() {
+		if(cam_ptz.canControlPtz()) {
 			float p = filter_deadzone(joystick.getPan());
 			float t = -filter_deadzone(joystick.getTilt());
 			float z = filter_deadzone(joystick.getZoom());
-			if(p != 0 || pan != 0 || t != 0 || tilt != 0 ||
-			   z != 0 || zoom != 0)
-			{
-				Float[] ptz = new Float[3];
-				ptz[0] = new Float(p);
-				ptz[1] = new Float(t);
-				ptz[2] = new Float(z);
-				proxy.setPtz(ptz);
-				pan = p;
-				tilt = t;
-				zoom = z;
-			}
+			cam_ptz.sendPtz(p, t, z);
 		}
 	}
 
@@ -262,6 +246,7 @@ public class CameraViewer extends JPanel
 	/** Dispose of the camera viewer */
 	public void dispose() {
 		removeAll();
+		cam_ptz.setCamera(null);
 		s_panel.dispose();
 		selected = null;
 	}
@@ -270,11 +255,9 @@ public class CameraViewer extends JPanel
 	public void setSelected(final Camera camera) {
 		if(camera == selected)
 			return;
+		cam_ptz.setCamera(camera);
 		s_panel.setCamera(camera);
 		selected = camera;
-		pan = 0;
-		tilt = 0;
-		zoom = 0;
 		if(camera != null) {
 			txtId.setText(camera.getName());
 			txtLocation.setText(GeoLocHelper.getDescription(
@@ -315,7 +298,7 @@ public class CameraViewer extends JPanel
 	protected void enableMonitorPanel(Camera camera) {
 		s_panel.setCamera(camera);
 		ptz_panel.setCamera(camera);
-		ptz_panel.setEnabled(canControlPtz(camera));
+		ptz_panel.setEnabled(cam_ptz.canControlPtz());
 	}
 
 	/** Disable the monitor panel */
@@ -351,15 +334,5 @@ public class CameraViewer extends JPanel
 		if(m.getSize() > 1)
 			box.setSelectedIndex(1);
 		return box;
-	}
-
-	/** Check if the user can update an attribute */
-	private boolean canUpdate(Camera c, String aname) {
-		return session.canUpdate(c, aname);
-	}
-
-	/** Can a ptz control be made */
-	private boolean canControlPtz(Camera c) {
-		return canUpdate(c, "ptz");
 	}
 }

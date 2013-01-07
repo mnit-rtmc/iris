@@ -25,9 +25,6 @@ import us.mn.state.dot.tms.Camera;
  */
 public interface VideoStream {
 
-	/** Get the associated camera */
-	Camera getCamera();
-
 	/** Get a component for displaying the video stream */
 	JComponent getComponent();
 

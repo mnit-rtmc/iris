@@ -58,14 +58,6 @@ public class GstStream implements VideoStream {
 		}
 	};
 
-	/** Streaming camera */
-	private final Camera camera;
-
-	/** Get streaming camera */
-	public Camera getCamera() {
-		return camera;
-	}
-
 	/** Stream type */
 	private final StreamType stream_type;
 
@@ -74,7 +66,6 @@ public class GstStream implements VideoStream {
 
 	/** Create a new gstreamer stream */
 	public GstStream(VideoRequest req, Camera c) throws IOException {
-		camera = c;
 		stream_type = req.getStreamType(c);
 		pipe = createPipe(createSource(req, c));
 		pipe.getBus().connect(error_listener);

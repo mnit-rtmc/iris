@@ -91,6 +91,9 @@ public class CameraControl extends JPanel {
 	/** Slider used to select the pan-tilt-zoom speed */
 	private final JSlider speed_sldr;
 
+	/** Camera PTZ control */
+	private final CameraPTZ cam_ptz;
+
 	/** Pan-tilt-zoom speed */
 	private float m_speed = 0.5f;
 
@@ -98,8 +101,9 @@ public class CameraControl extends JPanel {
 	private Camera camera = null;
 
 	/** Create a new camera control panel */
-	public CameraControl() {
+	public CameraControl(CameraPTZ cptz) {
 		super(new FlowLayout()); // ignores preferred sizes
+		cam_ptz = cptz;
 		((FlowLayout)getLayout()).setHgap(24);
 		speed_sldr = createSpeedSlider();
 		left_btn = createPtzButton("camera.ptz.left", -1, 0, 0);
@@ -162,9 +166,7 @@ public class CameraControl extends JPanel {
 	{
 		final JButton btn = new JButton(new IAction(text_id) {
 			protected void do_perform() {
-				Camera c = camera;
-				if(c != null)
-					c.setPtz(PTZ_STOP);
+				cam_ptz.clearPtz();
 			}
 		});
 		initButton(btn);
@@ -178,14 +180,9 @@ public class CameraControl extends JPanel {
 
 	/** Respond to a PTZ button pressed event */
 	private void buttonPressed(JButton btn, int pan, int tilt, int zoom) {
-		Camera c = camera;
-		if(c != null && btn.getModel().isPressed()) {
-			Float[] ptz = new Float[] {
-				m_speed * pan,
-				m_speed * tilt,
-				m_speed * zoom
-			};
-			c.setPtz(ptz);
+		if(btn.getModel().isPressed()) {
+			cam_ptz.sendPtz(m_speed * pan, m_speed * tilt,
+				m_speed * zoom);
 		}
 	}
 
