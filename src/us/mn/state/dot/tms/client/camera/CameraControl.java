@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  * Copyright (C) 2008-2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
@@ -126,7 +127,7 @@ public class CameraControl extends JPanel {
 		m_ptzSpeed.setMajorTickSpacing(10);
 		m_ptzSpeed.setPaintTicks(true);
 		m_ptzSpeed.setSnapToTicks(true);
-		m_ptzSpeed.setToolTipText("Speed");
+		m_ptzSpeed.setToolTipText(I18N.get("camera.ptz.speed.tooltip"));
 		m_ptzSpeed.setMinimumSize(SLIDER_SIZE);
 		m_ptzSpeed.setPreferredSize(SLIDER_SIZE);
 
