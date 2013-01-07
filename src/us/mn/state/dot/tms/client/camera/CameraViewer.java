@@ -389,8 +389,6 @@ public class CameraViewer extends JPanel
 	protected void playPressed(Camera c) {
 		if(c != null) {
 			VideoRequest vr = new VideoRequest(props, SIZE);
-			vr.setDuration(SystemAttrEnum.
-				CAMERA_STREAM_DURATION_SECS.getInt());
 			vr.setSonarSessionId(session_id);
 			vr.setRate(30);
 			s_panel.requestStream(vr, c);

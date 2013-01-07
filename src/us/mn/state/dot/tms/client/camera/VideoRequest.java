@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2012  Minnesota Department of Transportation
+ * Copyright (C) 2003-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,19 +111,6 @@ public class VideoRequest {
 	/** Set the frame rate (per second) */
 	public void setRate(int rt) {
 		rate = rt;
-	}
-
-	/** Duration of stream (seconds) */
-	private int duration = 60;
-
-	/** Get requested duration in seconds */
-	public int getDuration() {
-		return duration;
-	}
-
-	/** Set the stream duration in seconds */
-	public void setDuration(int d) {
-		duration = d;
 	}
 
 	/** Stream size */

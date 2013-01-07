@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2012  Minnesota Department of Transportation
+ * Copyright (C) 2002-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import us.mn.state.dot.sched.SwingRunner;
@@ -33,13 +32,15 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * A JPanel that can display a video stream. It includes a progress bar and
- * status label.
+ * A JPanel that can display a video stream. It includes a status label.
  *
  * @author Timothy Johnson
  * @author Douglas Lau
  */
 public class StreamPanel extends JPanel {
+
+	/** Milliseconds between updates to the status */
+	static private final int STATUS_DELAY = 1000;
 
 	/** JPanel which holds the component used to render the video stream */
 	protected final JPanel screen_pnl = new JPanel(new BorderLayout());
@@ -50,43 +51,22 @@ public class StreamPanel extends JPanel {
 	/** JLabel for displaying the stream details (codec, size, framerate) */
 	protected final JLabel status_lbl = new JLabel();
 
-	/** Progress bar for duration */
-	private final JProgressBar progress = new JProgressBar(0, 100);
-
-	/** Milliseconds between updates to the progress */
-	static protected final int TIMER_DELAY = 1000;
-
-	/** Timer listener for updating video progress */
-	protected class ProgressTimer implements ActionListener {
-		protected int seconds = 0;
-		protected int duration = 0;
-		public void start(int n_seconds) {
-			seconds = 0;
-			duration = n_seconds;
-			progress.setValue(0);
-			progress.setMaximum(n_seconds);
-		}
-		public void stop() {
-			progress.setValue(0);
-		}
-		public void actionPerformed(ActionEvent evt) {
-			seconds++;
+	/** Timer listener for updating video status */
+	private class StatusUpdater implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
 			VideoStream vs = stream;
-			if(vs != null) {
-				progress.setValue(seconds);
-				if(seconds > duration || !vs.isPlaying())
-					clearStream();
-				if(seconds <= duration)
-					status_lbl.setText(vs.getStatus());
-			}
+			if(vs != null && vs.isPlaying())
+				status_lbl.setText(vs.getStatus());
+			else
+				clearStream();
 		}
 	};
 
-	/** Timer task for updating video progress */
-	protected final ProgressTimer progress_timer = new ProgressTimer();
+	/** Timer task for updating video status */
+	private final StatusUpdater stat_updater = new StatusUpdater();
 
 	/** Stream progress timer */
-	protected final Timer timer = new Timer(TIMER_DELAY, progress_timer);
+	private final Timer timer = new Timer(STATUS_DELAY, stat_updater);
 
 	/** Current video stream */
 	private VideoStream stream = null;
@@ -101,7 +81,6 @@ public class StreamPanel extends JPanel {
 		c.gridy = GridBagConstraints.RELATIVE;
 		p.add(screen_pnl, c);
 		status_pnl.add(status_lbl, BorderLayout.WEST);
-		status_pnl.add(progress, BorderLayout.EAST);
 		p.add(status_pnl, c);
 		add(p);
 		screen_pnl.setBorder(BorderFactory.createBevelBorder(
@@ -120,7 +99,6 @@ public class StreamPanel extends JPanel {
 			JComponent screen = stream.getComponent();
 			screen.setPreferredSize(screen_pnl.getPreferredSize());
 			screen_pnl.add(screen);
-			progress_timer.start(req.getDuration());
 			timer.start();
 		}
 		catch(IOException e) {
@@ -156,7 +134,6 @@ public class StreamPanel extends JPanel {
 	protected void clearStream() {
 		screen_pnl.removeAll();
 		timer.stop();
-		progress_timer.stop();
 		VideoStream vs = stream;
 		if(vs != null) {
 			vs.dispose();
