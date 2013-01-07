@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,14 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Properties;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
@@ -39,11 +33,9 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * GUI for viewing camera images
@@ -67,12 +59,8 @@ public class CameraViewer extends JPanel
 	/** Button number to select next camera */
 	static protected final int BUTTON_NEXT = 11;
 
-	/** Network worker thread */
-	static private final Scheduler NETWORKER = new Scheduler("networker");
-
 	/** Video size */
-	static protected final VideoRequest.Size SIZE =
-		VideoRequest.Size.MEDIUM;
+	static private final VideoRequest.Size SIZE = VideoRequest.Size.MEDIUM;
 
 	/** User session */
 	private final Session session;
@@ -83,11 +71,8 @@ public class CameraViewer extends JPanel
 	/** Logged in user */
 	protected final User user;
 
-	/** Client properties */
-	protected final Properties props;
-
-	/** Session ID for sonar connection */
-	protected final long session_id;
+	/** Video request */
+	private final VideoRequest video_req;
 
 	/** Displays the name of the selected camera */
 	protected final JTextField txtId = new JTextField();
@@ -101,21 +86,11 @@ public class CameraViewer extends JPanel
 	/** Video monitor output */
 	protected VideoMonitor video_monitor;
 
-	/** Streaming video viewer */
-	protected final StreamPanel s_panel;
-
-	/** Button used to play video */
-	protected final JButton play = new JButton(Icons.getIcon("play"));
-
-	/** Button used to stop video */
-	protected final JButton stop = new JButton(Icons.getIcon("stop"));
+	/** Streaming video panel */
+	private final StreamPanel s_panel;
 
 	/** Panel for controlling camera PTZ */
 	protected final CameraControl ptz_panel = new CameraControl();
-
-	/** Panel for the video controls */
-	protected final JPanel videoControls =
-		new JPanel(new FlowLayout(FlowLayout.CENTER));
 
 	/** Proxy manager for camera devices */
 	protected final CameraManager manager;
@@ -144,15 +119,16 @@ public class CameraViewer extends JPanel
 	/** Create a new camera viewer */
 	public CameraViewer(Session s, CameraManager man) {
 		super(new GridBagLayout());
-		s_panel = new StreamPanel(UI.dimension(SIZE.width,SIZE.height));
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
 		session = s;
 		state = session.getSonarState();
 		user = session.getUser();
-		props = session.getProperties();
+		video_req = new VideoRequest(session.getProperties(), SIZE);
 		Connection c = state.lookupConnection(state.getConnection());
-		session_id = c.getSessionId();
+		video_req.setSonarSessionId(c.getSessionId());
+		video_req.setRate(30);
+		s_panel = new StreamPanel(video_req);
 		setBorder(BorderFactory.createTitledBorder(
 			I18N.get("camera.selected")));
 		GridBagConstraints bag = new GridBagConstraints();
@@ -193,24 +169,8 @@ public class CameraViewer extends JPanel
 		add(s_panel, bag);
 		bag.gridy = 3;
 		bag.fill = GridBagConstraints.NONE;
-		play.setToolTipText(I18N.get("camera.play.tooltip"));
-		stop.setToolTipText(I18N.get("camera.stop.tooltip"));
-		videoControls.add(play);
-		videoControls.add(stop);
-		add(videoControls, bag);
-		bag.gridy = 4;
 		if(SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean())
 			add(ptz_panel, bag);
-		new ActionJob(NETWORKER, play) {
-			public void perform() {
-				playPressed(selected);
-			}
-		};
-		new ActionJob(NETWORKER, stop) {
-			public void perform() {
-				stopPressed();
-			}
-		};
 		clear();
 		ptz_poller.setDaemon(true);
 		ptz_poller.start();
@@ -302,6 +262,7 @@ public class CameraViewer extends JPanel
 	/** Dispose of the camera viewer */
 	public void dispose() {
 		removeAll();
+		s_panel.dispose();
 		selected = null;
 	}
 
@@ -309,6 +270,7 @@ public class CameraViewer extends JPanel
 	public void setSelected(final Camera camera) {
 		if(camera == selected)
 			return;
+		s_panel.setCamera(camera);
 		selected = camera;
 		pan = 0;
 		tilt = 0;
@@ -317,11 +279,7 @@ public class CameraViewer extends JPanel
 			txtId.setText(camera.getName());
 			txtLocation.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
-			new AbstractJob(NETWORKER) {
-				public void perform() {
-					playPressed(camera);
-				}
-			}.addToScheduler();
+			s_panel.setCamera(camera);
 			if(video_monitor != null)
 				video_monitor.setCamera(camera);
 			updateMonitorPanel(camera);
@@ -355,21 +313,14 @@ public class CameraViewer extends JPanel
 
 	/** Enable the monitor panel */
 	protected void enableMonitorPanel(Camera camera) {
-		play.setEnabled(true);
-		stop.setEnabled(true);
+		s_panel.setCamera(camera);
 		ptz_panel.setCamera(camera);
 		ptz_panel.setEnabled(canControlPtz(camera));
 	}
 
 	/** Disable the monitor panel */
 	protected void disableMonitorPanel() {
-		new AbstractJob(NETWORKER) {
-			public void perform() {
-				stopPressed();
-			}
-		}.addToScheduler();
-		play.setEnabled(false);
-		stop.setEnabled(false);
+		s_panel.setCamera(null);
 		ptz_panel.setEnabled(false);
 	}
 
@@ -385,27 +336,11 @@ public class CameraViewer extends JPanel
 		updateMonitorPanel(camera);
 	}
 
-	/** Start video streaming */
-	protected void playPressed(Camera c) {
-		if(c != null) {
-			VideoRequest vr = new VideoRequest(props, SIZE);
-			vr.setSonarSessionId(session_id);
-			vr.setRate(30);
-			s_panel.requestStream(vr, c);
-		}
-	}
-
-	/** Stop video streaming */
-	protected void stopPressed() {
-		s_panel.clearStream();
-	}
-
 	/** Clear all of the fields */
 	protected void clear() {
 		txtId.setText("");
 		txtLocation.setText("");
 		disableMonitorPanel();
-		s_panel.clearStream();
 	}
 
 	/** Create the video output selection combo box */

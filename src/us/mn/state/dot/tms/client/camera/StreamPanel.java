@@ -27,9 +27,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.utils.I18N;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A JPanel that can display a video stream. It includes a status label.
@@ -42,11 +45,17 @@ public class StreamPanel extends JPanel {
 	/** Milliseconds between updates to the status */
 	static private final int STATUS_DELAY = 1000;
 
+	/** Network worker thread */
+	static private final Scheduler NETWORKER = new Scheduler("networker");
+
+	/** Video request */
+	private final VideoRequest video_req;
+
 	/** JPanel which holds the component used to render the video stream */
-	private final JPanel screen_pnl = new JPanel(new BorderLayout());
+	private final JPanel screen_pnl;
 
 	/** JPanel which holds the status widgets */
-	private final JPanel status_pnl = new JPanel(new BorderLayout());
+	private final JPanel status_pnl;
 
 	/** JLabel for displaying the stream details (codec, size, framerate) */
 	private final JLabel status_lbl = new JLabel();
@@ -72,30 +81,56 @@ public class StreamPanel extends JPanel {
 	private VideoStream stream = null;
 
 	/** Create a new stream panel */
-	public StreamPanel(Dimension sz) {
-		super(new BorderLayout());
-		JPanel p = new JPanel(new GridBagLayout());
+	public StreamPanel(VideoRequest req) {
+		super(new GridBagLayout());
+		VideoRequest.Size vsz = req.getSize();
+		Dimension sz = UI.dimension(vsz.width, vsz.height);
+		video_req = req;
+		screen_pnl = createScreenPanel(sz);
+		status_pnl = createStatusPanel(sz);
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 0;
 		c.gridy = GridBagConstraints.RELATIVE;
-		p.add(screen_pnl, c);
-		status_pnl.add(status_lbl, BorderLayout.WEST);
-		p.add(status_pnl, c);
-		add(p);
-		screen_pnl.setBorder(BorderFactory.createBevelBorder(
+		add(screen_pnl, c);
+		add(status_pnl, c);
+	}
+
+	/** Create the screen panel */
+	private JPanel createScreenPanel(Dimension sz) {
+		JPanel p = new JPanel(new BorderLayout());
+		p.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
-		screen_pnl.setPreferredSize(sz);
-		status_pnl.setPreferredSize(new Dimension(sz.width, 20));
+		p.setPreferredSize(sz);
+		return p;
+	}
+
+	/** Create the status panel */
+	private JPanel createStatusPanel(Dimension sz) {
+		JPanel p = new JPanel(new BorderLayout());
+		p.add(status_lbl, BorderLayout.WEST);
+		p.setPreferredSize(new Dimension(sz.width, 20));
+		return p;
+	}
+
+	/** Set the camera to stream */
+	public void setCamera(final Camera c) {
+		if(stream != null)
+			clearStream();
+		if(c != null) {
+			status_lbl.setText(I18N.get("camera.stream.opening"));
+			NETWORKER.addJob(new Job() {
+				public void perform() {
+					requestStream(c);
+				}
+			});
+		}
 	}
 
 	/** Request a new video stream */
-	public void requestStream(VideoRequest req, Camera c) {
-		if(stream != null)
-			clearStream();
+	private void requestStream(Camera c) {
 		try {
-			status_lbl.setText(I18N.get("camera.stream.opening"));
-			stream = createStream(req, c);
+			stream = createStream(c);
 			JComponent screen = stream.getComponent();
 			screen.setPreferredSize(screen_pnl.getPreferredSize());
 			screen_pnl.add(screen);
@@ -107,17 +142,17 @@ public class StreamPanel extends JPanel {
 	}
 
 	/** Create a new video stream */
-	private VideoStream createStream(VideoRequest req, Camera c)
+	private VideoStream createStream(Camera c)
 		throws IOException
 	{
-		switch(req.getStreamType(c)) {
+		switch(video_req.getStreamType(c)) {
 		case MJPEG:
-			return new MJPEGStream(req, c);
+			return new MJPEGStream(video_req, c);
 		case MPEG4:
 			try {
 				Class.forName("org.gstreamer.Gst");
 				Class.forName("com.sun.jna.Library");
-				return new GstStream(req, c);
+				return new GstStream(video_req, c);
 			}
 			catch(ClassNotFoundException cnfe) {
 				throw new IOException("Missing gstreamer");
@@ -131,7 +166,7 @@ public class StreamPanel extends JPanel {
 	}
 
 	/** Clear the video stream */
-	protected void clearStream() {
+	private void clearStream() {
 		screen_pnl.removeAll();
 		timer.stop();
 		VideoStream vs = stream;
