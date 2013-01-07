@@ -43,13 +43,13 @@ public class StreamPanel extends JPanel {
 	static private final int STATUS_DELAY = 1000;
 
 	/** JPanel which holds the component used to render the video stream */
-	protected final JPanel screen_pnl = new JPanel(new BorderLayout());
+	private final JPanel screen_pnl = new JPanel(new BorderLayout());
 
 	/** JPanel which holds the status widgets */
-	protected final JPanel status_pnl = new JPanel(new BorderLayout());
+	private final JPanel status_pnl = new JPanel(new BorderLayout());
 
 	/** JLabel for displaying the stream details (codec, size, framerate) */
-	protected final JLabel status_lbl = new JLabel();
+	private final JLabel status_lbl = new JLabel();
 
 	/** Timer listener for updating video status */
 	private class StatusUpdater implements ActionListener {
@@ -107,7 +107,7 @@ public class StreamPanel extends JPanel {
 	}
 
 	/** Create a new video stream */
-	protected VideoStream createStream(VideoRequest req, Camera c)
+	private VideoStream createStream(VideoRequest req, Camera c)
 		throws IOException
 	{
 		switch(req.getStreamType(c)) {
