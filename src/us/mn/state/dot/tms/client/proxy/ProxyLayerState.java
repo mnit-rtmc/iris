@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,6 +87,8 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 
 	/** Set the tab selected flag */
 	public void setTabSelected(boolean ts) {
+		if(tab_selected && !ts)
+			model.clearSelection();
 		tab_selected = ts;
 		if(visible == null)
 			notifyLayerChangedListeners(LayerChange.visibility);
