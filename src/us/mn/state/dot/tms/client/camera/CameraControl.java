@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.Widgets;
 
 /**
  * This class creates a Swing panel for controlling camera pan, tilt, and zoom.
@@ -49,9 +50,6 @@ public class CameraControl extends JPanel {
 
 	/** PTZ array to stop movement */
 	static private final Float[] PTZ_STOP = new Float[] { 0f, 0f, 0f };
-
-	/** The preferred size of the slider */
-	static private final Dimension SLIDER_SIZE = new Dimension(40, 110);
 
 	/** The preferred insets for buttons */
 	static private final Insets INSETS = new Insets(0, 0, 0, 0);
@@ -90,9 +88,8 @@ public class CameraControl extends JPanel {
 	private final JButton[] preset_btn =
 		new JButton[NUMBER_PRESET_BUTTONS];
 
-	/** The slider used to select the pan-tilt-zoom speed */
-	private final JSlider m_ptzSpeed = 
-		new JSlider(SwingConstants.VERTICAL);
+	/** Slider used to select the pan-tilt-zoom speed */
+	private final JSlider speed_sldr;
 
 	/** Pan-tilt-zoom speed */
 	private float m_speed = 0.5f;
@@ -104,7 +101,7 @@ public class CameraControl extends JPanel {
 	public CameraControl() {
 		super(new FlowLayout()); // ignores preferred sizes
 		((FlowLayout)getLayout()).setHgap(24);
-		add(buildSpeedSliderPanel());
+		speed_sldr = createSpeedSlider();
 		left_btn = createPtzButton("camera.ptz.left", -1, 0, 0);
 		right_btn = createPtzButton("camera.ptz.right", 1, 0, 0);
 		up_btn = createPtzButton("camera.ptz.up", 0, 1, 0);
@@ -114,35 +111,35 @@ public class CameraControl extends JPanel {
 		down_left_btn = createPtzButton("camera.ptz.down.left",-1,-1,0);
 		down_right_btn = createPtzButton("camera.ptz.down.right", 1,
 			-1, 0);
-		add(buildPanTiltPanel());
 		zoom_in_btn = createPtzButton("camera.ptz.zoom.in", 0, 0, 1);
 		zoom_out_btn = createPtzButton("camera.ptz.zoom.out", 0, 0, -1);
+		add(buildSpeedSliderPanel());
+		add(buildPanTiltPanel());
 		add(buildZoomPanel());
 		add(buildPresetPanel());
 	}
 
+	/** Create PTZ speed slider */
+	private JSlider createSpeedSlider() {
+		Dimension sz = Widgets.dimension(40, 110);
+		JSlider s = new JSlider(SwingConstants.VERTICAL);
+		s.setMajorTickSpacing(10);
+		s.setPaintTicks(true);
+		s.setSnapToTicks(true);
+		s.setToolTipText(I18N.get("camera.ptz.speed.tooltip"));
+		s.setMinimumSize(sz);
+		s.setPreferredSize(sz);
+		return s;
+	}
+
 	/** Build speed slider panel */
 	private JPanel buildSpeedSliderPanel() {
-		// configure
-		m_ptzSpeed.setMajorTickSpacing(10);
-		m_ptzSpeed.setPaintTicks(true);
-		m_ptzSpeed.setSnapToTicks(true);
-		m_ptzSpeed.setToolTipText(I18N.get("camera.ptz.speed.tooltip"));
-		m_ptzSpeed.setMinimumSize(SLIDER_SIZE);
-		m_ptzSpeed.setPreferredSize(SLIDER_SIZE);
-
-		// build panel
-		JPanel jp = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		c.gridwidth = 1;
-		c.gridheight = 3;
-		c.gridx = 0;
-		c.gridy = 0;
-		jp.add(m_ptzSpeed, c);
-		m_ptzSpeed.addChangeListener(new ChangeListener() {
+		JPanel jp = new JPanel(new FlowLayout());
+		jp.add(speed_sldr);
+		speed_sldr.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
-				if(!m_ptzSpeed.getValueIsAdjusting())
-					m_speed = m_ptzSpeed.getValue() / 100f;
+				if(!speed_sldr.getValueIsAdjusting())
+					m_speed = speed_sldr.getValue() / 100f;
 			}
 		});
 		return jp;
@@ -266,6 +263,7 @@ public class CameraControl extends JPanel {
 
 	/** Set the camera control enable status */
 	public void setEnabled(boolean enable) {
+		speed_sldr.setEnabled(enable);
 		left_btn.setEnabled(enable);
 		right_btn.setEnabled(enable);
 		up_btn.setEnabled(enable);
@@ -276,7 +274,6 @@ public class CameraControl extends JPanel {
 		down_right_btn.setEnabled(enable);
 		zoom_in_btn.setEnabled(enable);
 		zoom_out_btn.setEnabled(enable);
-		m_ptzSpeed.setEnabled(enable);
 		for(JButton b: preset_btn)
 			b.setEnabled(enable);
 	}
