@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,14 @@ public class GstStream implements VideoStream {
 		}
 	};
 
+	/** Streaming camera */
+	private final Camera camera;
+
+	/** Get streaming camera */
+	public Camera getCamera() {
+		return camera;
+	}
+
 	/** Stream type */
 	private final StreamType stream_type;
 
@@ -66,6 +74,7 @@ public class GstStream implements VideoStream {
 
 	/** Create a new gstreamer stream */
 	public GstStream(VideoRequest req, Camera c) throws IOException {
+		camera = c;
 		stream_type = req.getStreamType(c);
 		pipe = createPipe(createSource(req, c));
 		pipe.getBus().connect(error_listener);

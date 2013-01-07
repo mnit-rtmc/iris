@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import javax.swing.JComponent;
+import us.mn.state.dot.tms.Camera;
 
 /**
  * A video stream displays a video on a swing component.
@@ -23,6 +24,9 @@ import javax.swing.JComponent;
  * @author Timothy Johnson
  */
 public interface VideoStream {
+
+	/** Get the associated camera */
+	Camera getCamera();
 
 	/** Get a component for displaying the video stream */
 	JComponent getComponent();

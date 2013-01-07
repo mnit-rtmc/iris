@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2012  Minnesota Department of Transportation
+ * Copyright (C) 2003-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,14 @@ public class MJPEGStream implements VideoStream {
 	/** Label to display video stream */
 	private final JLabel screen = new JLabel();
 
+	/** Camera streaming */
+	private final Camera camera;
+
+	/** Get streaming camera */
+	public Camera getCamera() {
+		return camera;
+	}
+
 	/** URL of the data source */
 	private final URL url;
 
@@ -67,6 +75,7 @@ public class MJPEGStream implements VideoStream {
 
 	/** Create a new MJPEG stream */
 	public MJPEGStream(VideoRequest req, Camera c) throws IOException {
+		camera = c;
 		url = new URL(req.getUrl(c));
 		size = UI.dimension(req.getSize().width, req.getSize().height);
 		stream = createInputStream();
