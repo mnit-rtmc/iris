@@ -20,9 +20,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -106,71 +103,13 @@ public class StreamPanel extends JPanel {
 	/** Create the screen panel */
 	private JPanel createScreenPanel(Dimension sz) {
 		JPanel p = new JPanel(new BorderLayout());
-		MousePanTilt pt = new MousePanTilt(sz);
-		p.addMouseListener(pt);
-		p.addMouseMotionListener(pt);
+		MousePTZ ptz = new MousePTZ(cam_ptz, sz);
+		p.addMouseListener(ptz);
+		p.addMouseMotionListener(ptz);
 		p.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
 		p.setPreferredSize(sz);
 		return p;
-	}
-
-	/** Mouse event handler */
-	private final class MousePanTilt extends MouseAdapter
-		implements MouseMotionListener
-	{
-		private final Dimension size;
-		private final int dead_left;
-		private final int dead_right;
-		private final int dead_up;
-		private final int dead_down;
-		private float pan = 0;
-		private float tilt = 0;
-		private MousePanTilt(Dimension sz) {
-			size = sz;
-			int deadx = sz.width / 20;
-			dead_left = sz.width / 2 - deadx;
-			dead_right = sz.width / 2 + deadx;
-			int deady = sz.height / 20;
-			dead_up = sz.height / 2 - deady;
-			dead_down = sz.height / 2 + deady;
-		}
-		public void mousePressed(MouseEvent e) {
-			updatePanTilt(e);
-		}
-		public void mouseReleased(MouseEvent e) {
-			cancelPanTilt();
-		}
-		public void mouseDragged(MouseEvent e) {
-			updatePanTilt(e);
-		}
-		public void mouseMoved(MouseEvent e) { }
-		private void updatePanTilt(MouseEvent e) {
-			cam_ptz.sendPtz(calculatePan(e), calculateTilt(e), 0);
-		}
-		private float calculatePan(MouseEvent e) {
-			float x = e.getX();
-			if(x < dead_left)
-				return -(dead_left - x) / dead_left;
-			else if(x > dead_right) {
-				return (x - dead_right) /
-					(size.width - dead_right);
-			} else
-				return 0;
-		}
-		private float calculateTilt(MouseEvent e) {
-			float y = e.getY();
-			if(y < dead_up)
-				return (dead_up - y) / dead_up;
-			else if(y > dead_down) {
-				return -(y - dead_down) /
-					(size.height - dead_down);
-			} else
-				return 0;
-		}
-		private void cancelPanTilt() {
-			cam_ptz.clearPtz();
-		}
 	}
 
 	/** Create the status panel */
@@ -210,9 +149,7 @@ public class StreamPanel extends JPanel {
 	}
 
 	/** Create a new video stream */
-	private VideoStream createStream(Camera c)
-		throws IOException
-	{
+	private VideoStream createStream(Camera c) throws IOException {
 		switch(video_req.getStreamType(c)) {
 		case MJPEG:
 			return new MJPEGStream(video_req, c);
@@ -251,7 +188,7 @@ public class StreamPanel extends JPanel {
 	}
 
 	/** Dispose of the stream panel */
-	protected final void dispose() {
+	public final void dispose() {
 		clearStream();
 	}
 }
