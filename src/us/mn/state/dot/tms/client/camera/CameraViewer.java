@@ -256,7 +256,6 @@ public class CameraViewer extends JPanel
 		if(camera == selected)
 			return;
 		cam_ptz.setCamera(camera);
-		s_panel.setCamera(camera);
 		selected = camera;
 		if(camera != null) {
 			txtId.setText(camera.getName());
@@ -265,7 +264,8 @@ public class CameraViewer extends JPanel
 			s_panel.setCamera(camera);
 			if(video_monitor != null)
 				video_monitor.setCamera(camera);
-			updateMonitorPanel(camera);
+			ptz_panel.setCamera(camera);
+			ptz_panel.setEnabled(cam_ptz.canControlPtz());
 		} else
 			clear();
 	}
@@ -286,27 +286,6 @@ public class CameraViewer extends JPanel
 			setSelected(null);
 	}
 
-	/** Update the monitor panel */
-	protected void updateMonitorPanel(Camera camera) {
-		if(camera != null)
-			enableMonitorPanel(camera);
-		else
-			disableMonitorPanel();
-	}
-
-	/** Enable the monitor panel */
-	protected void enableMonitorPanel(Camera camera) {
-		s_panel.setCamera(camera);
-		ptz_panel.setCamera(camera);
-		ptz_panel.setEnabled(cam_ptz.canControlPtz());
-	}
-
-	/** Disable the monitor panel */
-	protected void disableMonitorPanel() {
-		s_panel.setCamera(null);
-		ptz_panel.setEnabled(false);
-	}
-
 	/** Called when a video monitor is selected */
 	protected void monitorSelected() {
 		Camera camera = selected;
@@ -316,14 +295,14 @@ public class CameraViewer extends JPanel
 			video_monitor.setCamera(camera);
 		} else
 			video_monitor = null;
-		updateMonitorPanel(camera);
 	}
 
 	/** Clear all of the fields */
-	protected void clear() {
+	private void clear() {
 		txtId.setText("");
 		txtLocation.setText("");
-		disableMonitorPanel();
+		s_panel.setCamera(null);
+		ptz_panel.setEnabled(false);
 	}
 
 	/** Create the video output selection combo box */
