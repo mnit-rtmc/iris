@@ -1372,7 +1372,6 @@ COPY iris.encoder_type (id, description) FROM stdin;
 COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
-camera_ptz_panel_enable	false
 client_units_si	true
 database_version	4.1.0
 detector_auto_fail_enable	true

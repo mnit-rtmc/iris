@@ -89,8 +89,8 @@ public class CameraViewer extends JPanel
 	/** Streaming video panel */
 	private final StreamPanel s_panel;
 
-	/** Panel for controlling camera PTZ */
-	private final CameraControl ptz_panel;
+	/** Panel for camera presets */
+	private final PresetPanel preset_pnl;
 
 	/** Proxy manager for camera devices */
 	protected final CameraManager manager;
@@ -109,7 +109,7 @@ public class CameraViewer extends JPanel
 		session = s;
 		cam_ptz = new CameraPTZ(s);
 		joy_ptz = new JoystickPTZ(cam_ptz);
-		ptz_panel = new CameraControl(cam_ptz);
+		preset_pnl = new PresetPanel();
 		state = session.getSonarState();
 		user = session.getUser();
 		video_req = new VideoRequest(session.getProperties(), SIZE);
@@ -157,8 +157,7 @@ public class CameraViewer extends JPanel
 		add(s_panel, bag);
 		bag.gridy = 3;
 		bag.fill = GridBagConstraints.NONE;
-		if(SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean())
-			add(ptz_panel, bag);
+		add(preset_pnl, bag);
 		clear();
 		joy_ptz.addJoystickListener(new JoystickListener() {
 			public void buttonChanged(JoystickButtonEvent ev) {
@@ -223,8 +222,8 @@ public class CameraViewer extends JPanel
 			s_panel.setCamera(camera);
 			if(video_monitor != null)
 				video_monitor.setCamera(camera);
-			ptz_panel.setCamera(camera);
-			ptz_panel.setEnabled(cam_ptz.canControlPtz());
+			preset_pnl.setCamera(camera);
+			preset_pnl.setEnabled(cam_ptz.canControlPtz());
 		} else
 			clear();
 	}
@@ -261,7 +260,7 @@ public class CameraViewer extends JPanel
 		txtId.setText("");
 		txtLocation.setText("");
 		s_panel.setCamera(null);
-		ptz_panel.setEnabled(false);
+		preset_pnl.setEnabled(false);
 	}
 
 	/** Create the video output selection combo box */

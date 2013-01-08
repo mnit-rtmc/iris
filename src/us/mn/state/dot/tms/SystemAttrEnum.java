@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.utils.I18N;
 public enum SystemAttrEnum {
 	CAMERA_ID_BLANK(""),
 	CAMERA_NUM_PRESET_BTNS(3, 0, 20, Change.RESTART_CLIENT),
-	CAMERA_PTZ_PANEL_ENABLE(false, Change.RESTART_CLIENT),
 	CLIENT_UNITS_SI(true),
 	DATABASE_VERSION(String.class, Change.RESTART_SERVER),
 	DETECTOR_AUTO_FAIL_ENABLE(true),
