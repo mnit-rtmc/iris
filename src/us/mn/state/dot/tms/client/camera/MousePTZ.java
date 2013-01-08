@@ -15,16 +15,25 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import javax.swing.Timer;
 
 /**
  * Mouse event handler for PTZ control.
  *
  * @author Douglas Lau
  */
-public class MousePTZ extends MouseAdapter implements MouseMotionListener {
+public class MousePTZ extends MouseAdapter implements MouseMotionListener,
+	MouseWheelListener
+{
+	/** Milliseconds between zoom ticks */
+	static private final int ZOOM_TICK = 250;
 
 	/** Camera PTZ control */
 	private final CameraPTZ cam_ptz;
@@ -44,6 +53,35 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener {
 	/** Lower edge of dead zone */
 	private final int dead_down;
 
+	/** Pan value from last update */
+	private float pan = 0;
+
+	/** Tilt value from last update */
+	private float tilt = 0;
+
+	/** Zoom value from last update */
+	private float zoom = 0;
+
+	/** Count of wheel ticks */
+	private int n_zoom = 0;
+
+	/** Timer listener for zoom timer */
+	private class ZoomTimer implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			float z = zoom;
+			if(n_zoom > 0)
+				n_zoom--;
+			else if(n_zoom < 0)
+				n_zoom++;
+			zoom = calculateZoom();
+			if(z != zoom)
+				cam_ptz.sendPtz(pan, tilt, zoom);
+		}
+	};
+
+	/** Zoom timer */
+	private final Timer timer = new Timer(ZOOM_TICK, new ZoomTimer());
+
 	/** Create a new mouse PTZ handler */
 	public MousePTZ(CameraPTZ cptz, Dimension sz) {
 		cam_ptz = cptz;
@@ -54,6 +92,12 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener {
 		int deady = sz.height / 20;
 		dead_up = sz.height / 2 - deady;
 		dead_down = sz.height / 2 + deady;
+		timer.start();
+	}
+
+	/** Dispose of the mouse PTZ handler */
+	public void dispose() {
+		timer.stop();
 	}
 
 	/** Handle a mouse pressed event */
@@ -76,7 +120,9 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener {
 
 	/** Update the camera pan/tilt */
 	private void updatePanTilt(MouseEvent e) {
-		cam_ptz.sendPtz(calculatePan(e), calculateTilt(e), 0);
+		pan = calculatePan(e);
+		tilt = calculateTilt(e);
+		cam_ptz.sendPtz(pan, tilt, zoom);
 	}
 
 	/** Calculate the pan value */
@@ -105,6 +151,25 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener {
 
 	/** Cancel the pan/tilt action */
 	private void cancelPanTilt() {
-		cam_ptz.clearPtz();
+		pan = 0;
+		tilt = 0;
+		cam_ptz.sendPtz(pan, tilt, zoom);
+	}
+
+	/** Calculate the zoom value */
+	private float calculateZoom() {
+		if(n_zoom > 0)
+			return 1;
+		else if(n_zoom < 0)
+			return -1;
+		else
+			return 0;
+	}
+
+	/** Respond to a mouse wheel event */
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		n_zoom -= e.getWheelRotation();
+		zoom = calculateZoom();
+		cam_ptz.sendPtz(pan, tilt, zoom);
 	}
 }

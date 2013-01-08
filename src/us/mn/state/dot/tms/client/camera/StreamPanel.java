@@ -80,6 +80,9 @@ public class StreamPanel extends JPanel {
 	/** Camera PTZ control */
 	private final CameraPTZ cam_ptz;
 
+	/** Mouse PTZ control */
+	private final MousePTZ mouse_ptz;
+
 	/** Current video stream */
 	private VideoStream stream = null;
 
@@ -89,6 +92,7 @@ public class StreamPanel extends JPanel {
 		cam_ptz = cptz;
 		VideoRequest.Size vsz = req.getSize();
 		Dimension sz = UI.dimension(vsz.width, vsz.height);
+		mouse_ptz = new MousePTZ(cam_ptz, sz);
 		video_req = req;
 		screen_pnl = createScreenPanel(sz);
 		status_pnl = createStatusPanel(sz);
@@ -103,9 +107,9 @@ public class StreamPanel extends JPanel {
 	/** Create the screen panel */
 	private JPanel createScreenPanel(Dimension sz) {
 		JPanel p = new JPanel(new BorderLayout());
-		MousePTZ ptz = new MousePTZ(cam_ptz, sz);
-		p.addMouseListener(ptz);
-		p.addMouseMotionListener(ptz);
+		p.addMouseListener(mouse_ptz);
+		p.addMouseMotionListener(mouse_ptz);
+		p.addMouseWheelListener(mouse_ptz);
 		p.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
 		p.setPreferredSize(sz);
@@ -190,5 +194,6 @@ public class StreamPanel extends JPanel {
 	/** Dispose of the stream panel */
 	public final void dispose() {
 		clearStream();
+		mouse_ptz.dispose();
 	}
 }
