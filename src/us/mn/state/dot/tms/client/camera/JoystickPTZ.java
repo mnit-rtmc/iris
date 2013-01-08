@@ -23,6 +23,9 @@ package us.mn.state.dot.tms.client.camera;
  */
 public class JoystickPTZ {
 
+	/** Joystick polling thread */
+	static private final JoystickThread joystick = new JoystickThread();
+
 	/** Period (ms) to poll PTZ state */
 	static private final int POLL_PERIOD = 200;
 
@@ -44,9 +47,6 @@ public class JoystickPTZ {
 
 	/** Camera PTZ control */
 	private final CameraPTZ cam_ptz;
-
-	/** Joystick polling thread */
-	private final JoystickThread joystick;
 
 	/** Flag to indicate life */
 	private boolean alive = true;
@@ -78,7 +78,6 @@ public class JoystickPTZ {
 	/** Create a new joystick PTZ poller */
 	public JoystickPTZ(CameraPTZ cptz) {
 		cam_ptz = cptz;
-		joystick = new JoystickThread();
 		joy_poller.setDaemon(true);
 		joy_poller.start();
 	}
@@ -103,5 +102,6 @@ public class JoystickPTZ {
 	/** Dispose of the joystick threads */
 	public void dispose() {
 		alive = false;
+		joystick.clearJoystickListeners();
 	}
 }

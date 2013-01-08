@@ -175,23 +175,36 @@ public final class JoystickThread {
 	}
 
 	/** The listeners of this model */
-	protected final List<JoystickListener> listeners =
+	private final List<JoystickListener> listeners =
 		new LinkedList<JoystickListener>();
 
 	/** Add a joystick listener */
 	public void addJoystickListener(JoystickListener l) {
-		listeners.add(l);
+		synchronized(listeners) {
+			listeners.add(l);
+		}
 	}
 
 	/** Remove a joystick listener */
 	public void removeJoystickListener(JoystickListener l) {
-		listeners.remove(l);
+		synchronized(listeners) {
+			listeners.remove(l);
+		}
+	}
+
+	/** Clear all joystick listeners */
+	public void clearJoystickListeners() {
+		synchronized(listeners) {
+			listeners.clear();
+		}
 	}
 
 	/** Fire a joystick event to all listeners */
-	protected void fireJoystickButtonEvent(JoystickButtonEvent e) {
-		for(JoystickListener l: listeners)
-			l.buttonChanged(e);
+	private void fireJoystickButtonEvent(JoystickButtonEvent e) {
+		synchronized(listeners) {
+			for(JoystickListener l: listeners)
+				l.buttonChanged(e);
+		}
 	}
 
 	/** Dispose of the joystick thread */
