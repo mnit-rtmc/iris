@@ -200,14 +200,25 @@ public class CameraViewer extends JPanel
 			return 0;
 	}
 
+	/** Pan value from last update */
+	private float pan = 0;
+
+	/** Tilt value from last update */
+	private float tilt = 0;
+
+	/** Zoom value from last update */
+	private float zoom = 0;
+
 	/** Poll the joystick and send PTZ command to server */
 	private void pollJoystick() {
-		if(cam_ptz.canControlPtz()) {
-			float p = filter_deadzone(joystick.getPan());
-			float t = -filter_deadzone(joystick.getTilt());
-			float z = filter_deadzone(joystick.getZoom());
+		float p = filter_deadzone(joystick.getPan());
+		float t = -filter_deadzone(joystick.getTilt());
+		float z = filter_deadzone(joystick.getZoom());
+		if(p != pan || t != tilt || z != zoom)
 			cam_ptz.sendPtz(p, t, z);
-		}
+		pan = p;
+		tilt = t;
+		zoom = z;
 	}
 
 	/** Process a joystick button event */
