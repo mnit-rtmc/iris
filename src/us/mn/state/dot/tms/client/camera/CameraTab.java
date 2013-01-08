@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,15 +25,25 @@ import us.mn.state.dot.tms.client.Session;
  */
 public class CameraTab extends MapTab {
 
+	/** Camera viewer */
+	private final CameraViewer viewer;
+
 	/** Create a new camera tab for the IRIS client */
 	public CameraTab(Session session, CameraManager manager) {
 		super("camera");
-		add(new CameraViewer(session, manager), BorderLayout.NORTH);
+		viewer = new CameraViewer(session, manager);
+		add(viewer, BorderLayout.NORTH);
 		add(manager.createStyleSummary(), BorderLayout.CENTER);
 	}
 
 	/** Get the tab number */
-	public int getNumber() {
+	@Override public int getNumber() {
 		return 2;
+	}
+
+	/** Perform any clean up necessary */
+	@Override public void dispose() {
+		super.dispose();
+		viewer.dispose();
 	}
 }

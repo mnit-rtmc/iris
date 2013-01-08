@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import us.mn.state.dot.sched.SwingRunner;
  *
  * @author Douglas Lau
  */
-public final class JoystickThread extends Thread {
+public final class JoystickThread {
 
 	/** Regular expression to match axis events */
 	static protected final Pattern AXIS =
@@ -48,35 +48,58 @@ public final class JoystickThread extends Thread {
 	/** Zoom (Z) axis */
 	static protected final int AXIS_ZOOM = 2;
 
-	/** Create a new joystick thread */
-	public JoystickThread() {
-		setDaemon(true);
-		start();
-	}
+	/** Sub-process to run joystick script */
+	private Process process;
 
-	/** Run the joystick thread */
-	public void run() {
-		try {
-			JoyScript joy = new JoyScript();
-			Process process = joy.createProcess();
-			InputStream is = process.getInputStream();
-			BufferedReader reader = new BufferedReader(
-				new InputStreamReader(is));
-			while(true) {
-				String line = reader.readLine();
-				if(line == null)
-					break;
-				else
-					parseEvent(line);
+	/** Flag to indicate life */
+	private boolean alive = true;
+
+	/** Joystick event thread */
+	private final Thread joy_event = new Thread() {
+		public void run() {
+			try {
+				process = createProcess();
+				if(process != null)
+					readEvents();
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+			finally {
+				if(process != null)
+					process.destroy();
 			}
 		}
-		catch(IOException e) {
-			e.printStackTrace();
+	};
+
+	/** Create a new joystick thread */
+	public JoystickThread() {
+		joy_event.setDaemon(true);
+		joy_event.start();
+	}
+
+	/** Create joystick sub-process */
+	private Process createProcess() throws IOException {
+		JoyScript joy = new JoyScript();
+		return joy.createProcess();
+	}
+
+	/** Read joystick events */
+	private void readEvents() throws IOException {
+		InputStream is = process.getInputStream();
+		BufferedReader reader = new BufferedReader(
+			new InputStreamReader(is));
+		while(alive) {
+			String line = reader.readLine();
+			if(line == null)
+				break;
+			else
+				parseEvent(line);
 		}
 	}
 
 	/** Parse one joystick event */
-	protected void parseEvent(String ev) {
+	private void parseEvent(String ev) {
 		Matcher m = AXIS.matcher(ev);
 		if(m.matches()) {
 			int axis = Integer.parseInt(m.group(1));
@@ -169,5 +192,13 @@ public final class JoystickThread extends Thread {
 	protected void fireJoystickButtonEvent(JoystickButtonEvent e) {
 		for(JoystickListener l: listeners)
 			l.buttonChanged(e);
+	}
+
+	/** Dispose of the joystick thread */
+	public void dispose() {
+		alive = false;
+		Process p = process;
+		if(p != null)
+			p.destroy();
 	}
 }

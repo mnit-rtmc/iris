@@ -46,9 +46,6 @@ import us.mn.state.dot.tms.utils.I18N;
 public class CameraViewer extends JPanel
 	implements ProxySelectionListener<Camera>
 {
-	/** Dead zone needed for too-precise joystick drivers */
-	static protected final float AXIS_DEADZONE = 3f / 64;
-
 	/** The system attribute for the number of button presets */
 	static protected final int NUMBER_BUTTON_PRESETS =
 		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
@@ -101,23 +98,8 @@ public class CameraViewer extends JPanel
 	/** Currently selected camera */
 	protected Camera selected = null;
 
-	/** Joystick polling thread */
-	protected final JoystickThread joystick = new JoystickThread();
-
-	/** Joystick PTZ polling thread */
-	protected final Thread ptz_poller = new Thread() {
-		public void run() {
-			while(true) {
-				try {
-					pollJoystick();
-					sleep(200);
-				}
-				catch(InterruptedException e) {
-					break;
-				}
-			}
-		}
-	};
+	/** Joystick PTZ handler */
+	private final JoystickPTZ joy_ptz;
 
 	/** Create a new camera viewer */
 	public CameraViewer(Session s, CameraManager man) {
@@ -126,6 +108,7 @@ public class CameraViewer extends JPanel
 		manager.getSelectionModel().addProxySelectionListener(this);
 		session = s;
 		cam_ptz = new CameraPTZ(s);
+		joy_ptz = new JoystickPTZ(cam_ptz);
 		ptz_panel = new CameraControl(cam_ptz);
 		state = session.getSonarState();
 		user = session.getUser();
@@ -177,48 +160,12 @@ public class CameraViewer extends JPanel
 		if(SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean())
 			add(ptz_panel, bag);
 		clear();
-		ptz_poller.setDaemon(true);
-		ptz_poller.start();
-		joystick.addJoystickListener(new JoystickListener() {
+		joy_ptz.addJoystickListener(new JoystickListener() {
 			public void buttonChanged(JoystickButtonEvent ev) {
 				if(ev.pressed)
 					doJoyButton(ev);
 			}
 		});
-	}
-
-	/** Filter an axis to remove slop around the joystick dead zone */
-	static protected float filter_deadzone(float v) {
-		float av = Math.abs(v);
-		if(av > AXIS_DEADZONE) {
-			float fv = (av - AXIS_DEADZONE) / (1 - AXIS_DEADZONE);
-			if(v < 0)
-				return -fv;
-			else
-				return fv;
-		} else
-			return 0;
-	}
-
-	/** Pan value from last update */
-	private float pan = 0;
-
-	/** Tilt value from last update */
-	private float tilt = 0;
-
-	/** Zoom value from last update */
-	private float zoom = 0;
-
-	/** Poll the joystick and send PTZ command to server */
-	private void pollJoystick() {
-		float p = filter_deadzone(joystick.getPan());
-		float t = -filter_deadzone(joystick.getTilt());
-		float z = filter_deadzone(joystick.getZoom());
-		if(p != pan || t != tilt || z != zoom)
-			cam_ptz.sendPtz(p, t, z);
-		pan = p;
-		tilt = t;
-		zoom = z;
 	}
 
 	/** Process a joystick button event */
@@ -257,6 +204,7 @@ public class CameraViewer extends JPanel
 	/** Dispose of the camera viewer */
 	public void dispose() {
 		removeAll();
+		joy_ptz.dispose();
 		cam_ptz.setCamera(null);
 		s_panel.dispose();
 		selected = null;
