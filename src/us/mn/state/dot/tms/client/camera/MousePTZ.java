@@ -39,30 +39,33 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 	static private final int ZOOM_TICK = 250;
 
 	/** Mouse cursor for "pt up" */
-	static private final Cursor pt_up = Icons.getCursor("pt_up");
+	static private final Cursor pt_up = Icons.getCursor("pt_up", 12, 1);
 
 	/** Mouse cursor for "pt down" */
-	static private final Cursor pt_down = Icons.getCursor("pt_down");
+	static private final Cursor pt_down = Icons.getCursor("pt_down", 12,23);
 
 	/** Mouse cursor for "pt left" */
-	static private final Cursor pt_left = Icons.getCursor("pt_left");
+	static private final Cursor pt_left = Icons.getCursor("pt_left", 1, 12);
 
 	/** Mouse cursor for "pt right" */
-	static private final Cursor pt_right = Icons.getCursor("pt_right");
+	static private final Cursor pt_right = Icons.getCursor("pt_right", 23,
+		12);
 
 	/** Mouse cursor for "pt left up" */
-	static private final Cursor pt_left_up = Icons.getCursor("pt_left_up");
+	static private final Cursor pt_left_up = Icons.getCursor("pt_left_up",
+		4, 4);
 
 	/** Mouse cursor for "pt left down" */
 	static private final Cursor pt_left_down = Icons.getCursor(
-		"pt_left_down");
+		"pt_left_down", 4, 20);
 
 	/** Mouse cursor for "pt right up" */
-	static private final Cursor pt_right_up =Icons.getCursor("pt_right_up");
+	static private final Cursor pt_right_up =Icons.getCursor("pt_right_up",
+		20, 4);
 
 	/** Mouse cursor for "pt right down" */
 	static private final Cursor pt_right_down = Icons.getCursor(
-		"pt_right_down");
+		"pt_right_down", 20, 20);
 
 	/** Camera PTZ control */
 	private final CameraPTZ cam_ptz;
@@ -150,6 +153,8 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 	/** Handle a mouse dragged event */
 	@Override public void mouseDragged(MouseEvent e) {
 		updatePanTilt(e);
+		if(component != null)
+			component.setCursor(getCursor(e));
 	}
 
 	/** Handle a mouse moved event */
@@ -181,8 +186,10 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 				return pt_up;
 			else if(y > dead_down)
 				return pt_down;
-			else
-				return null;
+			else {
+				return Cursor.getPredefinedCursor(
+					Cursor.MOVE_CURSOR);
+			}
 		}
 	}
 

@@ -129,11 +129,11 @@ public class Icons {
 	}
 
 	/** Get a mouse cursor */
-	static public Cursor getCursor(String key) {
+	static public Cursor getCursor(String key, int x, int y) {
 		Image img = getImage(key);
 		if(img != null) {
 			Toolkit t = Toolkit.getDefaultToolkit();
-			Point p = new Point(0, 0);
+			Point p = new Point(x, y);
 			return t.createCustomCursor(img, p, key);
 		} else
 			return null;
