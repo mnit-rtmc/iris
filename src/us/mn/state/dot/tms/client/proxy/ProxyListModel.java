@@ -49,6 +49,9 @@ public class ProxyListModel<T extends SonarObject>
 	/** Set of all proxies */
 	protected final TreeSet<T> proxies = createProxySet();
 
+	/** Flag to indicate enumeration of all objects has completed */
+	private boolean enumerated = false;
+
 	/** Create a new proxy list model */
 	public ProxyListModel(TypeCache<T> c) {
 		cache = c;
@@ -68,7 +71,7 @@ public class ProxyListModel<T extends SonarObject>
 	/** Add a new proxy to the model */
 	protected int doProxyAdded(T proxy) {
 		synchronized(proxies) {
-			if(proxies.add(proxy))
+			if(proxies.add(proxy) && enumerated)
 				return getRow(proxy);
 			else
 				return -1;
@@ -105,7 +108,27 @@ public class ProxyListModel<T extends SonarObject>
 	/** Enumeration of all proxies is complete. Defined in interface
 	 *  ProxyListener. */
 	public void enumerationComplete() {
-		// Nothing to do
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				enumerationCompleteSlow();
+			}
+		}.addToScheduler();
+	}
+
+	private void enumerationCompleteSlow() {
+		synchronized(proxies) {
+			enumerated = true;
+			final int row = proxies.size() - 1;
+			if(row >= 0) {
+				final ListModel model = this;
+				SwingRunner.invoke(new Runnable() {
+					public void run() {
+						fireIntervalAdded(model, 0,row);
+					}
+				});
+			}
+		}
 	}
 
 	/** Remove a proxy from the model */
