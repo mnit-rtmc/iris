@@ -14,7 +14,9 @@
  */
 package us.mn.state.dot.tms.client.widget;
 
+import java.awt.Cursor;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.RGBImageFilter;
@@ -124,5 +126,16 @@ public class Icons {
 		Toolkit t = Toolkit.getDefaultToolkit();
 		return new ImageIcon(t.createImage(new FilteredImageSource(
 			i.getImage().getSource(), f)));
+	}
+
+	/** Get a mouse cursor */
+	static public Cursor getCursor(String key) {
+		Image img = getImage(key);
+		if(img != null) {
+			Toolkit t = Toolkit.getDefaultToolkit();
+			Point p = new Point(0, 0);
+			return t.createCustomCursor(img, p, key);
+		} else
+			return null;
 	}
 }

@@ -222,7 +222,6 @@
 
 		<copy todir="${build.images}">
 			<fileset dir="${images.dir}">
-				<include name="*.gif"/>
 				<include name="*.png"/>
 				<include name="*.jpg"/>
 			</fileset>
@@ -340,7 +339,7 @@
 		<mkdir dir="${dist.client}/images"/>
 		<copy todir="${dist.client}/images">
 			<fileset dir="${images.dir}">
-				<include name="iris.gif"/>
+				<include name="iris.png"/>
 				<include name="iris_icon.png"/>
 			</fileset>
 		</copy>

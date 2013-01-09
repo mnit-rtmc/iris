@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +25,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import javax.swing.Timer;
+import us.mn.state.dot.tms.client.widget.Icons;
 
 /**
  * Mouse event handler for PTZ control.
@@ -35,11 +38,40 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 	/** Milliseconds between zoom ticks */
 	static private final int ZOOM_TICK = 250;
 
+	/** Mouse cursor for "pt up" */
+	static private final Cursor pt_up = Icons.getCursor("pt_up");
+
+	/** Mouse cursor for "pt down" */
+	static private final Cursor pt_down = Icons.getCursor("pt_down");
+
+	/** Mouse cursor for "pt left" */
+	static private final Cursor pt_left = Icons.getCursor("pt_left");
+
+	/** Mouse cursor for "pt right" */
+	static private final Cursor pt_right = Icons.getCursor("pt_right");
+
+	/** Mouse cursor for "pt left up" */
+	static private final Cursor pt_left_up = Icons.getCursor("pt_left_up");
+
+	/** Mouse cursor for "pt left down" */
+	static private final Cursor pt_left_down = Icons.getCursor(
+		"pt_left_down");
+
+	/** Mouse cursor for "pt right up" */
+	static private final Cursor pt_right_up =Icons.getCursor("pt_right_up");
+
+	/** Mouse cursor for "pt right down" */
+	static private final Cursor pt_right_down = Icons.getCursor(
+		"pt_right_down");
+
 	/** Camera PTZ control */
 	private final CameraPTZ cam_ptz;
 
 	/** Size of stream panel widget */
 	private final Dimension size;
+
+	/** Component for cursors */
+	private Component component;
 
 	/** Left edge of dead zone */
 	private final int dead_left;
@@ -86,13 +118,18 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 	public MousePTZ(CameraPTZ cptz, Dimension sz) {
 		cam_ptz = cptz;
 		size = sz;
-		int deadx = sz.width / 20;
+		int deadx = sz.width / 12;
 		dead_left = sz.width / 2 - deadx;
 		dead_right = sz.width / 2 + deadx;
-		int deady = sz.height / 20;
+		int deady = sz.height / 12;
 		dead_up = sz.height / 2 - deady;
 		dead_down = sz.height / 2 + deady;
 		timer.start();
+	}
+
+	/** Set the component for cursors */
+	public void setComponent(Component c) {
+		component = c;
 	}
 
 	/** Dispose of the mouse PTZ handler */
@@ -101,22 +138,53 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 	}
 
 	/** Handle a mouse pressed event */
-	public void mousePressed(MouseEvent e) {
+	@Override public void mousePressed(MouseEvent e) {
 		updatePanTilt(e);
 	}
 
 	/** Handle a moust released event */
-	public void mouseReleased(MouseEvent e) {
+	@Override public void mouseReleased(MouseEvent e) {
 		cancelPanTilt();
 	}
 
 	/** Handle a mouse dragged event */
-	public void mouseDragged(MouseEvent e) {
+	@Override public void mouseDragged(MouseEvent e) {
 		updatePanTilt(e);
 	}
 
 	/** Handle a mouse moved event */
-	public void mouseMoved(MouseEvent e) { }
+	@Override public void mouseMoved(MouseEvent e) {
+		if(component != null)
+			component.setCursor(getCursor(e));
+	}
+
+	/** Get the appropriate cursor */
+	private Cursor getCursor(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+		if(x < dead_left) {
+			if(y < dead_up)
+				return pt_left_up;
+			else if(y > dead_down)
+				return pt_left_down;
+			else
+				return pt_left;
+		} else if(x > dead_right) {
+			if(y < dead_up)
+				return pt_right_up;
+			else if(y > dead_down)
+				return pt_right_down;
+			else
+				return pt_right;
+		} else {
+			if(y < dead_up)
+				return pt_up;
+			else if(y > dead_down)
+				return pt_down;
+			else
+				return null;
+		}
+	}
 
 	/** Update the camera pan/tilt */
 	private void updatePanTilt(MouseEvent e) {
@@ -167,7 +235,7 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 	}
 
 	/** Respond to a mouse wheel event */
-	public void mouseWheelMoved(MouseWheelEvent e) {
+	@Override public void mouseWheelMoved(MouseWheelEvent e) {
 		n_zoom -= e.getWheelRotation();
 		zoom = calculateZoom();
 		cam_ptz.sendPtz(pan, tilt, zoom);
