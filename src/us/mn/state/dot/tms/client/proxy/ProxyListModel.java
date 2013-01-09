@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,6 +116,7 @@ public class ProxyListModel<T extends SonarObject>
 		}.addToScheduler();
 	}
 
+	/** Complete the enumeration of a proxy list */
 	private void enumerationCompleteSlow() {
 		synchronized(proxies) {
 			enumerated = true;
