@@ -40,7 +40,7 @@ public class PresetPanel extends JPanel {
 
 	/** Create a preset panel */
 	public PresetPanel() {
-		super(new GridLayout(0, 2, 6, 6));
+		super(new GridLayout(0, 6, 6, 6));
 		for(int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
 			preset_btn[i] = createPresetButton(i + 1);
 			add(preset_btn[i]);
