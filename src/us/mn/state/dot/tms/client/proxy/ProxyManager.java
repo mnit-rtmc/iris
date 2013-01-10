@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -237,9 +237,12 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Create a proxy JList for the given style */
 	public ProxyJList<T> createList(String style) {
+		ProxyJList<T> jl = new ProxyJList<T>(this);
 		StyleListModel<T> m = getStyleModel(style);
 		assert m != null;
-		return new ProxyJList<T>(m);
+		jl.setModel(m);
+		jl.setSelectionModel(m.getSelectionModel());
+		return jl;
 	}
 
 	/** Create a theme for this type of proxy */
