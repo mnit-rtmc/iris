@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class PixelIcon implements Icon {
 
 	/** Diameter of pixel */
-	static private final int SIZE = UI.scaled(16);
+	static private final int SIZE = UI.scaled(8);
 
 	/** On/off state of the pixel */
 	protected final boolean state;
