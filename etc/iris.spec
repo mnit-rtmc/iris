@@ -4,7 +4,7 @@
 #     and Douglas Lau
 #
 # IRIS -- Intelligent Roadway Information System
-# Copyright (C) 2009-2012  Minnesota Department of Transportation
+# Copyright (C) 2009-2013  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@ fi
 %{_clientdir}/index.html
 %{_clientdir}/mail.jnlp
 %{_clientdir}/iris-client.jnlp
-%{_clientdir}/images/iris.gif
+%{_clientdir}/images/iris.png
 %{_clientdir}/images/iris_icon.png
 %{_clientdir}/lib/mail.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
