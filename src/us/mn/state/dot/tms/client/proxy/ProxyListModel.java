@@ -94,12 +94,8 @@ public class ProxyListModel<T extends SonarObject>
 		}
 	}
 
-	/** 
-	 *  Add a new proxy to the list model. Defined in interface 
-	 *  ProxyListener. Called when a new object is added to the
-	 *  TypeCache.
-	 */
-	public final void proxyAdded(final T proxy) {
+	/** Add a new proxy to the list model */
+	@Override public final void proxyAdded(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
@@ -108,9 +104,8 @@ public class ProxyListModel<T extends SonarObject>
 		}.addToScheduler();
 	}
 
-	/** Enumeration of all proxies is complete. Defined in interface
-	 *  ProxyListener. */
-	public void enumerationComplete() {
+	/** Enumeration of all proxies is complete */
+	@Override public void enumerationComplete() {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
@@ -162,11 +157,8 @@ public class ProxyListModel<T extends SonarObject>
 		}
 	}
 
-	/** Remove a proxy from the model. Defined in interface 
-	 *  ProxyListener. Called when an object in the TypeCache
-	 *  is removed.
-	 */
-	public final void proxyRemoved(final T proxy) {
+	/** Remove a proxy from the model */
+	@Override public final void proxyRemoved(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
@@ -212,11 +204,10 @@ public class ProxyListModel<T extends SonarObject>
 		}
 	}
 
-	/** Change a proxy in the list model. Defined in interface 
-	 *  ProxyListener. Called when an object in the TypeCache
-	 *  changes.
-	 */
-	public final void proxyChanged(final T proxy, final String attrib) {
+	/** Change a proxy in the list model */
+	@Override public final void proxyChanged(final T proxy,
+		final String attrib)
+	{
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
@@ -226,14 +217,14 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Get the size (for ListModel) */
-	public int getSize() {
+	@Override public int getSize() {
 		synchronized(proxies) {
 			return proxies.size();
 		}
 	}
 
 	/** Get the element at the specified index (for ListModel) */
-	public Object getElementAt(int index) {
+	@Override public Object getElementAt(int index) {
 		return getProxy(index);
 	}
 
