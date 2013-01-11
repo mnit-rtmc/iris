@@ -604,17 +604,14 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Ramp meter queue status */
-	protected RampMeterQueue queue = RampMeterQueue.UNKNOWN;
+	private RampMeterQueue queue = RampMeterQueue.UNKNOWN;
 
 	/** Set the queue status */
-	protected void setQueue(RampMeterQueue q) {
-		if(isFailed())
-			queue = RampMeterQueue.UNKNOWN;
-		else if(isMetering())
+	private void setQueue(RampMeterQueue q) {
+		if(q != queue) {
 			queue = q;
-		else
-			queue = RampMeterQueue.EMPTY;
-		notifyAttribute("queue");
+			notifyAttribute("queue");
+		}
 	}
 
 	/** Get the queue status */
@@ -624,11 +621,18 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Update the ramp meter queue status */
 	public void updateQueueState() {
-		MeterAlgorithmState as = alg_state;
-		if(as != null)
-			setQueue(as.getQueueState(this));
-		else
-			setQueue(RampMeterQueue.UNKNOWN);
+		setQueue(queueStatus(alg_state));
+	}
+
+	/** Determine the queue status */
+	private RampMeterQueue queueStatus(MeterAlgorithmState as) {
+		if(as != null && !isFailed()) {
+			 if(isMetering())
+				return as.getQueueState(this);
+			else
+				return RampMeterQueue.EMPTY;
+		} else
+			return RampMeterQueue.UNKNOWN;
 	}
 
 	/** Is the ramp meter currently metering? */
