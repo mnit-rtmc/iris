@@ -555,8 +555,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the controller firmware version */
 	public void setVersion(String v) {
-		version = v;
-		notifyAttribute("version");
+		if(!v.equals(version)) {
+			version = v;
+			notifyAttribute("version");
+		}
 	}
 
 	/** Get the controller firmware version */
@@ -569,10 +571,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the controller error status */
 	public void setErrorStatus(String s) {
-		if(errorStatus.equals(s) || s == null)
-			return;
-		errorStatus = s;
-		notifyAttribute("status");
+		if(!s.equals(errorStatus)) {
+			errorStatus = s;
+			notifyAttribute("status");
+		}
 	}
 
 	/** Controller communication status */
@@ -662,11 +664,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the controller maint status */
 	public void setMaint(String s) {
-		if(s == null)
-			maint = "";
-		else
+		if(!s.equals(maint)) {
 			maint = s;
-		notifyAttribute("maint");
+			notifyAttribute("maint");
+		}
 	}
 
 	/** Get the controller maint status */
@@ -780,18 +781,30 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public void setCounters(boolean clear) {
 		setMaint("");
 		setErrorStatus("");
-		timeoutErr = 0;
-		notifyAttribute("timeoutErr");
-		checksumErr = 0;
-		notifyAttribute("checksumErr");
-		parsingErr = 0;
-		notifyAttribute("parsingErr");
-		controllerErr = 0;
-		notifyAttribute("controllerErr");
-		successOps = 0;
-		notifyAttribute("successOps");
-		failedOps = 0;
-		notifyAttribute("failedOps");
+		if(timeoutErr != 0) {
+			timeoutErr = 0;
+			notifyAttribute("timeoutErr");
+		}
+		if(checksumErr != 0) {
+			checksumErr = 0;
+			notifyAttribute("checksumErr");
+		}
+		if(parsingErr != 0) {
+			parsingErr = 0;
+			notifyAttribute("parsingErr");
+		}
+		if(controllerErr != 0) {
+			controllerErr = 0;
+			notifyAttribute("controllerErr");
+		}
+		if(successOps != 0) {
+			successOps = 0;
+			notifyAttribute("successOps");
+		}
+		if(failedOps != 0) {
+			failedOps = 0;
+			notifyAttribute("failedOps");
+		}
 	}
 
 	/** Log a comm event */
