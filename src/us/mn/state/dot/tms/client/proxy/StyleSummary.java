@@ -23,7 +23,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Enumeration;
+import java.util.HashMap;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -64,6 +64,10 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Radio button group */
 	protected final ButtonGroup r_buttons = new ButtonGroup();
 
+	/** Mapping of styles to radio buttons */
+	private final HashMap<String, JRadioButton> buttons =
+		new HashMap<String, JRadioButton>();
+
 	/** Titled border */
 	protected final TitledBorder border;
 
@@ -97,6 +101,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			int row = i % n_rows;
 			final StyleListModel<T> m =
 				manager.getStyleModel(styles[i]);
+			JRadioButton btn = createRadioButton(m);
+			buttons.put(m.getName(), btn);
 			// by default, the 1st button is selected
 			if(i == 0)
 				default_rbutton = m.getName();
@@ -108,7 +114,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			bag.gridx = GridBagConstraints.RELATIVE;
 			add(createCount(m), bag);
 			bag.anchor = GridBagConstraints.WEST;
-			add(createRadioButton(m), bag);
+			add(btn, bag);
 		}
 
 		// add space right of each column (except last)
@@ -186,16 +192,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		bgroup.add(bs);
 		bgroup.add(bm);
 		bgroup.add(bl);
-		selectCellBtn(bgroup, bl);
+		bl.setSelected(true);
 		return panel;
-	}
-
-	/** Select toggle button */
-	static private void selectCellBtn(ButtonGroup g, AbstractButton d) {
-		for(Enumeration e = g.getElements(); e.hasMoreElements();) {
-			AbstractButton b = (AbstractButton)e.nextElement();
-			b.setSelected(b == d);
-		}
 	}
 
 	/** Create a toggle button for changing cell renderer size */
@@ -222,19 +220,16 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** Set the selected style, results in action + button selection
-	 * changes. This method is called by external classes, so the
-	 * specified button is selected, all other deselected. */
+	 * changes. */
 	public void setStyle(String style) {
-		for(Enumeration e = r_buttons.getElements();
-		    e.hasMoreElements(); )
-		{
-			JRadioButton btn = (JRadioButton)e.nextElement();
-			btn.setSelected(btn.getText().equals(style));
+		JRadioButton btn = buttons.get(style);
+		if(btn != null) {
+			btn.setSelected(true);
+			setStyleAction(style);
 		}
-		setStyleAction(style);
 	}
 
-	/** Button click action. */
+	/** Button click action */
 	private void setStyleAction(String style) {
 		String t = manager.getLongProxyType() + " " +
 			I18N.get("device.status") + ": " + style;
