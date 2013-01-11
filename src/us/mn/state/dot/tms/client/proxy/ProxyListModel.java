@@ -47,7 +47,7 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Set of all proxies */
-	protected final TreeSet<T> proxies = createProxySet();
+	private final TreeSet<T> proxies = createProxySet();
 
 	/** Flag to indicate enumeration of all objects has completed */
 	private boolean enumerated = false;
@@ -66,6 +66,9 @@ public class ProxyListModel<T extends SonarObject>
 	/** Dispose of the proxy model */
 	public void dispose() {
 		cache.removeProxyListener(this);
+		synchronized(proxies) {
+			proxies.clear();
+		}
 	}
 
 	/** Add a new proxy to the model */
