@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2013  Minnesota Department of Transportation
- * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +18,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JList;
-import javax.swing.JScrollPane;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
 
@@ -27,7 +25,6 @@ import us.mn.state.dot.sonar.SonarObject;
  * A proxy JList is a special JList which contains SONAR proxy objects.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class ProxyJList<T extends SonarObject> extends JList {
 
@@ -52,8 +49,6 @@ public class ProxyJList<T extends SonarObject> extends JList {
 					popupMenu(e);
 			}
 		});
-		// without JScrollPane, getMaximumSize() returns huge numbers
-		JScrollPane listScroller = new JScrollPane(this);
 	}
 
 	/** Respond to a double-click event */
