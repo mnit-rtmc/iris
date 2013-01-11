@@ -19,7 +19,6 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.Box;
@@ -90,10 +89,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	protected final Map<String, StyleListModel<T>> models =
 		new HashMap<String, StyleListModel<T>>();
 
-	/** Mapping from MapObject identityHashCode to proxy objects.  This is
-	 * an optimization cache to help findProxy run fast. */
-	private final HashMap<Integer, T> map_proxies =
-		new HashMap<Integer, T>();
+	/** Cache of MapObject to proxy */
+	private final ProxyMapCache<T> map_cache = new ProxyMapCache<T>();
 
 	/** Map layer for the proxy type */
 	protected final ProxyLayer<T> layer;
@@ -140,6 +137,7 @@ abstract public class ProxyManager<T extends SonarObject>
 			model.dispose();
 		s_model.dispose();
 		models.clear();
+		map_cache.dispose();
 		cache.removeProxyListener(this);
 	}
 
@@ -157,18 +155,10 @@ abstract public class ProxyManager<T extends SonarObject>
 	protected void proxyAddedSlow(T proxy) {
 		MapGeoLoc loc = findGeoLoc(proxy);
 		if(loc != null) {
-			addMapProxy(proxy, loc);
+			map_cache.put(loc, proxy);
 			Double tan = getTangentAngle(loc);
 			if(tan != null)
 				loc.setTangent(tan);
-		}
-	}
-
-	/** Add a map geo log to the map proxies hash */
-	protected void addMapProxy(T proxy, MapGeoLoc loc) {
-		int i = System.identityHashCode(loc);
-		synchronized(map_proxies) {
-			map_proxies.put(i, proxy);
 		}
 	}
 
@@ -208,17 +198,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Called when a proxy has been removed */
 	protected void proxyRemovedSlow(T proxy) {
 		s_model.removeSelected(proxy);
-		synchronized(map_proxies) {
-			Iterator<Map.Entry<Integer, T>> it =
-				map_proxies.entrySet().iterator();
-			while(it.hasNext()) {
-				Map.Entry<Integer, T> ent = it.next();
-				if(ent.getValue() == proxy) {
-					it.remove();
-					break;
-				}
-			}
-		}
+		map_cache.remove(proxy);
 	}
 
 	/** Called when a proxy attribute has changed */
@@ -368,10 +348,7 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Find a proxy matching the given map object */
 	public T findProxy(MapObject mo) {
-		int i = System.identityHashCode(mo);
-		synchronized(map_proxies) {
-			return map_proxies.get(i);
-		}
+		return map_cache.lookup(mo);
 	}
 
 	/** Get the description of a proxy */
