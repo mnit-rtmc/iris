@@ -19,6 +19,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -766,8 +767,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the pixel status array */
 	public void setPixelStatus(String[] p) {
-		pixelStatus = p;
-		notifyAttribute("pixelStatus");
+		if(!Arrays.equals(p, pixelStatus)) {
+			pixelStatus = p;
+			notifyAttribute("pixelStatus");
+		}
 	}
 
 	/** Get the pixel status array */
@@ -782,8 +785,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the power supply status table */
 	public void setPowerStatus(String[] t) {
-		powerStatus = t;
-		notifyAttribute("powerStatus");
+		if(!Arrays.equals(t, powerStatus)) {
+			powerStatus = t;
+			notifyAttribute("powerStatus");
+		}
 	}
 
 	/** Get the power supply status table */
@@ -797,8 +802,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the photocell status table */
 	public void setPhotocellStatus(String[] t) {
-		photocellStatus = t;
-		notifyAttribute("photocellStatus");
+		if(!Arrays.equals(t, photocellStatus)) {
+			photocellStatus = t;
+			notifyAttribute("photocellStatus");
+		}
 	}
 
 	/** Get the photocell status table */
