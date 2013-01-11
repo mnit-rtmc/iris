@@ -242,6 +242,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		// Force the border title to be repainted
 		repaint();
 		StyleListModel<T> m = manager.getStyleModel(style);
+		// JList.setModel clears the selection, so let's use
+		// a dummy selection model temporarily
 		p_list.setSelectionModel(dummy_model);
 		p_list.setModel(m);
 		p_list.setSelectionModel(m.getSelectionModel());
