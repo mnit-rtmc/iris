@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
-import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -30,6 +29,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -64,17 +64,15 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Radio button group */
 	protected final ButtonGroup r_buttons = new ButtonGroup();
 
-	/** Card layout for style lists */
-	protected final CardLayout cards = new CardLayout();
-
-	/** List panel for card layout */
-	protected final JPanel list_panel;
-
 	/** Titled border */
 	protected final TitledBorder border;
 
-	/** Listboxes for each style */
-	protected final ProxyJList<?>[] s_list;
+	/** Dummy list selection model */
+	private final DefaultListSelectionModel dummy_model =
+		new DefaultListSelectionModel();
+
+	/** Proxy list */
+	private final ProxyJList<T> p_list;
 
 	/** Create a new style summary panel, with optional cell size buttons.
 	 * @param man ProxyManager */
@@ -86,10 +84,11 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		ListCellRenderer renderer = manager.createCellRenderer();
 		border = BorderFactory.createTitledBorder("");
 		setBorder(border);
-		list_panel = new JPanel(cards);
 		GridBagConstraints bag = new GridBagConstraints();
 		String[] styles = manager.getStyles();
-		s_list = new ProxyJList<?>[styles.length];
+		p_list = manager.createList();
+		p_list.setCellRenderer(renderer);
+		JScrollPane sp = new JScrollPane(p_list);
 		String default_rbutton = "";
 		final int n_rows = (styles.length - 1) / STYLE_COLS + 1;
 		// grid is filled top to bottom, left to right
@@ -98,10 +97,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			int row = i % n_rows;
 			final StyleListModel<T> m =
 				manager.getStyleModel(styles[i]);
-			s_list[i] = manager.createList(styles[i]); 
-			s_list[i].setCellRenderer(renderer);
-			JScrollPane sp = new JScrollPane(s_list[i]);
-			list_panel.add(sp, m.getName());
 			// by default, the 1st button is selected
 			if(i == 0)
 				default_rbutton = m.getName();
@@ -144,7 +139,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		bag.weightx = 1;
 		bag.weighty = 1;
 		bag.fill = GridBagConstraints.BOTH;
-		add(list_panel, bag);
+		add(sp, bag);
 
 		// select default button
 		setStyle(default_rbutton);
@@ -223,16 +218,15 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	protected void updateRenderer(CellRendererSize size) {
 		manager.setCellSize(size);
 		ListCellRenderer renderer = manager.createCellRenderer();
-		for(ProxyJList lst: s_list)
-			lst.setCellRenderer(renderer);
+		p_list.setCellRenderer(renderer);
 	}
 
 	/** Set the selected style, results in action + button selection
-	 * changes. This method is called by external classes, so the 
+	 * changes. This method is called by external classes, so the
 	 * specified button is selected, all other deselected. */
 	public void setStyle(String style) {
-		for(Enumeration e = r_buttons.getElements(); 
-		    e.hasMoreElements(); ) 
+		for(Enumeration e = r_buttons.getElements();
+		    e.hasMoreElements(); )
 		{
 			JRadioButton btn = (JRadioButton)e.nextElement();
 			btn.setSelected(btn.getText().equals(style));
@@ -247,7 +241,10 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		border.setTitle(t);
 		// Force the border title to be repainted
 		repaint();
-		cards.show(list_panel, style);
+		StyleListModel<T> m = manager.getStyleModel(style);
+		p_list.setSelectionModel(dummy_model);
+		p_list.setModel(m);
+		p_list.setSelectionModel(m.getSelectionModel());
 	}
 
 	/** Dispose of the widget */

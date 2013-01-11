@@ -235,14 +235,9 @@ abstract public class ProxyManager<T extends SonarObject>
 		return new ProxyCellRenderer<T>(this);
 	}
 
-	/** Create a proxy JList for the given style */
-	public ProxyJList<T> createList(String style) {
-		ProxyJList<T> jl = new ProxyJList<T>(this);
-		StyleListModel<T> m = getStyleModel(style);
-		assert m != null;
-		jl.setModel(m);
-		jl.setSelectionModel(m.getSelectionModel());
-		return jl;
+	/** Create a proxy JList */
+	public ProxyJList<T> createList() {
+		return new ProxyJList<T>(this);
 	}
 
 	/** Create a theme for this type of proxy */

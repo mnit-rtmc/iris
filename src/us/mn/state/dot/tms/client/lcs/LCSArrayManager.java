@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -251,9 +251,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		};
 	}
 
-	/** Create a proxy JList for the given style */
-	public ProxyJList<LCSArray> createList(String style) {
-		ProxyJList<LCSArray> list = super.createList(style);
+	/** Create a proxy JList */
+	public ProxyJList<LCSArray> createList() {
+		ProxyJList<LCSArray> list = super.createList();
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.setVisibleRowCount(0);
 		return list;
