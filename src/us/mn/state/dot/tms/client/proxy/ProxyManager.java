@@ -19,6 +19,7 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.Box;
@@ -207,9 +208,17 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Called when a proxy has been removed */
 	protected void proxyRemovedSlow(T proxy) {
 		s_model.removeSelected(proxy);
-		// FIXME: map_proxies will leak when proxy objects are removed.
-		// Not easy to fix, since proxy objects die before we can
-		// get the corresponding MapGeoLoc to remove.
+		synchronized(map_proxies) {
+			Iterator<Map.Entry<Integer, T>> it =
+				map_proxies.entrySet().iterator();
+			while(it.hasNext()) {
+				Map.Entry<Integer, T> ent = it.next();
+				if(ent.getValue() == proxy) {
+					it.remove();
+					break;
+				}
+			}
+		}
 	}
 
 	/** Called when a proxy attribute has changed */
