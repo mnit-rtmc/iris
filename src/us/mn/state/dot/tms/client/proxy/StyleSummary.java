@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2013  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -76,9 +76,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Listboxes for each style */
 	protected final ProxyJList<?>[] s_list;
 
-	/** Indicates if optional cell size buttons are enabled. */
-	private final boolean m_enableCellSizeBtns;
-
 	/** Create a new style summary panel, with optional cell size buttons.
 	 * @param man ProxyManager */
 	public StyleSummary(final ProxyManager<T> man,
@@ -86,7 +83,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	{
 		super(new GridBagLayout());
 		manager = man;
-		m_enableCellSizeBtns = enableCellSizeBtns;
 		ListCellRenderer renderer = manager.createCellRenderer();
 		border = BorderFactory.createTitledBorder("");
 		setBorder(border);
@@ -131,7 +127,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		}
 
 		// add optional panel with cell size selection buttons
-		if(m_enableCellSizeBtns) {
+		if(enableCellSizeBtns) {
 			bag.gridx = 0;
 			bag.gridwidth = 1;
 			bag.gridheight = 1;
@@ -141,7 +137,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		}
 
 		// add listbox
-		bag.gridx = (m_enableCellSizeBtns ? 1 : 0);
+		bag.gridx = (enableCellSizeBtns ? 1 : 0);
 		bag.gridwidth = GridBagConstraints.REMAINDER;
 		bag.insets = new Insets(8, 0, 0, 0);
 		bag.gridy = n_rows + 1;
