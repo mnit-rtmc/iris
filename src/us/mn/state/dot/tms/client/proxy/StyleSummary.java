@@ -40,6 +40,7 @@ import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.TitledBorder;
 import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.DeviceStyle;
@@ -120,6 +121,15 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			legend_lbl = new JLabel(s.getLegend());
 			count_lbl = new JLabel();
 			n_count = 0;
+		}
+		private void updateCountLabel() {
+			// Capture current count in case it's updated
+			final String c = Integer.toString(n_count);
+			SwingRunner.invoke(new Runnable() {
+				public void run() {
+					count_lbl.setText(c);
+				}
+			});
 		}
 	}
 
@@ -212,29 +222,34 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Update the count labels for each style status */
 	private void updateCounts() {
+		start_over = true;
+		new AbstractJob() {
+			public void perform() {
+				start_over = false;
+				doUpdateCounts();
+			}
+		}.addToScheduler();
+	}
+
+	/** Flag to start over style status counts */
+	private boolean start_over = false;
+
+	/** Update the count labels for each style status */
+	private void doUpdateCounts() {
 		for(StyleWidgets sw: widgets.values())
 			sw.n_count = 0;
 		Iterator<T> it = manager.getCache().iterator();
-		while(it.hasNext()) {
+		while(it.hasNext() && !start_over) {
 			T proxy = it.next();
 			for(StyleWidgets sw: widgets.values()) {
 				if(manager.checkStyle(sw.dstyle, proxy))
 					sw.n_count++;
 			}
 		}
-		updateCountLabels();
-	}
-
-	/** Update the count labels */
-	private void updateCountLabels() {
-		SwingRunner.invoke(new Runnable() {
-			public void run() {
-				for(StyleWidgets sw: widgets.values()) {
-					sw.count_lbl.setText(Integer.toString(
-						sw.n_count));
-				}
-			}
-		});
+		if(!start_over) {
+			for(StyleWidgets sw: widgets.values())
+				sw.updateCountLabel();
+		}
 	}
 
 	/** Create the optional panel that contains cell size buttons. */
