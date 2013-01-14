@@ -21,7 +21,6 @@ import java.awt.Shape;
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
-import java.util.LinkedList;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -89,7 +88,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a style list model for the given symbol */
 	protected StyleListModel<DMS> createStyleListModel(Symbol s) {
-		return new DMSStyleModel(this, s.getLabel(), s.getLegend(),
+		return new DMSStyleModel(this, s.getLabel(),
 			session.getSonarState().getConCache().getControllers());
 	}
 
@@ -123,25 +122,11 @@ public class DMSManager extends ProxyManager<DMS> {
 			theme.addStyle(DeviceStyle.AWS_CONTROLLED,
 				COLOR_HELIOTROPE);
 		}
-		theme.addStyle(DeviceStyle.NO_CONTROLLER,
-			ProxyTheme.COLOR_NO_CONTROLLER);
 		// NOTE: If a sign doesn't fit in one of the other themes,
 		//       it will be rendered using the ALL theme.
 		theme.addStyle(DeviceStyle.ALL,
 			ProxyTheme.COLOR_INACTIVE, ProxyTheme.OUTLINE_INACTIVE);
 		return theme;
-	}
-
-	/** Get an array of all styles.  This overrides the ProxyManager
-	 * version so that NO_CONTROLLER is filtered out. */
-	public String[] getStyles() {
-		String no_ctr = DeviceStyle.NO_CONTROLLER.toString();
-		LinkedList<String> styles = new LinkedList<String>();
-		for(Symbol s: theme.getSymbols()) {
-			if(!no_ctr.equals(s.getLabel()))
-				styles.add(s.getLabel());
-		}
-		return (String[])styles.toArray(new String[0]);
 	}
 
 	/** Create a list cell renderer */

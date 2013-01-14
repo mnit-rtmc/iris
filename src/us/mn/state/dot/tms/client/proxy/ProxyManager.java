@@ -18,9 +18,6 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -85,10 +82,6 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Theme for drawing objects on a map layer */
 	protected final ProxyTheme<T> theme;
 
-	/** Map of symbol names to style list models */
-	protected final Map<String, StyleListModel<T>> models =
-		new HashMap<String, StyleListModel<T>>();
-
 	/** Cache of MapObject to proxy */
 	private final ProxyMapCache<T> map_cache = new ProxyMapCache<T>();
 
@@ -108,7 +101,7 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Create a style list model for the given symbol */
 	protected StyleListModel<T> createStyleListModel(Symbol s) {
-		return new StyleListModel<T>(this, s.getLabel(), s.getLegend());
+		return new StyleListModel<T>(this, s.getLabel());
 	}
 
 	/** Create a layer for this proxy type */
@@ -120,23 +113,13 @@ abstract public class ProxyManager<T extends SonarObject>
 	 * because subclasses may not be fully constructed. */
 	public void initialize() {
 		waitForEnumeration();
-		for(Symbol s: theme.getSymbols()) {
-			StyleListModel<T> slm = createStyleListModel(s);
-			if(slm != null) {
-				models.put(s.getLabel(), slm);
-				slm.initialize();
-			}
-		}
 		layer.initialize();
 	}
 
 	/** Dispose of the proxy manager */
 	public void dispose() {
 		layer.dispose();
-		for(StyleListModel<T> model: models.values())
-			model.dispose();
 		s_model.dispose();
-		models.clear();
 		map_cache.dispose();
 		cache.removeProxyListener(this);
 	}
@@ -276,15 +259,13 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Get the specified style list model */
 	public StyleListModel<T> getStyleModel(String s) {
-		return models.get(s);
-	}
-
-	/** Get an array of all styles */
-	public String[] getStyles() {
-		LinkedList<String> styles = new LinkedList<String>();
-		for(Symbol s: theme.getSymbols())
-			styles.add(s.getLabel());
-		return (String[])styles.toArray(new String[0]);
+		Symbol sym = theme.getSymbol(s);
+		StyleListModel<T> slm = createStyleListModel(sym);
+		if(slm != null) {
+			slm.initialize();
+			return slm;
+		} else
+			return null;
 	}
 
 	/** Check the style of the specified proxy */

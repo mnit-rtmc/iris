@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,8 +62,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 
 	/** Create a style list model for the given symbol */
 	protected StyleListModel<Detector> createStyleListModel(Symbol s) {
-		return new StyleListModel<Detector>(this, s.getLabel(),
-			s.getLegend());
+		return new StyleListModel<Detector>(this, s.getLabel());
 	}
 
 	/** Get the proxy type name */

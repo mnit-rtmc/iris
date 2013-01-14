@@ -39,10 +39,10 @@ public class ProxyListModel<T extends SonarObject>
 	extends AbstractListModel implements ProxyListener<T>
 {
 	/** Proxy type cache */
-	protected final TypeCache<T> cache;
+	private final TypeCache<T> cache;
 
 	/** Create an empty set of proxies */
-	protected TreeSet<T> createProxySet() {
+	private TreeSet<T> createProxySet() {
 		return new TreeSet<T>(new NumericAlphaComparator<T>());
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.SwingRunner;
-import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -139,62 +140,35 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Array of ControllerIO device types */
 	protected final DeviceType[] types;
 
-	/** Available alarm model */
-	protected final WrapperComboBoxModel a_model;
+	/** Controller IO list for alarms */
+	private final ControllerIOList<Alarm> a_list;
 
-	/** Controller IO watcher for alarms */
-	protected final ControllerIOWatcher<Alarm> a_watcher;
+	/** Controller IO list for cameras */
+	private final ControllerIOList<Camera> c_list;
 
-	/** Available camera model */
-	protected final WrapperComboBoxModel c_model;
+	/** Controller IO list for detectors */
+	private final ControllerIOList<Detector> dt_list;
 
-	/** Controller IO watcher for cameras */
-	protected final ControllerIOWatcher<Camera> c_watcher;
+	/** Controller IO list for DMSs */
+	private final ControllerIOList<DMS> dms_list;
 
-	/** Available detector model */
-	protected final WrapperComboBoxModel dt_model;
+	/** Controller IO list for lane markings */
+	private final ControllerIOList<LaneMarking> lmark_list;
 
-	/** Controller IO watcher for detectors */
-	protected final ControllerIOWatcher<Detector> det_watcher;
+	/** Controller IO list for LCS indications */
+	private final ControllerIOList<LCSIndication> lcsi_list;
 
-	/** Available DMS model */
-	protected final WrapperComboBoxModel dms_model;
+	/** Controller IO list for ramp meters */
+	private final ControllerIOList<RampMeter> m_list;
 
-	/** Controller IO watcher for DMSs */
-	protected final ControllerIOWatcher<DMS> dms_watcher;
+	/** Controller IO list for warning signs */
+	private final ControllerIOList<WarningSign> w_list;
 
-	/** Available lane markings model */
-	protected final WrapperComboBoxModel lmark_model;
-
-	/** Controller IO watcher for lane markings */
-	protected final ControllerIOWatcher<LaneMarking> lmark_watcher;
-
-	/** Available LCS indication model */
-	protected final WrapperComboBoxModel lcsi_model;
-
-	/** Controller IO watcher for LCS indications */
-	protected final ControllerIOWatcher<LCSIndication> lcsi_watcher;
-
-	/** Available ramp meter model */
-	protected final WrapperComboBoxModel m_model;
-
-	/** Controller IO watcher for ramp meters */
-	protected final ControllerIOWatcher<RampMeter> m_watcher;
-
-	/** Available warning sign model */
-	protected final WrapperComboBoxModel w_model;
-
-	/** Controller IO watcher for warning signs */
-	protected final ControllerIOWatcher<WarningSign> w_watcher;
-
-	/** Available weather sensors model */
-	protected final WrapperComboBoxModel wsensor_model;
-
-	/** Controller IO watcher for weather sensors */
-	protected final ControllerIOWatcher<WeatherSensor> wsensor_watcher;
+	/** Controller IO list for weather sensors */
+	private final ControllerIOList<WeatherSensor> wsensor_list;
 
 	/** Model for null device type */
-	protected final ComboBoxModel no_model = new DefaultComboBoxModel();
+	private final ComboBoxModel no_model = new DefaultComboBoxModel();
 
 	/** Device combo box */
 	protected final JComboBox d_combo = new JComboBox();
@@ -207,64 +181,71 @@ public class ControllerIOModel extends AbstractTableModel {
 		io = new ControllerIO[Controller.ALL_PINS];
 		types = new DeviceType[Controller.ALL_PINS];
 		d_combo.setRenderer(new DeviceComboRenderer());
-		a_model = new WrapperComboBoxModel(state.getAvailableAlarms(),
-			 true);
-		final String st = DeviceStyle.NO_CONTROLLER.toString();
-		c_model = new WrapperComboBoxModel(
-			s.getCameraManager().getStyleModel(st), true);
-		dt_model = new WrapperComboBoxModel(
-			s.getDetectorManager().getStyleModel(st), true);
-		dms_model = new WrapperComboBoxModel(
-			s.getDMSManager().getStyleModel(st), true);
-		lmark_model = new WrapperComboBoxModel(
-			s.getLaneMarkingManager().getStyleModel(st), true);
-		lcsi_model = new WrapperComboBoxModel(
-			s.getLCSIManager().getStyleModel(st), true);
-		m_model = new WrapperComboBoxModel(
-			s.getMeterManager().getStyleModel(st), true);
-		w_model = new WrapperComboBoxModel(
-			s.getWarnManager().getStyleModel(st), true);
-		wsensor_model = new WrapperComboBoxModel(
-			s.getWeatherSensorManager().getStyleModel(st), true);
-		a_watcher = new ControllerIOWatcher<Alarm>();
-		c_watcher = new ControllerIOWatcher<Camera>();
-		det_watcher = new ControllerIOWatcher<Detector>();
-		dms_watcher = new ControllerIOWatcher<DMS>();
-		lmark_watcher = new ControllerIOWatcher<LaneMarking>();
-		lcsi_watcher = new ControllerIOWatcher<LCSIndication>();
-		m_watcher = new ControllerIOWatcher<RampMeter>();
-		w_watcher = new ControllerIOWatcher<WarningSign>();
-		wsensor_watcher = new ControllerIOWatcher<WeatherSensor>();
+		a_list = new ControllerIOList<Alarm>(state.getAlarms());
+		c_list = new ControllerIOList<Camera>(
+			state.getCamCache().getCameras());
+		dt_list = new ControllerIOList<Detector>(
+			state.getDetCache().getDetectors());
+		dms_list = new ControllerIOList<DMS>(
+			state.getDmsCache().getDMSs());
+		lmark_list = new ControllerIOList<LaneMarking>(
+			state.getLaneMarkings());
+		lcsi_list = new ControllerIOList<LCSIndication>(
+			state.getLcsCache().getLCSIndications());
+		m_list = new ControllerIOList<RampMeter>(
+			state.getRampMeters());
+		w_list = new ControllerIOList<WarningSign>(
+			state.getWarningSigns());
+		wsensor_list = new ControllerIOList<WeatherSensor>(
+			state.getWeatherSensors());
+	}
+
+	/** Controller IO list model */
+	private class ControllerIOList<T extends ControllerIO>
+		extends ProxyListModel<T>
+	{
+		private final WrapperComboBoxModel model;
+		private ControllerIOList(TypeCache<T> c) {
+			super(c);
+			model = new WrapperComboBoxModel(this, true);
+		}
+		@Override protected int doProxyAdded(T p) {
+			addIO(p);
+			if(p.getController() == null)
+				return super.doProxyAdded(p);
+			else
+				return -1;
+		}
+		@Override protected int doProxyRemoved(T p) {
+			removeIO(p);
+			return super.doProxyRemoved(p);
+		}
 	}
 
 	/** Initialize the model */
 	public void initialize() {
-		state.getAlarms().addProxyListener(a_watcher);
-		state.getCamCache().getCameras().addProxyListener(c_watcher);
-		state.getDetCache().getDetectors().addProxyListener(
-			det_watcher);
-		state.getDmsCache().getDMSs().addProxyListener(dms_watcher);
-		state.getLaneMarkings().addProxyListener(lmark_watcher);
-		state.getLcsCache().getLCSIndications().addProxyListener(
-			lcsi_watcher);
-		state.getRampMeters().addProxyListener(m_watcher);
-		state.getWarningSigns().addProxyListener(w_watcher);
-		state.getWeatherSensors().addProxyListener(wsensor_watcher);
+		a_list.initialize();
+		c_list.initialize();
+		dt_list.initialize();
+		dms_list.initialize();
+		lmark_list.initialize();
+		lcsi_list.initialize();
+		m_list.initialize();
+		w_list.initialize();
+		wsensor_list.initialize();
 	}
 
 	/** Dispose of the model */
 	public void dispose() {
-		state.getAlarms().removeProxyListener(a_watcher);
-		state.getCamCache().getCameras().removeProxyListener(c_watcher);
-		state.getDetCache().getDetectors().removeProxyListener(
-			det_watcher);
-		state.getDmsCache().getDMSs().removeProxyListener(dms_watcher);
-		state.getLaneMarkings().removeProxyListener(lmark_watcher);
-		state.getLcsCache().getLCSIndications().removeProxyListener(
-			lcsi_watcher);
-		state.getRampMeters().removeProxyListener(m_watcher);
-		state.getWarningSigns().removeProxyListener(w_watcher);
-		state.getWeatherSensors().removeProxyListener(wsensor_watcher);
+		a_list.dispose();
+		c_list.dispose();
+		dt_list.dispose();
+		dms_list.dispose();
+		lmark_list.dispose();
+		lcsi_list.dispose();
+		m_list.dispose();
+		w_list.dispose();
+		wsensor_list.dispose();
 	}
 
 	/** Get the count of columns in the table */
@@ -389,23 +370,23 @@ public class ControllerIOModel extends AbstractTableModel {
 			return no_model;
 		switch(d) {
 		case Alarm:
-			return a_model;
+			return a_list.model;
 		case Camera:
-			return c_model;
+			return c_list.model;
 		case Detector:
-			return dt_model;
+			return dt_list.model;
 		case DMS:
-			return dms_model;
+			return dms_list.model;
 		case Lane_Marking:
-			return lmark_model;
+			return lmark_list.model;
 		case LCSIndication:
-			return lcsi_model;
+			return lcsi_list.model;
 		case Ramp_Meter:
-			return m_model;
+			return m_list.model;
 		case Warning_Sign:
-			return w_model;
+			return w_list.model;
 		case Weather_Sensor:
-			return wsensor_model;
+			return wsensor_list.model;
 		default:
 			return no_model;
 		}
@@ -473,25 +454,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		m.addColumn(createTypeColumn());
 		m.addColumn(createDeviceColumn());
 		return m;
-	}
-
-	/** Controller IO watcher */
-	protected class ControllerIOWatcher<T extends ControllerIO>
-		implements ProxyListener<T>
-	{
-		public void proxyAdded(ControllerIO p) {
-			addIO(p);
-		}
-		public void enumerationComplete() { }
-		public void proxyRemoved(ControllerIO p) {
-			removeIO(p);
-		}
-		public void proxyChanged(ControllerIO p, final String a) {
-			if("controller".equals(a) || "pin".equals(a)) {
-				removeIO(p);
-				addIO(p);
-			}
-		}
 	}
 
 	/** Add an IO to a pin on the controller */

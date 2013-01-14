@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -161,14 +161,6 @@ public class SonarState extends Client {
 	/** Get the alarm cache */
 	public TypeCache<Alarm> getAlarms() {
 		return alarms;
-	}
-
-	/** Available alarm proxy list model */
-	protected final ProxyListModel<Alarm> avail_alarm_model;
-
-	/** Get the available alarm list model */
-	public ProxyListModel<Alarm> getAvailableAlarms() {
-		return avail_alarm_model;
 	}
 
 	/** Cache of warning signs */
@@ -362,15 +354,6 @@ public class SonarState extends Client {
 		inc_details = new TypeCache<IncidentDetail>(
 			IncidentDetail.class, this);
 		alarms = new TypeCache<Alarm>(Alarm.class, this);
-		avail_alarm_model = new ProxyListModel<Alarm>(alarms) {
-			protected int doProxyAdded(Alarm proxy) {
-				if(proxy.getController() == null)
-					return super.doProxyAdded(proxy);
-				else
-					return -1;
-			}
-		};
-		avail_alarm_model.initialize();
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
 			this);
 		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);

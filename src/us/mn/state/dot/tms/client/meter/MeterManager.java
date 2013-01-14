@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Create a style list model for the given symbol */
 	protected StyleListModel<RampMeter> createStyleListModel(Symbol s) {
-		return new MeterStyleModel(this, s.getLabel(), s.getLegend(),
+		return new MeterStyleModel(this, s.getLabel(),
 			session.getSonarState().getConCache().getControllers());
 	}
 
@@ -141,8 +141,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		theme.addStyle(DeviceStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(DeviceStyle.NO_CONTROLLER,
-			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(DeviceStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
 		theme.addStyle(DeviceStyle.ALL);

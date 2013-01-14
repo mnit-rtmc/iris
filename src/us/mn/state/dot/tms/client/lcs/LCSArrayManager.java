@@ -242,9 +242,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a style list model for the given symbol */
 	protected StyleListModel<LCSArray> createStyleListModel(Symbol s) {
-		return new StyleListModel<LCSArray>(this, s.getLabel(),
-			s.getLegend())
-		{
+		return new StyleListModel<LCSArray>(this, s.getLabel()) {
 			protected TreeSet<LCSArray> createProxySet() {
 				return new TreeSet<LCSArray>(comparator);
 			}

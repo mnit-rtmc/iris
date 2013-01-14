@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,8 +83,6 @@ public class CameraManager extends ProxyManager<Camera> {
 			ProxyTheme.OUTLINE_INACTIVE);
 		theme.addStyle(DeviceStyle.PLAYLIST, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(DeviceStyle.ACTIVE, COLOR_ACTIVE);
-		theme.addStyle(DeviceStyle.NO_CONTROLLER,
-			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(DeviceStyle.ALL);
 		return theme;
 	}
@@ -187,9 +185,7 @@ public class CameraManager extends ProxyManager<Camera> {
 		synchronized(playlist) {
 			playlist.add(c);
 		}
-		String st = DeviceStyle.PLAYLIST.toString();
-		StyleListModel<Camera> p_model = getStyleModel(st);
-		p_model.proxyChanged(c, st);
+		// FIXME: add server-side playlists
 	}
 
 	/** Remove a camera from the playlist */
@@ -197,9 +193,7 @@ public class CameraManager extends ProxyManager<Camera> {
 		synchronized(playlist) {
 			playlist.remove(c);
 		}
-		String st = DeviceStyle.PLAYLIST.toString();
-		StyleListModel<Camera> p_model = getStyleModel(st);
-		p_model.proxyChanged(c, st);
+		// FIXME: add server-side playlists
 	}
 
 	/** Find the map geo location for a proxy */

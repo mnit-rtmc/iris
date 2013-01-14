@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.util.Iterator;
-import javax.swing.Icon;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -39,10 +38,10 @@ public class MeterStyleModel extends StyleListModel<RampMeter> {
 	protected final ProxyListener<Controller> c_listener;
 
 	/** Create a new ramp meter style model */
-	public MeterStyleModel(MeterManager m, String n, Icon l,
+	public MeterStyleModel(MeterManager m, String n,
 		TypeCache<Controller> cont)
 	{
-		super(m, n, l);
+		super(m, n);
 		controllers = cont;
 		c_listener = new ProxyListener<Controller>() {
 			public void proxyAdded(Controller proxy) { }

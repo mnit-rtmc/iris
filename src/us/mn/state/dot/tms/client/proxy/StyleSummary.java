@@ -24,6 +24,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -37,10 +39,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
+import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.sonar.client.ProxyListener;
 
 /**
  * Panel to display a summary of styled objects, which contains radio
@@ -64,9 +68,9 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Radio button group */
 	protected final ButtonGroup r_buttons = new ButtonGroup();
 
-	/** Mapping of styles to radio buttons */
-	private final HashMap<String, JRadioButton> buttons =
-		new HashMap<String, JRadioButton>();
+	/** Mapping of style names to widgets */
+	private final HashMap<String, StyleWidgets> widgets =
+		new HashMap<String, StyleWidgets>();
 
 	/** Titled border */
 	protected final TitledBorder border;
@@ -75,8 +79,49 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	private final DefaultListSelectionModel dummy_model =
 		new DefaultListSelectionModel();
 
+	/** Selected style list model */
+	private StyleListModel<T> model;
+
 	/** Proxy list */
 	private final ProxyJList<T> p_list;
+
+	/** Style status counter */
+	private final ProxyListener<T> counter = new ProxyListener<T>() {
+		private boolean complete = false;
+		@Override public void proxyAdded(T proxy) {
+			if(complete)
+				updateCounts();
+		}
+		@Override public void enumerationComplete() {
+			complete = true;
+			updateCounts();
+		}
+		@Override public void proxyRemoved(T proxy) {
+			updateCounts();
+		}
+		@Override public void proxyChanged(T proxy, String attrib) {
+			updateCounts();
+		}
+	};
+
+	/** Widgets for one style */
+	private class StyleWidgets {
+		private final Symbol symbol;
+		private final DeviceStyle dstyle;
+		private final JRadioButton btn;
+		private final JLabel legend_lbl;
+		private final JLabel count_lbl;
+		private int n_count;
+		private StyleWidgets(Symbol s) {
+			symbol = s;
+			String style = s.getLabel();
+			dstyle = DeviceStyle.getStyle(style);
+			btn = createRadioButton(style);
+			legend_lbl = new JLabel(s.getLegend());
+			count_lbl = new JLabel();
+			n_count = 0;
+		}
+	}
 
 	/** Create a new style summary panel, with optional cell size buttons.
 	 * @param man ProxyManager */
@@ -89,32 +134,33 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		border = BorderFactory.createTitledBorder("");
 		setBorder(border);
 		GridBagConstraints bag = new GridBagConstraints();
-		String[] styles = manager.getStyles();
+		ProxyTheme<T> theme = manager.getTheme();
+		List<Symbol> symbols = theme.getSymbols();
 		p_list = manager.createList();
 		p_list.setCellRenderer(renderer);
 		JScrollPane sp = new JScrollPane(p_list);
-		String default_rbutton = "";
-		final int n_rows = (styles.length - 1) / STYLE_COLS + 1;
+		String def_style = "";
+		final int n_rows = (symbols.size() - 1) / STYLE_COLS + 1;
 		// grid is filled top to bottom, left to right
-		for(int i = 0; i < styles.length; i++) {
+		for(int i = 0; i < symbols.size() ; i++) {
 			int col = i / n_rows;
 			int row = i % n_rows;
-			final StyleListModel<T> m =
-				manager.getStyleModel(styles[i]);
-			JRadioButton btn = createRadioButton(m);
-			buttons.put(m.getName(), btn);
+			Symbol sym = symbols.get(i);
+			String style = sym.getLabel();
+			StyleWidgets sw = new StyleWidgets(sym);
+			widgets.put(style, sw);
 			// by default, the 1st button is selected
 			if(i == 0)
-				default_rbutton = m.getName();
+				def_style = style;
 			bag.gridx = col * GRID_COLS;
 			bag.gridy = row;
 			bag.insets = new Insets(0, 0, 0, 2);
 			bag.anchor = GridBagConstraints.EAST;
-			add(new JLabel(m.getLegend()), bag);
+			add(sw.legend_lbl, bag);
 			bag.gridx = GridBagConstraints.RELATIVE;
-			add(createCount(m), bag);
+			add(sw.count_lbl, bag);
 			bag.anchor = GridBagConstraints.WEST;
-			add(btn, bag);
+			add(sw.btn, bag);
 		}
 
 		// add space right of each column (except last)
@@ -148,34 +194,47 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		add(sp, bag);
 
 		// select default button
-		setStyle(default_rbutton);
+		setStyle(def_style);
+		manager.getCache().addProxyListener(counter);
 	}
 
 	/** Create a radio button for the given style list model */
-	protected JRadioButton createRadioButton(final StyleListModel<T> mdl) {
-		final JRadioButton btn = new JRadioButton(mdl.getName());
+	protected JRadioButton createRadioButton(final String style) {
+		final JRadioButton btn = new JRadioButton(style);
 		r_buttons.add(btn);
 		btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				setStyleAction(mdl.getName());
+				setStyleAction(style);
 			}
 		});
 		return btn;
 	}
 
-	/** Create a count label for the given style list model */
-	protected JLabel createCount(final StyleListModel<T> mdl) {
-		final JLabel lbl = new JLabel(Integer.toString(mdl.getSize()));
-		mdl.addListDataListener(new ListDataListener() {
-			public void contentsChanged(ListDataEvent e) { }
-			public void intervalAdded(ListDataEvent e) {
-				lbl.setText(Integer.toString(mdl.getSize()));
+	/** Update the count labels for each style status */
+	private void updateCounts() {
+		for(StyleWidgets sw: widgets.values())
+			sw.n_count = 0;
+		Iterator<T> it = manager.getCache().iterator();
+		while(it.hasNext()) {
+			T proxy = it.next();
+			for(StyleWidgets sw: widgets.values()) {
+				if(manager.checkStyle(sw.dstyle, proxy))
+					sw.n_count++;
 			}
-			public void intervalRemoved(ListDataEvent e) {
-				lbl.setText(Integer.toString(mdl.getSize()));
+		}
+		updateCountLabels();
+	}
+
+	/** Update the count labels */
+	private void updateCountLabels() {
+		SwingRunner.invoke(new Runnable() {
+			public void run() {
+				for(StyleWidgets sw: widgets.values()) {
+					sw.count_lbl.setText(Integer.toString(
+						sw.n_count));
+				}
 			}
 		});
-		return lbl;
 	}
 
 	/** Create the optional panel that contains cell size buttons. */
@@ -222,9 +281,9 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Set the selected style, results in action + button selection
 	 * changes. */
 	public void setStyle(String style) {
-		JRadioButton btn = buttons.get(style);
-		if(btn != null) {
-			btn.setSelected(true);
+		StyleWidgets sw = widgets.get(style);
+		if(sw != null) {
+			sw.btn.setSelected(true);
 			setStyleAction(style);
 		}
 	}
@@ -236,16 +295,20 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		border.setTitle(t);
 		// Force the border title to be repainted
 		repaint();
-		StyleListModel<T> m = manager.getStyleModel(style);
+		StyleListModel<T> mdl = model;
+		model = manager.getStyleModel(style);
 		// JList.setModel clears the selection, so let's use
 		// a dummy selection model temporarily
 		p_list.setSelectionModel(dummy_model);
-		p_list.setModel(m);
-		p_list.setSelectionModel(m.getSelectionModel());
+		p_list.setModel(model);
+		p_list.setSelectionModel(model.getSelectionModel());
+		if(mdl != null)
+			mdl.dispose();
 	}
 
 	/** Dispose of the widget */
 	public void dispose() {
 		removeAll();
+		manager.getCache().removeProxyListener(counter);
 	}
 }
