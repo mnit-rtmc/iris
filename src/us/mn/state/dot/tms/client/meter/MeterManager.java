@@ -108,7 +108,9 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Create a style list model for the given symbol */
-	protected StyleListModel<RampMeter> createStyleListModel(Symbol s) {
+	@Override protected StyleListModel<RampMeter> createStyleListModel(
+		Symbol s)
+	{
 		return new MeterStyleModel(this, s.getLabel(),
 			session.getSonarState().getConCache().getControllers());
 	}

@@ -42,7 +42,7 @@ public class ProxyListModel<T extends SonarObject>
 	private final TypeCache<T> cache;
 
 	/** Create an empty set of proxies */
-	private TreeSet<T> createProxySet() {
+	protected TreeSet<T> createProxySet() {
 		return new TreeSet<T>(new NumericAlphaComparator<T>());
 	}
 

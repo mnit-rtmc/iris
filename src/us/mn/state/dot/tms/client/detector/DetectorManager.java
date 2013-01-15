@@ -61,7 +61,9 @@ public class DetectorManager extends ProxyManager<Detector> {
 	}
 
 	/** Create a style list model for the given symbol */
-	protected StyleListModel<Detector> createStyleListModel(Symbol s) {
+	@Override protected StyleListModel<Detector> createStyleListModel(
+		Symbol s)
+	{
 		return new StyleListModel<Detector>(this, s.getLabel());
 	}
 

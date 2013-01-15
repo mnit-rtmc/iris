@@ -87,7 +87,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Create a style list model for the given symbol */
-	protected StyleListModel<DMS> createStyleListModel(Symbol s) {
+	@Override protected StyleListModel<DMS> createStyleListModel(Symbol s) {
 		return new DMSStyleModel(this, s.getLabel(),
 			session.getSonarState().getConCache().getControllers());
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -288,7 +288,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create a style list model for the given symbol */
-	protected StyleListModel<R_Node> createStyleListModel(Symbol s) {
+	@Override protected StyleListModel<R_Node> createStyleListModel(
+		Symbol s)
+	{
 		// No style list models on roadway tab
 		return null;
 	}
