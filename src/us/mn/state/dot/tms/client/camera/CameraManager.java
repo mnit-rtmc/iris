@@ -59,7 +59,7 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, TypeCache<Camera> c, GeoLocManager lm) {
-		super(c, lm);
+		super(c, lm, DeviceStyle.ACTIVE);
 		session = s;
 		cache.addProxyListener(this);
 	}
@@ -85,13 +85,6 @@ public class CameraManager extends ProxyManager<Camera> {
 		theme.addStyle(DeviceStyle.ACTIVE, COLOR_ACTIVE);
 		theme.addStyle(DeviceStyle.ALL);
 		return theme;
-	}
-
-	/** Create a new style summary for this proxy type */
-	public StyleSummary<Camera> createStyleSummary() {
-		StyleSummary<Camera> summary = super.createStyleSummary();
-		summary.setStyle(DeviceStyle.ACTIVE.toString());
-		return summary;
 	}
 
 	/** Check the style of the specified proxy */

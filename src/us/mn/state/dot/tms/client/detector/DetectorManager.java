@@ -56,7 +56,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	public DetectorManager(TypeCache<Detector> c, GeoLocManager lm,
 		R_NodeManager r_man)
 	{
-		super(c, lm);
+		super(c, lm, DeviceStyle.ACTIVE);
 		r_node_manager = r_man;
 		cache.addProxyListener(this);
 	}
@@ -89,13 +89,6 @@ public class DetectorManager extends ProxyManager<Detector> {
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(DeviceStyle.ALL);
 		return theme;
-	}
-
-	/** Create a new style summary for this proxy type */
-	public StyleSummary<Detector> createStyleSummary() {
-		StyleSummary<Detector> summary = super.createStyleSummary();
-		summary.setStyle(DeviceStyle.ACTIVE.toString());
-		return summary;
 	}
 
 	/** Check the style of the specified proxy */

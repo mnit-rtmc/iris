@@ -89,15 +89,25 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Map layer for the proxy type */
 	protected final ProxyLayer<T> layer;
 
+	/** Default style */
+	private final DeviceStyle def_style;
+
 	/** Flag to indicate enumeration of all objects has completed */
 	protected boolean enumerated = false;
 
 	/** Create a new proxy manager */
-	protected ProxyManager(TypeCache<T> c, GeoLocManager lm) {
+	protected ProxyManager(TypeCache<T> c, GeoLocManager lm, DeviceStyle ds)
+	{
 		cache = c;
 		loc_manager = lm;
+		def_style = ds;
 		theme = createTheme();
 		layer = createLayer();
+	}
+
+	/** Create a new proxy manager */
+	protected ProxyManager(TypeCache<T> c, GeoLocManager lm) {
+		this(c, lm, DeviceStyle.ALL);
 	}
 
 	/** Create a style list model for the given symbol */
@@ -250,12 +260,12 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Create a new style summary for this proxy type, with no cell
 	 * renderer size buttons. */
 	public StyleSummary<T> createStyleSummary() {
-		return new StyleSummary<T>(this, false);
+		return new StyleSummary<T>(this, def_style, false);
 	}
 
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<T> createStyleSummary(boolean enableCellSizeBtns) {
-		return new StyleSummary<T>(this, enableCellSizeBtns);
+		return new StyleSummary<T>(this, def_style, enableCellSizeBtns);
 	}
 
 	/** Get the specified style list model */

@@ -81,7 +81,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a new DMS manager */
 	public DMSManager(Session s, TypeCache<DMS> c, GeoLocManager lm) {
-		super(c, lm);
+		super(c, lm, DeviceStyle.DEPLOYED);
 		session = s;
 		cache.addProxyListener(this);
 	}
@@ -193,13 +193,6 @@ public class DMSManager extends ProxyManager<DMS> {
 			r.setDms(DMSHelper.lookup(dms_id));
 			renderers.put(dms_id, r);
 		}
-	}
-
-	/** Create a new style summary for this proxy type */
-	public StyleSummary<DMS> createStyleSummary() {
-		StyleSummary<DMS> summary = super.createStyleSummary(true);
-		summary.setStyle(DeviceStyle.DEPLOYED.toString());
-		return summary;
 	}
 
 	/** Show the properties form for the selected proxy */

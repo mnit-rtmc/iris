@@ -136,7 +136,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Create a new style summary panel, with optional cell size buttons.
 	 * @param man ProxyManager */
-	public StyleSummary(final ProxyManager<T> man,
+	public StyleSummary(final ProxyManager<T> man, DeviceStyle def_style,
 		boolean enableCellSizeBtns)
 	{
 		super(new GridBagLayout());
@@ -150,7 +150,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		p_list = manager.createList();
 		p_list.setCellRenderer(renderer);
 		JScrollPane sp = new JScrollPane(p_list);
-		String def_style = "";
 		final int n_rows = (symbols.size() - 1) / STYLE_COLS + 1;
 		// grid is filled top to bottom, left to right
 		for(int i = 0; i < symbols.size() ; i++) {
@@ -160,9 +159,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			String style = sym.getLabel();
 			StyleWidgets sw = new StyleWidgets(sym);
 			widgets.put(style, sw);
-			// by default, the 1st button is selected
-			if(i == 0)
-				def_style = style;
 			bag.gridx = col * GRID_COLS;
 			bag.gridy = row;
 			bag.insets = new Insets(0, 0, 0, 2);
@@ -204,8 +200,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		bag.fill = GridBagConstraints.BOTH;
 		add(sp, bag);
 
-		// select default button
-		setStyle(def_style);
+		// select default style
+		setStyle(def_style.toString());
 		manager.getCache().addProxyListener(counter);
 	}
 
@@ -296,7 +292,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Set the selected style, results in action + button selection
 	 * changes. */
-	public void setStyle(String style) {
+	private void setStyle(String style) {
 		StyleWidgets sw = widgets.get(style);
 		if(sw != null) {
 			sw.btn.setSelected(true);

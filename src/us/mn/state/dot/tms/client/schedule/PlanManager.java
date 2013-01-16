@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -174,13 +174,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 				return true;
 		}
 		return false;
-	}
-
-	/** Create a new style summary for this proxy type */
-	public StyleSummary<ActionPlan> createStyleSummary() {
-		StyleSummary<ActionPlan> summary = super.createStyleSummary();
-		summary.setStyle(DeviceStyle.ALL.toString());
-		return summary;
 	}
 
 	/** Get the description of an action plan */
