@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,12 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 
 /**
@@ -53,27 +54,27 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	private final ProxyListener<T> proxy_listener = new ProxyListener<T>() {
 		public void proxyAdded(final T proxy) {
 			// Don't hog the SONAR TaskProcessor thread
-			new AbstractJob() {
+			WORKER.addJob(new Job() {
 				public void perform() {
 					proxyAddedSlow(proxy);
 				}
-			}.addToScheduler();
+			});
 		}
 		public void proxyRemoved(final T proxy) {
 			// Don't hog the SONAR TaskProcessor thread
-			new AbstractJob() {
+			WORKER.addJob(new Job() {
 				public void perform() {
 					proxyRemovedSlow(proxy);
 				}
-			}.addToScheduler();
+			});
 		}
 		public void proxyChanged(final T proxy, final String attrib) {
 			// Don't hog the SONAR TaskProcessor thread
-			new AbstractJob() {
+			WORKER.addJob(new Job() {
 				public void perform() {
 					proxyChangedSlow(proxy, attrib);
 				}
-			}.addToScheduler();
+			});
 		}
 		public void enumerationComplete() {
 			// Nothing to do

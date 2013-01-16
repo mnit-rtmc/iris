@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,8 @@ package us.mn.state.dot.tms.client.widget;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -68,11 +69,11 @@ abstract public class IAction extends AbstractAction {
 
 	/** Schedule the action to be performed */
 	public void actionPerformed(ActionEvent e) {
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() throws Exception {
 				do_perform();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Actually perform the action */

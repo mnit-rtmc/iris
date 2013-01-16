@@ -40,12 +40,13 @@ import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.TitledBorder;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.DeviceStyle;
-import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.tms.DeviceStyle;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Panel to display a summary of styled objects, which contains radio
@@ -223,12 +224,12 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Update the count labels for each style status */
 	private void updateCounts() {
 		start_over = true;
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				start_over = false;
 				doUpdateCounts();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Flag to start over style status counts */

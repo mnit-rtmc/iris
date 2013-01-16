@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,13 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.util.HashMap;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
@@ -59,14 +60,14 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 	/** Add a new GeoLoc to the manager */
 	public void proxyAdded(final GeoLoc proxy) {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				MapGeoLoc loc = new MapGeoLoc(proxy);
 				synchronized(proxies) {
 					proxies.put(proxy.getName(), loc);
 				}
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Enumeration of the proxy type has completed */
@@ -79,19 +80,19 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 		// Get the name before the proxy is destroyed
 		final String name = proxy.getName();
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				synchronized(proxies) {
 					proxies.remove(name);
 				}
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Change a proxy in the model */
 	public void proxyChanged(final GeoLoc proxy, String attrib) {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				MapGeoLoc loc;
 				synchronized(proxies) {
@@ -100,7 +101,7 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 				if(loc != null)
 					loc.doUpdate();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Find the map location for the given proxy */

@@ -18,11 +18,12 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -97,21 +98,21 @@ public class ProxyListModel<T extends SonarObject>
 	/** Add a new proxy to the list model */
 	@Override public final void proxyAdded(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				proxyAddedSlow(proxy);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Enumeration of all proxies is complete */
 	@Override public void enumerationComplete() {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				enumerationCompleteSlow();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Complete the enumeration of a proxy list */
@@ -160,11 +161,11 @@ public class ProxyListModel<T extends SonarObject>
 	/** Remove a proxy from the model */
 	@Override public final void proxyRemoved(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				proxyRemovedSlow(proxy);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Change a proxy in the model */
@@ -209,11 +210,11 @@ public class ProxyListModel<T extends SonarObject>
 		final String attrib)
 	{
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				proxyChangedSlow(proxy, attrib);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Get the size (for ListModel) */

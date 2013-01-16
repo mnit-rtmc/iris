@@ -18,8 +18,9 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JList;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarObject;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 
 /**
  * A proxy JList is a special JList which contains SONAR proxy objects.
@@ -53,11 +54,11 @@ public class ProxyJList<T extends SonarObject> extends JList {
 
 	/** Respond to a double-click event */
 	protected void doDoubleClick() {
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				manager.showPropertiesForm();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Popup a context-sensitive menu */

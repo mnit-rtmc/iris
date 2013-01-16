@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import javax.swing.ListSelectionModel;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -271,12 +271,12 @@ public class CorridorList extends JPanel {
 	/** Called when a GeoLoc proxy attribute has changed */
 	protected void geoLocChanged(final GeoLoc loc, String a) {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		client.WORKER.addJob(new Job() {
 			public void perform() {
 				if(checkCorridor(loc))
 					updateListModel();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Check the corridor for a geo location */
@@ -334,11 +334,11 @@ public class CorridorList extends JPanel {
 	/** Update the corridor list model */
 	protected void updateListModel() {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		client.WORKER.addJob(new Job() {
 			public void perform() {
 				doUpdateListModel();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Update the corridor list model */

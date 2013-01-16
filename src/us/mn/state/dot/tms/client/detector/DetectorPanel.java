@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -251,11 +252,11 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Update one attribute */
 	public final void update(final Detector d, final String a) {
 		// Serialize on WORKER thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				doUpdate(d, a);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Update one attribute */
@@ -300,11 +301,11 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Clear all attributes */
 	public final void clear() {
 		// Serialize on WORKER thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				doClear();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Clear all attributes */

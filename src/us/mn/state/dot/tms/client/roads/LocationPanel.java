@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import javax.swing.JTextField;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
@@ -253,7 +253,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	/** Update one attribute */
 	public final void update(final GeoLoc l, final String a) {
 		// Serialize on WORKER thread
-		new AbstractJob() {
+		client.WORKER.addJob(new Job() {
 			public void perform() {
 				doUpdate(l, a);
 				// NOTE: this is needed to fix a problem where
@@ -261,7 +261,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 				//       after a call to setSelectedItem
 				repaint();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Update one attribute */
@@ -310,11 +310,11 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	/** Clear all attributes */
 	public final void clear() {
 		// Serialize on WORKER thread
-		new AbstractJob() {
+		client.WORKER.addJob(new Job() {
 			public void perform() {
 				doClear();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Clear all attributes */

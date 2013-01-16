@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,12 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -46,12 +47,12 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 		protected UAction(String text_id) {
 			super(text_id);
 		}
-		protected final void do_perform() {
+		@Override protected final void do_perform() {
 			User u = user;
 			if(u != null)
 				do_perform(u);
 		}
-		abstract void do_perform(User u);
+		abstract protected void do_perform(User u);
 	}
 
 	/** User session */
@@ -78,7 +79,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	private final UAction change_pwd = new UAction(
 		"user.password.change")
 	{
-		protected void do_perform(User u) {
+		@Override protected void do_perform(User u) {
 			String p = new String(passwd_txt.getPassword()).trim();
 			passwd_txt.setText("");
 			u.setPassword(p);
@@ -99,7 +100,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 
 	/** Role action */
 	private final UAction role_action = new UAction("role") {
-		protected void do_perform(User u) {
+		@Override protected void do_perform(User u) {
 			Object item = role_cbx.getSelectedItem();
 			if(item instanceof Role)
 				u.setRole((Role)item);
@@ -110,7 +111,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 
 	/** Enabled check box */
 	private final JCheckBox enabled_chk = new JCheckBox(new UAction(null) {
-		protected void do_perform(User u) {
+		@Override protected void do_perform(User u) {
 			u.setEnabled(enabled_chk.isSelected());
 		}
 	});
@@ -189,11 +190,11 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	/** Update one attribute */
 	public final void update(final User u, final String a) {
 		// Serialize on WORKER thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				doUpdate(u, a);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Update one attribute */
@@ -228,11 +229,11 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	/** Clear all attributes */
 	public final void clear() {
 		// Serialize on WORKER thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				doClear();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Clear all attributes */

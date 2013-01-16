@@ -25,7 +25,7 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 
 /**
  * A proxy manager is a container for SONAR proxy objects. It places each
@@ -127,11 +128,11 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Called when a proxy has been added */
 	@Override public void proxyAdded(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				proxyAddedSlow(proxy);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Add a proxy to the manager */
@@ -171,11 +172,11 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Called when a proxy has been removed */
 	@Override public void proxyRemoved(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				proxyRemovedSlow(proxy);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Called when a proxy has been removed */

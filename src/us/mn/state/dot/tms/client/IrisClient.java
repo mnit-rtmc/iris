@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -51,6 +51,9 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public class IrisClient extends JFrame {
+
+	/** Worker thread */
+	static public final Scheduler WORKER = new Scheduler("worker");
 
 	/** Login scheduler */
 	static private final Scheduler LOGIN = new Scheduler("login");

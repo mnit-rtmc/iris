@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -169,11 +170,11 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Called when proxy enumeration is complete */
 	public void enumerationComplete() {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				r_node_manager.arrangeCorridors();
 			}
-		}.addToScheduler();
+		});
 		super.enumerationComplete();
 	}
 

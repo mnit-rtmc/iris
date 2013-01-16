@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,12 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 
 /**
  * Layer for drawing SONAR proxy objects on the map.
@@ -80,12 +81,12 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 		if(complete) {
 			// NOTE: this also gets called when we "watch" an
 			//       object after it is selected.
-			new AbstractJob() {
+			WORKER.addJob(new Job() {
 				public void perform() {
 					notifyLayerChanged(
 						LayerChange.geometry);
 				}
-			}.addToScheduler();
+			});
 		}
 	}
 
@@ -93,33 +94,33 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	public void enumerationComplete() {
 		complete = true;
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				updateExtent();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Remove a proxy from the model */
 	public void proxyRemoved(T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				notifyLayerChanged(
 					LayerChange.geometry);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Change a proxy in the model */
 	public void proxyChanged(T proxy, String attrib) {
 		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				// Can an attribute change affect the layer?
 				notifyLayerChanged(LayerChange.status);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Update the layer extent */

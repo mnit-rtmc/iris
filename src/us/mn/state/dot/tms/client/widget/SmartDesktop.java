@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.SwingRunner;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.help.Help;
@@ -79,7 +79,7 @@ public class SmartDesktop extends JDesktopPane {
 
 	/** Invoke the help system */
 	protected void invokeHelp() {
-		new AbstractJob() {
+		client.WORKER.addJob(new Job() {
 			public void perform() throws IOException {
 				AbstractForm cf = findTopFrame();
 				if(cf != null)
@@ -87,7 +87,7 @@ public class SmartDesktop extends JDesktopPane {
 				else
 					Help.invokeHelp(null);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Create a new internal frame */

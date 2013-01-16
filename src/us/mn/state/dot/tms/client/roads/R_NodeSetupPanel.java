@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,13 @@ import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -205,11 +206,11 @@ public class R_NodeSetupPanel extends FormPanel {
 	/** Update one attribute */
 	public final void update(final R_Node n, final String a) {
 		// Serialize on WORKER thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				doUpdate(n, a);
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Update one attribute */
@@ -266,11 +267,11 @@ public class R_NodeSetupPanel extends FormPanel {
 	/** Clear all attributes */
 	public final void clear() {
 		// Serialize on WORKER thread
-		new AbstractJob() {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				doClear();
 			}
-		}.addToScheduler();
+		});
 	}
 
 	/** Clear all attributes */

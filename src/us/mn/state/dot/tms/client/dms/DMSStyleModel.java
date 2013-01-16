@@ -15,12 +15,13 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.Iterator;
-import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 
 /**
@@ -43,18 +44,18 @@ public class DMSStyleModel extends StyleListModel<DMS> {
 		super(m, n);
 		controllers = cont;
 		c_listener = new ProxyListener<Controller>() {
-			public void proxyAdded(Controller proxy) { }
-			public void enumerationComplete() { }
-			public void proxyChanged(final Controller proxy,
-				final String attrib)
+			@Override public void proxyAdded(Controller proxy) { }
+			@Override public void enumerationComplete() { }
+			@Override public void proxyChanged(
+				final Controller proxy, final String attrib)
 			{
-				new AbstractJob() {
+				WORKER.addJob(new Job() {
 					public void perform() {
 						controllerChanged(proxy,attrib);
 					}
-				}.addToScheduler();
+				});
 			}
-			public void proxyRemoved(Controller proxy) { }
+			@Override public void proxyRemoved(Controller proxy) { }
 		};
 	}
 
