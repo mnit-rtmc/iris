@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
@@ -67,7 +68,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Camera action */
 	private final IAction camera = new IAction("camera") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setCamera((Camera)camera_cbx.getSelectedItem());
 		}
 	};
@@ -77,7 +78,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			Controller c = proxy.getController();
 			if(c != null) {
 				SmartDesktop sd = session.getDesktop();
@@ -88,7 +89,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Meter type action */
 	private final IAction meter_type = new IAction("ramp.meter.type") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			int t = meter_type_cbx.getSelectedIndex();
 			if(t >= 0)
 				proxy.setMeterType(t);
@@ -107,7 +108,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Metering algorithm action */
 	private final IAction algorithm = new IAction("ramp.meter.algorithm") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			int a = algorithm_cbx.getSelectedIndex();
 			if(a >= 0)
 				proxy.setAlgorithm(a);
@@ -145,7 +146,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Send settings action */
 	private final IAction settings = new IAction("device.send.settings") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
 		}
@@ -198,35 +199,35 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create the widget jobs */
 	protected void createUpdateJobs() {
-		new FocusJob(notes) {
-			public void perform() {
+		notes.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setNotes(notes.getText());
 			}
-		};
-		new FocusJob(storage) {
-			public void perform() {
+		});
+		storage.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setStorage(Integer.parseInt(
 					storage.getText()));
 			}
-		};
-		new FocusJob(max_wait) {
-			public void perform() {
+		});
+		max_wait.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setMaxWait(Integer.parseInt(
 					max_wait.getText()));
 			}
-		};
-		new FocusJob(am_target_txt) {
-			public void perform() {
+		});
+		am_target_txt.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setAmTarget(Integer.parseInt(
 					am_target_txt.getText()));
 			}
-		};
-		new FocusJob(pm_target_txt) {
-			public void perform() {
+		});
+		pm_target_txt.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setPmTarget(Integer.parseInt(
 					pm_target_txt.getText()));
 			}
-		};
+		});
 		m_lock.setAction(new LockMeterAction(proxy, m_lock));
 	}
 

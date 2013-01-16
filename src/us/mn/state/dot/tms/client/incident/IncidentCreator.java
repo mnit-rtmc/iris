@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,11 +146,11 @@ public class IncidentCreator extends JPanel {
 		Symbol sym = theme.getSymbol(sty);
 		final JToggleButton btn = new JToggleButton(sty,
 			sym.getLegend());
-		new ChangeJob(btn) {
-			public void perform() {
+		btn.addChangeListener(new ChangeJob(client.WORKER) {
+			@Override public void perform() {
 				buttonChanged(btn, et);
 			}
-		};
+		});
 		btn.setHorizontalTextPosition(SwingConstants.LEADING);
 		return btn;
 	}

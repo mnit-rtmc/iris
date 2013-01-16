@@ -68,9 +68,9 @@ abstract public class IAction extends AbstractAction {
 	}
 
 	/** Schedule the action to be performed */
-	public void actionPerformed(ActionEvent e) {
+	@Override public void actionPerformed(ActionEvent e) {
 		WORKER.addJob(new Job() {
-			public void perform() throws Exception {
+			@Override public void perform() throws Exception {
 				do_perform();
 			}
 		});

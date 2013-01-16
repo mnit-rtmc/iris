@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.roads;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.tms.R_Node;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
@@ -56,12 +56,11 @@ public class R_NodeLocationPanel extends LocationPanel {
 	/** Create the jobs */
 	protected void createJobs() {
 		super.createJobs();
-		new FocusJob(notes_txt) {
-			public void perform() {
-				if(wasLost())
-					setNotes(notes_txt.getText());
+		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
+				setNotes(notes_txt.getText());
 			}
-		};
+		});
 	}
 
 	/** Set the node notes */

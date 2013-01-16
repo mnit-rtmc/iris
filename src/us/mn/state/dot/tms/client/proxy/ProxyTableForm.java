@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -43,7 +44,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 
 	/** Action to display the proxy properties */
 	private final IAction show_props = new IAction("device.properties") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			T proxy = getSelectedProxy();
 			if(proxy != null)
 				model.showPropertiesForm(proxy);
@@ -55,7 +56,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 
 	/** Action to delete the selected proxy */
 	private final IAction del_obj = new IAction("device.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			T proxy = getSelectedProxy();
 			if(proxy != null)
 				proxy.destroy();
@@ -90,11 +91,11 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	protected void createJobs() {
 		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
 				selectProxy();
 			}
-		};
+		});
 		if(model.hasProperties()) {
 			table.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {

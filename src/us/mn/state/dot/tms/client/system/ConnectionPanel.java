@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.client.system;
 
 import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Connection;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -39,7 +39,7 @@ public class ConnectionPanel extends FormPanel {
 
 	/** Action to delete the selected connection */
 	private final IAction del_conn = new IAction("connection.disconnect") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			ListSelectionModel s = c_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -67,10 +67,9 @@ public class ConnectionPanel extends FormPanel {
 		c_model.initialize();
 		ListSelectionModel s = c_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if(!e.getValueIsAdjusting())
-					selectConnection();
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectConnection();
 			}
 		});
 	}

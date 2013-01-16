@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,13 +28,14 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -57,7 +58,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Comm link action */
 	private final IAction comm_link = new IAction("comm.link") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setCommLink(
 				(CommLink)comm_link_cbx.getSelectedItem());
 		}
@@ -82,14 +83,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final IAction clear_pwd = new IAction(
 		"controller.password.clear")
 	{
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setPassword(null);
 		}
 	};
 
 	/** Active checkbox */
 	private final JCheckBox active_chk = new JCheckBox(new IAction(null) {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setActive(active_chk.isSelected());
 		}
 	});
@@ -102,7 +103,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Cabinet style action */
 	private final IAction cab_style = new IAction("cabinet.style") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			cabinet.setStyle((CabinetStyle)
 				cab_style_cbx.getSelectedItem());
 		}
@@ -155,14 +156,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Clear error status action */
 	private final IAction clear_err = new IAction("controller.error.clear"){
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setCounters(true);
 		}
 	};
 
 	/** Reset action */
 	private final IAction reset = new IAction("controller.reset") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDownload(true);
 		}
 	};
@@ -263,29 +264,26 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the jobs for the setup panel */
 	protected void createSetupJobs() {
-		new ChangeJob(this, drop_id) {
-			public void perform() {
+		drop_id.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)drop_id.getValue();
 				proxy.setDrop(n.shortValue());
 			}
-		};
-		new FocusJob(password) {
-			public void perform() {
-				if(wasLost()) {
-					String pwd = new String(
-						password.getPassword()).trim();
-					password.setText("");
-					if(pwd.length() > 0)
-						proxy.setPassword(pwd);
-				}
+		});
+		password.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
+				String pwd = new String(
+					password.getPassword()).trim();
+				password.setText("");
+				if(pwd.length() > 0)
+					proxy.setPassword(pwd);
 			}
-		};
-		new FocusJob(notes) {
-			public void perform() {
-				if(wasLost())
-					proxy.setNotes(notes.getText());
+		});
+		notes.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
+				proxy.setNotes(notes.getText());
 			}
-		};
+		});
 	}
 
 	/** Create the cabinet panel */
@@ -301,20 +299,21 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the jobs for the cabinet panel */
 	protected void createCabinetJobs() {
-		new FocusJob(mile) {
-			public void perform() {
-				if(wasLost()) {
-					String ms = mile.getText();
-					try {
-						Float m = Float.valueOf(ms);
-						cabinet.setMile(m);
-					}
-					catch(NumberFormatException e) {
-						cabinet.setMile(null);
-					}
-				}
+		mile.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
+				cabinet.setMile(parseMile());
 			}
-		};
+		});
+	}
+
+	/** Parse the mile point number */
+	private Float parseMile() {
+		try {
+			return Float.valueOf(mile.getText());
+		}
+		catch(NumberFormatException e) {
+			return null;
+		}
 	}
 
 	/** Listener for cabinet proxy changes */

@@ -21,7 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -156,20 +156,17 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 
 	/** Create the jobs */
 	private void createJobs() {
-		new FocusJob(f_name_txt) {
-			public void perform() {
-				if(wasLost()) {
-					String n = f_name_txt.getText();
-					setFullName(n.trim());
-				}
+		f_name_txt.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
+				String n = f_name_txt.getText();
+				setFullName(n.trim());
 			}
-		};
-		new FocusJob(dn_txt) {
-			public void perform() {
-				if(wasLost())
-					setDn(dn_txt.getText().trim());
+		});
+		dn_txt.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
+				setDn(dn_txt.getText().trim());
 			}
-		};
+		});
 		role_cbx.setAction(role_action);
 	}
 

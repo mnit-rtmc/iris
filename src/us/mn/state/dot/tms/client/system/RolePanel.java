@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Role;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -97,10 +97,9 @@ public class RolePanel extends JPanel {
 		r_model.initialize();
 		ListSelectionModel s = r_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if(!e.getValueIsAdjusting())
-					selectRole();
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectRole();
 			}
 		});
 	}

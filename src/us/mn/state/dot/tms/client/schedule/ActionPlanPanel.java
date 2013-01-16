@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -62,7 +63,7 @@ public class ActionPlanPanel extends JPanel {
 
 	/** Action to delete the selected action plan */
 	private final IAction del_plan = new IAction("action.plan.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			ListSelectionModel sm = p_table.getSelectionModel();
 			int row = sm.getMinSelectionIndex();
 			if(row >= 0)
@@ -129,12 +130,11 @@ public class ActionPlanPanel extends JPanel {
 	protected void addActionPlanJobs() {
 		ListSelectionModel sm = p_table.getSelectionModel();
 		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, sm) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectActionPlan();
+		sm.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectActionPlan();
 			}
-		};
+		});
 	}
 
 	/** Dispose of the form */

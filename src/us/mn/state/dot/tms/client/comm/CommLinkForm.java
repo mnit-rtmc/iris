@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
@@ -84,7 +85,7 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Action to delete the selected comm link */
 	private final IAction delete_link = new IAction("comm.link.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			ListSelectionModel s = table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -106,14 +107,14 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Action to show controller properties */
 	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			doPropertiesAction();
 		}
 	};
 
 	/** Action to delete the selected controller */
 	private final IAction del_ctr = new IAction("controller.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			ListSelectionModel cs = ctable.getSelectionModel();
 			int row = cs.getMinSelectionIndex();
 			if(row >= 0)
@@ -123,7 +124,7 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Action to go to a failed controller */
 	private final IAction go_ctrl = new IAction("controller.go") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			goFailedController();
 		}
 	};
@@ -180,20 +181,18 @@ public class CommLinkForm extends AbstractForm {
 		final JButton ctr_props = new JButton(controller);
 		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectCommLink();
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectCommLink();
 			}
-		};
+		});
 		ListSelectionModel cs = ctable.getSelectionModel();
 		cs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, cs) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectController();
+		cs.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectController();
 			}
-		};
+		});
 		ctable.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() > 1)

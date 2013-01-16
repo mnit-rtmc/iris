@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,12 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.EncoderType;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
@@ -54,7 +55,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			controllerPressed();
 		}
 	};
@@ -71,7 +72,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Encoder type action */
 	private final IAction encoder_type = new IAction("camera.encoder.type"){
-		protected void do_perform() {
+		@Override protected void do_perform() {
 		      proxy.setEncoderType(enc_type_cbx.getSelectedIndex());
 		}
 	};
@@ -82,7 +83,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Checkbox to allow publishing camera images */
 	private final JCheckBox publish_chk = new JCheckBox(new IAction(null) {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setPublish(publish_chk.isSelected());
 		}
 	});
@@ -150,22 +151,22 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create jobs */
 	protected void createJobs() {
-		new FocusJob(notes) {
-			public void perform() {
+		notes.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setNotes(notes.getText());
 			}
-		};
-		new FocusJob(encoder) {
-			public void perform() {
+		});
+		encoder.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setEncoder(encoder.getText());
 			}
-		};
-		new ChangeJob(this, encoder_channel) {
-			public void perform() {
+		});
+		encoder_channel.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number c = (Number)encoder_channel.getValue();
 				proxy.setEncoderChannel(c.intValue());
 			}
-		};
+		});
 	}
 
 	/** Update one attribute on the form */

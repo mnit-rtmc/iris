@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -44,7 +45,7 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 	private final IAction del_action = new IAction(
 		"action.plan.action.delete")
 	{
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			ListSelectionModel sm = table.getSelectionModel();
 			int row = sm.getMinSelectionIndex();
 			if(row >= 0)
@@ -69,15 +70,13 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 	private void addJobs() {
 		final ListSelectionModel sm = table.getSelectionModel();
 		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, sm) {
-			public void perform() {
-				if(!event.getValueIsAdjusting()) {
-					int row = sm.getMinSelectionIndex();
-					if(row >= 0)
-						selectRow(row);
-				}
+		sm.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				int row = sm.getMinSelectionIndex();
+				if(row >= 0)
+					selectRow(row);
 			}
-		};
+		});
 	}
 
 	/** Change the selected row */

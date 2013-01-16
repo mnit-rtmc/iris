@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,11 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.WeatherSensor;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -91,11 +92,11 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 
 	/** Create the widget jobs */
 	protected void createUpdateJobs() {
-		new FocusJob(notes) {
-			public void perform() {
+		notes.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setNotes(notes.getText());
 			}
-		};
+		});
 	}
 
 	/** Controller lookup button pressed */

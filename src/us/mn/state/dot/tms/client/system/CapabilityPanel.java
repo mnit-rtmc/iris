@@ -20,10 +20,10 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -110,18 +110,16 @@ public class CapabilityPanel extends JPanel {
 		p_model.initialize();
 		ListSelectionModel s = cap_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if(!e.getValueIsAdjusting())
-					selectCapability();
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectCapability();
 			}
 		});
 		ListSelectionModel sp = p_table.getSelectionModel();
 		sp.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		sp.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if(!e.getValueIsAdjusting())
-					selectPrivilege();
+		sp.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectPrivilege();
 			}
 		});
 	}

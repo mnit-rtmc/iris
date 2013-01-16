@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -139,11 +140,11 @@ public class CameraViewer extends JPanel
 		bag.weightx = 0.5;
 		cmbOutput = createOutputCombo();
 		add(cmbOutput, bag);
-		new ActionJob(this, cmbOutput) {
-			public void perform() {
+		cmbOutput.addActionListener(new ActionJob(WORKER) {
+			@Override public void perform() {
 				monitorSelected();
 			}
-		};
+		});
 		bag.gridx = 1;
 		bag.gridy = 1;
 		bag.weightx = 1;
@@ -245,7 +246,7 @@ public class CameraViewer extends JPanel
 	}
 
 	/** Called when a video monitor is selected */
-	protected void monitorSelected() {
+	private void monitorSelected() {
 		Camera camera = selected;
 		Object o = cmbOutput.getSelectedItem();
 		if(o instanceof VideoMonitor) {

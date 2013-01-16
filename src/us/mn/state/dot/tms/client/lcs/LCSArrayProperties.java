@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.LCSIndicationHelper;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -75,14 +76,14 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Action to edit the selected LCS */
 	private final IAction edit_lcs = new IAction("lcs.edit") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			editPressed();
 		}
 	};
 
 	/** Action to delete the selected LCS */
 	private final IAction delete_lcs = new IAction("lcs.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			ListSelectionModel s = lcs_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -110,7 +111,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Action to send settings */
 	private final IAction settings = new IAction("device.send.settings") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
 		}
@@ -176,28 +177,28 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create jobs for updating widgets */
 	protected void createUpdateJobs() {
-		new ChangeJob(this, shift_spn) {
-			public void perform() {
+		shift_spn.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)shift_spn.getValue();
 				proxy.setShift(n.intValue());
 			}
-		};
-		new FocusJob(notes) {
-			public void perform() {
+		});
+		notes.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setNotes(notes.getText());
 			}
-		};
+		});
 	}
 
 	/** Initialize the table */
 	protected void initTable() {
 		ListSelectionModel s = lcs_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
 				selectLCS();
 			}
-		};
+		});
 		lcs_table.setAutoCreateColumnsFromModel(false);
 		lcs_table.setColumnModel(table_model.createColumnModel());
 		lcs_table.setModel(table_model);
@@ -227,7 +228,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 			final int ind = i.ordinal();
 			JCheckBox btn = new JCheckBox();
 			btn.setAction(new IAction(null) {
-				protected void do_perform() {
+				@Override protected void do_perform() {
 					toggleIndication(ind);
 				}
 			});

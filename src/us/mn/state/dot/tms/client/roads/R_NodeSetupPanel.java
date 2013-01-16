@@ -21,7 +21,7 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
@@ -43,7 +43,7 @@ public class R_NodeSetupPanel extends FormPanel {
 		protected NAction(String text_id) {
 			super(text_id);
 		}
-		protected final void do_perform() {
+		@Override protected final void do_perform() {
 			R_Node n = node;
 			if(n != null)
 				do_perform(n);
@@ -101,32 +101,32 @@ public class R_NodeSetupPanel extends FormPanel {
 	/** Initialize the panel */
 	public void initialize() {
 		type_cbx.setAction(new NAction("r_node.type") {
-			protected void do_perform(R_Node n) {
+			@Override protected void do_perform(R_Node n) {
 				n.setNodeType(type_cbx.getSelectedIndex());
 			}
 		});
 		pick_chk.setAction(new NAction(null) {
-			protected void do_perform(R_Node n) {
+			@Override protected void do_perform(R_Node n) {
 				n.setPickable(pick_chk.isSelected());
 			}
 		});
 		trans_cbx.setAction(new NAction("r_node.transition") {
-			protected void do_perform(R_Node n) {
+			@Override protected void do_perform(R_Node n) {
 				n.setTransition(trans_cbx.getSelectedIndex());
 			}
 		});
 		above_chk.setAction(new NAction(null) {
-			protected void do_perform(R_Node n) {
+			@Override protected void do_perform(R_Node n) {
 				n.setAbove(above_chk.isSelected());
 			}
 		});
 		attach_chk.setAction(new NAction(null) {
-			protected void do_perform(R_Node n) {
+			@Override protected void do_perform(R_Node n) {
 				n.setAttachSide(attach_chk.isSelected());
 			}
 		});
 		active_chk.setAction(new NAction(null) {
-			protected void do_perform(R_Node n) {
+			@Override protected void do_perform(R_Node n) {
 				n.setActive(active_chk.isSelected());
 			}
 		});
@@ -147,32 +147,30 @@ public class R_NodeSetupPanel extends FormPanel {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ChangeJob(this, lane_spn) {
-			public void perform() {
+		lane_spn.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)lane_spn.getValue();
 				setLanes(n.intValue());
 			}
-		};
-		new ChangeJob(this, shift_spn) {
-			public void perform() {
+		});
+		shift_spn.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)shift_spn.getValue();
 				setShift(n.intValue());
 			}
-		};
-		new FocusJob(station_txt) {
-			public void perform() {
-				if(wasLost()) {
-					String s = station_txt.getText().trim();
-					setStationID(s);
-				}
+		});
+		station_txt.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
+				String s = station_txt.getText().trim();
+				setStationID(s);
 			}
-		};
-		new ChangeJob(this, speed_spn) {
-			public void perform() {
+		});
+		speed_spn.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)speed_spn.getValue();
 				setSpeedLimit(n.intValue());
 			}
-		};
+		});
 	}
 
 	/** Set the number of lanes */
@@ -207,7 +205,7 @@ public class R_NodeSetupPanel extends FormPanel {
 	public final void update(final R_Node n, final String a) {
 		// Serialize on WORKER thread
 		WORKER.addJob(new Job() {
-			public void perform() {
+			@Override public void perform() {
 				doUpdate(n, a);
 			}
 		});
@@ -268,7 +266,7 @@ public class R_NodeSetupPanel extends FormPanel {
 	public final void clear() {
 		// Serialize on WORKER thread
 		WORKER.addJob(new Job() {
-			public void perform() {
+			@Override public void perform() {
 				doClear();
 			}
 		});

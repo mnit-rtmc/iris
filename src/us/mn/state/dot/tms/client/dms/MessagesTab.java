@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -64,7 +65,7 @@ public class MessagesTab extends JPanel {
 
 	/** Action to delete a sign group */
 	private final IAction delete_group = new IAction("dms.group.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			SignGroup group = getSelectedGroup();
 			if(group != null)
 				group.destroy();
@@ -79,7 +80,7 @@ public class MessagesTab extends JPanel {
 
 	/** Action to delete sign text message */
 	private final IAction delete_text = new IAction("dms.message.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			SignText sign_text = getSelectedSignText();
 			if(sign_text != null)
 				sign_text.destroy();
@@ -97,7 +98,7 @@ public class MessagesTab extends JPanel {
 	private final JCheckBox aws_allowed_chk = new JCheckBox(
 		new IAction("dms.aws.allowed")
 	{
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setAwsAllowed(aws_allowed_chk.isSelected());
 		}
 	});
@@ -106,7 +107,7 @@ public class MessagesTab extends JPanel {
 	private final JCheckBox aws_control_chk = new JCheckBox(
 		new IAction("device.style.aws.controlled")
 	{
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setAwsControlled(aws_control_chk.isSelected());
 		}
 	});
@@ -131,7 +132,7 @@ public class MessagesTab extends JPanel {
 		initGroupTable();
 		initSignTextTable();
 		font_cbx.setAction(new IAction("font") {
-			protected void do_perform() {
+			@Override protected void do_perform() {
 				proxy.setDefaultFont(
 					(Font)font_cbx.getSelectedItem());
 			}
@@ -217,12 +218,11 @@ public class MessagesTab extends JPanel {
 	protected void initGroupTable() {
 		final ListSelectionModel s = group_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectGroup();
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectGroup();
 			}
-		};
+		});
 		group_table.setAutoCreateColumnsFromModel(false);
 		group_table.setColumnModel(
 			sign_group_model.createColumnModel());
@@ -293,12 +293,11 @@ public class MessagesTab extends JPanel {
 		final ListSelectionModel s =
 			sign_text_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectSignText();
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectSignText();
 			}
-		};
+		});
 		sign_text_table.setAutoCreateColumnsFromModel(false);
 		sign_text_table.setVisibleRowCount(12);
 	}

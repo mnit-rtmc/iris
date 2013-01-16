@@ -22,7 +22,7 @@ import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
@@ -211,16 +211,16 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new FocusJob(lat_txt) {
-			public void perform() {
+		lat_txt.addFocusListener(new FocusLostJob(client.WORKER) {
+			@Override public void perform() {
 				setLat(getTextDouble(lat_txt));
 			}
-		};
-		new FocusJob(lon_txt) {
-			public void perform() {
+		});
+		lon_txt.addFocusListener(new FocusLostJob(client.WORKER) {
+			@Override public void perform() {
 				setLon(getTextDouble(lon_txt));
 			}
-		};
+		});
 	}
 
 	/** Get a position */

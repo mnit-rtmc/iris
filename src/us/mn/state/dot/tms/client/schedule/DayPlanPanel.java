@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Holiday;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.CalendarWidget;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -74,7 +75,7 @@ public class DayPlanPanel extends JPanel {
 
 	/** Action for day plans */
 	private final IAction day = new IAction("action.plan.day") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			selectDayPlan();
 		}
 	};
@@ -84,7 +85,7 @@ public class DayPlanPanel extends JPanel {
 
 	/** Action to delete the selected day plan */
 	private final IAction del_plan = new IAction("action.plan.day.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			deleteSelectedPlan();
 		}
 	};
@@ -94,7 +95,7 @@ public class DayPlanPanel extends JPanel {
 
 	/** Action to select previous month */
 	private final IAction prev_month =new IAction("action.plan.month.prev"){
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			month.add(Calendar.MONTH, -1);
 			updateCalendarWidget();
 		}
@@ -105,7 +106,7 @@ public class DayPlanPanel extends JPanel {
 
 	/** Action to select next month */
 	private final IAction next_month =new IAction("action.plan.month.next"){
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			month.add(Calendar.MONTH, 1);
 			updateCalendarWidget();
 		}
@@ -113,7 +114,7 @@ public class DayPlanPanel extends JPanel {
 
 	/** Action to select previous year */
 	private final IAction prev_year = new IAction("action.plan.year.prev") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			month.add(Calendar.YEAR, -1);
 			updateCalendarWidget();
 		}
@@ -124,7 +125,7 @@ public class DayPlanPanel extends JPanel {
 
 	/** Action to select next year */
 	private final IAction next_year = new IAction("action.plan.year.next") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			month.add(Calendar.YEAR, 1);
 			updateCalendarWidget();
 		}
@@ -143,7 +144,7 @@ public class DayPlanPanel extends JPanel {
 	private final IAction del_holiday = new IAction(
 		"action.plan.holiday.delete")
 	{
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			deleteSelectedHoliday();
 		}
 	};
@@ -258,12 +259,13 @@ public class DayPlanPanel extends JPanel {
 
 	/** Create jobs for widget actions */
 	protected void createWidgetJobs() {
-		new ListSelectionJob(this, h_table.getSelectionModel()) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectHoliday();
+		h_table.getSelectionModel().addListSelectionListener(
+			new ListSelectionJob(WORKER)
+		{
+			@Override public void perform() {
+				selectHoliday();
 			}
-		};
+		});
 		cal_widget.setHighlighter(new CalendarWidget.Highlighter() {
 			public boolean isHighlighted(Calendar cal) {
 				DayPlan dp = getSelectedPlan();

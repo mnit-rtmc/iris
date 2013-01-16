@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.Temperature;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
@@ -126,7 +127,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			controllerPressed();
 		}
 	};
@@ -181,7 +182,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Button to query configuration */
 	private final IAction config = new IAction("dms.query.config") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				QUERY_CONFIGURATION.ordinal());
 		}
@@ -206,7 +207,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	private final IAction query_msg = new IAction("dms.query.msg", 
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
 	{
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				QUERY_MESSAGE.ordinal());
 		}
@@ -216,7 +217,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	private final IAction reset = new IAction("dms.reset", 
 		SystemAttrEnum.DMS_RESET_ENABLE)
 	{
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				RESET_DEVICE.ordinal());
 		}
@@ -224,7 +225,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Query status action */
 	private final IAction query_status = new IAction("dms.query.status") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				QUERY_STATUS.ordinal());
 		}
@@ -232,7 +233,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Send settings action */
 	private final IAction settings = new IAction("device.send.settings") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
 		}
@@ -249,7 +250,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Action to query pixel failures */
 	private final IAction query_pixels = new IAction("dms.query.pixels") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				QUERY_PIXEL_FAILURES.ordinal());
 		}
@@ -257,7 +258,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Action to test pixel failures */
 	private final IAction test_pixels = new IAction("dms.test.pixels") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(
 				DeviceRequest.TEST_PIXELS.ordinal());
 		}
@@ -271,7 +272,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Current brightness low feedback action */
 	private final IAction bright_low = new IAction("dms.brightness.low") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				BRIGHTNESS_TOO_DIM.ordinal());
 		}
@@ -279,7 +280,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Current brightness good feedback action */
 	private final IAction bright_good = new IAction("dms.brightness.good") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				BRIGHTNESS_GOOD.ordinal());
 		}
@@ -287,7 +288,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Current brightness high feedback action */
 	private final IAction bright_high = new IAction("dms.brightness.high") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				BRIGHTNESS_TOO_BRIGHT.ordinal());
 		}
@@ -380,29 +381,29 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create the widget jobs */
 	protected void createUpdateJobs() {
-		new FocusJob(notes) {
-			public void perform() {
+		notes.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setNotes(notes.getText());
 			}
-		};
-		new ChangeJob(this, ldcPotBaseSpn) {
-			public void perform() {
+		});
+		ldcPotBaseSpn.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)ldcPotBaseSpn.getValue();
 				proxy.setLdcPotBase(n.intValue());
 			}
-		};
-		new ChangeJob(this, currentLowSpn) {
-			public void perform() {
+		});
+		currentLowSpn.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)currentLowSpn.getValue();
 				proxy.setPixelCurrentLow(n.intValue());
 			}
-		};
-		new ChangeJob(this, currentHighSpn) {
-			public void perform() {
+		});
+		currentHighSpn.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)currentHighSpn.getValue();
 				proxy.setPixelCurrentHigh(n.intValue());
 			}
-		};
+		});
 	}
 
 	/** Disable the device request widgets */
@@ -431,7 +432,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
 		camera_cbx.setAction(new IAction("camera") {
-			protected void do_perform() {
+			@Override protected void do_perform() {
 				proxy.setCamera(
 					(Camera)camera_cbx.getSelectedItem());
 			}

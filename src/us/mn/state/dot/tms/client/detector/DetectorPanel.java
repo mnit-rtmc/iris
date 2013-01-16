@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
@@ -49,7 +49,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		protected DAction(String text_id) {
 			super(text_id);
 		}
-		protected final void do_perform() {
+		@Override protected final void do_perform() {
 			Detector d = detector;
 			if(d != null)
 				do_perform(d);
@@ -59,7 +59,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Lane type action */
 	private final DAction lane_type = new DAction("detector.lane.type") {
-		protected void do_perform(Detector d) {
+		@Override protected void do_perform(Detector d) {
 			d.setLaneType((short)type_cbx.getSelectedIndex());
 		}
 	};
@@ -74,14 +74,14 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Abandoned check box */
 	private final JCheckBox aband_chk = new JCheckBox(new DAction(null) {
-		protected void do_perform(Detector d) {
+		@Override protected void do_perform(Detector d) {
 			d.setAbandoned(aband_chk.isSelected());
 		}
 	});
 
 	/** Force fail check box */
 	private final JCheckBox fail_chk = new JCheckBox(new DAction(null) {
-		protected void do_perform(Detector d) {
+		@Override protected void do_perform(Detector d) {
 			d.setForceFail(fail_chk.isSelected());
 		}
 	});
@@ -100,7 +100,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	private final JButton controller_btn = new JButton(
 		new DAction("controller")
 	{
-		protected void do_perform(Detector d) {
+		@Override protected void do_perform(Detector d) {
 			showControllerForm(d);
 		}
 	});
@@ -109,7 +109,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	private final JButton r_node_btn = new JButton(
 		new DAction("r_node")
 	{
-		protected void do_perform(Detector d) {
+		@Override protected void do_perform(Detector d) {
 			showRNode(d);
 		}
 	});
@@ -164,30 +164,28 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		new ChangeJob(this, lane_spn) {
-			public void perform() {
+		lane_spn.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)lane_spn.getValue();
 				setLaneNumber(n.shortValue());
 			}
-		};
-		new ChangeJob(this, field_spn) {
-			public void perform() {
+		});
+		field_spn.addChangeListener(new ChangeJob(WORKER) {
+			@Override public void perform() {
 				Number n = (Number)field_spn.getValue();
 				setFieldLength(n.floatValue());
 			}
-		};
-		new FocusJob(fake_txt) {
-			public void perform() {
-				if(wasLost())
-					setFake(fake_txt.getText().trim());
+		});
+		fake_txt.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
+				setFake(fake_txt.getText().trim());
 			}
-		};
-		new FocusJob(note_txt) {
-			public void perform() {
-				if(wasLost())
-					setNotes(note_txt.getText().trim());
+		});
+		note_txt.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
+				setNotes(note_txt.getText().trim());
 			}
-		};
+		});
 	}
 
 	/** Set the detector lane number */
@@ -253,7 +251,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	public final void update(final Detector d, final String a) {
 		// Serialize on WORKER thread
 		WORKER.addJob(new Job() {
-			public void perform() {
+			@Override public void perform() {
 				doUpdate(d, a);
 			}
 		});
@@ -302,7 +300,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	public final void clear() {
 		// Serialize on WORKER thread
 		WORKER.addJob(new Job() {
-			public void perform() {
+			@Override public void perform() {
 				doClear();
 			}
 		});

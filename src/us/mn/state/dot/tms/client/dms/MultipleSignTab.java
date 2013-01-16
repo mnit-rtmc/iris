@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -83,12 +84,13 @@ public class MultipleSignTab extends JPanel implements
 		sign_group_model.initialize();
 		dms_sign_groups = cache.getDmsSignGroups();
 		group_list = new JList(sign_group_model);
-		new ListSelectionJob(this, group_list) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectGroup();
+		group_list.addListSelectionListener(new ListSelectionJob(
+			WORKER)
+		{
+			@Override public void perform() {
+				selectGroup();
 			}
-		};
+		});
 		selectionModel = sm;
 		selectionModel.addProxySelectionListener(this);
 		GridBagConstraints bag = new GridBagConstraints();

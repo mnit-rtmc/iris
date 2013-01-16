@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.PixmapGraphic;
 import us.mn.state.dot.tms.RasterGraphic;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
@@ -117,14 +118,14 @@ public class GraphicForm extends AbstractForm {
 
 	/** Action to create a new graphic */
 	private final IAction create_gr = new IAction("graphic.create") {
-		protected void do_perform() throws Exception {
+		@Override protected void do_perform() throws Exception {
 			createGraphic();
 		}
 	};
 
 	/** Action to delete the selected proxy */
 	private final IAction del_gr = new IAction("graphic.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			ListSelectionModel s = table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -162,12 +163,11 @@ public class GraphicForm extends AbstractForm {
 	protected JPanel createGraphicPanel() {
 		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectProxy();
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectProxy();
 			}
-		};
+		});
 		FormPanel panel = new FormPanel(true);
 		table.setRowHeight(UI.scaled(MAX_GRAPHIC_HEIGHT / 2));
 		table.setModel(model);

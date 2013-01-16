@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.WarningSign;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
@@ -112,16 +113,16 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
 	/** Create jobs for updating */
 	protected void createUpdateJobs() {
-		new FocusJob(notes) {
-			public void perform() {
+		notes.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setNotes(notes.getText());
 			}
-		};
-		new FocusJob(message) {
-			public void perform() {
+		});
+		message.addFocusListener(new FocusLostJob(WORKER) {
+			@Override public void perform() {
 				proxy.setMessage(message.getText());
 			}
-		};
+		});
 	}
 
 	/** Controller lookup button pressed */

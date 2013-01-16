@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -42,6 +40,7 @@ import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.RasterGraphic;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -71,7 +70,7 @@ public class FontForm extends AbstractForm {
 
 	/** Action to delete the selected font */
 	private final IAction del_font = new IAction("font.delete") {
-		protected void do_perform() {
+		@Override protected void do_perform() {
 			ListSelectionModel s = f_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -185,12 +184,11 @@ public class FontForm extends AbstractForm {
 		bag.insets = UI.insets();
 		ListSelectionModel s = f_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectFont();
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectFont();
 			}
-		};
+		});
 		f_table.setModel(f_model);
 		f_table.setAutoCreateColumnsFromModel(false);
 		f_table.setColumnModel(f_model.createColumnModel());
@@ -219,12 +217,11 @@ public class FontForm extends AbstractForm {
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("font.ascii")));
-		new ListSelectionJob(this, glist) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectGlyph();
+		glist.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+				selectGlyph();
 			}
-		};
+		});
 		DefaultListModel model = new DefaultListModel();
 		glist.setModel(model);
 		glist.setLayoutOrientation(JList.HORIZONTAL_WRAP);
