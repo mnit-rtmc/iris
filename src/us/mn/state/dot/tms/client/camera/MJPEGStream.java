@@ -20,9 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.StreamType;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -66,11 +69,13 @@ public class MJPEGStream implements VideoStream {
 	}
 
 	/** Create a new MJPEG stream */
-	public MJPEGStream(VideoRequest req, Camera c) throws IOException {
+	public MJPEGStream(Scheduler s, VideoRequest req, Camera c)
+		throws IOException
+	{
 		url = new URL(req.getUrl(c));
 		size = UI.dimension(req.getSize().width, req.getSize().height);
 		stream = createInputStream();
-		thread.start();
+		s.addJob(job);
 	}
 
 	/** Create an input stream from an HTTP connection */
@@ -83,24 +88,24 @@ public class MJPEGStream implements VideoStream {
 	}
 
 	/** Anonymous thread to read video stream */
-	private final Thread thread = new Thread() {
-		public void run() {
-			readStream();
+	private final Job job = new Job(Calendar.MILLISECOND, 1) {
+		public void perform() {
+			if(running)
+				readStream();
+		}
+		public boolean isRepeating() {
+			return running;
 		}
 	};
 
 	/** Read a video stream */
-	protected void readStream() {
+	private void readStream() {
 		try {
-			while(running) {
-				byte[] idata = getImage();
-				screen.setIcon(createIcon(idata));
-			}
+			byte[] idata = getImage();
+			screen.setIcon(createIcon(idata));
 		}
 		catch(IOException e) {
 			setErrorMsg(e.getMessage());
-		}
-		finally {
 			screen.setIcon(null);
 			running = false;
 		}
@@ -200,16 +205,11 @@ public class MJPEGStream implements VideoStream {
 	public void dispose() {
 		running = false;
 		try {
-			thread.join();
-		}
-		catch(InterruptedException e) {
-			setErrorMsg(e.getMessage());
-		}
-		try {
 			stream.close();
 		}
 		catch(IOException e) {
 			setErrorMsg(e.getMessage());
 		}
+		screen.setIcon(null);
 	}
 }

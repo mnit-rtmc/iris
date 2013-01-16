@@ -157,7 +157,7 @@ public class StreamPanel extends JPanel {
 	private VideoStream createStream(Camera c) throws IOException {
 		switch(video_req.getStreamType(c)) {
 		case MJPEG:
-			return new MJPEGStream(video_req, c);
+			return new MJPEGStream(NETWORKER, video_req, c);
 		case MPEG4:
 			try {
 				Class.forName("org.gstreamer.Gst");
