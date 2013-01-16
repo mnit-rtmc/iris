@@ -45,8 +45,8 @@ public class StreamPanel extends JPanel {
 	/** Milliseconds between updates to the status */
 	static private final int STATUS_DELAY = 1000;
 
-	/** Network worker thread */
-	static private final Scheduler NETWORKER = new Scheduler("networker");
+	/** Camera streamer thread */
+	static private final Scheduler STREAMER = new Scheduler("streamer");
 
 	/** Video request */
 	private final VideoRequest video_req;
@@ -131,7 +131,7 @@ public class StreamPanel extends JPanel {
 			clearStream();
 		if(c != null) {
 			status_lbl.setText(I18N.get("camera.stream.opening"));
-			NETWORKER.addJob(new Job() {
+			STREAMER.addJob(new Job() {
 				public void perform() {
 					requestStream(c);
 				}
@@ -157,7 +157,7 @@ public class StreamPanel extends JPanel {
 	private VideoStream createStream(Camera c) throws IOException {
 		switch(video_req.getStreamType(c)) {
 		case MJPEG:
-			return new MJPEGStream(NETWORKER, video_req, c);
+			return new MJPEGStream(STREAMER, video_req, c);
 		case MPEG4:
 			try {
 				Class.forName("org.gstreamer.Gst");
