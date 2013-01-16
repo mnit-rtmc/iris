@@ -30,7 +30,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Camera;
@@ -464,7 +464,7 @@ public class ControllerIOModel extends AbstractTableModel {
 				io[pin] = p;
 				types[pin] = getType(p);
 				final int row = pin - 1;
-				SwingRunner.invoke(new Runnable() {
+				runSwing(new Runnable() {
 					public void run() {
 						fireTableRowsUpdated(row, row);
 					}
@@ -480,7 +480,7 @@ public class ControllerIOModel extends AbstractTableModel {
 				io[pin] = null;
 				types[pin] = null;
 				final int row = pin - 1;
-				SwingRunner.invoke(new Runnable() {
+				runSwing(new Runnable() {
 					public void run() {
 						fireTableRowsUpdated(row, row);
 					}

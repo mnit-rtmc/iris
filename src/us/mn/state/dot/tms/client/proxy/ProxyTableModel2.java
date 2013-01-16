@@ -22,7 +22,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -171,7 +171,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	protected final void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
 		if(row >= 0) {
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					// should be:
 					// fireTableRowsInserted(row, row);
@@ -199,7 +199,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	protected final void proxyRemovedSlow(T proxy) {
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireTableDataChanged();
 					// should be:
@@ -214,7 +214,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	protected void proxyChangedSlow(T proxy, String attrib) {
 		final int row = getRow(proxy);
 		if(row >= 0) {
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireTableDataChanged();
 					// should be:

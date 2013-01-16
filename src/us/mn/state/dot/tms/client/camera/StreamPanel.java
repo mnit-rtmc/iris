@@ -29,7 +29,7 @@ import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.utils.I18N;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -185,7 +185,7 @@ public class StreamPanel extends JPanel {
 			stream = null;
 		}
 		status_lbl.setText(null);
-		SwingRunner.invoke(new Runnable() {
+		runSwing(new Runnable() {
 			public void run() {
 				screen_pnl.repaint();
 			}

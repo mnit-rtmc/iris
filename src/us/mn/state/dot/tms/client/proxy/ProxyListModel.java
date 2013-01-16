@@ -19,7 +19,7 @@ import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -87,7 +87,7 @@ public class ProxyListModel<T extends SonarObject>
 		final int row = doProxyAdded(proxy);
 		if(row >= 0) {
 			final ListModel model = this;
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireIntervalAdded(model, row, row);
 				}
@@ -122,7 +122,7 @@ public class ProxyListModel<T extends SonarObject>
 			final int row = proxies.size() - 1;
 			if(row >= 0) {
 				final ListModel model = this;
-				SwingRunner.invoke(new Runnable() {
+				runSwing(new Runnable() {
 					public void run() {
 						fireIntervalAdded(model, 0,row);
 					}
@@ -150,7 +150,7 @@ public class ProxyListModel<T extends SonarObject>
 		final ListModel model = this;
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireIntervalRemoved(model, row, row);
 				}
@@ -180,7 +180,7 @@ public class ProxyListModel<T extends SonarObject>
 		}
 		if(pre_row >= 0 && post_row < 0) {
 			final int row = pre_row;
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireIntervalRemoved(model, row, row);
 				}
@@ -188,7 +188,7 @@ public class ProxyListModel<T extends SonarObject>
 		}
 		if(pre_row < 0 && post_row >= 0) {
 			final int row = post_row;
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireIntervalAdded(model, row, row);
 				}
@@ -197,7 +197,7 @@ public class ProxyListModel<T extends SonarObject>
 		if(pre_row >= 0 && post_row >= 0) {
 			final int r0 = Math.min(pre_row, post_row);
 			final int r1 = Math.max(pre_row, post_row);
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireContentsChanged(model, r0, r1);
 				}

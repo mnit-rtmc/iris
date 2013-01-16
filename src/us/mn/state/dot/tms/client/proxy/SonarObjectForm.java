@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.BorderLayout;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -78,7 +78,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 
 	/** Close the form */
 	protected void closeForm() {
-		SwingRunner.invoke(new Runnable() {
+		runSwing(new Runnable() {
 			public void run() {
 				close();
 			}
@@ -93,7 +93,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 
 	/** Update one attribute on the form */
 	protected final void updateAttribute(final String a) {
-		SwingRunner.invoke(new Runnable() {
+		runSwing(new Runnable() {
 			public void run() {
 				doUpdateAttribute(a);
 			}

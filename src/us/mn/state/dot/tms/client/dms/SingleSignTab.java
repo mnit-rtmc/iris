@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
@@ -243,7 +243,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	/** A proxy has been changed */
 	public void proxyChanged(final DMS proxy, final String a) {
 		if(proxy == watching) {
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					updateAttribute(proxy, a);
 				}

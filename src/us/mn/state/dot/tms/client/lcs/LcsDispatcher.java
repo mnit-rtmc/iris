@@ -27,7 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -226,7 +226,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** A proxy has been changed */
 	public void proxyChanged(final LCSArray proxy, final String a) {
 		if(proxy == selectionModel.getSingleSelection()) {
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					updateAttribute(proxy, a);
 				}

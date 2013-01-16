@@ -24,7 +24,7 @@ import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -152,7 +152,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	/** Notify listeners that the layer has changed */
 	protected void notifyLayerChanged(LayerChange reason) {
 		final LayerChangedEvent e = new LayerChangedEvent(this, reason);
-		SwingRunner.invoke(new Runnable() {
+		runSwing(new Runnable() {
 			public void run() {
 				notifyLayerChangedListeners(e);
 			}

@@ -22,7 +22,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -145,7 +145,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	protected final void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
 		if(row >= 0) {
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireTableRowsInserted(row, row);
 				}
@@ -186,7 +186,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	protected final void proxyRemovedSlow(T proxy) {
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireTableRowsDeleted(row, row);
 				}
@@ -213,7 +213,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		}
 		if(pre_row >= 0 && post_row < 0) {
 			final int r = pre_row;
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireTableRowsDeleted(r, r);
 				}
@@ -221,7 +221,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		}
 		if(pre_row < 0 && post_row >= 0) {
 			final int r = post_row;
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireTableRowsInserted(r, r);
 				}
@@ -230,7 +230,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		if(pre_row >= 0 && post_row >= 0) {
 			final int r0 = Math.min(pre_row, post_row);
 			final int r1 = Math.max(pre_row, post_row);
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					fireTableRowsUpdated(r0, r1);
 				}

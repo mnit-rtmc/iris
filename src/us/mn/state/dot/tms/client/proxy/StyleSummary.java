@@ -41,7 +41,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.TitledBorder;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.tms.DeviceStyle;
@@ -126,7 +126,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		private void updateCountLabel() {
 			// Capture current count in case it's updated
 			final String c = Integer.toString(n_count);
-			SwingRunner.invoke(new Runnable() {
+			runSwing(new Runnable() {
 				public void run() {
 					count_lbl.setText(c);
 				}

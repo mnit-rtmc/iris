@@ -34,7 +34,7 @@ import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -350,7 +350,7 @@ public class CorridorList extends JPanel {
 		smodel = new R_NodeListSelectionModel(n_model, sel_model);
 		n_list.setModel(n_model);
 		n_list.setSelectionModel(smodel);
-		SwingRunner.invoke(new Runnable() {
+		runSwing(new Runnable() {
 			public void run() {
 				n_list.ensureIndexIsVisible(
 					n_list.getLeadSelectionIndex());

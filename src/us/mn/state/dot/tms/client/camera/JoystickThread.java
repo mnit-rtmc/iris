@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 
 /**
  * Joystick event driver for controlling camera PTZ
@@ -167,7 +167,7 @@ public final class JoystickThread {
 	protected void setButton(int button, boolean pressed) {
 		final JoystickButtonEvent ev = new JoystickButtonEvent(this,
 			button, pressed);
-		SwingRunner.invoke(new Runnable() {
+		runSwing(new Runnable() {
 			public void run() {
 				fireJoystickButtonEvent(ev);
 			}

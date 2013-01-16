@@ -25,7 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sched.SwingRunner;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
@@ -147,7 +147,7 @@ public class MultipleSignTab extends JPanel implements
 
 	/** Called whenever a sign is added to the selection */
 	public void selectionAdded(final DMS dms) {
-		SwingRunner.invoke(new Runnable() {
+		runSwing(new Runnable() {
 			public void run() {
 				sel_model.addElement(dms);
 			}
@@ -160,7 +160,7 @@ public class MultipleSignTab extends JPanel implements
 
 	/** Called whenever a sign is removed from the selection */
 	public void selectionRemoved(final DMS dms) {
-		SwingRunner.invoke(new Runnable() {
+		runSwing(new Runnable() {
 			public void run() {
 				sel_model.removeElement(dms);
 			}
