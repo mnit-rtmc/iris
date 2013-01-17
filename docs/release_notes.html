@@ -9,6 +9,33 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.2.0 (17 January 2013)</dt>
+	<dd><ul>
+		<li>
+			Replaced camera PTZ button panel with on-screen PTZ
+			control (mouse click pan/tilt; mouse wheel for zoom).
+		</li>
+		<li>
+			Added alarm trigger time attribute.
+		</li>
+		<li>
+			Reduced resource usage of client program.
+		</li>
+		<li>
+			Removed unnecessary attribute updates from server.
+		</li>
+		<li>
+			Fixed resource leak problems with client.
+		</li>
+		<li>
+			Lots of code cleanups.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.2.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>4.1.0 (2 January 2013)</dt>
 	<dd><ul>
 		<li>
