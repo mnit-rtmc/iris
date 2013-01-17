@@ -89,14 +89,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return map;
 	}
 
-	/** Get the fail time as a time stamp */
-	static private Date asTimestamp(Long ft) {
-		if(ft != null)
-			return new Date(ft);
-		else
-			return null;
-	}
-
 	/** Get the database table name */
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
@@ -128,14 +120,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		notes = nt;
 		failTime = stampMillis(ft);
 		initTransients();
-	}
-
-	/** Get fail time as milliseconds since epoch */
-	static private Long stampMillis(Date ft) {
-		if(ft != null)
-			return ft.getTime();
-		else
-			return null;
 	}
 
 	/** Create a new controller */
@@ -622,7 +606,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		notifyAttribute("failTime");
 	}
 
-	/** Set the administrator notes */
+	/** Set the fail time */
 	protected void setFailTime(Long ft) {
 		try {
 			store.update(this, "fail_time", asTimestamp(ft));

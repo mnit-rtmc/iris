@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,4 +32,8 @@ public interface Alarm extends ControllerIO {
 
 	/** Get the state of the alarm */
 	boolean getState();
+
+	/** Get the most recent alarm trigger time. This time is in
+	 * milliseconds since the epoch. */
+	Long getTriggerTime();
 }

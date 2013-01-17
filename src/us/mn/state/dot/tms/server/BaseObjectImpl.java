@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.text.NumberFormat;
+import java.util.Date;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.TMSException;
@@ -82,6 +83,22 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		DmsActionImpl.loadAll();
 		LaneActionImpl.loadAll();
 		MeterActionImpl.loadAll();
+	}
+
+	/** Get the time as a time stamp */
+	static protected Date asTimestamp(Long ts) {
+		if(ts != null)
+			return new Date(ts);
+		else
+			return null;
+	}
+
+	/** Get time as milliseconds since epoch */
+	static protected Long stampMillis(Date ts) {
+		if(ts != null)
+			return ts.getTime();
+		else
+			return null;
 	}
 
 	/** Get the primary key name */

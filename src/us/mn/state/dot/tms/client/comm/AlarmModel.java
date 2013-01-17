@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.comm;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -37,7 +38,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 	/** Create the columns in the model */
 	protected ArrayList<ProxyColumn<Alarm>> createColumns() {
 		ArrayList<ProxyColumn<Alarm>> cols =
-			new ArrayList<ProxyColumn<Alarm>>(5);
+			new ArrayList<ProxyColumn<Alarm>>(6);
 		cols.add(new ProxyColumn<Alarm>("alarm", 80) {
 			public Object getValueAt(Alarm a) {
 				return a.getName();
@@ -69,6 +70,15 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new StateCellRenderer();
+			}
+		});
+		cols.add(new ProxyColumn<Alarm>("alarm.trigger_time", 200) {
+			public Object getValueAt(Alarm a) {
+				Long tt = a.getTriggerTime();
+				if(tt != null)
+					return new Date(tt);
+				else
+					return "";
 			}
 		});
 		cols.add(new ProxyColumn<Alarm>("controller", 100) {

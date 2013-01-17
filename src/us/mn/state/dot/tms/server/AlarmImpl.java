@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,10 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -44,8 +46,9 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	/** Load all the alarms */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, AlarmImpl.class);
-		store.query("SELECT name, description, controller, pin, state" +
-			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, description, controller, pin, " +
+			"state, trigger_time FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new AlarmImpl(namespace,
@@ -53,7 +56,8 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 					row.getString(2),	// description
 					row.getString(3),	// controller
 					row.getInt(4),		// pin
-					row.getBoolean(5)	// state
+					row.getBoolean(5),	// state
+					row.getTimestamp(6)	// triggerTime
 				));
 			}
 		});
@@ -67,6 +71,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("state", state);
+		map.put("trigger_time", asTimestamp(triggerTime));
 		return map;
 	}
 
@@ -87,23 +92,24 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	}
 
 	/** Create a new alarm */
-	public AlarmImpl(String n, String d, ControllerImpl c, int p,
-		boolean s)
+	protected AlarmImpl(String n, String d, ControllerImpl c, int p,
+		boolean s, Date tt)
 	{
 		this(n);
 		description = d;
 		controller = c;
 		pin = p;
 		state = s;
+		triggerTime = stampMillis(tt);
 		initTransients();
 	}
 
 	/** Create a new alarm */
 	public AlarmImpl(Namespace ns, String n, String d, String c, int p,
-		boolean s)
+		boolean s, Date tt)
 	{
 		this(n, d, (ControllerImpl)ns.lookupObject(
-			Controller.SONAR_TYPE, c), p, s);
+			Controller.SONAR_TYPE, c), p, s, tt);
 	}
 
 	/** Initialize the controller for this alarm */
@@ -202,6 +208,8 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	public void setStateNotify(boolean s) {
 		if(s == state)
 			return;
+		if(s)
+			setTriggerTime();
 		AlarmEvent ev = new AlarmEvent(getEventType(s), getName());
 		try {
 			store.update(this, "state", s);
@@ -217,6 +225,29 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	/** Get the state of the alarm */
 	public boolean getState() {
 		return state;
+	}
+
+	/** Time stamp of most recent alarm trigger */
+	private Long triggerTime = TimeSteward.currentTimeMillis();
+
+	/** Set the trigger time */
+	private void setTriggerTime() {
+		Long tt = TimeSteward.currentTimeMillis();
+		try {
+			store.update(this, "trigger_time", asTimestamp(tt));
+		}
+		catch(TMSException e) {
+			// FIXME: what else can we do with this exception?
+			e.printStackTrace();
+		}
+		triggerTime = tt;
+		notifyAttribute("triggerTime");
+	}
+
+	/** Get the most recent alarm trigger time. This time is in
+	 * milliseconds since the epoch. */
+	public Long getTriggerTime() {
+		return triggerTime;
 	}
 
 	/** Destroy an alarm */

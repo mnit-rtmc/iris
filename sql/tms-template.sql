@@ -337,20 +337,22 @@ CREATE UNIQUE INDEX _device_io_ctrl_pin ON iris._device_io
 CREATE TABLE iris._alarm (
 	name VARCHAR(10) PRIMARY KEY,
 	description VARCHAR(24) NOT NULL,
-	state BOOLEAN NOT NULL
+	state BOOLEAN NOT NULL,
+	trigger_time timestamp WITH time zone
 );
 
 ALTER TABLE iris._alarm ADD CONSTRAINT _alarm_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.alarm AS
-	SELECT a.name, description, controller, pin, state
+	SELECT a.name, description, controller, pin, state, trigger_time
 	FROM iris._alarm a JOIN iris._device_io d ON a.name = d.name;
 
 CREATE RULE alarm_insert AS ON INSERT TO iris.alarm DO INSTEAD
 (
 	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._alarm VALUES (NEW.name, NEW.description, NEW.state);
+	INSERT INTO iris._alarm VALUES (NEW.name, NEW.description, NEW.state,
+		NEW.trigger_time);
 );
 
 CREATE RULE alarm_update AS ON UPDATE TO iris.alarm DO INSTEAD
@@ -361,7 +363,8 @@ CREATE RULE alarm_update AS ON UPDATE TO iris.alarm DO INSTEAD
 	WHERE name = OLD.name;
 	UPDATE iris._alarm SET
 		description = NEW.description,
-		state = NEW.state
+		state = NEW.state,
+		trigger_time = NEW.trigger_time
 	WHERE name = OLD.name;
 );
 
@@ -1118,8 +1121,8 @@ CREATE VIEW detector_view AS
 GRANT SELECT ON detector_view TO PUBLIC;
 
 CREATE VIEW alarm_view AS
-	SELECT a.name, a.description, a.state, a.controller, a.pin, c.comm_link,
-		c.drop_id
+	SELECT a.name, a.description, a.state, a.trigger_time, a.controller,
+		a.pin, c.comm_link, c.drop_id
 	FROM iris.alarm a LEFT JOIN iris.controller c ON a.controller = c.name;
 GRANT SELECT ON alarm_view TO PUBLIC;
 
@@ -1373,7 +1376,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 client_units_si	true
-database_version	4.1.0
+database_version	4.2.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
