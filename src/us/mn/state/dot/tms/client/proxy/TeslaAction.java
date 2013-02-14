@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public class TeslaAction<T extends SonarObject> extends ProxyAction {
 		String host = SystemAttrEnum.TESLA_HOST.getString();
 		if(host != null && host.trim().length() > 0) {
 			WebBrowser.open(new URL("http://" + host +
-				"/tesla/user/DeviceFailureEvent.do?" +
+				"/tesla/user/Ticket.do?" +
 				"command=form" +
 				"&deviceType=" + proxy.getTypeName() +
 				"&deviceName=" + proxy.getName()));
