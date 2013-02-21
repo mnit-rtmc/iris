@@ -1084,17 +1084,6 @@ CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
 	END;'
 LANGUAGE plpgsql;
 
-CREATE FUNCTION boolean_converter(boolean) RETURNS text AS
-'	DECLARE
-		value ALIAS FOR $1;
-	BEGIN
-		IF value = ''t'' THEN
-			RETURN ''Yes'';
-		END IF;
-		RETURN ''No'';
-	END;'
-LANGUAGE plpgsql;
-
 CREATE VIEW detector_label_view AS
 	SELECT d.name AS det_id,
 	detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
@@ -1104,16 +1093,23 @@ CREATE VIEW detector_label_view AS
 	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
 GRANT SELECT ON detector_label_view TO PUBLIC;
 
+CREATE VIEW detector_fail_view AS SELECT DISTINCT ON (device_id)
+	device_id, description AS fail_reason
+	FROM event.detector_event de
+	JOIN event.event_description ed ON de.event_desc_id = ed.event_desc_id
+	ORDER BY device_id, event_id DESC;
+GRANT SELECT ON detector_fail_view TO PUBLIC;
+
 CREATE VIEW detector_view AS
-	SELECT d.name AS det_id, d.r_node, d.controller, c.comm_link, c.drop_id,
+	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id,
 	d.pin, detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
 		d.lane_type, d.lane_number, d.abandoned) AS label,
 	rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
 	l.cross_dir, d.lane_number, d.field_length, ln.description AS lane_type,
-	boolean_converter(d.abandoned) AS abandoned,
-	boolean_converter(d.force_fail) AS force_fail,
-	boolean_converter(c.active) AS active, d.fake, d.notes
-	FROM iris.detector d
+	d.abandoned, d.force_fail, df.fail_reason, c.active, d.fake, d.notes
+	FROM (iris.detector d
+	LEFT OUTER JOIN detector_fail_view df
+		ON d.name = df.device_id AND force_fail = 't')
 	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
 	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
 	LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
@@ -1376,7 +1372,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 client_units_si	true
-database_version	4.2.0
+database_version	4.3.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
