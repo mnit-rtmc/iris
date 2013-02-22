@@ -162,6 +162,7 @@ public class ModemMessenger extends Messenger {
 	{
 		log("configure: " + config);
 		w.write(config + "\r\n");
+		w.flush();
 		try {
 			String resp = readResponse(isr).trim();
 			if(!resp.toUpperCase().contains("OK")) {
@@ -180,6 +181,7 @@ public class ModemMessenger extends Messenger {
 	{
 		log("dial: " + phone_number);
 		w.write("ATDT" + phone_number + "\r\n\n");
+		w.flush();
 		try {
 			wrapped.setTimeout(modem.getTimeout());
 			waitForConnect(isr);
