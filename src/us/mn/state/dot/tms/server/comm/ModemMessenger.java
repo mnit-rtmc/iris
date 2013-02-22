@@ -58,6 +58,12 @@ public class ModemMessenger extends Messenger {
 	/** Modem to dial */
 	protected final ModemImpl modem;
 
+	/** Set the modem state */
+	private void setState(ModemState ms) {
+		modem.setStateNotify(ms);
+		log("state: " + ms.toString());
+	}
+
 	/** Phone number to dial */
 	protected final String phone_number;
 
@@ -66,7 +72,8 @@ public class ModemMessenger extends Messenger {
 
 	/** Log a message to debug log */
 	private void log(String msg) {
-		MODEM_LOG.log(modem.getName() + ": " + msg);
+		if(MODEM_LOG.isOpen())
+			MODEM_LOG.log(modem.getName() + ": " + msg);
 	}
 
 	/** Create a new modem messenger */
@@ -89,20 +96,20 @@ public class ModemMessenger extends Messenger {
 		log("open");
 		try {
 			wrapped.open();
-			modem.setStateNotify(ModemState.connecting);
+			setState(ModemState.connecting);
 		}
 		catch(IOException e) {
-			modem.setStateNotify(ModemState.open_error);
+			setState(ModemState.open_error);
 			throw e;
 		}
 		output = wrapped.getOutputStream();
 		input = new ModemInputStream(wrapped.getInputStream(""));
 		try {
 			connectModemRetry();
-			modem.setStateNotify(ModemState.online);
+			setState(ModemState.online);
 		}
 		catch(IOException e) {
-			modem.setStateNotify(ModemState.connect_error);
+			setState(ModemState.connect_error);
 			throw e;
 		}
 	}
@@ -114,7 +121,7 @@ public class ModemMessenger extends Messenger {
 		output = null;
 		input = null;
 		if(!ModemState.isError(modem.getState()))
-			modem.setStateNotify(ModemState.offline);
+			setState(ModemState.offline);
 		modem.release();
 	}
 
