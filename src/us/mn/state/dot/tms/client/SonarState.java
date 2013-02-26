@@ -451,6 +451,8 @@ public class SonarState extends Client {
 		cam_cache.populate(this);
 		populateReadable(alarms);
 		populateReadable(warn_signs);
+		if(canRead(WarningSign.SONAR_TYPE))
+			warn_signs.ignoreAttribute("operation");
 		populateReadable(ramp_meters);
 		if(canRead(RampMeter.SONAR_TYPE))
 			ramp_meters.ignoreAttribute("operation");
@@ -458,7 +460,13 @@ public class SonarState extends Client {
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
 		populateReadable(lane_markings);
+		if(canRead(LaneMarking.SONAR_TYPE))
+			lane_markings.ignoreAttribute("operation");
 		populateReadable(weather_sensors);
+		if(canRead(WeatherSensor.SONAR_TYPE)) {
+			weather_sensors.ignoreAttribute("operation");
+			weather_sensors.ignoreAttribute("stamp");
+		}
 		populateReadable(incidents);
 		populateReadable(holidays);
 		populateReadable(day_plans);
