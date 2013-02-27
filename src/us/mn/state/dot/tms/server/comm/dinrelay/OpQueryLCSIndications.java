@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,24 +124,27 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		// Defer cleanup until opComplete is called
-		//    this allows setErrorStatus to be used in callbacks
-		//    from other (slave) operations.
+		testComplete();
 	}
 
-	/** Cleanup the operation */
-	private synchronized void opComplete(boolean success) {
-		if(!success)
-			op_success = false;
-		n_ops--;
-		if(n_ops == 0) {
+	/** Test if sub-operations are complete, and cleanup if necessary */
+	private synchronized void testComplete() {
+		if(n_ops <= 0) {
 			if(op_success)
 				setDarkIndications();
 			else
 				setAllIndications(null);
 			lcs_array.setIndicationsCurrent(indications, null);
+			super.cleanup();
 		}
-		super.cleanup();
+	}
+
+	/** Cleanup one sub-operation */
+	private synchronized void opComplete(boolean success) {
+		if(!success)
+			op_success = false;
+		n_ops--;
+		testComplete();
 	}
 
 	/** Set null indications to DARK */
