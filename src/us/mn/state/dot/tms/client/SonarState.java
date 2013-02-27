@@ -454,8 +454,10 @@ public class SonarState extends Client {
 		if(canRead(WarningSign.SONAR_TYPE))
 			warn_signs.ignoreAttribute("operation");
 		populateReadable(ramp_meters);
-		if(canRead(RampMeter.SONAR_TYPE))
+		if(canRead(RampMeter.SONAR_TYPE)) {
 			ramp_meters.ignoreAttribute("operation");
+			ramp_meters.ignoreAttribute("rate");
+		}
 		populateReadable(graphics);
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
