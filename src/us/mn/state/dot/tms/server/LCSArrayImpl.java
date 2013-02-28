@@ -364,22 +364,32 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	public synchronized void setLane(int lane, LCS lcs)
 		throws TMSException
 	{
-		if(lane < 1 || lane > 16)
+		lanes = createLanes(lane, lcs);
+		Integer[] ind = Arrays.copyOf(indicationsCurrent, lanes.length);
+		if(lane <= ind.length)
+			ind[lane - 1] = null;	// Unknown indication
+		indicationsCurrent = ind;
+		notifyAttribute("indicationsCurrent");
+	}
+
+	/** Create an array of LCS for all lanes, by altering one lane.
+	 * @param lane Lane number (right-to-left, starting from 1)
+	 * @param lcs Lane-Use Control Signal */
+	private LCSImpl[] createLanes(int lane, LCS lcs)
+		throws ChangeVetoException
+	{
+		if(lane < 1 || lane > MAX_LANES)
 			throw new ChangeVetoException("Invalid lane number");
 		int n_lanes = Math.max(lanes.length, lane);
 		LCSImpl[] lns = Arrays.copyOf(lanes, n_lanes);
 		if(lcs != null && lns[lane - 1] != null)
 			throw new ChangeVetoException("Lane already assigned");
 		lns[lane - 1] = (LCSImpl)lcs;
-		lanes = Arrays.copyOf(lns, getMaxLane(lns));
-		Integer[] ind = Arrays.copyOf(indicationsCurrent, lanes.length);
-		ind[lane - 1] = null;	// Unknown indication for new lane
-		indicationsCurrent = ind;
-		notifyAttribute("indicationsCurrent");
+		return Arrays.copyOf(lns, getMaxLane(lns));
 	}
 
 	/** Get the highest lane number */
-	static protected int getMaxLane(LCS[] lns) {
+	static private int getMaxLane(LCS[] lns) {
 		int lane = 0;
 		for(int i = 0; i < lns.length; i++) {
 			if(lns[i] != null)
