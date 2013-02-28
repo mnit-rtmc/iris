@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -364,10 +364,6 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	public synchronized void setLane(int lane, LCS lcs)
 		throws TMSException
 	{
-		for(Integer i: indicationsCurrent) {
-			if(i != null && i != LaneUseIndication.DARK.ordinal())
-				throw new ChangeVetoException("LCS in use");
-		}
 		if(lane < 1 || lane > 16)
 			throw new ChangeVetoException("Invalid lane number");
 		int n_lanes = Math.max(lanes.length, lane);
@@ -376,7 +372,9 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			throw new ChangeVetoException("Lane already assigned");
 		lns[lane - 1] = (LCSImpl)lcs;
 		lanes = Arrays.copyOf(lns, getMaxLane(lns));
-		indicationsCurrent = createDarkIndications(lanes.length);
+		Integer[] ind = Arrays.copyOf(indicationsCurrent, lanes.length);
+		ind[lane - 1] = null;	// Unknown indication for new lane
+		indicationsCurrent = ind;
 		notifyAttribute("indicationsCurrent");
 	}
 
