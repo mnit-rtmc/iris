@@ -76,7 +76,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Add a new proxy to the layer */
-	public void proxyAdded(T proxy) {
+	@Override public void proxyAdded(T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		if(complete) {
 			// NOTE: this also gets called when we "watch" an
@@ -91,7 +91,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Enumeration of all proxies is complete */
-	public void enumerationComplete() {
+	@Override public void enumerationComplete() {
 		complete = true;
 		// Don't hog the SONAR TaskProcessor thread
 		WORKER.addJob(new Job() {
@@ -102,7 +102,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Remove a proxy from the model */
-	public void proxyRemoved(T proxy) {
+	@Override public void proxyRemoved(T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		WORKER.addJob(new Job() {
 			public void perform() {
@@ -113,7 +113,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Change a proxy in the model */
-	public void proxyChanged(T proxy, String attrib) {
+	@Override public void proxyChanged(T proxy, String attrib) {
 		// Don't hog the SONAR TaskProcessor thread
 		WORKER.addJob(new Job() {
 			public void perform() {
