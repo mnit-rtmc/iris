@@ -30,3 +30,5 @@ CREATE VIEW detector_view AS
 GRANT SELECT ON detector_view TO PUBLIC;
 
 DROP FUNCTION boolean_converter(boolean);
+
+INSERT INTO iris.comm_protocol (id, description) VALUES (27, 'Axis PTZ');

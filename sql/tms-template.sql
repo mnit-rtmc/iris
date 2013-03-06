@@ -1275,6 +1275,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 24	URMS
 25	DLI DIN Relay
 26	Axis 292
+27	Axis PTZ
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;

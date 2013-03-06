@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -105,7 +105,10 @@ public enum CommProtocol {
 	DIN_RELAY("DLI DIN Relay"),
 
 	/** Axis 292 Video Decoder (26) */
-	AXIS_292("Axis 292");
+	AXIS_292("Axis 292"),
+
+	/** Axis PTS (27) */
+	AXIS_PTZ("Axis PTZ");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
