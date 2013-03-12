@@ -68,4 +68,20 @@ public class SpeedTest extends TestCase {
 		assertTrue(df.format(new Speed(d, i).convert(
 			Speed.Units.KPH)).equals("36.00 kph"));
 	}
+
+	public void test3() {
+		Interval.Formatter f = new Interval.Formatter(2);
+		assertTrue(f.format(new Speed(60, Speed.Units.MPH).elapsed(
+			new Distance(60, Distance.Units.MILES))).equals(
+			"3,600.00 s"));
+		assertTrue(f.format(new Speed(60, Speed.Units.MPH).elapsed(
+			new Distance(1, Distance.Units.MILES))).equals(
+			"60.00 s"));
+		assertTrue(f.format(new Speed(88, Speed.Units.FPS).elapsed(
+			new Distance(1, Distance.Units.MILES))).equals(
+			"60.00 s"));
+		assertTrue(f.format(new Speed(88, Speed.Units.FPS).elapsed(
+			new Distance(88, Distance.Units.FEET))).equals(
+			"1.00 s"));
+	}
 }

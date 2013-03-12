@@ -22,8 +22,11 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import static us.mn.state.dot.tms.units.Distance.Units.MILES;
+import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
+import us.mn.state.dot.tms.units.Speed;
+import static us.mn.state.dot.tms.units.Speed.Units.MPH;
 
 /**
  * Travel time estimator
@@ -33,10 +36,11 @@ import us.mn.state.dot.tms.units.Interval;
 public class TravelTimeEstimator {
 
 	/** Calculate the maximum trip minute to display on the sign */
-	static protected int maximumTripMinutes(float miles) {
-		float hours = miles /
-			SystemAttrEnum.TRAVEL_TIME_MIN_MPH.getInt();
-		return Math.round(hours * 60);
+	static private int maximumTripMinutes(Distance d) {
+		Speed min_trip = new Speed(
+			SystemAttrEnum.TRAVEL_TIME_MIN_MPH.getInt(), MPH);
+		Interval e_trip = min_trip.elapsed(d);
+		return e_trip.round(MINUTES);
 	}
 
 	/** Round up to the next 5 minutes */
@@ -104,8 +108,7 @@ public class TravelTimeEstimator {
 			boolean final_dest = isFinalDest(r);
 			try {
 				int mn = calculateTravelTime(r, final_dest);
-				int slow = maximumTripMinutes(
-					r.getDistance().asFloat(MILES));
+				int slow = maximumTripMinutes(r.getDistance());
 				addTravelTime(mn, slow);
 			}
 			catch(BadRouteException e) {
@@ -204,8 +207,7 @@ public class TravelTimeEstimator {
 	protected int calculateTravelTime(Route route, boolean final_dest)
 		throws BadRouteException
 	{
-		Interval t = route.getTravelTime(final_dest).convert(
-			Interval.Units.MINUTES);
+		Interval t = route.getTravelTime(final_dest).convert(MINUTES);
 		return (int)t.value + 1;
 	}
 

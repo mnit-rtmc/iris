@@ -166,6 +166,15 @@ public final class Speed {
 			return new Speed(kph() + d.kph());
 	}
 
+	/** Calculate elapsed interval.
+	 * @param d Distance travelled.
+	 * @return Time interval required to travel distance. */
+	public Interval elapsed(Distance d) {
+		// Calculate distance travelled per second
+		Distance ps = new Distance(convert(Units.FPS).value, FEET);
+		return new Interval(d.m() / ps.m());
+	}
+
 	/** Compare for equality */
 	@Override public boolean equals(Object other) {
 		if(other instanceof Speed) {
