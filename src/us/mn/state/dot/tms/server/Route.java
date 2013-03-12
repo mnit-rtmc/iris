@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintStream;
 import java.util.LinkedList;
+import us.mn.state.dot.tms.units.Distance;
+import us.mn.state.dot.tms.units.Interval;
 
 /**
  * A route is a list of "corridor trips" from an origin to a destination on a
@@ -26,12 +28,7 @@ import java.util.LinkedList;
 public class Route implements Comparable<Route> {
 
 	/** Penalty (in goodness) for each trip in a route */
-	static protected final float TRIP_PENALTY = 0.25f;
-
-	/** Convert minutes to hours */
-	static protected float minutesToHours(float minutes) {
-		return minutes / 60;
-	}
+	static private final float TRIP_PENALTY = 0.25f;
 
 	/** Name for route debugging */
 	private final String name;
@@ -72,17 +69,19 @@ public class Route implements Comparable<Route> {
 			return null;
 	}
 
-	/** Get the length of the route (in miles) */
-	public float getLength() {
-		float l = 0;
+	/** Get the route distance.
+	 * @return Total route distance. */
+	public Distance getDistance() {
+		Distance d = new Distance(0);
 		for(CorridorTrip trip: trips)
-			l += trip.getLength();
-		return l;
+			d = d.add(trip.getDistance());
+		return d;
 	}
 
 	/** Get the goodness rating (lower is better) */
 	public float getGoodness() {
-		return getLength() + TRIP_PENALTY * trips.size();
+		return getDistance().asFloat(Distance.Units.MILES) +
+			TRIP_PENALTY * trips.size();
 	}
 
 	/** Compare to another route (for sorting) */
@@ -90,25 +89,25 @@ public class Route implements Comparable<Route> {
 		return (int)Math.signum(getGoodness() - o.getGoodness());
 	}
 
-	/** Get the current travel time (in hours) */
-	public float getTravelTime(boolean final_dest)
+	/** Get the current travel time */
+	public Interval getTravelTime(boolean final_dest)
 		throws BadRouteException
 	{
 		if(trips.isEmpty())
 			throw new BadRouteException("Route is empty");
-		float hours = minutesToHours(turns);
+		Interval t = new Interval(turns, Interval.Units.MINUTES);
 		for(CorridorTrip trip: trips)
-			hours += trip.getTravelTime(final_dest);
+			t = t.add(trip.getTravelTime(final_dest));
 		if(TravelTime.isLogging())
-			TravelTime.log(name +" TRAVEL TIME " + hours +" hours");
-		return hours;
+			TravelTime.log(name +" TRAVEL TIME " + t);
+		return t;
 	}
 
 	/** Get a string representation of the route */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getLength());
-		sb.append(" miles, ");
+		sb.append(getDistance());
+		sb.append(", ");
 		sb.append(getTurns());
 		sb.append(" turns, ");
 		sb.append(getGoodness());

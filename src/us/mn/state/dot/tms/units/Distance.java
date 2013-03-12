@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,6 +103,16 @@ public final class Distance {
 			return (int)Math.round(value);
 		else
 			return (int)Math.round(m() / u.meters);
+	}
+
+	/** Add another distance.
+	 * @param d Other distance.
+	 * @return Sum of distances. */
+	public Distance add(Distance d) {
+		if(d.units == units)
+			return new Distance(value + d.value, units);
+		else
+			return new Distance(m() + d.m());
 	}
 
 	/** Compare for equality */

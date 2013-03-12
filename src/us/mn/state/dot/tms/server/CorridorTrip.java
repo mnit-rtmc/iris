@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintStream;
 import java.util.TreeMap;
+import us.mn.state.dot.tms.units.Distance;
+import us.mn.state.dot.tms.units.Interval;
 
 /**
  * A CorridorTrip is one "leg" (on a single corridor) of a Route.
@@ -82,9 +84,11 @@ public class CorridorTrip {
 			throwException("No stations");
 	}
 
-	/** Get the length of the corridor trip (in miles) */
-	public float getLength() {
-		return destination - origin;
+	/** Get the trip distance.
+	 * @return Distance of the corridor trip. */
+	public Distance getDistance() {
+		float d = destination - origin;
+		return new Distance(d, Distance.Units.MILES);
 	}
 
 	/** Calculate the travel time for one link */
@@ -152,8 +156,8 @@ public class CorridorTrip {
 		return (end - start) > (3 * MAX_LINK_LENGTH);
 	}
 
-	/** Find the trip time (in hours) */
-	protected float findTripTime(TripTimer tt) throws BadRouteException {
+	/** Find the trip time */
+	private Interval findTripTime(TripTimer tt) throws BadRouteException {
 		float avg = 0;
 		float low = 0;
 		float pmile = 0;
@@ -193,11 +197,13 @@ public class CorridorTrip {
 				throwException("End < destin");
 			tt.nextStation(mm, avg, low);
 		}
-		return tt.hours;
+		return new Interval(tt.hours, Interval.Units.HOURS);
 	}
 
-	/** Get the current travel time (in hours) */
-	public float getTravelTime(boolean final_dest)
+	/** Get the current travel time.
+	 * @param final_dest Flag to indicate final destination.
+	 * @return Travel time interval. */
+	public Interval getTravelTime(boolean final_dest)
 		throws BadRouteException
 	{
 		return findTripTime(new TripTimer(final_dest));

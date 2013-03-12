@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,6 +123,16 @@ public final class Interval {
 	/** Divide into equal parts */
 	public float divide(int i) {
 		return (float)(seconds() / i);
+	}
+
+	/** Add another interval.
+	 * @param o Other interval.
+	 * @return Sum of intervals. */
+	public Interval add(Interval o) {
+		if(o.units == units)
+			return new Interval(value + o.value, units);
+		else
+			return new Interval(seconds() + o.seconds());
 	}
 
 	/** Compare for equality */

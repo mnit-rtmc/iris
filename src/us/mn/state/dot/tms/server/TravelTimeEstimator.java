@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
+import us.mn.state.dot.tms.units.Interval;
 
 /**
  * Travel time estimator
@@ -102,7 +104,8 @@ public class TravelTimeEstimator {
 			boolean final_dest = isFinalDest(r);
 			try {
 				int mn = calculateTravelTime(r, final_dest);
-				int slow = maximumTripMinutes(r.getLength());
+				int slow = maximumTripMinutes(
+					r.getDistance().asFloat(MILES));
 				addTravelTime(mn, slow);
 			}
 			catch(BadRouteException e) {
@@ -178,7 +181,7 @@ public class TravelTimeEstimator {
 	protected boolean isFinalDest(Route r) {
 		for(Route ro: s_routes.values()) {
 			if(ro != r && isSameCorridor(r, ro) &&
-				r.getLength() < ro.getLength())
+				r.getDistance().m() < ro.getDistance().m())
 			{
 				return false;
 			}
@@ -201,8 +204,9 @@ public class TravelTimeEstimator {
 	protected int calculateTravelTime(Route route, boolean final_dest)
 		throws BadRouteException
 	{
-		float hours = route.getTravelTime(final_dest);
-		return (int)(hours * 60) + 1;
+		Interval t = route.getTravelTime(final_dest).convert(
+			Interval.Units.MINUTES);
+		return (int)t.value + 1;
 	}
 
 	/** Are all the routes confined to the same single corridor */
