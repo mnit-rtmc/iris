@@ -30,6 +30,7 @@ public final class Distance {
 		DECIMETERS(0.1, "dm"),
 		CENTIMETERS(0.01, "cm"),
 		MILLIMETERS(0.001, "mm"),
+		MICROMETERS(0.000001, "um"),
 		MILES(1609.344, "mi"),
 		FEET(MILES.meters / 5280, "ft"),
 		INCHES(FEET.meters / 12, "in"),

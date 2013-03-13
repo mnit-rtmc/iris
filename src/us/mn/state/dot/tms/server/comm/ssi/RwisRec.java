@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.Temperature;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.FEET;
+import static us.mn.state.dot.tms.units.Distance.Units.METERS;
+import static us.mn.state.dot.tms.units.Distance.Units.MICROMETERS;
+import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
+import us.mn.state.dot.tms.units.Speed;
+import static us.mn.state.dot.tms.units.Speed.Units.KPH;
+import static us.mn.state.dot.tms.units.Speed.Units.MPH;
+import us.mn.state.dot.tms.units.Temperature;
+import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
 
 /**
  * SSI record.
@@ -31,12 +40,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * @author Douglas Lau
  */
 public class RwisRec {
-
-	/** Feet per meter */
-	static private final float FT_PER_METER = 3.2808399f;
-
-	/** Kilometers per mile */
-	static private final float KM_PER_MILE = 1.609344f;
 
 	/** Get the duration of a record in milliseconds */
 	static private long durationMs() {
@@ -67,13 +70,15 @@ public class RwisRec {
 		}
 	}
 
-	/** Parse temperature */
+	/** Parse temperature.
+	 * @param field Temp as 1/100 degree Celsius.
+	 * @return Parsed temperature. */
 	static private Temperature parseTemp(String field) {
 		Double t = parseDouble(field);
 		if(t != null)
 			return new Temperature(t / 100);
 		else
-			return new Temperature();
+			return null;
 	}
 
 	/** Parse field as int */
@@ -84,6 +89,39 @@ public class RwisRec {
 		catch(NumberFormatException ex) {
 			return null;
 		}
+	}
+
+	/** Parse speed.
+	 * @param field Speed in MPH.
+	 * @return Parsed speed. */
+	static private Speed parseMph(String field) {
+		Integer mph = parseInt(field);
+		if(mph != null)
+			return new Speed(mph, MPH);
+		else
+			return null;
+	}
+
+	/** Parse distance.
+	 * @param field Distance in feet.
+	 * @return Parsed distance. */
+	static private Distance parseFt(String field) {
+		Integer ft = parseInt(field);
+		if(ft != null)
+			return new Distance(ft, FEET);
+		else
+			return null;
+	}
+
+	/** Parse distance.
+	 * @param field Distance in mm.
+	 * @return Parsed distance. */
+	static private Distance parseMm(String field) {
+		Integer mm = parseInt(field);
+		if(mm != null)
+			return new Distance(mm, MILLIMETERS);
+		else
+			return null;
 	}
 
 	/** Parse field as double */
@@ -113,20 +151,20 @@ public class RwisRec {
 	/** Observation time (DtTm) */
 	private final Long obs_time;
 
-	/** Air temperature (1/100th degree C) (AirTemp) */
+	/** Air temperature (AirTemp) */
 	private final Temperature air_temp;
 
-	/** Dew point (1/100th degree C) (Dewpoint) */
+	/** Dew point (Dewpoint) */
 	private final Temperature dew_point;
 
 	/** Relative humidity (%) (Rh) */
 	private final Integer rel_humidity;
 
 	/** Average wind speed in MPH (SpdAvg) */
-	private final Integer wind_speed_avg;
+	private final Speed wind_speed_avg;
 
 	/** Gust wind speed in MPH (SpdGust) */
-	private final Integer wind_speed_gust;
+	private final Speed wind_speed_gust;
 
 	/** Minimum wind direction in degrees (DirMin) */
 	private final Integer wind_dir_min;
@@ -150,10 +188,10 @@ public class RwisRec {
 	private final Integer precip_rate;
 
 	/** Precipitation accumulation in mm (PcAccum) */
-	private final Integer precip_accum;
+	private final Distance precip_accum;
 
-	/** Visibility in ft (Visibility) */
-	private final Integer visibility_ft;
+	/** Visibility (Visibility) */
+	private final Distance visibility;
 
 	/** Create a new RWIS record by parsing text that contains an ssi
 	 * record into fields.
@@ -174,8 +212,8 @@ public class RwisRec {
 		air_temp = parseTemp(header.getField(fs, "AirTemp"));
 		dew_point = parseTemp(header.getField(fs, "Dewpoint"));
 		rel_humidity = parseInt(header.getField(fs, "Rh"));
-		wind_speed_avg = parseInt(header.getField(fs, "SpdAvg"));
-		wind_speed_gust = parseInt(header.getField(fs, "SpdGust"));
+		wind_speed_avg = parseMph(header.getField(fs, "SpdAvg"));
+		wind_speed_gust = parseMph(header.getField(fs, "SpdGust"));
 		wind_dir_min = parseInt(header.getField(fs, "DirMin"));
 		wind_dir_avg = parseInt(header.getField(fs, "DirAvg"));
 		wind_dir_max = parseInt(header.getField(fs, "DirMax"));
@@ -183,8 +221,8 @@ public class RwisRec {
 		precip_intens = header.getField(fs, "PcIntens");
 		precip_type = header.getField(fs, "PcType");
 		precip_rate = parseInt(header.getField(fs, "PcRate"));
-		precip_accum = parseInt(header.getField(fs, "PcAccum"));
-		visibility_ft = parseInt(header.getField(fs, "Visibility"));
+		precip_accum = parseMm(header.getField(fs, "PcAccum"));
+		visibility = parseFt(header.getField(fs, "Visibility"));
 	}
 
 	/** To string */
@@ -208,7 +246,7 @@ public class RwisRec {
 		sb.append(", precip_type=").append(precip_type);
 		sb.append(", precip_rate=").append(precip_rate);
 		sb.append(", precip_accum=").append(precip_accum);
-		sb.append(", visibility_ft=").append(visibility_ft);
+		sb.append(", visibility=").append(visibility);
 		sb.append(")");
 		return sb.toString();
 	}
@@ -233,17 +271,16 @@ public class RwisRec {
 	/** Update the air temp */
 	private void updateAirTemp(WeatherSensorImpl ws) {
 		if(air_temp != null)
-			ws.setAirTempNotify(air_temp.toCInteger());
+			ws.setAirTempNotify(air_temp.round(CELSIUS));
 		else
 			ws.setAirTempNotify(null);
 	}
 
 	/** Update the wind speed */
 	private void updateWindSpeed(WeatherSensorImpl ws) {
-		if(wind_speed_avg != null) {
-			int kph = Math.round(wind_speed_avg * KM_PER_MILE);
-			ws.setWindSpeedNotify(kph);
-		} else
+		if(wind_speed_avg != null)
+			ws.setWindSpeedNotify(wind_speed_avg.round(KPH));
+		else
 			ws.setWindSpeedNotify(null);
 	}
 
@@ -254,25 +291,18 @@ public class RwisRec {
 
 	/** Update the weather sensor precip accumulation */
 	private void updateAccumulation(WeatherSensorImpl ws) {
-		if(precip_accum != null && precip_accum >= 0) {
-			// Convert accumulation to micrometers
-			int acc_um = precip_accum * 1000;
-			ws.updateAccumulation(acc_um, create_time);
+		if(precip_accum != null && precip_accum.value >= 0) {
+			ws.updateAccumulation(precip_accum.round(MICROMETERS),
+				create_time);
 		} else
 			ws.updateAccumulation(null, create_time);
 	}
 
 	/** Update the weather sensor visibility */
 	private void updateVisibility(WeatherSensorImpl ws) {
-		if(visibility_ft != null && visibility_ft >= 0) {
-			int vis_m = Math.round(feet_to_meters(visibility_ft));
-			ws.setVisibilityNotify(vis_m);
-		} else
+		if(visibility != null && visibility.value >= 0)
+			ws.setVisibilityNotify(visibility.round(METERS));
+		else
 			ws.setVisibilityNotify(null);
-	}
-
-	/** Convert feet to meters */
-	static private float feet_to_meters(float f) {
-		return f / FT_PER_METER;
 	}
 }
