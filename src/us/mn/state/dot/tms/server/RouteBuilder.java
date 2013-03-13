@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
- * A route builder builds a set of routes
+ * A route builder builds a set of routes.
  *
  * @author Douglas Lau
  */
@@ -63,13 +63,19 @@ public class RouteBuilder {
 	/** Set of all routes built */
 	private final TreeSet<Route> routes = new TreeSet<Route>();
 
-	/** Create a new route builder */
+	/** Create a new route builder.
+	 * @param n Name (for debugging).
+	 * @param c Corridor manager. */
 	public RouteBuilder(String n, CorridorManager c) {
 		name = n;
 		corridors = c;
 	}
 
-	/** Search a corridor for branching paths to a destination */
+	/** Search a corridor for branching paths to a destination.
+	 * @param distance Distance.
+	 * @param origin Route origin.
+	 * @param destination Route destination.
+	 * @throws BadRouteException if route cannot be found. */
 	private void searchCorridor(float distance, GeoLoc origin,
 		GeoLoc destination) throws BadRouteException
 	{
@@ -120,7 +126,14 @@ public class RouteBuilder {
 		}
 	}
 
-	/** Find the next node on the corridor */
+	/** Find the next node on the corridor.
+	 * @param c Corridor.
+	 * @param r_node Roadway node.
+	 * @param distance Distance.
+	 * @param origin Route origin.
+	 * @param destination Route destination.
+	 * @return Next roadway node.
+	 * @throws BadRouteException on route error. */
 	private R_NodeImpl findNextNode(Corridor c, R_NodeImpl r_node,
 		float distance, GeoLoc origin, GeoLoc destination)
 		throws BadRouteException
@@ -144,13 +157,17 @@ public class RouteBuilder {
 		return next;
 	}
 
-	/** Debug a route exception */
+	/** Debug a route exception.
+	 * @param e Bad route exception. */
 	private void debugRouteException(BadRouteException e) {
 		if(isLogging())
 			log(name + ": BAD ROUTE: " + e.getMessage());
 	}
 
-	/** Find all paths from an origin to a destination */
+	/** Find all paths from an origin to a destination.
+	 * @param distance Distance.
+	 * @param origin Route origin.
+	 * @param destination Route destination. */
 	private void findPaths(float distance, final GeoLoc origin,
 		final GeoLoc destination)
 	{
@@ -176,7 +193,9 @@ public class RouteBuilder {
 		}
 	}
 
-	/** Build a route from the current path */
+	/** Build a route from the current path.
+	 * @param odf Origin / destination pair.
+	 * @throws BadRouteException on route error. */
 	private void buildRoute(ODPair odf) throws BadRouteException {
 		Route r = new Route(name);
 		int turns = 0;
@@ -202,7 +221,10 @@ public class RouteBuilder {
 		}
 	}
 
-	/** Find all the routes from an origin to a destination */
+	/** Find all the routes from an origin to a destination.
+	 * @param o Route origin.
+	 * @param d Route destination.
+	 * @return Sorted set of routes. */
 	public SortedSet<Route> findRoutes(GeoLoc o, GeoLoc d) {
 		routes.clear();
 		path.clear();
