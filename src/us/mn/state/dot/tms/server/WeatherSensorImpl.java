@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@ import java.util.Map;
 import java.sql.ResultSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.Angle;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -186,11 +185,19 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		return wind_dir;
 	}
 
+	/** Round an integer to the nearest 45 */
+	static private Integer round45(Integer d) {
+		if(d != null)
+			return 45 * Math.round(d / 45.0f);
+		else
+			return null;
+	}
+
 	/** Set the wind direction.
 	 * @param wd Wind direction in degrees (null for missing). This 
-	 *	  angle is rounded to the nearest 10 degrees. */
+	 *	  angle is rounded to the nearest 45 degrees. */
 	public void setWindDirNotify(Integer wd) {
-		Integer a = new Angle(wd).round(10).toDegsInteger();
+		Integer a = round45(wd);
 		if(!integerEquals(a, wind_dir)) {
 			wind_dir = a;
 			notifyAttribute("windDir");
