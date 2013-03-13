@@ -40,7 +40,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.Temperature;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
@@ -52,6 +51,7 @@ import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.units.Temperature;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -62,6 +62,13 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public class DMSProperties extends SonarObjectForm<DMS> {
+
+	/** Get temperature units to use for display */
+	static private Temperature.Units tempUnits() {
+		return SystemAttrEnum.CLIENT_UNITS_SI.getBoolean()
+		     ? Temperature.Units.CELSIUS
+		     : Temperature.Units.FAHRENHEIT;
+	}
 
 	/** Ok status label color */
 	static private final Color OK = new Color(0f, 0.5f, 0f);
@@ -96,15 +103,25 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		return UNKNOWN;
 	}
 
-	/** Format the temperature */
-	static protected String formatTemp(Integer minTemp, Integer maxTemp) {
+	/** Format a temperature.
+	 * @param temp Temperature in degrees Celsius. */
+	static private String formatTemp(Integer temp) {
+		if(temp != null) {
+			Temperature.Formatter tf = new Temperature.Formatter(0);
+			return tf.format(new Temperature(temp).convert(
+				tempUnits()));
+		} else
+			return "???";
+	}
+
+	/** Format a temperature range */
+	static private String formatTemp(Integer minTemp, Integer maxTemp) {
 		if(minTemp == null || minTemp == maxTemp)
-			return new Temperature(maxTemp).toString();
+			return formatTemp(maxTemp);
 		else if(maxTemp == null)
-			return new Temperature(minTemp).toString();
+			return formatTemp(minTemp);
 		else
-			return new Temperature(minTemp).toString() + "..." + 
-				new Temperature(maxTemp).toString();
+			return formatTemp(minTemp) + "..." +formatTemp(maxTemp);
 	}
 
 	/** Generic sign make */
@@ -204,7 +221,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JLabel operation = new JLabel();
 
 	/** Query message action */
-	private final IAction query_msg = new IAction("dms.query.msg", 
+	private final IAction query_msg = new IAction("dms.query.msg",
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
 	{
 		@Override protected void do_perform() {
@@ -214,7 +231,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	};
 
 	/** Reset DMS action */
-	private final IAction reset = new IAction("dms.reset", 
+	private final IAction reset = new IAction("dms.reset",
 		SystemAttrEnum.DMS_RESET_ENABLE)
 	{
 		@Override protected void do_perform() {
