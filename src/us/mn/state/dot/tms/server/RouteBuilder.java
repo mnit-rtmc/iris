@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,25 +43,25 @@ public class RouteBuilder {
 	static private final float MAX_ORIGIN_M = 1000;
 
 	/** Maximum number of R_Nodes to follow on a corridor */
-	static protected final int MAX_R_NODE_LIMIT = 100;
+	static private final int MAX_R_NODE_LIMIT = 100;
 
 	/** Name to use for debugging purposes */
-	protected final String name;
+	private final String name;
 
 	/** Corridor manager */
-	protected final CorridorManager corridors;
+	private final CorridorManager corridors;
 
 	/** Maximum number of corridor legs */
-	protected final int legs = SystemAttrEnum.TRAVEL_TIME_MAX_LEGS.getInt();
+	private final int legs = SystemAttrEnum.TRAVEL_TIME_MAX_LEGS.getInt();
 
 	/** Maximum route distance (miles) */
-	protected float max_mi = SystemAttrEnum.TRAVEL_TIME_MAX_MILES.getInt();
+	private float max_mi = SystemAttrEnum.TRAVEL_TIME_MAX_MILES.getInt();
 
 	/** Working path */
-	protected final LinkedList<ODPair> path = new LinkedList<ODPair>();
+	private final LinkedList<ODPair> path = new LinkedList<ODPair>();
 
 	/** Set of all routes built */
-	protected final TreeSet<Route> routes = new TreeSet<Route>();
+	private final TreeSet<Route> routes = new TreeSet<Route>();
 
 	/** Create a new route builder */
 	public RouteBuilder(String n, CorridorManager c) {
@@ -70,7 +70,7 @@ public class RouteBuilder {
 	}
 
 	/** Search a corridor for branching paths to a destination */
-	protected void searchCorridor(float distance, GeoLoc origin,
+	private void searchCorridor(float distance, GeoLoc origin,
 		GeoLoc destination) throws BadRouteException
 	{
 		String cid = GeoLocHelper.getCorridorName(origin);
@@ -121,7 +121,7 @@ public class RouteBuilder {
 	}
 
 	/** Find the next node on the corridor */
-	protected R_NodeImpl findNextNode(Corridor c, R_NodeImpl r_node,
+	private R_NodeImpl findNextNode(Corridor c, R_NodeImpl r_node,
 		float distance, GeoLoc origin, GeoLoc destination)
 		throws BadRouteException
 	{
@@ -145,13 +145,13 @@ public class RouteBuilder {
 	}
 
 	/** Debug a route exception */
-	protected void debugRouteException(BadRouteException e) {
+	private void debugRouteException(BadRouteException e) {
 		if(isLogging())
 			log(name + ": BAD ROUTE: " + e.getMessage());
 	}
 
 	/** Find all paths from an origin to a destination */
-	protected void findPaths(float distance, final GeoLoc origin,
+	private void findPaths(float distance, final GeoLoc origin,
 		final GeoLoc destination)
 	{
 		ODPair od = new ODPair(origin, destination, false);
@@ -177,7 +177,7 @@ public class RouteBuilder {
 	}
 
 	/** Build a route from the current path */
-	protected void buildRoute(ODPair odf) throws BadRouteException {
+	private void buildRoute(ODPair odf) throws BadRouteException {
 		Route r = new Route(name);
 		int turns = 0;
 		for(ODPair od: path) {
