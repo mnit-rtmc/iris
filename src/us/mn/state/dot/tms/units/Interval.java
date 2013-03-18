@@ -21,7 +21,7 @@ import java.text.NumberFormat;
  *
  * @author Douglas Lau
  */
-public final class Interval {
+public final class Interval implements Comparable<Interval> {
 
 	/** Enumeration of interval units */
 	public enum Units {
@@ -145,6 +145,14 @@ public final class Interval {
 				return seconds() == o.seconds();
 		} else
 			return false;
+	}
+
+	/** Compare with another interval */
+	@Override public int compareTo(Interval o) {
+		if(units == o.units)
+			return Double.compare(value, o.value);
+		else
+			return Double.compare(seconds(), o.seconds());
 	}
 
 	/** Get an interval hash code */

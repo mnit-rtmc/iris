@@ -21,7 +21,7 @@ import java.text.NumberFormat;
  *
  * @author Douglas Lau
  */
-public final class Distance {
+public final class Distance implements Comparable<Distance> {
 
 	/** Enumeration of distance units */
 	public enum Units {
@@ -126,6 +126,14 @@ public final class Distance {
 				return m() == o.m();
 		} else
 			return false;
+	}
+
+	/** Compare with another distance */
+	@Override public int compareTo(Distance o) {
+		if(units == o.units)
+			return Double.compare(value, o.value);
+		else
+			return Double.compare(m(), o.m());
 	}
 
 	/** Get a distance hash code */

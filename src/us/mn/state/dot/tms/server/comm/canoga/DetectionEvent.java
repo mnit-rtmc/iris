@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,14 @@
 package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.util.Calendar;
-import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import us.mn.state.dot.tms.server.DetectorImpl;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.FEET;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.HOURS;
+import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
+import us.mn.state.dot.tms.units.Speed;
+import static us.mn.state.dot.tms.units.Speed.Units.MPH;
 
 /**
  * Canoga vehicle detection event
@@ -25,35 +31,37 @@ import us.mn.state.dot.tms.server.DetectorImpl;
  */
 public class DetectionEvent {
 
-	/** Conversion factor from milliseconds to seconds */
-	static protected final int MS_PER_SECOND = 1000;
-
-	/** Conversion factor from seconds to hours */
-	static protected final int SEC_PER_HOUR = 3600;
-
-	/** Minimum spacing (feet) between speed pair detectors */
-	static protected final int MIN_SPACING = 6;
-
-	/** Minimum duration needed to calculate speed */
-	static protected final int MIN_DURATION = 20;
-
-	/** Percent of duration to match vehicle on upstream sensor */
-	static protected final float MATCH_DURATION = 0.10f;
+	/** Minimum spacing between speed pair detectors */
+	static private final Distance MIN_SPACING = new Distance(6, FEET);
 
 	/** Minimum time (ms) elapsed (per foot) between speed events */
-	static protected final int MIN_ELAPSED = 5;
+	static private final int MIN_ELAPSED_PER_FOOT = 5;
 
 	/** Minimum speed (mph) to estimate */
-	static protected final int MIN_SPEED = 5;
+	static private final int MIN_SPEED_MPH = 5;
 
 	/** Maximum speed (mph) to estimate */
-	static protected final int MAX_SPEED = 120;
+	static private final int MAX_SPEED_MPH = 120;
 
-	/** Maximum valid duration (120 seconds) */
-	static protected final int MAX_DURATION = 120 * 1000;
+	/** Percent of duration to match vehicle on upstream sensor */
+	static private final float MATCH_DURATION = 0.10f;
 
-	/** Maximum valid headway (12 hours) */
-	static protected final int MAX_HEADWAY = 12 * 60 * 60 * 1000;
+	/** Minimum duration needed to calculate speed (ms) */
+	static private final int MIN_DURATION_MS = 20;
+
+	/** Maximum valid duration (ms) */
+	static private final long MAX_DURATION_MS = new Interval(120).ms();
+
+	/** Maximum valid headway (ms) */
+	static private final long MAX_HEADWAY_MS = new Interval(12, HOURS).ms();
+
+	/** Calculate the minimum elapsed interval for a given detector spacing.
+	 * @param spacing Spacing between a detector pair.
+	 * @return Minimum elapsed time interval for a valid vehicle event. */
+	static private Interval calculateMinElapsed(Distance spacing) {
+		return new Interval(MIN_ELAPSED_PER_FOOT *
+			spacing.convert(FEET).value, MILLISECONDS);
+	}
 
 	/** Duration of vehicle (in milliseconds) */
 	protected final int duration;
@@ -111,7 +119,7 @@ public class DetectionEvent {
 			return !equals(prev);
 		if(count == prev.count)
 			return !equals(prev);
-		if(duration > MAX_DURATION)
+		if(duration > MAX_DURATION_MS)
 			return true;
 		else
 			return hasDataErrors(prev);
@@ -161,7 +169,7 @@ public class DetectionEvent {
 			return false;
 		else {
 			int headway = calculateElapsed(prev);
-			return headway > 0 && headway < MAX_HEADWAY;
+			return headway > 0 && headway < MAX_HEADWAY_MS;
 		}
 	}
 
@@ -175,33 +183,47 @@ public class DetectionEvent {
 
 	/** Calculate speed (mph) from upstream event/spacing (ft).
 	 * Upstream detection event must be from same detector card
-	 * for time stamps to be comparable. */
-	public int calculateSpeed(DetectionEvent upstream, float spacing) {
-		if(spacing < MIN_SPACING)
+	 * for time stamps to be comparable.
+	 * @param upstream Upstream (pair) detection event.
+	 * @param spacing Distance spacing of detector pair.
+	 * @return Speed of vehicle, or 0 if speed is invalid. */
+	public int calculateSpeed(DetectionEvent upstream, Distance spacing) {
+		if(spacing.compareTo(MIN_SPACING) < 0)
 			return 0;
-		if(duration < MIN_DURATION)
+		if(!isDurationValid(upstream))
 			return 0;
-		int d = Math.round(duration * MATCH_DURATION);
-		if(upstream.duration < duration - d)
+		Interval min_elapsed = calculateMinElapsed(spacing);
+		Interval elapsed = calculateAvgElapsed(upstream);
+		if(elapsed.compareTo(min_elapsed) < 0)
 			return 0;
-		if(upstream.duration > duration + d)
-			return 0;
-		float elapsed = calculateAvgElapsed(upstream);
-		if(elapsed < MIN_ELAPSED * spacing)
-			return 0;
-		float fps = spacing * MS_PER_SECOND / elapsed;
-		float mph = fps * SEC_PER_HOUR / FEET_PER_MILE;
-		if(mph < MIN_SPEED || mph > MAX_SPEED)
+		Speed spd = new Speed(spacing, elapsed);
+		int mph = spd.round(MPH);
+		if(mph < MIN_SPEED_MPH || mph > MAX_SPEED_MPH)
 			return 0;
 		else
-			return Math.round(mph);
+			return mph;
 	}
 
-	/** Calculate the average elapsed time between events */
-	protected float calculateAvgElapsed(DetectionEvent upstream) {
+	/** Check if the event duration is valid.
+	 * @param upstream Upstream (pair) detection event.
+	 * @return true if event duration is valid. */
+	private boolean isDurationValid(DetectionEvent upstream) {
+		if(duration < MIN_DURATION_MS)
+			return false;
+		int d = Math.round(duration * MATCH_DURATION);
+		if(upstream.duration < duration - d)
+			return false;
+		if(upstream.duration > duration + d)
+			return false;
+		return true;
+	}
+
+	/** Calculate the average elapsed time between events.  This averages
+	 * the elapsed times between arrival and departure at each detector. */
+	private Interval calculateAvgElapsed(DetectionEvent upstream) {
 		int e1 = calculateElapsed(upstream);
 		int d = duration - upstream.duration;
 		int e2 = e1 + d;
-		return (e1 + e2) / 2.0f;
+		return new Interval((e1 + e2) / 2.0f, MILLISECONDS);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.FEET;
 
 /**
  * Binary Detection Property
@@ -130,8 +132,10 @@ public class BinaryDetectionProperty extends CanogaProperty {
 			DetectorImpl det = controller.getDetectorAtPin(inp + 1);
 			if(det != null) {
 				DetectionEvent ce = c_events[inp];
+				Distance spacing = new Distance(
+					det.getFieldLength(), FEET);
 				return ce.calculateSpeed(c_events[sp - 1],
-					det.getFieldLength());
+					spacing);
 			}
 		}
 		return 0;
