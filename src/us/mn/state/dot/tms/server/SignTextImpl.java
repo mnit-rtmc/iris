@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -141,7 +141,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	}
 
 	/** Set the MULTI string */
-	public void doSetMessage(String m) throws TMSException {
+	public void doSetMulti(String m) throws TMSException {
 		if(m.equals(multi))
 			return;
 		validateMulti(m);
