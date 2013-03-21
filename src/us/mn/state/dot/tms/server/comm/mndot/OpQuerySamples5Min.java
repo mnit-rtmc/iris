@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,8 +95,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 		/** Test if the timestamp is out of the valid range */
 		protected boolean isStampBad() {
 			if(stamp < oldest || stamp > newest) {
-				MNDOT_LOG.log("BAD TIMESTAMP: " +
-					new Date(stamp) + " for " + controller);
+				logError("BAD TIMESTAMP: " + new Date(stamp));
 				return true;
 			} else
 				return false;

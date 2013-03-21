@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class Op170 extends OpController {
 
 	/** MnDOT 170 debug log */
-	static protected final DebugLog MNDOT_LOG = new DebugLog("mndot170");
+	static private final DebugLog MNDOT_LOG = new DebugLog("mndot170");
 
 	/** I/O pin for first traffic device */
 	static protected final int DEVICE_1_PIN = 2;
@@ -108,6 +108,24 @@ abstract public class Op170 extends OpController {
 			return g / 2;
 		} else
 			return g;
+	}
+
+	/** Log an error msg */
+	protected void logError(String msg) {
+		if(MNDOT_LOG.isOpen())
+			MNDOT_LOG.log(controller.getName() + "! " + msg);
+	}
+
+	/** Log a property query */
+	protected void logQuery(MndotProperty prop) {
+		if(MNDOT_LOG.isOpen())
+			MNDOT_LOG.log(controller.getName() + ": " + prop);
+	}
+
+	/** Log a property store */
+	protected void logStore(MndotProperty prop) {
+		if(MNDOT_LOG.isOpen())
+			MNDOT_LOG.log(controller.getName() + ":= " + prop);
 	}
 
 	/** Ramp meter being queried */
