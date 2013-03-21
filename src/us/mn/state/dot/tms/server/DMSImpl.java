@@ -904,10 +904,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		       sm == messageNext;
 	}
 
-	/** Validate a sign message to send */
-	protected SignMessage validateMessage(SignMessage sm)
-		throws TMSException
-	{
+	/** Validate a sign message to send.
+	 * @param sm Sign message to validate.
+	 * @return The sign message to send (may be a scheduled message). */
+	private SignMessage validateMessage(SignMessage sm) throws TMSException{
 		MultiString multi = new MultiString(sm.getMulti());
 		SignMessage sched = messageSched;	// Avoid race
 		if(sched != null && multi.isBlank()) {
@@ -919,8 +919,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				return sched;
 			}
 			catch(TMSException e) {
-				System.err.println("Scheduled message for " +
-					getName() + " not deployed: " +
+				logAction("sched msg not valid: " +
 					e.getMessage());
 				// Ok, go ahead and blank the sign
 			}
