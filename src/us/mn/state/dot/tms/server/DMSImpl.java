@@ -48,10 +48,8 @@ import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.Point;
-import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -148,11 +146,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return SONAR_TYPE;
 	}
 
-	/** Travel time estimator */
-	protected final TravelTimeEstimator travel_est;
-
-	/** Speed advisory calculator */
-	protected final SpeedAdvisoryCalculator advisory;
+	/** MULTI message formatter */
+	private final MultiFormatter formatter;
 
 	/** Create a new DMS with a string name */
 	public DMSImpl(String n) throws TMSException, SonarException {
@@ -160,8 +155,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		GeoLocImpl g = new GeoLocImpl(name);
 		MainServer.server.createObject(g);
 		geo_loc = g;
-		travel_est = new TravelTimeEstimator(n, g);
-		advisory = new SpeedAdvisoryCalculator(g);
+		formatter = new MultiFormatter(this);
 	}
 
 	/** Create a dynamic message sign */
@@ -174,8 +168,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		awsAllowed = aa;
 		awsControlled = ac;
 		default_font = df;
-		travel_est = new TravelTimeEstimator(n, loc);
-		advisory = new SpeedAdvisoryCalculator(loc);
+		formatter = new MultiFormatter(this);
 		initTransients();
 	}
 
@@ -893,7 +886,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		//        in travel time estimator
 		int ap = smn.getActivationPriority();
 		if(ap == DMSMessagePriority.OVERRIDE.ordinal())
-			travel_est.clear();
+			formatter.clear();
 		p.sendMessage(this, smn, o);
 	}
 
@@ -1442,7 +1435,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			da.getActivationPriority());
 		DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
 			da.getRunTimePriority());
-		String m = createMulti(da);
+		String m = formatter.createMulti(da);
 		if(m != null)
 			return createMessage(m, ap, rp, true, d);
 		else
@@ -1460,30 +1453,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		/** FIXME: this should be twice the polling period for the
 		 *         sign.  Modem signs should have a longer duration. */
 		return 1;
-	}
-
-	/** Create a multi string for a DMS action */
-	protected String createMulti(DmsAction da) {
-		QuickMessage qm = da.getQuickMessage();
-		if(qm != null) {
-			FeedCallback fc = new FeedCallback(this,
-				da.getSignGroup());
-			MultiParser.parse(qm.getMulti(), fc);
-			String m = fc.toString();
-			MultiString multi = new MultiString(m);
-			if(!multi.isBlank())
-				return createMulti(m);
-		}
-		return null;
-	}
-
-	/** Create a MULTI string for a message */
-	protected String createMulti(String qm) {
-		String m = travel_est.replaceTravelTimes(qm);
-		if(m != null)
-			return advisory.replaceSpeedAdvisory(m);
-		else
-			return null;
 	}
 
 	/** Log an action */
