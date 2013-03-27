@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ public class SpeedAdvisoryCalculator {
 
 		protected boolean valid = true;
 
-		/** Add a varisble speed advisory */
+		/** Add a variable speed advisory */
 		public void addSpeedAdvisory() {
 			Integer a = calculateSpeedAdvisory();
 			if(a != null)
