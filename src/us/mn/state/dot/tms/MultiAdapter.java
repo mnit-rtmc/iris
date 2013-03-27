@@ -147,9 +147,10 @@ public class MultiAdapter implements Multi {
 
 	/** Add a slow traffic warning.
 	 * @param spd Highest speed to activate warning.
+	 * @param b Distance to end of backup (negative indicates upstream).
 	 * @param units Units for speed (mph or kph).
 	 * @param dist If true, replace tag with distance to slow station. */
-	public void addSlowWarning(int spd, String units, boolean dist) {
+	public void addSlowWarning(int spd, int b, String units, boolean dist) {
 		// subclass must handle
 	}
 

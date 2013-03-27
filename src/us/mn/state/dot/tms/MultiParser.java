@@ -216,17 +216,18 @@ public class MultiParser {
 			cb.setTextRectangle(x, y, w, h);
 	}
 
-	/** Parse slow traffic warning from a [slown], [slown,u] or
-	 * [slown,u,dist] tag.
-	 * @param v Slow traffic tag value (n, n,u, or n,u,dist from tag).
+	/** Parse slow traffic warning from a [slows,b], [slows,b,u] or
+	 * [slows,b,u,dist] tag.
+	 * @param v Slow traffic tag value (s,b, s,b,u, s,b,u,dist from tag).
 	 * @param cb Callback to set slow warning. */
 	static private void parseSlowWarning(String v, Multi cb) {
-		String[] args = v.split(",", 3);
+		String[] args = v.split(",", 4);
 		Integer spd = parseInt(args, 0);
-		String units = parseSpeedUnits(args, 1);
-		boolean dist = parseDist(args, 2);
-		if(spd != null && spd > 0 && spd <= 100)
-			cb.addSlowWarning(spd, units, dist);
+		Integer b = parseInt(args, 1);
+		String units = parseSpeedUnits(args, 2);
+		boolean dist = parseDist(args, 3);
+		if(isSpeedValid(spd) && isBackupValid(b))
+			cb.addSlowWarning(spd, b, units, dist);
 	}
 
 	/** Parse an integer value */
@@ -245,6 +246,16 @@ public class MultiParser {
 		catch(NumberFormatException e) {
 			return null;
 		}
+	}
+
+	/** Test if a parsed speed is valid */
+	static private boolean isSpeedValid(Integer spd) {
+		return spd != null && spd > 0 && spd < 100;
+	}
+
+	/** Test if a parsed backup distance is valid */
+	static private boolean isBackupValid(Integer b) {
+		return b != null && b <= 16 && b >= -16;
 	}
 
 	/** Parse a speed units value */
