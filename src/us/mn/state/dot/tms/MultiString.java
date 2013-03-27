@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -223,6 +223,22 @@ public class MultiString implements Multi {
 	/** Add a speed advisory */
 	public void addSpeedAdvisory() {
 		multi.append("[vsa]");
+	}
+
+	/** Add a slow traffic warning.
+	 * @param spd Highest speed to activate warning.
+	 * @param units Units for speed (mph or kph).
+	 * @param dist If true, replace tag with distance to slow station. */
+	public void addSlowWarning(int spd, String units, boolean dist) {
+		multi.append("[slow");
+		multi.append(spd);
+		if(dist || !units.equals("mph")) {
+			multi.append(',');
+			multi.append(units);
+			if(dist)
+				multi.append(",dist");
+		}
+		multi.append("]");
 	}
 
 	/** Add a feed message */

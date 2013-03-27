@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class MultiParser {
 
 	/** Regular expression to match supported MULTI tags */
 	static private final Pattern TAGS = Pattern.compile(
-		"(pb|cf|cr|fo|g|jl|jp|nl|np|pt|sc|tr|tt|vsa|feed)(.*)");
+		"(pb|cf|cr|fo|g|jl|jp|nl|np|pt|sc|tr|tt|vsa|slow|feed)(.*)");
 
 	/** Regular expression to match text between MULTI tags */
 	static private final Pattern TEXT_PATTERN = Pattern.compile(
@@ -92,6 +92,8 @@ public class MultiParser {
 				cb.addTravelTime(tparam);
 			else if(tid.equals("vsa"))
 				cb.addSpeedAdvisory();
+			else if(tid.equals("slow"))
+				parseSlowWarning(tparam, cb);
 			else if(tid.equals("feed"))
 				cb.addFeed(tparam);
 		}
@@ -214,6 +216,19 @@ public class MultiParser {
 			cb.setTextRectangle(x, y, w, h);
 	}
 
+	/** Parse slow traffic warning from a [slown], [slown,u] or
+	 * [slown,u,dist] tag.
+	 * @param v Slow traffic tag value (n, n,u, or n,u,dist from tag).
+	 * @param cb Callback to set slow warning. */
+	static private void parseSlowWarning(String v, Multi cb) {
+		String[] args = v.split(",", 3);
+		Integer spd = parseInt(args, 0);
+		String units = parseSpeedUnits(args, 1);
+		boolean dist = parseDist(args, 2);
+		if(spd != null && spd > 0 && spd <= 100)
+			cb.addSlowWarning(spd, units, dist);
+	}
+
 	/** Parse an integer value */
 	static private Integer parseInt(String[] args, int n) {
 		if(n < args.length)
@@ -230,6 +245,35 @@ public class MultiParser {
 		catch(NumberFormatException e) {
 			return null;
 		}
+	}
+
+	/** Parse a speed units value */
+	static private String parseSpeedUnits(String[] args, int n) {
+		if(n < args.length)
+			return parseSpeedUnits(args[n]);
+		else
+			return "mph";
+	}
+
+	/** Parse a speed units value */
+	static private String parseSpeedUnits(String param) {
+		if(param.equals("kph"))
+			return param;
+		else
+			return "mph";
+	}
+
+	/** Parse a "dist" value */
+	static private boolean parseDist(String[] args, int n) {
+		if(n < args.length)
+			return parseDist(args[n]);
+		else
+			return false;
+	}
+
+	/** Parse a "dist" value */
+	static private boolean parseDist(String param) {
+		return param.equals("dist");
 	}
 
 	/** Validate a MULTI string */

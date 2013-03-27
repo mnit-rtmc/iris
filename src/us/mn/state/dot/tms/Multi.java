@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,6 +110,12 @@ public interface Multi {
 
 	/** Add a speed advisory */
 	void addSpeedAdvisory();
+
+	/** Add a slow traffic warning.
+	 * @param spd Highest speed to activate warning.
+	 * @param units Units for speed (mph or kph).
+	 * @param dist If true, replace tag with distance to slow station. */
+	void addSlowWarning(int spd, String units, boolean dist);
 
 	/** Add a feed message */
 	void addFeed(String fid);
