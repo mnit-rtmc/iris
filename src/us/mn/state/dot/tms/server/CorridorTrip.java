@@ -181,9 +181,11 @@ public class CorridorTrip {
 					throwException("Start > origin");
 				tt.firstStation(mm, avg, low);
 				first = false;
-			} else if(checkLinkLength(pmile, mile))
-				throwException("Link too long: " + s);
-			else
+			} else if(checkLinkLength(pmile, mile)) {
+				float llen = mile - pmile;
+				throwException("Link too long (" + llen +
+					") " + s);
+			} else
 				tt.nextStation(mile, avg, low);
 			pmile = mile;
 		}
