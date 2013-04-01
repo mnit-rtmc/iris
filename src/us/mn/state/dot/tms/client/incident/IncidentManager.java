@@ -164,7 +164,14 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(DeviceStyle ds, Incident proxy) {
-		EventType et = EventType.fromId(proxy.getEventType());
+		// FIXME: this should not be necessary, but we're getting
+		//        NullPointerExceptions here...
+		if(proxy == null)
+			return false;
+		Integer iet = proxy.getEventType();
+		if(iet == null)
+			return false;
+		EventType et = EventType.fromId(iet);
 		switch(ds) {
 		case CRASH:
 			return et == EventType.INCIDENT_CRASH;
