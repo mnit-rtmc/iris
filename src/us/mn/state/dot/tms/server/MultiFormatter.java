@@ -69,7 +69,7 @@ public class MultiFormatter {
 		if(tm != null) {
 			String am = advisory.replaceSpeedAdvisory(tm);
 			if(am != null)
-				slow_warn.replaceSlowWarning(am);
+				return slow_warn.replaceSlowWarning(am);
 		}
 		return null;
 	}
