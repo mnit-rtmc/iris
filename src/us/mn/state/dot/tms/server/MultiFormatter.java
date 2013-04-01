@@ -36,12 +36,16 @@ public class MultiFormatter {
 	/** Speed advisory calculator */
 	private final SpeedAdvisoryCalculator advisory;
 
+	/** Slow warning formatter */
+	private final SlowWarningFormatter slow_warn;
+
 	/** Create a new MULTI formatter */
 	public MultiFormatter(DMSImpl d) {
 		dms = d;
 		GeoLoc g = d.getGeoLoc();
 		travel_est = new TravelTimeEstimator(dms.getName(), g);
 		advisory = new SpeedAdvisoryCalculator(g);
+		slow_warn = new SlowWarningFormatter(g);
 	}
 
 	/** Create a multi string for a DMS action */
@@ -61,11 +65,13 @@ public class MultiFormatter {
 
 	/** Create a MULTI string for a message */
 	private String createMulti(String qm) {
-		String m = travel_est.replaceTravelTimes(qm);
-		if(m != null)
-			return advisory.replaceSpeedAdvisory(m);
-		else
-			return null;
+		String tm = travel_est.replaceTravelTimes(qm);
+		if(tm != null) {
+			String am = advisory.replaceSpeedAdvisory(tm);
+			if(am != null)
+				slow_warn.replaceSlowWarning(am);
+		}
+		return null;
 	}
 
 	/** Clear the current routes */
