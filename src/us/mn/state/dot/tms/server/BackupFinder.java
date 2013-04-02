@@ -75,7 +75,8 @@ public class BackupFinder implements Corridor.StationFinder {
 			return false;
 	}
 
-	/** Calculate the distance to mainline backup */
+	/** Calculate the distance to mainline backup.
+	 * @return Distance to end of backup, or null for no backup. */
 	public Distance backupDistance() {
 		if(back_mp != null) {
 			float d = back_mp - ma;

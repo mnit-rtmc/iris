@@ -45,12 +45,15 @@ public class SlowWarningFormatter {
 	/** Location for warning */
 	private final GeoLoc loc;
 
-	/** Create a new slow warning formatter */
+	/** Create a new slow warning formatter.
+	 * @param l Location of sign. */
 	public SlowWarningFormatter(GeoLoc l) {
 		loc = l;
 	}
 
-	/** Replace slow warning tags in a MULTI string */
+	/** Replace slow warning tags in a MULTI string.
+	 * @param multi MULTI string to parse.
+	 * @return MULTI string with slow warning tags replaced. */
 	public String replaceSlowWarning(String multi) {
 		MultiCallback cb = new MultiCallback();
 		MultiParser.parse(multi, cb);

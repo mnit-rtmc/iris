@@ -63,8 +63,11 @@ public class MultiFormatter {
 		return null;
 	}
 
-	/** Create a MULTI string for a message */
+	/** Create a MULTI string for a message.
+	 * @param qm Quick message MULTI string to parse.
+	 * @return MULTI string with travel, vsa and slow warnings resolved. */
 	private String createMulti(String qm) {
+		// FIXME: combine these into a single MULTI parse step.
 		String tm = travel_est.replaceTravelTimes(qm);
 		if(tm != null) {
 			String am = advisory.replaceSpeedAdvisory(tm);
