@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.units.Speed;
@@ -86,10 +85,10 @@ public class BackupFinder implements Corridor.StationFinder {
 	}
 
 	/** Debug the finder */
-	public void debug(DebugLog SLOW_LOG) {
-		SLOW_LOG.log("spd_threshold: " + spd_threshold +
-		             ", blimit_mi: " + blimit_mi +
-		             ", ma: " + ma +
-		             ", backup dist: " + backupDistance());
+	public void debug(SlowWarningFormatter f) {
+		f.log("spd_threshold: " + spd_threshold +
+		      ", blimit_mi: " + blimit_mi +
+		      ", ma: " + ma +
+		      ", backup dist: " + backupDistance());
 	}
 }

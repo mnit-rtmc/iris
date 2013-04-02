@@ -32,6 +32,16 @@ public class SlowWarningFormatter {
 	/** SLOW debug log */
 	static private final DebugLog SLOW_LOG = new DebugLog("slow");
 
+	/** Check if debug log is open */
+	private boolean isLogging() {
+		return SLOW_LOG.isOpen();
+	}
+
+	/** Log a debug message */
+	public void log(String msg) {
+		SLOW_LOG.log(loc.getName() + ": " + msg);
+	}
+
 	/** Location for warning */
 	private final GeoLoc loc;
 
@@ -121,8 +131,8 @@ public class SlowWarningFormatter {
 		Distance bd)
 	{
 		Float m = cor.calculateMilePoint(loc);
-		if(SLOW_LOG.isOpen())
-			SLOW_LOG.log(loc.getName() + ", mp: " + m);
+		if(isLogging())
+			log("mp " + m);
 		if(m != null)
 			return slowWarningDistance(cor, as, bd, m);
 		else
@@ -140,8 +150,8 @@ public class SlowWarningFormatter {
 	{
 		BackupFinder backup_finder = new BackupFinder(as, bd, m);
 		cor.findStation(backup_finder);
-		if(SLOW_LOG.isOpen())
-			backup_finder.debug(SLOW_LOG);
+		if(isLogging())
+			backup_finder.debug(this);
 		return backup_finder.backupDistance();
 	}
 }
