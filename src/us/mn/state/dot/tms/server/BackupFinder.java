@@ -27,7 +27,7 @@ import static us.mn.state.dot.tms.units.Speed.Units.MPH;
 public class BackupFinder implements Corridor.StationFinder {
 
 	/** Speed threshold to indicate backup */
-	private final Speed spd_threshold;
+	private final Speed spd_thresh;
 
 	/** Backup limit distance (miles) */
 	private final float blimit_mi;
@@ -43,7 +43,7 @@ public class BackupFinder implements Corridor.StationFinder {
 	 * @param bd Distance limit to backup (negative indicates upstream).
 	 * @param m Milepoint to start from. */
 	public BackupFinder(Speed as, Distance bd, float m) {
-		spd_threshold = as;
+		spd_thresh = as;
 		blimit_mi = bd.asFloat(MILES);
 		ma = m;
 	}
@@ -55,7 +55,7 @@ public class BackupFinder implements Corridor.StationFinder {
 	@Override public boolean check(Float m, StationImpl s) {
 		if(back_mp == null && isNearSearch(m)) {
 			float spd = s.getRollingAverageSpeed();
-			if(spd > 0 && spd < spd_threshold.round(MPH))
+			if(spd > 0 && spd < spd_thresh.round(MPH))
 				back_mp = m;
 		}
 		return false;
@@ -86,9 +86,9 @@ public class BackupFinder implements Corridor.StationFinder {
 
 	/** Debug the finder */
 	public void debug(SlowWarningFormatter f) {
-		f.log("spd_threshold: " + spd_threshold +
+		f.log("spd_thresh: " + spd_thresh +
 		      ", blimit_mi: " + blimit_mi +
 		      ", ma: " + ma +
-		      ", backup dist: " + backupDistance());
+		      ", backup: " + backupDistance());
 	}
 }
