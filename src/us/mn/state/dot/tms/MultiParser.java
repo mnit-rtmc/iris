@@ -28,7 +28,7 @@ public class MultiParser {
 
 	/** Regular expression to locate tags */
 	static private final Pattern TAG = Pattern.compile(
-		"\\[([A-Za-z,0-9]*)\\]");
+		"\\[([-A-Za-z,0-9]*)\\]");
 
 	/** Regular expression to match supported MULTI tags */
 	static private final Pattern TAGS = Pattern.compile(
