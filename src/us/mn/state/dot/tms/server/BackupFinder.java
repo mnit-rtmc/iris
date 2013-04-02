@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.units.Speed;
@@ -36,9 +35,6 @@ public class BackupFinder implements Corridor.StationFinder {
 
 	/** Mile point to search for backup */
 	private final float ma;
-
-	/** Previous station */
-	private StationImpl prev_stat;
 
 	/** Milepoint at backup station */
 	private Float back_mp;
@@ -62,7 +58,6 @@ public class BackupFinder implements Corridor.StationFinder {
 			float spd = s.getRollingAverageSpeed();
 			if(spd > 0 && spd < spd_threshold.round(MPH))
 				back_mp = m;
-			prev_stat = s;
 		}
 		return false;
 	}
