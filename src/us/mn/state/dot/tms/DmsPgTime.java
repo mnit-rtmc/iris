@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms;
 
-import java.lang.NullPointerException;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
- *  A DMS page time.
- *  @see MultiString, DmsPgTimeSpinner, SignMessageComposer
- *  @author Michael Darter
+ * DMS page time helper.
+ * @see MultiString, DmsPgTimeSpinner, SignMessageComposer
+ *
+ * @author Michael Darter
+ * @author Douglas Lau
  */
 public class DmsPgTime {
 
@@ -82,11 +82,6 @@ public class DmsPgTime {
 		return m_tenths * 100;
 	}
 
-	/** Return the page time in tenths */
-	public String toString() {
-		return SString.intToString(m_tenths);
-	}
-
 	/** Is the value zero? */
 	public Boolean isZero() {
 		return toTenths() == 0;
@@ -124,34 +119,34 @@ public class DmsPgTime {
 	}
 
 	/** Validate an on-time as a function of if the message is single
-	 *  or multi-page. */
-	public static DmsPgTime validateOnTime(DmsPgTime t, 
+	 * or multi-page. */
+	public static DmsPgTime validateOnTime(DmsPgTime t,
 		boolean singlepg)
 	{
 		if(t == null)
 			throw new NullPointerException();
-		int tenths = (int)validateValue(t.toTenths(), singlepg, 
+		int tenths = (int)validateValue(t.toTenths(), singlepg,
 			getMinOnTime().toTenths(), getMaxOnTime().toTenths());
 		return new DmsPgTime(tenths);
 	}
 
 	/** Return a validated spinner value. A value of zero is valid
-	 *  for single page messages only. */
-	public DmsPgTime validateValue(boolean singlepg, 
+	 * for single page messages only. */
+	public DmsPgTime validateValue(boolean singlepg,
 		DmsPgTime min, DmsPgTime max)
 	{
-		int tenths = validateValue(toTenths(), 
+		int tenths = validateValue(toTenths(),
 			singlepg, min.toTenths(), max.toTenths());
 		return new DmsPgTime(tenths);
 	}
 
-	/** Validate a page time. A value of zero is valid for single 
-	 *  page messages only. 
-	 *  @param value Page time in tenths.
-	 *  @param min Minimum page time in tenths.
-	 *  @param max Maximum page time in tenths.
-	 *  @return The validated page time in tenths. */
-	public static int validateValue(int value, boolean singlepg, 
+	/** Validate a page time. A value of zero is valid for single
+	 * page messages only.
+	 * @param value Page time in tenths.
+	 * @param min Minimum page time in tenths.
+	 * @param max Maximum page time in tenths.
+	 * @return The validated page time in tenths. */
+	public static int validateValue(int value, boolean singlepg,
 		int min, int max)
 	{
 		if(singlepg) {

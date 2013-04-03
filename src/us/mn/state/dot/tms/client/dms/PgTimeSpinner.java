@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,10 +185,11 @@ public class PgTimeSpinner extends JSpinner {
 	 * of the MULTI string. If no value is specified in the MULTI,
 	 * the default value is used for multi-page messages else 0
 	 * for single page messages.
-	 * @param ms A MULTI string, containing possible page times. */
-	public void setValue(String ms) {
-		setSinglePage(new MultiString(ms).singlePage());
-		setValue(new MultiString(ms).getPageOnTime());
+	 * @param m A MULTI string, containing possible page times. */
+	public void setValue(String m) {
+		MultiString ms = new MultiString(m);
+		setSinglePage(ms.singlePage());
+		setValue(ms.getPageOnTime());
 	}
 
 	/** Set number of pages in current message. */
