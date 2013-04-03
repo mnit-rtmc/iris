@@ -59,19 +59,23 @@ public class PageTimeCounter extends MultiAdapter {
 		page_off[ms_page] = pageOffInterval();
 	}
 
-	/** Get the current page-on interval. */
+	/** Get the current page-on interval.
+	 * @return Page-on interval for current page. */
 	private Interval pageOnInterval() {
 		Integer pt = ms_pt_on;
 		return pt != null ? new Interval(pt, DECISECONDS) : null;
 	}
 
-	/** Get the current page-off interval. */
+	/** Get the current page-off interval.
+	 * @return Page-off interval for current page. */
 	private Interval pageOffInterval() {
 		Integer pt = ms_pt_off;
 		return pt != null ? new Interval(pt, DECISECONDS) : null;
 	}
 
-	/** Get an array of page-on intervals */
+	/** Get an array of page-on intervals.
+	 * @param dflt Default page-on interval.
+	 * @return Array of page-on intervals. */
 	public Interval[] pageOnIntervals(Interval dflt) {
 		Interval[] ret = new Interval[page_on.length];
 		for(int i = 0; i < ret.length; i++) {
@@ -81,7 +85,9 @@ public class PageTimeCounter extends MultiAdapter {
 		return ret;
 	}
 
-	/** Get an array of page-off intervals */
+	/** Get an array of page-off intervals.
+	 * @param dflt Default page-off interval.
+	 * @return Array of page-off intervals. */
 	public Interval[] pageOffIntervals(Interval dflt) {
 		Interval[] ret = new Interval[page_off.length];
 		for(int i = 0; i < ret.length; i++) {
