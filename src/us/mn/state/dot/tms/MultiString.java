@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -345,11 +346,11 @@ public class MultiString implements Multi {
 	 * @return An integer, which is in tenths of secs. */
 	public DmsPgTime getPageOnTime() {
 		DmsPgTime def = DmsPgTime.getDefaultOn(singlePage());
-		int[] pont = getPageOnTimes(def.toTenths());
-		if(pont.length < 1)
-			return def;
+		Interval dflt_on = new Interval(def.toTenths(), DECISECONDS);
+		Interval[] pg_on = pageOnIntervals(dflt_on);
 		// return 1st page on-time read, even if specified per page
-		return new DmsPgTime(pont[0]);
+		int pont = pg_on[0].round(DECISECONDS);
+		return new DmsPgTime(pont);
 	}
 
 	/** Get an array of page-on time intervals.
