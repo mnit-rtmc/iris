@@ -147,12 +147,14 @@ public class DmsPgTime {
 
 	/** Return a validated spinner value. A value of zero is valid
 	 * for single page messages only. */
-	public DmsPgTime validateValue(boolean singlepg,
-		DmsPgTime min, DmsPgTime max)
+	static public Interval validateValue(Interval val, boolean singlepg,
+		Interval min, Interval max)
 	{
-		int tenths = validateValue(toTenths(),
-			singlepg, min.toTenths(), max.toTenths());
-		return new DmsPgTime(tenths);
+		int ds = val.round(DECISECONDS);
+		int min_ds = min.round(DECISECONDS);
+		int max_ds = max.round(DECISECONDS);
+		int tenths = validateValue(ds, singlepg, min_ds,max_ds);
+		return new Interval(tenths, DECISECONDS);
 	}
 
 	/** Validate a page time. A value of zero is valid for single

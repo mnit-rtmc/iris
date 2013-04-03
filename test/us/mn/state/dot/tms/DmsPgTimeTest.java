@@ -52,40 +52,40 @@ public class DmsPgTimeTest extends TestCase {
 			equals(DmsPgTime.minPageOnInterval()));
 
 		// validateValue: single page
-		assertTrue(new DmsPgTime(0).equals(
-			new DmsPgTime(-3).validateValue(true,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
-		assertTrue(new DmsPgTime(0).equals(
-			new DmsPgTime(-3).validateValue(true,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
-		assertTrue(new DmsPgTime(0).equals(
-			new DmsPgTime(0).validateValue(true,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
-		assertTrue(new DmsPgTime(0).equals(
-			new DmsPgTime(.4).validateValue(true,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
-		assertTrue(new DmsPgTime(26).equals(
-			new DmsPgTime(2.6).validateValue(true,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
-		assertTrue(new DmsPgTime(100).equals(
-			new DmsPgTime(12.0).validateValue(true,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
+		assertTrue(new Interval(0).equals(
+			DmsPgTime.validateValue(new Interval(-3), true,
+			new Interval(.5), new Interval(10.0))));
+		assertTrue(new Interval(0).equals(
+			DmsPgTime.validateValue(new Interval(-3), true,
+			new Interval(.5), new Interval(10.0))));
+		assertTrue(new Interval(0).equals(
+			DmsPgTime.validateValue(new Interval(0), true,
+			new Interval(.5), new Interval(10.0))));
+		assertTrue(new Interval(0).equals(
+			DmsPgTime.validateValue(new Interval(.4), true,
+			new Interval(.5), new Interval(10.0))));
+		assertTrue(new Interval(2.6).equals(
+			DmsPgTime.validateValue(new Interval(2.6), true,
+			new Interval(.5), new Interval(10.0))));
+		assertTrue(new Interval(10.0).equals(
+			DmsPgTime.validateValue(new Interval(12.0), true,
+			new Interval(.5), new Interval(10.0))));
 
 		// validateValue: multi page
-		assertTrue(new DmsPgTime(5).equals(
-			new DmsPgTime(-3.3).validateValue(false,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
-		assertTrue(new DmsPgTime(5).equals(
-			new DmsPgTime(0).validateValue(false,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
-		assertTrue(new DmsPgTime(5).equals(
-			new DmsPgTime(.4).validateValue(false,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
-		assertTrue(new DmsPgTime(26).equals(
-			new DmsPgTime(2.6).validateValue(false,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
-		assertTrue(new DmsPgTime(100).equals(
-			new DmsPgTime(12.0).validateValue(false,
-			new DmsPgTime(.5), new DmsPgTime(10.0))));
+		assertTrue(new Interval(.5).equals(
+			DmsPgTime.validateValue(new Interval(-3.3), false,
+			new Interval(.5), new Interval(10.0))));
+		assertTrue(new Interval(.5).equals(
+			DmsPgTime.validateValue(new Interval(0), false,
+			new Interval(.5), new Interval(10.0))));
+		assertTrue(new Interval(.5).equals(
+			DmsPgTime.validateValue(new Interval(.4), false,
+			new Interval(.5), new Interval(10.0))));
+		assertTrue(new Interval(2.6).equals(
+			DmsPgTime.validateValue(new Interval(2.6), false,
+			new Interval(.5), new Interval(10.0))));
+		assertTrue(new Interval(10.0).equals(
+			DmsPgTime.validateValue(new Interval(12.0), false,
+			new Interval(.5), new Interval(10.0))));
 	}
 }

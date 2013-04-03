@@ -20,6 +20,8 @@ import javax.swing.JSpinner;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -44,7 +46,7 @@ import us.mn.state.dot.tms.utils.SString;
 public class PgTimeSpinner extends JSpinner {
 
 	/** Page on-time increment value */
-	static public final float INC_ONTIME_SECS = .1f;
+	static private final float INC_ONTIME_SECS = .1f;
 
 	/** Is this control IRIS enabled? */
 	static public boolean getIEnabled() {
@@ -60,10 +62,10 @@ public class PgTimeSpinner extends JSpinner {
 	protected class PgTimeSpinnerModel extends AbstractSpinnerModel {
 
 		/** Inclusive minimum value allowed */
-		private final double m_min;
+		private final Interval m_min;
 
 		/** Inclusive maximum value allowed */
-		private final double m_max;
+		private final Interval m_max;
 
 		/** Increment value */
 		private final double m_inc;
@@ -72,15 +74,16 @@ public class PgTimeSpinner extends JSpinner {
 		private double m_value = 0;
 
 		/** Constructor.
-		 *  @param def Initial value.
-		 *  @param max Maximum (inclusive) allowed value.
-		 *  @param min Minimum (inclusive) allowed value.
-		 *  @param inc Increment value. */
-		public PgTimeSpinnerModel(double def, double min, double max,
+		 * @param def Initial value.
+		 * @param max Maximum (inclusive) allowed interval.
+		 * @param min Minimum (inclusive) allowed interval.
+		 * @param inc Increment value. */
+		public PgTimeSpinnerModel(double def, Interval min,Interval max,
 			double inc)
 		{
-			m_min = Math.min(min, max);
-			m_max = Math.max(min, max);
+			assert min.seconds() <= max.seconds();
+			m_min = min;
+			m_max = max;
 			m_value = validate(def);
 			m_inc = inc;
 		}
@@ -88,17 +91,16 @@ public class PgTimeSpinner extends JSpinner {
 		/** Return a validated spinner value in seconds. A value of
 		 * zero is valid for single page messages only. */
 		private double validate(double value) {
-			DmsPgTime t = new DmsPgTime(value).validateValue(
-				m_singlepg, new DmsPgTime(m_min),
-				new DmsPgTime(m_max));
-			return t.toSecs();
+			Interval t = DmsPgTime.validateValue(
+				new Interval(value), m_singlepg, m_min, m_max);
+			return t.seconds();
 		}
 
 		/** Get the next value, or null if the next value would be
 		 *  out of range. */
 		public Object getNextValue() {
 			if(m_singlepg && m_value == 0)
-				return m_min;
+				return m_min.seconds();
 			else
 				return validate(m_value + m_inc);
 		}
@@ -121,9 +123,9 @@ public class PgTimeSpinner extends JSpinner {
 		public void setValue(Object value) {
 			if(value == null)
 				setValueDouble(0.0);
-			else if(value instanceof DmsPgTime) {
-				DmsPgTime pt = (DmsPgTime)value;
-				setValueDouble(pt.toSecs());
+			else if(value instanceof Interval) {
+				Interval pt = (Interval)value;
+				setValueDouble(pt.seconds());
 			} else if(value instanceof Number) {
 				Number n = (Number)value;
 				setValueDouble(n.doubleValue());
@@ -143,10 +145,9 @@ public class PgTimeSpinner extends JSpinner {
 	/** Create a new page time spinner */
 	public PgTimeSpinner() {
 		setModel(new PgTimeSpinnerModel(
-			DmsPgTime.getDefaultOn(true).toSecs(),
-			DmsPgTime.minPageOnInterval().seconds(),
-			DmsPgTime.maxPageOnInterval().seconds(),
-			INC_ONTIME_SECS));
+			DmsPgTime.defaultPageOnInterval(true).seconds(),
+			DmsPgTime.minPageOnInterval(),
+			DmsPgTime.maxPageOnInterval(), INC_ONTIME_SECS));
 		setToolTipText(I18N.get("dms.page.on.time.tooltip"));
 
 		// force the spinner to be editable
@@ -159,18 +160,22 @@ public class PgTimeSpinner extends JSpinner {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		// if disabled, reset value to default
-		if(!b)
-			setValue(DmsPgTime.getDefaultOn(m_singlepg).toSecs());
+		if(!b) {
+			Interval dflt = DmsPgTime.defaultPageOnInterval(
+				m_singlepg);
+			setValue(dflt.seconds());
+		}
 	}
 
-	/** Set value using seconds. */
+	/** Set value using seconds */
 	public void setValue(float secs) {
-		super.setValue(new DmsPgTime(secs).toSecs());
+		int ds = new Interval(secs).round(DECISECONDS);
+		super.setValue(new Interval(ds, DECISECONDS).seconds());
 	}
 
 	/** Set value. */
-	public void setValue(DmsPgTime t) {
-		super.setValue(t.toSecs());
+	public void setValue(Interval t) {
+		super.setValue(t.seconds());
 	}
 
 	/** Get the current value as a DmsPgTime. */
