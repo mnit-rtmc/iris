@@ -384,35 +384,33 @@ public class MultiStringTest extends TestCase {
 	}
 
 	public void testReplacePageOnTime() {
-		MultiString t1, t2;
-		int[] pt;
+		checkReplacePageTimes("YA1[np]YA2",
+		                      "[pt4o]YA1[np]YA2",
+		                      7, 4, new int[] { 4, 4 });
+		checkReplacePageTimes("[pt3o]YA1[np]OH YA2",
+		                      "[pt4o]YA1[np]OH YA2",
+		                      7, 4, new int[] { 4, 4 });
+		checkReplacePageTimes("[pt3o50]YA1[np]OH YA2",
+		                      "[pt4o50]YA1[np]OH YA2",
+		                      7, 4, new int[] { 4, 4 });
+		checkReplacePageTimes("[pt3o50]YA1[np][pt22o60]OH YA2",
+		                      "[pt4o50]YA1[np][pt4o60]OH YA2",
+		                      7, 4, new int[] { 4, 4 });
+	}
 
-		t1 = new MultiString("YA1[np]YA2");
-		t2 = t1.replacePageOnTime(4);
-		pt = t2.getPageOnTimes(7);
-		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
-		assertTrue("[pt4o]YA1[np]YA2".equals(t2.toString()));
-
-		t1 = new MultiString("[pt3o]YA1[np]OH YA2");
-		t2 = t1.replacePageOnTime(4);
-		pt = t2.getPageOnTimes(7);
-		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
-		assertTrue("[pt4o]YA1[np]OH YA2".equals(t2.toString()));
-
-		t1 = new MultiString("[pt3o50]YA1[np]OH YA2");
-		t2 = new MultiString(MultiString.
-			replacePageOnTime(t1.toString(), 4));
-		pt = t2.getPageOnTimes(7);
-		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
-		assertTrue("[pt4o50]YA1[np]OH YA2".equals(t2.toString()));
-
-		t1 = new MultiString("[pt3o50]YA1[np][pt22o60]OH YA2");
-		t2 = new MultiString(MultiString.
-			replacePageOnTime(t1.toString(), 4));
-		pt = t2.getPageOnTimes(7);
-		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
-		assertTrue("[pt4o50]YA1[np][pt4o60]OH YA2".
-			equals(t2.toString()));
+	private void checkReplacePageTimes(String ms, String cms, int dflt_ds,
+		int pot, int[] intvls)
+	{
+		Interval dflt = new Interval(dflt_ds, DECISECONDS);
+		MultiString ms1 = new MultiString(ms);
+		MultiString ms2 = ms1.replacePageOnTime(pot);
+		Interval[] t = ms2.pageOnIntervals(dflt);
+		assertTrue(t.length == intvls.length);
+		for(int i = 0; i < t.length; i++) {
+			Interval val = new Interval(intvls[i], DECISECONDS);
+			assertTrue(t[i].equals(val));
+		}
+		assertTrue(cms.equals(ms2.toString()));
 	}
 
 	public void testGetFonts() {

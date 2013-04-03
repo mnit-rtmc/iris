@@ -373,30 +373,6 @@ public class MultiString implements Multi {
 		return ptc.pageOffIntervals(dflt);
 	}
 
-	/** Get an array of page on times. The page on time is assumed
-	 * to apply to subsequent pages if not specified on each page.
-	 * @param def_pont Default page on time, in tenths of a sec.
-	 * @return An integer array with length equal to the number
-	 *         of pages in the message, containing tenths of secs. */
-	public int[] getPageOnTimes(final int def_pont) {
-		int np = getNumPages();
-		assert np > 0;
-		final int[] ret = new int[np]; // pg time indexed by pg
-		for(int i = 0; i < ret.length; ++i)
-			ret[i] = def_pont;
-		MultiParser.parse(toString(), new MultiAdapter() {
-			public void addSpan(String span) {
-				// note: fields in span use ms prefix
-				if(ms_page >= 0 && ms_page < ret.length) {
-					if(ms_pt_on != null)
-						ret[ms_page] = ms_pt_on;
-				} else
-					assert false : "bogus # pages";
-			}
-		});
-		return ret;
-	}
-
 	/** Replace all the page on times in a MULTI string with the specified
 	 * value.  If no on-time is specified, then a page time tag is
 	 * prepended.
