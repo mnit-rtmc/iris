@@ -44,14 +44,14 @@ public class DMSPanelPager {
 	/** Rasters for each page */
 	private final RasterGraphic[] rasters;
 
-	/** Current page being displayed */
-	private int page = 0;
-
 	/** Multipage message on time */
 	private final DmsPgTime pgOnTime;
 
 	/** Multipage message off time */
 	private final DmsPgTime pgOffTime;
+
+	/** Current page being displayed */
+	private int page = 0;
 
 	/** Swing timer */
 	private final Timer timer;

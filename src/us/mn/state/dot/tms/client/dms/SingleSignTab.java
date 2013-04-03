@@ -410,10 +410,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Get the page-on time for the specified multi string */
 	protected DmsPgTime getPgOnTime(String ms) {
-		if(ms.isEmpty())
-			return DmsPgTime.getDefaultOn(true);
-		else
-			return new MultiString(ms).getPageOnTime();
+		return new MultiString(ms).getPageOnTime();
 	}
 
 	/** Get the MULTI string currently on the specified dms.
