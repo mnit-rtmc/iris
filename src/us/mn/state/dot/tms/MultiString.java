@@ -293,8 +293,8 @@ public class MultiString implements Multi {
 	}
 
 	/** Return a value indicating if the message is single or multi-page.
-	 *  @return True if the message contains a single page else false
-	 *  for multi-page. */
+	 * @return True if the message contains a single page else false
+	 * for multi-page. */
 	public boolean singlePage() {
 		return getNumPages() <= 1;
 	}
@@ -339,9 +339,9 @@ public class MultiString implements Multi {
 	}
 
 	/** Get the page on-time for the 1st page. If no page on-time is
-	 *  specified in the MULTI string, the default is returned, which
-	 *  is a function of the number of pages in the multi-string.
-	 *  @return An integer, which is in tenths of secs. */
+	 * specified in the MULTI string, the default is returned, which
+	 * is a function of the number of pages in the multi-string.
+	 * @return An integer, which is in tenths of secs. */
 	public DmsPgTime getPageOnTime() {
 		DmsPgTime def = DmsPgTime.getDefaultOn(singlePage());
 		int[] pont = getPageOnTimes(def.toTenths());
@@ -352,12 +352,13 @@ public class MultiString implements Multi {
 	}
 
 	/** Get an array of page on times. The page on time is assumed
-	 *  to apply to subsequent pages if not specified on each page.
-	 *  @param def_pont Default page on time, in tenths of a sec.
-	 *  @return An integer array with length equal to the number
-	 *	    of pages in the message, containing tenths of secs. */
+	 * to apply to subsequent pages if not specified on each page.
+	 * @param def_pont Default page on time, in tenths of a sec.
+	 * @return An integer array with length equal to the number
+	 *        of pages in the message, containing tenths of secs. */
 	public int[] getPageOnTimes(final int def_pont) {
 		int np = getNumPages();
+		assert np > 0;
 		final int[] ret = new int[np]; // pg time indexed by pg
 		for(int i = 0; i < ret.length; ++i)
 			ret[i] = def_pont;
