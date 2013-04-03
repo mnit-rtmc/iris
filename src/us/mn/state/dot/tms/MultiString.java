@@ -355,7 +355,7 @@ public class MultiString implements Multi {
 	 * to apply to subsequent pages if not specified on each page.
 	 * @param def_pont Default page on time, in tenths of a sec.
 	 * @return An integer array with length equal to the number
-	 *        of pages in the message, containing tenths of secs. */
+	 *         of pages in the message, containing tenths of secs. */
 	public int[] getPageOnTimes(final int def_pont) {
 		int np = getNumPages();
 		assert np > 0;
