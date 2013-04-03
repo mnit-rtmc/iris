@@ -26,6 +26,7 @@ public final class Interval implements Comparable<Interval> {
 	/** Enumeration of interval units */
 	public enum Units {
 		MILLISECONDS(0.001, "ms"),
+		DECISECONDS(0.1, "ds"),
 		SECONDS(1, "s"),
 		MINUTES(60, "min"),
 		HOURS(60 * MINUTES.seconds, "hr"),

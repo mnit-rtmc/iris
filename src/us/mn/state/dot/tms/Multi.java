@@ -92,8 +92,8 @@ public interface Multi {
 	void addPage();
 
 	/** Set the page times.
-	 * @param pt_on Page on time (tenths of second; null means default)
-	 * @param pt_off Page off time (tenths of second; null means default) */
+	 * @param pt_on Page on time (deciseconds; null means default)
+	 * @param pt_off Page off time (deciseconds; null means default) */
 	void setPageTimes(Integer pt_on, Integer pt_off);
 
 	/** Set the character spacing.

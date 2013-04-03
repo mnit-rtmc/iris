@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import us.mn.state.dot.tms.units.Interval;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -86,9 +87,9 @@ public class MultiString implements Multi {
 		multi.append("[np]");
 	}
 
-	/** Set page times.
-	 * @param pt_on Page on-time (tenths of second; null for default).
-	 * @param pt_off Page off-time (tenths of second; null for default). */
+	/** Set the page times.
+	 * @param pt_on Page on time (deciseconds; null means default)
+	 * @param pt_off Page off time (deciseconds; null means default) */
 	public void setPageTimes(Integer pt_on, Integer pt_off) {
 		multi.append("[pt");
 		if(pt_on != null)
@@ -349,6 +350,26 @@ public class MultiString implements Multi {
 			return def;
 		// return 1st page on-time read, even if specified per page
 		return new DmsPgTime(pont[0]);
+	}
+
+	/** Get an array of page-on time intervals.
+	 * @param dflt Default page-on time.
+	 * @return An array of page-on time Intervals, one value per page. */
+	public Interval[] pageOnIntervals(Interval dflt) {
+		int np = getNumPages();
+		PageTimeCounter ptc = new PageTimeCounter(np);
+		MultiParser.parse(toString(), ptc);
+		return ptc.pageOnIntervals(dflt);
+	}
+
+	/** Get an array of page-off time intervals.
+	 * @param dflt Default page-off time.
+	 * @return An array of page-off time Intervals, one value per page. */
+	public Interval[] pageOffIntervals(Interval dflt) {
+		int np = getNumPages();
+		PageTimeCounter ptc = new PageTimeCounter(np);
+		MultiParser.parse(toString(), ptc);
+		return ptc.pageOffIntervals(dflt);
 	}
 
 	/** Get an array of page on times. The page on time is assumed
