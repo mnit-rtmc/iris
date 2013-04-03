@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.units.Interval;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
 
@@ -103,11 +104,10 @@ class OpMessage extends OpDms {
 
 	/** Determine if single page message is flashing or not. */
 	public static boolean isFlashing(String multi) {
-		int[] pont = new MultiString(multi).getPageOnTimes(0);
-		boolean flashing = false;
-		if(pont != null && pont.length == 1)
-			flashing = (pont[0] != 0);
-		return flashing;
+		Interval zero = new Interval(0);
+		Interval[] pont = new MultiString(multi).pageOnIntervals(zero);
+		assert pont != null;
+		return pont.length == 1 && !pont[0].equals(zero);
 	}
 
 	/** create 2nd phase */

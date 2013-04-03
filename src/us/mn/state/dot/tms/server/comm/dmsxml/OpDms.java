@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2012  Minnesota Department of Transportation
+ * Copyright (C) 2002-2013  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,6 +29,8 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
@@ -244,14 +246,13 @@ abstract class OpDms extends OpDevice {
 	DmsPgTime determinePageOnTime(String multi) {
 		MultiString ms = new MultiString(multi);
 		boolean singlepg = (ms.getNumPages() <= 1);
+		int pg_on = DmsPgTime.getDefaultOn(singlepg).toTenths();
+		Interval dflt_on = new Interval(pg_on, DECISECONDS);
+		Interval[] on_int = ms.pageOnIntervals(dflt_on);
 		// extract from 1st page of MULTI
-		int[] pont = ms.getPageOnTimes(
-			DmsPgTime.getDefaultOn(singlepg).toTenths());
-		DmsPgTime ret;
-		if(pont != null && pont.length > 0)
-			ret = new DmsPgTime(pont[0]);
-		else
-			ret = DmsPgTime.getDefaultOn(singlepg);
+		assert on_int != null && on_int.length > 0;
+		int pg_1 = on_int[0].round(DECISECONDS);
+		DmsPgTime ret = new DmsPgTime(pg_1);
 		return DmsPgTime.validateOnTime(ret, singlepg);
 	}
 
