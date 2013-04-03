@@ -27,21 +27,15 @@ import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
  */
 public class DmsPgTime {
 
-	/** Get minimum page on time */
-	static public DmsPgTime getMinOnTime() {
-		return new DmsPgTime(
-			SystemAttrEnum.DMS_PAGE_ON_MIN_SECS.getFloat());
-	}
-
 	/** Get minimum page-on interval */
 	static public Interval minPageOnInterval() {
 		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MIN_SECS.getFloat());
 	}
 
-	/** Get maximum page on time */
-	static public DmsPgTime getMaxOnTime() {
-		return new DmsPgTime(
+	/** Get maximum page-on interval */
+	static public Interval maxPageOnInterval() {
+		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MAX_SECS.getFloat());
 	}
 
@@ -145,8 +139,9 @@ public class DmsPgTime {
 		boolean singlepg)
 	{
 		int ds = po.round(DECISECONDS);
-		int tenths = validateValue(ds, singlepg,
-			getMinOnTime().toTenths(), getMaxOnTime().toTenths());
+		int min_on = minPageOnInterval().round(DECISECONDS);
+		int max_on = maxPageOnInterval().round(DECISECONDS);
+		int tenths = validateValue(ds, singlepg, min_on, max_on);
 		return new Interval(tenths, DECISECONDS);
 	}
 

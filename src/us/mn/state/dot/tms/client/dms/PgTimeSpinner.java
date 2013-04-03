@@ -144,8 +144,9 @@ public class PgTimeSpinner extends JSpinner {
 	public PgTimeSpinner() {
 		setModel(new PgTimeSpinnerModel(
 			DmsPgTime.getDefaultOn(true).toSecs(),
-			DmsPgTime.getMinOnTime().toSecs(),
-			DmsPgTime.getMaxOnTime().toSecs(), INC_ONTIME_SECS));
+			DmsPgTime.minPageOnInterval().seconds(),
+			DmsPgTime.maxPageOnInterval().seconds(),
+			INC_ONTIME_SECS));
 		setToolTipText(I18N.get("dms.page.on.time.tooltip"));
 
 		// force the spinner to be editable
