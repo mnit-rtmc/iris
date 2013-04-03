@@ -242,18 +242,16 @@ abstract class OpDms extends OpDevice {
 	}
 
 	/** Return the page on-time. If a value is not found in the MULTI
-	 *  string, the system default value is returned. */
-	DmsPgTime determinePageOnTime(String multi) {
+	 * string, the system default value is returned. */
+	Interval determinePageOnInterval(String multi) {
 		MultiString ms = new MultiString(multi);
-		boolean singlepg = (ms.getNumPages() <= 1);
-		int pg_on = DmsPgTime.getDefaultOn(singlepg).toTenths();
-		Interval dflt_on = new Interval(pg_on, DECISECONDS);
+		boolean single = (ms.getNumPages() <= 1);
+		Interval dflt_on = DmsPgTime.defaultPageOnInterval(single);
 		Interval[] on_int = ms.pageOnIntervals(dflt_on);
 		// extract from 1st page of MULTI
 		assert on_int != null && on_int.length > 0;
-		int pg_1 = on_int[0].round(DECISECONDS);
-		DmsPgTime ret = new DmsPgTime(pg_1);
-		return DmsPgTime.validateOnTime(ret, singlepg);
+		Interval pg_1 = on_int[0];
+		return DmsPgTime.validateOnInterval(pg_1, single);
 	}
 
 	/** Update operation intermediate status in the client.

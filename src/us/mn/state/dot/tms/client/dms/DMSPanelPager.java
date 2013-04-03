@@ -21,6 +21,8 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
 
 /**
  * Pager for a SignPixelPanel.  This class enables multiple page messages
@@ -45,10 +47,10 @@ public class DMSPanelPager {
 	private final RasterGraphic[] rasters;
 
 	/** Multipage message on time */
-	private final DmsPgTime pgOnTime;
+	private final Interval[] page_on;
 
 	/** Multipage message off time */
-	private final DmsPgTime pgOffTime;
+	private final Interval[] page_off;
 
 	/** Current page being displayed */
 	private int page = 0;
@@ -69,14 +71,16 @@ public class DMSPanelPager {
 	 * @param ot Page on-time, which is validated, so if zero, is
 	 *           assigned the system default. */
 	public DMSPanelPager(SignPixelPanel p, DMS proxy, RasterGraphic[] rg,
-		DmsPgTime ot)
+		Interval[] p_on, Interval[] p_off)
 	{
+		assert rg.length == p_off.length;
+		assert rg.length == p_on.length;
 		panel = p;
 		dms = proxy;
 		rasters = getRasters(rg);
 		int npg = rasters.length;
-		pgOnTime = DmsPgTime.validateOnTime(ot, npg <= 1);
-		pgOffTime = DmsPgTime.getDefaultOff();
+		page_on = p_on;
+		page_off = p_off;
 		setDimensions();
 		panel.setGraphic(rasters[page]);
 		timer = new Timer(TIMER_TICK_MS, new ActionListener() {
@@ -160,16 +164,21 @@ public class DMSPanelPager {
 	/** Update the timer for one tick.
 	 * @return True if panel needs repainting */
 	private boolean doTick() {
+		boolean singlepg = page_on.length == 1;
+		Interval on_int = DmsPgTime.validateOnInterval(page_on[page],
+			singlepg);
+		int on_ms = on_int.round(MILLISECONDS);
+		int off_ms = page_off[page].round(MILLISECONDS);
 		phase_ms += TIMER_TICK_MS;
 		if(isBlanking) {
-			if(phase_ms >= pgOffTime.toMs()) {
+			if(phase_ms >= off_ms) {
 				isBlanking = false;
 				phase_ms = 0;
 				return true;
 			}
 		} else {
-			if(phase_ms >= pgOnTime.toMs()) {
-				if(pgOffTime.toMs() > 0)
+			if(phase_ms >= on_ms) {
+				if(off_ms > 0)
 					isBlanking = true;
 				phase_ms = 0;
 				return true;

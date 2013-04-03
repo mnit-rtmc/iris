@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
@@ -29,6 +28,7 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
 
@@ -184,8 +184,8 @@ class OpMessage extends OpDms {
 		xrr.addReq("OffTime", offtime);
 
 		// DisplayTimeMS: extract from 1st page of MULTI
-		DmsPgTime pt = determinePageOnTime(m_sm.getMulti());
-		xrr.addReq("DisplayTimeMS", pt.toMs());
+		Interval pt = determinePageOnInterval(m_sm.getMulti());
+		xrr.addReq("DisplayTimeMS", pt.round(MILLISECONDS));
 
 		// activation priority
 		xrr.addReq("ActPriority", 

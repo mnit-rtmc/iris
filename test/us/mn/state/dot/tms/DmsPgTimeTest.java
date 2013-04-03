@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,13 @@ package us.mn.state.dot.tms;
 
 import junit.framework.TestCase;
 import us.mn.state.dot.tms.DmsPgTime;
+import us.mn.state.dot.tms.units.Interval;
 
-/** 
+/**
  * DmsPgTime test cases
+ *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class DmsPgTimeTest extends TestCase {
 
@@ -41,50 +44,48 @@ public class DmsPgTimeTest extends TestCase {
 		assertTrue(new DmsPgTime(0).isZero());
 		assertFalse(new DmsPgTime(1).isZero());
 
-		// validateOnTime
-		assertTrue(DmsPgTime.validateOnTime(
-			new DmsPgTime(0), true).toTenths() 
-			== DmsPgTime.getDefaultOn(true).toTenths());
+		// validateOnInterval
+		assertTrue(DmsPgTime.validateOnInterval(new Interval(0), true).
+			equals(DmsPgTime.defaultPageOnInterval(true)));
 		// a validated multipage on-time should equal the minimum
-		assertTrue(DmsPgTime.validateOnTime(
-			new DmsPgTime(0), false).toTenths() 
-			== DmsPgTime.getMinOnTime().toTenths());
+		assertTrue(DmsPgTime.validateOnInterval(new Interval(0), false).
+			equals(DmsPgTime.minPageOnInterval()));
 
 		// validateValue: single page
 		assertTrue(new DmsPgTime(0).equals(
-			new DmsPgTime(-3).validateValue(true, 
+			new DmsPgTime(-3).validateValue(true,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 		assertTrue(new DmsPgTime(0).equals(
-			new DmsPgTime(-3).validateValue(true, 
+			new DmsPgTime(-3).validateValue(true,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 		assertTrue(new DmsPgTime(0).equals(
-			new DmsPgTime(0).validateValue(true, 
+			new DmsPgTime(0).validateValue(true,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 		assertTrue(new DmsPgTime(0).equals(
-			new DmsPgTime(.4).validateValue(true, 
+			new DmsPgTime(.4).validateValue(true,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 		assertTrue(new DmsPgTime(26).equals(
-			new DmsPgTime(2.6).validateValue(true, 
+			new DmsPgTime(2.6).validateValue(true,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 		assertTrue(new DmsPgTime(100).equals(
-			new DmsPgTime(12.0).validateValue(true, 
+			new DmsPgTime(12.0).validateValue(true,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 
 		// validateValue: multi page
 		assertTrue(new DmsPgTime(5).equals(
-			new DmsPgTime(-3.3).validateValue(false, 
+			new DmsPgTime(-3.3).validateValue(false,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 		assertTrue(new DmsPgTime(5).equals(
-			new DmsPgTime(0).validateValue(false, 
+			new DmsPgTime(0).validateValue(false,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 		assertTrue(new DmsPgTime(5).equals(
-			new DmsPgTime(.4).validateValue(false, 
+			new DmsPgTime(.4).validateValue(false,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 		assertTrue(new DmsPgTime(26).equals(
-			new DmsPgTime(2.6).validateValue(false, 
+			new DmsPgTime(2.6).validateValue(false,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 		assertTrue(new DmsPgTime(100).equals(
-			new DmsPgTime(12.0).validateValue(false, 
+			new DmsPgTime(12.0).validateValue(false,
 			new DmsPgTime(.5), new DmsPgTime(10.0))));
 	}
 }

@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 
 /**
  * DMS page time helper.
@@ -28,6 +30,12 @@ public class DmsPgTime {
 	/** Get minimum page on time */
 	static public DmsPgTime getMinOnTime() {
 		return new DmsPgTime(
+			SystemAttrEnum.DMS_PAGE_ON_MIN_SECS.getFloat());
+	}
+
+	/** Get minimum page-on interval */
+	static public Interval minPageOnInterval() {
+		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MIN_SECS.getFloat());
 	}
 
@@ -97,10 +105,21 @@ public class DmsPgTime {
 		}
 	}
 
-	/** Get default page off-time */
-	public static DmsPgTime getDefaultOff() {
-		return new DmsPgTime(secsToTenths(
-			SystemAttrEnum.DMS_PAGE_OFF_DEFAULT_SECS.getFloat()));
+	/** Get default page-on interval.
+	 * @param singlepg True for single-page messages. */
+	static public Interval defaultPageOnInterval(boolean singlepg) {
+		if(singlepg)
+			return new Interval(0);
+		else {
+			return new Interval(SystemAttrEnum.
+				DMS_PAGE_ON_DEFAULT_SECS.getFloat());
+		}
+	}
+
+	/** Get default page-off interval */
+	static public Interval defaultPageOffInterval() {
+		return new Interval(
+			SystemAttrEnum.DMS_PAGE_OFF_DEFAULT_SECS.getFloat());
 	}
 
 	/** Convert from 10ths of a second to seconds */
@@ -118,16 +137,17 @@ public class DmsPgTime {
 		return (int)(ms / 100);
 	}
 
-	/** Validate an on-time as a function of if the message is single
-	 * or multi-page. */
-	public static DmsPgTime validateOnTime(DmsPgTime t,
+	/** Valicate a page-on interval.
+	 * @param po Page-on interval.
+	 * @param singlepg True for single page messages.
+	 * @return Validated interval. */
+	static public Interval validateOnInterval(Interval po,
 		boolean singlepg)
 	{
-		if(t == null)
-			throw new NullPointerException();
-		int tenths = (int)validateValue(t.toTenths(), singlepg,
+		int ds = po.round(DECISECONDS);
+		int tenths = validateValue(ds, singlepg,
 			getMinOnTime().toTenths(), getMaxOnTime().toTenths());
-		return new DmsPgTime(tenths);
+		return new Interval(tenths, DECISECONDS);
 	}
 
 	/** Return a validated spinner value. A value of zero is valid
@@ -146,7 +166,7 @@ public class DmsPgTime {
 	 * @param min Minimum page time in tenths.
 	 * @param max Maximum page time in tenths.
 	 * @return The validated page time in tenths. */
-	public static int validateValue(int value, boolean singlepg,
+	static public int validateValue(int value, boolean singlepg,
 		int min, int max)
 	{
 		if(singlepg) {

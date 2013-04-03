@@ -49,12 +49,13 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
+import us.mn.state.dot.tms.units.Interval;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A SingleSignTab is a GUI component for displaying the status of a single
  * selected DMS within the DMS dispatcher.  One instance of this class is
- * created on client startup by DMSDispatcher. 
+ * created on client startup by DMSDispatcher.
  * @see DMSDispatcher.
  *
  * @author Douglas Lau
@@ -388,8 +389,10 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		if(dms != null) {
 			RasterGraphic[] rg = DMSHelper.getRasters(dms);
 			if(rg != null) {
+				String ms = getMultiString(dms);
 				pnlPager = new DMSPanelPager(currentPnl, dms,
-					rg, getPgOnTime(dms));
+					rg, pageOnIntervals(ms),
+					pageOffIntervals(ms));
 			} else
 				currentPnl.clear();
 		}
@@ -402,15 +405,21 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		adjusting--;
 	}
 
-	/** Get the page on-time for the current message on the 
-	 * specified DMS. */
-	protected DmsPgTime getPgOnTime(DMS dms) {
-		return getPgOnTime(getMultiString(dms));
+	/** Get the page-on intervals for the specified MULTI string.
+	 * @param m MULTI string.
+	 * @return Array of page-on intervals (for each page). */
+	private Interval[] pageOnIntervals(String m) {
+		MultiString ms = new MultiString(m);
+		return ms.pageOnIntervals(DmsPgTime.defaultPageOnInterval(
+			ms.singlePage()));
 	}
 
-	/** Get the page-on time for the specified multi string */
-	protected DmsPgTime getPgOnTime(String ms) {
-		return new MultiString(ms).getPageOnTime();
+	/** Get the page-off intervals for the specified MULTI string.
+	 * @param ms MULTI string.
+	 * @return Array of page-off intervals (for each page). */
+	private Interval[] pageOffIntervals(String ms) {
+		return new MultiString(ms).pageOffIntervals(
+			DmsPgTime.defaultPageOffInterval());
 	}
 
 	/** Get the MULTI string currently on the specified dms.
@@ -430,7 +439,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			String ms = dispatcher.getMessage();
 			RasterGraphic[] rg = dispatcher.getPixmaps();
 			pnlPager = new DMSPanelPager(previewPnl, dms, rg,
-				getPgOnTime(ms));
+				pageOnIntervals(ms), pageOffIntervals(ms));
 		}
 	}
 
