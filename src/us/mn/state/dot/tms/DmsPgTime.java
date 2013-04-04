@@ -59,21 +59,6 @@ public class DmsPgTime {
 			SystemAttrEnum.DMS_PAGE_OFF_DEFAULT_SECS.getFloat());
 	}
 
-	/** Convert from 10ths of a second to seconds */
-	public static float tenthsToSecs(int tenths) {
-		return (float)tenths / 10f;
-	}
-
-	/** Convert from seconds to 10ths. */
-	public static int secsToTenths(float secs) {
-		return Math.round(secs * 10f);
-	}
-
-	/** Convert from seconds to 10ths. */
-	public static int MsToTenths(int ms) {
-		return (int)(ms / 100);
-	}
-
 	/** Valicate a page-on interval.
 	 * @param po Page-on interval.
 	 * @param singlepg True for single page messages.
