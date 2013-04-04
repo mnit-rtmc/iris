@@ -59,13 +59,10 @@ public class PgTimeSpinner extends JSpinner {
 
 	/** Page time spinner model, which allows for an closed range of
 	 *  values. Single page messages also allow a value of zero. */
-	protected class PgTimeSpinnerModel extends AbstractSpinnerModel {
+	private class PgTimeSpinnerModel extends AbstractSpinnerModel {
 
 		/** Inclusive minimum value allowed */
 		private final Interval m_min;
-
-		/** Inclusive maximum value allowed */
-		private final Interval m_max;
 
 		/** Increment value */
 		private final double m_inc;
@@ -73,26 +70,21 @@ public class PgTimeSpinner extends JSpinner {
 		/** Current model value */
 		private double m_value = 0;
 
-		/** Constructor.
+		/** Create a new page time spinner model.
 		 * @param def Initial value.
-		 * @param max Maximum (inclusive) allowed interval.
 		 * @param min Minimum (inclusive) allowed interval.
 		 * @param inc Increment value. */
-		public PgTimeSpinnerModel(double def, Interval min,Interval max,
-			double inc)
-		{
-			assert min.seconds() <= max.seconds();
-			m_min = min;
-			m_max = max;
+		public PgTimeSpinnerModel(double def, Interval min, double inc){
 			m_value = validate(def);
+			m_min = min;
 			m_inc = inc;
 		}
 
 		/** Return a validated spinner value in seconds. A value of
 		 * zero is valid for single page messages only. */
 		private double validate(double value) {
-			Interval t = DmsPgTime.validateValue(
-				new Interval(value), m_singlepg, m_min, m_max);
+			Interval t = DmsPgTime.validateOnInterval(
+				new Interval(value), m_singlepg);
 			return t.seconds();
 		}
 
@@ -146,8 +138,7 @@ public class PgTimeSpinner extends JSpinner {
 	public PgTimeSpinner() {
 		setModel(new PgTimeSpinnerModel(
 			DmsPgTime.defaultPageOnInterval(true).seconds(),
-			DmsPgTime.minPageOnInterval(),
-			DmsPgTime.maxPageOnInterval(), INC_ONTIME_SECS));
+			DmsPgTime.minPageOnInterval(), INC_ONTIME_SECS));
 		setToolTipText(I18N.get("dms.page.on.time.tooltip"));
 
 		// force the spinner to be editable
