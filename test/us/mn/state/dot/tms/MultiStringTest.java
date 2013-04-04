@@ -245,8 +245,8 @@ public class MultiStringTest extends TestCase {
 		// test page time specified once for entire message
 		assertTrue(new MultiString("ABC[nl]DEF").
 			pageOnInterval().equals(new Interval(0)));
-		Interval defspg = DmsPgTime.defaultPageOnInterval(true);
-		Interval defmpg = DmsPgTime.defaultPageOnInterval(false);
+		Interval defspg = PageTimeHelper.defaultPageOnInterval(true);
+		Interval defmpg = PageTimeHelper.defaultPageOnInterval(false);
 		assertTrue(new MultiString("").
 			pageOnInterval().equals(defspg));
 		assertTrue(new MultiString("ABC[nl]DEF").

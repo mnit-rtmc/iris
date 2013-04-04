@@ -22,13 +22,13 @@ import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
  * DMS page time helper.
  * @see MultiString, PgTimeSpinner, SignMessageComposer
  *
- * @author Michael Darter
  * @author Douglas Lau
+ * @author Michael Darter
  */
-public class DmsPgTime {
+public class PageTimeHelper {
 
 	/** Don't allow instantiation */
-	private DmsPgTime() { }
+	private PageTimeHelper() { }
 
 	/** Get minimum page-on interval */
 	static public Interval minPageOnInterval() {

@@ -18,8 +18,8 @@ import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
@@ -165,8 +165,8 @@ public class DMSPanelPager {
 	 * @return True if panel needs repainting */
 	private boolean doTick() {
 		boolean singlepg = page_on.length == 1;
-		Interval on_int = DmsPgTime.validateOnInterval(page_on[page],
-			singlepg);
+		Interval on_int = PageTimeHelper.validateOnInterval(
+			page_on[page], singlepg);
 		int on_ms = on_int.round(MILLISECONDS);
 		int off_ms = page_off[page].round(MILLISECONDS);
 		phase_ms += TIMER_TICK_MS;

@@ -37,9 +37,9 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -410,7 +410,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	 * @return Array of page-on intervals (for each page). */
 	private Interval[] pageOnIntervals(String m) {
 		MultiString ms = new MultiString(m);
-		return ms.pageOnIntervals(DmsPgTime.defaultPageOnInterval(
+		return ms.pageOnIntervals(PageTimeHelper.defaultPageOnInterval(
 			ms.singlePage()));
 	}
 
@@ -419,7 +419,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	 * @return Array of page-off intervals (for each page). */
 	private Interval[] pageOffIntervals(String ms) {
 		return new MultiString(ms).pageOffIntervals(
-			DmsPgTime.defaultPageOffInterval());
+			PageTimeHelper.defaultPageOffInterval());
 	}
 
 	/** Get the MULTI string currently on the specified dms.

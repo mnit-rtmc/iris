@@ -23,10 +23,10 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
-import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
@@ -244,7 +244,7 @@ class OpQueryMsg extends OpDms {
 		int npgs = new MultiString(multi).getNumPages();
 		// if one page, use page on-time of zero.
 		if(npgs <= 1)
-			pt = DmsPgTime.defaultPageOnInterval(true);
+			pt = PageTimeHelper.defaultPageOnInterval(true);
 		String ret = MultiString.replacePageOnTime(
 			multi, pt.round(DECISECONDS));
 		Log.finest("OpQueryMsg.updatePageOnTime(): " +

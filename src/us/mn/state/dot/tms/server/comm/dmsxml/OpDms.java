@@ -18,11 +18,11 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 import java.io.IOException;
 import java.util.Random;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -246,12 +246,12 @@ abstract class OpDms extends OpDevice {
 	Interval determinePageOnInterval(String multi) {
 		MultiString ms = new MultiString(multi);
 		boolean single = (ms.getNumPages() <= 1);
-		Interval dflt_on = DmsPgTime.defaultPageOnInterval(single);
+		Interval dflt_on = PageTimeHelper.defaultPageOnInterval(single);
 		Interval[] on_int = ms.pageOnIntervals(dflt_on);
 		// extract from 1st page of MULTI
 		assert on_int != null && on_int.length > 0;
 		Interval pg_1 = on_int[0];
-		return DmsPgTime.validateOnInterval(pg_1, single);
+		return PageTimeHelper.validateOnInterval(pg_1, single);
 	}
 
 	/** Update operation intermediate status in the client.

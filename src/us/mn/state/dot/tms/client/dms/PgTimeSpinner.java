@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.client.dms;
 import javax.swing.AbstractSpinnerModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
-import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.utils.SString;
  * current value--e.g. if it's 0, and the user has just entered a 2nd page,
  * the spinner sets a non-default page on-time.
  *
- * @see DmsPgTime
+ * @see PageTimeHelper
  * @author Michael Darter
  * @author Douglas Lau
  */
@@ -83,7 +83,7 @@ public class PgTimeSpinner extends JSpinner {
 		/** Return a validated spinner value in seconds. A value of
 		 * zero is valid for single page messages only. */
 		private double validate(double value) {
-			Interval t = DmsPgTime.validateOnInterval(
+			Interval t = PageTimeHelper.validateOnInterval(
 				new Interval(value), m_singlepg);
 			return t.seconds();
 		}
@@ -137,8 +137,8 @@ public class PgTimeSpinner extends JSpinner {
 	/** Create a new page time spinner */
 	public PgTimeSpinner() {
 		setModel(new PgTimeSpinnerModel(
-			DmsPgTime.defaultPageOnInterval(true).seconds(),
-			DmsPgTime.minPageOnInterval(), INC_ONTIME_SECS));
+			PageTimeHelper.defaultPageOnInterval(true).seconds(),
+			PageTimeHelper.minPageOnInterval(), INC_ONTIME_SECS));
 		setToolTipText(I18N.get("dms.page.on.time.tooltip"));
 
 		// force the spinner to be editable
@@ -151,8 +151,10 @@ public class PgTimeSpinner extends JSpinner {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		// if disabled, reset value to default
-		if(!b)
-			setValue(DmsPgTime.defaultPageOnInterval(m_singlepg));
+		if(!b) {
+			setValue(PageTimeHelper.defaultPageOnInterval(
+				m_singlepg));
+		}
 	}
 
 	/** Set value using seconds */
@@ -172,7 +174,7 @@ public class PgTimeSpinner extends JSpinner {
 		if(v instanceof Number)
 			return new Interval(((Number)v).floatValue());
 		else
-			return DmsPgTime.defaultPageOnInterval(m_singlepg);
+			return PageTimeHelper.defaultPageOnInterval(m_singlepg);
 	}
 
 	/** Set value using the page on-time specified in the 1st page

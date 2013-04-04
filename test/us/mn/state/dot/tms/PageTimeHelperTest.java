@@ -15,65 +15,66 @@
 package us.mn.state.dot.tms;
 
 import junit.framework.TestCase;
-import us.mn.state.dot.tms.DmsPgTime;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.units.Interval;
 
 /**
- * DmsPgTime test cases
+ * PageTimeHelper test cases
  *
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class DmsPgTimeTest extends TestCase {
+public class PageTimeHelperTest extends TestCase {
 
 	/** constructor */
-	public DmsPgTimeTest(String name) {
+	public PageTimeHelperTest(String name) {
 		super(name);
 	}
 
 	public void testValidateOnInterval() {
-		assertTrue(DmsPgTime.validateOnInterval(new Interval(0), true).
-			equals(DmsPgTime.defaultPageOnInterval(true)));
-		assertTrue(DmsPgTime.validateOnInterval(new Interval(0), false).
-			equals(DmsPgTime.minPageOnInterval()));
+		assertTrue(PageTimeHelper.validateOnInterval(new Interval(0),
+			true).equals(PageTimeHelper.defaultPageOnInterval(
+			true)));
+		assertTrue(PageTimeHelper.validateOnInterval(new Interval(0),
+			false).equals(PageTimeHelper.minPageOnInterval()));
 	}
 
 	public void testValidateValue() {
 		// single page
 		assertTrue(new Interval(0).equals(
-			DmsPgTime.validateValue(new Interval(-3), true,
+			PageTimeHelper.validateValue(new Interval(-3), true,
 			new Interval(.5), new Interval(10.0))));
 		assertTrue(new Interval(0).equals(
-			DmsPgTime.validateValue(new Interval(-3), true,
+			PageTimeHelper.validateValue(new Interval(-3), true,
 			new Interval(.5), new Interval(10.0))));
 		assertTrue(new Interval(0).equals(
-			DmsPgTime.validateValue(new Interval(0), true,
+			PageTimeHelper.validateValue(new Interval(0), true,
 			new Interval(.5), new Interval(10.0))));
 		assertTrue(new Interval(0).equals(
-			DmsPgTime.validateValue(new Interval(.4), true,
+			PageTimeHelper.validateValue(new Interval(.4), true,
 			new Interval(.5), new Interval(10.0))));
 		assertTrue(new Interval(2.6).equals(
-			DmsPgTime.validateValue(new Interval(2.6), true,
+			PageTimeHelper.validateValue(new Interval(2.6), true,
 			new Interval(.5), new Interval(10.0))));
 		assertTrue(new Interval(10.0).equals(
-			DmsPgTime.validateValue(new Interval(12.0), true,
+			PageTimeHelper.validateValue(new Interval(12.0), true,
 			new Interval(.5), new Interval(10.0))));
 
 		// multi page
 		assertTrue(new Interval(.5).equals(
-			DmsPgTime.validateValue(new Interval(-3.3), false,
+			PageTimeHelper.validateValue(new Interval(-3.3), false,
 			new Interval(.5), new Interval(10.0))));
 		assertTrue(new Interval(.5).equals(
-			DmsPgTime.validateValue(new Interval(0), false,
+			PageTimeHelper.validateValue(new Interval(0), false,
 			new Interval(.5), new Interval(10.0))));
 		assertTrue(new Interval(.5).equals(
-			DmsPgTime.validateValue(new Interval(.4), false,
+			PageTimeHelper.validateValue(new Interval(.4), false,
 			new Interval(.5), new Interval(10.0))));
 		assertTrue(new Interval(2.6).equals(
-			DmsPgTime.validateValue(new Interval(2.6), false,
+			PageTimeHelper.validateValue(new Interval(2.6), false,
 			new Interval(.5), new Interval(10.0))));
 		assertTrue(new Interval(10.0).equals(
-			DmsPgTime.validateValue(new Interval(12.0), false,
+			PageTimeHelper.validateValue(new Interval(12.0), false,
 			new Interval(.5), new Interval(10.0))));
 	}
 }

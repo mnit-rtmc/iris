@@ -344,7 +344,8 @@ public class MultiString implements Multi {
 	 * is a function of the number of pages in the multi-string.
 	 * @return The page-on interval. */
 	public Interval pageOnInterval() {
-		Interval dflt = DmsPgTime.defaultPageOnInterval(singlePage());
+		Interval dflt = PageTimeHelper.defaultPageOnInterval(
+			singlePage());
 		Interval[] pg_on = pageOnIntervals(dflt);
 		// return 1st page on-time read, even if specified per page
 		return pg_on[0];
