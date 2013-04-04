@@ -20,7 +20,7 @@ import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 
 /**
  * DMS page time helper.
- * @see MultiString, DmsPgTimeSpinner, SignMessageComposer
+ * @see MultiString, PgTimeSpinner, SignMessageComposer
  *
  * @author Michael Darter
  * @author Douglas Lau
