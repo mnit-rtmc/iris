@@ -31,27 +31,15 @@ public class DmsPgTimeTest extends TestCase {
 		super(name);
 	}
 
-	/** test cases */
-	public void test() {
-		// equals
-		assertTrue(new DmsPgTime(13).equals(new DmsPgTime(13)));
-		assertFalse(new DmsPgTime(12).equals(new DmsPgTime(13)));
-		assertTrue(new DmsPgTime(10.3).equals(new DmsPgTime(103)));
-		assertTrue(new DmsPgTime(10.3f).equals(new DmsPgTime(10.3d)));
-		assertFalse(new DmsPgTime(33).equals(new DmsPgTime(34)));
-
-		// isZero
-		assertTrue(new DmsPgTime(0).isZero());
-		assertFalse(new DmsPgTime(1).isZero());
-
-		// validateOnInterval
+	public void testValidateOnInterval() {
 		assertTrue(DmsPgTime.validateOnInterval(new Interval(0), true).
 			equals(DmsPgTime.defaultPageOnInterval(true)));
-		// a validated multipage on-time should equal the minimum
 		assertTrue(DmsPgTime.validateOnInterval(new Interval(0), false).
 			equals(DmsPgTime.minPageOnInterval()));
+	}
 
-		// validateValue: single page
+	public void testValidateValue() {
+		// single page
 		assertTrue(new Interval(0).equals(
 			DmsPgTime.validateValue(new Interval(-3), true,
 			new Interval(.5), new Interval(10.0))));
@@ -71,7 +59,7 @@ public class DmsPgTimeTest extends TestCase {
 			DmsPgTime.validateValue(new Interval(12.0), true,
 			new Interval(.5), new Interval(10.0))));
 
-		// validateValue: multi page
+		// multi page
 		assertTrue(new Interval(.5).equals(
 			DmsPgTime.validateValue(new Interval(-3.3), false,
 			new Interval(.5), new Interval(10.0))));

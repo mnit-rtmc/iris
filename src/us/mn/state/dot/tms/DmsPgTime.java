@@ -27,6 +27,9 @@ import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
  */
 public class DmsPgTime {
 
+	/** Don't allow instantiation */
+	private DmsPgTime() { }
+
 	/** Get minimum page-on interval */
 	static public Interval minPageOnInterval() {
 		return new Interval(
@@ -37,56 +40,6 @@ public class DmsPgTime {
 	static public Interval maxPageOnInterval() {
 		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MAX_SECS.getFloat());
-	}
-
-	/** page time */
-	private final int m_tenths;
-
-	/** constructor */
-	public DmsPgTime(int tenths) {
-		m_tenths = tenths;
-	}
-
-	/** constructor */
-	public DmsPgTime(float secs) {
-		m_tenths = secsToTenths(secs);
-	}
-
-	/** constructor */
-	public DmsPgTime(double secs) {
-		m_tenths = secsToTenths((float)secs);
-	}
-
-	/** Test if the DmsPgTime is equal to another DmsPgTime */
-	public boolean equals(Object o) {
-		if(o instanceof DmsPgTime)
-			return toTenths() == ((DmsPgTime)o).toTenths();
-		return false;
-	}
-
-	/** Calculate a hash code */
-	public int hashCode() {
-		return new Integer(m_tenths).hashCode();
-	}
-
-	/** Return the page time in tenths */
-	public int toTenths() {
-		return m_tenths;
-	}
-
-	/** Return the page time in seconds */
-	public float toSecs() {
-		return tenthsToSecs(m_tenths);
-	}
-
-	/** Return the page time in ms */
-	public int toMs() {
-		return m_tenths * 100;
-	}
-
-	/** Is the value zero? */
-	public Boolean isZero() {
-		return toTenths() == 0;
 	}
 
 	/** Get default page-on interval.
