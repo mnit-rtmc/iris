@@ -160,11 +160,8 @@ public class PgTimeSpinner extends JSpinner {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		// if disabled, reset value to default
-		if(!b) {
-			Interval dflt = DmsPgTime.defaultPageOnInterval(
-				m_singlepg);
-			setValue(dflt.seconds());
-		}
+		if(!b)
+			setValue(DmsPgTime.defaultPageOnInterval(m_singlepg));
 	}
 
 	/** Set value using seconds */
@@ -178,24 +175,24 @@ public class PgTimeSpinner extends JSpinner {
 		super.setValue(t.seconds());
 	}
 
-	/** Get the current value as a DmsPgTime. */
-	public DmsPgTime getValuePgTime() {
+	/** Get the current value as an Interval */
+	public Interval getValueInterval() {
 		Object v = getValue();
 		if(v instanceof Number)
-			return new DmsPgTime(((Number)v).floatValue());
+			return new Interval(((Number)v).floatValue());
 		else
-			return DmsPgTime.getDefaultOn(m_singlepg);
+			return DmsPgTime.defaultPageOnInterval(m_singlepg);
 	}
 
 	/** Set value using the page on-time specified in the 1st page
 	 * of the MULTI string. If no value is specified in the MULTI,
 	 * the default value is used for multi-page messages else 0
 	 * for single page messages.
-	 * @param m A MULTI string, containing possible page times. */
-	public void setValue(String m) {
-		MultiString ms = new MultiString(m);
+	 * @param multi A MULTI string, containing possible page times. */
+	public void setValue(String multi) {
+		MultiString ms = new MultiString(multi);
 		setSinglePage(ms.singlePage());
-		setValue(ms.getPageOnTime());
+		setValue(ms.pageOnInterval());
 	}
 
 	/** Set number of pages in current message. */

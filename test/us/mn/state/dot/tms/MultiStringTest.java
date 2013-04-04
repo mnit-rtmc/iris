@@ -244,26 +244,25 @@ public class MultiStringTest extends TestCase {
 
 		// test page time specified once for entire message
 		assertTrue(new MultiString("ABC[nl]DEF").
-			getPageOnTime().toTenths() == 0);
-		DmsPgTime defspg = DmsPgTime.getDefaultOn(true);
-		DmsPgTime defmpg = DmsPgTime.getDefaultOn(false);
+			pageOnInterval().equals(new Interval(0)));
+		Interval defspg = DmsPgTime.defaultPageOnInterval(true);
+		Interval defmpg = DmsPgTime.defaultPageOnInterval(false);
 		assertTrue(new MultiString("").
-			getPageOnTime().equals(defspg));
+			pageOnInterval().equals(defspg));
 		assertTrue(new MultiString("ABC[nl]DEF").
-			getPageOnTime().equals(defspg));
+			pageOnInterval().equals(defspg));
 		assertTrue(new MultiString("ABC[np]DEF").
-			getPageOnTime().equals(defmpg));
+			pageOnInterval().equals(defmpg));
 		assertTrue(new MultiString("[pt13o0]ABC[nl]DEF").
-			getPageOnTime().toTenths() == 13);
+			pageOnInterval().round(DECISECONDS) == 13);
 		assertTrue(new MultiString("ABC[nl][pt14o]DEF").
-			getPageOnTime().toTenths() == 14);
-		//FIXME: this fails, probably shouldn't
-		//assertTrue(new MultiString("ABC[nl]DEF[pt14o]").
-		//	getPageOnTime().toTenths() == 14);
+			pageOnInterval().round(DECISECONDS) == 14);
+		assertTrue(new MultiString("ABC[nl]DEF[pt14o]").
+			pageOnInterval().round(DECISECONDS) == 14);
 		assertTrue(new MultiString("ABC[np][pt14o]DEF").
-			getPageOnTime().equals(defmpg));
+			pageOnInterval().equals(defmpg));
 		assertTrue(new MultiString("ABC[np]DEF[pt14o]").
-			getPageOnTime().equals(defmpg));
+			pageOnInterval().equals(defmpg));
 	}
 
 	public void testPageOnIntervals() {

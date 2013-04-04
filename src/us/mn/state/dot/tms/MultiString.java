@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.units.Interval;
-import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -340,17 +339,15 @@ public class MultiString implements Multi {
 		return ret;
 	}
 
-	/** Get the page on-time for the 1st page. If no page on-time is
+	/** Get the page-on interval for the 1st page. If no page-on is
 	 * specified in the MULTI string, the default is returned, which
 	 * is a function of the number of pages in the multi-string.
-	 * @return An integer, which is in tenths of secs. */
-	public DmsPgTime getPageOnTime() {
-		DmsPgTime def = DmsPgTime.getDefaultOn(singlePage());
-		Interval dflt_on = new Interval(def.toTenths(), DECISECONDS);
-		Interval[] pg_on = pageOnIntervals(dflt_on);
+	 * @return The page-on interval. */
+	public Interval pageOnInterval() {
+		Interval dflt = DmsPgTime.defaultPageOnInterval(singlePage());
+		Interval[] pg_on = pageOnIntervals(dflt);
 		// return 1st page on-time read, even if specified per page
-		int pont = pg_on[0].round(DECISECONDS);
-		return new DmsPgTime(pont);
+		return pg_on[0];
 	}
 
 	/** Get an array of page-on time intervals.

@@ -89,16 +89,6 @@ public class DmsPgTime {
 		return toTenths() == 0;
 	}
 
-	/** Get default page on-time for sigle and multi-page messages. */
-	public static DmsPgTime getDefaultOn(boolean singlepg) {
-		if(singlepg)
-			return new DmsPgTime(0);
-		else {
-			return new DmsPgTime(secsToTenths(SystemAttrEnum.
-				DMS_PAGE_ON_DEFAULT_SECS.getFloat()));
-		}
-	}
-
 	/** Get default page-on interval.
 	 * @param singlepg True for single-page messages. */
 	static public Interval defaultPageOnInterval(boolean singlepg) {

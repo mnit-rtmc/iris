@@ -44,6 +44,8 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 
 /**
  * A sign message composer is GUI for composing DMS messages.  It uses a number
@@ -476,8 +478,9 @@ public class SignMessageComposer extends JPanel {
 		for(int i = 0; i < p; i++) {
 			if(i == 0) {
 				if(PgTimeSpinner.getIEnabled()) {
-					int pt = pg_on_spn.getValuePgTime()
-						.toTenths();
+					Interval poi =
+						pg_on_spn.getValueInterval();
+					int pt = poi.round(DECISECONDS);
 					if(pt > 0)
 						multi.setPageTimes(pt, null);
 				}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,6 +32,9 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
+import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
 
@@ -107,7 +110,7 @@ class OpQueryMsg extends OpDms {
 	 *         other system message. If bitmap is blank, then an
 	 *         empty MULTI is returned. */
 	private static String createMultiUsingBitmap(
-		BitmapGraphic[] pages, DmsPgTime pgOnTime)
+		BitmapGraphic[] pages, Interval pgOnTime)
 	{
 		if(areBitmapsBlank(pages))
 			return ""; 
@@ -115,7 +118,7 @@ class OpQueryMsg extends OpDms {
 		MultiString multi = new MultiString();
 
 		// pg on-time read from controller
-		multi.setPageTimes(pgOnTime.toTenths(), null);
+		multi.setPageTimes(pgOnTime.round(DECISECONDS), null);
 
 		// default text if no bitmap, see comments in 
 		// method for why this is a hack.
@@ -194,7 +197,7 @@ class OpQueryMsg extends OpDms {
 	 * @return A SignMessage that contains the text of the message and 
 	 *         a rendered bitmap. */
 	private SignMessageImpl createSignMessageWithBitmap(String sbitmap,
-		Integer duration, DmsPgTime pgOnTime, DMSMessagePriority apri,
+		Integer duration, Interval pgOnTime, DMSMessagePriority apri,
 		DMSMessagePriority rpri)
 	{
 		if(sbitmap == null)
@@ -237,13 +240,13 @@ class OpQueryMsg extends OpDms {
 	 *  the value read from controller.
 	 *  @param pt Page on time, used to update returned MultiString. 
 	 *  @return MULTI string containing updated page on time. */
-	private String updatePageOnTime(String multi, DmsPgTime pt) {
+	private String updatePageOnTime(String multi, Interval pt) {
 		int npgs = new MultiString(multi).getNumPages();
 		// if one page, use page on-time of zero.
 		if(npgs <= 1)
-			pt = DmsPgTime.getDefaultOn(true);
+			pt = DmsPgTime.defaultPageOnInterval(true);
 		String ret = MultiString.replacePageOnTime(
-			multi, pt.toTenths());
+			multi, pt.round(DECISECONDS));
 		Log.finest("OpQueryMsg.updatePageOnTime(): " +
 			"updated multi w/ page display time: " + ret);
 		return ret;
@@ -297,7 +300,7 @@ class OpQueryMsg extends OpDms {
 		Calendar ont = new GregorianCalendar();
 		boolean useofft = false;
 		Calendar offt = new GregorianCalendar();
-		DmsPgTime pgOnTime = new DmsPgTime(0);
+		Interval pgOnTime = new Interval(0);
 		boolean usebitmap = false;
 		String bitmap = "";
 
@@ -349,10 +352,9 @@ class OpQueryMsg extends OpDms {
 
 				// display time (pg on-time)
 				int ms = xrr.getResInt("DisplayTimeMS");
-				pgOnTime = new DmsPgTime(
-					DmsPgTime.MsToTenths(ms));
+				pgOnTime = new Interval(ms, MILLISECONDS);
 				Log.finest("PhaseQueryMsg: ms=" + ms +
-					", pgOnTime="+pgOnTime.toMs());
+					", pgOnTime=" + pgOnTime.ms());
 
 				// bitmap
 				usebitmap = xrr.getResBoolean("UseBitmap");
