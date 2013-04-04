@@ -66,11 +66,8 @@ public class DmsPgTime {
 	static public Interval validateOnInterval(Interval po,
 		boolean singlepg)
 	{
-		int ds = po.round(DECISECONDS);
-		int min_on = minPageOnInterval().round(DECISECONDS);
-		int max_on = maxPageOnInterval().round(DECISECONDS);
-		int tenths = validateValue(ds, singlepg, min_on, max_on);
-		return new Interval(tenths, DECISECONDS);
+		return validateValue(po, singlepg, minPageOnInterval(),
+			maxPageOnInterval());
 	}
 
 	/** Return a validated spinner value. A value of zero is valid
@@ -91,7 +88,7 @@ public class DmsPgTime {
 	 * @param min Minimum page time in tenths.
 	 * @param max Maximum page time in tenths.
 	 * @return The validated page time in tenths. */
-	static public int validateValue(int value, boolean singlepg,
+	static private int validateValue(int value, boolean singlepg,
 		int min, int max)
 	{
 		if(singlepg) {
