@@ -1345,42 +1345,17 @@ CREATE VIEW detector_event_view AS
 	JOIN detector_label_view dl ON e.device_id = dl.det_id;
 GRANT SELECT ON detector_event_view TO PUBLIC;
 
-CREATE FUNCTION event.message_line(text, integer) RETURNS text AS
-'DECLARE
-	message ALIAS FOR $1;
-	line ALIAS FOR $2;
-	word text;
-	wstop int2;
-BEGIN
-	word := message;
-
-	FOR w in 1..(line-1) LOOP
-		wstop := strpos(word, ''[nl]'');
-		IF wstop > 0 THEN
-			word := SUBSTR(word, wstop + 4);
-		ELSE
-			word := '''';
-		END IF;
-	END LOOP;
-	wstop := strpos(word, ''[nl]'');
-	IF wstop > 0 THEN
-		word := SUBSTR(word, 0, wstop);
-	END IF;
-	RETURN word;
-END;' LANGUAGE plpgsql;
-
 CREATE VIEW sign_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, e.device_id,
-		event.message_line(e.message, 1) AS line1,
-		event.message_line(e.message, 2) AS line2,
-		event.message_line(e.message, 3) AS line3,
-		e.iris_user
-	FROM event.sign_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+	SELECT event_id, event_date, description, device_id,
+	       regexp_replace(replace(replace(message, '[nl]', E'\n'), '[np]',
+	                      E'\n'), '\[.+?\]', ' ', 'g') AS message, iris_user
+	FROM event.sign_event JOIN event.event_description
+	ON sign_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON sign_event_view TO PUBLIC;
 
 CREATE VIEW recent_sign_event_view AS
-	SELECT * FROM sign_event_view
+	SELECT event_id, event_date, description, device_id, message, iris_user
+	FROM sign_event_view
 	WHERE (CURRENT_TIMESTAMP - event_date) < interval '90 days';
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
@@ -1554,7 +1529,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 client_units_si	true
-database_version	4.3.0
+database_version	4.4.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
