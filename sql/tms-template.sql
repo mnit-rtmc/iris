@@ -889,6 +889,116 @@ CREATE TABLE iris.meter_action (
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
+CREATE SEQUENCE event.event_id_seq;
+
+CREATE TABLE event.event_description (
+	event_desc_id integer PRIMARY KEY,
+	description text NOT NULL
+);
+
+CREATE TABLE event.alarm_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	alarm VARCHAR(10) NOT NULL REFERENCES iris._alarm(name)
+		ON DELETE CASCADE
+);
+
+CREATE TABLE event.brightness_sample (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	dms VARCHAR(10) NOT NULL REFERENCES iris._dms(name)
+		ON DELETE CASCADE,
+	photocell integer NOT NULL,
+	output integer NOT NULL
+);
+
+CREATE TABLE event.comm_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	controller VARCHAR(20) NOT NULL REFERENCES iris.controller(name)
+		ON DELETE CASCADE,
+	device_id VARCHAR(20)
+);
+
+CREATE TABLE event.detector_event (
+	event_id integer DEFAULT nextval('event.event_id_seq') NOT NULL,
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(10) REFERENCES iris._detector(name)
+);
+
+CREATE TABLE event.sign_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(20),
+	message text,
+	iris_user VARCHAR(15)
+);
+
+CREATE TABLE event.client_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	host_port VARCHAR(64) NOT NULL,
+	iris_user VARCHAR(15)
+);
+
+CREATE TABLE event.incident_detail (
+	name VARCHAR(8) PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE event.incident (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	name VARCHAR(16) NOT NULL UNIQUE,
+	replaces VARCHAR(16) REFERENCES event.incident(name),
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	detail VARCHAR(8) REFERENCES event.incident_detail(name),
+	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
+	road VARCHAR(20) NOT NULL,
+	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+	lat double precision NOT NULL,
+	lon double precision NOT NULL,
+	camera VARCHAR(10),
+	impact VARCHAR(20) NOT NULL,
+	cleared BOOLEAN NOT NULL
+);
+
+CREATE TABLE event.incident_update (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
+	event_date timestamp WITH time zone NOT NULL,
+	impact VARCHAR(20) NOT NULL,
+	cleared BOOLEAN NOT NULL
+);
+
+CREATE FUNCTION event.incident_update_trig() RETURNS "trigger" AS
+'
+BEGIN
+	INSERT INTO event.incident_update
+		(incident, event_date, impact, cleared)
+	VALUES (NEW.name, now(), NEW.impact, NEW.cleared);
+	RETURN NEW;
+END;' LANGUAGE plpgsql;
+
+CREATE TRIGGER incident_update_trigger
+	AFTER INSERT OR UPDATE ON event.incident
+	FOR EACH ROW EXECUTE PROCEDURE event.incident_update_trig();
+
+--- Views
+
 CREATE VIEW action_plan_view AS
 	SELECT name, description, sync_actions, sticky, active, default_phase,
 		phase
@@ -1211,6 +1321,77 @@ CREATE VIEW modem_view AS
 	SELECT name, uri, config, timeout
 	FROM iris.modem;
 GRANT SELECT ON modem_view TO PUBLIC;
+
+CREATE VIEW alarm_event_view AS
+	SELECT e.event_id, e.event_date, ed.description AS event_description,
+		e.alarm, a.description
+	FROM event.alarm_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	JOIN iris.alarm a ON e.alarm = a.name;
+GRANT SELECT ON alarm_event_view TO PUBLIC;
+
+CREATE VIEW comm_event_view AS
+	SELECT e.event_id, e.event_date, ed.description,
+		e.controller, c.comm_link, c.drop_id
+	FROM event.comm_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	LEFT JOIN iris.controller c ON e.controller = c.name;
+GRANT SELECT ON comm_event_view TO PUBLIC;
+
+CREATE VIEW detector_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
+	FROM event.detector_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	JOIN detector_label_view dl ON e.device_id = dl.det_id;
+GRANT SELECT ON detector_event_view TO PUBLIC;
+
+CREATE FUNCTION event.message_line(text, integer) RETURNS text AS
+'DECLARE
+	message ALIAS FOR $1;
+	line ALIAS FOR $2;
+	word text;
+	wstop int2;
+BEGIN
+	word := message;
+
+	FOR w in 1..(line-1) LOOP
+		wstop := strpos(word, ''[nl]'');
+		IF wstop > 0 THEN
+			word := SUBSTR(word, wstop + 4);
+		ELSE
+			word := '''';
+		END IF;
+	END LOOP;
+	wstop := strpos(word, ''[nl]'');
+	IF wstop > 0 THEN
+		word := SUBSTR(word, 0, wstop);
+	END IF;
+	RETURN word;
+END;' LANGUAGE plpgsql;
+
+CREATE VIEW sign_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.device_id,
+		event.message_line(e.message, 1) AS line1,
+		event.message_line(e.message, 2) AS line2,
+		event.message_line(e.message, 3) AS line3,
+		e.iris_user
+	FROM event.sign_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON sign_event_view TO PUBLIC;
+
+CREATE VIEW recent_sign_event_view AS
+	SELECT * FROM sign_event_view
+	WHERE (CURRENT_TIMESTAMP - event_date) < interval '90 days';
+GRANT SELECT ON recent_sign_event_view TO PUBLIC;
+
+CREATE VIEW client_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.host_port,
+		e.iris_user
+	FROM event.client_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON client_event_view TO PUBLIC;
+
+--- Data
 
 COPY iris.direction (id, direction, dir) FROM stdin;
 0		
@@ -1672,187 +1853,6 @@ operator	detection
 COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
 admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=		administrator	t
 \.
-
-SET search_path = event, public, pg_catalog;
-
-CREATE SEQUENCE event.event_id_seq;
-
-CREATE TABLE event.event_description (
-	event_desc_id integer PRIMARY KEY,
-	description text NOT NULL
-);
-
-CREATE TABLE event.alarm_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	alarm VARCHAR(10) NOT NULL REFERENCES iris._alarm(name)
-		ON DELETE CASCADE
-);
-
-CREATE TABLE event.brightness_sample (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	dms VARCHAR(10) NOT NULL REFERENCES iris._dms(name)
-		ON DELETE CASCADE,
-	photocell integer NOT NULL,
-	output integer NOT NULL
-);
-
-CREATE TABLE event.comm_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	controller VARCHAR(20) NOT NULL REFERENCES iris.controller(name)
-		ON DELETE CASCADE,
-	device_id VARCHAR(20)
-);
-
-CREATE TABLE event.detector_event (
-	event_id integer DEFAULT nextval('event.event_id_seq') NOT NULL,
-	event_date timestamp with time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(10) REFERENCES iris._detector(name)
-);
-
-CREATE TABLE event.sign_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20),
-	message text,
-	iris_user VARCHAR(15)
-);
-
-CREATE TABLE event.client_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	host_port VARCHAR(64) NOT NULL,
-	iris_user VARCHAR(15)
-);
-
-CREATE TABLE event.incident_detail (
-	name VARCHAR(8) PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
-);
-
-CREATE TABLE event.incident (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	name VARCHAR(16) NOT NULL UNIQUE,
-	replaces VARCHAR(16) REFERENCES event.incident(name),
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	detail VARCHAR(8) REFERENCES event.incident_detail(name),
-	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
-	road VARCHAR(20) NOT NULL,
-	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-	lat double precision NOT NULL,
-	lon double precision NOT NULL,
-	camera VARCHAR(10),
-	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL
-);
-
-CREATE TABLE event.incident_update (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
-	event_date timestamp WITH time zone NOT NULL,
-	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL
-);
-
-CREATE FUNCTION event.incident_update_trig() RETURNS "trigger" AS
-'
-BEGIN
-	INSERT INTO event.incident_update
-		(incident, event_date, impact, cleared)
-	VALUES (NEW.name, now(), NEW.impact, NEW.cleared);
-	RETURN NEW;
-END;' LANGUAGE plpgsql;
-
-CREATE TRIGGER incident_update_trigger
-	AFTER INSERT OR UPDATE ON event.incident
-	FOR EACH ROW EXECUTE PROCEDURE event.incident_update_trig();
-
-SET search_path = public, event, pg_catalog;
-
-CREATE VIEW alarm_event_view AS
-	SELECT e.event_id, e.event_date, ed.description AS event_description,
-		e.alarm, a.description
-	FROM event.alarm_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
-	JOIN iris.alarm a ON e.alarm = a.name;
-GRANT SELECT ON alarm_event_view TO PUBLIC;
-
-CREATE VIEW comm_event_view AS
-	SELECT e.event_id, e.event_date, ed.description,
-		e.controller, c.comm_link, c.drop_id
-	FROM comm_event e
-	JOIN event_description ed ON e.event_desc_id = ed.event_desc_id
-	LEFT JOIN iris.controller c ON e.controller = c.name;
-GRANT SELECT ON comm_event_view TO PUBLIC;
-
-CREATE VIEW detector_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
-	FROM event.detector_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
-	JOIN detector_label_view dl ON e.device_id = dl.det_id;
-GRANT SELECT ON detector_event_view TO PUBLIC;
-
-CREATE FUNCTION event.message_line(text, integer) RETURNS text AS
-'DECLARE
-	message ALIAS FOR $1;
-	line ALIAS FOR $2;
-	word text;
-	wstop int2;
-BEGIN
-	word := message;
-
-	FOR w in 1..(line-1) LOOP
-		wstop := strpos(word, ''[nl]'');
-		IF wstop > 0 THEN
-			word := SUBSTR(word, wstop + 4);
-		ELSE
-			word := '''';
-		END IF;
-	END LOOP;
-	wstop := strpos(word, ''[nl]'');
-	IF wstop > 0 THEN
-		word := SUBSTR(word, 0, wstop);
-	END IF;
-	RETURN word;
-END;' LANGUAGE plpgsql;
-
-CREATE VIEW sign_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, e.device_id,
-		message_line(e.message, 1) AS line1,
-		message_line(e.message, 2) AS line2,
-		message_line(e.message, 3) AS line3,
-		e.iris_user
-	FROM sign_event e
-	JOIN event_description ed ON e.event_desc_id = ed.event_desc_id;
-GRANT SELECT ON sign_event_view TO PUBLIC;
-
-CREATE VIEW recent_sign_event_view AS
-	SELECT * FROM sign_event_view
-	WHERE (CURRENT_TIMESTAMP - event_date) < interval '90 days';
-GRANT SELECT ON recent_sign_event_view TO PUBLIC;
-
-CREATE VIEW client_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, e.host_port,
-		e.iris_user
-	FROM event.client_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
-GRANT SELECT ON client_event_view TO PUBLIC;
 
 COPY event.event_description (event_desc_id, description) FROM stdin;
 1	Alarm TRIGGERED
