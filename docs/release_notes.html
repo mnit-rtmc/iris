@@ -9,6 +9,43 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.3.0 (8 April 2013)</dt>
+	<dd><ul>
+		<li>
+			Added custom [slow...] MULTI tag for "slow traffic
+			ahead" type warnings.
+		</li>
+		<li>
+			Fixed bug which prevented updates to sign text multi
+			strings from being stored in database.
+		</li>
+		<li>
+			Removed more unnecessary attribute updates from server.
+		</li>
+		<li>
+			Cleaned up detector_view in database.
+		</li>
+		<li>
+			Added "units" subpackage with classes defined for
+			Distance, Interval, Speed and Temperature.  Converted
+			code to use units instead of raw int and float values.
+		</li>
+		<li>
+			Fixed problem with DMS page on/off time and multiple
+			page messages.
+		</li>
+		<li>
+			Fixed a bug in LCS array administration.
+		</li>
+		<li>
+			Fixed a serious bug in dinrelay protocol.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.3.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>4.2.0 (17 January 2013)</dt>
 	<dd><ul>
 		<li>
