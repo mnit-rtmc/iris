@@ -262,8 +262,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Command the camera pan, tilt or zoom */
 	public void setPtz(Float[] ptz) {
-		// FIXME: SONAR should not send notification to clients for
-		// this write-only attribute.
 		if(ptz.length != 3)
 			return;
 		float p = ptz[0];
