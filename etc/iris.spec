@@ -38,7 +38,7 @@ BuildArch:	noarch
 Buildroot:	%{buildroot}
 Vendor:		@@RPM.PACKAGER@@
 Packager:	@@RPM.PACKAGER@@
-Requires:	java-1.7.0-openjdk, postgresql-server, httpd
+Requires:	java-1.7.0-openjdk, postgresql-server, postgresql-jdbc, httpd
 
 %Description
 @@RPM.DESCRIPTION@@
