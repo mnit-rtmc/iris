@@ -99,8 +99,8 @@ fi
 /etc/httpd/conf.d/iris.conf
 
 # /usr/share/java/iris-server-x.x.x
-%dir %attr(0755,tms,tms) %{_serverdir}
-%defattr(0644,tms,tms)
+%dir %attr(0755,root,root) %{_serverdir}
+%defattr(0644,root,root)
 %{_serverdir}/iris-server-%{version}.jar
 %{_serverdir}/iris-common-%{version}.jar
 %{_serverdir}/mail.jar
