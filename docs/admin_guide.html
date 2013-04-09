@@ -21,8 +21,8 @@
   <h2><a id="installation_link" href="#installation">Installation</a></h2>
   <div id="installation_div">
     <h3><a href="#operating_system">Operating System</a></h3>
-    <h3><a href="#install_dependencies">Install Dependencies</a></h3>
     <h3><a href="#install_iris">Install IRIS</a></h3>
+    <h3><a href="#init_iris">Initialize IRIS</a></h3>
     <h3><a href="#server_properties">Server Properties</a></h3>
     <h3><a href="#start_services">Start Services</a></h3>
     <h3><a href="#initial_login">Initial Login</a></h3>
@@ -84,7 +84,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">27 March 2013</div>
+<div id="stamp">9 April 2013</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -283,17 +283,6 @@
 	set up headless.
 </p>
 
-<h3 id="install_dependencies">Install Dependencies</h3>
-<p>
-	Install package dependencies, including
-	<a href="http://openjdk.java.net">OpenJDK</a>,
-	<a href="http://www.postgresql.org">PostgreSQL</a> and
-	<a href="http://projects.apache.org/projects/http_server.html">Apache</a>.
-	This can be performed with yum by running the following command (as
-	root):
-</p>
-<pre class="code">yum install java-1.7.0-openjdk postgresql-server postgresql-jdbc httpd</pre>
-
 <h3 id="install_iris">Install IRIS</h3>
 <p>
 	<a href="http://iris.dot.state.mn.us/rpms/">Download</a> and install
@@ -306,7 +295,14 @@
 	since Java is architecture independent.
 	It can be installed with the following command (as root):
 </p>
-<pre class="code">rpm -i iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm</pre>
+<pre class="code">yum install iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm</pre>
+<p>
+	Yum will install dependencies not already installed, including
+	<a href="http://openjdk.java.net">OpenJDK</a>,
+	<a href="http://www.postgresql.org">PostgreSQL</a> and
+	<a href="http://projects.apache.org/projects/http_server.html">Apache</a>.
+</p>
+<h3 id="init_iris">Ininialize IRIS</h3>
 <p>
 	Next, you must initialize the IRIS server installation.
 	Run the following command (as root):
