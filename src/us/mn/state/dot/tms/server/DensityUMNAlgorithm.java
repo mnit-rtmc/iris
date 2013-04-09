@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.util.Date;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -73,7 +72,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 	static private final DebugLog DENS_LOG = new DebugLog("dens_umn");
 
 	/** Debug level of detail to be used in logging */
-	static protected int DEBUG_LEVEL = 5;
+	static protected int DEBUG_LEVEL = 100;
 
 	/** Path where meter data files are stored */
 	static protected final String DATA_PATH = "/var/lib/iris/meter";
@@ -88,7 +87,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 	static protected int CRITICAL_DENSITY = 45;
 
 	/** Parameter used to define the safe uncongested density */
-	static protected float LOW_DENS_MARGIN = 0.8f;
+	static protected float LOW_DENS_MARGIN = 0.85f;
 
 	/** Parameter denoting the amount of time in seconds that is considered as safe time to congestion on ramp */
 	static protected int SAFE_TIME_MAINLINE = 240;
@@ -98,6 +97,12 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 
 	/** Parameter for threshold ratio between release rate and meter rate after which max wait time is considered*/
 	static protected final float RAMP_WAIT_RATIO = 0.8f;
+
+	/** Parameter for the ramp wait time threshold in seconds */
+	static protected int TARGET_RAMP_WAIT = 240;
+
+	/** Parameter for the freeflow speed in miles per hour */
+	static protected int FREEFLOW_SPEED = 60;
 
 	/** Feedback adjustment to metering rate from congestion situation on mainline */
 	static protected int K1 = 100;
@@ -109,7 +114,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 	static protected int FLOW_CAPACITY = 2400;
 
 	/** Critical density threshold beyond which Queue Detector is considered unreliable */
-	static protected int Q_THRESH_DENS = 30;
+	static protected int Q_THRESH_DENS = 60;
 
 	/** Default step change when metering is controlling strategy */
 	static protected int METERING_STEP = 120;
@@ -121,7 +126,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 	static protected int STEP_CHANGE_THRESHOLD = 1200;
 
 	/** Value of new step change in metering rate when threshold is reached */
-	static protected int STEP_CHANGE_POST_THRESH = 300;
+	static protected int STEP_CHANGE_POST_THRESH = 360;
 
 	/** No of seconds used for averaging calculations related to LWR model estimation */
 	static protected int MOVING_AVERAGE_LENGTH = 90;
@@ -205,17 +210,11 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 	protected final LinkedList<MeterState> meters =
 		new LinkedList<MeterState>();
 
-	/** Boolean check for whether the list of MeterStates is sorted or not */
-	protected boolean isSortedList;
-
 	/** Sorts the already populated MeterState list */
 	protected void sortMeterList () {
-		if (!isSortedList) {
-			Collections.sort(meters);
-			writeDebugLog("Sorting List of meters for current PlanState obj corresponding to corridor : " +
-					corridor.getID().toString(), 4);
-		}
-		isSortedList = true;
+		Collections.sort(meters);
+		writeDebugLog("Sorting List of meters for current PlanState obj corresponding to corridor : " +
+			corridor.getID(), 4);
 	}
 
 	/** Add a meterState object to the list of meters associated with DensityUMNAlgorithm object */
@@ -223,7 +222,6 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		meters.add(new_meter);
 		writeDebugLog("Adding meter: " + new_meter.getMeterImpl().getName().toString() +
 				" to Plan State corridor: " + corridor.getID().toString(), 4);
-		isSortedList = false;
 	}
 
 	/** Linked list for all Mainline Nodes for corridor */
@@ -239,7 +237,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 	protected boolean areNodesSectionsLoaded = false;
 
 	/** Linked list for all Sections */
-	static protected LinkedList<SectionState> sections = new LinkedList<SectionState>();
+	protected LinkedList<SectionState> sections = new LinkedList<SectionState>();
 
 	/** Boolean check for whether Sections list is currently sorted */
 	protected boolean isSortedSectionsList;
@@ -437,6 +435,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		writeDebugLog("Adding meterstate: " + meter.getName() + " to corridor " + corridor.getID().toString(), 5);
 		state = new MeterState(meter);
 		meters.add(state);
+		Collections.sort(meters);
 		areNodesSectionsLoaded = false;
 		return state;
 	}
@@ -457,19 +456,23 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		return corridor;
 	}
 
+	protected void resetTimeSteps () {
+		for (SectionState sect : sections) {
+			sect.reset_timestep();
+		}
+	}
+
 	/** Process all DensityUMNAlgorithm objects */
 	static public void processAllStates () {
 		writeDebugLog("In ProcessAllStates", 4);
 		loadGlobalVariables();
-		for (SectionState sect : sections) {
-			sect.reset_timestep();
-		}
 		Iterator<DensityUMNAlgorithm> it = all_states.values().iterator();
 		while (it.hasNext()) {
 			DensityUMNAlgorithm state = it.next();
 			if (!state.areNodesSectionsLoaded) {
-				writeDebugLog("Processing Nodes etc for :" + state.getCorridor().getID().toString(), 5);
+				writeDebugLog("Processing Nodes etc for :" + state.getCorridor().getID(), 5);
 				try {
+					state.resetTimeSteps();
 					state.sortMeterList();
 					state.loadAllNodes();
 					state.loadSectionsFromNodes();
@@ -478,9 +481,11 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 					state.linkSectionsToMeters();
 					state.areNodesSectionsLoaded = true;
 				} catch (Exception e) {
-					writeDebugLog(e.getStackTrace(), e.toString(), e.getMessage().toString(), " - ", 1);
+					writeDebugLog(e.getStackTrace(), e.toString(), e.getMessage(), " - ", 1);
 				}
 			}
+			state.resetTimeSteps();
+			state.sortMeterList();
 			writeDebugLog("Processing all states within corridor:" + state.getCorridor().getID().toString(), 5);
 			state.processAllLocations();
 		}
@@ -685,6 +690,9 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		/** Critical density */
 		protected float crit_dens;
 
+		/** Free flow speed */
+		protected int ff_speed;
+
 		/** Safe time allowed for congestion on ramp */
 		protected float safe_t2w;
 
@@ -795,7 +803,8 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		/** Process the meterstate for current metering cycle time step */
 		public void process() {
 			writeDebugLog("Processing meter: " + meter.getName().toString(), 4);
-			loadMeterXML();
+			//loadMeterXML();
+			loadRampXmlVars();
 			findDownstreamMeter();
 			calcCongestionState();
 			calcBottleneckLevel();
@@ -843,7 +852,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 				writeDebugLog(DensMeterLoadXML.loadRampsXMLParams(), 4);
 			} catch (Exception e) {
 				writeDebugLog("Loading XML Params File (" + XML_PATH + ") failed with :\n",1);
-				writeDebugLog(e.getStackTrace(), e.toString(), e.getMessage().toString(), "-", 1);
+				writeDebugLog(e.getStackTrace(), e.toString(), e.getMessage(), "-", 1);
 			}
 			String rampID = meter.getName();
 			int isCong;
@@ -883,6 +892,53 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 			writeDebugLog(" -- Reached end of MFD blocking XML Loading",6);
 		}
 
+		/* Load up the ramp related parameters from the main global parameters
+		 */
+		public void loadRampXmlVars () {
+
+			int no_lanes = 0;
+			if (upstream_det != null) {
+				no_lanes = upstream_det.size();
+			}
+			else {
+				if (downstream_det != null) {
+					no_lanes = downstream_det.size();
+				}
+			}
+
+			writeDebugLog("@loadRampXmlVars: No of lanes is: " + no_lanes, 5);
+
+			crit_dens = CRITICAL_DENSITY;
+			safe_t2k = SAFE_TIME_MAINLINE;
+			target_wait = TARGET_RAMP_WAIT;
+			safe_t2w = SAFE_TIME_RAMP;
+			while (safe_t2w > 0.75*TIME2_CONGESTION_MAX) {
+				TIME2_CONGESTION_MAX = 2*TIME2_CONGESTION_MAX;
+			}
+			while (safe_t2k > 0.5*TIME2_CONGESTION_MAX_MAINLINE) {
+				TIME2_CONGESTION_MAX_MAINLINE = 2*TIME2_CONGESTION_MAX_MAINLINE;
+			}
+			target_dens = (float) (0.9*crit_dens);
+			ff_speed = (int)(FREEFLOW_SPEED*(no_lanes - (1-0.5)));
+
+			uncongested_capacity = (int)(FLOW_CAPACITY*(no_lanes - (1-0.85)));
+			if (uncongested_capacity > ff_speed*crit_dens*0.95) {
+				ff_speed = (int)(1.1*uncongested_capacity/crit_dens);
+			}
+
+			int dens1;
+			dens1 = (int)((uncongested_capacity / (0.15*ff_speed)) - (0.85*0.95*crit_dens/0.15));
+			dens1 = Math.max(dens1,0);
+			dens1 = Math.min(dens1, (int)crit_dens);
+
+			this_section.lwr = new LWREstimator();
+			this_section.lwr.step[0] = new LWREstimatorCase((int)(dens1), false, 0, ff_speed);
+			this_section.lwr.step[1] = new LWREstimatorCase((int)(0.95*crit_dens), false, (int)(uncongested_capacity - (0.85*0.95*ff_speed*crit_dens)), (int)(0.85*ff_speed));
+			this_section.lwr.step[2] = new LWREstimatorCase((int)(1.05*crit_dens), false, uncongested_capacity, 0);
+			this_section.lwr.step[3] = new LWREstimatorCase((int)(1.09*crit_dens),  true, (int)(uncongested_capacity*0.9), 0);
+			this_section.lwr.step[4] = new LWREstimatorCase(                  300,  true, (int)(uncongested_capacity + (20*1.05*crit_dens)), (-20));
+		}
+
 		/** Calculates the length (in LWR steps) to the location of the ramp from the
 		 * upstream end of the containing section.
 		 */
@@ -906,7 +962,12 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		public int compareTo(MeterState compareMetState) {
 			float orig_loc = corridor.calculateMilePoint(meter.geo_loc);
 			float comp_loc = corridor.calculateMilePoint(compareMetState.meter.geo_loc);
-			return (int)(orig_loc - comp_loc);
+			if (orig_loc - comp_loc > 0)
+				return -1;
+			if (orig_loc - comp_loc < 0)
+				return 1;
+
+			return 0;
 		}
 
 		/** Returns the next downstream meter encountered along the Corridor.
@@ -916,14 +977,17 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 			/** Use linked list to obtain next meter*/
 		public void findDownstreamMeter () {
 			if (meters.indexOf(this) <= 0)	{
-				writeDebugLog(" -- Downstream meter for meter: " + meter.getName().toString() +
+				writeDebugLog(" -- Downstream meter for meter: " + meter.getName() +
 					" does not exist", 5);
 				downstream_meter = meters.get(meters.indexOf(this));
 				return;
 			}
 			downstream_meter = meters.get(meters.indexOf(this)-1);
-			writeDebugLog(" -- Downstream meter for meter: " + meter.getName().toString()+
-					" identified as: " + downstream_meter.getMeterImpl().getName().toString(), 5);
+			writeDebugLog(" -- Downstream meter for meter: " + meter.getName()+
+					" identified as: " + downstream_meter.getMeterImpl().getName(), 5);
+
+                        writeDebugLog(" meter location  " + corridor.calculateMilePoint(meter.geo_loc) , 5);
+			writeDebugLog(" downstream meter location  " + corridor.calculateMilePoint(downstream_meter.meter.geo_loc) , 5);
 		}
 
 		/** Calculated the mainline merge density to be used in algorithm.
@@ -937,9 +1001,11 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 			int mergeDistance = lengthToMergeSteps();
 			if (LWR_SWITCH) {
 				density = this_section.getAvgDensityAtIntermediateLoc(mergeDistance,1);
+			        writeDebugLog(" -- LWR switch density: " + density, 5);
 			}
 			else {
 				density = Math.max(0, this_section.mainlineUp.getDensity());
+			        writeDebugLog(" -- non LWR_SWITCH density: " + density, 5);
 			}
 			writeDebugLog(" -- Calculated mainline dens: " + density, 5);
 			return density;
@@ -1006,6 +1072,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		 */
 		public float calculateRampWait () {
 			float wait_time = 0;
+			writeDebugLog(" -- ==== Entering Ramp Wait Time Calculation..", 5);
 			writeDebugLog(" -- ==== Entering Ramp Wait Time Calculation..", 8);
 			boolean good_queue = true;
 			if (queue == null) {
@@ -1048,7 +1115,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 						writeDebugLog(" -- Merge Detector also not good.. using 0 wait time", 8);
 					} else {
 						writeDebugLog(" -- ==== Using Merge Detector " + merge.detectors.first().getName(), 8);
-						if (merge.getFlow() > RAMP_WAIT_RATIO * meter.getRate())
+						if (meter.getRate() != null && (merge.getFlow() > RAMP_WAIT_RATIO * meter.getRate()))
 							wait_time = target_wait*(meter.getRate()/getMaxRelease());
 						else
 							wait_time = target_wait*(Math.max(0, merge.getFlow())/getMaxRelease());
@@ -1371,7 +1438,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 			meter_rate = Math.min(meter_rate, getMaxRelease());
 			meter_rate = Math.max(meter_rate, getMinRelease());
 			if (orig_rate != meter_rate)
-				writeDebugLog(" -- Refining Metering Rate for Meter: " + meter.getName().toString() +
+				writeDebugLog(" -- Refining Metering Rate for Meter: " + meter.getName() +
 						" from " + orig_rate + " to " + meter_rate, 5);
 			return meter_rate;
 		}
@@ -1379,18 +1446,23 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		/** Sets the metering rate for the ramp */
 		public void setMetering (int meter_rate) {
 			metering_rate = meter_rate;
-
-			// DENSMETER - TODO - This following call needs to be uncommented for actual runs
-			//meter.setRatePlanned(meter_rate);
-			writeDebugLog(" -- Setting Metering Rate for Meter : " + meter.getName().toString() +" to " + meter_rate, 3);
+			meter.setRatePlanned(meter_rate);
+			writeDebugLog(" -- Setting Metering Rate for Meter : " + meter.getName() + " to " + meter_rate, 3);
 			metering_set = true;
 		}
 
 		/** Obtain the most recently set metering rate for the ramp */
 		public int getMeteringRate () {
-			if (metering_set)
-				return metering_rate;
-			else return meter.getRate();
+			try {
+				if (metering_set)
+					return metering_rate;
+				else
+					return meter.getRate();
+			}
+			catch(Exception e) {
+				writeDebugLog(e.getStackTrace(), e.toString(), e.getMessage(), " - ", 1);
+				return 0;
+			}
 		}
 	}
 
@@ -1721,15 +1793,18 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate the LWR Profile for the section for the meter cycle */
 		protected void calculateProfile () {
+			writeDebugLog("isComputeLWR status " + isComputedLWR , 4);
 			if (isComputedLWR)
 				return;
+			writeDebugLog("isInitiatedLWR status " + isInitiatedLWR , 4);
+
 			if (!isInitiatedLWR)
 				initiateLRW();
 			loadRawValues();
-			writeDebugLog(" -- -- -- Calcuating LWR profile for each time: ", 7);
+			writeDebugLog(" -- -- -- Calcuating LWR profile for each time: ", 4);
 			int time_steps_in_cycle = METERING_CYCLE_TIME / LWR_TIME_STEP;
 			for (int time_s = 0; time_s < time_steps_in_cycle; time_s++) {
-				writeDebugLog(" -- -- ---- Step: " + time_s, 8);
+				writeDebugLog(" -- -- ---- Step: " + time_s, 4);
 				calcTimeStep();
 				updateRawStep();
 			}
@@ -1759,8 +1834,18 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		 * Initiates the raw flow and raw dens lists
 		 */
 		protected void initiateLRW () {
+			try {
+				initiateLRW2();
+			}
+			catch(Exception e) {
+				writeDebugLog(e.getStackTrace(), e.toString(), e.getMessage(), "-", 1);
+			}
+		}
+
+		/** Actual implementation of initiateLRW */
+		private void initiateLRW2() {
 			initiateProfiles();
-			writeDebugLog(" -- -- -- Initiating LWR", 7);
+			writeDebugLog(" -- -- -- Initiating LWR", 4);
 			float generation_raw;
 			int upFlow = Math.max(0, mainlineUp.getFlow());
 			float upDens = Math.max(0, mainlineUp.getDensity());
@@ -1802,6 +1887,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 				raw_flows.get(i).set(steps-1,raw_flows.get(i).get(steps-1)-(float)dnFlow);
 			}
 			writeDebugLog(" -- -- -- Done Initiating LWR", 8);
+
 			isInitiatedLWR = true;
 		}
 
@@ -1818,7 +1904,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 			int stepTo = distance;
 			stepTo += stepFrom;
 			float density = 0;
-			writeDebugLog(" -- -- -- Avg Density obtaining between : " + stepFrom + " to " + stepTo, 8);
+			writeDebugLog(" -- -- -- Avg Density obtaining between : " + stepFrom + " to " + stepTo, 4);
 			for (int time_st = 0; time_st < time_steps_movavg; time_st++) {
 				for (int dist_st = stepFrom; dist_st <= stepTo; dist_st++) {
 					density = density + dens_profile.get(time_st).get(dist_st);
@@ -1827,7 +1913,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 			if (stepTo != stepFrom)
 				density = density / (stepTo - stepFrom + 1);
 			density = density / time_steps_movavg;
-			writeDebugLog(" -- -- Avg Density obtained: " + density, 6);
+			writeDebugLog(" -- -- Avg Density obtained: " + density, 4);
 			return density;
 		}
 
@@ -1962,32 +2048,46 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 			writeDebugLog(DensMeterLoadXML.loadGlobalXMLParams(), 4);
 		} catch (Exception e) {
 			writeDebugLog("Loading XML Params File (" + XML_PATH + ") failed with :\n", 1);
-			writeDebugLog(e.getStackTrace(), e.toString(), e.getMessage().toString(), "-", 1);
+			writeDebugLog(e.getStackTrace(), e.toString(), e.getMessage(), "-", 1);
 		}
 		DEBUG_LEVEL = DensMeterLoadXML.getGlobalIntP("DEBUG_LEVEL", DEBUG_LEVEL);
 		LWR_SWITCH = DensMeterLoadXML.getGlobalBooleanP("LWR_SWITCH", LWR_SWITCH);
-		int lwr_dist_step_temp = DensMeterLoadXML.getGlobalIntP("LWR_DIST_STEP", (int)(LWR_DIST_STEP * FEET_IN_MILE));
-		LWR_DIST_STEP = (float)(lwr_dist_step_temp/FEET_IN_MILE);
-		LWR_TIME_STEP = DensMeterLoadXML.getGlobalIntP("LWR_TIME_STEP", LWR_TIME_STEP);
-		NO_STEPS_MFD = DensMeterLoadXML.getGlobalIntP("NO_STEPS_MFD", NO_STEPS_MFD);
-		MOVING_AVERAGE_LENGTH = DensMeterLoadXML.getGlobalIntP("MOVING_AVERAGE_LENGTH", MOVING_AVERAGE_LENGTH);
+
 		METERING_STEP = DensMeterLoadXML.getGlobalIntP("METERING_STEP", METERING_STEP);
-		STEP_CHANGE_THRESHOLD = DensMeterLoadXML.getGlobalIntP("STEP_CHANGE_THRESHOLD", STEP_CHANGE_THRESHOLD);
-		STEP_CHANGE_POST_THRESH = DensMeterLoadXML.getGlobalIntP("STEP_CHANGE_POST_THRESH", STEP_CHANGE_POST_THRESH);
+		METERING_CYCLE_TIME = DensMeterLoadXML.getGlobalIntP("METERING_CYCLE_TIME", METERING_CYCLE_TIME);
+
 		CRITICAL_DENSITY = DensMeterLoadXML.getGlobalIntP("CRITICAL_DENSITY", CRITICAL_DENSITY);
-		LOW_DENS_MARGIN = DensMeterLoadXML.getGlobalFloatP("LOW_DENS_MARGIN", LOW_DENS_MARGIN);
 		FLOW_CAPACITY = DensMeterLoadXML.getGlobalIntP("FLOW_CAPACITY", FLOW_CAPACITY);
 		SAFE_TIME_MAINLINE = DensMeterLoadXML.getGlobalIntP("SAFE_TIME_MAINLINE", SAFE_TIME_MAINLINE);
 		SAFE_TIME_RAMP = DensMeterLoadXML.getGlobalIntP("SAFE_TIME_RAMP", SAFE_TIME_RAMP);
+		TARGET_RAMP_WAIT = DensMeterLoadXML.getGlobalIntP("TARGET_TIME_RAMP", TARGET_RAMP_WAIT);
+
 		K1 = DensMeterLoadXML.getGlobalIntP("K1", DEBUG_LEVEL);
 		K2 = DensMeterLoadXML.getGlobalIntP("K2", DEBUG_LEVEL);
-		Q_THRESH_DENS = DensMeterLoadXML.getGlobalIntP("Q_THRESH_DENS", Q_THRESH_DENS);
-		METERING_CYCLE_TIME = DensMeterLoadXML.getGlobalIntP("METERING_CYCLE_TIME", METERING_CYCLE_TIME);
+		FREEFLOW_SPEED = DensMeterLoadXML.getGlobalIntP("FREEFLOW_SPEED", FREEFLOW_SPEED);
+		FLOW_CAPACITY = DensMeterLoadXML.getGlobalIntP("LANE_CAPACITY", FLOW_CAPACITY);
+
+		if (FREEFLOW_SPEED < 55) {
+			LWR_DIST_STEP = 200/FEET_IN_MILE;
+		} else if (FREEFLOW_SPEED > 65) {
+			if (FREEFLOW_SPEED > 75) {
+				LWR_DIST_STEP = 350/FEET_IN_MILE;
+			} else {
+				LWR_DIST_STEP = 300/FEET_IN_MILE;
+			}
+		}
+
 	}
 
 	/** Set the XML Parameter File Path to the DensMeterLoadXML helper*/
 	static protected void setParamXMLPath () {
 		DensMeterLoadXML.setXMLFilePath(XML_PATH);
 		isParamXMLPathSet = true;
+	}
+
+	static protected void calcGlobalEstimates () {
+		LWR_DIST_STEP = 250;
+		LWR_TIME_STEP = 3;
+		return;
 	}
 }
