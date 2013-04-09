@@ -62,7 +62,7 @@ function create_keystores() {
 
 function install_jdbc() { 
 	echo "Creating link to JDBC driver"
-	ln -snf /usr/share/java/postgresql-jdbc.jar /usr/lib/jvm/jre/lib/ext/
+	ln -snf /usr/share/java/postgresql-jdbc.jar /usr/lib/jvm/jre-openjdk/lib/ext/
 }
 
 function init_db() {
