@@ -90,9 +90,9 @@ fi
 %defattr(0755,root,root)
 /usr/bin/iris_ctl
 
-# /usr/lib/systemd/system
+# %{_unitdir}
 %defattr(0644,root,root)
-/usr/lib/systemd/system/iris.service
+%{_unitdir}/iris.service
 
 # /etc/httpd/conf.d
 %defattr(0644,root,root)
