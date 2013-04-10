@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,17 +28,29 @@ public class MonochromeColor extends ASN1OctetString {
 		super(MIB1203.vmsCfg.create(new int[] {7, 0}));
 	}
 
-	/** Get the foreground color */
+	/** Get the value array.
+	 * @return Array of 6 bytes (3 RGB on and 3 RGB off colors) */
+	private byte[] valArray() {
+		byte[] val = value;
+		if(val.length == 6)
+			return val;
+		else
+			return new byte[6];
+	}
+
+	/** Get the foreground color.
+	 * @return Array of 3 bytes (RGB of foreground color). */
 	public byte[] getForeground() {
 		byte[] fg = new byte[3];
-		System.arraycopy(value, 0, fg, 0, Math.max(3, value.length));
+		System.arraycopy(valArray(), 0, fg, 0, 3);
 		return fg;
 	}
 
-	/** Get the background color */
+	/** Get the background color.
+	 * @return Array of 3 bytes (RGB of background color). */
 	public byte[] getBackground() {
 		byte[] bg = new byte[3];
-		System.arraycopy(value, 3, bg, 0, Math.max(3, value.length -3));
+		System.arraycopy(valArray(), 3, bg, 0, 3);
 		return bg;
 	}
 }
