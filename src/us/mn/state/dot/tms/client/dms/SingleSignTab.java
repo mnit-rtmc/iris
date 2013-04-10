@@ -107,11 +107,12 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	protected final DMSDispatcher dispatcher;
 
 	/** Panel for drawing current pixel status */
-	protected final SignPixelPanel currentPnl = new SignPixelPanel(true);
+	private final SignPixelPanel currentPnl = new SignPixelPanel(100, 400,
+		true);
 
 	/** Panel for drawing preview pixel status */
-	protected final SignPixelPanel previewPnl = new SignPixelPanel(true,
-		new Color(0, 0, 0.4f));
+	private final SignPixelPanel previewPnl = new SignPixelPanel(100, 400,
+		true, new Color(0, 0, 0.4f));
 
 	/** Pager for selected DMS panel */
 	protected DMSPanelPager pnlPager;

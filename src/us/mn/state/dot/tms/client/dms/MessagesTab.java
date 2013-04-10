@@ -88,8 +88,8 @@ public class MessagesTab extends JPanel {
 	};
 
 	/** Sign pixel panel */
-	protected final SignPixelPanel pixel_panel = new SignPixelPanel(true,
-		new Color(0, 0, 0.4f));
+	protected final SignPixelPanel pixel_panel = new SignPixelPanel(40, 400,
+		true, new Color(0, 0, 0.4f));
 
 	/** Default font combo box */
 	private final JComboBox font_cbx = new JComboBox();

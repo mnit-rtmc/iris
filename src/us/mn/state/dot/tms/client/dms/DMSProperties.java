@@ -260,10 +260,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JLabel badPixels = new JLabel();
 
 	/** Stuck off pixel panel */
-	protected final SignPixelPanel stuck_off_pnl = new SignPixelPanel(true);
+	private final SignPixelPanel stuck_off_pnl = new SignPixelPanel(100,
+		400, true);
 
 	/** Stuck on pixel panel */
-	protected final SignPixelPanel stuck_on_pnl = new SignPixelPanel(true);
+	private final SignPixelPanel stuck_on_pnl = new SignPixelPanel(100,
+		400, true);
 
 	/** Action to query pixel failures */
 	private final IAction query_pixels = new IAction("dms.query.pixels") {

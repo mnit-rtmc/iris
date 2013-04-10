@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -49,7 +49,8 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Sign pixel panel to display sign message */
-	protected final SignPixelPanel pixelPnl = new SignPixelPanel(false);
+	private final SignPixelPanel pixelPnl = new SignPixelPanel(50, 200,
+		false);
 
 	/** List cell renderer (needed for colors) */
 	protected final DefaultListCellRenderer cell =

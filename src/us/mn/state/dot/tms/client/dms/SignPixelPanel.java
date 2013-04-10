@@ -89,15 +89,19 @@ public class SignPixelPanel extends JPanel {
 	protected boolean dirty = false;
 
 	/** Create a new sign pixel panel.
+	 * @param h Height of panel.
+	 * @param w Width of panel.
 	 * @param a If true, render with antialiasing. */
-	public SignPixelPanel(boolean a) {
-		this(a, Color.BLACK);
+	public SignPixelPanel(int h, int w, boolean a) {
+		this(h, w, a, Color.BLACK);
 	}
 
 	/** Create a new sign pixel panel.
+	 * @param h Height of panel.
+	 * @param w Width of panel.
 	 * @param a If true, render with antialiasing.
 	 * @param f Face color of sign. */
-	public SignPixelPanel(boolean a, Color f) {
+	public SignPixelPanel(int h, int w, boolean a, Color f) {
 		super(true);
 		antialias = a;
 		face_color = f;
@@ -107,7 +111,7 @@ public class SignPixelPanel extends JPanel {
 				repaint();
 			}
 		});
-		setSizes();
+		setSizes(h, w);
 	}
 
 	/** Set the physical sign dimensions */
@@ -377,14 +381,10 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Set the panel size */
-	private void setSizes() {
-		setMinimumSize(calcDimsUsingHeight(50));
-		setPreferredSize(calcDimsUsingHeight(100));
-		setMaximumSize(calcDimsUsingHeight(100));
-	}
-
-	/** Calculate pixel panel dimensions as a function of height */
-	private Dimension calcDimsUsingHeight(int height) {
-		return UI.dimension(height * 4, height);
+	private void setSizes(int height, int width) {
+		Dimension d = UI.dimension(width, height);
+		setMinimumSize(d);
+		setPreferredSize(d);
+		setMaximumSize(d);
 	}
 }
