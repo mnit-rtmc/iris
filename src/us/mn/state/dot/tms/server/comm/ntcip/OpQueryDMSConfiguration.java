@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -178,6 +178,27 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			// NOTE: these must be set last
 			dms.setCharHeightPixels(c_height.getInteger());
 			dms.setCharWidthPixels(c_width.getInteger());
+			return new QueryV2();
+		}
+	}
+
+	/** Phase to query the 1203v2 objects */
+	protected class QueryV2 extends Phase {
+
+		/** Query the 1203v2 objects */
+		protected Phase poll(CommMessage mess) throws IOException {
+			MonochromeColor m_color = new MonochromeColor();
+			DmsColorScheme color_scheme = new DmsColorScheme();
+			mess.add(m_color);
+			mess.add(color_scheme);
+			try {
+				mess.queryProps();
+				DMS_LOG.log(dms.getName() + ": " + m_color);
+				DMS_LOG.log(dms.getName() + ": " +color_scheme);
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// Sign supports 1203v1 only
+			}
 			return null;
 		}
 	}
