@@ -190,14 +190,21 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			MonochromeColor m_color = new MonochromeColor();
 			DmsColorScheme color_scheme = new DmsColorScheme();
 			DmsSupportedMultiTags tags =new DmsSupportedMultiTags();
+			DmsMaxNumberPages pages = new DmsMaxNumberPages();
+			DmsMaxMultiStringLength m_len =
+				new DmsMaxMultiStringLength();
 			mess.add(m_color);
 			mess.add(color_scheme);
 			mess.add(tags);
+			mess.add(pages);
+			mess.add(m_len);
 			try {
 				mess.queryProps();
 				DMS_LOG.log(dms.getName() + ": " + m_color);
 				DMS_LOG.log(dms.getName() + ": " +color_scheme);
 				DMS_LOG.log(dms.getName() + ": " + tags);
+				DMS_LOG.log(dms.getName() + ": " + pages);
+				DMS_LOG.log(dms.getName() + ": " + m_len);
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Sign supports 1203v1 only
