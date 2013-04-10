@@ -53,4 +53,25 @@ public class MonochromeColor extends ASN1OctetString {
 		System.arraycopy(valArray(), 3, bg, 0, 3);
 		return bg;
 	}
+
+	/** Get the object value */
+	public String getValue() {
+		byte[] fg = getForeground();
+		byte[] bg = getBackground();
+		StringBuilder sb = new StringBuilder();
+		sb.append("foreground(");
+		sb.append(fg[0] & 0xFF);
+		sb.append(',');
+		sb.append(fg[1] & 0xFF);
+		sb.append(',');
+		sb.append(fg[2] & 0xFF);
+		sb.append("),background(");
+		sb.append(bg[0] & 0xFF);
+		sb.append(',');
+		sb.append(bg[1] & 0xFF);
+		sb.append(',');
+		sb.append(bg[2] & 0xFF);
+		sb.append(")");
+		return sb.toString();
+	}
 }
