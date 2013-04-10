@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -88,12 +88,15 @@ public class SignPixelPanel extends JPanel {
 	/** Flag that determines if buffer needs repainting */
 	protected boolean dirty = false;
 
-	/** Create a new sign pixel panel */
+	/** Create a new sign pixel panel.
+	 * @param a If true, render with antialiasing. */
 	public SignPixelPanel(boolean a) {
 		this(a, Color.BLACK);
 	}
 
-	/** Create a new sign pixel panel */
+	/** Create a new sign pixel panel.
+	 * @param a If true, render with antialiasing.
+	 * @param f Face color of sign. */
 	public SignPixelPanel(boolean a, Color f) {
 		super(true);
 		antialias = a;
