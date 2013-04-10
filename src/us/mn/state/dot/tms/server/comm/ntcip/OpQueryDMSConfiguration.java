@@ -189,12 +189,15 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			MonochromeColor m_color = new MonochromeColor();
 			DmsColorScheme color_scheme = new DmsColorScheme();
+			DmsSupportedMultiTags tags =new DmsSupportedMultiTags();
 			mess.add(m_color);
 			mess.add(color_scheme);
+			mess.add(tags);
 			try {
 				mess.queryProps();
 				DMS_LOG.log(dms.getName() + ": " + m_color);
 				DMS_LOG.log(dms.getName() + ": " +color_scheme);
+				DMS_LOG.log(dms.getName() + ": " + tags);
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Sign supports 1203v1 only
