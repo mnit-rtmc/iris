@@ -51,7 +51,7 @@ public class DmsSupportedMultiTags extends ASN1OctetString {
 			if(tags[i]) {
 				Enum tag = Enum.fromOrdinal(i);
 				if(tag != null) {
-					b.append(b.toString());
+					b.append(tag.toString());
 					b.append(',');
 				}
 			}
