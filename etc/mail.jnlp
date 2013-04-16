@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0"
-      codebase="http://@@WEBSTART.HOST@@/iris-client"
       href="mail.jnlp">
     <information>
         <title>Mail</title>
