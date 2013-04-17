@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2012  Minnesota Department of Transportation
+ * Copyright (C) 2002-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,8 +73,7 @@ public class OpResetDMS extends OpDMS {
 				// Controller must still be offline
 			}
 			if(TimeSteward.currentTimeMillis() > expire) {
-				DMS_LOG.log(dms.getName() + ": reset " +
-					"timeout expired -- giving up");
+				logError("reset timeout expired -- giving up");
 				return null;
 			} else
 				return this;

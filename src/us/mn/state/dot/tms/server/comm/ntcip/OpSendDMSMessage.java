@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ public class OpSendDMSMessage extends OpDMS {
 			act.setAddress(0);
 			mess.add(act);
 			try {
-				DMS_LOG.log(dms.getName() + ":= " + act);
+				logStore(act);
 				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
@@ -138,7 +138,7 @@ public class OpSendDMSMessage extends OpDMS {
 			status.setEnum(DmsMessageStatus.Enum.modifyReq);
 			mess.add(status);
 			try {
-				DMS_LOG.log(dms.getName() + ":= " + status);
+				logStore(status);
 				mess.storeProps();
 			}
 			catch(SNMP.Message.BadValue e) {
@@ -164,7 +164,7 @@ public class OpSendDMSMessage extends OpDMS {
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			mess.add(status);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(status);
 			if(status.isModifying())
 				return new ModifyMessage();
 			else if(!modify_requested)
@@ -198,10 +198,10 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.add(beacon);
 			mess.add(srv);
 			mess.add(prior);
-			DMS_LOG.log(dms.getName() + ":= " + multi);
-			DMS_LOG.log(dms.getName() + ":= " + beacon);
-			DMS_LOG.log(dms.getName() + ":= " + srv);
-			DMS_LOG.log(dms.getName() + ":= " + prior);
+			logStore(multi);
+			logStore(beacon);
+			logStore(srv);
+			logStore(prior);
 			mess.storeProps();
 			return new ValidateRequest();
 		}
@@ -217,7 +217,7 @@ public class OpSendDMSMessage extends OpDMS {
 			status.setEnum(DmsMessageStatus.Enum.validateReq);
 			mess.add(status);
 			try {
-				DMS_LOG.log(dms.getName() + ":= " + status);
+				logStore(status);
 				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
@@ -239,15 +239,15 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.add(status);
 			mess.add(crc);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + status);
-			DMS_LOG.log(dms.getName() + ": " + crc);
+			logQuery(status);
+			logQuery(crc);
 			if(!status.isValid())
 				return new QueryValidateMsgErr();
 			if(message_crc != crc.getInteger()) {
 				String ms = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
 					Integer.toHexString(crc.getInteger());
-				DMS_LOG.log(dms.getName() + ": " + ms);
+				logError(ms);
 				setErrorStatus(ms);
 				return null;
 			}
@@ -269,9 +269,9 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.add(m_err);
 			mess.add(e_pos);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + error);
-			DMS_LOG.log(dms.getName() + ": " + m_err);
-			DMS_LOG.log(dms.getName() + ": " + e_pos);
+			logQuery(error);
+			logQuery(m_err);
+			logQuery(e_pos);
 			if(error.isSyntaxMulti())
 				setErrorStatus(m_err.toString());
 			else if(error.isError())
@@ -294,7 +294,7 @@ public class OpSendDMSMessage extends OpDMS {
 			act.setAddress(0);
 			mess.add(act);
 			try {
-				DMS_LOG.log(dms.getName() + ":= " + act);
+				logStore(act);
 				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
@@ -313,7 +313,7 @@ public class OpSendDMSMessage extends OpDMS {
 			DmsActivateMsgError error = new DmsActivateMsgError();
 			mess.add(error);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + error);
+			logQuery(error);
 			switch(error.getEnum()) {
 			case syntaxMULTI:
 				setErrorStatus(error.toString());
@@ -351,8 +351,8 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.add(m_err);
 			mess.add(e_pos);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + m_err);
-			DMS_LOG.log(dms.getName() + ": " + e_pos);
+			logQuery(m_err);
+			logQuery(e_pos);
 			if(m_err.isOther())
 				return new QueryOtherMultiErr(m_err);
 			else {
@@ -380,7 +380,7 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.add(o_err);
 			try {
 				mess.queryProps();
-				DMS_LOG.log(dms.getName() + ": " + o_err);
+				logQuery(o_err);
 				setErrorStatus(o_err.toString());
 			}
 			catch(SNMP.Message.NoSuchName e) {
@@ -406,7 +406,7 @@ public class OpSendDMSMessage extends OpDMS {
 				// must not be a Ledstar sign ...
 				return null;
 			}
-			DMS_LOG.log(dms.getName() + ": " + error);
+			logQuery(error);
 			setErrorStatus(error.toString());
 			return null;
 		}
@@ -431,9 +431,9 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.add(time);
 			mess.add(comm_msg);
 			mess.add(long_msg);
-			DMS_LOG.log(dms.getName() + ":= " + time);
-			DMS_LOG.log(dms.getName() + ":= " + comm_msg);
-			DMS_LOG.log(dms.getName() + ":= " + long_msg);
+			logStore(time);
+			logStore(comm_msg);
+			logStore(long_msg);
 			mess.storeProps();
 			return null;
 		}

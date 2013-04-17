@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class OpUpdateDMSDuration extends OpDMS {
 			DmsMessageTimeRemaining remaining =
 				new DmsMessageTimeRemaining(getDuration());
 			mess.add(remaining);
-			DMS_LOG.log(dms.getName() + ":= " + remaining);
+			logStore(remaining);
 			mess.storeProps();
 			return null;
 		}

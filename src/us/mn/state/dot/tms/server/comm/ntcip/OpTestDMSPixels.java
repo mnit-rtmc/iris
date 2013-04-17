@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ public class OpTestDMSPixels extends OpDMS {
 			PixelTestActivation test = new PixelTestActivation();
 			mess.add(test);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + test);
+			logQuery(test);
 			if(test.getEnum() == PixelTestActivation.Enum.noTest)
 				return new ActivatePixelTest();
 			else
@@ -100,7 +100,7 @@ public class OpTestDMSPixels extends OpDMS {
 			PixelTestActivation test = new PixelTestActivation();
 			test.setEnum(PixelTestActivation.Enum.test);
 			mess.add(test);
-			DMS_LOG.log(dms.getName() + ":= " + test);
+			logStore(test);
 			mess.storeProps();
 			return new CheckTestCompletion();
 		}
@@ -121,12 +121,12 @@ public class OpTestDMSPixels extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(test);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + test);
+			logQuery(test);
 			if(test.getEnum() == PixelTestActivation.Enum.noTest)
 				return new QueryRowCount();
 			if(TimeSteward.currentTimeMillis() > expire) {
-				DMS_LOG.log(dms.getName() + ": pixel test " +
-					"timeout expired -- giving up");
+				logError("pixel test timeout expired -- " +
+					"giving up");
 				return new QueryRowCount();
 			} else
 				return this;
@@ -140,7 +140,7 @@ public class OpTestDMSPixels extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(total_rows);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + total_rows);
+			logQuery(total_rows);
 			if(total_rows.getInteger() > 0)
 				return new QueryTestAndMessageRows();
 			else
@@ -157,8 +157,8 @@ public class OpTestDMSPixels extends OpDMS {
 			mess.add(message_rows);
 			try {
 				mess.queryProps();
-				DMS_LOG.log(dms.getName() + ": " + test_rows);
-				DMS_LOG.log(dms.getName() + ": " +message_rows);
+				logQuery(test_rows);
+				logQuery(message_rows);
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Must be 1203v1 only, so try reading the
@@ -224,9 +224,9 @@ public class OpTestDMSPixels extends OpDMS {
 				// this detection type.  Must be a v1 sign.
 				return nextTablePhase();
 			}
-			DMS_LOG.log(dms.getName() + ": " + x_loc);
-			DMS_LOG.log(dms.getName() + ": " + y_loc);
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(x_loc);
+			logQuery(y_loc);
+			logQuery(status);
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
 			if(status.isStuckOn())

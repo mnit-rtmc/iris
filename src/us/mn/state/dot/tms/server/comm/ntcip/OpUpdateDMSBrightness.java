@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,9 +73,9 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			mess.add(p_level);
 			mess.add(light);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + max_level);
-			DMS_LOG.log(dms.getName() + ": " + p_level);
-			DMS_LOG.log(dms.getName() + ": " + light);
+			logQuery(max_level);
+			logQuery(p_level);
+			logQuery(light);
 			dms.feedbackBrightness(event_type,
 				p_level.getInteger(), light.getInteger());
 			return new QueryBrightnessTable();
@@ -92,9 +92,9 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			DmsIllumControl control = new DmsIllumControl();
 			mess.add(control);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + b_levels);
-			DMS_LOG.log(dms.getName() + ": " + brightness);
-			DMS_LOG.log(dms.getName() + ": " + control);
+			logQuery(b_levels);
+			logQuery(brightness);
+			logQuery(control);
 			if(control.isPhotocell())
 				return new SetManualControl();
 			else
@@ -110,8 +110,8 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			DmsIllumControl control = new DmsIllumControl();
 			control.setEnum(DmsIllumControl.Enum.manual);
 			mess.add(control);
+			logStore(control);
 			mess.storeProps();
-			DMS_LOG.log(dms.getName() + ":= " + control);
 			return new SetBrightnessTable();
 		}
 	}
@@ -127,8 +127,8 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			if(brightness.isValid()) {
 				brightness.setTable(calculateTable());
 				mess.add(brightness);
+				logStore(brightness);
 				mess.storeProps();
-				DMS_LOG.log(dms.getName() + ":= " + brightness);
 			}
 			return new SetPhotocellControl();
 		}
@@ -149,8 +149,8 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			DmsIllumControl control = new DmsIllumControl();
 			control.setEnum(DmsIllumControl.Enum.photocell);
 			mess.add(control);
+			logStore(control);
 			mess.storeProps();
-			DMS_LOG.log(dms.getName() + ":= " + control);
 			return null;
 		}
 	}

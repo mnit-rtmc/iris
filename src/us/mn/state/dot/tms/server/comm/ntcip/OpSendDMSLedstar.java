@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,9 +57,9 @@ public class OpSendDMSLedstar extends OpDMS {
 			mess.add(potBase);
 			mess.add(currentLow);
 			mess.add(currentHigh);
-			DMS_LOG.log(dms.getName() + ":= " + potBase);
-			DMS_LOG.log(dms.getName() + ":= " + currentLow);
-			DMS_LOG.log(dms.getName() + ":= " + currentHigh);
+			logStore(potBase);
+			logStore(currentLow);
+			logStore(currentHigh);
 			mess.storeProps();
 			return null;
 		}

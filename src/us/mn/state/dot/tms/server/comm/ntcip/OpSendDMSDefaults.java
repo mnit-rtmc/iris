@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,9 +62,9 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.add(power_time);
 			mess.add(comm_time);
 			mess.add(end_msg);
-			DMS_LOG.log(dms.getName() + ":= " + power_time);
-			DMS_LOG.log(dms.getName() + ":= " + comm_time);
-			DMS_LOG.log(dms.getName() + ":= " + end_msg);
+			logStore(power_time);
+			logStore(comm_time);
+			logStore(end_msg);
 			mess.storeProps();
 			return new PixelService();
 		}
@@ -86,9 +86,9 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.add(dur);
 			mess.add(freq);
 			mess.add(time);
-			DMS_LOG.log(dms.getName() + ":= " + dur);
-			DMS_LOG.log(dms.getName() + ":= " + freq);
-			DMS_LOG.log(dms.getName() + ":= " + time);
+			logStore(dur);
+			logStore(freq);
+			logStore(time);
 			mess.storeProps();
 			return new MessageDefaults();
 		}
@@ -115,10 +115,10 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.add(page);
 			mess.add(on_time);
 			mess.add(off_time);
-			DMS_LOG.log(dms.getName() + ":= " + line);
-			DMS_LOG.log(dms.getName() + ":= " + page);
-			DMS_LOG.log(dms.getName() + ":= " + on_time);
-			DMS_LOG.log(dms.getName() + ":= " + off_time);
+			logStore(line);
+			logStore(page);
+			logStore(on_time);
+			logStore(off_time);
 			mess.storeProps();
 			return new LedstarDefaults();
 		}
@@ -141,9 +141,9 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.add(limit);
 			try {
 				mess.storeProps();
-				DMS_LOG.log(dms.getName() + ":= " + temp);
-				DMS_LOG.log(dms.getName() + ":= " + override);
-				DMS_LOG.log(dms.getName() + ":= " + limit);
+				logStore(temp);
+				logStore(override);
+				logStore(limit);
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Must not be a Ledstar sign
@@ -177,11 +177,11 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.add(max_lvl);
 			try {
 				mess.storeProps();
-				DMS_LOG.log(dms.getName() + ":= " + temp);
-				DMS_LOG.log(dms.getName() + ":= " + day_night);
-				DMS_LOG.log(dms.getName() + ":= " + day_rate);
-				DMS_LOG.log(dms.getName() + ":= " + night_rate);
-				DMS_LOG.log(dms.getName() + ":= " + max_lvl);
+				logStore(temp);
+				logStore(day_night);
+				logStore(day_rate);
+				logStore(night_rate);
+				logStore(max_lvl);
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Must not be a Skyline sign
@@ -224,10 +224,10 @@ public class OpSendDMSDefaults extends OpDMS {
 				mess.add(h_pitch);
 				mess.add(v_pitch);
 				mess.storeProps();
-				DMS_LOG.log(dms.getName() + ":= " + h_border);
-				DMS_LOG.log(dms.getName() + ":= " + v_border);
-				DMS_LOG.log(dms.getName() + ":= " + h_pitch);
-				DMS_LOG.log(dms.getName() + ":= " + v_pitch);
+				logStore(h_border);
+				logStore(v_border);
+				logStore(h_pitch);
+				logStore(v_pitch);
 			}
 			return null;
 		}

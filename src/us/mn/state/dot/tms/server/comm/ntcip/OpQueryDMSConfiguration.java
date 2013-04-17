@@ -50,7 +50,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			GlobalMaxModules modules = new GlobalMaxModules();
 			mess.add(modules);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + modules);
+			logQuery(modules);
 			return new QueryModules(modules.getInteger());
 		}
 	}
@@ -80,10 +80,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(version);
 			mess.add(m_type);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + make);
-			DMS_LOG.log(dms.getName() + ": " + model);
-			DMS_LOG.log(dms.getName() + ": " + version);
-			DMS_LOG.log(dms.getName() + ": " + m_type);
+			logQuery(make);
+			logQuery(model);
+			logQuery(version);
+			logQuery(m_type);
 			if(m_type.getEnum() == ModuleType.Enum.software) {
 				dms.setMake(make.getValue());
 				dms.setModel(model.getValue());
@@ -122,15 +122,15 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(beacon);
 			mess.add(tech);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + access);
-			DMS_LOG.log(dms.getName() + ": " + type);
-			DMS_LOG.log(dms.getName() + ": " + height);
-			DMS_LOG.log(dms.getName() + ": " + width);
-			DMS_LOG.log(dms.getName() + ": " + h_border);
-			DMS_LOG.log(dms.getName() + ": " + v_border);
-			DMS_LOG.log(dms.getName() + ": " + legend);
-			DMS_LOG.log(dms.getName() + ": " + beacon);
-			DMS_LOG.log(dms.getName() + ": " + tech);
+			logQuery(access);
+			logQuery(type);
+			logQuery(height);
+			logQuery(width);
+			logQuery(h_border);
+			logQuery(v_border);
+			logQuery(legend);
+			logQuery(beacon);
+			logQuery(tech);
 			dms.setSignAccess(access.getValue());
 			dms.setDmsType(type.getValueEnum());
 			dms.setFaceHeight(height.getInteger());
@@ -165,12 +165,12 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(c_height);
 			mess.add(c_width);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + s_height);
-			DMS_LOG.log(dms.getName() + ": " + s_width);
-			DMS_LOG.log(dms.getName() + ": " + h_pitch);
-			DMS_LOG.log(dms.getName() + ": " + v_pitch);
-			DMS_LOG.log(dms.getName() + ": " + c_height);
-			DMS_LOG.log(dms.getName() + ": " + c_width);
+			logQuery(s_height);
+			logQuery(s_width);
+			logQuery(h_pitch);
+			logQuery(v_pitch);
+			logQuery(c_height);
+			logQuery(c_width);
 			dms.setHeightPixels(s_height.getInteger());
 			dms.setWidthPixels(s_width.getInteger());
 			dms.setHorizontalPitch(h_pitch.getInteger());
@@ -200,11 +200,11 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(m_len);
 			try {
 				mess.queryProps();
-				DMS_LOG.log(dms.getName() + ": " + m_color);
-				DMS_LOG.log(dms.getName() + ": " +color_scheme);
-				DMS_LOG.log(dms.getName() + ": " + tags);
-				DMS_LOG.log(dms.getName() + ": " + pages);
-				DMS_LOG.log(dms.getName() + ": " + m_len);
+				logQuery(m_color);
+				logQuery(color_scheme);
+				logQuery(tags);
+				logQuery(pages);
+				logQuery(m_len);
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Sign supports 1203v1 only

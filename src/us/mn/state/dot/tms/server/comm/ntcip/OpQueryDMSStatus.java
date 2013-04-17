@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,10 +79,10 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(light);
 			mess.add(control);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + p_level);
-			DMS_LOG.log(dms.getName() + ": " + b_level);
-			DMS_LOG.log(dms.getName() + ": " + light);
-			DMS_LOG.log(dms.getName() + ": " + control);
+			logQuery(p_level);
+			logQuery(b_level);
+			logQuery(light);
+			logQuery(control);
 			dms.setLightOutput(light.getPercent());
 			return new QueryMessageTable();
 		}
@@ -110,13 +110,13 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(vol_max);
 			mess.add(vol_mem);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + perm_num);
-			DMS_LOG.log(dms.getName() + ": " + chg_num);
-			DMS_LOG.log(dms.getName() + ": " + chg_max);
-			DMS_LOG.log(dms.getName() + ": " + chg_mem);
-			DMS_LOG.log(dms.getName() + ": " + vol_num);
-			DMS_LOG.log(dms.getName() + ": " + vol_max);
-			DMS_LOG.log(dms.getName() + ": " + vol_mem);
+			logQuery(perm_num);
+			logQuery(chg_num);
+			logQuery(chg_max);
+			logQuery(chg_mem);
+			logQuery(vol_num);
+			logQuery(vol_max);
+			logQuery(vol_mem);
 			return new ControllerTemperature();
 		}
 	}
@@ -131,8 +131,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(min_cab);
 			mess.add(max_cab);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + min_cab);
-			DMS_LOG.log(dms.getName() + ": " + max_cab);
+			logQuery(min_cab);
+			logQuery(max_cab);
 			int mn = min_cab.getInteger();
 			int mx = max_cab.getInteger();
 			if(mn <= mx) {
@@ -157,8 +157,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(max_amb);
 			try {
 				mess.queryProps();
-				DMS_LOG.log(dms.getName() + ": " + min_amb);
-				DMS_LOG.log(dms.getName() + ": " + max_amb);
+				logQuery(min_amb);
+				logQuery(max_amb);
 				int mn = min_amb.getInteger();
 				int mx = max_amb.getInteger();
 				if(mn <= mx) {
@@ -188,8 +188,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(min_hou);
 			mess.add(max_hou);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + min_hou);
-			DMS_LOG.log(dms.getName() + ": " + max_hou);
+			logQuery(min_hou);
+			logQuery(max_hou);
 			int mn = min_hou.getInteger();
 			int mx = max_hou.getInteger();
 			if(mn <= mx) {
@@ -210,7 +210,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(shortError);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + shortError);
+			logQuery(shortError);
 			return new MoreFailures();
 		}
 	}
@@ -230,11 +230,11 @@ public class OpQueryDMSStatus extends OpDMS {
 				mess.add(pix_rows);
 			mess.queryProps();
 			if(shortError.checkError(ShortErrorStatus.MESSAGE))
-				DMS_LOG.log(dms.getName() + ": " + msg_err);
+				logQuery(msg_err);
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
-				DMS_LOG.log(dms.getName() + ": " + con);
+				logQuery(con);
 			if(shortError.checkError(ShortErrorStatus.PIXEL))
-				DMS_LOG.log(dms.getName() + ": " + pix_rows);
+				logQuery(pix_rows);
 			return new PowerSupplyCount();
 		}
 	}
@@ -254,7 +254,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				dms.setPowerStatus(new String[0]);
 				return new LedstarStatus();
 			}
-			DMS_LOG.log(dms.getName() + ": " + n_pwr);
+			logQuery(n_pwr);
 			if(n_pwr.getInteger() > 0)
 				return new QueryPowerStatus(n_pwr.getInteger());
 			else {
@@ -295,11 +295,11 @@ public class OpQueryDMSStatus extends OpDMS {
 				dms.setPowerStatus(new String[0]);
 				return new LedstarStatus();
 			}
-			DMS_LOG.log(dms.getName() + ": " + desc);
-			DMS_LOG.log(dms.getName() + ": " + p_type);
-			DMS_LOG.log(dms.getName() + ": " + status);
-			DMS_LOG.log(dms.getName() + ": " + mfr_status);
-			DMS_LOG.log(dms.getName() + ": " + voltage);
+			logQuery(desc);
+			logQuery(p_type);
+			logQuery(status);
+			logQuery(mfr_status);
+			logQuery(voltage);
 			supplies[row - 1] = join(desc.getValue(),
 				p_type.getValue(), status.getValue(),
 				mfr_status.getValue() + ' ' +
@@ -348,7 +348,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				// 1203v2 not supported ...
 				return new LedstarStatus();
 			}
-			DMS_LOG.log(dms.getName() + ": " + n_snsr);
+			logQuery(n_snsr);
 			if(n_snsr.getInteger() > 0) {
 				return new QueryLightSensorStatus(
 					n_snsr.getInteger());
@@ -377,9 +377,9 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(status);
 			mess.add(reading);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + desc);
-			DMS_LOG.log(dms.getName() + ": " + status);
-			DMS_LOG.log(dms.getName() + ": " + reading);
+			logQuery(desc);
+			logQuery(status);
+			logQuery(reading);
 			light_sensors.add(desc.getValue() + "," +
 				status.getValue() + "," + reading.getInteger());
 			row++;
@@ -413,10 +413,10 @@ public class OpQueryDMSStatus extends OpDMS {
 				dms.setPixelCurrentHigh(null);
 				return new SkylineStatus();
 			}
-			DMS_LOG.log(dms.getName() + ": " + potBase);
-			DMS_LOG.log(dms.getName() + ": " + low);
-			DMS_LOG.log(dms.getName() + ": " + high);
-			DMS_LOG.log(dms.getName() + ": " + bad);
+			logQuery(potBase);
+			logQuery(low);
+			logQuery(high);
+			logQuery(bad);
 			dms.setLdcPotBase(potBase.getInteger());
 			dms.setPixelCurrentLow(low.getInteger());
 			dms.setPixelCurrentHigh(high.getInteger());
@@ -437,9 +437,9 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(sensor);
 			try {
 				mess.queryProps();
-				DMS_LOG.log(dms.getName() + ": " + heat);
-				DMS_LOG.log(dms.getName() + ": " + power);
-				DMS_LOG.log(dms.getName() + ": " + sensor);
+				logQuery(heat);
+				logQuery(power);
+				logQuery(sensor);
 				dms.setHeatTapeStatus(heat.getValue());
 				dms.setPowerStatus(power.getPowerStatus());
 				if(power.isCritical())

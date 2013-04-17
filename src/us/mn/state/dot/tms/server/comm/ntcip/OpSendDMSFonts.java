@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(max_char);
 			try {
 				mess.queryProps();
-				DMS_LOG.log(dms.getName() + ": " + max_char);
+				logQuery(max_char);
 				version2 = true;
 			}
 			catch(SNMP.Message.NoSuchName e) {
@@ -112,8 +112,8 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(num_fonts);
 			mess.add(max_characters);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + num_fonts);
-			DMS_LOG.log(dms.getName() + ": " + max_characters);
+			logQuery(num_fonts);
+			logQuery(max_characters);
 			for(row = 1; row <= num_fonts.getInteger(); row++)
 				open_rows.add(row);
 			row = 1;
@@ -140,9 +140,9 @@ public class OpSendDMSFonts extends OpDMS {
 				populateNum2Row();
 				return nextFontPhase();
 			}
-			DMS_LOG.log(dms.getName() + ": " + number);
+			logQuery(number);
 			if(version2)
-				DMS_LOG.log(dms.getName() + ": " + status);
+				logQuery(status);
 			Integer f_num = number.getInteger();
 			if(num_2_row.containsKey(f_num)) {
 				num_2_row.put(f_num, row);
@@ -198,8 +198,8 @@ public class OpSendDMSFonts extends OpDMS {
 		Font f = font;
 		if(f != null) {
 			String s = "Font " + f.getNumber() + " aborted -- "+msg;
+			logError(s);
 			setMaintStatus(s);
-			DMS_LOG.log(dms.getName() + " " + s);
 		}
 	}
 
@@ -219,9 +219,9 @@ public class OpSendDMSFonts extends OpDMS {
 				version.setInteger(-1);
 			}
 			int v = version.getInteger();
-			DMS_LOG.log(dms.getName() + ": " + version);
+			logQuery(version);
 			if(isVersionIDCorrect(v)) {
-				DMS_LOG.log(dms.getName() + ": Font is valid");
+				logError("Font is valid");
 				if(font == dms.getDefaultFont())
 					return new SetDefaultFont();
 				else
@@ -254,7 +254,7 @@ public class OpSendDMSFonts extends OpDMS {
 			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(status);
 			switch(status.getEnum()) {
 			case notUsed:
 				return new RequestStatusModify();
@@ -279,7 +279,7 @@ public class OpSendDMSFonts extends OpDMS {
 			FontStatus status = new FontStatus(row);
 			status.setEnum(FontStatus.Enum.notUsedReq);
 			mess.add(status);
-			DMS_LOG.log(dms.getName() + ":= " + status);
+			logStore(status);
 			mess.storeProps();
 			return new VerifyStatusNotUsed();
 		}
@@ -293,7 +293,7 @@ public class OpSendDMSFonts extends OpDMS {
 			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(status);
 			if(status.getEnum() != FontStatus.Enum.notUsed) {
 				abortUpload("Expected notUsed, was "
 					+ status.getEnum());
@@ -311,7 +311,7 @@ public class OpSendDMSFonts extends OpDMS {
 			FontStatus status = new FontStatus(row);
 			status.setEnum(FontStatus.Enum.modifyReq);
 			mess.add(status);
-			DMS_LOG.log(dms.getName() + ":= " + status);
+			logStore(status);
 			mess.storeProps();
 			return new VerifyStatusModifying();
 		}
@@ -325,7 +325,7 @@ public class OpSendDMSFonts extends OpDMS {
 			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(status);
 			if(status.getEnum() != FontStatus.Enum.modifying) {
 				abortUpload("Expected modifying, was " +
 					status.getEnum());
@@ -342,7 +342,7 @@ public class OpSendDMSFonts extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			FontHeight height = new FontHeight(row);
 			mess.add(height);
-			DMS_LOG.log(dms.getName() + ":= " + height);
+			logStore(height);
 			try {
 				mess.storeProps();
 			}
@@ -374,11 +374,11 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(height);
 			mess.add(char_spacing);
 			mess.add(line_spacing);
-			DMS_LOG.log(dms.getName() + ":= " + number);
-			DMS_LOG.log(dms.getName() + ":= " + name);
-			DMS_LOG.log(dms.getName() + ":= " + height);
-			DMS_LOG.log(dms.getName() + ":= " + char_spacing);
-			DMS_LOG.log(dms.getName() + ":= " + line_spacing);
+			logStore(number);
+			logStore(name);
+			logStore(height);
+			logStore(char_spacing);
+			logStore(line_spacing);
 			mess.storeProps();
 			Collection<Glyph> glyphs =FontHelper.lookupGlyphs(font);
 			if(glyphs.isEmpty()) {
@@ -423,8 +423,8 @@ public class OpSendDMSFonts extends OpDMS {
 			char_bitmap.setOctetString(pixels);
 			mess.add(char_width);
 			mess.add(char_bitmap);
-			DMS_LOG.log(dms.getName() + ":= " + char_width);
-			DMS_LOG.log(dms.getName() + ":= " + char_bitmap);
+			logStore(char_width);
+			logStore(char_bitmap);
 			mess.storeProps();
 			count++;
 			if(count % 20 == 0 && !controller.isFailed())
@@ -450,7 +450,7 @@ public class OpSendDMSFonts extends OpDMS {
 			FontHeight height = new FontHeight(row);
 			height.setInteger(font.getHeight());
 			mess.add(height);
-			DMS_LOG.log(dms.getName() + ":= " + height);
+			logStore(height);
 			mess.storeProps();
 			if(font == dms.getDefaultFont())
 				return new SetDefaultFont();
@@ -467,7 +467,7 @@ public class OpSendDMSFonts extends OpDMS {
 			FontStatus status = new FontStatus(row);
 			status.setEnum(FontStatus.Enum.readyForUseReq);
 			mess.add(status);
-			DMS_LOG.log(dms.getName() + ":= " + status);
+			logStore(status);
 			mess.storeProps();
 			return new VerifyStatusReadyForUse();
 		}
@@ -488,7 +488,7 @@ public class OpSendDMSFonts extends OpDMS {
 			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(status);
 			switch(status.getEnum()) {
 			case readyForUse:
 				if(font == dms.getDefaultFont())
@@ -519,7 +519,7 @@ public class OpSendDMSFonts extends OpDMS {
 			DefaultFont dfont = new DefaultFont();
 			dfont.setInteger(font.getNumber());
 			mess.add(dfont);
-			DMS_LOG.log(dms.getName() + ":= " + dfont);
+			logStore(dfont);
 			mess.storeProps();
 			return nextFontPhase();
 		}

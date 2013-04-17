@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,12 +103,12 @@ public class OpSendDMSGraphics extends OpDMS {
 				// Must be 1203v1 only (no graphics) ...
 				return null;
 			}
-			DMS_LOG.log(dms.getName() + ": " + color_scheme);
-			DMS_LOG.log(dms.getName() + ": " + max_graphics);
-			DMS_LOG.log(dms.getName() + ": " + num_graphics);
-			DMS_LOG.log(dms.getName() + ": " + max_size);
-			DMS_LOG.log(dms.getName() + ": " + available_memory);
-			DMS_LOG.log(dms.getName() + ": " + block_size);
+			logQuery(color_scheme);
+			logQuery(max_graphics);
+			logQuery(num_graphics);
+			logQuery(max_size);
+			logQuery(available_memory);
+			logQuery(block_size);
 			for(row = 1; row <= max_graphics.getInteger(); row++)
 				open_rows.add(row);
 			row = 1;
@@ -168,8 +168,8 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(number);
 			mess.add(status);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + number);
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(number);
+			logQuery(status);
 			Integer g_num = number.getInteger();
 			if(num_2_row.containsKey(g_num)) {
 				num_2_row.put(g_num, row);
@@ -206,8 +206,7 @@ public class OpSendDMSGraphics extends OpDMS {
 				row = num_2_row.get(g_num);
 				return new VerifyGraphic();
 			}
-			DMS_LOG.log(dms.getName() + ": Skipping graphic " +
-				g_num);
+			logError("Skipping graphic " + g_num);
 		}
 		return null;
 	}
@@ -220,9 +219,9 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicID gid = new DmsGraphicID(row);
 			mess.add(gid);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + gid);
+			logQuery(gid);
 			if(isIDCorrect(gid.getInteger())) {
-				DMS_LOG.log(dms.getName() + ": Graphic valid");
+				logError("Graphic valid");
 				return nextGraphicPhase();
 			} else
 				return new QueryInitialStatus();
@@ -245,7 +244,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(status);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(status);
 			switch(status.getEnum()) {
 			case notUsed:
 				return new RequestModify();
@@ -254,8 +253,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			case readyForUse:
 				return new InvalidateGraphic();
 			default:
-				DMS_LOG.log(dms.getName() +
-					": skipping graphic #" + row);
+				logError("skipping graphic #" + row);
 				return nextGraphicPhase();
 			}
 		}
@@ -269,7 +267,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			status.setEnum(DmsGraphicStatus.Enum.notUsedReq);
 			mess.add(status);
-			DMS_LOG.log(dms.getName() + ":= " + status);
+			logStore(status);
 			mess.storeProps();
 			return new RequestModify();
 		}
@@ -283,7 +281,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			status.setEnum(DmsGraphicStatus.Enum.modifyReq);
 			mess.add(status);
-			DMS_LOG.log(dms.getName() + ":= " + status);
+			logStore(status);
 			mess.storeProps();
 			return new VerifyStatusModifying();
 		}
@@ -297,10 +295,9 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(status);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(status);
 			if(status.getEnum() != DmsGraphicStatus.Enum.modifying){
-				DMS_LOG.log(dms.getName() +
-					": graphic send aborted");
+				logError("graphic send aborted");
 				return nextGraphicPhase();
 			}
 			return new CreateGraphic();
@@ -340,13 +337,13 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(type);
 			mess.add(trans_enabled);
 			mess.add(trans_color);
-			DMS_LOG.log(dms.getName() + ":= " + number);
-			DMS_LOG.log(dms.getName() + ":= " + name);
-			DMS_LOG.log(dms.getName() + ":= " + height);
-			DMS_LOG.log(dms.getName() + ":= " + width);
-			DMS_LOG.log(dms.getName() + ":= " + type);
-			DMS_LOG.log(dms.getName() + ":= " + trans_enabled);
-			DMS_LOG.log(dms.getName() + ":= " + trans_color);
+			logStore(number);
+			logStore(name);
+			logStore(height);
+			logStore(width);
+			logStore(type);
+			logStore(trans_enabled);
+			logStore(trans_color);
 			mess.storeProps();
 			return new SendGraphicBlock();
 		}
@@ -373,7 +370,7 @@ public class OpSendDMSGraphics extends OpDMS {
 				new DmsGraphicBlockBitmap(row, block);
 			block_bitmap.setOctetString(createBlock());
 			mess.add(block_bitmap);
-			DMS_LOG.log(dms.getName() + ":= " + block_bitmap);
+			logStore(block_bitmap);
 			mess.storeProps();
 			if(block * block_size.getInteger() < bitmap.length) {
 				block++;
@@ -403,7 +400,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			status.setEnum(DmsGraphicStatus.Enum.readyForUseReq);
 			mess.add(status);
-			DMS_LOG.log(dms.getName() + ":= " + status);
+			logStore(status);
 			mess.storeProps();
 			return new VerifyStatusReadyForUse();
 		}
@@ -421,13 +418,13 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(status);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			logQuery(status);
 			if(status.getEnum() ==
 			   DmsGraphicStatus.Enum.readyForUse)
 				return new VerifyGraphicFinal();
 			if(TimeSteward.currentTimeMillis() > expire) {
-				DMS_LOG.log(dms.getName() + ": graphic status" +
-					" timeout expired -- aborted");
+				logError("graphic status timeout expired -- " +
+					"aborted");
 				return nextGraphicPhase();
 			} else
 				return this;
@@ -442,7 +439,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicID gid = new DmsGraphicID(row);
 			mess.add(gid);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + gid);
+			logQuery(gid);
 			if(!isIDCorrect(gid.getInteger())) {
 				setErrorStatus("Graphic " +graphic.getGNumber()+
 					" ID incorrect after validating");

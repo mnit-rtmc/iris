@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ public class OpQueryDMSMessage extends OpDMS {
 				return new QueryCurrentMessage();
 		} else {
 			/* The source table is not valid.  What??! */
-			DMS_LOG.log(dms.getName() + ": INVALID SOURCE");
+			logError("INVALID SOURCE");
 		}
 		return null;
 	}
@@ -76,7 +76,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(source);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + source);
+			logQuery(source);
 			return processMessageSource();
 		}
 	}
@@ -100,16 +100,16 @@ public class OpQueryDMSMessage extends OpDMS {
 			mess.add(status);
 			mess.add(time);
 			mess.queryProps();
-			DMS_LOG.log(dms.getName() + ": " + multi);
-			DMS_LOG.log(dms.getName() + ": " + prior);
-			DMS_LOG.log(dms.getName() + ": " + status);
-			DMS_LOG.log(dms.getName() + ": " + time);
+			logQuery(multi);
+			logQuery(prior);
+			logQuery(status);
+			logQuery(time);
 			if(status.isValid()) {
 				Integer d = parseDuration(time.getInteger());
 				setCurrentMessage(multi.getValue(),
 					prior.getEnum(), d);
 			} else {
-				DMS_LOG.log(dms.getName() + ": INVALID STATUS");
+				logError("INVALID STATUS");
 				setErrorStatus(status.toString());
 			}
 			return null;
