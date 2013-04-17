@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,14 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsMsgSourceMode extends ASN1Integer {
 
-	/** Enumeration of MULTI syntax errors */
+	/** Enumeration of message source modes */
 	static public enum Enum {
 		undefined, other, local, external,
 		otherCom1, otherCom2, otherCom3, otherCom4,
 		central, timebasedScheduler, powerRecovery, reset, commLoss,
 		powerLoss, endDuration;
 
-		/** Get MULTI syntax error from an ordinal value */
+		/** Get message source mode from an ordinal value */
 		static protected Enum fromOrdinal(int o) {
 			for(Enum e: Enum.values()) {
 				if(e.ordinal() == o)
