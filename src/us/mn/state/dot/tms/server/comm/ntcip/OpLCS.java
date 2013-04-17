@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.util.Arrays;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -31,9 +30,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpLCS extends OpNtcip {
-
-	/** LCS debug log */
-	static protected final DebugLog LCS_LOG = new DebugLog("lcs");
 
 	/** LCS array to query */
 	protected final LCSArrayImpl lcs_array;
@@ -81,7 +77,7 @@ abstract public class OpLCS extends OpNtcip {
 	protected void lookupDMSs() {
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
 		if(lcss.length != ind_before.length) {
-			LCS_LOG.log("lookupDMS: array invalid");
+			logError("lookupDMS: array invalid");
 			return;
 		}
 		for(int i = 0; i < lcss.length; i++) {
