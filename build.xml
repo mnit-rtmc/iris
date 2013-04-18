@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2012  Minnesota Department of Transportation
+     Copyright (C) 2007-2013  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -173,9 +173,7 @@
 	</target>
 
 	<!-- Prepare the build/etc directory -->
-	<target name="prepare-etc"
-	        description="Prepare the build/etc directory">
-
+	<target name="prepare-etc">
 		<copy todir="${build.etc}">
 			<fileset dir="${etc.dir}"/>
 			<filterset begintoken="@@" endtoken="@@">
@@ -203,8 +201,7 @@
 
 	<!-- Prepare the build directory -->
 	<target name="prepare"
-	        depends="prepare-etc"
-	        description="Prepare the build directory">
+	        depends="prepare-etc">
 
 		<copy todir="${build.src}" filtering="true">
 			<fileset dir="${src.dir}"/>
@@ -248,8 +245,9 @@
 		       destdir="${build.classes}"
 		       debug="${debug}"
 		       deprecation="on"
-		       source="1.5"
-		       target="1.5">
+		       includeantruntime="true"
+		       source="1.6"
+		       target="1.6">
 			<classpath refid="classpath"/>
 <!--			<compilerarg value="-Xlint:unchecked"/> -->
 		</javac>
@@ -290,8 +288,7 @@
 
 	<!-- Create the common jar -->
 	<target name="common-jar"
-		depends="compile"
-		description="Create the iris-common jar">
+		depends="compile">
 		<jar jarfile="${build.lib}/${common.jar}">
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/*.class"/>
@@ -513,8 +510,7 @@
 
 	<!-- init junit dirs-->
 	<target name="init-junit"
-		depends="prepare"
-		description="Init junit test cases">
+		depends="prepare">
 		<delete dir="${testdata.dir}"/>
 		<delete dir="${testreports.dir}"/>
 		<mkdir dir="${testbuild.dir}" />
@@ -524,12 +520,14 @@
 
 	<!-- compile junit test cases -->
 	<target name="compile-junit"
-		depends="compile, init-junit"
-		description="Compile junit test cases">
+		depends="compile, init-junit">
 		<javac srcdir="${testsrc.dir}"
-			includeAntRuntime="true"
-			destdir="${testbuild.dir}"
-			debug="true">
+		       destdir="${testbuild.dir}"
+		       debug="true"
+		       deprecation="on"
+		       includeantruntime="true"
+		       source="1.6"
+		       target="1.6">
 			<classpath refid="junit.classpath"/>
 		</javac>
 	</target>
