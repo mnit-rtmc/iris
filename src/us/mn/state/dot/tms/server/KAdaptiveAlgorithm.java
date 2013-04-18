@@ -1137,13 +1137,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if the meter queue is empty */
 		private boolean isQueueEmpty() {
-			return (!isQueueOccupancyHigh()) &&
-			       (isDemandBelowPassage() ||isPassageBelowGreen());
+			return isQueueVolumeLow() && !isQueueOccupancyHigh();
 		}
 
-		/** Check if queue occupancy is above threshold */
-		private boolean isQueueOccupancyHigh() {
-			return queue.getMaxOccupancy() > QUEUE_OCC_THRESHOLD;
+		/** Check if the queue volume is low */
+		private boolean isQueueVolumeLow() {
+			return isDemandBelowPassage() || isPassageBelowGreen();
 		}
 
 		/** Check if cumulative demand is below cumulative passage */
@@ -1154,6 +1153,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if cumulative passage is below cumulative green */
 		private boolean isPassageBelowGreen() {
 			return violationCount() < QUEUE_EMPTY_THRESHOLD;
+		}
+
+		/** Check if queue occupancy is above threshold */
+		private boolean isQueueOccupancyHigh() {
+			return queue.getMaxOccupancy() > QUEUE_OCC_THRESHOLD;
 		}
 
 		/** Calculate violation count (passage above green count) */
