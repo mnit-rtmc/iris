@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -254,7 +254,7 @@ public class Session {
 	/** Create the tile layer */
 	protected TileLayer createTileLayer(String url) {
 		if(url != null)
-			return new TileLayer("Base map", url, 500);
+			return new TileLayer("Base map", url, 1000);
 		else
 			return null;
 	}
