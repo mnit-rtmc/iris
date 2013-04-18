@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2012  Minnesota Department of Transportation
+ * Copyright (C) 2001-2013  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1174,10 +1174,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get ramp meter queue state enum value */
 		private RampMeterQueue getQueueState() {
 			if(isMetering) {
-				if(isQueueEmpty())
-					return RampMeterQueue.EMPTY;
-				else if(isQueueFull())
+				if(isQueueFull())
 					return RampMeterQueue.FULL;
+				else if(isQueueEmpty())
+					return RampMeterQueue.EMPTY;
 				else
 					return RampMeterQueue.EXISTS;
 			}
