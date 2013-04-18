@@ -403,9 +403,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Check if the detector is currently 'failed' */
 	public boolean isFailed() {
-		return force_fail ||
-		       last_volume == MISSING_DATA ||
-		       super.isFailed();
+		return force_fail || super.isFailed();
 	}
 
 	/** Get the active status */
