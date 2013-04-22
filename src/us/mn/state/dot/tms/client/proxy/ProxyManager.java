@@ -29,9 +29,9 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 
@@ -90,14 +90,13 @@ abstract public class ProxyManager<T extends SonarObject>
 	protected final ProxyLayer<T> layer;
 
 	/** Default style */
-	private final DeviceStyle def_style;
+	private final ItemStyle def_style;
 
 	/** Flag to indicate enumeration of all objects has completed */
 	protected boolean enumerated = false;
 
 	/** Create a new proxy manager */
-	protected ProxyManager(TypeCache<T> c, GeoLocManager lm, DeviceStyle ds)
-	{
+	protected ProxyManager(TypeCache<T> c, GeoLocManager lm, ItemStyle ds) {
 		cache = c;
 		loc_manager = lm;
 		def_style = ds;
@@ -107,7 +106,7 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Create a new proxy manager */
 	protected ProxyManager(TypeCache<T> c, GeoLocManager lm) {
-		this(c, lm, DeviceStyle.ALL);
+		this(c, lm, ItemStyle.ALL);
 	}
 
 	/** Create a style list model for the given symbol */
@@ -280,7 +279,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, T proxy) {
+	public boolean checkStyle(ItemStyle is, T proxy) {
 		return false;
 	}
 

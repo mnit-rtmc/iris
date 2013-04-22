@@ -35,9 +35,9 @@ import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
@@ -273,8 +273,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, R_Node proxy) {
-		switch(ds) {
+	public boolean checkStyle(ItemStyle is, R_Node proxy) {
+		switch(is) {
 		case GPS:
 			return !GeoLocHelper.isNull(getGeoLoc(proxy));
 		case NO_LOC:
@@ -299,10 +299,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create a theme for r_nodes */
 	protected R_NodeMapTheme createTheme() {
 		R_NodeMapTheme theme = new R_NodeMapTheme(this);
-		theme.addStyle(DeviceStyle.GPS, COLOR_GPS);
-		theme.addStyle(DeviceStyle.NO_LOC, COLOR_NO_LOC);
-		theme.addStyle(DeviceStyle.INACTIVE, COLOR_INACTIVE);
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.GPS, COLOR_GPS);
+		theme.addStyle(ItemStyle.NO_LOC, COLOR_NO_LOC);
+		theme.addStyle(ItemStyle.INACTIVE, COLOR_INACTIVE);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 

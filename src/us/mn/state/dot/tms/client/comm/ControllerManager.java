@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -75,11 +75,11 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Create a theme for controllers */
 	protected ProxyTheme<Controller> createTheme() {
 		ControllerTheme theme = new ControllerTheme(this, MARKER);
-		theme.addStyle(DeviceStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(DeviceStyle.MAINTENANCE,
+		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 
@@ -138,8 +138,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, Controller proxy) {
-		switch(ds) {
+	public boolean checkStyle(ItemStyle is, Controller proxy) {
+		switch(is) {
 		case ACTIVE:
 			return ControllerHelper.isActive(proxy);
 		case MAINTENANCE:

@@ -16,10 +16,10 @@ package us.mn.state.dot.tms.client.proxy;
 
 import javax.swing.event.ListDataListener;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.DeviceStyle;
+import us.mn.state.dot.tms.ItemStyle;
 
 /**
- * A list model for device styles.
+ * A list model for proxy item styles.
  *
  * @author Douglas lau
  */
@@ -57,8 +57,8 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 
 	/** Add a new proxy */
 	protected int doProxyAdded(T proxy) {
-		DeviceStyle ds = DeviceStyle.getStyle(name);
-		if(manager.checkStyle(ds, proxy))
+		ItemStyle is = ItemStyle.getStyle(name);
+		if(manager.checkStyle(is, proxy))
 			return super.doProxyAdded(proxy);
 		else
 			return -1;

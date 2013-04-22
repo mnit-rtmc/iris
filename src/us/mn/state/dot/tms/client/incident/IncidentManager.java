@@ -25,10 +25,10 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
@@ -86,12 +86,12 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Create a theme for incidents */
 	protected IncidentTheme createTheme() {
 		IncidentTheme theme = new IncidentTheme(this);
-		theme.addStyle(DeviceStyle.CLEARED, new Color(128, 255, 128));
-		theme.addStyle(DeviceStyle.CRASH, new Color(255, 128, 128));
-		theme.addStyle(DeviceStyle.STALL, new Color(255, 128, 255));
-		theme.addStyle(DeviceStyle.ROADWORK, new Color(255, 208, 128));
-		theme.addStyle(DeviceStyle.HAZARD, new Color(255, 255, 128));
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.CLEARED, new Color(128, 255, 128));
+		theme.addStyle(ItemStyle.CRASH, new Color(255, 128, 128));
+		theme.addStyle(ItemStyle.STALL, new Color(255, 128, 255));
+		theme.addStyle(ItemStyle.ROADWORK, new Color(255, 208, 128));
+		theme.addStyle(ItemStyle.HAZARD, new Color(255, 255, 128));
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 
@@ -163,7 +163,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, Incident proxy) {
+	public boolean checkStyle(ItemStyle is, Incident proxy) {
 		// FIXME: this should not be necessary, but we're getting
 		//        NullPointerExceptions here...
 		if(proxy == null)
@@ -172,7 +172,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 		if(iet == null)
 			return false;
 		EventType et = EventType.fromId(iet);
-		switch(ds) {
+		switch(is) {
 		case CRASH:
 			return et == EventType.INCIDENT_CRASH;
 		case STALL:
@@ -194,13 +194,13 @@ public class IncidentManager extends ProxyManager<Incident> {
 	public String getStyle(EventType et) {
 		switch(et) {
 		case INCIDENT_CRASH:
-			return DeviceStyle.CRASH.toString();
+			return ItemStyle.CRASH.toString();
 		case INCIDENT_STALL:
-			return DeviceStyle.STALL.toString();
+			return ItemStyle.STALL.toString();
 		case INCIDENT_ROADWORK:
-			return DeviceStyle.ROADWORK.toString();
+			return ItemStyle.ROADWORK.toString();
 		case INCIDENT_HAZARD:
-			return DeviceStyle.HAZARD.toString();
+			return ItemStyle.HAZARD.toString();
 		default:
 			return null;
 		}
@@ -268,7 +268,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 			if(sym != null)
 				return sym.getLegend();
 		}
-		String st = DeviceStyle.CLEARED.toString();
+		String st = ItemStyle.CLEARED.toString();
 		return getTheme().getSymbol(st).getLegend();
 	}
 

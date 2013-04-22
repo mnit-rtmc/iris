@@ -20,10 +20,10 @@ import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
@@ -86,12 +86,12 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Create a theme for action plans */
 	protected PlanTheme createTheme() {
 		PlanTheme theme = new PlanTheme(this);
-		theme.addStyle(DeviceStyle.DMS, new DmsMarker());
-		theme.addStyle(DeviceStyle.METER, new MeterMarker());
-		theme.addStyle(DeviceStyle.LANE);
-		theme.addStyle(DeviceStyle.TIME, new TimeMarker());
-		theme.addStyle(DeviceStyle.ACTIVE);
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.DMS, new DmsMarker());
+		theme.addStyle(ItemStyle.METER, new MeterMarker());
+		theme.addStyle(ItemStyle.LANE);
+		theme.addStyle(ItemStyle.TIME, new TimeMarker());
+		theme.addStyle(ItemStyle.ACTIVE);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 
@@ -106,10 +106,10 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, ActionPlan proxy) {
+	public boolean checkStyle(ItemStyle is, ActionPlan proxy) {
 		if(!canUpdate(proxy))
 			return false;
-		switch(ds) {
+		switch(is) {
 		case DMS:
 			return proxy.getActive() && hasDmsAction(proxy);
 		case METER:

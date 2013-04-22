@@ -25,8 +25,8 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
@@ -59,7 +59,7 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, TypeCache<Camera> c, GeoLocManager lm) {
-		super(c, lm, DeviceStyle.ACTIVE);
+		super(c, lm, ItemStyle.ACTIVE);
 		session = s;
 		cache.addProxyListener(this);
 	}
@@ -77,19 +77,19 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Create a theme for cameras */
 	protected ProxyTheme<Camera> createTheme() {
 		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this, MARKER);
-		theme.addStyle(DeviceStyle.UNPUBLISHED,
+		theme.addStyle(ItemStyle.UNPUBLISHED,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(DeviceStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
+		theme.addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
-		theme.addStyle(DeviceStyle.PLAYLIST, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(DeviceStyle.ACTIVE, COLOR_ACTIVE);
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.PLAYLIST, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.ACTIVE, COLOR_ACTIVE);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, Camera proxy) {
-		switch(ds) {
+	public boolean checkStyle(ItemStyle is, Camera proxy) {
+		switch(is) {
 		case ACTIVE:
 			return ControllerHelper.isActive(proxy.getController());
 		case INACTIVE:

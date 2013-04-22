@@ -28,11 +28,11 @@ import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -183,15 +183,13 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	protected ProxyTheme<LCSArray> createTheme() {
 		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
 			MARKER);
-		theme.addStyle(DeviceStyle.AVAILABLE,
-			ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(DeviceStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(DeviceStyle.SCHEDULED,
-			ProxyTheme.COLOR_SCHEDULED);
-		theme.addStyle(DeviceStyle.MAINTENANCE,
+		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
+		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 
@@ -260,8 +258,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, LCSArray proxy) {
-		switch(ds) {
+	public boolean checkStyle(ItemStyle is, LCSArray proxy) {
+		switch(is) {
 		case AVAILABLE:
 			return isAvailable(proxy);
 		case DEPLOYED:

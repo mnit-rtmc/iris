@@ -32,11 +32,11 @@ public class DMSHelper extends BaseHelper {
 	}
 
 	/** All styles */
-	static private final DeviceStyle[] STYLES_ALL = {
-		DeviceStyle.AVAILABLE, DeviceStyle.DEPLOYED,
-		DeviceStyle.SCHEDULED, DeviceStyle.TRAVEL_TIME,
-		DeviceStyle.MAINTENANCE, DeviceStyle.FAILED,
-		DeviceStyle.AWS_CONTROLLED, DeviceStyle.NO_CONTROLLER
+	static private final ItemStyle[] STYLES_ALL = {
+		ItemStyle.AVAILABLE, ItemStyle.DEPLOYED,
+		ItemStyle.SCHEDULED, ItemStyle.TRAVEL_TIME,
+		ItemStyle.MAINTENANCE, ItemStyle.FAILED,
+		ItemStyle.AWS_CONTROLLED, ItemStyle.NO_CONTROLLER
 	};
 
 	/** Lookup the DMS with the specified name */
@@ -166,7 +166,7 @@ public class DMSHelper extends BaseHelper {
 		if(ctr != null)
 			return ctr.getMaint();
 		else
-			return DeviceStyle.NO_CONTROLLER.toString();
+			return ItemStyle.NO_CONTROLLER.toString();
 	}
 
 	/** Test if a DMS needs maintenance */
@@ -188,7 +188,7 @@ public class DMSHelper extends BaseHelper {
 		if(ctr != null)
 			return ctr.getStatus();
 		else
-			return DeviceStyle.NO_CONTROLLER.toString();
+			return ItemStyle.NO_CONTROLLER.toString();
 	}
 
 	/** Test if a DMS has a critical error */
@@ -200,7 +200,7 @@ public class DMSHelper extends BaseHelper {
 	static public String getStatus(DMS proxy) {
 		Controller c = proxy.getController();
 		if(c == null)
-			return DeviceStyle.NO_CONTROLLER.toString();
+			return ItemStyle.NO_CONTROLLER.toString();
 		else
 			return c.getStatus();
 	}
@@ -211,8 +211,8 @@ public class DMSHelper extends BaseHelper {
 	}
 
 	/** Check the style of the specified proxy */
-	static public boolean checkStyle(DeviceStyle ds, DMS proxy) {
-		switch(ds) {
+	static public boolean checkStyle(ItemStyle is, DMS proxy) {
+		switch(is) {
 		case NO_CONTROLLER:
 			return proxy.getController() == null;
 		case AVAILABLE:
@@ -242,7 +242,7 @@ public class DMSHelper extends BaseHelper {
 	 *  separated by commas. */
 	static public String getAllStyles(DMS proxy) {
 		StringBuilder s = new StringBuilder();
-		for(DeviceStyle style: STYLES_ALL) {
+		for(ItemStyle style: STYLES_ALL) {
 			String st = style.toString();
 			if(checkStyle(style, proxy)) {
 				s.append(st);

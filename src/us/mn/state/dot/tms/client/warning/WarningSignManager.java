@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -68,19 +68,18 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	protected ProxyTheme<WarningSign> createTheme() {
 		ProxyTheme<WarningSign> theme =new ProxyTheme<WarningSign>(this,
 			MARKER);
-		theme.addStyle(DeviceStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(DeviceStyle.AVAILABLE,
-			ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(DeviceStyle.NO_CONTROLLER,
+		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(ItemStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, WarningSign proxy) {
-		switch(ds) {
+	public boolean checkStyle(ItemStyle is, WarningSign proxy) {
+		switch(is) {
 		case DEPLOYED:
 			return proxy.getDeployed();
 		case AVAILABLE:

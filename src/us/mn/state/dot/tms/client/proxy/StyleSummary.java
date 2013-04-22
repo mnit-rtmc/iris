@@ -44,7 +44,7 @@ import us.mn.state.dot.sched.Job;
 import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
-import us.mn.state.dot.tms.DeviceStyle;
+import us.mn.state.dot.tms.ItemStyle;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -109,7 +109,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Widgets for one style */
 	private class StyleWidgets {
 		private final Symbol symbol;
-		private final DeviceStyle dstyle;
+		private final ItemStyle istyle;
 		private final JRadioButton btn;
 		private final JLabel legend_lbl;
 		private final JLabel count_lbl;
@@ -117,7 +117,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		private StyleWidgets(Symbol s) {
 			symbol = s;
 			String style = s.getLabel();
-			dstyle = DeviceStyle.getStyle(style);
+			istyle = ItemStyle.getStyle(style);
 			btn = createRadioButton(style);
 			legend_lbl = new JLabel(s.getLegend());
 			count_lbl = new JLabel();
@@ -136,7 +136,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Create a new style summary panel, with optional cell size buttons.
 	 * @param man ProxyManager */
-	public StyleSummary(final ProxyManager<T> man, DeviceStyle def_style,
+	public StyleSummary(final ProxyManager<T> man, ItemStyle def_style,
 		boolean enableCellSizeBtns)
 	{
 		super(new GridBagLayout());
@@ -239,7 +239,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		while(it.hasNext() && !start_over) {
 			T proxy = it.next();
 			for(StyleWidgets sw: widgets.values()) {
-				if(manager.checkStyle(sw.dstyle, proxy))
+				if(manager.checkStyle(sw.istyle, proxy))
 					sw.n_count++;
 			}
 		}

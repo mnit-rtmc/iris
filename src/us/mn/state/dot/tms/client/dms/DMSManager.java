@@ -29,11 +29,11 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -81,7 +81,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a new DMS manager */
 	public DMSManager(Session s, TypeCache<DMS> c, GeoLocManager lm) {
-		super(c, lm, DeviceStyle.DEPLOYED);
+		super(c, lm, ItemStyle.DEPLOYED);
 		session = s;
 		cache.addProxyListener(this);
 	}
@@ -107,25 +107,22 @@ public class DMSManager extends ProxyManager<DMS> {
 		// NOTE: the ordering of themes controls which color is used
 		//       to render the sign icon on the map
 		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this, MARKER);
-		theme.addStyle(DeviceStyle.AVAILABLE,
-			ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(DeviceStyle.DEPLOYED,
-			ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(DeviceStyle.SCHEDULED,
-			ProxyTheme.COLOR_SCHEDULED);
+		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
-			theme.addStyle(DeviceStyle.AWS_DEPLOYED, Color.RED);
-		theme.addStyle(DeviceStyle.MAINTENANCE,
+			theme.addStyle(ItemStyle.AWS_DEPLOYED, Color.RED);
+		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			theme.addStyle(DeviceStyle.AWS_CONTROLLED,
+			theme.addStyle(ItemStyle.AWS_CONTROLLED,
 				COLOR_HELIOTROPE);
 		}
 		// NOTE: If a sign doesn't fit in one of the other themes,
 		//       it will be rendered using the ALL theme.
-		theme.addStyle(DeviceStyle.ALL,
-			ProxyTheme.COLOR_INACTIVE, ProxyTheme.OUTLINE_INACTIVE);
+		theme.addStyle(ItemStyle.ALL, ProxyTheme.COLOR_INACTIVE,
+			ProxyTheme.OUTLINE_INACTIVE);
 		return theme;
 	}
 
@@ -258,12 +255,12 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, DMS proxy) {
+	public boolean checkStyle(ItemStyle is, DMS proxy) {
 		// Filter out LCSs for all styles except NO_CONTROLLER
-		if(DMSHelper.isLCS(proxy) && ds != DeviceStyle.NO_CONTROLLER)
+		if(DMSHelper.isLCS(proxy) && is != ItemStyle.NO_CONTROLLER)
 			return false;
 		else
-			return DMSHelper.checkStyle(ds, proxy);
+			return DMSHelper.checkStyle(is, proxy);
 	}
 
 	/** Get the layer zoom visibility threshold */

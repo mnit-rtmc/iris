@@ -80,7 +80,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** AWS controlled checkbox (optional) */
 	private final JCheckBox aws_control_chk = new JCheckBox(
-		new IAction("device.style.aws.controlled")
+		new IAction("item.style.aws.controlled")
 	{
 		protected void do_perform() {
 			DMS proxy = watching;

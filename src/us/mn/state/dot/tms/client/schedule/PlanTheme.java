@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import java.awt.Shape;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.VectorSymbol;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.DeviceStyle;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
@@ -41,14 +41,14 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	}
 
 	/** Add a default style to the theme */
-	public void addStyle(DeviceStyle ds) {
-		Style style = new Style(ds.toString(), OUTLINE, COLOR);
+	public void addStyle(ItemStyle is) {
+		Style style = new Style(is.toString(), OUTLINE, COLOR);
 		addStyle(style);
 	}
 
 	/** Add a new style to the theme */
-	public void addStyle(DeviceStyle ds, Shape shp) {
-		Style style = new Style(ds.toString(), OUTLINE, COLOR);
+	public void addStyle(ItemStyle is, Shape shp) {
+		Style style = new Style(is.toString(), OUTLINE, COLOR);
 		styles.add(style);
 		addSymbol(new VectorSymbol(style, shp));
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -59,15 +59,15 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	protected ProxyTheme<LCSIndication> createTheme() {
 		ProxyTheme<LCSIndication> theme = new ProxyTheme<LCSIndication>(
 			this, new LcsMarker());
-		theme.addStyle(DeviceStyle.NO_CONTROLLER,
+		theme.addStyle(ItemStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, LCSIndication proxy) {
-		switch(ds) {
+	public boolean checkStyle(ItemStyle is, LCSIndication proxy) {
+		switch(is) {
 		case NO_CONTROLLER:
 			return proxy.getController() == null;
 		case ALL:

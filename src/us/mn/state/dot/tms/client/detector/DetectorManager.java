@@ -24,10 +24,10 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.R_Node;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
@@ -56,7 +56,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	public DetectorManager(TypeCache<Detector> c, GeoLocManager lm,
 		R_NodeManager r_man)
 	{
-		super(c, lm, DeviceStyle.ACTIVE);
+		super(c, lm, ItemStyle.ACTIVE);
 		r_node_manager = r_man;
 		cache.addProxyListener(this);
 	}
@@ -82,18 +82,18 @@ public class DetectorManager extends ProxyManager<Detector> {
 	protected ProxyTheme<Detector> createTheme() {
 		ProxyTheme<Detector> theme = new ProxyTheme<Detector>(this,
 			MARKER);
-		theme.addStyle(DeviceStyle.ACTIVE, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(DeviceStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
+		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
-		theme.addStyle(DeviceStyle.NO_CONTROLLER,
+		theme.addStyle(ItemStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, Detector proxy) {
-		switch(ds) {
+	public boolean checkStyle(ItemStyle is, Detector proxy) {
+		switch(is) {
 		case ACTIVE:
 			return ControllerHelper.isActive(proxy.getController());
 		case INACTIVE:

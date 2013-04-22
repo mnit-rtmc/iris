@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@ import java.util.HashMap;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * Device style enumeration.
+ * Item style enumeration.
  *
  * @author Douglas Lau
  */
-public enum DeviceStyle {
+public enum ItemStyle {
 	ACTIVE,
 	ALL,
 	AVAILABLE,
@@ -53,24 +53,24 @@ public enum DeviceStyle {
 	TRAVEL_TIME,	// dms
 	UNPUBLISHED;	// camera
 
-	/** Get a string representation of the device style */
+	/** Get a string representation of the item style */
 	public String toString() {
-		return I18N.get("device.style." +
+		return I18N.get("item.style." +
 			name().toLowerCase().replace('_', '.'));
 	}
 
 	/** Hash map of all styles */
-	static private final HashMap<String, DeviceStyle> ALL_STYLES =
-		new HashMap<String, DeviceStyle>();
+	static private final HashMap<String, ItemStyle> ALL_STYLES =
+		new HashMap<String, ItemStyle>();
 
 	/** Initialize hash map of all styles */
 	static {
-		for(DeviceStyle ds: DeviceStyle.values())
-			ALL_STYLES.put(ds.toString(), ds);
+		for(ItemStyle is: ItemStyle.values())
+			ALL_STYLES.put(is.toString(), is);
 	}
 
-	/** Lookup a device style from a string description */
-	static public DeviceStyle getStyle(String style) {
+	/** Lookup a item style from a string description */
+	static public ItemStyle getStyle(String style) {
 		return ALL_STYLES.get(style);
 	}
 }

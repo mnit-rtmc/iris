@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.DeviceStyle;
+import us.mn.state.dot.tms.ItemStyle;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -84,19 +84,19 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	}
 
 	/** Add a style to the theme */
-	public void addStyle(DeviceStyle ds, Color color, Outline outline) {
-		Style style = new Style(ds.toString(), outline, color);
+	public void addStyle(ItemStyle is, Color color, Outline outline) {
+		Style style = new Style(is.toString(), outline, color);
 		addStyle(style);
 	}
 
 	/** Add a style to the theme */
-	public void addStyle(DeviceStyle ds, Color color) {
-		addStyle(ds, color, OUTLINE);
+	public void addStyle(ItemStyle is, Color color) {
+		addStyle(is, color, OUTLINE);
 	}
 
 	/** Add a default style to the theme */
-	public void addStyle(DeviceStyle ds) {
-		dstyle = new Style(ds.toString(), null, null);
+	public void addStyle(ItemStyle is) {
+		dstyle = new Style(is.toString(), null, null);
 		addStyle(dstyle);
 	}
 
@@ -113,8 +113,8 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	protected Style getStyle(T proxy) {
 		// FIXME: combine styles when it applies (locked meters)
 		for(Style st: styles) {
-			DeviceStyle ds = DeviceStyle.getStyle(st.getLabel());
-			if(manager.checkStyle(ds, proxy))
+			ItemStyle is = ItemStyle.getStyle(st.getLabel());
+			if(manager.checkStyle(is, proxy))
 				return st;
 		}
 		return dstyle;

@@ -21,9 +21,9 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
@@ -134,24 +134,24 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	protected ProxyTheme<RampMeter> createTheme() {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
 			MARKER);
-		theme.addStyle(DeviceStyle.AVAILABLE, COLOR_AVAILABLE);
-		theme.addStyle(DeviceStyle.QUEUE_FULL, COLOR_WARNING);
-		theme.addStyle(DeviceStyle.QUEUE_EXISTS, COLOR_DEPLOYED);
-		theme.addStyle(DeviceStyle.METERING, COLOR_METERING);
-		theme.addStyle(DeviceStyle.LOCKED, null,
+		theme.addStyle(ItemStyle.AVAILABLE, COLOR_AVAILABLE);
+		theme.addStyle(ItemStyle.QUEUE_FULL, COLOR_WARNING);
+		theme.addStyle(ItemStyle.QUEUE_EXISTS, COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.METERING, COLOR_METERING);
+		theme.addStyle(ItemStyle.LOCKED, null,
 			ProxyTheme.OUTLINE_LOCKED);
-		theme.addStyle(DeviceStyle.MAINTENANCE,
+		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(DeviceStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(DeviceStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
+		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
-		theme.addStyle(DeviceStyle.ALL);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(DeviceStyle ds, RampMeter proxy) {
-		switch(ds) {
+	public boolean checkStyle(ItemStyle is, RampMeter proxy) {
+		switch(is) {
 		case AVAILABLE:
 			return isAvailable(proxy);
 		case QUEUE_FULL:
