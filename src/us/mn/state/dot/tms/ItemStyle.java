@@ -23,35 +23,43 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public enum ItemStyle {
-	ACTIVE,
+	/* Generic item styles */
 	ALL,
+	ACTIVE,
+	/* Generic device styles */
 	AVAILABLE,
-	AWS_CONTROLLED,	// dms
-	AWS_DEPLOYED,	// dms
-	CLEARED,	// incident
-	CRASH,		// incident
 	DEPLOYED,
-	DMS,		// plan
-	FAILED,
-	GPS,		// r_node
-	HAZARD,		// incident
-	INACTIVE,
-	LANE,		// plan
-	LOCKED,		// meter
 	MAINTENANCE,
-	METER,		// plan
-	METERING,	// meter
+	FAILED,
+	INACTIVE,
 	NO_CONTROLLER,
-	NO_LOC,		// r_node
-	PLAYLIST,	// camera
-	QUEUE_EXISTS,	// meter
-	QUEUE_FULL,	// meter
-	ROADWORK,	// incident
-	SCHEDULED,	// dms
-	STALL,		// incident
-	TIME,		// plan
-	TRAVEL_TIME,	// dms
-	UNPUBLISHED;	// camera
+	/* Incident styles */
+	CLEARED,
+	CRASH,
+	STALL,
+	ROADWORK,
+	HAZARD,
+	/* DMS styles */
+	SCHEDULED,
+	TRAVEL_TIME,
+	AWS_CONTROLLED,
+	AWS_DEPLOYED,
+	/* Camera styles */
+	PLAYLIST,
+	UNPUBLISHED,
+	/* Ramp meter styles */
+	LOCKED,
+	METERING,
+	QUEUE_EXISTS,
+	QUEUE_FULL,
+	/* R_Node styles */
+	GPS,
+	NO_LOC,
+	/* Plan styles */
+	DMS,
+	LANE,
+	METER,
+	TIME;
 
 	/** Get a string representation of the item style */
 	public String toString() {
