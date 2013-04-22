@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
-import us.mn.state.dot.tms.DeviceStyle;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneUseIndication;
