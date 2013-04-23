@@ -1298,7 +1298,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get the max wait time (seconds) */
 		private int maxWaitTime() {
-			return meter.getMaxWait();
+			return Math.max(meter.getMaxWait(), 1);
 		}
 
 		/** Calculate target minimum rate.
