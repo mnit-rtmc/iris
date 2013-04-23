@@ -25,9 +25,6 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.RampMeterLock;
-import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
@@ -59,41 +56,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Color to display metering meters */
 	static protected final Color COLOR_METERING = new Color(0, 192, 0);
-
-	/** Test if a meter is available */
-	static protected boolean isAvailable(RampMeter proxy) {
-		return RampMeterHelper.isActive(proxy) &&
-		       !RampMeterHelper.isFailed(proxy) &&
-		       !isMetering(proxy) &&
-		       !needsMaintenance(proxy);
-	}
-
-	/** Test if a meter needs maintenance */
-	static protected boolean needsMaintenance(RampMeter proxy) {
-		RampMeterLock lck = RampMeterLock.fromOrdinal(proxy.getMLock());
-		return lck == RampMeterLock.POLICE_PANEL ||
-		       lck == RampMeterLock.KNOCK_DOWN;
-	}
-
-	/** Test if a meter is metering */
-	static protected boolean isMetering(RampMeter proxy) {
-		return proxy.getRate() != null &&
-		       !RampMeterHelper.isFailed(proxy);
-	}
-
-	/** Test if a meter has a queue */
-	static protected boolean queueExists(RampMeter proxy) {
-		return RampMeterHelper.isActive(proxy) &&
-		       !RampMeterHelper.isFailed(proxy) &&
-		       proxy.getQueue() == RampMeterQueue.EXISTS.ordinal();
-	}
-
-	/** Test if a meter has a full queue */
-	static protected boolean queueFull(RampMeter proxy) {
-		return RampMeterHelper.isActive(proxy) &&
-		       !RampMeterHelper.isFailed(proxy) &&
-		       proxy.getQueue() == RampMeterQueue.FULL.ordinal();
-	}
 
 	/** User session */
 	protected final Session session;
@@ -151,30 +113,12 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(ItemStyle is, RampMeter proxy) {
-		switch(is) {
-		case AVAILABLE:
-			return isAvailable(proxy);
-		case QUEUE_FULL:
-			return queueFull(proxy);
-		case QUEUE_EXISTS:
-			return queueExists(proxy);
-		case METERING:
-			return isMetering(proxy);
-		case LOCKED:
-			return proxy.getMLock() != null;
-		case MAINTENANCE:
-			return needsMaintenance(proxy);
-		case FAILED:
-			return RampMeterHelper.isFailed(proxy);
-		case NO_CONTROLLER:
-			return proxy.getController() == null;
-		case INACTIVE:
-			return !RampMeterHelper.isActive(proxy);
-		case ALL:
-			return true;
-		default:
-			return false;
+		long styles = proxy.getStyles();
+		for(ItemStyle s: ItemStyle.toStyles(styles)) {
+			if(s == is)
+				return true;
 		}
+		return false;
 	}
 
 	/** Show the properties form for the selected proxy */
@@ -213,7 +157,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(meter)));
 		p.addSeparator();
-		if(isMetering(meter)) {
+		if(meter.getRate() != null) {
 			p.add(new ShrinkQueueAction(meter));
 			p.add(new GrowQueueAction(meter));
 			p.add(new TurnOffAction(meter));
