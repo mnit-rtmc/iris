@@ -243,6 +243,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Set the active status */
 	public void setActive(boolean a) {
 		active = a;
+		updateStyles();
 	}
 
 	/** Set the active status */
@@ -307,6 +308,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return notes;
 	}
 
+	/** Update styles for associated devices */
+	public synchronized void updateStyles() {
+		for(ControllerIO io: io_pins.values()) {
+			if(io instanceof DeviceImpl) {
+				DeviceImpl dev = (DeviceImpl)io;
+				dev.updateStyles();
+			}
+		}
+	}
+
 	/** Mapping of all controller I/O pins */
 	protected transient HashMap<Integer, ControllerIO> io_pins =
 		new HashMap<Integer, ControllerIO>();
@@ -318,10 +329,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Assign an IO to the specified controller I/O pin */
 	public synchronized void setIO(int pin, ControllerIO io) {
-		if(io != null)
+		if(io != null) {
 			io_pins.put(pin, io);
-		else
-			io_pins.remove(pin);
+			if(io instanceof DeviceImpl)
+				((DeviceImpl)io).updateStyles();
+		} else {
+			ControllerIO oio = io_pins.remove(pin);
+			if(oio instanceof DeviceImpl)
+				((DeviceImpl)oio).updateStyles();
+		}
 	}
 
 	/** Determine whether this controller has an active ramp meter */
@@ -604,6 +620,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 		notifyAttribute("status");
 		notifyAttribute("failTime");
+		updateStyles();
 	}
 
 	/** Set the fail time */

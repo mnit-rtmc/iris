@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
@@ -201,6 +202,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public void initTransients() {
 		super.initTransients();
 		lookupGreenDetector();
+		updateStyles();
 	}
 
 	/** Destroy an object */
@@ -492,11 +494,13 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			if(m_lock == null) {
 				setMLock(RampMeterLock.POLICE_PANEL);
 				notifyAttribute("mLock");
+				updateStyles();
 			}
 		} else {
 			if(m_lock == RampMeterLock.POLICE_PANEL) {
 				setMLock((RampMeterLock)null);
 				notifyAttribute("mLock");
+				updateStyles();
 			}
 		}
 	}
@@ -517,11 +521,13 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			if(m_lock == null) {
 				setMLock(RampMeterLock.MANUAL);
 				notifyAttribute("mLock");
+				updateStyles();
 			}
 		} else {
 			if(m_lock == RampMeterLock.MANUAL) {
 				setMLock((RampMeterLock)null);
 				notifyAttribute("mLock");
+				updateStyles();
 			}
 		}
 	}
@@ -611,6 +617,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if(q != queue) {
 			queue = q;
 			notifyAttribute("queue");
+			updateStyles();
 		}
 	}
 
@@ -677,6 +684,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if(rateChanged(r)) {
 			rate = r;
 			notifyAttribute("rate");
+			updateStyles();
 		}
 	}
 
@@ -699,6 +707,75 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			return SystemAttributeHelper.getMeterMaxRelease();
 		else
 			return SystemAttributeHelper.getMeterMinRelease();
+	}
+
+	/** Test if a meter needs maintenance */
+	private boolean needsMaintenance() {
+		RampMeterLock lck = m_lock;
+		return lck == RampMeterLock.POLICE_PANEL ||
+		       lck == RampMeterLock.KNOCK_DOWN;
+	}
+
+	/** Test if a meter is available */
+	private boolean isAvailable() {
+		return isActive() &&
+		      !isFailed() &&
+		      !isMetering() &&
+		      !needsMaintenance();
+	}
+
+	/** Test if a meter has a full queue */
+	private boolean isQueueFull() {
+		return isActive() &&
+		      !isFailed() &&
+		       queue == RampMeterQueue.FULL;
+	}
+
+	/** Test if a meter has a queue */
+	private boolean queueExists() {
+		return isActive() &&
+		      !isFailed() &&
+		       queue == RampMeterQueue.EXISTS;
+	}
+
+	/** Item style bits */
+	private transient long styles = 0;
+
+	/** Update the ramp meter styles */
+	public void updateStyles() {
+		long s = ItemStyle.ALL.bit();
+		if(isAvailable())
+			s |= ItemStyle.AVAILABLE.bit();
+		if(isQueueFull())
+			s |= ItemStyle.QUEUE_FULL.bit();
+		if(queueExists())
+			s |= ItemStyle.QUEUE_EXISTS.bit();
+		if(isMetering())
+			s |= ItemStyle.METERING.bit();
+		if(isLocked())
+			s |= ItemStyle.LOCKED.bit();
+		if(needsMaintenance())
+			s |= ItemStyle.MAINTENANCE.bit();
+		if(isFailed())
+			s |= ItemStyle.FAILED.bit();
+		if(getController() == null)
+			s |= ItemStyle.NO_CONTROLLER.bit();
+		if(!isActive())
+			s |= ItemStyle.INACTIVE.bit();
+		setStyles(s);
+	}
+
+	/** Set the item style bits (and notify clients) */
+	private void setStyles(long s) {
+		if(s != styles) {
+			styles = s;
+			notifyAttribute("styles");
+		}
+	}
+
+	/** Get item style bits */
+	public long getStyles() {
+		return styles;
 	}
 
 	/** Get the detector set associated with the ramp meter */

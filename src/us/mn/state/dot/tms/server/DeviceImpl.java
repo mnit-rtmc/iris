@@ -150,6 +150,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		return pin;
 	}
 
+	/** Update the item styles */
+	public void updateStyles() {
+		// Sub-classes should override
+	}
+
 	/** Administrator notes for this device */
 	protected String notes;
 
