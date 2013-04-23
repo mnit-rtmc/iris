@@ -1061,14 +1061,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 		}
 
-		/** Estimate the queue undercount (vehicles) */
+		/** Estimate queue undercount when occupancy is high.
+		 * @return Vehicle undercount at queue detector. */
 		private float estimateQueueUndercount() {
 			float under = maxStorage() - queueLength();
 			return Math.max(queueOverflowRatio() * under,
 				MIN_DEMAND_ADJUSTMENT);
 		}
 
-		/** Estimate the queue overflow ratio */
+		/** Estimate the queue overflow ratio.
+		 * @return Ratio from 0 to MAX_DEMAND_ADJ_RATIO. */
 		private float queueOverflowRatio() {
 			float full_secs = queueFullCount * STEP_SECONDS;
 			return Math.min(2 * full_secs / maxWaitTime(),
