@@ -117,7 +117,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		private StyleWidgets(Symbol s) {
 			symbol = s;
 			String style = s.getLabel();
-			istyle = ItemStyle.getStyle(style);
+			istyle = ItemStyle.lookupStyle(style);
 			btn = createRadioButton(style);
 			legend_lbl = new JLabel(s.getLegend());
 			count_lbl = new JLabel();

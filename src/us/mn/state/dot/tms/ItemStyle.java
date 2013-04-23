@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -67,6 +68,16 @@ public enum ItemStyle {
 			name().toLowerCase().replace('_', '.'));
 	}
 
+	/** Get the bit for a style */
+	public long bit() {
+		return 1L << ordinal();
+	}
+
+	/** Check if the style bit is set */
+	public boolean checkBit(long bits) {
+		return (bits & bit()) != 0;
+	}
+
 	/** Hash map of all styles */
 	static private final HashMap<String, ItemStyle> ALL_STYLES =
 		new HashMap<String, ItemStyle>();
@@ -78,7 +89,25 @@ public enum ItemStyle {
 	}
 
 	/** Lookup a item style from a string description */
-	static public ItemStyle getStyle(String style) {
+	static public ItemStyle lookupStyle(String style) {
 		return ALL_STYLES.get(style);
+	}
+
+	/** Get an array of item styles from a bit set */
+	static public ItemStyle[] toStyles(long bits) {
+		LinkedList<ItemStyle> styles = new LinkedList<ItemStyle>();
+		for(ItemStyle is: ItemStyle.values()) {
+			if(is.checkBit(bits))
+				styles.add(is);
+		}
+		return styles.toArray(new ItemStyle[0]);
+	}
+
+	/** Get the bits for a set of styles */
+	static public long toBits(ItemStyle... styles) {
+		long bits = 0;
+		for(ItemStyle is: styles)
+			bits |= is.bit();
+		return bits;
 	}
 }

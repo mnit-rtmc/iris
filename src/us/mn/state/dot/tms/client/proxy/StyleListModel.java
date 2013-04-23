@@ -57,7 +57,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 
 	/** Add a new proxy */
 	protected int doProxyAdded(T proxy) {
-		ItemStyle is = ItemStyle.getStyle(name);
+		ItemStyle is = ItemStyle.lookupStyle(name);
 		if(manager.checkStyle(is, proxy))
 			return super.doProxyAdded(proxy);
 		else

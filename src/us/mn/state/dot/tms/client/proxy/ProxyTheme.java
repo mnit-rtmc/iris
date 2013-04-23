@@ -113,7 +113,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	protected Style getStyle(T proxy) {
 		// FIXME: combine styles when it applies (locked meters)
 		for(Style st: styles) {
-			ItemStyle is = ItemStyle.getStyle(st.getLabel());
+			ItemStyle is = ItemStyle.lookupStyle(st.getLabel());
 			if(manager.checkStyle(is, proxy))
 				return st;
 		}
