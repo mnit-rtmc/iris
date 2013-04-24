@@ -234,6 +234,7 @@ public class MeterStatusPanel extends FormPanel
 			release_lbl.setText("");
 			cycle_lbl.setText("");
 			queue_lbl.setText("");
+			lockCmb.setSelectedIndex(0);
 		}
 		setEnabled(canUpdate(proxy));
 	}
