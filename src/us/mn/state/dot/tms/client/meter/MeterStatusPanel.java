@@ -95,7 +95,7 @@ public class MeterStatusPanel extends FormPanel
 	private final JButton grow_btn = new JButton();
 
 	/** Reason the meter was locked */
-	protected final JComboBox lockCmb = new JComboBox(
+	private final JComboBox lock_cbx = new JComboBox(
 		RampMeterLock.getDescriptions());
 
 	/** Metering on radio button */
@@ -146,7 +146,7 @@ public class MeterStatusPanel extends FormPanel
 		add(I18N.get("ramp.meter.queue"), queue_lbl);
 		add(shrink_btn);
 		addRow(grow_btn);
-		add(I18N.get("ramp.meter.lock"), lockCmb);
+		add(I18N.get("ramp.meter.lock"), lock_cbx);
 		finishRow();
 		add(I18N.get("ramp.meter.metering"), on_btn);
 		addRow(off_btn);
@@ -221,7 +221,7 @@ public class MeterStatusPanel extends FormPanel
 		shrink_btn.setAction(new ShrinkQueueAction(proxy));
 		grow_btn.setAction(new GrowQueueAction(proxy));
 		if(proxy != null) {
-			lockCmb.setAction(new LockMeterAction(proxy, lockCmb));
+			lock_cbx.setAction(new LockMeterAction(proxy,lock_cbx));
 			on_btn.setAction(new TurnOnAction(proxy));
 			off_btn.setAction(new TurnOffAction(proxy));
 			updateAttribute(proxy, null);
@@ -234,7 +234,7 @@ public class MeterStatusPanel extends FormPanel
 			release_lbl.setText("");
 			cycle_lbl.setText("");
 			queue_lbl.setText("");
-			lockCmb.setSelectedIndex(0);
+			lock_cbx.setSelectedIndex(0);
 		}
 		setEnabled(canUpdate(proxy));
 	}
@@ -242,7 +242,7 @@ public class MeterStatusPanel extends FormPanel
 	/** Enable or disable the status panel */
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		lockCmb.setEnabled(enabled);
+		lock_cbx.setEnabled(enabled);
 		on_btn.setEnabled(enabled);
 		off_btn.setEnabled(enabled);
 	}
@@ -294,9 +294,9 @@ public class MeterStatusPanel extends FormPanel
 		if(a == null || a.equals("mLock")) {
 			Integer ml = meter.getMLock();
 			if(ml != null)
-				lockCmb.setSelectedIndex(ml);
+				lock_cbx.setSelectedIndex(ml);
 			else
-				lockCmb.setSelectedIndex(0);
+				lock_cbx.setSelectedIndex(0);
 		}
 	}
 
