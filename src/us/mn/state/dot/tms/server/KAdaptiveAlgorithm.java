@@ -78,9 +78,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Ramp queue jam density (vehicles per foot) */
 	static private final float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
 
-	/** Minimum demand adjustment for queue undercount correction */
-	static private final float MIN_DEMAND_ADJUSTMENT = 1.0f;
-
 	/** Rate value for checking if metering is started */
 	static private final double START_FLOW_RATIO = 0.8;
 
@@ -1063,7 +1060,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private float estimateQueueUndercount() {
 			float under = maxStorage() - queueLength();
 			return Math.max(queueOverflowRatio() * under,
-				MIN_DEMAND_ADJUSTMENT);
+				minDemandAdjustment());
 		}
 
 		/** Estimate the queue overflow ratio.
@@ -1075,6 +1072,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get the queue full duration (seconds) */
 		private float queueFullSecs() {
 			return queueFullCount * STEP_SECONDS;
+		}
+
+		/** Calculate the minimum demand undercount adjustment */
+		private float minDemandAdjustment() {
+			int minutes = Math.round(queueFullSecs() / 60);
+			float per_min = STEP_SECONDS / 60.0f;
+			return minutes * per_min;
 		}
 
 		/** Estimate the length of queue (vehicles) */
