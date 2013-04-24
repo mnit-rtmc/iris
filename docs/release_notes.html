@@ -9,6 +9,44 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.4.0 (24 April 2013)</dt>
+	<dd><ul>
+		<li>
+			Improved sign_event_view and recent_sign_event_view.
+		</li>
+		<li>
+			Fixed a bug in fake detector parsing.
+		</li>
+		<li>
+			Improved map tile loading.
+		</li>
+		<li>
+			Improved installation procedure.
+		</li>
+		<li>
+			Fixed quirk in DMS sign pixel panel sizing.
+		</li>
+		<li>
+			Fixed problems with K-adaptive metering algorithm.
+		</li>
+		<li>
+			Added "styles" attribute to meter and DMS.
+		</li>
+		<li>
+			Added some missing NTCIP 1203 objects.
+		</li>
+		<li>
+			Replaced "dms" and "lcs" debug logs with "ntcip".
+		</li>
+		<li>
+			Updated U of M density metering algorithm.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.4.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>4.3.0 (8 April 2013)</dt>
 	<dd><ul>
 		<li>
