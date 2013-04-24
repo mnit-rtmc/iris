@@ -574,6 +574,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if(!s.equals(errorStatus)) {
 			errorStatus = s;
 			notifyAttribute("status");
+			updateStyles();
 		}
 	}
 
@@ -668,6 +669,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if(!s.equals(maint)) {
 			maint = s;
 			notifyAttribute("maint");
+			updateStyles();
 		}
 	}
 

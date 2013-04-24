@@ -1063,6 +1063,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		notifyAttribute("messageCurrent");
 		ownerCurrent = o;
 		notifyAttribute("ownerCurrent");
+		updateStyles();
 	}
 
 	/** Get the current messasge.
@@ -1496,6 +1497,77 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		SignMessage nxt = messageNext;
 		return (cur == null || cur.getScheduled()) &&
 		       (nxt == null || nxt.getScheduled());
+	}
+
+	/** Test if DMS is available */
+	private boolean isAvailable() {
+		return isActive() &&
+		      !isFailed() &&
+		      !isDeployed() &&
+		      !needsMaintenance();
+	}
+
+	/** Test if DMS is deployed */
+	private boolean isDeployed() {
+		return !SignMessageHelper.isBlank(messageCurrent);
+	}
+
+	/** Test if DMS needs maintenance */
+	private boolean needsMaintenance() {
+		if(isFailed() || !isActive())
+			return false;
+		if(hasCriticalError())
+			return true;
+		return !DMSHelper.getMaintenance(this).isEmpty();
+	}
+
+	/** Test if DMS has a critical error */
+	private boolean hasCriticalError() {
+		return !DMSHelper.getCriticalError(this).isEmpty();
+	}
+
+	/** Item style bits */
+	private transient long styles = 0;
+
+	/** Update the DMS styles */
+	public void updateStyles() {
+		long s = ItemStyle.ALL.bit();
+		if(DMSHelper.isLCS(this))
+			s |= ItemStyle.LCS.bit();
+		if(isAvailable())
+			s |= ItemStyle.AVAILABLE.bit();
+		if(DMSHelper.isUserDeployed(this))
+			s |= ItemStyle.DEPLOYED.bit();
+		if(DMSHelper.isTravelTimeDeployed(this))
+			s |= ItemStyle.TRAVEL_TIME.bit();
+		if(DMSHelper.isScheduleDeployed(this))
+			s |= ItemStyle.SCHEDULED.bit();
+		if(DMSHelper.isAwsMessageDeployed(this))
+			s |= ItemStyle.AWS_DEPLOYED.bit();
+		if(DMSHelper.isAwsControlled(this))
+			s |= ItemStyle.AWS_CONTROLLED.bit();
+		if(needsMaintenance())
+			s |= ItemStyle.MAINTENANCE.bit();
+		if(isFailed())
+			s |= ItemStyle.FAILED.bit();
+		if(getController() == null)
+			s |= ItemStyle.NO_CONTROLLER.bit();
+		if(!isActive())
+			s |= ItemStyle.INACTIVE.bit();
+		setStyles(s);
+	}
+
+	/** Set the item style bits (and notify clients) */
+	private void setStyles(long s) {
+		if(s != styles) {
+			styles = s;
+			notifyAttribute("styles");
+		}
+	}
+
+	/** Get item style bits */
+	public long getStyles() {
+		return styles;
 	}
 
 	/** render to kml (KmlPlacemark interface) */

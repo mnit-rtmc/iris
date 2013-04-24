@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -176,6 +176,9 @@ public interface DMS extends Device {
 	 * @return Time message was deployed (ms since epoch).
 	 * @see java.lang.System.currentTimeMillis */
 	long getDeployTime();
+
+	/** Get item style bits */
+	long getStyles();
 
 	/* Manufacturer-specific attributes */
 
