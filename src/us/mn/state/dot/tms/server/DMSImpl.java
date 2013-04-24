@@ -464,6 +464,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(!integerEquals(h, faceHeight)) {
 			faceHeight = h;
 			notifyAttribute("faceHeight");
+			updateStyles();
 		}
 	}
 
@@ -480,6 +481,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(!integerEquals(w, faceWidth)) {
 			faceWidth = w;
 			notifyAttribute("faceWidth");
+			updateStyles();
 		}
 	}
 
@@ -1499,12 +1501,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		       (nxt == null || nxt.getScheduled());
 	}
 
+	/** Test if DMS is online (active and not failed) */
+	private boolean isOnline() {
+		return isActive() && !isFailed();
+	}
+
 	/** Test if DMS is available */
 	private boolean isAvailable() {
-		return isActive() &&
-		      !isFailed() &&
-		      !isDeployed() &&
-		      !needsMaintenance();
+		return isOnline() && !isDeployed() && !needsMaintenance();
 	}
 
 	/** Test if DMS is deployed */
@@ -1514,7 +1518,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Test if DMS needs maintenance */
 	private boolean needsMaintenance() {
-		if(isFailed() || !isActive())
+		if(!isOnline())
 			return false;
 		if(hasCriticalError())
 			return true;
@@ -1532,28 +1536,30 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Update the DMS styles */
 	public void updateStyles() {
 		long s = ItemStyle.ALL.bit();
-		if(DMSHelper.isLCS(this))
-			s |= ItemStyle.LCS.bit();
-		if(isAvailable())
-			s |= ItemStyle.AVAILABLE.bit();
-		if(DMSHelper.isUserDeployed(this))
-			s |= ItemStyle.DEPLOYED.bit();
-		if(DMSHelper.isTravelTimeDeployed(this))
-			s |= ItemStyle.TRAVEL_TIME.bit();
-		if(DMSHelper.isScheduleDeployed(this))
-			s |= ItemStyle.SCHEDULED.bit();
-		if(DMSHelper.isAwsMessageDeployed(this))
-			s |= ItemStyle.AWS_DEPLOYED.bit();
-		if(DMSHelper.isAwsControlled(this))
-			s |= ItemStyle.AWS_CONTROLLED.bit();
-		if(needsMaintenance())
-			s |= ItemStyle.MAINTENANCE.bit();
-		if(isFailed())
-			s |= ItemStyle.FAILED.bit();
 		if(getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if(!isActive())
-			s |= ItemStyle.INACTIVE.bit();
+		if(DMSHelper.isLCS(this))
+			s |= ItemStyle.LCS.bit();
+		else {
+			if(isAvailable())
+				s |= ItemStyle.AVAILABLE.bit();
+			if(DMSHelper.isUserDeployed(this))
+				s |= ItemStyle.DEPLOYED.bit();
+			if(DMSHelper.isTravelTimeDeployed(this))
+				s |= ItemStyle.TRAVEL_TIME.bit();
+			if(DMSHelper.isScheduleDeployed(this))
+				s |= ItemStyle.SCHEDULED.bit();
+			if(DMSHelper.isAwsMessageDeployed(this))
+				s |= ItemStyle.AWS_DEPLOYED.bit();
+			if(DMSHelper.isAwsControlled(this))
+				s |= ItemStyle.AWS_CONTROLLED.bit();
+			if(needsMaintenance())
+				s |= ItemStyle.MAINTENANCE.bit();
+			if(DMSHelper.isFailed(this))
+				s |= ItemStyle.FAILED.bit();
+			if(!isActive())
+				s |= ItemStyle.INACTIVE.bit();
+		}
 		setStyles(s);
 	}
 
