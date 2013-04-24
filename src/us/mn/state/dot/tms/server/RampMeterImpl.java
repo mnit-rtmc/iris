@@ -444,6 +444,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Set the ramp meter lock status */
 	public void setMLock(Integer l) {
+		// Required by RampMeter iface; shouldn't ever be called
 		m_lock = RampMeterLock.fromOrdinal(l);
 	}
 
@@ -456,6 +457,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		else
 			store.update(this, "m_lock", null);
 		m_lock = l;
+		updateStyles();
 	}
 
 	/** Set the ramp meter lock status */
@@ -494,13 +496,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			if(m_lock == null) {
 				setMLock(RampMeterLock.POLICE_PANEL);
 				notifyAttribute("mLock");
-				updateStyles();
 			}
 		} else {
 			if(m_lock == RampMeterLock.POLICE_PANEL) {
 				setMLock((RampMeterLock)null);
 				notifyAttribute("mLock");
-				updateStyles();
 			}
 		}
 	}
@@ -521,13 +521,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			if(m_lock == null) {
 				setMLock(RampMeterLock.MANUAL);
 				notifyAttribute("mLock");
-				updateStyles();
 			}
 		} else {
 			if(m_lock == RampMeterLock.MANUAL) {
 				setMLock((RampMeterLock)null);
 				notifyAttribute("mLock");
-				updateStyles();
 			}
 		}
 	}
