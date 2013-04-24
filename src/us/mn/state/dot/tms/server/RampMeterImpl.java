@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.MeterAlgorithm;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
@@ -714,26 +715,24 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		       lck == RampMeterLock.KNOCK_DOWN;
 	}
 
-	/** Test if a meter is available */
+	/** Test if meter is online (active and not failed) */
+	private boolean isOnline() {
+		return isActive() && !isFailed();
+	}
+
+	/** Test if meter is available */
 	private boolean isAvailable() {
-		return isActive() &&
-		      !isFailed() &&
-		      !isMetering() &&
-		      !needsMaintenance();
+		return isOnline() && !isMetering() && !needsMaintenance();
 	}
 
-	/** Test if a meter has a full queue */
+	/** Test if meter has a full queue */
 	private boolean isQueueFull() {
-		return isActive() &&
-		      !isFailed() &&
-		       queue == RampMeterQueue.FULL;
+		return isOnline() && queue == RampMeterQueue.FULL;
 	}
 
-	/** Test if a meter has a queue */
+	/** Test if meter has a queue */
 	private boolean queueExists() {
-		return isActive() &&
-		      !isFailed() &&
-		       queue == RampMeterQueue.EXISTS;
+		return isOnline() && queue == RampMeterQueue.EXISTS;
 	}
 
 	/** Item style bits */
@@ -754,7 +753,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			s |= ItemStyle.LOCKED.bit();
 		if(needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
-		if(isFailed())
+		if(RampMeterHelper.isFailed(this))
 			s |= ItemStyle.FAILED.bit();
 		if(getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
