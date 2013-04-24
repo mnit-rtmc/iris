@@ -1072,9 +1072,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Estimate the queue overflow ratio.
 		 * @return Ratio from 0 to MAX_DEMAND_ADJ_RATIO. */
 		private float queueOverflowRatio() {
-			float full_secs = queueFullCount * STEP_SECONDS;
-			return Math.min(2 * full_secs / maxWaitTime(),
+			return Math.min(2 * queueFullSecs() / maxWaitTime(),
 				MAX_DEMAND_ADJ_RATIO);
+		}
+
+		/** Get the queue full duration (seconds) */
+		private float queueFullSecs() {
+			return queueFullCount * STEP_SECONDS;
 		}
 
 		/** Estimate the length of queue (vehicles) */
