@@ -256,11 +256,12 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(ItemStyle is, DMS proxy) {
-		// Filter out LCSs for all styles except NO_CONTROLLER
-		if(DMSHelper.isLCS(proxy) && is != ItemStyle.NO_CONTROLLER)
-			return false;
-		else
-			return DMSHelper.checkStyle(is, proxy);
+		long styles = proxy.getStyles();
+		for(ItemStyle s: ItemStyle.toStyles(styles)) {
+			if(s == is)
+				return true;
+		}
+		return false;
 	}
 
 	/** Get the layer zoom visibility threshold */

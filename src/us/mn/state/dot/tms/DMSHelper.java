@@ -31,14 +31,6 @@ public class DMSHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** All styles */
-	static private final ItemStyle[] STYLES_ALL = {
-		ItemStyle.AVAILABLE, ItemStyle.DEPLOYED,
-		ItemStyle.SCHEDULED, ItemStyle.TRAVEL_TIME,
-		ItemStyle.MAINTENANCE, ItemStyle.FAILED,
-		ItemStyle.AWS_CONTROLLED, ItemStyle.NO_CONTROLLER
-	};
-
 	/** Lookup the DMS with the specified name */
 	static public DMS lookup(String name) {
 		return (DMS)namespace.lookupObject(DMS.SONAR_TYPE, name);
@@ -210,44 +202,13 @@ public class DMSHelper extends BaseHelper {
 		return ControllerHelper.isFailed(proxy.getController());
 	}
 
-	/** Check the style of the specified proxy */
-	static public boolean checkStyle(ItemStyle is, DMS proxy) {
-		switch(is) {
-		case NO_CONTROLLER:
-			return proxy.getController() == null;
-		case AVAILABLE:
-			return isAvailable(proxy);
-		case DEPLOYED:
-			return isUserDeployed(proxy);
-		case TRAVEL_TIME:
-			return isTravelTimeDeployed(proxy);
-		case SCHEDULED:
-			return isScheduleDeployed(proxy);
-		case AWS_DEPLOYED:
-			return isAwsMessageDeployed(proxy);
-		case MAINTENANCE:
-			return needsMaintenance(proxy);
-		case FAILED:
-			return isFailed(proxy);
-		case AWS_CONTROLLED:
-			return isAwsControlled(proxy);
-		case ALL:
-			return true;
-		default:
-			return false;
-		}
-	}
-
 	/** Get a string that contains all active DMS styles,
 	 *  separated by commas. */
 	static public String getAllStyles(DMS proxy) {
 		StringBuilder s = new StringBuilder();
-		for(ItemStyle style: STYLES_ALL) {
-			String st = style.toString();
-			if(checkStyle(style, proxy)) {
-				s.append(st);
-				s.append(", ");
-			}
+		for(ItemStyle style: ItemStyle.toStyles(proxy.getStyles())) {
+			s.append(style.toString());
+			s.append(", ");
 		}
 		return SString.removeTail(s.toString(), ", ");
 	}

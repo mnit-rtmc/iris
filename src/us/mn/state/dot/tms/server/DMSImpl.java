@@ -1664,17 +1664,17 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** get kml icon color, which is a function of the DMS state */
 	public KmlColor getKmlIconColor() {
 		// note: this is a prioritized list
-		if(DMSHelper.checkStyle(ItemStyle.AVAILABLE, this))
+		if(ItemStyle.AVAILABLE.checkBit(styles))
 			return KmlColorImpl.Blue;
-		if(DMSHelper.checkStyle(ItemStyle.DEPLOYED, this))
+		if(ItemStyle.DEPLOYED.checkBit(styles))
 			return KmlColorImpl.Yellow;
-		if(DMSHelper.checkStyle(ItemStyle.AWS_DEPLOYED, this))
+		if(ItemStyle.AWS_DEPLOYED.checkBit(styles))
 			return KmlColorImpl.Red;
-		if(DMSHelper.checkStyle(ItemStyle.SCHEDULED, this))
+		if(ItemStyle.SCHEDULED.checkBit(styles))
 			return KmlColorImpl.Orange;
-		if(DMSHelper.checkStyle(ItemStyle.MAINTENANCE, this))
+		if(ItemStyle.MAINTENANCE.checkBit(styles))
 			return KmlColorImpl.Black;
-		if(DMSHelper.checkStyle(ItemStyle.FAILED, this))
+		if(ItemStyle.FAILED.checkBit(styles))
 			return KmlColorImpl.Gray;
 		return KmlColorImpl.Black;
 	}
