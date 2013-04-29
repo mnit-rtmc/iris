@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,23 +50,23 @@ import us.mn.state.dot.tms.utils.I18N;
 public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
 	/** Currently logged in user */
-	protected final User user;
+	private final User user;
 
 	/** Incident manager */
-	protected final IncidentManager manager;
+	private final IncidentManager manager;
 
 	/** Incident deployment policy */
-	protected final IncidentPolicy policy;
+	private final IncidentPolicy policy;
 
 	/** Mapping of LCS array names to proposed indications */
-	protected final HashMap<String, Integer []> indications =
+	private final HashMap<String, Integer []> indications =
 		new HashMap<String, Integer []>();
 
 	/** Model for deployment list */
-	protected final DefaultListModel model = new DefaultListModel();
+	private final DefaultListModel model = new DefaultListModel();
 
 	/** List of deployments for the incident */
-	protected final JList list = new JList(model);
+	private final JList list = new JList(model);
 
 	/** Action to send device messages */
 	private final IAction send = new IAction("incident.send") {
@@ -85,20 +85,22 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<Incident> getTypeCache() {
+	@Override protected TypeCache<Incident> getTypeCache() {
 		return state.getIncidents();
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		super.initialize();
 		list.setCellRenderer(new LCSArrayCellRenderer(
 			session.getLCSArrayManager())
 		{
-			protected User getUser(LCSArray lcs_array) {
+			@Override protected User getUser(LCSArray lcs_array) {
 				return user;
 			}
-			protected Integer[] getIndications(LCSArray lcs_array) {
+			@Override protected Integer[] getIndications(
+				LCSArray lcs_array)
+			{
 				return indications.get(lcs_array.getName());
 			}
 		});
@@ -107,7 +109,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Populate the list model with LCS array indications to display */
-	protected void populateList() {
+	private void populateList() {
 		IncidentLoc loc = new IncidentLoc(proxy);
 		CorridorBase cb = manager.lookupCorridor(loc);
 		if(cb != null) {
@@ -118,7 +120,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Populate the list model with LCS array indications to display */
-	protected void populateList(CorridorBase cb, float mp) {
+	private void populateList(CorridorBase cb, float mp) {
 		TreeMap<Float, LCSArray> upstream = findUpstream(cb, mp);
 		LaneConfiguration config = cb.laneConfiguration(
 			getWgs84Position());
@@ -166,7 +168,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Check if a set of indications should be deployed */
-	static protected boolean shouldDeploy(Integer[] ind) {
+	static private boolean shouldDeploy(Integer[] ind) {
 		for(int i: ind) {
 			LaneUseIndication li = LaneUseIndication.fromOrdinal(i);
 			switch(LaneUseIndication.fromOrdinal(i)) {
@@ -181,7 +183,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Create the panel for the form */
-	protected JPanel createPanel() {
+	private JPanel createPanel() {
 		JLabel lbl = new JLabel();
 		lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		lbl.setText(manager.getDescription(proxy));
@@ -199,7 +201,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Send new indications to LCS arrays for the incident */
-	protected void sendIndications() {
+	private void sendIndications() {
 		for(int i = 0; i < model.getSize(); i++) {
 			Object e = model.getElementAt(i);
 			if(e instanceof LCSArray)
@@ -208,7 +210,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Send new indications to the specified LCS array */
-	protected void sendIndications(LCSArray lcs_array) {
+	private void sendIndications(LCSArray lcs_array) {
 		Integer[] ind = indications.get(lcs_array.getName());
 		if(ind != null) {
 			lcs_array.setOwnerNext(user);
@@ -217,7 +219,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Update one attribute on the form */
-	protected void doUpdateAttribute(String a) {
+	@Override protected void doUpdateAttribute(String a) {
 		if("cleared".equals(a) && proxy.getCleared())
 			closeForm();
 	}
