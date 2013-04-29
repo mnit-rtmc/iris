@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.Point;
 import us.mn.state.dot.tms.RasterBuilder;
@@ -1530,6 +1531,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return !DMSHelper.getCriticalError(this).isEmpty();
 	}
 
+	/** Test if DMS is part of an LCS array */
+	private boolean isLCS() {
+		return LCSHelper.lookup(name) != null;
+	}
+
 	/** Item style bits */
 	private transient long styles = 0;
 
@@ -1538,7 +1544,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		long s = ItemStyle.ALL.bit();
 		if(getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if(DMSHelper.isLCS(this))
+		if(isLCS())
 			s |= ItemStyle.LCS.bit();
 		else {
 			if(isAvailable())

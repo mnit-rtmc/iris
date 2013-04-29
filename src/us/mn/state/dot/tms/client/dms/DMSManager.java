@@ -243,7 +243,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Find the map geo location for a DMS */
 	public MapGeoLoc findGeoLoc(DMS proxy) {
-		if(DMSHelper.isLCS(proxy))
+		if(ItemStyle.LCS.checkBit(proxy.getStyles()))
 			return null;
 		else
 			return super.findGeoLoc(proxy);
