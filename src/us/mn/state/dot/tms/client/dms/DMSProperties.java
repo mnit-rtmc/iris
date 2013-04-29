@@ -20,22 +20,16 @@ import java.awt.Color;
 import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
@@ -44,12 +38,9 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.units.Temperature;
 import us.mn.state.dot.tms.utils.I18N;
@@ -134,20 +125,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	static private final String MAKE_SKYLINE = "Skyline";
 
 	/** Location panel */
-	private final LocationPanel location;
-
-	/** Notes text area */
-	private final JTextArea notes = new JTextArea(3, 24);
-
-	/** Camera combo box */
-	private final JComboBox camera_cbx = new JComboBox();
-
-	/** Controller action */
-	private final IAction controller = new IAction("controller") {
-		@Override protected void do_perform() {
-			controllerPressed();
-		}
-	};
+	private final LocationPanelDMS location_pnl;
 
 	/** Messages tab */
 	private final MessagesTab messagesTab;
@@ -355,7 +333,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		setHelpPageName("help.dmsproperties");
 		state = s.getSonarState();
 		user = s.getUser();
-		location = new LocationPanel(s);
+		location_pnl = new LocationPanelDMS(s, sign);
 		messagesTab = new MessagesTab(s, sign);
 	}
 
@@ -367,8 +345,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Initialize the widgets on the form */
 	@Override protected void initialize() {
 		super.initialize();
+		location_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add(I18N.get("location"), createLocationPanel());
+		tab.add(I18N.get("location"), location_pnl);
 		tab.add(I18N.get("dms.messages"), messagesTab);
 		tab.add(I18N.get("dms.config"), createConfigurationPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
@@ -393,18 +372,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Dispose of the form */
 	@Override protected void dispose() {
-		location.dispose();
+		location_pnl.dispose();
 		messagesTab.dispose();
 		super.dispose();
 	}
 
 	/** Create the widget jobs */
 	private void createUpdateJobs() {
-		notes.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
-				proxy.setNotes(notes.getText());
-			}
-		});
 		ldcPotBaseSpn.addChangeListener(new ChangeJob(WORKER) {
 			@Override public void perform() {
 				Number n = (Number)ldcPotBaseSpn.getValue();
@@ -437,35 +411,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		bright_low.setEnabled(false);
 		bright_good.setEnabled(false);
 		bright_high.setEnabled(false);
-	}
-
-	/** Controller lookup button pressed */
-	private void controllerPressed() {
-		Controller c = proxy.getController();
-		if(c != null) {
-			session.getDesktop().show(
-				new ControllerForm(session, c));
-		}
-	}
-
-	/** Create the location panel */
-	private JPanel createLocationPanel() {
-		camera_cbx.setAction(new IAction("camera") {
-			@Override protected void do_perform() {
-				proxy.setCamera(
-					(Camera)camera_cbx.getSelectedItem());
-			}
-		});
-		camera_cbx.setModel(new WrapperComboBoxModel(
-			state.getCamCache().getCameraModel()));
-		location.setGeoLoc(proxy.getGeoLoc());
-		location.initialize();
-		location.addRow(I18N.get("device.notes"), notes);
-		location.add(I18N.get("camera"), camera_cbx);
-		location.finishRow();
-		location.setCenter();
-		location.addRow(new JButton(controller));
-		return location;
 	}
 
 	/** Create the configuration panel */
@@ -620,17 +565,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Update one attribute on the form */
 	@Override protected void doUpdateAttribute(String a) {
+		location_pnl.updateAttribute(a);
 		messagesTab.updateAttribute(a);
-		if(a == null || a.equals("controller"))
-			controller.setEnabled(proxy.getController() != null);
-		if(a == null || a.equals("notes")) {
-			notes.setEnabled(canUpdate("notes"));
-			notes.setText(proxy.getNotes());
-		}
-		if(a == null || a.equals("camera")) {
-			camera_cbx.setEnabled(canUpdate("camera"));
-			camera_cbx.setSelectedItem(proxy.getCamera());
-		}
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);

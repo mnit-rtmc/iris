@@ -81,7 +81,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	private final IrisClient client;
 
 	/** Sonar state object */
-	private final SonarState state;
+	protected final SonarState state;
 
 	/** Proxy watcher */
 	private final ProxyWatcher<GeoLoc> watcher;
