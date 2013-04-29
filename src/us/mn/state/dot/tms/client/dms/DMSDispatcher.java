@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -458,6 +458,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Can a message be sent to the specified DMS? */
 	public boolean canSend(DMS dms) {
 		return dms != null &&
+		       creator.canCreate() &&
 		       namespace.canUpdate(user, new Name(dms, "ownerNext")) &&
 		       namespace.canUpdate(user, new Name(dms, "messageNext"));
 	}

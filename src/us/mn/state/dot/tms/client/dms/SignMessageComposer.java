@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -451,8 +451,8 @@ public class SignMessageComposer extends JPanel {
 		dur_cbx.setSelectedItem(0);
 		pg_on_spn.setEnabled(b);
 		alert_chx.setEnabled(b);
-		send_msg.setEnabled(b);
-		blank_msg.setEnabled(b);
+		send_msg.setEnabled(b && dispatcher.canSend());
+		blank_msg.setEnabled(b && dispatcher.canSend());
 		query_msg.setEnabled(b && dispatcher.canRequest());
 		adjusting--;
 	}

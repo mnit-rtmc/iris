@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,7 +150,7 @@ public class SignMessageCreator {
 		final int uid_max = names.size() + EXTRA_MSG_IDS;
 		for(int i = 0; i < uid_max; i++) {
 			final int _uid = (uid + i) % uid_max + 1;
-			String n = user.getName() + "_" + _uid;
+			String n = createName(_uid);
 			if(!names.contains(n)) {
 				uid = _uid;
 				return n;
@@ -158,6 +158,13 @@ public class SignMessageCreator {
 		}
 		assert false;
 		return null;
+	}
+
+	/** Create a SignMessage name.
+	 * @param uid ID of name.
+	 * @return Name of SignMessage. */
+	private String createName(int uid) {
+		return user.getName() + '_' + uid;
 	}
 
 	/** 
@@ -172,5 +179,11 @@ public class SignMessageCreator {
 				names.add(sm.getName());
 		}
 		return names;
+	}
+
+	/** Check if the user can create a sign message */
+	public boolean canCreate() {
+		Name n = new Name(SignMessage.SONAR_TYPE, createName(0));
+		return namespace.canAdd(user, n);
 	}
 }
