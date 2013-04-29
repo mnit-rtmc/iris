@@ -623,10 +623,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		messagesTab.updateAttribute(a);
 		if(a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
-		if(a == null || a.equals("notes"))
+		if(a == null || a.equals("notes")) {
+			notes.setEnabled(canUpdate("notes"));
 			notes.setText(proxy.getNotes());
-		if(a == null || a.equals("camera"))
+		}
+		if(a == null || a.equals("camera")) {
+			camera_cbx.setEnabled(canUpdate("camera"));
 			camera_cbx.setSelectedItem(proxy.getCamera());
+		}
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);

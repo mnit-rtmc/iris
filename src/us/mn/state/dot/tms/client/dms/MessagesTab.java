@@ -121,6 +121,11 @@ public class MessagesTab extends JPanel {
 	/** DMS proxy */
 	protected final DMS proxy;
 
+	/** Check if the user can update an attribute */
+	private boolean canUpdate(String aname) {
+		return session.canUpdate(proxy, aname);
+	}
+
 	/** Create a new messages tab */
 	public MessagesTab(Session s, DMS sign) {
 		super(new GridBagLayout());
@@ -382,12 +387,18 @@ public class MessagesTab extends JPanel {
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if(a == null || a.equals("defaultFont"))
+		if(a == null || a.equals("defaultFont")) {
+			font_cbx.setEnabled(canUpdate("defaultFont"));
 			font_cbx.setSelectedItem(proxy.getDefaultFont());
-		if(a == null || a.equals("awsAllowed"))
+		}
+		if(a == null || a.equals("awsAllowed")) {
+			aws_allowed_chk.setEnabled(canUpdate("awsAllowed"));
 			aws_allowed_chk.setSelected(proxy.getAwsAllowed());
-		if(a == null || a.equals("awsControlled"))
+		}
+		if(a == null || a.equals("awsControlled")) {
+			aws_control_chk.setEnabled(canUpdate("awsControlled"));
 			aws_control_chk.setSelected(proxy.getAwsControlled());
+		}
 		// NOTE: messageCurrent attribute changes after all sign
 		//       dimension attributes are updated.
 		if(a == null || a.equals("messageCurrent"))
