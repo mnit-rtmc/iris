@@ -50,12 +50,12 @@ import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * MessagesTab is a GUI tab for displaying and editing sign messages on a
+ * PropMessages is a GUI panel for displaying and editing sign messages on a
  * DMS properties form.
  *
  * @author Douglas Lau
  */
-public class MessagesTab extends JPanel {
+public class PropMessages extends JPanel {
 
 	/** Sign group table model */
 	private final SignGroupTableModel sign_group_model;
@@ -126,8 +126,8 @@ public class MessagesTab extends JPanel {
 		return session.canUpdate(proxy, aname);
 	}
 
-	/** Create a new messages tab */
-	public MessagesTab(Session s, DMS sign) {
+	/** Create a new DMS properties messages panel */
+	public PropMessages(Session s, DMS sign) {
 		super(new GridBagLayout());
 		session = s;
 		dms_cache = s.getSonarState().getDmsCache();

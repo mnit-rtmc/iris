@@ -125,10 +125,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	static private final String MAKE_SKYLINE = "Skyline";
 
 	/** Location panel */
-	private final LocationPanelDMS location_pnl;
+	private final PropLocation location_pnl;
 
-	/** Messages tab */
-	private final MessagesTab messagesTab;
+	/** Messages panel */
+	private final PropMessages messages_pnl;
 
 	/** Sign type label */
 	private final JLabel type = new JLabel();
@@ -333,8 +333,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		setHelpPageName("help.dmsproperties");
 		state = s.getSonarState();
 		user = s.getUser();
-		location_pnl = new LocationPanelDMS(s, sign);
-		messagesTab = new MessagesTab(s, sign);
+		location_pnl = new PropLocation(s, sign);
+		messages_pnl = new PropMessages(s, sign);
 	}
 
 	/** Get the SONAR type cache */
@@ -348,7 +348,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		location_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), location_pnl);
-		tab.add(I18N.get("dms.messages"), messagesTab);
+		tab.add(I18N.get("dms.messages"), messages_pnl);
 		tab.add(I18N.get("dms.config"), createConfigurationPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
@@ -373,7 +373,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Dispose of the form */
 	@Override protected void dispose() {
 		location_pnl.dispose();
-		messagesTab.dispose();
+		messages_pnl.dispose();
 		super.dispose();
 	}
 
@@ -566,7 +566,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Update one attribute on the form */
 	@Override protected void doUpdateAttribute(String a) {
 		location_pnl.updateAttribute(a);
-		messagesTab.updateAttribute(a);
+		messages_pnl.updateAttribute(a);
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);

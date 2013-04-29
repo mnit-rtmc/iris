@@ -30,12 +30,12 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * LocationPanelDMS is a GUI tab for displaying and editing locations on a DMS
+ * PropLocation is a GUI panel for displaying and editing locations on a DMS
  * properties form.
  *
  * @author Douglas Lau
  */
-public class LocationPanelDMS extends LocationPanel {
+public class PropLocation extends LocationPanel {
 
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(3, 24);
@@ -62,8 +62,8 @@ public class LocationPanelDMS extends LocationPanel {
 	/** DMS to display */
 	private final DMS dms;
 
-	/** Create a new DMS location panel */
-	public LocationPanelDMS(Session s, DMS sign) {
+	/** Create a new DMS properties location panel */
+	public PropLocation(Session s, DMS sign) {
 		super(s);
 		dms = sign;
 	}
