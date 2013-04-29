@@ -77,7 +77,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	static private final String UNKNOWN = "???";
 
 	/** Format a string field */
-	static protected String formatString(String s) {
+	static private String formatString(String s) {
 		if(s != null && s.length() > 0)
 			return s;
 		else
@@ -85,7 +85,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Format millimeter units for display */
-	static protected String formatMM(Integer i) {
+	static private String formatMM(Integer i) {
 		if(i != null && i > 0)
 			return i + " " + I18N.get("units.mm");
 		else
@@ -93,7 +93,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Format pixel units for display */
-	static protected String formatPixels(Integer i) {
+	static private String formatPixels(Integer i) {
 		if(i != null) {
 			if(i > 0)
 				return i + " " + I18N.get("units.pixels");
@@ -125,19 +125,19 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Generic sign make */
-	static protected final String MAKE_GENERIC = "Generic";
+	static private final String MAKE_GENERIC = "Generic";
 
 	/** Ledstar sign make */
-	static protected final String MAKE_LEDSTAR = "Ledstar";
+	static private final String MAKE_LEDSTAR = "Ledstar";
 
 	/** Skyline sign make */
-	static protected final String MAKE_SKYLINE = "Skyline";
+	static private final String MAKE_SKYLINE = "Skyline";
 
 	/** Location panel */
 	private final LocationPanel location;
 
 	/** Notes text area */
-	protected final JTextArea notes = new JTextArea(3, 24);
+	private final JTextArea notes = new JTextArea(3, 24);
 
 	/** Camera combo box */
 	private final JComboBox camera_cbx = new JComboBox();
@@ -150,52 +150,52 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	};
 
 	/** Messages tab */
-	protected final MessagesTab messagesTab;
+	private final MessagesTab messagesTab;
 
 	/** Sign type label */
-	protected final JLabel type = new JLabel();
+	private final JLabel type = new JLabel();
 
 	/** Sign technology label */
-	protected final JLabel tech = new JLabel();
+	private final JLabel tech = new JLabel();
 
 	/** Sign access label */
-	protected final JLabel access = new JLabel();
+	private final JLabel access = new JLabel();
 
 	/** Sign legend label */
-	protected final JLabel legend = new JLabel();
+	private final JLabel legend = new JLabel();
 
 	/** Beacon label */
-	protected final JLabel beacon = new JLabel();
+	private final JLabel beacon = new JLabel();
 
 	/** Sign face width label */
-	protected final JLabel faceWidth = new JLabel();
+	private final JLabel faceWidth = new JLabel();
 
 	/** Sign face height label */
-	protected final JLabel faceHeight = new JLabel();
+	private final JLabel faceHeight = new JLabel();
 
 	/** Horizontal border label */
-	protected final JLabel hBorder = new JLabel();
+	private final JLabel hBorder = new JLabel();
 
 	/** Vertical border label */
-	protected final JLabel vBorder = new JLabel();
+	private final JLabel vBorder = new JLabel();
 
 	/** Horizontal pitch label */
-	protected final JLabel hPitch = new JLabel();
+	private final JLabel hPitch = new JLabel();
 
 	/** Vertical pitch label */
-	protected final JLabel vPitch = new JLabel();
+	private final JLabel vPitch = new JLabel();
 
 	/** Sign width (pixels) label */
-	protected final JLabel pWidth = new JLabel();
+	private final JLabel pWidth = new JLabel();
 
 	/** Sign height (pixels) label */
-	protected final JLabel pHeight = new JLabel();
+	private final JLabel pHeight = new JLabel();
 
 	/** Character width label */
-	protected final JLabel cWidth = new JLabel();
+	private final JLabel cWidth = new JLabel();
 
 	/** Character height label */
-	protected final JLabel cHeight = new JLabel();
+	private final JLabel cHeight = new JLabel();
 
 	/** Button to query configuration */
 	private final IAction config = new IAction("dms.query.config") {
@@ -206,19 +206,19 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	};
 
 	/** Cabinet temperature label */
-	protected final JLabel cabinetTemp = new JLabel();
+	private final JLabel cabinetTemp = new JLabel();
 
 	/** Ambient temperature label */
-	protected final JLabel ambientTemp = new JLabel();
+	private final JLabel ambientTemp = new JLabel();
 
 	/** Housing temperature label */
-	protected final JLabel housingTemp = new JLabel();
+	private final JLabel housingTemp = new JLabel();
 
 	/** Power supply status table */
-	protected final ZTable powerTable = new ZTable();
+	private final ZTable powerTable = new ZTable();
 
 	/** Operation description label */
-	protected final JLabel operation = new JLabel();
+	private final JLabel operation = new JLabel();
 
 	/** Query message action */
 	private final IAction query_msg = new IAction("dms.query.msg",
@@ -257,7 +257,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	};
 
 	/** Bad pixel count label */
-	protected final JLabel badPixels = new JLabel();
+	private final JLabel badPixels = new JLabel();
 
 	/** Stuck off pixel panel */
 	private final SignPixelPanel stuck_off_pnl = new SignPixelPanel(100,
@@ -284,10 +284,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	};
 
 	/** Photocell status table */
-	protected final ZTable photocellTable = new ZTable();
+	private final ZTable photocellTable = new ZTable();
 
 	/** Light output label */
-	protected final JLabel lightOutput = new JLabel();
+	private final JLabel lightOutput = new JLabel();
 
 	/** Current brightness low feedback action */
 	private final IAction bright_low = new IAction("dms.brightness.low") {
@@ -314,40 +314,40 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	};
 
 	/** Card layout for manufacturer panels */
-	protected final CardLayout cards = new CardLayout();
+	private final CardLayout cards = new CardLayout();
 
 	/** Card panel for manufacturer panels */
-	protected final JPanel card_panel = new JPanel(cards);
+	private final JPanel card_panel = new JPanel(cards);
 
 	/** Make label */
-	protected final JLabel make = new JLabel();
+	private final JLabel make = new JLabel();
 
 	/** Model label */
-	protected final JLabel model = new JLabel();
+	private final JLabel model = new JLabel();
 
 	/** Version label */
-	protected final JLabel version = new JLabel();
+	private final JLabel version = new JLabel();
 
 	/** Spinner to adjuct LDC pot base */
-	protected final JSpinner ldcPotBaseSpn = new JSpinner(
+	private final JSpinner ldcPotBaseSpn = new JSpinner(
 		new SpinnerNumberModel(20, 20, 65, 5));
 
 	/** Pixel current low threshold spinner */
-	protected final JSpinner currentLowSpn = new JSpinner(
+	private final JSpinner currentLowSpn = new JSpinner(
 		new SpinnerNumberModel(5, 0, 100, 1));
 
 	/** Pixel current high threshold spinner */
-	protected final JSpinner currentHighSpn = new JSpinner(
+	private final JSpinner currentHighSpn = new JSpinner(
 		new SpinnerNumberModel(40, 0, 100, 1));
 
 	/** Heat tape status label */
-	protected final JLabel heatTapeStatus = new JLabel();
+	private final JLabel heatTapeStatus = new JLabel();
 
 	/** Sonar state */
-	protected final SonarState state;
+	private final SonarState state;
 
 	/** SONAR user */
-	protected final User user;
+	private final User user;
 
 	/** Create a new DMS properties form */
 	public DMSProperties(Session s, DMS sign) {
@@ -360,12 +360,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<DMS> getTypeCache() {
+	@Override protected TypeCache<DMS> getTypeCache() {
 		return state.getDmsCache().getDMSs();
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
@@ -392,14 +392,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
+	@Override protected void dispose() {
 		location.dispose();
 		messagesTab.dispose();
 		super.dispose();
 	}
 
 	/** Create the widget jobs */
-	protected void createUpdateJobs() {
+	private void createUpdateJobs() {
 		notes.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
 				proxy.setNotes(notes.getText());
@@ -426,7 +426,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Disable the device request widgets */
-	protected void disableRequestWidgets() {
+	private void disableRequestWidgets() {
 		config.setEnabled(false);
 		query_msg.setEnabled(false);
 		reset.setEnabled(false);
@@ -440,7 +440,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Controller lookup button pressed */
-	protected void controllerPressed() {
+	private void controllerPressed() {
 		Controller c = proxy.getController();
 		if(c != null) {
 			session.getDesktop().show(
@@ -449,7 +449,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create the location panel */
-	protected JPanel createLocationPanel() {
+	private JPanel createLocationPanel() {
 		camera_cbx.setAction(new IAction("camera") {
 			@Override protected void do_perform() {
 				proxy.setCamera(
@@ -469,7 +469,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create the configuration panel */
-	protected JPanel createConfigurationPanel() {
+	private JPanel createConfigurationPanel() {
 		type.setForeground(OK);
 		tech.setForeground(OK);
 		access.setForeground(OK);
@@ -506,7 +506,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create status panel */
-	protected JPanel createStatusPanel() {
+	private JPanel createStatusPanel() {
 		powerTable.setAutoCreateColumnsFromModel(false);
 		powerTable.setVisibleRowCount(6);
 		cabinetTemp.setForeground(OK);
@@ -530,7 +530,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create pixel panel */
-	protected JPanel createPixelPanel() {
+	private JPanel createPixelPanel() {
 		JPanel buttonPnl = new JPanel();
 		buttonPnl.add(new JButton(query_pixels));
 		buttonPnl.add(new JButton(test_pixels));
@@ -558,7 +558,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create brightness panel */
-	protected JPanel createBrightnessPanel() {
+	private JPanel createBrightnessPanel() {
 		photocellTable.setAutoCreateColumnsFromModel(false);
 		photocellTable.setVisibleRowCount(6);
 		lightOutput.setForeground(OK);
@@ -575,7 +575,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create manufacturer-specific panel */
-	protected JPanel createManufacturerPanel() {
+	private JPanel createManufacturerPanel() {
 		make.setForeground(OK);
 		model.setForeground(OK);
 		version.setForeground(OK);
@@ -591,7 +591,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create generic manufacturer panel */
-	protected JPanel createGenericPanel() {
+	private JPanel createGenericPanel() {
 		FormPanel panel = new FormPanel(true);
 		panel.setTitle(I18N.get("dms.manufacturer.unknown"));
 		panel.addRow(new JLabel(UNKNOWN));
@@ -599,7 +599,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create Ledstar-specific panel */
-	protected JPanel createLedstarPanel() {
+	private JPanel createLedstarPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
 		panel.setTitle(MAKE_LEDSTAR);
 		panel.addRow(I18N.get("dms.ledstar.pot.base"), ldcPotBaseSpn);
@@ -610,7 +610,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create Skyline-specific panel */
-	protected JPanel createSkylinePanel() {
+	private JPanel createSkylinePanel() {
 		heatTapeStatus.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.setTitle(MAKE_SKYLINE);
@@ -619,7 +619,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Update one attribute on the form */
-	protected void doUpdateAttribute(String a) {
+	@Override protected void doUpdateAttribute(String a) {
 		messagesTab.updateAttribute(a);
 		if(a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
@@ -739,7 +739,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Select card on manufacturer panel for the given make */
-	protected void updateMake(String m) {
+	private void updateMake(String m) {
 		if(m.contains(MAKE_LEDSTAR.toUpperCase()))
 			cards.show(card_panel, MAKE_LEDSTAR);
 		else if(m.contains(MAKE_SKYLINE.toUpperCase()))
@@ -749,7 +749,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Update the power status */
-	protected void updatePowerStatus() {
+	private void updatePowerStatus() {
 		String[] s = proxy.getPowerStatus();
 		if(s != null) {
 			PowerTableModel m = new PowerTableModel(s);
@@ -759,7 +759,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Update the pixel status */
-	protected void updatePixelStatus() {
+	private void updatePixelStatus() {
 		updatePixelPanel(stuck_off_pnl);
 		updatePixelPanel(stuck_on_pnl);
 		String[] pixels = proxy.getPixelStatus();
@@ -778,7 +778,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Update the pixel status */
-	protected void updatePixelStatus(String[] pixels) throws IOException {
+	private void updatePixelStatus(String[] pixels) throws IOException {
 		BitmapGraphic stuckOff = createBlankBitmap();
 		BitmapGraphic stuckOn = createBlankBitmap();
 		if(stuckOff == null || stuckOn == null)
@@ -797,7 +797,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Create a blank bitmap */
-	protected BitmapGraphic createBlankBitmap() {
+	private BitmapGraphic createBlankBitmap() {
 		Integer w = proxy.getWidthPixels();	// Avoid race
 		Integer h = proxy.getHeightPixels();	// Avoid race
 		if(w != null && h != null)
@@ -807,14 +807,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Update the dimensions of a sign pixel panel */
-	protected void updatePixelPanel(SignPixelPanel p) {
+	private void updatePixelPanel(SignPixelPanel p) {
 		updatePixelPhysical(p);
 		updatePixelLogical(p);
 		p.repaint();
 	}
 
 	/** Update the physical dimensions of a sign pixel panel */
-	protected void updatePixelPhysical(SignPixelPanel p) {
+	private void updatePixelPhysical(SignPixelPanel p) {
 		Integer w = proxy.getFaceWidth();
 		Integer h = proxy.getFaceHeight();
 		Integer hp = proxy.getHorizontalPitch();
@@ -829,7 +829,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Update the logical dimensions of a sign pixel panel */
-	protected void updatePixelLogical(SignPixelPanel p) {
+	private void updatePixelLogical(SignPixelPanel p) {
 		Integer wp = proxy.getWidthPixels();
 		Integer hp = proxy.getHeightPixels();
 		Integer cw = proxy.getCharWidthPixels();
@@ -839,7 +839,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Update the photocell status */
-	protected void updatePhotocellStatus() {
+	private void updatePhotocellStatus() {
 		String[] s = proxy.getPhotocellStatus();
 		if(s != null) {
 			PhotocellTableModel m = new PhotocellTableModel(s);
@@ -849,7 +849,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Update the feedback buttons */
-	protected void updateFeedback() {
+	private void updateFeedback() {
 		boolean enable = canRequest() && !SignMessageHelper.isBlank(
 			proxy.getMessageCurrent());
 		bright_low.setEnabled(enable);
@@ -858,7 +858,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Check if the user can make device requests */
-	protected boolean canRequest() {
+	private boolean canRequest() {
 		return canUpdate("deviceRequest");
 	}
 }

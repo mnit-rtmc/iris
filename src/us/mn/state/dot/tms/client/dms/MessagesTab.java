@@ -58,10 +58,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class MessagesTab extends JPanel {
 
 	/** Sign group table model */
-	protected final SignGroupTableModel sign_group_model;
+	private final SignGroupTableModel sign_group_model;
 
 	/** Sign group table component */
-	protected final ZTable group_table = new ZTable();
+	private final ZTable group_table = new ZTable();
 
 	/** Action to delete a sign group */
 	private final IAction delete_group = new IAction("dms.group.delete") {
@@ -73,10 +73,10 @@ public class MessagesTab extends JPanel {
 	};
 
 	/** Sign text table model */
-	protected SignTextTableModel sign_text_model;
+	private SignTextTableModel sign_text_model;
 
 	/** Sign text table component */
-	protected final ZTable sign_text_table = new ZTable();
+	private final ZTable sign_text_table = new ZTable();
 
 	/** Action to delete sign text message */
 	private final IAction delete_text = new IAction("dms.message.delete") {
@@ -88,7 +88,7 @@ public class MessagesTab extends JPanel {
 	};
 
 	/** Sign pixel panel */
-	protected final SignPixelPanel pixel_panel = new SignPixelPanel(40, 400,
+	private final SignPixelPanel pixel_panel = new SignPixelPanel(40, 400,
 		true, new Color(0, 0, 0.4f));
 
 	/** Default font combo box */
@@ -113,13 +113,13 @@ public class MessagesTab extends JPanel {
 	});
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** DMS cache */
-	protected final DmsCache dms_cache;
+	private final DmsCache dms_cache;
 
 	/** DMS proxy */
-	protected final DMS proxy;
+	private final DMS proxy;
 
 	/** Check if the user can update an attribute */
 	private boolean canUpdate(String aname) {
@@ -155,7 +155,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Initialize the widgets on the tab */
-	protected void initWidgets() {
+	private void initWidgets() {
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets = UI.insets();
 		bag.fill = GridBagConstraints.BOTH;
@@ -210,7 +210,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Create a message preview panel */
-	protected JPanel createPreviewPanel() {
+	private JPanel createPreviewPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("dms.message.preview")));
@@ -220,7 +220,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Initialize the sign group table */
-	protected void initGroupTable() {
+	private void initGroupTable() {
 		final ListSelectionModel s = group_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionJob(WORKER) {
@@ -236,7 +236,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Select a new sign group */
-	protected void selectGroup() {
+	private void selectGroup() {
 		SignGroup group = getSelectedGroup();
 		if(group != null) {
 			if(sign_text_model != null)
@@ -255,12 +255,12 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Check if a sign group is deletable */
-	protected boolean isGroupDeletable(SignGroup sg) {
+	private boolean isGroupDeletable(SignGroup sg) {
 		return hasNoReferences(sg) && canRemove(sg);
 	}
 
 	/** Check if a sign group has no references */
-	protected boolean hasNoReferences(SignGroup group) {
+	private boolean hasNoReferences(SignGroup group) {
 		return !(hasMembers(group) || hasSignText(group));
 	}
 
@@ -283,18 +283,18 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Check if the user can remove the specified sign group */
-	protected boolean canRemove(SignGroup sg) {
+	private boolean canRemove(SignGroup sg) {
 		return sign_group_model.canRemove(sg);
 	}
 
 	/** Get the selected sign group */
-	protected SignGroup getSelectedGroup() {
+	private SignGroup getSelectedGroup() {
 		ListSelectionModel s = group_table.getSelectionModel();
 		return sign_group_model.getProxy(s.getMinSelectionIndex());
 	}
 
 	/** Initialize the sign text table */
-	protected void initSignTextTable() {
+	private void initSignTextTable() {
 		final ListSelectionModel s =
 			sign_text_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -308,7 +308,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Select a new sign text message */
-	protected void selectSignText() {
+	private void selectSignText() {
 		Integer w = proxy.getFaceWidth();
 		Integer lh = getLineHeightPixels();
 		Integer hp = proxy.getHorizontalPitch();
@@ -334,13 +334,13 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Check if the user can remove the specified sign text */
-	protected boolean canRemove(SignText st) {
+	private boolean canRemove(SignText st) {
 		SignTextTableModel stm = sign_text_model;
 		return (stm != null) && (st != null) && stm.canRemove(st);
 	}
 
 	/** Get the line height of the sign */
-	protected Integer getLineHeightPixels() {
+	private Integer getLineHeightPixels() {
 		RasterBuilder b = DMSHelper.createRasterBuilder(proxy);
 		if(b != null)
 			return b.getLineHeightPixels();
@@ -349,7 +349,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Render a message to a raster graphic */
-	protected RasterGraphic renderMessage(SignText st) {
+	private RasterGraphic renderMessage(SignText st) {
 		MultiString multi = new MultiString(st.getMulti());
 		RasterGraphic[] pages = renderPages(multi);
 		if(pages != null && pages.length > 0)
@@ -359,7 +359,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Render the pages of a text message */
-	protected RasterGraphic[] renderPages(MultiString ms) {
+	private RasterGraphic[] renderPages(MultiString ms) {
 		Integer w = proxy.getWidthPixels();
 		Integer h = getLineHeightPixels();
 		Integer cw = proxy.getCharWidthPixels();
@@ -377,7 +377,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Get the selected sign text message */
-	protected SignText getSelectedSignText() {
+	private SignText getSelectedSignText() {
 		SignTextTableModel m = sign_text_model;
 		if(m == null)
 			return null;
