@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ZTable;
-import us.mn.state.dot.tms.units.Temperature;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -52,13 +51,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public class DMSProperties extends SonarObjectForm<DMS> {
-
-	/** Get temperature units to use for display */
-	static private Temperature.Units tempUnits() {
-		return SystemAttrEnum.CLIENT_UNITS_SI.getBoolean()
-		     ? Temperature.Units.CELSIUS
-		     : Temperature.Units.FAHRENHEIT;
-	}
 
 	/** Ok status label color */
 	static private final Color OK = new Color(0f, 0.5f, 0f);
@@ -72,27 +64,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			return s;
 		else
 			return UNKNOWN;
-	}
-
-	/** Format a temperature.
-	 * @param temp Temperature in degrees Celsius. */
-	static private String formatTemp(Integer temp) {
-		if(temp != null) {
-			Temperature.Formatter tf = new Temperature.Formatter(0);
-			return tf.format(new Temperature(temp).convert(
-				tempUnits()));
-		} else
-			return "???";
-	}
-
-	/** Format a temperature range */
-	static private String formatTemp(Integer minTemp, Integer maxTemp) {
-		if(minTemp == null || minTemp == maxTemp)
-			return formatTemp(maxTemp);
-		else if(maxTemp == null)
-			return formatTemp(minTemp);
-		else
-			return formatTemp(minTemp) + "..." +formatTemp(maxTemp);
 	}
 
 	/** Generic sign make */
@@ -113,56 +84,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Configuration panel */
 	private final PropConfiguration config_pnl;
 
-	/** Cabinet temperature label */
-	private final JLabel cabinetTemp = new JLabel();
-
-	/** Ambient temperature label */
-	private final JLabel ambientTemp = new JLabel();
-
-	/** Housing temperature label */
-	private final JLabel housingTemp = new JLabel();
-
-	/** Power supply status table */
-	private final ZTable powerTable = new ZTable();
-
-	/** Operation description label */
-	private final JLabel operation = new JLabel();
-
-	/** Query message action */
-	private final IAction query_msg = new IAction("dms.query.msg",
-		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
-	{
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(DeviceRequest.
-				QUERY_MESSAGE.ordinal());
-		}
-	};
-
-	/** Reset DMS action */
-	private final IAction reset = new IAction("dms.reset",
-		SystemAttrEnum.DMS_RESET_ENABLE)
-	{
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(DeviceRequest.
-				RESET_DEVICE.ordinal());
-		}
-	};
-
-	/** Query status action */
-	private final IAction query_status = new IAction("dms.query.status") {
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(DeviceRequest.
-				QUERY_STATUS.ordinal());
-		}
-	};
-
-	/** Send settings action */
-	private final IAction settings = new IAction("device.send.settings") {
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(DeviceRequest.
-				SEND_SETTINGS.ordinal());
-		}
-	};
+	/** Status panel */
+	private final PropStatus status_pnl;
 
 	/** Bad pixel count label */
 	private final JLabel badPixels = new JLabel();
@@ -266,6 +189,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		location_pnl = new PropLocation(s, sign);
 		messages_pnl = new PropMessages(s, sign);
 		config_pnl = new PropConfiguration(s, sign);
+		status_pnl = new PropStatus(s, sign);
 	}
 
 	/** Get the SONAR type cache */
@@ -278,11 +202,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		super.initialize();
 		location_pnl.initialize();
 		config_pnl.initialize();
+		status_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), location_pnl);
 		tab.add(I18N.get("dms.messages"), messages_pnl);
 		tab.add(I18N.get("dms.config"), config_pnl);
-		tab.add(I18N.get("device.status"), createStatusPanel());
+		tab.add(I18N.get("device.status"), status_pnl);
 		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.pixels"), createPixelPanel());
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
@@ -333,39 +258,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Disable the device request widgets */
 	private void disableRequestWidgets() {
-		query_msg.setEnabled(false);
-		reset.setEnabled(false);
-		query_status.setEnabled(false);
-		settings.setEnabled(false);
 		query_pixels.setEnabled(false);
 		test_pixels.setEnabled(false);
 		bright_low.setEnabled(false);
 		bright_good.setEnabled(false);
 		bright_high.setEnabled(false);
-	}
-
-	/** Create status panel */
-	private JPanel createStatusPanel() {
-		powerTable.setAutoCreateColumnsFromModel(false);
-		powerTable.setVisibleRowCount(6);
-		cabinetTemp.setForeground(OK);
-		ambientTemp.setForeground(OK);
-		housingTemp.setForeground(OK);
-		operation.setForeground(OK);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(I18N.get("dms.temp.cabinet"), cabinetTemp);
-		panel.addRow(I18N.get("dms.temp.ambient"), ambientTemp);
-		panel.addRow(I18N.get("dms.temp.housing"), housingTemp);
-		panel.addRow(I18N.get("dms.power.supplies"), powerTable);
-		panel.add(I18N.get("device.operation"), operation);
-		if(query_msg.getIEnabled())
-			panel.add(new JButton(query_msg));
-		panel.finishRow();
-		if(reset.getIEnabled())
-			panel.addRow(new JButton(reset));
-		panel.addRow(new JButton(query_status));
-		panel.addRow(new JButton(settings));
-		return panel;
 	}
 
 	/** Create pixel panel */
@@ -462,6 +359,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		location_pnl.updateAttribute(a);
 		messages_pnl.updateAttribute(a);
 		config_pnl.updateAttribute(a);
+		status_pnl.updateAttribute(a);
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);
@@ -492,8 +390,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			if(c != null)
 				currentHighSpn.setValue(c);
 		}
-		if(a == null || a.equals("powerStatus"))
-			updatePowerStatus();
 		if(a == null || a.equals("heatTapeStatus"))
 			heatTapeStatus.setText(proxy.getHeatTapeStatus());
 		if(a == null || a.equals("pixelStatus"))
@@ -508,29 +404,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				lightOutput.setText(UNKNOWN);
 			updateFeedback();
 		}
-		if(a == null || a.equals("minCabinetTemp") ||
-		   a.equals("maxCabinetTemp"))
-		{
-			cabinetTemp.setText(formatTemp(
-				proxy.getMinCabinetTemp(),
-				proxy.getMaxCabinetTemp()));
-		}
-		if(a == null || a.equals("minAmbientTemp") ||
-		   a.equals("maxAmbientTemp"))
-		{
-			ambientTemp.setText(formatTemp(
-				proxy.getMinAmbientTemp(),
-				proxy.getMaxAmbientTemp()));
-		}
-		if(a == null || a.equals("minHousingTemp") ||
-		   a.equals("maxHousingTemp"))
-		{
-			housingTemp.setText(formatTemp(
-				proxy.getMinHousingTemp(),
-				proxy.getMaxHousingTemp()));
-		}
-		if(a == null || a.equals("operation"))
-			operation.setText(proxy.getOperation());
 	}
 
 	/** Select card on manufacturer panel for the given make */
@@ -541,16 +414,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			cards.show(card_panel, MAKE_SKYLINE);
 		else
 			cards.show(card_panel, MAKE_GENERIC);
-	}
-
-	/** Update the power status */
-	private void updatePowerStatus() {
-		String[] s = proxy.getPowerStatus();
-		if(s != null) {
-			PowerTableModel m = new PowerTableModel(s);
-			powerTable.setColumnModel(m.createColumnModel());
-			powerTable.setModel(m);
-		}
 	}
 
 	/** Update the pixel status */
