@@ -125,34 +125,34 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected ControllerIOModel io_model;
 
 	/** Firmware version */
-	protected final JLabel version = new JLabel();
+	private final JLabel version_lbl = FormPanel.createValueLabel();
 
 	/** Maint status */
-	protected final JLabel maint = new JLabel();
+	private final JLabel maint_lbl = FormPanel.createValueLabel();
 
 	/** Status */
-	protected final JLabel status = new JLabel();
+	private final JLabel status_lbl = FormPanel.createValueLabel();
 
 	/** Fail time */
-	protected final JLabel fail_time_lbl = new JLabel();
+	private final JLabel fail_time_lbl = FormPanel.createValueLabel();
 
 	/** Timeout errors label */
-	protected final JLabel timeout_lbl = new JLabel();
+	private final JLabel timeout_lbl = FormPanel.createValueLabel();
 
 	/** Checksum errors label */
-	protected final JLabel checksum_lbl = new JLabel();
+	private final JLabel checksum_lbl = FormPanel.createValueLabel();
 
 	/** Parsing errors label */
-	protected final JLabel parsing_lbl = new JLabel();
+	private final JLabel parsing_lbl = FormPanel.createValueLabel();
 
 	/** Controller errors label */
-	protected final JLabel controller_lbl = new JLabel();
+	private final JLabel controller_lbl = FormPanel.createValueLabel();
 
 	/** Successful operations label */
-	protected final JLabel success_lbl = new JLabel();
+	private final JLabel success_lbl = FormPanel.createValueLabel();
 
 	/** Failed operations label */
-	protected final JLabel failed_lbl = new JLabel();
+	private final JLabel failed_lbl = FormPanel.createValueLabel();
 
 	/** Clear error status action */
 	private final IAction clear_err = new IAction("controller.error.clear"){
@@ -346,9 +346,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		buttonPnl.add(new JButton(clear_err));
 		buttonPnl.add(new JButton(reset));
 		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow(I18N.get("controller.version"), version);
-		panel.addRow(I18N.get("controller.maint"), maint);
-		panel.addRow(I18N.get("controller.status"), status);
+		panel.addRow(I18N.get("controller.version"), version_lbl);
+		panel.addRow(I18N.get("controller.maint"), maint_lbl);
+		panel.addRow(I18N.get("controller.status"), status_lbl);
 		panel.addRow(I18N.get("controller.fail"), fail_time_lbl);
 		panel.addRow(I18N.get("controller.err.timeout"), timeout_lbl);
 		panel.addRow(I18N.get("controller.err.checksum"), checksum_lbl);
@@ -379,11 +379,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			active_chk.setSelected(proxy.getActive());
 		}
 		if(a == null || a.equals("version"))
-			version.setText(proxy.getVersion());
+			version_lbl.setText(proxy.getVersion());
 		if(a == null || a.equals("maint"))
-			maint.setText(proxy.getMaint());
+			maint_lbl.setText(proxy.getMaint());
 		if(a == null || a.equals("status"))
-			status.setText(proxy.getStatus());
+			status_lbl.setText(proxy.getStatus());
 		if(a == null || a.equals("failTime")) {
 			Long ft = proxy.getFailTime();
 			if(ft != null)
