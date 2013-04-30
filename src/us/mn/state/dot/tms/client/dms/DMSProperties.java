@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.CardLayout;
 import java.awt.Color;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -25,17 +24,13 @@ import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -85,35 +80,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Pixel panel */
 	private final PropPixels pixel_pnl;
 
-	/** Photocell status table */
-	private final ZTable photocellTable = new ZTable();
-
-	/** Light output label */
-	private final JLabel lightOutput = new JLabel();
-
-	/** Current brightness low feedback action */
-	private final IAction bright_low = new IAction("dms.brightness.low") {
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(DeviceRequest.
-				BRIGHTNESS_TOO_DIM.ordinal());
-		}
-	};
-
-	/** Current brightness good feedback action */
-	private final IAction bright_good = new IAction("dms.brightness.good") {
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(DeviceRequest.
-				BRIGHTNESS_GOOD.ordinal());
-		}
-	};
-
-	/** Current brightness high feedback action */
-	private final IAction bright_high = new IAction("dms.brightness.high") {
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(DeviceRequest.
-				BRIGHTNESS_TOO_BRIGHT.ordinal());
-		}
-	};
+	/** Brightness panel */
+	private final PropBrightness bright_pnl;
 
 	/** Card layout for manufacturer panels */
 	private final CardLayout cards = new CardLayout();
@@ -162,6 +130,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		config_pnl = new PropConfiguration(s, sign);
 		status_pnl = new PropStatus(s, sign);
 		pixel_pnl = new PropPixels(s, sign);
+		bright_pnl = new PropBrightness(s, sign);
 	}
 
 	/** Get the SONAR type cache */
@@ -176,6 +145,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		config_pnl.initialize();
 		status_pnl.initialize();
 		pixel_pnl.initialize();
+		bright_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), location_pnl);
 		tab.add(I18N.get("dms.messages"), messages_pnl);
@@ -183,10 +153,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		tab.add(I18N.get("device.status"), status_pnl);
 		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.pixels"), pixel_pnl);
-		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
-			tab.add(I18N.get("dms.brightness"),
-				createBrightnessPanel());
-		}
+		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
+			tab.add(I18N.get("dms.brightness"), bright_pnl);
 		if(SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean()) {
 			tab.add(I18N.get("dms.manufacturer"),
 				createManufacturerPanel());
@@ -195,8 +163,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
-		if(!canRequest())
-			disableRequestWidgets();
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -227,30 +193,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				proxy.setPixelCurrentHigh(n.intValue());
 			}
 		});
-	}
-
-	/** Disable the device request widgets */
-	private void disableRequestWidgets() {
-		bright_low.setEnabled(false);
-		bright_good.setEnabled(false);
-		bright_high.setEnabled(false);
-	}
-
-	/** Create brightness panel */
-	private JPanel createBrightnessPanel() {
-		photocellTable.setAutoCreateColumnsFromModel(false);
-		photocellTable.setVisibleRowCount(6);
-		lightOutput.setForeground(OK);
-		JPanel feedback = new JPanel();
-		feedback.add(new JButton(bright_low));
-		feedback.add(new JButton(bright_good));
-		feedback.add(new JButton(bright_high));
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(I18N.get("dms.brightness.photocells"),
-			photocellTable);
-		panel.addRow(I18N.get("dms.brightness.output"), lightOutput);
-		panel.addRow(I18N.get("dms.brightness.feedback"), feedback);
-		return panel;
 	}
 
 	/** Create manufacturer-specific panel */
@@ -304,6 +246,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		config_pnl.updateAttribute(a);
 		status_pnl.updateAttribute(a);
 		pixel_pnl.updateAttribute(a);
+		bright_pnl.updateAttribute(a);
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);
@@ -313,8 +256,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			model.setText(formatString(proxy.getModel()));
 		if(a == null || a.equals("version"))
 			version.setText(formatString(proxy.getVersion()));
-		if(a == null || a.equals("messageCurrent"))
-			updateFeedback();
 		if(a == null || a.equals("ldcPotBase")) {
 			Integer b = proxy.getLdcPotBase();
 			if(b != null)
@@ -332,16 +273,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		}
 		if(a == null || a.equals("heatTapeStatus"))
 			heatTapeStatus.setText(proxy.getHeatTapeStatus());
-		if(a == null || a.equals("photocellStatus"))
-			updatePhotocellStatus();
-		if(a == null || a.equals("lightOutput")) {
-			Integer o = proxy.getLightOutput();
-			if(o != null)
-				lightOutput.setText("" + o + "%");
-			else
-				lightOutput.setText(UNKNOWN);
-			updateFeedback();
-		}
 	}
 
 	/** Select card on manufacturer panel for the given make */
@@ -352,29 +283,5 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			cards.show(card_panel, MAKE_SKYLINE);
 		else
 			cards.show(card_panel, MAKE_GENERIC);
-	}
-
-	/** Update the photocell status */
-	private void updatePhotocellStatus() {
-		String[] s = proxy.getPhotocellStatus();
-		if(s != null) {
-			PhotocellTableModel m = new PhotocellTableModel(s);
-			photocellTable.setColumnModel(m.createColumnModel());
-			photocellTable.setModel(m);
-		}
-	}
-
-	/** Update the feedback buttons */
-	private void updateFeedback() {
-		boolean enable = canRequest() && !SignMessageHelper.isBlank(
-			proxy.getMessageCurrent());
-		bright_low.setEnabled(enable);
-		bright_good.setEnabled(enable);
-		bright_high.setEnabled(enable);
-	}
-
-	/** Check if the user can make device requests */
-	private boolean canRequest() {
-		return canUpdate("deviceRequest");
 	}
 }
