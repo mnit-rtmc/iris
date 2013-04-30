@@ -15,11 +15,13 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
+import java.awt.GridLayout;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.EtchedBorder;
 import static us.mn.state.dot.sched.SwingRunner.runSwing;
@@ -131,9 +133,14 @@ public class MeterStatusPanel extends FormPanel
 		ButtonGroup group = new ButtonGroup();
 		group.add(on_btn);
 		group.add(off_btn);
+		JPanel b_pnl = new JPanel(new GridLayout(1, 2));
+		b_pnl.add(on_btn);
+		b_pnl.add(off_btn);
 		setTitle(I18N.get("ramp.meter.selected"));
 		setEnabled(false);
+		setHeavy(true);
 		add(I18N.get("device.name"), name_lbl);
+		setHeavy(false);
 		addRow(I18N.get("camera"), camera_btn);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
@@ -148,8 +155,7 @@ public class MeterStatusPanel extends FormPanel
 		addRow(grow_btn);
 		add(I18N.get("ramp.meter.lock"), lock_cbx);
 		finishRow();
-		add(I18N.get("ramp.meter.metering"), on_btn);
-		addRow(off_btn);
+		addRow(I18N.get("ramp.meter.metering"), b_pnl);
 		setSelected(null);
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
