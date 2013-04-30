@@ -14,11 +14,8 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.io.IOException;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,8 +25,6 @@ import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Base64;
-import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -87,32 +82,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Status panel */
 	private final PropStatus status_pnl;
 
-	/** Bad pixel count label */
-	private final JLabel badPixels = new JLabel();
-
-	/** Stuck off pixel panel */
-	private final SignPixelPanel stuck_off_pnl = new SignPixelPanel(100,
-		400, true);
-
-	/** Stuck on pixel panel */
-	private final SignPixelPanel stuck_on_pnl = new SignPixelPanel(100,
-		400, true);
-
-	/** Action to query pixel failures */
-	private final IAction query_pixels = new IAction("dms.query.pixels") {
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(DeviceRequest.
-				QUERY_PIXEL_FAILURES.ordinal());
-		}
-	};
-
-	/** Action to test pixel failures */
-	private final IAction test_pixels = new IAction("dms.test.pixels") {
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(
-				DeviceRequest.TEST_PIXELS.ordinal());
-		}
-	};
+	/** Pixel panel */
+	private final PropPixels pixel_pnl;
 
 	/** Photocell status table */
 	private final ZTable photocellTable = new ZTable();
@@ -190,6 +161,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		messages_pnl = new PropMessages(s, sign);
 		config_pnl = new PropConfiguration(s, sign);
 		status_pnl = new PropStatus(s, sign);
+		pixel_pnl = new PropPixels(s, sign);
 	}
 
 	/** Get the SONAR type cache */
@@ -203,13 +175,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		location_pnl.initialize();
 		config_pnl.initialize();
 		status_pnl.initialize();
+		pixel_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), location_pnl);
 		tab.add(I18N.get("dms.messages"), messages_pnl);
 		tab.add(I18N.get("dms.config"), config_pnl);
 		tab.add(I18N.get("device.status"), status_pnl);
 		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
-			tab.add(I18N.get("dms.pixels"), createPixelPanel());
+			tab.add(I18N.get("dms.pixels"), pixel_pnl);
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
 			tab.add(I18N.get("dms.brightness"),
 				createBrightnessPanel());
@@ -258,39 +231,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Disable the device request widgets */
 	private void disableRequestWidgets() {
-		query_pixels.setEnabled(false);
-		test_pixels.setEnabled(false);
 		bright_low.setEnabled(false);
 		bright_good.setEnabled(false);
 		bright_high.setEnabled(false);
-	}
-
-	/** Create pixel panel */
-	private JPanel createPixelPanel() {
-		JPanel buttonPnl = new JPanel();
-		buttonPnl.add(new JButton(query_pixels));
-		buttonPnl.add(new JButton(test_pixels));
-		badPixels.setForeground(OK);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(I18N.get("dms.pixel.errors"), badPixels);
-		panel.setFill();
-		panel.addRow(createTitledPanel("dms.pixel.errors.off",
-			stuck_off_pnl));
-		panel.setFill();
-		panel.addRow(createTitledPanel("dms.pixel.errors.on",
-			stuck_on_pnl));
-		panel.setCenter();
-		panel.add(buttonPnl);
-		return panel;
-	}
-
-	/** Create a panel with a titled border */
-	private JPanel createTitledPanel(String text_id, JPanel p) {
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBorder(BorderFactory.createTitledBorder(I18N.get(
-			text_id)));
-		panel.add(p, BorderLayout.CENTER);
-		return panel;
 	}
 
 	/** Create brightness panel */
@@ -360,6 +303,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		messages_pnl.updateAttribute(a);
 		config_pnl.updateAttribute(a);
 		status_pnl.updateAttribute(a);
+		pixel_pnl.updateAttribute(a);
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);
@@ -369,12 +313,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			model.setText(formatString(proxy.getModel()));
 		if(a == null || a.equals("version"))
 			version.setText(formatString(proxy.getVersion()));
-		// NOTE: messageCurrent attribute changes after all sign
-		//       dimension attributes are updated.
-		if(a == null || a.equals("messageCurrent")) {
-			updatePixelStatus();
+		if(a == null || a.equals("messageCurrent"))
 			updateFeedback();
-		}
 		if(a == null || a.equals("ldcPotBase")) {
 			Integer b = proxy.getLdcPotBase();
 			if(b != null)
@@ -392,8 +332,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		}
 		if(a == null || a.equals("heatTapeStatus"))
 			heatTapeStatus.setText(proxy.getHeatTapeStatus());
-		if(a == null || a.equals("pixelStatus"))
-			updatePixelStatus();
 		if(a == null || a.equals("photocellStatus"))
 			updatePhotocellStatus();
 		if(a == null || a.equals("lightOutput")) {
@@ -414,86 +352,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			cards.show(card_panel, MAKE_SKYLINE);
 		else
 			cards.show(card_panel, MAKE_GENERIC);
-	}
-
-	/** Update the pixel status */
-	private void updatePixelStatus() {
-		updatePixelPanel(stuck_off_pnl);
-		updatePixelPanel(stuck_on_pnl);
-		String[] pixels = proxy.getPixelStatus();
-		if(pixels != null && pixels.length == 2) {
-			try {
-				updatePixelStatus(pixels);
-				return;
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
-		}
-		stuck_off_pnl.setGraphic(null);
-		stuck_on_pnl.setGraphic(null);
-		badPixels.setText(UNKNOWN);
-	}
-
-	/** Update the pixel status */
-	private void updatePixelStatus(String[] pixels) throws IOException {
-		BitmapGraphic stuckOff = createBlankBitmap();
-		BitmapGraphic stuckOn = createBlankBitmap();
-		if(stuckOff == null || stuckOn == null)
-			return;
-		byte[] b_off = Base64.decode(pixels[DMS.STUCK_OFF_BITMAP]);
-		if(b_off.length == stuckOff.length())
-			stuckOff.setPixels(b_off);
-		stuck_off_pnl.setGraphic(stuckOff);
-		byte[] b_on = Base64.decode(pixels[DMS.STUCK_ON_BITMAP]);
-		if(b_on.length == stuckOn.length())
-			stuckOn.setPixels(b_on);
-		stuck_on_pnl.setGraphic(stuckOn);
-		int n_off = stuckOff.getLitCount();
-		int n_on = stuckOn.getLitCount();
-		badPixels.setText(String.valueOf(n_off + n_on));
-	}
-
-	/** Create a blank bitmap */
-	private BitmapGraphic createBlankBitmap() {
-		Integer w = proxy.getWidthPixels();	// Avoid race
-		Integer h = proxy.getHeightPixels();	// Avoid race
-		if(w != null && h != null)
-			return new BitmapGraphic(w, h);
-		else
-			return null;
-	}
-
-	/** Update the dimensions of a sign pixel panel */
-	private void updatePixelPanel(SignPixelPanel p) {
-		updatePixelPhysical(p);
-		updatePixelLogical(p);
-		p.repaint();
-	}
-
-	/** Update the physical dimensions of a sign pixel panel */
-	private void updatePixelPhysical(SignPixelPanel p) {
-		Integer w = proxy.getFaceWidth();
-		Integer h = proxy.getFaceHeight();
-		Integer hp = proxy.getHorizontalPitch();
-		Integer vp = proxy.getVerticalPitch();
-		Integer hb = proxy.getHorizontalBorder();
-		Integer vb = proxy.getVerticalBorder();
-		if(w != null && h != null && hp != null && vp != null &&
-		   hb != null && vb != null)
-		{
-			p.setPhysicalDimensions(w, h, hb, vb, hp, vp);
-		}
-	}
-
-	/** Update the logical dimensions of a sign pixel panel */
-	private void updatePixelLogical(SignPixelPanel p) {
-		Integer wp = proxy.getWidthPixels();
-		Integer hp = proxy.getHeightPixels();
-		Integer cw = proxy.getCharWidthPixels();
-		Integer ch = proxy.getCharHeightPixels();
-		if(wp != null && hp != null && cw != null && ch != null)
-			p.setLogicalDimensions(wp, hp, cw, ch);
 	}
 
 	/** Update the photocell status */
