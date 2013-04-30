@@ -69,9 +69,6 @@ public class CameraViewer extends JPanel
 	/** Logged in user */
 	protected final User user;
 
-	/** Video request */
-	private final VideoRequest video_req;
-
 	/** Displays the name of the selected camera */
 	protected final JTextField txtId = new JTextField();
 
@@ -113,11 +110,7 @@ public class CameraViewer extends JPanel
 		preset_pnl = new PresetPanel();
 		state = session.getSonarState();
 		user = session.getUser();
-		video_req = new VideoRequest(session.getProperties(), SIZE);
-		Connection c = state.lookupConnection(state.getConnection());
-		video_req.setSonarSessionId(c.getSessionId());
-		video_req.setRate(30);
-		s_panel = new StreamPanel(cam_ptz, video_req);
+		s_panel = createStreamPanel();
 		setBorder(BorderFactory.createTitledBorder(
 			I18N.get("camera.selected")));
 		GridBagConstraints bag = new GridBagConstraints();
@@ -166,6 +159,16 @@ public class CameraViewer extends JPanel
 					doJoyButton(ev);
 			}
 		});
+	}
+
+	/** Create the stream panel */
+	private StreamPanel createStreamPanel() {
+		VideoRequest vr = new VideoRequest(session.getProperties(),
+			SIZE);
+		Connection c = state.lookupConnection(state.getConnection());
+		vr.setSonarSessionId(c.getSessionId());
+		vr.setRate(30);
+		return new StreamPanel(cam_ptz, vr);
 	}
 
 	/** Process a joystick button event */
