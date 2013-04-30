@@ -48,7 +48,6 @@ import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.units.Interval;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -167,23 +166,21 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		cache = s.getSonarState().getDmsCache().getDMSs();
 		cache.addProxyListener(this);
 		cam_sel_model = s.getCameraManager().getSelectionModel();
-		name_lbl.setMinimumSize(UI.dimension(36, 16));
+		setWeightX(1);
 		add(I18N.get("device.name"), name_lbl);
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
 			add(I18N.get("dms.brightness"), brightness_lbl);
+		setWeightX(0);
 		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
 		addRow(I18N.get("camera"), cameraBtn);
-		location_lbl.setMinimumSize(UI.dimension(260, 16));
 		addRow(I18N.get("location"), location_lbl);
 		addRow(I18N.get("device.status"), status_lbl);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
 		addRow(I18N.get("device.operation"), operation_lbl);
-		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean()) {
-			op_status_lbl.setMinimumSize(UI.dimension(36, 16));
+		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean())
 			addRow(I18N.get("device.op.status"), op_status_lbl);
-		}
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			setWest();
 			aws_control_chk.setHorizontalTextPosition(
@@ -192,6 +189,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		}
 		tab.add(I18N.get("dms.msg.current"), currentPnl);
 		tab.add(I18N.get("dms.msg.preview"), previewPnl);
+		setCenter();
 		addRow(tab);
 		createJobs();
 	}
