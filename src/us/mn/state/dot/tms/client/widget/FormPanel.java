@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,13 @@ public class FormPanel extends JPanel {
 		lbl.setBorder(new LineBorder(LIGHT_BLUE));
 		// By default, labels are BOLD
 		lbl.setFont(lbl.getFont().deriveFont(Font.PLAIN));
+		return lbl;
+	}
+
+	/** Create a value label */
+	static public JLabel createValueLabel(String txt) {
+		JLabel lbl = createValueLabel();
+		lbl.setText(txt);
 		return lbl;
 	}
 
