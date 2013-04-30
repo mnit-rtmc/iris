@@ -130,6 +130,11 @@ public class FormPanel extends JPanel {
 		bag.weighty = 1;
 	}
 
+	/** Set the X weight */
+	public void setWeightX(float w) {
+		bag.weightx = w;
+	}
+
 	/** Set the anchor state to EAST */
 	public void setEast() {
 		bag.anchor = GridBagConstraints.EAST;
