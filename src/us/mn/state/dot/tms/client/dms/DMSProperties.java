@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
@@ -75,25 +74,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			return UNKNOWN;
 	}
 
-	/** Format millimeter units for display */
-	static private String formatMM(Integer i) {
-		if(i != null && i > 0)
-			return i + " " + I18N.get("units.mm");
-		else
-			return UNKNOWN;
-	}
-
-	/** Format pixel units for display */
-	static private String formatPixels(Integer i) {
-		if(i != null) {
-			if(i > 0)
-				return i + " " + I18N.get("units.pixels");
-			else if(i == 0)
-				return I18N.get("units.pixels.variable");
-		}
-		return UNKNOWN;
-	}
-
 	/** Format a temperature.
 	 * @param temp Temperature in degrees Celsius. */
 	static private String formatTemp(Integer temp) {
@@ -130,58 +110,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Messages panel */
 	private final PropMessages messages_pnl;
 
-	/** Sign type label */
-	private final JLabel type = new JLabel();
-
-	/** Sign technology label */
-	private final JLabel tech = new JLabel();
-
-	/** Sign access label */
-	private final JLabel access = new JLabel();
-
-	/** Sign legend label */
-	private final JLabel legend = new JLabel();
-
-	/** Beacon label */
-	private final JLabel beacon = new JLabel();
-
-	/** Sign face width label */
-	private final JLabel faceWidth = new JLabel();
-
-	/** Sign face height label */
-	private final JLabel faceHeight = new JLabel();
-
-	/** Horizontal border label */
-	private final JLabel hBorder = new JLabel();
-
-	/** Vertical border label */
-	private final JLabel vBorder = new JLabel();
-
-	/** Horizontal pitch label */
-	private final JLabel hPitch = new JLabel();
-
-	/** Vertical pitch label */
-	private final JLabel vPitch = new JLabel();
-
-	/** Sign width (pixels) label */
-	private final JLabel pWidth = new JLabel();
-
-	/** Sign height (pixels) label */
-	private final JLabel pHeight = new JLabel();
-
-	/** Character width label */
-	private final JLabel cWidth = new JLabel();
-
-	/** Character height label */
-	private final JLabel cHeight = new JLabel();
-
-	/** Button to query configuration */
-	private final IAction config = new IAction("dms.query.config") {
-		@Override protected void do_perform() {
-			proxy.setDeviceRequest(DeviceRequest.
-				QUERY_CONFIGURATION.ordinal());
-		}
-	};
+	/** Configuration panel */
+	private final PropConfiguration config_pnl;
 
 	/** Cabinet temperature label */
 	private final JLabel cabinetTemp = new JLabel();
@@ -335,6 +265,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		user = s.getUser();
 		location_pnl = new PropLocation(s, sign);
 		messages_pnl = new PropMessages(s, sign);
+		config_pnl = new PropConfiguration(s, sign);
 	}
 
 	/** Get the SONAR type cache */
@@ -346,10 +277,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	@Override protected void initialize() {
 		super.initialize();
 		location_pnl.initialize();
+		config_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), location_pnl);
 		tab.add(I18N.get("dms.messages"), messages_pnl);
-		tab.add(I18N.get("dms.config"), createConfigurationPanel());
+		tab.add(I18N.get("dms.config"), config_pnl);
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.pixels"), createPixelPanel());
@@ -401,7 +333,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Disable the device request widgets */
 	private void disableRequestWidgets() {
-		config.setEnabled(false);
 		query_msg.setEnabled(false);
 		reset.setEnabled(false);
 		query_status.setEnabled(false);
@@ -411,43 +342,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		bright_low.setEnabled(false);
 		bright_good.setEnabled(false);
 		bright_high.setEnabled(false);
-	}
-
-	/** Create the configuration panel */
-	private JPanel createConfigurationPanel() {
-		type.setForeground(OK);
-		tech.setForeground(OK);
-		access.setForeground(OK);
-		legend.setForeground(OK);
-		beacon.setForeground(OK);
-		faceWidth.setForeground(OK);
-		faceHeight.setForeground(OK);
-		hBorder.setForeground(OK);
-		vBorder.setForeground(OK);
-		hPitch.setForeground(OK);
-		vPitch.setForeground(OK);
-		pWidth.setForeground(OK);
-		pHeight.setForeground(OK);
-		cWidth.setForeground(OK);
-		cHeight.setForeground(OK);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(I18N.get("dms.type"), type);
-		panel.addRow(I18N.get("dms.technology"), tech);
-		panel.addRow(I18N.get("dms.access"), access);
-		panel.addRow(I18N.get("dms.legend"), legend);
-		panel.addRow(I18N.get("dms.beacon"), beacon);
-		panel.addRow(I18N.get("dms.face.width"), faceWidth);
-		panel.addRow(I18N.get("dms.face.height"), faceHeight);
-		panel.addRow(I18N.get("dms.border.horiz"), hBorder);
-		panel.addRow(I18N.get("dms.border.vert"), vBorder);
-		panel.addRow(I18N.get("dms.pitch.horiz"), hPitch);
-		panel.addRow(I18N.get("dms.pitch.vert"), vPitch);
-		panel.addRow(I18N.get("dms.pixel.width"), pWidth);
-		panel.addRow(I18N.get("dms.pixel.height"), pHeight);
-		panel.addRow(I18N.get("dms.char.width"), cWidth);
-		panel.addRow(I18N.get("dms.char.height"), cHeight);
-		panel.addRow(new JButton(config));
-		return panel;
 	}
 
 	/** Create status panel */
@@ -567,6 +461,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	@Override protected void doUpdateAttribute(String a) {
 		location_pnl.updateAttribute(a);
 		messages_pnl.updateAttribute(a);
+		config_pnl.updateAttribute(a);
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);
@@ -576,42 +471,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			model.setText(formatString(proxy.getModel()));
 		if(a == null || a.equals("version"))
 			version.setText(formatString(proxy.getVersion()));
-		if(a == null || a.equals("signAccess"))
-			access.setText(formatString(proxy.getSignAccess()));
-		if(a == null || a.equals("dmsType")) {
-			DMSType t = DMSType.fromOrdinal(proxy.getDmsType());
-			type.setText(t.description);
-		}
-		if(a == null || a.equals("faceHeight"))
-			faceHeight.setText(formatMM(proxy.getFaceHeight()));
-		if(a == null || a.equals("faceWidth"))
-			faceWidth.setText(formatMM(proxy.getFaceWidth()));
-		if(a == null || a.equals("heightPixels"))
-			pHeight.setText(formatPixels(proxy.getHeightPixels()));
-		if(a == null || a.equals("widthPixels"))
-			pWidth.setText(formatPixels(proxy.getWidthPixels()));
-		if(a == null || a.equals("horizontalBorder"))
-			hBorder.setText(formatMM(proxy.getHorizontalBorder()));
-		if(a == null || a.equals("verticalBorder"))
-			vBorder.setText(formatMM(proxy.getVerticalBorder()));
-		if(a == null || a.equals("legend"))
-			legend.setText(formatString(proxy.getLegend()));
-		if(a == null || a.equals("beaconType"))
-			beacon.setText(formatString(proxy.getBeaconType()));
-		if(a == null || a.equals("technology"))
-			tech.setText(formatString(proxy.getTechnology()));
-		if(a == null || a.equals("charHeightPixels")) {
-			cHeight.setText(formatPixels(
-				proxy.getCharHeightPixels()));
-		}
-		if(a == null || a.equals("charWidthPixels")) {
-			cWidth.setText(formatPixels(
-				proxy.getCharWidthPixels()));
-		}
-		if(a == null || a.equals("horizontalPitch"))
-			hPitch.setText(formatMM(proxy.getHorizontalPitch()));
-		if(a == null || a.equals("verticalPitch"))
-			vPitch.setText(formatMM(proxy.getVerticalPitch()));
 		// NOTE: messageCurrent attribute changes after all sign
 		//       dimension attributes are updated.
 		if(a == null || a.equals("messageCurrent")) {
