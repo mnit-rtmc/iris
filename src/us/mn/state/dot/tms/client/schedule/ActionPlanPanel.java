@@ -113,7 +113,7 @@ public class ActionPlanPanel extends JPanel {
 
 	/** Create the main action plan panel */
 	private JPanel createActionPlanPanel() {
-		FormPanel p_panel = new FormPanel(true);
+		FormPanel p_panel = new FormPanel();
 		p_panel.setBorder();
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);

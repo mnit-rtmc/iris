@@ -223,7 +223,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create the indication panel */
 	protected JPanel createIndicationPanel() {
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel();
 		for(LaneUseIndication i: LaneUseIndication.values()) {
 			final int ind = i.ordinal();
 			JCheckBox btn = new JCheckBox();

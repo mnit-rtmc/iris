@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ public class LoginForm extends AbstractForm {
 
 	/** Initialize the form */
 	protected void initialize() {
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel();
 		panel.addRow(I18N.get("user.name"), user_txt);
 		panel.addRow(I18N.get("user.password"), passwd_txt);
 		final JButton login_btn = new JButton(login);

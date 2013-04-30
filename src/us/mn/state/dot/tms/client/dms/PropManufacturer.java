@@ -134,7 +134,7 @@ public class PropManufacturer extends FormPanel {
 
 	/** Create generic manufacturer panel */
 	private JPanel createGenericPanel() {
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel();
 		panel.setTitle(I18N.get("dms.manufacturer.unknown"));
 		panel.addRow(createValueLabel(UNKNOWN));
 		return panel;
@@ -142,7 +142,7 @@ public class PropManufacturer extends FormPanel {
 
 	/** Create Ledstar-specific panel */
 	private JPanel createLedstarPanel() {
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel();
 		panel.setTitle(MAKE_LEDSTAR);
 		panel.addRow(I18N.get("dms.ledstar.pot.base"), pot_base_spn);
 		panel.addRow(I18N.get("dms.ledstar.current.low"),
@@ -154,7 +154,7 @@ public class PropManufacturer extends FormPanel {
 
 	/** Create Skyline-specific panel */
 	private JPanel createSkylinePanel() {
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel();
 		panel.setTitle(MAKE_SKYLINE);
 		panel.addRow(I18N.get("dms.skyline.heat.tape"), heat_tape_lbl);
 		return panel;

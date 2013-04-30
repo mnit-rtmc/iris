@@ -168,7 +168,7 @@ public class GraphicForm extends AbstractForm {
 				selectProxy();
 			}
 		});
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel();
 		table.setRowHeight(UI.scaled(MAX_GRAPHIC_HEIGHT / 2));
 		table.setModel(model);
 		table.setAutoCreateColumnsFromModel(false);

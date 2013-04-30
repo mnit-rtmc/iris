@@ -202,7 +202,7 @@ public class IncidentDispatcher extends JPanel
 		cam_panel.add(camera_btn, CAMERA_BTN);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel();
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("incident.selected")));
 		panel.addRow(I18N.get("incident.type"), type_lbl);

@@ -335,7 +335,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		table.setColumnModel(io_model.createColumnModel());
 		table.setRowHeight(ROW_HEIGHT);
 		table.setVisibleRowCount(8);
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel();
 		panel.addRow(table);
 		return panel;
 	}

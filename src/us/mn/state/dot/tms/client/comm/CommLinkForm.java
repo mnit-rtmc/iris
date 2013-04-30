@@ -313,7 +313,7 @@ public class CommLinkForm extends AbstractForm {
 					go_btn.doClick();
 			}
 		});
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel();
 		ftable.setModel(fmodel);
 		ftable.setAutoCreateColumnsFromModel(false);
 		ftable.setColumnModel(fmodel.createColumnModel());
