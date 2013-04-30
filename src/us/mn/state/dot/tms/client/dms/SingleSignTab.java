@@ -166,11 +166,11 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		cache = s.getSonarState().getDmsCache().getDMSs();
 		cache.addProxyListener(this);
 		cam_sel_model = s.getCameraManager().getSelectionModel();
-		setWeightX(1);
+		setHeavy(true);
 		add(I18N.get("device.name"), name_lbl);
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
 			add(I18N.get("dms.brightness"), brightness_lbl);
-		setWeightX(0);
+		setHeavy(false);
 		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
 		addRow(I18N.get("camera"), cameraBtn);

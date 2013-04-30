@@ -66,6 +66,9 @@ public class FormPanel extends JPanel {
 	/** Current grid bag constraints state */
 	protected GridBagConstraints bag;
 
+	/** Heavy width flag */
+	private boolean heavy = false;
+
 	/** Create a new form panel */
 	public FormPanel() {
 		this(true);
@@ -88,6 +91,11 @@ public class FormPanel extends JPanel {
 		setBorder(UI.border);
 	}
 
+	/** Set the heavy flag */
+	public void setHeavy(boolean h) {
+		heavy = h;
+	}
+
 	/** Set the form title */
 	public void setTitle(String t) {
 		setBorder(BorderFactory.createTitledBorder(t));
@@ -101,6 +109,7 @@ public class FormPanel extends JPanel {
 		bag.insets.bottom = UI.vgap;
 		bag.gridx = GridBagConstraints.RELATIVE;
 		bag.gridy = row++;
+		heavy = false;
 	}
 
 	/** Set the grid width state */
@@ -130,11 +139,6 @@ public class FormPanel extends JPanel {
 		bag.weighty = 1;
 	}
 
-	/** Set the X weight */
-	public void setWeightX(float w) {
-		bag.weightx = w;
-	}
-
 	/** Set the anchor state to EAST */
 	public void setEast() {
 		bag.anchor = GridBagConstraints.EAST;
@@ -153,7 +157,10 @@ public class FormPanel extends JPanel {
 		setEast();
 		add(c1);
 		setWest();
+		if(heavy)
+			bag.weightx = 1;
 		add(c2);
+		bag.weightx = 0;
 	}
 
 	/** Add a table component */
@@ -182,6 +189,8 @@ public class FormPanel extends JPanel {
 		add(c1);
 		setWest();
 		setWidth(GridBagConstraints.REMAINDER);
+		if(heavy)
+			bag.weightx = 1;
 		add(c2);
 		finishRow();
 	}
@@ -191,6 +200,8 @@ public class FormPanel extends JPanel {
 		setEast();
 		add(new JLabel(name));
 		setWest();
+		if(heavy)
+			bag.weightx = 1;
 		addRow(comp);
 	}
 

@@ -161,10 +161,12 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		FormPanel panel = new FormPanel();
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("lcs.selected")));
-		panel.add(I18N.get("device.name"), name_lbl);
-		panel.addRow(I18N.get("camera"), camera_btn);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
+		panel.setHeavy(true);
+		panel.add(I18N.get("device.name"), name_lbl);
+		panel.setHeavy(false);
+		panel.addRow(I18N.get("camera"), camera_btn);
 		panel.addRow(I18N.get("location"), location_lbl);
 		panel.addRow(I18N.get("device.status"), status_lbl);
 		// Make label opaque so that we can set the background color

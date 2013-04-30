@@ -119,9 +119,9 @@ public class CameraViewer extends FormPanel
 		});
 		setBorder(BorderFactory.createTitledBorder(
 			I18N.get("camera.selected")));
-		setWeightX(1);
+		setHeavy(true);
 		add(I18N.get("device.name"), name_lbl);
-		setWeightX(0);
+		setHeavy(false);
 		addRow(I18N.get("camera.output"), output_cbx);
 		addRow(I18N.get("location"), location_lbl);
 		setFill();
