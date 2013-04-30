@@ -89,7 +89,7 @@ public class IncidentDispatcher extends JPanel
 	protected final ProxySelectionModel<Incident> selectionModel;
 
 	/** Type label */
-	protected final JLabel type_lbl = new JLabel();
+	private final JLabel type_lbl;
 
 	/** Incident detail proxy list model */
 	protected final ProxyListModel<IncidentDetail> dtl_model;
@@ -184,6 +184,7 @@ public class IncidentDispatcher extends JPanel
 		dtl_model = new ProxyListModel<IncidentDetail>(
 			st.getIncidentDetails());
 		dtl_model.initialize();
+		type_lbl = FormPanel.createValueLabel();
 		detail_cbx.setRenderer(new IncidentDetailRenderer());
 		detail_cbx.setModel(new WrapperComboBoxModel(dtl_model, true,
 			true));
