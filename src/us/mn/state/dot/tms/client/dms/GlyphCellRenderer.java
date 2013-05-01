@@ -33,10 +33,10 @@ import us.mn.state.dot.tms.BitmapGraphic;
 public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Margin reserved for default renderer */
-	static protected final int MARGIN = 16;
+	static private final int MARGIN = 16;
 
 	/** Hash of characters to bitmap graphics */
-	protected final HashMap<String, FontForm.GlyphData> gmap;
+	private final HashMap<String, FontForm.GlyphData> gmap;
 
 	/** Create a new glyph cell renderer */
 	public GlyphCellRenderer(HashMap<String, FontForm.GlyphData> gm) {
@@ -45,7 +45,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Lookup the glyph data */
-	protected FontForm.GlyphData lookupGlyphData(String v) {
+	private FontForm.GlyphData lookupGlyphData(String v) {
 		synchronized(gmap) {
 			return gmap.get(v);
 		}
@@ -64,72 +64,73 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 			index, isSelected, cellHasFocus);
 	}
 
-	/** Configure the list cell renderer */
-	protected void configureRenderer() {
-		pitch = calculatePitch();
-		left = calculateLeft();
-		top = calculateTop();
-	}
-
 	/** Bitmap for currently configured glyph */
-	protected BitmapGraphic bitmap;
+	private BitmapGraphic bitmap;
 
 	/** Pitch for currently configured glyph */
-	protected float pitch;
+	private float pitch;
+
+	/** Left margin for currently configured glyph */
+	private int left;
+
+	/** Top margin for currently configured glyph */
+	private int top;
+
+	/** Paint the currently configured glyph */
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		BitmapGraphic bmap = bitmap;
+		if(bmap != null) {
+			configureRenderer(bmap);
+			paintPixels((Graphics2D)g, bmap);
+		}
+	}
+
+	/** Configure the list cell renderer */
+	private void configureRenderer(BitmapGraphic bmap) {
+		pitch = calculatePitch(bmap);
+		left = calculateLeft(bmap);
+		top = calculateTop(bmap);
+	}
 
 	/** Calculate the pitch for the current glyph */
-	protected float calculatePitch() {
+	private float calculatePitch(BitmapGraphic bmap) {
 		float w = 0;
-		if(bitmap.getWidth() > 0)
- 			w = getWidth() / bitmap.getWidth();
+		if(bmap.getWidth() > 0)
+ 			w = getWidth() / bmap.getWidth();
 		float h = 0;
-		if(bitmap.getHeight() > 0)
-			h = getHeight() / bitmap.getHeight();
+		if(bmap.getHeight() > 0)
+			h = getHeight() / bmap.getHeight();
 		return Math.min(w, h);
 	}
 
-	/** Left margin for currently configured glyph */
-	protected int left;
-
 	/** Calculate the left side of the current glyph */
-	protected int calculateLeft() {
+	private int calculateLeft(BitmapGraphic bmap) {
 		return MARGIN + (int)(getWidth() - MARGIN -
-			bitmap.getWidth() * pitch) / 2;
+			bmap.getWidth() * pitch) / 2;
 	}
 
-	/** Top margin for currently configured glyph */
-	protected int top;
-
 	/** Calculate the top of the current glyph */
-	protected int calculateTop() {
-		return (int)(getHeight() - bitmap.getHeight() * pitch) / 2;
+	private int calculateTop(BitmapGraphic bmap) {
+		return (int)(getHeight() - bmap.getHeight() * pitch) / 2;
 	}
 
 	/** Paint the pixels for the current glyph */
-	protected void paintPixels(Graphics2D g) {
+	private void paintPixels(Graphics2D g, BitmapGraphic bmap) {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
 		Ellipse2D pixel = new Ellipse2D.Float();
 		float yy = top;
-		for(int y = 0; y < bitmap.getHeight(); y++, yy += pitch) {
+		for(int y = 0; y < bmap.getHeight(); y++, yy += pitch) {
 			float xx = left;
-			for(int x = 0; x < bitmap.getWidth(); x++, xx += pitch){
-				if(bitmap.getPixel(x, y).isLit())
+			for(int x = 0; x < bmap.getWidth(); x++, xx += pitch){
+				if(bmap.getPixel(x, y).isLit())
 					g.setColor(Color.YELLOW);
 				else
 					g.setColor(Color.GRAY);
 				pixel.setFrame(xx, yy, pitch, pitch);
 				g.fill(pixel);
 			}
-		}
-	}
-
-	/** Paint the currently configured glyph */
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		if(bitmap != null) {
-			configureRenderer();
-			paintPixels((Graphics2D)g);
 		}
 	}
 }
