@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2013  Minnesota Department of Transportation
- * Copyright (C) 2010  AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +32,6 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * Pixel panel renders a representation of the pixels on a sign.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class SignPixelPanel extends JPanel {
 
