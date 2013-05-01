@@ -221,7 +221,7 @@ public class OpSendDMSMessage extends OpDMS {
 				mess.storeProps();
 			}
 			catch(SNMP.Message.GenError e) {
-				return new QueryValidateMsgErr();
+				return new QueryValidateMsgErr(status);
 			}
 			return new QueryMsgValidity();
 		}
@@ -242,7 +242,7 @@ public class OpSendDMSMessage extends OpDMS {
 			logQuery(status);
 			logQuery(crc);
 			if(!status.isValid())
-				return new QueryValidateMsgErr();
+				return new QueryValidateMsgErr(status);
 			if(message_crc != crc.getInteger()) {
 				String ms = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
@@ -257,6 +257,14 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Phase to query a validate message error */
 	protected class QueryValidateMsgErr extends Phase {
+
+		/** Status code which triggered validate error */
+		private final DmsMessageStatus status;
+
+		/** Create a query validate message error phase */
+		protected QueryValidateMsgErr(DmsMessageStatus s) {
+			status = s;
+		}
 
 		/** Query a validate message error */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -276,6 +284,11 @@ public class OpSendDMSMessage extends OpDMS {
 				setErrorStatus(m_err.toString());
 			else if(error.isError())
 				setErrorStatus(error.toString());
+			else {
+				// This should never happen, but of course it
+				// does in some cases with Addco signs.
+				setErrorStatus(status.toString());
+			}
 			return null;
 		}
 	}
