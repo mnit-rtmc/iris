@@ -23,6 +23,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -42,11 +43,15 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
+import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -56,6 +61,12 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class PropMessages extends JPanel {
+
+	/** Get tiny distance units to use for display */
+	static private Distance.Units distUnitsTiny() {
+		return SystemAttrEnum.CLIENT_UNITS_SI.getBoolean()
+		     ? Distance.Units.CENTIMETERS : INCHES;
+	}
 
 	/** Sign group table model */
 	private final SignGroupTableModel sign_group_model;
@@ -93,6 +104,9 @@ public class PropMessages extends JPanel {
 
 	/** Default font combo box */
 	private final JComboBox font_cbx = new JComboBox();
+
+	/** Font height label */
+	private final JLabel font_height_lbl = FormPanel.createValueLabel();
 
 	/** AWS allowed check box */
 	private final JCheckBox aws_allowed_chk = new JCheckBox(
@@ -199,9 +213,16 @@ public class PropMessages extends JPanel {
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.WEST;
 		add(font_cbx, bag);
+		bag.gridx = 0;
+		bag.gridy = 4;
+		bag.anchor = GridBagConstraints.EAST;
+		add(new ILabel("dms.font.height"), bag);
+		bag.gridx = 1;
+		bag.anchor = GridBagConstraints.WEST;
+		add(font_height_lbl, bag);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			bag.anchor = GridBagConstraints.CENTER;
-			bag.gridy = 4;
+			bag.gridy = 5;
 			bag.gridx = 0;
 			add(aws_allowed_chk, bag);
 			bag.gridx = 1;
@@ -391,6 +412,9 @@ public class PropMessages extends JPanel {
 			font_cbx.setEnabled(canUpdate("defaultFont"));
 			font_cbx.setSelectedItem(proxy.getDefaultFont());
 		}
+		if(a == null || a.equals("defaultFont") ||
+		   a.equals("verticalPitch"))
+			font_height_lbl.setText(calculateFontHeight());
 		if(a == null || a.equals("awsAllowed")) {
 			aws_allowed_chk.setEnabled(canUpdate("awsAllowed"));
 			aws_allowed_chk.setSelected(proxy.getAwsAllowed());
@@ -403,5 +427,26 @@ public class PropMessages extends JPanel {
 		//       dimension attributes are updated.
 		if(a == null || a.equals("messageCurrent"))
 			selectSignText();
+	}
+
+	/** Calculate the height of the default font on the sign */
+	private String calculateFontHeight() {
+		Font f = proxy.getDefaultFont();
+		Integer vp = proxy.getVerticalPitch();
+		if(f != null && vp != null) {
+			int h = f.getHeight();
+			if(h > 0 && vp > 0) {
+				float mm = (h - 0.5f) * vp;
+				Distance fh = new Distance(mm, MILLIMETERS);
+				return formatFontHeight(fh);
+			}
+		}
+		return "???";
+	}
+
+	/** Format the font height for display */
+	private String formatFontHeight(Distance fh) {
+		Distance.Formatter df = new Distance.Formatter(1);
+		return df.format(fh.convert(distUnitsTiny()));
 	}
 }
