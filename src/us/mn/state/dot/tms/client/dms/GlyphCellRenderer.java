@@ -24,6 +24,7 @@ import java.util.HashMap;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import us.mn.state.dot.tms.BitmapGraphic;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Renderer for font glyphs in a Jlist
@@ -33,7 +34,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
 public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Margin reserved for default renderer */
-	static private final int MARGIN = 16;
+	static private final int MARGIN = UI.scaled(12);
 
 	/** Hash of characters to bitmap graphics */
 	private final HashMap<String, BitmapGraphic> bitmaps =
@@ -100,24 +101,33 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Calculate the pitch for the current glyph */
 	private float calculatePitch(BitmapGraphic bmap) {
-		float w = 0;
-		if(bmap.getWidth() > 0)
- 			w = getWidth() / bmap.getWidth();
-		float h = 0;
 		if(bmap.getHeight() > 0)
-			h = getHeight() / bmap.getHeight();
-		return Math.min(w, h);
+			return getBitmapHeight() / bmap.getHeight();
+		else
+			return 0;
+	}
+
+	/** Get height of area for bitmap */
+	private float getBitmapHeight() {
+		int h = getHeight();
+		return h > 2 ? h - 2 : 0;
 	}
 
 	/** Calculate the left side of the current glyph */
 	private int calculateLeft(BitmapGraphic bmap) {
-		return MARGIN + (int)(getWidth() - MARGIN -
+		return MARGIN + (int)(getBitmapWidth() -
 			bmap.getWidth() * pitch) / 2;
+	}
+
+	/** Get width of area for bitmap */
+	private int getBitmapWidth() {
+		return getWidth() - MARGIN;
 	}
 
 	/** Calculate the top of the current glyph */
 	private int calculateTop(BitmapGraphic bmap) {
-		return (int)(getHeight() - bmap.getHeight() * pitch) / 2;
+		return 1 + (int)((getBitmapHeight() -
+			bmap.getHeight() * pitch) / 2);
 	}
 
 	/** Paint the pixels for the current glyph */
