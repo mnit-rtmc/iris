@@ -39,11 +39,15 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new LCSImpl(namespace,
+				LCSImpl lcs = new LCSImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// lcs_array
 					row.getInt(3)		// lane
-				));
+				);
+				namespace.addObject(lcs);
+				// call this after adding to namespace, since
+				// matching DMS needs to look it up.
+				lcs.updateStyles();
 			}
 		});
 	}
@@ -88,7 +92,6 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 
 	/** Initialize the LCS array */
 	public void initTransients() {
-		updateStyles();
 		try {
 			if(lcsArray instanceof LCSArrayImpl) {
 				LCSArrayImpl la = (LCSArrayImpl)lcsArray;
