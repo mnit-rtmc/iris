@@ -36,18 +36,27 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	static private final int MARGIN = 16;
 
 	/** Hash of characters to bitmap graphics */
-	private final HashMap<String, FontForm.GlyphData> gmap;
+	private final HashMap<String, BitmapGraphic> bitmaps =
+		new HashMap<String, BitmapGraphic>();
 
-	/** Create a new glyph cell renderer */
-	public GlyphCellRenderer(HashMap<String, FontForm.GlyphData> gm) {
-		gmap = gm;
-		setBackground(Color.BLACK);
+	/** Set bitmap for one character */
+	public void setBitmap(String c, BitmapGraphic bmap) {
+		synchronized(bitmaps) {
+			bitmaps.put(c, bmap);
+		}
 	}
 
-	/** Lookup the glyph data */
-	private FontForm.GlyphData lookupGlyphData(String v) {
-		synchronized(gmap) {
-			return gmap.get(v);
+	/** Clear bitmaps for all characters */
+	public void clearBitmaps() {
+		synchronized(bitmaps) {
+			bitmaps.clear();
+		}
+	}
+
+	/** Lookup one bitmap */
+	private BitmapGraphic lookupBitmap(String v) {
+		synchronized(bitmaps) {
+			return bitmaps.get(v);
 		}
 	}
 
@@ -55,11 +64,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		FontForm.GlyphData gdata = lookupGlyphData(value.toString());
-		if(gdata != null)
-			bitmap = gdata.bmap;
-		else
-			bitmap = null;
+		bitmap = lookupBitmap(value.toString());
 		return super.getListCellRendererComponent(list, value,
 			index, isSelected, cellHasFocus);
 	}

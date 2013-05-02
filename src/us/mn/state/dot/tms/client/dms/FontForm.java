@@ -149,6 +149,9 @@ public class FontForm extends AbstractForm {
 	/** Glyph list */
 	private final JList glist = new JList();
 
+	/** Glyph cell renderer */
+	private final GlyphCellRenderer renderer = new GlyphCellRenderer();
+
 	/** Glyph panel */
 	private final GlyphPanel glyph_pnl;
 
@@ -159,6 +162,7 @@ public class FontForm extends AbstractForm {
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
 		graphics = s.getSonarState().getGraphics();
 		glyph_pnl = new GlyphPanel(this);
+		glist.setCellRenderer(renderer);
 	}
 
 	/** Initializze the widgets in the form */
@@ -263,8 +267,10 @@ public class FontForm extends AbstractForm {
 		synchronized(gmap) {
 			gmap.clear();
 		}
+		renderer.clearBitmaps();
 		for(Glyph g: gs)
 			addGlyph(g);
+		glist.repaint();
 		selectGlyph();
 	}
 
@@ -279,17 +285,20 @@ public class FontForm extends AbstractForm {
 
 	/** Add a Glyph to the glyph map */
 	private void addGlyph(Glyph g) {
+		String c = String.valueOf((char)g.getCodePoint());
+		GlyphData gd = new GlyphData(g);
+		renderer.setBitmap(c, gd.bmap);
 		synchronized(gmap) {
-			String c = String.valueOf((char)g.getCodePoint());
-			gmap.put(c, new GlyphData(g));
+			gmap.put(c, gd);
 		}
 		del_font.setEnabled(isFontDeletable());
 	}
 
 	/** Remove a Glyph from the glyph map */
 	protected void removeGlyph(Glyph g) {
+		String c = String.valueOf((char)g.getCodePoint());
+		renderer.setBitmap(c, null);
 		synchronized(gmap) {
-			String c = String.valueOf((char)g.getCodePoint());
 			gmap.remove(c);
 		}
 		del_font.setEnabled(isFontDeletable());
@@ -323,7 +332,6 @@ public class FontForm extends AbstractForm {
 		font = f;
 		lookupGlyphs(f);
 		del_font.setEnabled(isFontDeletable());
-		glist.setCellRenderer(new GlyphCellRenderer(gmap));
 	}
 
 	/** Change the selected glyph */
