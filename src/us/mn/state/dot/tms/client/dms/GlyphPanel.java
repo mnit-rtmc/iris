@@ -34,7 +34,8 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * GlyphPanel is a panel for editing font glyphs.
+ * GlyphPanel is a panel for editing font glyphs.  It includes the glyph editor
+ * plus buttons for adjusting the width and draw mode.
  *
  * @author Douglas Lau
  */
