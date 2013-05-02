@@ -226,16 +226,21 @@ public class FontForm extends AbstractForm {
 				selectGlyph();
 			}
 		});
-		DefaultListModel model = new DefaultListModel();
-		glist.setModel(model);
+		glist.setModel(createCodePointModel());
 		glist.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		glist.setVisibleRowCount(12);
 		glist.setFixedCellHeight(UI.scaled(24));
 		glist.setFixedCellWidth(UI.scaled(32));
-		for(int i = 32; i < 127; i++)
-			model.addElement(String.valueOf((char)i));
 		panel.add(glist);
 		return panel;
+	}
+
+	/** Create a list model containing font code points */
+	private DefaultListModel createCodePointModel() {
+		DefaultListModel model = new DefaultListModel();
+		for(int i = 32; i < 127; i++)
+			model.addElement(String.valueOf((char)i));
+		return model;
 	}
 
 	/** Lookup the glyphs in the selected font */
