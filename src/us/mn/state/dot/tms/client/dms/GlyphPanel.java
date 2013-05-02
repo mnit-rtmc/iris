@@ -50,8 +50,8 @@ public class GlyphPanel extends JPanel {
 	/** Current font */
 	private Font font;
 
-	/** Glyph data */
-	private FontForm.GlyphData gdata;
+	/** Glyph info */
+	private GlyphInfo ginfo;
 
 	/** Working bitmap graphic */
 	private BitmapGraphic bmap = new BitmapGraphic(0, 0);
@@ -142,14 +142,14 @@ public class GlyphPanel extends JPanel {
 	}
 
 	/** Set the glyph to edit */
-	public void setGlyph(FontForm.GlyphData g) {
+	public void setGlyph(GlyphInfo g) {
 		int height = fontHeight();
 		apply_btn.setEnabled(g != null);
 		narrow_btn.setEnabled(g != null);
 		widen_btn.setEnabled(height > 0);
-		if(g == gdata && bmap.getHeight() > 0)
+		if(g == ginfo && bmap.getHeight() > 0)
 			return;
-		gdata = g;
+		ginfo = g;
 		if(g != null)
 			setBitmap(g.bmap);
 		else
@@ -224,25 +224,25 @@ public class GlyphPanel extends JPanel {
 		}
 	}
 
-	/** Update an existing Glyph */
-	private void updateGlyph() {
-		if(bmap.getWidth() > 0) {
-			gdata.graphic.setWidth(bmap.getWidth());
-			gdata.graphic.setPixels(Base64.encode(
-				bmap.getPixels()));
-		} else {
-			gdata.glyph.destroy();
-			gdata.graphic.destroy();
-			setGlyph(null);
-		}
-	}
-
 	/** Apply button pressed */
 	private void applyPressed() {
 		updateBitmap();
-		if(gdata != null)
-			updateGlyph();
+		GlyphInfo gi = ginfo;
+		if(gi != null)
+			updateGlyph(gi);
 		else if(bmap.getWidth() > 0)
 			font_form.createGlyph(bmap);
+	}
+
+	/** Update an existing Glyph */
+	private void updateGlyph(GlyphInfo gi) {
+		if(bmap.getWidth() > 0) {
+			gi.graphic.setWidth(bmap.getWidth());
+			gi.graphic.setPixels(Base64.encode(bmap.getPixels()));
+		} else {
+			gi.glyph.destroy();
+			gi.graphic.destroy();
+			setGlyph(null);
+		}
 	}
 }

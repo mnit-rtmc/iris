@@ -143,8 +143,8 @@ public class FontForm extends AbstractForm {
 	protected Font font;
 
 	/** Map of glyph data for currently selected font */
-	protected final HashMap<String, GlyphData> gmap =
-		new HashMap<String, GlyphData>();
+	protected final HashMap<String, GlyphInfo> gmap =
+		new HashMap<String, GlyphInfo>();
 
 	/** Glyph list */
 	private final JList glist = new JList();
@@ -238,29 +238,6 @@ public class FontForm extends AbstractForm {
 		return panel;
 	}
 
-	/** Simple glyph structure */
-	static public class GlyphData {
-		public final Glyph glyph;
-		public final Graphic graphic;
-		public BitmapGraphic bmap;
-
-		protected GlyphData(Glyph g) {
-			glyph = g;
-			graphic = glyph.getGraphic();
-			updateBitmap();
-		}
-
-		protected void updateBitmap() {
-			RasterGraphic rg = GraphicHelper.createRaster(graphic);
-			if(rg instanceof BitmapGraphic)
-				bmap = (BitmapGraphic)rg;
-			else {
-				// Oh well, the Graphic is invalid
-				// Should we throw up an error dialog?
-			}
-		}
-	}
-
 	/** Lookup the glyphs in the selected font */
 	protected void lookupGlyphs(Font font) {
 		Collection<Glyph> gs = FontHelper.lookupGlyphs(font);
@@ -286,10 +263,10 @@ public class FontForm extends AbstractForm {
 	/** Add a Glyph to the glyph map */
 	private void addGlyph(Glyph g) {
 		String c = String.valueOf((char)g.getCodePoint());
-		GlyphData gd = new GlyphData(g);
-		renderer.setBitmap(c, gd.bmap);
+		GlyphInfo gi = new GlyphInfo(g);
+		renderer.setBitmap(c, gi.bmap);
 		synchronized(gmap) {
-			gmap.put(c, gd);
+			gmap.put(c, gi);
 		}
 		del_font.setEnabled(isFontDeletable());
 	}
@@ -304,21 +281,21 @@ public class FontForm extends AbstractForm {
 		del_font.setEnabled(isFontDeletable());
 	}
 
-	/** Update a Graphic in the GlyphData map */
-	protected void updateGraphic(Graphic g) {
-		GlyphData gd = findGlyph(g);
-		if(gd != null) {
-			gd.updateBitmap();
+	/** Update a Graphic in the GlyphInfo map */
+	private void updateGraphic(Graphic g) {
+		GlyphInfo gi = findGlyph(g);
+		if(gi != null) {
+			addGlyph(gi.glyph);
 			repaint();
 		}
 	}
 
 	/** Find glyph data for a graphic */
-	protected GlyphData findGlyph(Graphic g) {
+	protected GlyphInfo findGlyph(Graphic g) {
 		synchronized(gmap) {
-			for(GlyphData gd: gmap.values()) {
-				if(gd.graphic == g)
-					return gd;
+			for(GlyphInfo gi: gmap.values()) {
+				if(gi.graphic == g)
+					return gi;
 			}
 		}
 		return null;
@@ -337,11 +314,11 @@ public class FontForm extends AbstractForm {
 	/** Change the selected glyph */
 	private void selectGlyph() {
 		Object value = glist.getSelectedValue();
-		glyph_pnl.setGlyph(lookupGlyphData(value));
+		glyph_pnl.setGlyph(lookupGlyphInfo(value));
 	}
 
 	/** Lookup the glyph data */
-	private GlyphData lookupGlyphData(Object value) {
+	private GlyphInfo lookupGlyphInfo(Object value) {
 		if(value != null) {
 			synchronized(gmap) {
 				return gmap.get(value.toString());
