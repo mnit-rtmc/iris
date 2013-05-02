@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,19 +114,6 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 
 	/** Code point in the font */
 	protected int codePoint;
-
-	/** Set the code point */
-	public void setCodePoint(int p) {
-		codePoint = p;
-	}
-
-	/** Set the code point */
-	public void doSetCodePoint(int p) throws TMSException {
-		if(p == codePoint)
-			return;
-		store.update(this, "code_point", p);
-		setCodePoint(p);
-	}
 
 	/** Get the code point */
 	public int getCodePoint() {
