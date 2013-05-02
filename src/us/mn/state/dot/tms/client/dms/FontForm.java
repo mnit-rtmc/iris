@@ -147,10 +147,10 @@ public class FontForm extends AbstractForm {
 		new HashMap<String, GlyphData>();
 
 	/** Glyph list */
-	protected final JList glist = new JList();
+	private final JList glist = new JList();
 
 	/** Glyph panel */
-	private GlyphPanel glyph_pnl;
+	private final GlyphPanel glyph_pnl;
 
 	/** Create a new font form */
 	public FontForm(Session s) {
@@ -158,6 +158,7 @@ public class FontForm extends AbstractForm {
 		f_model = new FontModel(s);
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
 		graphics = s.getSonarState().getGraphics();
+		glyph_pnl = new GlyphPanel(this);
 	}
 
 	/** Initializze the widgets in the form */
@@ -204,7 +205,6 @@ public class FontForm extends AbstractForm {
 		bag.gridy = 1;
 		bag.anchor = GridBagConstraints.WEST;
 		panel.add(fviewer, bag);
-		glyph_pnl = new GlyphPanel(this);
 		bag.gridwidth = 2;
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.CENTER;
@@ -265,6 +265,7 @@ public class FontForm extends AbstractForm {
 		}
 		for(Glyph g: gs)
 			addGlyph(g);
+		selectGlyph();
 	}
 
 	/** Check if the currently selected font is deletable */
@@ -277,13 +278,12 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Add a Glyph to the glyph map */
-	protected void addGlyph(Glyph g) {
+	private void addGlyph(Glyph g) {
 		synchronized(gmap) {
 			String c = String.valueOf((char)g.getCodePoint());
 			gmap.put(c, new GlyphData(g));
 		}
 		del_font.setEnabled(isFontDeletable());
-		selectGlyph();
 	}
 
 	/** Remove a Glyph from the glyph map */
@@ -318,27 +318,28 @@ public class FontForm extends AbstractForm {
 	/** Change the selected font */
 	protected void selectFont() {
 		ListSelectionModel s = f_table.getSelectionModel();
-		font = f_model.getProxy(s.getMinSelectionIndex());
-		glyph_pnl.setFont(font);
-		lookupGlyphs(font);
+		Font f = f_model.getProxy(s.getMinSelectionIndex());
+		glyph_pnl.setFont(f);
+		font = f;
+		lookupGlyphs(f);
 		del_font.setEnabled(isFontDeletable());
 		glist.setCellRenderer(new GlyphCellRenderer(gmap));
 	}
 
-	/** Lookup the glyph data */
-	protected GlyphData lookupGlyphData(String v) {
-		synchronized(gmap) {
-			return gmap.get(v);
-		}
+	/** Change the selected glyph */
+	private void selectGlyph() {
+		Object value = glist.getSelectedValue();
+		glyph_pnl.setGlyph(lookupGlyphData(value));
 	}
 
-	/** Change the selected glyph */
-	protected void selectGlyph() {
-		Object value = glist.getSelectedValue();
-		if(value != null)
-			glyph_pnl.setGlyph(lookupGlyphData(value.toString()));
-		else
-			glyph_pnl.setGlyph(null);
+	/** Lookup the glyph data */
+	private GlyphData lookupGlyphData(Object value) {
+		if(value != null) {
+			synchronized(gmap) {
+				return gmap.get(value.toString());
+			}
+		} else
+			return null;
 	}
 
 	/** Create a new Glyph */

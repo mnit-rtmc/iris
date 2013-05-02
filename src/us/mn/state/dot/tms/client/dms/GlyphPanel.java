@@ -135,29 +135,32 @@ public class GlyphPanel extends JPanel {
 		return b;
 	}
 
-	/** Set the font which owns the glyph */
+	/** Set the font */
 	public void setFont(Font f) {
-		font = f;
 		setGlyph(null);
+		font = f;
 	}
 
 	/** Set the glyph to edit */
 	public void setGlyph(FontForm.GlyphData g) {
-		apply_btn.setEnabled(font != null);
-		narrow_btn.setEnabled(font != null && g != null);
-		widen_btn.setEnabled(font != null);
+		int height = fontHeight();
+		apply_btn.setEnabled(g != null);
+		narrow_btn.setEnabled(g != null);
+		widen_btn.setEnabled(height > 0);
 		if(g == gdata && bmap.getHeight() > 0)
 			return;
 		gdata = g;
 		if(g != null)
 			setBitmap(g.bmap);
-		else {
-			int h = 0;
-			if(font != null)
-				h = font.getHeight();
-			setBitmap(new BitmapGraphic(0, h));
-		}
+		else
+			setBitmap(new BitmapGraphic(0, height));
 		repaint();
+	}
+
+	/** Get the font height */
+	private int fontHeight() {
+		Font f = font;
+		return f != null ? f.getHeight() : 0;
 	}
 
 	/** Set the glyph to edit */
