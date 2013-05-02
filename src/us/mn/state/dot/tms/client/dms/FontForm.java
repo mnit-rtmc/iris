@@ -143,8 +143,8 @@ public class FontForm extends AbstractForm {
 	protected Font font;
 
 	/** Map of glyph data for currently selected font */
-	protected final HashMap<String, GlyphInfo> gmap =
-		new HashMap<String, GlyphInfo>();
+	private final HashMap<Integer, GlyphInfo> gmap =
+		new HashMap<Integer, GlyphInfo>();
 
 	/** Glyph list */
 	private final JList glist = new JList();
@@ -230,7 +230,7 @@ public class FontForm extends AbstractForm {
 		glist.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		glist.setVisibleRowCount(12);
 		glist.setFixedCellHeight(UI.scaled(24));
-		glist.setFixedCellWidth(UI.scaled(32));
+		glist.setFixedCellWidth(UI.scaled(36));
 		panel.add(glist);
 		return panel;
 	}
@@ -239,7 +239,7 @@ public class FontForm extends AbstractForm {
 	private DefaultListModel createCodePointModel() {
 		DefaultListModel model = new DefaultListModel();
 		for(int i = 32; i < 127; i++)
-			model.addElement(String.valueOf((char)i));
+			model.addElement(i);
 		return model;
 	}
 
@@ -267,7 +267,7 @@ public class FontForm extends AbstractForm {
 
 	/** Add a Glyph to the glyph map */
 	private void addGlyph(Glyph g) {
-		String c = String.valueOf((char)g.getCodePoint());
+		int c = g.getCodePoint();
 		GlyphInfo gi = new GlyphInfo(g);
 		renderer.setBitmap(c, gi.bmap);
 		synchronized(gmap) {
@@ -278,7 +278,7 @@ public class FontForm extends AbstractForm {
 
 	/** Remove a Glyph from the glyph map */
 	protected void removeGlyph(Glyph g) {
-		String c = String.valueOf((char)g.getCodePoint());
+		int c = g.getCodePoint();
 		renderer.setBitmap(c, null);
 		synchronized(gmap) {
 			gmap.remove(c);
@@ -318,26 +318,27 @@ public class FontForm extends AbstractForm {
 
 	/** Change the selected glyph */
 	private void selectGlyph() {
+		glyph_pnl.setGlyph(lookupGlyphInfo(selectedCodePoint()));
+	}
+
+	/** Get selected code point */
+	private int selectedCodePoint() {
 		Object value = glist.getSelectedValue();
-		glyph_pnl.setGlyph(lookupGlyphInfo(value));
+		return value instanceof Integer ? (Integer)value : 0;
 	}
 
 	/** Lookup the glyph data */
-	private GlyphInfo lookupGlyphInfo(Object value) {
-		if(value != null) {
-			synchronized(gmap) {
-				return gmap.get(value.toString());
-			}
-		} else
-			return null;
+	private GlyphInfo lookupGlyphInfo(int c) {
+		synchronized(gmap) {
+			return gmap.get(c);
+		}
 	}
 
 	/** Create a new Glyph */
 	protected void createGlyph(BitmapGraphic bmap) {
-		Object value = glist.getSelectedValue();
+		int c = selectedCodePoint();
 		Font f = font;
-		if(value != null && f != null) {
-			int c = value.toString().codePointAt(0);
+		if(c > 0 && f != null) {
 			String name = f.getName() + "_" + c;
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();

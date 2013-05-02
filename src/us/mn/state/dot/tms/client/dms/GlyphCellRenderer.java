@@ -36,12 +36,12 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	/** Margin reserved for default renderer */
 	static private final int MARGIN = UI.scaled(12);
 
-	/** Hash of characters to bitmap graphics */
-	private final HashMap<String, BitmapGraphic> bitmaps =
-		new HashMap<String, BitmapGraphic>();
+	/** Hash of code points to bitmap graphics */
+	private final HashMap<Integer, BitmapGraphic> bitmaps =
+		new HashMap<Integer, BitmapGraphic>();
 
 	/** Set bitmap for one character */
-	public void setBitmap(String c, BitmapGraphic bmap) {
+	public void setBitmap(int c, BitmapGraphic bmap) {
 		synchronized(bitmaps) {
 			bitmaps.put(c, bmap);
 		}
@@ -55,9 +55,9 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Lookup one bitmap */
-	private BitmapGraphic lookupBitmap(String v) {
+	private BitmapGraphic lookupBitmap(int c) {
 		synchronized(bitmaps) {
-			return bitmaps.get(v);
+			return bitmaps.get(c);
 		}
 	}
 
@@ -65,9 +65,15 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		bitmap = lookupBitmap(value.toString());
-		return super.getListCellRendererComponent(list, value,
-			index, isSelected, cellHasFocus);
+		String val = "";
+		if(value instanceof Integer) {
+			int v = (Integer)value;
+			bitmap = lookupBitmap(v);
+			val = String.valueOf((char)v);
+		} else
+			bitmap = null;
+		return super.getListCellRendererComponent(list, val, index,
+			isSelected, cellHasFocus);
 	}
 
 	/** Bitmap for currently configured glyph */
