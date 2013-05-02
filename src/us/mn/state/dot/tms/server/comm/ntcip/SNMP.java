@@ -283,10 +283,14 @@ public class SNMP extends BER {
 			if(decodeIdentifier(is) != Tag.COUNTER)
 				throw new ParsingException("EXPECTED COUNTER");
 			int length = decodeLength(is);
-			if(length != 4)
-				throw new ParsingException("INVALID LENGTH");
-			int value = 0;
-			for(int i = 0; i < 4; i++) {
+			if(length < 1 || length > 4) {
+				throw new ParsingException(
+					"INVALID COUNTER LENGTH");
+			}
+			int value = is.read();
+			if(value < 0)
+				throw END_OF_STREAM;
+			for(int i = 1; i < length; i++) {
 				value <<= 8;
 				int v = is.read();
 				if(v < 0)
