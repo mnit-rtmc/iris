@@ -149,8 +149,8 @@ public class FontForm extends AbstractForm {
 	/** Glyph list */
 	protected final JList glist = new JList();
 
-	/** Glyph editor */
-	protected GlyphEditor geditor;
+	/** Glyph panel */
+	private GlyphPanel glyph_pnl;
 
 	/** Create a new font form */
 	public FontForm(Session s) {
@@ -198,22 +198,22 @@ public class FontForm extends AbstractForm {
 		del_font.setEnabled(false);
 		bag.gridwidth = 1;
 		panel.add(new JButton(del_font), bag);
-		JPanel gpanel = createGlyphPanel();
+		JPanel fviewer = createFontViewer();
 		bag.gridwidth = 1;
 		bag.gridx = 0;
 		bag.gridy = 1;
 		bag.anchor = GridBagConstraints.WEST;
-		panel.add(gpanel, bag);
-		geditor = new GlyphEditor(this);
+		panel.add(fviewer, bag);
+		glyph_pnl = new GlyphPanel(this);
 		bag.gridwidth = 2;
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.CENTER;
-		panel.add(geditor, bag);
+		panel.add(glyph_pnl, bag);
 		return panel;
 	}
 
-	/** Create a glyph panel */
-	protected JPanel createGlyphPanel() {
+	/** Create a font viewer panel */
+	private JPanel createFontViewer() {
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("font.ascii")));
@@ -319,7 +319,7 @@ public class FontForm extends AbstractForm {
 	protected void selectFont() {
 		ListSelectionModel s = f_table.getSelectionModel();
 		font = f_model.getProxy(s.getMinSelectionIndex());
-		geditor.setFont(font);
+		glyph_pnl.setFont(font);
 		lookupGlyphs(font);
 		del_font.setEnabled(isFontDeletable());
 		glist.setCellRenderer(new GlyphCellRenderer(gmap));
@@ -336,9 +336,9 @@ public class FontForm extends AbstractForm {
 	protected void selectGlyph() {
 		Object value = glist.getSelectedValue();
 		if(value != null)
-			geditor.setGlyph(lookupGlyphData(value.toString()));
+			glyph_pnl.setGlyph(lookupGlyphData(value.toString()));
 		else
-			geditor.setGlyph(null);
+			glyph_pnl.setGlyph(null);
 	}
 
 	/** Create a new Glyph */

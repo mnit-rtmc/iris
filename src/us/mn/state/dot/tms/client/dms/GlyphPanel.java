@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,32 +34,32 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * GlyphEditor is a panel for editing font glyphs
+ * GlyphPanel is a panel for editing font glyphs.
  *
  * @author Douglas Lau
  */
-public class GlyphEditor extends JPanel {
+public class GlyphPanel extends JPanel {
 
 	/** Icon to display an "off" pixel */
-	static protected final Icon PIXEL_OFF = new PixelIcon(false);
+	static private final Icon PIXEL_OFF = new PixelIcon(false);
 
 	/** Icon to display an "on" pixel */
-	static protected final Icon PIXEL_ON = new PixelIcon(true);
+	static private final Icon PIXEL_ON = new PixelIcon(true);
 
 	/** Current font */
-	protected Font font;
+	private Font font;
 
 	/** Glyph data */
-	protected FontForm.GlyphData gdata;
+	private FontForm.GlyphData gdata;
 
 	/** Working bitmap graphic */
-	protected BitmapGraphic bmap = new BitmapGraphic(0, 0);
+	private BitmapGraphic bmap = new BitmapGraphic(0, 0);
 
 	/** Grid panel */
-	protected final JPanel gpanel = new JPanel();
+	private final JPanel gpanel = new JPanel();
 
 	/** Pixel toggle buttons */
-	protected JToggleButton[] p_button;
+	private JToggleButton[] p_button;
 
 	/** "Narrow" button */
 	private final JButton narrow_btn = new JButton(
@@ -89,10 +89,10 @@ public class GlyphEditor extends JPanel {
 	});
 
 	/** Font form */
-	protected final FontForm font_form;
+	private final FontForm font_form;
 
 	/** Create a box with glue on either side of a component */
-	static protected Box createGlueBox(JComponent c) {
+	static private Box createGlueBox(JComponent c) {
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createGlue());
 		box.add(c);
@@ -100,8 +100,8 @@ public class GlyphEditor extends JPanel {
 		return box;
 	}
 
-	/** Create a glyph editor */
-	public GlyphEditor(FontForm form) {
+	/** Create a glyph panel */
+	public GlyphPanel(FontForm form) {
 		font_form = form;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createTitledBorder(
@@ -125,7 +125,7 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Create a pixel toggle button */
-	protected JToggleButton createPixelButton() {
+	private JToggleButton createPixelButton() {
 		JToggleButton b = new JToggleButton(PIXEL_OFF);
 		b.setSelectedIcon(PIXEL_ON);
 		b.setBorder(null);
@@ -160,7 +160,7 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Set the glyph to edit */
-	protected void setBitmap(BitmapGraphic b) {
+	private void setBitmap(BitmapGraphic b) {
 		gpanel.removeAll();
 		bmap = b;
 		if(b.getWidth() < 1) {
@@ -185,7 +185,7 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Update the bitmap with the current pixel button state */
-	protected void updateBitmap() {
+	private void updateBitmap() {
 		BitmapGraphic b = bmap;
 		for(int y = 0; y < b.getHeight(); y++) {
 			for(int x = 0; x < b.getWidth(); x++) {
@@ -199,7 +199,7 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Narrow buton pressed */
-	protected void narrowPressed() {
+	private void narrowPressed() {
 		if(bmap.getWidth() > 0) {
 			updateBitmap();
 			BitmapGraphic b = new BitmapGraphic(bmap.getWidth() - 1,
@@ -210,7 +210,7 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Widen buton pressed */
-	protected void widenPressed() {
+	private void widenPressed() {
 		if(bmap.getWidth() < 12) {
 			updateBitmap();
 			BitmapGraphic b = new BitmapGraphic(bmap.getWidth() + 1,
@@ -221,7 +221,7 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Update an existing Glyph */
-	protected void updateGlyph() {
+	private void updateGlyph() {
 		if(bmap.getWidth() > 0) {
 			gdata.graphic.setWidth(bmap.getWidth());
 			gdata.graphic.setPixels(Base64.encode(
@@ -234,7 +234,7 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Apply button pressed */
-	protected void applyPressed() {
+	private void applyPressed() {
 		updateBitmap();
 		if(gdata != null)
 			updateGlyph();
