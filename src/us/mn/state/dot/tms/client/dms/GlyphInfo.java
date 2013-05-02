@@ -27,6 +27,9 @@ import us.mn.state.dot.tms.RasterGraphic;
  */
 public class GlyphInfo {
 
+	/** Code point */
+	public final int code_point;
+
 	/** Glyph object */
 	public final Glyph glyph;
 
@@ -37,10 +40,11 @@ public class GlyphInfo {
 	public final BitmapGraphic bmap;
 
 	/** Create a new glyph info structure */
-	public GlyphInfo(Glyph g) {
+	public GlyphInfo(int cp, Glyph g) {
+		code_point = cp;
 		glyph = g;
-		graphic = glyph.getGraphic();
-		bmap = createBitmap();
+		graphic = g != null ? g.getGraphic() : null;
+		bmap = g != null ? createBitmap() : null;
 	}
 
 	/** Create a bitmap of glyph */

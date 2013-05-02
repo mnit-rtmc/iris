@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -24,10 +25,12 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -46,6 +49,12 @@ public class GlyphPanel extends JPanel {
 
 	/** Icon to display an "on" pixel */
 	static private final Icon PIXEL_ON = new PixelIcon(true);
+
+	/** Glyph type cache */
+	private final TypeCache<Glyph> glyphs;
+
+	/** Graphic type cache */
+	private final TypeCache<Graphic> graphics;
 
 	/** Current font */
 	private Font font;
@@ -89,9 +98,6 @@ public class GlyphPanel extends JPanel {
 		}
 	});
 
-	/** Font form */
-	private final FontForm font_form;
-
 	/** Create a box with glue on either side of a component */
 	static private Box createGlueBox(JComponent c) {
 		Box box = Box.createHorizontalBox();
@@ -102,8 +108,9 @@ public class GlyphPanel extends JPanel {
 	}
 
 	/** Create a glyph panel */
-	public GlyphPanel(FontForm form) {
-		font_form = form;
+	public GlyphPanel(TypeCache<Glyph> gl, TypeCache<Graphic> gr) {
+		glyphs = gl;
+		graphics = gr;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createTitledBorder(
 			I18N.get("font.glyph.selected")));
@@ -137,23 +144,17 @@ public class GlyphPanel extends JPanel {
 
 	/** Set the font */
 	public void setFont(Font f) {
-		setGlyph(null);
 		font = f;
+		setGlyph(null);
 	}
 
 	/** Set the glyph to edit */
-	public void setGlyph(GlyphInfo g) {
-		int height = fontHeight();
-		apply_btn.setEnabled(g != null);
-		narrow_btn.setEnabled(g != null);
-		widen_btn.setEnabled(height > 0);
-		if(g == ginfo && bmap.getHeight() > 0)
-			return;
-		ginfo = g;
-		if(g != null)
-			setBitmap(g.bmap);
-		else
-			setBitmap(new BitmapGraphic(0, height));
+	public void setGlyph(GlyphInfo gi) {
+		apply_btn.setEnabled(gi != null);
+		narrow_btn.setEnabled(gi != null);
+		widen_btn.setEnabled(gi != null && fontHeight() > 0);
+		ginfo = gi;
+		setBitmap(glyphBitmap(gi));
 		repaint();
 	}
 
@@ -161,6 +162,13 @@ public class GlyphPanel extends JPanel {
 	private int fontHeight() {
 		Font f = font;
 		return f != null ? f.getHeight() : 0;
+	}
+
+	/** Get the glyph bitmap */
+	private BitmapGraphic glyphBitmap(GlyphInfo gi) {
+		return (gi != null && gi.bmap != null)
+		     ? gi.bmap
+		     : new BitmapGraphic(0, fontHeight());
 	}
 
 	/** Set the glyph to edit */
@@ -231,7 +239,7 @@ public class GlyphPanel extends JPanel {
 		if(gi != null)
 			updateGlyph(gi);
 		else if(bmap.getWidth() > 0)
-			font_form.createGlyph(bmap);
+			createGlyph(bmap);
 	}
 
 	/** Update an existing Glyph */
@@ -242,7 +250,29 @@ public class GlyphPanel extends JPanel {
 		} else {
 			gi.glyph.destroy();
 			gi.graphic.destroy();
-			setGlyph(null);
+			setGlyph(new GlyphInfo(gi.code_point, null));
+		}
+	}
+
+	/** Create a new Glyph */
+	private void createGlyph(BitmapGraphic bmap) {
+		GlyphInfo gi = ginfo;
+		int c = gi != null ? gi.code_point : 0;
+		Font f = font;
+		if(c > 0 && f != null) {
+			String name = f.getName() + "_" + c;
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("bpp", 1);
+			attrs.put("height", bmap.getHeight());
+			attrs.put("width", bmap.getWidth());
+			attrs.put("pixels", Base64.encode(bmap.getPixels()));
+			graphics.createObject(name, attrs);
+			attrs.clear();
+			attrs.put("font", f);
+			attrs.put("codePoint", c);
+			attrs.put("graphic", name);
+			glyphs.createObject(name, attrs);
 		}
 	}
 }

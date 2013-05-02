@@ -18,28 +18,21 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Base64;
-import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.GraphicHelper;
-import us.mn.state.dot.tms.RasterGraphic;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
@@ -79,10 +72,10 @@ public class FontForm extends AbstractForm {
 	};
 
 	/** Glyph type cache */
-	protected final TypeCache<Glyph> glyphs;
+	private final TypeCache<Glyph> glyphs;
 
 	/** Graphic type cache */
-	protected final TypeCache<Graphic> graphics;
+	private final TypeCache<Graphic> graphics;
 
 	/** Check if the specified Graphic is from the selected font */
 	protected boolean isFromSelectedFont(Graphic p) {
@@ -161,7 +154,7 @@ public class FontForm extends AbstractForm {
 		f_model = new FontModel(s);
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
 		graphics = s.getSonarState().getGraphics();
-		glyph_pnl = new GlyphPanel(this);
+		glyph_pnl = new GlyphPanel(glyphs, graphics);
 		glist.setCellRenderer(renderer);
 	}
 
@@ -268,7 +261,7 @@ public class FontForm extends AbstractForm {
 	/** Add a Glyph to the glyph map */
 	private void addGlyph(Glyph g) {
 		int c = g.getCodePoint();
-		GlyphInfo gi = new GlyphInfo(g);
+		GlyphInfo gi = new GlyphInfo(c, g);
 		renderer.setBitmap(c, gi.bmap);
 		synchronized(gmap) {
 			gmap.put(c, gi);
@@ -318,7 +311,7 @@ public class FontForm extends AbstractForm {
 
 	/** Change the selected glyph */
 	private void selectGlyph() {
-		glyph_pnl.setGlyph(lookupGlyphInfo(selectedCodePoint()));
+		glyph_pnl.setGlyph(glyphInfo(selectedCodePoint()));
 	}
 
 	/** Get selected code point */
@@ -327,31 +320,16 @@ public class FontForm extends AbstractForm {
 		return value instanceof Integer ? (Integer)value : 0;
 	}
 
-	/** Lookup the glyph data */
+	/** Get glyph information */
+	private GlyphInfo glyphInfo(int c) {
+		GlyphInfo gi = lookupGlyphInfo(c);
+		return gi != null ? gi : new GlyphInfo(c, null);
+	}
+
+	/** Lookup cached glyph information */
 	private GlyphInfo lookupGlyphInfo(int c) {
 		synchronized(gmap) {
 			return gmap.get(c);
-		}
-	}
-
-	/** Create a new Glyph */
-	protected void createGlyph(BitmapGraphic bmap) {
-		int c = selectedCodePoint();
-		Font f = font;
-		if(c > 0 && f != null) {
-			String name = f.getName() + "_" + c;
-			HashMap<String, Object> attrs =
-				new HashMap<String, Object>();
-			attrs.put("bpp", 1);
-			attrs.put("height", bmap.getHeight());
-			attrs.put("width", bmap.getWidth());
-			attrs.put("pixels", Base64.encode(bmap.getPixels()));
-			graphics.createObject(name, attrs);
-			attrs.clear();
-			attrs.put("font", f);
-			attrs.put("codePoint", c);
-			attrs.put("graphic", name);
-			glyphs.createObject(name, attrs);
 		}
 	}
 }
