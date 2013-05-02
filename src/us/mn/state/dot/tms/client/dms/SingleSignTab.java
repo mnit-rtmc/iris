@@ -69,7 +69,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	private final JLabel brightness_lbl = createValueLabel();
 
 	/** Displays the verify camera for the DMS */
-	protected final JButton cameraBtn = new JButton();
+	private final JButton camera_btm = new JButton();
 
 	/** Displays the location of the DMS */
 	private final JLabel location_lbl = createValueLabel();
@@ -97,17 +97,17 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	private final JLabel op_status_lbl = createValueLabel();
 
 	/** Client session */
-	protected final Session session;
+	private final Session session;
 
 	/** DMS dispatcher */
-	protected final DMSDispatcher dispatcher;
+	private final DMSDispatcher dispatcher;
 
 	/** Panel for drawing current pixel status */
-	private final SignPixelPanel currentPnl = new SignPixelPanel(100, 400,
+	private final SignPixelPanel current_pnl = new SignPixelPanel(100, 400,
 		true);
 
 	/** Panel for drawing preview pixel status */
-	private final SignPixelPanel previewPnl = new SignPixelPanel(100, 400,
+	private final SignPixelPanel preview_pnl = new SignPixelPanel(100, 400,
 		true, new Color(0, 0, 0.4f));
 
 	/** Pager for selected DMS panel */
@@ -168,9 +168,9 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
 			add(I18N.get("dms.brightness"), brightness_lbl);
 		setHeavy(false);
-		cameraBtn.setBorder(BorderFactory.createEtchedBorder(
+		camera_btm.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		addRow(I18N.get("camera"), cameraBtn);
+		addRow(I18N.get("camera"), camera_btm);
 		addRow(I18N.get("location"), location_lbl);
 		addRow(I18N.get("device.status"), status_lbl);
 		// Make label opaque so that we can set the background color
@@ -184,8 +184,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 				SwingConstants.LEFT);
 			addRow(aws_control_chk);
 		}
-		tab.add(I18N.get("dms.msg.current"), currentPnl);
-		tab.add(I18N.get("dms.msg.preview"), previewPnl);
+		tab.add(I18N.get("dms.msg.current"), current_pnl);
+		tab.add(I18N.get("dms.msg.preview"), preview_pnl);
 		setCenter();
 		addRow(tab);
 		createJobs();
@@ -203,8 +203,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 				}
 			}
 		});
-		currentPnl.addMouseListener(popper);
-		previewPnl.addMouseListener(popper);
+		current_pnl.addMouseListener(popper);
+		preview_pnl.addMouseListener(popper);
 	}
 
 	/** Process a popup menu event */
@@ -262,10 +262,10 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	public void setMessage() {
 		if(preview) {
 			updatePreviewPanel(watching);
-			tab.setSelectedComponent(previewPnl);
+			tab.setSelectedComponent(preview_pnl);
 		} else {
 			updateCurrentPanel(watching);
-			tab.setSelectedComponent(currentPnl);
+			tab.setSelectedComponent(current_pnl);
 		}
 	}
 
@@ -281,8 +281,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	/** Clear the selected DMS */
 	protected void clearSelected() {
 		clearPager();
-		currentPnl.clear();
-		previewPnl.clear();
+		current_pnl.clear();
+		preview_pnl.clear();
 		name_lbl.setText("");
 		brightness_lbl.setText("");
 		setCameraAction(null);
@@ -299,8 +299,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	/** Set the camera action */
 	protected void setCameraAction(DMS dms) {
 		Camera cam = DMSHelper.getCamera(dms);
-		cameraBtn.setAction(new CameraSelectAction(cam, cam_sel_model));
-		cameraBtn.setEnabled(cam != null);
+		camera_btm.setAction(new CameraSelectAction(cam,cam_sel_model));
+		camera_btm.setEnabled(cam != null);
 	}
 
 	/** Update one (or all) attribute(s) on the form.
@@ -386,11 +386,11 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			RasterGraphic[] rg = DMSHelper.getRasters(dms);
 			if(rg != null) {
 				String ms = getMultiString(dms);
-				pnlPager = new DMSPanelPager(currentPnl, dms,
+				pnlPager = new DMSPanelPager(current_pnl, dms,
 					rg, pageOnIntervals(ms),
 					pageOffIntervals(ms));
 			} else
-				currentPnl.clear();
+				current_pnl.clear();
 		}
 	}
 
@@ -434,7 +434,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		if(dms != null) {
 			String ms = dispatcher.getMessage();
 			RasterGraphic[] rg = dispatcher.getPixmaps();
-			pnlPager = new DMSPanelPager(previewPnl, dms, rg,
+			pnlPager = new DMSPanelPager(preview_pnl, dms, rg,
 				pageOnIntervals(ms), pageOffIntervals(ms));
 		}
 	}
