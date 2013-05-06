@@ -286,7 +286,7 @@ public class FontForm extends AbstractForm {
 		GlyphInfo gi = findGlyph(g);
 		if(gi != null) {
 			addGlyph(gi.glyph);
-			repaint();
+			glist.repaint();
 		}
 	}
 
