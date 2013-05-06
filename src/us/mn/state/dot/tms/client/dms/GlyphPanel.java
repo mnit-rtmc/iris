@@ -112,6 +112,7 @@ public class GlyphPanel extends JPanel {
 		glyphs = gl;
 		graphics = gr;
 		ginfo = new GlyphInfo();
+		updateButtons();
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createTitledBorder(
 			I18N.get("font.glyph.selected")));
@@ -121,15 +122,12 @@ public class GlyphPanel extends JPanel {
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createGlue());
 		box.add(narrow_btn);
-		narrow_btn.setEnabled(false);
 		box.add(Box.createGlue());
 		box.add(widen_btn);
-		widen_btn.setEnabled(false);
 		box.add(Box.createGlue());
 		add(box);
 		add(Box.createVerticalStrut(UI.vgap));
 		add(createGlueBox(apply_btn));
-		apply_btn.setEnabled(false);
 		add(Box.createGlue());
 	}
 
@@ -152,12 +150,19 @@ public class GlyphPanel extends JPanel {
 	/** Set the glyph to edit */
 	public void setGlyph(GlyphInfo gi) {
 		assert gi != null;
-		apply_btn.setEnabled(gi.exists());
-		narrow_btn.setEnabled(gi.exists());
-		widen_btn.setEnabled(gi.exists() && fontHeight() > 0);
 		ginfo = gi;
+		updateButtons();
 		setBitmap(glyphBitmap(gi));
 		repaint();
+	}
+
+	/** Update button enabled states */
+	private void updateButtons() {
+		GlyphInfo gi = ginfo;
+		BitmapGraphic bg = bmap;
+		apply_btn.setEnabled(gi.exists());
+		narrow_btn.setEnabled(gi.exists() && bg.getWidth() > 0);
+		widen_btn.setEnabled(gi.exists() && fontHeight() > 0);
 	}
 
 	/** Get the font height */
@@ -175,23 +180,22 @@ public class GlyphPanel extends JPanel {
 	}
 
 	/** Set the glyph to edit */
-	private void setBitmap(BitmapGraphic b) {
+	private void setBitmap(BitmapGraphic bg) {
 		gpanel.removeAll();
-		bmap = b;
-		if(b.getWidth() < 1) {
-			narrow_btn.setEnabled(false);
+		bmap = bg;
+		updateButtons();
+		if(bg.getWidth() < 1) {
 			repaint();
 			return;
 		}
-		narrow_btn.setEnabled(true);
-		gpanel.setLayout(new GridLayout(b.getHeight(), b.getWidth()));
-		p_button = new JToggleButton[b.getHeight() * b.getWidth()];
-		for(int y = 0; y < b.getHeight(); y++) {
-			for(int x = 0; x < b.getWidth(); x++) {
-				int i = y * b.getWidth() + x;
+		gpanel.setLayout(new GridLayout(bg.getHeight(), bg.getWidth()));
+		p_button = new JToggleButton[bg.getHeight() * bg.getWidth()];
+		for(int y = 0; y < bg.getHeight(); y++) {
+			for(int x = 0; x < bg.getWidth(); x++) {
+				int i = y * bg.getWidth() + x;
 				p_button[i] = createPixelButton();
 				p_button[i].setSelected(
-					b.getPixel(x, y).isLit());
+					bg.getPixel(x, y).isLit());
 				gpanel.add(p_button[i]);
 			}
 		}
@@ -201,36 +205,38 @@ public class GlyphPanel extends JPanel {
 
 	/** Update the bitmap with the current pixel button state */
 	private void updateBitmap() {
-		BitmapGraphic b = bmap;
-		for(int y = 0; y < b.getHeight(); y++) {
-			for(int x = 0; x < b.getWidth(); x++) {
-				int i = y * b.getWidth() + x;
+		BitmapGraphic bg = bmap;
+		for(int y = 0; y < bg.getHeight(); y++) {
+			for(int x = 0; x < bg.getWidth(); x++) {
+				int i = y * bg.getWidth() + x;
 				DmsColor p = DmsColor.BLACK;
 				if(p_button[i].isSelected())
 					p = DmsColor.AMBER;
-				b.setPixel(x, y, p);
+				bg.setPixel(x, y, p);
 			}
 		}
 	}
 
 	/** Narrow buton pressed */
 	private void narrowPressed() {
-		if(bmap.getWidth() > 0) {
+		BitmapGraphic bg = bmap;
+		if(bg.getWidth() > 0) {
 			updateBitmap();
-			BitmapGraphic b = new BitmapGraphic(bmap.getWidth() - 1,
-				bmap.getHeight());
-			b.copy(bmap);
+			BitmapGraphic b = new BitmapGraphic(bg.getWidth() - 1,
+				bg.getHeight());
+			b.copy(bg);
 			setBitmap(b);
 		}
 	}
 
 	/** Widen buton pressed */
 	private void widenPressed() {
-		if(bmap.getWidth() < 12) {
+		BitmapGraphic bg = bmap;
+		if(bg.getWidth() < 12) {
 			updateBitmap();
-			BitmapGraphic b = new BitmapGraphic(bmap.getWidth() + 1,
-				bmap.getHeight());
-			b.copy(bmap);
+			BitmapGraphic b = new BitmapGraphic(bg.getWidth() + 1,
+				bg.getHeight());
+			b.copy(bg);
 			setBitmap(b);
 		}
 	}
@@ -239,18 +245,19 @@ public class GlyphPanel extends JPanel {
 	private void applyPressed() {
 		updateBitmap();
 		GlyphInfo gi = ginfo;
+		BitmapGraphic bg = bmap;
 		if(gi.exists())
-			updateGlyph(gi);
-		else if(bmap.getWidth() > 0)
-			createGlyph(gi, bmap);
+			updateGlyph(gi, bg);
+		else if(bg.getWidth() > 0)
+			createGlyph(gi, bg);
 	}
 
 	/** Update an existing Glyph */
-	private void updateGlyph(GlyphInfo gi) {
+	private void updateGlyph(GlyphInfo gi, BitmapGraphic bg) {
 		assert gi.exists();
-		if(bmap.getWidth() > 0) {
-			gi.graphic.setWidth(bmap.getWidth());
-			gi.graphic.setPixels(Base64.encode(bmap.getPixels()));
+		if(bg.getWidth() > 0) {
+			gi.graphic.setWidth(bg.getWidth());
+			gi.graphic.setPixels(Base64.encode(bg.getPixels()));
 		} else {
 			gi.glyph.destroy();
 			gi.graphic.destroy();
@@ -259,7 +266,7 @@ public class GlyphPanel extends JPanel {
 	}
 
 	/** Create a new Glyph */
-	private void createGlyph(GlyphInfo gi, BitmapGraphic bmap) {
+	private void createGlyph(GlyphInfo gi, BitmapGraphic bg) {
 		assert !gi.exists();
 		int c = gi.code_point;
 		Font f = font;
@@ -268,9 +275,9 @@ public class GlyphPanel extends JPanel {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("bpp", 1);
-			attrs.put("height", bmap.getHeight());
-			attrs.put("width", bmap.getWidth());
-			attrs.put("pixels", Base64.encode(bmap.getPixels()));
+			attrs.put("height", bg.getHeight());
+			attrs.put("width", bg.getWidth());
+			attrs.put("pixels", Base64.encode(bg.getPixels()));
 			graphics.createObject(name, attrs);
 			attrs.clear();
 			attrs.put("font", f);
