@@ -111,6 +111,7 @@ public class GlyphPanel extends JPanel {
 	public GlyphPanel(TypeCache<Glyph> gl, TypeCache<Graphic> gr) {
 		glyphs = gl;
 		graphics = gr;
+		ginfo = new GlyphInfo();
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createTitledBorder(
 			I18N.get("font.glyph.selected")));
@@ -145,14 +146,15 @@ public class GlyphPanel extends JPanel {
 	/** Set the font */
 	public void setFont(Font f) {
 		font = f;
-		setGlyph(null);
+		setGlyph(new GlyphInfo());
 	}
 
 	/** Set the glyph to edit */
 	public void setGlyph(GlyphInfo gi) {
-		apply_btn.setEnabled(gi != null);
-		narrow_btn.setEnabled(gi != null);
-		widen_btn.setEnabled(gi != null && fontHeight() > 0);
+		assert gi != null;
+		apply_btn.setEnabled(gi.exists());
+		narrow_btn.setEnabled(gi.exists());
+		widen_btn.setEnabled(gi.exists() && fontHeight() > 0);
 		ginfo = gi;
 		setBitmap(glyphBitmap(gi));
 		repaint();
@@ -166,7 +168,8 @@ public class GlyphPanel extends JPanel {
 
 	/** Get the glyph bitmap */
 	private BitmapGraphic glyphBitmap(GlyphInfo gi) {
-		return (gi != null && gi.bmap != null)
+		assert gi != null;
+		return (gi.bmap != null)
 		     ? gi.bmap
 		     : new BitmapGraphic(0, fontHeight());
 	}
@@ -236,14 +239,15 @@ public class GlyphPanel extends JPanel {
 	private void applyPressed() {
 		updateBitmap();
 		GlyphInfo gi = ginfo;
-		if(gi != null)
+		if(gi.exists())
 			updateGlyph(gi);
 		else if(bmap.getWidth() > 0)
-			createGlyph(bmap);
+			createGlyph(gi, bmap);
 	}
 
 	/** Update an existing Glyph */
 	private void updateGlyph(GlyphInfo gi) {
+		assert gi.exists();
 		if(bmap.getWidth() > 0) {
 			gi.graphic.setWidth(bmap.getWidth());
 			gi.graphic.setPixels(Base64.encode(bmap.getPixels()));
@@ -255,9 +259,9 @@ public class GlyphPanel extends JPanel {
 	}
 
 	/** Create a new Glyph */
-	private void createGlyph(BitmapGraphic bmap) {
-		GlyphInfo gi = ginfo;
-		int c = gi != null ? gi.code_point : 0;
+	private void createGlyph(GlyphInfo gi, BitmapGraphic bmap) {
+		assert !gi.exists();
+		int c = gi.code_point;
 		Font f = font;
 		if(c > 0 && f != null) {
 			String name = f.getName() + "_" + c;

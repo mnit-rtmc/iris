@@ -47,6 +47,11 @@ public class GlyphInfo {
 		bmap = g != null ? createBitmap() : null;
 	}
 
+	/** Create a new default glyph info */
+	public GlyphInfo() {
+		this(0, null);
+	}
+
 	/** Create a bitmap of glyph */
 	private BitmapGraphic createBitmap() {
 		RasterGraphic rg = GraphicHelper.createRaster(graphic);
@@ -54,5 +59,10 @@ public class GlyphInfo {
 			return (BitmapGraphic)rg;
 		else
 			return null;
+	}
+
+	/** Test if the glyph exists */
+	public boolean exists() {
+		return glyph != null;
 	}
 }
