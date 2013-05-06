@@ -44,6 +44,9 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class GlyphPanel extends JPanel {
 
+	/** Maximum width of glyphs */
+	static private final int MAX_GLYPH_WIDTH = 16;
+
 	/** Icon to display an "off" pixel */
 	static private final Icon PIXEL_OFF = new PixelIcon(false);
 
@@ -151,7 +154,6 @@ public class GlyphPanel extends JPanel {
 	public void setGlyph(GlyphInfo gi) {
 		assert gi != null;
 		ginfo = gi;
-		updateButtons();
 		setBitmap(glyphBitmap(gi));
 		repaint();
 	}
@@ -160,9 +162,10 @@ public class GlyphPanel extends JPanel {
 	private void updateButtons() {
 		GlyphInfo gi = ginfo;
 		BitmapGraphic bg = bmap;
-		apply_btn.setEnabled(gi.exists());
-		narrow_btn.setEnabled(gi.exists() && bg.getWidth() > 0);
-		widen_btn.setEnabled(gi.exists() && fontHeight() > 0);
+		boolean e = fontHeight() > 0;
+		narrow_btn.setEnabled(e && bg.getWidth() > 0);
+		widen_btn.setEnabled(e && bg.getWidth() < MAX_GLYPH_WIDTH);
+		apply_btn.setEnabled(e);
 	}
 
 	/** Get the font height */
@@ -232,7 +235,7 @@ public class GlyphPanel extends JPanel {
 	/** Widen buton pressed */
 	private void widenPressed() {
 		BitmapGraphic bg = bmap;
-		if(bg.getWidth() < 12) {
+		if(bg.getWidth() < MAX_GLYPH_WIDTH) {
 			updateBitmap();
 			BitmapGraphic b = new BitmapGraphic(bg.getWidth() + 1,
 				bg.getHeight());
