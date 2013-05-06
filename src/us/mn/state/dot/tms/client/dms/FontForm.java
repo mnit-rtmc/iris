@@ -56,10 +56,10 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Table model for fonts */
-	protected final FontModel f_model;
+	private final FontModel f_model;
 
 	/** Table to hold the font list */
-	protected final ZTable f_table = new ZTable();
+	private final ZTable f_table = new ZTable();
 
 	/** Action to delete the selected font */
 	private final IAction del_font = new IAction("font.delete") {
@@ -78,7 +78,7 @@ public class FontForm extends AbstractForm {
 	private final TypeCache<Graphic> graphics;
 
 	/** Check if the specified Graphic is from the selected font */
-	protected boolean isFromSelectedFont(Graphic p) {
+	private boolean isFromSelectedFont(Graphic p) {
 		Font f = font;
 		if(f != null)
 			return p.getName().startsWith(f.getName());
@@ -87,7 +87,7 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Proxy listener for Graphic proxies */
-	protected final ProxyListener<Graphic> gr_listener =
+	private final ProxyListener<Graphic> gr_listener =
 		new ProxyListener<Graphic>()
 	{
 		public void proxyAdded(Graphic p) { }
@@ -104,7 +104,7 @@ public class FontForm extends AbstractForm {
 	};
 
 	/** Check if the specified Glyph is from the selected font */
-	protected boolean isFromSelectedFont(Glyph p) {
+	private boolean isFromSelectedFont(Glyph p) {
 		Font f = font;
 		if(f != null)
 			return p.getName().startsWith(f.getName());
@@ -113,7 +113,7 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Proxy listener for Glyph proxies */
-	protected final ProxyListener<Glyph> gl_listener =
+	private final ProxyListener<Glyph> gl_listener =
 		new ProxyListener<Glyph>()
 	{
 		public void proxyAdded(Glyph p) {
@@ -133,7 +133,7 @@ public class FontForm extends AbstractForm {
 	};
 
 	/** Selected font */
-	protected Font font;
+	private Font font;
 
 	/** Map of glyph data for currently selected font */
 	private final HashMap<Integer, GlyphInfo> gmap =
@@ -159,7 +159,7 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Initializze the widgets in the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		f_model.initialize();
 		add(createFontPanel());
 		graphics.addProxyListener(gr_listener);
@@ -167,14 +167,14 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
+	@Override protected void dispose() {
 		f_model.dispose();
 		graphics.removeProxyListener(gr_listener);
 		glyphs.removeProxyListener(gl_listener);
 	}
 
 	/** Create font panel */
-	protected JPanel createFontPanel() {
+	private JPanel createFontPanel() {
 		JPanel panel = new JPanel(new GridBagLayout());
 		panel.setBorder(UI.border);
 		GridBagConstraints bag = new GridBagConstraints();
@@ -237,7 +237,7 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Lookup the glyphs in the selected font */
-	protected void lookupGlyphs(Font font) {
+	private void lookupGlyphs(Font font) {
 		Collection<Glyph> gs = FontHelper.lookupGlyphs(font);
 		synchronized(gmap) {
 			gmap.clear();
@@ -250,7 +250,7 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Check if the currently selected font is deletable */
-	protected boolean isFontDeletable() {
+	private boolean isFontDeletable() {
 		if(font == null)
 			return false;
 		synchronized(gmap) {
@@ -270,7 +270,7 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Remove a Glyph from the glyph map */
-	protected void removeGlyph(Glyph g) {
+	private void removeGlyph(Glyph g) {
 		int c = g.getCodePoint();
 		renderer.setBitmap(c, null);
 		synchronized(gmap) {
@@ -289,7 +289,7 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Find glyph data for a graphic */
-	protected GlyphInfo findGlyph(Graphic g) {
+	private GlyphInfo findGlyph(Graphic g) {
 		synchronized(gmap) {
 			for(GlyphInfo gi: gmap.values()) {
 				if(gi.graphic == g)
@@ -300,7 +300,7 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Change the selected font */
-	protected void selectFont() {
+	private void selectFont() {
 		ListSelectionModel s = f_table.getSelectionModel();
 		Font f = f_model.getProxy(s.getMinSelectionIndex());
 		glyph_pnl.setFont(f);
