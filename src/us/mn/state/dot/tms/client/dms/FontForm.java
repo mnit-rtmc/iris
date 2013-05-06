@@ -168,6 +168,7 @@ public class FontForm extends AbstractForm {
 
 	/** Dispose of the form */
 	@Override protected void dispose() {
+		glyph_pnl.dispose();
 		f_model.dispose();
 		graphics.removeProxyListener(gr_listener);
 		glyphs.removeProxyListener(gl_listener);
@@ -205,6 +206,7 @@ public class FontForm extends AbstractForm {
 		bag.gridwidth = 2;
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.CENTER;
+		bag.fill = GridBagConstraints.BOTH;
 		panel.add(glyph_pnl, bag);
 		return panel;
 	}

@@ -14,17 +14,12 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.GridLayout;
-import java.awt.Insets;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -47,12 +42,6 @@ public class GlyphPanel extends JPanel {
 	/** Maximum width of glyphs */
 	static private final int MAX_GLYPH_WIDTH = 16;
 
-	/** Icon to display an "off" pixel */
-	static private final Icon PIXEL_OFF = new PixelIcon(false);
-
-	/** Icon to display an "on" pixel */
-	static private final Icon PIXEL_ON = new PixelIcon(true);
-
 	/** Glyph type cache */
 	private final TypeCache<Glyph> glyphs;
 
@@ -68,11 +57,8 @@ public class GlyphPanel extends JPanel {
 	/** Working bitmap graphic */
 	private BitmapGraphic bmap = new BitmapGraphic(0, 0);
 
-	/** Grid panel */
-	private final JPanel gpanel = new JPanel();
-
-	/** Pixel toggle buttons */
-	private JToggleButton[] p_button;
+	/** Glyph editor */
+	private final GlyphEditor geditor = new GlyphEditor();
 
 	/** "Narrow" button */
 	private final JButton narrow_btn = new JButton(
@@ -101,47 +87,39 @@ public class GlyphPanel extends JPanel {
 		}
 	});
 
-	/** Create a box with glue on either side of a component */
-	static private Box createGlueBox(JComponent c) {
-		Box box = Box.createHorizontalBox();
-		box.add(Box.createGlue());
-		box.add(c);
-		box.add(Box.createGlue());
-		return box;
-	}
-
 	/** Create a glyph panel */
 	public GlyphPanel(TypeCache<Glyph> gl, TypeCache<Graphic> gr) {
+		super(new GridBagLayout());
 		glyphs = gl;
 		graphics = gr;
 		ginfo = new GlyphInfo();
 		updateButtons();
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createTitledBorder(
 			I18N.get("font.glyph.selected")));
-		add(Box.createGlue());
-		add(createGlueBox(gpanel));
-		add(Box.createVerticalStrut(UI.vgap));
-		Box box = Box.createHorizontalBox();
-		box.add(Box.createGlue());
-		box.add(narrow_btn);
-		box.add(Box.createGlue());
-		box.add(widen_btn);
-		box.add(Box.createGlue());
-		add(box);
-		add(Box.createVerticalStrut(UI.vgap));
-		add(createGlueBox(apply_btn));
-		add(Box.createGlue());
+		GridBagConstraints bag = new GridBagConstraints();
+		bag.insets = UI.insets();
+		bag.gridwidth = 3;
+		bag.gridx = 0;
+		bag.gridy = 0;
+		bag.weightx = 1;
+		bag.weighty = 1;
+		bag.fill = GridBagConstraints.BOTH;
+		add(geditor, bag);
+		bag.gridwidth = 1;
+		bag.gridy = 1;
+		bag.fill = GridBagConstraints.NONE;
+		bag.weightx = 0.3333;
+		bag.weighty = 0;
+		add(narrow_btn, bag);
+		bag.gridx = 1;
+		add(apply_btn, bag);
+		bag.gridx = 2;
+		add(widen_btn, bag);
 	}
 
-	/** Create a pixel toggle button */
-	private JToggleButton createPixelButton() {
-		JToggleButton b = new JToggleButton(PIXEL_OFF);
-		b.setSelectedIcon(PIXEL_ON);
-		b.setBorder(null);
-		b.setContentAreaFilled(false);
-		b.setMargin(new Insets(0, 0, 0, 0));
-		return b;
+	/** Dispose of the panel */
+	public void dispose() {
+		geditor.dispose();
 	}
 
 	/** Set the font */
@@ -155,7 +133,6 @@ public class GlyphPanel extends JPanel {
 		assert gi != null;
 		ginfo = gi;
 		setBitmap(glyphBitmap(gi));
-		repaint();
 	}
 
 	/** Update button enabled states */
@@ -177,54 +154,25 @@ public class GlyphPanel extends JPanel {
 	/** Get the glyph bitmap */
 	private BitmapGraphic glyphBitmap(GlyphInfo gi) {
 		assert gi != null;
-		return (gi.bmap != null)
-		     ? gi.bmap
-		     : new BitmapGraphic(0, fontHeight());
+		if(gi.bmap != null) {
+			BitmapGraphic bg = gi.bmap.createBlankCopy();
+			bg.copy(gi.bmap);
+			return bg;
+		} else
+			return new BitmapGraphic(0, fontHeight());
 	}
 
 	/** Set the glyph to edit */
 	private void setBitmap(BitmapGraphic bg) {
-		gpanel.removeAll();
 		bmap = bg;
+		geditor.setBitmap(bg);
 		updateButtons();
-		if(bg.getWidth() < 1) {
-			repaint();
-			return;
-		}
-		gpanel.setLayout(new GridLayout(bg.getHeight(), bg.getWidth()));
-		p_button = new JToggleButton[bg.getHeight() * bg.getWidth()];
-		for(int y = 0; y < bg.getHeight(); y++) {
-			for(int x = 0; x < bg.getWidth(); x++) {
-				int i = y * bg.getWidth() + x;
-				p_button[i] = createPixelButton();
-				p_button[i].setSelected(
-					bg.getPixel(x, y).isLit());
-				gpanel.add(p_button[i]);
-			}
-		}
-		gpanel.setMaximumSize(gpanel.getPreferredSize());
-		revalidate();
-	}
-
-	/** Update the bitmap with the current pixel button state */
-	private void updateBitmap() {
-		BitmapGraphic bg = bmap;
-		for(int y = 0; y < bg.getHeight(); y++) {
-			for(int x = 0; x < bg.getWidth(); x++) {
-				int i = y * bg.getWidth() + x;
-				DmsColor p = DmsColor.BLACK;
-				if(p_button[i].isSelected())
-					p = DmsColor.AMBER;
-				bg.setPixel(x, y, p);
-			}
-		}
 	}
 
 	/** Narrow buton pressed */
 	private void narrowPressed() {
 		BitmapGraphic bg = bmap;
 		if(bg.getWidth() > 0) {
-			updateBitmap();
 			BitmapGraphic b = new BitmapGraphic(bg.getWidth() - 1,
 				bg.getHeight());
 			b.copy(bg);
@@ -236,7 +184,6 @@ public class GlyphPanel extends JPanel {
 	private void widenPressed() {
 		BitmapGraphic bg = bmap;
 		if(bg.getWidth() < MAX_GLYPH_WIDTH) {
-			updateBitmap();
 			BitmapGraphic b = new BitmapGraphic(bg.getWidth() + 1,
 				bg.getHeight());
 			b.copy(bg);
@@ -246,7 +193,6 @@ public class GlyphPanel extends JPanel {
 
 	/** Apply button pressed */
 	private void applyPressed() {
-		updateBitmap();
 		GlyphInfo gi = ginfo;
 		BitmapGraphic bg = bmap;
 		if(gi.exists())

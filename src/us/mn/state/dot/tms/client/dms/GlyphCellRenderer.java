@@ -145,10 +145,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 		for(int y = 0; y < bmap.getHeight(); y++, yy += pitch) {
 			float xx = left;
 			for(int x = 0; x < bmap.getWidth(); x++, xx += pitch){
-				if(bmap.getPixel(x, y).isLit())
-					g.setColor(Color.YELLOW);
-				else
-					g.setColor(Color.GRAY);
+				g.setColor(bmap.getPixel(x, y).color);
 				pixel.setFrame(xx, yy, pitch, pitch);
 				g.fill(pixel);
 			}

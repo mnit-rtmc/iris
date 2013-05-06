@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,6 +13,8 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
+
+import java.awt.Color;
 
 /**
  * A color as displayed on a DMS.
@@ -41,11 +43,15 @@ public class DmsColor {
 	/** Blue component of color */
 	public final int blue;
 
+	/** AWT color */
+	public final Color color;
+
 	/** Create a new DMS color */
 	public DmsColor(int r, int g, int b) {
 		red = clampComponent(r);
 		green = clampComponent(g);
 		blue = clampComponent(b);
+		color = new Color(red, green, blue);
 	}
 
 	/** Create a DMS color from an rgb value */
@@ -53,6 +59,7 @@ public class DmsColor {
 		red = (rgb >> 16) & 0xFF;
 		green = (rgb >> 8) & 0xFF;
 		blue = rgb & 0xFF;
+		color = new Color(red, green, blue);
 	}
 
 	/** Test if the color is lit (not black) */
