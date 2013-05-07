@@ -99,7 +99,7 @@ public class PropMessages extends JPanel {
 	};
 
 	/** Sign pixel panel */
-	private final SignPixelPanel pixel_panel = new SignPixelPanel(40, 400,
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400,
 		true, new Color(0, 0, 0.4f));
 
 	/** Default font combo box */
@@ -235,8 +235,7 @@ public class PropMessages extends JPanel {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("dms.message.preview")));
-		panel.add(pixel_panel, BorderLayout.CENTER);
-		pixel_panel.setPreferredSize(UI.dimension(390, 32));
+		panel.add(pixel_pnl, BorderLayout.CENTER);
 		return panel;
 	}
 
@@ -339,18 +338,18 @@ public class PropMessages extends JPanel {
 		   hb != null)
 		{
 			int h = lh * vp;
-			pixel_panel.setPhysicalDimensions(w, h, hb, 0, hp, vp);
+			pixel_pnl.setPhysicalDimensions(w, h, hb, 0, hp, vp);
 		}
 		Integer wp = proxy.getWidthPixels();
 		Integer cw = proxy.getCharWidthPixels();
 		if(wp != null && lh != null && cw != null)
-			pixel_panel.setLogicalDimensions(wp, lh, cw, 0);
-		pixel_panel.repaint();
+			pixel_pnl.setLogicalDimensions(wp, lh, cw, 0);
+		pixel_pnl.repaint();
 		SignText st = getSelectedSignText();
 		if(st != null)
-			pixel_panel.setGraphic(renderMessage(st));
+			pixel_pnl.setGraphic(renderMessage(st));
 		else
-			pixel_panel.setGraphic(null);
+			pixel_pnl.setGraphic(null);
 		delete_text.setEnabled(canRemove(st));
 	}
 
