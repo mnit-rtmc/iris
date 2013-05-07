@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -78,7 +78,8 @@ public class OpQueryStats extends OpG4 {
 			logQuery(stat);
 			long stamp = stat.getStamp();
 			PeriodicSample ps = new PeriodicSample(stamp, period,0);
-			if(ps.end() != comp_sample.end()) {
+			long e = ps.end();
+			if(e < comp_sample.start() || e > comp_sample.end()) {
 				logError("BAD TIMESTAMP: " + new Date(stamp));
 				setFailed();
 				throw new DownloadRequestException(
