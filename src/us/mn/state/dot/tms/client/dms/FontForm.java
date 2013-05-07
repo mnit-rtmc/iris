@@ -33,6 +33,10 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.RasterGraphic;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
@@ -148,6 +152,10 @@ public class FontForm extends AbstractForm {
 	/** Glyph panel */
 	private final GlyphPanel glyph_pnl;
 
+	/** Sign pixel panel */
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400,
+		true);
+
 	/** Create a new font form */
 	public FontForm(Session s) {
 		super(I18N.get("font.title"));
@@ -208,6 +216,10 @@ public class FontForm extends AbstractForm {
 		bag.anchor = GridBagConstraints.CENTER;
 		bag.fill = GridBagConstraints.BOTH;
 		panel.add(glyph_pnl, bag);
+		bag.gridx = 0;
+		bag.gridy = 2;
+		bag.gridwidth = 3;
+		panel.add(pixel_pnl, bag);
 		return panel;
 	}
 
@@ -287,6 +299,7 @@ public class FontForm extends AbstractForm {
 		if(gi != null) {
 			addGlyph(gi.glyph);
 			glist.repaint();
+			pixel_pnl.repaint();
 		}
 	}
 
@@ -309,6 +322,50 @@ public class FontForm extends AbstractForm {
 		font = f;
 		lookupGlyphs(f);
 		del_font.setEnabled(isFontDeletable());
+		int h = fontHeight(f);
+		int cw = fontWidth(f);
+		int w = cw > 0 ? (512 / cw) * cw : 512;
+		pixel_pnl.setPhysicalDimensions(w, h, 4, 4, 1, 1);
+		pixel_pnl.setLogicalDimensions(w, h, cw, 0);
+		pixel_pnl.setGraphic(renderMessage(f));
+		pixel_pnl.repaint();
+	}
+
+	/** Get the font height */
+	private int fontHeight(Font f) {
+		return f != null ? f.getHeight() : 0;
+	}
+
+	/** Get the font width */
+	private int fontWidth(Font f) {
+		return f != null ? f.getWidth() : 0;
+	}
+
+	/** Render a message to a raster graphic */
+	private RasterGraphic renderMessage(Font f) {
+		if(f != null) {
+			MultiString ms = new MultiString(I18N.get(
+				"font.glyph.sample"));
+			RasterGraphic[] pages = renderPages(f, ms);
+			if(pages != null && pages.length > 0)
+				return pages[0];
+		}
+		return null;
+	}
+
+	/** Render the pages of a text message */
+	private RasterGraphic[] renderPages(Font f, MultiString ms) {
+		int h = fontHeight(f);
+		int cw = fontWidth(f);
+		int w = cw > 0 ? (512 / cw) * cw : 512;
+		int df = f.getNumber();
+		RasterBuilder b = new RasterBuilder(w, h, cw, 0, df);
+		try {
+			return b.createPixmaps(ms);
+		}
+		catch(InvalidMessageException e) {
+			return null;
+		}
 	}
 
 	/** Change the selected glyph */
