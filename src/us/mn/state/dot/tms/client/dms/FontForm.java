@@ -280,6 +280,7 @@ public class FontForm extends AbstractForm {
 		synchronized(gmap) {
 			gmap.put(c, gi);
 		}
+		glyph_pnl.setGlyph(gi);
 		del_font.setEnabled(isFontDeletable());
 	}
 
@@ -290,6 +291,7 @@ public class FontForm extends AbstractForm {
 		synchronized(gmap) {
 			gmap.remove(c);
 		}
+		glyph_pnl.setGlyph(glyphInfo(c));
 		del_font.setEnabled(isFontDeletable());
 	}
 
