@@ -4,7 +4,7 @@ SET SESSION AUTHORIZATION 'tms';
 
 INSERT INTO iris.font
     (name, f_number, height, width, line_spacing, char_spacing, version_id)
-    VALUES ('07_char', 1, 7, 5, 0, 0, 13606);
+    VALUES ('07_char', 1, 7, 5, 0, 0, 1506);
 
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
     VALUES ('07_char_32', 1, 7, 5, 'AAAAAAA=');
@@ -31,7 +31,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_37', '07_char', 37, '07_char_37');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_38', 1, 7, 5, 'IompqaA=');
+    VALUES ('07_char_38', 1, 7, 5, 'RSiKyaA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_38', '07_char', 38, '07_char_38');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -67,7 +67,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_46', '07_char', 46, '07_char_46');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_47', 1, 7, 5, 'CIREIgA=');
+    VALUES ('07_char_47', 1, 7, 5, 'AEREQAA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_47', '07_char', 47, '07_char_47');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -99,7 +99,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_54', '07_char', 54, '07_char_54');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_55', 1, 7, 5, '+ERCIgA=');
+    VALUES ('07_char_55', 1, 7, 5, '+EQiEQA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_55', '07_char', 55, '07_char_55');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -111,11 +111,11 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_57', '07_char', 57, '07_char_57');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_58', 1, 7, 5, 'AxgGMAA=');
+    VALUES ('07_char_58', 1, 7, 5, 'AAgCAAA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_58', '07_char', 58, '07_char_58');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_59', 1, 7, 5, 'AQgCIAA=');
+    VALUES ('07_char_59', 1, 7, 5, 'AAgCIAA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_59', '07_char', 59, '07_char_59');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -135,11 +135,11 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_63', '07_char', 63, '07_char_63');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_64', 1, 7, 5, 'dGtoIMA=');
+    VALUES ('07_char_64', 1, 7, 5, 'dGdZwcA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_64', '07_char', 64, '07_char_64');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_65', 1, 7, 5, 'dGMfxiA=');
+    VALUES ('07_char_65', 1, 7, 5, 'dGP4xiA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_65', '07_char', 65, '07_char_65');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -191,7 +191,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_77', '07_char', 77, '07_char_77');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_78', 1, 7, 5, 'jHNZxiA=');
+    VALUES ('07_char_78', 1, 7, 5, 'jnNZziA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_78', '07_char', 78, '07_char_78');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -211,7 +211,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_82', '07_char', 82, '07_char_82');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_83', 1, 7, 5, 'fCDgh8A=');
+    VALUES ('07_char_83', 1, 7, 5, 'dGDgxcA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_83', '07_char', 83, '07_char_83');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -223,7 +223,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_85', '07_char', 85, '07_char_85');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_86', 1, 7, 5, 'jGMYqIA=');
+    VALUES ('07_char_86', 1, 7, 5, 'jGMVKIA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_86', '07_char', 86, '07_char_86');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -247,7 +247,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_91', '07_char', 91, '07_char_91');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_char_92', 1, 7, 5, 'ghBBCCA=');
+    VALUES ('07_char_92', 1, 7, 5, 'BBBBBAA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_char_92', '07_char', 92, '07_char_92');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
