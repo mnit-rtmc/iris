@@ -4,7 +4,7 @@ SET SESSION AUTHORIZATION 'tms';
 
 INSERT INTO iris.font
     (name, f_number, height, width, line_spacing, char_spacing, version_id)
-    VALUES ('09_full', 4, 9, 0, 2, 2, 64667);
+    VALUES ('09_full', 4, 9, 0, 2, 2, 33816);
 
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
     VALUES ('09_full_32', 1, 9, 1, 'AAA=');
@@ -171,7 +171,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('09_full_72', '09_full', 72, '09_full_72');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('09_full_73', 1, 9, 1, '/4A=');
+    VALUES ('09_full_73', 1, 9, 3, '6SSS4A==');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('09_full_73', '09_full', 73, '09_full_73');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
