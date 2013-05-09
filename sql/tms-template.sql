@@ -1239,6 +1239,11 @@ CREATE VIEW sign_text_view AS
 	JOIN iris.sign_text st ON sg.name = st.sign_group;
 GRANT SELECT ON sign_text_view TO PUBLIC;
 
+CREATE VIEW cabinet_view AS
+	SELECT name, style, geo_loc, mile
+	FROM iris.cabinet;
+GRANT SELECT ON cabinet_view TO PUBLIC;
+
 CREATE VIEW controller_view AS
 	SELECT c.name, drop_id, comm_link, cabinet, active, notes, cab.geo_loc
 	FROM iris.controller c
@@ -1529,7 +1534,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 client_units_si	true
-database_version	4.4.0
+database_version	4.5.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
