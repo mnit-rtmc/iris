@@ -23,15 +23,15 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('12_full_35', '12_full', 35, '12_full_35');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('12_full_36', 1, 12, 5, 'AR9KMMUviAA=');
+    VALUES ('12_full_36', 1, 12, 5, 'I6lKOKUriAA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('12_full_36', '12_full', 36, '12_full_36');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('12_full_37', 1, 12, 6, 'AxzCGMMYQzjA');
+    VALUES ('12_full_37', 1, 12, 6, 'AwzCGMMYQzDA');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('12_full_37', '12_full', 37, '12_full_37');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('12_full_38', 1, 12, 6, 'MSSSUId1ni3d');
+    VALUES ('12_full_38', 1, 12, 6, 'IcUUcId1ni3d');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('12_full_38', '12_full', 38, '12_full_38');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
