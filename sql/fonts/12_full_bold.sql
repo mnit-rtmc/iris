@@ -135,11 +135,11 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('12_full_bold_63', '12_full_bold', 63, '12_full_bold_63');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('12_full_bold_64', 1, 12, 8, 'fv/Dz9/b29/OwP58');
+    VALUES ('12_full_bold_64', 1, 12, 8, 'fv/Dz9/T09/OwP58');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('12_full_bold_64', '12_full_bold', 64, '12_full_bold_64');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('12_full_bold_65', 1, 12, 8, 'GBg8PGZmZv//w8PD');
+    VALUES ('12_full_bold_65', 1, 12, 8, 'GDx+58PD///Dw8PD');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('12_full_bold_65', '12_full_bold', 65, '12_full_bold_65');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
