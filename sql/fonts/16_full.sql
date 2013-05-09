@@ -179,7 +179,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('16_full_74', '16_full', 74, '16_full_74');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('16_full_75', 1, 16, 8, 'w8fGzszY+PDw+NjMzsbHww==');
+    VALUES ('16_full_75', 1, 16, 8, 'w8PHxs7c+PD43MzOxsfDww==');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('16_full_75', '16_full', 75, '16_full_75');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
