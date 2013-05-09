@@ -27,7 +27,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('09_full_36', '09_full', 36, '09_full_36');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('09_full_37', 1, 9, 5, 'BnQiIXMA');
+    VALUES ('09_full_37', 1, 9, 5, 'BjIiImMA');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('09_full_37', '09_full', 37, '09_full_37');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -259,6 +259,6 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('09_full_94', '09_full', 94, '09_full_94');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('09_full_95', 1, 9, 4, 'AAAAAPA=');
+    VALUES ('09_full_95', 1, 9, 5, 'AAAAAAD4');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('09_full_95', '09_full', 95, '09_full_95');
