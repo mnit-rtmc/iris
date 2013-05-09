@@ -23,7 +23,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_line_35', '07_line', 35, '07_line_35');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_line_36', 1, 7, 5, 'I+ji+IA=');
+    VALUES ('07_line_36', 1, 7, 5, 'I6jiuIA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_line_36', '07_line', 36, '07_line_36');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -135,7 +135,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_line_63', '07_line', 63, '07_line_63');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_line_64', 1, 7, 5, 'dG9bwcA=');
+    VALUES ('07_line_64', 1, 7, 5, 'dGdZwcA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_line_64', '07_line', 64, '07_line_64');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -171,7 +171,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_line_72', '07_line', 72, '07_line_72');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_line_73', 1, 7, 1, '/w==');
+    VALUES ('07_line_73', 1, 7, 3, '6SS4');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_line_73', '07_line', 73, '07_line_73');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
@@ -255,7 +255,7 @@ INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_line_93', '07_line', 93, '07_line_93');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
-    VALUES ('07_line_94', 1, 7, 3, 'VAAA');
+    VALUES ('07_line_94', 1, 7, 5, 'IqIAAAA=');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('07_line_94', '07_line', 94, '07_line_94');
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
