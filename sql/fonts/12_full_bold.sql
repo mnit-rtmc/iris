@@ -4,7 +4,7 @@ SET SESSION AUTHORIZATION 'tms';
 
 INSERT INTO iris.font
     (name, f_number, height, width, line_spacing, char_spacing, version_id)
-    VALUES ('12_full_bold', 9, 12, 0, 4, 3, 0);
+    VALUES ('12_full_bold', 8, 12, 0, 4, 3, 0);
 
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
     VALUES ('12_full_bold_32', 1, 12, 1, 'AAA=');
