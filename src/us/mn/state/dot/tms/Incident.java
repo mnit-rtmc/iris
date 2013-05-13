@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,10 +66,13 @@ public interface Incident extends SonarObject {
 	 * Each subsequent character represents the next lane to the right,
 	 * until the right lane.
 	 * The last character represents the condition of the right shoulder.
-	 * There are three characters to indicate the status for each lane:<br/>
-	 *     .  Free-flowing (no obstruction)<br/>
-	 *     ?  Partially blocked (debris, etc.)<br/>
-	 *     !  Completely blocked<br/> */
+	 * There are three characters to indicate the status for each lane:
+	 * <pre>
+	 *     .  Free-flowing (no obstruction)
+	 *     ?  Partially blocked (debris, etc.)
+	 *     !  Completely blocked
+	 * </pre>
+	 * @see us.mn.state.dot.tms.IncidentImpact */
 	String getImpact();
 
 	/** Set the impact code */

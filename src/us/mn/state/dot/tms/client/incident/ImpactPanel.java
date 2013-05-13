@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import us.mn.state.dot.tms.IncidentImpact;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -40,32 +41,6 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * @author Douglas Lau
  */
 public class ImpactPanel extends JPanel {
-
-	/** Impact for one lane */
-	static enum LaneImpact {
-		open('.'), blocked('!'), caution('?');
-		protected final char _char;
-		LaneImpact(char c) {
-			_char = c;
-		}
-		protected LaneImpact next() {
-			switch(this) {
-			case open:
-				return blocked;
-			case blocked:
-				return caution;
-			default:
-				return open;
-			}
-		}
-		static LaneImpact fromChar(char i) {
-			for(LaneImpact li: LaneImpact.values()) {
-				if(li._char == i)
-					return li;
-			}
-			return null;
-		}
-	}
 
 	/** Width of one lane */
 	static private final int LANE_WIDTH = UI.scaled(32);
@@ -91,7 +66,7 @@ public class ImpactPanel extends JPanel {
 	/** Color for blocked impact */
 	static protected final Color COLOR_BLOCKED = new Color(208, 64, 64);
 
-	/** Image for caution impact */
+	/** Image for partially-blocked impact */
 	static protected final BufferedImage IMAGE_CAUTION =
 		new BufferedImage(4, 4, BufferedImage.TYPE_INT_RGB);
 	static {
@@ -115,26 +90,19 @@ public class ImpactPanel extends JPanel {
 	/** Renderer component height */
 	protected int height = 0;
 
-	/** Lane impact array */
-	protected LaneImpact[] impact = new LaneImpact[0];
+	/** Incident impact array */
+	private IncidentImpact[] impact = new IncidentImpact[0];
 
 	/** Set the impact */
 	public void setImpact(String im) {
-		LaneImpact[] imp = new LaneImpact[im.length()];
-		for(int i = 0; i < imp.length; i++)
-			imp[i] = LaneImpact.fromChar(im.charAt(i));
-		impact = imp;
+		impact = IncidentImpact.fromString(im);
 		revalidate();
 		repaint();
 	}
 
 	/** Get the impact */
 	public String getImpact() {
-		LaneImpact[] imp = impact;
-		char[] im = new char[imp.length];
-		for(int i = 0; i < im.length; i++)
-			im[i] = imp[i]._char;
-		return new String(im);
+		return IncidentImpact.fromArray(impact);
 	}
 
 	/** Create a new roadway node renderer */
@@ -212,22 +180,22 @@ public class ImpactPanel extends JPanel {
 	}
 
 	/** Draw the impact for one lane */
-	protected void drawImpact(Graphics2D g, int x, LaneImpact li) {
+	private void drawImpact(Graphics2D g, int x, IncidentImpact ii) {
 		int s = LANE_WIDTH / 2;
 		x += (LANE_WIDTH - s) / 2;
 		int h = (height - s) / 2;
-		switch(li) {
-		case open:
+		switch(ii) {
+		case FREE_FLOWING:
 			g.setColor(Color.WHITE);
 			g.drawRect(x, h, s, s);
 			break;
-		case blocked:
+		case BLOCKED:
 			g.setColor(COLOR_BLOCKED);
 			g.fillRect(x, h, s, s);
 			g.setColor(Color.WHITE);
 			g.drawRect(x, h, s, s);
 			break;
-		case caution:
+		case PARTIALLY_BLOCKED:
 			g.setPaint(PAINT_CAUTION);
 			g.fillRect(x, h, s, s);
 			g.setColor(Color.WHITE);
@@ -259,12 +227,24 @@ public class ImpactPanel extends JPanel {
 
 	/** Increment lane impact */
 	protected void incrementImpact(int lane) {
-		LaneImpact[] imp = impact;	// Avoid race
+		IncidentImpact[] imp = impact;	// Avoid race
 		if(lane < 0 || lane >= imp.length)
 			return;
-		imp[lane] = imp[lane].next();
+		imp[lane] = nextImpact(imp[lane]);
 		repaint();
 		fireStateChanged();
+	}
+
+	/** Get next incident impact */
+	static private IncidentImpact nextImpact(IncidentImpact v) {
+		switch(v) {
+		case FREE_FLOWING:
+			return IncidentImpact.BLOCKED;
+		case BLOCKED:
+			return IncidentImpact.PARTIALLY_BLOCKED;
+		default:
+			return IncidentImpact.FREE_FLOWING;
+		}
 	}
 
 	/** Get the preferred size */
