@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
+import static us.mn.state.dot.tms.IncidentImpact.FREE_FLOWING;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
@@ -306,7 +307,7 @@ public class IncidentCreator extends JPanel {
 	protected String createImpact(int n_lanes) {
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < n_lanes + 2; i++)
-			sb.append('.');
+			sb.append(FREE_FLOWING._char);
 		return sb.toString();
 	}
 
