@@ -932,6 +932,7 @@ CREATE TABLE event.detector_event (
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(10) REFERENCES iris._detector(name)
+		ON DELETE CASCADE
 );
 
 CREATE TABLE event.sign_event (
