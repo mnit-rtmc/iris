@@ -20,8 +20,6 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
@@ -32,6 +30,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncidentImpact;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -45,16 +44,13 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  */
 public class IncidentImpl extends BaseObjectImpl implements Incident {
 
-	/** Impact code validation regex pattern */
-	static protected final Pattern IMPACT_PATTERN = Pattern.compile(
-		"[.?!]*");
-
 	/** Validate an impact code */
-	static protected void validateImpact(String imp)
+	static private void validateImpact(String imp)
 		throws ChangeVetoException
 	{
-		Matcher m = IMPACT_PATTERN.matcher(imp);
-		if(!m.matches())
+		String vimp = IncidentImpact.fromArray(
+			IncidentImpact.fromString(imp));
+		if(!vimp.equals(imp))
 			throw new ChangeVetoException("Invalid impact: " + imp);
 	}
 
