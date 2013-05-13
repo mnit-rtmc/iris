@@ -29,16 +29,16 @@ import us.mn.state.dot.tms.LaneUseIndication;
 public class IncidentPolicy {
 
 	/** Distance 1 upstream of incident to deploy devices */
-	static protected final float DIST_UPSTREAM_1_MILES = 0.5f;
+	static private final float DIST_UPSTREAM_1_MILES = 0.5f;
 
 	/** Distance 2 upstream of incident to deploy devices */
-	static protected final float DIST_UPSTREAM_2_MILES = 1.0f;
+	static private final float DIST_UPSTREAM_2_MILES = 1.0f;
 
 	/** Distance 3 upstream of incident to deploy devices */
-	static protected final float DIST_UPSTREAM_3_MILES = 1.5f;
+	static private final float DIST_UPSTREAM_3_MILES = 1.5f;
 
 	/** Incident in question */
-	protected final Incident incident;
+	private final Incident incident;
 
 	/** Create a new incident policy */
 	public IncidentPolicy(Incident inc) {
@@ -72,7 +72,7 @@ public class IncidentPolicy {
 	 * @param shift Lane shift relative to incident.
 	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication(float up, int n_lcs,
+	private LaneUseIndication getIndication(float up, int n_lcs,
 		int shift, int i)
 	{
 		if(up < 0)
@@ -92,7 +92,7 @@ public class IncidentPolicy {
 	 * @param shift Lane shift relative to incident.
 	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication1(int n_lcs, int shift,
+	private LaneUseIndication getIndication1(int n_lcs, int shift,
 		int i)
 	{
 		int ln = shift + n_lcs - i;
@@ -111,7 +111,9 @@ public class IncidentPolicy {
 		return LaneUseIndication.LANE_OPEN;
 	}
 
-	/** Get the impact at the specified lane */
+	/** Get the impact at the specified lane.
+	 * @param ln Lane number (0 for right shoulder, increasing to left).
+	 * @return IcidentImpact for given lane. */
 	private IncidentImpact getImpact(int ln) {
 		String impact = incident.getImpact();
 		// Don't look at the shoulder lanes
@@ -121,7 +123,10 @@ public class IncidentPolicy {
 			return IncidentImpact.fromChar(impact.charAt(ln));
 	}
 
-	/** Get the impact at the specified adjacent lane */
+	/** Get the impact at the specified adjacent lane.
+	 * @param ln Lane number (0 for right shoulder, increasing to left).
+	 * @param def Default impact for invalid lanes.
+	 * @return IncidentImpact for given adjacent lane. */
 	private IncidentImpact getAdjacentImpact(int ln, IncidentImpact def) {
 		String impact = incident.getImpact();
 		if(ln < 0 || ln >= impact.length())
@@ -135,7 +140,7 @@ public class IncidentPolicy {
 	 * @param shift Lane shift relative to incident.
 	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication2(int n_lcs, int shift,
+	private LaneUseIndication getIndication2(int n_lcs, int shift,
 		int i)
 	{
 		int ln = shift + n_lcs - i;
@@ -164,7 +169,7 @@ public class IncidentPolicy {
 	 * @param shift Lane shift relative to incident.
 	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication3(int n_lcs, int shift,
+	private LaneUseIndication getIndication3(int n_lcs, int shift,
 		int i)
 	{
 		int ln = shift + n_lcs - i;
