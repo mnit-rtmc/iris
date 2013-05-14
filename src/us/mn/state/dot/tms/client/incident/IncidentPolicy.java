@@ -101,11 +101,10 @@ public class IncidentPolicy {
 			return LaneUseIndication.LANE_CLOSED;
 		if(ii == PARTIALLY_BLOCKED)
 			return LaneUseIndication.USE_CAUTION;
-		IncidentImpact def = FREE_FLOWING;
-		IncidentImpact right = getAdjacentImpact(ln + 1, def);
+		IncidentImpact right = getAdjacentImpact(ln + 1, FREE_FLOWING);
 		if(right == BLOCKED)
 			return LaneUseIndication.USE_CAUTION;
-		IncidentImpact left = getAdjacentImpact(ln - 1, def);
+		IncidentImpact left = getAdjacentImpact(ln - 1, FREE_FLOWING);
 		if(left == BLOCKED)
 			return LaneUseIndication.USE_CAUTION;
 		return LaneUseIndication.LANE_OPEN;
@@ -147,11 +146,10 @@ public class IncidentPolicy {
 		IncidentImpact ii = getImpact(ln);
 		if(ii != BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
-		IncidentImpact def = BLOCKED;
-		IncidentImpact right = getAdjacentImpact(ln + 1, def);
+		IncidentImpact right = getAdjacentImpact(ln + 1, BLOCKED);
 		if(i - 1 < 0)
 			right = BLOCKED;
-		IncidentImpact left = getAdjacentImpact(ln - 1, def);
+		IncidentImpact left = getAdjacentImpact(ln - 1, BLOCKED);
 		if(i + 1 >= n_lcs)
 			left = BLOCKED;
 		if(left == BLOCKED && right == BLOCKED)
@@ -176,20 +174,19 @@ public class IncidentPolicy {
 		IncidentImpact ii = getImpact(ln);
 		if(ii != BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
-		IncidentImpact def = BLOCKED;
-		IncidentImpact right = getAdjacentImpact(ln + 1, def);
+		IncidentImpact right = getAdjacentImpact(ln + 1, BLOCKED);
 		if(i - 1 < 0)
 			right = BLOCKED;
-		IncidentImpact left = getAdjacentImpact(ln - 1, def);
+		IncidentImpact left = getAdjacentImpact(ln - 1, BLOCKED);
 		if(i + 1 >= n_lcs)
 			left = BLOCKED;
 		if(left == BLOCKED && right == BLOCKED) {
 			// NOTE: adjacent lanes are also BLOCKED, so find the
 			//       impact 2 lanes to the left and right
-			right = getAdjacentImpact(ln + 2, def);
+			right = getAdjacentImpact(ln + 2, BLOCKED);
 			if(i - 2 < 0)
 				right = BLOCKED;
-			left = getAdjacentImpact(ln - 2, def);
+			left = getAdjacentImpact(ln - 2, BLOCKED);
 			if(i + 2 >= n_lcs)
 				left = BLOCKED;
 			if(left != BLOCKED && right != BLOCKED)
