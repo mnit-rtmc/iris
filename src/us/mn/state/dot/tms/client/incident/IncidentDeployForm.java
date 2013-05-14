@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.client.lcs.LCSArrayCellRenderer;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -121,11 +122,11 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
 	/** Populate the list model with LCS array indications to display */
 	private void populateList(CorridorBase cb, float mp) {
-		TreeMap<Float, LCSArray> upstream = findUpstream(cb, mp);
+		TreeMap<Distance, LCSArray> upstream = findUpstream(cb, mp);
 		LaneConfiguration config = cb.laneConfiguration(
 			getWgs84Position());
 		int shift = config.leftShift;
-		for(Float up: upstream.keySet()) {
+		for(Distance up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
 			int n_lcs = lcs_array.getIndicationsCurrent().length;
 			int l_shift = lcs_array.getShift() - shift;
@@ -144,11 +145,11 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Find all LCS arrays upstream of a given point on a corridor */
-	private TreeMap<Float, LCSArray> findUpstream(CorridorBase cb,
+	private TreeMap<Distance, LCSArray> findUpstream(CorridorBase cb,
 		float mp)
 	{
-		TreeMap<Float, LCSArray> upstream =
-			new TreeMap<Float, LCSArray>();
+		TreeMap<Distance, LCSArray> upstream =
+			new TreeMap<Distance, LCSArray>();
 		Iterator<LCSArray> lit = LCSArrayHelper.iterator();
 		while(lit.hasNext()) {
 			LCSArray lcs_array = lit.next();
@@ -157,10 +158,10 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 			   loc.getRoadDir() == cb.getRoadDir())
 			{
 				Float lp = cb.calculateMilePoint(loc);
-				if(lp != null) {
-					float up = mp - lp;
-					if(up > 0)
-						upstream.put(up, lcs_array);
+				if(lp != null && mp > lp) {
+					Distance up = new Distance(mp - lp,
+						Distance.Units.MILES);
+					upstream.put(up, lcs_array);
 				}
 			}
 		}

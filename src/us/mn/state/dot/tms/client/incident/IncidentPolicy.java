@@ -20,6 +20,8 @@ import static us.mn.state.dot.tms.IncidentImpact.FREE_FLOWING;
 import static us.mn.state.dot.tms.IncidentImpact.PARTIALLY_BLOCKED;
 import static us.mn.state.dot.tms.IncidentImpact.BLOCKED;
 import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
  * IncidentPolicy determines which LCS indications to propose for an incident.
@@ -31,14 +33,14 @@ public class IncidentPolicy {
 	/** Maximum number of lanes to check for blockage */
 	static private final int MAX_LANES_BLOCKED = 16;
 
-	/** Distance 1 upstream of incident to deploy devices */
-	static private final float DIST_UPSTREAM_1_MILES = 0.5f;
+	/** Short distance upstream of incident to deploy devices */
+	static private final Distance DIST_SHORT = new Distance(0.5f, MILES);
 
-	/** Distance 2 upstream of incident to deploy devices */
-	static private final float DIST_UPSTREAM_2_MILES = 1.0f;
+	/** Medium distance upstream of incident to deploy devices */
+	static private final Distance DIST_MEDIUM = new Distance(1.0f, MILES);
 
-	/** Distance 3 upstream of incident to deploy devices */
-	static private final float DIST_UPSTREAM_3_MILES = 1.5f;
+	/** Long distance upstream of incident to deploy devices */
+	static private final Distance DIST_LONG = new Distance(1.5f, MILES);
 
 	/** Incident in question */
 	private final Incident incident;
@@ -54,7 +56,7 @@ public class IncidentPolicy {
 	 * @param shift Lane shift relative to incident.
 	 * @param n_lanes Number of full lanes at LCS array.
 	 * @return Array of LaneUseIndication ordinal values. */
-	public Integer[] createIndications(float up, int n_lcs, int shift,
+	public Integer[] createIndications(Distance up, int n_lcs, int shift,
 		int n_lanes)
 	{
 		Integer[] ind = new Integer[n_lcs];
@@ -63,33 +65,34 @@ public class IncidentPolicy {
 			if(isShoulder(ln))
 				ind[i] = LaneUseIndication.DARK.ordinal();
 			else
-				ind[i] = getIndication(up, ln).ordinal();
+				ind[i] = createIndication(up, ln).ordinal();
 		}
 		return ind;
 	}
 
-	/** Get an indication for one lane.
-	 * @param up Distance upstream from incident (miles).
+	/** Create an LCS indication for one lane.
+	 * @param up Distance upstream from incident.
 	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication getIndication(float up, int ln) {
-		if(up < 0)
+	private LaneUseIndication createIndication(Distance up, int ln) {
+		double m = up.m();
+		if(m < 0)
 			return LaneUseIndication.DARK;
-		if(up < DIST_UPSTREAM_1_MILES)
-			return getIndication1(ln);
-		if(up < DIST_UPSTREAM_2_MILES)
-			return getIndication2(ln);
-		if(up < DIST_UPSTREAM_3_MILES)
-			return getIndication3(ln);
+		if(m < DIST_SHORT.m())
+			return createIndicationShort(ln);
+		if(m < DIST_MEDIUM.m())
+			return createIndicationMedium(ln);
+		if(m < DIST_LONG.m())
+			return createIndicationLong(ln);
 		else
 			return LaneUseIndication.DARK;
 	}
 
-	/** Get the first indication for one lane.  This is for LCS structures
-	 * within a short distance of the incident.
+	/** Create an LCS indication for one lane within a short distance of
+	 * the incident.
 	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication getIndication1(int ln) {
+	private LaneUseIndication createIndicationShort(int ln) {
 		IncidentImpact ii = getImpact(ln);
 		if(ii == BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
@@ -132,10 +135,11 @@ public class IncidentPolicy {
 			return IncidentImpact.fromChar(impact.charAt(ln));
 	}
 
-	/** Get the second indication for one lane.
+	/** Create an LCS indication for one lane at a medium distance to
+	 * the incident.
 	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication getIndication2(int ln) {
+	private LaneUseIndication createIndicationMedium(int ln) {
 		if(!isLaneBlocked(ln))
 			return LaneUseIndication.LANE_OPEN;
 		int n_left = unblockedLeftMainline(ln);
@@ -238,10 +242,11 @@ public class IncidentPolicy {
 		return MAX_LANES_BLOCKED;
 	}
 
-	/** Get the third indication for one lane.
+	/** Create an LCS indication for one lane at a long distance to
+	 * the incident.
 	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication getIndication3(int ln) {
+	private LaneUseIndication createIndicationLong(int ln) {
 		if(isLaneBlocked(ln))
 			return LaneUseIndication.LANE_CLOSED_AHEAD;
 		else
