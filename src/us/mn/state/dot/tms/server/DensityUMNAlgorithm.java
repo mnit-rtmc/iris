@@ -224,14 +224,6 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		isSortedList = true;
 	}
 
-	/** Add a meterState object to the list of meters associated with DensityUMNAlgorithm object */
-	public void addMeterToList(MeterState new_meter) {
-		meters.add(new_meter);
-		writeDebugLog("Adding meter: " + new_meter.getMeterImpl() +
-		              " to Plan State corridor: " + corridor.getID(),4);
-		isSortedList = false;
-	}
-
 	/** Linked list for all Mainline Nodes for corridor */
 	protected LinkedList<DetectorSet> mainlines = new LinkedList<DetectorSet>();
 
@@ -641,8 +633,7 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		// TODO : Do we need anything ? Also validate is not needed
 		for (MeterState meter : meters) {
 			writeDebugLog(" ============== Processing Meter :" + meter.meter.getName(), 4);
-			if (meter != null)
-				meter.process();
+			meter.process();
 		}
 		printZoning();
 	}
@@ -753,26 +744,9 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		/** Are the parameters for the meter loaded from the external parameters file */
 		protected boolean isParamLoaded;
 
-		/** Create a new meterState object */
-		protected MeterState () {
-			meter = null;
-			metering_set = false;
-			isParamLoaded = false;
-			return;
-		}
-
 		/** Place holder for any validate code needed */
 		public void validate () {
 			return;
-		}
-
-		/** Create a new MeterState object for the given set of RampMeterImpl and TimingPlan objects
-		 * and the SectionState that contains the current meter state
-		 */
-		protected MeterState (RampMeterImpl m, SectionState sect) {
-			this(m);
-			this_section = sect;
-			setMainlineDetectors();
 		}
 
 		/** Create a new MeterState object for the given RampMeterImpl and TimingPlanImpl objects */
