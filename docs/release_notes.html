@@ -9,6 +9,41 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.5.0 (14 May 2013)</dt>
+	<dd><ul>
+		<li>
+			Improved font editor user interface.
+		</li>
+		<li>
+			Added 15 standard DMS fonts to database template.
+		</li>
+		<li>
+			Updated LCS deployment policy for incidents.
+		</li>
+		<li>
+			Improved client user interface style consistency.
+		</li>
+		<li>
+			Improved styles updates for DMS and ramp meters.
+		</li>
+		<li>
+			Added cabinet_view to database.
+		</li>
+		<li>
+			Fixed a timestamp problem in RTMS G4 driver.
+		</li>
+		<li>
+			Fixed parsing of NTCIP Counter objects.
+		</li>
+		<li>
+			Improved handling of invalid NTCIP state changes.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.5.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>4.4.0 (24 April 2013)</dt>
 	<dd><ul>
 		<li>
