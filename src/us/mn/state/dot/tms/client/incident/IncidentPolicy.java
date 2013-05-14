@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.LaneUseIndication;
  */
 public class IncidentPolicy {
 
+	/** Maximum number of lanes to check for blockage */
+	static private final int MAX_LANES_BLOCKED = 16;
+
 	/** Distance 1 upstream of incident to deploy devices */
 	static private final float DIST_UPSTREAM_1_MILES = 0.5f;
 
@@ -56,62 +59,48 @@ public class IncidentPolicy {
 	{
 		Integer[] ind = new Integer[n_lcs];
 		for(int i = 0; i < ind.length; i++) {
-			if(i < n_lcs - n_lanes) {
-				// Don't deploy shoulder lanes
+			int ln = shift + n_lcs - i;
+			if(isShoulder(ln))
 				ind[i] = LaneUseIndication.DARK.ordinal();
-				continue;
-			}
-			ind[i] = getIndication(up, n_lcs, shift, i).ordinal();
+			else
+				ind[i] = getIndication(up, ln).ordinal();
 		}
 		return ind;
 	}
 
 	/** Get an indication for one lane.
 	 * @param up Distance upstream from incident (miles).
-	 * @param n_lcs Number of lanes on LCS array.
-	 * @param shift Lane shift relative to incident.
-	 * @param i Lane number.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication getIndication(float up, int n_lcs,
-		int shift, int i)
-	{
+	private LaneUseIndication getIndication(float up, int ln) {
 		if(up < 0)
 			return LaneUseIndication.DARK;
 		if(up < DIST_UPSTREAM_1_MILES)
-			return getIndication1(n_lcs, shift, i);
+			return getIndication1(ln);
 		if(up < DIST_UPSTREAM_2_MILES)
-			return getIndication2(n_lcs, shift, i);
+			return getIndication2(ln);
 		if(up < DIST_UPSTREAM_3_MILES)
-			return getIndication3(n_lcs, shift, i);
+			return getIndication3(ln);
 		else
 			return LaneUseIndication.DARK;
 	}
 
-	/** Get the first indication for one lane.
-	 * @param n_lcs Number of lanes on LCS array.
-	 * @param shift Lane shift relative to incident.
-	 * @param i Lane number.
+	/** Get the first indication for one lane.  This is for LCS structures
+	 * within a short distance of the incident.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication getIndication1(int n_lcs, int shift,
-		int i)
-	{
-		int ln = shift + n_lcs - i;
+	private LaneUseIndication getIndication1(int ln) {
 		IncidentImpact ii = getImpact(ln);
 		if(ii == BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
-		if(ii == PARTIALLY_BLOCKED)
+		else if(ii == PARTIALLY_BLOCKED || isAdjacentLaneBlocked(ln))
 			return LaneUseIndication.USE_CAUTION;
-		IncidentImpact right = getAdjacentImpact(ln + 1, FREE_FLOWING);
-		if(right == BLOCKED)
-			return LaneUseIndication.USE_CAUTION;
-		IncidentImpact left = getAdjacentImpact(ln - 1, FREE_FLOWING);
-		if(left == BLOCKED)
-			return LaneUseIndication.USE_CAUTION;
-		return LaneUseIndication.LANE_OPEN;
+		else
+			return LaneUseIndication.LANE_OPEN;
 	}
 
 	/** Get the impact at the specified lane.
-	 * @param ln Lane number (0 for right shoulder, increasing to left).
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return IcidentImpact for given lane. */
 	private IncidentImpact getImpact(int ln) {
 		String impact = incident.getImpact();
@@ -122,8 +111,17 @@ public class IncidentPolicy {
 			return IncidentImpact.fromChar(impact.charAt(ln));
 	}
 
+	/** Check if an adjacent lane is blocked.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @return true if an adjacent lane is blocked, false otherwise. */
+	private boolean isAdjacentLaneBlocked(int ln) {
+		IncidentImpact left = getAdjacentImpact(ln - 1, FREE_FLOWING);
+		IncidentImpact right = getAdjacentImpact(ln + 1, FREE_FLOWING);
+		return left == BLOCKED || right == BLOCKED;
+	}
+
 	/** Get the impact at the specified adjacent lane.
-	 * @param ln Lane number (0 for right shoulder, increasing to left).
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @param def Default impact for invalid lanes.
 	 * @return IncidentImpact for given adjacent lane. */
 	private IncidentImpact getAdjacentImpact(int ln, IncidentImpact def) {
@@ -135,67 +133,118 @@ public class IncidentPolicy {
 	}
 
 	/** Get the second indication for one lane.
-	 * @param n_lcs Number of lanes in array.
-	 * @param shift Lane shift relative to incident.
-	 * @param i Lane number.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication getIndication2(int n_lcs, int shift,
-		int i)
-	{
-		int ln = shift + n_lcs - i;
-		IncidentImpact ii = getImpact(ln);
-		if(ii != BLOCKED)
+	private LaneUseIndication getIndication2(int ln) {
+		if(!isLaneBlocked(ln))
 			return LaneUseIndication.LANE_OPEN;
-		IncidentImpact right = getAdjacentImpact(ln + 1, BLOCKED);
-		if(i - 1 < 0)
-			right = BLOCKED;
-		IncidentImpact left = getAdjacentImpact(ln - 1, BLOCKED);
-		if(i + 1 >= n_lcs)
-			left = BLOCKED;
-		if(left == BLOCKED && right == BLOCKED)
-			return LaneUseIndication.LANE_CLOSED;
-		if(left != BLOCKED && right != BLOCKED)
-			return LaneUseIndication.MERGE_BOTH;
-		if(left == BLOCKED)
-			return LaneUseIndication.MERGE_RIGHT;
-		else
+		int n_left = unblockedLeftMainline(ln);
+		int n_right = unblockedRightMainline(ln);
+		if(n_left < n_right)
 			return LaneUseIndication.MERGE_LEFT;
+		else if(n_right < n_left)
+			return LaneUseIndication.MERGE_RIGHT;
+		else if(n_left < MAX_LANES_BLOCKED)
+			return LaneUseIndication.MERGE_BOTH;
+		else
+			return indication2MainlineBlocked(ln);
+	}
+
+	/** Check if a lane is blocked.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @return true if lane is blocked, false otherwise. */
+	private boolean isLaneBlocked(int ln) {
+		String impact = incident.getImpact();
+		if(ln > 0 && ln < impact.length()) {
+			char c = impact.charAt(ln);
+			IncidentImpact ii = IncidentImpact.fromChar(c);
+			return ii == BLOCKED;
+		} else
+			return true;
+	}
+
+	/** Check if a lane is blocked or a shoulder lane.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @return true if lane is blocked, false otherwise. */
+	private boolean isLaneBlockedOrShoulder(int ln) {
+		return isShoulder(ln) || isLaneBlocked(ln);
+	}
+
+	/** Check if a lane is a shoulder lane.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @return true if lane is a shoulder, false otherwise. */
+	private boolean isShoulder(int ln) {
+		String impact = incident.getImpact();
+		return ln <= 0 || ln >= impact.length() - 1;
+	}
+
+	/** Get number of lanes to the next unblocked mainline lanes left.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @return Number of lanes to left until a lane is not blocked. */
+	private int unblockedLeftMainline(int ln) {
+		for(int i = 0; i < MAX_LANES_BLOCKED; i++) {
+			if(!isLaneBlockedOrShoulder(ln - i))
+				return i;
+		}
+		return MAX_LANES_BLOCKED;
+	}
+
+	/** Get number of lanes to the next unblocked mainline lane right.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @return Number of lanes to right until a lane is not blocked. */
+	private int unblockedRightMainline(int ln) {
+		for(int i = 0; i < MAX_LANES_BLOCKED; i++) {
+			if(!isLaneBlockedOrShoulder(ln + i))
+				return i;
+		}
+		return MAX_LANES_BLOCKED;
+	}
+
+	/** Get the second indication when all mainline lanes are blocked.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @return LaneUseIndication value. */
+	private LaneUseIndication indication2MainlineBlocked(int ln) {
+		int n_left = unblockedLeft(ln);
+		int n_right = unblockedRight(ln);
+		if(n_left < n_right)
+			return LaneUseIndication.MERGE_LEFT;
+		else if(n_right < n_left)
+			return LaneUseIndication.MERGE_RIGHT;
+		else if(n_left < MAX_LANES_BLOCKED)
+			return LaneUseIndication.MERGE_BOTH;
+		else
+			return LaneUseIndication.LANE_CLOSED;
+	}
+
+	/** Get number of lanes to the next unblocked lane left.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @return Number of lanes to left until a lane is not blocked. */
+	private int unblockedLeft(int ln) {
+		for(int i = 0; i < MAX_LANES_BLOCKED; i++) {
+			if(!isLaneBlocked(ln - i))
+				return i;
+		}
+		return MAX_LANES_BLOCKED;
+	}
+
+	/** Get number of lanes to the next unblocked lane right.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @return Number of lanes to right until a lane is not blocked. */
+	private int unblockedRight(int ln) {
+		for(int i = 0; i < MAX_LANES_BLOCKED; i++) {
+			if(!isLaneBlocked(ln + i))
+				return i;
+		}
+		return MAX_LANES_BLOCKED;
 	}
 
 	/** Get the third indication for one lane.
-	 * @param n_lcs Number of lanes in array.
-	 * @param shift Lane shift relative to incident.
-	 * @param i Lane number.
+	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication getIndication3(int n_lcs, int shift,
-		int i)
-	{
-		int ln = shift + n_lcs - i;
-		IncidentImpact ii = getImpact(ln);
-		if(ii != BLOCKED)
-			return LaneUseIndication.LANE_OPEN;
-		IncidentImpact right = getAdjacentImpact(ln + 1, BLOCKED);
-		if(i - 1 < 0)
-			right = BLOCKED;
-		IncidentImpact left = getAdjacentImpact(ln - 1, BLOCKED);
-		if(i + 1 >= n_lcs)
-			left = BLOCKED;
-		if(left == BLOCKED && right == BLOCKED) {
-			// NOTE: adjacent lanes are also BLOCKED, so find the
-			//       impact 2 lanes to the left and right
-			right = getAdjacentImpact(ln + 2, BLOCKED);
-			if(i - 2 < 0)
-				right = BLOCKED;
-			left = getAdjacentImpact(ln - 2, BLOCKED);
-			if(i + 2 >= n_lcs)
-				left = BLOCKED;
-			if(left != BLOCKED && right != BLOCKED)
-				return LaneUseIndication.MERGE_BOTH;
-			if(left == BLOCKED)
-				return LaneUseIndication.MERGE_RIGHT;
-			else
-				return LaneUseIndication.MERGE_LEFT;
-		} else
+	private LaneUseIndication getIndication3(int ln) {
+		if(isLaneBlocked(ln))
 			return LaneUseIndication.LANE_CLOSED_AHEAD;
+		else
+			return LaneUseIndication.LANE_OPEN;
 	}
 }
