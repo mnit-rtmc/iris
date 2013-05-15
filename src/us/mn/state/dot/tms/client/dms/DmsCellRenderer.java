@@ -114,9 +114,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	public DmsCellRenderer(CellRendererSize sz) {
 		super(new BorderLayout());
 		mode = DmsRendererMode.determine(sz);
-		Dimension psz = mode.pixelPanelSize();
-		pixelPnl.setPreferredSize(psz);
-		pixelPnl.setMaximumSize(psz);
 		switch(mode) {
 		case LARGE:
 			initLarge();
