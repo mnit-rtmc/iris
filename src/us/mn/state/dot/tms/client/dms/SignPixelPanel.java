@@ -213,16 +213,16 @@ public class SignPixelPanel extends JPanel {
 		g.transform(transform);
 		g.setColor(face_color);
 		g.fillRect(0, 0, width_mm, height_mm);
-		if(antialias) {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		}
 		if(graphic != null)
 			paintPixels(g, graphic);
 	}
 
 	/** Paint the pixels of the sign */
-	protected void paintPixels(Graphics2D g, RasterGraphic rg) {
+	private void paintPixels(Graphics2D g, RasterGraphic rg) {
+		if(antialias) {
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		}
 		// NOTE: unlit pixels are drawn first to allow blooming to
 		//       overdraw for lit pixels
 		paintUnlitPixels(g, rg);
