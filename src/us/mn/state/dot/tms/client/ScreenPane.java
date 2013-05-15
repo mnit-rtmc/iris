@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -101,7 +101,7 @@ public class ScreenPane extends JPanel {
 		add(map_panel, BorderLayout.CENTER);
 		tab_pane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				map.addPointSelector(null);
+				map.setPointSelector(null);
 				setSelectedLayer(getSelectedHomeLayer());
 				storeSelectedTabIndex();
 			}

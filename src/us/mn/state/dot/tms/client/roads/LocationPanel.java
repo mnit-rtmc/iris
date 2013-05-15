@@ -120,12 +120,13 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
 	/** Point selector */
 	private final PointSelector point_sel = new PointSelector() {
-		public void selectPoint(Point2D p) {
-			client.setPointSelector(null);
+		public boolean selectPoint(Point2D p) {
 			Position pos = getPosition(p);
 			setLat(pos.getLatitude());
 			setLon(pos.getLongitude());
+			return true;
 		}
+		public void finish() { }
 	};
 
 	/** Action to select a point from the map */

@@ -403,10 +403,11 @@ public class CorridorList extends JPanel {
 	/** Do the add node action */
 	protected void doAddNode() {
 		client.setPointSelector(new PointSelector() {
-			public void selectPoint(Point2D p) {
-				client.setPointSelector(null);
+			public boolean selectPoint(Point2D p) {
 				createNode(corridor, p);
+				return true;
 			}
+			public void finish() { }
 		});
 	}
 

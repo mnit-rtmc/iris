@@ -26,6 +26,7 @@ import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.EventType;
@@ -148,8 +149,13 @@ public class IncidentCreator extends JPanel {
 		final JToggleButton btn = new JToggleButton(sty,
 			sym.getLegend());
 		btn.addChangeListener(new ChangeJob(client.WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				buttonChanged(btn, et);
+			}
+		});
+		btn.addActionListener(new ActionJob(client.WORKER) {
+			public void perform() {
+				createIncident(btn, et);
 			}
 		});
 		btn.setHorizontalTextPosition(SwingConstants.LEADING);
@@ -171,7 +177,6 @@ public class IncidentCreator extends JPanel {
 				work_btn.setSelected(false);
 			if(btn != hazard_btn && hazard_btn.isSelected())
 				hazard_btn.setSelected(false);
-			createIncident(btn, et);
 		}
 	}
 
@@ -184,9 +189,11 @@ public class IncidentCreator extends JPanel {
 		       et == EventType.INCIDENT_ROADWORK ||
 		       et == EventType.INCIDENT_HAZARD;
 		client.setPointSelector(new PointSelector() {
-			public void selectPoint(Point2D p) {
-				client.setPointSelector(null);
+			public boolean selectPoint(Point2D p) {
 				createIncident(null, et, getPosition(p));
+				return true;
+			}
+			public void finish() {
 				btn.setSelected(false);
 				setEnabled(true);
 			}
@@ -200,11 +207,12 @@ public class IncidentCreator extends JPanel {
 		final IncidentDetail dtl = inc.getDetail();
 		final LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
 		client.setPointSelector(new PointSelector() {
-			public void selectPoint(Point2D p) {
-				client.setPointSelector(null);
+			public boolean selectPoint(Point2D p) {
 				createIncident(replaces, et, dtl, lt,
 					getPosition(p));
+				return true;
 			}
+			public void finish() { }
 		});
 	}
 

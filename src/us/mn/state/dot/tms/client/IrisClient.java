@@ -376,6 +376,6 @@ public class IrisClient extends JFrame {
 	/** Set the point selector for all map beans */
 	public void setPointSelector(PointSelector ps) {
 		for(ScreenPane sp: getVisiblePanes())
-			sp.getMap().addPointSelector(ps);
+			sp.getMap().setPointSelector(ps);
 	}
 }
