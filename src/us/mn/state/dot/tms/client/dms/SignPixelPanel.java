@@ -75,10 +75,10 @@ public class SignPixelPanel extends JPanel {
 	protected AffineTransform transform;
 
 	/** Raster graphic to paint */
-	protected RasterGraphic graphic;
+	private RasterGraphic graphic;
 
 	/** Buffer for screen display */
-	protected BufferedImage buffer;
+	private BufferedImage buffer;
 
 	/** Bloom size relative to pixel size (0 means no blooming) */
 	protected float bloom = 0f;
@@ -151,23 +151,23 @@ public class SignPixelPanel extends JPanel {
 	/** Paint this on the screen */
 	public void paintComponent(Graphics g) {
 		while(dirty)
-			updateBuffer();
+			updateBuffer(graphic);
 		BufferedImage b = buffer;	// Avoid NPE race
 		if(b != null)
 			g.drawImage(b, 0, 0, this);
 	}
 
 	/** Update the screen buffer to reflect current sign state */
-	protected void updateBuffer() {
+	private void updateBuffer(RasterGraphic rg) {
 		dirty = false;
 		BufferedImage b = getBufferedImage();
 		rescale();
-		doPaint(b.createGraphics());
+		doPaint(b.createGraphics(), rg);
 		buffer = b;
 	}
 
 	/** Get an appropriate buffered image */
-	protected BufferedImage getBufferedImage() {
+	private BufferedImage getBufferedImage() {
 		BufferedImage b = buffer;	// Avoid NPE race
 		int w = getWidth();
 		int h = getHeight();
@@ -205,7 +205,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Paint the pixel panel onto a graphics context */
-	protected void doPaint(Graphics2D g) {
+	private void doPaint(Graphics2D g, RasterGraphic rg) {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, getWidth(), getHeight());
 		if(transform == null)
@@ -213,8 +213,8 @@ public class SignPixelPanel extends JPanel {
 		g.transform(transform);
 		g.setColor(face_color);
 		g.fillRect(0, 0, width_mm, height_mm);
-		if(graphic != null)
-			paintPixels(g, graphic);
+		if(rg != null)
+			paintPixels(g, rg);
 	}
 
 	/** Paint the pixels of the sign */
