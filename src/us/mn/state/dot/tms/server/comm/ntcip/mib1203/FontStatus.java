@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,5 +57,18 @@ public class FontStatus extends ASN1Integer {
 	/** Get the object value */
 	public String getValue() {
 		return Enum.fromOrdinal(value).toString();
+	}
+
+	/** Check if the font can be updated */
+	public boolean isUpdatable() {
+		switch(getEnum()) {
+		case notUsed:
+		case modifying:
+		case readyForUse:
+		case unmanaged:
+			return true;
+		default:
+			return false;
+		}
 	}
 }

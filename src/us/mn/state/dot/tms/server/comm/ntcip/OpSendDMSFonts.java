@@ -143,9 +143,12 @@ public class OpSendDMSFonts extends OpDMS {
 			logQuery(number);
 			if(version2)
 				logQuery(status);
+			else
+				status.setEnum(FontStatus.Enum.unmanaged);
 			Integer f_num = number.getInteger();
 			if(num_2_row.containsKey(f_num)) {
-				num_2_row.put(f_num, row);
+				if(status.isUpdatable())
+					num_2_row.put(f_num, row);
 				open_rows.remove(row);
 			}
 			if(row < num_fonts.getInteger()) {
