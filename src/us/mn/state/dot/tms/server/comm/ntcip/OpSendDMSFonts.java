@@ -236,14 +236,22 @@ public class OpSendDMSFonts extends OpDMS {
 	}
 
 	/** Compare the font version ID */
-	protected boolean isVersionIDCorrect(int v) throws IOException {
+	private boolean isVersionIDCorrect(int v) throws IOException {
+		return isManualVersionIDCorrect(v) || isAutoVersionIDCorrect(v);
+	}
+
+	/** Check if a font version ID matches the manually specified ID */
+	private boolean isManualVersionIDCorrect(int v) {
+		int fvid = font.getVersionID();
+		return fvid != 0 && v == fvid;
+	}
+
+	/** Check if a font version ID matches the automatic ID */
+	private boolean isAutoVersionIDCorrect(int v) throws IOException {
 		FontVersionByteStream fv = new FontVersionByteStream(font);
 		int crc = fv.getCrc() ^ CRC16.INITIAL_CRC;
 		int vid = ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
-		if(v == vid)
-			return true;
-		else
-			return v == font.getVersionID();
+		return v == vid;
 	}
 
 	/** Phase to query the initial font status */
