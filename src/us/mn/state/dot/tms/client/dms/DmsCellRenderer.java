@@ -49,7 +49,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Sign pixel panel to display sign message */
-	private final SignPixelPanel pixelPnl = new SignPixelPanel(50, 200,
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200,
 		false);
 
 	/** List cell renderer (needed for colors) */
@@ -149,7 +149,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		title.setLayout(new GridLayout(1, 1));
 		title.add(lblID);
 		add(title, BorderLayout.NORTH);
-		add(pixelPnl, BorderLayout.CENTER);
+		add(pixel_pnl, BorderLayout.CENTER);
 		// This is only needed to get preferred height
 		lblID.setText("V999W99X");
 		Dimension lsz = lblID.getPreferredSize();
@@ -170,7 +170,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		location.add(lblLocation);
 		location.add(Box.createGlue());
 		add(title, BorderLayout.NORTH);
-		add(pixelPnl, BorderLayout.CENTER);
+		add(pixel_pnl, BorderLayout.CENTER);
 		add(location, BorderLayout.SOUTH);
 		// This is only needed to get preferred height
 		lblID.setText("V999W99X");
@@ -224,7 +224,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 				getDescription(dms.getGeoLoc());
 			lblLocation.setText(loca);
 			setDimensions(dms);
-			pixelPnl.setGraphic(getPageOne(dms));
+			pixel_pnl.setGraphic(getPageOne(dms));
 			updateToolTip(dms, dmsname, loca, formatOwner(dms));
 		} else if(a.equals("ownerCurrent"))
 			lblUser.setText(formatOwner(dms));
@@ -263,9 +263,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		if(w != null && h != null && hp != null && vp != null &&
 		   hb != null && vb != null)
 		{
-			pixelPnl.setPhysicalDimensions(w, h, hb, vb, hp, vp);
+			pixel_pnl.setPhysicalDimensions(w, h, hb, vb, hp, vp);
 		} else
-			pixelPnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
+			pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 	}
 
 	/** Set the logical dimensions of the pixel panel */
@@ -275,9 +275,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		Integer cw = dms.getCharWidthPixels();
 		Integer ch = dms.getCharHeightPixels();
 		if(wp != null && hp != null && cw != null && ch != null)
-			pixelPnl.setLogicalDimensions(wp, hp, cw, ch);
+			pixel_pnl.setLogicalDimensions(wp, hp, cw, ch);
 		else
-			pixelPnl.setLogicalDimensions(0, 0, 0, 0);
+			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
 	}
 
 	/** Get the raster graphic for page one */
