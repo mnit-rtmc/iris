@@ -26,6 +26,7 @@ import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPopupMenu;
+import us.mn.state.dot.geokit.ZoomLevel;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.map.PointSelector;
@@ -310,6 +311,15 @@ public class IrisClient extends JFrame {
 				sp.setMapExtent(me);
 		}
  	}
+
+	/** Set the map extent.
+	 * @param zoom Zoom level.
+	 * @param lat Latitude coordinate.
+	 * @param lon Longitude coordinate. */
+	public void setMapExtent(ZoomLevel zoom, float lat, float lon) {
+		for(ScreenPane sp: s_panes)
+			sp.setMapExtent(zoom, lat, lon);
+	}
 
 	/** Create a new map model */
 	protected MapModel createMapModel(MapBean mb, Session s) {

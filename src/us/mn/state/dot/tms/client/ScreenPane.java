@@ -56,6 +56,16 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  */
 public class ScreenPane extends JPanel {
 
+	/** Create a point in spherical mercator units.
+	 * @param lat Latitude coordinate.
+	 * @param lon Longitude coordinate.
+	 * @return Point in spherical mercator units. */
+	static private Point2D createPoint(float lat, float lon) {
+		SphericalMercatorPosition c = SphericalMercatorPosition.convert(
+			new Position(lat, lon));
+		return new Point2D.Double(c.getX(), c.getY());
+	}
+
 	/** Side panel for tabs and menu */
 	private final JPanel side_panel;
 
@@ -259,18 +269,17 @@ public class ScreenPane extends JPanel {
 
 	/** Set the map extent */
 	public void setMapExtent(MapExtent me) {
-		Point2D ctr = createCenter(me);
 		ZoomLevel zoom = ZoomLevel.fromOrdinal(me.getZoom());
-		if(ctr != null && zoom != null)
-			map.getModel().setExtent(ctr, zoom);
+		if(zoom != null)
+			setMapExtent(zoom, me.getLat(), me.getLon());
 	}
 
-	/** Create a center point in spherical mercator units */
-	static protected Point2D createCenter(MapExtent me) {
-		float lat = me.getLat();
-		float lon = me.getLon();
-		SphericalMercatorPosition c = SphericalMercatorPosition.convert(
-			new Position(lat, lon));
-		return new Point2D.Double(c.getX(), c.getY());
+	/** Set the map extent.
+	 * @param zoom Zoom level.
+	 * @param lat Latitude coordinate.
+	 * @param lon Longitude coordinate. */
+	public void setMapExtent(ZoomLevel zoom, float lat, float lon) {
+		Point2D ctr = createPoint(lat, lon);
+		map.getModel().setExtent(ctr, zoom);
 	}
 }

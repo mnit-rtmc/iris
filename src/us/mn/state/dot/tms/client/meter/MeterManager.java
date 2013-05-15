@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
@@ -154,8 +155,11 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Create a popup menu for a single ramp meter selection */
 	protected JPopupMenu createSinglePopup(final RampMeter meter) {
+		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(meter)));
+		p.addSeparator();
+		p.add(new MapAction(desktop.client, meter, meter.getGeoLoc()));
 		p.addSeparator();
 		if(meter.getRate() != null) {
 			p.add(new ShrinkQueueAction(meter));

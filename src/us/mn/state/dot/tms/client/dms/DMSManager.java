@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
@@ -226,8 +227,11 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a popup menu for a single DMS selection */
 	protected JPopupMenu createSinglePopup(DMS proxy) {
+		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
+		p.addSeparator();
+		p.add(new MapAction(desktop.client, proxy, proxy.getGeoLoc()));
 		p.addSeparator();
 		if(blankAction != null)
 			p.add(blankAction);

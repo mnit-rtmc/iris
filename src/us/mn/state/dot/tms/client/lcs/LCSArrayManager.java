@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -309,8 +310,12 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a popup menu for a single LCS array selection */
 	protected JPopupMenu createSinglePopup(final LCSArray la) {
+		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(la)));
+		p.addSeparator();
+		p.add(new MapAction(desktop.client, la,
+			LCSArrayHelper.lookupGeoLoc(la)));
 		p.addSeparator();
 		if(isDeployed(la) && blankAction != null)
 			p.add(blankAction);

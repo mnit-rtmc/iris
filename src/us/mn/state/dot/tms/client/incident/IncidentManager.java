@@ -33,10 +33,12 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -119,8 +121,12 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Create a popup menu for a single incident selection */
 	protected JPopupMenu createSinglePopup(Incident proxy) {
+		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
+		p.addSeparator();
+		p.add(new MapAction(desktop.client, proxy, proxy.getLat(),
+			proxy.getLon()));
 		p.addSeparator();
 		// FIXME: add menu item to clear incident
 		return p;

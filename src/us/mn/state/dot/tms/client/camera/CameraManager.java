@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
@@ -145,8 +146,11 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a popup menu for a single camera selection */
 	protected JPopupMenu createSinglePopup(Camera proxy) {
+		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
+		p.addSeparator();
+		p.add(new MapAction(desktop.client, proxy, proxy.getGeoLoc()));
 		p.addSeparator();
 		p.add(new PublishAction(s_model));
 		p.add(new UnpublishAction(s_model));
