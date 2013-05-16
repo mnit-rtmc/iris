@@ -19,7 +19,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -31,7 +30,6 @@ import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
@@ -68,14 +66,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		super(c, lm);
 		session = s;
 		cache.addProxyListener(this);
-	}
-
-	/** Create a style list model for the given symbol */
-	@Override protected StyleListModel<RampMeter> createStyleListModel(
-		Symbol s)
-	{
-		return new MeterStyleModel(this, s.getLabel(),
-			session.getSonarState().getConCache().getControllers());
 	}
 
 	/** Get the proxy type name */
