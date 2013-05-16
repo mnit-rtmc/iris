@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.dms;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -38,9 +37,6 @@ public class DMSPanelPager {
 
 	/** Sign pixel panel being controlled */
 	private final SignPixelPanel pixel_pnl;
-
-	/** Selected DMS */
-	private final DMS dms;
 
 	/** Rasters for each page */
 	private final RasterGraphic[] rasters;
@@ -68,15 +64,13 @@ public class DMSPanelPager {
 
 	/** Create a new DMS panel pager.
 	 * @param p SignPixelPanel.
-	 * @param proxy DMS proxy.
 	 * @param rg Array of raster graphics, one per page.
 	 * @param p_on Array of page-on times, one per page.
 	 * @param p_off Array of page-off times, one per page. */
-	public DMSPanelPager(SignPixelPanel p, DMS proxy, RasterGraphic[] rg,
+	public DMSPanelPager(SignPixelPanel p, RasterGraphic[] rg,
 		Interval[] p_on, Interval[] p_off)
 	{
 		pixel_pnl = p;
-		dms = proxy;
 		rasters = rg;
 		page_on = p_on;
 		page_off = p_off;
@@ -86,7 +80,6 @@ public class DMSPanelPager {
 		n_pages = Math.min(rg.length, Math.min(p_on.length,
 			p_off.length));
 		assert n_pages > 0;
-		pixel_pnl.setDimensions(dms);
 		pixel_pnl.setGraphic(rasters[page]);
 		timer = new Timer(TIMER_TICK_MS, new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -159,12 +152,8 @@ public class DMSPanelPager {
 
 	/** Create a blank raster graphic */
 	private RasterGraphic createBlankPage() {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		if(wp != null && hp != null)
-			return new BitmapGraphic(wp, hp);
-		else
-			return new BitmapGraphic(0, 0);
+		RasterGraphic rg = rasters[0];
+		return new BitmapGraphic(rg.getWidth(), rg.getHeight());
 	}
 
 	/** Display the next page of the message */
