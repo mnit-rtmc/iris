@@ -33,41 +33,39 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.RasterGraphic;
-import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * This class renders DMSs in a JList within the DMS StyleSummary.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  * @author Michael Darter
  */
 public class DmsCellRenderer extends JPanel implements ListCellRenderer {
+
+	/** Prototype name */
+	static private final String PROTOTYPE_NAME = "V999W99X";
 
 	/** Sign pixel panel to display sign message */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200,
 		false);
 
 	/** List cell renderer (needed for colors) */
-	protected final DefaultListCellRenderer cell =
+	private final DefaultListCellRenderer cell =
 		new DefaultListCellRenderer();
 
 	/** Title bar */
-	protected final JPanel title = new JPanel();
+	private final JPanel title = new JPanel();
 
 	/** The label that displays the sign ID */
-	protected final JLabel lblID = new JLabel();
+	private final JLabel name_lbl = new JLabel();
 
 	/** The label for the user */
-	protected final JLabel lblUser = new JLabel();
-
-	/** Location bar */
-	protected final Box location = Box.createHorizontalBox();
+	private final JLabel user_lbl = new JLabel();
 
 	/** The label that displays the sign location */
-	protected final JLabel lblLocation = new JLabel();
+	private final JLabel loc_lbl = new JLabel();
 
 	/** DMS cell renderer mode */
 	private enum DmsRendererMode {
@@ -79,7 +77,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		private final Dimension pixel_panel_size;
 
 		/** Associated style summary cell renderer size */
-		protected final CellRendererSize cell_size;
+		private final CellRendererSize cell_size;
 
 		/** Create a new DMS renderer mode */
 		private DmsRendererMode(int w, int h, CellRendererSize cs) {
@@ -96,7 +94,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		 * and apperance of the renderer.
 		 * @param sz StyleSummary renderer size. */
 		static private DmsRendererMode determine(CellRendererSize sz) {
-			for(DmsRendererMode m : DmsRendererMode.values()) 
+			for(DmsRendererMode m : DmsRendererMode.values())
 				if(m.cell_size == sz)
 					return m;
 			assert false;
@@ -133,10 +131,10 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.RAISED));
 		title.setLayout(new GridLayout(1, 1));
-		title.add(lblID);
+		title.add(name_lbl);
 		add(title);
-		lblID.setText("V999W99X");
-		setPreferredSize(lblID.getPreferredSize());
+		name_lbl.setText(PROTOTYPE_NAME);
+		setPreferredSize(name_lbl.getPreferredSize());
 	}
 
 	/** Initialize a medium size DMS cell renderer */
@@ -145,12 +143,12 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
 			  BorderFactory.createRaisedBevelBorder()));
 		title.setLayout(new GridLayout(1, 1));
-		title.add(lblID);
+		title.add(name_lbl);
 		add(title, BorderLayout.NORTH);
 		add(pixel_pnl, BorderLayout.CENTER);
 		// This is only needed to get preferred height
-		lblID.setText("V999W99X");
-		Dimension lsz = lblID.getPreferredSize();
+		name_lbl.setText(PROTOTYPE_NAME);
+		Dimension lsz = name_lbl.getPreferredSize();
 		Dimension psz = mode.pixelPanelSize();
 		setPreferredSize(new Dimension(psz.width,
 			lsz.height + psz.height));
@@ -162,17 +160,18 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
 			  BorderFactory.createRaisedBevelBorder()));
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
-		title.add(lblID);
+		title.add(name_lbl);
 		title.add(Box.createGlue());
-		title.add(lblUser);
-		location.add(lblLocation);
-		location.add(Box.createGlue());
+		title.add(user_lbl);
+		Box box = Box.createHorizontalBox();
+		box.add(loc_lbl);
+		box.add(Box.createGlue());
 		add(title, BorderLayout.NORTH);
 		add(pixel_pnl, BorderLayout.CENTER);
-		add(location, BorderLayout.SOUTH);
+		add(box, BorderLayout.SOUTH);
 		// This is only needed to get preferred height
-		lblID.setText("V999W99X");
-		Dimension lsz = lblID.getPreferredSize();
+		name_lbl.setText(PROTOTYPE_NAME);
+		Dimension lsz = name_lbl.getPreferredSize();
 		Dimension psz = mode.pixelPanelSize();
 		setPreferredSize(new Dimension(psz.width,
 			lsz.height * 2 + psz.height));
@@ -192,17 +191,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 				value, index, isSelected, cellHasFocus);
 			title.setBackground(temp.getBackground());
 		} else
-			title.setBackground(lblID.getBackground());
+			title.setBackground(name_lbl.getBackground());
 		return this;
-	}
-
-	/** Return the owner name as a function of the display mode */
-	protected String formatOwner(DMS dms) {
-		String s = IrisUserHelper.getNamePruned(dms.getOwnerCurrent());
-		if(mode == DmsRendererMode.MEDIUM)
-			return SString.truncate(s, 8);
-		else
-			return s;
 	}
 
 	/** Set the DMS to be displayed. All attributes are updated. */
@@ -212,40 +202,54 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	}
 
 	/** Update a specified attribute on the DMS.
-	 *  @param dms DMS to update.
-	 *  @param a Attribute to update. */
+	 * @param dms DMS to update.
+	 * @param a Attribute to update. */
 	public void updateDms(DMS dms, String a) {
 		if(a.equals("messageCurrent")) {
-			String dmsname = dms.getName();
-			lblID.setText(dmsname);
-			String loca = GeoLocHelper.
-				getDescription(dms.getGeoLoc());
-			lblLocation.setText(loca);
+			String name = dms.getName();
+			name_lbl.setText(name);
+			String loc = GeoLocHelper.getDescription(
+				dms.getGeoLoc());
+			loc_lbl.setText(loc);
 			pixel_pnl.setDimensions(dms);
 			pixel_pnl.setGraphic(getPageOne(dms));
-			updateToolTip(dms, dmsname, loca, formatOwner(dms));
+			updateToolTip(dms, name, loc);
 		} else if(a.equals("ownerCurrent"))
-			lblUser.setText(formatOwner(dms));
+			user_lbl.setText(formatOwner(dms));
+	}
+
+	/** Format the owner name */
+	private String formatOwner(DMS dms) {
+		return IrisUserHelper.getNamePruned(dms.getOwnerCurrent());
 	}
 
 	/** Update tooltip */
-	private void updateToolTip(DMS dms, String dmsname, String loca, 
-		String author) 
-	{
-		StringBuilder tt = new StringBuilder("");
-		if(mode == DmsRendererMode.SMALL) {
-			tt.append(dmsname);
-			if(!author.isEmpty())
-				tt.append(": ").append(author);
-			tt.append(": ").append(loca);
-			tt.append(": ").append(DMSHelper.buildMsgLine(dms));
-		} else if(mode == DmsRendererMode.MEDIUM)
-			tt.append(dmsname).append(": ").append(loca);
+	private void updateToolTip(DMS dms, String name, String loc) {
+		StringBuilder tt = new StringBuilder();
+		switch(mode) {
+		case SMALL:
+			String owner = formatOwner(dms);
+			tt.append(name);
+			if(!owner.isEmpty()) {
+				tt.append(": ");
+				tt.append(owner);
+			}
+			tt.append(": ");
+			tt.append(loc);
+			tt.append(": ");
+			tt.append(DMSHelper.buildMsgLine(dms));
+			break;
+		case MEDIUM:
+			tt.append(name);
+			tt.append(": ");
+			tt.append(loc);
+			break;
+		}
 		setToolTipText(tt.toString());
  	}
 
 	/** Get the raster graphic for page one */
-	protected RasterGraphic getPageOne(DMS dms) {
+	private RasterGraphic getPageOne(DMS dms) {
 		RasterGraphic[] rasters = DMSHelper.getRasters(dms);
 		if(rasters != null && rasters.length > 0)
 			return rasters[0];
