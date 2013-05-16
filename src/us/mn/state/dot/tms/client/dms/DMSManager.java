@@ -26,7 +26,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
-import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
@@ -45,7 +44,6 @@ import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -85,12 +83,6 @@ public class DMSManager extends ProxyManager<DMS> {
 		super(c, lm, ItemStyle.DEPLOYED);
 		session = s;
 		cache.addProxyListener(this);
-	}
-
-	/** Create a style list model for the given symbol */
-	@Override protected StyleListModel<DMS> createStyleListModel(Symbol s) {
-		return new DMSStyleModel(this, s.getLabel(),
-			session.getSonarState().getConCache().getControllers());
 	}
 
 	/** Get the proxy type name */
