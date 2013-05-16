@@ -25,20 +25,19 @@ import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
 
 /**
- * Pager for a SignPixelPanel.  This class enables multiple page messages
- * to be displayed on a SignPixelPanel. The page on-time is passed as a
- * constructor argument and represents the on-time for all pages.
+ * Pager for a SignPixelPanel.  This class updates a sign pixel panel at the
+ * appropriate times for multipage messages.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
 public class DMSPanelPager {
 
-	/** Time counter for amount of time message has been displayed */
+	/** Time period for timer tick which updates panel */
 	static private final int TIMER_TICK_MS = 100;
 
 	/** Sign pixel panel being controlled */
-	private final SignPixelPanel panel;
+	private final SignPixelPanel pixel_pnl;
 
 	/** Selected DMS */
 	private final DMS dms;
@@ -51,6 +50,9 @@ public class DMSPanelPager {
 
 	/** Multipage message off time */
 	private final Interval[] page_off;
+
+	/** Total number of pages */
+	private final int n_pages;
 
 	/** Current page being displayed */
 	private int page = 0;
@@ -67,22 +69,25 @@ public class DMSPanelPager {
 	/** Create a new DMS panel pager.
 	 * @param p SignPixelPanel.
 	 * @param proxy DMS proxy.
-	 * @param rg Array of raster graphics.
-	 * @param ot Page on-time, which is validated, so if zero, is
-	 *           assigned the system default. */
+	 * @param rg Array of raster graphics, one per page.
+	 * @param p_on Array of page-on times, one per page.
+	 * @param p_off Array of page-off times, one per page. */
 	public DMSPanelPager(SignPixelPanel p, DMS proxy, RasterGraphic[] rg,
 		Interval[] p_on, Interval[] p_off)
 	{
-		assert rg.length == p_off.length;
-		assert rg.length == p_on.length;
-		panel = p;
+		pixel_pnl = p;
 		dms = proxy;
-		rasters = getRasters(rg);
-		int npg = rasters.length;
+		rasters = rg;
 		page_on = p_on;
 		page_off = p_off;
+		// These array lengths should always be the same length, but
+		// there is a short race which could make them different.  Use
+		// the smallest to prevent walking off the end of one.
+		n_pages = Math.min(rg.length, Math.min(p_on.length,
+			p_off.length));
+		assert n_pages > 0;
 		setDimensions();
-		panel.setGraphic(rasters[page]);
+		pixel_pnl.setGraphic(rasters[page]);
 		timer = new Timer(TIMER_TICK_MS, new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				pageTimerTick();
@@ -95,17 +100,6 @@ public class DMSPanelPager {
 	/** Dispose of the pager */
 	public void dispose() {
 		timer.stop();
-	}
-
-	/** Get rasters to display on the panel */
-	private RasterGraphic[] getRasters(RasterGraphic[] rg) {
-		if(rg != null && rg.length > 0)
-			return rg;
-		else {
-			return new RasterGraphic[] {
-				createBlankPage()
-			};
-		}
 	}
 
 	/** Set the dimensions of the pixel panel */
@@ -125,7 +119,7 @@ public class DMSPanelPager {
 		if(w != null && h != null && hp != null && vp != null &&
 		   hb != null && vb != null)
 		{
-			panel.setPhysicalDimensions(w, h, hb, vb, hp, vp);
+			pixel_pnl.setPhysicalDimensions(w, h, hb, vb, hp, vp);
 		}
 	}
 
@@ -136,7 +130,7 @@ public class DMSPanelPager {
 		Integer cw = dms.getCharWidthPixels();
 		Integer ch = dms.getCharHeightPixels();
 		if(wp != null && hp != null && cw != null && ch != null)
-			panel.setLogicalDimensions(wp, hp, cw, ch);
+			pixel_pnl.setLogicalDimensions(wp, hp, cw, ch);
 	}
 
 	/** Create a blank raster graphic */
@@ -163,9 +157,8 @@ public class DMSPanelPager {
 	/** Update the timer for one tick.
 	 * @return True if panel needs repainting */
 	private boolean doTick() {
-		boolean singlepg = page_on.length == 1;
 		Interval on_int = PageTimeHelper.validateOnInterval(
-			page_on[page], singlepg);
+			page_on[page], n_pages == 1);
 		int on_ms = on_int.round(MILLISECONDS);
 		int off_ms = page_off[page].round(MILLISECONDS);
 		phase_ms += TIMER_TICK_MS;
@@ -189,21 +182,21 @@ public class DMSPanelPager {
 	/** Make the display blank (without advancing the page number) */
 	private void makeBlank() {
 		if(isMultipage())
-			panel.setGraphic(createBlankPage());
+			pixel_pnl.setGraphic(createBlankPage());
 	}
 
 	/** Display the next page of the message */
 	private void nextPage() {
 		if(isMultipage()) {
 			page++;
-			if(page >= rasters.length)
+			if(page >= n_pages)
 				page = 0;
-			panel.setGraphic(rasters[page]);
+			pixel_pnl.setGraphic(rasters[page]);
 		}
 	}
 
 	/** Check if the current message has multiple pages */
 	private boolean isMultipage() {
-		return rasters.length > 1;
+		return n_pages > 1;
 	}
 }
