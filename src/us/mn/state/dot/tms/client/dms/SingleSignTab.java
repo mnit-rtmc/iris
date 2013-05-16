@@ -384,6 +384,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		RasterGraphic[] rg = DMSHelper.getRasters(dms);
 		if(rg != null) {
 			String ms = getMultiString(dms);
+			current_pnl.setDimensions(dms);
 			setPager(new DMSPanelPager(current_pnl, dms, rg,
 			         pageOnIntervals(ms), pageOffIntervals(ms)));
 		} else {
@@ -428,15 +429,27 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Update the preview panel */
 	private void updatePreviewPanel(DMS dms) {
-		if(dms != null) {
-			String ms = dispatcher.getMessage();
-			RasterGraphic[] rg = dispatcher.getPixmaps();
-			setPager(new DMSPanelPager(preview_pnl, dms, rg,
-			         pageOnIntervals(ms), pageOffIntervals(ms)));
+		DMSPanelPager p = createPreviewPager(dms);
+		if(p != null) {
+			preview_pnl.setDimensions(dms);
+			setPager(p);
 		} else {
 			setPager(null);
 			preview_pnl.clear();
 		}
+	}
+
+	/** Create a preview panel pager */
+	private DMSPanelPager createPreviewPager(DMS dms) {
+		if(dms != null) {
+			String ms = dispatcher.getMessage();
+			RasterGraphic[] rg = dispatcher.getPixmaps();
+			if(rg != null) {
+				return new DMSPanelPager(preview_pnl, dms, rg,
+				    pageOnIntervals(ms), pageOffIntervals(ms));
+			}
+		}
+		return null;
 	}
 
 	/** Set the DMS panel pager */
