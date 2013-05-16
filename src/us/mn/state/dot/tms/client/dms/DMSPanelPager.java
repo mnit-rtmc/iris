@@ -54,11 +54,11 @@ public class DMSPanelPager {
 	/** Total number of pages */
 	private final int n_pages;
 
-	/** Current page being displayed */
-	private int page = 0;
-
 	/** Swing timer */
 	private final Timer timer;
+
+	/** Current page being displayed */
+	private int page = 0;
 
 	/** Time counter for amount of time message has been displayed */
 	private int phase_ms = 0;
@@ -93,13 +93,68 @@ public class DMSPanelPager {
 				pageTimerTick();
 			}
 		});
-		if(isMultipage())
+		if(n_pages > 1)
 			timer.start();
 	}
 
 	/** Dispose of the pager */
 	public void dispose() {
 		timer.stop();
+	}
+
+	/** Update the phase timer by one tick. */
+	private void pageTimerTick() {
+		phase_ms += TIMER_TICK_MS;
+		if(doTick()) {
+			phase_ms = 0;
+			if(isBlanking)
+				makeBlank();
+			else
+				nextPage();
+		}
+	}
+
+	/** Update the timer for one tick.
+	 * @return True if panel needs updating. */
+	private boolean doTick() {
+		return isBlanking ? doTickOff() : doTickOn();
+	}
+
+	/** Update the timer for one tick while blanking.
+	 * @return True if panel needs updating. */
+	private boolean doTickOff() {
+		if(phase_ms >= currentPageOffMs()) {
+			isBlanking = false;
+			return true;
+		} else
+			return false;
+	}
+
+	/** Get page-off time for current page */
+	private int currentPageOffMs() {
+		return page_off[page].round(MILLISECONDS);
+	}
+
+	/** Update the timer for one tick while displaying a page.
+	 * @return True if panel needs updating. */
+	private boolean doTickOn() {
+		if(phase_ms >= currentPageOnMs()) {
+			isBlanking = (currentPageOffMs() > 0);
+			return true;
+		} else
+			return false;
+	}
+
+	/** Get page-on time for current page */
+	private int currentPageOnMs() {
+		Interval on_int = PageTimeHelper.validateOnInterval(
+			page_on[page], n_pages == 1);
+		 return on_int.round(MILLISECONDS);
+	}
+
+	/** Make the display blank (without advancing the page number) */
+	private void makeBlank() {
+		pixel_pnl.setGraphic(createBlankPage());
 	}
 
 	/** Create a blank raster graphic */
@@ -112,60 +167,11 @@ public class DMSPanelPager {
 			return new BitmapGraphic(0, 0);
 	}
 
-	/** Page timer tick. Called periodically to change the sign contents
-	 * for multipage signs. */
-	private void pageTimerTick() {
-		if(doTick()) {
-			if(isBlanking)
-				makeBlank();
-			else
-				nextPage();
-		}
-	}
-
-	/** Update the timer for one tick.
-	 * @return True if panel needs repainting */
-	private boolean doTick() {
-		Interval on_int = PageTimeHelper.validateOnInterval(
-			page_on[page], n_pages == 1);
-		int on_ms = on_int.round(MILLISECONDS);
-		int off_ms = page_off[page].round(MILLISECONDS);
-		phase_ms += TIMER_TICK_MS;
-		if(isBlanking) {
-			if(phase_ms >= off_ms) {
-				isBlanking = false;
-				phase_ms = 0;
-				return true;
-			}
-		} else {
-			if(phase_ms >= on_ms) {
-				if(off_ms > 0)
-					isBlanking = true;
-				phase_ms = 0;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/** Make the display blank (without advancing the page number) */
-	private void makeBlank() {
-		if(isMultipage())
-			pixel_pnl.setGraphic(createBlankPage());
-	}
-
 	/** Display the next page of the message */
 	private void nextPage() {
-		if(isMultipage()) {
-			page++;
-			if(page >= n_pages)
-				page = 0;
-			pixel_pnl.setGraphic(rasters[page]);
-		}
-	}
-
-	/** Check if the current message has multiple pages */
-	private boolean isMultipage() {
-		return n_pages > 1;
+		page++;
+		if(page >= n_pages)
+			page = 0;
+		pixel_pnl.setGraphic(rasters[page]);
 	}
 }
