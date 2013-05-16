@@ -72,7 +72,7 @@ public class SignPixelPanel extends JPanel {
 	protected int height_line;
 
 	/** Transform from user (mm) to screen coordinates */
-	protected AffineTransform transform;
+	private AffineTransform transform;
 
 	/** Raster graphic to paint */
 	private RasterGraphic graphic;
@@ -208,13 +208,14 @@ public class SignPixelPanel extends JPanel {
 	private void doPaint(Graphics2D g, RasterGraphic rg) {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, getWidth(), getHeight());
-		if(transform == null)
-			return;
-		g.transform(transform);
-		g.setColor(face_color);
-		g.fillRect(0, 0, width_mm, height_mm);
-		if(rg != null)
-			paintPixels(g, rg);
+		AffineTransform t = transform;
+		if(t != null) {
+			g.transform(t);
+			g.setColor(face_color);
+			g.fillRect(0, 0, width_mm, height_mm);
+			if(rg != null)
+				paintPixels(g, rg);
+		}
 	}
 
 	/** Paint the pixels of the sign */
