@@ -227,7 +227,6 @@ public class MeterStatusPanel extends FormPanel
 		shrink_btn.setAction(new ShrinkQueueAction(proxy));
 		grow_btn.setAction(new GrowQueueAction(proxy));
 		if(proxy != null) {
-			lock_cbx.setAction(new LockMeterAction(proxy,lock_cbx));
 			on_btn.setAction(new TurnOnAction(proxy));
 			off_btn.setAction(new TurnOffAction(proxy));
 			updateAttribute(proxy, null);
@@ -240,6 +239,7 @@ public class MeterStatusPanel extends FormPanel
 			release_lbl.setText("");
 			cycle_lbl.setText("");
 			queue_lbl.setText("");
+			lock_cbx.setAction(null);
 			lock_cbx.setSelectedIndex(0);
 		}
 		setEnabled(canUpdate(proxy));
@@ -298,12 +298,16 @@ public class MeterStatusPanel extends FormPanel
 			queue_lbl.setText(q.description);
 		}
 		if(a == null || a.equals("mLock")) {
-			Integer ml = meter.getMLock();
-			if(ml != null)
-				lock_cbx.setSelectedIndex(ml);
-			else
-				lock_cbx.setSelectedIndex(0);
+			lock_cbx.setAction(null);
+			lock_cbx.setSelectedIndex(getMLock(meter));
+			lock_cbx.setAction(new LockMeterAction(meter,lock_cbx));
 		}
+	}
+
+	/** Get the current meter lock */
+	private int getMLock(RampMeter meter) {
+		Integer ml = meter.getMLock();
+		return ml != null ? ml : 0;
 	}
 
 	/** Check if the user can update the given ramp meter */
