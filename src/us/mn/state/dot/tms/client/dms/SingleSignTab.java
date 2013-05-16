@@ -111,7 +111,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		true, new Color(0, 0, 0.4f));
 
 	/** Pager for selected DMS panel */
-	protected DMSPanelPager pnlPager;
+	private DMSPanelPager pnlPager;
 
 	/** Tabbed pane for current/preview panels */
 	protected final JTabbedPane tab = new JTabbedPane();
@@ -217,7 +217,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	public void dispose() {
 		setSelected(null);
 		cache.removeProxyListener(this);
-		clearPager();
+		setPager(null);
 		super.dispose();
 	}
 
@@ -280,7 +280,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Clear the selected DMS */
 	protected void clearSelected() {
-		clearPager();
+		setPager(null);
 		current_pnl.clear();
 		preview_pnl.clear();
 		name_lbl.setText("");
@@ -380,17 +380,15 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Update the current panel */
-	protected void updateCurrentPanel(DMS dms) {
-		clearPager();
-		if(dms != null) {
-			RasterGraphic[] rg = DMSHelper.getRasters(dms);
-			if(rg != null) {
-				String ms = getMultiString(dms);
-				pnlPager = new DMSPanelPager(current_pnl, dms,
-					rg, pageOnIntervals(ms),
-					pageOffIntervals(ms));
-			} else
-				current_pnl.clear();
+	private void updateCurrentPanel(DMS dms) {
+		RasterGraphic[] rg = DMSHelper.getRasters(dms);
+		if(rg != null) {
+			String ms = getMultiString(dms);
+			setPager(new DMSPanelPager(current_pnl, dms, rg,
+			         pageOnIntervals(ms), pageOffIntervals(ms)));
+		} else {
+			setPager(null);
+			current_pnl.clear();
 		}
 	}
 
@@ -429,22 +427,23 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Update the preview panel */
-	protected void updatePreviewPanel(DMS dms) {
-		clearPager();
+	private void updatePreviewPanel(DMS dms) {
 		if(dms != null) {
 			String ms = dispatcher.getMessage();
 			RasterGraphic[] rg = dispatcher.getPixmaps();
-			pnlPager = new DMSPanelPager(preview_pnl, dms, rg,
-				pageOnIntervals(ms), pageOffIntervals(ms));
+			setPager(new DMSPanelPager(preview_pnl, dms, rg,
+			         pageOnIntervals(ms), pageOffIntervals(ms)));
+		} else {
+			setPager(null);
+			preview_pnl.clear();
 		}
 	}
 
-	/** Clear the DMS panel pager */
-	protected void clearPager() {
+	/** Set the DMS panel pager */
+	private void setPager(DMSPanelPager p) {
 		DMSPanelPager pager = pnlPager;
-		if(pager != null) {
+		if(pager != null)
 			pager.dispose();
-			pnlPager = null;
-		}
+		pnlPager = p;
 	}
 }
