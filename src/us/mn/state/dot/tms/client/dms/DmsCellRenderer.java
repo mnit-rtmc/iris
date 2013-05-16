@@ -111,17 +111,13 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		super(new BorderLayout());
 		mode = DmsRendererMode.determine(sz);
 		switch(mode) {
-		case LARGE:
-			initLarge();
+		case SMALL:
+			initSmall();
 			break;
 		case MEDIUM:
 			initMedium();
 			break;
-		case SMALL:
-			initSmall();
-			break;
 		default:
-			assert false;
 			initLarge();
 		}
 	}
