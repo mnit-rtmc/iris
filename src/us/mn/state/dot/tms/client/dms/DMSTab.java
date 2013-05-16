@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
- * Copyright (C) 2010 AHMCT, University of California, Davis
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,17 +23,15 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
 /**
  * The DMSTab class provides the GUI for working with DMS objects.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class DMSTab extends MapTab {
 
 	/** DMS dispatcher component */
-	protected final DMSDispatcher dispatcher;
+	private final DMSDispatcher dispatcher;
 
 	/** Summary of DMSs of each status */
-	protected final StyleSummary<DMS> summary;
+	private final StyleSummary<DMS> summary;
 
 	/** Create a new DMS tab */
  	public DMSTab(Session session, DMSManager manager) {
