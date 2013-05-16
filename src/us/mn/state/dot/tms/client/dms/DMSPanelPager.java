@@ -86,7 +86,7 @@ public class DMSPanelPager {
 		n_pages = Math.min(rg.length, Math.min(p_on.length,
 			p_off.length));
 		assert n_pages > 0;
-		setDimensions();
+		pixel_pnl.setDimensions(dms);
 		pixel_pnl.setGraphic(rasters[page]);
 		timer = new Timer(TIMER_TICK_MS, new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -100,37 +100,6 @@ public class DMSPanelPager {
 	/** Dispose of the pager */
 	public void dispose() {
 		timer.stop();
-	}
-
-	/** Set the dimensions of the pixel panel */
-	private void setDimensions() {
-		setPhysicalDimensions();
-		setLogicalDimensions();
-	}
-
-	/** Set the physical dimensions of the pixel panel */
-	private void setPhysicalDimensions() {
-		Integer w = dms.getFaceWidth();
-		Integer h = dms.getFaceHeight();
-		Integer hp = dms.getHorizontalPitch();
-		Integer vp = dms.getVerticalPitch();
-		Integer hb = dms.getHorizontalBorder();
-		Integer vb = dms.getVerticalBorder();
-		if(w != null && h != null && hp != null && vp != null &&
-		   hb != null && vb != null)
-		{
-			pixel_pnl.setPhysicalDimensions(w, h, hb, vb, hp, vp);
-		}
-	}
-
-	/** Set the logical dimensions of the pixel panel */
-	private void setLogicalDimensions() {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		if(wp != null && hp != null && cw != null && ch != null)
-			pixel_pnl.setLogicalDimensions(wp, hp, cw, ch);
 	}
 
 	/** Create a blank raster graphic */

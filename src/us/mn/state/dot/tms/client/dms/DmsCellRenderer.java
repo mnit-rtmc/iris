@@ -19,7 +19,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -29,7 +28,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EtchedBorder;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -223,7 +221,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			String loca = GeoLocHelper.
 				getDescription(dms.getGeoLoc());
 			lblLocation.setText(loca);
-			setDimensions(dms);
+			pixel_pnl.setDimensions(dms);
 			pixel_pnl.setGraphic(getPageOne(dms));
 			updateToolTip(dms, dmsname, loca, formatOwner(dms));
 		} else if(a.equals("ownerCurrent"))
@@ -245,40 +243,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			tt.append(dmsname).append(": ").append(loca);
 		setToolTipText(tt.toString());
  	}
-
-	/** Set the dimensions of the pixel panel */
-	protected void setDimensions(DMS dms) {
-		setPhysicalDimensions(dms);
-		setLogicalDimensions(dms);
-	}
-
-	/** Set the physical dimensions of the pixel panel */
-	protected void setPhysicalDimensions(DMS dms) {
-		Integer w = dms.getFaceWidth();
-		Integer h = dms.getFaceHeight();
-		Integer hp = dms.getHorizontalPitch();
-		Integer vp = dms.getVerticalPitch();
-		Integer hb = dms.getHorizontalBorder();
-		Integer vb = dms.getVerticalBorder();
-		if(w != null && h != null && hp != null && vp != null &&
-		   hb != null && vb != null)
-		{
-			pixel_pnl.setPhysicalDimensions(w, h, hb, vb, hp, vp);
-		} else
-			pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
-	}
-
-	/** Set the logical dimensions of the pixel panel */
-	protected void setLogicalDimensions(DMS dms) {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		if(wp != null && hp != null && cw != null && ch != null)
-			pixel_pnl.setLogicalDimensions(wp, hp, cw, ch);
-		else
-			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
-	}
 
 	/** Get the raster graphic for page one */
 	protected RasterGraphic getPageOne(DMS dms) {

@@ -168,34 +168,8 @@ public class PropPixels extends FormPanel {
 
 	/** Update the dimensions of a sign pixel panel */
 	private void updatePixelPanel(SignPixelPanel p) {
-		updatePixelPhysical(p);
-		updatePixelLogical(p);
+		p.setDimensions(dms);
 		p.repaint();
-	}
-
-	/** Update the physical dimensions of a sign pixel panel */
-	private void updatePixelPhysical(SignPixelPanel p) {
-		Integer w = dms.getFaceWidth();
-		Integer h = dms.getFaceHeight();
-		Integer hp = dms.getHorizontalPitch();
-		Integer vp = dms.getVerticalPitch();
-		Integer hb = dms.getHorizontalBorder();
-		Integer vb = dms.getVerticalBorder();
-		if(w != null && h != null && hp != null && vp != null &&
-		   hb != null && vb != null)
-		{
-			p.setPhysicalDimensions(w, h, hb, vb, hp, vp);
-		}
-	}
-
-	/** Update the logical dimensions of a sign pixel panel */
-	private void updatePixelLogical(SignPixelPanel p) {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		if(wp != null && hp != null && cw != null && ch != null)
-			p.setLogicalDimensions(wp, hp, cw, ch);
 	}
 
 	/** Check if the user can update an attribute */

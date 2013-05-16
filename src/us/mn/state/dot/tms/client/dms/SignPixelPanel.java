@@ -24,6 +24,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.RasterGraphic;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -385,5 +386,39 @@ public class SignPixelPanel extends JPanel {
 		setMinimumSize(d);
 		setPreferredSize(d);
 		setMaximumSize(d);
+	}
+
+	/** Set the dimensions from a DMS */
+	public void setDimensions(DMS dms) {
+		setPhysicalDimensions(dms);
+		setLogicalDimensions(dms);
+	}
+
+	/** Set the physical dimensions from a DMS */
+	private void setPhysicalDimensions(DMS dms) {
+		Integer w = dms.getFaceWidth();
+		Integer h = dms.getFaceHeight();
+		Integer hp = dms.getHorizontalPitch();
+		Integer vp = dms.getVerticalPitch();
+		Integer hb = dms.getHorizontalBorder();
+		Integer vb = dms.getVerticalBorder();
+		if(w != null && h != null && hp != null && vp != null &&
+		   hb != null && vb != null)
+		{
+			setPhysicalDimensions(w, h, hb, vb, hp, vp);
+		} else
+			setPhysicalDimensions(0, 0, 0, 0, 0, 0);
+	}
+
+	/** Set the logical dimensions from a DMS */
+	private void setLogicalDimensions(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		if(wp != null && hp != null && cw != null && ch != null)
+			setLogicalDimensions(wp, hp, cw, ch);
+		else
+			setLogicalDimensions(0, 0, 0, 0);
 	}
 }
