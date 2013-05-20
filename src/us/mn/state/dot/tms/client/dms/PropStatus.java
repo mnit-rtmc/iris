@@ -14,8 +14,10 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -152,11 +154,18 @@ public class PropStatus extends FormPanel {
 		if(query_msg.getIEnabled())
 			add(new JButton(query_msg));
 		finishRow();
-		if(reset.getIEnabled())
-			addRow(new JButton(reset));
-		addRow(new JButton(query_status));
-		addRow(new JButton(settings));
+		addRow(createButtonPanel());
 		updateAttribute(null);
+	}
+
+	/** Create the button panel */
+	private JPanel createButtonPanel() {
+		JPanel p = new JPanel(new FlowLayout());
+		p.add(new JButton(query_status));
+		p.add(new JButton(settings));
+		if(reset.getIEnabled())
+			p.add(new JButton(reset));
+		return p;
 	}
 
 	/** Update one attribute on the panel */
