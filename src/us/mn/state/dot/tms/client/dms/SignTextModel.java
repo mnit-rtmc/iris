@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -144,13 +144,13 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	 * Create a new sign text and add to the local sign text library.
 	 * @param line Combobox line number.
 	 * @param multi MULTI string for line.
-	 * @param priority line priority
+	 * @param rank Message rank.
 	 */
-	protected void createSignText(short line, String multi, short priority){
+	protected void createSignText(short line, String multi, short rank) {
 		SignGroup sg = getLocalSignGroup();
 		if(sg != null) {
 			if(multi.length() > 0)
-				creator.create(sg, line, multi, priority);
+				creator.create(sg, line, multi, rank);
 		}
 	}
 

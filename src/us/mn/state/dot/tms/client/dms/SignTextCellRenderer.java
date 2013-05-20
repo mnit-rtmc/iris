@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.SignText;
  */
 public class SignTextCellRenderer extends BasicComboBoxRenderer {
 
-	/** Highlight color for special priority levels */
+	/** Highlight color for special rank levels */
 	static protected final Color HIGHLIGHT = new Color(204, 204, 255);
 
 	/** Configure the renderer component for a sign text message */
@@ -39,16 +39,16 @@ public class SignTextCellRenderer extends BasicComboBoxRenderer {
 		boolean cellHasFocus)
 	{
 		String v = "";
-		short p = 50;
+		short rank = 50;
 		if(value instanceof SignText) {
 			SignText t = (SignText)value;
 			v = new MultiString(t.getMulti()).asText();
-			p = t.getPriority();
+			rank = t.getRank();
 		}
 		JLabel r = (JLabel)super.getListCellRendererComponent(
 			list, v, index, isSelected, cellHasFocus);
 		r.setHorizontalAlignment(SwingConstants.CENTER);
-		if(p != 50 && !isSelected)
+		if(rank != 50 && !isSelected)
 			r.setBackground(HIGHLIGHT);
 		return r;
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2011  Minnesota Department of Transportation
+ * Copyright (C) 2004-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,9 +42,9 @@ public interface SignText extends SonarObject {
 	/** Get the MULTI string */
 	String getMulti();
 
-	/** Set the priority */
-	void setPriority(short p);
+	/** Set the rank */
+	void setRank(short r);
 
-	/** Get the priority */
-	short getPriority();
+	/** Get the rank */
+	short getRank();
 }

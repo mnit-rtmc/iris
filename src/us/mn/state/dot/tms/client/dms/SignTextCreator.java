@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,10 +65,10 @@ public class SignTextCreator {
 	 * @param sg SignGroup the new message will be associated with.
 	 * @param line Combobox line number.
 	 * @param multi MULTI string.
-	 * @param priority Message sort priority
+	 * @param rank Message rank.
 	 */
 	public void create(SignGroup sg, short line, String multi,
-		short priority)
+		short rank)
 	{
 		multi = MultiParser.normalize(multi);
 		String name = createUniqueSignTextName(sg);
@@ -78,7 +78,7 @@ public class SignTextCreator {
 			attrs.put("sign_group", sg);
 			attrs.put("line", new Short(line));
 			attrs.put("multi", multi);
-			attrs.put("priority", new Short(priority));
+			attrs.put("rank", new Short(rank));
 			sign_text.createObject(name, attrs);
 		}
 	}

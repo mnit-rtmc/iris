@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,27 +22,27 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.table.TableCellEditor;
 
 /**
- * Cell editor for sign text priority.
+ * Cell editor for sign text rank.
  *
  * @author Douglas Lau
  */
-public class PriorityCellEditor extends AbstractCellEditor
+public class RankCellEditor extends AbstractCellEditor
 	implements TableCellEditor
 {
-	/** Model for priority cells */
-	protected final SpinnerNumberModel model =
+	/** Model for rank cells */
+	private final SpinnerNumberModel model =
 		new SpinnerNumberModel(50, 1, 99, 1);
 
-	/** Spinner for editing priority values */
-	protected final JSpinner spinner = new JSpinner(model);
+	/** Spinner for editing rank values */
+	private final JSpinner spinner = new JSpinner(model);
 
-	/** Get the priority cell editor component */
+	/** Get the rank cell editor component */
 	public Component getTableCellEditorComponent(JTable table,
 		Object value, boolean isSelected, int row, int column)
 	{
 		if(value != null) {
-			Short p = (Short)value;
-			model.setValue(p.intValue());
+			Short r = (Short)value;
+			model.setValue(r.intValue());
 		}
 		return spinner;
 	}

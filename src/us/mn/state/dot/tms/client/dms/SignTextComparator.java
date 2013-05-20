@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ public class SignTextComparator implements Comparator<SignText> {
 		int c = s0.compareTo(s1);
 		if(c != 0)
 			return c;
-		s0 = t0.getPriority();
-		s1 = t1.getPriority();
+		s0 = t0.getRank();
+		s1 = t1.getRank();
 		c = s0.compareTo(s1);
 		if(c != 0)
 			return c;

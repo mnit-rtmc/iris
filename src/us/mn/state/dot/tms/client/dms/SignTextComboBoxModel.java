@@ -33,8 +33,8 @@ import us.mn.state.dot.tms.SignGroup;
 public class SignTextComboBoxModel extends AbstractListModel
 	implements ComboBoxModel
 {
-	/** Priority for on-the-fly created sign messages */
-	static protected final short ON_THE_FLY_PRIORITY = 99;
+	/** Rank for on-the-fly created sign messages */
+	static private final short ON_THE_FLY_RANK = 99;
 
 	/** Blank client-side sign text object */
 	static protected final SignText BLANK_SIGN_TEXT =
@@ -185,7 +185,6 @@ public class SignTextComboBoxModel extends AbstractListModel
 
 	/** Add a message to the local sign group library */
 	protected void addMsgToLib(String multi) {
-		m_signTextModel.createSignText(m_cbline, multi,
-			ON_THE_FLY_PRIORITY);
+		m_signTextModel.createSignText(m_cbline, multi,ON_THE_FLY_RANK);
 	}
 }

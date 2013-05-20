@@ -46,8 +46,8 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	/** Load all the sign text */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignTextImpl.class);
-		store.query("SELECT name, sign_group, line, multi, priority" +
-			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, sign_group, line, multi, rank " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignTextImpl(namespace,
@@ -55,7 +55,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 					row.getString(2),	// sign_group
 					row.getShort(3),	// line
 					row.getString(4),	// multi
-					row.getShort(5)		// priority
+					row.getShort(5)		// rank
 				));
 			}
 		});
@@ -68,7 +68,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		map.put("sign_group", sign_group);
 		map.put("line", line);
 		map.put("multi", multi);
-		map.put("priority", priority);
+		map.put("rank", rank);
 		return map;
 	}
 
@@ -88,12 +88,12 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	}
 
 	/** Create a new sign text message */
-	public SignTextImpl(String n, SignGroup g, short l, String m, short p) {
+	public SignTextImpl(String n, SignGroup g, short l, String m, short r) {
 		super(n);
 		sign_group = g;
 		line = l;
 		multi = m;
-		priority = p;
+		rank = r;
 	}
 
 	/** Create a new sign text message */
@@ -154,24 +154,24 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		return multi;
 	}
 
-	/** Message ordering priority */
-	protected short priority;
+	/** Message ordering rank */
+	protected short rank;
 
-	/** Set the priority */
-	public void setPriority(short p) {
-		priority = p;
+	/** Set the rank */
+	public void setRank(short r) {
+		rank = r;
 	}
 
-	/** Set the priority */
-	public void doSetPriority(short p) throws TMSException {
-		if(p == priority)
+	/** Set the rank */
+	public void doSetRank(short r) throws TMSException {
+		if(r == rank)
 			return;
-		store.update(this, "priority", p);
-		setPriority(p);
+		store.update(this, "rank", r);
+		setRank(r);
 	}
 
-	/** Get the priority */
-	public short getPriority() {
-		return priority;
+	/** Get the rank */
+	public short getRank() {
+		return rank;
 	}
 }

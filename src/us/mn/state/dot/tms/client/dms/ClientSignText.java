@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,13 +67,13 @@ public class ClientSignText implements SignText {
 		return multi;
 	}
 
-	/** Set the priority */
-	public void setPriority(short p) {
+	/** Set the rank */
+	public void setRank(short r) {
 		// do nothing
 	}
 
-	/** Get the priority */
-	public short getPriority() {
+	/** Get the rank */
+	public short getRank() {
 		return 1;
 	}
 

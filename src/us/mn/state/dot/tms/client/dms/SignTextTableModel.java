@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,11 +80,11 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				return RENDERER;
 			}
 		});
-		cols.add(new ProxyColumn<SignText>("dms.priority", 48,
+		cols.add(new ProxyColumn<SignText>("dms.rank", 24,
 			Short.class)
 		{
 			public Object getValueAt(SignText st) {
-				return st.getPriority();
+				return st.getRank();
 			}
 			public boolean isEditable(SignText st) {
 				return canUpdate(st);
@@ -92,11 +92,11 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 			public void setValueAt(SignText st, Object value) {
 				if(value instanceof Number) {
 					Number n = (Number)value;
-					st.setPriority(n.shortValue());
+					st.setRank(n.shortValue());
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				return new PriorityCellEditor();
+				return new RankCellEditor();
 			}
 		});
 		return cols;
@@ -133,8 +133,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 		creator = new SignTextCreator(s);
 	}
 
-	/** Create a new sign text message using the current line and priority
-	 * values */
+	/** Create a new sign text message using default line and rank values */
 	protected void createSignText(String multi) {
 		creator.create(group, (short)1, multi, (short)50);
 	}

@@ -799,10 +799,9 @@ CREATE TABLE iris.sign_text (
 	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
 	line smallint NOT NULL,
 	multi VARCHAR(64) NOT NULL,
-	priority smallint NOT NULL,
+	rank smallint NOT NULL,
 	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
-	CONSTRAINT sign_text_priority CHECK
-		((priority >= 1) AND (priority <= 99))
+	CONSTRAINT sign_text_rank CHECK ((rank >= 1) AND (rank <= 99))
 );
 
 CREATE TABLE iris.sign_message (
@@ -1234,7 +1233,7 @@ CREATE VIEW alarm_view AS
 GRANT SELECT ON alarm_view TO PUBLIC;
 
 CREATE VIEW sign_text_view AS
-	SELECT dms, local, line, multi, priority
+	SELECT dms, local, line, multi, rank
 	FROM iris.dms_sign_group dsg
 	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
 	JOIN iris.sign_text st ON sg.name = st.sign_group;
@@ -1535,7 +1534,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 client_units_si	true
-database_version	4.5.0
+database_version	4.6.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
