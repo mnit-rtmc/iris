@@ -47,7 +47,9 @@ public class OpResetDMS extends OpDMS {
 
 		/** Execute the DMS reset */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new DmsSWReset());
+			DmsSWReset reset = new DmsSWReset();
+			mess.add(reset);
+			logStore(reset);
 			mess.storeProps();
 			return new CheckResetCompletion();
 		}
@@ -66,6 +68,7 @@ public class OpResetDMS extends OpDMS {
 			mess.add(reset);
 			try {
 				mess.queryProps();
+				logQuery(reset);
 				if(reset.getInteger() == 0)
 					return null;
 			}
