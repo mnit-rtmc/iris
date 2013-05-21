@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.lcs;
+package us.mn.state.dot.tms.client.roads;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -59,10 +59,8 @@ public class LaneConfigurationPanel extends JPanel {
 	/** Lane configuration */
 	private LaneConfiguration config;
 
-	/**
-	 * Create a lane configuration panel.
-	 * @param w Width of each lane. 
-	 */
+	/** Create a lane configuration panel.
+	 * @param w Width of each lane. */
 	public LaneConfigurationPanel(int w) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		l_width = w;
