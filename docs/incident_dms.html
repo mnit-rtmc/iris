@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>Automatic Deployment of DMS from Incidents</title>
+</head>
+
+<body>
+<h1>Automatic Deployment of DMS from Incidents</h1>
+<h2>Incident Severity</h2>
+<p>
+	Add a <i>severity</i> attribute to incidents.
+	It can have a value of <i>MINOR</i>, <i>NORMAL</i> or <i>MAJOR</i>.
+	The severity of an incident affects the distance to deploy DMS.
+</p>
+<table>
+<tr>
+	<th>Severity</th>
+	<th>Range</th>
+	<th>Miles</th>
+	<th>Branching</th>
+</tr>
+<tr>
+	<td>MINOR</td>
+	<td>NEAR</td>
+	<td>1.5</td>
+	<td>No</td>
+</tr>
+<tr>
+	<td>NORMAL</td>
+	<td>MIDDLE</td>
+	<td>5.0</td>
+	<td>Yes</td>
+</tr>
+<tr>
+	<td>MAJOR</td>
+	<td>FAR</td>
+	<td>10.0</td>
+	<td>Yes</td>
+</tr>
+</table>
+<p>
+	Find all DMS within the range of the incident.
+	Each of these DMS will be deployed if the proper sign_messages can be
+	found for <i>selector</i>, <i>locator</i> and <i>advide</i>.
+</p>
+<p>
+	Each sign_text message can be associated with one of the following
+	incident categories: <i>Locator</i>, <i>Selector</i> or <i>Advice</i>.
+</p>
+<h3>Locator</h3>
+<p>
+	A sign_text can be associated with an r_node, distance pair.
+	Add a new MULTI tag to allow messages like X MILES AHEAD, for rural
+	areas with no landmark nearby.
+	Typically on a 3-line sign, these sign_text will be for line 2.
+</p>
+<table>
+<tr>
+	<th>Distance</th>
+	<th>Message Format</th>
+</tr>
+<tr>
+	<td>NEAR</td>
+	<td>AHEAD</td>
+</tr>
+<tr>
+	<td>MIDDLE or FAR</td>
+	<td>AT HWY 100</td>
+</tr>
+<tr>
+	<td>ALT_NEAR</td>
+	<td>ON 394 EAST</td>
+</tr>
+<tr>
+	<td>ALT_MIDDLE or ALT_FAR</td>
+	<td>ON 394 AT HWY 100</td>
+</tr>
+</table>
+<br/>
+<h3>Incident Selector</h3>
+<p>
+	An incident selector is a set of values which must match an incident
+	to qualify for deployment.
+	On a 3-line sign, a sign_text will normally have a selector for line 1.
+</p>
+<ul>
+	<li>Event type (CRASH, STALL, ROAD WORK, HAZARD)</li>
+	<li>Detail (Debris, Animal, Flash Flooding, etc.)</li>
+	<li>Lane type (mainline, exit ramp, etc.)</li>
+	<li>Clear flag</li>
+</ul>
+<h3>Advice</h3>
+<p>
+	Non-blocking incidents?
+</p>
+<ul>
+	<li>IN x LANE</li>
+	<li>IN MEDIAN</li>
+	<li>ON x SHOULDER</li>
+</ul>
+<p>
+	For blocking incidents?
+</p>
+<ul>
+	<li>LANE CLOSED +variations</li>
+	<li>REDUCED TO x LANES</li>
+	<li>ROAD CLOSED</li>
+	<li>USE OTHER ROUTES</li>
+</ul>
+<p>
+	After blocking incident is cleared?
+</p>
+<ul>
+	<li>ALL LANES OPEN</li>
+</ul>
+<p>
+	Road work with all lanes blocked?
+</p>
+<ul>
+	<li>USE DETOUR</li>
+</ul>
+<p>
+	What criteria to use to select these?
+</p>
+<ul>
+	<li>REDUCE SPEED</li>
+	<li>USE CAUTION</li>
+	<li>PREPARE TO STOP</li>
+	<li>EXPECT DELAYS</li>
+	<li>MAJOR DELAY</li>
+	<li>LOCAL TRAFFIC ONLY</li>
+	<li>RADIO 88.5 FM</li>
+</ul>
+
+</body>
+</html>
