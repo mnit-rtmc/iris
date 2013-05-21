@@ -121,14 +121,14 @@ public class ImpactPanel extends JPanel {
 
 	/** Paint the component */
 	public void paintComponent(Graphics g) {
-		Dimension d = (Dimension)getSize();
+		Dimension d = getSize();
+		g.setColor(getBackground());
+		g.fillRect(0, 0, getWidth(), getHeight());
 		Insets insets = getInsets();
 		width = (int)d.getWidth() - insets.left - insets.right;
 		height = (int)d.getHeight() - insets.top - insets.bottom;
 		Graphics2D g2 = (Graphics2D)g.create(insets.left, insets.top,
 			width, height);
-		g2.setColor(getBackground());
-		g2.fillRect(0, 0, width, height);
 		fillRoadway(g2);
 		drawYellowLine(g2);
 		drawSkipStripes(g2);
@@ -207,7 +207,7 @@ public class ImpactPanel extends JPanel {
 
 	/** Perform a mouse click event */
 	protected void doClick(final int x, final int y) {
-		Dimension d = (Dimension)getSize();
+		Dimension d = getSize();
 		Insets insets = getInsets();
 		int height = (int)d.getHeight() - insets.top - insets.bottom;
 		int s = LANE_WIDTH / 2;
