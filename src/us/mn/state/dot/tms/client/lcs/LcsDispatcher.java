@@ -184,8 +184,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		Box box = Box.createHorizontalBox();
 		box.add(createLabel(I18N.get("location.left")));
 		box.add(Box.createHorizontalStrut(4));
+		lane_config.add(Box.createVerticalStrut(4));
 		lane_config.add(lcsPnl);
 		lane_config.add(indicationSelector);
+		lane_config.add(Box.createVerticalStrut(4));
 		box.add(lane_config);
 		box.add(Box.createHorizontalStrut(4));
 		box.add(createLabel(I18N.get("location.right")));
