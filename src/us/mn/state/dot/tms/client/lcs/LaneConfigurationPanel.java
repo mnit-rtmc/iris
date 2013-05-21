@@ -27,7 +27,9 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.LaneConfiguration;
 
 /**
- * Lane configuration panel.
+ * A lane configuration panel can draw configuration of a roadway, including
+ * all lanes, shoulders and skip stripes.  Non-opaque child components can be
+ * added to draw devices or other graphical features over the lanes.
  *
  * @author Douglas Lau
  */
@@ -85,13 +87,13 @@ public class LaneConfigurationPanel extends JPanel {
 
 	/** Paint the panel */
 	public void paintComponent(Graphics g) {
-		clearComponent(g);
+		clearGraphics(g);
 		if(config.getLanes() > 0)
 			paint2D((Graphics2D)g);
 	}
 
-	/** Clear the component panel */
-	private void clearComponent(Graphics g) {
+	/** Clear the graphics */
+	private void clearGraphics(Graphics g) {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, getWidth(), getHeight());
 	}
