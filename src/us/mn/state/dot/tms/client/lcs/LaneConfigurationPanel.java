@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.LinearGradientPaint;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import javax.swing.BoxLayout;
@@ -31,6 +32,15 @@ import us.mn.state.dot.tms.LaneConfiguration;
  * @author Douglas Lau
  */
 public class LaneConfigurationPanel extends JPanel {
+
+	/** Color of lanes */
+	static private final Color LANE_COLOR = Color.GRAY;
+
+	/** Color of shoulders */
+	static private final Color SHOULDER_COLOR = Color.LIGHT_GRAY;
+
+	/** Fractions for shoulder gradient paint */
+	static private final float[] GRAD_FRACS = new float[] { 0.3f, 0.7f };
 
 	/** Solid stroke line */
 	static private final BasicStroke LINE_SOLID = new BasicStroke(2,
@@ -93,16 +103,32 @@ public class LaneConfigurationPanel extends JPanel {
 		int height = (int)d.getHeight();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
+		fillShoulders(g, height);
 		fillLanes(g, height);
 		drawLines(g, height);
 		g.setStroke(s);
 	}
 
+	/** Fill the shoulders */
+	private void fillShoulders(Graphics2D g, int height) {
+		int x0 = getX(config.leftShift - 1);
+		int x1 = getX(config.leftShift);
+		int x2 = getX(config.rightShift);
+		int x3 = getX(config.rightShift + 1);
+		g.setPaint(new LinearGradientPaint(x0, 0, x1, 0, GRAD_FRACS,
+			new Color[] { getBackground(), SHOULDER_COLOR }));
+		int w = (l_width + 6);
+		g.fillRect(x0, 0, w, height);
+		g.setPaint(new LinearGradientPaint(x2, 0, x3, 0, GRAD_FRACS,
+			new Color[] { SHOULDER_COLOR, getBackground() }));
+		g.fillRect(x2, 0, w, height);
+	}
+
 	/** Fill the lanes */
 	private void fillLanes(Graphics2D g, int height) {
-		g.setColor(Color.GRAY);
-		int x = getX(config.leftShift) - 2;
-		int w = config.getLanes() * (l_width + 6) + 4;
+		g.setColor(LANE_COLOR);
+		int x = getX(config.leftShift);
+		int w = config.getLanes() * (l_width + 6);
 		g.fillRect(x, 0, w, height);
 	}
 
