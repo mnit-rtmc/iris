@@ -1870,6 +1870,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 COPY event.incident_detail (name, description) FROM stdin;
 animal	Animal on Road
 debris	Debris
+detour	Detour
 emrg_veh	Emergency Vehicles
 event	Event Congestion
 flooding	Flash Flooding
