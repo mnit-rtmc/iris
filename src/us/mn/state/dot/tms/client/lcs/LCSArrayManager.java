@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayLock;
+import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapAction;
@@ -321,7 +322,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 			p.add(blankAction);
 		if(TeslaAction.isConfigured()) {
 			p.addSeparator();
-			for(int i = 1; i <= LCSArray.MAX_LANES; i++) {
+			for(int i = 1; i <= MAX_LANES; i++) {
 				DMS dms = LCSArrayHelper.lookupDMS(la, i);
 				if(dms != null)
 					p.add(new TeslaAction<DMS>(dms));

@@ -42,9 +42,6 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  */
 public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
-	/** Maximum number of lanes allowed */
-	static protected final int LANES_MAX = 8;
-
 	/** Minimum lane shift allowed */
 	static protected final int SHIFT_MIN = 0;
 
@@ -330,7 +327,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	public void doSetLanes(int l) throws TMSException {
 		if(l == lanes)
 			return;
-		if(l < 0 || l > LANES_MAX)
+		if(l < 0 || l > MAX_LANES)
 			throw new ChangeVetoException("Bad lanes: " + l);
 		store.update(this, "lanes", l);
 		setLanes(l);

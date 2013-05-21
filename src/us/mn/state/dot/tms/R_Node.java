@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2011  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,9 @@ public interface R_Node extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "r_node";
+
+	/** Maximum number of lanes */
+	int MAX_LANES = 8;
 
 	/** Set the location.  This is needed for creating a new phantom r_node
 	 * with SONAR.  It is an error to call this method this after the

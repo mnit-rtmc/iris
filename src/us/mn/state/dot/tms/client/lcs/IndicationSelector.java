@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSHelper;
+import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 
 /**
  * Selector for lane-use control siganl arrays.
@@ -35,8 +36,7 @@ public class IndicationSelector extends JPanel {
 	private final int pixels;
 
 	/** Array of lane-use indication combo boxes (left to right) */
-	protected final JComboBox[] indications =
-		new JComboBox[LCSArray.MAX_LANES];
+	private final JComboBox[] indications = new JComboBox[MAX_LANES];
 
 	/** Number of lanes */
 	protected int n_lanes = 0;
@@ -48,7 +48,7 @@ public class IndicationSelector extends JPanel {
 	public IndicationSelector(int p) {
 		setLayout(null);
 		pixels = p;
-		int w = getX(LCSArray.MAX_LANES) + 3;
+		int w = getX(MAX_LANES) + 3;
 		setMinimumSize(new Dimension(w, p - 16));
 		setPreferredSize(new Dimension(w, p - 16));
 		IndicationRenderer ir = new IndicationRenderer(p - 26);

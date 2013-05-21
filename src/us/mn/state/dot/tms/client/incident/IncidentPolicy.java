@@ -20,6 +20,7 @@ import static us.mn.state.dot.tms.IncidentImpact.FREE_FLOWING;
 import static us.mn.state.dot.tms.IncidentImpact.PARTIALLY_BLOCKED;
 import static us.mn.state.dot.tms.IncidentImpact.BLOCKED;
 import us.mn.state.dot.tms.LaneUseIndication;
+import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
@@ -31,7 +32,7 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 public class IncidentPolicy {
 
 	/** Maximum number of lanes to check for blockage */
-	static private final int MAX_LANES_BLOCKED = 16;
+	static private final int MAX_LANES_BLOCKED = MAX_LANES + 2;
 
 	/** Short distance upstream of incident to deploy devices */
 	static private final Distance DIST_SHORT = new Distance(0.5f, MILES);
