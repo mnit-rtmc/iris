@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,11 @@ public class LaneConfigurationPanel extends JPanel {
 		clear();
 	}
 
+	/** Is the component opaque? */
+	@Override public boolean isOpaque() {
+		return true;
+	}
+
 	/** Clear the lane configuration */
 	public void clear() {
 		setConfiguration(new LaneConfiguration(0, 0));
@@ -70,22 +75,21 @@ public class LaneConfigurationPanel extends JPanel {
 
 	/** Paint the panel */
 	public void paintComponent(Graphics g) {
-		clearComponent((Graphics2D)g);
+		clearComponent(g);
 		if(config.getLanes() > 0)
 			paint2D((Graphics2D)g);
 	}
 
 	/** Clear the component panel */
-	private void clearComponent(Graphics2D g) {
-		Dimension d = getSize();
-		g.setColor(g.getBackground());
-		g.fillRect(0, 0, (int)d.getWidth(), (int)d.getHeight());
+	private void clearComponent(Graphics g) {
+		g.setColor(getBackground());
+		g.fillRect(0, 0, getWidth(), getHeight());
 	}
 
 	/** Paint the panel */
 	private void paint2D(Graphics2D g) {
 		final Stroke s = g.getStroke();
-		Dimension d = (Dimension)getSize();
+		Dimension d = getSize();
 		int height = (int)d.getHeight();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
