@@ -9,6 +9,29 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.6.0 (22 May 2013)</dt>
+	<dd><ul>
+		<li>
+			Renamed sign_text priority to rank.
+		</li>
+		<li>
+			Fixed widget rendering problems on Windows.
+		</li>
+		<li>
+			Improved lane configuration on LCS (shoulders).
+		</li>
+		<li>
+			Added "Center Map" menu item to some objects.
+		</li>
+		<li>
+			Cleaned up client component code.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.6.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>4.5.0 (14 May 2013)</dt>
 	<dd><ul>
 		<li>
