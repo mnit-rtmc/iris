@@ -17,10 +17,10 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -58,7 +58,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	ProxySelectionListener<LCSArray>
 {
 	/** Size in pixels for each LCS in array */
-	static private final int LCS_SIZE = UI.scaled(48);
+	static private final int LCS_SIZE = UI.scaled(44);
 
 	/** Current session */
 	protected final Session session;
@@ -93,7 +93,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Lane configuration panel */
 	private final LaneConfigurationPanel lane_config =
-		new LaneConfigurationPanel(LCS_SIZE);
+		new LaneConfigurationPanel(LCS_SIZE, true);
 
 	/** Panel for drawing an LCS array */
 	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(LCS_SIZE);
@@ -176,35 +176,21 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 //		panel.add(I18N.get("lcs.lock"), lcs_lock);
 		panel.finishRow();
 		panel.addRow(buildSelectorBox());
-		panel.addRow(buildButtonPanel());
+		panel.addRow(createButtonPanel());
 		return panel;
 	}
 
-	/** Build the indication selector box */
-	protected Box buildSelectorBox() {
-		Box box = Box.createHorizontalBox();
-		box.add(createLabel(I18N.get("location.left")));
-		box.add(Box.createHorizontalStrut(4));
+	/** Build the indication selector */
+	private JPanel buildSelectorBox() {
 		lane_config.add(Box.createVerticalStrut(4));
 		lane_config.add(lcsPnl);
 		lane_config.add(indicationSelector);
 		lane_config.add(Box.createVerticalStrut(4));
-		box.add(lane_config);
-		box.add(Box.createHorizontalStrut(4));
-		box.add(createLabel(I18N.get("location.right")));
-		return box;
+		return lane_config;
 	}
 
-	/** Create an "L" or "R" label */
-	protected JLabel createLabel(String t) {
-		JLabel label = new JLabel(t);
-		Font f = label.getFont();
-		label.setFont(f.deriveFont(2f * f.getSize2D()));
-		return label;
-	}
-
-	/** Build the panel that holds the send and clear buttons */
-	protected Box buildButtonPanel() {
+	/** Create the button panel */
+	private Box createButtonPanel() {
 		Box box = Box.createHorizontalBox();
 		box.add(new JButton(send));
 		box.add(Box.createHorizontalStrut(4));

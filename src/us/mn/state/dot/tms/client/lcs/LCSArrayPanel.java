@@ -79,7 +79,7 @@ public class LCSArrayPanel extends JPanel {
 	public LCSArrayPanel(int p) {
 		setLayout(null);
 		pixels = p;
-		int w = getX(MAX_SHIFT + 1) + 3;
+		int w = getX(MAX_SHIFT + 1);
 		setMinimumSize(new Dimension(w, pixels + 4));
 		setPreferredSize(new Dimension(w, pixels + 4));
 		for(int i = 0; i < lanes.length; i++) {

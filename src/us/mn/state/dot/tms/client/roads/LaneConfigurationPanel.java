@@ -17,16 +17,20 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.LinearGradientPaint;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.font.GlyphVector;
+import java.awt.geom.Rectangle2D;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.LaneConfiguration;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A lane configuration panel can draw configuration of a roadway, including
@@ -56,14 +60,19 @@ public class LaneConfigurationPanel extends JPanel {
 	/** Pixel width of each lane */
 	private final int l_width;
 
+	/** Flag to draw labels */
+	private final boolean labels;
+
 	/** Lane configuration */
 	private LaneConfiguration config;
 
 	/** Create a lane configuration panel.
-	 * @param w Width of each lane. */
-	public LaneConfigurationPanel(int w) {
+	 * @param w Width of each lane.
+	 * @param l True if labels should be drawn */
+	public LaneConfigurationPanel(int w, boolean l) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		l_width = w;
+		labels = l;
 		float s = w / 3.0f;
 		line_dashed = new BasicStroke(UI.scaled(2),
 			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
@@ -90,11 +99,9 @@ public class LaneConfigurationPanel extends JPanel {
 	/** Paint the panel */
 	public void paintComponent(Graphics g) {
 		clearGraphics(g);
-		if(config.getLanes() > 0) {
-			Graphics g2 = createGraphics(g);
-			if(g2 instanceof Graphics2D)
-				paint2D((Graphics2D)g2);
-		}
+		Graphics g2 = createGraphics(g);
+		if(g2 instanceof Graphics2D)
+			paint2D((Graphics2D)g2);
 	}
 
 	/** Clear the graphics */
@@ -117,9 +124,15 @@ public class LaneConfigurationPanel extends JPanel {
 		int height = (int)d.getHeight();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
-		fillShoulders(g, height);
-		fillLanes(g, height);
-		drawLines(g, height);
+		if(config.getLanes() > 0) {
+			fillShoulders(g, height);
+			fillLanes(g, height);
+			drawLines(g, height);
+		}
+		if(labels) {
+			drawLeft(g, height);
+			drawRight(g, height);
+		}
 	}
 
 	/** Fill the shoulders */
@@ -159,6 +172,35 @@ public class LaneConfigurationPanel extends JPanel {
 			x = getX(i);
 			g.drawLine(x, 0, x, height);
 		}
+	}
+
+	/** Create a glyph vector */
+	private GlyphVector createGlyphVector(Graphics2D g, String txt) {
+		Font f = getFont();
+		Font fd = f.deriveFont(2f * f.getSize2D());
+		return fd.createGlyphVector(g.getFontRenderContext(), txt);
+	}
+
+	/** Draw the left side text */
+	private void drawLeft(Graphics2D g, int height) {
+		GlyphVector gv = createGlyphVector(g,
+			I18N.get("location.left"));
+		Rectangle2D rect = gv.getVisualBounds();
+		int x = 0;
+		int y = (height + (int)rect.getHeight()) / 2;
+		g.setColor(Color.BLACK);
+		g.drawGlyphVector(gv, x, y);
+	}
+
+	/** Draw the right side text */
+	private void drawRight(Graphics2D g, int height) {
+		GlyphVector gv = createGlyphVector(g,
+			I18N.get("location.right"));
+		Rectangle2D rect = gv.getVisualBounds();
+		int x = getWidth() - (int)rect.getWidth() - 4;
+		int y = (height + (int)rect.getHeight()) / 2;
+		g.setColor(Color.BLACK);
+		g.drawGlyphVector(gv, x, y);
 	}
 
 	/** Get the X pixel value of a shift.

@@ -42,7 +42,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Size in pixels for each LCS in array */
-	static private final int LCS_SIZE = UI.scaled(22);
+	static private final int LCS_SIZE = UI.scaled(20);
 
 	/** LCS array manager */
 	private final LCSArrayManager manager;
@@ -63,7 +63,7 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Lane configuration panel */
 	private final LaneConfigurationPanel lane_config =
-		new LaneConfigurationPanel(LCS_SIZE);
+		new LaneConfigurationPanel(LCS_SIZE, false);
 
 	/** LCS array panel */
 	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(LCS_SIZE);

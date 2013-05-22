@@ -48,7 +48,7 @@ public class IndicationSelector extends JPanel {
 	public IndicationSelector(int p) {
 		setLayout(null);
 		pixels = p;
-		int w = getX(MAX_SHIFT + 1) + 3;
+		int w = getX(MAX_SHIFT + 1);
 		setMinimumSize(new Dimension(w, p - 16));
 		setPreferredSize(new Dimension(w, p - 16));
 		IndicationRenderer ir = new IndicationRenderer(p - 26);
