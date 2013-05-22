@@ -20,7 +20,7 @@ import static us.mn.state.dot.tms.IncidentImpact.FREE_FLOWING;
 import static us.mn.state.dot.tms.IncidentImpact.PARTIALLY_BLOCKED;
 import static us.mn.state.dot.tms.IncidentImpact.BLOCKED;
 import us.mn.state.dot.tms.LaneUseIndication;
-import static us.mn.state.dot.tms.R_Node.MAX_LANES;
+import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
@@ -30,9 +30,6 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
  * @author Douglas Lau
  */
 public class IncidentPolicy {
-
-	/** Maximum number of lanes to check for blockage */
-	static private final int MAX_LANES_BLOCKED = MAX_LANES + 2;
 
 	/** Short distance upstream of incident to deploy devices */
 	static private final Distance DIST_SHORT = new Distance(0.5f, MILES);
@@ -149,7 +146,7 @@ public class IncidentPolicy {
 			return LaneUseIndication.MERGE_LEFT;
 		else if(n_right < n_left)
 			return LaneUseIndication.MERGE_RIGHT;
-		else if(n_left < MAX_LANES_BLOCKED)
+		else if(n_left < MAX_SHIFT)
 			return LaneUseIndication.MERGE_BOTH;
 		else
 			return indication2MainlineBlocked(ln);
@@ -187,22 +184,22 @@ public class IncidentPolicy {
 	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return Number of lanes to left until a lane is not blocked. */
 	private int unblockedLeftMainline(int ln) {
-		for(int i = 0; i < MAX_LANES_BLOCKED; i++) {
+		for(int i = 0; i < MAX_SHIFT; i++) {
 			if(!isLaneBlockedOrShoulder(ln - i))
 				return i;
 		}
-		return MAX_LANES_BLOCKED;
+		return MAX_SHIFT;
 	}
 
 	/** Get number of lanes to the next unblocked mainline lane right.
 	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return Number of lanes to right until a lane is not blocked. */
 	private int unblockedRightMainline(int ln) {
-		for(int i = 0; i < MAX_LANES_BLOCKED; i++) {
+		for(int i = 0; i < MAX_SHIFT; i++) {
 			if(!isLaneBlockedOrShoulder(ln + i))
 				return i;
 		}
-		return MAX_LANES_BLOCKED;
+		return MAX_SHIFT;
 	}
 
 	/** Get the second indication when all mainline lanes are blocked.
@@ -215,7 +212,7 @@ public class IncidentPolicy {
 			return LaneUseIndication.MERGE_LEFT;
 		else if(n_right < n_left)
 			return LaneUseIndication.MERGE_RIGHT;
-		else if(n_left < MAX_LANES_BLOCKED)
+		else if(n_left < MAX_SHIFT)
 			return LaneUseIndication.MERGE_BOTH;
 		else
 			return LaneUseIndication.LANE_CLOSED;
@@ -225,22 +222,22 @@ public class IncidentPolicy {
 	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return Number of lanes to left until a lane is not blocked. */
 	private int unblockedLeft(int ln) {
-		for(int i = 0; i < MAX_LANES_BLOCKED; i++) {
+		for(int i = 0; i < MAX_SHIFT; i++) {
 			if(!isLaneBlocked(ln - i))
 				return i;
 		}
-		return MAX_LANES_BLOCKED;
+		return MAX_SHIFT;
 	}
 
 	/** Get number of lanes to the next unblocked lane right.
 	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return Number of lanes to right until a lane is not blocked. */
 	private int unblockedRight(int ln) {
-		for(int i = 0; i < MAX_LANES_BLOCKED; i++) {
+		for(int i = 0; i < MAX_SHIFT; i++) {
 			if(!isLaneBlocked(ln + i))
 				return i;
 		}
-		return MAX_LANES_BLOCKED;
+		return MAX_SHIFT;
 	}
 
 	/** Create an LCS indication for one lane at a long distance to

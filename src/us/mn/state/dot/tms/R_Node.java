@@ -26,8 +26,14 @@ public interface R_Node extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "r_node";
 
+	/** Minimum lane shift */
+	int MIN_SHIFT = 1;
+
+	/** Maximum lane shift */
+	int MAX_SHIFT = 9;
+
 	/** Maximum number of lanes */
-	int MAX_LANES = 8;
+	int MAX_LANES = MAX_SHIFT - MIN_SHIFT;
 
 	/** Set the location.  This is needed for creating a new phantom r_node
 	 * with SONAR.  It is an error to call this method this after the

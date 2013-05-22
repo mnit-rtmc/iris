@@ -42,12 +42,6 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  */
 public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
-	/** Minimum lane shift allowed */
-	static protected final int SHIFT_MIN = 0;
-
-	/** Maximum lane shift allowed */
-	static protected final int SHIFT_MAX = 12;
-
 	/** Default speed limit */
 	static public final int DEFAULT_SPEED_LIMIT = 55;
 
@@ -360,7 +354,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Lane shift from corridor reference to attach side */
-	protected int shift;
+	private int shift = MIN_SHIFT;
 
 	/** Set the lane shift */
 	public void setShift(int s) {
@@ -371,7 +365,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	public void doSetShift(int s) throws TMSException {
 		if(s == shift)
 			return;
-		if(s < SHIFT_MIN || s > SHIFT_MAX)
+		if(s < MIN_SHIFT || s > MAX_SHIFT)
 			throw new ChangeVetoException("Bad shift: " + s);
 		store.update(this, "shift", s);
 		setShift(s);
