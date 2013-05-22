@@ -26,6 +26,7 @@ import java.awt.Stroke;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.LaneConfiguration;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A lane configuration panel can draw configuration of a roadway, including
@@ -46,13 +47,11 @@ public class LaneConfigurationPanel extends JPanel {
 	static private final float[] GRAD_FRACS = new float[] { 0.3f, 0.7f };
 
 	/** Solid stroke line */
-	static private final BasicStroke LINE_SOLID = new BasicStroke(2,
-		BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+	static private final BasicStroke LINE_SOLID = new BasicStroke(
+		UI.scaled(2), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
 	/** Dashed stroke line */
-	static private final Stroke LINE_DASHED = new BasicStroke(2,
-		BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
-		new float[] { 8, 16 }, 16);
+	private final Stroke line_dashed;
 
 	/** Pixel width of each lane */
 	private final int l_width;
@@ -65,6 +64,10 @@ public class LaneConfigurationPanel extends JPanel {
 	public LaneConfigurationPanel(int w) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		l_width = w;
+		float s = w / 3.0f;
+		line_dashed = new BasicStroke(UI.scaled(2),
+			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
+			new float[] { s, 2 * s }, 2 * s);
 		clear();
 	}
 
@@ -151,7 +154,7 @@ public class LaneConfigurationPanel extends JPanel {
 		g.setColor(Color.WHITE);
 		x = getX(config.rightShift);
 		g.drawLine(x, 0, x, height);
-		g.setStroke(LINE_DASHED);
+		g.setStroke(line_dashed);
 		for(int i = config.leftShift + 1; i < config.rightShift; i++) {
 			x = getX(i);
 			g.drawLine(x, 0, x, height);
