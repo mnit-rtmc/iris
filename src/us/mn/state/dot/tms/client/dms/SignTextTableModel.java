@@ -80,7 +80,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				return RENDERER;
 			}
 		});
-		cols.add(new ProxyColumn<SignText>("dms.rank", 24,
+		cols.add(new ProxyColumn<SignText>("dms.rank", 32,
 			Short.class)
 		{
 			public Object getValueAt(SignText st) {
