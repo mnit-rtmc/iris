@@ -23,7 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArray;
-import static us.mn.state.dot.tms.R_Node.MAX_LANES;
+import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
 
 /**
  * Scale GUI representation of a LCS array panel.
@@ -41,7 +41,7 @@ public class LCSArrayPanel extends JPanel {
 	protected final int pixels;
 
 	/** Array of lane indication labels (icons) from left to right */
-	protected final LCSPanel[] lanes = new LCSPanel[MAX_LANES];
+	private final LCSPanel[] lanes = new LCSPanel[MAX_SHIFT + 1];
 
 	/** Handler for click events */
 	protected ClickHandler handler;
@@ -79,7 +79,7 @@ public class LCSArrayPanel extends JPanel {
 	public LCSArrayPanel(int p) {
 		setLayout(null);
 		pixels = p;
-		int w = getX(MAX_LANES) + 3;
+		int w = getX(MAX_SHIFT + 1) + 3;
 		setMinimumSize(new Dimension(w, pixels + 4));
 		setPreferredSize(new Dimension(w, pixels + 4));
 		for(int i = 0; i < lanes.length; i++) {
@@ -90,9 +90,11 @@ public class LCSArrayPanel extends JPanel {
 		setOpaque(false);
 	}
 
-	/** Get the X position of a lane */
-	private int getX(int l) {
-		return 6 + l * (pixels + 6);
+	/** Get the X pixel value of a shift.
+	 * @param shift Lane shift.
+	 * @return X pixel value at lane shift. */
+	private int getX(int shift) {
+		return 6 + shift * (pixels + 6);
 	}
 
 	/** Set new indications */

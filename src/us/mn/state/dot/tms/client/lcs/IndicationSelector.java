@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSHelper;
-import static us.mn.state.dot.tms.R_Node.MAX_LANES;
+import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
 
 /**
  * Selector for lane-use control siganl arrays.
@@ -36,7 +36,7 @@ public class IndicationSelector extends JPanel {
 	private final int pixels;
 
 	/** Array of lane-use indication combo boxes (left to right) */
-	private final JComboBox[] indications = new JComboBox[MAX_LANES];
+	private final JComboBox[] indications = new JComboBox[MAX_SHIFT + 1];
 
 	/** Number of lanes */
 	protected int n_lanes = 0;
@@ -48,7 +48,7 @@ public class IndicationSelector extends JPanel {
 	public IndicationSelector(int p) {
 		setLayout(null);
 		pixels = p;
-		int w = getX(MAX_LANES) + 3;
+		int w = getX(MAX_SHIFT + 1) + 3;
 		setMinimumSize(new Dimension(w, p - 16));
 		setPreferredSize(new Dimension(w, p - 16));
 		IndicationRenderer ir = new IndicationRenderer(p - 26);
@@ -62,9 +62,11 @@ public class IndicationSelector extends JPanel {
 		setOpaque(false);
 	}
 
-	/** Get the X position of a lane */
-	private int getX(int l) {
-		return 6 + l * (pixels + 6);
+	/** Get the X pixel value of a shift.
+	 * @param shift Lane shift.
+	 * @return X pixel value at lane shift. */
+	private int getX(int shift) {
+		return 6 + shift * (pixels + 6);
 	}
 
 	/** Dispose of the indication selector */

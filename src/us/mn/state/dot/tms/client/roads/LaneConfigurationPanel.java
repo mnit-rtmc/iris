@@ -161,8 +161,10 @@ public class LaneConfigurationPanel extends JPanel {
 		}
 	}
 
-	/** Get the X pixel value of a lane */
-	private int getX(int l) {
-		return 3 + l * (l_width + 6);
+	/** Get the X pixel value of a shift.
+	 * @param shift Lane shift.
+	 * @return X pixel value at lane shift. */
+	private int getX(int shift) {
+		return 3 + shift * (l_width + 6);
 	}
 }
