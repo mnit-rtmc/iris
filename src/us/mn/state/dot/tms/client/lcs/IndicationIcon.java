@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,20 +17,15 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.font.FontRenderContext;
-import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
 import javax.swing.Icon;
-import javax.swing.JLabel;
 import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.client.widget.TextShape;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -56,23 +51,7 @@ abstract public class IndicationIcon implements Icon {
 	static protected Color AMBER = new Color(255, 208, 0);
 
 	/** Shape to use for representing an error condition */
-	static protected final Shape ERROR_SHAPE = createTextShape("?");
-
-	/** Create a text shape */
-	static protected Shape createTextShape(String text) {
-		Font font = new JLabel().getFont();
-		FontRenderContext frc = new FontRenderContext(
-			new AffineTransform(), false, false);
-		GlyphVector vec = font.createGlyphVector(frc, text);
-		Shape s = vec.getGlyphOutline(0);
-		Rectangle2D rect = s.getBounds2D();
-		AffineTransform a = new AffineTransform();
-		a.translate(SHAPE_BORDER, SHAPE_BORDER);
-		a.scale((1 - 2 * SHAPE_BORDER) / rect.getWidth(),
-			(1 - 2 * SHAPE_BORDER) / rect.getHeight());
-		a.translate(-rect.getX(), -rect.getY());
-		return a.createTransformedShape(s);
-	}
+	static private final Shape ERROR_SHAPE = TextShape.create("?");
 
 	/** Shape to draw an arrow */
 	static protected final Shape ARROW_SHAPE;
