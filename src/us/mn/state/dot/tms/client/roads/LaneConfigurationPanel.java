@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.LinearGradientPaint;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
@@ -86,8 +87,11 @@ public class LaneConfigurationPanel extends JPanel {
 	/** Paint the panel */
 	public void paintComponent(Graphics g) {
 		clearGraphics(g);
-		if(config.getLanes() > 0)
-			paint2D((Graphics2D)g);
+		if(config.getLanes() > 0) {
+			Graphics g2 = createGraphics(g);
+			if(g2 instanceof Graphics2D)
+				paint2D((Graphics2D)g2);
+		}
 	}
 
 	/** Clear the graphics */
@@ -96,9 +100,16 @@ public class LaneConfigurationPanel extends JPanel {
 		g.fillRect(0, 0, getWidth(), getHeight());
 	}
 
+	/** Create graphics clipped to insets */
+	private Graphics createGraphics(Graphics g) {
+		Insets insets = getInsets();
+		int width = getWidth() - insets.left - insets.right;
+		int height = getHeight() - insets.top - insets.bottom;
+		return g.create(insets.left, insets.top, width, height);
+	}
+
 	/** Paint the panel */
 	private void paint2D(Graphics2D g) {
-		final Stroke s = g.getStroke();
 		Dimension d = getSize();
 		int height = (int)d.getHeight();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -106,7 +117,6 @@ public class LaneConfigurationPanel extends JPanel {
 		fillShoulders(g, height);
 		fillLanes(g, height);
 		drawLines(g, height);
-		g.setStroke(s);
 	}
 
 	/** Fill the shoulders */
