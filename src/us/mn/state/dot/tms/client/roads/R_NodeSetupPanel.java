@@ -23,6 +23,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.tms.R_Node;
+import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
@@ -66,8 +67,8 @@ public class R_NodeSetupPanel extends FormPanel {
 	private final JCheckBox above_chk = new JCheckBox();
 
 	/** Component for number of lanes */
-	protected final JSpinner lane_spn = new JSpinner(
-		new SpinnerNumberModel(2, 0, 6, 1));
+	private final JSpinner lane_spn = new JSpinner(
+		new SpinnerNumberModel(2, 0, MAX_LANES - 2, 1));
 
 	/** Attach side check box */
 	private final JCheckBox attach_chk = new JCheckBox();
