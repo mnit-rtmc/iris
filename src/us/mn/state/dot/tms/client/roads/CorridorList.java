@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import static us.mn.state.dot.tms.R_Node.MID_SHIFT;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
@@ -416,7 +417,7 @@ public class CorridorList extends JPanel {
 		Position pos = getWgs84Position(p);
 		if(c != null) {
 			int lanes = 2;
-			int shift = 4;
+			int shift = MID_SHIFT + 1;
 			R_NodeModel mdl = findModel(c, pos);
 			if(mdl != null) {
 				shift = mdl.getDownstreamLane(false);

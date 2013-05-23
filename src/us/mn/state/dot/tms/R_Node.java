@@ -35,6 +35,9 @@ public interface R_Node extends SonarObject {
 	/** Maximum number of lanes */
 	int MAX_LANES = MAX_SHIFT - MIN_SHIFT;
 
+	/** Middle shift value */
+	int MID_SHIFT = MIN_SHIFT + MAX_LANES / 2;
+
 	/** Set the location.  This is needed for creating a new phantom r_node
 	 * with SONAR.  It is an error to call this method after the r_node has
 	 * been created. */

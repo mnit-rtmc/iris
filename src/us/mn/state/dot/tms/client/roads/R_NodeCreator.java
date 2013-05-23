@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
+import static us.mn.state.dot.tms.R_Node.MID_SHIFT;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.SonarState;
 
@@ -124,7 +125,7 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 
 	/** Create a new r_node (with no default corridor) */
 	public void create(Position pos) {
-		create(null, (short)0, pos, 2, 4);
+		create(null, (short)0, pos, 2, MID_SHIFT + 1);
 	}
 
 	/** Create a unique R_Node name */
