@@ -91,12 +91,12 @@ public class LCSArrayPanel extends JPanel {
 		setLayout(null);
 		pixels = p;
 		int w = getX(MAX_SHIFT + 1);
-		setMinimumSize(new Dimension(w, pixels + 4));
-		setPreferredSize(new Dimension(w, pixels + 4));
+		setMinimumSize(new Dimension(w, pixels));
+		setPreferredSize(new Dimension(w, pixels));
 		for(int i = 0; i < lcs_pnl.length; i++) {
 			lcs_pnl[i] = new LCSPanel();
 			add(lcs_pnl[i]);
-			lcs_pnl[i].setBounds(getX(i), 2, pixels, pixels);
+			lcs_pnl[i].setBounds(getX(i), 0, pixels, pixels);
 		}
 		setOpaque(false);
 	}

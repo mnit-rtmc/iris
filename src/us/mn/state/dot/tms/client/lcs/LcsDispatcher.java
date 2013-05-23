@@ -96,7 +96,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		new LaneConfigurationPanel(LCS_SIZE, true);
 
 	/** Panel for drawing an LCS array */
-	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(LCS_SIZE);
+	private final LCSArrayPanel lcs_pnl = new LCSArrayPanel(LCS_SIZE);
 
 	/** LCS indicaiton selector */
 	protected final IndicationSelector indicationSelector =
@@ -182,10 +182,11 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Build the indication selector */
 	private JPanel buildSelectorBox() {
-		lane_config.add(Box.createVerticalStrut(4));
-		lane_config.add(lcsPnl);
+		lane_config.add(Box.createVerticalStrut(UI.vgap));
+		lane_config.add(lcs_pnl);
+		lane_config.add(Box.createVerticalStrut(UI.vgap));
 		lane_config.add(indicationSelector);
-		lane_config.add(Box.createVerticalStrut(4));
+		lane_config.add(Box.createVerticalStrut(UI.vgap));
 		return lane_config;
 	}
 
@@ -193,7 +194,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	private Box createButtonPanel() {
 		Box box = Box.createHorizontalBox();
 		box.add(new JButton(send));
-		box.add(Box.createHorizontalStrut(4));
+		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(blankBtn);
 		return box;
 	}
@@ -284,7 +285,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		indicationSelector.setEnabled(false);
 		send.setEnabled(false);
 		blankBtn.setEnabled(false);
-		lcsPnl.clear();
+		lcs_pnl.clear();
 		lane_config.clear();
 	}
 
@@ -326,8 +327,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		}
 		if(a == null || a.equals("indicationsCurrent")) {
 			Integer[] ind = lcs_array.getIndicationsCurrent();
-			lcsPnl.setIndications(ind, lcs_array.getShift());
-			lcsPnl.setClickHandler(new LCSArrayPanel.ClickHandler(){
+			lcs_pnl.setIndications(ind, lcs_array.getShift());
+			lcs_pnl.setClickHandler(
+				new LCSArrayPanel.ClickHandler()
+			{
 				public void handleClick(int lane) {
 					selectDMS(lcs_array, lane);
 				}
