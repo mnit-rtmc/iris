@@ -18,7 +18,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.LaneUseIndication;
@@ -38,13 +37,13 @@ public class LCSArrayPanel extends JPanel {
 	}
 
 	/** Pixel size (height and width) of each LCS */
-	protected final int pixels;
+	private final int pixels;
 
-	/** Array of lane indication labels (icons) from left to right */
-	private final LCSPanel[] lanes = new LCSPanel[MAX_SHIFT + 1];
+	/** Array of LCS indication panels (icons) from left to right */
+	private final LCSPanel[] lcs_pnl = new LCSPanel[MAX_SHIFT + 1];
 
 	/** Handler for click events */
-	protected ClickHandler handler;
+	private ClickHandler handler;
 
 	/** Set the click handler */
 	public void setClickHandler(ClickHandler ch) {
@@ -52,9 +51,10 @@ public class LCSArrayPanel extends JPanel {
 	}
 
 	/** Panel to display on LCS indication */
-	protected class LCSPanel extends JLabel {
-		protected Integer lane;
-		protected LCSPanel() {
+	private class LCSPanel extends JLabel {
+		private Integer lane;
+		private LCSPanel() {
+			setBackground(Color.BLACK);
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					Integer ln = lane;
@@ -63,10 +63,21 @@ public class LCSArrayPanel extends JPanel {
 				}
 			});
 		}
+		private void setIndication(int ln, Integer ind) {
+			setIcon(IndicationIcon.create(pixels,
+				LaneUseIndication.fromOrdinal(ind)));
+			setOpaque(true);
+			lane = ln + 1;
+		}
+		private void clearIndication() {
+			setIcon(null);
+			setOpaque(false);
+			lane = null;
+		}
 	}
 
 	/** Process a click on an LCS panel */
-	protected void doClick(int ln) {
+	private void doClick(int ln) {
 		ClickHandler ch = handler;
 		if(ch != null)
 			ch.handleClick(ln);
@@ -82,10 +93,10 @@ public class LCSArrayPanel extends JPanel {
 		int w = getX(MAX_SHIFT + 1);
 		setMinimumSize(new Dimension(w, pixels + 4));
 		setPreferredSize(new Dimension(w, pixels + 4));
-		for(int i = 0; i < lanes.length; i++) {
-			lanes[i] = new LCSPanel();
-			add(lanes[i]);
-			lanes[i].setBounds(getX(i), 2, pixels, pixels);
+		for(int i = 0; i < lcs_pnl.length; i++) {
+			lcs_pnl[i] = new LCSPanel();
+			add(lcs_pnl[i]);
+			lcs_pnl[i].setBounds(getX(i), 2, pixels, pixels);
 		}
 		setOpaque(false);
 	}
@@ -100,22 +111,12 @@ public class LCSArrayPanel extends JPanel {
 	/** Set new indications */
 	public void setIndications(Integer[] ind, int shift) {
 		int ilen = ind != null ? ind.length : 0;
-		for(int i = 0; i < lanes.length; i++) {
-			LCSPanel lbl = lanes[i];
+		for(int i = 0; i < lcs_pnl.length; i++) {
 			int ln = shift + ilen - 1 - i;
-			if(ln >= 0 && ln < ilen) {
-				Icon icon = IndicationIcon.create(pixels,
-					LaneUseIndication.fromOrdinal(ind[ln]));
-				lbl.setIcon(icon);
-				lbl.setOpaque(true);
-				lbl.setBackground(Color.BLACK);
-				lbl.lane = ln + 1;
-			} else {
-				lbl.setIcon(null);
-				lbl.setOpaque(false);
-				lbl.setBackground(null);
-				lbl.lane = null;
-			}
+			if(ln >= 0 && ln < ilen)
+				lcs_pnl[i].setIndication(ln, ind[ln]);
+			else
+				lcs_pnl[i].clearIndication();
 		}
 	}
 
