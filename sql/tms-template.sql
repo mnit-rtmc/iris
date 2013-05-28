@@ -279,6 +279,45 @@ CREATE TABLE iris.r_node (
 
 CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
 
+CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
+	RETURNS INTEGER AS '
+DECLARE node_type ALIAS FOR $1;
+DECLARE lanes ALIAS FOR $2;
+DECLARE attach_side ALIAS FOR $3;
+DECLARE shift ALIAS FOR $4;
+BEGIN
+	IF attach_side = TRUE THEN
+		RETURN shift;
+	END IF;
+	IF node_type = 0 THEN
+		RETURN shift - lanes;
+	END IF;
+	RETURN shift;
+END;'
+LANGUAGE PLPGSQL;
+
+CREATE FUNCTION iris.r_node_right(INTEGER, INTEGER, BOOLEAN, INTEGER)
+	RETURNS INTEGER AS '
+DECLARE node_type ALIAS FOR $1;
+DECLARE lanes ALIAS FOR $2;
+DECLARE attach_side ALIAS FOR $3;
+DECLARE shift ALIAS FOR $4;
+BEGIN
+	IF attach_side = FALSE THEN
+		RETURN shift;
+	END IF;
+	IF node_type = 0 THEN
+		RETURN shift + lanes;
+	END IF;
+	RETURN shift;
+END;'
+LANGUAGE PLPGSQL;
+
+ALTER TABLE iris.r_node ADD CONSTRAINT left_edge_ck
+	CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
+ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
+	CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
+
 CREATE TABLE iris.comm_protocol (
 	id smallint PRIMARY KEY,
 	description VARCHAR(20) NOT NULL
@@ -1534,7 +1573,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 client_units_si	true
-database_version	4.6.0
+database_version	4.7.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
