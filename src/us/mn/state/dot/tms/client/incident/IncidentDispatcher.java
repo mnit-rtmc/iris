@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.incident;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
@@ -41,6 +40,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
@@ -49,10 +49,12 @@ import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.roads.LaneConfigurationPanel;
 import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -63,57 +65,64 @@ import us.mn.state.dot.tms.utils.I18N;
 public class IncidentDispatcher extends JPanel
 	implements ProxyListener<Incident>, ProxySelectionListener<Incident>
 {
+	/** Size in pixels for each lane */
+	static private final int LANE_SIZE = UI.scaled(32);
+
 	/** Formatter for incident names */
-	static protected final SimpleDateFormat NAME_FMT =
+	static private final SimpleDateFormat NAME_FMT =
 		new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
 	/** Card layout name for camera combo box */
-	static protected final String CAMERA_CBOX = "camera_cbox";
+	static private final String CAMERA_CBOX = "camera_cbox";
 
 	/** Card layout name for camera button */
-	static protected final String CAMERA_BTN = "camera_btn";
+	static private final String CAMERA_BTN = "camera_btn";
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Incident manager */
-	protected final IncidentManager manager;
+	private final IncidentManager manager;
 
 	/** Incident creator */
-	protected final IncidentCreator creator;
+	private final IncidentCreator creator;
 
 	/** Cache of incident proxy objects */
-	protected final TypeCache<Incident> cache;
+	private final TypeCache<Incident> cache;
 
 	/** Selection model */
-	protected final ProxySelectionModel<Incident> selectionModel;
+	private final ProxySelectionModel<Incident> selectionModel;
 
 	/** Type label */
 	private final JLabel type_lbl;
 
 	/** Incident detail proxy list model */
-	protected final ProxyListModel<IncidentDetail> dtl_model;
+	private final ProxyListModel<IncidentDetail> dtl_model;
 
 	/** Incident detail combo box */
-	protected final JComboBox detail_cbx = new JComboBox();
+	private final JComboBox detail_cbx = new JComboBox();
 
 	/** Location of incident */
 	private final JLabel location_lbl = FormPanel.createValueLabel();
 
 	/** Card layout for camera widgets */
-	protected final CardLayout cam_cards = new CardLayout();
+	private final CardLayout cam_cards = new CardLayout();
 
 	/** Camera panel */
-	protected final JPanel cam_panel = new JPanel(cam_cards);
+	private final JPanel cam_pnl = new JPanel(cam_cards);
 
 	/** Verify camera combo box */
-	protected final JComboBox camera_cbx = new JComboBox();
+	private final JComboBox camera_cbx = new JComboBox();
 
 	/** Verify camera button */
-	protected final JButton camera_btn = new JButton();
+	private final JButton camera_btn = new JButton();
+
+	/** Lane configuration panel */
+	private final LaneConfigurationPanel lane_config =
+		new LaneConfigurationPanel(LANE_SIZE, true);
 
 	/** Impact panel */
-	protected final ImpactPanel impact_pnl = new ImpactPanel();
+	private final ImpactPanel impact_pnl = new ImpactPanel(LANE_SIZE);
 
 	/** Action to log an incident change */
 	private final IAction log_inc = new IAction("incident.log") {
@@ -197,52 +206,39 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Create the main panel */
-	protected JPanel createMainPanel() {
+	private JPanel createMainPanel() {
 		type_lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
-		cam_panel.add(camera_cbx, CAMERA_CBOX);
-		cam_panel.add(camera_btn, CAMERA_BTN);
+		cam_pnl.add(camera_cbx, CAMERA_CBOX);
+		cam_pnl.add(camera_btn, CAMERA_BTN);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		FormPanel panel = new FormPanel();
-		panel.setBorder(BorderFactory.createTitledBorder(
+		FormPanel p = new FormPanel();
+		p.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("incident.selected")));
-		panel.addRow(I18N.get("incident.type"), type_lbl);
-		panel.addRow(I18N.get("incident.detail"), detail_cbx);
-		panel.addRow(I18N.get("location"), location_lbl);
-		panel.addRow(I18N.get("camera"), cam_panel);
-		panel.addRow(buildImpactBox());
+		p.addRow(I18N.get("incident.type"), type_lbl);
+		p.addRow(I18N.get("incident.detail"), detail_cbx);
+		p.addRow(I18N.get("location"), location_lbl);
+		p.addRow(I18N.get("camera"), cam_pnl);
+		p.addRow(buildImpactBox());
 		JPanel btns = new JPanel(new FlowLayout());
 		btns.add(new JButton(log_inc));
 		btns.add(new JButton(deploy_inc));
 		btns.add(clear_btn);
 		btns.add(new JButton(edit_inc));
-		panel.addRow(btns);
-		return panel;
+		p.addRow(btns);
+		return p;
 	}
 
 	/** Build the impact box */
-	protected Box buildImpactBox() {
-		impact_pnl.setBorder(BorderFactory.createTitledBorder(
-			I18N.get("incident.impact")));
-		Box box = Box.createHorizontalBox();
-		box.add(createLabel("location.left"));
-		box.add(Box.createHorizontalStrut(4));
-		box.add(impact_pnl);
-		box.add(Box.createHorizontalStrut(4));
-		box.add(createLabel("location.right"));
-		return box;
-	}
-
-	/** Create an "L" or "R" label */
-	protected JLabel createLabel(String t) {
-		JLabel label = new ILabel(t);
-		Font f = label.getFont();
-		label.setFont(f.deriveFont(2f * f.getSize2D()));
-		return label;
+	private JPanel buildImpactBox() {
+		lane_config.add(Box.createVerticalStrut(LANE_SIZE / 2));
+		lane_config.add(impact_pnl);
+		lane_config.add(Box.createVerticalStrut(LANE_SIZE / 2));
+		return lane_config;
 	}
 
 	/** Create jobs for button press events */
-	protected void createButtonJobs() {
+	private void createButtonJobs() {
 		impact_pnl.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				Incident inc = watching;
@@ -263,7 +259,7 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Create a new incident */
-	protected void create(ClientIncident inc) {
+	private void create(ClientIncident inc) {
 		String name = createUniqueIncidentName();
 		if(canAdd(name)) {
 			HashMap<String, Object> attrs =
@@ -333,7 +329,7 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Get the selected incident detail */
-	protected IncidentDetail getSelectedDetail() {
+	private IncidentDetail getSelectedDetail() {
 		Object detail = detail_cbx.getSelectedItem();
 		if(detail instanceof IncidentDetail)
 			return (IncidentDetail)detail;
@@ -342,7 +338,7 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Get the selected camera */
-	protected Object getSelectedCamera() {
+	private Object getSelectedCamera() {
 		Object cam = camera_cbx.getSelectedItem();
 		if(cam != null)
 			return cam;
@@ -351,18 +347,18 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Update an incident */
-	protected void logUpdate(Incident inc) {
+	private void logUpdate(Incident inc) {
 		inc.setImpact(impact_pnl.getImpact());
 	}
 
 	/** Show the incident deploy form */
-	protected void showDeployForm(Incident inc) {
+	private void showDeployForm(Incident inc) {
 		session.getDesktop().show(new IncidentDeployForm(session, inc,
 			manager));
 	}
 
 	/** Create a unique incident name */
-	protected String createUniqueIncidentName() {
+	private String createUniqueIncidentName() {
 		String name = NAME_FMT.format(System.currentTimeMillis());
 		return name.substring(0, 16);
 	}
@@ -437,7 +433,7 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Update the selected object(s) */
-	protected void updateSelected() {
+	private void updateSelected() {
 		Incident inc = selectionModel.getSingleSelection();
 		if(inc != null)
 			setSelected(inc);
@@ -446,13 +442,13 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Clear the selection */
-	protected void clearSelected() {
+	private void clearSelected() {
 		watch(null);
 		disableWidgets();
 	}
 
 	/** Disable the dispatcher widgets */
-	protected void disableWidgets() {
+	private void disableWidgets() {
 		clearEventType();
 		detail_cbx.setSelectedItem(null);
 		detail_cbx.setEnabled(false);
@@ -460,33 +456,37 @@ public class IncidentDispatcher extends JPanel
 		camera_cbx.setSelectedItem(null);
 		camera_cbx.setEnabled(false);
 		setCameraAction(null);
-		cam_cards.show(cam_panel, CAMERA_BTN);
+		cam_cards.show(cam_pnl, CAMERA_BTN);
 		log_inc.setEnabled(false);
 		deploy_inc.setEnabled(false);
 		clear_inc.setEnabled(false);
 		clear_btn.setSelected(false);
 		edit_inc.setEnabled(false);
+		lane_config.clear();
 		impact_pnl.setImpact("");
 	}
 
 	/** Set a single selected incident */
-	protected void setSelected(Incident inc) {
+	private void setSelected(Incident inc) {
 		if(inc instanceof ClientIncident)
 			watch(null);
 		else
 			watch(inc);
+		LaneConfiguration lc = manager.laneConfiguration(inc);
+		lane_config.setConfiguration(lc);
+		impact_pnl.setConfiguration(lc);
 		impact_pnl.setImpact(inc.getImpact());
 		updateAttribute(inc, null);
 		enableWidgets(inc);
 	}
 
 	/** Enable the dispatcher widgets */
-	protected void enableWidgets(Incident inc) {
+	private void enableWidgets(Incident inc) {
 		if(inc instanceof ClientIncident) {
 			boolean create = canAdd("oname");
 			detail_cbx.setEnabled(create);
 			camera_cbx.setEnabled(create);
-			cam_cards.show(cam_panel, CAMERA_CBOX);
+			cam_cards.show(cam_pnl, CAMERA_CBOX);
 			log_inc.setEnabled(create);
 			deploy_inc.setEnabled(false);
 			clear_inc.setEnabled(false);
@@ -495,7 +495,7 @@ public class IncidentDispatcher extends JPanel
 			boolean update = canUpdate(inc);
 			detail_cbx.setEnabled(false);
 			camera_cbx.setEnabled(false);
-			cam_cards.show(cam_panel, CAMERA_BTN);
+			cam_cards.show(cam_pnl, CAMERA_BTN);
 			log_inc.setEnabled(update && isImpactChanged(inc));
 			deploy_inc.setEnabled(update && canDeploy(inc) &&
 				!inc.getCleared());
@@ -505,7 +505,7 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Check if the impact has changed */
-	protected boolean isImpactChanged(Incident inc) {
+	private boolean isImpactChanged(Incident inc) {
 		String imp = impact_pnl.getImpact();
 		return !imp.equals(inc.getImpact());
 	}
@@ -531,7 +531,7 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Set the camera action */
-	protected void setCameraAction(Incident inc) {
+	private void setCameraAction(Incident inc) {
 		Camera cam = IncidentHelper.getCamera(inc);
 		camera_btn.setAction(new CameraSelectAction(cam,
 		    session.getCameraManager().getSelectionModel()));
@@ -539,13 +539,13 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Clear the event type */
-	protected void clearEventType() {
+	private void clearEventType() {
 		type_lbl.setText("");
 		type_lbl.setIcon(manager.getIcon(null));
 	}
 
 	/** Create a combo box model for nearby cameras */
-	protected DefaultComboBoxModel createCameraModel(Incident inc) {
+	private DefaultComboBoxModel createCameraModel(Incident inc) {
 		DefaultComboBoxModel model = new DefaultComboBoxModel();
 		if(inc instanceof ClientIncident) {
 			ClientIncident ci = (ClientIncident)inc;
@@ -569,12 +569,12 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Check if the user can update the given incident */
-	protected boolean canUpdate(Incident inc) {
+	private boolean canUpdate(Incident inc) {
 		return session.canUpdate(inc);
 	}
 
 	/** Check if the user can deploy signs for an incident */
-	protected boolean canDeploy(Incident inc) {
+	private boolean canDeploy(Incident inc) {
 		switch(LaneType.fromOrdinal(inc.getLaneType())) {
 		case MAINLINE:
 			return canSendIndications();
@@ -584,7 +584,7 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Check if the user can send LCS array indications */
-	protected boolean canSendIndications() {
+	private boolean canSendIndications() {
 		return session.canUpdate(LCSArray.SONAR_TYPE, "indicationsNext")
 		    && session.canUpdate(LCSArray.SONAR_TYPE, "ownerNext");
 	}

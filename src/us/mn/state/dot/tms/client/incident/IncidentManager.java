@@ -22,6 +22,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
+import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -29,6 +30,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
@@ -166,6 +168,32 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Lookup the corridor for an incident location */
 	public CorridorBase lookupCorridor(IncidentLoc loc) {
 		return session.getR_NodeManager().lookupCorridor(loc);
+	}
+
+	/** Get lane configuration at an incident */
+	public LaneConfiguration laneConfiguration(Incident inc) {
+		LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
+		if(lt.isRamp())
+			return rampLaneConfiguration(inc);
+		IncidentLoc loc = new IncidentLoc(inc);
+		CorridorBase cb = lookupCorridor(loc);
+		if(cb != null)
+			return cb.laneConfiguration(getWgs84Position(inc));
+		else
+			return new LaneConfiguration(0, 0);
+	}
+
+	/** Get ramp lane configuration at an incident */
+	private LaneConfiguration rampLaneConfiguration(Incident inc) {
+		int lanes = inc.getImpact().length();
+		int left = 5 - lanes / 2;
+		int right = left + lanes - 2;
+		return new LaneConfiguration(left, right);
+	}
+
+	/** Get Position in WGS84 */
+	private Position getWgs84Position(Incident inc) {
+		return new Position(inc.getLat(), inc.getLon());
 	}
 
 	/** Check the style of the specified proxy */
