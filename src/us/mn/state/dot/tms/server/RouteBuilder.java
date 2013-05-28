@@ -201,12 +201,16 @@ public class RouteBuilder {
 		int turns = 0;
 		for(ODPair od: path) {
 			Corridor c = corridors.getCorridor(od);
+			if(c == null)
+				throw new BadRouteException("MISSING CORRIDOR");
 			r.addTrip(new CorridorTrip(name, c, od));
 			if(od.hasTurn())
 				turns++;
 		}
 		r.setTurns(turns);
 		Corridor c = corridors.getCorridor(odf);
+		if(c == null)
+			throw new BadRouteException("MISSING CORRIDOR");
 		r.addTrip(new CorridorTrip(name, c, odf));
 		routes.add(r);
 		// NOTE: this optimisation will prevent us from finding some
