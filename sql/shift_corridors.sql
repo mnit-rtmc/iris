@@ -18,12 +18,10 @@ ALTER TABLE r_node_corridor ADD COLUMN adj INTEGER;
 UPDATE r_node_corridor SET adj = 5 - min_left - (max_right - min_left) / 2;
 ALTER TABLE r_node_corridor ALTER COLUMN adj SET NOT NULL;
 
-SELECT * FROM r_node_corridor;
-
---UPDATE iris.r_node SET shift = shift + r_node_corridor.adj
---    FROM iris.geo_loc, r_node_corridor
---    WHERE r_node.geo_loc = geo_loc.name
---        AND geo_loc.roadway = r_node_corridor.roadway
---        AND geo_loc.road_dir = r_node_corridor.road_dir;
+UPDATE iris.r_node SET shift = shift + r_node_corridor.adj
+    FROM iris.geo_loc, r_node_corridor
+    WHERE r_node.geo_loc = geo_loc.name
+        AND geo_loc.roadway = r_node_corridor.roadway
+        AND geo_loc.road_dir = r_node_corridor.road_dir;
 
 DROP TABLE r_node_corridor;
