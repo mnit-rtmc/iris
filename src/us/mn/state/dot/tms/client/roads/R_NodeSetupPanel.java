@@ -85,6 +85,9 @@ public class R_NodeSetupPanel extends FormPanel {
 	/** Station ID text field */
 	protected final JTextField station_txt = new JTextField(8);
 
+	/** Abandoned check box */
+	private final JCheckBox abandoned_chk = new JCheckBox();
+
 	/** Component for speed limit */
 	protected final JSpinner speed_spn = new JSpinner(
 		new SpinnerNumberModel(55, 25, 120, 5));
@@ -133,6 +136,11 @@ public class R_NodeSetupPanel extends FormPanel {
 				n.setActive(active_chk.isSelected());
 			}
 		});
+		abandoned_chk.setAction(new NAction(null) {
+			@Override protected void do_perform(R_Node n) {
+				n.setAbandoned(abandoned_chk.isSelected());
+			}
+		});
 		add(new ILabel("r_node.type"), type_cbx);
 		addRow(new ILabel("r_node.pickable"), pick_chk);
 		add(new ILabel("r_node.transition"), trans_cbx);
@@ -142,7 +150,7 @@ public class R_NodeSetupPanel extends FormPanel {
 		add(new ILabel("r_node.shift"), shift_spn);
 		addRow(new ILabel("r_node.active"), active_chk);
 		add(new ILabel("r_node.station"), station_txt);
-		finishRow();
+		addRow(new ILabel("r_node.abandoned"), abandoned_chk);
 		add(new ILabel("r_node.speed.limit"), speed_spn);
 		createJobs();
 		clear();
@@ -254,6 +262,10 @@ public class R_NodeSetupPanel extends FormPanel {
 			station_txt.setEnabled(canUpdate(n, "stationID"));
 			station_txt.setText(n.getStationID());
 		}
+		if(a == null || a.equals("abandoned")) {
+			abandoned_chk.setEnabled(canUpdate(n, "abandoned"));
+			abandoned_chk.setSelected(n.getAbandoned());
+		}
 		if(a == null || a.equals("speedLimit")) {
 			speed_spn.setEnabled(canUpdate(n, "speedLimit"));
 			speed_spn.setValue(n.getSpeedLimit());
@@ -296,6 +308,8 @@ public class R_NodeSetupPanel extends FormPanel {
 		active_chk.setSelected(false);
 		station_txt.setEnabled(false);
 		station_txt.setText("");
+		abandoned_chk.setEnabled(false);
+		abandoned_chk.setSelected(false);
 		speed_spn.setEnabled(false);
 		speed_spn.setValue(55);
 	}

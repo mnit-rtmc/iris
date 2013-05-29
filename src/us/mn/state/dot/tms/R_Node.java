@@ -94,6 +94,12 @@ public interface R_Node extends SonarObject {
 	/** Get the active state */
 	boolean getActive();
 
+	/** Set the abandoned state */
+	void setAbandoned(boolean a);
+
+	/** Get the abandoned state */
+	boolean getAbandoned();
+
 	/** Set the station ID */
 	void setStationID(String s);
 

@@ -265,7 +265,9 @@ public class CorridorList extends JPanel {
 
 	/** Called when an r_node attribute has changed */
 	protected void nodeChanged(R_Node proxy, String a) {
-		if(manager.checkCorridor(proxy))
+		if(a.equals("abandoned"))
+			updateListModel();
+		else if(manager.checkCorridor(proxy))
 			n_model.updateItem(proxy);
 	}
 
@@ -372,7 +374,7 @@ public class CorridorList extends JPanel {
 				prev = mdl;
 			}
 		}
-		nodes.addAll(0, no_loc);
+		nodes.addAll(no_loc);
 		return new R_NodeListModel(nodes);
 	}
 
@@ -386,12 +388,17 @@ public class CorridorList extends JPanel {
 		Iterator<R_Node> it = node_s.iterator();
 		while(it.hasNext()) {
 			R_Node proxy = it.next();
-			if(GeoLocHelper.isNull(proxy.getGeoLoc())) {
+			if(isNullOrAbandoned(proxy)) {
 				no_loc.add(new R_NodeModel(proxy, null));
 				it.remove();
 			}
 		}
 		return no_loc;
+	}
+
+	/** Check if location is null or r_node is abandoned */
+	private boolean isNullOrAbandoned(R_Node n) {
+		return n.getAbandoned() || GeoLocHelper.isNull(n.getGeoLoc());
 	}
 
 	/** Update the roadway node selection */

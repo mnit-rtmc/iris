@@ -56,8 +56,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		namespace.registerType(SONAR_TYPE, R_NodeImpl.class);
 		store.query("SELECT name, geo_loc, node_type, pickable, " +
 			"above, transition, lanes, attach_side, shift, " +
-			"active, station_id, speed_limit, notes FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"active, abandoned, station_id, speed_limit, notes " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new R_NodeImpl(namespace,
@@ -71,9 +71,10 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 					row.getBoolean(8),	// attach_side
 					row.getInt(9),		// shift
 					row.getBoolean(10),	// active
-					row.getString(11),	// station_id
-					row.getInt(12),		// speed_limit
-					row.getString(13)	// notes
+					row.getBoolean(11),	// abandoned
+					row.getString(12),	// station_id
+					row.getInt(13),		// speed_limit
+					row.getString(14)	// notes
 				));
 			}
 		});
@@ -92,6 +93,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		map.put("attach_side", attach_side);
 		map.put("shift", shift);
 		map.put("active", active);
+		map.put("abandoned", abandoned);
 		map.put("station_id", station_id);
 		map.put("speed_limit", speed_limit);
 		map.put("notes", notes);
@@ -117,7 +119,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Create an r_node */
 	protected R_NodeImpl(String n, GeoLocImpl loc, int typ, boolean p,
 		boolean a, int trn, int l, boolean as, int s, boolean act,
-		String st, int sl, String nt)
+		boolean abnd, String st, int sl, String nt)
 	{
 		super(n);
 		geo_loc = loc;
@@ -129,6 +131,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		attach_side = as;
 		shift = s;
 		active = act;
+		abandoned = abnd;
 		station_id = st;
 		speed_limit = sl;
 		notes = nt;
@@ -138,10 +141,10 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Create an r_node */
 	protected R_NodeImpl(Namespace ns, String n, String loc, int typ,
 		boolean p, boolean a, int trn, int l, boolean as, int s,
-		boolean act, String st, int sl, String nt)
+		boolean act, boolean abnd, String st, int sl, String nt)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-			typ, p, a, trn, l, as, s, act, st, sl, nt);
+			typ, p, a, trn, l, as, s, act, abnd, st, sl, nt);
 	}
 
 	/** Initialize transient fields */
@@ -397,6 +400,27 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return active;
 	}
 
+	/** Abandoned state */
+	private boolean abandoned;
+
+	/** Set the abandoned state */
+	public void setAbandoned(boolean a) {
+		abandoned = a;
+	}
+
+	/** Set the abandoned state */
+	public void doSetAbandoned(boolean a) throws TMSException {
+		if(a == abandoned)
+			return;
+		store.update(this, "abandoned", a);
+		setAbandoned(a);
+	}
+
+	/** Get the abandoned state */
+	public boolean getAbandoned() {
+		return abandoned;
+	}
+
 	/** Staiton ID */
 	protected String station_id;
 
@@ -605,6 +629,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			w.write(" shift='" + s + "'");
 		if(!getActive())
 			w.write(" active='f'");
+		if(getAbandoned())
+			w.write(" abandoned='t'");
 		int slim = getSpeedLimit();
 		if(slim != DEFAULT_SPEED_LIMIT)
 			w.write(" s_limit='" + slim + "'");

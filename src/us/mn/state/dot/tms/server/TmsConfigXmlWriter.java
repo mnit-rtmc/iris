@@ -101,6 +101,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 		w.write("<!ATTLIST r_node attach_side CDATA 'right'>\n");
 		w.write("<!ATTLIST r_node shift CDATA '0'>\n");
 		w.write("<!ATTLIST r_node active CDATA 't'>\n");
+		w.write("<!ATTLIST r_node abandoned CDATA 'f'>\n");
 		w.write("<!ATTLIST r_node s_limit CDATA '" +
 			R_NodeImpl.DEFAULT_SPEED_LIMIT +"'>\n");
 		w.write("<!ATTLIST r_node forks CDATA #IMPLIED>\n");
