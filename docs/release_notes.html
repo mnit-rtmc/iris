@@ -9,6 +9,27 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.7.0 (29 May 2013)</dt>
+	<dd><ul>
+		<li>
+			Added "abandoned" flag to r_nodes.
+		</li>
+		<li>
+			Added check constraints for r_node lane shift values.
+		</li>
+		<li>
+			Added SQL script to "center" r_node shift values.
+		</li>
+		<li>
+			Use "lane configuration panel" for incident impact
+			widget.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.7.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>4.6.0 (22 May 2013)</dt>
 	<dd><ul>
 		<li>
