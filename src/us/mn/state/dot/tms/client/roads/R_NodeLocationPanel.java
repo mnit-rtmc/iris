@@ -45,7 +45,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Initialize the widgets on the panel */
-	public void initialize() {
+	@Override public void initialize() {
 		super.initialize();
 		addRow(I18N.get("device.notes"), notes_txt);
 		setCenter();
@@ -54,7 +54,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Create the jobs */
-	protected void createJobs() {
+	@Override protected void createJobs() {
 		super.createJobs();
 		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
@@ -98,7 +98,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Clear all attributes */
-	protected void doClear() {
+	@Override protected void doClear() {
 		super.doClear();
 		node = null;
 		name_lbl.setText(I18N.get("r_node.name.none"));
