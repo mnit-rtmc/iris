@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import us.mn.state.dot.sched.ActionJob;
@@ -29,7 +28,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -39,7 +38,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  * @author Tim Johnson
  */
-public class CameraViewer extends FormPanel
+public class CameraViewer extends IPanel
 	implements ProxySelectionListener<Camera>
 {
 	/** The system attribute for the number of button presets */
@@ -117,17 +116,15 @@ public class CameraViewer extends FormPanel
 					doJoyButton(ev);
 			}
 		});
-		setBorder(BorderFactory.createTitledBorder(
-			I18N.get("camera.selected")));
-		setHeavy(true);
-		add(I18N.get("device.name"), name_lbl);
-		setHeavy(false);
-		addRow(I18N.get("camera.output"), output_cbx);
-		addRow(I18N.get("location"), location_lbl);
-		setFill();
-		addRow(stream_pnl);
-		setCenter();
-		addRow(preset_pnl);
+		setTitle(I18N.get("camera.selected"));
+		add("device.name");
+		add(name_lbl);
+		add("camera.output");
+		add(output_cbx, Stretch.LAST);
+		add("location");
+		add(location_lbl, Stretch.LAST);
+		add(stream_pnl, Stretch.FULL);
+		add(preset_pnl, Stretch.FULL);
 		clear();
 	}
 

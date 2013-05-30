@@ -36,6 +36,26 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  */
 public class IPanel extends JPanel {
 
+	/** Stretch types */
+	public enum Stretch {
+		NONE(GridBagConstraints.NONE, 1, GridBagConstraints.EAST, 0.1f),
+		SOME(GridBagConstraints.NONE, 1, GridBagConstraints.WEST, 0.5f),
+		FULL(GridBagConstraints.BOTH, GridBagConstraints.REMAINDER,
+			GridBagConstraints.CENTER, 1),
+		LAST(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
+			GridBagConstraints.WEST, 0.1f);
+		private Stretch(int f, int w, int a, float x) {
+			fill = f;
+			width = w;
+			anchor = a;
+			wx = x;
+		}
+		private final int fill;
+		private final int width;
+		private final int anchor;
+		private final float wx;
+	}
+
 	/** Color for value label text */
 	static private final Color DARK_BLUE = new Color(0, 0, 128);
 
@@ -75,82 +95,59 @@ public class IPanel extends JPanel {
 	}
 
 	/** Create grid bag constraints */
-	private GridBagConstraints createConstraints(boolean last) {
+	private GridBagConstraints createConstraints(Stretch s) {
 		GridBagConstraints bag = new GridBagConstraints();
-		bag.anchor = GridBagConstraints.WEST;
-		bag.fill = GridBagConstraints.NONE;
+		bag.anchor = s.anchor;
+		bag.fill = s.fill;
 		bag.insets.left = UI.hgap / 2;
 		bag.insets.right = UI.hgap / 2;
 		bag.insets.top = UI.vgap / 2;
 		bag.insets.bottom = UI.vgap / 2;
+		bag.weightx = s.wx;
+		bag.weighty = 0;
 		bag.gridx = GridBagConstraints.RELATIVE;
 		bag.gridy = row;
-		bag.gridwidth = last ? GridBagConstraints.REMAINDER : 1;
-		if(last)
-			row++;
-		return bag;
-	}
-
-	/** Create filled grid bag constraints */
-	private GridBagConstraints createFill(boolean last) {
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.anchor = GridBagConstraints.CENTER;
-		bag.fill = GridBagConstraints.BOTH;
-		bag.insets.left = UI.hgap / 2;
-		bag.insets.right = UI.hgap / 2;
-		bag.insets.top = UI.vgap / 2;
-		bag.insets.bottom = UI.vgap / 2;
-		bag.weightx = 1;
-		bag.weighty = 1;
-		bag.gridx = GridBagConstraints.RELATIVE;
-		bag.gridy = row;
-		bag.gridwidth = last ? GridBagConstraints.REMAINDER : 1;
-		if(last)
+		bag.gridwidth = s.width;
+		if(s == Stretch.LAST || s == Stretch.FULL)
 			row++;
 		return bag;
 	}
 
 	/** Add a label to the current row */
-	public void add(String msg, boolean last) {
-		GridBagConstraints bag = createConstraints(last);
-		bag.anchor = GridBagConstraints.EAST;
-		add(new ILabel(msg), bag);
+	public void add(String msg, Stretch s) {
+		add(new ILabel(msg), createConstraints(s));
 	}
 
 	/** Add a label to the current row */
 	public void add(String msg) {
-		add(msg, false);
+		add(msg, Stretch.NONE);
 	}
 
 	/** Add a component to the current row */
-	public void add(JComponent comp, boolean last) {
-		GridBagConstraints bag = createConstraints(last);
-		add(comp, bag);
+	public void add(JComponent comp, Stretch s) {
+		add(comp, createConstraints(s));
 	}
 
 	/** Add a component to the current row */
 	public void add(JComponent comp) {
-		add(comp, false);
+		add(comp, Stretch.SOME);
 	}
 
 	/** Add a text area to the current row */
-	public void add(JTextArea area, boolean last) {
-		GridBagConstraints bag = createFill(last);
+	public void add(JTextArea area, Stretch s) {
 		area.setWrapStyleWord(true);
 		area.setLineWrap(true);
-		add(createScrollPane(area), bag);
+		add(createScrollPane(area), s);
 	}
 
 	/** Add a list to the current row */
-	public void add(JList list, boolean last) {
-		GridBagConstraints bag = createFill(last);
-		add(createScrollPane(list), bag);
+	public void add(JList list, Stretch s) {
+		add(createScrollPane(list), s);
 	}
 
 	/** Add a table to the current row */
-	public void add(JTable table, boolean last) {
-		GridBagConstraints bag = createFill(last);
-		add(createScrollPane(table), bag);
+	public void add(JTable table, Stretch s) {
+		add(createScrollPane(table), s);
 	}
 
 	/** Create a scroll pane */

@@ -144,21 +144,21 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	/** Initialize the panel */
 	public void initialize() {
 		add("detector.lane.type");
-		add(type_cbx, true);
+		add(type_cbx, Stretch.LAST);
 		add("detector.lane.number");
-		add(lane_spn, true);
+		add(lane_spn, Stretch.LAST);
 		add("detector.abandoned");
 		add(aband_chk);
 		add("detector.force.fail");
-		add(fail_chk, true);
+		add(fail_chk, Stretch.LAST);
 		add("detector.field.len");
-		add(field_spn, true);
+		add(field_spn, Stretch.LAST);
 		add("detector.fake");
-		add(fake_txt, true);
+		add(fake_txt, Stretch.LAST);
 		add("device.notes");
-		add(note_txt, true);
+		add(note_txt, Stretch.LAST);
 		add(controller_btn);
-		add(r_node_btn, true);
+		add(r_node_btn, Stretch.LAST);
 		createJobs();
 		watcher.initialize();
 	}
