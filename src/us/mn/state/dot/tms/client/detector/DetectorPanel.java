@@ -33,8 +33,8 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
+public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 
 	/** Detector action */
 	abstract private class DAction extends IAction {
@@ -133,9 +133,9 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Create the detector panel */
 	public DetectorPanel(Session s, boolean r) {
-		super(false);
 		session = s;
 		has_r_btn = r;
+		r_node_btn.setVisible(r);
 		TypeCache<Detector> cache =
 			s.getSonarState().getDetCache().getDetectors();
 		watcher = new ProxyWatcher<Detector>(s, this, cache, false);
@@ -143,20 +143,22 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Initialize the panel */
 	public void initialize() {
-		addRow(I18N.get("detector.lane.type"), type_cbx);
-		addRow(I18N.get("detector.lane.number"), lane_spn);
-		add(I18N.get("detector.abandoned"), aband_chk);
-		addRow(I18N.get("detector.force.fail"), fail_chk);
-		addRow(I18N.get("detector.field.len"), field_spn);
-		addRow(I18N.get("detector.fake"), fake_txt);
-		addRow(I18N.get("device.notes"), note_txt);
-		setWest();
-		setWidth(2);
-		bag.insets.bottom = 0;
+		add("detector.lane.type");
+		add(type_cbx, true);
+		add("detector.lane.number");
+		add(lane_spn, true);
+		add("detector.abandoned");
+		add(aband_chk);
+		add("detector.force.fail");
+		add(fail_chk, true);
+		add("detector.field.len");
+		add(field_spn, true);
+		add("detector.fake");
+		add(fake_txt, true);
+		add("device.notes");
+		add(note_txt, true);
 		add(controller_btn);
-		if(has_r_btn)
-			add(r_node_btn);
-		finishRow();
+		add(r_node_btn, true);
 		createJobs();
 		watcher.initialize();
 	}
