@@ -21,8 +21,9 @@ import javax.swing.JPasswordField;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -58,14 +59,16 @@ public class ChangePasswordForm extends AbstractForm {
 	}
 
 	/** Initialize the form */
-	protected void initialize() {
-		FormPanel panel = new FormPanel();
-		panel.addRow(I18N.get("user.password.old"), o_pwd_txt);
-		panel.addRow(I18N.get("user.password.new"), n_pwd_txt);
-		panel.addRow(I18N.get("user.password.verify"), v_pwd_txt);
-		panel.setCenter();
-		panel.addRow(new JButton(change));
-		add(panel);
+	@Override protected void initialize() {
+		IPanel p = new IPanel();
+		p.add("user.password.old");
+		p.add(o_pwd_txt, Stretch.LAST);
+		p.add("user.password.new");
+		p.add(n_pwd_txt, Stretch.LAST);
+		p.add("user.password.verify");
+		p.add(v_pwd_txt, Stretch.LAST);
+		p.add(new JButton(change), Stretch.CENTER);
+		add(p);
 	}
 
 	/** Do the password change */

@@ -21,8 +21,9 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -34,7 +35,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class LoginForm extends AbstractForm {
 
 	/** User name text entry component */
-	protected final JTextField user_txt = new JTextField(12);
+	private final JTextField user_txt = new JTextField(12);
 
 	/** Password entry component */
 	private final JPasswordField passwd_txt = new JPasswordField(16);
@@ -47,10 +48,10 @@ public class LoginForm extends AbstractForm {
 	};
 
 	/** Iris client */
-	protected final IrisClient client;
+	private final IrisClient client;
 
 	/** Smart desktp */
-	protected final SmartDesktop desktop;
+	private final SmartDesktop desktop;
 
 	/** Create a new login form */
 	public LoginForm(IrisClient ic, SmartDesktop sd) {
@@ -60,10 +61,7 @@ public class LoginForm extends AbstractForm {
 	}
 
 	/** Initialize the form */
-	protected void initialize() {
-		FormPanel panel = new FormPanel();
-		panel.addRow(I18N.get("user.name"), user_txt);
-		panel.addRow(I18N.get("user.password"), passwd_txt);
+	@Override protected void initialize() {
 		final JButton login_btn = new JButton(login);
 		passwd_txt.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
@@ -71,9 +69,13 @@ public class LoginForm extends AbstractForm {
 					login_btn.doClick();
 			}
 		});
-		panel.setCenter();
-		panel.addRow(login_btn);
-		add(panel);
+		IPanel p = new IPanel();
+		p.add("user.name");
+		p.add(user_txt, Stretch.LAST);
+		p.add("user.password");
+		p.add(passwd_txt, Stretch.LAST);
+		p.add(login_btn, Stretch.CENTER);
+		add(p);
 	}
 
 	/** Do the login authentication */
