@@ -69,7 +69,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		new JComboBox(LaneType.getDescriptions());
 
 	/** Spinner for lane number */
-	protected final JSpinner lane_spn = new JSpinner(
+	private final JSpinner lane_spn = new JSpinner(
 		new SpinnerNumberModel(0, 0, 12, 1));
 
 	/** Abandoned check box */
@@ -87,14 +87,14 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	});
 
 	/** Spinner for field length */
-	protected final JSpinner field_spn = new JSpinner(
+	private final JSpinner field_spn = new JSpinner(
 		new SpinnerNumberModel(22, 1, 100, 0.01));
 
 	/** Fake det text field */
-	protected final JTextField fake_txt = new JTextField(12);
+	private final JTextField fake_txt = new JTextField(12);
 
 	/** Note text field */
-	protected final JTextField note_txt = new JTextField(12);
+	private final JTextField note_txt = new JTextField(12);
 
 	/** Button to display the controller */
 	private final JButton controller_btn = new JButton(
@@ -115,16 +115,16 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	});
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Flag to include r_node button */
-	protected final boolean has_r_btn;
+	private final boolean has_r_btn;
 
 	/** Proxy watcher */
-	protected final ProxyWatcher<Detector> watcher;
+	private final ProxyWatcher<Detector> watcher;
 
 	/** Detector being edited */
-	protected Detector detector;
+	private Detector detector;
 
 	/** Set the detector */
 	public void setDetector(Detector det) {
@@ -162,7 +162,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	}
 
 	/** Create the jobs */
-	protected void createJobs() {
+	private void createJobs() {
 		lane_spn.addChangeListener(new ChangeJob(WORKER) {
 			public void perform() {
 				Number n = (Number)lane_spn.getValue();
@@ -188,42 +188,42 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	}
 
 	/** Set the detector lane number */
-	protected void setLaneNumber(short n) {
+	private void setLaneNumber(short n) {
 		Detector det = detector;
 		if(det != null)
 			det.setLaneNumber(n);
 	}
 
 	/** Set the detector field length */
-	protected void setFieldLength(float f) {
+	private void setFieldLength(float f) {
 		Detector det = detector;
 		if(det != null)
 			det.setFieldLength(f);
 	}
 
 	/** Set the detector fake expression */
-	protected void setFake(String f) {
+	private void setFake(String f) {
 		Detector det = detector;
 		if(det != null)
 			det.setFake(f);
 	}
 
 	/** Set the detector notes */
-	protected void setNotes(String n) {
+	private void setNotes(String n) {
 		Detector det = detector;
 		if(det != null)
 			det.setNotes(n);
 	}
 
 	/** Show the controller form for a detector */
-	protected void showControllerForm(Detector d) {
+	private void showControllerForm(Detector d) {
 		ControllerForm form = createControllerForm(d);
 		if(form != null)
 			session.getDesktop().show(form);
 	}
 
 	/** Show the r_node for a detector */
-	protected void showRNode(Detector d) {
+	private void showRNode(Detector d) {
 		R_Node n = d.getR_Node();
 		if(n == null)
 			return;
@@ -231,7 +231,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	}
 
 	/** Create a controller form */
-	protected ControllerForm createControllerForm(Detector d) {
+	private ControllerForm createControllerForm(Detector d) {
 		if(d != null) {
 			Controller c = d.getController();
 			if(c != null)
@@ -258,7 +258,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	}
 
 	/** Update one attribute */
-	protected void doUpdate(Detector d, String a) {
+	private void doUpdate(Detector d, String a) {
 		if(a == null) {
 			detector = d;
 			controller_btn.setEnabled(d != null &&
@@ -309,7 +309,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	}
 
 	/** Clear all attributes */
-	protected void doClear() {
+	private void doClear() {
 		detector = null;
 		type_cbx.setEnabled(false);
 		type_cbx.setSelectedIndex(0);
