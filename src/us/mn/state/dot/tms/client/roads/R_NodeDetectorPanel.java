@@ -14,14 +14,12 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.FlowLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -32,6 +30,7 @@ import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.detector.DetectorPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -132,51 +131,24 @@ public class R_NodeDetectorPanel extends JPanel {
 
 	/** Create a new roadway node detector panel */
 	public R_NodeDetectorPanel(Session s) {
-		super(new GridBagLayout());
+		super(new FlowLayout());
 		session = s;
 		det_pnl = new DetectorPanel(s, false);
-		setBorder(UI.border);
 	}
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		det_table.setAutoCreateColumnsFromModel(false);
-		det_table.setRowHeight(20);
 		det_table.setVisibleRowCount(5);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.gridwidth = 3;
-		bag.weightx = 1;
-		bag.weighty = 1;
-		bag.fill = GridBagConstraints.BOTH;
-		bag.insets.left = 2;
-		bag.insets.right = 2;
-		bag.insets.top = 2;
-		bag.insets.bottom = 2;
-		add(new JScrollPane(det_table), bag);
-		bag.gridx = 3;
-		bag.gridwidth = 1;
-		bag.gridheight = 3;
-		bag.weightx = 0;
-		bag.weighty = 0;
-		bag.fill = GridBagConstraints.NONE;
-		add(det_pnl, bag);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		bag.gridheight = 1;
-		add(det_txt, bag);
-		bag.gridx = 1;
-		bag.gridwidth = 2;
-		bag.anchor = GridBagConstraints.WEST;
-		add(det_lbl, bag);
-		bag.gridx = 0;
-		bag.gridy = 2;
-		bag.gridwidth = 1;
-		bag.anchor = GridBagConstraints.CENTER;
-		add(create_btn, bag);
-		bag.gridx = 1;
-		add(new JButton(transfer_det), bag);
-		bag.gridx = 2;
-		add(new JButton(delete_det), bag);
+		IPanel pnl = new IPanel();
+		pnl.add(det_table, true);
+		pnl.add(det_txt);
+		pnl.add(det_lbl, true);
+		pnl.add(create_btn);
+		pnl.add(new JButton(transfer_det));
+		pnl.add(new JButton(delete_det));
+		add(pnl);
+		add(det_pnl);
 		createJobs();
 		det_pnl.initialize();
 		det_txt.setEnabled(false);
