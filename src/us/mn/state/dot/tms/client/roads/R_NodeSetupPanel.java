@@ -30,16 +30,15 @@ import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IPanel;
 
 /**
  * A panel for editing the setup properties of an r_node.
  *
  * @author Douglas Lau
  */
-public class R_NodeSetupPanel extends FormPanel {
+public class R_NodeSetupPanel extends IPanel {
 
 	/** R_Node action */
 	abstract private class NAction extends IAction {
@@ -100,7 +99,6 @@ public class R_NodeSetupPanel extends FormPanel {
 
 	/** Create the roadway node setup panel */
 	public R_NodeSetupPanel(Session s) {
-		super(false);
 		session = s;
 	}
 
@@ -141,17 +139,28 @@ public class R_NodeSetupPanel extends FormPanel {
 				n.setAbandoned(abandoned_chk.isSelected());
 			}
 		});
-		add(new ILabel("r_node.type"), type_cbx);
-		addRow(new ILabel("r_node.pickable"), pick_chk);
-		add(new ILabel("r_node.transition"), trans_cbx);
-		addRow(new ILabel("r_node.above"), above_chk);
-		add(new ILabel("r_node.lanes"), lane_spn);
-		addRow(new ILabel("r_node.attach.side"), attach_chk);
-		add(new ILabel("r_node.shift"), shift_spn);
-		addRow(new ILabel("r_node.active"), active_chk);
-		add(new ILabel("r_node.station"), station_txt);
-		addRow(new ILabel("r_node.abandoned"), abandoned_chk);
-		add(new ILabel("r_node.speed.limit"), speed_spn);
+		add("r_node.type");
+		add(type_cbx);
+		add("r_node.pickable");
+		add(pick_chk, true);
+		add("r_node.transition");
+		add(trans_cbx);
+		add("r_node.above");
+		add(above_chk, true);
+		add("r_node.lanes");
+		add(lane_spn);
+		add("r_node.attach.side");
+		add(attach_chk, true);
+		add("r_node.shift");
+		add(shift_spn);
+		add("r_node.active");
+		add(active_chk, true);
+		add("r_node.station");
+		add(station_txt);
+		add("r_node.abandoned");
+		add(abandoned_chk, true);
+		add("r_node.speed.limit");
+		add(speed_spn, true);
 		createJobs();
 		clear();
 	}
