@@ -117,7 +117,7 @@ public class IPanel extends JPanel {
 
 	/** Add a label to the current row */
 	public void add(String msg, Stretch s) {
-		add(new ILabel(msg), createConstraints(s));
+		add(new ILabel(msg), s);
 	}
 
 	/** Add a label to the current row */
