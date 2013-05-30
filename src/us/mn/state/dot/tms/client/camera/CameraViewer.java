@@ -124,7 +124,7 @@ public class CameraViewer extends IPanel
 		add("location");
 		add(location_lbl, Stretch.LAST);
 		add(stream_pnl, Stretch.FULL);
-		add(preset_pnl, Stretch.FULL);
+		add(preset_pnl, Stretch.CENTER);
 		clear();
 	}
 

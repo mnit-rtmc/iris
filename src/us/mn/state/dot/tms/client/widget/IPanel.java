@@ -40,6 +40,8 @@ public class IPanel extends JPanel {
 	public enum Stretch {
 		NONE(GridBagConstraints.NONE, 1, GridBagConstraints.EAST, 0.1f),
 		SOME(GridBagConstraints.NONE, 1, GridBagConstraints.WEST, 0.5f),
+		CENTER(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
+			GridBagConstraints.CENTER, 0),
 		FULL(GridBagConstraints.BOTH, GridBagConstraints.REMAINDER,
 			GridBagConstraints.CENTER, 1),
 		LAST(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
@@ -108,7 +110,7 @@ public class IPanel extends JPanel {
 		bag.gridx = GridBagConstraints.RELATIVE;
 		bag.gridy = row;
 		bag.gridwidth = s.width;
-		if(s == Stretch.LAST || s == Stretch.FULL)
+		if(s == Stretch.CENTER || s == Stretch.FULL ||s == Stretch.LAST)
 			row++;
 		return bag;
 	}
