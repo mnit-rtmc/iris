@@ -49,7 +49,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 		protected DAction(String text_id) {
 			super(text_id);
 		}
-		@Override protected final void do_perform() {
+		protected final void do_perform() {
 			Detector d = detector;
 			if(d != null)
 				do_perform(d);
@@ -59,7 +59,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Lane type action */
 	private final DAction lane_type = new DAction("detector.lane.type") {
-		@Override protected void do_perform(Detector d) {
+		protected void do_perform(Detector d) {
 			d.setLaneType((short)type_cbx.getSelectedIndex());
 		}
 	};
@@ -74,14 +74,14 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Abandoned check box */
 	private final JCheckBox aband_chk = new JCheckBox(new DAction(null) {
-		@Override protected void do_perform(Detector d) {
+		protected void do_perform(Detector d) {
 			d.setAbandoned(aband_chk.isSelected());
 		}
 	});
 
 	/** Force fail check box */
 	private final JCheckBox fail_chk = new JCheckBox(new DAction(null) {
-		@Override protected void do_perform(Detector d) {
+		protected void do_perform(Detector d) {
 			d.setForceFail(fail_chk.isSelected());
 		}
 	});
@@ -100,7 +100,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	private final JButton controller_btn = new JButton(
 		new DAction("controller")
 	{
-		@Override protected void do_perform(Detector d) {
+		protected void do_perform(Detector d) {
 			showControllerForm(d);
 		}
 	});
@@ -109,7 +109,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	private final JButton r_node_btn = new JButton(
 		new DAction("r_node")
 	{
-		@Override protected void do_perform(Detector d) {
+		protected void do_perform(Detector d) {
 			showRNode(d);
 		}
 	});
@@ -143,7 +143,6 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Initialize the panel */
 	public void initialize() {
-		type_cbx.setAction(lane_type);
 		addRow(I18N.get("detector.lane.type"), type_cbx);
 		addRow(I18N.get("detector.lane.number"), lane_spn);
 		add(I18N.get("detector.abandoned"), aband_chk);
@@ -165,24 +164,24 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	/** Create the jobs */
 	protected void createJobs() {
 		lane_spn.addChangeListener(new ChangeJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				Number n = (Number)lane_spn.getValue();
 				setLaneNumber(n.shortValue());
 			}
 		});
 		field_spn.addChangeListener(new ChangeJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				Number n = (Number)field_spn.getValue();
 				setFieldLength(n.floatValue());
 			}
 		});
 		fake_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				setFake(fake_txt.getText().trim());
 			}
 		});
 		note_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				setNotes(note_txt.getText().trim());
 			}
 		});
@@ -243,6 +242,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 
 	/** Dispose of the panel */
 	public void dispose() {
+		type_cbx.setAction(null);
 		watcher.dispose();
 		super.dispose();
 	}
@@ -251,7 +251,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	public final void update(final Detector d, final String a) {
 		// Serialize on WORKER thread
 		WORKER.addJob(new Job() {
-			@Override public void perform() {
+			public void perform() {
 				doUpdate(d, a);
 			}
 		});
@@ -266,8 +266,10 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 			r_node_btn.setEnabled(d != null && d.getR_Node()!=null);
 		}
 		if(a == null || a.equals("laneType")) {
+			type_cbx.setAction(null);
 			type_cbx.setEnabled(watcher.canUpdate(d, "laneType"));
 			type_cbx.setSelectedIndex(d.getLaneType());
+			type_cbx.setAction(lane_type);
 		}
 		if(a == null || a.equals("laneNumber")) {
 			lane_spn.setValue(d.getLaneNumber());
@@ -300,7 +302,7 @@ public class DetectorPanel extends FormPanel implements ProxyView<Detector> {
 	public final void clear() {
 		// Serialize on WORKER thread
 		WORKER.addJob(new Job() {
-			@Override public void perform() {
+			public void perform() {
 				doClear();
 			}
 		});
