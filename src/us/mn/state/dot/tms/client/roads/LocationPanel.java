@@ -75,13 +75,13 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Iris client */
 	private final IrisClient client;
 
 	/** Sonar state object */
-	protected final SonarState state;
+	private final SonarState state;
 
 	/** Proxy watcher */
 	private final ProxyWatcher<GeoLoc> watcher;
@@ -203,7 +203,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Select position grid bag constraints */
-	protected void updateSelectBag() {
+	private void updateSelectBag() {
 		bag.gridx = 2;
 		bag.gridy = 2;
 		bag.gridwidth = 1;
@@ -211,7 +211,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Create the jobs */
-	protected void createJobs() {
+	private void createJobs() {
 		lat_txt.addFocusListener(new FocusLostJob(client.WORKER) {
 			@Override public void perform() {
 				setLat(getTextDouble(lat_txt));
@@ -266,7 +266,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Update one attribute */
-	protected void doUpdate(GeoLoc l, String a) {
+	private void doUpdate(GeoLoc l, String a) {
 		if(a == null)
 			loc = l;
 		if(a == null || a.equals("roadway")) {
@@ -304,7 +304,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Test if the user can update an attribute */
-	protected boolean canUpdate(GeoLoc l, String a) {
+	private boolean canUpdate(GeoLoc l, String a) {
 		return session.canUpdate(l, a);
 	}
 
@@ -319,7 +319,7 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Clear all attributes */
-	protected void doClear() {
+	private void doClear() {
 		loc = null;
 		roadway_cbx.setEnabled(false);
 		roadway_cbx.setSelectedIndex(0);
