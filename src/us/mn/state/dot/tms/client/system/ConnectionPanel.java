@@ -20,8 +20,8 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Connection;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -29,17 +29,17 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  *
  * @author Douglas Lau
  */
-public class ConnectionPanel extends FormPanel {
+public class ConnectionPanel extends IPanel {
 
 	/** Table model for connections */
-	protected final ConnectionModel c_model;
+	private final ConnectionModel c_model;
 
 	/** Table to hold the connection list */
-	protected final ZTable c_table = new ZTable();
+	private final ZTable c_table = new ZTable();
 
 	/** Action to delete the selected connection */
 	private final IAction del_conn = new IAction("connection.disconnect") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			ListSelectionModel s = c_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -49,16 +49,15 @@ public class ConnectionPanel extends FormPanel {
 
 	/** Create a new connection panel */
 	public ConnectionPanel(Session s) {
-		super(true);
 		c_model = new ConnectionModel(s);
 		c_table.setModel(c_model);
 		c_table.setAutoCreateColumnsFromModel(false);
 		c_table.setColumnModel(c_model.createColumnModel());
 		c_table.setVisibleRowCount(16);
-		addRow(c_table);
+		add(c_table, Stretch.FULL);
 		if(false) {
-			del_conn.setEnabled(false);
-			addRow(new JButton(del_conn));
+			// FIXME: this disconnects all clients
+			add(new JButton(del_conn), Stretch.RIGHT);
 		}
 	}
 
@@ -75,15 +74,15 @@ public class ConnectionPanel extends FormPanel {
 	}
 
 	/** Dispose of the panel */
-	public void dispose() {
+	@Override public void dispose() {
 		c_model.dispose();
 		super.dispose();
 	}
 
 	/** Change the selected connection */
-	protected void selectConnection() {
+	private void selectConnection() {
 		ListSelectionModel s = c_table.getSelectionModel();
 		Connection c = c_model.getProxy(s.getMinSelectionIndex());
-		del_conn.setEnabled(c != null);
+		del_conn.setEnabled(c_model.canRemove(c));
 	}
 }
