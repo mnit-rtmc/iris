@@ -63,27 +63,27 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	static private final int LCS_SIZE = UI.scaled(18);
 
 	/** SONAR state */
-	protected final SonarState state;
+	private final SonarState state;
 
 	/** LCS Indication creator */
-	protected final LCSIndicationCreator creator;
+	private final LCSIndicationCreator creator;
 
 	/** LCS table model */
-	protected final LCSTableModel table_model;
+	private final LCSTableModel table_model;
 
 	/** LCS table */
-	protected final ZTable lcs_table = new ZTable();
+	private final ZTable lcs_table = new ZTable();
 
 	/** Action to edit the selected LCS */
 	private final IAction edit_lcs = new IAction("lcs.edit") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			editPressed();
 		}
 	};
 
 	/** Action to delete the selected LCS */
 	private final IAction delete_lcs = new IAction("lcs.delete") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			ListSelectionModel s = lcs_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -92,26 +92,26 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	};
 
 	/** Spinner for lane shift */
-	protected final JSpinner shift_spn = new JSpinner(
+	private final JSpinner shift_spn = new JSpinner(
 		new SpinnerNumberModel(0, 0, 12, 1));
 
 	/** Notes text area */
-	protected final JTextArea notes = new JTextArea(3, 24);
+	private final JTextArea notes = new JTextArea(3, 24);
 
 	/** List of indication buttons */
-	protected final LinkedList<JCheckBox> indications =
+	private final LinkedList<JCheckBox> indications =
 		new LinkedList<JCheckBox>();
 
 	/** LCS lock combo box component */
-	protected final JComboBox lcs_lock = new JComboBox(
+	private final JComboBox lcs_lock = new JComboBox(
 		LCSArrayLock.getDescriptions());
 
 	/** Operation description label */
-	protected final JLabel operation = new JLabel();
+	private final JLabel operation = new JLabel();
 
 	/** Action to send settings */
 	private final IAction settings = new IAction("device.send.settings") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
 		}
@@ -129,12 +129,12 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<LCSArray> getTypeCache() {
+	@Override protected TypeCache<LCSArray> getTypeCache() {
 		return state.getLcsCache().getLCSArrays();
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("device.setup"), createSetupPanel());
@@ -150,13 +150,13 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
+	@Override protected void dispose() {
 		table_model.dispose();
 		super.dispose();
 	}
 
 	/** Create setup panel */
-	protected JPanel createSetupPanel() {
+	private JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
 		initTable();
 		FormPanel tpnl = new FormPanel(canUpdate());
@@ -176,7 +176,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Create jobs for updating widgets */
-	protected void createUpdateJobs() {
+	private void createUpdateJobs() {
 		shift_spn.addChangeListener(new ChangeJob(WORKER) {
 			@Override public void perform() {
 				Number n = (Number)shift_spn.getValue();
@@ -191,7 +191,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Initialize the table */
-	protected void initTable() {
+	private void initTable() {
 		ListSelectionModel s = lcs_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionJob(WORKER) {
@@ -206,7 +206,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Edit button pressed */
-	protected void editPressed() {
+	private void editPressed() {
 		LCS lcs = getSelectedLCS();
 		if(lcs != null) {
 			DMS dms = DMSHelper.lookup(lcs.getName());
@@ -216,19 +216,19 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Get the selected LCS */
-	protected LCS getSelectedLCS() {
+	private LCS getSelectedLCS() {
 		ListSelectionModel s = lcs_table.getSelectionModel();
 		return table_model.getProxy(s.getMinSelectionIndex());
 	}
 
 	/** Create the indication panel */
-	protected JPanel createIndicationPanel() {
+	private JPanel createIndicationPanel() {
 		FormPanel panel = new FormPanel();
 		for(LaneUseIndication i: LaneUseIndication.values()) {
 			final int ind = i.ordinal();
 			JCheckBox btn = new JCheckBox();
 			btn.setAction(new IAction(null) {
-				@Override protected void do_perform() {
+				protected void do_perform() {
 					toggleIndication(ind);
 				}
 			});
@@ -242,7 +242,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Toggle one LCS indication checkbox */
-	protected void toggleIndication(int ind) {
+	private void toggleIndication(int ind) {
 		LCS lcs = getSelectedLCS();
 		if(lcs != null) {
 			JCheckBox btn = indications.get(ind);
@@ -266,7 +266,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Select an LCS in the table */
-	protected void selectLCS() {
+	private void selectLCS() {
 		LCS lcs = getSelectedLCS();
 		if(lcs != null)
 			selectLCS(lcs);
@@ -281,7 +281,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Select an LCS in the table */
-	protected void selectLCS(LCS lcs) {
+	private void selectLCS(LCS lcs) {
 		edit_lcs.setEnabled(true);
 		HashMap<Integer, LCSIndication> ind = lookupIndications(lcs);
 		delete_lcs.setEnabled(ind.isEmpty());
@@ -316,7 +316,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Create status panel */
-	protected JPanel createStatusPanel() {
+	private JPanel createStatusPanel() {
 		FormPanel panel = new FormPanel(false);
 		panel.addRow(I18N.get("lcs.lock"), lcs_lock);
 		panel.addRow(I18N.get("device.operation"), operation);
@@ -327,13 +327,13 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Create lock job */
-	protected void createLockJob() {
+	private void createLockJob() {
 		lcs_lock.setAction(new LockLcsAction(proxy, lcs_lock));
 		lcs_lock.setEnabled(true);
 	}
 
 	/** Update one attribute on the form */
-	protected void doUpdateAttribute(String a) {
+	@Override protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("shift"))
 			shift_spn.setValue(proxy.getShift());
 		if(a == null || a.equals("notes"))
