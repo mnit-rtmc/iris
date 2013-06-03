@@ -18,7 +18,6 @@ import java.awt.Color;
 import javax.swing.ListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -29,12 +28,12 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.WarningSign;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -134,24 +133,33 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
 	/** Create the setup panel */
 	private JPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(canUpdate());
 		ListModel m = state.getCamCache().getCameraModel();
-		camera_cbx.setAction(camera);
 		camera_cbx.setModel(new WrapperComboBoxModel(m));
-		panel.addRow(I18N.get("camera"), camera_cbx);
-		panel.addRow(I18N.get("warning.sign.text"), message_txt);
-		return panel;
+		IPanel p = new IPanel();
+		p.add("camera");
+		p.add(camera_cbx, Stretch.LAST);
+		p.add("warning.sign.text");
+		p.add(message_txt, Stretch.LAST);
+		return p;
 	}
 
 	/** Update one attribute on the form */
 	@Override protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
-		if(a == null || a.equals("notes"))
+		if(a == null || a.equals("notes")) {
+			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(proxy.getNotes());
-		if(a == null || a.equals("camera"))
+		}
+		if(a == null || a.equals("camera")) {
+			camera_cbx.setAction(null);
+			camera_cbx.setEnabled(canUpdate("camera"));
 			camera_cbx.setSelectedItem(proxy.getCamera());
-		if(a == null || a.equals("message"))
+			camera_cbx.setAction(camera);
+		}
+		if(a == null || a.equals("message")) {
+			message_txt.setEnabled(canUpdate("message"));
 			message_txt.setText(proxy.getMessage());
+		}
 	}
 }
