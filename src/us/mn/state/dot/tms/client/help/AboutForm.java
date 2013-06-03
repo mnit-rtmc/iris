@@ -17,9 +17,10 @@ package us.mn.state.dot.tms.client.help;
 import java.awt.Font;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -37,19 +38,15 @@ public class AboutForm extends AbstractForm {
 	}
 
 	/** Initialize the About form */
-	protected void initialize() {
-		FormPanel panel = new FormPanel();
-		panel.setCenter();
-		panel.addRow(new JLabel(Icons.getIcon("iris")));
-		panel.addRow(new JLabel(" "));
-		panel.setCenter();
-		panel.addRow(createTitle("iris.about1", 1.8f));
-		panel.setCenter();
-		panel.addRow(createTitle("iris.about2", 1.5f));
-		panel.setCenter();
-		panel.addRow(createTitle("iris.about3", 1.5f));
-		panel.addRow(new JLabel(" "));
-		add(panel);
+	@Override protected void initialize() {
+		IPanel p = new IPanel();
+		p.add(new JLabel(Icons.getIcon("iris")), Stretch.CENTER);
+		p.add(new JLabel(" "), Stretch.LAST);
+		p.add(createTitle("iris.about1", 1.8f), Stretch.CENTER);
+		p.add(createTitle("iris.about2", 1.5f), Stretch.CENTER);
+		p.add(createTitle("iris.about3", 1.5f), Stretch.CENTER);
+		p.add(new JLabel(" "), Stretch.LAST);
+		add(p);
 	}
 
 	/** Create a title label */
