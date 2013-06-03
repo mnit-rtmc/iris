@@ -46,10 +46,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
 	/** Location panel */
-	private final LocationPanel location;
+	private final LocationPanel loc_pnl;
 
 	/** Notes text area */
-	protected final JTextArea notes = new JTextArea(3, 24);
+	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -69,21 +69,21 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	private final JComboBox camera_cbx = new JComboBox();
 
 	/** Sign message text area */
-	protected final JTextArea message = new JTextArea(3, 24);
+	private final JTextArea message_txt = new JTextArea(3, 24);
 
 	/** Create a new warning sign form */
 	public WarningSignProperties(Session s, WarningSign ws) {
 		super(I18N.get("warning.sign") + ": ", s, ws);
-		location = new LocationPanel(s);
+		loc_pnl = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<WarningSign> getTypeCache() {
+	@Override protected TypeCache<WarningSign> getTypeCache() {
 		return state.getWarningSigns();
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
@@ -96,62 +96,62 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
-		location.dispose();
+	@Override protected void dispose() {
+		loc_pnl.dispose();
 		super.dispose();
 	}
 
 	/** Create the location panel */
-	protected JPanel createLocationPanel() {
-		location.setGeoLoc(proxy.getGeoLoc());
-		location.initialize();
-		location.addRow(I18N.get("device.notes"), notes);
-		location.setCenter();
-		location.addRow(new JButton(controller));
-		return location;
+	private JPanel createLocationPanel() {
+		loc_pnl.setGeoLoc(proxy.getGeoLoc());
+		loc_pnl.initialize();
+		loc_pnl.addRow(I18N.get("device.notes"), notes_txt);
+		loc_pnl.setCenter();
+		loc_pnl.addRow(new JButton(controller));
+		return loc_pnl;
 	}
 
 	/** Create jobs for updating */
-	protected void createUpdateJobs() {
-		notes.addFocusListener(new FocusLostJob(WORKER) {
+	private void createUpdateJobs() {
+		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
-				proxy.setNotes(notes.getText());
+				proxy.setNotes(notes_txt.getText());
 			}
 		});
-		message.addFocusListener(new FocusLostJob(WORKER) {
+		message_txt.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
-				proxy.setMessage(message.getText());
+				proxy.setMessage(message_txt.getText());
 			}
 		});
 	}
 
 	/** Controller lookup button pressed */
-	protected void controllerPressed() {
+	private void controllerPressed() {
 		Controller c = proxy.getController();
 		if(c != null)
 			showForm(new ControllerForm(session, c));
 	}
 
 	/** Create the setup panel */
-	protected JPanel createSetupPanel() {
+	private JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
 		ListModel m = state.getCamCache().getCameraModel();
 		camera_cbx.setAction(camera);
 		camera_cbx.setModel(new WrapperComboBoxModel(m));
 		panel.addRow(I18N.get("camera"), camera_cbx);
-		panel.addRow(I18N.get("warning.sign.text"), message);
+		panel.addRow(I18N.get("warning.sign.text"), message_txt);
 		return panel;
 	}
 
 	/** Update one attribute on the form */
-	protected void doUpdateAttribute(String a) {
+	@Override protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
-			notes.setText(proxy.getNotes());
+			notes_txt.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
 			camera_cbx.setSelectedItem(proxy.getCamera());
-		if(a == null || a.equals("text"))
-			message.setText(proxy.getMessage());
+		if(a == null || a.equals("message"))
+			message_txt.setText(proxy.getMessage());
 	}
 }
