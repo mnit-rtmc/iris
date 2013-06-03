@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class LoginForm extends AbstractForm {
 
 	/** User name text entry component */
-	private final JTextField user_txt = new JTextField(12);
+	private final JTextField user_txt = new JTextField(15);
 
 	/** Password entry component */
 	private final JPasswordField passwd_txt = new JPasswordField(16);

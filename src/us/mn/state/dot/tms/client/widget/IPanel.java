@@ -44,6 +44,8 @@ public class IPanel extends JPanel {
 			GridBagConstraints.CENTER, 0),
 		FULL(GridBagConstraints.BOTH, GridBagConstraints.REMAINDER,
 			GridBagConstraints.CENTER, 1),
+		LEFT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
+			GridBagConstraints.WEST, 1),
 		RIGHT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
 			GridBagConstraints.EAST, 0.1f),
 		LAST(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
@@ -112,7 +114,7 @@ public class IPanel extends JPanel {
 		bag.gridx = GridBagConstraints.RELATIVE;
 		bag.gridy = row;
 		bag.gridwidth = s.width;
-		if(s == Stretch.CENTER || s == Stretch.FULL ||s == Stretch.LAST)
+		if(s.width == GridBagConstraints.REMAINDER)
 			row++;
 		return bag;
 	}

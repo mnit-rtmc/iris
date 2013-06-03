@@ -20,8 +20,8 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.User;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -29,10 +29,10 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  *
  * @author Douglas Lau
  */
-public class UserTabPanel extends FormPanel {
+public class UserTabPanel extends IPanel {
 
 	/** Table model for users */
-	protected final UserModel u_model;
+	private final UserModel u_model;
 
 	/** Table to hold the users */
 	private final ZTable u_table = new ZTable();
@@ -52,17 +52,15 @@ public class UserTabPanel extends FormPanel {
 
 	/** Create a new user tab panel */
 	public UserTabPanel(Session s) {
-		super(true);
 		u_model = new UserModel(s);
 		user_pnl = new UserPanel(s);
 		u_table.setModel(u_model);
 		u_table.setAutoCreateColumnsFromModel(false);
 		u_table.setColumnModel(u_model.createColumnModel());
 		u_table.setVisibleRowCount(16);
-		add(u_table);
-		addRow(user_pnl);
-		del_user.setEnabled(false);
-		addRow(new JButton(del_user));
+		add(u_table, Stretch.SOME);
+		add(user_pnl, Stretch.LAST);
+		add(new JButton(del_user), Stretch.RIGHT);
 	}
 
 	/** Initializze the widgets in the form */
@@ -72,14 +70,14 @@ public class UserTabPanel extends FormPanel {
 		ListSelectionModel s = u_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				selectUser();
 			}
 		});
 	}
 
 	/** Dispose of the panel */
-	public void dispose() {
+	@Override public void dispose() {
 		u_model.dispose();
 		user_pnl.dispose();
 		super.dispose();

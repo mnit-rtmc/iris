@@ -30,8 +30,8 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class UserPanel extends FormPanel implements ProxyView<User> {
+public class UserPanel extends IPanel implements ProxyView<User> {
 
 	/** User action */
 	abstract private class UAction extends IAction {
@@ -70,7 +70,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	}
 
 	/** Full name text field */
-	private final JTextField f_name_txt = new JTextField(30);
+	private final JTextField f_name_txt = new JTextField(32);
 
 	/** Password entry component */
 	private final JPasswordField passwd_txt = new JPasswordField(16);
@@ -87,7 +87,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	};
 
 	/** Dn (distinguished name) field */
-	private final JTextField dn_txt = new JTextField(48);
+	private final JTextField dn_txt = new JTextField(64);
 
 	/** Role list model */
 	private final ProxyListModel<Role> r_list;
@@ -100,7 +100,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 
 	/** Role action */
 	private final UAction role_action = new UAction("role") {
-		@Override protected void do_perform(User u) {
+		protected void do_perform(User u) {
 			Object item = role_cbx.getSelectedItem();
 			if(item instanceof Role)
 				u.setRole((Role)item);
@@ -111,14 +111,13 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 
 	/** Enabled check box */
 	private final JCheckBox enabled_chk = new JCheckBox(new UAction(null) {
-		@Override protected void do_perform(User u) {
+		protected void do_perform(User u) {
 			u.setEnabled(enabled_chk.isSelected());
 		}
 	});
 
 	/** Create the user panel */
 	public UserPanel(Session s) {
-		super(false);
 		session = s;
 		TypeCache<User> cache = s.getSonarState().getUsers();
 		watcher = new ProxyWatcher<User>(s, this, cache, false);
@@ -129,18 +128,17 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 
 	/** Initialize the panel */
 	public void initialize() {
-		add(new JLabel(I18N.get("user.name.full")));
-		setWidth(3);
-		add(f_name_txt);
-		addRow(new JLabel());
-		add(I18N.get("user.password"), passwd_txt);
-		add(new JLabel());
-		add(new JButton(change_pwd));
-		addRow(new JLabel());
-		addRow(I18N.get("user.dn"), dn_txt);
-		add(I18N.get("role"), role_cbx);
-		addRow(new JLabel());
-		addRow(I18N.get("user.enabled"), enabled_chk);
+		add("user.name.full");
+		add(f_name_txt, Stretch.LAST);
+		add("user.password");
+		add(passwd_txt);
+		add(new JButton(change_pwd), Stretch.LEFT);
+		add("user.dn");
+		add(dn_txt, Stretch.LAST);
+		add("role");
+		add(role_cbx, Stretch.LAST);
+		add("user.enabled");
+		add(enabled_chk, Stretch.LAST);
 		createJobs();
 		watcher.initialize();
 		r_list.initialize();
@@ -148,7 +146,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	}
 
 	/** Dispose of the panel */
-	public void dispose() {
+	@Override public void dispose() {
 		r_list.dispose();
 		watcher.dispose();
 		super.dispose();
@@ -157,7 +155,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	/** Create the jobs */
 	private void createJobs() {
 		f_name_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				String n = f_name_txt.getText();
 				setFullName(n.trim());
 			}
@@ -185,7 +183,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	}
 
 	/** Update one attribute */
-	public final void update(final User u, final String a) {
+	@Override public final void update(final User u, final String a) {
 		// Serialize on WORKER thread
 		WORKER.addJob(new Job() {
 			public void perform() {
@@ -224,7 +222,7 @@ public class UserPanel extends FormPanel implements ProxyView<User> {
 	}
 
 	/** Clear all attributes */
-	public final void clear() {
+	@Override public final void clear() {
 		// Serialize on WORKER thread
 		WORKER.addJob(new Job() {
 			public void perform() {
