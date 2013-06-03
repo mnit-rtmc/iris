@@ -44,6 +44,8 @@ public class IPanel extends JPanel {
 			GridBagConstraints.CENTER, 0),
 		FULL(GridBagConstraints.BOTH, GridBagConstraints.REMAINDER,
 			GridBagConstraints.CENTER, 1),
+		RIGHT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
+			GridBagConstraints.EAST, 0.1f),
 		LAST(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
 			GridBagConstraints.WEST, 0.1f);
 		private Stretch(int f, int w, int a, float x) {

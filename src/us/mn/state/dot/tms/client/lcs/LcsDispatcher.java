@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.List;
 import javax.swing.BorderFactory;
@@ -41,8 +40,8 @@ import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.LaneConfigurationPanel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -52,7 +51,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
+public class LcsDispatcher extends IPanel implements ProxyListener<LCSArray>,
 	ProxySelectionListener<LCSArray>
 {
 	/** Size in pixels for each LCS in array */
@@ -71,19 +70,19 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	private final ProxySelectionModel<LCSArray> sel_model;
 
 	/** Name of the selected LCS array */
-	private final JLabel name_lbl = FormPanel.createValueLabel();
+	private final JLabel name_lbl = createValueLabel();
 
 	/** Verify camera button */
 	private final JButton camera_btn = new JButton();
 
 	/** Location of LCS array */
-	private final JLabel location_lbl = FormPanel.createValueLabel();
+	private final JLabel location_lbl = createValueLabel();
 
 	/** Status of selected LCS array */
-	private final JLabel status_lbl = FormPanel.createValueLabel();
+	private final JLabel status_lbl = createValueLabel();
 
 	/** Operation of selected LCS array */
-	private final JLabel operation_lbl = FormPanel.createValueLabel();
+	private final JLabel operation_lbl = createValueLabel();
 
 	/** LCS lock combo box component */
 	private final JComboBox lock_cmb = new JComboBox(
@@ -131,7 +130,6 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Create a new LCS dispatcher */
 	public LcsDispatcher(Session s, LCSArrayManager m) {
-		super(new BorderLayout());
 		session = s;
 		manager = m;
 		cache = session.getSonarState().getLcsCache().getLCSArrays();
@@ -140,7 +138,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		blankAction = new BlankLcsAction(sel_model, user);
 		blank_btn.setAction(blankAction);
 		manager.setBlankAction(blankAction);
-		add(createMainPanel(), BorderLayout.CENTER);
+		addWidgets();
 		clearSelected();
 		cache.addProxyListener(this);
 		sel_model.addProxySelectionListener(this);
@@ -155,27 +153,27 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		removeAll();
 	}
 
-	/** Create the dispatcher panel */
-	private JPanel createMainPanel() {
-		FormPanel panel = new FormPanel();
-		panel.setBorder(BorderFactory.createTitledBorder(
-			I18N.get("lcs.selected")));
+	/** Add the widgets to the panel */
+	private void addWidgets() {
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		panel.setHeavy(true);
-		panel.add(I18N.get("device.name"), name_lbl);
-		panel.setHeavy(false);
-		panel.addRow(I18N.get("camera"), camera_btn);
-		panel.addRow(I18N.get("location"), location_lbl);
-		panel.addRow(I18N.get("device.status"), status_lbl);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
-		panel.addRow(I18N.get("device.operation"), operation_lbl);
-//		panel.add(I18N.get("lcs.lock"), lock_cmb);
-		panel.finishRow();
-		panel.addRow(buildSelectorBox());
-		panel.addRow(createButtonPanel());
-		return panel;
+		setTitle(I18N.get("lcs.selected"));
+		add("device.name");
+		add(name_lbl);
+		add("camera");
+		add(camera_btn, Stretch.LAST);
+		add("location");
+		add(location_lbl, Stretch.LAST);
+		add("device.status");
+		add(status_lbl, Stretch.LAST);
+		add("device.operation");
+		add(operation_lbl, Stretch.LAST);
+//		add("lcs.lock");
+//		add(lock_cmb, Stretch.LAST);
+		add(buildSelectorBox(), Stretch.FULL);
+		add(createButtonPanel(), Stretch.RIGHT);
 	}
 
 	/** Build the indication selector */
