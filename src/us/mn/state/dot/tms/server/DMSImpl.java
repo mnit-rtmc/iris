@@ -1381,7 +1381,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			return sm;
 		}
 		catch(SonarException e) {
-			// FIXME: we should do something more here...
+			// This can pretty much only happen when the SONAR task
+			// processor does not store the sign message within 30
+			// seconds.  It *shouldn't* happen, but there may be
+			// a rare bug which triggers it.
 			e.printStackTrace();
 			return null;
 		}
