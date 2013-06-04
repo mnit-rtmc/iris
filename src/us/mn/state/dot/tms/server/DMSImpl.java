@@ -198,7 +198,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		MainServer.server.removeObject(geo_loc);
+		MainServer.removeObject(geo_loc);
 	}
 
 	/** Set the controller to which this DMS is assigned */

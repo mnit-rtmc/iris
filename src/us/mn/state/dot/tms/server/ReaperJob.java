@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ public class ReaperJob extends Job {
 		if(inc.getCleared()) {
 			if(inc.getClearTime() + getIncidentClearThreshold() <
 			   TimeSteward.currentTimeMillis())
-				MainServer.server.removeObject(inc);
+				MainServer.removeObject(inc);
 		}
 	}
 
@@ -94,7 +94,7 @@ public class ReaperJob extends Job {
 				// asynchronously from the namespace.
 				sm = SignMessageHelper.lookup(sm.getName());
 				if(sm != null && !isReferenced(sm))
-					MainServer.server.removeObject(sm);
+					MainServer.removeObject(sm);
 			}
 			reapable.clear();
 		}

@@ -113,7 +113,7 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		MainServer.server.removeObject(geo_loc);
+		MainServer.removeObject(geo_loc);
 	}
 
 	/** Device location */

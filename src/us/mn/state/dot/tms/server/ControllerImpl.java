@@ -879,7 +879,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			link.pullController(this);
 		}
 		super.doDestroy();
-		MainServer.server.removeObject(cabinet);
+		MainServer.removeObject(cabinet);
 	}
 
 	/** Check if the controller is assigned to a modem comm link */

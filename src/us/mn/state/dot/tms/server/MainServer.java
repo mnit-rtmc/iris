@@ -216,4 +216,11 @@ public class MainServer {
 		else
 			BaseObjectImpl.namespace.storeObject(so);
 	}
+
+	/** Remove an object from the server's namespace */
+	static public void removeObject(SonarObject so) {
+		Server s = server;
+		if(s != null)
+			s.removeObject(so);
+	}
 }

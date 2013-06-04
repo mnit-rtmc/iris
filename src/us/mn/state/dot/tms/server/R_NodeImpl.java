@@ -462,7 +462,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		if(s != null)
 			MainServer.server.addObject(s);
 		if(os != null)
-			MainServer.server.removeObject(os);
+			MainServer.removeObject(os);
 		station = s;
 	}
 
