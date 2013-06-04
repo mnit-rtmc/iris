@@ -103,7 +103,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public ControllerImpl(String n) throws TMSException, SonarException {
 		super(n);
 		CabinetImpl c = new CabinetImpl(n);
-		MainServer.server.createObject(c);
+		MainServer.createObject(c);
 		cabinet = c;
 	}
 

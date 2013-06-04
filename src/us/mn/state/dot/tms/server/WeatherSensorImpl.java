@@ -101,7 +101,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	{
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.server.createObject(g);
+		MainServer.createObject(g);
 		geo_loc = g;
 		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
 		pt_cache = new PeriodicSampleCache(

@@ -95,7 +95,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	public CameraImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.server.createObject(g);
+		MainServer.createObject(g);
 		geo_loc = g;
 	}
 

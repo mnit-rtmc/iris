@@ -165,7 +165,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public RampMeterImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.server.createObject(g);
+		MainServer.createObject(g);
 		geo_loc = g;
 	}
 

@@ -25,6 +25,8 @@ import java.util.Properties;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.BaseHelper;
@@ -204,5 +206,14 @@ public class MainServer {
 		FLUSH.addJob(new XmlConfigJob(1000));
 		FLUSH.addJob(new SignMessageXmlJob());
 		FLUSH.addJob(new IncidentXmlJob());
+	}
+
+	/** Create an object in the server's namespace */
+	static public void createObject(SonarObject so) throws SonarException {
+		Server s = server;
+		if(s != null)
+			s.createObject(so);
+		else
+			BaseObjectImpl.namespace.storeObject(so);
 	}
 }

@@ -154,7 +154,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public DMSImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.server.createObject(g);
+		MainServer.createObject(g);
 		geo_loc = g;
 		formatter = new MultiFormatter(this);
 	}
@@ -1377,7 +1377,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	{
 		SignMessageImpl sm = new SignMessageImpl(m, b, ap, rp, s, d);
 		try {
-			notifyNewSignMessage(sm);
+			MainServer.createObject(sm);
 			return sm;
 		}
 		catch(SonarException e) {
@@ -1385,16 +1385,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-	/** Notify SONAR that a new sign message exists */
-	private void notifyNewSignMessage(SignMessageImpl sm)
-		throws SonarException
-	{
-		if(MainServer.server != null)
-			MainServer.server.createObject(sm);
-		else
-			namespace.storeObject(sm);
 	}
 
 	/** Flag for current scheduled message.  This is used to guarantee that
