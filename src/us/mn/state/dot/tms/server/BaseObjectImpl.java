@@ -176,8 +176,9 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** Notify SONAR clients of a change to an attribute */
 	protected void notifyAttribute(String aname) {
-		if(MainServer.server != null)
-			MainServer.server.setAttribute(this, aname);
+		Server s = MainServer.server;
+		if(s != null)
+			s.setAttribute(this, aname);
 	}
 
 	/** Format a float value */
