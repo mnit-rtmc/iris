@@ -20,8 +20,9 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -30,22 +31,22 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  *
  * @author Douglas Lau
  */
-public class PlanTablePanel<T extends SonarObject> extends FormPanel {
+public class PlanTablePanel<T extends SonarObject> extends IPanel {
 
 	/** Table row height */
 	static private final int ROW_HEIGHT = UI.scaled(22);
 
 	/** Table model for plan actions */
-	protected ProxyTableModel<T> model;
+	private ProxyTableModel<T> model;
 
 	/** Table to hold plan actions */
-	protected final ZTable table = new ZTable();
+	private final ZTable table = new ZTable();
 
 	/** Action to delete the selected action */
 	private final IAction del_action = new IAction(
 		"action.plan.action.delete")
 	{
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			ListSelectionModel sm = table.getSelectionModel();
 			int row = sm.getMinSelectionIndex();
 			if(row >= 0)
@@ -55,13 +56,11 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 
 	/** Create a new plan table panel */
 	public PlanTablePanel() {
-		super(true);
-		setBorder();
 		table.setAutoCreateColumnsFromModel(false);
 		table.setRowHeight(ROW_HEIGHT);
 		table.setVisibleRowCount(10);
-		addRow(table);
-		addRow(new JButton(del_action));
+		add(table, Stretch.FULL);
+		add(new JButton(del_action), Stretch.RIGHT);
 		del_action.setEnabled(false);
 		addJobs();
 	}
@@ -109,7 +108,7 @@ public class PlanTablePanel<T extends SonarObject> extends FormPanel {
 	}
 
 	/** Dispose of the form */
-	public void dispose() {
+	@Override public void dispose() {
 		super.dispose();
 		if(model != null) {
 			model.dispose();

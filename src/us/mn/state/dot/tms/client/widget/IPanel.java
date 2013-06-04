@@ -38,28 +38,32 @@ public class IPanel extends JPanel {
 
 	/** Stretch types */
 	public enum Stretch {
-		NONE(GridBagConstraints.NONE, 1, GridBagConstraints.EAST, 0.1f),
-		SOME(GridBagConstraints.NONE, 1, GridBagConstraints.WEST, 0.5f),
+		NONE(GridBagConstraints.NONE, 1, GridBagConstraints.EAST, 0.1f,
+			0),
+		SOME(GridBagConstraints.NONE, 1, GridBagConstraints.WEST, 0.5f,
+			0),
 		CENTER(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
-			GridBagConstraints.CENTER, 0),
+			GridBagConstraints.CENTER, 0, 0),
 		FULL(GridBagConstraints.BOTH, GridBagConstraints.REMAINDER,
-			GridBagConstraints.CENTER, 1),
+			GridBagConstraints.CENTER, 1, 1),
 		LEFT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
-			GridBagConstraints.WEST, 1),
+			GridBagConstraints.WEST, 1, 0),
 		RIGHT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
-			GridBagConstraints.EAST, 0.1f),
+			GridBagConstraints.EAST, 0.1f, 0),
 		LAST(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
-			GridBagConstraints.WEST, 0.1f);
-		private Stretch(int f, int w, int a, float x) {
+			GridBagConstraints.WEST, 0.1f, 0);
+		private Stretch(int f, int w, int a, float x, float y) {
 			fill = f;
 			width = w;
 			anchor = a;
 			wx = x;
+			wy = y;
 		}
 		private final int fill;
 		private final int width;
 		private final int anchor;
 		private final float wx;
+		private final float wy;
 	}
 
 	/** Color for value label text */
@@ -110,7 +114,7 @@ public class IPanel extends JPanel {
 		bag.insets.top = UI.vgap / 2;
 		bag.insets.bottom = UI.vgap / 2;
 		bag.weightx = s.wx;
-		bag.weighty = 0;
+		bag.weighty = s.wy;
 		bag.gridx = GridBagConstraints.RELATIVE;
 		bag.gridy = row;
 		bag.gridwidth = s.width;
