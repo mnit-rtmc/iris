@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  University of Minnesota
+ * Copyright (C) 2010-2013  University of Minnesota
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +37,7 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
  * Density metering algorithm state
  *
  * @author Anupam
+ * @author Douglas Lau
  */
 public class DensityUMNAlgorithm implements MeterAlgorithmState {
 
@@ -1432,8 +1434,13 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Obtain the most recently set metering rate for the ramp */
-		public int getMeteringRate() {
-			return metering_set ? metering_rate : meter.getRate();
+		public int getMeteringRate () {
+			if(metering_set)
+				return metering_rate;
+			else {
+				Integer r = meter.getRate();
+				return r != null ? r : getMaxRelease();
+			}
 		}
 	}
 
