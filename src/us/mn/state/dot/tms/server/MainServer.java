@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ import us.mn.state.dot.tms.utils.PropertyLoader;
 public class MainServer {
 
 	/** Location of IRIS property configuration file */
-	static protected final String PROP_FILE =
+	static private final String PROP_FILE =
 		"/etc/iris/iris-server.properties";
 
 	/** Directory to store IRIS log files */
@@ -70,10 +70,10 @@ public class MainServer {
 	static public IrisProvider auth_provider;
 
 	/** SQL connection */
-	static protected SQLConnection store;
+	static private SQLConnection store;
 
 	/** Agency district property */
-	static protected String district = "tms";
+	static private String district = "tms";
 
 	/** Get the district ID */
 	static public String districtId() {
@@ -110,7 +110,7 @@ public class MainServer {
 	}
 
 	/** Initialize the server process */
-	static protected void initialize() throws IOException {
+	static private void initialize() throws IOException {
 		redirectStdStreams();
 		DebugLog.init(new File(LOG_FILE_DIR),
 			"IRIS @@VERSION@@ restarted");
@@ -118,7 +118,7 @@ public class MainServer {
 	}
 
 	/** Redirect the standard output and error streams to log files */
-	static protected void redirectStdStreams() throws IOException {
+	static private void redirectStdStreams() throws IOException {
 		System.setOut(createPrintStream(STD_OUT));
 		System.setErr(createPrintStream(STD_ERR));
 		String msg = "IRIS @@VERSION@@ restarted @ " +
@@ -128,7 +128,7 @@ public class MainServer {
 	}
 
 	/** Create a buffered print stream to a log file */
-	static protected PrintStream createPrintStream(String fname)
+	static private PrintStream createPrintStream(String fname)
 		throws IOException
 	{
 		FileOutputStream fos = new FileOutputStream(fname, true);
@@ -137,7 +137,7 @@ public class MainServer {
 	}
 
 	/** Check assertion status */
-	static protected void checkAssert() {
+	static private void checkAssert() {
 		boolean assertsEnabled = false;
 		// Intentional assignment side-effect
 		assert assertsEnabled = true;
@@ -146,14 +146,14 @@ public class MainServer {
 	}
 
 	/** Initialize the proxy selector */
-	static protected void initProxySelector(Properties props) {
+	static private void initProxySelector(Properties props) {
 		HTTPProxySelector ps = new HTTPProxySelector(props);
 		if(ps.hasProxies())
 			ProxySelector.setDefault(ps);
 	}
 
 	/** Create the database connection */
-	static protected SQLConnection createStore(Properties props)
+	static private SQLConnection createStore(Properties props)
 		throws IOException, TMSException
 	{
 		return new SQLConnection(
@@ -164,7 +164,7 @@ public class MainServer {
 	}
 
 	/** Create the server namespace */
-	static protected ServerNamespace createNamespace() {
+	static private ServerNamespace createNamespace() {
 		ServerNamespace ns = new ServerNamespace();
 		// FIXME: static namespace hacks
 		BaseHelper.namespace = ns;
@@ -173,7 +173,7 @@ public class MainServer {
 	}
 
 	/** Schedule jobs on TIMER thread */
-	static protected void scheduleTimerJobs() {
+	static private void scheduleTimerJobs() {
 		int secs = SystemAttrEnum.DMS_POLL_PERIOD_SECS.getInt();
 		if(secs > 5) {
 			TIMER.addJob(new DmsQueryMsgJob(secs));
@@ -195,7 +195,7 @@ public class MainServer {
 	}
 
 	/** Schedule jobs on FLUSH thread */
-	static protected void scheduleFlushJobs() {
+	static private void scheduleFlushJobs() {
 		FLUSH.addJob(new FlushSamplesJob());
 		FLUSH.addJob(new ArchiveSamplesJob());
 		FLUSH.addJob(new ProfilingJob());
