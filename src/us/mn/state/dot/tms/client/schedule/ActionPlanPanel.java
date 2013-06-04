@@ -56,14 +56,14 @@ public class ActionPlanPanel extends JPanel {
 	static private final int ROW_HEIGHT = UI.scaled(22);
 
 	/** Table model for action plans */
-	protected final ActionPlanModel p_model;
+	private final ActionPlanModel p_model;
 
 	/** Table to hold the action plans */
-	protected final ZTable p_table = new ZTable();
+	private final ZTable p_table = new ZTable();
 
 	/** Action to delete the selected action plan */
 	private final IAction del_plan = new IAction("action.plan.delete") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			ListSelectionModel sm = p_table.getSelectionModel();
 			int row = sm.getMinSelectionIndex();
 			if(row >= 0)
@@ -84,7 +84,7 @@ public class ActionPlanPanel extends JPanel {
 	private final PlanTablePanel<MeterAction> m_panel;
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
@@ -127,7 +127,7 @@ public class ActionPlanPanel extends JPanel {
 	}
 
 	/** Add jobs for action plan table */
-	protected void addActionPlanJobs() {
+	private void addActionPlanJobs() {
 		ListSelectionModel sm = p_table.getSelectionModel();
 		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		sm.addListSelectionListener(new ListSelectionJob(WORKER) {
@@ -147,7 +147,7 @@ public class ActionPlanPanel extends JPanel {
 	}
 
 	/** Change the selected action plan */
-	protected void selectActionPlan() {
+	private void selectActionPlan() {
 		ActionPlan ap = p_model.getProxy(p_table.getSelectedRow());
 		del_plan.setEnabled(p_model.canRemove(ap));
 		t_panel.setTableModel(new TimeActionModel(session, ap));
