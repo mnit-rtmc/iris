@@ -29,8 +29,9 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -113,17 +114,16 @@ public class ActionPlanPanel extends JPanel {
 
 	/** Create the main action plan panel */
 	private JPanel createActionPlanPanel() {
-		FormPanel p_panel = new FormPanel();
-		p_panel.setBorder();
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(p_model.createColumnModel());
 		p_table.setRowHeight(ROW_HEIGHT);
 		p_table.setVisibleRowCount(10);
-		p_panel.addRow(p_table);
-		p_panel.addRow(new JButton(del_plan));
+		IPanel p = new IPanel();
+		p.add(p_table, Stretch.FULL);
+		p.add(new JButton(del_plan), Stretch.RIGHT);
 		del_plan.setEnabled(false);
-		return p_panel;
+		return p;
 	}
 
 	/** Add jobs for action plan table */
@@ -131,7 +131,7 @@ public class ActionPlanPanel extends JPanel {
 		ListSelectionModel sm = p_table.getSelectionModel();
 		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		sm.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				selectActionPlan();
 			}
 		});
