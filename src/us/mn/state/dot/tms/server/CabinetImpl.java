@@ -72,12 +72,12 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	public CabinetImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(n);
-		MainServer.createObject(g);
+		g.notifyCreate();
 		geo_loc = g;
 	}
 
 	/** Create a new cabinet */
-	protected CabinetImpl(String n, CabinetStyle s, GeoLoc l, Float m) {
+	protected CabinetImpl(String n, CabinetStyle s, GeoLocImpl l, Float m) {
 		super(n);
 		style = s;
 		geo_loc = l;
@@ -89,7 +89,7 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 		Float m)
 	{
 		this(n, (CabinetStyle)ns.lookupObject( CabinetStyle.SONAR_TYPE,
-			s), (GeoLoc)ns.lookupObject(GeoLoc.SONAR_TYPE, l), m);
+		     s), (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l), m);
 	}
 
 	/** Cabinet style */
@@ -114,7 +114,7 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	}
 
 	/** Cabinet location */
-	protected GeoLoc geo_loc;
+	protected GeoLocImpl geo_loc;
 
 	/** Get the cabinet location */
 	public GeoLoc getGeoLoc() {
@@ -145,6 +145,6 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		MainServer.removeObject(geo_loc);
+		geo_loc.notifyRemove();
 	}
 }

@@ -165,7 +165,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public RampMeterImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.createObject(g);
+		g.notifyCreate();
 		geo_loc = g;
 	}
 
@@ -209,7 +209,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		MainServer.removeObject(geo_loc);
+		geo_loc.notifyRemove();
 	}
 
 	/** Device location */

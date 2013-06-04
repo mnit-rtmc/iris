@@ -16,7 +16,9 @@ package us.mn.state.dot.tms.server;
 
 import java.text.NumberFormat;
 import java.util.Date;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.TMSException;
 
@@ -154,6 +156,22 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		// Override this to initialize new objects
+	}
+
+	/** Notify SONAR clients of an object created */
+	public void notifyCreate() throws SonarException {
+		Server s = MainServer.server;
+		if(s != null)
+			s.createObject(this);
+		else
+			namespace.storeObject(this);
+	}
+
+	/** Notify SONAR clients of an object removed */
+	public void notifyRemove() {
+		Server s = MainServer.server;
+		if(s != null)
+			s.removeObject(this);
 	}
 
 	/** Notify SONAR clients of a change to an attribute */

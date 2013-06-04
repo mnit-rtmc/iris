@@ -85,7 +85,7 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 	public WarningSignImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.createObject(g);
+		g.notifyCreate();
 		geo_loc = g;
 	}
 
@@ -113,7 +113,7 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		MainServer.removeObject(geo_loc);
+		geo_loc.notifyRemove();
 	}
 
 	/** Device location */

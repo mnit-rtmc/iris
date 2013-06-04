@@ -19,6 +19,7 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.NavigableMap;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -652,5 +653,12 @@ public class StationImpl implements Station {
 	/** Get the downstream bottleneck distance */
 	protected float getDownstreamDistance() {
 		return SystemAttrEnum.VSA_DOWNSTREAM_MILES.getFloat();
+	}
+
+	/** Notify SONAR clients of an object removed */
+	public void notifyRemove() {
+		Server s = MainServer.server;
+		if(s != null)
+			s.removeObject(this);
 	}
 }

@@ -103,12 +103,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public ControllerImpl(String n) throws TMSException, SonarException {
 		super(n);
 		CabinetImpl c = new CabinetImpl(n);
-		MainServer.createObject(c);
+		c.notifyCreate();
 		cabinet = c;
 	}
 
 	/** Create a new controller */
-	protected ControllerImpl(String n, Cabinet c, CommLink l, short d,
+	protected ControllerImpl(String n, CabinetImpl c, CommLink l, short d,
 		boolean a, String p, String nt, Date ft) throws TMSException
 	{
 		super(n);
@@ -127,7 +127,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		short d, boolean a, String p, String nt, Date ft)
 		throws TMSException
 	{
-		this(n, (Cabinet)ns.lookupObject(Cabinet.SONAR_TYPE, c),
+		this(n, (CabinetImpl)ns.lookupObject(Cabinet.SONAR_TYPE, c),
 			(CommLink)ns.lookupObject(CommLink.SONAR_TYPE, l),
 			d, a, p, nt, ft);
 	}
@@ -157,15 +157,18 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Controller cabinet */
-	protected Cabinet cabinet;
+	protected CabinetImpl cabinet;
 
 	/** Set the controller cabinet */
 	public void setCabinet(Cabinet c) {
-		cabinet = c;
+		if(c instanceof CabinetImpl)
+			cabinet = (CabinetImpl)c;
 	}
 
 	/** Set the controller cabinet */
 	public void doSetCabinet(Cabinet c) throws TMSException {
+		if(!(c instanceof CabinetImpl))
+			return;
 		if(c == cabinet)
 			return;
 		store.update(this, "cabinet", c);
@@ -879,7 +882,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			link.pullController(this);
 		}
 		super.doDestroy();
-		MainServer.removeObject(cabinet);
+		cabinet.notifyRemove();
 	}
 
 	/** Check if the controller is assigned to a modem comm link */

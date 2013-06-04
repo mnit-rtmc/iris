@@ -154,7 +154,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public DMSImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.createObject(g);
+		g.notifyCreate();
 		geo_loc = g;
 		formatter = new MultiFormatter(this);
 	}
@@ -198,7 +198,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		MainServer.removeObject(geo_loc);
+		geo_loc.notifyRemove();
 	}
 
 	/** Set the controller to which this DMS is assigned */
@@ -1377,7 +1377,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	{
 		SignMessageImpl sm = new SignMessageImpl(m, b, ap, rp, s, d);
 		try {
-			MainServer.createObject(sm);
+			sm.notifyCreate();
 			return sm;
 		}
 		catch(SonarException e) {

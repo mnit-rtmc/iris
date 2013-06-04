@@ -101,7 +101,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	{
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.createObject(g);
+		g.notifyCreate();
 		geo_loc = g;
 		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
 		pt_cache = new PeriodicSampleCache(
@@ -132,7 +132,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		MainServer.removeObject(geo_loc);
+		geo_loc.notifyRemove();
 	}
 
 	/** Device location */
