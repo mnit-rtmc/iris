@@ -1322,8 +1322,15 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return createMessageB(m, bmaps, ap, rp, s, d);
 	}
 
-	/** Create a new message (B version) */
-	protected SignMessage createMessageB(String m, BitmapGraphic[] pages,
+	/** Create a new message (B version).
+	 * @param m MULTI string for message.
+	 * @param pages Pre-rendered graphics for all pages.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
+	 * @param s Scheduled flag.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	private SignMessage createMessageB(String m, BitmapGraphic[] pages,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
 		Integer d)
 	{
@@ -1337,10 +1344,17 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return createMessage(m, bitmaps, ap, rp, s, d);
 	}
 
-	/** Create a sign message */
-	protected SignMessage createMessage(final String m, final String b,
-		DMSMessagePriority ap, DMSMessagePriority rp, final boolean s,
-		final Integer d)
+	/** Create a new sign message.
+	 * @param m MULTI string for message.
+	 * @param b Message bitmaps (Base64).
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
+	 * @param s Scheduled flag.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	private SignMessage createMessage(String m, String b,
+		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
+		Integer d)
 	{
 		SignMessage esm = SignMessageHelper.find(m, b, ap, rp, s, d);
 		if(esm != null)
@@ -1349,28 +1363,38 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			return createMessageC(m, b, ap, rp, s, d);
 	}
 
-	/** Create a new sign message (C version) */
-	protected SignMessage createMessageC(String m, String b,
+	/** Create a new sign message (C version).
+	 * @param m MULTI string for message.
+	 * @param b Message bitmaps (Base64).
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
+	 * @param s Scheduled flag.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	private SignMessage createMessageC(String m, String b,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
 		Integer d)
 	{
 		SignMessageImpl sm = new SignMessageImpl(m, b, ap, rp, s, d);
-		notifyNewSignMessage(sm);
-		return sm;
-	}
-
-	/** Notify SONAR that a new sign message exists */
-	protected void notifyNewSignMessage(SignMessageImpl sm) {
 		try {
-			if(MainServer.server != null)
-				MainServer.server.createObject(sm);
-			else
-				namespace.storeObject(sm);
+			notifyNewSignMessage(sm);
+			return sm;
 		}
 		catch(SonarException e) {
 			// FIXME: we should do something more here...
 			e.printStackTrace();
+			return null;
 		}
+	}
+
+	/** Notify SONAR that a new sign message exists */
+	private void notifyNewSignMessage(SignMessageImpl sm)
+		throws SonarException
+	{
+		if(MainServer.server != null)
+			MainServer.server.createObject(sm);
+		else
+			namespace.storeObject(sm);
 	}
 
 	/** Flag for current scheduled message.  This is used to guarantee that
