@@ -492,8 +492,22 @@ public class DensityUMNAlgorithm implements MeterAlgorithmState {
 			state.resetTimeSteps();
 			writeDebugLog("Processing all states within corridor:" + state.getCorridor().getID(), 5);
 			state.processAllLocations();
+			if(state.isDone()) {
+				writeDebugLog("isDone: removing " +
+					state.getCorridor().getID(), 5);
+				it.remove();
+			}
 		}
 		return;
+	}
+
+	/** Is this DensityUMNAlgorithm done? */
+	private boolean isDone() {
+		for(MeterState ms : meters) {
+			if(ms.meter.isOperating())
+				return false;
+		}
+		return true;
 	}
 
 	/** Link all meters with their corresponding Sections on Mainline */
