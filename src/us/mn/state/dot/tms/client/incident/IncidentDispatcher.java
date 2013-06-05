@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.FlowLayout;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
@@ -50,9 +49,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.LaneConfigurationPanel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
@@ -103,7 +102,7 @@ public class IncidentDispatcher extends JPanel
 	private final JComboBox detail_cbx = new JComboBox();
 
 	/** Location of incident */
-	private final JLabel location_lbl = FormPanel.createValueLabel();
+	private final JLabel location_lbl = IPanel.createValueLabel();
 
 	/** Card layout for camera widgets */
 	private final CardLayout cam_cards = new CardLayout();
@@ -193,7 +192,7 @@ public class IncidentDispatcher extends JPanel
 		dtl_model = new ProxyListModel<IncidentDetail>(
 			st.getIncidentDetails());
 		dtl_model.initialize();
-		type_lbl = FormPanel.createValueLabel();
+		type_lbl = IPanel.createValueLabel();
 		detail_cbx.setRenderer(new IncidentDetailRenderer());
 		detail_cbx.setModel(new WrapperComboBoxModel(dtl_model, true,
 			true));
@@ -212,20 +211,18 @@ public class IncidentDispatcher extends JPanel
 		cam_pnl.add(camera_btn, CAMERA_BTN);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		FormPanel p = new FormPanel();
-		p.setBorder(BorderFactory.createTitledBorder(
-			I18N.get("incident.selected")));
-		p.addRow(I18N.get("incident.type"), type_lbl);
-		p.addRow(I18N.get("incident.detail"), detail_cbx);
-		p.addRow(I18N.get("location"), location_lbl);
-		p.addRow(I18N.get("camera"), cam_pnl);
-		p.addRow(buildImpactBox());
-		JPanel btns = new JPanel(new FlowLayout());
-		btns.add(new JButton(log_inc));
-		btns.add(new JButton(deploy_inc));
-		btns.add(clear_btn);
-		btns.add(new JButton(edit_inc));
-		p.addRow(btns);
+		IPanel p = new IPanel();
+		p.setTitle(I18N.get("incident.selected"));
+		p.add("incident.type");
+		p.add(type_lbl, Stretch.LAST);
+		p.add("incident.detail");
+		p.add(detail_cbx, Stretch.LAST);
+		p.add("location");
+		p.add(location_lbl, Stretch.LAST);
+		p.add("camera");
+		p.add(cam_pnl, Stretch.LAST);
+		p.add(buildImpactBox(), Stretch.FULL);
+		p.add(buildButtonBox(), Stretch.RIGHT);
 		return p;
 	}
 
@@ -235,6 +232,19 @@ public class IncidentDispatcher extends JPanel
 		lane_config.add(impact_pnl);
 		lane_config.add(Box.createVerticalStrut(LANE_SIZE / 2));
 		return lane_config;
+	}
+
+	/** Build the button box */
+	private Box buildButtonBox() {
+		Box btns = Box.createHorizontalBox();
+		btns.add(new JButton(log_inc));
+		btns.add(Box.createHorizontalStrut(UI.hgap));
+		btns.add(new JButton(deploy_inc));
+		btns.add(Box.createHorizontalStrut(UI.hgap));
+		btns.add(clear_btn);
+		btns.add(Box.createHorizontalStrut(UI.hgap));
+		btns.add(new JButton(edit_inc));
+		return btns;
 	}
 
 	/** Create jobs for button press events */
