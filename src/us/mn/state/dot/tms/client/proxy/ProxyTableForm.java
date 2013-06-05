@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
@@ -23,8 +24,9 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -44,7 +46,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 
 	/** Action to display the proxy properties */
 	private final IAction show_props = new IAction("device.properties") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			T proxy = getSelectedProxy();
 			if(proxy != null)
 				model.showPropertiesForm(proxy);
@@ -56,7 +58,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 
 	/** Action to delete the selected proxy */
 	private final IAction del_obj = new IAction("device.delete") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			T proxy = getSelectedProxy();
 			if(proxy != null)
 				proxy.destroy();
@@ -92,7 +94,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				selectProxy();
 			}
 		});
@@ -107,29 +109,35 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	}
 
 	/** Create the panel for the form */
-	protected JPanel createPanel() {
+	private JPanel createPanel() {
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
 		table.setModel(model);
 		table.setRowHeight(UI.scaled(getRowHeight()));
 		table.setVisibleRowCount(getVisibleRowCount());
-		FormPanel panel = new FormPanel();
-		panel.setBorder();
-		addTable(panel);
-		if(model.hasProperties())
-			panel.add(prop_btn);
-		if(model.hasDelete())
-			panel.addRow(new JButton(del_obj));
-		else
-			panel.finishRow();
 		show_props.setEnabled(false);
 		del_obj.setEnabled(false);
-		return panel;
+		IPanel p = new IPanel();
+		addTable(p);
+		p.add(buildButtonBox(), Stretch.RIGHT);
+		return p;
+	}
+
+	/** Build the button box */
+	private Box buildButtonBox() {
+		Box box = Box.createHorizontalBox();
+		if(model.hasProperties())
+			box.add(prop_btn);
+		if(model.hasDelete()) {
+			box.add(Box.createHorizontalStrut(UI.hgap));
+			box.add(new JButton(del_obj));
+		}
+		return box;
 	}
 
 	/** Add the table to the panel */
-	protected void addTable(FormPanel panel) {
-		panel.addRow(table);
+	protected void addTable(IPanel p) {
+		p.add(table, Stretch.FULL);
 	}
 
 	/** Get the row height */

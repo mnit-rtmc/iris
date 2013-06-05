@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,8 @@ package us.mn.state.dot.tms.client.detector;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
-import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -33,7 +34,7 @@ public class DetectorForm extends ProxyTableForm<Detector> {
 	}
 
 	/** Detector panel */
-	protected final DetectorPanel det_pnl;
+	private final DetectorPanel det_pnl;
 
 	/** Create a new detector form */
 	public DetectorForm(Session s) {
@@ -43,27 +44,24 @@ public class DetectorForm extends ProxyTableForm<Detector> {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
+	@Override protected void dispose() {
 		det_pnl.dispose();
 		super.dispose();
 	}
 
 	/** Add the table to the panel */
-	protected void addTable(FormPanel panel) {
-		panel.setFill();
-		panel.setWidth(1);
-		panel.add(table);
-		panel.setFill();
-		panel.addRow(det_pnl);
+	@Override protected void addTable(IPanel p) {
+		p.add(table, Stretch.HALF);
+		p.add(det_pnl, Stretch.FULL);
 	}
 
 	/** Get the row height */
-	protected int getRowHeight() {
+	@Override protected int getRowHeight() {
 		return 20;
 	}
 
 	/** Select a new proxy */
-	protected void selectProxy() {
+	@Override protected void selectProxy() {
 		super.selectProxy();
 		det_pnl.setDetector(getSelectedProxy());
 	}

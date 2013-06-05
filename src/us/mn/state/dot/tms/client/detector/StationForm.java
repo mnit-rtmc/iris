@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,9 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -52,7 +53,7 @@ public class StationForm extends ProxyTableForm<Station> {
 	}
 
 	/** Show the r_node for the selected station */
-	protected void showRNode() {
+	private void showRNode() {
 		Station s = getSelectedProxy();
 		if(s == null)
 			return;
@@ -61,18 +62,18 @@ public class StationForm extends ProxyTableForm<Station> {
 	}
 
 	/** Add the table to the panel */
-	protected void addTable(FormPanel panel) {
-		panel.addRow(table);
-		panel.addRow(new JButton(r_node));
+	@Override protected void addTable(IPanel p) {
+		p.add(table, Stretch.FULL);
+		p.add(new JButton(r_node), Stretch.RIGHT);
 	}
 
 	/** Get the row height */
-	protected int getRowHeight() {
+	@Override protected int getRowHeight() {
 		return 20;
 	}
 
 	/** Select a new proxy */
-	protected void selectProxy() {
+	@Override protected void selectProxy() {
 		r_node.setEnabled(getSelectedProxy() != null);
 	}
 }
