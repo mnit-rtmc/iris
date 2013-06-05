@@ -39,8 +39,9 @@ import us.mn.state.dot.tms.RasterGraphic;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -148,14 +149,14 @@ public class GraphicForm extends AbstractForm {
 	}
 
 	/** Initializze the widgets in the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		model.initialize();
 		add(createGraphicPanel());
 		table.setVisibleRowCount(5);
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
+	@Override protected void dispose() {
 		model.dispose();
 	}
 
@@ -168,17 +169,17 @@ public class GraphicForm extends AbstractForm {
 				selectProxy();
 			}
 		});
-		FormPanel panel = new FormPanel();
 		table.setRowHeight(UI.scaled(MAX_GRAPHIC_HEIGHT / 2));
 		table.setModel(model);
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
-		panel.addRow(table);
-		panel.add(new JButton(create_gr));
-		panel.addRow(new JButton(del_gr));
 		create_gr.setEnabled(model.canAdd());
 		del_gr.setEnabled(false);
-		return panel;
+		IPanel p = new IPanel();
+		p.add(table, Stretch.FULL);
+		p.add(new JButton(create_gr));
+		p.add(new JButton(del_gr), Stretch.RIGHT);
+		return p;
 	}
 
 	/** Change the selected proxy */
