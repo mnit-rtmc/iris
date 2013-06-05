@@ -109,19 +109,19 @@ public class MeterStatusPanel extends FormPanel
 		I18N.get("ramp.meter.off"));
 
 	/** Current session */
-	protected final Session session;
+	private final Session session;
 
 	/** Ramp meter manager */
-	protected final MeterManager manager;
+	private final MeterManager manager;
 
 	/** Selection model */
-	protected final ProxySelectionModel<RampMeter> selectionModel;
+	private final ProxySelectionModel<RampMeter> selectionModel;
 
 	/** Ramp meter proxy cache */
-	protected final TypeCache<RampMeter> cache;
+	private final TypeCache<RampMeter> cache;
 
 	/** Selected ramp meter */
-	protected RampMeter selected = null;
+	private RampMeter selected = null;
 
 	/** Create a new MeterStatusPanel */
 	public MeterStatusPanel(Session s, MeterManager m) {
@@ -254,14 +254,14 @@ public class MeterStatusPanel extends FormPanel
 	}
 
 	/** Set the camera action */
-	protected void setCameraAction(RampMeter meter) {
+	private void setCameraAction(RampMeter meter) {
 		Camera cam = RampMeterHelper.getCamera(meter);
 		camera_btn.setAction(new CameraSelectAction(cam,
 			session.getCameraManager().getSelectionModel()));
 	}
 
 	/** Update one attribute on the form */
-	protected void updateAttribute(RampMeter meter, String a) {
+	private void updateAttribute(RampMeter meter, String a) {
 		if(a == null || a.equals("name"))
 			name_lbl.setText(meter.getName());
 		if(a == null || a.equals("camera"))
@@ -311,7 +311,7 @@ public class MeterStatusPanel extends FormPanel
 	}
 
 	/** Check if the user can update the given ramp meter */
-	protected boolean canUpdate(RampMeter meter) {
+	private boolean canUpdate(RampMeter meter) {
 		return session.canUpdate(meter, "rateNext") &&
 		       session.canUpdate(meter, "mLock");
 	}
