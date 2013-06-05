@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -47,7 +47,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class MeterStatusPanel extends FormPanel
+public class MeterStatusPanel extends IPanel
 	implements ProxyListener<RampMeter>, ProxySelectionListener<RampMeter>
 {
 	/** Format the meter release rate */
@@ -125,7 +125,6 @@ public class MeterStatusPanel extends FormPanel
 
 	/** Create a new MeterStatusPanel */
 	public MeterStatusPanel(Session s, MeterManager m) {
-		super(true);
 		session = s;
 		manager = m;
 		selectionModel = manager.getSelectionModel();
@@ -137,25 +136,30 @@ public class MeterStatusPanel extends FormPanel
 		b_pnl.add(on_btn);
 		b_pnl.add(off_btn);
 		setTitle(I18N.get("ramp.meter.selected"));
-		setEnabled(false);
-		setHeavy(true);
-		add(I18N.get("device.name"), name_lbl);
-		setHeavy(false);
-		addRow(I18N.get("camera"), camera_btn);
+		add("device.name");
+		add(name_lbl);
+		add("camera");
+		add(camera_btn, Stretch.LAST);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		addRow(I18N.get("location"), location_lbl);
-		addRow(I18N.get("device.operation"), operation_lbl);
+		add("location");
+		add(location_lbl, Stretch.LAST);
+		add("device.operation");
+		add(operation_lbl, Stretch.LAST);
 		// Make label opaque so that we can set the background color
 		operation_lbl.setOpaque(true);
-		add(I18N.get("ramp.meter.rate"), release_lbl);
-		addRow(I18N.get("ramp.meter.cycle"), cycle_lbl);
-		add(I18N.get("ramp.meter.queue"), queue_lbl);
-		add(shrink_btn);
-		addRow(grow_btn);
-		add(I18N.get("ramp.meter.lock"), lock_cbx);
-		finishRow();
-		addRow(I18N.get("ramp.meter.metering"), b_pnl);
+		add("ramp.meter.rate");
+		add(release_lbl);
+		add("ramp.meter.cycle");
+		add(cycle_lbl, Stretch.LAST);
+		add("ramp.meter.queue");
+		add(queue_lbl);
+		add(shrink_btn, Stretch.NONE);
+		add(grow_btn, Stretch.LAST);
+		add("ramp.meter.lock");
+		add(lock_cbx, Stretch.LAST);
+		add("ramp.meter.metering");
+		add(b_pnl, Stretch.LAST);
 		setSelected(null);
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
