@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.FlowLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -132,7 +132,7 @@ public class R_NodeDetectorPanel extends JPanel {
 
 	/** Create a new roadway node detector panel */
 	public R_NodeDetectorPanel(Session s) {
-		super(new FlowLayout());
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		session = s;
 		det_pnl = new DetectorPanel(s, false);
 	}
