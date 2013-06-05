@@ -65,26 +65,26 @@ public class CommLinkForm extends AbstractForm {
 	static private final int ROW_HEIGHT = UI.scaled(24);
 
 	/** Tabbed pane */
-	protected final JTabbedPane tab = new JTabbedPane();
+	private final JTabbedPane tab = new JTabbedPane();
 
 	/** Table model for comm links */
-	protected final CommLinkModel model;
+	private final CommLinkModel model;
 
 	/** Table to hold the comm link list */
-	protected final ZTable table = new ZTable();
+	private final ZTable table = new ZTable();
 
 	/** Table model for controllers */
-	protected ControllerModel cmodel;
+	private ControllerModel cmodel;
 
 	/** Table to hold controllers */
-	protected final ZTable ctable = new ZTable();
+	private final ZTable ctable = new ZTable();
 
 	/** Comm link status */
-	protected final JLabel link_status = new JLabel();
+	private final JLabel link_status = new JLabel();
 
 	/** Action to delete the selected comm link */
 	private final IAction delete_link = new IAction("comm.link.delete") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			ListSelectionModel s = table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -93,27 +93,27 @@ public class CommLinkForm extends AbstractForm {
 	};
 
 	/** Table to hold failed controllers */
-	protected final ZTable ftable = new ZTable();
+	private final ZTable ftable = new ZTable();
 
 	/** Failed controller table model */
-	protected final FailedControllerModel fmodel;
+	private final FailedControllerModel fmodel;
 
 	/** Table row sorter */
-	protected final TableRowSorter<FailedControllerModel> sorter;
+	private final TableRowSorter<FailedControllerModel> sorter;
 
 	/** Table row filter */
-	protected final RowFilter<FailedControllerModel, Integer> filter;
+	private final RowFilter<FailedControllerModel, Integer> filter;
 
 	/** Action to show controller properties */
 	private final IAction controller = new IAction("controller") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			doPropertiesAction();
 		}
 	};
 
 	/** Action to delete the selected controller */
 	private final IAction del_ctr = new IAction("controller.delete") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			ListSelectionModel cs = ctable.getSelectionModel();
 			int row = cs.getMinSelectionIndex();
 			if(row >= 0)
@@ -123,13 +123,13 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Action to go to a failed controller */
 	private final IAction go_ctrl = new IAction("controller.go") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			goFailedController();
 		}
 	};
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Create a new comm link form */
 	public CommLinkForm(Session s) {
@@ -156,7 +156,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Initializze the widgets in the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		model.initialize();
 		fmodel.initialize();
 		setLayout(new BorderLayout());
@@ -168,7 +168,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
+	@Override protected void dispose() {
 		model.dispose();
 		fmodel.dispose();
 		if(cmodel != null)
@@ -176,7 +176,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Create comm link panel */
-	protected JPanel createCommLinkPanel() {
+	private JPanel createCommLinkPanel() {
 		final JButton ctr_props = new JButton(controller);
 		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -264,7 +264,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Change the selected comm link */
-	protected void selectCommLink() {
+	private void selectCommLink() {
 		int row = table.getSelectedRow();
 		CommLink cl = model.getProxy(row);
 		if(cl != null)
@@ -283,7 +283,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Change the selected controller */
-	protected void selectController() {
+	private void selectController() {
 		int row = ctable.getSelectedRow();
 		Controller c = cmodel.getProxy(row);
 		controller.setEnabled(c != null);
@@ -291,7 +291,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Do the action for controller properties button */
-	protected void doPropertiesAction() {
+	private void doPropertiesAction() {
 		ListSelectionModel cs = ctable.getSelectionModel();
 		int row = cs.getMinSelectionIndex();
 		if(row >= 0) {
@@ -302,7 +302,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Create the failed controller panel */
-	protected JPanel createFailedControllerPanel() {
+	private JPanel createFailedControllerPanel() {
 		final JButton go_btn = new JButton(go_ctrl);
 		ListSelectionModel s = ftable.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -325,7 +325,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Go to the failed controller (on the main tab) */
-	protected void goFailedController() {
+	private void goFailedController() {
 		int row = ftable.getSelectedRow();
 		if(row >= 0) {
 			int mrow = ftable.convertRowIndexToModel(row);
@@ -338,7 +338,7 @@ public class CommLinkForm extends AbstractForm {
 	}
 
 	/** Go to the specified controller (on the main tab) */
-	protected void goController(Controller c) {
+	private void goController(Controller c) {
 		CommLink l = c.getCommLink();
 		int row = model.getRow(l);
 		if(row >= 0) {
