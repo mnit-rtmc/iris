@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,10 +22,10 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * PropBrightness is a GUI panel for displaying brightness data on a DMS
@@ -32,7 +33,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class PropBrightness extends FormPanel {
+public class PropBrightness extends IPanel {
 
 	/** Unknown value string */
 	static private final String UNKNOWN = "???";
@@ -45,7 +46,7 @@ public class PropBrightness extends FormPanel {
 
 	/** Current brightness low feedback action */
 	private final IAction bright_low = new IAction("dms.brightness.low") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			dms.setDeviceRequest(DeviceRequest.
 				BRIGHTNESS_TOO_DIM.ordinal());
 		}
@@ -53,7 +54,7 @@ public class PropBrightness extends FormPanel {
 
 	/** Current brightness good feedback action */
 	private final IAction bright_good = new IAction("dms.brightness.good") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			dms.setDeviceRequest(DeviceRequest.
 				BRIGHTNESS_GOOD.ordinal());
 		}
@@ -61,7 +62,7 @@ public class PropBrightness extends FormPanel {
 
 	/** Current brightness high feedback action */
 	private final IAction bright_high = new IAction("dms.brightness.high") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			dms.setDeviceRequest(DeviceRequest.
 				BRIGHTNESS_TOO_BRIGHT.ordinal());
 		}
@@ -75,7 +76,6 @@ public class PropBrightness extends FormPanel {
 
 	/** Create a new DMS properties brightness panel */
 	public PropBrightness(Session s, DMS sign) {
-		super(true);
 		session = s;
 		dms = sign;
 	}
@@ -84,14 +84,24 @@ public class PropBrightness extends FormPanel {
 	public void initialize() {
 		photocell_tbl.setAutoCreateColumnsFromModel(false);
 		photocell_tbl.setVisibleRowCount(6);
-		JPanel f_pnl = new JPanel();
-		f_pnl.add(new JButton(bright_low));
-		f_pnl.add(new JButton(bright_good));
-		f_pnl.add(new JButton(bright_high));
-		addRow(I18N.get("dms.brightness.photocells"), photocell_tbl);
-		addRow(I18N.get("dms.brightness.output"), output_lbl);
-		addRow(I18N.get("dms.brightness.feedback"), f_pnl);
+		add("dms.brightness.photocells");
+		add(photocell_tbl, Stretch.FULL);
+		add("dms.brightness.output");
+		add(output_lbl, Stretch.LAST);
+		add("dms.brightness.feedback");
+		add(buildButtonBox(), Stretch.LEFT);
 		updateAttribute(null);
+	}
+
+	/** Build the button box */
+	private Box buildButtonBox() {
+		Box box = Box.createHorizontalBox();
+		box.add(new JButton(bright_low));
+		box.add(Box.createHorizontalStrut(UI.hgap));
+		box.add(new JButton(bright_good));
+		box.add(Box.createHorizontalStrut(UI.hgap));
+		box.add(new JButton(bright_high));
+		return box;
 	}
 
 	/** Update one attribute on the panel */

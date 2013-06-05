@@ -43,9 +43,9 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -106,7 +106,7 @@ public class PropMessages extends JPanel {
 	private final JComboBox font_cbx = new JComboBox();
 
 	/** Font height label */
-	private final JLabel font_height_lbl = FormPanel.createValueLabel();
+	private final JLabel font_height_lbl = IPanel.createValueLabel();
 
 	/** AWS allowed check box */
 	private final JCheckBox aws_allowed_chk = new JCheckBox(

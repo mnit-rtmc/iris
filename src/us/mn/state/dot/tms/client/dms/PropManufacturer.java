@@ -23,7 +23,7 @@ import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.tms.DMS;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class PropManufacturer extends FormPanel {
+public class PropManufacturer extends IPanel {
 
 	/** Unknown value string */
 	static private final String UNKNOWN = "???";
@@ -92,17 +92,19 @@ public class PropManufacturer extends FormPanel {
 
 	/** Create a new DMS properties manufacturer panel */
 	public PropManufacturer(Session s, DMS sign) {
-		super(true);
 		session = s;
 		dms = sign;
 	}
 
 	/** Initialize the widgets on the panel */
 	public void initialize() {
-		addRow(I18N.get("dms.make"), make_lbl);
-		addRow(I18N.get("dms.model"), model_lbl);
-		addRow(I18N.get("dms.version"), version_lbl);
-		addRow(card_pnl);
+		add("dms.make");
+		add(make_lbl, Stretch.LAST);
+		add("dms.model");
+		add(model_lbl, Stretch.LAST);
+		add("dms.version");
+		add(version_lbl, Stretch.LAST);
+		add(card_pnl, Stretch.CENTER);
 		card_pnl.add(createGenericPanel(), MAKE_GENERIC);
 		card_pnl.add(createLedstarPanel(), MAKE_LEDSTAR);
 		card_pnl.add(createSkylinePanel(), MAKE_SKYLINE);
@@ -134,30 +136,32 @@ public class PropManufacturer extends FormPanel {
 
 	/** Create generic manufacturer panel */
 	private JPanel createGenericPanel() {
-		FormPanel panel = new FormPanel();
-		panel.setTitle(I18N.get("dms.manufacturer.unknown"));
-		panel.addRow(createValueLabel(UNKNOWN));
-		return panel;
+		IPanel p = new IPanel();
+		p.setTitle(I18N.get("dms.manufacturer.unknown"));
+		p.add(createValueLabel(UNKNOWN), Stretch.CENTER);
+		return p;
 	}
 
 	/** Create Ledstar-specific panel */
 	private JPanel createLedstarPanel() {
-		FormPanel panel = new FormPanel();
-		panel.setTitle(MAKE_LEDSTAR);
-		panel.addRow(I18N.get("dms.ledstar.pot.base"), pot_base_spn);
-		panel.addRow(I18N.get("dms.ledstar.current.low"),
-			current_low_spn);
-		panel.addRow(I18N.get("dms.ledstar.current.high"),
-			current_high_spn);
-		return panel;
+		IPanel p = new IPanel();
+		p.setTitle(MAKE_LEDSTAR);
+		p.add("dms.ledstar.pot.base");
+		p.add(pot_base_spn, Stretch.LAST);
+		p.add("dms.ledstar.current.low");
+		p.add(current_low_spn, Stretch.LAST);
+		p.add("dms.ledstar.current.high");
+		p.add(current_high_spn, Stretch.LAST);
+		return p;
 	}
 
 	/** Create Skyline-specific panel */
 	private JPanel createSkylinePanel() {
-		FormPanel panel = new FormPanel();
-		panel.setTitle(MAKE_SKYLINE);
-		panel.addRow(I18N.get("dms.skyline.heat.tape"), heat_tape_lbl);
-		return panel;
+		IPanel p = new IPanel();
+		p.setTitle(MAKE_SKYLINE);
+		p.add("dms.skyline.heat.tape");
+		p.add(heat_tape_lbl, Stretch.LAST);
+		return p;
 	}
 
 	/** Update one attribute on the panel */

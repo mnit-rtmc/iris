@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.FlowLayout;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -22,11 +22,11 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.FormPanel;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.units.Temperature;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * PropStatus is a GUI panel for displaying status data on a DMS properties
@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class PropStatus extends FormPanel {
+public class PropStatus extends IPanel {
 
 	/** Get temperature units to use for display */
 	static private Temperature.Units tempUnits() {
@@ -137,7 +137,6 @@ public class PropStatus extends FormPanel {
 
 	/** Create a new DMS properties status panel */
 	public PropStatus(Session s, DMS sign) {
-		super(true);
 		session = s;
 		dms = sign;
 	}
@@ -146,26 +145,35 @@ public class PropStatus extends FormPanel {
 	public void initialize() {
 		power_tbl.setAutoCreateColumnsFromModel(false);
 		power_tbl.setVisibleRowCount(6);
-		addRow(I18N.get("dms.temp.cabinet"), temp_cabinet_lbl);
-		addRow(I18N.get("dms.temp.ambient"), temp_ambient_lbl);
-		addRow(I18N.get("dms.temp.housing"), temp_housing_lbl);
-		addRow(I18N.get("dms.power.supplies"), power_tbl);
-		add(I18N.get("device.operation"), operation_lbl);
-		if(query_msg.getIEnabled())
-			add(new JButton(query_msg));
-		finishRow();
-		addRow(createButtonPanel());
+		add("dms.temp.cabinet");
+		add(temp_cabinet_lbl, Stretch.LAST);
+		add("dms.temp.ambient");
+		add(temp_ambient_lbl, Stretch.LAST);
+		add("dms.temp.housing");
+		add(temp_housing_lbl, Stretch.LAST);
+		add("dms.power.supplies");
+		add(power_tbl, Stretch.FULL);
+		add("device.operation");
+		add(operation_lbl, Stretch.LAST);
+		add(buildButtonBox(), Stretch.RIGHT);
 		updateAttribute(null);
 	}
 
-	/** Create the button panel */
-	private JPanel createButtonPanel() {
-		JPanel p = new JPanel(new FlowLayout());
-		p.add(new JButton(query_status));
-		p.add(new JButton(settings));
-		if(reset.getIEnabled())
-			p.add(new JButton(reset));
-		return p;
+	/** Build the button box */
+	private Box buildButtonBox() {
+		Box box = Box.createHorizontalBox();
+		if(query_msg.getIEnabled()) {
+			box.add(new JButton(query_msg));
+			box.add(Box.createHorizontalStrut(UI.hgap));
+		}
+		box.add(new JButton(query_status));
+		box.add(Box.createHorizontalStrut(UI.hgap));
+		box.add(new JButton(settings));
+		if(reset.getIEnabled()) {
+			box.add(Box.createHorizontalStrut(UI.hgap));
+			box.add(new JButton(reset));
+		}
+		return box;
 	}
 
 	/** Update one attribute on the panel */

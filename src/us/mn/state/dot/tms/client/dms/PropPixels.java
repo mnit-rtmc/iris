@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.BorderLayout;
 import java.io.IOException;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,8 +26,9 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -35,7 +37,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class PropPixels extends FormPanel {
+public class PropPixels extends IPanel {
 
 	/** Unknown value string */
 	static private final String UNKNOWN = "???";
@@ -75,23 +77,19 @@ public class PropPixels extends FormPanel {
 
 	/** Create a new DMS properties pixels panel */
 	public PropPixels(Session s, DMS sign) {
-		super(true);
 		session = s;
 		dms = sign;
 	}
 
 	/** Initialize the widgets on the panel */
 	public void initialize() {
-		JPanel b_pnl = new JPanel();
-		b_pnl.add(new JButton(query_pixels));
-		b_pnl.add(new JButton(test_pixels));
-		addRow(I18N.get("dms.pixel.errors"), bad_pixels_lbl);
-		setFill();
-		addRow(createTitledPanel("dms.pixel.errors.off",stuck_off_pnl));
-		setFill();
-		addRow(createTitledPanel("dms.pixel.errors.on", stuck_on_pnl));
-		setCenter();
-		add(b_pnl);
+		add("dms.pixel.errors");
+		add(bad_pixels_lbl, Stretch.LAST);
+		add(createTitledPanel("dms.pixel.errors.off", stuck_off_pnl),
+			Stretch.FULL);
+		add(createTitledPanel("dms.pixel.errors.on", stuck_on_pnl),
+			Stretch.FULL);
+		add(buildButtonBox(), Stretch.RIGHT);
 		updateAttribute(null);
 	}
 
@@ -102,6 +100,15 @@ public class PropPixels extends FormPanel {
 			text_id)));
 		panel.add(p, BorderLayout.CENTER);
 		return panel;
+	}
+
+	/** Build the button box */
+	private Box buildButtonBox() {
+		Box box = Box.createHorizontalBox();
+		box.add(new JButton(query_pixels));
+		box.add(Box.createHorizontalStrut(UI.hgap));
+		box.add(new JButton(test_pixels));
+		return box;
 	}
 
 	/** Update one attribute on the panel */
