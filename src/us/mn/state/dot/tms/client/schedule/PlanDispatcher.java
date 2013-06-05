@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
-import java.awt.GridBagConstraints;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,8 +42,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
-import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -52,8 +50,8 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class PlanDispatcher extends FormPanel
-	implements ProxyListener<ActionPlan>, ProxySelectionListener<ActionPlan>
+public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
+	ProxySelectionListener<ActionPlan>
 {
 	/** Name component */
 	private final JLabel name_lbl = createValueLabel();
@@ -90,34 +88,24 @@ public class PlanDispatcher extends FormPanel
 
 	/** Create a new plan dispatcher */
 	public PlanDispatcher(Session s, PlanManager m) {
-		super(true);
 		session = s;
 		manager = m;
 		selectionModel = manager.getSelectionModel();
 		cache = session.getSonarState().getActionPlans();
 		setTitle(I18N.get("action.plan.selected"));
 		setEnabled(false);
-		add(new ILabel("action.plan.name"));
-		bag.weightx = 0.4f;
-		bag.weighty = 0.4f;
-		setWest();
-		add(name_lbl);
-		bag.weightx = 0.6f;
-		bag.weighty = 0.6f;
-		addRow(new JLabel(""));
-		add(new ILabel("device.description"));
-		setFill();
-		setWidth(2);
-		add(description_lbl);
-		finishRow();
-		add(I18N.get("dms"), dms_lbl);
-		finishRow();
-		add(I18N.get("lane.markings"), lane_lbl);
-		finishRow();
-		add(I18N.get("ramp.meter.long.plural"), meter_lbl);
-		finishRow();
-		add(I18N.get("action.plan.phase"), phaseCmb);
-		finishRow();
+		add("action.plan.name");
+		add(name_lbl, Stretch.LAST);
+		add("device.description");
+		add(description_lbl, Stretch.LAST);
+		add("dms");
+		add(dms_lbl, Stretch.LAST);
+		add("lane.markings");
+		add(lane_lbl, Stretch.LAST);
+		add("ramp.meter.long.plural");
+		add(meter_lbl, Stretch.LAST);
+		add("action.plan.phase");
+		add(phaseCmb, Stretch.LAST);
 		setSelected(null);
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
