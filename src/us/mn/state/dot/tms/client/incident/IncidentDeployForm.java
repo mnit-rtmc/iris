@@ -38,8 +38,9 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.lcs.LCSArrayCellRenderer;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -189,16 +190,15 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		lbl.setText(manager.getDescription(proxy));
 		lbl.setIcon(manager.getIcon(proxy));
-		FormPanel panel = new FormPanel(false);
-		panel.addRow(lbl);
-		panel.addRow(I18N.get("incident.deploy.proposed"), list);
 		JButton btn = new JButton(send);
-		panel.addRow(btn);
 		send.setEnabled(model.getSize() > 0);
-		// Need to call setEnabled on JButton,
-		// since FormPanel disables it
 		btn.setEnabled(model.getSize() > 0);
-		return panel;
+		IPanel p = new IPanel();
+		p.add(lbl, Stretch.CENTER);
+		p.add("incident.deploy.proposed");
+		p.add(list, Stretch.FULL);
+		p.add(btn, Stretch.RIGHT);
+		return p;
 	}
 
 	/** Send new indications to LCS arrays for the incident */
