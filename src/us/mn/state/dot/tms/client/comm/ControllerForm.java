@@ -40,8 +40,9 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -125,34 +126,34 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private ControllerIOModel io_model;
 
 	/** Firmware version */
-	private final JLabel version_lbl = FormPanel.createValueLabel();
+	private final JLabel version_lbl = IPanel.createValueLabel();
 
 	/** Maint status */
-	private final JLabel maint_lbl = FormPanel.createValueLabel();
+	private final JLabel maint_lbl = IPanel.createValueLabel();
 
 	/** Status */
-	private final JLabel status_lbl = FormPanel.createValueLabel();
+	private final JLabel status_lbl = IPanel.createValueLabel();
 
 	/** Fail time */
-	private final JLabel fail_time_lbl = FormPanel.createValueLabel();
+	private final JLabel fail_time_lbl = IPanel.createValueLabel();
 
 	/** Timeout errors label */
-	private final JLabel timeout_lbl = FormPanel.createValueLabel();
+	private final JLabel timeout_lbl = IPanel.createValueLabel();
 
 	/** Checksum errors label */
-	private final JLabel checksum_lbl = FormPanel.createValueLabel();
+	private final JLabel checksum_lbl = IPanel.createValueLabel();
 
 	/** Parsing errors label */
-	private final JLabel parsing_lbl = FormPanel.createValueLabel();
+	private final JLabel parsing_lbl = IPanel.createValueLabel();
 
 	/** Controller errors label */
-	private final JLabel controller_lbl = FormPanel.createValueLabel();
+	private final JLabel controller_lbl = IPanel.createValueLabel();
 
 	/** Successful operations label */
-	private final JLabel success_lbl = FormPanel.createValueLabel();
+	private final JLabel success_lbl = IPanel.createValueLabel();
 
 	/** Failed operations label */
-	private final JLabel failed_lbl = FormPanel.createValueLabel();
+	private final JLabel failed_lbl = IPanel.createValueLabel();
 
 	/** Clear error status action */
 	private final IAction clear_err = new IAction("controller.error.clear"){
@@ -197,10 +198,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		io_model = new ControllerIOModel(session, proxy);
 		io_model.initialize();
 		cabinets.addProxyListener(cab_listener);
-		comm_link_cbx.setAction(comm_link);
 		comm_link_cbx.setModel(new WrapperComboBoxModel(link_model,
 			false));
-		cab_style_cbx.setAction(cab_style);
 		cab_style_cbx.setModel(new WrapperComboBoxModel(sty_model,
 			true));
 		JTabbedPane tab = new JTabbedPane();
@@ -210,9 +209,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		updateAttribute(null);
-		if(canUpdate())
-			createSetupJobs();
-		if(canUpdateCabinet())
+		createSetupJobs();
+		if(canUpdateCabinet("mile"))
 			createCabinetJobs();
 		if(!canRequest()) {
 			clear_err.setEnabled(false);
@@ -231,30 +229,24 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the controller setup panel */
 	private JPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(canUpdate());
-		panel.add(I18N.get("comm.link"), comm_link_cbx);
-		panel.finishRow();
-		panel.add(I18N.get("controller.drop"), drop_spn);
-		panel.finishRow();
-		panel.add(I18N.get("controller.password"), password);
-		panel.setEast();
-		panel.addRow(new JButton(clear_pwd));
-		panel.addRow(I18N.get("device.notes"), notes_txt);
-		panel.add(I18N.get("controller.active"), active_chk);
-		// Add a third column to the grid bag so the drop spinner
-		// does not extend across the whole form
-		panel.addRow(new javax.swing.JLabel());
-		return panel;
-	}
-
-	/** Check if the user can activate a controller */
-	private boolean canActivate() {
-		return canUpdate("active");
+		IPanel p = new IPanel();
+		p.add("comm.link");
+		p.add(comm_link_cbx, Stretch.LAST);
+		p.add("controller.drop");
+		p.add(drop_spn, Stretch.LAST);
+		p.add("controller.password");
+		p.add(password);
+		p.add(new JButton(clear_pwd), Stretch.RIGHT);
+		p.add("device.notes");
+		p.add(notes_txt, Stretch.FULL);
+		p.add("controller.active");
+		p.add(active_chk, Stretch.LAST);
+		return p;
 	}
 
 	/** Check if the user can update the cabinet */
-	private boolean canUpdateCabinet() {
-		return session.canUpdate(cabinet);
+	private boolean canUpdateCabinet(String a) {
+		return session.canUpdate(cabinet, a);
 	}
 
 	/** Can a controller request be made */
@@ -264,26 +256,35 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the jobs for the setup panel */
 	private void createSetupJobs() {
-		drop_spn.addChangeListener(new ChangeJob(WORKER) {
-			@Override public void perform() {
-				Number n = (Number)drop_spn.getValue();
-				proxy.setDrop(n.shortValue());
-			}
-		});
-		password.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
-				String pwd = new String(
-					password.getPassword()).trim();
-				password.setText("");
-				if(pwd.length() > 0)
-					proxy.setPassword(pwd);
-			}
-		});
-		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
-				proxy.setNotes(notes_txt.getText());
-			}
-		});
+		if(canUpdate("drop")) {
+			drop_spn.addChangeListener(new ChangeJob(WORKER) {
+				public void perform() {
+					Number n = (Number)drop_spn.getValue();
+					proxy.setDrop(n.shortValue());
+				}
+			});
+		}
+		if(canUpdate("password")) {
+			password.addFocusListener(new FocusLostJob(WORKER) {
+				public void perform() {
+					String pwd = new String(
+						password.getPassword()).trim();
+					password.setText("");
+					if(pwd.length() > 0)
+						proxy.setPassword(pwd);
+				}
+			});
+		} else {
+			password.setEnabled(false);
+			clear_pwd.setEnabled(false);
+		}
+		if(canUpdate("notes")) {
+			notes_txt.addFocusListener(new FocusLostJob(WORKER) {
+				public void perform() {
+					proxy.setNotes(notes_txt.getText());
+				}
+			});
+		}
 	}
 
 	/** Create the cabinet panel */
@@ -300,7 +301,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create the jobs for the cabinet panel */
 	private void createCabinetJobs() {
 		mile_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				cabinet.setMile(parseMile());
 			}
 		});
@@ -335,9 +336,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		table.setColumnModel(io_model.createColumnModel());
 		table.setRowHeight(ROW_HEIGHT);
 		table.setVisibleRowCount(8);
-		FormPanel panel = new FormPanel();
-		panel.addRow(table);
-		return panel;
+		IPanel p = new IPanel();
+		p.add(table, Stretch.FULL);
+		return p;
 	}
 
 	/** Create the status panel */
@@ -345,37 +346,53 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		JPanel buttonPnl = new JPanel();
 		buttonPnl.add(new JButton(clear_err));
 		buttonPnl.add(new JButton(reset));
-		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow(I18N.get("controller.version"), version_lbl);
-		panel.addRow(I18N.get("controller.maint"), maint_lbl);
-		panel.addRow(I18N.get("controller.status"), status_lbl);
-		panel.addRow(I18N.get("controller.fail"), fail_time_lbl);
-		panel.addRow(I18N.get("controller.err.timeout"), timeout_lbl);
-		panel.addRow(I18N.get("controller.err.checksum"), checksum_lbl);
-		panel.addRow(I18N.get("controller.err.parsing"), parsing_lbl);
-		panel.addRow(I18N.get("controller.err.ctrl"), controller_lbl);
-		panel.addRow(I18N.get("controller.ops.good"), success_lbl);
-		panel.addRow(I18N.get("controller.ops.bad"), failed_lbl);
-		panel.addRow(buttonPnl);
-		return panel;
+		IPanel p = new IPanel();
+		p.add("controller.version");
+		p.add(version_lbl, Stretch.LAST);
+		p.add("controller.maint");
+		p.add(maint_lbl, Stretch.LAST);
+		p.add("controller.status");
+		p.add(status_lbl, Stretch.LAST);
+		p.add("controller.fail");
+		p.add(fail_time_lbl, Stretch.LAST);
+		p.add("controller.err.timeout");
+		p.add(timeout_lbl, Stretch.LAST);
+		p.add("controller.err.checksum");
+		p.add(checksum_lbl, Stretch.LAST);
+		p.add("controller.err.parsing");
+		p.add(parsing_lbl, Stretch.LAST);
+		p.add("controller.err.ctrl");
+		p.add(controller_lbl, Stretch.LAST);
+		p.add("controller.ops.good");
+		p.add(success_lbl, Stretch.LAST);
+		p.add("controller.ops.bad");
+		p.add(failed_lbl, Stretch.LAST);
+		p.add(buttonPnl, Stretch.RIGHT);
+		return p;
 	}
 
 	/** Update one attribute on the form */
 	@Override protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("commLink")) {
-			comm_link_cbx.setEnabled(canUpdate());
+			comm_link_cbx.setAction(null);
+			comm_link_cbx.setEnabled(canUpdate("commLink"));
 			comm_link_cbx.setSelectedItem(proxy.getCommLink());
+			comm_link_cbx.setAction(comm_link);
 			drop_model = new DropNumberModel(
 				proxy.getCommLink(), getTypeCache(),
 				proxy.getDrop());
 			drop_spn.setModel(drop_model);
 		}
-		if(a == null || a.equals("drop"))
+		if(a == null || a.equals("drop")) {
+			drop_spn.setEnabled(canUpdate("drop"));
 			drop_spn.setValue(proxy.getDrop());
-		if(a == null || a.equals("notes"))
+		}
+		if(a == null || a.equals("notes")) {
+			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(proxy.getNotes());
+		}
 		if(a == null || a.equals("active")) {
-			active_chk.setEnabled(canActivate());
+			active_chk.setEnabled(canUpdate("active"));
 			active_chk.setSelected(proxy.getActive());
 		}
 		if(a == null || a.equals("version"))
@@ -416,7 +433,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 				proxy.getFailedOps()));
 		}
 		if(a == null || a.equals("mile")) {
-			mile_txt.setEnabled(canUpdateCabinet());
+			mile_txt.setEnabled(canUpdateCabinet("mile"));
 			Float m = cabinet.getMile();
 			if(m == null)
 				mile_txt.setText("");
@@ -424,8 +441,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 				mile_txt.setText(m.toString());
 		}
 		if(a == null || a.equals("style")) {
-			cab_style_cbx.setEnabled(canUpdateCabinet());
+			cab_style_cbx.setAction(null);
+			cab_style_cbx.setEnabled(canUpdateCabinet("style"));
 			cab_style_cbx.setSelectedItem(cabinet.getStyle());
+			cab_style_cbx.setAction(cab_style);
 		}
 	}
 }
