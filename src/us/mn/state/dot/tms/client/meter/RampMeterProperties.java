@@ -38,8 +38,9 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -101,10 +102,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		RampMeterType.getDescriptions());
 
 	/** Field for Storage length (feet) */
-	private final JTextField storage_txt = new JTextField();
+	private final JTextField storage_txt = new JTextField(6);
 
 	/** Field for Maximum wait time (seconds) */
-	private final JTextField max_wait_txt = new JTextField();
+	private final JTextField max_wait_txt = new JTextField(5);
 
 	/** Metering algorithm action */
 	private final IAction algorithm = new IAction("ramp.meter.algorithm") {
@@ -120,10 +121,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		MeterAlgorithm.getDescriptions());
 
 	/** Field for AM target rate */
-	private final JTextField am_target_txt = new JTextField();
+	private final JTextField am_target_txt = new JTextField(6);
 
 	/** Field for PM target rate */
-	private final JTextField pm_target_txt = new JTextField();
+	private final JTextField pm_target_txt = new JTextField(6);
 
 	/** Release rate component */
 	private final JLabel release_lbl = new JLabel();
@@ -228,34 +229,43 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 					pm_target_txt.getText()));
 			}
 		});
-		lock_cmb.setAction(new LockMeterAction(proxy, lock_cmb));
 	}
 
 	/** Create ramp meter setup panel */
 	private JPanel createSetupPanel() {
-		meter_type_cbx.setAction(meter_type);
-		algorithm_cbx.setAction(algorithm);
-		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow(I18N.get("ramp.meter.type"), meter_type_cbx);
-		panel.addRow(I18N.get("ramp.meter.storage"), storage_txt);
-		panel.addRow(I18N.get("ramp.meter.max.wait"), max_wait_txt);
-		panel.addRow(I18N.get("ramp.meter.algorithm"), algorithm_cbx);
-		panel.addRow(I18N.get("ramp.meter.target.am"), am_target_txt);
-		panel.addRow(I18N.get("ramp.meter.target.pm"), pm_target_txt);
-		return panel;
+		IPanel p = new IPanel();
+		p.add("ramp.meter.type");
+		p.add(meter_type_cbx, Stretch.LAST);
+		p.add("ramp.meter.storage");
+		p.add(storage_txt, Stretch.LAST);
+		p.add("ramp.meter.max.wait");
+		p.add(max_wait_txt, Stretch.LAST);
+		p.add("ramp.meter.algorithm");
+		p.add(algorithm_cbx, Stretch.LAST);
+		p.add("ramp.meter.target.am");
+		p.add(am_target_txt, Stretch.LAST);
+		p.add("ramp.meter.target.pm");
+		p.add(pm_target_txt, Stretch.LAST);
+		return p;
 	}
 
 	/** Create ramp meter status panel */
 	private JPanel createStatusPanel() {
-		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow(I18N.get("ramp.meter.rate"), release_lbl);
-		panel.addRow(I18N.get("ramp.meter.cycle"), cycle_lbl);
-		panel.addRow(I18N.get("ramp.meter.queue"), queue_lbl);
-		panel.addRow(I18N.get("ramp.meter.lock"), lock_cmb);
-		panel.addRow(I18N.get("device.operation"), op_lbl);
-		panel.addRow(I18N.get("device.status"), status_lbl);
-		panel.addRow(new JButton(settings));
-		return panel;
+		IPanel p = new IPanel();
+		p.add("ramp.meter.rate");
+		p.add(release_lbl, Stretch.LAST);
+		p.add("ramp.meter.cycle");
+		p.add(cycle_lbl, Stretch.LAST);
+		p.add("ramp.meter.queue");
+		p.add(queue_lbl, Stretch.LAST);
+		p.add("ramp.meter.lock");
+		p.add(lock_cmb, Stretch.LAST);
+		p.add("device.operation");
+		p.add(op_lbl, Stretch.LAST);
+		p.add("device.status");
+		p.add(status_lbl, Stretch.LAST);
+		p.add(new JButton(settings), Stretch.RIGHT);
+		return p;
 	}
 
 	/** Update one attribute on the form */
@@ -266,18 +276,34 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			notes_txt.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
 			camera_cbx.setSelectedItem(proxy.getCamera());
-		if(a == null || a.equals("meterType"))
+		if(a == null || a.equals("meterType")) {
+			meter_type_cbx.setAction(null);
+			meter_type_cbx.setEnabled(canUpdate("meterType"));
 			meter_type_cbx.setSelectedIndex(proxy.getMeterType());
-		if(a == null || a.equals("storage"))
+			meter_type_cbx.setAction(meter_type);
+		}
+		if(a == null || a.equals("storage")) {
+			storage_txt.setEnabled(canUpdate("storage"));
 			storage_txt.setText("" + proxy.getStorage());
-		if(a == null || a.equals("maxWait"))
+		}
+		if(a == null || a.equals("maxWait")) {
+			max_wait_txt.setEnabled(canUpdate("maxWait"));
 			max_wait_txt.setText("" + proxy.getMaxWait());
-		if(a == null || a.equals("algorithm"))
+		}
+		if(a == null || a.equals("algorithm")) {
+			algorithm_cbx.setAction(null);
+			algorithm_cbx.setEnabled(canUpdate("algorithm"));
 			algorithm_cbx.setSelectedIndex(proxy.getAlgorithm());
-		if(a == null || a.equals("amTarget"))
+			algorithm_cbx.setAction(algorithm);
+		}
+		if(a == null || a.equals("amTarget")) {
+			am_target_txt.setEnabled(canUpdate("amTarget"));
 			am_target_txt.setText("" + proxy.getAmTarget());
-		if(a == null || a.equals("pmTarget"))
+		}
+		if(a == null || a.equals("pmTarget")) {
+			pm_target_txt.setEnabled(canUpdate("pmTarget"));
 			pm_target_txt.setText("" + proxy.getPmTarget());
+		}
 		if(a == null || a.equals("rate")) {
 			Integer rate = proxy.getRate();
 			cycle_lbl.setText(MeterStatusPanel.formatCycle(rate));
@@ -290,11 +316,14 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			queue_lbl.setText(q.description);
 		}
 		if(a == null || a.equals("mLock")) {
+			lock_cmb.setAction(null);
+			lock_cmb.setEnabled(canUpdate("mLock"));
 			Integer ml = proxy.getMLock();
 			if(ml != null)
 				lock_cmb.setSelectedIndex(ml);
 			else
 				lock_cmb.setSelectedIndex(0);
+			lock_cmb.setAction(new LockMeterAction(proxy,lock_cmb));
 		}
 		if(a == null || a.equals("operation")) {
 			op_lbl.setText(proxy.getOperation());
