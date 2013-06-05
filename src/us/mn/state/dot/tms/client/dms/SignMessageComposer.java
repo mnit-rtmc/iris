@@ -618,9 +618,9 @@ public class SignMessageComposer extends JPanel {
 
 		/** Create a font box */
 		private Box createFontBox() {
-			Box box = Box.createHorizontalBox();
 			ILabel label = new ILabel("font");
 			label.setLabelFor(font_cbx);
+			Box box = Box.createHorizontalBox();
 			box.add(label);
 			box.add(Box.createHorizontalStrut(UI.hgap));
 			box.add(font_cbx);
