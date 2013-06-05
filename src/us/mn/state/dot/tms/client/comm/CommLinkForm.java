@@ -17,15 +17,12 @@ package us.mn.state.dot.tms.client.comm;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -41,9 +38,9 @@ import us.mn.state.dot.tms.ControllerHelper;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -111,6 +108,9 @@ public class CommLinkForm extends AbstractForm {
 		}
 	};
 
+	/** Controller properties button */
+	private final JButton ctr_props = new JButton(controller);
+
 	/** Action to delete the selected controller */
 	private final IAction del_ctr = new IAction("controller.delete") {
 		protected void do_perform() {
@@ -127,6 +127,9 @@ public class CommLinkForm extends AbstractForm {
 			goFailedController();
 		}
 	};
+
+	/** Go button */
+	private final JButton go_btn = new JButton(go_ctrl);
 
 	/** User session */
 	private final Session session;
@@ -165,6 +168,7 @@ public class CommLinkForm extends AbstractForm {
 			createFailedControllerPanel());
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
+		createJobs();
 	}
 
 	/** Dispose of the form */
@@ -175,20 +179,19 @@ public class CommLinkForm extends AbstractForm {
 			cmodel.dispose();
 	}
 
-	/** Create comm link panel */
-	private JPanel createCommLinkPanel() {
-		final JButton ctr_props = new JButton(controller);
+	/** Create jobs */
+	private void createJobs() {
 		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				selectCommLink();
 			}
 		});
 		ListSelectionModel cs = ctable.getSelectionModel();
 		cs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		cs.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				selectController();
 			}
 		});
@@ -198,69 +201,43 @@ public class CommLinkForm extends AbstractForm {
 					ctr_props.doClick();
 			}
 		});
-		JPanel panel = new JPanel(new GridBagLayout());
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = UI.hgap;
-		bag.insets.right = UI.hgap;
-		bag.insets.top = UI.vgap;
-		bag.insets.bottom = UI.vgap;
-		bag.gridwidth = 3;
-		bag.fill = GridBagConstraints.BOTH;
-		bag.weightx = 1;
-		bag.weighty = 0.6f;
+		ListSelectionModel fs = ftable.getSelectionModel();
+		fs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		ftable.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() > 1)
+					go_btn.doClick();
+			}
+		});
+	}
+
+	/** Create comm link panel */
+	private JPanel createCommLinkPanel() {
 		table.setModel(model);
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setRowHeight(ROW_HEIGHT);
 		table.setVisibleRowCount(5);
-		JScrollPane pane = new JScrollPane(table);
-		panel.add(pane, bag);
-		bag.gridwidth = 1;
-		bag.gridx = 0;
-		bag.gridy = 1;
-		bag.anchor = GridBagConstraints.WEST;
-		bag.fill = GridBagConstraints.NONE;
-		bag.weightx = 0;
-		bag.weighty = 0;
-		panel.add(new ILabel("comm.link.selected"), bag);
-		bag.gridx = 1;
-		panel.add(link_status, bag);
-		bag.gridx = 2;
-		bag.anchor = GridBagConstraints.EAST;
 		delete_link.setEnabled(false);
-		panel.add(new JButton(delete_link), bag);
-		bag.gridx = 0;
-		bag.gridy = 2;
-		bag.gridwidth = 3;
-		bag.anchor = GridBagConstraints.CENTER;
-		bag.fill = GridBagConstraints.BOTH;
-		bag.weightx = 1;
-		bag.weighty = 1;
 		ctable.setAutoCreateColumnsFromModel(false);
 		ctable.setRowHeight(ROW_HEIGHT);
-		// NOTE: the width of the controller table is the same as the
-		// comm link table on purpose.
+		// NOTE: the width of the controller table is the
+		//       same as the comm link table on purpose.
 		ctable.setPreferredScrollableViewportSize(new Dimension(
 			table.getPreferredSize().width, ROW_HEIGHT * 12));
-		pane = new JScrollPane(ctable);
-		panel.add(pane, bag);
-		bag.gridwidth = 1;
-		bag.gridx = 0;
-		bag.gridy = 3;
-		bag.anchor = GridBagConstraints.WEST;
-		bag.fill = GridBagConstraints.NONE;
-		bag.weightx = 0;
-		bag.weighty = 0;
-		panel.add(new ILabel("controller.selected"), bag);
-		bag.gridx = 1;
-		bag.anchor = GridBagConstraints.EAST;
 		controller.setEnabled(false);
-		panel.add(ctr_props, bag);
-		bag.gridx = 2;
 		del_ctr.setEnabled(false);
-		panel.add(new JButton(del_ctr), bag);
-		return panel;
+		IPanel p = new IPanel();
+		p.add(table, Stretch.FULL);
+		p.add("comm.link.selected");
+		p.add(link_status);
+		p.add(new JButton(delete_link), Stretch.RIGHT);
+		p.add(ctable, Stretch.FULL);
+		p.add("controller.selected");
+		p.add(ctr_props);
+		p.add(new JButton(del_ctr), Stretch.RIGHT);
+		return p;
 	}
 
 	/** Change the selected comm link */
@@ -303,25 +280,16 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Create the failed controller panel */
 	private JPanel createFailedControllerPanel() {
-		final JButton go_btn = new JButton(go_ctrl);
-		ListSelectionModel s = ftable.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		ftable.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount() > 1)
-					go_btn.doClick();
-			}
-		});
-		FormPanel panel = new FormPanel();
 		ftable.setModel(fmodel);
 		ftable.setAutoCreateColumnsFromModel(false);
 		ftable.setColumnModel(fmodel.createColumnModel());
 		ftable.setRowHeight(ROW_HEIGHT);
 		ftable.setVisibleRowCount(16);
 		ftable.setRowSorter(sorter);
-		panel.addRow(ftable);
-		panel.add(go_btn);
-		return panel;
+		IPanel p = new IPanel();
+		p.add(ftable, Stretch.FULL);
+		p.add(go_btn, Stretch.RIGHT);
+		return p;
 	}
 
 	/** Go to the failed controller (on the main tab) */
