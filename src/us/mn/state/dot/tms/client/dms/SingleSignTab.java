@@ -114,10 +114,10 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	private DMSPanelPager pnlPager;
 
 	/** Tabbed pane for current/preview panels */
-	protected final JTabbedPane tab = new JTabbedPane();
+	private final JTabbedPane tab = new JTabbedPane();
 
 	/** Mouse listener for popup menus */
-	protected final MouseListener popper = new MouseAdapter() {
+	private final MouseListener popper = new MouseAdapter() {
 		public void mousePressed(MouseEvent me) {
 			doPopup(me);
 		}
@@ -128,10 +128,10 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	};
 
 	/** Cache of DMS proxy objects */
-	protected final TypeCache<DMS> cache;
+	private final TypeCache<DMS> cache;
 
 	/** Camera selection model */
-	protected final ProxySelectionModel<Camera> cam_sel_model;
+	private final ProxySelectionModel<Camera> cam_sel_model;
 
 	/** Currently selected DMS.  This will be null if there are zero or
 	 * multiple DMS selected. */
@@ -148,12 +148,12 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Preview mode */
-	protected boolean preview;
+	private boolean preview;
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
 	 * callbacks to this class.  This prevents infinite loops. */
-	protected int adjusting = 0;
+	private int adjusting = 0;
 
 	/** Create a new single sign tab */
 	public SingleSignTab(Session s, DMSDispatcher d) {
@@ -192,7 +192,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Create the widget jobs */
-	protected void createJobs() {
+	private void createJobs() {
 		tab.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
@@ -208,7 +208,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Process a popup menu event */
-	protected void doPopup(MouseEvent me) {
+	private void doPopup(MouseEvent me) {
 		if(me.isPopupTrigger())
 			session.getDMSManager().showPopupMenu(me);
 	}
@@ -279,7 +279,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Clear the selected DMS */
-	protected void clearSelected() {
+	private void clearSelected() {
 		setPager(null);
 		current_pnl.clear();
 		preview_pnl.clear();
@@ -297,7 +297,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Set the camera action */
-	protected void setCameraAction(DMS dms) {
+	private void setCameraAction(DMS dms) {
 		Camera cam = DMSHelper.getCamera(dms);
 		camera_btm.setAction(new CameraSelectAction(cam,cam_sel_model));
 		camera_btm.setEnabled(cam != null);
@@ -306,7 +306,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	/** Update one (or all) attribute(s) on the form.
 	 * @param dms The newly selected DMS. May not be null.
 	 * @param a Attribute to update, null for all attributes. */
-	protected void updateAttribute(DMS dms, String a) {
+	private void updateAttribute(DMS dms, String a) {
 		if(a == null || a.equals("name"))
 			name_lbl.setText(dms.getName());
 		if(a == null || a.equals("lightOutput")) {
@@ -342,7 +342,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Update the status widgets */
-	protected void updateStatus(DMS dms) {
+	private void updateStatus(DMS dms) {
 		if(DMSHelper.isFailed(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
@@ -354,7 +354,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Update the critical error status */
-	protected void updateCritical(DMS dms) {
+	private void updateCritical(DMS dms) {
 		String critical = DMSHelper.getCriticalError(dms);
 		if(critical.isEmpty())
 			updateMaintenance(dms);
@@ -366,7 +366,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Update the maintenance error status */
-	protected void updateMaintenance(DMS dms) {
+	private void updateMaintenance(DMS dms) {
 		String maintenance = DMSHelper.getMaintenance(dms);
 		if(maintenance.isEmpty()) {
 			status_lbl.setForeground(null);
@@ -394,7 +394,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 	}
 
 	/** Update the current message */
-	protected void updateMessageCurrent(DMS dms) {
+	private void updateMessageCurrent(DMS dms) {
 		adjusting++;
 		dispatcher.setMessage(getMultiString(dms));
 		adjusting--;
@@ -419,7 +419,7 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Get the MULTI string currently on the specified dms.
 	 * @param dms DMS to lookup, may not be null. */
-	protected String getMultiString(DMS dms) {
+	private String getMultiString(DMS dms) {
 		SignMessage sm = dms.getMessageCurrent();
 		if(sm != null)
 			return sm.getMulti();
