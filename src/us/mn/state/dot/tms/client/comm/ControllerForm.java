@@ -54,11 +54,11 @@ import us.mn.state.dot.tms.utils.I18N;
 public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Table row height */
-	static protected final int ROW_HEIGHT = 24;
+	static private final int ROW_HEIGHT = 24;
 
 	/** Comm link action */
 	private final IAction comm_link = new IAction("comm.link") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			proxy.setCommLink(
 				(CommLink)comm_link_cbx.getSelectedItem());
 		}
@@ -68,42 +68,42 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final JComboBox comm_link_cbx = new JComboBox();
 
 	/** Model for drop address spinner */
-	protected DropNumberModel drop_model;
+	private DropNumberModel drop_model;
 
 	/** Drop address spinner */
-	protected final JSpinner drop_id = new JSpinner();
+	private final JSpinner drop_spn = new JSpinner();
 
 	/** Controller notes text */
-	protected final JTextArea notes = new JTextArea(3, 24);
+	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Access password */
-	protected final JPasswordField password = new JPasswordField(16);
+	private final JPasswordField password = new JPasswordField(16);
 
 	/** Action to clear the access password */
 	private final IAction clear_pwd = new IAction(
 		"controller.password.clear")
 	{
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			proxy.setPassword(null);
 		}
 	};
 
 	/** Active checkbox */
 	private final JCheckBox active_chk = new JCheckBox(new IAction(null) {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			proxy.setActive(active_chk.isSelected());
 		}
 	});
 
 	/** Location panel */
-	private final LocationPanel location;
+	private final LocationPanel loc_pnl;
 
 	/** Mile point text field */
-	protected final JTextField mile = new JTextField(10);
+	private final JTextField mile_txt = new JTextField(10);
 
 	/** Cabinet style action */
 	private final IAction cab_style = new IAction("cabinet.style") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			cabinet.setStyle((CabinetStyle)
 				cab_style_cbx.getSelectedItem());
 		}
@@ -113,16 +113,16 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final JComboBox cab_style_cbx = new JComboBox();
 
 	/** Cabinet for controller */
-	protected final Cabinet cabinet;
+	private final Cabinet cabinet;
 
 	/** Cabinet cache */
-	protected final TypeCache<Cabinet> cabinets;
+	private final TypeCache<Cabinet> cabinets;
 
 	/** Cabinet listener */
-	protected CabinetListener cab_listener;
+	private CabinetListener cab_listener;
 
 	/** Controller IO model */
-	protected ControllerIOModel io_model;
+	private ControllerIOModel io_model;
 
 	/** Firmware version */
 	private final JLabel version_lbl = FormPanel.createValueLabel();
@@ -156,23 +156,23 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Clear error status action */
 	private final IAction clear_err = new IAction("controller.error.clear"){
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			proxy.setCounters(true);
 		}
 	};
 
 	/** Reset action */
 	private final IAction reset = new IAction("controller.reset") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			proxy.setDownload(true);
 		}
 	};
 
 	/** Comm Link list model */
-	protected final ProxyListModel<CommLink> link_model;
+	private final ProxyListModel<CommLink> link_model;
 
 	/** Cabinet style list model */
-	protected final ProxyListModel<CabinetStyle> sty_model;
+	private final ProxyListModel<CabinetStyle> sty_model;
 
 	/** Create a new controller form */
 	public ControllerForm(Session s, Controller c) {
@@ -183,16 +183,16 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		cabinet = proxy.getCabinet();
 		cab_listener = new CabinetListener();
 		sty_model = con_cache.getCabinetStyleModel();
-		location = new LocationPanel(s);
+		loc_pnl = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<Controller> getTypeCache() {
+	@Override protected TypeCache<Controller> getTypeCache() {
 		return state.getConCache().getControllers();
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		super.initialize();
 		io_model = new ControllerIOModel(session, proxy);
 		io_model.initialize();
@@ -222,24 +222,24 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
+	@Override protected void dispose() {
 		io_model.dispose();
 		cabinets.removeProxyListener(cab_listener);
-		location.dispose();
+		loc_pnl.dispose();
 		super.dispose();
 	}
 
 	/** Create the controller setup panel */
-	protected JPanel createSetupPanel() {
+	private JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
 		panel.add(I18N.get("comm.link"), comm_link_cbx);
 		panel.finishRow();
-		panel.add(I18N.get("controller.drop"), drop_id);
+		panel.add(I18N.get("controller.drop"), drop_spn);
 		panel.finishRow();
 		panel.add(I18N.get("controller.password"), password);
 		panel.setEast();
 		panel.addRow(new JButton(clear_pwd));
-		panel.addRow(I18N.get("device.notes"), notes);
+		panel.addRow(I18N.get("device.notes"), notes_txt);
 		panel.add(I18N.get("controller.active"), active_chk);
 		// Add a third column to the grid bag so the drop spinner
 		// does not extend across the whole form
@@ -248,25 +248,25 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Check if the user can activate a controller */
-	protected boolean canActivate() {
+	private boolean canActivate() {
 		return canUpdate("active");
 	}
 
 	/** Check if the user can update the cabinet */
-	protected boolean canUpdateCabinet() {
+	private boolean canUpdateCabinet() {
 		return session.canUpdate(cabinet);
 	}
 
 	/** Can a controller request be made */
-	protected boolean canRequest() {
+	private boolean canRequest() {
 		return canUpdate("counters") && canUpdate("download");
 	}
 
 	/** Create the jobs for the setup panel */
-	protected void createSetupJobs() {
-		drop_id.addChangeListener(new ChangeJob(WORKER) {
+	private void createSetupJobs() {
+		drop_spn.addChangeListener(new ChangeJob(WORKER) {
 			@Override public void perform() {
-				Number n = (Number)drop_id.getValue();
+				Number n = (Number)drop_spn.getValue();
 				proxy.setDrop(n.shortValue());
 			}
 		});
@@ -279,27 +279,27 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 					proxy.setPassword(pwd);
 			}
 		});
-		notes.addFocusListener(new FocusLostJob(WORKER) {
+		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
-				proxy.setNotes(notes.getText());
+				proxy.setNotes(notes_txt.getText());
 			}
 		});
 	}
 
 	/** Create the cabinet panel */
-	protected JPanel createCabinetPanel() {
-		location.initialize();
-		location.setGeoLoc(cabinet.getGeoLoc());
-		location.add(I18N.get("cabinet.milepoint"), mile);
-		location.finishRow();
-		location.add(I18N.get("cabinet.style"), cab_style_cbx);
-		location.finishRow();
-		return location;
+	private JPanel createCabinetPanel() {
+		loc_pnl.initialize();
+		loc_pnl.setGeoLoc(cabinet.getGeoLoc());
+		loc_pnl.add(I18N.get("cabinet.milepoint"), mile_txt);
+		loc_pnl.finishRow();
+		loc_pnl.add(I18N.get("cabinet.style"), cab_style_cbx);
+		loc_pnl.finishRow();
+		return loc_pnl;
 	}
 
 	/** Create the jobs for the cabinet panel */
-	protected void createCabinetJobs() {
-		mile.addFocusListener(new FocusLostJob(WORKER) {
+	private void createCabinetJobs() {
+		mile_txt.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
 				cabinet.setMile(parseMile());
 			}
@@ -309,7 +309,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Parse the mile point number */
 	private Float parseMile() {
 		try {
-			return Float.valueOf(mile.getText());
+			return Float.valueOf(mile_txt.getText());
 		}
 		catch(NumberFormatException e) {
 			return null;
@@ -317,7 +317,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Listener for cabinet proxy changes */
-	protected class CabinetListener implements ProxyListener<Cabinet> {
+	private class CabinetListener implements ProxyListener<Cabinet> {
 		public void proxyAdded(Cabinet p) {}
 		public void enumerationComplete() { }
 		public void proxyRemoved(Cabinet p) {}
@@ -328,7 +328,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Create the I/O panel */
-	protected JPanel createIOPanel() {
+	private JPanel createIOPanel() {
 		ZTable table = new ZTable();
 		table.setAutoCreateColumnsFromModel(false);
 		table.setModel(io_model);
@@ -341,7 +341,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Create the status panel */
-	protected JPanel createStatusPanel() {
+	private JPanel createStatusPanel() {
 		JPanel buttonPnl = new JPanel();
 		buttonPnl.add(new JButton(clear_err));
 		buttonPnl.add(new JButton(reset));
@@ -361,19 +361,19 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Update one attribute on the form */
-	protected void doUpdateAttribute(String a) {
+	@Override protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("commLink")) {
 			comm_link_cbx.setEnabled(canUpdate());
 			comm_link_cbx.setSelectedItem(proxy.getCommLink());
 			drop_model = new DropNumberModel(
 				proxy.getCommLink(), getTypeCache(),
 				proxy.getDrop());
-			drop_id.setModel(drop_model);
+			drop_spn.setModel(drop_model);
 		}
 		if(a == null || a.equals("drop"))
-			drop_id.setValue(proxy.getDrop());
+			drop_spn.setValue(proxy.getDrop());
 		if(a == null || a.equals("notes"))
-			notes.setText(proxy.getNotes());
+			notes_txt.setText(proxy.getNotes());
 		if(a == null || a.equals("active")) {
 			active_chk.setEnabled(canActivate());
 			active_chk.setSelected(proxy.getActive());
@@ -416,12 +416,12 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 				proxy.getFailedOps()));
 		}
 		if(a == null || a.equals("mile")) {
-			mile.setEnabled(canUpdateCabinet());
+			mile_txt.setEnabled(canUpdateCabinet());
 			Float m = cabinet.getMile();
 			if(m == null)
-				mile.setText("");
+				mile_txt.setText("");
 			else
-				mile.setText(m.toString());
+				mile_txt.setText(m.toString());
 		}
 		if(a == null || a.equals("style")) {
 			cab_style_cbx.setEnabled(canUpdateCabinet());
