@@ -52,7 +52,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Get the controller status */
-	static protected String getControllerStatus(RampMeter proxy) {
+	static private String getControllerStatus(RampMeter proxy) {
 		Controller c = proxy.getController();
 		if(c == null)
 			return "???";
@@ -61,14 +61,14 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	}
 
 	/** Location panel */
-	private final LocationPanel location;
+	private final LocationPanel loc_pnl;
 
 	/** Notes text area */
-	protected final JTextArea notes = new JTextArea(3, 24);
+	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Camera action */
 	private final IAction camera = new IAction("camera") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			proxy.setCamera((Camera)camera_cbx.getSelectedItem());
 		}
 	};
@@ -78,7 +78,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			Controller c = proxy.getController();
 			if(c != null) {
 				SmartDesktop sd = session.getDesktop();
@@ -89,7 +89,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Meter type action */
 	private final IAction meter_type = new IAction("ramp.meter.type") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			int t = meter_type_cbx.getSelectedIndex();
 			if(t >= 0)
 				proxy.setMeterType(t);
@@ -101,14 +101,14 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		RampMeterType.getDescriptions());
 
 	/** Field for Storage length (feet) */
-	protected final JTextField storage = new JTextField();
+	private final JTextField storage_txt = new JTextField();
 
 	/** Field for Maximum wait time (seconds) */
-	protected final JTextField max_wait = new JTextField();
+	private final JTextField max_wait_txt = new JTextField();
 
 	/** Metering algorithm action */
 	private final IAction algorithm = new IAction("ramp.meter.algorithm") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			int a = algorithm_cbx.getSelectedIndex();
 			if(a >= 0)
 				proxy.setAlgorithm(a);
@@ -120,55 +120,55 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		MeterAlgorithm.getDescriptions());
 
 	/** Field for AM target rate */
-	protected final JTextField am_target_txt = new JTextField();
+	private final JTextField am_target_txt = new JTextField();
 
 	/** Field for PM target rate */
-	protected final JTextField pm_target_txt = new JTextField();
+	private final JTextField pm_target_txt = new JTextField();
 
 	/** Release rate component */
-	protected final JLabel release = new JLabel();
+	private final JLabel release_lbl = new JLabel();
 
 	/** Cycle time component */
-	protected final JLabel cycle = new JLabel();
+	private final JLabel cycle_lbl = new JLabel();
 
 	/** Queue label component */
-	protected final JLabel queue = new JLabel();
+	private final JLabel queue_lbl = new JLabel();
 
 	/** Meter lock combo box component */
-	protected final JComboBox m_lock = new JComboBox(
+	private final JComboBox lock_cmb = new JComboBox(
 		RampMeterLock.getDescriptions());
 
 	/** Operation description label */
-	protected final JLabel operation = new JLabel();
+	private final JLabel op_lbl = new JLabel();
 
 	/** Status component */
-	protected final JLabel l_status = new JLabel();
+	private final JLabel status_lbl = new JLabel();
 
 	/** Send settings action */
 	private final IAction settings = new IAction("device.send.settings") {
-		@Override protected void do_perform() {
+		protected void do_perform() {
 			proxy.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
 		}
 	};
 
 	/** Sonar state */
-	protected final SonarState state;
+	private final SonarState state;
 
 	/** Create a new ramp meter properties form */
 	public RampMeterProperties(Session s, RampMeter meter) {
 		super(I18N.get("ramp.meter.long") + ": ", s, meter);
 		state = s.getSonarState();
-		location = new LocationPanel(s);
+		loc_pnl = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<RampMeter> getTypeCache() {
+	@Override protected TypeCache<RampMeter> getTypeCache() {
 		return state.getRampMeters();
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
@@ -183,37 +183,37 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	}
 
 	/** Create the location panel */
-	protected JPanel createLocationPanel() {
+	private JPanel createLocationPanel() {
 		camera_cbx.setAction(camera);
 		camera_cbx.setModel(new WrapperComboBoxModel(
 			state.getCamCache().getCameraModel()));
-		location.setGeoLoc(proxy.getGeoLoc());
-		location.initialize();
-		location.addRow(I18N.get("device.notes"), notes);
-		location.add(I18N.get("camera"), camera_cbx);
-		location.finishRow();
-		location.setCenter();
-		location.addRow(new JButton(controller));
-		return location;
+		loc_pnl.setGeoLoc(proxy.getGeoLoc());
+		loc_pnl.initialize();
+		loc_pnl.addRow(I18N.get("device.notes"), notes_txt);
+		loc_pnl.add(I18N.get("camera"), camera_cbx);
+		loc_pnl.finishRow();
+		loc_pnl.setCenter();
+		loc_pnl.addRow(new JButton(controller));
+		return loc_pnl;
 	}
 
 	/** Create the widget jobs */
-	protected void createUpdateJobs() {
-		notes.addFocusListener(new FocusLostJob(WORKER) {
+	private void createUpdateJobs() {
+		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
-				proxy.setNotes(notes.getText());
+				proxy.setNotes(notes_txt.getText());
 			}
 		});
-		storage.addFocusListener(new FocusLostJob(WORKER) {
+		storage_txt.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
 				proxy.setStorage(Integer.parseInt(
-					storage.getText()));
+					storage_txt.getText()));
 			}
 		});
-		max_wait.addFocusListener(new FocusLostJob(WORKER) {
+		max_wait_txt.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
 				proxy.setMaxWait(Integer.parseInt(
-					max_wait.getText()));
+					max_wait_txt.getText()));
 			}
 		});
 		am_target_txt.addFocusListener(new FocusLostJob(WORKER) {
@@ -228,17 +228,17 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 					pm_target_txt.getText()));
 			}
 		});
-		m_lock.setAction(new LockMeterAction(proxy, m_lock));
+		lock_cmb.setAction(new LockMeterAction(proxy, lock_cmb));
 	}
 
 	/** Create ramp meter setup panel */
-	protected JPanel createSetupPanel() {
+	private JPanel createSetupPanel() {
 		meter_type_cbx.setAction(meter_type);
 		algorithm_cbx.setAction(algorithm);
 		FormPanel panel = new FormPanel(canUpdate());
 		panel.addRow(I18N.get("ramp.meter.type"), meter_type_cbx);
-		panel.addRow(I18N.get("ramp.meter.storage"), storage);
-		panel.addRow(I18N.get("ramp.meter.max.wait"), max_wait);
+		panel.addRow(I18N.get("ramp.meter.storage"), storage_txt);
+		panel.addRow(I18N.get("ramp.meter.max.wait"), max_wait_txt);
 		panel.addRow(I18N.get("ramp.meter.algorithm"), algorithm_cbx);
 		panel.addRow(I18N.get("ramp.meter.target.am"), am_target_txt);
 		panel.addRow(I18N.get("ramp.meter.target.pm"), pm_target_txt);
@@ -246,32 +246,32 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	}
 
 	/** Create ramp meter status panel */
-	protected JPanel createStatusPanel() {
+	private JPanel createStatusPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
-		panel.addRow(I18N.get("ramp.meter.rate"), release);
-		panel.addRow(I18N.get("ramp.meter.cycle"), cycle);
-		panel.addRow(I18N.get("ramp.meter.queue"), queue);
-		panel.addRow(I18N.get("ramp.meter.lock"), m_lock);
-		panel.addRow(I18N.get("device.operation"), operation);
-		panel.addRow(I18N.get("device.status"), l_status);
+		panel.addRow(I18N.get("ramp.meter.rate"), release_lbl);
+		panel.addRow(I18N.get("ramp.meter.cycle"), cycle_lbl);
+		panel.addRow(I18N.get("ramp.meter.queue"), queue_lbl);
+		panel.addRow(I18N.get("ramp.meter.lock"), lock_cmb);
+		panel.addRow(I18N.get("device.operation"), op_lbl);
+		panel.addRow(I18N.get("device.status"), status_lbl);
 		panel.addRow(new JButton(settings));
 		return panel;
 	}
 
 	/** Update one attribute on the form */
-	protected void doUpdateAttribute(String a) {
+	@Override protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
-			notes.setText(proxy.getNotes());
+			notes_txt.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
 			camera_cbx.setSelectedItem(proxy.getCamera());
 		if(a == null || a.equals("meterType"))
 			meter_type_cbx.setSelectedIndex(proxy.getMeterType());
 		if(a == null || a.equals("storage"))
-			storage.setText("" + proxy.getStorage());
+			storage_txt.setText("" + proxy.getStorage());
 		if(a == null || a.equals("maxWait"))
-			max_wait.setText("" + proxy.getMaxWait());
+			max_wait_txt.setText("" + proxy.getMaxWait());
 		if(a == null || a.equals("algorithm"))
 			algorithm_cbx.setSelectedIndex(proxy.getAlgorithm());
 		if(a == null || a.equals("amTarget"))
@@ -280,32 +280,33 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			pm_target_txt.setText("" + proxy.getPmTarget());
 		if(a == null || a.equals("rate")) {
 			Integer rate = proxy.getRate();
-			cycle.setText(MeterStatusPanel.formatCycle(rate));
-			release.setText(MeterStatusPanel.formatRelease(rate));
+			cycle_lbl.setText(MeterStatusPanel.formatCycle(rate));
+			release_lbl.setText(MeterStatusPanel.formatRelease(
+				rate));
 		}
 		if(a == null || a.equals("queue")) {
 			RampMeterQueue q = RampMeterQueue.fromOrdinal(
 				proxy.getQueue());
-			queue.setText(q.description);
+			queue_lbl.setText(q.description);
 		}
 		if(a == null || a.equals("mLock")) {
 			Integer ml = proxy.getMLock();
 			if(ml != null)
-				m_lock.setSelectedIndex(ml);
+				lock_cmb.setSelectedIndex(ml);
 			else
-				m_lock.setSelectedIndex(0);
+				lock_cmb.setSelectedIndex(0);
 		}
 		if(a == null || a.equals("operation")) {
-			operation.setText(proxy.getOperation());
+			op_lbl.setText(proxy.getOperation());
 			String s = getControllerStatus(proxy);
 			if("".equals(s)) {
-				operation.setForeground(null);
-				operation.setBackground(null);
+				op_lbl.setForeground(null);
+				op_lbl.setBackground(null);
 			} else {
-				operation.setForeground(Color.WHITE);
-				operation.setBackground(Color.GRAY);
+				op_lbl.setForeground(Color.WHITE);
+				op_lbl.setBackground(Color.GRAY);
 			}
-			l_status.setText(s);
+			status_lbl.setText(s);
 		}
 	}
 }
