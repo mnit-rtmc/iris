@@ -46,8 +46,9 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.units.Interval;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -60,7 +61,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
+public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 	/** Displays the id of the DMS */
 	private final JLabel name_lbl = createValueLabel();
@@ -157,37 +158,42 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Create a new single sign tab */
 	public SingleSignTab(Session s, DMSDispatcher d) {
-		super(true);
 		session = s;
 		dispatcher = d;
 		cache = s.getSonarState().getDmsCache().getDMSs();
 		cache.addProxyListener(this);
 		cam_sel_model = s.getCameraManager().getSelectionModel();
-		setHeavy(true);
-		add(I18N.get("device.name"), name_lbl);
-		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
-			add(I18N.get("dms.brightness"), brightness_lbl);
-		setHeavy(false);
 		camera_btm.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		addRow(I18N.get("camera"), camera_btm);
-		addRow(I18N.get("location"), location_lbl);
-		addRow(I18N.get("device.status"), status_lbl);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
-		addRow(I18N.get("device.operation"), operation_lbl);
-		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean())
-			addRow(I18N.get("device.op.status"), op_status_lbl);
+
+		add("device.name");
+		add(name_lbl);
+		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
+			add("dms.brightness");
+			add(brightness_lbl);
+		}
+		add("camera");
+		add(camera_btm, Stretch.LAST);
+		add("location");
+		add(location_lbl, Stretch.LAST);
+		add("device.status");
+		add(status_lbl, Stretch.LAST);
+		add("device.operation");
+		add(operation_lbl, Stretch.LAST);
+		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean()) {
+			add("device.op.status");
+			add(op_status_lbl, Stretch.LAST);
+		}
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			setWest();
 			aws_control_chk.setHorizontalTextPosition(
 				SwingConstants.LEFT);
-			addRow(aws_control_chk);
+			add(aws_control_chk, Stretch.LEFT);
 		}
 		tab.add(I18N.get("dms.msg.current"), current_pnl);
 		tab.add(I18N.get("dms.msg.preview"), preview_pnl);
-		setCenter();
-		addRow(tab);
+		add(tab, Stretch.CENTER);
 		createJobs();
 	}
 
