@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.BorderLayout;
+import javax.swing.Action;
+import javax.swing.JComboBox;
 import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -102,6 +104,23 @@ abstract public class SonarObjectForm<T extends SonarObject>
 
 	/** Update one attribute on the form */
 	abstract protected void doUpdateAttribute(String a);
+
+	/** Update one combo box attribute on the form.
+	 * @param a Name of current attribute.
+	 * @param an Attribute name for combo box.
+	 * @param cmb Combo box to update.
+	 * @param idx New index to select in combo box.
+	 * @param act Action for combo box. */
+	protected final void updateComboBox(String a, String an, JComboBox cmb,
+		int idx, Action act)
+	{
+		if(a == null || a.equals(an)) {
+			cmb.setAction(null);
+			cmb.setEnabled(canUpdate(an));
+			cmb.setSelectedIndex(idx);
+			cmb.setAction(act);
+		}
+	}
 
 	/** Dispose of the form */
 	protected void dispose() {

@@ -139,6 +139,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JComboBox lock_cmb = new JComboBox(
 		RampMeterLock.getDescriptions());
 
+	/** Lock meter action */
+	private final LockMeterAction lock_action;
+
 	/** Operation description label */
 	private final JLabel op_lbl = new JLabel();
 
@@ -161,6 +164,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		super(I18N.get("ramp.meter.long") + ": ", s, meter);
 		state = s.getSonarState();
 		loc_pnl = new LocationPanel(s);
+		lock_action = new LockMeterAction(meter, lock_cmb);
 	}
 
 	/** Get the SONAR type cache */
@@ -276,12 +280,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			notes_txt.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
 			camera_cbx.setSelectedItem(proxy.getCamera());
-		if(a == null || a.equals("meterType")) {
-			meter_type_cbx.setAction(null);
-			meter_type_cbx.setEnabled(canUpdate("meterType"));
-			meter_type_cbx.setSelectedIndex(proxy.getMeterType());
-			meter_type_cbx.setAction(meter_type);
-		}
+		updateComboBox(a, "meterType", meter_type_cbx,
+			proxy.getMeterType(), meter_type);
 		if(a == null || a.equals("storage")) {
 			storage_txt.setEnabled(canUpdate("storage"));
 			storage_txt.setText("" + proxy.getStorage());
@@ -290,12 +290,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			max_wait_txt.setEnabled(canUpdate("maxWait"));
 			max_wait_txt.setText("" + proxy.getMaxWait());
 		}
-		if(a == null || a.equals("algorithm")) {
-			algorithm_cbx.setAction(null);
-			algorithm_cbx.setEnabled(canUpdate("algorithm"));
-			algorithm_cbx.setSelectedIndex(proxy.getAlgorithm());
-			algorithm_cbx.setAction(algorithm);
-		}
+		updateComboBox(a, "algorithm", algorithm_cbx,
+			proxy.getAlgorithm(), algorithm);
 		if(a == null || a.equals("amTarget")) {
 			am_target_txt.setEnabled(canUpdate("amTarget"));
 			am_target_txt.setText("" + proxy.getAmTarget());
@@ -315,16 +311,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 				proxy.getQueue());
 			queue_lbl.setText(q.description);
 		}
-		if(a == null || a.equals("mLock")) {
-			lock_cmb.setAction(null);
-			lock_cmb.setEnabled(canUpdate("mLock"));
-			Integer ml = proxy.getMLock();
-			if(ml != null)
-				lock_cmb.setSelectedIndex(ml);
-			else
-				lock_cmb.setSelectedIndex(0);
-			lock_cmb.setAction(new LockMeterAction(proxy,lock_cmb));
-		}
+		updateComboBox(a, "mLock", lock_cmb, getMLock(), lock_action);
 		if(a == null || a.equals("operation")) {
 			op_lbl.setText(proxy.getOperation());
 			String s = getControllerStatus(proxy);
@@ -337,5 +324,11 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			}
 			status_lbl.setText(s);
 		}
+	}
+
+	/** Get meter lock index */
+	private int getMLock() {
+		Integer ml = proxy.getMLock();
+		return ml != null ? ml : 0;
 	}
 }
