@@ -154,9 +154,9 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		add("detector.field.len");
 		add(field_spn, Stretch.LAST);
 		add("detector.fake");
-		add(fake_txt, Stretch.LAST);
+		add(fake_txt, Stretch.FULL);
 		add("device.notes");
-		add(note_txt, Stretch.LAST);
+		add(note_txt, Stretch.FULL);
 		add(controller_btn);
 		add(r_node_btn, Stretch.LAST);
 		createJobs();
