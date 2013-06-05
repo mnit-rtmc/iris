@@ -49,7 +49,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Location panel */
-	private final LocationPanel location;
+	private final LocationPanel loc_pnl;
 
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(3, 24);
@@ -92,7 +92,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Create a new camera properties form */
 	public CameraProperties(Session s, Camera c) {
 		super(I18N.get("camera") + ": ", s, c);
-		location = new LocationPanel(s);
+		loc_pnl = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
@@ -115,18 +115,18 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Dispose of the form */
 	@Override protected void dispose() {
-		location.dispose();
+		loc_pnl.dispose();
 		super.dispose();
 	}
 
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
-		location.setGeoLoc(proxy.getGeoLoc());
-		location.initialize();
-		location.addRow(I18N.get("device.notes"), notes_txt);
-		location.setCenter();
-		location.addRow(new JButton(controller));
-		return location;
+		loc_pnl.setGeoLoc(proxy.getGeoLoc());
+		loc_pnl.initialize();
+		loc_pnl.add("device.notes");
+		loc_pnl.add(notes_txt, Stretch.FULL);
+		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
+		return loc_pnl;
 	}
 
 	/** Controller lookup button pressed */

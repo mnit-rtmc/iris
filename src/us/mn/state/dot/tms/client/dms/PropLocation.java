@@ -73,11 +73,11 @@ public class PropLocation extends LocationPanel {
 		super.initialize();
 		camera_cbx.setModel(new WrapperComboBoxModel(
 			state.getCamCache().getCameraModel()));
-		addRow(I18N.get("device.notes"), notes_txt);
-		add(I18N.get("camera"), camera_cbx);
-		finishRow();
-		setCenter();
-		addRow(new JButton(controller));
+		add("device.notes");
+		add(notes_txt, Stretch.FULL);
+		add("camera");
+		add(camera_cbx, Stretch.LAST);
+		add(new JButton(controller), Stretch.RIGHT);
 		setGeoLoc(dms.getGeoLoc());
 	}
 

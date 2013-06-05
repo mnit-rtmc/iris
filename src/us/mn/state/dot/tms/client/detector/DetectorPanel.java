@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.detector;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
@@ -154,7 +155,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		add("detector.field.len");
 		add(field_spn, Stretch.LAST);
 		add("detector.fake");
-		add(fake_txt, Stretch.FULL);
+		add(fake_txt, Stretch.END);
 		add("device.notes");
 		add(note_txt, Stretch.FULL);
 		add(controller_btn);

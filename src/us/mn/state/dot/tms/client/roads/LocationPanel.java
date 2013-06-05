@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.geom.Point2D;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JTextField;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
@@ -33,9 +34,8 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.FormPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
@@ -43,7 +43,7 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  *
  * @author Douglas Lau
  */
-public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
+public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 
 	/** Get the Double value of a text field */
 	static private Double getTextDouble(JTextField tf) {
@@ -175,7 +175,6 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 
 	/** Create a new location panel */
 	public LocationPanel(Session s) {
-		super(true);
 		session = s;
 		client = s.getDesktop().client;
 		state = s.getSonarState();
@@ -189,43 +188,31 @@ public class LocationPanel extends FormPanel implements ProxyView<GeoLoc> {
 			state.getRoadModel(), true));
 		cross_cbx.setModel(new WrapperComboBoxModel(
 			state.getRoadModel(), true));
-		add(new ILabel("location.roadway"), roadway_cbx);
-		setWidth(2);
-		addRow(road_dir_cbx);
-		add(cross_mod_cbx);
-		setWest();
-		setWidth(2);
+		add("location.roadway");
+		add(roadway_cbx);
+		add(road_dir_cbx, Stretch.LAST);
+		add(cross_mod_cbx, Stretch.NONE);
 		add(cross_cbx);
-		setWidth(1);
-		addRow(cross_dir_cbx);
-		add(new ILabel("location.lat"), lat_txt);
-		finishRow();
-		add(new ILabel("location.lon"), lon_txt);
-		finishRow();
-		setWidth(4);
-		updateSelectBag();
-		addRow(new JButton(select_pt));
+		add(cross_dir_cbx, Stretch.LAST);
+		add("location.lat");
+		add(lat_txt, Stretch.WIDE);
+		add(new JButton(select_pt), Stretch.TALL);
+		add("location.lon");
+		add(lon_txt, Stretch.WIDE);
+		add(new JLabel(), Stretch.LEFT);
 		createJobs();
 		watcher.initialize();
-	}
-
-	/** Select position grid bag constraints */
-	private void updateSelectBag() {
-		bag.gridx = 2;
-		bag.gridy = 2;
-		bag.gridwidth = 1;
-		bag.gridheight = 2;
 	}
 
 	/** Create the jobs */
 	protected void createJobs() {
 		lat_txt.addFocusListener(new FocusLostJob(client.WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				setLat(getTextDouble(lat_txt));
 			}
 		});
 		lon_txt.addFocusListener(new FocusLostJob(client.WORKER) {
-			@Override public void perform() {
+			public void perform() {
 				setLon(getTextDouble(lon_txt));
 			}
 		});

@@ -38,31 +38,39 @@ public class IPanel extends JPanel {
 
 	/** Stretch types */
 	public enum Stretch {
-		NONE(GridBagConstraints.NONE, 1, GridBagConstraints.EAST, 0.1f,
-			0),
-		SOME(GridBagConstraints.NONE, 1, GridBagConstraints.WEST, 0.5f,
-			0),
-		HALF(GridBagConstraints.BOTH, 1, GridBagConstraints.CENTER,
+		NONE(GridBagConstraints.NONE, 1, 1, GridBagConstraints.EAST,
+			0.1f, 0),
+		SOME(GridBagConstraints.NONE, 1, 1, GridBagConstraints.WEST,
+			0.5f, 0),
+		HALF(GridBagConstraints.BOTH, 1, 1, GridBagConstraints.CENTER,
 			1, 1),
-		CENTER(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
+		WIDE(GridBagConstraints.HORIZONTAL, 1, 1,
+			GridBagConstraints.WEST, 0, 0),
+		END(GridBagConstraints.HORIZONTAL, GridBagConstraints.REMAINDER,
+			1, GridBagConstraints.WEST, 0, 0),
+		CENTER(GridBagConstraints.NONE, GridBagConstraints.REMAINDER, 1,
 			GridBagConstraints.CENTER, 0, 0),
-		FULL(GridBagConstraints.BOTH, GridBagConstraints.REMAINDER,
+		FULL(GridBagConstraints.BOTH, GridBagConstraints.REMAINDER, 1,
 			GridBagConstraints.CENTER, 1, 1),
-		LEFT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
+		LEFT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER, 1,
 			GridBagConstraints.WEST, 1, 0),
-		RIGHT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
+		RIGHT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER, 1,
 			GridBagConstraints.EAST, 0.1f, 0),
-		LAST(GridBagConstraints.NONE, GridBagConstraints.REMAINDER,
+		TALL(GridBagConstraints.NONE, GridBagConstraints.REMAINDER, 2,
+			GridBagConstraints.EAST, 0.1f, 0),
+		LAST(GridBagConstraints.NONE, GridBagConstraints.REMAINDER, 1,
 			GridBagConstraints.WEST, 0.1f, 0);
-		private Stretch(int f, int w, int a, float x, float y) {
+		private Stretch(int f, int w, int h, int a, float x, float y) {
 			fill = f;
 			width = w;
+			height = h;
 			anchor = a;
 			wx = x;
 			wy = y;
 		}
 		private final int fill;
 		private final int width;
+		private final int height;
 		private final int anchor;
 		private final float wx;
 		private final float wy;
@@ -89,6 +97,9 @@ public class IPanel extends JPanel {
 
 	/** Current row on the form */
 	private int row = 0;
+
+	/** Current column on the form */
+	private int col = 0;
 
 	/** Create a new panel */
 	public IPanel() {
@@ -117,11 +128,15 @@ public class IPanel extends JPanel {
 		bag.insets.bottom = UI.vgap / 2;
 		bag.weightx = s.wx;
 		bag.weighty = s.wy;
-		bag.gridx = GridBagConstraints.RELATIVE;
+		bag.gridx = col;
 		bag.gridy = row;
 		bag.gridwidth = s.width;
-		if(s.width == GridBagConstraints.REMAINDER)
+		bag.gridheight = s.height;
+		if(s.width == GridBagConstraints.REMAINDER) {
 			row++;
+			col = 0;
+		} else
+			col += s.width;
 		return bag;
 	}
 

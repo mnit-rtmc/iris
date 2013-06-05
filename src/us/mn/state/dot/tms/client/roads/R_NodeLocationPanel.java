@@ -31,13 +31,13 @@ import us.mn.state.dot.tms.utils.I18N;
 public class R_NodeLocationPanel extends LocationPanel {
 
 	/** Component for editing notes */
-	protected final JTextField notes_txt = new JTextField(20);
+	private final JTextField notes_txt = new JTextField(20);
 
 	/** Label for r_node name */
-	protected final JLabel name_lbl = new JLabel();
+	private final JLabel name_lbl = createValueLabel();
 
 	/** Node being edited */
-	protected R_Node node;
+	private R_Node node;
 
 	/** Create a new roadway node location panel */
 	public R_NodeLocationPanel(Session s) {
@@ -47,9 +47,9 @@ public class R_NodeLocationPanel extends LocationPanel {
 	/** Initialize the widgets on the panel */
 	@Override public void initialize() {
 		super.initialize();
-		addRow(I18N.get("device.notes"), notes_txt);
-		setCenter();
-		addRow(name_lbl);
+		add("device.notes");
+		add(notes_txt, Stretch.FULL);
+		add(name_lbl, Stretch.CENTER);
 		clear();
 	}
 
@@ -64,7 +64,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Set the node notes */
-	protected void setNotes(String nt) {
+	private void setNotes(String nt) {
 		R_Node n = node;
 		if(n != null)
 			n.setNotes(nt);
@@ -81,7 +81,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Update one attribute */
-	protected void doUpdate(R_Node n, String a) {
+	private void doUpdate(R_Node n, String a) {
 		if(a == null) {
 			node = n;
 			name_lbl.setText(n.getName());
@@ -93,7 +93,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Test if the user can update an attribute */
-	protected boolean canUpdate(R_Node n, String a) {
+	private boolean canUpdate(R_Node n, String a) {
 		return session.canUpdate(n, a);
 	}
 

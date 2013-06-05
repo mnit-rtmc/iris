@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -39,10 +40,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 
 	/** Location panel */
-	private final LocationPanel location;
+	private final LocationPanel loc_pnl;
 
 	/** Notes text area */
-	protected final JTextArea notes = new JTextArea(3, 24);
+	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -54,16 +55,16 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	/** Create a new weather sensor properties form */
 	public WeatherSensorProperties(Session s, WeatherSensor ws) {
 		super(I18N.get("weather.sensor") + ": ", s, ws);
-		location = new LocationPanel(s);
+		loc_pnl = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<WeatherSensor> getTypeCache() {
+	@Override protected TypeCache<WeatherSensor> getTypeCache() {
 		return state.getWeatherSensors();
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() {
+	@Override protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
@@ -75,42 +76,42 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {
-		location.dispose();
+	@Override protected void dispose() {
+		loc_pnl.dispose();
 		super.dispose();
 	}
 
 	/** Create the location panel */
-	protected JPanel createLocationPanel() {
-		location.setGeoLoc(proxy.getGeoLoc());
-		location.initialize();
-		location.addRow(I18N.get("device.notes"), notes);
-		location.setCenter();
-		location.addRow(new JButton(controller));
-		return location;
+	private JPanel createLocationPanel() {
+		loc_pnl.setGeoLoc(proxy.getGeoLoc());
+		loc_pnl.initialize();
+		loc_pnl.add("device.notes");
+		loc_pnl.add(notes_txt, Stretch.FULL);
+		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
+		return loc_pnl;
 	}
 
 	/** Create the widget jobs */
-	protected void createUpdateJobs() {
-		notes.addFocusListener(new FocusLostJob(WORKER) {
+	private void createUpdateJobs() {
+		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
 			@Override public void perform() {
-				proxy.setNotes(notes.getText());
+				proxy.setNotes(notes_txt.getText());
 			}
 		});
 	}
 
 	/** Controller lookup button pressed */
-	protected void controllerPressed() {
+	private void controllerPressed() {
 		Controller c = proxy.getController();
 		if(c != null)
 			showForm(new ControllerForm(session, c));
 	}
 
 	/** Update one attribute on the form */
-	protected void doUpdateAttribute(String a) {
+	@Override protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
-			notes.setText(proxy.getNotes());
+			notes_txt.setText(proxy.getNotes());
 	}
 }
