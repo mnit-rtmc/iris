@@ -110,61 +110,61 @@ CREATE TABLE iris.glyph (
 	graphic VARCHAR(20) NOT NULL REFERENCES iris.graphic(name)
 );
 
-CREATE FUNCTION graphic_bpp(VARCHAR(20)) RETURNS INTEGER AS '
-	DECLARE n ALIAS FOR $1;
-		b INTEGER;
-	BEGIN SELECT INTO b bpp FROM iris.graphic WHERE name = n;
-		RETURN b;
-	END;'
-LANGUAGE PLPGSQL;
+CREATE FUNCTION graphic_bpp(VARCHAR(20)) RETURNS INTEGER AS $graphic_bpp$
+DECLARE n ALIAS FOR $1;
+    b INTEGER;
+BEGIN SELECT INTO b bpp FROM iris.graphic WHERE name = n;
+    RETURN b;
+END;
+$graphic_bpp$ LANGUAGE plpgsql;
 
-CREATE FUNCTION graphic_height(VARCHAR(20)) RETURNS INTEGER AS '
-	DECLARE n ALIAS FOR $1;
-		h INTEGER;
-	BEGIN SELECT INTO h height FROM iris.graphic WHERE name = n;
-		RETURN h;
-	END;'
-LANGUAGE PLPGSQL;
+CREATE FUNCTION graphic_height(VARCHAR(20)) RETURNS INTEGER AS $graphic_height$
+DECLARE n ALIAS FOR $1;
+    h INTEGER;
+BEGIN SELECT INTO h height FROM iris.graphic WHERE name = n;
+    RETURN h;
+END;
+$graphic_height$ LANGUAGE plpgsql;
 
-CREATE FUNCTION graphic_width(VARCHAR(20)) RETURNS INTEGER AS '
-	DECLARE n ALIAS FOR $1;
-		w INTEGER;
-	BEGIN SELECT INTO w width FROM iris.graphic WHERE name = n;
-		RETURN w;
-	END;'
-LANGUAGE PLPGSQL;
+CREATE FUNCTION graphic_width(VARCHAR(20)) RETURNS INTEGER AS $graphic_width$
+DECLARE n ALIAS FOR $1;
+    w INTEGER;
+BEGIN SELECT INTO w width FROM iris.graphic WHERE name = n;
+    RETURN w;
+END;
+$graphic_width$ LANGUAGE plpgsql;
 
-CREATE FUNCTION glyph_font(VARCHAR(20)) RETURNS VARCHAR(16) AS '
-	DECLARE n ALIAS FOR $1;
-		f VARCHAR(16);
-	BEGIN SELECT INTO f font FROM iris.glyph WHERE graphic = n;
-		RETURN f;
-	END;'
-LANGUAGE PLPGSQL;
+CREATE FUNCTION glyph_font(VARCHAR(20)) RETURNS VARCHAR(16) AS $glyph_font$
+DECLARE n ALIAS FOR $1;
+    f VARCHAR(16);
+BEGIN SELECT INTO f font FROM iris.glyph WHERE graphic = n;
+    RETURN f;
+END;
+$glyph_font$ LANGUAGE plpgsql;
 
-CREATE FUNCTION font_height(VARCHAR(16)) RETURNS INTEGER AS '
-	DECLARE n ALIAS FOR $1;
-		h INTEGER;
-	BEGIN SELECT INTO h height FROM iris.font WHERE name = n;
-		RETURN h;
-	END;'
-LANGUAGE PLPGSQL;
+CREATE FUNCTION font_height(VARCHAR(16)) RETURNS INTEGER AS $font_height$
+DECLARE n ALIAS FOR $1;
+    h INTEGER;
+BEGIN SELECT INTO h height FROM iris.font WHERE name = n;
+    RETURN h;
+END;
+$font_height$ LANGUAGE plpgsql;
 
-CREATE FUNCTION font_width(VARCHAR(16)) RETURNS INTEGER AS '
-	DECLARE n ALIAS FOR $1;
-		w INTEGER;
-	BEGIN SELECT INTO w width FROM iris.font WHERE name = n;
-		RETURN w;
-	END;'
-LANGUAGE PLPGSQL;
+CREATE FUNCTION font_width(VARCHAR(16)) RETURNS INTEGER AS $font_width$
+DECLARE n ALIAS FOR $1;
+    w INTEGER;
+BEGIN SELECT INTO w width FROM iris.font WHERE name = n;
+    RETURN w;
+END;
+$font_width$ LANGUAGE plpgsql;
 
-CREATE FUNCTION font_graphic(VARCHAR(16)) RETURNS VARCHAR(20) AS '
-	DECLARE n ALIAS FOR $1;
-		g TEXT;
-	BEGIN SELECT INTO g graphic FROM iris.glyph WHERE font = n;
-		RETURN g;
-	END;'
-LANGUAGE PLPGSQL;
+CREATE FUNCTION font_graphic(VARCHAR(16)) RETURNS VARCHAR(20) AS $font_graphic$
+DECLARE n ALIAS FOR $1;
+    g TEXT;
+BEGIN SELECT INTO g graphic FROM iris.glyph WHERE font = n;
+    RETURN g;
+END;
+$font_graphic$ LANGUAGE plpgsql;
 
 ALTER TABLE iris.graphic
 	ADD CONSTRAINT graphic_bpp_ck
@@ -281,38 +281,38 @@ CREATE TABLE iris.r_node (
 CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
 
 CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
-	RETURNS INTEGER AS '
+	RETURNS INTEGER AS $r_node_left$
 DECLARE node_type ALIAS FOR $1;
 DECLARE lanes ALIAS FOR $2;
 DECLARE attach_side ALIAS FOR $3;
 DECLARE shift ALIAS FOR $4;
 BEGIN
-	IF attach_side = TRUE THEN
-		RETURN shift;
-	END IF;
-	IF node_type = 0 THEN
-		RETURN shift - lanes;
-	END IF;
-	RETURN shift;
-END;'
-LANGUAGE PLPGSQL;
+    IF attach_side = TRUE THEN
+        RETURN shift;
+    END IF;
+    IF node_type = 0 THEN
+        RETURN shift - lanes;
+    END IF;
+    RETURN shift;
+END;
+$r_node_left$ LANGUAGE plpgsql;
 
 CREATE FUNCTION iris.r_node_right(INTEGER, INTEGER, BOOLEAN, INTEGER)
-	RETURNS INTEGER AS '
+	RETURNS INTEGER AS $r_node_right$
 DECLARE node_type ALIAS FOR $1;
 DECLARE lanes ALIAS FOR $2;
 DECLARE attach_side ALIAS FOR $3;
 DECLARE shift ALIAS FOR $4;
 BEGIN
-	IF attach_side = FALSE THEN
-		RETURN shift;
-	END IF;
-	IF node_type = 0 THEN
-		RETURN shift + lanes;
-	END IF;
-	RETURN shift;
-END;'
-LANGUAGE PLPGSQL;
+    IF attach_side = FALSE THEN
+        RETURN shift;
+    END IF;
+    IF node_type = 0 THEN
+        RETURN shift + lanes;
+    END IF;
+    RETURN shift;
+END;
+$r_node_right$ LANGUAGE plpgsql;
 
 ALTER TABLE iris.r_node ADD CONSTRAINT left_edge_ck
 	CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
@@ -1077,14 +1077,14 @@ CREATE TABLE event.incident_update (
 	cleared BOOLEAN NOT NULL
 );
 
-CREATE FUNCTION event.incident_update_trig() RETURNS "trigger" AS
-'
+CREATE FUNCTION event.incident_update_trig() RETURNS TRIGGER AS
+$incident_update_trig$
 BEGIN
-	INSERT INTO event.incident_update
-		(incident, event_date, impact, cleared)
-	VALUES (NEW.name, now(), NEW.impact, NEW.cleared);
-	RETURN NEW;
-END;' LANGUAGE plpgsql;
+    INSERT INTO event.incident_update (incident, event_date, impact, cleared)
+        VALUES (NEW.name, now(), NEW.impact, NEW.cleared);
+    RETURN NEW;
+END;
+$incident_update_trig$ LANGUAGE plpgsql;
 
 CREATE TRIGGER incident_update_trigger
 	AFTER INSERT OR UPDATE ON event.incident
@@ -1262,41 +1262,41 @@ CREATE VIEW lane_type_view AS
 GRANT SELECT ON lane_type_view TO PUBLIC;
 
 CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
-	smallint, boolean) RETURNS text AS
-'	DECLARE
-		rd ALIAS FOR $1;
-		rdir ALIAS FOR $2;
-		xst ALIAS FOR $3;
-		cross_dir ALIAS FOR $4;
-		xmod ALIAS FOR $5;
-		l_type ALIAS FOR $6;
-		lane_number ALIAS FOR $7;
-		abandoned ALIAS FOR $8;
-		xmd varchar(2);
-		ltyp varchar(2);
-		lnum varchar(2);
-		suffix varchar(5);
-	BEGIN
-		IF rd IS NULL OR xst IS NULL THEN
-			RETURN ''FUTURE'';
-		END IF;
-		SELECT INTO ltyp dcode FROM lane_type_view WHERE id = l_type;
-		lnum = '''';
-		IF lane_number > 0 THEN
-			lnum = TO_CHAR(lane_number, ''FM9'');
-		END IF;
-		xmd = '''';
-		IF xmod != ''@'' THEN
-			xmd = xmod;
-		END IF;
-		suffix = '''';
-		IF abandoned THEN
-			suffix = ''-ABND'';
-		END IF;
-		RETURN rd || ''/'' || cross_dir || xmd || xst || rdir ||
-			ltyp || lnum || suffix;
-	END;'
-LANGUAGE plpgsql;
+	smallint, boolean) RETURNS text AS $detector_label$
+DECLARE
+    rd ALIAS FOR $1;
+    rdir ALIAS FOR $2;
+    xst ALIAS FOR $3;
+    cross_dir ALIAS FOR $4;
+    xmod ALIAS FOR $5;
+    l_type ALIAS FOR $6;
+    lane_number ALIAS FOR $7;
+    abandoned ALIAS FOR $8;
+    xmd varchar(2);
+    ltyp varchar(2);
+    lnum varchar(2);
+    suffix varchar(5);
+BEGIN
+    IF rd IS NULL OR xst IS NULL THEN
+        RETURN 'FUTURE';
+    END IF;
+    SELECT INTO ltyp dcode FROM lane_type_view WHERE id = l_type;
+    lnum = '';
+    IF lane_number > 0 THEN
+        lnum = TO_CHAR(lane_number, 'FM9');
+    END IF;
+    xmd = '';
+    IF xmod != '@' THEN
+        xmd = xmod;
+    END IF;
+    suffix = '';
+    IF abandoned THEN
+        suffix = '-ABND';
+    END IF;
+    RETURN rd || '/' || cross_dir || xmd || xst || rdir || ltyp || lnum ||
+           suffix;
+END;
+$detector_label$ LANGUAGE plpgsql;
 
 CREATE VIEW detector_label_view AS
 	SELECT d.name AS det_id,
