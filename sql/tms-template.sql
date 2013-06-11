@@ -321,6 +321,17 @@ ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
 ALTER TABLE iris.r_node ADD CONSTRAINT active_ck
 	CHECK (active = FALSE OR abandoned = FALSE);
 
+CREATE TABLE iris.sign_group (
+	name VARCHAR(16) PRIMARY KEY,
+	local BOOLEAN NOT NULL
+);
+
+CREATE TABLE iris.quick_message (
+	name VARCHAR(20) PRIMARY KEY,
+	sign_group VARCHAR(16) REFERENCES iris.sign_group,
+	multi VARCHAR(256) NOT NULL
+);
+
 CREATE TABLE iris.comm_protocol (
 	id smallint PRIMARY KEY,
 	description VARCHAR(20) NOT NULL
@@ -825,10 +836,56 @@ CREATE RULE lcs_indication_update AS ON UPDATE TO iris.lcs_indication DO INSTEAD
 CREATE RULE lcs_indication_delete AS ON DELETE TO iris.lcs_indication DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
-CREATE TABLE iris.sign_group (
-	name VARCHAR(16) PRIMARY KEY,
-	local BOOLEAN NOT NULL
+CREATE TABLE iris._gate_arm (
+	name VARCHAR(10) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
+	notes VARCHAR(64) NOT NULL,
+	camera VARCHAR(10) REFERENCES iris._camera,
+	approach VARCHAR(10) REFERENCES iris._camera,
+	dms VARCHAR(10) REFERENCES iris._dms,
+	open_msg VARCHAR(20) REFERENCES iris.quick_message,
+	closed_msg VARCHAR(20) REFERENCES iris.quick_message
 );
+
+ALTER TABLE iris._gate_arm ADD CONSTRAINT _gate_arm_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.gate_arm AS SELECT
+	_gate_arm.name, geo_loc, controller, pin, notes, camera, approach,
+	dms, open_msg, closed_msg
+	FROM iris._gate_arm JOIN iris._device_io
+	ON _gate_arm.name = _device_io.name;
+
+CREATE FUNCTION iris.gate_arm_update() RETURNS TRIGGER AS $gate_arm_update$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
+        INSERT INTO iris._gate_arm VALUES (NEW.name, NEW.geo_loc, NEW.notes,
+            NEW.camera, NEW.approach, NEW.dms, NEW.open_msg, NEW.closed_msg);
+        RETURN NEW;
+    ELSIF TG_OP = 'UPDATE' THEN
+	UPDATE iris._device_io SET controller = NEW.controller, pin = NEW.pin
+	WHERE name = OLD.name;
+        UPDATE iris._gate_arm SET geo_loc = NEW.geo_loc, notes = NEW.notes,
+            camera = NEW.camera, approach = NEW.approach, dms = NEW.dms,
+            open_msg = NEW.open_msg, closed_msg = NEW.closed_msg
+	WHERE name = OLD.name;
+        RETURN NEW;
+    ELSIF TG_OP = 'DELETE' THEN
+        DELETE FROM iris._device_io WHERE name = OLD.name;
+        IF FOUND THEN
+            RETURN OLD;
+        ELSE
+            RETURN NULL;
+	END IF;
+    END IF;
+    RETURN NEW;
+END;
+$gate_arm_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gate_arm_update_trig
+    INSTEAD OF INSERT OR UPDATE OR DELETE ON iris.gate_arm
+    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_update();
 
 CREATE TABLE iris.dms_sign_group (
 	name VARCHAR(24) PRIMARY KEY,
@@ -854,12 +911,6 @@ CREATE TABLE iris.sign_message (
 	r_priority INTEGER NOT NULL,
 	scheduled BOOLEAN NOT NULL,
 	duration INTEGER
-);
-
-CREATE TABLE iris.quick_message (
-	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(16) REFERENCES iris.sign_group,
-	multi VARCHAR(256) NOT NULL
 );
 
 CREATE TABLE iris.lane_use_multi (
@@ -1195,6 +1246,17 @@ CREATE VIEW weather_sensor_view AS
 	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
+CREATE VIEW gate_arm_view AS
+	SELECT g.name, g.notes, g.geo_loc,
+	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	l.lat, l.lon,
+	g.controller, g.pin, ctr.comm_link, ctr.drop_id, ctr.active,
+	g.camera, g.approach, g.dms, g.open_msg, g.closed_msg
+	FROM iris.gate_arm g
+	LEFT JOIN geo_loc_view l ON g.geo_loc = l.name
+	LEFT JOIN iris.controller ctr ON g.controller = ctr.name;
+GRANT SELECT ON gate_arm_view TO PUBLIC;
+
 CREATE VIEW lane_type_view AS
 	SELECT id, description, dcode FROM iris.lane_type;
 GRANT SELECT ON lane_type_view TO PUBLIC;
@@ -1327,6 +1389,11 @@ CREATE VIEW iris.controller_camera AS
 	FROM iris._device_io dio
 	JOIN iris.camera c ON dio.name = c.name;
 
+CREATE VIEW iris.controller_gate_arm AS
+	SELECT dio.name, dio.controller, dio.pin, g.geo_loc
+	FROM iris._device_io dio
+	JOIN iris.gate_arm g ON dio.name = g.name;
+
 CREATE VIEW iris.controller_device AS
 	SELECT * FROM iris.controller_dms UNION ALL
 	SELECT * FROM iris.controller_lane_marking UNION ALL
@@ -1334,7 +1401,8 @@ CREATE VIEW iris.controller_device AS
 	SELECT * FROM iris.controller_lcs UNION ALL
 	SELECT * FROM iris.controller_meter UNION ALL
 	SELECT * FROM iris.controller_warning_sign UNION ALL
-	SELECT * FROM iris.controller_camera;
+	SELECT * FROM iris.controller_camera UNION ALL
+	SELECT * FROM iris.controller_gate_arm;
 
 CREATE VIEW controller_device_view AS
 	SELECT d.name, d.controller, d.pin, d.geo_loc,
@@ -1576,7 +1644,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 client_units_si	true
-database_version	4.7.0
+database_version	4.8.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
