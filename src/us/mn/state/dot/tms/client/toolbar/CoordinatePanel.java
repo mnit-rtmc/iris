@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2009  AHMCT, University of California, Davis
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.widget.IPanel;
 
 /**
  * A tool panel that contains the map coordinates of the mouse pointer.
@@ -46,11 +47,19 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 	/** Longitude label */
 	static private final String LON = I18N.get("location.lon");
 
+	/** Empty coordinate label value */
+	static private final String COORD = LAT + DEGREES + " " + LON + DEGREES;
+
+	/** Is this panel IRIS enabled? */
+	static public boolean getIEnabled() {
+		return true;
+	}
+
 	/** Map bean */
-	protected final MapBean map;
+	private final MapBean map;
 
 	/** Label used for cursor coordinates */
-	protected final JLabel coord_lbl = new JLabel();
+	private final JLabel coord_lbl = IPanel.createValueLabel();
 
 	/** Create a new coordinate panel */
 	public CoordinatePanel(MapBean m) {
@@ -58,35 +67,40 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 		map = m;
 		add(coord_lbl);
 		map.addMouseMotionListener(this);
-		coord_lbl.setText(LAT + DEGREES + " " + LON + DEGREES);
-	}
-
-	/** is this panel IRIS enabled? */
-	public static boolean getIEnabled() {
-		return true;
+		coord_lbl.setText(COORD);
 	}
 
 	/** Process the mouse moved event */
-	public void mouseMoved(MouseEvent e) {
+	@Override public void mouseMoved(MouseEvent e) {
 		Point2D p = map.transformPoint(e.getPoint());
 		SphericalMercatorPosition smp =
 			new SphericalMercatorPosition(p.getX(), p.getY());
-		Position pos = smp.getPosition();
-		DecimalFormat df = new DecimalFormat(LAT_LON_FORMAT);
-		String lat = df.format(pos.getLatitude());
-		String lon = df.format(pos.getLongitude());
-		coord_lbl.setText(LAT + " " + lat + DEGREES + " " +
-			LON + " " + lon + DEGREES);
+		coord_lbl.setText(formatCoordinates(smp));
+	}
+
+	/** Format a coordinate label */
+	private String formatCoordinates(SphericalMercatorPosition smp) {
+		try {
+			Position pos = smp.getPosition();
+			DecimalFormat df = new DecimalFormat(LAT_LON_FORMAT);
+			String lat = df.format(pos.getLatitude());
+			String lon = df.format(pos.getLongitude());
+			return LAT + " " + lat + DEGREES + " " +
+			       LON + " " + lon + DEGREES;
+		}
+		catch(IllegalArgumentException e) {
+			return COORD;
+		}
 	}
 
 	/** Process the mouse dragged event */
-	public void mouseDragged(MouseEvent e) {
+	@Override public void mouseDragged(MouseEvent e) {
 		// dragging on the map is for panning,
 		// so coordinate bar should not be updated
 	}
 
 	/** Cleanup */
-	public void dispose() {
+	@Override public void dispose() {
 		map.removeMouseMotionListener(this);
 	}
 }
