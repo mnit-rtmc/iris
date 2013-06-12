@@ -43,6 +43,9 @@ public class ImpactPanel extends JPanel {
 	static private final BasicStroke LINE_IMPACT = new BasicStroke(1,
 		BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
+	/** Color for no impact */
+	static private final Color COLOR_OPEN = new Color(64, 128, 64, 32);
+
 	/** Color for blocked impact */
 	static private final Color COLOR_BLOCKED = new Color(208, 64, 64);
 
@@ -103,6 +106,8 @@ public class ImpactPanel extends JPanel {
 			g.setStroke(LINE_IMPACT);
 			switch(im) {
 			case FREE_FLOWING:
+				g.setColor(COLOR_OPEN);
+				g.fillRect(o, o, p, p);
 				break;
 			case BLOCKED:
 				g.setColor(COLOR_BLOCKED);
@@ -114,6 +119,8 @@ public class ImpactPanel extends JPanel {
 				g.setPaint(null);
 				break;
 			}
+			g.setColor(Color.BLACK);
+			g.drawRect(o - 1, o - 1, p, p);
 			g.setColor(Color.WHITE);
 			g.drawRect(o, o, p, p);
 		}
