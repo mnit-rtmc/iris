@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
@@ -235,6 +236,14 @@ public class SonarState extends Client {
 		return weather_sensors;
 	}
 
+	/** Cache of gate arms */
+	private final TypeCache<GateArm> gate_arms;
+
+	/** Get the gate arm cache */
+	public TypeCache<GateArm> getGateArms() {
+		return gate_arms;
+	}
+
 	/** Cache of incident details */
 	protected final TypeCache<IncidentDetail> inc_details;
 
@@ -366,6 +375,7 @@ public class SonarState extends Client {
 			this);
 		weather_sensors = new TypeCache<WeatherSensor>(
 			WeatherSensor.class, this);
+		gate_arms = new TypeCache<GateArm>(GateArm.class, this);
 		incidents = new TypeCache<Incident>(Incident.class, this);
 		holidays = new TypeCache<Holiday>(Holiday.class, this);
 		day_plans = new TypeCache<DayPlan>(DayPlan.class, this);
@@ -470,6 +480,9 @@ public class SonarState extends Client {
 			weather_sensors.ignoreAttribute("operation");
 			weather_sensors.ignoreAttribute("stamp");
 		}
+		populateReadable(gate_arms);
+		if(canRead(GateArm.SONAR_TYPE))
+			gate_arms.ignoreAttribute("operation");
 		populateReadable(incidents);
 		populateReadable(holidays);
 		populateReadable(day_plans);

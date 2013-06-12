@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.client.comm.MaintenanceMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.detector.StationForm;
 import us.mn.state.dot.tms.client.dms.SignMenu;
+import us.mn.state.dot.tms.client.gate.GateArmForm;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
@@ -79,6 +80,9 @@ public class ViewMenu extends JMenu {
 		item = createWeatherItem();
 		if(item != null)
 			add(item);
+		item = createGateArmItem();
+		if(item != null)
+			add(item);
 	}
 
 	/** Create the detector menu item */
@@ -133,6 +137,17 @@ public class ViewMenu extends JMenu {
 		return new JMenuItem(new IAction("weather.sensors") {
 			protected void do_perform() {
 				desktop.show(new WeatherSensorForm(session));
+			}
+		});
+	}
+
+	/** Create the gate arm menu item */
+	private JMenuItem createGateArmItem() {
+		if(!GateArmForm.isPermitted(session))
+			return null;
+		return new JMenuItem(new IAction("gate.arms") {
+			protected void do_perform() {
+				desktop.show(new GateArmForm(session));
 			}
 		});
 	}

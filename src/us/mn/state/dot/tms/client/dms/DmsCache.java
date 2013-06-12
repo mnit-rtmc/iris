@@ -81,6 +81,14 @@ public class DmsCache {
 		return dmss;
 	}
 
+	/** DMS proxy list model */
+	private final ProxyListModel<DMS> dms_model;
+
+	/** Get the DMS list model */
+	public ProxyListModel<DMS> getDMSModel() {
+		return dms_model;
+	}
+
 	/** Cache of sign groups */
 	protected final TypeCache<SignGroup> sign_groups;
 
@@ -118,6 +126,8 @@ public class DmsCache {
 		quick_messages = new TypeCache<QuickMessage>(QuickMessage.class,
 			client);
 		dmss = new TypeCache<DMS>(DMS.class, client);
+		dms_model = new ProxyListModel<DMS>(dmss);
+		dms_model.initialize();
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class, client);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class, client);
