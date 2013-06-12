@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmState;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
@@ -260,11 +261,11 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 		}
 		if(a == null || a.equals("openMsg")) {
 			open_msg_txt.setEnabled(canUpdate("openMsg"));
-			open_msg_txt.setText(proxy.getOpenMsg().toString());
+			open_msg_txt.setText(getOpenMsg());
 		}
 		if(a == null || a.equals("closedMsg")) {
 			closed_msg_txt.setEnabled(canUpdate("closedMsg"));
-			closed_msg_txt.setText(proxy.getClosedMsg().toString());
+			closed_msg_txt.setText(getClosedMsg());
 		}
 		if(a == null || a.equals("version"))
 			version_lbl.setText(proxy.getVersion());
@@ -284,5 +285,17 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 			}
 			status_lbl.setText(s);
 		}
+	}
+
+	/** Get OPEN message */
+	private String getOpenMsg() {
+		QuickMessage msg = proxy.getOpenMsg();
+		return msg != null ? msg.toString() : "";
+	}
+
+	/** Get CLOSED message */
+	private String getClosedMsg() {
+		QuickMessage msg = proxy.getClosedMsg();
+		return msg != null ? msg.toString() : "";
 	}
 }
