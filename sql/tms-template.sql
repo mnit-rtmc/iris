@@ -1755,6 +1755,8 @@ lcs_tab	t
 lcs_control	t
 meter_tab	t
 meter_control	t
+gate_arm_tab	t
+gate_arm_control	t
 detection	t
 det_control	t
 plan_control	t
@@ -1803,6 +1805,7 @@ PRV_0032	lcs_tab	lcs_array(/.*)?	t	f	f	f
 PRV_0033	lcs_tab	lcs_indication(/.*)?	t	f	f	f
 PRV_0034	lcs_tab	quick_message(/.*)?	t	f	f	f
 PRV_0035	meter_tab	ramp_meter(/.*)?	t	f	f	f
+PRV_0036	gate_arm_tab	gate_arm(/.*)?	t	f	f	f
 PRV_0037	maintenance	alarm(/.*)?	t	f	f	f
 PRV_0038	maintenance	cabinet(/.*)?	t	f	f	f
 PRV_0039	maintenance	cabinet_style(/.*)?	t	f	f	f
@@ -1885,6 +1888,7 @@ PRV_0116	device_admin	video_monitor/.*	f	t	t	t
 PRV_0117	device_admin	warning_sign/.*	f	t	t	t
 PRV_0118	device_admin	weather_sensor(/.*)?	t	f	f	f
 PRV_0119	device_admin	weather_sensor/.*	f	t	t	t
+PRV_0133	device_admin	gate_arm/.*	f	t	t	t
 PRV_0120	system_admin	cabinet_style/.*	f	t	t	t
 PRV_0121	system_admin	font/.*	f	t	t	t
 PRV_0122	system_admin	glyph/.*	f	t	t	t
@@ -1896,6 +1900,8 @@ PRV_0127	user_admin	role/.*	f	t	t	t
 PRV_0128	user_admin	privilege/.*	f	t	t	t
 PRV_0129	user_admin	capability/.*	f	t	t	t
 PRV_0130	user_admin	connection/.*	f	f	f	t
+PRV_0131	gate_arm_control	gate_arm/.*/armState	f	t	f	f
+PRV_0132	gate_arm_control	gate_arm/.*/ownerNext	f	t	f	f
 \.
 
 COPY iris.role (name, enabled) FROM stdin;
@@ -1915,6 +1921,8 @@ administrator	lcs_tab
 administrator	lcs_control
 administrator	meter_tab
 administrator	meter_control
+administrator	gate_arm_tab
+administrator	gate_arm_control
 administrator	detection
 administrator	policy_admin
 administrator	device_admin

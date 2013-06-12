@@ -106,3 +106,28 @@ CREATE VIEW controller_report AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
+
+INSERT INTO iris.capability (name, enabled) VALUES ('gate_arm_tab', true);
+INSERT INTO iris.capability (name, enabled) VALUES ('gate_arm_control', true);
+
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_gtb0', 'gate_arm_tab', 'gate_arm(/.*)?', true, false,
+	false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_da99', 'device_admin', 'gate_arm/.*', false, true,
+	true, true);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_gac0', 'gate_arm_control', 'gate_arm/.*/armState', false,
+	true, false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+	priv_d)
+	VALUES ('prv_gac1', 'gate_arm_control', 'gate_arm/.*/ownerNext', false,
+	true, false, false);
+
+INSERT INTO iris.role_capability (role, capability)
+	VALUES ('administrator', 'gate_arm_tab');
+INSERT INTO iris.role_capability (role, capability)
+	VALUES ('administrator', 'gate_arm_control');
