@@ -36,9 +36,6 @@ abstract public class MapTab extends JPanel {
 		return name;
 	}
 
-	/** Get the tab number */
-	abstract public int getNumber();
-
 	/** Tip for hovering */
 	private final String tip;
 

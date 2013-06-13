@@ -64,11 +64,6 @@ public class IncidentTab extends MapTab {
 		return panel;
 	}
 
-	/** Get the tab number */
-	@Override public int getNumber() {
-		return 0;
-	}
-
 	/** Dispose of the incident tab */
 	@Override public void dispose() {
 		super.dispose();

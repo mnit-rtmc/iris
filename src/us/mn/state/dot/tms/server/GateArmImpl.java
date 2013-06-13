@@ -411,29 +411,36 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Item style bits */
-	private transient long styles = 0;
+	private transient long styles = calculateStyles();
 
-	/** Update the item styles */
-	public void updateStyles() {
+	/** Calculate item styles */
+	private long calculateStyles() {
 		long s = ItemStyle.ALL.bit();
 		if(getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if(isAvailable())
-			s |= ItemStyle.AVAILABLE.bit();
-		if(isDeployed())
-			s |= ItemStyle.DEPLOYED.bit();
+		if(isClosed())
+			s |= ItemStyle.CLOSED.bit();
+		if(isOpen())
+			s |= ItemStyle.OPEN.bit();
+		if(isMoving())
+			s |= ItemStyle.MOVING.bit();
 		if(needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
 		if(isFailed())
 			s |= ItemStyle.FAILED.bit();
 		if(!isActive())
 			s |= ItemStyle.INACTIVE.bit();
-		setStyles(s);
+		return s;
 	}
 
-	/** Test if gate arm is available */
-	private boolean isAvailable() {
-		return isOnline() && !isDeployed() && !needsMaintenance();
+	/** Update the item styles */
+	public void updateStyles() {
+		setStyles(calculateStyles());
+	}
+
+	/** Test if gate arm is closed */
+	private boolean isClosed() {
+		return isOnline() && arm_state == GateArmState.CLOSED;
 	}
 
 	/** Test if gate arm is online (active and not failed) */
@@ -441,9 +448,15 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return isActive() && !isFailed();
 	}
 
-	/** Test if gate arm is deployed */
-	private boolean isDeployed() {
+	/** Test if gate arm is (or may be) open */
+	private boolean isOpen() {
 		return arm_state != GateArmState.CLOSED;
+	}
+
+	/** Test if gate arm is moving */
+	private boolean isMoving() {
+		return arm_state == GateArmState.OPENING ||
+		       arm_state == GateArmState.CLOSING;
 	}
 
 	/** Test if gate arm needs maintenance */

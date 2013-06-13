@@ -50,11 +50,6 @@ public class RampMeterTab extends MapTab {
 		add(summary, BorderLayout.CENTER);
 	}
 
-	/** Get the tab number */
-	@Override public int getNumber() {
-		return 4;
-	}
-
 	/** Dispose of the ramp meter tab */
 	@Override public void dispose() {
 		super.dispose();

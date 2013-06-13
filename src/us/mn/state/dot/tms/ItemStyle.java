@@ -54,6 +54,10 @@ public enum ItemStyle {
 	METERING,
 	QUEUE_EXISTS,
 	QUEUE_FULL,
+	/* Gate arm styles */
+	CLOSED,
+	OPEN,
+	MOVING,
 	/* R_Node styles */
 	GPS,
 	NO_LOC,

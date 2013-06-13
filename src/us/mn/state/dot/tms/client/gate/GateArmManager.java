@@ -1,0 +1,158 @@
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2013  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+package us.mn.state.dot.tms.client.gate;
+
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapAction;
+import us.mn.state.dot.tms.client.proxy.PropertiesAction;
+import us.mn.state.dot.tms.client.proxy.ProxyManager;
+import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.client.proxy.TeslaAction;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
+
+/**
+ * The GateArmManager class provides proxies for GateArm objects.
+ *
+ * @author Douglas Lau
+ */
+public class GateArmManager extends ProxyManager<GateArm> {
+
+	/** Gate Arm map object marker */
+	static private final GateArmMarker MARKER = new GateArmMarker();
+
+	/** User session */
+	private final Session session;
+
+	/** Create a new gate arm manager */
+	public GateArmManager(Session s, TypeCache<GateArm> c,
+		GeoLocManager lm)
+	{
+		super(c, lm);
+		session = s;
+		cache.addProxyListener(this);
+	}
+
+	/** Get the proxy type name */
+	@Override public String getProxyType() {
+		return I18N.get("gate.arm");
+	}
+
+	/** Get the shape for a given proxy */
+	@Override protected Shape getShape(AffineTransform at) {
+		return MARKER.createTransformedShape(at);
+	}
+
+	/** Create a theme for gate arms */
+	@Override protected ProxyTheme<GateArm> createTheme() {
+		ProxyTheme<GateArm> theme = new ProxyTheme<GateArm>(this,
+			MARKER);
+		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.MOVING, ProxyTheme.COLOR_SCHEDULED);
+		theme.addStyle(ItemStyle.MAINTENANCE,
+			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(ItemStyle.ALL);
+		return theme;
+	}
+
+	/** Check the style of the specified proxy */
+	@Override public boolean checkStyle(ItemStyle is, GateArm proxy) {
+		long styles = proxy.getStyles();
+		for(ItemStyle s: ItemStyle.toStyles(styles)) {
+			if(s == is)
+				return true;
+		}
+		return false;
+	}
+
+	/** Show the properties form for the selected proxy */
+	@Override public void showPropertiesForm() {
+		if(s_model.getSelectedCount() == 1) {
+			for(GateArm ga: s_model.getSelected())
+				showPropertiesForm(ga);
+		}
+	}
+
+	/** Show the properteis form for the given proxy */
+	private void showPropertiesForm(GateArm ga) {
+		SmartDesktop desktop = session.getDesktop();
+		desktop.show(new GateArmProperties(session, ga));
+	}
+
+	/** Create a popup menu for the selected proxy object(s) */
+	@Override protected JPopupMenu createPopup() {
+		int n_selected = s_model.getSelectedCount();
+		if(n_selected < 1)
+			return null;
+		if(n_selected == 1) {
+			for(GateArm ga: s_model.getSelected())
+				return createSinglePopup(ga);
+		}
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel("" + n_selected + " " + I18N.get(
+			"gate.arms")));
+		p.addSeparator();
+		return p;
+	}
+
+	/** Create a popup menu for a single gate arm selection */
+	private JPopupMenu createSinglePopup(final GateArm ga) {
+		SmartDesktop desktop = session.getDesktop();
+		JPopupMenu p = new JPopupMenu();
+		p.add(makeMenuLabel(getDescription(ga)));
+		p.addSeparator();
+		p.add(new MapAction(desktop.client, ga, ga.getGeoLoc()));
+		p.addSeparator();
+		if(TeslaAction.isConfigured()) {
+			p.addSeparator();
+			p.add(new TeslaAction<GateArm>(ga));
+		}
+		p.addSeparator();
+		p.add(new PropertiesAction<GateArm>(ga) {
+			protected void do_perform() {
+				showPropertiesForm(ga);
+			}
+		});
+		return p;
+	}
+
+	/** Find the map geo location for a proxy */
+	@Override protected GeoLoc getGeoLoc(GateArm proxy) {
+		return proxy.getGeoLoc();
+	}
+
+	/** Get the description of a proxy */
+	@Override public String getDescription(GateArm proxy) {
+		return proxy.getName() + " - " +
+			GeoLocHelper.getDescription(getGeoLoc(proxy));
+	}
+
+	/** Get the layer zoom visibility threshold */
+	@Override protected int getZoomThreshold() {
+		return 15;
+	}
+}

@@ -46,11 +46,6 @@ public class LcsTab extends MapTab {
 		add(summary, BorderLayout.CENTER);
 	}
 
-	/** Get the tab number */
-	@Override public int getNumber() {
-		return 3;
-	}
-
 	/** Dispose of the LCS tab */
 	@Override public void dispose() {
 		super.dispose();

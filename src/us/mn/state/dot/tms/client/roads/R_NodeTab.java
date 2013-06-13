@@ -42,11 +42,6 @@ public class R_NodeTab extends MapTab {
 		clist.initialize();
 	}
 
-	/** Get the tab number */
-	@Override public int getNumber() {
-		return 5;
-	}
-
 	/** Dispose of the roadway tab */
 	@Override public void dispose() {
 		clist.dispose();

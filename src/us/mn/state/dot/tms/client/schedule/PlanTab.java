@@ -46,11 +46,6 @@ public class PlanTab extends MapTab {
 		add(summary, BorderLayout.CENTER);
 	}
 
-	/** Get the tab number */
-	@Override public int getNumber() {
-		return 6;
-	}
-
 	/** Dispose of the plan tab */
 	@Override public void dispose() {
 		super.dispose();

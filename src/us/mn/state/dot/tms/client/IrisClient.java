@@ -21,6 +21,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
 import javax.swing.JFrame;
@@ -226,9 +227,11 @@ public class IrisClient extends JFrame {
 		LinkedList<ScreenPane> visible = getVisiblePanes();
 		if(visible.isEmpty())
 			return;
+		Iterator<ScreenPane> it = visible.iterator();
 		for(MapTab tab: s.getTabs()) {
-			int p = tab.getNumber() % visible.size();
-			ScreenPane sp = visible.get(p);
+			if(!it.hasNext())
+				it = visible.iterator();
+			ScreenPane sp = it.next();
 			sp.addTab(tab);
 		}
 		setSelectedTabViaPersist();

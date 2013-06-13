@@ -52,11 +52,6 @@ public class CommTab extends MapTab {
 		return panel;
 	}
 
-	/** Get the tab number */
-	@Override public int getNumber() {
-		return 7;
-	}
-
 	/** Dispose of the comm tab */
 	@Override public void dispose() {
 		super.dispose();

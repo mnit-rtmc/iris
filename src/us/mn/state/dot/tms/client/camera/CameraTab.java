@@ -36,11 +36,6 @@ public class CameraTab extends MapTab {
 		add(manager.createStyleSummary(), BorderLayout.CENTER);
 	}
 
-	/** Get the tab number */
-	@Override public int getNumber() {
-		return 2;
-	}
-
 	/** Perform any clean up necessary */
 	@Override public void dispose() {
 		super.dispose();

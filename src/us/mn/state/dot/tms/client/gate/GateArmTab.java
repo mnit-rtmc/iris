@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,40 +12,48 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.dms;
+package us.mn.state.dot.tms.client.gate;
 
 import java.awt.BorderLayout;
-import us.mn.state.dot.tms.DMS;
+import java.io.IOException;
+import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 
 /**
- * The DMSTab class provides the GUI for working with DMS objects.
+ * Tab for managing gate arms.
  *
  * @author Douglas Lau
  */
-public class DMSTab extends MapTab {
+public class GateArmTab extends MapTab {
 
-	/** DMS dispatcher component */
-	private final DMSDispatcher dispatcher;
+	/** Gate Arm device manager */
+	private final GateArmManager manager;
 
-	/** Summary of DMSs of each status */
-	private final StyleSummary<DMS> summary;
+	/** Gate Arm dispatch panel */
+	private final GateArmDispatcher dispatcher;
 
-	/** Create a new DMS tab */
- 	public DMSTab(Session session, DMSManager manager) {
-		super("dms");
-		dispatcher = new DMSDispatcher(session, manager);
-		summary = manager.createStyleSummary(true);
+	/** Summary of gate arms of each status */
+	private final StyleSummary<GateArm> summary;
+
+	/** Create a new gate arm tab */
+  	public GateArmTab(Session session, GateArmManager man)
+		throws IOException
+	{
+		super("gate.arm");
+		manager = man;
+		dispatcher = new GateArmDispatcher(session, manager);
+		summary = manager.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}
 
-	/** Dispose of the DMS tab */
+	/** Dispose of the tab */
 	@Override public void dispose() {
 		super.dispose();
-		dispatcher.dispose();
+		manager.getSelectionModel().clearSelection();
 		summary.dispose();
+		dispatcher.dispose();
 	}
 }
