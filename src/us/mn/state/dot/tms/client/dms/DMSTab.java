@@ -43,12 +43,12 @@ public class DMSTab extends MapTab {
 	}
 
 	/** Get the tab number */
-	public int getNumber() {
+	@Override public int getNumber() {
 		return 1;
 	}
 
 	/** Dispose of the DMS tab */
-	public void dispose() {
+	@Override public void dispose() {
 		super.dispose();
 		dispatcher.dispose();
 		summary.dispose();

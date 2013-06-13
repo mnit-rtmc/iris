@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,10 @@ import us.mn.state.dot.tms.client.Session;
 public class R_NodeTab extends MapTab {
 
 	/** R_Node panel */
-	protected final R_NodePanel panel;
+	private final R_NodePanel panel;
 
 	/** Corridor list */
-	protected final CorridorList clist;
+	private final CorridorList clist;
 
 	/** Create a new roadway node tab */
 	public R_NodeTab(Session session, R_NodeManager man) {
@@ -43,12 +43,12 @@ public class R_NodeTab extends MapTab {
 	}
 
 	/** Get the tab number */
-	public int getNumber() {
+	@Override public int getNumber() {
 		return 5;
 	}
 
 	/** Dispose of the roadway tab */
-	public void dispose() {
+	@Override public void dispose() {
 		clist.dispose();
 		panel.dispose();
 		super.dispose();

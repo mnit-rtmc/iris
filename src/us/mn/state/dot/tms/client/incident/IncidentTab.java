@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,16 +31,16 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
 public class IncidentTab extends MapTab {
 
 	/** Incident manager */
-	protected final IncidentManager manager;
+	private final IncidentManager manager;
 
 	/** Incident creator */
-	protected final IncidentCreator creator;
+	private final IncidentCreator creator;
 
 	/** Incident dispatcher */
-	protected final IncidentDispatcher dispatcher;
+	private final IncidentDispatcher dispatcher;
 
 	/** Summary of incidents of each status */
-	protected final StyleSummary<Incident> summary;
+	private final StyleSummary<Incident> summary;
 
 	/** Create a new incident tab */
   	public IncidentTab(Session session, IncidentManager m)
@@ -57,7 +57,7 @@ public class IncidentTab extends MapTab {
 	}
 
 	/** Create the north panel */
-	protected JPanel createNorthPanel() {
+	private JPanel createNorthPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(creator, BorderLayout.NORTH);
 		panel.add(dispatcher, BorderLayout.CENTER);
@@ -65,12 +65,12 @@ public class IncidentTab extends MapTab {
 	}
 
 	/** Get the tab number */
-	public int getNumber() {
+	@Override public int getNumber() {
 		return 0;
 	}
 
 	/** Dispose of the incident tab */
-	public void dispose() {
+	@Override public void dispose() {
 		super.dispose();
 		manager.getSelectionModel().clearSelection();
 		summary.dispose();
@@ -79,13 +79,13 @@ public class IncidentTab extends MapTab {
 	}
 
 	/** Set the map for this tab */
-	public void setMap(MapBean m) {
+	@Override public void setMap(MapBean m) {
 		super.setMap(m);
 		creator.setEnabled(canAdd() && m != null);
 	}
 
 	/** Check if the user can add an incident */
-	protected boolean canAdd() {
+	private boolean canAdd() {
 		return dispatcher.canAdd("oname");
 	}
 }

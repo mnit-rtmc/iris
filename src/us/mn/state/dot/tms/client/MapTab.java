@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,17 @@ import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * Super class of all tabs used in the IrisClient.
+ * Side panel tab for main IRIS map interface.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
  */
 abstract public class MapTab extends JPanel {
 
-	/** Name of tab */
-	protected final String name;
+	/** Name of side panel tab */
+	private final String name;
 
-	/** Get the name of the tab */
+	/** Get the name of the side panel tab */
 	public String getName() {
 		return name;
 	}
@@ -40,7 +40,7 @@ abstract public class MapTab extends JPanel {
 	abstract public int getNumber();
 
 	/** Tip for hovering */
-	protected final String tip;
+	private final String tip;
 
 	/** Get the tip */
 	public String getTip() {
@@ -48,7 +48,7 @@ abstract public class MapTab extends JPanel {
 	}
 
 	/** Current map for this tab */
-	protected MapBean map;
+	private MapBean map;
 
 	/** Set the map for this tab */
 	public void setMap(MapBean m) {

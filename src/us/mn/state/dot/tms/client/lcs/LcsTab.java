@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
 public class LcsTab extends MapTab {
 
 	/** LCS dispatcher */
-	protected final LcsDispatcher dispatcher;
+	private final LcsDispatcher dispatcher;
 
 	/** Summary of LCS arrays of each status */
-	protected final StyleSummary<LCSArray> summary;
+	private final StyleSummary<LCSArray> summary;
 
 	/** Create a new LCS tab */
 	public LcsTab(Session session, LCSArrayManager manager)
@@ -47,12 +47,12 @@ public class LcsTab extends MapTab {
 	}
 
 	/** Get the tab number */
-	public int getNumber() {
+	@Override public int getNumber() {
 		return 3;
 	}
 
 	/** Dispose of the LCS tab */
-	public void dispose() {
+	@Override public void dispose() {
 		super.dispose();
 		dispatcher.dispose();
 		summary.dispose();

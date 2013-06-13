@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
 public class RampMeterTab extends MapTab {
 
 	/** Meter device manager */
-	protected final MeterManager manager;
+	private final MeterManager manager;
 
 	/** Meter status panel */
-	protected final MeterStatusPanel statusPanel;
+	private final MeterStatusPanel statusPanel;
 
 	/** Summary of meters of each status */
-	protected final StyleSummary<RampMeter> summary;
+	private final StyleSummary<RampMeter> summary;
 
 	/** Create a new ramp meter tab */
   	public RampMeterTab(Session session, MeterManager man)
@@ -51,12 +51,12 @@ public class RampMeterTab extends MapTab {
 	}
 
 	/** Get the tab number */
-	public int getNumber() {
+	@Override public int getNumber() {
 		return 4;
 	}
 
 	/** Dispose of the ramp meter tab */
-	public void dispose() {
+	@Override public void dispose() {
 		super.dispose();
 		manager.getSelectionModel().clearSelection();
 		summary.dispose();

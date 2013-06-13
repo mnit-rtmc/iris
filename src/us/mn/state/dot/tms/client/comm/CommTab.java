@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
 public class CommTab extends MapTab {
 
 	/** Controller manager */
-	protected final ControllerManager manager;
+	private final ControllerManager manager;
 
 	/** Summary of controllers of each status */
-	protected final StyleSummary<Controller> summary;
+	private final StyleSummary<Controller> summary;
 
 	/** Create a new comm tab */
   	public CommTab(Session session, ControllerManager m)
@@ -47,18 +47,18 @@ public class CommTab extends MapTab {
 	}
 
 	/** Create the north panel */
-	protected JPanel createNorthPanel() {
+	private JPanel createNorthPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		return panel;
 	}
 
 	/** Get the tab number */
-	public int getNumber() {
+	@Override public int getNumber() {
 		return 7;
 	}
 
 	/** Dispose of the comm tab */
-	public void dispose() {
+	@Override public void dispose() {
 		super.dispose();
 		manager.getSelectionModel().clearSelection();
 		summary.dispose();
