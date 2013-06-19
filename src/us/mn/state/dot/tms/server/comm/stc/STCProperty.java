@@ -33,6 +33,9 @@ abstract public class STCProperty extends ControllerProperty {
 	/** Frame sentinel value */
 	static private final int SENTINEL = 0xFF;
 
+	/** Drop address of master (for responses) */
+	static private final int DROP_MASTER = 0;
+
 	/** Byte offsets from beginning of frame */
 	static private final int OFF_SENTINEL = 0;
 	static private final int OFF_ADDRESS = 1;
@@ -71,7 +74,7 @@ abstract public class STCProperty extends ControllerProperty {
 		if(parse8(header, OFF_SENTINEL) != SENTINEL)
 			throw new ParsingException("INVALID SENTINEL");
 		int d = parse8(header, OFF_ADDRESS);
-		if(d != drop)
+		if(d != DROP_MASTER)
 			throw new ParsingException("INVALID ADDRESS: " + d);
 		int size = parse8(header, OFF_SIZE);
 		if(size < MIN_MESSAGE_SIZE || size > MAX_MESSAGE_SIZE)
