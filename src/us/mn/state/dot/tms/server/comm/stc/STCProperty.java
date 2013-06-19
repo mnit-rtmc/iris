@@ -80,7 +80,7 @@ abstract public class STCProperty extends ControllerProperty {
 		if(size < MIN_MESSAGE_SIZE || size > MAX_MESSAGE_SIZE)
 			throw new ParsingException("INVALID SIZE: " + size);
 		byte[] body = recvResponse(is, size + 1);
-		if(checksum(header) + checksum(body) != 0)
+		if((checksum(header) + checksum(body)) % 256 != 0)
 			throw new ChecksumException(body);
 		parseMessage(body, body.length - 1);
 	}
