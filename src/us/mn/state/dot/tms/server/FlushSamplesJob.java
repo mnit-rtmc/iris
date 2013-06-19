@@ -48,12 +48,12 @@ public class FlushSamplesJob extends Job {
 	}
 
 	/** Periodic sample writer */
-	private final PeriodicSampleWriter writer = new PeriodicSampleWriter(
-		new SampleArchiveFactoryImpl());
+	private final PeriodicSampleWriter writer;
 
 	/** Create a new flush samples job */
-	public FlushSamplesJob() {
+	public FlushSamplesJob(SampleArchiveFactory saf) {
 		super(Calendar.MINUTE, 2);
+		writer = new PeriodicSampleWriter(saf);
 	}
 
 	/** Perform the flush samples job */

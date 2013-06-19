@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,11 +42,15 @@ public class ArchiveSamplesJob extends Job {
 	/** Buffer for reading sample data files */
 	protected final byte[] buffer = new byte[8192];
 
+	/** Sample archive factory */
+	private final SampleArchiveFactory a_factory;
+
 	/** Create a new job to archive sample data.  This needs to happen
 	 * after 6 PM to allow for buffered data to be read in case of
 	 * communication errors (MnDOT protocol). */
-	public ArchiveSamplesJob() {
+	public ArchiveSamplesJob(SampleArchiveFactory saf) {
 		super(Calendar.DATE, 1, Calendar.HOUR, 22);
+		a_factory = saf;
 	}
 
 	/** Perform the archive samples job */
@@ -129,7 +133,7 @@ public class ArchiveSamplesJob extends Job {
 	{
 		String[] entries = day.list(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return isValidSampleFile(name);
+				return a_factory.hasKnownExtension(name);
 			}
 		});
 		Arrays.sort(entries);
@@ -168,7 +172,7 @@ public class ArchiveSamplesJob extends Job {
 		while(e.hasMoreElements()) {
 			ZipEntry ze = (ZipEntry)e.nextElement();
 			String name = ze.getName();
-			if(isValidSampleFile(name)) {
+			if(a_factory.hasKnownExtension(name)) {
 				File file = new File(day, name);
 				if(file.isFile())
 					file.delete();
@@ -200,15 +204,5 @@ public class ArchiveSamplesJob extends Job {
 		catch(NumberFormatException e) {
 			return false;
 		}
-	}
-
-	/** Test if a sample file name is valid */
-	static protected boolean isValidSampleFile(String name) {
-		return name.endsWith(".v30") ||
-		       name.endsWith(".c30") ||
-		       name.endsWith(".s30") ||
-		       name.endsWith(".vlog") ||
-		       name.endsWith(".pr60") ||
-		       name.endsWith(".pt60");
 	}
 }

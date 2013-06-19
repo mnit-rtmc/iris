@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,4 +40,7 @@ public interface SampleArchiveFactory {
 	 * @return File to archive periodic sample. */
 	File createFile(String sensor_id, PeriodicSampleType s_type,
 		PeriodicSample ps) throws IOException;
+
+	/** Test if a sample file name has a known extension */
+	boolean hasKnownExtension(String name);
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
@@ -46,6 +47,27 @@ public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 		return dir.getCanonicalPath();
 	}
 
+	/** Set of all archive file extensions */
+	private final HashSet<String> extensions = new HashSet<String>();
+
+	/** Add a file extension */
+	private void addExtension(String ext) {
+		synchronized(extensions) {
+			extensions.add(ext);
+		}
+	}
+
+	/** Test if a sample file name has a known extension */
+	public boolean hasKnownExtension(String name) {
+		synchronized(extensions) {
+			for(String ext: extensions) {
+				if(name.endsWith(ext))
+					return true;
+			}
+		}
+		return false;
+	}
+
 	/** Create an archive file.
 	 * @param sensor_id Sensor identifier.
 	 * @param ext File extension.
@@ -54,8 +76,9 @@ public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 	public File createFile(String sensor_id, String ext, long stamp)
 		throws IOException
 	{
-		String name = sensor_id + '.' + ext;
-		return new File(directory(stamp), name);
+		String dext = "." + ext;
+		addExtension(dext);
+		return new File(directory(stamp), sensor_id + dext);
 	}
 
 	/** Create an archive file.

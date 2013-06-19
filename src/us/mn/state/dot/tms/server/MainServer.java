@@ -63,6 +63,10 @@ public class MainServer {
 	/** Flush thread for disk writing jobs */
 	static public final Scheduler FLUSH = new Scheduler("flush");
 
+	/** Sample archive factory */
+	static public final SampleArchiveFactoryImpl a_factory =
+		new SampleArchiveFactoryImpl();
+
 	/** SONAR server */
 	static public Server server;
 
@@ -196,8 +200,8 @@ public class MainServer {
 
 	/** Schedule jobs on FLUSH thread */
 	static private void scheduleFlushJobs() {
-		FLUSH.addJob(new FlushSamplesJob());
-		FLUSH.addJob(new ArchiveSamplesJob());
+		FLUSH.addJob(new FlushSamplesJob(a_factory));
+		FLUSH.addJob(new ArchiveSamplesJob(a_factory));
 		FLUSH.addJob(new ProfilingJob());
 		FLUSH.addJob(new KmlWriterJob());
 		FLUSH.addJob(new XmlConfigJob());
