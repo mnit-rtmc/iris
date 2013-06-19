@@ -52,15 +52,8 @@ public class OpQueryGateStatus extends OpSTC {
 			mess.add(s);
 			mess.queryProps();
 			logQuery(s);
-			return null;
+			device.release(operation);
+			return phaseOne();
 		}
-	}
-
-	/** Cleanup the operation */
-	@Override public void cleanup() {
-		super.cleanup();
-		// Continuously query the gate arm status
-		if(isSuccess())
-			poller.sendRequest(gate_arm, QUERY_STATUS);
 	}
 }
