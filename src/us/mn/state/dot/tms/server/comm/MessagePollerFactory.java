@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2013  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
 import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
 import us.mn.state.dot.tms.server.comm.ssi.SsiPoller;
+import us.mn.state.dot.tms.server.comm.stc.STCPoller;
 import us.mn.state.dot.tms.server.comm.vicon.ViconPoller;
 import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
 
@@ -113,6 +114,8 @@ public class MessagePollerFactory {
 			return createSsiPoller();
 		case DIN_RELAY:
 			return createDinRelayPoller();
+		case HYSECURITY_STC:
+			return createSTCPoller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -299,5 +302,10 @@ public class MessagePollerFactory {
 	/** Create a DIN relay poller */
 	private MessagePoller createDinRelayPoller() throws IOException {
 		return new DinRelayPoller(name, createHttpFileMessenger());
+	}
+
+	/** Create a STC poller */
+	private MessagePoller createSTCPoller() throws IOException {
+		return new STCPoller(name, createSocketMessenger(TCP));
 	}
 }

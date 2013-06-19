@@ -1547,6 +1547,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 25	DLI DIN Relay
 26	Axis 292
 27	Axis PTZ
+28	HySecurity STC
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;

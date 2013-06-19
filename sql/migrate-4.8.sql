@@ -131,3 +131,5 @@ INSERT INTO iris.role_capability (role, capability)
 	VALUES ('administrator', 'gate_arm_tab');
 INSERT INTO iris.role_capability (role, capability)
 	VALUES ('administrator', 'gate_arm_control');
+
+INSERT INTO iris.comm_protocol (id, description) VALUES (28, 'HySecurity STC');

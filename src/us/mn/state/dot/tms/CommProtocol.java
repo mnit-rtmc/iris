@@ -108,7 +108,10 @@ public enum CommProtocol {
 	AXIS_292("Axis 292"),
 
 	/** Axis PTS (27) */
-	AXIS_PTZ("Axis PTZ");
+	AXIS_PTZ("Axis PTZ"),
+
+	/** HySecurity STC gate arm (28) */
+	HYSECURITY_STC("HySecurity STC");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
