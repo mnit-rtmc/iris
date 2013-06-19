@@ -70,8 +70,9 @@ abstract public class STCProperty extends ControllerProperty {
 		byte[] header = recvResponse(is, OFF_MESSAGE);
 		if(parse8(header, OFF_SENTINEL) != SENTINEL)
 			throw new ParsingException("INVALID SENTINEL");
-		if(parse8(header, OFF_ADDRESS) != drop)
-			throw new ParsingException("INVALID ADDRESS");
+		int d = parse8(header, OFF_ADDRESS);
+		if(d != drop)
+			throw new ParsingException("INVALID ADDRESS: " + d);
 		int size = parse8(header, OFF_SIZE);
 		if(size < MIN_MESSAGE_SIZE || size > MAX_MESSAGE_SIZE)
 			throw new ParsingException("INVALID SIZE: " + size);
@@ -94,7 +95,7 @@ abstract public class STCProperty extends ControllerProperty {
 			return Integer.parseInt(hex, 16);
 		}
 		catch(NumberFormatException e) {
-			throw new ParsingException("Invalid HEX: " + hex);
+			throw new ParsingException("INVALID HEX: " + hex);
 		}
 	}
 
@@ -107,7 +108,7 @@ abstract public class STCProperty extends ControllerProperty {
 			return Integer.parseInt(hex, 16);
 		}
 		catch(NumberFormatException e) {
-			throw new ParsingException("Invalid HEX: " + hex);
+			throw new ParsingException("INVALID HEX: " + hex);
 		}
 	}
 
@@ -122,7 +123,7 @@ abstract public class STCProperty extends ControllerProperty {
 		case '1':
 			return true;
 		default:
-			throw new ParsingException("Invalid bool: " + b);
+			throw new ParsingException("INVALID BOOL: " + b);
 		}
 	}
 }
