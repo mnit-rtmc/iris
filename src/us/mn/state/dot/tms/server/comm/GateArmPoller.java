@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.GateArmImpl;
 
@@ -30,8 +29,8 @@ public interface GateArmPoller {
 	void sendRequest(GateArmImpl ga, DeviceRequest r);
 
 	/** Open the gate arm */
-	void openGate(GateArmImpl ga, User o);
+	void openGate(GateArmImpl ga);
 
 	/** Close the gate arm */
-	void closeGate(GateArmImpl ga, User o);
+	void closeGate(GateArmImpl ga);
 }

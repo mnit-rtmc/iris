@@ -393,13 +393,14 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * @param o User requesting new state.
 	 * @param p Gate arm poller. */
 	private void doSetArmState(GateArmState gas, User o, GateArmPoller p) {
+		// FIXME: log request with user
 		setArmState(gas.ordinal());
 		switch(gas) {
 		case OPENING:
-			p.openGate(this, o);
+			p.openGate(this);
 			break;
 		case CLOSING:
-			p.closeGate(this, o);
+			p.closeGate(this);
 			break;
 		default:
 			break;

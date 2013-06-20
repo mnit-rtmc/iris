@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.stc;
 
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.GateArmImpl;
@@ -57,12 +56,12 @@ public class STCPoller extends MessagePoller<STCProperty>
 	}
 
 	/** Open the gate arm */
-	public void openGate(GateArmImpl ga, User o) {
+	public void openGate(GateArmImpl ga) {
 		addOperation(new OpControlGate(ga, GateArmState.OPENING));
 	}
 
 	/** Close the gate arm */
-	public void closeGate(GateArmImpl ga, User o) {
+	public void closeGate(GateArmImpl ga) {
 		addOperation(new OpControlGate(ga, GateArmState.CLOSING));
 	}
 }
