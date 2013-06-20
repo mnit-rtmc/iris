@@ -243,7 +243,12 @@ public class StatusProperty extends STCProperty {
 		OperatorStatus os = operator_state;
 		if(OperatorStatus.isFault(os))
 			return os.toString();
-		else
-			return "";
+		else {
+			CommandStatus cs = command_state;
+			if(CommandStatus.isFault(cs))
+				return cs.toString();
+			else
+				return "";
+		}
 	}
 }
