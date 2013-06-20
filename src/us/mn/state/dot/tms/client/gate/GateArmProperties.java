@@ -276,13 +276,6 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 		if(a == null || a.equals("operation")) {
 			op_lbl.setText(proxy.getOperation());
 			String s = getControllerStatus(proxy);
-			if("".equals(s)) {
-				op_lbl.setForeground(null);
-				op_lbl.setBackground(null);
-			} else {
-				op_lbl.setForeground(Color.WHITE);
-				op_lbl.setBackground(Color.GRAY);
-			}
 			status_lbl.setText(s);
 		}
 	}

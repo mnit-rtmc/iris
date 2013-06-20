@@ -161,31 +161,28 @@ public class DMSHelper extends BaseHelper {
 		return !getMaintenance(proxy).isEmpty();
 	}
 
+	/** Test if a DMS has a critical error */
+	static public boolean hasCriticalError(DMS proxy) {
+		return !getCriticalError(proxy).isEmpty();
+	}
+
 	/** Get the DMS critical error */
 	static public String getCriticalError(DMS proxy) {
 		Integer h = proxy.getFaceHeight();
 		Integer w = proxy.getFaceWidth();
 		if(h == null || w == null || h <= 0 || w <= 0)
 			return "Invalid dimensions";
+		else
+			return getStatus(proxy);
+	}
+
+	/** Get DMS controller communication status */
+	static public String getStatus(DMS proxy) {
 		Controller ctr = proxy.getController();
 		if(ctr != null)
 			return ctr.getStatus();
 		else
 			return ItemStyle.NO_CONTROLLER.toString();
-	}
-
-	/** Test if a DMS has a critical error */
-	static public boolean hasCriticalError(DMS proxy) {
-		return !getCriticalError(proxy).isEmpty();
-	}
-
-	/** Get DMS controller communication status */
-	static public String getStatus(DMS proxy) {
-		Controller c = proxy.getController();
-		if(c == null)
-			return ItemStyle.NO_CONTROLLER.toString();
-		else
-			return c.getStatus();
 	}
 
 	/** Test if a DMS if failed */
