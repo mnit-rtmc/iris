@@ -133,3 +133,14 @@ INSERT INTO iris.role_capability (role, capability)
 	VALUES ('administrator', 'gate_arm_control');
 
 INSERT INTO iris.comm_protocol (id, description) VALUES (28, 'HySecurity STC');
+
+CREATE OR REPLACE VIEW incident_view AS
+    SELECT iu.event_id, name, iu.event_date, ed.description, road,
+           d.direction, iu.impact, iu.cleared, camera,
+           ln.description AS lane_type, detail, replaces, lat, lon
+    FROM event.incident i
+    JOIN event.incident_update iu ON i.name = iu.incident
+    LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
+    LEFT JOIN iris.direction d ON i.dir = d.id
+    LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
+GRANT SELECT ON incident_view TO PUBLIC;

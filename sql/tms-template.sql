@@ -1481,6 +1481,17 @@ CREATE VIEW client_event_view AS
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON client_event_view TO PUBLIC;
 
+CREATE VIEW incident_view AS
+    SELECT iu.event_id, name, iu.event_date, ed.description, road,
+           d.direction, iu.impact, iu.cleared, camera,
+           ln.description AS lane_type, detail, replaces, lat, lon
+    FROM event.incident i
+    JOIN event.incident_update iu ON i.name = iu.incident
+    LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
+    LEFT JOIN iris.direction d ON i.dir = d.id
+    LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
+GRANT SELECT ON incident_view TO PUBLIC;
+
 --- Data
 
 COPY iris.direction (id, direction, dir) FROM stdin;
