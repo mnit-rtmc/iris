@@ -66,6 +66,11 @@ abstract public class STCProperty extends ControllerProperty {
 		return req;
 	}
 
+	/** Format a boolean ASCII-hex value */
+	static protected void formatBoolean(byte[] buf, int pos, boolean v) {
+		buf[pos] = (byte)(v ? '1' : '0');
+	}
+
 	/** Parse one frame.
 	 * @param is Input stream to read from.
 	 * @param drop Drop address. */
