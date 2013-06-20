@@ -340,6 +340,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override public void setArmState(int gas) {
 		// FIXME: log changes to gate arm state
 		arm_state = GateArmState.fromOrdinal(gas);
+		// FIXME: check for conflicts and send alerts
 	}
 
 	/** Set the arm state */
@@ -402,6 +403,15 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			break;
 		default:
 			break;
+		}
+	}
+
+	/** Set the arm state */
+	public void setArmStateNotify(GateArmState gas) {
+		if(gas != arm_state) {
+			setArmState(gas.ordinal());
+			notifyAttribute("armState");
+			updateStyles();
 		}
 	}
 

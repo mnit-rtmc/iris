@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.stc;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -192,5 +193,48 @@ public class StatusProperty extends STCProperty {
 		sb.append(" loitering:");
 		sb.append(loitering);
 		return sb.toString();
+	}
+
+	/** Get the gate arm state */
+	public GateArmState getState() {
+		if(hasFaults())
+			return GateArmState.FAULT;
+		else if(isOpening())
+			return GateArmState.OPENING;
+		else if(isClosing())
+			return GateArmState.CLOSING;
+		else if(isOpen())
+			return GateArmState.OPEN;
+		else if(isClosed())
+			return GateArmState.CLOSED;
+		else
+			return GateArmState.UNKNOWN;
+	}
+
+	/** Test if the gate arm has faults */
+	private boolean hasFaults() {
+		return faults ||
+		       CommandStatus.isFault(command_state) ||
+		       OperatorStatus.isFault(operator_state);
+	}
+
+	/** Test if the gate arm is opening */
+	private boolean isOpening() {
+		return CommandStatus.isOpening(command_state);
+	}
+
+	/** Test if the gate arm is closing */
+	private boolean isClosing() {
+		return CommandStatus.isClosing(command_state);
+	}
+
+	/** Test if the gate arm is open */
+	private boolean isOpen() {
+		return open_limit && CommandStatus.isOpen(command_state);
+	}
+
+	/** Test if the gate arm is closed */
+	private boolean isClosed() {
+		return close_limit && CommandStatus.isClosed(command_state);
 	}
 }

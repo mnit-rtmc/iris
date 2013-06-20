@@ -58,4 +58,60 @@ public enum CommandStatus {
 		}
 		return null;
 	}
+
+	/** Test if a command status is "fault" */
+	static public boolean isFault(CommandStatus cs) {
+		switch(cs) {
+		case FAULT:
+		case ERROR:
+		case ALERT:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Test if a command status is "opening" */
+	static public boolean isOpening(CommandStatus cs) {
+		switch(cs) {
+		case OPEN_IN_PROGRESS:
+		case EM_OPEN_IN_PROGRESS:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Test if a command status is "closing" */
+	static public boolean isClosing(CommandStatus cs) {
+		switch(cs) {
+		case CLOSE_IN_PROGRESS:
+		case EM_CLOSE_IN_PROGRESS:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Test if a command status is "open" */
+	static public boolean isOpen(CommandStatus cs) {
+		switch(cs) {
+		case OPEN_COMPLETE:
+		case EM_OPEN_COMPLETE:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Test if a command status is "closed" */
+	static public boolean isClosed(CommandStatus cs) {
+		switch(cs) {
+		case CLOSE_COMPLETE:
+		case EM_CLOSE_COMPLETE:
+			return true;
+		default:
+			return false;
+		}
+	}
 }

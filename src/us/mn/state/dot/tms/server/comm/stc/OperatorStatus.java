@@ -68,4 +68,28 @@ public enum OperatorStatus {
 		}
 		return null;
 	}
+
+	/** Test if an operator status is "fault" (generic) */
+	static public boolean isFault(OperatorStatus os) {
+		switch(os) {
+		case FAULT_RUN_TIMEOUT:
+		case FAULT_PHOTO_EYE:
+		case FAULT_VOLTAGE_SAG:
+		case FAULT_OPEN_CLOSE_LIMIT:
+		case ERROR_DIRECTION:
+		case ERROR_DISCONNECTED_IES:
+		case ERROR_RS_485_BOARD:
+		case ERROR_RPM_SENSOR:
+		case ERROR_DISCONNECTED_BATT:
+		case ERROR_SLOWDOWN_SWITCH:
+		case ALERT_GATE_FORCED_OPEN:
+		case ALERT_GATE_DRIFT_CLOSED:
+		case ALERT_MOTOR_THERMAL_OVERLOAD:
+		case ALERT_BOTH_LIMITS_TRIGGERED:
+		case ALERT_NO_MOTION:
+			return true;
+		default:
+			return false;
+		}
+	}
 }
