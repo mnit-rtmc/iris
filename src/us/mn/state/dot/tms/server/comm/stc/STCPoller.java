@@ -47,7 +47,7 @@ public class STCPoller extends MessagePoller<STCProperty>
 			addOperation(new OpResetGate(ga));
 			break;
 		case QUERY_STATUS:
-			addOperation(new OpQueryGateStatus(ga, this));
+			addOperation(new OpQueryGateStatus(ga));
 			break;
 		default:
 			// Ignore other requests

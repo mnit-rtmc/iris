@@ -15,30 +15,43 @@
 package us.mn.state.dot.tms.server.comm.stc;
 
 import java.io.IOException;
-import static us.mn.state.dot.tms.DeviceRequest.QUERY_STATUS;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Operatoin to query gate arm status.
+ * Operation to query gate arm status.
  *
  * @author Douglas Lau
  */
 public class OpQueryGateStatus extends OpSTC {
 
-	/** STC Poller */
-	private final STCPoller poller;
-
 	/** Create a new gate arm query status operation */
-	public OpQueryGateStatus(GateArmImpl d, STCPoller p) {
+	public OpQueryGateStatus(GateArmImpl d) {
 		super(PriorityLevel.DEVICE_DATA, d);
-		poller = p;
 	}
 
 	/** Create the second phase of the operation */
 	protected Phase<STCProperty> phaseTwo() {
-		return new QueryStatus();
+		return new QueryVersion();
+	}
+
+	/** Phase to query the version */
+	protected class QueryVersion extends Phase<STCProperty> {
+
+		/** Query the version */
+		protected Phase<STCProperty> poll(CommMessage mess)
+			throws IOException
+		{
+			VersionProperty v = new VersionProperty();
+			mess.add(v);
+			mess.queryProps();
+			logQuery(v);
+			gate_arm.setVersion(v.getVersion());
+			// Don't hold device lock while looping
+			device.release(operation);
+			return new QueryStatus();
+		}
 	}
 
 	/** Phase to query the gate status */
@@ -52,8 +65,7 @@ public class OpQueryGateStatus extends OpSTC {
 			mess.add(s);
 			mess.queryProps();
 			logQuery(s);
-			device.release(operation);
-			return phaseOne();
+			return this;
 		}
 	}
 }
