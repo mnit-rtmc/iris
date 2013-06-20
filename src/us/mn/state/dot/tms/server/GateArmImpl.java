@@ -434,7 +434,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Update the item styles */
-	public void updateStyles() {
+	@Override public void updateStyles() {
 		setStyles(calculateStyles());
 	}
 
