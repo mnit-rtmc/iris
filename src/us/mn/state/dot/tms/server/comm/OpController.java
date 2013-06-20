@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,12 +129,28 @@ abstract public class OpController<T extends ControllerProperty>
 		return errorCounter < getRetryThreshold();
 	}
 
+	/** Update controller maintenance status */
+	protected final void updateMaintStatus() {
+		String s = maintStatus;
+		if(s != null) {
+			controller.setMaint(filterMessage(s));
+			maintStatus = null;
+		}
+	}
+
+	/** Update controller error status */
+	protected final void updateErrorStatus() {
+		String s = errorStatus;
+		if(s != null) {
+			controller.setErrorStatus(filterMessage(s));
+			errorStatus = null;
+		}
+	}
+
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(maintStatus != null)
-			controller.setMaint(filterMessage(maintStatus));
-		if(errorStatus != null)
-			controller.setErrorStatus(filterMessage(errorStatus));
+		updateMaintStatus();
+		updateErrorStatus();
 		controller.completeOperation(id, isSuccess());
 		super.cleanup();
 	}

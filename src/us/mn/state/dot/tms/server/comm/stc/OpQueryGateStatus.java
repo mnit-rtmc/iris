@@ -65,6 +65,8 @@ public class OpQueryGateStatus extends OpSTC {
 			mess.add(s);
 			mess.queryProps();
 			logQuery(s);
+			setMaintStatus(s.getMaintStatus());
+			updateMaintStatus();
 			gate_arm.setArmStateNotify(s.getState());
 			return this;
 		}

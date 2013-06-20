@@ -237,4 +237,13 @@ public class StatusProperty extends STCProperty {
 	private boolean isClosed() {
 		return close_limit && CommandStatus.isClosed(command_state);
 	}
+
+	/** Get the maintenance status */
+	public String getMaintStatus() {
+		OperatorStatus os = operator_state;
+		if(OperatorStatus.isFault(os))
+			return os.toString();
+		else
+			return "";
+	}
 }
