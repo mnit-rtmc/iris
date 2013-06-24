@@ -409,11 +409,18 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Set the arm state */
 	public void setArmStateNotify(GateArmState gas) {
-		if(gas != arm_state) {
+		if(isChanged(gas)) {
 			setArmState(gas.ordinal());
 			notifyAttribute("armState");
 			updateStyles();
 		}
+	}
+
+	/** Test if the gate arm state is changed */
+	private boolean isChanged(GateArmState gas) {
+		return gas != arm_state &&
+		      (gas != GateArmState.OPEN ||
+		       arm_state != GateArmState.WARN_CLOSE);
 	}
 
 	/** Get the arm state */
