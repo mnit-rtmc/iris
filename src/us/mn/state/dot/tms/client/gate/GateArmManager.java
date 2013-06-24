@@ -70,8 +70,8 @@ public class GateArmManager extends ProxyManager<GateArm> {
 		ProxyTheme<GateArm> theme = new ProxyTheme<GateArm>(this,
 			MARKER);
 		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.MOVING, ProxyTheme.COLOR_SCHEDULED);
+		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
