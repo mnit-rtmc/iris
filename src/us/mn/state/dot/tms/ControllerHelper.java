@@ -80,4 +80,20 @@ public class ControllerHelper extends BaseHelper {
 		       !(ctrl.getStatus().isEmpty() &&
 		         ctrl.getMaint().isEmpty());
 	}
+
+	/** Get controller communication status */
+	static public String getStatus(Controller ctrl) {
+		if(ctrl != null)
+			return ctrl.getStatus();
+		else
+			return ItemStyle.NO_CONTROLLER.toString();
+	}
+
+	/** Get controller maintenance status */
+	static public String getMaintenance(Controller ctrl) {
+		if(ctrl != null)
+			return ctrl.getMaint();
+		else
+			return ItemStyle.NO_CONTROLLER.toString();
+	}
 }

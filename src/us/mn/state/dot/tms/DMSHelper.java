@@ -145,11 +145,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the maintenance status of a DMS */
 	static public String getMaintenance(DMS proxy) {
-		Controller ctr = proxy.getController();
-		if(ctr != null)
-			return ctr.getMaint();
-		else
-			return ItemStyle.NO_CONTROLLER.toString();
+		return ControllerHelper.getMaintenance(proxy.getController());
 	}
 
 	/** Test if a DMS needs maintenance */
@@ -178,14 +174,10 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get DMS controller communication status */
 	static public String getStatus(DMS proxy) {
-		Controller ctr = proxy.getController();
-		if(ctr != null)
-			return ctr.getStatus();
-		else
-			return ItemStyle.NO_CONTROLLER.toString();
+		return ControllerHelper.getStatus(proxy.getController());
 	}
 
-	/** Test if a DMS if failed */
+	/** Test if a DMS is failed */
 	static public boolean isFailed(DMS proxy) {
 		return ControllerHelper.isFailed(proxy.getController());
 	}

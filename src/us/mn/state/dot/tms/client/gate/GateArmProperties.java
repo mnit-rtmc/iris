@@ -125,7 +125,7 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 	private final JLabel op_lbl = IPanel.createValueLabel();
 
 	/** Status component */
-	private final JLabel status_lbl = new JLabel();
+	private final JLabel status_lbl = IPanel.createValueLabel();
 
 	/** Send settings action */
 	private final IAction settings = new IAction("device.send.settings") {
