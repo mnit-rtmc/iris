@@ -129,6 +129,12 @@ public class GateArmDispatcher extends IPanel {
 		}
 	}
 
+	/** Approach video panel */
+	private final StreamPanel approach_pnl;
+
+	/** Approach PTZ control */
+	private final CameraPTZ approach_ptz;
+
 	/** Currently selected gate arm.  This will be null if there are zero or
 	 * multiple devices selected. */
 	private GateArm watching;
@@ -169,6 +175,8 @@ public class GateArmDispatcher extends IPanel {
 		sel_model.addProxySelectionListener(sel_listener);
 		verify_ptz = new CameraPTZ(s);
 		verify_pnl = createStreamPanel(verify_ptz);
+		approach_ptz = new CameraPTZ(s);
+		approach_pnl = createStreamPanel(approach_ptz);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
 		setTitle(I18N.get("gate.arm.selected"));
@@ -184,6 +192,7 @@ public class GateArmDispatcher extends IPanel {
 		add("gate.arm.state");
 		add(arm_state_lbl);
 		add(buildButtonBox(), Stretch.RIGHT);
+		add(approach_pnl, Stretch.FULL);
 		clear();
 	}
 
@@ -216,6 +225,8 @@ public class GateArmDispatcher extends IPanel {
 		removeAll();
 		verify_pnl.dispose();
 		verify_ptz.setCamera(null);
+		approach_pnl.dispose();
+		approach_ptz.setCamera(null);
 		setSelected(null);
 	}
 
@@ -253,6 +264,11 @@ public class GateArmDispatcher extends IPanel {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
 				ga.getArmState()).toString());
 			updateButtons(ga);
+		}
+		if(a == null || a.equals("approach")) {
+			Camera c = ga.getApproach();
+			approach_ptz.setCamera(c);
+			approach_pnl.setCamera(c);
 		}
 	}
 
@@ -320,5 +336,6 @@ public class GateArmDispatcher extends IPanel {
 		open_arm.setEnabled(false);
 		warn_close_arm.setEnabled(false);
 		close_arm.setEnabled(false);
+		approach_pnl.setCamera(null);
 	}
 }
