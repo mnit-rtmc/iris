@@ -410,6 +410,9 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		case OPENING:
 			p.openGate(this, o);
 			break;
+		case WARN_CLOSE:
+			setArmStateNotify(gas, o);
+			break;
 		case CLOSING:
 			p.closeGate(this, o);
 			break;
