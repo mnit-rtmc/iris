@@ -351,14 +351,13 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Gate arm state */
 	private transient GateArmState arm_state = GateArmState.UNKNOWN;
 
-	/** Set the arm state */
-	@Override public void setArmState(int gas) {
-		arm_state = GateArmState.fromOrdinal(gas);
-		// FIXME: check for conflicts and send alerts
+	/** Set the next arm state (request change) */
+	@Override public void setArmStateNext(int gas) {
+		// Do nothing; required by iface
 	}
 
-	/** Set the arm state */
-	public void doSetArmState(int gas) throws TMSException {
+	/** Set the arm state (request change) */
+	public void doSetArmStateNext(int gas) throws TMSException {
 		User o_next = ownerNext;	// Avoid race
 		// ownerNext is only valid for one message, clear it
 		ownerNext = null;
@@ -407,14 +406,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * @param o User requesting new state.
 	 * @param p Gate arm poller. */
 	private void doSetArmState(GateArmState gas, User o, GateArmPoller p) {
-		logStateChange(gas, o);
-		setArmState(gas.ordinal());
 		switch(gas) {
 		case OPENING:
-			p.openGate(this);
+			p.openGate(this, o);
 			break;
 		case CLOSING:
-			p.closeGate(this);
+			p.closeGate(this, o);
 			break;
 		default:
 			break;
@@ -422,10 +419,9 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Set the arm state */
-	public void setArmStateNotify(GateArmState gas) {
+	public void setArmStateNotify(GateArmState gas, User o) {
 		if(isChanged(gas)) {
-			logStateChange(gas, null);
-			setArmState(gas.ordinal());
+			setArmState(gas, o);
 			notifyAttribute("armState");
 			updateStyles();
 		}
@@ -438,9 +434,15 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		       arm_state != GateArmState.WARN_CLOSE);
 	}
 
+	/** Set the arm state */
+	private void setArmState(GateArmState gas, User o) {
+		logStateChange(gas, o);
+		arm_state = gas;
+		// FIXME: check for conflicts and send alerts
+	}
+
 	/** Log a gate arm state change */
 	private void logStateChange(GateArmState gas, User o) {
-Thread.currentThread().dumpStack();
 		String owner = o != null ? o.getName() : null;
 		logEvent(new GateArmEvent(gas, name, owner));
 	}

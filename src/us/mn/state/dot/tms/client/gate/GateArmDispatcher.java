@@ -125,7 +125,7 @@ public class GateArmDispatcher extends IPanel {
 		GateArm ga = watching;
 		if(ga != null) {
 			ga.setOwnerNext(session.getUser());
-			ga.setArmState(gas.ordinal());
+			ga.setArmStateNext(gas.ordinal());
 		}
 	}
 

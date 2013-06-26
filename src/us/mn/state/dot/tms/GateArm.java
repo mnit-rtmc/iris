@@ -65,8 +65,8 @@ public interface GateArm extends Device {
 	/** Set the next state owner */
 	void setOwnerNext(User o);
 
-	/** Set the arm state */
-	void setArmState(int gas);
+	/** Set the next arm state (request change) */
+	void setArmStateNext(int gas);
 
 	/** Get the arm state */
 	int getArmState();
