@@ -52,6 +52,11 @@ import us.mn.state.dot.tms.server.event.CommEvent;
  */
 public class ControllerImpl extends BaseObjectImpl implements Controller {
 
+	/** Get comm link impl */
+	static private CommLinkImpl commLinkImpl(CommLink cl) {
+		return cl instanceof CommLinkImpl ? (CommLinkImpl)cl : null;
+	}
+
 	/** Load all the controllers */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
@@ -108,12 +113,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Create a new controller */
-	protected ControllerImpl(String n, CabinetImpl c, CommLink l, short d,
+	protected ControllerImpl(String n, CabinetImpl c, CommLink cl, short d,
 		boolean a, String p, String nt, Date ft) throws TMSException
 	{
 		super(n);
 		cabinet = c;
-		comm_link = l;
+		comm_link = commLinkImpl(cl);
 		drop_id = d;
 		active = a;
 		password = p;
@@ -123,28 +128,26 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Create a new controller */
-	protected ControllerImpl(Namespace ns, String n, String c, String l,
+	protected ControllerImpl(Namespace ns, String n, String c, String cl,
 		short d, boolean a, String p, String nt, Date ft)
 		throws TMSException
 	{
 		this(n, (CabinetImpl)ns.lookupObject(Cabinet.SONAR_TYPE, c),
-			(CommLink)ns.lookupObject(CommLink.SONAR_TYPE, l),
+			(CommLink)ns.lookupObject(CommLink.SONAR_TYPE, cl),
 			d, a, p, nt, ft);
 	}
 
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		version = "";
-		CommLink cl = comm_link;
-		if(cl instanceof CommLinkImpl) {
-			CommLinkImpl link = (CommLinkImpl)cl;
-			link.putController(drop_id, this);
-		}
+		CommLinkImpl cl = comm_link;
+		if(cl != null)
+			cl.putController(drop_id, this);
 	}
 
 	/** Get controller label */
 	public String getLabel() {
-		CommLink cl = comm_link;
+		CommLinkImpl cl = comm_link;
 		StringBuilder b = new StringBuilder();
 		b.append("Link ");
 		if(cl != null)
@@ -181,35 +184,38 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Put this controller into a comm link */
-	protected void putCommLink(int d, CommLink l) throws TMSException {
-		CommLinkImpl link = (CommLinkImpl)l;
-		if(link != null)
-			link.putController(d, this);
+	private void putCommLink(int d, CommLinkImpl cl) throws TMSException {
+		if(cl != null) {
+			cl.testGateArmDisable();
+			cl.putController(d, this);
+		}
 	}
 
 	/** Pull this controller from a comm link */
-	protected void pullCommLink(CommLink l) {
-		CommLinkImpl link = (CommLinkImpl)l;
-		if(link != null)
-			link.pullController(this);
+	private void pullCommLink(CommLinkImpl cl) {
+		if(cl != null) {
+			cl.testGateArmDisable();
+			cl.pullController(this);
+		}
 	}
 
 	/** Comm link */
-	protected CommLink comm_link;
+	private CommLinkImpl comm_link;
 
 	/** Set the comm link for this controller */
 	public void setCommLink(CommLink c) {
-		comm_link = c;
+		comm_link = commLinkImpl(c);
 	}
 
 	/** Set the comm link for this controller */
 	public void doSetCommLink(CommLink c) throws TMSException {
-		if(c == comm_link)
-			return;
-		putCommLink(drop_id, c);
-		store.update(this, "comm_link", c);
-		pullCommLink(comm_link);
-		setCommLink(c);
+		CommLinkImpl cl = commLinkImpl(c);
+		if(cl != comm_link) {
+			putCommLink(drop_id, cl);
+			store.update(this, "comm_link", cl);
+			pullCommLink(comm_link);
+			setCommLink(cl);
+		}
 	}
 
 	/** Get the comm link */
@@ -240,11 +246,19 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return drop_id;
 	}
 
+	/** Test whether gate arm system should be disabled */
+	private void testGateArmDisable() {
+		CommLinkImpl cl = comm_link;
+		if(cl != null)
+			cl.testGateArmDisable();
+	}
+
 	/** Active status flag */
 	protected boolean active;
 
 	/** Set the active status */
 	public void setActive(boolean a) {
+		testGateArmDisable();
 		active = a;
 		updateStyles();
 	}
@@ -267,6 +281,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the access password */
 	public void setPassword(String pwd) {
+		testGateArmDisable();
 		password = pwd;
 	}
 
@@ -336,10 +351,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			io_pins.put(pin, io);
 			if(io instanceof DeviceImpl)
 				((DeviceImpl)io).updateStyles();
+			if(io instanceof GateArmImpl)
+				GateArmImpl.disableConfig();
 		} else {
 			ControllerIO oio = io_pins.remove(pin);
 			if(oio instanceof DeviceImpl)
 				((DeviceImpl)oio).updateStyles();
+			if(oio instanceof GateArmImpl)
+				GateArmImpl.disableConfig();
 		}
 	}
 
@@ -456,7 +475,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Check if the controller is a message feed controller */
 	public boolean isMsgFeed() {
-		CommLink cl = comm_link;
+		CommLinkImpl cl = comm_link;
 		if(cl != null) {
 			return CommProtocol.fromOrdinal(cl.getProtocol()) ==
 			       CommProtocol.MSG_FEED;
@@ -847,12 +866,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get the message poller of a comm link */
-	static private MessagePoller getPoller(CommLink cl) {
-		if(cl instanceof CommLinkImpl) {
-			CommLinkImpl link = (CommLinkImpl)cl;
-			return link != null ? link.getPoller() : null;
-		} else
-			return null;
+	static private MessagePoller getPoller(CommLinkImpl cl) {
+		return cl != null ? cl.getPoller() : null;
 	}
 
 	/** Perform a controller download (reset) */
@@ -876,10 +891,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
-		CommLink cl = comm_link;
-		if(cl instanceof CommLinkImpl) {
-			CommLinkImpl link = (CommLinkImpl)cl;
-			link.pullController(this);
+		CommLinkImpl cl = comm_link;
+		if(cl != null) {
+			cl.testGateArmDisable();
+			cl.pullController(this);
 		}
 		super.doDestroy();
 		cabinet.notifyRemove();
@@ -887,22 +902,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Check if the controller is assigned to a modem comm link */
 	public boolean hasModemCommLink() {
-		CommLink cl = comm_link;
-		if(cl instanceof CommLinkImpl) {
-			CommLinkImpl link = (CommLinkImpl)cl;
-			return link.isModemLink();
-		} else
-			return false;
+		CommLinkImpl cl = comm_link;
+		return cl != null ? cl.isModemLink() : false;
 	}
 
 	/** Check if the controller comm link is currently connected */
 	public boolean isConnected() {
-		CommLink cl = comm_link;
-		if(cl instanceof CommLinkImpl) {
-			CommLinkImpl link = (CommLinkImpl)cl;
-			return link.isConnected();
-		} else
-			return false;
+		CommLinkImpl cl = comm_link;
+		return cl != null ? cl.isConnected() : false;
 	}
 
 	/** Write the controller as an XML element */

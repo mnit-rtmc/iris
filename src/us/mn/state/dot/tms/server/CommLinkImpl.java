@@ -39,6 +39,11 @@ import us.mn.state.dot.tms.server.comm.MessagePoller;
  */
 public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
+	/** Test if a comm protocol supports gate arm control */
+	static private boolean isGateArm(CommProtocol cp) {
+		return cp == CommProtocol.HYSECURITY_STC;
+	}
+
 	/** Load all the comm links */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CommLinkImpl.class);
@@ -123,11 +128,18 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return description;
 	}
 
+	/** Test whether gate arm system should be disabled */
+	public void testGateArmDisable() {
+		if(isGateArm(protocol))
+			GateArmImpl.disableConfig();
+	}
+
 	/** Remote URI for link */
 	protected String uri = "";
 
 	/** Set remote URI for link */
 	public void setUri(String u) {
+		testGateArmDisable();
 		uri = u;
 	}
 
@@ -150,7 +162,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set the communication protocol */
 	public void setProtocol(short p) {
+		testGateArmDisable();
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
+		if(isGateArm(cp))
+			GateArmImpl.disableConfig();
 		if(cp != null)
 			protocol = cp;
 	}
@@ -177,6 +192,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set the polling timeout (milliseconds) */
 	public void setTimeout(int t) {
+		testGateArmDisable();
 		timeout = t;
 	}
 
