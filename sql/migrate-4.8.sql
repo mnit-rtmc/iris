@@ -144,3 +144,33 @@ CREATE OR REPLACE VIEW incident_view AS
     LEFT JOIN iris.direction d ON i.dir = d.id
     LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
 GRANT SELECT ON incident_view TO PUBLIC;
+
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (301, 'Gate Arm UNKNOWN');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (302, 'Gate Arm FAULT');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (303, 'Gate Arm OPENING');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (304, 'Gate Arm OPEN');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (305, 'Gate Arm WARN CLOSE');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (306, 'Gate Arm CLOSING');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (307, 'Gate Arm CLOSED');
+
+CREATE TABLE event.gate_arm_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(20),
+	iris_user VARCHAR(15)
+);
+
+CREATE VIEW gate_arm_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, device_id, e.iris_user
+	FROM event.gate_arm_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON gate_arm_event_view TO PUBLIC;

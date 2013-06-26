@@ -1046,6 +1046,15 @@ CREATE TABLE event.client_event (
 	iris_user VARCHAR(15)
 );
 
+CREATE TABLE event.gate_arm_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(20),
+	iris_user VARCHAR(15)
+);
+
 CREATE TABLE event.incident_detail (
 	name VARCHAR(8) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL
@@ -1480,6 +1489,12 @@ CREATE VIEW client_event_view AS
 	FROM event.client_event e
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON client_event_view TO PUBLIC;
+
+CREATE VIEW gate_arm_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, device_id, e.iris_user
+	FROM event.gate_arm_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
 CREATE VIEW incident_view AS
     SELECT iu.event_id, name, iu.event_date, ed.description, road,
@@ -1995,6 +2010,13 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 202	Client AUTHENTICATE
 203	Client FAIL AUTHENTICATION
 204	Client DISCONNECT
+301	Gate Arm UNKNOWN
+302	Gate Arm FAULT
+303	Gate Arm OPENING
+304	Gate Arm OPEN
+305	Gate Arm WARN CLOSE
+306	Gate Arm CLOSING
+307	Gate Arm CLOSED
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;

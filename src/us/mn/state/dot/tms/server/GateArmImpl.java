@@ -34,8 +34,10 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.event.GateArmEvent;
 
 /**
  * Gate Arm Device.
@@ -338,7 +340,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Set the arm state */
 	@Override public void setArmState(int gas) {
-		// FIXME: log changes to gate arm state
 		arm_state = GateArmState.fromOrdinal(gas);
 		// FIXME: check for conflicts and send alerts
 	}
@@ -366,7 +367,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		}
 	}
 
-	/** Validate a new gate arm state */
+	/** Validate a new user initiated gate arm state */
 	private boolean validateStateReq(GateArmState gas) throws TMSException {
 		if(gas == arm_state)
 			return false;
@@ -393,7 +394,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * @param o User requesting new state.
 	 * @param p Gate arm poller. */
 	private void doSetArmState(GateArmState gas, User o, GateArmPoller p) {
-		// FIXME: log request with user
+		logStateChange(gas, o);
 		setArmState(gas.ordinal());
 		switch(gas) {
 		case OPENING:
@@ -410,6 +411,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Set the arm state */
 	public void setArmStateNotify(GateArmState gas) {
 		if(isChanged(gas)) {
+			logStateChange(gas, null);
 			setArmState(gas.ordinal());
 			notifyAttribute("armState");
 			updateStyles();
@@ -421,6 +423,21 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return gas != arm_state &&
 		      (gas != GateArmState.OPEN ||
 		       arm_state != GateArmState.WARN_CLOSE);
+	}
+
+	/** Log a gate arm state change */
+	private void logStateChange(GateArmState gas, User o) {
+		String owner = o != null ? o.getName() : null;
+		logEvent(new GateArmEvent(gas, name, owner));
+	}
+
+	/** Log a gate arm state event */
+	private void logEvent(final GateArmEvent ev) {
+		FLUSH.addJob(new Job() {
+			public void perform() throws TMSException {
+				ev.doStore();
+			}
+		});
 	}
 
 	/** Get the arm state */
