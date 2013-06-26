@@ -30,12 +30,16 @@ public class OpControlGate extends OpSTC {
 	/** Control property */
 	private final ControlProperty control;
 
+	/** Requested gate arm state */
+	private final GateArmState req_state;
+
 	/** Create a new gate arm control operation */
 	public OpControlGate(GateArmImpl d, GateArmState gas) {
 		super(PriorityLevel.COMMAND, d);
 		control = new ControlProperty();
 		control.setOpen(gas == GateArmState.OPENING);
 		control.setClose(gas == GateArmState.CLOSING);
+		req_state = gas;
 	}
 
 	/** Create the second phase of the operation */
@@ -53,6 +57,36 @@ public class OpControlGate extends OpSTC {
 			mess.add(control);
 			logStore(control);
 			mess.storeProps();
+			// Verify requested status is needed so that
+			// OpQueryGateStatus can't sneak in and revert
+			// the gate arm to state it was in pre-request
+			return new VerifyStatus();
+		}
+	}
+
+	/** Phase to verify the requested gate status */
+	protected class VerifyStatus extends Phase<STCProperty> {
+
+		/** Number of tries to verify status */
+		private int n_tries = 0;
+
+		/** Verify the requested status */
+		protected Phase<STCProperty> poll(CommMessage mess)
+			throws IOException
+		{
+			StatusProperty s = new StatusProperty();
+			mess.add(s);
+			mess.queryProps();
+			logQuery(s);
+			setMaintStatus(s.getMaintStatus());
+			// Try up to 3 times to verify that the requested
+			// state has been accepted before giving up
+			if(s.getState() != req_state) {
+				n_tries++;
+				if(n_tries < 3)
+					return this;
+			}
+			gate_arm.setArmStateNotify(s.getState());
 			return null;
 		}
 	}
