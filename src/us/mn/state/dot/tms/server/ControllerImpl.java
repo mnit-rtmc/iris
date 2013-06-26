@@ -347,19 +347,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Assign an IO to the specified controller I/O pin */
 	public synchronized void setIO(int pin, ControllerIO io) {
-		if(io != null) {
+		if(io != null)
 			io_pins.put(pin, io);
-			if(io instanceof DeviceImpl)
-				((DeviceImpl)io).updateStyles();
-			if(io instanceof GateArmImpl)
-				GateArmImpl.disableConfig("IO 0");
-		} else {
-			ControllerIO oio = io_pins.remove(pin);
-			if(oio instanceof DeviceImpl)
-				((DeviceImpl)oio).updateStyles();
-			if(oio instanceof GateArmImpl)
-				GateArmImpl.disableConfig("IO 1");
-		}
+		else
+			io_pins.remove(pin);
 	}
 
 	/** Determine whether this controller has an active ramp meter */

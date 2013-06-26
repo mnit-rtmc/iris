@@ -164,6 +164,18 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		geo_loc.notifyRemove();
 	}
 
+	/** Update the controller and/or pin.
+	 * @param oc Old controller.
+	 * @param op Old pin.
+	 * @param nc New controller.
+	 * @param np New pin. */
+	@Override protected void updateControllerPin(ControllerImpl oc, int op,
+		ControllerImpl nc, int np)
+	{
+		disableConfig("controller/pin");
+		super.updateControllerPin(oc, op, nc, np);
+	}
+
 	/** Device location */
 	private GeoLocImpl geo_loc;
 
@@ -428,6 +440,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Log a gate arm state change */
 	private void logStateChange(GateArmState gas, User o) {
+Thread.currentThread().dumpStack();
 		String owner = o != null ? o.getName() : null;
 		logEvent(new GateArmEvent(gas, name, owner));
 	}

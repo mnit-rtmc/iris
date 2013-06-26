@@ -47,8 +47,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	}
 
 	/** Initialize the controller for this device */
-	public void initTransients() {
-		updateControllerPin(null, 0, controller, pin);
+	@Override public void initTransients() {
+		ControllerImpl c = controller;
+		if(c != null)
+			c.setIO(pin, this);
+		updateStyles();
 	}
 
 	/** Get the active status */
@@ -99,6 +102,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			oc.setIO(op, null);
 		if(nc != null)
 			nc.setIO(np, this);
+		updateStyles();
 	}
 
 	/** Set the controller of the device */
