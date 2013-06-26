@@ -129,9 +129,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Test whether gate arm system should be disabled */
-	public void testGateArmDisable() {
+	public void testGateArmDisable(String reason) {
 		if(isGateArm(protocol))
-			GateArmImpl.disableConfig();
+			GateArmImpl.disableConfig(reason);
 	}
 
 	/** Remote URI for link */
@@ -139,7 +139,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set remote URI for link */
 	public void setUri(String u) {
-		testGateArmDisable();
+		testGateArmDisable("URI");
 		uri = u;
 	}
 
@@ -162,10 +162,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set the communication protocol */
 	public void setProtocol(short p) {
-		testGateArmDisable();
+		testGateArmDisable("protocol 0");
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
 		if(isGateArm(cp))
-			GateArmImpl.disableConfig();
+			GateArmImpl.disableConfig("protocol 1");
 		if(cp != null)
 			protocol = cp;
 	}
@@ -192,7 +192,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set the polling timeout (milliseconds) */
 	public void setTimeout(int t) {
-		testGateArmDisable();
+		testGateArmDisable("timeout");
 		timeout = t;
 	}
 

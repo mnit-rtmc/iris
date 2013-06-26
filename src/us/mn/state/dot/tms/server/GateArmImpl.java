@@ -63,11 +63,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Disable gate arm configuration */
-	static public void disableConfig() {
+	static public void disableConfig(String reason) {
 		if(isConfigEnabled())
 			CONFIG_FLAG = CONFIG_ENABLE.delete();
-		System.err.println(new Date().toString() +
-			": " + CONFIG_ENABLE.toString() + ", " + CONFIG_FLAG);
+		System.err.println(new Date().toString() + " " +
+			CONFIG_ENABLE.toString() + ": " + reason + " (" +
+			CONFIG_FLAG + ")");
 	}
 
 	/** Load all the gate arms */

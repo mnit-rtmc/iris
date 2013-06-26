@@ -186,7 +186,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Put this controller into a comm link */
 	private void putCommLink(int d, CommLinkImpl cl) throws TMSException {
 		if(cl != null) {
-			cl.testGateArmDisable();
+			cl.testGateArmDisable("comm_link 0");
 			cl.putController(d, this);
 		}
 	}
@@ -194,7 +194,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Pull this controller from a comm link */
 	private void pullCommLink(CommLinkImpl cl) {
 		if(cl != null) {
-			cl.testGateArmDisable();
+			cl.testGateArmDisable("comm_link 1");
 			cl.pullController(this);
 		}
 	}
@@ -247,10 +247,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Test whether gate arm system should be disabled */
-	private void testGateArmDisable() {
+	private void testGateArmDisable(String reason) {
 		CommLinkImpl cl = comm_link;
 		if(cl != null)
-			cl.testGateArmDisable();
+			cl.testGateArmDisable(reason);
 	}
 
 	/** Active status flag */
@@ -258,7 +258,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the active status */
 	public void setActive(boolean a) {
-		testGateArmDisable();
+		testGateArmDisable("active");
 		active = a;
 		updateStyles();
 	}
@@ -281,7 +281,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the access password */
 	public void setPassword(String pwd) {
-		testGateArmDisable();
+		testGateArmDisable("password");
 		password = pwd;
 	}
 
@@ -352,13 +352,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			if(io instanceof DeviceImpl)
 				((DeviceImpl)io).updateStyles();
 			if(io instanceof GateArmImpl)
-				GateArmImpl.disableConfig();
+				GateArmImpl.disableConfig("IO 0");
 		} else {
 			ControllerIO oio = io_pins.remove(pin);
 			if(oio instanceof DeviceImpl)
 				((DeviceImpl)oio).updateStyles();
 			if(oio instanceof GateArmImpl)
-				GateArmImpl.disableConfig();
+				GateArmImpl.disableConfig("IO 1");
 		}
 	}
 
@@ -893,7 +893,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public void doDestroy() throws TMSException {
 		CommLinkImpl cl = comm_link;
 		if(cl != null) {
-			cl.testGateArmDisable();
+			cl.testGateArmDisable("destroy");
 			cl.pullController(this);
 		}
 		super.doDestroy();
