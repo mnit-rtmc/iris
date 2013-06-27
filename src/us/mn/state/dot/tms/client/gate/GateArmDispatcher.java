@@ -97,6 +97,10 @@ public class GateArmDispatcher extends IPanel {
 	/** Arm state label */
 	private final JLabel arm_state_lbl = IPanel.createValueLabel();
 
+	/** Interlock label */
+	private final JLabel interlock_lbl = new JLabel(I18N.get(
+		"gate.arm.interlock"));
+
 	/** Action to open the gate arm */
 	private final IAction open_arm = new IAction("gate.arm.open") {
 		protected void do_perform() {
@@ -179,6 +183,7 @@ public class GateArmDispatcher extends IPanel {
 		approach_pnl = createStreamPanel(approach_ptz);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
+		interlock_lbl.setOpaque(true);
 		setTitle(I18N.get("gate.arm.selected"));
 		add("device.name");
 		add(name_lbl);
@@ -188,7 +193,8 @@ public class GateArmDispatcher extends IPanel {
 		add("device.operation");
 		add(op_lbl, Stretch.LAST);
 		add("device.status");
-		add(status_lbl, Stretch.LAST);
+		add(status_lbl);
+		add(interlock_lbl, Stretch.LAST);
 		add("gate.arm.state");
 		add(arm_state_lbl);
 		add(buildButtonBox(), Stretch.RIGHT);
@@ -265,6 +271,16 @@ public class GateArmDispatcher extends IPanel {
 				ga.getArmState()).toString());
 			updateButtons(ga);
 		}
+		if(a == null || a.equals("interlock")) {
+			if(ga.getInterlock()) {
+				interlock_lbl.setForeground(Color.WHITE);
+				interlock_lbl.setBackground(Color.RED);
+			} else {
+				interlock_lbl.setForeground(Color.WHITE);
+				interlock_lbl.setBackground(Color.GREEN);
+			}
+			updateButtons(ga);
+		}
 		if(a == null || a.equals("approach")) {
 			Camera c = ga.getApproach();
 			approach_ptz.setCamera(c);
@@ -318,7 +334,8 @@ public class GateArmDispatcher extends IPanel {
 	private void updateButtons(GateArm ga) {
 		boolean e = session.canUpdate(ga, "armState");
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
-		open_arm.setEnabled(e && gas == GateArmState.CLOSED);
+		open_arm.setEnabled(e && gas == GateArmState.CLOSED &&
+			!ga.getInterlock());
 		warn_close_arm.setEnabled(e && gas == GateArmState.OPEN);
 		close_arm.setEnabled(e && gas == GateArmState.WARN_CLOSE);
 	}
@@ -333,6 +350,8 @@ public class GateArmDispatcher extends IPanel {
 		status_lbl.setBackground(null);
 		op_lbl.setText("");
 		arm_state_lbl.setText("");
+		interlock_lbl.setForeground(null);
+		interlock_lbl.setBackground(null);
 		open_arm.setEnabled(false);
 		warn_close_arm.setEnabled(false);
 		close_arm.setEnabled(false);
