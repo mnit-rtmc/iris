@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.Color;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -183,6 +184,9 @@ public class GateArmDispatcher extends IPanel {
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
 		interlock_lbl.setOpaque(true);
+		interlock_lbl.setBorder(BorderFactory.createCompoundBorder(
+			BorderFactory.createLineBorder(Color.BLACK),
+			UI.panelBorder()));
 		setTitle(I18N.get("gate.arm.selected"));
 		add("device.name");
 		add(name_lbl);
@@ -190,10 +194,11 @@ public class GateArmDispatcher extends IPanel {
 		add(location_lbl, Stretch.LAST);
 		add(verify_pnl, Stretch.FULL);
 		add("device.operation");
-		add(op_lbl, Stretch.LAST);
+		add(op_lbl, Stretch.WIDE);
+		add(interlock_lbl, Stretch.TALL);
 		add("device.status");
-		add(status_lbl);
-		add(interlock_lbl, Stretch.RIGHT);
+		add(status_lbl, Stretch.WIDE);
+		add(new JLabel(), Stretch.LEFT);
 		add("gate.arm.state");
 		add(arm_state_lbl);
 		add(buildButtonBox(), Stretch.RIGHT);
@@ -277,7 +282,7 @@ public class GateArmDispatcher extends IPanel {
 				interlock_lbl.setText(I18N.get(
 					"gate.arm.interlock.on"));
 			} else {
-				interlock_lbl.setForeground(Color.WHITE);
+				interlock_lbl.setForeground(Color.BLACK);
 				interlock_lbl.setBackground(Color.GREEN);
 				interlock_lbl.setText(I18N.get(
 					"gate.arm.interlock.off"));
