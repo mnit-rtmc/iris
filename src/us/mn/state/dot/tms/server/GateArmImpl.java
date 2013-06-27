@@ -519,7 +519,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private transient boolean deny_close = false;
 
 	/** Flag to enable gate arm system */
-	private transient boolean system_enable = false;
+	private transient boolean system_enable = true;
 
 	/** Set flag to enable gate arm system */
 	private void setSystemEnable(boolean e) {
@@ -537,7 +537,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Get the interlock enum */
 	public int getInterlock() {
-		if(system_enable)
+		if(!system_enable)
 			return GateArmInterlock.SYSTEM_DISABLE.ordinal();
 		else if(deny_open && deny_close)
 			return GateArmInterlock.DENY_ALL.ordinal();
