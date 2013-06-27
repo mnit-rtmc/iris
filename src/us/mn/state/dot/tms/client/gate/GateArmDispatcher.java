@@ -26,6 +26,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -276,17 +277,7 @@ public class GateArmDispatcher extends IPanel {
 			updateButtons(ga);
 		}
 		if(a == null || a.equals("interlock")) {
-			if(ga.getInterlock()) {
-				interlock_lbl.setForeground(Color.WHITE);
-				interlock_lbl.setBackground(Color.RED);
-				interlock_lbl.setText(I18N.get(
-					"gate.arm.interlock.on"));
-			} else {
-				interlock_lbl.setForeground(Color.BLACK);
-				interlock_lbl.setBackground(Color.GREEN);
-				interlock_lbl.setText(I18N.get(
-					"gate.arm.interlock.off"));
-			}
+			updateInterlock(ga);
 			updateButtons(ga);
 		}
 		if(a == null || a.equals("approach")) {
@@ -338,14 +329,61 @@ public class GateArmDispatcher extends IPanel {
 		}
 	}
 
+	private void updateInterlock(GateArm ga) {
+		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
+		case NONE:
+			interlock_lbl.setForeground(Color.BLACK);
+			interlock_lbl.setBackground(Color.GREEN);
+			interlock_lbl.setText(I18N.get(
+				"gate.arm.interlock.none"));
+			break;
+		case DENY_OPEN:
+			interlock_lbl.setForeground(Color.WHITE);
+			interlock_lbl.setBackground(Color.RED);
+			interlock_lbl.setText(I18N.get(
+				"gate.arm.interlock.deny_open"));
+			break;
+		case DENY_CLOSE:
+			interlock_lbl.setForeground(Color.BLACK);
+			interlock_lbl.setBackground(Color.YELLOW);
+			interlock_lbl.setText(I18N.get(
+				"gate.arm.interlock.deny_close"));
+			break;
+		case DENY_ALL:
+			interlock_lbl.setForeground(Color.WHITE);
+			interlock_lbl.setBackground(Color.RED);
+			interlock_lbl.setText(I18N.get(
+				"gate.arm.interlock.deny_all"));
+			break;
+		case SYSTEM_DISABLE:
+			interlock_lbl.setForeground(Color.WHITE);
+			interlock_lbl.setBackground(Color.GRAY);
+			interlock_lbl.setText(I18N.get(
+				"gate.arm.interlock.system_disable"));
+			break;
+		}
+	}
+
 	/** Update the button enabled states */
 	private void updateButtons(GateArm ga) {
 		boolean e = session.canUpdate(ga, "armState");
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
 		open_arm.setEnabled(e && gas == GateArmState.CLOSED &&
-			!ga.getInterlock());
+			isOpenAllowed(ga));
 		warn_close_arm.setEnabled(e && gas == GateArmState.OPEN);
 		close_arm.setEnabled(e && gas == GateArmState.WARN_CLOSE);
+	}
+
+	/** Check if gate arm open is allowed */
+	private boolean isOpenAllowed(GateArm ga) {
+		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
+		case DENY_OPEN:
+		case DENY_ALL:
+		case SYSTEM_DISABLE:
+			return false;
+		default:
+			return true;
+		}
 	}
 
 	/** Clear all of the fields */

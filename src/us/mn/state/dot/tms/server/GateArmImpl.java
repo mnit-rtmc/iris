@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmHelper;
+import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
@@ -54,27 +55,56 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Path to configuration enable file.  This must not be a system
 	 * attribute for security reasons. */
-	static private final File CONFIG_ENABLE = new File(
+	static private final File CONFIG_ENABLE_FILE = new File(
 		"/var/lib/iris/gate_arm_enable");
 
 	/** Config override flag */
 	static private boolean CONFIG_FLAG = true;
 
+	/** Config enable flag */
+	static private boolean CONFIG_ENABLE = true;
+
 	/** Test whether gate arm configuration is enabled */
-	static private boolean isConfigEnabled() {
+	static private boolean isConfigEnabledFile() {
 		return CONFIG_FLAG &&
-		       CONFIG_ENABLE.isFile() &&
-		       CONFIG_ENABLE.canRead() &&
-		       CONFIG_ENABLE.canWrite();
+		       CONFIG_ENABLE_FILE.isFile() &&
+		       CONFIG_ENABLE_FILE.canRead() &&
+		       CONFIG_ENABLE_FILE.canWrite();
+	}
+
+	/** Enable or disable gate arm system config */
+	static private void setConfigEnabled(boolean e) {
+		CONFIG_ENABLE = e;
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while(it.hasNext()) {
+			GateArm g = it.next();
+			if(g instanceof GateArmImpl) {
+				GateArmImpl ga = (GateArmImpl)g;
+				ga.setSystemEnable(e);
+			}
+		}
 	}
 
 	/** Disable gate arm configuration */
 	static public void disableConfig(String reason) {
-		if(isConfigEnabled())
-			CONFIG_FLAG = CONFIG_ENABLE.delete();
+		if(isConfigEnabledFile())
+			CONFIG_FLAG = CONFIG_ENABLE_FILE.delete();
+		if(CONFIG_ENABLE)
+			setConfigEnabled(false);
 		System.err.println(new Date().toString() + " " +
-			CONFIG_ENABLE.toString() + ": " + reason + " (" +
+			CONFIG_ENABLE_FILE.toString() + ": " + reason + " (" +
 			CONFIG_FLAG + ")");
+	}
+
+	/** Check if config is enabled (and enable if required) */
+	static private boolean checkConfigEnabled() {
+		if(CONFIG_ENABLE)
+			return true;
+		if(isConfigEnabledFile()) {
+			setConfigEnabled(true);
+			return true;
+		} else
+			return false;
 	}
 
 	/** Load all the gate arms */
@@ -317,7 +347,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Request a device operation */
 	@Override public void setDeviceRequest(int r) {
 		DeviceRequest req = checkRequest(r);
-		if(isConfigEnabled() && req != null) {
+		if(checkConfigEnabled() && req != null) {
 			GateArmPoller p = getGateArmPoller();
 			if(p != null)
 				p.sendRequest(this, req);
@@ -378,7 +408,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		throws TMSException
 	{
 		GateArmState s = GateArmState.fromOrdinal(gas);
-		if(validateStateReq(s) && isConfigEnabled()) {
+		if(validateStateReq(s) && checkConfigEnabled()) {
 			GateArmPoller p = getGateArmPoller();
 			if(p != null)
 				doSetArmState(s, o, p);
@@ -392,7 +422,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		switch(arm_state) {
 		case CLOSED:
 			if(gas == GateArmState.OPENING) {
-				if(getInterlock()) {
+				if(deny_open) {
 					throw new ChangeVetoException(
 						"INTERLOCK CONFLICT");
 				} else
@@ -474,21 +504,54 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return arm_state.ordinal();
 	}
 
-	/** Open interlock flag */
-	private transient boolean interlock = true;
+	/** Flag to deny gate arm open (interlock) */
+	private transient boolean deny_open = true;
 
-	/** Set the interlock flag */
-	private void setInterlockNotify(boolean i) {
-		if(i != interlock) {
-			interlock = i;
-			notifyAttribute("interlock");
-			setDeviceRequest(DeviceRequest.SEND_SETTINGS.ordinal());
-		}
+	/** Set interlock flag to deny gate open */
+	private void setDenyOpen(boolean d) {
+		int gai = getInterlock();
+		deny_open = d;
+		if(gai != getInterlock())
+			setInterlockNotify();
 	}
 
-	/** Get the interlock flag */
-	public boolean getInterlock() {
-		return interlock;
+	/** Flag to deny gate arm close (interlock) */
+	private transient boolean deny_close = false;
+
+	/** Flag to enable gate arm system */
+	private transient boolean system_enable = false;
+
+	/** Set flag to enable gate arm system */
+	private void setSystemEnable(boolean e) {
+		int gai = getInterlock();
+		system_enable = e;
+		if(gai != getInterlock())
+			setInterlockNotify();
+	}
+
+	/** Set the interlock flag */
+	private void setInterlockNotify() {
+		notifyAttribute("interlock");
+		setDeviceRequest(DeviceRequest.SEND_SETTINGS.ordinal());
+	}
+
+	/** Get the interlock enum */
+	public int getInterlock() {
+		if(system_enable)
+			return GateArmInterlock.SYSTEM_DISABLE.ordinal();
+		else if(deny_open && deny_close)
+			return GateArmInterlock.DENY_ALL.ordinal();
+		else if(deny_open)
+			return GateArmInterlock.DENY_OPEN.ordinal();
+		else if(deny_close)
+			return GateArmInterlock.DENY_CLOSE.ordinal();
+		else
+			return GateArmInterlock.NONE.ordinal();
+	}
+
+	/** Check is arm open interlock in effect */
+	public boolean isOpenInterlock() {
+		return deny_open || !system_enable;
 	}
 
 	/** Item style bits */
@@ -518,7 +581,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override public void updateStyles() {
 		setStyles(calculateStyles());
 		checkInterlocks();
-		setConflict(getInterlock() && isOpen());
+		setConflict(deny_open && isOpen());
 	}
 
 	/** Conflict detected flag.  This is initially set to true because
@@ -567,7 +630,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * @param d Valid open direction; 0 for any, -1 for none */
 	private void setOpenDirection(int d) {
 		int gd = getRoadDir();
-		setInterlockNotify(d != 0 && d != gd);
+		setDenyOpen(d != 0 && d != gd);
 	}
 
 	/** Get valid gate open direction for the specified road.  If gates are
