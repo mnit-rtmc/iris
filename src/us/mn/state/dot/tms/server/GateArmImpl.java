@@ -529,7 +529,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 				GateArmImpl ga = (GateArmImpl)g;
 				Road gr = ga.getRoad();
 				if(gr == r)
-					setOpenDirection(d);
+					ga.setOpenDirection(d);
 			}
 		}
 	}
