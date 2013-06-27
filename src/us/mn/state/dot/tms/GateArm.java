@@ -71,6 +71,9 @@ public interface GateArm extends Device {
 	/** Get the arm state */
 	int getArmState();
 
+	/** Get the interlock flag */
+	boolean getInterlock();
+
 	/** Get item style bits */
 	long getStyles();
 }

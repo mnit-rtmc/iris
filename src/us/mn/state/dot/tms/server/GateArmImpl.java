@@ -18,6 +18,7 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.Namespace;
@@ -29,10 +30,12 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
@@ -372,7 +375,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	{
 		GateArmState s = GateArmState.fromOrdinal(gas);
 		if(validateStateReq(s) && isConfigEnabled()) {
-			// FIXME: check for conflicts
 			GateArmPoller p = getGateArmPoller();
 			if(p != null)
 				doSetArmState(s, o, p);
@@ -385,8 +387,13 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			return false;
 		switch(arm_state) {
 		case CLOSED:
-			if(gas == GateArmState.OPENING)
-				return true;
+			if(gas == GateArmState.OPENING) {
+				if(interlock) {
+					throw new ChangeVetoException(
+						"INTERLOCK CONFLICT");
+				} else
+					return true;
+			}
 			break;
 		case OPEN:
 			if(gas == GateArmState.WARN_CLOSE)
@@ -441,7 +448,73 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private void setArmState(GateArmState gas, User o) {
 		logStateChange(gas, o);
 		arm_state = gas;
-		// FIXME: check for conflicts and send alerts
+		checkInterlocks();
+		// FIXME: send alerts
+	}
+
+	/** Set all gate arm open interlocks */
+	private void checkInterlocks() {
+		Road r = getRoad();
+		int d = openGateDirection(r);
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while(it.hasNext()) {
+			GateArm g = it.next();
+			if(g instanceof GateArmImpl) {
+				GateArmImpl ga = (GateArmImpl)g;
+				Road gr = ga.getRoad();
+				if(gr == r)
+					setOpenDirection(d);
+			}
+		}
+	}
+
+	/** Set the valid open direction for road.
+	 * @param d Valid open direction; 0 for any, -1 for none */
+	private void setOpenDirection(int d) {
+		int gd = getRoadDir();
+		setInterlockNotify(d != 0 && d != gd);
+	}
+
+	/** Get valid gate open direction for the specified road.  If gates are
+	 * open in more than one direction, then no direction is valid.
+	 * @param r Road to check.
+	 * @return Ordinal of valid gate Direction; 0 for any, -1 for none. */
+	static private int openGateDirection(Road r) {
+		int d = 0;
+		boolean found = false;
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while(it.hasNext()) {
+			GateArm g = it.next();
+			if(g instanceof GateArmImpl) {
+				GateArmImpl ga = (GateArmImpl)g;
+				if(ga.isOpen()) {
+					Road gr = ga.getRoad();
+					if(gr == r) {
+						int gd = ga.getRoadDir();
+						if(found && d != gd)
+							return -1;
+						else {
+							found = true;
+							d = gd;
+						}
+					}
+				}
+			}
+		}
+		return d;
+	}
+
+	/** Get gate arm road */
+	private Road getRoad() {
+		GeoLoc gl = getGeoLoc();
+		return gl != null ? gl.getRoadway() : null;
+	}
+
+	/** Get gate arm road direction.
+	 * @return Index of road direction, or 0 for unknown */
+	private int getRoadDir() {
+		GeoLoc gl = getGeoLoc();
+		return gl != null ? gl.getRoadDir() : 0;
 	}
 
 	/** Log a gate arm state change */
@@ -462,6 +535,22 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Get the arm state */
 	@Override public int getArmState() {
 		return arm_state.ordinal();
+	}
+
+	/** Open interlock flag */
+	private transient boolean interlock = true;
+
+	/** Set the interlock flag */
+	private void setInterlockNotify(boolean i) {
+		if(i != interlock) {
+			interlock = i;
+			notifyAttribute("interlock");
+		}
+	}
+
+	/** Get the interlock flag */
+	public boolean getInterlock() {
+		return interlock;
 	}
 
 	/** Item style bits */
@@ -504,13 +593,14 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Test if gate arm is (or may be) open */
 	private boolean isOpen() {
-		return arm_state != GateArmState.CLOSED;
+		return isActive() && arm_state != GateArmState.CLOSED;
 	}
 
 	/** Test if gate arm is moving */
 	private boolean isMoving() {
-		return arm_state == GateArmState.OPENING ||
-		       arm_state == GateArmState.CLOSING;
+		return isOnline() &&
+		      (arm_state == GateArmState.OPENING ||
+		       arm_state == GateArmState.CLOSING);
 	}
 
 	/** Test if gate arm needs maintenance */
