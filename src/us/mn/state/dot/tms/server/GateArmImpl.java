@@ -521,8 +521,9 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		setConflict(getInterlock() && isOpen());
 	}
 
-	/** Conflict detected flag */
-	private transient boolean conflict = false;
+	/** Conflict detected flag.  This is initially set to true because
+	 * devices start in failed state after a server restart. */
+	private transient boolean conflict = true;
 
 	/** Set open conflict state */
 	private void setConflict(boolean c) {
