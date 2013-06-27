@@ -449,73 +449,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private void setArmState(GateArmState gas, User o) {
 		logStateChange(gas, o);
 		arm_state = gas;
-		checkInterlocks();
-		// FIXME: send alerts
-	}
-
-	/** Set all gate arm open interlocks */
-	private void checkInterlocks() {
-		Road r = getRoad();
-		int d = openGateDirection(r);
-		Iterator<GateArm> it = GateArmHelper.iterator();
-		while(it.hasNext()) {
-			GateArm g = it.next();
-			if(g instanceof GateArmImpl) {
-				GateArmImpl ga = (GateArmImpl)g;
-				Road gr = ga.getRoad();
-				if(gr == r)
-					setOpenDirection(d);
-			}
-		}
-	}
-
-	/** Set the valid open direction for road.
-	 * @param d Valid open direction; 0 for any, -1 for none */
-	private void setOpenDirection(int d) {
-		int gd = getRoadDir();
-		setInterlockNotify(d != 0 && d != gd);
-	}
-
-	/** Get valid gate open direction for the specified road.  If gates are
-	 * open in more than one direction, then no direction is valid.
-	 * @param r Road to check.
-	 * @return Ordinal of valid gate Direction; 0 for any, -1 for none. */
-	static private int openGateDirection(Road r) {
-		int d = 0;
-		boolean found = false;
-		Iterator<GateArm> it = GateArmHelper.iterator();
-		while(it.hasNext()) {
-			GateArm g = it.next();
-			if(g instanceof GateArmImpl) {
-				GateArmImpl ga = (GateArmImpl)g;
-				if(ga.isOpen()) {
-					Road gr = ga.getRoad();
-					if(gr == r) {
-						int gd = ga.getRoadDir();
-						if(found && d != gd)
-							return -1;
-						else {
-							found = true;
-							d = gd;
-						}
-					}
-				}
-			}
-		}
-		return d;
-	}
-
-	/** Get gate arm road */
-	private Road getRoad() {
-		GeoLoc gl = getGeoLoc();
-		return gl != null ? gl.getRoadway() : null;
-	}
-
-	/** Get gate arm road direction.
-	 * @return Index of road direction, or 0 for unknown */
-	private int getRoadDir() {
-		GeoLoc gl = getGeoLoc();
-		return gl != null ? gl.getRoadDir() : 0;
 	}
 
 	/** Log a gate arm state change */
@@ -581,6 +514,73 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Update the item styles */
 	@Override public void updateStyles() {
 		setStyles(calculateStyles());
+		checkInterlocks();
+		// FIXME: send alerts
+	}
+
+	/** Set all gate arm open interlocks */
+	private void checkInterlocks() {
+		Road r = getRoad();
+		int d = openGateDirection(r);
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while(it.hasNext()) {
+			GateArm g = it.next();
+			if(g instanceof GateArmImpl) {
+				GateArmImpl ga = (GateArmImpl)g;
+				Road gr = ga.getRoad();
+				if(gr == r)
+					setOpenDirection(d);
+			}
+		}
+	}
+
+	/** Get gate arm road */
+	private Road getRoad() {
+		GeoLoc gl = getGeoLoc();
+		return gl != null ? gl.getRoadway() : null;
+	}
+
+	/** Get gate arm road direction.
+	 * @return Index of road direction, or 0 for unknown */
+	private int getRoadDir() {
+		GeoLoc gl = getGeoLoc();
+		return gl != null ? gl.getRoadDir() : 0;
+	}
+
+	/** Set the valid open direction for road.
+	 * @param d Valid open direction; 0 for any, -1 for none */
+	private void setOpenDirection(int d) {
+		int gd = getRoadDir();
+		setInterlockNotify(d != 0 && d != gd);
+	}
+
+	/** Get valid gate open direction for the specified road.  If gates are
+	 * open in more than one direction, then no direction is valid.
+	 * @param r Road to check.
+	 * @return Ordinal of valid gate Direction; 0 for any, -1 for none. */
+	static private int openGateDirection(Road r) {
+		int d = 0;
+		boolean found = false;
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while(it.hasNext()) {
+			GateArm g = it.next();
+			if(g instanceof GateArmImpl) {
+				GateArmImpl ga = (GateArmImpl)g;
+				if(ga.isOpen()) {
+					Road gr = ga.getRoad();
+					if(gr == r) {
+						int gd = ga.getRoadDir();
+						if(found && d != gd)
+							return -1;
+						else {
+							found = true;
+							d = gd;
+						}
+					}
+				}
+			}
+		}
+		return d;
 	}
 
 	/** Test if gate arm is closed */
