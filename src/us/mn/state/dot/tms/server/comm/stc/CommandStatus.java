@@ -59,6 +59,19 @@ public enum CommandStatus {
 		return null;
 	}
 
+	/** Test if a command status is "normal" */
+	static public boolean isNormal(CommandStatus cs) {
+		switch(cs) {
+		case OPEN_IN_PROGRESS:
+		case OPEN_COMPLETE:
+		case CLOSE_IN_PROGRESS:
+		case CLOSE_COMPLETE:
+			return true;
+		default:
+			return false;
+		}
+	}
+
 	/** Test if a command status is "fault" */
 	static public boolean isFault(CommandStatus cs) {
 		switch(cs) {
@@ -98,6 +111,8 @@ public enum CommandStatus {
 		switch(cs) {
 		case OPEN_COMPLETE:
 		case EM_OPEN_COMPLETE:
+		case BLOCK_FREE_EXIT_LOOP:
+		case BLOCK_OPEN_COMMAND:
 			return true;
 		default:
 			return false;
@@ -109,6 +124,8 @@ public enum CommandStatus {
 		switch(cs) {
 		case CLOSE_COMPLETE:
 		case EM_CLOSE_COMPLETE:
+		case BLOCK_OPEN_INTERLOCK:
+		case BLOCK_LOCK_INTERLOCK:
 			return true;
 		default:
 			return false;

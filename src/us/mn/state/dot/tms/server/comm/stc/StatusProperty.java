@@ -245,10 +245,10 @@ public class StatusProperty extends STCProperty {
 			return os.toString();
 		else {
 			CommandStatus cs = command_state;
-			if(CommandStatus.isFault(cs))
-				return cs.toString();
-			else
+			if(CommandStatus.isNormal(cs))
 				return "";
+			else
+				return cs.toString();
 		}
 	}
 }
