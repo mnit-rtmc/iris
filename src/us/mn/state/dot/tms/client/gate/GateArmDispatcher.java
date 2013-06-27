@@ -98,8 +98,7 @@ public class GateArmDispatcher extends IPanel {
 	private final JLabel arm_state_lbl = IPanel.createValueLabel();
 
 	/** Interlock label */
-	private final JLabel interlock_lbl = new JLabel(I18N.get(
-		"gate.arm.interlock"));
+	private final JLabel interlock_lbl = new JLabel();
 
 	/** Action to open the gate arm */
 	private final IAction open_arm = new IAction("gate.arm.open") {
@@ -194,7 +193,7 @@ public class GateArmDispatcher extends IPanel {
 		add(op_lbl, Stretch.LAST);
 		add("device.status");
 		add(status_lbl);
-		add(interlock_lbl, Stretch.LAST);
+		add(interlock_lbl, Stretch.RIGHT);
 		add("gate.arm.state");
 		add(arm_state_lbl);
 		add(buildButtonBox(), Stretch.RIGHT);
@@ -275,9 +274,13 @@ public class GateArmDispatcher extends IPanel {
 			if(ga.getInterlock()) {
 				interlock_lbl.setForeground(Color.WHITE);
 				interlock_lbl.setBackground(Color.RED);
+				interlock_lbl.setText(I18N.get(
+					"gate.arm.interlock.on"));
 			} else {
 				interlock_lbl.setForeground(Color.WHITE);
 				interlock_lbl.setBackground(Color.GREEN);
+				interlock_lbl.setText(I18N.get(
+					"gate.arm.interlock.off"));
 			}
 			updateButtons(ga);
 		}
@@ -350,6 +353,7 @@ public class GateArmDispatcher extends IPanel {
 		status_lbl.setBackground(null);
 		op_lbl.setText("");
 		arm_state_lbl.setText("");
+		interlock_lbl.setText("");
 		interlock_lbl.setForeground(null);
 		interlock_lbl.setBackground(null);
 		open_arm.setEnabled(false);
