@@ -504,7 +504,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			s |= ItemStyle.MOVING.bit();
 		if(needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
-		if(isFailed())
+		if(isActive() && isFailed())
 			s |= ItemStyle.FAILED.bit();
 		if(!isActive())
 			s |= ItemStyle.INACTIVE.bit();
