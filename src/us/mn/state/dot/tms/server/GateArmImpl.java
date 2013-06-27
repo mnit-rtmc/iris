@@ -325,6 +325,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private DeviceRequest checkRequest(int r) {
 		DeviceRequest req = DeviceRequest.fromOrdinal(r);
 		switch(req) {
+		case SEND_SETTINGS:
 		case QUERY_STATUS:
 		case RESET_DEVICE:
 			return req;
@@ -545,6 +546,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		if(i != interlock) {
 			interlock = i;
 			notifyAttribute("interlock");
+			setDeviceRequest(DeviceRequest.SEND_SETTINGS.ordinal());
 		}
 	}
 

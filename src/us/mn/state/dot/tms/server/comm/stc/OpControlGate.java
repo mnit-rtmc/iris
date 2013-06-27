@@ -41,10 +41,16 @@ public class OpControlGate extends OpSTC {
 	public OpControlGate(GateArmImpl d, User o, GateArmState gas) {
 		super(PriorityLevel.COMMAND, d);
 		user = o;
+		req_state = gas;
 		control = new ControlProperty();
 		control.setOpen(gas == GateArmState.OPENING);
 		control.setClose(gas == GateArmState.CLOSING);
-		req_state = gas;
+		control.setInterlock(d.getInterlock());
+	}
+
+	/** Create a new gate arm control operation (to set interlock only) */
+	public OpControlGate(GateArmImpl d) {
+		this(d, null, null);
 	}
 
 	/** Create the second phase of the operation */
@@ -62,7 +68,8 @@ public class OpControlGate extends OpSTC {
 			mess.add(control);
 			logStore(control);
 			mess.storeProps();
-			gate_arm.setArmStateNotify(req_state, user);
+			if(req_state != null)
+				gate_arm.setArmStateNotify(req_state, user);
 			return null;
 		}
 	}

@@ -106,6 +106,11 @@ public class ControlProperty extends STCProperty {
 	/** Open interlock */
 	private boolean oi = false;
 
+	/** Set open interlock */
+	public void setInterlock(boolean i) {
+		oi = i;
+	}
+
 	/** Block exit vehicle detector */
 	private boolean bevd = false;
 

@@ -44,6 +44,9 @@ public class STCPoller extends MessagePoller<STCProperty>
 	/** Send a device request */
 	public void sendRequest(GateArmImpl ga, DeviceRequest r) {
 		switch(r) {
+		case SEND_SETTINGS:
+			addOperation(new OpControlGate(ga));
+			break;
 		case RESET_DEVICE:
 			addOperation(new OpResetGate(ga));
 			break;
