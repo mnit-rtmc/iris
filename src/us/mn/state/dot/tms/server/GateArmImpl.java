@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import javax.mail.MessagingException;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
@@ -36,11 +37,13 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.event.GateArmEvent;
+import us.mn.state.dot.tms.utils.SEmail;
 
 /**
  * Gate Arm Device.
@@ -389,7 +392,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		switch(arm_state) {
 		case CLOSED:
 			if(gas == GateArmState.OPENING) {
-				if(interlock) {
+				if(getInterlock()) {
 					throw new ChangeVetoException(
 						"INTERLOCK CONFLICT");
 				} else
@@ -515,7 +518,19 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override public void updateStyles() {
 		setStyles(calculateStyles());
 		checkInterlocks();
-		// FIXME: send alerts
+		setConflict(getInterlock() && isOpen());
+	}
+
+	/** Conflict detected flag */
+	private transient boolean conflict = false;
+
+	/** Set open conflict state */
+	private void setConflict(boolean c) {
+		if(c != conflict) {
+			conflict = c;
+			if(conflict)
+				sendEmailAlert("Open conflict: " + name);
+		}
 	}
 
 	/** Set all gate arm open interlocks */
@@ -630,5 +645,34 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			return (GateArmPoller)mp;
 		else
 			return null;
+	}
+
+	/** Send an email alert */
+	static private void sendEmailAlert(String msg) {
+		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
+		if(sender == null || sender.length() <= 0) {
+			logError("sendEmailAlert: invalid sender");
+			return;
+		}
+		String recipient =
+			SystemAttrEnum.EMAIL_RECIPIENT_GATE_ARM.getString();
+		if(recipient == null || recipient.length() <= 0) {
+			logError("sendEmailAlert: invalid recipient");
+			return;
+		}
+		String subject = "Gate arm ALERT";
+		SEmail email = new SEmail(sender, recipient, subject, msg);
+		try {
+			email.send();
+		}
+		catch(MessagingException e) {
+			logError("sendEmailAlert: email failed: " +
+				e.getMessage());
+		}
+	}
+
+	/** Log an error to stderr */
+	static private void logError(String msg) {
+		System.err.println("GateArmImpl." + msg);
 	}
 }

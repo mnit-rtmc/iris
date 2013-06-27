@@ -69,6 +69,7 @@ public enum SystemAttrEnum {
 	EMAIL_SMTP_HOST(String.class),
 	EMAIL_RECIPIENT_AWS(String.class),
 	EMAIL_RECIPIENT_BUGS(String.class),
+	EMAIL_RECIPIENT_GATE_ARM(String.class),
 	HELP_TROUBLE_TICKET_ENABLE(false),
 	HELP_TROUBLE_TICKET_URL(String.class),
 	INCIDENT_CLEAR_SECS(600, 0, 3600),
