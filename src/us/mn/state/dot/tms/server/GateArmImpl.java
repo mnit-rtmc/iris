@@ -651,13 +651,13 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	static private void sendEmailAlert(String msg) {
 		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
 		if(sender == null || sender.length() <= 0) {
-			logError("sendEmailAlert: invalid sender");
+			logEmailError(msg, "invalid sender");
 			return;
 		}
 		String recipient =
 			SystemAttrEnum.EMAIL_RECIPIENT_GATE_ARM.getString();
 		if(recipient == null || recipient.length() <= 0) {
-			logError("sendEmailAlert: invalid recipient");
+			logEmailError(msg, "invalid recipient");
 			return;
 		}
 		String subject = "Gate arm ALERT";
@@ -666,13 +666,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			email.send();
 		}
 		catch(MessagingException e) {
-			logError("sendEmailAlert: email failed: " +
-				e.getMessage());
+			logEmailError(msg, "email failed: " + e.getMessage());
 		}
 	}
 
 	/** Log an error to stderr */
-	static private void logError(String msg) {
-		System.err.println("GateArmImpl." + msg);
+	static private void logEmailError(String msg, String reason) {
+		System.err.println("Gate Arm alert!  " + msg + ", " + reason);
 	}
 }
