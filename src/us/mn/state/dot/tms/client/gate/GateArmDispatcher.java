@@ -198,12 +198,6 @@ public class GateArmDispatcher extends IPanel {
 		stream_pnl = createStreamPanel(stream_ptz, MEDIUM);
 		thumb_ptz = new CameraPTZ(s);
 		thumb_pnl = createStreamPanel(thumb_ptz, THUMBNAIL);
-		JPanel pnl = new JPanel(new BorderLayout());
-		pnl.add(stream_pnl, BorderLayout.WEST);
-		IPanel p = new IPanel();
-		p.add(thumb_pnl, Stretch.RIGHT);
-		p.add(new JButton(swap_act), Stretch.RIGHT);
-		pnl.add(p, BorderLayout.EAST);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
 		interlock_lbl.setOpaque(true);
@@ -215,7 +209,9 @@ public class GateArmDispatcher extends IPanel {
 		add(name_lbl);
 		add("location");
 		add(location_lbl, Stretch.LAST);
-		add(pnl, Stretch.FULL);
+		add(stream_pnl, Stretch.DOUBLE);
+		add(thumb_pnl, Stretch.RIGHT);
+		add(new JButton(swap_act), Stretch.RIGHT);
 		add("device.operation");
 		add(op_lbl, Stretch.WIDE);
 		add(interlock_lbl, Stretch.TALL);
@@ -287,20 +283,20 @@ public class GateArmDispatcher extends IPanel {
 		}
 		if(a == null || a.equals("camera"))
 			updateCameraStream(ga);
-		if(a == null || a.equals("operation"))
+		if(a == null || a.equals("operation") || a.equals("armState"))
 			updateStatus(ga);
 		if(a == null || a.equals("armState")) {
-			updateStatus(ga);
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
 				ga.getArmState()).toString());
-			updateButtons(ga);
 		}
-		if(a == null || a.equals("interlock")) {
+		if(a == null || a.equals("interlock"))
 			updateInterlock(ga);
-			updateButtons(ga);
-		}
 		if(a == null || a.equals("approach"))
 			updateApproachStream(ga);
+		if(a == null || a.equals("camera") || a.equals("approach"))
+			updateSwapButton(ga);
+		if(a == null || a.equals("armState") || a.equals("interlock"))
+			updateButtons(ga);
 	}
 
 	/** Update camera stream */
@@ -369,6 +365,7 @@ public class GateArmDispatcher extends IPanel {
 		}
 	}
 
+	/** Update the interlock label */
 	private void updateInterlock(GateArm ga) {
 		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
 		case NONE:
@@ -402,6 +399,12 @@ public class GateArmDispatcher extends IPanel {
 				"gate.arm.interlock.system_disable"));
 			break;
 		}
+	}
+
+	/** Update the swap button enabled states */
+	private void updateSwapButton(GateArm ga) {
+		swap_act.setEnabled(ga != null && ga.getCamera() != null &&
+			ga.getApproach() != null);
 	}
 
 	/** Update the button enabled states */
@@ -439,6 +442,7 @@ public class GateArmDispatcher extends IPanel {
 		interlock_lbl.setText("");
 		interlock_lbl.setForeground(null);
 		interlock_lbl.setBackground(null);
+		swap_act.setEnabled(false);
 		open_arm.setEnabled(false);
 		warn_close_arm.setEnabled(false);
 		close_arm.setEnabled(false);

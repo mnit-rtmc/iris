@@ -96,13 +96,15 @@ public class StreamPanel extends JPanel {
 		video_req = req;
 		screen_pnl = createScreenPanel(sz);
 		mouse_ptz.setComponent(screen_pnl);
-		status_pnl = createStatusPanel(sz);
+		status_pnl = createStatusPanel(vsz);
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 0;
 		c.gridy = GridBagConstraints.RELATIVE;
 		add(screen_pnl, c);
 		add(status_pnl, c);
+		setPreferredSize(UI.dimension(vsz.width, vsz.height + 20));
+		setMinimumSize(UI.dimension(vsz.width, vsz.height + 20));
 	}
 
 	/** Create the screen panel */
@@ -114,14 +116,16 @@ public class StreamPanel extends JPanel {
 		p.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
 		p.setPreferredSize(sz);
+		p.setMinimumSize(sz);
 		return p;
 	}
 
 	/** Create the status panel */
-	private JPanel createStatusPanel(Dimension sz) {
+	private JPanel createStatusPanel(VideoRequest.Size vsz) {
 		JPanel p = new JPanel(new BorderLayout());
 		p.add(status_lbl, BorderLayout.WEST);
-		p.setPreferredSize(new Dimension(sz.width, 20));
+		p.setPreferredSize(UI.dimension(vsz.width, 20));
+		p.setMinimumSize(UI.dimension(vsz.width, 20));
 		return p;
 	}
 
