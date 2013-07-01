@@ -80,7 +80,10 @@ public class StatusProperty extends STCProperty {
 		if(operator_state == null)
 			throw new ParsingException("INVALID OPERATOR:" + o);
 		faults = parseBoolean(msg, OFF_FAULTS);
-		battery = parseAsciiHex1(msg, OFF_BATTERY);
+		int b = parseAsciiHex1(msg, OFF_BATTERY);
+		battery_state = BatteryStatus.fromOrdinal(b);
+		if(battery_state == null)
+			throw new ParsingException("INVALID BATTERY:" + b);
 		ac_present = parseBoolean(msg, OFF_AC_PRESENT);
 		open_limit = parseBoolean(msg, OFF_OPEN_LIMIT);
 		close_limit = parseBoolean(msg, OFF_CLOSE_LIMIT);
@@ -109,7 +112,7 @@ public class StatusProperty extends STCProperty {
 	private boolean faults;
 
 	/** Battery state */
-	private int battery;
+	private BatteryStatus battery_state;
 
 	/** AC present */
 	private boolean ac_present;
@@ -163,7 +166,7 @@ public class StatusProperty extends STCProperty {
 		sb.append(" faults:");
 		sb.append(faults);
 		sb.append(" battery:");
-		sb.append(battery);
+		sb.append(battery_state);
 		sb.append(" AC_present:");
 		sb.append(ac_present);
 		sb.append(" open_limit:");
