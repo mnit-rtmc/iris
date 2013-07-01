@@ -109,7 +109,7 @@ fi
 %{_serverdir}/sonar-server-@@SONAR.VERSION@@.jar
 
 # /var/lib/iris
-%dir %attr(0775,tms,tms) /var/lib/iris
+%dir %attr(3775,tms,tms) /var/lib/iris
 %attr(0444,tms,tms) /var/lib/iris/sql/
 %dir %attr(0775,tms,tms) /var/lib/iris/sql
 %dir %attr(0775,tms,tms) /var/lib/iris/sql/fonts
