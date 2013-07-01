@@ -44,9 +44,10 @@ public class VideoRequest {
 
 	/** Video stream size enum */
 	static public enum Size {
-		SMALL(176, 120, 's'),	// Quarter SIF
-		MEDIUM(352, 240, 'm'),	// Full SIF
-		LARGE(704, 480, 'l');	// 4x SIF
+		THUMBNAIL(132, 90, 's'),	// Thumbnail
+		SMALL(176, 120, 's'),		// Quarter SIF
+		MEDIUM(352, 240, 'm'),		// Full SIF
+		LARGE(704, 480, 'l');		// 4x SIF
 		private Size(int w, int h, char c) {
 			width = w;
 			height = h;
