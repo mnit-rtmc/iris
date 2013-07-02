@@ -114,7 +114,7 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Handle a communication error */
-	public void handleCommError(EventType et, String msg) {
+	@Override public void handleCommError(EventType et, String msg) {
 		COMM_LOG.log(id + " " + et + ", " + msg);
 		controller.logCommEvent(et, id, filterMessage(msg));
 		if(!retry())
