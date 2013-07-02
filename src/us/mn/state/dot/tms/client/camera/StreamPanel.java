@@ -105,6 +105,7 @@ public class StreamPanel extends JPanel {
 		add(status_pnl, c);
 		setPreferredSize(UI.dimension(vsz.width, vsz.height + 20));
 		setMinimumSize(UI.dimension(vsz.width, vsz.height + 20));
+		setMaximumSize(UI.dimension(vsz.width, vsz.height + 20));
 	}
 
 	/** Create the screen panel */

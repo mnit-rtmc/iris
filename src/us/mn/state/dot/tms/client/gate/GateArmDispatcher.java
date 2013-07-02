@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.gate;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -209,9 +208,7 @@ public class GateArmDispatcher extends IPanel {
 		add(name_lbl);
 		add("location");
 		add(location_lbl, Stretch.LAST);
-		add(stream_pnl, Stretch.DOUBLE);
-		add(thumb_pnl, Stretch.RIGHT);
-		add(new JButton(swap_act), Stretch.RIGHT);
+		add(createStreamsBox(), Stretch.FULL);
 		add("device.operation");
 		add(op_lbl, Stretch.WIDE);
 		add(interlock_lbl, Stretch.TALL);
@@ -222,6 +219,21 @@ public class GateArmDispatcher extends IPanel {
 		add(arm_state_lbl);
 		add(buildButtonBox(), Stretch.RIGHT);
 		clear();
+	}
+
+	/** Create streams box */
+	private Box createStreamsBox() {
+		Box vb = Box.createVerticalBox();
+		vb.add(Box.createVerticalGlue());
+		vb.add(thumb_pnl);
+		vb.add(Box.createVerticalStrut(UI.hgap));
+		vb.add(new JButton(swap_act));
+		vb.add(Box.createVerticalGlue());
+		Box b = Box.createHorizontalBox();
+		b.add(stream_pnl);
+		b.add(Box.createHorizontalStrut(UI.hgap));
+		b.add(vb);
+		return b;
 	}
 
 	/** Create a stream panel */
