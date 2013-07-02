@@ -197,6 +197,9 @@ public class GateArmDispatcher extends IPanel {
 		stream_pnl = createStreamPanel(stream_ptz, MEDIUM);
 		thumb_ptz = new CameraPTZ(s);
 		thumb_pnl = createStreamPanel(thumb_ptz, THUMBNAIL);
+		// Make label opaque so that we can set the background color
+		status_lbl.setOpaque(true);
+		interlock_lbl.setOpaque(true);
 		interlock_lbl.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createLineBorder(Color.BLACK),
 			UI.panelBorder()));
@@ -296,7 +299,7 @@ public class GateArmDispatcher extends IPanel {
 			updateApproachStream(ga);
 		if(a == null || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
-		if(a == null || a.equals("operation") || a.equals("style"))
+		if(a == null || a.equals("operation") || a.equals("styles"))
 			updateStatus(ga);
 		if(a == null || a.equals("armState")) {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
@@ -335,7 +338,6 @@ public class GateArmDispatcher extends IPanel {
 	/** Update the status widgets */
 	private void updateStatus(GateArm ga) {
 		if(ControllerHelper.isFailed(ga.getController())) {
-			status_lbl.setOpaque(true);
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
 			status_lbl.setText(getStatus(ga));
@@ -355,7 +357,6 @@ public class GateArmDispatcher extends IPanel {
 		if(critical.isEmpty())
 			updateMaintenance(ga);
 		else {
-			status_lbl.setOpaque(true);
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.BLACK);
 			status_lbl.setText(critical);
@@ -366,12 +367,10 @@ public class GateArmDispatcher extends IPanel {
 	private void updateMaintenance(GateArm ga) {
 		String m = ControllerHelper.getMaintenance(ga.getController());
 		if(m.isEmpty()) {
-			status_lbl.setOpaque(false);
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
 			status_lbl.setText("");
 		} else {
-			status_lbl.setOpaque(true);
 			status_lbl.setForeground(Color.BLACK);
 			status_lbl.setBackground(Color.YELLOW);
 			status_lbl.setText(m);
@@ -380,8 +379,6 @@ public class GateArmDispatcher extends IPanel {
 
 	/** Update the interlock label */
 	private void updateInterlock(GateArm ga) {
-		// Make label opaque so that we can set the background color
-		interlock_lbl.setOpaque(true);
 		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
 		case NONE:
 			interlock_lbl.setForeground(Color.BLACK);
@@ -449,13 +446,11 @@ public class GateArmDispatcher extends IPanel {
 		name_lbl.setText("");
 		location_lbl.setText("");
 		stream_pnl.setCamera(null);
-		status_lbl.setOpaque(false);
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
 		status_lbl.setText("");
 		op_lbl.setText("");
 		arm_state_lbl.setText("");
-		interlock_lbl.setOpaque(false);
 		interlock_lbl.setForeground(null);
 		interlock_lbl.setBackground(null);
 		interlock_lbl.setText(" ");
