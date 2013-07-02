@@ -52,15 +52,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class GateArmProperties extends SonarObjectForm<GateArm> {
 
-	/** Get the controller status */
-	static private String getControllerStatus(GateArm proxy) {
-		Controller c = proxy.getController();
-		if(c == null)
-			return "???";
-		else
-			return c.getStatus();
-	}
-
 	/** Location panel */
 	private final LocationPanel loc_pnl;
 
@@ -227,8 +218,6 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 		p.add(arm_state_lbl, Stretch.LAST);
 		p.add("device.operation");
 		p.add(op_lbl, Stretch.LAST);
-		p.add("device.status");
-		p.add(status_lbl, Stretch.LAST);
 		p.add(new JButton(settings), Stretch.RIGHT);
 		return p;
 	}
@@ -273,11 +262,8 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
 				proxy.getArmState()).toString());
 		}
-		if(a == null || a.equals("operation")) {
+		if(a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());
-			String s = getControllerStatus(proxy);
-			status_lbl.setText(s);
-		}
 	}
 
 	/** Get OPEN message */
