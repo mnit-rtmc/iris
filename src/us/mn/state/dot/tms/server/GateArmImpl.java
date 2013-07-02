@@ -524,7 +524,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Set flag to enable gate arm system */
 	private void setSystemEnable(boolean e) {
 		int gai = getInterlock();
-		system_enable = e;
+		system_enable = e && isActive();
 		if(gai != getInterlock())
 			setInterlockNotify();
 	}
@@ -611,6 +611,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 					ga.setOpenDirection(d);
 			}
 		}
+		setSystemEnable(CONFIG_ENABLE);
 	}
 
 	/** Get gate arm road */
