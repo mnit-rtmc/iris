@@ -148,7 +148,7 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Cleanup the operation */
-	public void cleanup() {
+	@Override public void cleanup() {
 		updateMaintStatus();
 		updateErrorStatus();
 		controller.completeOperation(id, isSuccess());

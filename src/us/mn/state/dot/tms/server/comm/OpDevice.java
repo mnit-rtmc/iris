@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ abstract public class OpDevice<T extends ControllerProperty>
 	}
 
 	/** Operation equality test */
-	public boolean equals(Object o) {
+	@Override public boolean equals(Object o) {
 		return (o instanceof OpDevice) &&
 		       (getClass() == o.getClass()) &&
 		       ((OpDevice)o).device == device;
@@ -60,7 +60,7 @@ abstract public class OpDevice<T extends ControllerProperty>
 	}
 
 	/** Create the first phase of the operation */
-	protected final Phase<T> phaseOne() {
+	@Override protected final Phase<T> phaseOne() {
 		return new AcquireDevice();
 	}
 
@@ -68,7 +68,7 @@ abstract public class OpDevice<T extends ControllerProperty>
 	abstract protected Phase<T> phaseTwo();
 
 	/** Cleanup the operation */
-	public void cleanup() {
+	@Override public void cleanup() {
 		device.release(operation);
 		super.cleanup();
 	}
