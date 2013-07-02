@@ -39,7 +39,7 @@ public enum CommandStatus {
 	LOCK_LOW_BATTERY,		/* 16 open/closed locked by low batt */
 	STOPPED_OBSTRUCTION,		/* 17 open stopped by IOLD and OOLD */
 	BLOCK_STUCK,			/* 18 open/close blocked; stuck gate */
-	BLOCK_OPEN_COMMAND,		/* 19 close blocked by open command */
+	BLOCK_LOCK_OPEN,		/* 19 close blocked by lock open */
 	BLOCK_ENTRAPMENT,		/* 20 open/close blocked; entrapment */
 	LIMIT_RELEARN,			/* 21 limit relearn in progress */
 	FAULT,				/* 22 gate operator fault */
