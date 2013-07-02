@@ -295,6 +295,10 @@ public class GateArmDispatcher extends IPanel {
 		}
 		if(a == null || a.equals("camera"))
 			updateCameraStream(ga);
+		if(a == null || a.equals("approach"))
+			updateApproachStream(ga);
+		if(a == null || a.equals("camera") || a.equals("approach"))
+			updateSwapButton(ga);
 		if(a == null || a.equals("operation") || a.equals("style"))
 			updateStatus(ga);
 		if(a == null || a.equals("armState")) {
@@ -303,10 +307,6 @@ public class GateArmDispatcher extends IPanel {
 		}
 		if(a == null || a.equals("interlock"))
 			updateInterlock(ga);
-		if(a == null || a.equals("approach"))
-			updateApproachStream(ga);
-		if(a == null || a.equals("camera") || a.equals("approach"))
-			updateSwapButton(ga);
 		if(a == null || a.equals("armState") || a.equals("interlock"))
 			updateButtons(ga);
 	}
