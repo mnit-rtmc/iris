@@ -112,7 +112,7 @@ public enum CommandStatus {
 		case OPEN_COMPLETE:
 		case EM_OPEN_COMPLETE:
 		case BLOCK_FREE_EXIT_LOOP:
-		case BLOCK_OPEN_COMMAND:
+		case BLOCK_LOCK_OPEN:
 			return true;
 		default:
 			return false;
