@@ -77,14 +77,11 @@ public class OpQueryGateStatus extends OpSTC {
 
 	/** Update controller status */
 	private void updateStatus() {
-		gate_arm.setArmStateNotify(status.getState(), null);
 		setMaintStatus(status.getMaintStatus());
 		updateMaintStatus();
-		if(status_update) {
+		if(status_update)
 			controller.completeOperation(id, isSuccess());
-			// This forces notifyAttribute on operation
-			device.release(operation);
-		}
 		status_update = false;
+		gate_arm.setArmStateNotify(status.getState(), null);
 	}
 }
