@@ -82,6 +82,7 @@ public class OpQueryGateStatus extends OpSTC {
 		if(status_update)
 			controller.completeOperation(id, isSuccess());
 		status_update = false;
+		// Update armState last to trigger client UI updates
 		gate_arm.setArmStateNotify(status.getState(), null);
 	}
 }

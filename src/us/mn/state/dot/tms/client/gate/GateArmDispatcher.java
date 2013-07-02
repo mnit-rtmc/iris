@@ -295,6 +295,7 @@ public class GateArmDispatcher extends IPanel {
 		}
 		if(a == null || a.equals("camera"))
 			updateCameraStream(ga);
+		// armState is updated after controller status
 		if(a == null || a.equals("operation") || a.equals("armState"))
 			updateStatus(ga);
 		if(a == null || a.equals("armState")) {
