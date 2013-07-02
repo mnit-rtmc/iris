@@ -26,6 +26,12 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQueryGateStatus extends OpSTC {
 
+	/** Status property */
+	private final StatusProperty status = new StatusProperty();
+
+	/** Flag for controller status update */
+	private boolean status_update = true;
+
 	/** Create a new gate arm query status operation */
 	public OpQueryGateStatus(GateArmImpl d) {
 		super(PriorityLevel.DEVICE_DATA, d);
@@ -61,14 +67,21 @@ public class OpQueryGateStatus extends OpSTC {
 		protected Phase<STCProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			StatusProperty s = new StatusProperty();
-			mess.add(s);
+			mess.add(status);
 			mess.queryProps();
-			logQuery(s);
-			setMaintStatus(s.getMaintStatus());
-			updateMaintStatus();
-			gate_arm.setArmStateNotify(s.getState(), null);
+			logQuery(status);
+			updateStatus();
 			return this;
 		}
+	}
+
+	/** Update controller status */
+	private void updateStatus() {
+		gate_arm.setArmStateNotify(status.getState(), null);
+		setMaintStatus(status.getMaintStatus());
+		updateMaintStatus();
+		if(status_update)
+			controller.completeOperation(id, isSuccess());
+		status_update = false;
 	}
 }
