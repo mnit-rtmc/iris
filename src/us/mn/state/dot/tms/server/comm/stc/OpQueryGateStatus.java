@@ -99,7 +99,8 @@ public class OpQueryGateStatus extends OpSTC {
 
 	/** Test if comm has failed for longer than threshold */
 	private boolean isFailThresholdExpired() {
-		return TimeSteward.currentTimeMillis() >
-			controller.getFailMillis() + FAIL_TIMEOUT_MS;
+		Long ft = controller.getFailTime();
+		return ft != null && TimeSteward.currentTimeMillis() >
+			ft + FAIL_TIMEOUT_MS;
 	}
 }
