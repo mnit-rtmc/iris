@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package us.mn.state.dot.tms;
  * Helper class for MapExtent.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class MapExtentHelper extends BaseHelper {
 
@@ -29,7 +30,8 @@ public class MapExtentHelper extends BaseHelper {
 
 	/** Lookup the MapExtent with the specified name */
 	static public MapExtent lookup(String name) {
-		return (MapExtent)namespace.lookupObject(MapExtent.SONAR_TYPE,
-			name);
+		// namespace could be null on client if login fails
+		return namespace != null ? (MapExtent)namespace.lookupObject(
+			MapExtent.SONAR_TYPE, name) : null;
 	}
 }
