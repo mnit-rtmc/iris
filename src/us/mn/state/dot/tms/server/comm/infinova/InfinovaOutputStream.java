@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.infinova;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
+import us.mn.state.dot.sched.DebugLog;
 
 /**
  * An OutputStream which prepends an Infinova header to messages.
@@ -24,6 +25,9 @@ import java.io.BufferedOutputStream;
  * @author Douglas Lau
  */
 public class InfinovaOutputStream extends OutputStream {
+
+	/** Debug log */
+	static private final DebugLog INF_LOG = new DebugLog("infinova");
 
 	/** Maximum message size */
 	static protected final int MAX_MESSAGE = 256;
@@ -63,6 +67,8 @@ public class InfinovaOutputStream extends OutputStream {
 			writeAuthentication();
 		writeHeader(MSG_ID_PTZ, AUTH_SZ + len);
 		writePtzHeader(len);
+		if(INF_LOG.isOpen())
+			INF_LOG.log("write: " + len);
 		out.write(b, off, len);
 	}
 
@@ -73,6 +79,8 @@ public class InfinovaOutputStream extends OutputStream {
 
 	/** Write an authentication message */
 	private void writeAuthentication() throws IOException {
+		if(INF_LOG.isOpen())
+			INF_LOG.log("writeAuthentication");
 		writeHeader(MSG_ID_AUTH, AUTH_SZ);
 		out.write(AUTH);
 		needs_auth = false;
@@ -80,6 +88,8 @@ public class InfinovaOutputStream extends OutputStream {
 
 	/** Write an infinova header */
 	private void writeHeader(byte msg_id, int len) throws IOException {
+		if(INF_LOG.isOpen())
+			INF_LOG.log("writeHeader: " + msg_id);
 		byte[] header = new byte[] {
 			'I', 'N', 'F', 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		};
@@ -94,6 +104,8 @@ public class InfinovaOutputStream extends OutputStream {
 
 	/** Write a PTZ header */
 	private void writePtzHeader(int len) throws IOException {
+		if(INF_LOG.isOpen())
+			INF_LOG.log("writePtzHeader");
 		byte[] header = new byte[12];
 		header[0] = 1;
 		header[7] = (byte)len;
@@ -102,6 +114,8 @@ public class InfinovaOutputStream extends OutputStream {
 
 	/** Flush pending data to the output stream */
 	public void flush() throws IOException {
+		if(INF_LOG.isOpen())
+			INF_LOG.log("flush");
 		out.flush();
 	}
 
@@ -111,6 +125,8 @@ public class InfinovaOutputStream extends OutputStream {
 			flush();
 		}
 		finally {
+			if(INF_LOG.isOpen())
+				INF_LOG.log("close");
 			out.close();
 		}
 	}
