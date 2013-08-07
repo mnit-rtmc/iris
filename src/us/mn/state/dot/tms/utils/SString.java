@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2011  AHMCT, University of California
+ * Copyright (C) 2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,23 +147,14 @@ public class SString {
 		return (s);
 	}
 
-	/**
-	 *  return a string truncated to the specified maximum length (inclusive).
-	 *  @param maxlen maximum number of chars in returned string.
-	 */
-	public static String truncate(String arg,int maxlen) {
-		arg = (arg==null ? "" : arg);
-		maxlen = (maxlen<0 ? 0 : maxlen);
-		maxlen = (maxlen>arg.length() ? arg.length() : maxlen);
-		String ret="";
-		if (maxlen<=0)
-			return "";
-		try {
-			ret=arg.substring(0,maxlen);
-		} catch(Exception ex) {
-			// ignore except
-		}
-		return ret;	
+	/** Truncate a string to a given maximum length.
+	 * @param arg String to be truncated.
+	 * @param maxlen Maximum length of string (characters).
+	 * @return Truncated string. */
+	static public String truncate(String arg, int maxlen) {
+		arg = (arg == null) ? "" : arg;
+		return arg.substring(0, Math.min(arg.length(),
+			Math.max(0, maxlen)));
 	}
 
 	/**

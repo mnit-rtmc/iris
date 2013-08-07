@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.event;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This is a class for logging client access events to a database.
@@ -38,8 +39,8 @@ public class ClientEvent extends BaseEvent {
 		       e == EventType.CLIENT_AUTHENTICATE ||
 		       e == EventType.CLIENT_FAIL_AUTHENTICATION ||
 		       e == EventType.CLIENT_DISCONNECT;
-		host_port = hp;
-		iris_user = iu;
+		host_port = SString.truncate(hp, 64);
+		iris_user = SString.truncate(iu, 16);
 	}
 
 	/** Get the database table name */
