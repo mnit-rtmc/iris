@@ -520,7 +520,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Update the item styles */
 	@Override public void updateStyles() {
 		setStyles(calculateStyles());
-		checkInterlocks();
+		GateArmSystem.checkInterlocks(getRoad());
+		setSystemEnable(checkEnabled());
 		setConflict(deny_open && isOpen());
 	}
 
@@ -535,12 +536,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			if(conflict)
 				sendEmailAlert("OPEN CONFLICT: " + name);
 		}
-	}
-
-	/** Set all gate arm open interlocks */
-	private void checkInterlocks() {
-		GateArmSystem.checkInterlocks(getRoad());
-		setSystemEnable(checkEnabled());
 	}
 
 	/** Get gate arm road */
