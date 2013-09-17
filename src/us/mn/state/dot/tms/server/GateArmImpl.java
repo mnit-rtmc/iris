@@ -14,118 +14,42 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.File;
 import java.sql.ResultSet;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import javax.mail.MessagingException;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
-import us.mn.state.dot.tms.GateArmHelper;
-import us.mn.state.dot.tms.GateArmInterlock;
+import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
-import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
-import us.mn.state.dot.tms.server.event.GateArmEvent;
-import us.mn.state.dot.tms.utils.SEmail;
 
 /**
- * Gate Arm Device.
+ * A Gate Arm is a device for restricting access to a ramp on a road.
  *
  * @author Douglas Lau
  */
 public class GateArmImpl extends DeviceImpl implements GateArm {
 
-	/** Path to configuration enable file.  This must not be a system
-	 * attribute for security reasons. */
-	static private final File CONFIG_ENABLE_FILE = new File(
-		"/var/lib/iris/gate_arm_enable");
-
-	/** Config override flag */
-	static private boolean CONFIG_FLAG = true;
-
-	/** Config enable flag */
-	static private boolean CONFIG_ENABLE = true;
-
-	/** Test whether gate arm configuration is enabled */
-	static private boolean isConfigEnabledFile() {
-		return CONFIG_FLAG &&
-		       CONFIG_ENABLE_FILE.isFile() &&
-		       CONFIG_ENABLE_FILE.canRead() &&
-		       CONFIG_ENABLE_FILE.canWrite();
-	}
-
-	/** Enable or disable gate arm system config */
-	static private void setConfigEnabled(boolean e) {
-		CONFIG_ENABLE = e;
-		Iterator<GateArm> it = GateArmHelper.iterator();
-		while(it.hasNext()) {
-			GateArm g = it.next();
-			if(g instanceof GateArmImpl) {
-				GateArmImpl ga = (GateArmImpl)g;
-				ga.setSystemEnable(e);
-			}
-		}
-	}
-
-	/** Disable gate arm configuration */
-	static public void disableConfig(String reason) {
-		if(isConfigEnabledFile())
-			CONFIG_FLAG = CONFIG_ENABLE_FILE.delete();
-		if(CONFIG_ENABLE)
-			setConfigEnabled(false);
-		System.err.println(new Date().toString() + " " +
-			CONFIG_ENABLE_FILE.toString() + ": " + reason + " (" +
-			CONFIG_FLAG + ")");
-	}
-
-	/** Check if config is enabled (and enable if required) */
-	static private boolean checkConfigEnabled() {
-		if(CONFIG_ENABLE)
-			return true;
-		if(isConfigEnabledFile()) {
-			setConfigEnabled(true);
-			return true;
-		} else
-			return false;
-	}
-
 	/** Load all the gate arms */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GateArmImpl.class);
-		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"camera, approach, dms, open_msg, closed_msg " +
-			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
+		store.query("SELECT name, ga_array, idx, controller, pin, " +
+			"notes FROM iris." + SONAR_TYPE  + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new GateArmImpl(namespace,
+				namespace.addObject(new GateArmImpl(
 					row.getString(1),	// name
-					row.getString(2),	// geo_loc
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getString(5),	// notes
-					row.getString(6),	// camera
-					row.getString(7),	// approach
-					row.getString(8),	// dms
-					row.getString(9),	// open_msg
-					row.getString(10)	// closed_msg
+					row.getString(2),	// ga_array
+					row.getInt(3),		// idx
+					row.getString(4),	// controller
+					row.getInt(5),		// pin
+					row.getString(6)	// notes
 				));
 			}
 		});
@@ -135,15 +59,11 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("geo_loc", geo_loc);
+		map.put("ga_array", ga_array);
+		map.put("idx", idx);
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
-		map.put("camera", camera);
-		map.put("approach", approach);
-		map.put("dms", dms);
-		map.put("open_msg", open_msg);
-		map.put("closed_msg", closed_msg);
 		return map;
 	}
 
@@ -160,44 +80,57 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Create a new gate arm with a string name */
 	public GateArmImpl(String n) throws TMSException, SonarException {
 		super(n);
-		GeoLocImpl g = new GeoLocImpl(name);
-		g.notifyCreate();
-		geo_loc = g;
 	}
 
 	/** Create a gate arm */
-	private GateArmImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, Camera cam, Camera ap, DMS d, QuickMessage om,
-		QuickMessage cm)
+	private GateArmImpl(String n, GateArmArrayImpl a, int i,
+		ControllerImpl c, int p, String nt)
 	{
 		super(n, c, p, nt);
-		geo_loc = loc;
-		camera = cam;
-		approach = ap;
-		dms = d;
-		open_msg = om;
-		closed_msg = cm;
+		ga_array = a;
+		idx = i;
 		initTransients();
 	}
 
 	/** Create a gate arm */
-	private GateArmImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, String cam, String ap, String d,
-		String om, String cm)
+	private GateArmImpl(String n, String a, int i, String c, int p,
+		String nt)
 	{
-		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
-		     p, nt, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
-		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, ap),
-		     (DMS)ns.lookupObject(DMS.SONAR_TYPE, d),
-		     (QuickMessage)ns.lookupObject(QuickMessage.SONAR_TYPE, om),
-		     (QuickMessage)ns.lookupObject(QuickMessage.SONAR_TYPE,cm));
+		this(n, (GateArmArrayImpl)GateArmArrayHelper.lookup(a), i,
+		    (ControllerImpl)ControllerHelper.lookup(c), p, nt);
 	}
 
-	/** Destroy an object */
-	@Override public void doDestroy() throws TMSException {
-		super.doDestroy();
-		geo_loc.notifyRemove();
+	/** Initialize the gate arm */
+	@Override public void initTransients() {
+		try {
+			GateArmArrayImpl a = ga_array;
+			if(a != null)
+				a.setIndex(idx, this);
+		}
+		catch(TMSException e) {
+			System.err.println("GateArm " + getName() +
+				" initialization error");
+			e.printStackTrace();
+		}
+		finally {
+			super.initTransients();
+		}
+	}
+
+	/** Gate arm array */
+	private GateArmArrayImpl ga_array;
+
+	/** Get the gate arm array */
+	@Override public GateArmArrayImpl getArray() {
+		return ga_array;
+	}
+
+	/** Index in array */
+	private int idx;
+
+	/** Get the index in array */
+	@Override public int getIndex() {
+		return idx;
 	}
 
 	/** Update the controller and/or pin.
@@ -208,121 +141,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override protected void updateControllerPin(ControllerImpl oc, int op,
 		ControllerImpl nc, int np)
 	{
-		disableConfig("controller/pin");
+		GateArmSystem.disable("controller/pin");
 		super.updateControllerPin(oc, op, nc, np);
-	}
-
-	/** Device location */
-	private GeoLocImpl geo_loc;
-
-	/** Get the device location */
-	@Override public GeoLoc getGeoLoc() {
-		return geo_loc;
-	}
-
-	/** Camera from which this can be seen */
-	private Camera camera;
-
-	/** Set the verification camera */
-	@Override public void setCamera(Camera c) {
-		camera = c;
-	}
-
-	/** Set the verification camera */
-	public void doSetCamera(Camera c) throws TMSException {
-		if(c != camera) {
-			store.update(this, "camera", c);
-			setCamera(c);
-		}
-	}
-
-	/** Get verification camera */
-	@Override public Camera getCamera() {
-		return camera;
-	}
-
-	/** Camera to view approach */
-	private Camera approach;
-
-	/** Set the approach camera */
-	@Override public void setApproach(Camera c) {
-		approach = c;
-	}
-
-	/** Set the approach camera */
-	public void doSetApproach(Camera c) throws TMSException {
-		if(c != approach) {
-			store.update(this, "approach", c);
-			setApproach(c);
-		}
-	}
-
-	/** Get approach camera */
-	@Override public Camera getApproach() {
-		return approach;
-	}
-
-	/** DMS for warning */
-	private DMS dms;
-
-	/** Set the DMS for warning */
-	@Override public void setDms(DMS d) {
-		dms = d;
-	}
-
-	/** Set the DMS for warning */
-	public void doSetDms(DMS d) throws TMSException {
-		if(d != dms) {
-			store.update(this, "dms", d);
-			setDms(d);
-		}
-	}
-
-	/** Get the DMS for warning */
-	@Override public DMS getDms() {
-		return dms;
-	}
-
-	/** Quick message to send for OPEN state */
-	private QuickMessage open_msg;
-
-	/** Set the OPEN quick message */
-	@Override public void setOpenMsg(QuickMessage om) {
-		open_msg = om;
-	}
-
-	/** Set the OPEN quick message */
-	public void doSetOpenMsg(QuickMessage om) throws TMSException {
-		if(om != open_msg) {
-			store.update(this, "open_msg", om);
-			setOpenMsg(om);
-		}
-	}
-
-	/** Get the OPEN quick message */
-	@Override public QuickMessage getOpenMsg() {
-		return open_msg;
-	}
-
-	/** Quick message to send for CLOSED state */
-	private QuickMessage closed_msg;
-
-	/** Set the CLOSED quick message */
-	@Override public void setClosedMsg(QuickMessage cm) {
-		closed_msg = cm;
-	}
-
-	/** Set the CLOSED quick message */
-	public void doSetClosedMsg(QuickMessage cm) throws TMSException {
-		if(cm != closed_msg) {
-			store.update(this, "closed_msg", cm);
-			setClosedMsg(cm);
-		}
-	}
-
-	/** Get the CLOSED quick message */
-	@Override public QuickMessage getClosedMsg() {
-		return closed_msg;
 	}
 
 	/** Software version */
@@ -346,113 +166,36 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Request a device operation */
 	@Override public void setDeviceRequest(int r) {
-		DeviceRequest req = checkRequest(r);
-		if(checkConfigEnabled() && req != null) {
+		DeviceRequest req = GateArmSystem.checkRequest(r);
+		if(GateArmSystem.checkEnabled() && req != null) {
 			GateArmPoller p = getGateArmPoller();
 			if(p != null)
 				p.sendRequest(this, req);
 		}
 	}
 
-	/** Check a device request for valid gate arm requests */
-	private DeviceRequest checkRequest(int r) {
-		DeviceRequest req = DeviceRequest.fromOrdinal(r);
-		switch(req) {
-		case SEND_SETTINGS:
-		case QUERY_STATUS:
-		case RESET_DEVICE:
-			return req;
-		}
-		return null;
-	}
-
-	/** The owner of the next state to be requested.  This is a write-only
-	 * SONAR attribute. */
-	private transient User ownerNext;
-
-	/** Set the next state owner.  When a user sends a new state to the
-	 * gate arm, two attributes must be set: ownerNext and armState.  There
-	 * can be a race between two clients setting these attributes.  If
-	 * ownerNext is non-null when being set, then a race has been detected,
-	 * meaning two clients are trying to set the state at the same time. */
-	@Override public synchronized void setOwnerNext(User o) {
-		if(ownerNext != null && o != null) {
-			System.err.println("GateArmImpl.setOwnerNext: " +
-				getName() + ", " + ownerNext.getName() +
-				" vs. " + o.getName());
-			ownerNext = null;
-		} else
-			ownerNext = o;
-	}
-
 	/** Gate arm state */
 	private transient GateArmState arm_state = GateArmState.UNKNOWN;
 
-	/** Set the next arm state (request change) */
-	@Override public void setArmStateNext(int gas) {
-		// Do nothing; required by iface
-	}
-
-	/** Set the arm state (request change) */
-	public void doSetArmStateNext(int gas) throws TMSException {
-		User o_next = ownerNext;	// Avoid race
-		// ownerNext is only valid for one message, clear it
-		ownerNext = null;
-		if(o_next == null)
-			throw new ChangeVetoException("MUST SET OWNER FIRST");
-		doSetArmState(gas, o_next);
-	}
-
-	/** Set the arm state */
-	private synchronized void doSetArmState(int gas, User o)
+	/** Request a change to the gate arm state.
+	 * @param gas Requested gate arm state.
+	 * @param o User requesting new state. */
+	public void requestArmState(GateArmState gas, User o)
 		throws TMSException
 	{
-		GateArmState s = GateArmState.fromOrdinal(gas);
-		if(validateStateReq(s) && checkConfigEnabled()) {
-			GateArmPoller p = getGateArmPoller();
-			if(p != null)
-				doSetArmState(s, o, p);
-		}
+		GateArmPoller p = getGateArmPoller();
+		if(p != null)
+			requestArmState(gas, o, p);
 	}
 
-	/** Validate a new user initiated gate arm state */
-	private boolean validateStateReq(GateArmState gas) throws TMSException {
-		if(gas == arm_state)
-			return false;
-		switch(arm_state) {
-		case CLOSED:
-			if(gas == GateArmState.OPENING) {
-				if(deny_open) {
-					throw new ChangeVetoException(
-						"INTERLOCK CONFLICT");
-				} else
-					return true;
-			}
-			break;
-		case OPEN:
-			if(gas == GateArmState.WARN_CLOSE)
-				return true;
-			break;
-		case WARN_CLOSE:
-			if(gas == GateArmState.CLOSING)
-				return true;
-			break;
-		}
-		throw new ChangeVetoException("INVALID STATE CHANGE: " +
-			arm_state + " to " + gas);
-	}
-
-	/** Set the arm state.
+	/** Request a change to the gate arm state.
 	 * @param gas Requested gate arm state.
 	 * @param o User requesting new state.
 	 * @param p Gate arm poller. */
-	private void doSetArmState(GateArmState gas, User o, GateArmPoller p) {
+	private void requestArmState(GateArmState gas, User o, GateArmPoller p){
 		switch(gas) {
 		case OPENING:
 			p.openGate(this, o);
-			break;
-		case WARN_CLOSE:
-			setArmStateNotify(gas, o);
 			break;
 		case CLOSING:
 			p.closeGate(this, o);
@@ -462,245 +205,31 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		}
 	}
 
-	/** Set the arm state */
+	/** Set the gate arm state.
+	 * @param gas Gate arm state.
+	 * @param o User who requested new state, or null. */
 	public void setArmStateNotify(GateArmState gas, User o) {
-		if(isChanged(gas)) {
-			setArmState(gas, o);
+		if(gas != arm_state) {
+			GateArmSystem.logEvent(gas, name, o);
+			arm_state = gas;
 			notifyAttribute("armState");
-			updateStyles();
+			ga_array.updateArmState();
 		}
 	}
 
-	/** Test if the gate arm state is changed */
-	private boolean isChanged(GateArmState gas) {
-		return gas != arm_state &&
-		      (gas != GateArmState.OPEN ||
-		       arm_state != GateArmState.WARN_CLOSE);
-	}
-
-	/** Set the arm state */
-	private void setArmState(GateArmState gas, User o) {
-		logStateChange(gas, o);
-		arm_state = gas;
-	}
-
-	/** Log a gate arm state change */
-	private void logStateChange(GateArmState gas, User o) {
-		String owner = o != null ? o.getName() : null;
-		logEvent(new GateArmEvent(gas, name, owner));
-	}
-
-	/** Log a gate arm state event */
-	private void logEvent(final GateArmEvent ev) {
-		FLUSH.addJob(new Job() {
-			public void perform() throws TMSException {
-				ev.doStore();
-			}
-		});
+	/** Get the arm state */
+	public GateArmState getArmStateEnum() {
+		return arm_state;
 	}
 
 	/** Get the arm state */
 	@Override public int getArmState() {
-		return arm_state.ordinal();
-	}
-
-	/** Flag to deny gate arm open (interlock) */
-	private transient boolean deny_open = true;
-
-	/** Set interlock flag to deny gate open */
-	private void setDenyOpen(boolean d) {
-		int gai = getInterlock();
-		deny_open = d;
-		if(gai != getInterlock())
-			setInterlockNotify();
-	}
-
-	/** Flag to deny gate arm close (interlock) */
-	private transient boolean deny_close = false;
-
-	/** Flag to enable gate arm system */
-	private transient boolean system_enable = true;
-
-	/** Set flag to enable gate arm system */
-	private void setSystemEnable(boolean e) {
-		int gai = getInterlock();
-		system_enable = e && isActive();
-		if(gai != getInterlock())
-			setInterlockNotify();
-	}
-
-	/** Set the interlock flag */
-	private void setInterlockNotify() {
-		notifyAttribute("interlock");
-		setDeviceRequest(DeviceRequest.SEND_SETTINGS.ordinal());
-	}
-
-	/** Get the interlock enum */
-	public int getInterlock() {
-		if(!system_enable)
-			return GateArmInterlock.SYSTEM_DISABLE.ordinal();
-		else if(deny_open && deny_close)
-			return GateArmInterlock.DENY_ALL.ordinal();
-		else if(deny_open)
-			return GateArmInterlock.DENY_OPEN.ordinal();
-		else if(deny_close)
-			return GateArmInterlock.DENY_CLOSE.ordinal();
-		else
-			return GateArmInterlock.NONE.ordinal();
+		return getArmStateEnum().ordinal();
 	}
 
 	/** Check is arm open interlock in effect */
 	public boolean isOpenInterlock() {
-		return deny_open || !system_enable;
-	}
-
-	/** Item style bits */
-	private transient long styles = calculateStyles();
-
-	/** Calculate item styles */
-	private long calculateStyles() {
-		long s = ItemStyle.ALL.bit();
-		if(getController() == null)
-			s |= ItemStyle.NO_CONTROLLER.bit();
-		if(isClosed())
-			s |= ItemStyle.CLOSED.bit();
-		if(isOpen())
-			s |= ItemStyle.OPEN.bit();
-		if(isMoving())
-			s |= ItemStyle.MOVING.bit();
-		if(needsMaintenance())
-			s |= ItemStyle.MAINTENANCE.bit();
-		if(isActive() && isFailed())
-			s |= ItemStyle.FAILED.bit();
-		if(!isActive())
-			s |= ItemStyle.INACTIVE.bit();
-		return s;
-	}
-
-	/** Update the item styles */
-	@Override public void updateStyles() {
-		setStyles(calculateStyles());
-		checkInterlocks();
-		setConflict(deny_open && isOpen());
-	}
-
-	/** Conflict detected flag.  This is initially set to true because
-	 * devices start in failed state after a server restart. */
-	private transient boolean conflict = true;
-
-	/** Set open conflict state */
-	private void setConflict(boolean c) {
-		if(c != conflict) {
-			conflict = c;
-			if(conflict)
-				sendEmailAlert("Open conflict: " + name);
-		}
-	}
-
-	/** Set all gate arm open interlocks */
-	private void checkInterlocks() {
-		Road r = getRoad();
-		int d = openGateDirection(r);
-		Iterator<GateArm> it = GateArmHelper.iterator();
-		while(it.hasNext()) {
-			GateArm g = it.next();
-			if(g instanceof GateArmImpl) {
-				GateArmImpl ga = (GateArmImpl)g;
-				Road gr = ga.getRoad();
-				if(gr == r)
-					ga.setOpenDirection(d);
-			}
-		}
-		setSystemEnable(CONFIG_ENABLE);
-	}
-
-	/** Get gate arm road */
-	private Road getRoad() {
-		GeoLoc gl = getGeoLoc();
-		return gl != null ? gl.getRoadway() : null;
-	}
-
-	/** Get gate arm road direction.
-	 * @return Index of road direction, or 0 for unknown */
-	private int getRoadDir() {
-		GeoLoc gl = getGeoLoc();
-		return gl != null ? gl.getRoadDir() : 0;
-	}
-
-	/** Set the valid open direction for road.
-	 * @param d Valid open direction; 0 for any, -1 for none */
-	private void setOpenDirection(int d) {
-		int gd = getRoadDir();
-		setDenyOpen(d != 0 && d != gd);
-	}
-
-	/** Get valid gate open direction for the specified road.  If gates are
-	 * open in more than one direction, then no direction is valid.
-	 * @param r Road to check.
-	 * @return Ordinal of valid gate Direction; 0 for any, -1 for none. */
-	static private int openGateDirection(Road r) {
-		int d = 0;
-		boolean found = false;
-		Iterator<GateArm> it = GateArmHelper.iterator();
-		while(it.hasNext()) {
-			GateArm g = it.next();
-			if(g instanceof GateArmImpl) {
-				GateArmImpl ga = (GateArmImpl)g;
-				if(ga.isOpen()) {
-					Road gr = ga.getRoad();
-					if(gr == r) {
-						int gd = ga.getRoadDir();
-						if(found && d != gd)
-							return -1;
-						else {
-							found = true;
-							d = gd;
-						}
-					}
-				}
-			}
-		}
-		return d;
-	}
-
-	/** Test if gate arm is closed */
-	private boolean isClosed() {
-		return isOnline() && arm_state == GateArmState.CLOSED;
-	}
-
-	/** Test if gate arm is online (active and not failed) */
-	private boolean isOnline() {
-		return isActive() && !isFailed();
-	}
-
-	/** Test if gate arm is (or may be) open */
-	private boolean isOpen() {
-		return isActive() && arm_state != GateArmState.CLOSED;
-	}
-
-	/** Test if gate arm is moving */
-	private boolean isMoving() {
-		return isOnline() &&
-		      (arm_state == GateArmState.OPENING ||
-		       arm_state == GateArmState.CLOSING);
-	}
-
-	/** Test if gate arm needs maintenance */
-	private boolean needsMaintenance() {
-		return isOnline() && arm_state == GateArmState.FAULT;
-	}
-
-	/** Set the item style bits (and notify clients) */
-	private void setStyles(long s) {
-		if(s != styles) {
-			styles = s;
-			notifyAttribute("styles");
-		}
-	}
-
-	/** Get item style bits */
-	@Override public long getStyles() {
-		return styles;
+		return ga_array.isOpenInterlock();
 	}
 
 	/** Get the gate arm poller */
@@ -710,33 +239,5 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			return (GateArmPoller)mp;
 		else
 			return null;
-	}
-
-	/** Send an email alert */
-	static private void sendEmailAlert(String msg) {
-		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
-		if(sender == null || sender.length() <= 0) {
-			logEmailError(msg, "invalid sender");
-			return;
-		}
-		String recipient =
-			SystemAttrEnum.EMAIL_RECIPIENT_GATE_ARM.getString();
-		if(recipient == null || recipient.length() <= 0) {
-			logEmailError(msg, "invalid recipient");
-			return;
-		}
-		String subject = "Gate arm ALERT";
-		SEmail email = new SEmail(sender, recipient, subject, msg);
-		try {
-			email.send();
-		}
-		catch(MessagingException e) {
-			logEmailError(msg, "email failed: " + e.getMessage());
-		}
-	}
-
-	/** Log an error to stderr */
-	static private void logEmailError(String msg, String reason) {
-		System.err.println("Gate Arm alert!  " + msg + ", " + reason);
 	}
 }

@@ -31,6 +31,12 @@ public class ControllerHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Lookup the controller with the specified name */
+	static public Controller lookup(String name) {
+		return (Controller)namespace.lookupObject(Controller.SONAR_TYPE,
+			name);
+	}
+
 	/** Get a controller iterator */
 	static public Iterator<Controller> iterator() {
 		return new IteratorWrapper<Controller>(namespace.iterator(

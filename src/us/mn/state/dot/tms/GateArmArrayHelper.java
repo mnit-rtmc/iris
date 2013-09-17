@@ -14,27 +14,29 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.User;
+import java.util.Iterator;
 
 /**
- * Gate Arm device interface.
+ * Helper class for gate arm arrays.  Used on the client and server.
  *
  * @author Douglas Lau
  */
-public interface GateArm extends Device {
+public class GateArmArrayHelper extends BaseHelper {
 
-	/** SONAR type name */
-	String SONAR_TYPE = "gate_arm";
+	/** don't instantiate */
+	private GateArmArrayHelper() {
+		assert false;
+	}
 
-	/** Get the gate arm array */
-	GateArmArray getArray();
+	/** Lookup the gate arm array with the specified name */
+	static public GateArmArray lookup(String name) {
+		return (GateArmArray)namespace.lookupObject(
+			GateArmArray.SONAR_TYPE, name);
+	}
 
-	/** Get the array index */
-	int getIndex();
-
-	/** Get the version */
-	String getVersion();
-
-	/** Get the arm state */
-	int getArmState();
+	/** Get a gate arm array iterator */
+	static public Iterator<GateArmArray> iterator() {
+		return new IteratorWrapper<GateArmArray>(namespace.iterator(
+			GateArmArray.SONAR_TYPE));
+	}
 }

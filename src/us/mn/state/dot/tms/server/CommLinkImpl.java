@@ -131,7 +131,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Test whether gate arm system should be disabled */
 	public void testGateArmDisable(String reason) {
 		if(isGateArm(protocol))
-			GateArmImpl.disableConfig(reason);
+			GateArmSystem.disable(reason);
 	}
 
 	/** Remote URI for link */
@@ -165,7 +165,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		testGateArmDisable("protocol 0");
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
 		if(isGateArm(cp))
-			GateArmImpl.disableConfig("protocol 1");
+			GateArmSystem.disable("protocol 1");
 		if(cp != null)
 			protocol = cp;
 	}

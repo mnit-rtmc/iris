@@ -15,7 +15,9 @@
 package us.mn.state.dot.tms;
 
 /**
- * Gate Arm state enumeration.
+ * Gate Arm state enumeration.  These states are used for gate arm arrays as
+ * well as individual gate arms.  The WARN_CLOSE state only applies to gate
+ * arm arrays.
  *
  * @author Douglas Lau
  */
@@ -26,7 +28,7 @@ public enum GateArmState {
 	FAULT,		/* open / close fault	user: WARN_CLOSE */
 	OPENING,	/* open in progress	system: OPEN or FAULT */
 	OPEN,		/* gate open		user: WARN_CLOSE */
-	WARN_CLOSE,	/* gate open, DMS warn	user: CLOSING */
+	WARN_CLOSE,	/* gate open, DMS warn	user: CLOSING or OPENING */
 	CLOSING,	/* close in progress	system: CLOSED or FAULT */
 	CLOSED;		/* gate closed		user: OPENING */
 
