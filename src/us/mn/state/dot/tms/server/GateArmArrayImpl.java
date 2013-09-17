@@ -24,7 +24,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmInterlock;
@@ -474,7 +473,16 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the interlock flag */
 	private void setInterlockNotify() {
 		notifyAttribute("interlock");
-		setDeviceRequest(DeviceRequest.SEND_SETTINGS.ordinal());
+		sendInterlocks();
+	}
+
+	/** Send gate arm interlock settings */
+	private void sendInterlocks() {
+		for(int i = 0; i < MAX_ARMS; i++) {
+			GateArmImpl ga = arms[i];
+			if(ga != null)
+				ga.sendInterlocks();
+		}
 	}
 
 	/** Get the interlock enum */
@@ -491,9 +499,10 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			return GateArmInterlock.NONE.ordinal();
 	}
 
-	/** Check if arm open interlock in effect */
+	/** Check if arm open interlock in effect.  When gate arm system is
+	 * disabled, open interlock is shut off to allow manual control. */
 	public boolean isOpenInterlock() {
-		return deny_open || !system_enable;
+		return deny_open && system_enable;
 	}
 
 	/** Item style bits */

@@ -174,6 +174,14 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		}
 	}
 
+	/** Send gate arm interlock settings.  Do not test checkEnabled since
+	 * this is used to shut off interlocks when disabling gate arm system.*/
+	public void sendInterlocks() {
+		GateArmPoller p = getGateArmPoller();
+		if(p != null)
+			p.sendRequest(this, DeviceRequest.SEND_SETTINGS);
+	}
+
 	/** Gate arm state */
 	private transient GateArmState arm_state = GateArmState.UNKNOWN;
 
