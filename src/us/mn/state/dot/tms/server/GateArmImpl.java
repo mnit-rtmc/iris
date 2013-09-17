@@ -188,28 +188,15 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Request a change to the gate arm state.
 	 * @param gas Requested gate arm state.
 	 * @param o User requesting new state. */
-	public void requestArmState(GateArmState gas, User o)
-		throws TMSException
-	{
-		GateArmPoller p = getGateArmPoller();
-		if(p != null)
-			requestArmState(gas, o, p);
-	}
-
-	/** Request a change to the gate arm state.
-	 * @param gas Requested gate arm state.
-	 * @param o User requesting new state.
-	 * @param p Gate arm poller. */
-	private void requestArmState(GateArmState gas, User o, GateArmPoller p){
-		switch(gas) {
-		case OPENING:
-			p.openGate(this, o);
-			break;
-		case CLOSING:
-			p.closeGate(this, o);
-			break;
-		default:
-			break;
+	public void requestArmState(GateArmState gas, User o) {
+		if(GateArmSystem.checkEnabled()) {
+			GateArmPoller p = getGateArmPoller();
+			if(p != null) {
+				if(gas == GateArmState.OPENING)
+					p.openGate(this, o);
+				if(gas == GateArmState.CLOSING)
+					p.closeGate(this, o);
+			}
 		}
 	}
 
