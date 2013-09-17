@@ -52,7 +52,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GateArmArrayImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"camera, approach, dms, open_msg, closed_msg " +
+			"prereq, camera, approach, dms, open_msg, closed_msg " +
 			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -63,11 +63,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 					row.getString(3),	// controller
 					row.getInt(4),		// pin
 					row.getString(5),	// notes
-					row.getString(6),	// camera
-					row.getString(7),	// approach
-					row.getString(8),	// dms
-					row.getString(9),	// open_msg
-					row.getString(10)	// closed_msg
+					row.getString(6),	// prereq
+					row.getString(7),	// camera
+					row.getString(8),	// approach
+					row.getString(9),	// dms
+					row.getString(10),	// open_msg
+					row.getString(11)	// closed_msg
 				));
 			}
 		});
@@ -81,6 +82,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("prereq", prereq);
 		map.put("camera", camera);
 		map.put("approach", approach);
 		map.put("dms", dms);
@@ -109,11 +111,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, Camera cam, Camera ap, DMS d, QuickMessage om,
-		QuickMessage cm)
+		int p, String nt, String pr, Camera cam, Camera ap, DMS d,
+		QuickMessage om, QuickMessage cm)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
+		prereq = pr;
 		camera = cam;
 		approach = ap;
 		dms = d;
@@ -124,12 +127,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, String cam, String ap, String d,
+		int p, String nt, String pr, String cam, String ap, String d,
 		String om, String cm)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
 		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
-		     p, nt, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
+		     p, nt, pr, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
 		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, ap),
 		     (DMS)ns.lookupObject(DMS.SONAR_TYPE, d),
 		     (QuickMessage)ns.lookupObject(QuickMessage.SONAR_TYPE, om),
@@ -158,6 +161,27 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Get the device location */
 	@Override public GeoLoc getGeoLoc() {
 		return geo_loc;
+	}
+
+	/** Prerequesite gate arm array */
+	private String prereq;
+
+	/** Set the prerequesite gate arm array */
+	@Override public void setPrereq(String pr) {
+		prereq = pr;
+	}
+
+	/** Set the prerequesite gate arm array */
+	public void doSetPrereq(String pr) throws TMSException {
+		if(pr != prereq) {
+			store.update(this, "prereq", pr);
+			setPrereq(pr);
+		}
+	}
+
+	/** Get prerequesite gate arm array */
+	@Override public String getPrereq() {
+		return prereq;
 	}
 
 	/** Camera from which this can be seen */

@@ -32,6 +32,12 @@ public interface GateArmArray extends Device {
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 
+	/** Set prerequisite gate arm array */
+	void setPrereq(String pr);
+
+	/** Get prerequisite gate arm array */
+	String getPrereq();
+
 	/** Set verification camera */
 	void setCamera(Camera c);
 
