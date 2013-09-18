@@ -474,7 +474,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set flag to enable gate arm system */
 	public void setSystemEnable(boolean e) {
-		if(lock_state.setSystemEnable(e))
+		if(lock_state.setSystemEnable(e && isActive()))
 			setInterlockNotify();
 	}
 
@@ -540,7 +540,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override public void updateStyles() {
 		setStyles(calculateStyles());
 		GateArmSystem.checkInterlocks(getRoad());
-		setSystemEnable(checkEnabled() && isActive());
+		setSystemEnable(checkEnabled());
 		setOpenConflict(lock_state.isOpenDenied() && isOpen());
 		setCloseConflict(lock_state.isCloseDenied() && isClosed());
 	}
