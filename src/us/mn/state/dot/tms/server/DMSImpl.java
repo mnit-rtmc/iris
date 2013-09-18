@@ -1049,8 +1049,17 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Send a sign message created by IRIS server */
-	public void sendMessage(SignMessage sm) throws TMSException {
-		doSetMessageNext(sm, null);
+	public void sendMessage(String m, DMSMessagePriority ap,
+		DMSMessagePriority rp)
+	{
+		SignMessage sm = createMessage(m, ap, rp, null);
+		try {
+			if(!isMessageCurrentEquivalent(sm))
+				doSetMessageNext(sm, null);
+		}
+		catch(TMSException e) {
+			logAction(e.getMessage());
+		}
 	}
 
 	/** Current message (Shall not be null) */

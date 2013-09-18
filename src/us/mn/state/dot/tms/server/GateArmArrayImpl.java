@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
+import static us.mn.state.dot.tms.DMSMessagePriority.PSA;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
@@ -408,7 +409,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			if(ga != null)
 				ga.requestArmState(rs, o);
 		}
-		// FIXME: update DMS for WARN_CLOSE state
 	}
 
 	/** Set the arm state */
@@ -416,6 +416,26 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		arm_state = gas;
 		notifyAttribute("armState");
 		updateStyles();
+		updateDmsMessage();
+	}
+
+	/** Update the message displayed on the DMS */
+	private void updateDmsMessage() {
+		DMS d = dms;
+		if(d instanceof DMSImpl)
+			updateDmsMessage((DMSImpl)d);
+	}
+
+	/** Update the message on the specified DMS */
+	private void updateDmsMessage(DMSImpl d) {
+		QuickMessage qm = isMsgOpen() ? getOpenMsg() : getClosedMsg();
+		if(qm != null)
+			d.sendMessage(qm.getMulti(), PSA, PSA);
+	}
+
+	/** Test if message should be open */
+	private boolean isMsgOpen() {
+		return isActive() && arm_state == GateArmState.OPEN;
 	}
 
 	/** Update the arm state */
