@@ -369,20 +369,20 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		throws TMSException
 	{
 		if(rs == GateArmState.OPENING) {
-			if(deny_open)
+			if(lock_state.isOpenDenied())
 				throw INTERLOCK_CONFLICT;
 			if(cs == GateArmState.CLOSED ||
 			   cs == GateArmState.WARN_CLOSE)
 				return rs;
 		}
 		if(rs == GateArmState.WARN_CLOSE) {
-			if(deny_close)
+			if(lock_state.isCloseDenied())
 				throw INTERLOCK_CONFLICT;
 			if(cs == GateArmState.OPEN || cs == GateArmState.FAULT)
 				return rs;
 		}
 		if(rs == GateArmState.CLOSING) {
-			if(deny_close)
+			if(lock_state.isCloseDenied())
 				throw INTERLOCK_CONFLICT;
 			if(cs == GateArmState.WARN_CLOSE)
 				return rs;
@@ -469,28 +469,24 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return arm_state.ordinal();
 	}
 
-	/** Flag to deny gate arm open (interlock) */
-	private transient boolean deny_open = true;
-
-	/** Set interlock flag to deny gate open */
-	private void setDenyOpen(boolean d) {
-		int gai = getInterlock();
-		deny_open = d;
-		if(gai != getInterlock())
-			setInterlockNotify();
-	}
-
-	/** Flag to deny gate arm close (interlock) */
-	private transient boolean deny_close = false;
-
-	/** Flag to enable gate arm system */
-	private transient boolean system_enable = false;
+	/** Lock state */
+	private transient GateArmLockState lock_state = new GateArmLockState();
 
 	/** Set flag to enable gate arm system */
 	public void setSystemEnable(boolean e) {
-		int gai = getInterlock();
-		system_enable = e && isActive();
-		if(gai != getInterlock())
+		if(lock_state.setSystemEnable(e))
+			setInterlockNotify();
+	}
+
+	/** Set interlock flag to deny gate open */
+	private void setDenyOpen(boolean d) {
+		if(lock_state.setDenyOpen(d))
+			setInterlockNotify();
+	}
+
+	/** Set interlock flag to deny gate close */
+	private void setDenyClose(boolean d) {
+		if(lock_state.setDenyClose(d))
 			setInterlockNotify();
 	}
 
@@ -511,22 +507,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Get the interlock enum */
 	@Override public int getInterlock() {
-		if(!system_enable)
-			return GateArmInterlock.SYSTEM_DISABLE.ordinal();
-		else if(deny_open && deny_close)
-			return GateArmInterlock.DENY_ALL.ordinal();
-		else if(deny_open)
-			return GateArmInterlock.DENY_OPEN.ordinal();
-		else if(deny_close)
-			return GateArmInterlock.DENY_CLOSE.ordinal();
-		else
-			return GateArmInterlock.NONE.ordinal();
+		return lock_state.getInterlock().ordinal();
 	}
 
-	/** Check if arm open interlock in effect.  When gate arm system is
-	 * disabled, open interlock is shut off to allow manual control. */
+	/** Check if arm open interlock in effect. */
 	public boolean isOpenInterlock() {
-		return deny_open && system_enable;
+		return lock_state.isOpenInterlock();
 	}
 
 	/** Item style bits */
@@ -554,8 +540,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override public void updateStyles() {
 		setStyles(calculateStyles());
 		GateArmSystem.checkInterlocks(getRoad());
-		setSystemEnable(checkEnabled());
-		setConflict(deny_open && isOpen());
+		setSystemEnable(checkEnabled() && isActive());
+		setConflict(lock_state.isOpenDenied() && isOpen());
 	}
 
 	/** Conflict detected flag.  This is initially set to true because
