@@ -198,4 +198,48 @@ public class GateArmSystem {
 		}
 		return d;
 	}
+
+	/** Update all dependant gate arm arrays.  NOTE: this does three
+	 * linear scans of all gate arm arrays -- it doesn't scale very well. */
+	static public void updateDependants() {
+		clearDependants();
+		checkDependants();
+		setDependants();
+	}
+
+	/** Clear dependant open flags for all gate arm arrays */
+	static private void clearDependants() {
+		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
+		while(it.hasNext()) {
+			GateArmArray g = it.next();
+			if(g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl)g;
+				ga.clearDependant();
+			}
+		}
+	}
+
+	/** Check dependant open flags for all gate arm arrays */
+	static private void checkDependants() {
+		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
+		while(it.hasNext()) {
+			GateArmArray g = it.next();
+			if(g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl)g;
+				ga.checkDependant();
+			}
+		}
+	}
+
+	/** Set dependant open flags for all gate arm arrays */
+	static private void setDependants() {
+		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
+		while(it.hasNext()) {
+			GateArmArray g = it.next();
+			if(g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl)g;
+				ga.setDependant();
+			}
+		}
+	}
 }

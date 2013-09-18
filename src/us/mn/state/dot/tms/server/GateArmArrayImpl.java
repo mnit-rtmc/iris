@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
-import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
@@ -475,58 +474,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return arm_state.ordinal();
 	}
 
-	/** Lock state */
-	private transient GateArmLockState lock_state = new GateArmLockState();
-
-	/** Set flag to enable gate arm system */
-	public void setSystemEnable(boolean e) {
-		if(lock_state.setSystemEnable(e && isActive()))
-			setInterlockNotify();
-	}
-
-	/** Set flag to indicate opposing direction open */
-	private void setOpposingOpen(boolean o) {
-		if(lock_state.setOpposingOpen(o))
-			setInterlockNotify();
-	}
-
-	/** Set flag to indicate prerequisite closed */
-	private void setPrereqClosed(boolean c) {
-		if(lock_state.setPrereqClosed(c))
-			setInterlockNotify();
-	}
-
-	/** Set interlock flag to deny gate close */
-	private void setDenyClose(boolean d) {
-		if(lock_state.setDenyClose(d))
-			setInterlockNotify();
-	}
-
-	/** Set the interlock flag */
-	private void setInterlockNotify() {
-		notifyAttribute("interlock");
-		sendInterlocks();
-	}
-
-	/** Send gate arm interlock settings */
-	private void sendInterlocks() {
-		for(int i = 0; i < MAX_ARMS; i++) {
-			GateArmImpl ga = arms[i];
-			if(ga != null)
-				ga.sendInterlocks();
-		}
-	}
-
-	/** Get the interlock enum */
-	@Override public int getInterlock() {
-		return lock_state.getInterlock().ordinal();
-	}
-
-	/** Check if arm open interlock in effect. */
-	public boolean isOpenInterlock() {
-		return lock_state.isOpenInterlock();
-	}
-
 	/** Item style bits */
 	private transient long styles = calculateStyles();
 
@@ -553,15 +500,90 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		setStyles(calculateStyles());
 		GateArmSystem.checkInterlocks(getRoad());
 		checkPrerequesite();
+		GateArmSystem.updateDependants();
 		setSystemEnable(checkEnabled());
 		setOpenConflict(lock_state.isOpenDenied() && isOpen());
 		setCloseConflict(lock_state.isCloseDenied() && isClosed());
+	}
+
+	/** Set the item style bits (and notify clients) */
+	private void setStyles(long s) {
+		if(s != styles) {
+			styles = s;
+			notifyAttribute("styles");
+		}
+	}
+
+	/** Lock state */
+	private transient GateArmLockState lock_state = new GateArmLockState();
+
+	/** Set the interlock flag */
+	private void setInterlockNotify() {
+		notifyAttribute("interlock");
+		sendInterlocks();
+	}
+
+	/** Send gate arm interlock settings */
+	private void sendInterlocks() {
+		for(int i = 0; i < MAX_ARMS; i++) {
+			GateArmImpl ga = arms[i];
+			if(ga != null)
+				ga.sendInterlocks();
+		}
+	}
+
+	/** Get the interlock enum */
+	@Override public int getInterlock() {
+		return lock_state.getInterlock().ordinal();
+	}
+
+	/** Check if arm open interlock in effect. */
+	public boolean isOpenInterlock() {
+		return lock_state.isOpenInterlock();
 	}
 
 	/** Check open/close state of prerequesite gate arm array */
 	private void checkPrerequesite() {
 		GateArmArrayImpl pr = getPrerequisite();
 		setPrereqClosed(pr != null && pr.isClosed());
+	}
+
+	/** Set flag to indicate prerequisite closed */
+	private void setPrereqClosed(boolean c) {
+		if(lock_state.setPrereqClosed(c))
+			setInterlockNotify();
+	}
+
+	/** Dependant open flag */
+	private transient boolean dep_open = false;
+
+	/** Clear dependant open flag */
+	public void clearDependant() {
+		dep_open = false;
+	}
+
+	/** Check open/close state of dependant gate arm array */
+	public void checkDependant() {
+		GateArmArrayImpl pr = getPrerequisite();
+		if(pr != null)
+			pr.dep_open = (pr.dep_open || isOpen());
+	}
+
+	/** Set dependant open state */
+	public void setDependant() {
+		setDependantOpen(dep_open);
+	}
+
+	/** Set flag to indicate dependant gate arm open */
+	private void setDependantOpen(boolean o) {
+		if(lock_state.setDependantOpen(o))
+			setInterlockNotify();
+	}
+
+	/** Set flag to enable gate arm system */
+	public void setSystemEnable(boolean e) {
+		if(lock_state.setSystemEnable(e && isActive()))
+			setInterlockNotify();
 	}
 
 	/** Open conflict detected flag.  This is initially set to true because
@@ -607,6 +629,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	public void setOpenDirection(int d) {
 		int gd = getRoadDir();
 		setOpposingOpen(d != 0 && d != gd);
+	}
+
+	/** Set flag to indicate opposing direction open */
+	private void setOpposingOpen(boolean o) {
+		if(lock_state.setOpposingOpen(o))
+			setInterlockNotify();
 	}
 
 	/** Get the active status.  Tests that at least one gate arm is
@@ -660,14 +688,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Test if gate arm needs maintenance */
 	private boolean needsMaintenance() {
 		return isOnline() && arm_state == GateArmState.FAULT;
-	}
-
-	/** Set the item style bits (and notify clients) */
-	private void setStyles(long s) {
-		if(s != styles) {
-			styles = s;
-			notifyAttribute("styles");
-		}
 	}
 
 	/** Get item style bits */

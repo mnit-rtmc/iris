@@ -64,21 +64,21 @@ public class GateArmLockState {
 		return opposing_open || prereq_closed;
 	}
 
-	/** Flag to deny gate arm close (interlock) */
-	private boolean deny_close = false;
+	/** Flag to indicate dependant gate arm open */
+	private boolean dependant_open = false;
 
-	/** Set interlock flag to deny gate close.
-	 * @param d True to deny gate close, or false to allow.
+	/** Set flag to indicate dependant gate arm open.
+	 * @param o True if dependant gate open; false otherwise.
 	 * @return True if interlock value changed. */
-	public boolean setDenyClose(boolean d) {
+	public boolean setDependantOpen(boolean o) {
 		GateArmInterlock gai = getInterlock();
-		deny_close = d;
+		dependant_open = o;
 		return gai != getInterlock();
 	}
 
 	/** Check if gate close is denied */
 	public boolean isCloseDenied() {
-		return deny_close;
+		return dependant_open;
 	}
 
 	/** Get the interlock enum */
