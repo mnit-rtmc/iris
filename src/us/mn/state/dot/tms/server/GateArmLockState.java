@@ -35,21 +35,21 @@ public class GateArmLockState {
 		return gai != getInterlock();
 	}
 
-	/** Flag to deny gate arm open (interlock) */
-	private boolean deny_open = true;
+	/** Flag to indicate opposing direction conflict */
+	private boolean dir_conflict = true;
 
-	/** Set interlock flag to deny gate open.
-	 * @param d True to deny gate open, or false to allow.
+	/** Set flag to indicate opposing direction conflict.
+	 * @param d True if opposing gate open; false otherwise.
 	 * @return True if interlock value changed. */
-	public boolean setDenyOpen(boolean d) {
+	public boolean setDirConflict(boolean d) {
 		GateArmInterlock gai = getInterlock();
-		deny_open = d;
+		dir_conflict = d;
 		return gai != getInterlock();
 	}
 
 	/** Check if gate open is denied */
 	public boolean isOpenDenied() {
-		return deny_open;
+		return dir_conflict;
 	}
 
 	/** Flag to deny gate arm close (interlock) */
@@ -73,11 +73,11 @@ public class GateArmLockState {
 	public GateArmInterlock getInterlock() {
 		if(!system_enable)
 			return GateArmInterlock.SYSTEM_DISABLE;
-		else if(deny_open && deny_close)
+		else if(isOpenDenied() && isCloseDenied())
 			return GateArmInterlock.DENY_ALL;
-		else if(deny_open)
+		else if(isOpenDenied())
 			return GateArmInterlock.DENY_OPEN;
-		else if(deny_close)
+		else if(isCloseDenied())
 			return GateArmInterlock.DENY_CLOSE;
 		else
 			return GateArmInterlock.NONE;
@@ -87,6 +87,6 @@ public class GateArmLockState {
 	 * disabled, open interlock is shut off to allow manual control.
 	 * @return True if gate arm open is denied. */
 	public boolean isOpenInterlock() {
-		return deny_open && system_enable;
+		return isOpenDenied() && system_enable;
 	}
 }

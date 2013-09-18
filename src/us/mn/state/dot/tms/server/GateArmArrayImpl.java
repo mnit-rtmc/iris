@@ -478,9 +478,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			setInterlockNotify();
 	}
 
-	/** Set interlock flag to deny gate open */
-	private void setDenyOpen(boolean d) {
-		if(lock_state.setDenyOpen(d))
+	/** Set flag to indicate direction conflict */
+	private void setDirConflict(boolean d) {
+		if(lock_state.setDirConflict(d))
 			setInterlockNotify();
 	}
 
@@ -541,19 +541,32 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		setStyles(calculateStyles());
 		GateArmSystem.checkInterlocks(getRoad());
 		setSystemEnable(checkEnabled() && isActive());
-		setConflict(lock_state.isOpenDenied() && isOpen());
+		setOpenConflict(lock_state.isOpenDenied() && isOpen());
+		setCloseConflict(lock_state.isCloseDenied() && isClosed());
 	}
 
-	/** Conflict detected flag.  This is initially set to true because
+	/** Open conflict detected flag.  This is initially set to true because
 	 * devices start in failed state after a server restart. */
-	private transient boolean conflict = true;
+	private transient boolean open_conflict = true;
 
 	/** Set open conflict state */
-	private void setConflict(boolean c) {
-		if(c != conflict) {
-			conflict = c;
-			if(conflict)
+	private void setOpenConflict(boolean c) {
+		if(c != open_conflict) {
+			open_conflict = c;
+			if(c)
 				sendEmailAlert("OPEN CONFLICT: " + name);
+		}
+	}
+
+	/** Close conflict detected flag. */
+	private transient boolean close_conflict = false;
+
+	/** Set close conflict state */
+	private void setCloseConflict(boolean c) {
+		if(c != close_conflict) {
+			close_conflict = c;
+			if(c)
+				sendEmailAlert("CLOSE CONFLICT: " + name);
 		}
 	}
 
@@ -574,7 +587,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	 * @param d Valid open direction; 0 for any, -1 for none */
 	public void setOpenDirection(int d) {
 		int gd = getRoadDir();
-		setDenyOpen(d != 0 && d != gd);
+		setDirConflict(d != 0 && d != gd);
 	}
 
 	/** Get the active status.  Tests that at least one gate arm is
