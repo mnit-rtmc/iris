@@ -35,21 +35,33 @@ public class GateArmLockState {
 		return gai != getInterlock();
 	}
 
-	/** Flag to indicate opposing direction conflict */
-	private boolean dir_conflict = true;
+	/** Flag to indicate opposing direction open */
+	private boolean opposing_open = false;
 
-	/** Set flag to indicate opposing direction conflict.
+	/** Set flag to indicate opposing direction open.
 	 * @param d True if opposing gate open; false otherwise.
 	 * @return True if interlock value changed. */
-	public boolean setDirConflict(boolean d) {
+	public boolean setOpposingOpen(boolean o) {
 		GateArmInterlock gai = getInterlock();
-		dir_conflict = d;
+		opposing_open = o;
+		return gai != getInterlock();
+	}
+
+	/** Flag to indicate prerequesite gate arm closed */
+	private boolean prereq_closed = false;
+
+	/** Set flag to indicate prerequesite gate arm closed.
+	 * @param d True if prerequesite gate closed; false otherwise.
+	 * @return True if interlock value changed. */
+	public boolean setPrereqClosed(boolean c) {
+		GateArmInterlock gai = getInterlock();
+		prereq_closed = c;
 		return gai != getInterlock();
 	}
 
 	/** Check if gate open is denied */
 	public boolean isOpenDenied() {
-		return dir_conflict;
+		return opposing_open || prereq_closed;
 	}
 
 	/** Flag to deny gate arm close (interlock) */

@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
@@ -182,6 +183,11 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Get prerequesite gate arm array */
 	@Override public String getPrereq() {
 		return prereq;
+	}
+
+	/** Get prerequesite gate arm array */
+	private GateArmArrayImpl getPrerequisite() {
+		return (GateArmArrayImpl)GateArmArrayHelper.lookup(prereq);
 	}
 
 	/** Camera from which this can be seen */
@@ -478,9 +484,15 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			setInterlockNotify();
 	}
 
-	/** Set flag to indicate direction conflict */
-	private void setDirConflict(boolean d) {
-		if(lock_state.setDirConflict(d))
+	/** Set flag to indicate opposing direction open */
+	private void setOpposingOpen(boolean o) {
+		if(lock_state.setOpposingOpen(o))
+			setInterlockNotify();
+	}
+
+	/** Set flag to indicate prerequisite closed */
+	private void setPrereqClosed(boolean c) {
+		if(lock_state.setPrereqClosed(c))
 			setInterlockNotify();
 	}
 
@@ -540,9 +552,16 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override public void updateStyles() {
 		setStyles(calculateStyles());
 		GateArmSystem.checkInterlocks(getRoad());
+		checkPrerequesite();
 		setSystemEnable(checkEnabled());
 		setOpenConflict(lock_state.isOpenDenied() && isOpen());
 		setCloseConflict(lock_state.isCloseDenied() && isClosed());
+	}
+
+	/** Check open/close state of prerequesite gate arm array */
+	private void checkPrerequesite() {
+		GateArmArrayImpl pr = getPrerequisite();
+		setPrereqClosed(pr != null && pr.isClosed());
 	}
 
 	/** Open conflict detected flag.  This is initially set to true because
@@ -587,7 +606,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	 * @param d Valid open direction; 0 for any, -1 for none */
 	public void setOpenDirection(int d) {
 		int gd = getRoadDir();
-		setDirConflict(d != 0 && d != gd);
+		setOpposingOpen(d != 0 && d != gd);
 	}
 
 	/** Get the active status.  Tests that at least one gate arm is
@@ -616,14 +635,14 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return false;
 	}
 
-	/** Test if gate arm is closed */
-	private boolean isClosed() {
-		return isOnline() && arm_state == GateArmState.CLOSED;
-	}
-
 	/** Test if gate arm is online (active and not failed) */
 	private boolean isOnline() {
 		return isActive() && !isFailed();
+	}
+
+	/** Test if gate arm is closed */
+	private boolean isClosed() {
+		return isActive() && arm_state == GateArmState.CLOSED;
 	}
 
 	/** Test if gate arm is (or may be) open */
