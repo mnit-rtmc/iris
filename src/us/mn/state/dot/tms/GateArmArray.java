@@ -27,7 +27,7 @@ public interface GateArmArray extends Device {
 	String SONAR_TYPE = "gate_arm_array";
 
 	/** Maximum number of gate arms in array */
-	int MAX_ARMS = 10;
+	int MAX_ARMS = 8;
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();
