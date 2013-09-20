@@ -25,6 +25,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.GateArmState;
 import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
 import us.mn.state.dot.tms.client.Session;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
@@ -54,7 +55,7 @@ public class GateArmTableModel extends AbstractTableModel
 	/** Create the columns in the model */
 	private ArrayList<ProxyColumn<GateArm>> createColumns() {
 		ArrayList<ProxyColumn<GateArm>> cols =
-			new ArrayList<ProxyColumn<GateArm>>(2);
+			new ArrayList<ProxyColumn<GateArm>>(4);
 		cols.add(new ProxyColumn<GateArm>("gate.arm.index", 36,
 			Integer.class)
 		{
@@ -65,7 +66,7 @@ public class GateArmTableModel extends AbstractTableModel
 				return ga.getIdx();
 			}
 		});
-		cols.add(new ProxyColumn<GateArm>("device.name", 140) {
+		cols.add(new ProxyColumn<GateArm>("device.name", 74) {
 			public Object getValueAt(GateArm ga) {
 				return ga.getName();
 			}
@@ -76,6 +77,28 @@ public class GateArmTableModel extends AbstractTableModel
 				String v = value.toString().trim();
 				if(v.length() > 0)
 					createGateArm(v, row + 1);
+			}
+		});
+		cols.add(new ProxyColumn<GateArm>("device.notes", 200) {
+			public Object getValueAt(GateArm ga) {
+				return ga.getNotes();
+			}
+			public boolean isEditable(GateArm ga) {
+				return canUpdate(ga, "notes");
+			}
+			public void setValueAt(GateArm ga, Object value) {
+				ga.setNotes(value.toString().trim());
+			}
+		});
+		cols.add(new ProxyColumn<GateArm>("controller.version", 100) {
+			public Object getValueAt(GateArm ga) {
+				return ga.getVersion();
+			}
+		});
+		cols.add(new ProxyColumn<GateArm>("gate.arm.state", 100) {
+			public Object getValueAt(GateArm ga) {
+				return GateArmState.fromOrdinal(
+					ga.getArmState());
 			}
 		});
 		return cols;
@@ -89,6 +112,11 @@ public class GateArmTableModel extends AbstractTableModel
 	/** Check if the user can add a proxy */
 	private boolean canAdd() {
 		return canAdd("oname");
+	}
+
+	/** Check if the user can update a proxy */
+	private boolean canUpdate(GateArm proxy, String aname) {
+		return session.canUpdate(proxy, aname);
 	}
 
 	/** Create a new gate arm */
