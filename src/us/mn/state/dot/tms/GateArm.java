@@ -29,7 +29,7 @@ public interface GateArm extends Device {
 	/** Get the gate arm array */
 	GateArmArray getGaArray();
 
-	/** Get the array index */
+	/** Get the index in array (1 to MAX_ARMS) */
 	int getIdx();
 
 	/** Get the version */

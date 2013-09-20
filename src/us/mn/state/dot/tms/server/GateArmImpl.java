@@ -125,10 +125,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return ga_array;
 	}
 
-	/** Index in array */
+	/** Index in array (1 to MAX_ARMS) */
 	private int idx;
 
-	/** Get the index in array */
+	/** Get the index in array (1 to MAX_ARMS) */
 	@Override public int getIdx() {
 		return idx;
 	}

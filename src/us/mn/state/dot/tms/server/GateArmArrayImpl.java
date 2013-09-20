@@ -309,6 +309,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	public synchronized void setIndex(int idx, GateArmImpl ga)
 		throws TMSException
 	{
+		idx--;
 		if(idx < 0 || idx >= MAX_ARMS)
 			throw new ChangeVetoException("Invalid index");
 		if(ga != null && arms[idx] != null)
