@@ -245,6 +245,14 @@ public class SonarState extends Client {
 		return gate_arm_arrays;
 	}
 
+	/** Gate arm array proxy list model */
+	private final ProxyListModel<GateArmArray> gate_arm_array_model;
+
+	/** Get the gate arm array list model */
+	public ProxyListModel<GateArmArray> getGateArmArrayModel() {
+		return gate_arm_array_model;
+	}
+
 	/** Cache of gate arms */
 	private final TypeCache<GateArm> gate_arms;
 
@@ -386,6 +394,9 @@ public class SonarState extends Client {
 			WeatherSensor.class, this);
 		gate_arm_arrays = new TypeCache<GateArmArray>(
 			GateArmArray.class, this);
+		gate_arm_array_model = new ProxyListModel<GateArmArray>(
+			gate_arm_arrays);
+		gate_arm_array_model.initialize();
 		gate_arms = new TypeCache<GateArm>(GateArm.class, this);
 		incidents = new TypeCache<Incident>(Incident.class, this);
 		holidays = new TypeCache<Holiday>(Holiday.class, this);

@@ -57,7 +57,7 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("gate.arm");
+		return I18N.get("gate.arm.array");
 	}
 
 	/** Get the shape for a given proxy */
@@ -114,7 +114,7 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		}
 		JPopupMenu p = new JPopupMenu();
 		p.add(new JLabel("" + n_selected + " " + I18N.get(
-			"gate.arms")));
+			"gate.arm.arrays")));
 		p.addSeparator();
 		return p;
 	}

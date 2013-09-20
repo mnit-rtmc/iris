@@ -34,7 +34,7 @@ public class GateArmArrayModel extends ProxyTableModel<GateArmArray> {
 	{
 		ArrayList<ProxyColumn<GateArmArray>> cols =
 			new ArrayList<ProxyColumn<GateArmArray>>(2);
-		cols.add(new ProxyColumn<GateArmArray>("gate.arm", 200) {
+		cols.add(new ProxyColumn<GateArmArray>("gate.arm.array", 200) {
 			public Object getValueAt(GateArmArray ga) {
 				return ga.getName();
 			}

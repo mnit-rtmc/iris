@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
@@ -79,6 +80,18 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Approach camera combo box */
 	private final JComboBox approach_cbx = new JComboBox();
+
+	/** Prerequesite gate arm array */
+	private final IAction prereq = new IAction("gate.arm.prereq") {
+		protected void do_perform() {
+			GateArmArray ga =
+				(GateArmArray)prereq_cbx.getSelectedItem();
+			proxy.setPrereq(ga != null ? ga.getName() : "");
+		}
+	};
+
+	/** Prerequisite combo box */
+	private final JComboBox prereq_cbx = new JComboBox();
 
 	/** Warning DMS action */
 	private final IAction dms = new IAction("gate.arm.dms") {
@@ -132,7 +145,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Create a new gate arm array properties form */
 	public GateArmArrayProperties(Session s, GateArmArray ga) {
-		super(I18N.get("gate.arm") + ": ", s, ga);
+		super(I18N.get("gate.arm.array") + ": ", s, ga);
 		state = s.getSonarState();
 		loc_pnl = new LocationPanel(s);
 	}
@@ -198,9 +211,13 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Create gate arm setup panel */
 	private JPanel createSetupPanel() {
+		prereq_cbx.setModel(new WrapperComboBoxModel(
+			state.getGateArmArrayModel()));
 		dms_cbx.setModel(new WrapperComboBoxModel(
 			state.getDmsCache().getDMSModel()));
 		IPanel p = new IPanel();
+		p.add("gate.arm.prereq");
+		p.add(prereq_cbx, Stretch.LAST);
 		p.add("gate.arm.dms");
 		p.add(dms_cbx, Stretch.LAST);
 		p.add("gate.arm.open.msg");
@@ -242,6 +259,13 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 			approach_cbx.setEnabled(canUpdate("approach"));
 			approach_cbx.setSelectedItem(proxy.getApproach());
 			approach_cbx.setAction(approach);
+		}
+		if(a == null || a.equals("prereq")) {
+			prereq_cbx.setAction(null);
+			prereq_cbx.setEnabled(canUpdate("prereq"));
+			prereq_cbx.setSelectedItem(GateArmArrayHelper.lookup(
+				proxy.getPrereq()));
+			prereq_cbx.setAction(prereq);
 		}
 		if(a == null || a.equals("dms")) {
 			dms_cbx.setAction(null);
