@@ -93,7 +93,7 @@ abstract public class ProxyColumn<T extends SonarObject> {
 
 	/** Get the value of the column for the given row */
 	public Object getValueAt(int row) {
-		return "";
+		return null;
 	}
 
 	/** Get the value of the column for the given proxy */
