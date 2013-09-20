@@ -22,7 +22,9 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.FocusLostJob;
+import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -45,6 +47,7 @@ import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -103,22 +106,28 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Warning DMS combo box */
 	private final JComboBox dms_cbx = new JComboBox();
 
-	/** Controller action */
-	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
-			Controller c = proxy.getController();
-			if(c != null) {
-				SmartDesktop sd = session.getDesktop();
-				sd.show(new ControllerForm(session, c));
-			}
-		}
-	};
-
 	/** Text field for OPEN quick message */
 	private final JTextField open_msg_txt = new JTextField(20);
 
 	/** Text field for CLOSED quick message */
 	private final JTextField closed_msg_txt = new JTextField(20);
+
+	/** Gate arm table model */
+	private final GateArmTableModel table_model;
+
+	/** Gate arm table */
+	private final ZTable ga_table = new ZTable();
+
+	/** Gate arm controller action */
+	private final IAction controller = new IAction("controller") {
+		protected void do_perform() {
+/*			Controller c = proxy.getController();
+			if(c != null) {
+				SmartDesktop sd = session.getDesktop();
+				sd.show(new ControllerForm(session, c));
+			} */
+		}
+	};
 
 	/** Version label */
 	private final JLabel version_lbl = IPanel.createValueLabel();
@@ -148,6 +157,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		super(I18N.get("gate.arm.array") + ": ", s, ga);
 		state = s.getSonarState();
 		loc_pnl = new LocationPanel(s);
+		table_model = new GateArmTableModel(s, proxy);
+		table_model.initialize();
 	}
 
 	/** Get the SONAR type cache */
@@ -161,6 +172,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
 		tab.add(I18N.get("device.setup"), createSetupPanel());
+		tab.add(I18N.get("gate.arms"), createGateArmPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		updateAttribute(null);
@@ -184,7 +196,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		loc_pnl.add(camera_cbx, Stretch.LAST);
 		loc_pnl.add("gate.arm.approach");
 		loc_pnl.add(approach_cbx, Stretch.LAST);
-		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
 		return loc_pnl;
 	}
 
@@ -227,6 +238,30 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		return p;
 	}
 
+	/** Create gate arm panel */
+	private JPanel createGateArmPanel() {
+		initTable();
+		IPanel p = new IPanel();
+		p.add(ga_table, Stretch.FULL);
+		p.add(new JButton(controller));
+		return p;
+	}
+
+	/** Initialize the table */
+	private void initTable() {
+		ListSelectionModel s = ga_table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		s.addListSelectionListener(new ListSelectionJob(WORKER) {
+			@Override public void perform() {
+//				selectGateArm();
+			}
+		});
+		ga_table.setAutoCreateColumnsFromModel(false);
+		ga_table.setColumnModel(table_model.createColumnModel());
+		ga_table.setModel(table_model);
+		ga_table.setVisibleRowCount(GateArmArray.MAX_ARMS);
+	}
+
 	/** Create ramp meter status panel */
 	private JPanel createStatusPanel() {
 		IPanel p = new IPanel();
@@ -240,10 +275,16 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		return p;
 	}
 
+	/** Dispose of the form */
+	@Override protected void dispose() {
+		table_model.dispose();
+		super.dispose();
+	}
+
 	/** Update one attribute on the form */
 	@Override protected void doUpdateAttribute(String a) {
-		if(a == null || a.equals("controller"))
-			controller.setEnabled(proxy.getController() != null);
+//		if(a == null || a.equals("controller"))
+//			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes")) {
 			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(proxy.getNotes());
