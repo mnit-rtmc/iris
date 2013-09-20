@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.gate;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
-import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
@@ -28,22 +28,22 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  */
 public class GateArmTab extends MapTab {
 
-	/** Gate Arm device manager */
-	private final GateArmManager manager;
+	/** Gate arm array manager */
+	private final GateArmArrayManager manager;
 
 	/** Gate Arm dispatch panel */
-	private final GateArmDispatcher dispatcher;
+	private final GateArmArrayDispatcher dispatcher;
 
-	/** Summary of gate arms of each status */
-	private final StyleSummary<GateArm> summary;
+	/** Summary of gate arm arrays of each status */
+	private final StyleSummary<GateArmArray> summary;
 
 	/** Create a new gate arm tab */
-  	public GateArmTab(Session session, GateArmManager man)
+  	public GateArmTab(Session session, GateArmArrayManager man)
 		throws IOException
 	{
 		super("gate.arm");
 		manager = man;
-		dispatcher = new GateArmDispatcher(session, manager);
+		dispatcher = new GateArmArrayDispatcher(session, manager);
 		summary = manager.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);

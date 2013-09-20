@@ -26,7 +26,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -45,29 +45,29 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * GateArmDispatcher is a GUI component for deploying gate arms.
+ * GateArmArrayDispatcher is a GUI component for deploying gate arms.
  *
  * @author Douglas Lau
  */
-public class GateArmDispatcher extends IPanel {
+public class GateArmArrayDispatcher extends IPanel {
 
 	/** SONAR session */
 	private final Session session;
 
 	/** Cache of gate arm proxy objects */
-	private final TypeCache<GateArm> cache;
+	private final TypeCache<GateArmArray> cache;
 
 	/** Selection model */
-	private final ProxySelectionModel<GateArm> sel_model;
+	private final ProxySelectionModel<GateArmArray> sel_model;
 
 	/** Proxy listener */
-	private final ProxyListener<GateArm> p_listener =
-		new ProxyListener<GateArm>()
+	private final ProxyListener<GateArmArray> p_listener =
+		new ProxyListener<GateArmArray>()
 	{
-		public void proxyAdded(GateArm ga) { }
+		public void proxyAdded(GateArmArray ga) { }
 		public void enumerationComplete() { }
-		public void proxyRemoved(GateArm ga) { }
-		public void proxyChanged(final GateArm ga, final String a) {
+		public void proxyRemoved(GateArmArray ga) { }
+		public void proxyChanged(final GateArmArray ga, final String a) {
 			if(ga == watching) {
 				runSwing(new Runnable() {
 					public void run() {
@@ -103,7 +103,7 @@ public class GateArmDispatcher extends IPanel {
 	private final IAction swap_act = new IAction("gate.arm.stream.swap") {
 		protected void do_perform() {
 			swap_streams = !swap_streams;
-			GateArm ga = watching;
+			GateArmArray ga = watching;
 			if(ga != null) {
 				updateCameraStream(ga);
 				updateApproachStream(ga);
@@ -148,7 +148,7 @@ public class GateArmDispatcher extends IPanel {
 
 	/** Request a gate arm state change */
 	private void requestState(GateArmState gas) {
-		GateArm ga = watching;
+		GateArmArray ga = watching;
 		if(ga != null) {
 			ga.setOwnerNext(session.getUser());
 			ga.setArmStateNext(gas.ordinal());
@@ -157,11 +157,11 @@ public class GateArmDispatcher extends IPanel {
 
 	/** Currently selected gate arm.  This will be null if there are zero or
 	 * multiple devices selected. */
-	private GateArm watching;
+	private GateArmArray watching;
 
 	/** Watch a gate arm */
-	private void watch(final GateArm nw) {
-		final GateArm ow = watching;
+	private void watch(final GateArmArray nw) {
+		final GateArmArray ow = watching;
 		if(ow != null)
 			cache.ignoreObject(ow);
 		watching = nw;
@@ -170,26 +170,26 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Selection listener */
-	private final ProxySelectionListener<GateArm> sel_listener =
-		new ProxySelectionListener<GateArm>()
+	private final ProxySelectionListener<GateArmArray> sel_listener =
+		new ProxySelectionListener<GateArmArray>()
 	{
-		public void selectionAdded(GateArm ga) {
+		public void selectionAdded(GateArmArray ga) {
 			if(sel_model.getSelectedCount() <= 1)
 				setSelected(ga);
 		}
-		public void selectionRemoved(GateArm ga) {
+		public void selectionRemoved(GateArmArray ga) {
 			if(sel_model.getSelectedCount() == 1) {
-				for(GateArm g: sel_model.getSelected())
+				for(GateArmArray g: sel_model.getSelected())
 					setSelected(g);
 			} else if(ga == watching)
 				setSelected(null);
 		}
 	};
 
-	/** Create a new gate arm dispatcher */
-	public GateArmDispatcher(Session s, GateArmManager manager) {
+	/** Create a new gate arm array dispatcher */
+	public GateArmArrayDispatcher(Session s, GateArmArrayManager manager) {
 		session = s;
-		cache = s.getSonarState().getGateArms();
+		cache = s.getSonarState().getGateArmArrays();
 		cache.addProxyListener(p_listener);
 		sel_model = manager.getSelectionModel();
 		sel_model.addProxySelectionListener(sel_listener);
@@ -272,8 +272,8 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Set the selected gate arm */
-	private void setSelected(final GateArm ga) {
-		final GateArm p = watching;
+	private void setSelected(final GateArmArray ga) {
+		final GateArmArray p = watching;
 		watch(ga);
 		if(ga != p) {
 			if(ga != null)
@@ -286,7 +286,7 @@ public class GateArmDispatcher extends IPanel {
 	/** Update one (or all) attribute(s) on the form.
 	 * @param ga The newly selected gate arm.  May not be null.
 	 * @param a Attribute to update, null for all attributes. */
-	private void updateAttribute(GateArm ga, String a) {
+	private void updateAttribute(GateArmArray ga, String a) {
 		if(a == null || a.equals("name"))
 			name_lbl.setText(ga.getName());
 		if(a == null || a.equals("geoLoc")) {
@@ -312,7 +312,7 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Update camera stream */
-	private void updateCameraStream(GateArm ga) {
+	private void updateCameraStream(GateArmArray ga) {
 		Camera c = ga.getCamera();
 		if(swap_streams) {
 			thumb_ptz.setCamera(c);
@@ -324,7 +324,7 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Update approach stream */
-	private void updateApproachStream(GateArm ga) {
+	private void updateApproachStream(GateArmArray ga) {
 		Camera c = ga.getApproach();
 		if(swap_streams) {
 			stream_ptz.setCamera(c);
@@ -336,7 +336,7 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Update the status widgets */
-	private void updateStatus(GateArm ga) {
+	private void updateStatus(GateArmArray ga) {
 		if(ControllerHelper.isFailed(ga.getController())) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
@@ -347,12 +347,12 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Get gate arm controller communication status */
-	static private String getStatus(GateArm ga) {
+	static private String getStatus(GateArmArray ga) {
 		return ControllerHelper.getStatus(ga.getController());
 	}
 
 	/** Update the critical error status */
-	private void updateCritical(GateArm ga) {
+	private void updateCritical(GateArmArray ga) {
 		String critical = getStatus(ga);
 		if(critical.isEmpty())
 			updateMaintenance(ga);
@@ -364,7 +364,7 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Update the maintenance error status */
-	private void updateMaintenance(GateArm ga) {
+	private void updateMaintenance(GateArmArray ga) {
 		String m = ControllerHelper.getMaintenance(ga.getController());
 		if(m.isEmpty()) {
 			status_lbl.setForeground(null);
@@ -378,7 +378,7 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Update the interlock label */
-	private void updateInterlock(GateArm ga) {
+	private void updateInterlock(GateArmArray ga) {
 		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
 		case NONE:
 			interlock_lbl.setForeground(Color.BLACK);
@@ -414,13 +414,13 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Update the swap button enabled states */
-	private void updateSwapButton(GateArm ga) {
+	private void updateSwapButton(GateArmArray ga) {
 		swap_act.setEnabled(ga != null && ga.getCamera() != null &&
 			ga.getApproach() != null);
 	}
 
 	/** Update the button enabled states */
-	private void updateButtons(GateArm ga) {
+	private void updateButtons(GateArmArray ga) {
 		boolean e = session.canUpdate(ga, "armState");
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
 		open_arm.setEnabled(e && gas == GateArmState.CLOSED &&
@@ -430,7 +430,7 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Check if gate arm open is allowed */
-	private boolean isOpenAllowed(GateArm ga) {
+	private boolean isOpenAllowed(GateArmArray ga) {
 		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
 		case DENY_OPEN:
 		case DENY_ALL:

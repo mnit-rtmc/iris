@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.gate;
 
-import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
@@ -24,15 +24,15 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class GateArmForm extends ProxyTableForm<GateArm> {
+public class GateArmArrayForm extends ProxyTableForm<GateArmArray> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canRead(GateArm.SONAR_TYPE);
+		return s.canRead(GateArmArray.SONAR_TYPE);
 	}
 
-	/** Create a new gate arm form */
-	public GateArmForm(Session s) {
-		super(I18N.get("gate.arms"), new GateArmModel(s));
+	/** Create a new gate arm array form */
+	public GateArmArrayForm(Session s) {
+		super(I18N.get("gate.arms"), new GateArmArrayModel(s));
 	}
 }

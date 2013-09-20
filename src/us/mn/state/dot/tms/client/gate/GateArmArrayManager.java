@@ -22,7 +22,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapAction;
@@ -34,20 +34,20 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * The GateArmManager class provides proxies for GateArm objects.
+ * The GateArmArrayManager class provides proxies for GateArmArray objects.
  *
  * @author Douglas Lau
  */
-public class GateArmManager extends ProxyManager<GateArm> {
+public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 
-	/** Gate Arm map object marker */
+	/** Gate arm map object marker */
 	static private final GateArmMarker MARKER = new GateArmMarker();
 
 	/** User session */
 	private final Session session;
 
-	/** Create a new gate arm manager */
-	public GateArmManager(Session s, TypeCache<GateArm> c,
+	/** Create a new gate arm array manager */
+	public GateArmArrayManager(Session s, TypeCache<GateArmArray> c,
 		GeoLocManager lm)
 	{
 		super(c, lm);
@@ -66,9 +66,9 @@ public class GateArmManager extends ProxyManager<GateArm> {
 	}
 
 	/** Create a theme for gate arms */
-	@Override protected ProxyTheme<GateArm> createTheme() {
-		ProxyTheme<GateArm> theme = new ProxyTheme<GateArm>(this,
-			MARKER);
+	@Override protected ProxyTheme<GateArmArray> createTheme() {
+		ProxyTheme<GateArmArray> theme = new ProxyTheme<GateArmArray>(
+			this, MARKER);
 		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.MOVING, ProxyTheme.COLOR_SCHEDULED);
 		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
@@ -80,7 +80,7 @@ public class GateArmManager extends ProxyManager<GateArm> {
 	}
 
 	/** Check the style of the specified proxy */
-	@Override public boolean checkStyle(ItemStyle is, GateArm proxy) {
+	@Override public boolean checkStyle(ItemStyle is, GateArmArray proxy) {
 		long styles = proxy.getStyles();
 		for(ItemStyle s: ItemStyle.toStyles(styles)) {
 			if(s == is)
@@ -92,15 +92,15 @@ public class GateArmManager extends ProxyManager<GateArm> {
 	/** Show the properties form for the selected proxy */
 	@Override public void showPropertiesForm() {
 		if(s_model.getSelectedCount() == 1) {
-			for(GateArm ga: s_model.getSelected())
+			for(GateArmArray ga: s_model.getSelected())
 				showPropertiesForm(ga);
 		}
 	}
 
 	/** Show the properteis form for the given proxy */
-	private void showPropertiesForm(GateArm ga) {
+	private void showPropertiesForm(GateArmArray ga) {
 		SmartDesktop desktop = session.getDesktop();
-		desktop.show(new GateArmProperties(session, ga));
+		desktop.show(new GateArmArrayProperties(session, ga));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
@@ -109,7 +109,7 @@ public class GateArmManager extends ProxyManager<GateArm> {
 		if(n_selected < 1)
 			return null;
 		if(n_selected == 1) {
-			for(GateArm ga: s_model.getSelected())
+			for(GateArmArray ga: s_model.getSelected())
 				return createSinglePopup(ga);
 		}
 		JPopupMenu p = new JPopupMenu();
@@ -120,7 +120,7 @@ public class GateArmManager extends ProxyManager<GateArm> {
 	}
 
 	/** Create a popup menu for a single gate arm selection */
-	private JPopupMenu createSinglePopup(final GateArm ga) {
+	private JPopupMenu createSinglePopup(final GateArmArray ga) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(ga)));
@@ -129,10 +129,10 @@ public class GateArmManager extends ProxyManager<GateArm> {
 		p.addSeparator();
 		if(TeslaAction.isConfigured()) {
 			p.addSeparator();
-			p.add(new TeslaAction<GateArm>(ga));
+			p.add(new TeslaAction<GateArmArray>(ga));
 		}
 		p.addSeparator();
-		p.add(new PropertiesAction<GateArm>(ga) {
+		p.add(new PropertiesAction<GateArmArray>(ga) {
 			protected void do_perform() {
 				showPropertiesForm(ga);
 			}
@@ -141,12 +141,12 @@ public class GateArmManager extends ProxyManager<GateArm> {
 	}
 
 	/** Find the map geo location for a proxy */
-	@Override protected GeoLoc getGeoLoc(GateArm proxy) {
+	@Override protected GeoLoc getGeoLoc(GateArmArray proxy) {
 		return proxy.getGeoLoc();
 	}
 
 	/** Get the description of a proxy */
-	@Override public String getDescription(GateArm proxy) {
+	@Override public String getDescription(GateArmArray proxy) {
 		return proxy.getName() + " - " +
 			GeoLocHelper.getDescription(getGeoLoc(proxy));
 	}

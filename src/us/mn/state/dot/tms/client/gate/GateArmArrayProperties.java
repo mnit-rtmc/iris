@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
@@ -46,11 +47,11 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * This is a form for viewing and editing the properties of a gate arm.
+ * This is a form for viewing and editing the properties of a gate arm array.
  *
  * @author Douglas Lau
  */
-public class GateArmProperties extends SonarObjectForm<GateArm> {
+public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Location panel */
 	private final LocationPanel loc_pnl;
@@ -129,16 +130,16 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 	/** Sonar state */
 	private final SonarState state;
 
-	/** Create a new gate arm properties form */
-	public GateArmProperties(Session s, GateArm ga) {
+	/** Create a new gate arm array properties form */
+	public GateArmArrayProperties(Session s, GateArmArray ga) {
 		super(I18N.get("gate.arm") + ": ", s, ga);
 		state = s.getSonarState();
 		loc_pnl = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
-	@Override protected TypeCache<GateArm> getTypeCache() {
-		return state.getGateArms();
+	@Override protected TypeCache<GateArmArray> getTypeCache() {
+		return state.getGateArmArrays();
 	}
 
 	/** Initialize the widgets on the form */
@@ -256,8 +257,8 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 			closed_msg_txt.setEnabled(canUpdate("closedMsg"));
 			closed_msg_txt.setText(getClosedMsg());
 		}
-		if(a == null || a.equals("version"))
-			version_lbl.setText(proxy.getVersion());
+/* FIXME	if(a == null || a.equals("version"))
+			version_lbl.setText(proxy.getVersion()); */
 		if(a == null || a.equals("armState")) {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
 				proxy.getArmState()).toString());

@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.client.comm.MaintenanceMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.detector.StationForm;
 import us.mn.state.dot.tms.client.dms.SignMenu;
-import us.mn.state.dot.tms.client.gate.GateArmForm;
+import us.mn.state.dot.tms.client.gate.GateArmArrayForm;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
@@ -143,11 +143,11 @@ public class ViewMenu extends JMenu {
 
 	/** Create the gate arm menu item */
 	private JMenuItem createGateArmItem() {
-		if(!GateArmForm.isPermitted(session))
+		if(!GateArmArrayForm.isPermitted(session))
 			return null;
 		return new JMenuItem(new IAction("gate.arms") {
 			protected void do_perform() {
-				desktop.show(new GateArmForm(session));
+				desktop.show(new GateArmArrayForm(session));
 			}
 		});
 	}

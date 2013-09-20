@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.RampMeter;
@@ -46,7 +47,7 @@ import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
-import us.mn.state.dot.tms.client.gate.GateArmManager;
+import us.mn.state.dot.tms.client.gate.GateArmArrayManager;
 import us.mn.state.dot.tms.client.gate.GateArmTab;
 import us.mn.state.dot.tms.client.incident.IncidentManager;
 import us.mn.state.dot.tms.client.incident.IncidentTab;
@@ -205,11 +206,11 @@ public class Session {
 		return meter_manager;
 	}
 
-	/** Gate arm manager */
-	private final GateArmManager gate_arm_manager;
+	/** Gate arm array manager */
+	private final GateArmArrayManager gate_arm_manager;
 
-	/** Get the gate arm manager */
-	public GateArmManager getGateArmManager() {
+	/** Get the gate arm array manager */
+	public GateArmArrayManager getGateArmArrayManager() {
 		return gate_arm_manager;
 	}
 
@@ -256,8 +257,8 @@ public class Session {
 			state.getWeatherSensors(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
-		gate_arm_manager = new GateArmManager(this,
-			state.getGateArms(), loc_manager);
+		gate_arm_manager = new GateArmArrayManager(this,
+			state.getGateArmArrays(), loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
 		plan_manager = new PlanManager(this, loc_manager);
 		seg_layer = r_node_manager.getSegmentLayer();
@@ -313,7 +314,7 @@ public class Session {
 			tabs.add(new LcsTab(this, lcs_array_manager));
 		if(canRead(RampMeter.SONAR_TYPE))
 			tabs.add(new RampMeterTab(this, meter_manager));
-		if(canRead(GateArm.SONAR_TYPE))
+		if(canReadGateArms())
 			tabs.add(new GateArmTab(this, gate_arm_manager));
 		if(canRead(R_Node.SONAR_TYPE))
 			tabs.add(new R_NodeTab(this, r_node_manager));
@@ -321,6 +322,12 @@ public class Session {
 			tabs.add(new PlanTab(this, plan_manager));
 		if(canRead(CommLink.SONAR_TYPE))
 			tabs.add(new CommTab(this, controller_manager));
+	}
+
+	/** Check if user can read gate arms + arrays */
+	private boolean canReadGateArms() {
+		return canRead(GateArmArray.SONAR_TYPE) &&
+		       canRead(GateArm.SONAR_TYPE);
 	}
 
 	/** Create the layer states.  The map bean and model must be seperate
@@ -340,7 +347,7 @@ public class Session {
 			mm.addLayer(cam_manager.getLayer().createState(mb));
 		if(canRead(RampMeter.SONAR_TYPE))
 			mm.addLayer(meter_manager.getLayer().createState(mb));
-		if(canRead(GateArm.SONAR_TYPE))
+		if(canReadGateArms())
 			mm.addLayer(gate_arm_manager.getLayer().createState(mb));
 		if(canRead(DMS.SONAR_TYPE))
 			mm.addLayer(dms_manager.getLayer().createState(mb));
