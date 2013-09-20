@@ -37,7 +37,7 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 			Integer.class)
 		{
 			public Object getValueAt(GateArm ga) {
-				return ga.getIndex();
+				return ga.getIdx();
 			}
 		});
 		cols.add(new ProxyColumn<GateArm>("device.name", 140) {
@@ -47,10 +47,10 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 			public boolean isEditable(GateArm ga) {
 				return (ga == null) && canAdd();
 			}
-			public void setValueAt(GateArm ga, Object value) {
+			public void setValueAt(GateArm ga,int row,Object value){
 				String v = value.toString().trim();
 				if(v.length() > 0)
-					createGateArm(v, getRowCount());
+					createGateArm(v, row + 1);
 			}
 		});
 		return cols;
@@ -59,8 +59,8 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 	/** Create a new gate arm */
 	private void createGateArm(String name, int idx) {
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		attrs.put("array", ga_array);
-		attrs.put("index", new Integer(idx));
+		attrs.put("ga_array", ga_array);
+		attrs.put("idx", new Integer(idx));
 		cache.createObject(name, attrs);
 	}
 
@@ -75,7 +75,7 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 
 	/** Add a new proxy to the table model */
 	protected int doProxyAdded(GateArm proxy) {
-		if(proxy.getArray() == ga_array)
+		if(proxy.getGaArray() == ga_array)
 			return super.doProxyAdded(proxy);
 		else
 			return -1;

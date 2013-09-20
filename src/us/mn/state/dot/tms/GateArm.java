@@ -27,10 +27,10 @@ public interface GateArm extends Device {
 	String SONAR_TYPE = "gate_arm";
 
 	/** Get the gate arm array */
-	GateArmArray getArray();
+	GateArmArray getGaArray();
 
 	/** Get the array index */
-	int getIndex();
+	int getIdx();
 
 	/** Get the version */
 	String getVersion();

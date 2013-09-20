@@ -121,7 +121,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private GateArmArrayImpl ga_array;
 
 	/** Get the gate arm array */
-	@Override public GateArmArrayImpl getArray() {
+	@Override public GateArmArrayImpl getGaArray() {
 		return ga_array;
 	}
 
@@ -129,7 +129,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private int idx;
 
 	/** Get the index in array */
-	@Override public int getIndex() {
+	@Override public int getIdx() {
 		return idx;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,6 +97,11 @@ abstract public class ProxyColumn<T extends SonarObject> {
 	/** Test if the column for the given proxy is editable */
 	public boolean isEditable(T proxy) {
 		return false;
+	}
+
+	/** Set the value of the column for the given proxy */
+	public void setValueAt(T proxy, int row, Object value) {
+		setValueAt(proxy, value);
 	}
 
 	/** Set the value of the column for the given proxy */

@@ -120,7 +120,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	public void setValueAt(Object value, int row, int col) {
 		ProxyColumn pc = getProxyColumn(col);
 		if(pc != null)
-			pc.setValueAt(getProxy(row), value);
+			pc.setValueAt(getProxy(row), row, value);
 	}
 
 	/** Create the table column model */
