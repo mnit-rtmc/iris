@@ -119,6 +119,11 @@ public class GateArmTableModel extends AbstractTableModel
 		return session.canUpdate(proxy, aname);
 	}
 
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(GateArm proxy) {
+		return session.canRemove(proxy);
+	}
+
 	/** Create a new gate arm */
 	private void createGateArm(String name, int idx) {
 		HashMap<String, Object> attrs = new HashMap<String, Object>();

@@ -121,16 +121,31 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Gate arm controller action */
 	private final IAction controller = new IAction("controller") {
 		protected void do_perform() {
-/*			Controller c = proxy.getController();
-			if(c != null) {
-				SmartDesktop sd = session.getDesktop();
-				sd.show(new ControllerForm(session, c));
-			} */
+			GateArm ga = getSelectedGateArm();
+			if(ga != null) {
+				Controller c = ga.getController();
+				if(c != null) {
+					SmartDesktop sd = session.getDesktop();
+					sd.show(new ControllerForm(session, c));
+				}
+			}
 		}
 	};
 
-	/** Version label */
-	private final JLabel version_lbl = IPanel.createValueLabel();
+	/** Action to delete the selected LCS */
+	private final IAction delete_ga = new IAction("gate.arm.delete") {
+		protected void do_perform() {
+			GateArm ga = getSelectedGateArm();
+			if(ga != null)
+				ga.destroy();
+		}
+	};
+
+	/** Get the selected gate arm */
+	private GateArm getSelectedGateArm() {
+		ListSelectionModel s = ga_table.getSelectionModel();
+		return table_model.getProxy(s.getMinSelectionIndex());
+	}
 
 	/** Arm state label */
 	private final JLabel arm_state_lbl = IPanel.createValueLabel();
@@ -244,16 +259,18 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		IPanel p = new IPanel();
 		p.add(ga_table, Stretch.FULL);
 		p.add(new JButton(controller));
+		p.add(new JButton(delete_ga), Stretch.LAST);
 		return p;
 	}
 
 	/** Initialize the table */
 	private void initTable() {
+		selectGateArm();
 		ListSelectionModel s = ga_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionJob(WORKER) {
 			@Override public void perform() {
-//				selectGateArm();
+				selectGateArm();
 			}
 		});
 		ga_table.setAutoCreateColumnsFromModel(false);
@@ -262,11 +279,26 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		ga_table.setVisibleRowCount(GateArmArray.MAX_ARMS);
 	}
 
+	/** Select a gate arm in the table */
+	private void selectGateArm() {
+		GateArm ga = getSelectedGateArm();
+		if(ga != null)
+			selectGateArm(ga);
+		else {
+			controller.setEnabled(false);
+			delete_ga.setEnabled(false);
+		}
+	}
+
+	/** Select a gate arm in the table */
+	private void selectGateArm(GateArm ga) {
+		controller.setEnabled(ga.getController() != null);
+		delete_ga.setEnabled(table_model.canRemove(ga));
+	}
+
 	/** Create ramp meter status panel */
 	private JPanel createStatusPanel() {
 		IPanel p = new IPanel();
-		p.add("controller.version");
-		p.add(version_lbl, Stretch.LAST);
 		p.add("gate.arm.state");
 		p.add(arm_state_lbl, Stretch.LAST);
 		p.add("device.operation");
@@ -283,8 +315,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Update one attribute on the form */
 	@Override protected void doUpdateAttribute(String a) {
-//		if(a == null || a.equals("controller"))
-//			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes")) {
 			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(proxy.getNotes());
@@ -322,8 +352,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 			closed_msg_txt.setEnabled(canUpdate("closedMsg"));
 			closed_msg_txt.setText(getClosedMsg());
 		}
-/* FIXME	if(a == null || a.equals("version"))
-			version_lbl.setText(proxy.getVersion()); */
 		if(a == null || a.equals("armState")) {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
 				proxy.getArmState()).toString());
