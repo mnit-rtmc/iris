@@ -292,8 +292,9 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Select a gate arm in the table */
 	private void selectGateArm(GateArm ga) {
-		controller.setEnabled(ga.getController() != null);
-		delete_ga.setEnabled(table_model.canRemove(ga));
+		boolean c = ga.getController() != null;
+		controller.setEnabled(c);
+		delete_ga.setEnabled(!c && table_model.canRemove(ga));
 	}
 
 	/** Create ramp meter status panel */
