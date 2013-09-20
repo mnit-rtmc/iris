@@ -101,11 +101,13 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Get the value at the specified cell */
 	public Object getValueAt(int row, int col) {
-		T proxy = getProxy(row);
-		if(proxy != null) {
-			ProxyColumn pc = getProxyColumn(col);
-			if(pc != null)
+		ProxyColumn pc = getProxyColumn(col);
+		if(pc != null) {
+			T proxy = getProxy(row);
+			if(proxy != null)
 				return pc.getValueAt(proxy);
+			else
+				return pc.getValueAt(row);
 		}
 		return null;
 	}
