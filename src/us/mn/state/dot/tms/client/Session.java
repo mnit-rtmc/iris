@@ -46,7 +46,6 @@ import us.mn.state.dot.tms.client.comm.CommTab;
 import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
-import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.gate.GateArmArrayManager;
 import us.mn.state.dot.tms.client.gate.GateArmTab;
 import us.mn.state.dot.tms.client.incident.IncidentManager;
@@ -306,7 +305,7 @@ public class Session {
 		if(canRead(Incident.SONAR_TYPE))
 			tabs.add(inc_manager.createTab());
 		if(canRead(DMS.SONAR_TYPE))
-			tabs.add(new DMSTab(this, dms_manager));
+			tabs.add(dms_manager.createTab());
 		if(canRead(Camera.SONAR_TYPE))
 			tabs.add(new CameraTab(this, cam_manager));
 		if(canRead(LCSArray.SONAR_TYPE))

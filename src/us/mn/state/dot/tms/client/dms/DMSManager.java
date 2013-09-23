@@ -89,6 +89,11 @@ public class DMSManager extends ProxyManager<DMS> {
 		return I18N.get("dms");
 	}
 
+	/** Create a DMS map tab */
+	public DMSTab createTab() {
+		return new DMSTab(session, this);
+	}
+
 	/** Get the shape for a given proxy */
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
