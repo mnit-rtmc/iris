@@ -53,7 +53,6 @@ import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
-import us.mn.state.dot.tms.client.roads.R_NodeTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.schedule.PlanManager;
 import us.mn.state.dot.tms.client.schedule.PlanTab;
@@ -311,7 +310,7 @@ public class Session {
 		if(canReadGateArms())
 			tabs.add(gate_arm_manager.createTab());
 		if(canRead(R_Node.SONAR_TYPE))
-			tabs.add(new R_NodeTab(this, r_node_manager));
+			tabs.add(r_node_manager.createTab());
 		if(canRead(ActionPlan.SONAR_TYPE))
 			tabs.add(new PlanTab(this, plan_manager));
 		if(canRead(CommLink.SONAR_TYPE))

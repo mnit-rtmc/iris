@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -110,6 +109,16 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		seg_layer = new SegmentLayer(this, session);
 		lm.setR_NodeManager(this);
 		cache.addProxyListener(this);
+	}
+
+	/** Get the proxy type */
+	@Override public String getProxyType() {
+		return I18N.get("r_node");
+	}
+
+	/** Create an r_node map tab */
+	public R_NodeTab createTab() {
+		return new R_NodeTab(session, this);
 	}
 
 	/** Add a new proxy to the r_node manager */
@@ -260,11 +269,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Get the segment layer */
 	public SegmentLayer getSegmentLayer() {
 		return seg_layer;
-	}
-
-	/** Get the proxy type */
-	public String getProxyType() {
-		return I18N.get("r_node");
 	}
 
 	/** Get a transformed marker shape */
