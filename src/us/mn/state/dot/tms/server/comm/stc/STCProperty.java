@@ -87,6 +87,7 @@ abstract public class STCProperty extends ControllerProperty {
 		byte[] body = recvResponse(is, size + 1);
 		if((checksum(header) + checksum(body)) % 256 != 0)
 			throw new ChecksumException(body);
+		assert body.length > 1;
 		parseMessage(body, body.length - 1);
 	}
 
@@ -94,11 +95,8 @@ abstract public class STCProperty extends ControllerProperty {
 	abstract protected void parseMessage(byte[] msg, int len)
 		throws IOException;
 
-	/** Parse a 1-digit ASCII-hex value */
-	static protected int parseAsciiHex1(byte[] body, int pos)
-		throws IOException
-	{
-		String hex = new String(body, pos, 1, ASCII);
+	/** Parse an ASCII-hex string */
+	static private int parseAsciiHex(String hex) throws IOException {
 		try {
 			return Integer.parseInt(hex, 16);
 		}
@@ -107,17 +105,25 @@ abstract public class STCProperty extends ControllerProperty {
 		}
 	}
 
+	/** Parse a 1-digit ASCII-hex value */
+	static protected int parseAsciiHex1(byte[] body, int pos)
+		throws IOException
+	{
+		return parseAsciiHex(new String(body, pos, 1, ASCII));
+	}
+
 	/** Parse a 2-digit ASCII-hex value */
 	static protected int parseAsciiHex2(byte[] body, int pos)
 		throws IOException
 	{
-		String hex = new String(body, pos, 2, ASCII);
-		try {
-			return Integer.parseInt(hex, 16);
-		}
-		catch(NumberFormatException e) {
-			throw new ParsingException("INVALID HEX: " + hex);
-		}
+		return parseAsciiHex(new String(body, pos, 2, ASCII));
+	}
+
+	/** Parse a 6-digit ASCII-hex value */
+	static protected int parseAsciiHex6(byte[] body, int pos)
+		throws IOException
+	{
+		return parseAsciiHex(new String(body, pos, 6, ASCII));
 	}
 
 	/** Parse a boolean ASCII-hex value */

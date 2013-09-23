@@ -46,6 +46,11 @@ public class StatusProperty extends STCProperty {
 	static private final int OFF_OPEN_TOO_LONG = 18;
 	static private final int OFF_TAILGATER = 19;
 	static private final int OFF_LOITERING = 20;
+	static private final int OFF_COMMON_LEN = 21;
+	static private final int OFF_TRANSIENT_CNT = 21;
+	static private final int OFF_TENANT_CNT = 27;
+	static private final int OFF_SPECIAL_CNT = 33;
+	static private final int OFF_NEW_LENGTH = 39;
 
 	/** Encode a QUERY request */
 	@Override public void encodeQuery(OutputStream os, int drop)
@@ -67,10 +72,50 @@ public class StatusProperty extends STCProperty {
 	@Override protected void parseMessage(byte[] msg, int len)
 		throws IOException
 	{
-		if(msg[0] != 'S')
-			throw new ParsingException("INVALID MESSAGE:" + msg[0]);
-		if(len != 21)
+		if(msg[0] == 'S') {
+			parseMessageS(msg, len);
+			return;
+		}
+		if(msg[0] == 'N') {
+			parseMessageN(msg, len);
+			return;
+		}
+		throw new ParsingException("INVALID MESSAGE:" + msg[0]);
+	}
+
+	/** Parse a received "S" message.  This is the response to a status
+	 * request in verson 1 of the STC protocol. */
+	private void parseMessageS(byte[] msg, int len) throws IOException {
+		if(len != OFF_COMMON_LEN)
 			throw new ParsingException("INVALID LENGTH:" + len);
+		parseMessageCommon(msg, len);
+		relay[0] = parseBoolean(msg, OFF_RELAY_1);
+		relay[1] = parseBoolean(msg, OFF_RELAY_2);
+		relay[2] = parseBoolean(msg, OFF_RELAY_3);
+		for(int i = 3; i < relay.length; i++)
+			relay[i] = false;
+	}
+
+	/** Parse a received "N" message.  This is the "NEW" response to a
+	 * status request in version 2 of the STC protocol. */
+	private void parseMessageN(byte[] msg, int len) throws IOException {
+		if(len != OFF_NEW_LENGTH)
+			throw new ParsingException("INVALID LENGTH:" + len);
+		parseMessageCommon(msg, len);
+		for(int i = 0; i < 3; i++) {
+			int r = parseAsciiHex1(msg, OFF_RELAY_1 + i);
+			for(int b = 0; b < 4; b++) {
+				int j = i * 4 + b;
+				relay[j] = ((r >> b) & 1) != 0;
+			}
+		}
+		transient_cnt = parseAsciiHex6(msg, OFF_TRANSIENT_CNT);
+		tenant_cnt = parseAsciiHex6(msg, OFF_TENANT_CNT);
+		special_cnt = parseAsciiHex6(msg, OFF_SPECIAL_CNT);
+	}
+
+	/** Parse parts common to original and new status message */
+	private void parseMessageCommon(byte[] msg, int len) throws IOException{
 		int c = parseAsciiHex2(msg, OFF_COMMAND);
 		command_state = CommandStatus.fromOrdinal(c);
 		if(command_state == null)
@@ -94,9 +139,6 @@ public class StatusProperty extends STCProperty {
 		outer_obstruction_loop = parseBoolean(msg,
 			OFF_OUTER_OBSTRUCTION_LOOP);
 		reset_shadow_loop = parseBoolean(msg, OFF_RESET_SHADOW_LOOP);
-		relay_1 = parseBoolean(msg, OFF_RELAY_1);
-		relay_2 = parseBoolean(msg, OFF_RELAY_2);
-		relay_3 = parseBoolean(msg, OFF_RELAY_3);
 		open_too_long = parseBoolean(msg, OFF_OPEN_TOO_LONG);
 		tailgater = parseBoolean(msg, OFF_TAILGATER);
 		loitering = parseBoolean(msg, OFF_LOITERING);
@@ -138,14 +180,8 @@ public class StatusProperty extends STCProperty {
 	/** Reset / shadow loop */
 	private boolean reset_shadow_loop;
 
-	/** Relay #1 */
-	private boolean relay_1;
-
-	/** Relay #2 */
-	private boolean relay_2;
-
-	/** Relay #3 */
-	private boolean relay_3;
+	/** Relay states */
+	private boolean[] relay = new boolean[12];
 
 	/** Open too long */
 	private boolean open_too_long;
@@ -155,6 +191,15 @@ public class StatusProperty extends STCProperty {
 
 	/** Loitering */
 	private boolean loitering;
+
+	/** Transient count */
+	private int transient_cnt;
+
+	/** Tenant count */
+	private int tenant_cnt;
+
+	/** Special count */
+	private int special_cnt;
 
 	/** Get a string representation */
 	public String toString() {
@@ -183,18 +228,24 @@ public class StatusProperty extends STCProperty {
 		sb.append(outer_obstruction_loop);
 		sb.append(" reset_shadow_loop:");
 		sb.append(reset_shadow_loop);
-		sb.append(" relay_1:");
-		sb.append(relay_1);
-		sb.append(" relay_2:");
-		sb.append(relay_2);
-		sb.append(" relay_3:");
-		sb.append(relay_3);
+		sb.append(" relay:");
+		for(int i = 0; i < relay.length; i++) {
+			if(i > 0)
+				sb.append(',');
+			sb.append(relay[i]);
+		}
 		sb.append(" open_too_long:");
 		sb.append(open_too_long);
 		sb.append(" tailgater:");
 		sb.append(tailgater);
 		sb.append(" loitering:");
 		sb.append(loitering);
+		sb.append(" transient_cnt:");
+		sb.append(transient_cnt);
+		sb.append(" tenant_cnt:");
+		sb.append(tenant_cnt);
+		sb.append(" special_cnt:");
+		sb.append(special_cnt);
 		return sb.toString();
 	}
 
