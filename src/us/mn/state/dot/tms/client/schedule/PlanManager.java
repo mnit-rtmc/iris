@@ -64,13 +64,18 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Get the proxy type name */
-	public String getProxyType() {
+	@Override public String getProxyType() {
 		return I18N.get("action.plan");
 	}
 
 	/** Get longer proxy type name for display */
-	public String getLongProxyType() {
+	@Override public String getLongProxyType() {
 		return I18N.get("action.plan.long");
+	}
+
+	/** Create a plan map tab */
+	public PlanTab createTab() {
+		return new PlanTab(session, this);
 	}
 
 	/** Find the map geo location for a proxy */

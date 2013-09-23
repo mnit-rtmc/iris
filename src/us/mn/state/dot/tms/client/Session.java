@@ -55,7 +55,6 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.schedule.PlanManager;
-import us.mn.state.dot.tms.client.schedule.PlanTab;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 import us.mn.state.dot.tms.client.weather.WeatherSensorManager;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -312,7 +311,7 @@ public class Session {
 		if(canRead(R_Node.SONAR_TYPE))
 			tabs.add(r_node_manager.createTab());
 		if(canRead(ActionPlan.SONAR_TYPE))
-			tabs.add(new PlanTab(this, plan_manager));
+			tabs.add(plan_manager.createTab());
 		if(canRead(CommLink.SONAR_TYPE))
 			tabs.add(new CommTab(this, controller_manager));
 	}
