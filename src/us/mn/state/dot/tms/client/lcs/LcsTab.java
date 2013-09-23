@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -36,9 +35,7 @@ public class LcsTab extends MapTab {
 	private final StyleSummary<LCSArray> summary;
 
 	/** Create a new LCS tab */
-	public LcsTab(Session session, LCSArrayManager manager)
-		throws IOException
-	{
+	public LcsTab(Session session, LCSArrayManager manager) {
 		super("lcs");
 		dispatcher = new LcsDispatcher(session, manager);
 		summary = manager.createStyleSummary();

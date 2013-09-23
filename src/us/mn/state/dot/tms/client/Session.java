@@ -48,7 +48,6 @@ import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.gate.GateArmArrayManager;
 import us.mn.state.dot.tms.client.gate.GateArmTab;
 import us.mn.state.dot.tms.client.incident.IncidentManager;
-import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.lcs.LCSArrayManager;
 import us.mn.state.dot.tms.client.lcs.LCSIManager;
 import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
@@ -308,7 +307,7 @@ public class Session {
 		if(canRead(Camera.SONAR_TYPE))
 			tabs.add(cam_manager.createTab());
 		if(canRead(LCSArray.SONAR_TYPE))
-			tabs.add(new LcsTab(this, lcs_array_manager));
+			tabs.add(lcs_array_manager.createTab());
 		if(canRead(RampMeter.SONAR_TYPE))
 			tabs.add(new RampMeterTab(this, meter_manager));
 		if(canReadGateArms())

@@ -176,6 +176,11 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return I18N.get("lcs");
 	}
 
+	/** Create an LCS map tab */
+	public LcsTab createTab() {
+		return new LcsTab(session, this);
+	}
+
 	/** Get the shape for a given proxy */
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
