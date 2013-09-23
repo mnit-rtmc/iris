@@ -20,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -64,6 +65,12 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Create a comm map tab */
 	public CommTab createTab() {
 		return new CommTab(session, this);
+	}
+
+	/** Check if user can read controllers */
+	public boolean canRead() {
+		return session.canRead(Controller.SONAR_TYPE) &&
+		       session.canRead(CommLink.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

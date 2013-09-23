@@ -69,18 +69,23 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Get the proxy type name */
-	public String getProxyType() {
+	@Override public String getProxyType() {
 		return I18N.get("ramp.meter");
 	}
 
 	/** Get longer proxy type name for display */
-	public String getLongProxyType() {
+	@Override public String getLongProxyType() {
 		return I18N.get("ramp.meter.long");
 	}
 
 	/** Create a ramp meter map tab */
 	public RampMeterTab createTab() {
 		return new RampMeterTab(session, this);
+	}
+
+	/** Check if user can read ramp meters */
+	public boolean canRead() {
+		return session.canRead(RampMeter.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

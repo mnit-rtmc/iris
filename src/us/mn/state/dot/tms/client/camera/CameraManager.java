@@ -66,13 +66,18 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Get the proxy type name */
-	public String getProxyType() {
+	@Override public String getProxyType() {
 		return I18N.get("camera");
 	}
 
 	/** Create a camera map tab */
 	public CameraTab createTab() {
 		return new CameraTab(session, this);
+	}
+
+	/** Check if user can read cameras */
+	public boolean canRead() {
+		return session.canRead(Camera.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

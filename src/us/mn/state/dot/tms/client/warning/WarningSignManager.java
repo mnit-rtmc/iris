@@ -55,8 +55,13 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	}
 
 	/** Get the proxy type name */
-	public String getProxyType() {
+	@Override public String getProxyType() {
 		return I18N.get("warning.sign");
+	}
+
+	/** Check if user can read warning signs */
+	public boolean canRead() {
+		return session.canRead(WarningSign.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

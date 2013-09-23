@@ -85,13 +85,18 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Get the proxy type name */
-	public String getProxyType() {
+	@Override public String getProxyType() {
 		return I18N.get("dms");
 	}
 
 	/** Create a DMS map tab */
 	public DMSTab createTab() {
 		return new DMSTab(session, this);
+	}
+
+	/** Check if user can read DMS */
+	public boolean canRead() {
+		return session.canRead(DMS.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

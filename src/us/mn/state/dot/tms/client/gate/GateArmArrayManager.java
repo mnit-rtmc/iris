@@ -22,6 +22,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -63,6 +64,12 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	/** Create a gate arm map tab */
 	public GateArmTab createTab() {
 		return new GateArmTab(session, this);
+	}
+
+	/** Check if user can read gate arms + arrays */
+	public boolean canRead() {
+		return session.canRead(GateArmArray.SONAR_TYPE) &&
+		       session.canRead(GateArm.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

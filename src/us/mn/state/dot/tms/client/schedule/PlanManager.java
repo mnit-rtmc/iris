@@ -78,6 +78,11 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		return new PlanTab(session, this);
 	}
 
+	/** Check if user can read action plans */
+	public boolean canRead() {
+		return session.canRead(ActionPlan.SONAR_TYPE);
+	}
+
 	/** Find the map geo location for a proxy */
 	protected GeoLoc getGeoLoc(ActionPlan proxy) {
 		return null;

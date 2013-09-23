@@ -77,6 +77,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 		return I18N.get("incident");
 	}
 
+	/** Check if user can read incidents */
+	public boolean canRead() {
+		return session.canRead(Incident.SONAR_TYPE);
+	}
+
 	/** Create an incident map tab */
 	public IncidentTab createTab() {
 		return new IncidentTab(session, this);

@@ -27,19 +27,6 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.Detector;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.GateArm;
-import us.mn.state.dot.tms.GateArmArray;
-import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
@@ -295,30 +282,24 @@ public class Session {
 
 	/** Add the tabs */
 	private void addTabs() {
-		if(canRead(Incident.SONAR_TYPE))
+		if(inc_manager.canRead())
 			tabs.add(inc_manager.createTab());
-		if(canRead(DMS.SONAR_TYPE))
+		if(dms_manager.canRead())
 			tabs.add(dms_manager.createTab());
-		if(canRead(Camera.SONAR_TYPE))
+		if(cam_manager.canRead())
 			tabs.add(cam_manager.createTab());
-		if(canRead(LCSArray.SONAR_TYPE))
+		if(lcs_array_manager.canRead())
 			tabs.add(lcs_array_manager.createTab());
-		if(canRead(RampMeter.SONAR_TYPE))
+		if(meter_manager.canRead())
 			tabs.add(meter_manager.createTab());
-		if(canReadGateArms())
+		if(gate_arm_manager.canRead())
 			tabs.add(gate_arm_manager.createTab());
-		if(canRead(R_Node.SONAR_TYPE))
+		if(r_node_manager.canAdd())
 			tabs.add(r_node_manager.createTab());
-		if(canRead(ActionPlan.SONAR_TYPE))
+		if(plan_manager.canRead())
 			tabs.add(plan_manager.createTab());
-		if(canRead(CommLink.SONAR_TYPE))
+		if(controller_manager.canRead())
 			tabs.add(controller_manager.createTab());
-	}
-
-	/** Check if user can read gate arms + arrays */
-	private boolean canReadGateArms() {
-		return canRead(GateArmArray.SONAR_TYPE) &&
-		       canRead(GateArm.SONAR_TYPE);
 	}
 
 	/** Create the layer states.  The map bean and model must be seperate
@@ -330,23 +311,23 @@ public class Session {
 		if(tile_layer != null)
 			mm.addLayer(tile_layer.createState(mb));
 		mm.addLayer(seg_layer.createState(mb));
-		if(canRead(Controller.SONAR_TYPE))
+		if(controller_manager.canRead())
 			mm.addLayer(controller_manager.createState(mb));
-		if(canRead(Camera.SONAR_TYPE))
+		if(cam_manager.canRead())
 			mm.addLayer(cam_manager.createState(mb));
-		if(canRead(RampMeter.SONAR_TYPE))
+		if(meter_manager.canRead())
 			mm.addLayer(meter_manager.createState(mb));
-		if(canReadGateArms())
+		if(gate_arm_manager.canRead())
 			mm.addLayer(gate_arm_manager.createState(mb));
-		if(canRead(DMS.SONAR_TYPE))
+		if(dms_manager.canRead())
 			mm.addLayer(dms_manager.createState(mb));
-		if(canRead(LCSArray.SONAR_TYPE))
+		if(lcs_array_manager.canRead())
 			mm.addLayer(lcs_array_manager.createState(mb));
-		if(canRead(WarningSign.SONAR_TYPE))
+		if(warn_manager.canRead())
 			mm.addLayer(warn_manager.createState(mb));
-		if(canRead(Incident.SONAR_TYPE))
+		if(inc_manager.canRead())
 			mm.addLayer(inc_manager.createState(mb));
-		if(canAdd(R_Node.SONAR_TYPE))
+		if(r_node_manager.canAdd())
 			mm.addLayer(r_node_manager.createState(mb));
 	}
 
