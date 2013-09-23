@@ -53,7 +53,7 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 public class Session {
 
 	/** Session User */
-	protected final User user;
+	private final User user;
 
 	/** Get the currently logged-in user */
 	public User getUser() {
@@ -61,7 +61,7 @@ public class Session {
 	}
 
 	/** SONAR state */
-	protected final SonarState state;
+	private final SonarState state;
 
 	/** Get the SONAR state */
 	public SonarState getSonarState() {
@@ -69,10 +69,10 @@ public class Session {
 	}
 
 	/** SONAR namespace */
-	protected final Namespace namespace;
+	private final Namespace namespace;
 
 	/** Desktop used by this session */
-	protected final SmartDesktop desktop;
+	private final SmartDesktop desktop;
 
 	/** Get the desktop */
 	public SmartDesktop getDesktop() {
@@ -80,7 +80,7 @@ public class Session {
 	}
 
 	/** Client properties */
-	protected final Properties props;
+	private final Properties props;
 
 	/** Get the client properties */
 	public Properties getProperties() {
@@ -88,13 +88,13 @@ public class Session {
 	}
 
 	/** Tile layer */
-	protected final TileLayer tile_layer;
+	private final TileLayer tile_layer;
 
 	/** Segment layer */
-	protected final SegmentLayer seg_layer;
+	private final SegmentLayer seg_layer;
 
 	/** Location manager */
-	protected final GeoLocManager loc_manager;
+	private final GeoLocManager loc_manager;
 
 	/** Controller manager */
 	private final ControllerManager controller_manager;
@@ -105,7 +105,7 @@ public class Session {
 	}
 
 	/** Camera manager */
-	protected final CameraManager cam_manager;
+	private final CameraManager cam_manager;
 
 	/** Get the camera manager */
 	public CameraManager getCameraManager() {
@@ -113,7 +113,7 @@ public class Session {
 	}
 
 	/** DMS manager */
-	protected final DMSManager dms_manager;
+	private final DMSManager dms_manager;
 
 	/** Get the DMS manager */
 	public DMSManager getDMSManager() {
@@ -121,7 +121,7 @@ public class Session {
 	}
 
 	/** LCS array manager */
-	protected final LCSArrayManager lcs_array_manager;
+	private final LCSArrayManager lcs_array_manager;
 
 	/** Get the LCS array manager */
 	public LCSArrayManager getLCSArrayManager() {
@@ -129,7 +129,7 @@ public class Session {
 	}
 
 	/** LCS indication manager */
-	protected final LCSIManager lcsi_manager;
+	private final LCSIManager lcsi_manager;
 
 	/** Get the LCS indication manager */
 	public LCSIManager getLCSIManager() {
@@ -137,7 +137,7 @@ public class Session {
 	}
 
 	/** Lane marking manager */
-	protected final LaneMarkingManager lane_marking_manager;
+	private final LaneMarkingManager lane_marking_manager;
 
 	/** Get the lane marking manager */
 	public LaneMarkingManager getLaneMarkingManager() {
@@ -145,7 +145,7 @@ public class Session {
 	}
 
 	/** Detector manager */
-	protected final DetectorManager det_manager;
+	private final DetectorManager det_manager;
 
 	/** Get the detector manager */
 	public DetectorManager getDetectorManager() {
@@ -153,7 +153,7 @@ public class Session {
 	}
 
 	/** R_Node manager */
-	protected final R_NodeManager r_node_manager;
+	private final R_NodeManager r_node_manager;
 
 	/** Get the r_node manager */
 	public R_NodeManager getR_NodeManager() {
@@ -161,7 +161,7 @@ public class Session {
 	}
 
 	/** Warning sign manager */
-	protected final WarningSignManager warn_manager;
+	private final WarningSignManager warn_manager;
 
 	/** Get the warning sign manager */
 	public WarningSignManager getWarnManager() {
@@ -169,7 +169,7 @@ public class Session {
 	}
 
 	/** Weather sensor manager */
-	protected final WeatherSensorManager weather_sensor_manager;
+	private final WeatherSensorManager weather_sensor_manager;
 
 	/** Get the weather sensor manager */
 	public WeatherSensorManager getWeatherSensorManager() {
@@ -177,7 +177,7 @@ public class Session {
 	}
 
 	/** Ramp meter manager */
-	protected final MeterManager meter_manager;
+	private final MeterManager meter_manager;
 
 	/** Get the ramp meter manager */
 	public MeterManager getMeterManager() {
@@ -193,13 +193,13 @@ public class Session {
 	}
 
 	/** Incident manager */
-	protected final IncidentManager inc_manager;
+	private final IncidentManager inc_manager;
 
 	/** Action plan manager */
 	private final PlanManager plan_manager;
 
 	/** List of all tabs */
-	protected final List<MapTab> tabs = new LinkedList<MapTab>();
+	private final List<MapTab> tabs = new LinkedList<MapTab>();
 
 	/** Get a list of all tabs */
 	public List<MapTab> getTabs() {
@@ -244,7 +244,7 @@ public class Session {
 	}
 
 	/** Create the tile layer */
-	protected TileLayer createTileLayer(String url) {
+	private TileLayer createTileLayer(String url) {
 		if(url != null)
 			return new TileLayer("Base map", url, 1000);
 		else
@@ -263,7 +263,7 @@ public class Session {
 	}
 
 	/** Initialize all the proxy managers */
-	protected void initializeManagers() {
+	private void initializeManagers() {
 		r_node_manager.initialize();
 		det_manager.initialize();
 		controller_manager.initialize();
