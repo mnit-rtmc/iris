@@ -339,28 +339,24 @@ public class Session {
 		if(tile_layer != null)
 			mm.addLayer(tile_layer.createState(mb));
 		mm.addLayer(seg_layer.createState(mb));
-		if(canRead(Controller.SONAR_TYPE)) {
-			mm.addLayer(controller_manager.getLayer().createState(
-				mb));
-		}
+		if(canRead(Controller.SONAR_TYPE))
+			mm.addLayer(controller_manager.createState(mb));
 		if(canRead(Camera.SONAR_TYPE))
-			mm.addLayer(cam_manager.getLayer().createState(mb));
+			mm.addLayer(cam_manager.createState(mb));
 		if(canRead(RampMeter.SONAR_TYPE))
-			mm.addLayer(meter_manager.getLayer().createState(mb));
+			mm.addLayer(meter_manager.createState(mb));
 		if(canReadGateArms())
-			mm.addLayer(gate_arm_manager.getLayer().createState(mb));
+			mm.addLayer(gate_arm_manager.createState(mb));
 		if(canRead(DMS.SONAR_TYPE))
-			mm.addLayer(dms_manager.getLayer().createState(mb));
-		if(canRead(LCSArray.SONAR_TYPE)) {
-			mm.addLayer(lcs_array_manager.getLayer().createState(
-				mb));
-		}
+			mm.addLayer(dms_manager.createState(mb));
+		if(canRead(LCSArray.SONAR_TYPE))
+			mm.addLayer(lcs_array_manager.createState(mb));
 		if(canRead(WarningSign.SONAR_TYPE))
-			mm.addLayer(warn_manager.getLayer().createState(mb));
+			mm.addLayer(warn_manager.createState(mb));
 		if(canRead(Incident.SONAR_TYPE))
-			mm.addLayer(inc_manager.getLayer().createState(mb));
+			mm.addLayer(inc_manager.createState(mb));
 		if(canAdd(R_Node.SONAR_TYPE))
-			mm.addLayer(r_node_manager.getLayer().createState(mb));
+			mm.addLayer(r_node_manager.createState(mb));
 	}
 
 	/** Check if the user can add an object */

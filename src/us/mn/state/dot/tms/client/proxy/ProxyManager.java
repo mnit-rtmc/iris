@@ -22,6 +22,8 @@ import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
+import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.Symbol;
@@ -81,13 +83,13 @@ abstract public class ProxyManager<T extends SonarObject>
 		new ProxySelectionModel<T>();
 
 	/** Theme for drawing objects on a map layer */
-	protected final ProxyTheme<T> theme;
+	private final ProxyTheme<T> theme;
 
 	/** Cache of MapObject to proxy */
 	private final ProxyMapCache<T> map_cache = new ProxyMapCache<T>();
 
 	/** Map layer for the proxy type */
-	protected final ProxyLayer<T> layer;
+	private final ProxyLayer<T> layer;
 
 	/** Default style */
 	private final ItemStyle def_style;
@@ -249,6 +251,11 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Create a map layer for the proxy type */
 	public ProxyLayer<T> getLayer() {
 		return layer;
+	}
+
+	/** Create layer state for a map bean */
+	public LayerState createState(MapBean mb) {
+		return layer.createState(mb);
 	}
 
 	/** Get the proxy selection model */
