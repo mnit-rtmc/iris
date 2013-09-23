@@ -78,6 +78,11 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return I18N.get("ramp.meter.long");
 	}
 
+	/** Create a ramp meter map tab */
+	public RampMeterTab createTab() {
+		return new RampMeterTab(session, this);
+	}
+
 	/** Get the shape for a given proxy */
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);

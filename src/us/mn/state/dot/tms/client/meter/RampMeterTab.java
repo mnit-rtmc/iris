@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -39,9 +38,7 @@ public class RampMeterTab extends MapTab {
 	private final StyleSummary<RampMeter> summary;
 
 	/** Create a new ramp meter tab */
-  	public RampMeterTab(Session session, MeterManager man)
-		throws IOException
-	{
+  	public RampMeterTab(Session session, MeterManager man) {
 		super("ramp.meter");
 		manager = man;
 		statusPanel = new MeterStatusPanel(session, manager);
