@@ -50,7 +50,6 @@ import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.gate.GateArmArrayManager;
 import us.mn.state.dot.tms.client.gate.GateArmTab;
 import us.mn.state.dot.tms.client.incident.IncidentManager;
-import us.mn.state.dot.tms.client.incident.IncidentTab;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.lcs.LCSArrayManager;
 import us.mn.state.dot.tms.client.lcs.LCSIManager;
@@ -305,7 +304,7 @@ public class Session {
 	/** Add the tabs */
 	protected void addTabs() throws IOException {
 		if(canRead(Incident.SONAR_TYPE))
-			tabs.add(new IncidentTab(this, inc_manager));
+			tabs.add(inc_manager.createTab());
 		if(canRead(DMS.SONAR_TYPE))
 			tabs.add(new DMSTab(this, dms_manager));
 		if(canRead(Camera.SONAR_TYPE))

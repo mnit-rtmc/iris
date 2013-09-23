@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.Incident;
@@ -43,9 +42,7 @@ public class IncidentTab extends MapTab {
 	private final StyleSummary<Incident> summary;
 
 	/** Create a new incident tab */
-  	public IncidentTab(Session session, IncidentManager m)
-		throws IOException
-	{
+  	public IncidentTab(Session session, IncidentManager m) {
 		super("incident");
 		manager = m;
 		creator = new IncidentCreator(session, manager.getTheme(),

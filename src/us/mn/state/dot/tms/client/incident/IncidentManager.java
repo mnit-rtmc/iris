@@ -59,7 +59,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Location mapping */
 	protected final HashMap<String, IncidentGeoLoc> locations =
@@ -75,6 +75,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Get the proxy type name */
 	public String getProxyType() {
 		return I18N.get("incident");
+	}
+
+	/** Create an incident map tab */
+	public IncidentTab createTab() {
+		return new IncidentTab(session, this);
 	}
 
 	/** Create a list cell renderer */
