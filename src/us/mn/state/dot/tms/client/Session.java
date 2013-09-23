@@ -99,11 +99,6 @@ public class Session {
 	/** Controller manager */
 	private final ControllerManager controller_manager;
 
-	/** Get the controller manager */
-	public ControllerManager getControllerManager() {
-		return controller_manager;
-	}
-
 	/** Camera manager */
 	private final CameraManager cam_manager;
 
@@ -131,18 +126,8 @@ public class Session {
 	/** LCS indication manager */
 	private final LCSIManager lcsi_manager;
 
-	/** Get the LCS indication manager */
-	public LCSIManager getLCSIManager() {
-		return lcsi_manager;
-	}
-
 	/** Lane marking manager */
 	private final LaneMarkingManager lane_marking_manager;
-
-	/** Get the lane marking manager */
-	public LaneMarkingManager getLaneMarkingManager() {
-		return lane_marking_manager;
-	}
 
 	/** Detector manager */
 	private final DetectorManager det_manager;
@@ -163,34 +148,14 @@ public class Session {
 	/** Warning sign manager */
 	private final WarningSignManager warn_manager;
 
-	/** Get the warning sign manager */
-	public WarningSignManager getWarnManager() {
-		return warn_manager;
-	}
-
 	/** Weather sensor manager */
 	private final WeatherSensorManager weather_sensor_manager;
-
-	/** Get the weather sensor manager */
-	public WeatherSensorManager getWeatherSensorManager() {
-		return weather_sensor_manager;
-	}
 
 	/** Ramp meter manager */
 	private final MeterManager meter_manager;
 
-	/** Get the ramp meter manager */
-	public MeterManager getMeterManager() {
-		return meter_manager;
-	}
-
 	/** Gate arm array manager */
 	private final GateArmArrayManager gate_arm_manager;
-
-	/** Get the gate arm array manager */
-	public GateArmArrayManager getGateArmArrayManager() {
-		return gate_arm_manager;
-	}
 
 	/** Incident manager */
 	private final IncidentManager inc_manager;
