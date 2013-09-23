@@ -60,6 +60,11 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		return I18N.get("gate.arm.array");
 	}
 
+	/** Create a gate arm map tab */
+	public GateArmTab createTab() {
+		return new GateArmTab(session, this);
+	}
+
 	/** Get the shape for a given proxy */
 	@Override protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);

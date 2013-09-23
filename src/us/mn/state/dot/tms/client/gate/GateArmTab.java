@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -38,9 +37,7 @@ public class GateArmTab extends MapTab {
 	private final StyleSummary<GateArmArray> summary;
 
 	/** Create a new gate arm tab */
-  	public GateArmTab(Session session, GateArmArrayManager man)
-		throws IOException
-	{
+  	public GateArmTab(Session session, GateArmArrayManager man) {
 		super("gate.arm");
 		manager = man;
 		dispatcher = new GateArmArrayDispatcher(session, manager);
