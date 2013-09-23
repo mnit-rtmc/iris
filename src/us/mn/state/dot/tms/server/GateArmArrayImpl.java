@@ -488,7 +488,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		if(open && !(closed || opening || closing))
 			return GateArmState.OPEN;
 		if(closed && !(open || opening || closing))
-			return GateArmState.OPEN;
+			return GateArmState.CLOSED;
 		if(opening || open || closing || closed)
 			return GateArmState.FAULT;
 		else
