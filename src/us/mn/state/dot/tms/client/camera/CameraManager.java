@@ -70,6 +70,11 @@ public class CameraManager extends ProxyManager<Camera> {
 		return I18N.get("camera");
 	}
 
+	/** Create a camera map tab */
+	public CameraTab createTab() {
+		return new CameraTab(session, this);
+	}
+
 	/** Get the shape for a given proxy */
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);

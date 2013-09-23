@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.camera.CameraManager;
-import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.comm.CommTab;
 import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
@@ -307,7 +306,7 @@ public class Session {
 		if(canRead(DMS.SONAR_TYPE))
 			tabs.add(dms_manager.createTab());
 		if(canRead(Camera.SONAR_TYPE))
-			tabs.add(new CameraTab(this, cam_manager));
+			tabs.add(cam_manager.createTab());
 		if(canRead(LCSArray.SONAR_TYPE))
 			tabs.add(new LcsTab(this, lcs_array_manager));
 		if(canRead(RampMeter.SONAR_TYPE))
