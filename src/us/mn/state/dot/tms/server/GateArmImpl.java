@@ -80,6 +80,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Create a new gate arm with a string name */
 	public GateArmImpl(String n) throws TMSException, SonarException {
 		super(n);
+		GateArmSystem.disable(n + ": create");
 	}
 
 	/** Create a gate arm */
@@ -115,6 +116,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		finally {
 			super.initTransients();
 		}
+	}
+
+	/** Destroy an object */
+	@Override public void doDestroy() throws TMSException {
+		super.doDestroy();
+		GateArmSystem.disable(name + ": destroy");
 	}
 
 	/** Gate arm array */

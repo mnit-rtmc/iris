@@ -144,6 +144,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override public void doDestroy() throws TMSException {
 		super.doDestroy();
 		geo_loc.notifyRemove();
+		GateArmSystem.disable(name + ": destroy");
 	}
 
 	/** Set the controller of the device */
@@ -169,6 +170,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set the prerequesite gate arm array */
 	@Override public void setPrereq(String pr) {
+		GateArmSystem.disable(name + ": prereq");
 		prereq = pr;
 	}
 
@@ -237,6 +239,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set the DMS for warning */
 	@Override public void setDms(DMS d) {
+		GateArmSystem.disable(name + ": dms");
 		dms = d;
 	}
 
@@ -258,6 +261,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set the OPEN quick message */
 	@Override public void setOpenMsg(QuickMessage om) {
+		GateArmSystem.disable(name + ": openMsg");
 		open_msg = om;
 	}
 
@@ -279,6 +283,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set the CLOSED quick message */
 	@Override public void setClosedMsg(QuickMessage cm) {
+		GateArmSystem.disable(name + ": closedMsg");
 		closed_msg = cm;
 	}
 
