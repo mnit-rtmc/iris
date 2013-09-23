@@ -59,6 +59,11 @@ public enum CommandStatus {
 		return null;
 	}
 
+	/** Test if a command status is "reset" */
+	static public boolean isReset(CommandStatus cs) {
+		return cs == RESET;
+	}
+
 	/** Test if a command status is "normal" */
 	static public boolean isNormal(CommandStatus cs) {
 		switch(cs) {

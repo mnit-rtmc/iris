@@ -257,9 +257,9 @@ public class StatusProperty extends STCProperty {
 			return GateArmState.OPENING;
 		else if(isClosing())
 			return GateArmState.CLOSING;
-		else if(isOpen())
+		else if(isOpen() && !isClosed())
 			return GateArmState.OPEN;
-		else if(isClosed())
+		else if(isClosed() && !isOpen())
 			return GateArmState.CLOSED;
 		else
 			return GateArmState.UNKNOWN;
@@ -284,12 +284,14 @@ public class StatusProperty extends STCProperty {
 
 	/** Test if the gate arm is open */
 	private boolean isOpen() {
-		return open_limit && CommandStatus.isOpen(command_state);
+		return open_limit && (CommandStatus.isOpen(command_state) ||
+		                      CommandStatus.isReset(command_state));
 	}
 
 	/** Test if the gate arm is closed */
 	private boolean isClosed() {
-		return close_limit && CommandStatus.isClosed(command_state);
+		return close_limit && (CommandStatus.isClosed(command_state) ||
+		                       CommandStatus.isReset(command_state));
 	}
 
 	/** Get the maintenance status */
