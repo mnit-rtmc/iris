@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.MapTab;
@@ -36,9 +35,7 @@ public class CommTab extends MapTab {
 	private final StyleSummary<Controller> summary;
 
 	/** Create a new comm tab */
-  	public CommTab(Session session, ControllerManager m)
-		throws IOException
-	{
+  	public CommTab(Session session, ControllerManager m) {
 		super("comm");
 		manager = m;
 		summary = manager.createStyleSummary();

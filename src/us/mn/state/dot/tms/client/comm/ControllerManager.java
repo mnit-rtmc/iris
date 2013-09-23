@@ -57,8 +57,13 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Get the proxy type name */
-	public String getProxyType() {
+	@Override public String getProxyType() {
 		return I18N.get("controller");
+	}
+
+	/** Create a comm map tab */
+	public CommTab createTab() {
+		return new CommTab(session, this);
 	}
 
 	/** Get the shape for a given proxy */

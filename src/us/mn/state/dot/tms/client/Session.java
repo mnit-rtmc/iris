@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.camera.CameraManager;
-import us.mn.state.dot.tms.client.comm.CommTab;
 import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
@@ -295,7 +294,7 @@ public class Session {
 	}
 
 	/** Add the tabs */
-	protected void addTabs() throws IOException {
+	private void addTabs() {
 		if(canRead(Incident.SONAR_TYPE))
 			tabs.add(inc_manager.createTab());
 		if(canRead(DMS.SONAR_TYPE))
@@ -313,7 +312,7 @@ public class Session {
 		if(canRead(ActionPlan.SONAR_TYPE))
 			tabs.add(plan_manager.createTab());
 		if(canRead(CommLink.SONAR_TYPE))
-			tabs.add(new CommTab(this, controller_manager));
+			tabs.add(controller_manager.createTab());
 	}
 
 	/** Check if user can read gate arms + arrays */
