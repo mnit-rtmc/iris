@@ -178,30 +178,21 @@ public class Session {
 		namespace = state.getNamespace();
 		desktop = d;
 		props = p;
-		loc_manager = new GeoLocManager(state.getGeoLocs());
-		r_node_manager = new R_NodeManager(this,
-			state.getDetCache().getR_Nodes(), loc_manager);
-		det_manager = new DetectorManager(
-			state.getDetCache().getDetectors(), loc_manager,
+		loc_manager = new GeoLocManager(this);
+		r_node_manager = new R_NodeManager(this, loc_manager);
+		det_manager = new DetectorManager(this, loc_manager,
 			r_node_manager);
-		controller_manager = new ControllerManager(this,
-			state.getConCache().getControllers(), loc_manager);
-		cam_manager = new CameraManager(this,
-			state.getCamCache().getCameras(), loc_manager);
-		dms_manager = new DMSManager(this,state.getDmsCache().getDMSs(),
-			loc_manager);
+		controller_manager = new ControllerManager(this, loc_manager);
+		cam_manager = new CameraManager(this, loc_manager);
+		dms_manager = new DMSManager(this, loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);
-		lane_marking_manager = new LaneMarkingManager(this,
-			state.getLaneMarkings(), loc_manager);
-		warn_manager = new WarningSignManager(this,
-			state.getWarningSigns(), loc_manager);
+		lane_marking_manager = new LaneMarkingManager(this,loc_manager);
+		warn_manager = new WarningSignManager(this, loc_manager);
 		weather_sensor_manager = new WeatherSensorManager(this,
-			state.getWeatherSensors(), loc_manager);
-		meter_manager = new MeterManager(this,
-			state.getRampMeters(), loc_manager);
-		gate_arm_manager = new GateArmArrayManager(this,
-			state.getGateArmArrays(), loc_manager);
+			loc_manager);
+		meter_manager = new MeterManager(this, loc_manager);
+		gate_arm_manager = new GateArmArrayManager(this, loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
 		plan_manager = new PlanManager(this, loc_manager);
 		seg_layer = r_node_manager.getSegmentLayer();

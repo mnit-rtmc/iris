@@ -45,14 +45,17 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Controller map object marker */
 	static private final ControllerMarker MARKER = new ControllerMarker();
 
+	/** Get the controller cache */
+	static private TypeCache<Controller> getCache(Session s) {
+		return s.getSonarState().getConCache().getControllers();
+	}
+
 	/** User session */
 	private final Session session;
 
 	/** Create a new controller manager */
-	public ControllerManager(Session s, TypeCache<Controller> c,
-		GeoLocManager lm)
-	{
-		super(c, lm);
+	public ControllerManager(Session s, GeoLocManager lm) {
+		super(getCache(s), lm);
 		session = s;
 		cache.addProxyListener(this);
 	}

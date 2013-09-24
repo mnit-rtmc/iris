@@ -52,6 +52,11 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Color for active camera style */
 	static protected final Color COLOR_ACTIVE = new Color(0, 192, 255);
 
+	/** Get the camera cache */
+	static private TypeCache<Camera> getCache(Session s) {
+		return s.getSonarState().getCamCache().getCameras();
+	}
+
 	/** User session */
 	protected final Session session;
 
@@ -59,8 +64,8 @@ public class CameraManager extends ProxyManager<Camera> {
 	protected final HashSet<Camera> playlist = new HashSet<Camera>();
 
 	/** Create a new camera manager */
-	public CameraManager(Session s, TypeCache<Camera> c, GeoLocManager lm) {
-		super(c, lm, ItemStyle.ACTIVE);
+	public CameraManager(Session s, GeoLocManager lm) {
+		super(getCache(s), lm, ItemStyle.ACTIVE);
 		session = s;
 		cache.addProxyListener(this);
 	}

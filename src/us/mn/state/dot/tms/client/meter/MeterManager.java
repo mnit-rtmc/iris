@@ -56,14 +56,17 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Color to display metering meters */
 	static protected final Color COLOR_METERING = new Color(0, 192, 0);
 
+	/** Get the ramp meter cache */
+	static private TypeCache<RampMeter> getCache(Session s) {
+		return s.getSonarState().getRampMeters();
+	}
+
 	/** User session */
 	protected final Session session;
 
 	/** Create a new meter manager */
-	public MeterManager(Session s, TypeCache<RampMeter> c,
-		GeoLocManager lm)
-	{
-		super(c, lm);
+	public MeterManager(Session s, GeoLocManager lm) {
+		super(getCache(s), lm);
 		session = s;
 		cache.addProxyListener(this);
 	}

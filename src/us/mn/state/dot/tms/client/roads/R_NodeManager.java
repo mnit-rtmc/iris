@@ -74,6 +74,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	static protected final R_NodeMarker MARKER =
 		new R_NodeMarker();
 
+	/** Get the r_node cache */
+	static private TypeCache<R_Node> getCache(Session s) {
+		return s.getSonarState().getDetCache().getR_Nodes();
+	}
+
 	/** Map to of corridor names to corridors */
 	protected final Map<String, CorridorBase> corridors =
 		new TreeMap<String, CorridorBase>();
@@ -101,10 +106,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create a new roadway node manager */
-	public R_NodeManager(Session s, TypeCache<R_Node> c,
-		GeoLocManager lm)
-	{
-		super(c, lm);
+	public R_NodeManager(Session s, GeoLocManager lm) {
+		super(getCache(s), lm);
 		session = s;
 		seg_layer = new SegmentLayer(this, session);
 		lm.setR_NodeManager(this);

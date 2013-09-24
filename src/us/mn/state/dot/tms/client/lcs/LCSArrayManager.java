@@ -101,13 +101,13 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Get the LCS array cache */
-	static protected TypeCache<LCSArray> getCache(Session s) {
+	static private TypeCache<LCSArray> getCache(Session s) {
 		LcsCache cache = s.getSonarState().getLcsCache();
 		return cache.getLCSArrays();
 	}
 
 	/** Get the LCS cache */
-	static protected TypeCache<LCS> getLCSCache(Session s) {
+	static private TypeCache<LCS> getLCSCache(Session s) {
 		LcsCache cache = s.getSonarState().getLcsCache();
 		return cache.getLCSs();
 	}

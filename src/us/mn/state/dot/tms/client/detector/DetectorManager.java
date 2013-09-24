@@ -49,14 +49,18 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Shape for map object rendering */
 	static protected final DetectorMarker MARKER = new DetectorMarker();
 
+	/** Get the detector cache */
+	static private TypeCache<Detector> getCache(Session s) {
+		return s.getSonarState().getDetCache().getDetectors();
+	}
+
 	/** R_Node manager */
 	protected final R_NodeManager r_node_manager;
 
 	/** Create a new detector manager */
-	public DetectorManager(TypeCache<Detector> c, GeoLocManager lm,
-		R_NodeManager r_man)
+	public DetectorManager(Session s, GeoLocManager lm, R_NodeManager r_man)
 	{
-		super(c, lm, ItemStyle.ACTIVE);
+		super(getCache(s), lm, ItemStyle.ACTIVE);
 		r_node_manager = r_man;
 		cache.addProxyListener(this);
 	}

@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
@@ -30,6 +31,11 @@ import us.mn.state.dot.tms.client.roads.R_NodeManager;
  * @author Douglas Lau
  */
 public class GeoLocManager implements ProxyListener<GeoLoc> {
+
+	/** Get the geo loc cache */
+	static private TypeCache<GeoLoc> getCache(Session s) {
+		return s.getSonarState().getGeoLocs();
+	}
 
 	/** Proxy type cache */
 	protected final TypeCache<GeoLoc> cache;
@@ -47,8 +53,8 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 	}
 
 	/** Create a new GeoLoc manager */
-	public GeoLocManager(TypeCache<GeoLoc> c) {
-		cache = c;
+	public GeoLocManager(Session s) {
+		cache = getCache(s);
 		cache.addProxyListener(this);
 	}
 

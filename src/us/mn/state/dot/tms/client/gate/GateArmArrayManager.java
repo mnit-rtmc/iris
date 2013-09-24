@@ -44,14 +44,17 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	/** Gate arm map object marker */
 	static private final GateArmMarker MARKER = new GateArmMarker();
 
+	/** Get the gate arm array cache */
+	static private TypeCache<GateArmArray> getCache(Session s) {
+		return s.getSonarState().getGateArmArrays();
+	}
+
 	/** User session */
 	private final Session session;
 
 	/** Create a new gate arm array manager */
-	public GateArmArrayManager(Session s, TypeCache<GateArmArray> c,
-		GeoLocManager lm)
-	{
-		super(c, lm);
+	public GateArmArrayManager(Session s, GeoLocManager lm) {
+		super(getCache(s), lm);
 		session = s;
 		cache.addProxyListener(this);
 	}
