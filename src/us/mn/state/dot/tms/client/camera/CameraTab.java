@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.BorderLayout;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 
@@ -23,17 +24,17 @@ import us.mn.state.dot.tms.client.Session;
  *
  * @author Douglas Lau
  */
-public class CameraTab extends MapTab {
+public class CameraTab extends MapTab<Camera> {
 
 	/** Camera viewer */
 	private final CameraViewer viewer;
 
 	/** Create a new camera tab for the IRIS client */
-	public CameraTab(Session session, CameraManager manager) {
-		super("camera");
-		viewer = new CameraViewer(session, manager);
+	public CameraTab(Session session, CameraManager man) {
+		super("camera", man);
+		viewer = new CameraViewer(session, man);
 		add(viewer, BorderLayout.NORTH);
-		add(manager.createStyleSummary(), BorderLayout.CENTER);
+		add(man.createStyleSummary(), BorderLayout.CENTER);
 	}
 
 	/** Perform any clean up necessary */

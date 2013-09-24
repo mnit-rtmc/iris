@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class LcsTab extends MapTab {
+public class LcsTab extends MapTab<LCSArray> {
 
 	/** LCS dispatcher */
 	private final LcsDispatcher dispatcher;
@@ -35,10 +35,10 @@ public class LcsTab extends MapTab {
 	private final StyleSummary<LCSArray> summary;
 
 	/** Create a new LCS tab */
-	public LcsTab(Session session, LCSArrayManager manager) {
-		super("lcs");
-		dispatcher = new LcsDispatcher(session, manager);
-		summary = manager.createStyleSummary();
+	public LcsTab(Session session, LCSArrayManager man) {
+		super("lcs", man);
+		dispatcher = new LcsDispatcher(session, man);
+		summary = man.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}

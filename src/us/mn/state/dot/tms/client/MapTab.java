@@ -16,9 +16,12 @@ package us.mn.state.dot.tms.client;
 
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
+import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.proxy.ProxyManager;
 
 /**
  * Side panel tab for main IRIS map interface.
@@ -26,7 +29,10 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-abstract public class MapTab extends JPanel {
+abstract public class MapTab<T extends SonarObject> extends JPanel {
+
+	/** Proxy manager */
+	protected final ProxyManager<T> manager;
 
 	/** Name of side panel tab */
 	private final String name;
@@ -44,6 +50,19 @@ abstract public class MapTab extends JPanel {
 		return tip;
 	}
 
+	/** Create a new map tab */
+	public MapTab(String text_id, ProxyManager<T> m) {
+		super(new BorderLayout());
+		manager = m;
+		name = I18N.get(text_id);
+		tip = I18N.get(text_id + ".tab");
+	}
+
+	/** Perform any clean up necessary */
+	public void dispose() {
+		removeAll();
+	}
+
 	/** Current map for this tab */
 	private MapBean map;
 
@@ -57,23 +76,15 @@ abstract public class MapTab extends JPanel {
 		MapBean m = map;
 		if(m != null) {
 			for(LayerState ls: m.getLayers()) {
-				String ln = ls.getLayer().getName();
-				if(ln.equals(name))
+				if(isHomeLayer(ls.getLayer()))
 					return ls;
 			}
 		}
 		return null;
 	}
 
-	/** Create a new map tab */
-	public MapTab(String text_id) {
-		super(new BorderLayout());
-		name = I18N.get(text_id);
-		tip = I18N.get(text_id + ".tab");
-	}
-
-	/** Perform any clean up necessary */
-	public void dispose() {
-		removeAll();
+	/** Test if a layer is the home layer for the tab */
+	private boolean isHomeLayer(Layer l) {
+		return l == manager.getLayer();
 	}
 }

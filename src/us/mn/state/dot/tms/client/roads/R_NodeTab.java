@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.BorderLayout;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 
@@ -23,7 +24,7 @@ import us.mn.state.dot.tms.client.Session;
  *
  * @author Douglas Lau
  */
-public class R_NodeTab extends MapTab {
+public class R_NodeTab extends MapTab<R_Node> {
 
 	/** R_Node panel */
 	private final R_NodePanel panel;
@@ -33,7 +34,7 @@ public class R_NodeTab extends MapTab {
 
 	/** Create a new roadway node tab */
 	public R_NodeTab(Session session, R_NodeManager man) {
-		super("r_node");
+		super("r_node", man);
 		panel = new R_NodePanel(session);
 		add(panel, BorderLayout.NORTH);
 		clist = new CorridorList(session, man, panel);

@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  *
  * @author Douglas Lau
  */
-public class DMSTab extends MapTab {
+public class DMSTab extends MapTab<DMS> {
 
 	/** DMS dispatcher component */
 	private final DMSDispatcher dispatcher;
@@ -34,10 +34,10 @@ public class DMSTab extends MapTab {
 	private final StyleSummary<DMS> summary;
 
 	/** Create a new DMS tab */
- 	public DMSTab(Session session, DMSManager manager) {
-		super("dms");
-		dispatcher = new DMSDispatcher(session, manager);
-		summary = manager.createStyleSummary(true);
+ 	public DMSTab(Session session, DMSManager man) {
+		super("dms", man);
+		dispatcher = new DMSDispatcher(session, man);
+		summary = man.createStyleSummary(true);
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}

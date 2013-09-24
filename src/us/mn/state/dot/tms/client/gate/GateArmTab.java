@@ -25,10 +25,7 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  *
  * @author Douglas Lau
  */
-public class GateArmTab extends MapTab {
-
-	/** Gate arm array manager */
-	private final GateArmArrayManager manager;
+public class GateArmTab extends MapTab<GateArmArray> {
 
 	/** Gate Arm dispatch panel */
 	private final GateArmArrayDispatcher dispatcher;
@@ -38,10 +35,9 @@ public class GateArmTab extends MapTab {
 
 	/** Create a new gate arm tab */
   	public GateArmTab(Session session, GateArmArrayManager man) {
-		super("gate.arm");
-		manager = man;
-		dispatcher = new GateArmArrayDispatcher(session, manager);
-		summary = manager.createStyleSummary();
+		super("gate.arm", man);
+		dispatcher = new GateArmArrayDispatcher(session, man);
+		summary = man.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}

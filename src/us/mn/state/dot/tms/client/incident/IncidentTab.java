@@ -27,10 +27,7 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  *
  * @author Douglas Lau
  */
-public class IncidentTab extends MapTab {
-
-	/** Incident manager */
-	private final IncidentManager manager;
+public class IncidentTab extends MapTab<Incident> {
 
 	/** Incident creator */
 	private final IncidentCreator creator;
@@ -43,12 +40,11 @@ public class IncidentTab extends MapTab {
 
 	/** Create a new incident tab */
   	public IncidentTab(Session session, IncidentManager m) {
-		super("incident");
-		manager = m;
-		creator = new IncidentCreator(session, manager.getTheme(),
-			manager.getSelectionModel());
-		dispatcher = new IncidentDispatcher(session, manager, creator);
-		summary = manager.createStyleSummary();
+		super("incident", m);
+		creator = new IncidentCreator(session, m.getTheme(),
+			m.getSelectionModel());
+		dispatcher = new IncidentDispatcher(session, m, creator);
+		summary = m.createStyleSummary();
 		add(createNorthPanel(), BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}

@@ -26,10 +26,7 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class RampMeterTab extends MapTab {
-
-	/** Meter device manager */
-	private final MeterManager manager;
+public class RampMeterTab extends MapTab<RampMeter> {
 
 	/** Meter status panel */
 	private final MeterStatusPanel statusPanel;
@@ -39,10 +36,9 @@ public class RampMeterTab extends MapTab {
 
 	/** Create a new ramp meter tab */
   	public RampMeterTab(Session session, MeterManager man) {
-		super("ramp.meter");
-		manager = man;
-		statusPanel = new MeterStatusPanel(session, manager);
-		summary = manager.createStyleSummary();
+		super("ramp.meter", man);
+		statusPanel = new MeterStatusPanel(session, man);
+		summary = man.createStyleSummary();
 		add(statusPanel, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}

@@ -26,19 +26,15 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  *
  * @author Douglas Lau
  */
-public class CommTab extends MapTab {
-
-	/** Controller manager */
-	private final ControllerManager manager;
+public class CommTab extends MapTab<Controller> {
 
 	/** Summary of controllers of each status */
 	private final StyleSummary<Controller> summary;
 
 	/** Create a new comm tab */
   	public CommTab(Session session, ControllerManager m) {
-		super("comm");
-		manager = m;
-		summary = manager.createStyleSummary();
+		super("comm", m);
+		summary = m.createStyleSummary();
 		add(createNorthPanel(), BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}
