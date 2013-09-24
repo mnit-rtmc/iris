@@ -42,30 +42,9 @@ public class DMSHelper extends BaseHelper {
 			DMS.SONAR_TYPE));
 	}
 
-	/** Test if a DMS is available */
-	static public boolean isAvailable(DMS proxy) {
-		return isActive(proxy) &&
-		       !isFailed(proxy) &&
-		       !isDeployed(proxy) &&
-		       !needsMaintenance(proxy);
-	}
-
 	/** Test if a DMS is active */
 	static public boolean isActive(DMS proxy) {
 		return ControllerHelper.isActive(proxy.getController());
-	}
-
-	/** Test if a DMS has a travel time message deployed */
-	static public boolean isTravelTime(DMS proxy) {
-		SignMessage sm = proxy.getMessageCurrent();
-		if(sm != null) {
-			return sm.getRunTimePriority() ==
-			       DMSMessagePriority.TRAVEL_TIME.ordinal();
-		} else {
-			// messageCurrent should never be null, so this means
-			// the proxy has just been removed
-			return false;
-		}
 	}
 
 	/** Test if a DMS has a scheduled message deployed */
@@ -93,48 +72,6 @@ public class DMSHelper extends BaseHelper {
 		return isActive(proxy) &&
 		       !isFailed(proxy) &&
 		       isDeployed(proxy);
-	}
-
-	/** Test if a DMS can be controlled by AWS */
-	static public boolean isAwsControlled(DMS proxy) {
-		if(proxy == null)
-			return false;
-		return proxy.getAwsAllowed() && proxy.getAwsControlled();
-	}
-
-	/** Test if a DMS has an AWS message deployed */
-	static public boolean isAwsDeployed(DMS proxy) {
-		if(proxy == null)
-			return false;
-		SignMessage m = proxy.getMessageCurrent();
-		if(m != null) {
-			return m.getRunTimePriority() == DMSMessagePriority.AWS.
-				ordinal() && !SignMessageHelper.isBlank(m);
-		} else {
-			// messageCurrent should never be null, so this means
-			// the proxy has just been removed
-			return false;
-		}
-	}
-
-	/** Test if a DMS is active, not failed and deployed by AWS */
-	static public boolean isAwsMessageDeployed(DMS proxy) {
-		return isActive(proxy) &&
-		       !isFailed(proxy) &&
-		       isAwsDeployed(proxy);
-	}
-
-	/** Test if a DMS has been deployed by a user */
-	static public boolean isUserDeployed(DMS proxy) {
-		return isMessageDeployed(proxy) &&
-		       !isScheduled(proxy) &&
-		       !isAwsDeployed(proxy);
-	}
-
-	/** Test if a DMS has been deployed by travel time */
-	static public boolean isTravelTimeDeployed(DMS proxy) {
-		return isMessageDeployed(proxy) &&
-		       isTravelTime(proxy);
 	}
 
 	/** Test if a DMS has been deployed by schedule */

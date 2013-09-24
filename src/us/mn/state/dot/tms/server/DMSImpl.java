@@ -40,6 +40,8 @@ import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import static us.mn.state.dot.tms.DMSMessagePriority.AWS;
+import static us.mn.state.dot.tms.DMSMessagePriority.TRAVEL_TIME;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
@@ -1528,6 +1530,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		       (nxt == null || nxt.getScheduled());
 	}
 
+	/** Test if DMS is part of an LCS array */
+	private boolean isLCS() {
+		return LCSHelper.lookup(name) != null;
+	}
+
 	/** Test if DMS is online (active and not failed) */
 	private boolean isOnline() {
 		return isActive() && !isFailed();
@@ -1535,12 +1542,59 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Test if DMS is available */
 	private boolean isAvailable() {
-		return isOnline() && !isDeployed() && !needsMaintenance();
+		return isOnline() && isMsgBlank() && !needsMaintenance();
 	}
 
-	/** Test if DMS is deployed */
-	private boolean isDeployed() {
-		return !SignMessageHelper.isBlank(messageCurrent);
+	/** Test if current message is blank */
+	private boolean isMsgBlank() {
+		return SignMessageHelper.isBlank(messageCurrent);
+	}
+
+	/** Test if the current message is "scheduled" */
+	private boolean isMsgScheduled() {
+		return getMessageCurrent().getScheduled();
+	}
+
+	/** Test if the current message is a travel time */
+	private boolean isMsgTravelTime() {
+		SignMessage sm = getMessageCurrent();
+		return sm.getRunTimePriority() == TRAVEL_TIME.ordinal();
+	}
+
+	/** Test if the current message is AWS */
+	private boolean isMsgAws() {
+		SignMessage sm = getMessageCurrent();
+		return sm.getRunTimePriority() == AWS.ordinal();
+	}
+
+	/** Test if a DMS is active, not failed and deployed */
+	private boolean isMsgDeployed() {
+		return isOnline() && !isMsgBlank();
+	}
+
+	/** Test if a DMS has been deployed by a user */
+	private boolean isUserDeployed() {
+		return isMsgDeployed() && !isMsgScheduled() && !isMsgAws();
+	}
+
+	/** Test if a DMS has been deployed by schedule */
+	private boolean isScheduleDeployed() {
+		return isMsgDeployed() && isMsgScheduled();
+	}
+
+	/** Test if a DMS has been deployed by travel time */
+	private boolean isTravelTimeDeployed() {
+		return isMsgDeployed() && isMsgTravelTime();
+	}
+
+	/** Test if a DMS is active, not failed and deployed by AWS */
+	private boolean isAwsDeployed() {
+		return isMsgDeployed() && isMsgAws();
+	}
+
+	/** Test if a DMS can be controlled by AWS */
+	private boolean isAwsControlled() {
+		return getAwsAllowed() && getAwsControlled();
 	}
 
 	/** Test if DMS needs maintenance */
@@ -1557,11 +1611,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return !DMSHelper.getCriticalError(this).isEmpty();
 	}
 
-	/** Test if DMS is part of an LCS array */
-	private boolean isLCS() {
-		return LCSHelper.lookup(name) != null;
-	}
-
 	/** Item style bits */
 	private transient long styles = 0;
 
@@ -1575,19 +1624,19 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		else {
 			if(isAvailable())
 				s |= ItemStyle.AVAILABLE.bit();
-			if(DMSHelper.isUserDeployed(this))
+			if(isUserDeployed())
 				s |= ItemStyle.DEPLOYED.bit();
-			if(DMSHelper.isTravelTimeDeployed(this))
+			if(isTravelTimeDeployed())
 				s |= ItemStyle.TRAVEL_TIME.bit();
-			if(DMSHelper.isScheduleDeployed(this))
+			if(isScheduleDeployed())
 				s |= ItemStyle.SCHEDULED.bit();
-			if(DMSHelper.isAwsMessageDeployed(this))
+			if(isAwsDeployed())
 				s |= ItemStyle.AWS_DEPLOYED.bit();
-			if(DMSHelper.isAwsControlled(this))
+			if(isAwsControlled())
 				s |= ItemStyle.AWS_CONTROLLED.bit();
 			if(needsMaintenance())
 				s |= ItemStyle.MAINTENANCE.bit();
-			if(DMSHelper.isFailed(this))
+			if(isActive() && isFailed())
 				s |= ItemStyle.FAILED.bit();
 			if(!isActive())
 				s |= ItemStyle.INACTIVE.bit();
