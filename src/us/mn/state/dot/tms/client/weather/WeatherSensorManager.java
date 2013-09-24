@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A weather sensor manager is a container for SONAR weather sensor objects.
@@ -46,7 +45,7 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("weather.sensor");
+		return "weather.sensor";
 	}
 
 	/** Get the weather sensor cache */

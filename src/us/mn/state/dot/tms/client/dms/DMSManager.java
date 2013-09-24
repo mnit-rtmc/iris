@@ -82,7 +82,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("dms");
+		return "dms";
 	}
 
 	/** Get the DMS cache */

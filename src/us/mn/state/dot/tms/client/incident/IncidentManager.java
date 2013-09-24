@@ -65,7 +65,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("incident");
+		return "incident";
 	}
 
 	/** Get the incident cache */

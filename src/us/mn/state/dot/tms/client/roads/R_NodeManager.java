@@ -106,7 +106,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Get the proxy type */
 	@Override public String getProxyType() {
-		return I18N.get("r_node");
+		return "r_node";
 	}
 
 	/** Get the r_node cache */

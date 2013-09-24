@@ -53,7 +53,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("controller");
+		return "controller";
 	}
 
 	/** Get the controller cache */

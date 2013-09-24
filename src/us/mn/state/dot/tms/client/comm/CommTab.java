@@ -33,7 +33,7 @@ public class CommTab extends MapTab<Controller> {
 
 	/** Create a new comm tab */
   	public CommTab(Session session, ControllerManager m) {
-		super("comm", m);
+		super(m, "comm");
 		summary = m.createStyleSummary();
 		add(createNorthPanel(), BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);

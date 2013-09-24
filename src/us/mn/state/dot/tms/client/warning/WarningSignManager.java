@@ -50,7 +50,7 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("warning.sign");
+		return "warning.sign";
 	}
 
 	/** Get the warning sign cache */

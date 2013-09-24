@@ -52,7 +52,7 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("gate.arm.array");
+		return "gate.arm.array";
 	}
 
 	/** Get the gate arm array cache */

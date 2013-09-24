@@ -41,7 +41,7 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return "LCSIndication";
+		return "lcs";
 	}
 
 	/** Get the LCS indication cache */

@@ -157,7 +157,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("lcs");
+		return "lcs";
 	}
 
 	/** Get the LCS array cache */

@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A lane marking manager is a container for SONAR lane marking objects.
@@ -46,7 +45,7 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("lane.marking");
+		return "lane.marking";
 	}
 
 	/** Get the lane marking cache */

@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A detector manager is a container for SONAR detector objects.
@@ -69,7 +68,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("detector");
+		return "detector";
 	}
 
 	/** Get the detector cache */

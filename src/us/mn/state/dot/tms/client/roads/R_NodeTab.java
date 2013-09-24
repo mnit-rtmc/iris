@@ -34,7 +34,7 @@ public class R_NodeTab extends MapTab<R_Node> {
 
 	/** Create a new roadway node tab */
 	public R_NodeTab(Session session, R_NodeManager man) {
-		super("r_node", man);
+		super(man);
 		panel = new R_NodePanel(session);
 		add(panel, BorderLayout.NORTH);
 		clist = new CorridorList(session, man, panel);

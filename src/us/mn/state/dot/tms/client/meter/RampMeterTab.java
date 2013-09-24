@@ -36,7 +36,7 @@ public class RampMeterTab extends MapTab<RampMeter> {
 
 	/** Create a new ramp meter tab */
   	public RampMeterTab(Session session, MeterManager man) {
-		super("ramp.meter", man);
+		super(man);
 		statusPanel = new MeterStatusPanel(session, man);
 		summary = man.createStyleSummary();
 		add(statusPanel, BorderLayout.NORTH);

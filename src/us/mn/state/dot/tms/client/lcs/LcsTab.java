@@ -36,7 +36,7 @@ public class LcsTab extends MapTab<LCSArray> {
 
 	/** Create a new LCS tab */
 	public LcsTab(Session session, LCSArrayManager man) {
-		super("lcs", man);
+		super(man);
 		dispatcher = new LcsDispatcher(session, man);
 		summary = man.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);

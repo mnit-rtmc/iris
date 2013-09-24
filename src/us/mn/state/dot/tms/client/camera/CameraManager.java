@@ -63,7 +63,7 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("camera");
+		return "camera";
 	}
 
 	/** Get the camera cache */

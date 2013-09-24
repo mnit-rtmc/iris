@@ -51,11 +51,16 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	}
 
 	/** Create a new map tab */
-	public MapTab(String text_id, ProxyManager<T> m) {
+	public MapTab(ProxyManager<T> m, String text_id) {
 		super(new BorderLayout());
 		manager = m;
 		name = I18N.get(text_id);
 		tip = I18N.get(text_id + ".tab");
+	}
+
+	/** Create a new map tab */
+	public MapTab(ProxyManager<T> m) {
+		this(m, m.getProxyType());
 	}
 
 	/** Perform any clean up necessary */

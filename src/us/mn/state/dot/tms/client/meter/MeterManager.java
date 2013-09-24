@@ -64,12 +64,12 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
-		return I18N.get("ramp.meter");
+		return "ramp.meter";
 	}
 
 	/** Get longer proxy type name for display */
 	@Override public String getLongProxyType() {
-		return I18N.get("ramp.meter.long");
+		return "ramp.meter.long";
 	}
 
 	/** Get the ramp meter cache */

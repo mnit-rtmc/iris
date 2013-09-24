@@ -22,6 +22,7 @@ import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.utils.I18N;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -79,7 +80,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Create a new SONAR proxy theme */
 	public ProxyTheme(ProxyManager<T> m, Shape s) {
-		super(m.getProxyType(), s, lsize);
+		super(I18N.get(m.getProxyType()), s, lsize);
 		manager = m;
 	}
 

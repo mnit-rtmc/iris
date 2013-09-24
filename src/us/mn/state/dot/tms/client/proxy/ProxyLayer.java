@@ -28,6 +28,7 @@ import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.utils.I18N;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 
 /**
@@ -55,7 +56,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 
 	/** Create a new SONAR map layer */
 	public ProxyLayer(ProxyManager<T> m) {
-		super(m.getProxyType());
+		super(I18N.get(m.getProxyType()));
 		manager = m;
 		cache = manager.getCache();
 	}

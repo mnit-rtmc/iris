@@ -40,7 +40,7 @@ public class IncidentTab extends MapTab<Incident> {
 
 	/** Create a new incident tab */
   	public IncidentTab(Session session, IncidentManager m) {
-		super("incident", m);
+		super(m);
 		creator = new IncidentCreator(session, m.getTheme(),
 			m.getSelectionModel());
 		dispatcher = new IncidentDispatcher(session, m, creator);
