@@ -48,19 +48,10 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class PlanManager extends ProxyManager<ActionPlan> {
 
-	/** Get the action plan cache */
-	static protected TypeCache<ActionPlan> getCache(Session s) {
-		return s.getSonarState().getActionPlans();
-	}
-
-	/** User session */
-	protected final Session session;
-
 	/** Create a new action plan manager */
 	public PlanManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		session = s;
-		cache.addProxyListener(this);
+		super(s, lm);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
@@ -71,6 +62,11 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Get longer proxy type name for display */
 	@Override public String getLongProxyType() {
 		return I18N.get("action.plan.long");
+	}
+
+	/** Get the action plan cache */
+	@Override public TypeCache<ActionPlan> getCache() {
+		return session.getSonarState().getActionPlans();
 	}
 
 	/** Create a plan map tab */

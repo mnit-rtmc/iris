@@ -56,19 +56,10 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Color to display metering meters */
 	static protected final Color COLOR_METERING = new Color(0, 192, 0);
 
-	/** Get the ramp meter cache */
-	static private TypeCache<RampMeter> getCache(Session s) {
-		return s.getSonarState().getRampMeters();
-	}
-
-	/** User session */
-	protected final Session session;
-
 	/** Create a new meter manager */
 	public MeterManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		session = s;
-		cache.addProxyListener(this);
+		super(s, lm);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
@@ -79,6 +70,11 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Get longer proxy type name for display */
 	@Override public String getLongProxyType() {
 		return I18N.get("ramp.meter.long");
+	}
+
+	/** Get the ramp meter cache */
+	@Override public TypeCache<RampMeter> getCache() {
+		return session.getSonarState().getRampMeters();
 	}
 
 	/** Create a ramp meter map tab */

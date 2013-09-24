@@ -100,18 +100,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return LCSArrayHelper.isScheduleDeployed(proxy);
 	}
 
-	/** Get the LCS array cache */
-	static private TypeCache<LCSArray> getCache(Session s) {
-		LcsCache cache = s.getSonarState().getLcsCache();
-		return cache.getLCSArrays();
-	}
-
-	/** Get the LCS cache */
-	static private TypeCache<LCS> getLCSCache(Session s) {
-		LcsCache cache = s.getSonarState().getLcsCache();
-		return cache.getLCSs();
-	}
-
 	/** Simple class to wait until all LCS have been enumerated */
 	static protected class LCSWaiter implements ProxyListener<LCS> {
 		protected boolean enumerated = false;
@@ -143,9 +131,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		       !needsMaintenance(proxy);
 	}
 
-	/** User session */
-	protected final Session session;
-
 	/** Action to blank the selected LCS array */
 	protected BlankLcsAction blankAction;
 
@@ -156,15 +141,14 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a new LCS array manager */
 	public LCSArrayManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		session = s;
-		cache.addProxyListener(this);
-		waitForLCSEnumeration(s);
+		super(s, lm);
+		getCache().addProxyListener(this);
+		waitForLCSEnumeration();
 	}
 
 	/** Wait for all LCS to be enumerated */
-	protected void waitForLCSEnumeration(Session s) {
-		TypeCache<LCS> lc = getLCSCache(s);
+	private void waitForLCSEnumeration() {
+		TypeCache<LCS> lc = getLCSCache();
 		LCSWaiter waiter = new LCSWaiter();
 		lc.addProxyListener(waiter);
 		waiter.waitForEnumeration();
@@ -174,6 +158,18 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
 		return I18N.get("lcs");
+	}
+
+	/** Get the LCS array cache */
+	@Override public TypeCache<LCSArray> getCache() {
+		LcsCache cache = session.getSonarState().getLcsCache();
+		return cache.getLCSArrays();
+	}
+
+	/** Get the LCS cache */
+	private TypeCache<LCS> getLCSCache() {
+		LcsCache cache = session.getSonarState().getLcsCache();
+		return cache.getLCSs();
 	}
 
 	/** Create an LCS map tab */

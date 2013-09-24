@@ -33,21 +33,21 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class LCSIManager extends ProxyManager<LCSIndication> {
 
-	/** Get the LCS indication cache */
-	static protected TypeCache<LCSIndication> getCache(Session s) {
-		LcsCache cache = s.getSonarState().getLcsCache();
-		return cache.getLCSIndications();
-	}
-
 	/** Create a new LCS indicaiton manager */
 	public LCSIManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		cache.addProxyListener(this);
+		super(s, lm);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
-	public String getProxyType() {
+	@Override public String getProxyType() {
 		return "LCSIndication";
+	}
+
+	/** Get the LCS indication cache */
+	@Override public TypeCache<LCSIndication> getCache() {
+		LcsCache cache = session.getSonarState().getLcsCache();
+		return cache.getLCSIndications();
 	}
 
 	/** Get the shape for a given proxy */

@@ -38,24 +38,20 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	static protected final LaneMarkingMarker MARKER =
 		new LaneMarkingMarker();
 
-	/** Get the lane marking cache */
-	static private TypeCache<LaneMarking> getCache(Session s) {
-		return s.getSonarState().getLaneMarkings();
-	}
-
-	/** User session */
-	protected final Session session;
-
 	/** Create a new lane marking manager */
 	public LaneMarkingManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		session = s;
-		cache.addProxyListener(this);
+		super(s, lm);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
 		return I18N.get("lane.marking");
+	}
+
+	/** Get the lane marking cache */
+	@Override public TypeCache<LaneMarking> getCache() {
+		return session.getSonarState().getLaneMarkings();
 	}
 
 	/** Get the shape for a given proxy */

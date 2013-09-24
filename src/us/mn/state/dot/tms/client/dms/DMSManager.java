@@ -62,14 +62,6 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Color definition for AWS controlled style */
 	static protected final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
 
-	/** Get the DMS cache */
-	static private TypeCache<DMS> getCache(Session s) {
-		return s.getSonarState().getDmsCache().getDMSs();
-	}
-
-	/** User session */
-	protected final Session session;
-
 	/** Mapping of DMS names to cell renderers */
 	protected final HashMap<String, DmsCellRenderer> renderers =
 		new HashMap<String, DmsCellRenderer>();
@@ -84,14 +76,18 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a new DMS manager */
 	public DMSManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm, ItemStyle.DEPLOYED);
-		session = s;
-		cache.addProxyListener(this);
+		super(s, lm, ItemStyle.DEPLOYED);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
 		return I18N.get("dms");
+	}
+
+	/** Get the DMS cache */
+	@Override public TypeCache<DMS> getCache() {
+		return session.getSonarState().getDmsCache().getDMSs();
 	}
 
 	/** Create a DMS map tab */

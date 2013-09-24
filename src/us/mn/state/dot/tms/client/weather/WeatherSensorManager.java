@@ -38,24 +38,20 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	static protected final WeatherSensorMarker MARKER =
 		new WeatherSensorMarker();
 
-	/** Get the weather sensor cache */
-	static private TypeCache<WeatherSensor> getCache(Session s) {
-		return s.getSonarState().getWeatherSensors();
-	}
-
-	/** User session */
-	protected final Session session;
-
 	/** Create a new weather sensor manager */
 	public WeatherSensorManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		session = s;
-		cache.addProxyListener(this);
+		super(s, lm);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
-	public String getProxyType() {
+	@Override public String getProxyType() {
 		return I18N.get("weather.sensor");
+	}
+
+	/** Get the weather sensor cache */
+	@Override public TypeCache<WeatherSensor> getCache() {
+		return session.getSonarState().getWeatherSensors();
 	}
 
 	/** Get the shape for a given proxy */

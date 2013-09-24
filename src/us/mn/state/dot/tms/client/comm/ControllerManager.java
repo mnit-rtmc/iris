@@ -45,24 +45,20 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Controller map object marker */
 	static private final ControllerMarker MARKER = new ControllerMarker();
 
-	/** Get the controller cache */
-	static private TypeCache<Controller> getCache(Session s) {
-		return s.getSonarState().getConCache().getControllers();
-	}
-
-	/** User session */
-	private final Session session;
-
 	/** Create a new controller manager */
 	public ControllerManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		session = s;
-		cache.addProxyListener(this);
+		super(s, lm);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
 		return I18N.get("controller");
+	}
+
+	/** Get the controller cache */
+	@Override public TypeCache<Controller> getCache() {
+		return session.getSonarState().getConCache().getControllers();
 	}
 
 	/** Create a comm map tab */

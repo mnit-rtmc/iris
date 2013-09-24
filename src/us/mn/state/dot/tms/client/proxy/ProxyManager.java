@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
+import us.mn.state.dot.tms.client.Session;
 
 /**
  * A proxy manager is a container for SONAR proxy objects. It places each
@@ -72,8 +73,8 @@ abstract public class ProxyManager<T extends SonarObject>
 		return SystemAttrEnum.MAP_ICON_SIZE_SCALE_MAX.getFloat();
 	}
 
-	/** Proxy type cache */
-	protected final TypeCache<T> cache;
+	/** User session */
+	protected final Session session;
 
 	/** Geo location manager */
 	protected final GeoLocManager loc_manager;
@@ -98,8 +99,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	protected boolean enumerated = false;
 
 	/** Create a new proxy manager */
-	protected ProxyManager(TypeCache<T> c, GeoLocManager lm, ItemStyle ds) {
-		cache = c;
+	protected ProxyManager(Session s, GeoLocManager lm, ItemStyle ds) {
+		session = s;
 		loc_manager = lm;
 		def_style = ds;
 		theme = createTheme();
@@ -107,8 +108,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Create a new proxy manager */
-	protected ProxyManager(TypeCache<T> c, GeoLocManager lm) {
-		this(c, lm, ItemStyle.ALL);
+	protected ProxyManager(Session s, GeoLocManager lm) {
+		this(s, lm, ItemStyle.ALL);
 	}
 
 	/** Create a style list model for the given symbol */
@@ -133,7 +134,7 @@ abstract public class ProxyManager<T extends SonarObject>
 		layer.dispose();
 		s_model.dispose();
 		map_cache.dispose();
-		cache.removeProxyListener(this);
+		getCache().removeProxyListener(this);
 	}
 
 	/** Called when a proxy has been added */
@@ -210,9 +211,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Get the proxy type cache */
-	public TypeCache<T> getCache() {
-		return cache;
-	}
+	abstract public TypeCache<T> getCache();
 
 	/** Create a list cell renderer */
 	public ListCellRenderer createCellRenderer() {
@@ -316,7 +315,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Iterate through all proxy objects */
 	private MapObject forEach(MapSearcher ms, AffineTransform at) {
 		Shape shp = getShape(at);
-		for(T proxy: cache) {
+		for(T proxy: getCache()) {
 			MapGeoLoc loc = findGeoLoc(proxy);
 			if(isLocationSet(loc)) {
 				loc.setShape(shp);

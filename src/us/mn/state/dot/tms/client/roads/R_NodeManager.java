@@ -74,11 +74,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	static protected final R_NodeMarker MARKER =
 		new R_NodeMarker();
 
-	/** Get the r_node cache */
-	static private TypeCache<R_Node> getCache(Session s) {
-		return s.getSonarState().getDetCache().getR_Nodes();
-	}
-
 	/** Map to of corridor names to corridors */
 	protected final Map<String, CorridorBase> corridors =
 		new TreeMap<String, CorridorBase>();
@@ -90,9 +85,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public ListModel getCorridorModel() {
 		return model;
 	}
-
-	/** User session */
-	protected final Session session;
 
 	/** Segment layer */
 	protected final SegmentLayer seg_layer;
@@ -107,16 +99,20 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Create a new roadway node manager */
 	public R_NodeManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		session = s;
+		super(s, lm);
 		seg_layer = new SegmentLayer(this, session);
 		lm.setR_NodeManager(this);
-		cache.addProxyListener(this);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type */
 	@Override public String getProxyType() {
 		return I18N.get("r_node");
+	}
+
+	/** Get the r_node cache */
+	@Override public TypeCache<R_Node> getCache() {
+		return session.getSonarState().getDetCache().getR_Nodes();
 	}
 
 	/** Create an r_node map tab */
@@ -330,7 +326,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create a set of roadway nodes for the current corridor */
 	public Set<R_Node> createSet() {
 		HashSet<R_Node> nodes = new HashSet<R_Node>();
-		for(R_Node n: cache) {
+		for(R_Node n: getCache()) {
 			if(checkCorridor(n))
 				nodes.add(n);
 		}

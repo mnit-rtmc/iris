@@ -42,24 +42,20 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	static protected final WarningSignMarker MARKER =
 		new WarningSignMarker();
 
-	/** Get the warning sign cache */
-	static private TypeCache<WarningSign> getCache(Session s) {
-		return s.getSonarState().getWarningSigns();
-	}
-
-	/** User session */
-	protected final Session session;
-
 	/** Create a new warning sign manager */
 	public WarningSignManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		session = s;
-		cache.addProxyListener(this);
+		super(s, lm);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
 		return I18N.get("warning.sign");
+	}
+
+	/** Get the warning sign cache */
+	@Override public TypeCache<WarningSign> getCache() {
+		return session.getSonarState().getWarningSigns();
 	}
 
 	/** Check if user can read warning signs */

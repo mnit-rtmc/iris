@@ -52,27 +52,23 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Color for active camera style */
 	static protected final Color COLOR_ACTIVE = new Color(0, 192, 255);
 
-	/** Get the camera cache */
-	static private TypeCache<Camera> getCache(Session s) {
-		return s.getSonarState().getCamCache().getCameras();
-	}
-
-	/** User session */
-	protected final Session session;
-
 	/** Set of cameras in the playlist */
 	protected final HashSet<Camera> playlist = new HashSet<Camera>();
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm, ItemStyle.ACTIVE);
-		session = s;
-		cache.addProxyListener(this);
+		super(s, lm, ItemStyle.ACTIVE);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
 	@Override public String getProxyType() {
 		return I18N.get("camera");
+	}
+
+	/** Get the camera cache */
+	@Override public TypeCache<Camera> getCache() {
+		return session.getSonarState().getCamCache().getCameras();
 	}
 
 	/** Create a camera map tab */

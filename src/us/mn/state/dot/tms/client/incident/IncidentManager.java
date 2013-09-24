@@ -53,28 +53,24 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Incident Map object marker */
 	static protected final IncidentMarker MARKER = new IncidentMarker();
 
-	/** Get the incident cache */
-	static protected TypeCache<Incident> getCache(Session s) {
-		return s.getSonarState().getIncidents();
-	}
-
-	/** User session */
-	private final Session session;
-
 	/** Location mapping */
 	protected final HashMap<String, IncidentGeoLoc> locations =
 		new HashMap<String, IncidentGeoLoc>();
 
 	/** Create a new incident manager */
 	public IncidentManager(Session s, GeoLocManager lm) {
-		super(getCache(s), lm);
-		session = s;
-		cache.addProxyListener(this);
+		super(s, lm);
+		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
-	public String getProxyType() {
+	@Override public String getProxyType() {
 		return I18N.get("incident");
+	}
+
+	/** Get the incident cache */
+	@Override public TypeCache<Incident> getCache() {
+		return session.getSonarState().getIncidents();
 	}
 
 	/** Check if user can read incidents */
