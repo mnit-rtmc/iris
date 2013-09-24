@@ -43,7 +43,6 @@ import us.mn.state.dot.tms.MeterAlgorithm;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
@@ -747,13 +746,13 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			s |= ItemStyle.QUEUE_FULL.bit();
 		if(queueExists())
 			s |= ItemStyle.QUEUE_EXISTS.bit();
-		if(isMetering())
+		if(isOnline() && isMetering())
 			s |= ItemStyle.METERING.bit();
 		if(isLocked())
 			s |= ItemStyle.LOCKED.bit();
 		if(needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
-		if(RampMeterHelper.isFailed(this))
+		if(isFailed())
 			s |= ItemStyle.FAILED.bit();
 		if(getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
