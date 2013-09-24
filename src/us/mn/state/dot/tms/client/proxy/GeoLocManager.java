@@ -32,35 +32,27 @@ import us.mn.state.dot.tms.client.roads.R_NodeManager;
  */
 public class GeoLocManager implements ProxyListener<GeoLoc> {
 
-	/** Get the geo loc cache */
-	static private TypeCache<GeoLoc> getCache(Session s) {
-		return s.getSonarState().getGeoLocs();
-	}
-
-	/** Proxy type cache */
-	protected final TypeCache<GeoLoc> cache;
+	/** User session */
+	private final Session session;
 
 	/** Map of all GeoLocs */
 	protected final HashMap<String, MapGeoLoc> proxies =
 		new HashMap<String, MapGeoLoc>();
 
-	/** R_Node manager */
-	protected R_NodeManager r_node_manager;
-
-	/** Set the r_node manager */
-	public void setR_NodeManager(R_NodeManager m) {
-		r_node_manager = m;
-	}
-
 	/** Create a new GeoLoc manager */
 	public GeoLocManager(Session s) {
-		cache = getCache(s);
-		cache.addProxyListener(this);
+		session = s;
+		getCache().addProxyListener(this);
+	}
+
+	/** Get the geo loc cache */
+	private TypeCache<GeoLoc> getCache() {
+		return session.getSonarState().getGeoLocs();
 	}
 
 	/** Dispose of the proxy model */
 	public void dispose() {
-		cache.removeProxyListener(this);
+		getCache().removeProxyListener(this);
 	}
 
 	/** Add a new GeoLoc to the manager */
@@ -119,13 +111,21 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 
 	/** Get the tangent angle for a location */
 	public Double getTangentAngle(MapGeoLoc mloc) {
+		R_NodeManager n_man = session.getR_NodeManager();
+		if(n_man != null)
+			return getTangentAngle(n_man, mloc);
+		else
+			return null;
+	}
+
+	/** Get the tangent angle for a location */
+	private Double getTangentAngle(R_NodeManager n_man, MapGeoLoc mloc) {
 		GeoLoc loc = mloc.getGeoLoc();
-		CorridorBase c = r_node_manager.lookupCorridor(loc);
+		CorridorBase c = n_man.lookupCorridor(loc);
 		if(c != null) {
 			R_Node r_node = c.findNearest(loc);
 			if(r_node != null) {
-				MapGeoLoc n_loc = r_node_manager.findGeoLoc(
-					r_node);
+				MapGeoLoc n_loc = n_man.findGeoLoc(r_node);
 				if(n_loc != null)
 					return n_loc.getTangent();
 			}
