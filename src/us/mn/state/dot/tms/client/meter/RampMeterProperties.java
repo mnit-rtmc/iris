@@ -26,7 +26,9 @@ import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.MeterAlgorithm;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
@@ -51,15 +53,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class RampMeterProperties extends SonarObjectForm<RampMeter> {
-
-	/** Get the controller status */
-	static private String getControllerStatus(RampMeter proxy) {
-		Controller c = proxy.getController();
-		if(c == null)
-			return "???";
-		else
-			return c.getStatus();
-	}
 
 	/** Location panel */
 	private final LocationPanel loc_pnl;
@@ -266,6 +259,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		p.add(lock_cmb, Stretch.LAST);
 		p.add("device.operation");
 		p.add(op_lbl, Stretch.LAST);
+		// Make label opaque so that we can set the background color
+		op_lbl.setOpaque(true);
 		p.add("device.status");
 		p.add(status_lbl, Stretch.LAST);
 		p.add(new JButton(settings), Stretch.RIGHT);
@@ -312,17 +307,18 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			queue_lbl.setText(q.description);
 		}
 		updateComboBox(a, "mLock", lock_cmb, getMLock(), lock_action);
-		if(a == null || a.equals("operation")) {
+		if(a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());
-			String s = getControllerStatus(proxy);
-			if("".equals(s)) {
-				op_lbl.setForeground(null);
-				op_lbl.setBackground(null);
-			} else {
+		if(a == null || a.equals("styles")) {
+			if(ItemStyle.FAILED.checkBit(proxy.getStyles())) {
 				op_lbl.setForeground(Color.WHITE);
 				op_lbl.setBackground(Color.GRAY);
+			} else {
+				op_lbl.setForeground(null);
+				op_lbl.setBackground(null);
 			}
-			status_lbl.setText(s);
+			status_lbl.setText(ControllerHelper.getStatus(
+				proxy.getController()));
 		}
 	}
 

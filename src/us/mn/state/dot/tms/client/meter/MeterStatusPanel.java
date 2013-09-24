@@ -29,6 +29,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
@@ -275,16 +276,8 @@ public class MeterStatusPanel extends IPanel
 			location_lbl.setText(GeoLocHelper.getOnRampDescription(
 				meter.getGeoLoc()));
 		}
-		if(a == null || a.equals("operation")) {
-			if(RampMeterHelper.isFailed(meter)) {
-				operation_lbl.setForeground(Color.WHITE);
-				operation_lbl.setBackground(Color.GRAY);
-			} else {
-				operation_lbl.setForeground(null);
-				operation_lbl.setBackground(null);
-			}
+		if(a == null || a.equals("operation"))
 			operation_lbl.setText(meter.getOperation());
-		}
 		if(a == null || a.equals("rate")) {
 			Integer rate = meter.getRate();
 			release_lbl.setText(formatRelease(rate));
@@ -305,6 +298,15 @@ public class MeterStatusPanel extends IPanel
 			lock_cbx.setAction(null);
 			lock_cbx.setSelectedIndex(getMLock(meter));
 			lock_cbx.setAction(new LockMeterAction(meter,lock_cbx));
+		}
+		if(a == null || a.equals("styles")) {
+			if(ItemStyle.FAILED.checkBit(meter.getStyles())) {
+				operation_lbl.setForeground(Color.WHITE);
+				operation_lbl.setBackground(Color.GRAY);
+			} else {
+				operation_lbl.setForeground(null);
+				operation_lbl.setBackground(null);
+			}
 		}
 	}
 
