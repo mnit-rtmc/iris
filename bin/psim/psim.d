@@ -27,12 +27,12 @@ private:
 	ProtocolDriver driver;
 public:
 	/** Create a listener */
-	this(ushort port) {
+	this(ushort port, ProtocolDriver d) {
 		sock = new TcpSocket();
 		sock.blocking = false;
 		sock.bind(new InternetAddress(port));
 		sock.listen(5);
-		driver = new EchoDriver();
+		driver = d;
 	}
 
 	/** Accept a new connection */
@@ -206,8 +206,8 @@ public:
 	}
 
 	/** Add a connection listener */
-	void add_listener(ushort port) {
-		listeners ~= new Listener(port);
+	void add_listener(ushort port, ProtocolDriver d) {
+		listeners ~= new Listener(port, d);
 	}
 
 	/** Poll the socket server */
@@ -223,7 +223,7 @@ public:
 /** Main entry point */
 int main(char[][] args) {
 	Server srv = new Server();
-	srv.add_listener(1234);
+	srv.add_listener(1234, new EchoDriver());
 	while(true)
 		srv.poll();
 	return 0;
