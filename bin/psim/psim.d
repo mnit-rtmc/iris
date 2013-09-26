@@ -14,6 +14,7 @@
  */
 import std.socket;
 import std.stdio;
+import protocol;
 
 /** Socket listener.
  */
@@ -21,7 +22,7 @@ class Listener {
 private:
 	/** Listener socket */
 	Socket sock;
-	// FIXME: protocol enum
+	ProtocolDriver driver;
 public:
 	/** Create a listener */
 	this(ushort port) {
@@ -29,11 +30,12 @@ public:
 		sock.blocking = false;
 		sock.bind(new InternetAddress(port));
 		sock.listen(5);
+		driver = new EchoDriver();
 	}
 
 	/** Accept a new connection */
 	Connection accept_connection() {
-		return new Connection(sock.accept());
+		return new Connection(sock.accept(), driver);
 	}
 }
 
@@ -46,11 +48,23 @@ private:
 
 	/** Remote client socket address */
 	Address address;
+
+	/** Protocol driver */
+	ProtocolDriver driver;
+
+	/** Receive data buffer */
+	byte[] rx_buf;
+
+	/** Transmit data buffer */
+	byte[] tx_buf;
 public:
 	/** Create a client connection */
-	this(Socket s) {
+	this(Socket s, ProtocolDriver d) {
 		sock = s;
 		address = s.remoteAddress();
+		driver = d;
+		rx_buf.length = 1024;
+		tx_buf.length = 0;
 	}
 
 	/** Destroy a client connection */
@@ -60,14 +74,22 @@ public:
 
 	/** Receive data from client connection */
 	bool receive() {
-		char[1024] buf;
-		auto n_bytes = sock.receive(buf);
+		auto n_bytes = sock.receive(rx_buf);
 		if (n_bytes > 0) {
-			writefln("Received %d bytes from %s: \"%s\"", n_bytes,
-				address, buf[0 .. n_bytes]);
+			tx_buf ~= driver.recv(rx_buf[0 .. n_bytes]);
 			return true;
 		} else if (n_bytes == Socket.ERROR)
-			writeln("Connection socket error: %s", address);
+			writefln("Connection socket error: %s", address);
+		return false;
+	}
+
+	bool transmit() {
+		auto n_bytes = sock.send(tx_buf);
+		if (n_bytes > 0) {
+			tx_buf = tx_buf[n_bytes .. $];
+			return true;
+		} else if (n_bytes == Socket.ERROR)
+			writefln("Connection socket error: %s", address);
 		return false;
 	}
 
@@ -97,6 +119,9 @@ private:
 	/** Read-ready socket set */
 	SocketSet r_set;
 
+	/** Write-ready socket set */
+	SocketSet w_set;
+
 	/** Prepare read socket set for polling */
 	void prepare_read_set() {
 		r_set.reset();
@@ -104,6 +129,15 @@ private:
 			r_set.add(l.sock);
 		foreach (Connection c; conns)
 			r_set.add(c.sock);
+	}
+
+	/** Prepare write socket set for polling */
+	void prepare_write_set() {
+		w_set.reset();
+		foreach (Connection c; conns) {
+			if(c.tx_buf.length > 0)
+				w_set.add(c.sock);
+		}
 	}
 
 	/** Poll listener sockets for new connections */
@@ -134,11 +168,21 @@ private:
 			if (r_set.isSet(conns[i].sock))
 				receive_client(i);
 		}
+		for (long i = conns.length - 1; i >= 0; --i) {
+			if (w_set.isSet(conns[i].sock))
+				transmit_client(i);
+		}
 	}
 
 	/** Receive data from a client connection */
 	void receive_client(long i) {
 		if(!conns[i].receive())
+			close_connection(i);
+	}
+
+	/** Transmit data to a client connection */
+	void transmit_client(long i) {
+		if(!conns[i].transmit())
 			close_connection(i);
 	}
 
@@ -154,6 +198,7 @@ public:
 	/** Create a socket server */
 	this() {
 		r_set = new SocketSet(MAX_CONNECTIONS);
+		w_set = new SocketSet(MAX_CONNECTIONS);
 	}
 
 	/** Add a connection listener */
@@ -164,7 +209,8 @@ public:
 	/** Poll the socket server */
 	void poll() {
 		prepare_read_set();
-		Socket.select(r_set, null, null);
+		prepare_write_set();
+		Socket.select(r_set, w_set, null);
 		poll_listeners();
 		poll_clients();
 	}
