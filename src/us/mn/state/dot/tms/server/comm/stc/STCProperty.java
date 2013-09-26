@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -122,8 +123,12 @@ abstract public class STCProperty extends ControllerProperty {
 	}
 
 	/** Parse a received message */
-	abstract protected void parseMessage(byte[] msg, int len)
-		throws IOException;
+	protected void parseMessage(byte[] msg, int len) throws IOException {
+		if(msg[0] == 'P')
+			throw new ControllerException("AUTH REQUIRED");
+		else
+			throw new ParsingException("INVALID MESSAGE:" + msg[0]);
+	}
 
 	/** Parse an ASCII-hex string */
 	static private int parseAsciiHex(String hex) throws IOException {

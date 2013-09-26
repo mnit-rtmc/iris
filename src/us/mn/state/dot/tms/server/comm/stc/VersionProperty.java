@@ -52,7 +52,7 @@ public class VersionProperty extends STCProperty {
 		throws IOException
 	{
 		if(msg[0] != 'V')
-			throw new ParsingException("INVALID MESSAGE:" + msg[0]);
+			super.parseMessage(msg, len);
 		version = new String(msg, 1, len - 1, ASCII).trim();
 	}
 

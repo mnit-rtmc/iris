@@ -85,7 +85,7 @@ public class StatusProperty extends STCProperty {
 			parseMessageN(msg, len);
 			return;
 		}
-		throw new ParsingException("INVALID MESSAGE:" + msg[0]);
+		super.parseMessage(msg, len);
 	}
 
 	/** Parse a received "S" message.  This is the response to a status

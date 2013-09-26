@@ -70,8 +70,8 @@ public class ControlProperty extends STCProperty {
 		throws IOException
 	{
 		if(msg[0] != 'C')
-			throw new ParsingException("INVALID MESSAGE:" + msg[0]);
-		if(len != 1)
+			super.parseMessage(msg, len);
+		else if(len != 1)
 			throw new ParsingException("INVALID LENGTH:" + len);
 	}
 
