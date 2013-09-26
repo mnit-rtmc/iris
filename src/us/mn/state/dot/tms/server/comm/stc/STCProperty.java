@@ -88,14 +88,14 @@ abstract public class STCProperty extends ControllerProperty {
 
 	/** Format a request frame */
 	protected final byte[] formatRequest(int drop, byte[] data) {
-		int dlen = OFF_MESSAGE + data.length;
-		int dplen = dlen + password.length;
-		byte[] req = new byte[dlen + 1];
+		int ppos = OFF_MESSAGE + data.length;
+		int dplen = ppos + password.length;
+		byte[] req = new byte[dplen + 1];
 		format8(req, OFF_SENTINEL, SENTINEL);
 		format8(req, OFF_ADDRESS, drop);
-		format8(req, OFF_SIZE, data.length);
+		format8(req, OFF_SIZE, data.length + password.length);
 		System.arraycopy(data, 0, req, OFF_MESSAGE, data.length);
-		System.arraycopy(password, dlen,req,password.length,req.length);
+		System.arraycopy(password, 0, req, ppos, password.length);
 		int c = checksum(req);
 		format8(req, dplen, (~c) + 1);
 		return req;
