@@ -52,6 +52,11 @@ public class StatusProperty extends STCProperty {
 	static private final int OFF_SPECIAL_CNT = 33;
 	static private final int OFF_NEW_LENGTH = 39;
 
+	/** Create a new status property */
+	public StatusProperty(String pw) {
+		super(pw);
+	}
+
 	/** Encode a QUERY request */
 	@Override public void encodeQuery(OutputStream os, int drop)
 		throws IOException

@@ -42,7 +42,7 @@ public class OpControlGate extends OpSTC {
 		super(PriorityLevel.COMMAND, d);
 		user = o;
 		req_state = gas;
-		control = new ControlProperty();
+		control = new ControlProperty(password());
 		control.setOpen(gas == GateArmState.OPENING);
 		control.setClose(gas == GateArmState.CLOSING);
 		control.setInterlock(d.isOpenInterlock());

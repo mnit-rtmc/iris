@@ -25,6 +25,11 @@ import java.io.OutputStream;
  */
 public class ResetProperty extends STCProperty {
 
+	/** Create a new reset property */
+	public ResetProperty(String pw) {
+		super(pw);
+	}
+
 	/** Encode a STORE request */
 	@Override public void encodeStore(OutputStream os, int drop)
 		throws IOException

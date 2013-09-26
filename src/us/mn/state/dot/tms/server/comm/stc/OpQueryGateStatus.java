@@ -32,7 +32,7 @@ public class OpQueryGateStatus extends OpSTC {
 	static private final long FAIL_TIMEOUT_MS = 90 * 1000;
 
 	/** Status property */
-	private final StatusProperty status = new StatusProperty();
+	private final StatusProperty status;
 
 	/** Flag for controller status update */
 	private boolean status_update = true;
@@ -40,6 +40,7 @@ public class OpQueryGateStatus extends OpSTC {
 	/** Create a new gate arm query status operation */
 	public OpQueryGateStatus(GateArmImpl d) {
 		super(PriorityLevel.DEVICE_DATA, d);
+		status = new StatusProperty(password());
 	}
 
 	/** Create the second phase of the operation */
@@ -54,7 +55,7 @@ public class OpQueryGateStatus extends OpSTC {
 		protected Phase<STCProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			VersionProperty v = new VersionProperty();
+			VersionProperty v = new VersionProperty(password());
 			mess.add(v);
 			mess.queryProps();
 			logQuery(v);

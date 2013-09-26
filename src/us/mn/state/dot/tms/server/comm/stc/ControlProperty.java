@@ -36,6 +36,11 @@ public class ControlProperty extends STCProperty {
 	static private final int OFF_OPEN_INTERLOCK = 7;
 	static private final int OFF_BLOCK_EXIT_VEHICLE_DETECTOR = 8;
 
+	/** Create a new control property */
+	public ControlProperty(String pw) {
+		super(pw);
+	}
+
 	/** Encode a STORE request */
 	@Override public void encodeStore(OutputStream os, int drop)
 		throws IOException

@@ -55,4 +55,9 @@ abstract public class OpSTC extends OpDevice<STCProperty> {
 		super(p, ga);
 		gate_arm = ga;
 	}
+
+	/** Get the controller password */
+	public String password() {
+		return getController().getPassword();
+	}
 }

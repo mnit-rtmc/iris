@@ -26,6 +26,11 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class VersionProperty extends STCProperty {
 
+	/** Create a new version property */
+	public VersionProperty(String pw) {
+		super(pw);
+	}
+
 	/** Encode a QUERY request */
 	@Override public void encodeQuery(OutputStream os, int drop)
 		throws IOException

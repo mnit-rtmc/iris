@@ -48,7 +48,7 @@ public class OpResetGate extends OpSTC {
 		protected Phase<STCProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			ResetProperty reset = new ResetProperty();
+			ResetProperty reset = new ResetProperty(password());
 			mess.add(reset);
 			logStore(reset);
 			mess.storeProps();
@@ -67,7 +67,7 @@ public class OpResetGate extends OpSTC {
 		protected Phase<STCProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			VersionProperty v = new VersionProperty();
+			VersionProperty v = new VersionProperty(password());
 			mess.add(v);
 			try {
 				mess.queryProps();

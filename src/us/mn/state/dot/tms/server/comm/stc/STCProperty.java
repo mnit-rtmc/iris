@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.stc;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -46,6 +47,24 @@ abstract public class STCProperty extends ControllerProperty {
 	static private final int MIN_MESSAGE_SIZE = 1;
 	static private final int MAX_MESSAGE_SIZE = 254;
 
+	/** Create a password byte array */
+	static private byte[] createPassword(String pw) {
+		try {
+			byte[] pword = new byte[16];
+			byte[] pb = pw.getBytes(ASCII);
+			for(int i = 0; i < pword.length; ++i) {
+				if(i < pb.length)
+					pword[i] = pb[i];
+				else
+					pword[i] = ' ';
+			}
+			return pword;
+		}
+		catch(UnsupportedEncodingException e) {
+			return new byte[0];
+		}
+	}
+
 	/** Calculate a checksum */
 	static private int checksum(byte[] buf) {
 		int c = 0;
@@ -54,21 +73,32 @@ abstract public class STCProperty extends ControllerProperty {
 		return c;
 	}
 
+	/** Format a boolean ASCII-hex value */
+	static protected void formatBoolean(byte[] buf, int pos, boolean v) {
+		buf[pos] = (byte)(v ? '1' : '0');
+	}
+
+	/** Controller password */
+	private final byte[] password;
+
+	/** Create a new STC property */
+	protected STCProperty(String pw) {
+		password = (pw != null) ? createPassword(pw) : new byte[0];
+	}
+
 	/** Format a request frame */
-	static protected final byte[] formatRequest(int drop, byte[] data) {
-		byte[] req = new byte[OFF_MESSAGE + data.length + 1];
+	protected final byte[] formatRequest(int drop, byte[] data) {
+		int dlen = OFF_MESSAGE + data.length;
+		int dplen = dlen + password.length;
+		byte[] req = new byte[dlen + 1];
 		format8(req, OFF_SENTINEL, SENTINEL);
 		format8(req, OFF_ADDRESS, drop);
 		format8(req, OFF_SIZE, data.length);
 		System.arraycopy(data, 0, req, OFF_MESSAGE, data.length);
+		System.arraycopy(password, dlen,req,password.length,req.length);
 		int c = checksum(req);
-		format8(req, OFF_MESSAGE + data.length, (~c) + 1);
+		format8(req, dplen, (~c) + 1);
 		return req;
-	}
-
-	/** Format a boolean ASCII-hex value */
-	static protected void formatBoolean(byte[] buf, int pos, boolean v) {
-		buf[pos] = (byte)(v ? '1' : '0');
 	}
 
 	/** Parse one frame.
