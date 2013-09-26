@@ -22,6 +22,8 @@ class Listener {
 private:
 	/** Listener socket */
 	Socket sock;
+
+	/** Protocol driver */
 	ProtocolDriver driver;
 public:
 	/** Create a listener */
@@ -83,6 +85,7 @@ public:
 		return false;
 	}
 
+	/** Transmit data to client connection */
 	bool transmit() {
 		auto n_bytes = sock.send(tx_buf);
 		if (n_bytes > 0) {
@@ -108,7 +111,8 @@ public:
  */
 class Server {
 private:
-	const int MAX_CONNECTIONS = 150;
+	/** Maximum number of simultaneous sockets */
+	const int MAX_SOCKETS = 150;
 
 	/** Listener sockets */
 	Listener[] listeners;
@@ -151,7 +155,7 @@ private:
 	/** Accept a connection from a listener */
 	void accept_connection(Listener l) {
 		Connection c = l.accept_connection();
-		if (conns.length < MAX_CONNECTIONS) {
+		if (listeners.length + conns.length <= MAX_SOCKETS) {
 			writefln("Connection established: %s", c);
 			conns ~= c;
 		} else {
@@ -197,8 +201,8 @@ private:
 public:
 	/** Create a socket server */
 	this() {
-		r_set = new SocketSet(MAX_CONNECTIONS);
-		w_set = new SocketSet(MAX_CONNECTIONS);
+		r_set = new SocketSet(MAX_SOCKETS);
+		w_set = new SocketSet(MAX_SOCKETS);
 	}
 
 	/** Add a connection listener */
