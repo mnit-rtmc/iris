@@ -55,10 +55,10 @@ private:
 	ProtocolDriver driver;
 
 	/** Receive data buffer */
-	byte[] rx_buf;
+	ubyte[] rx_buf;
 
 	/** Transmit data buffer */
-	byte[] tx_buf;
+	ubyte[] tx_buf;
 public:
 	/** Create a client connection */
 	this(Socket s, ProtocolDriver d) {
