@@ -1,5 +1,5 @@
 /*
- * psim -- Protocol simulator
+ * protest -- Protocol Tester
  * Copyright (C) 2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify

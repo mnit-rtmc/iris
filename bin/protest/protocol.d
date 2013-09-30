@@ -66,6 +66,10 @@ private:
 		// Check for valid address
 		if(pkt[1] > 254)
 			return;
+		final switch(pkt[3]) {
+		case 'V':
+			break;
+		}
 	}
 public:
 	ubyte[] recv(ubyte[] buf) {
