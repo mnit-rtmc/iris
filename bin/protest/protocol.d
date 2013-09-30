@@ -1,5 +1,5 @@
 /*
- * psim -- Protocol simulator
+ * protest -- Protocol Tester
  * Copyright (C) 2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,10 +24,27 @@ public:
 	}
 }
 
+class STCController {
+private:
+	int address;
+public:
+	this(int a) {
+		address = a;
+	}
+	ubyte[] process_packet(ubyte pkt[]) {
+		final switch(pkt[3]) {
+		case 'V':
+			return cast(ubyte[])"Vh4.33, Boot Loader: V1.0\0";
+		}
+		return null;
+	}
+}
+
 class STCDriver : ProtocolDriver {
 private:
 	ubyte[] rx_buf;
 	ubyte[] tx_buf;
+	STCController[int] controllers;
 	ulong sentinel() {
 		for(int i = 0; i < rx_buf.length; i++) {
 			if(rx_buf[i] == 0xFF)
@@ -57,22 +74,34 @@ private:
 		int xsum = 0;
 		for(int i = 0; i < pkt.length; i++)
 			xsum += pkt[i];
-		xsum = (~xsum) & 0xFF;
-		if(xsum != 0)
+		if((xsum & 0xFF) != 0)
 			return;
 		// Check for valid message size
 		if(pkt[2] < 1 || pkt[2] > 254)
 			return;
-		// Check for valid address
-		if(pkt[1] > 254)
-			return;
-		final switch(pkt[3]) {
-		case 'V':
-			break;
+		int address = pkt[1];
+		STCController c = controllers[address];
+		if(c !is null)
+			process_packet(pkt, c);
+	}
+	void process_packet(ubyte pkt[], STCController c) {
+		ubyte[] msg = c.process_packet(pkt);
+		if(msg !is null) {
+			ubyte[] rsp = [cast(ubyte)0xFF, cast(ubyte)0x00,
+				cast(ubyte)msg.length] ~ msg;
+			int xsum = 0;
+			for(int i = 0; i < rsp.length; i++)
+				xsum += rsp[i];
+			rsp ~= cast(ubyte)((~xsum) + 1);
+			tx_buf ~= rsp;
 		}
 	}
 public:
+	this() {
+		controllers[1] = new STCController(1);
+	}
 	ubyte[] recv(ubyte[] buf) {
+		tx_buf.length = 0;
 		rx_buf ~= buf;
 		skip_garbage();
 		check_packet();

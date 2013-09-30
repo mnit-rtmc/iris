@@ -223,7 +223,7 @@ public:
 /** Main entry point */
 int main(char[][] args) {
 	Server srv = new Server();
-	srv.add_listener(1234, new EchoDriver());
+	srv.add_listener(1234, new STCDriver());
 	while(true)
 		srv.poll();
 	return 0;
