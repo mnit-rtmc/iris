@@ -224,6 +224,7 @@ public:
 int main(char[][] args) {
 	Server srv = new Server();
 	srv.add_listener(1234, new STCDriver());
+	srv.add_listener(1235, new STCDriver());
 	while(true)
 		srv.poll();
 	return 0;
