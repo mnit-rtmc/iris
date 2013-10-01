@@ -101,27 +101,31 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		    (ControllerImpl)ControllerHelper.lookup(c), p, nt);
 	}
 
-	/** Initialize the gate arm */
-	@Override public void initTransients() {
+	/** Set gate arm array index */
+	private void setArrayIndex(GateArmImpl ga) {
 		try {
 			GateArmArrayImpl a = ga_array;
 			if(a != null)
-				a.setIndex(idx, this);
+				a.setIndex(idx, ga);
 		}
 		catch(TMSException e) {
-			System.err.println("GateArm " + getName() +
-				" initialization error");
+			System.err.println("GateArmImpl.setArrayIndex: " +
+				getName() + " error");
 			e.printStackTrace();
 		}
-		finally {
-			super.initTransients();
-		}
+	}
+
+	/** Initialize the gate arm */
+	@Override public void initTransients() {
+		setArrayIndex(this);
+		super.initTransients();
 	}
 
 	/** Destroy an object */
 	@Override public void doDestroy() throws TMSException {
-		super.doDestroy();
 		GateArmSystem.disable(name + ": destroy");
+		super.doDestroy();
+		setArrayIndex(null);
 	}
 
 	/** Gate arm array */
