@@ -12,6 +12,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+import std.array;
+import std.datetime;
+import std.format;
+import std.stdio;
 
 interface ProtocolDriver {
 	ubyte[] recv(ubyte[] buf);
@@ -24,17 +28,119 @@ public:
 	}
 }
 
+enum command_status {
+	reset,
+	open_in_progress,
+	open_complete,
+	close_in_progress,
+	close_complete,
+	stopped,
+}
+
+enum operator_status {
+	reset,
+	learn_limit_stop, learn_limit_open, learn_limit_close,
+	normal_stop,
+	check_pe_open, pep_2_open, warn_b4_open,
+	normal_open,
+	reverse_2_close_peo, wait_peo, delay_peo,
+	check_pe_close, pep_2_close, warn_b4_close,
+	normal_close,
+	wait_vd, reverse_2_open_pec, wait_pe, delay_pe,
+	reverse_2_close, reverse_2_open,
+	safety_stop, entrapment_stop,
+	fault_1, fault_2, fault_3, fault_5,
+	error_1, error_2, error_6, error_8, error_9, error_10,
+	alert_1, alert_2, alert_4, alert_5, alert_6,
+}
+
 class STCController {
 private:
 	int address;
+	command_status cmd_stat = command_status.reset;
+	operator_status op_stat = operator_status.reset;
+	SysTime tm;
+	bool open_limit = false;
+	bool close_limit = true;
+
+	void update_status() {
+		if(tm < Clock.currTime())
+			update_op_status();
+	}
+	void update_op_status() {
+		switch(op_stat) {
+		case operator_status.normal_close:
+			cmd_stat = command_status.close_complete;
+			op_stat = operator_status.normal_stop;
+			close_limit = true;
+			break;
+		case operator_status.normal_open:
+			cmd_stat = command_status.open_complete;
+			op_stat = operator_status.normal_stop;
+			open_limit = true;
+			break;
+		default:
+			op_stat = operator_status.normal_stop;
+			break;
+		}
+	}
+	ubyte[] process_status() {
+		auto rsp = appender!string();
+		formattedWrite(rsp, "S%02X%02X041%1X%1X00000000000", cmd_stat,
+			op_stat, open_limit, close_limit);
+		return cast(ubyte[])rsp.data();
+	}
+	ubyte[] process_status_n() {
+		auto rsp = appender!string();
+		formattedWrite(rsp,
+			"N%02X%02X041%1X%1X00000000000000000000000000000",
+			cmd_stat, op_stat, open_limit, close_limit);
+		return cast(ubyte[])rsp.data();
+	}
+	ubyte[] control_request(ubyte[] pkt) {
+		if(pkt.length == 9) {
+			if(pkt[1] == '1' && pkt[2] == '0' && pkt[3] == '0')
+				control_open();
+			if(pkt[1] == '0' && pkt[2] == '1' && pkt[3] == '0')
+				control_close();
+			if(pkt[1] == '0' && pkt[2] == '0' && pkt[3] == '1')
+				control_stop();
+			return cast(ubyte[])"C";
+		}
+		return null;
+	}
+	void control_open() {
+		cmd_stat = command_status.open_in_progress;
+		op_stat = operator_status.normal_open;
+		close_limit = false;
+		tm = Clock.currTime() + dur!"seconds"(7);
+	}
+	void control_close() {
+		cmd_stat = command_status.close_in_progress;
+		op_stat = operator_status.normal_close;
+		open_limit = false;
+		tm = Clock.currTime() + dur!"seconds"(7);
+	}
+	void control_stop() {
+		cmd_stat = command_status.stopped;
+		op_stat = operator_status.normal_stop;
+	}
 public:
 	this(int a) {
 		address = a;
+		tm = Clock.currTime();
 	}
 	ubyte[] process_packet(ubyte pkt[]) {
-		final switch(pkt[3]) {
+		final switch(pkt[0]) {
+		case 'R':
+			break;
 		case 'V':
 			return cast(ubyte[])"Vh4.33, Boot Loader: V1.0\0";
+		case 'S':
+			update_status();
+			return process_status_n();
+		case 'C':
+			return control_request(pkt);
 		}
 		return null;
 	}
@@ -82,7 +188,7 @@ private:
 		int address = pkt[1];
 		STCController c = controllers[address];
 		if(c !is null)
-			process_packet(pkt, c);
+			process_packet(pkt[3 .. $-1], c);
 	}
 	void process_packet(ubyte pkt[], STCController c) {
 		ubyte[] msg = c.process_packet(pkt);
