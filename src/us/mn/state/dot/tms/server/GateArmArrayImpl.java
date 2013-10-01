@@ -448,7 +448,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	public void updateArmState() {
 		GateArmState cs = arm_state;
 		GateArmState gas = aggregateArmState();
-		if(gas != cs)
+		// Don't update WARN_CLOSE back to OPEN
+		if(gas != cs &&
+		  (gas != GateArmState.OPEN || cs != GateArmState.WARN_CLOSE))
 			setArmState(gas);
 	}
 
