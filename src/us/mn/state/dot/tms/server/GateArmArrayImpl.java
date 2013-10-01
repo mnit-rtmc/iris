@@ -390,13 +390,14 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		if(rs == GateArmState.WARN_CLOSE) {
 			if(lock_state.isCloseDenied())
 				throw INTERLOCK_CONFLICT;
-			if(cs == GateArmState.OPEN || cs == GateArmState.FAULT)
+			if(cs == GateArmState.OPEN)
 				return rs;
 		}
 		if(rs == GateArmState.CLOSING) {
 			if(lock_state.isCloseDenied())
 				throw INTERLOCK_CONFLICT;
-			if(cs == GateArmState.WARN_CLOSE)
+			if(cs == GateArmState.WARN_CLOSE ||
+			   cs == GateArmState.FAULT)
 				return rs;
 		}
 		throw new ChangeVetoException("INVALID STATE CHANGE: " + cs +

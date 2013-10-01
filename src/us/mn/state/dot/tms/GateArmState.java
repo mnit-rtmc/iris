@@ -25,7 +25,7 @@ public enum GateArmState {
 
 	/** Gate Arm states */
 	UNKNOWN,	/* comm. failure	no change allowed */
-	FAULT,		/* open / close fault	user: WARN_CLOSE */
+	FAULT,		/* open / close fault	user: CLOSING */
 	OPENING,	/* open in progress	system: OPEN or FAULT */
 	OPEN,		/* gate open		user: WARN_CLOSE */
 	WARN_CLOSE,	/* gate open, DMS warn	user: CLOSING or OPENING */

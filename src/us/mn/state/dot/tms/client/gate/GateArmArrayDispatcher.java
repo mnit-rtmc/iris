@@ -426,7 +426,7 @@ public class GateArmArrayDispatcher extends IPanel {
 		open_arm.setEnabled(e && gas == GateArmState.CLOSED &&
 			isOpenAllowed(ga));
 		warn_close_arm.setEnabled(e && gas == GateArmState.OPEN);
-		close_arm.setEnabled(e && gas == GateArmState.WARN_CLOSE);
+		close_arm.setEnabled(e && isClosePossible(gas));
 	}
 
 	/** Check if gate arm open is allowed */
@@ -438,6 +438,17 @@ public class GateArmArrayDispatcher extends IPanel {
 			return false;
 		default:
 			return true;
+		}
+	}
+
+	/** Check if gate arm close is possible */
+	private boolean isClosePossible(GateArmState gas) {
+		switch(gas) {
+		case FAULT:
+		case WARN_CLOSE:
+			return true;
+		default:
+			return false;
 		}
 	}
 
