@@ -242,4 +242,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		else
 			return null;
 	}
+
+	/** Update the gate arm styles.  This is called by the controller
+	 * when active or fail state changes. */
+	public void updateStyles() {
+		ga_array.updateStyles();
+	}
 }
