@@ -463,7 +463,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		boolean closed = false;
 		for(int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
-			if(ga != null) {
+			if(ga != null && ga.isActive()) {
 				GateArmState gas = ga.getArmStateEnum();
 				switch(gas) {
 				case UNKNOWN:

@@ -204,7 +204,8 @@ private:
 	}
 public:
 	this() {
-		controllers[1] = new STCController(1);
+		foreach(int a; 1 .. 8)
+			controllers[a] = new STCController(a);
 	}
 	ubyte[] recv(ubyte[] buf) {
 		tx_buf.length = 0;
