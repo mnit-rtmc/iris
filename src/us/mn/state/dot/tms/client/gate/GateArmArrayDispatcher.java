@@ -425,14 +425,28 @@ public class GateArmArrayDispatcher extends IPanel {
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
 		open_arm.setEnabled(e && gas == GateArmState.CLOSED &&
 			isOpenAllowed(ga));
-		warn_close_arm.setEnabled(e && gas == GateArmState.OPEN);
-		close_arm.setEnabled(e && isClosePossible(gas));
+		warn_close_arm.setEnabled(e && gas == GateArmState.OPEN &&
+			isCloseAllowed(ga));
+		close_arm.setEnabled(e && isClosePossible(gas) &&
+			isCloseAllowed(ga));
 	}
 
 	/** Check if gate arm open is allowed */
 	private boolean isOpenAllowed(GateArmArray ga) {
 		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
 		case DENY_OPEN:
+		case DENY_ALL:
+		case SYSTEM_DISABLE:
+			return false;
+		default:
+			return true;
+		}
+	}
+
+	/** Check if gate arm close is allowed */
+	private boolean isCloseAllowed(GateArmArray ga) {
+		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
+		case DENY_CLOSE:
 		case DENY_ALL:
 		case SYSTEM_DISABLE:
 			return false;
