@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraPTZ;
@@ -209,8 +210,6 @@ public class GateArmArrayDispatcher extends IPanel {
 			state_lbl[i].setOpaque(true);
 		}
 		arm_state_lbl.setOpaque(true);
-		arm_state_lbl.setBackground(Color.WHITE);
-		arm_state_lbl.setForeground(Color.BLACK);
 		interlock_lbl.setOpaque(true);
 		interlock_lbl.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createLineBorder(Color.BLACK),
@@ -221,16 +220,11 @@ public class GateArmArrayDispatcher extends IPanel {
 		add("location");
 		add(location_lbl, Stretch.LAST);
 		add(createStreamsBox(), Stretch.FULL);
-		add("gate.arm.short");
-		add("gate.arm.state");
-		add("gate.arm.short");
-		add("gate.arm.state");
-		add(new JLabel(), Stretch.LAST);
 		add(gate_lbl[0], Stretch.NONE);
 		add(state_lbl[0]);
 		add(gate_lbl[4], Stretch.NONE);
 		add(state_lbl[4]);
-		add(new JLabel(), Stretch.NONE);
+		add("gate.arm.array.state");
 		add(interlock_lbl, Stretch.TALL);
 		add(gate_lbl[1], Stretch.NONE);
 		add(state_lbl[1]);
@@ -329,8 +323,16 @@ public class GateArmArrayDispatcher extends IPanel {
 			updateApproachStream(ga);
 		if(a == null || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
-		if(a == null || a.equals("styles"))
+		if(a == null || a.equals("styles")) {
+			if(ItemStyle.FAILED.checkBit(ga.getStyles())) {
+				arm_state_lbl.setForeground(Color.WHITE);
+				arm_state_lbl.setBackground(Color.GRAY);
+			} else {
+				arm_state_lbl.setForeground(Color.BLACK);
+				arm_state_lbl.setBackground(Color.WHITE);
+			}
 			updateGateArms(ga);
+		}
 		if(a == null || a.equals("armState")) {
 			arm_state_lbl.setText(" " + GateArmState.fromOrdinal(
 				ga.getArmState()).toString() + " ");
@@ -460,6 +462,8 @@ public class GateArmArrayDispatcher extends IPanel {
 		location_lbl.setText("");
 		stream_pnl.setCamera(null);
 		arm_state_lbl.setText(" ");
+		arm_state_lbl.setBackground(null);
+		arm_state_lbl.setForeground(null);
 		interlock_lbl.setForeground(null);
 		interlock_lbl.setBackground(null);
 		interlock_lbl.setText(" ");
