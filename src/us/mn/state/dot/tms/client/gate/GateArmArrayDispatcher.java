@@ -59,32 +59,11 @@ public class GateArmArrayDispatcher extends IPanel {
 	/** SONAR session */
 	private final Session session;
 
-	/** Cache of gate arm proxy objects */
-	private final TypeCache<GateArm> ga_cache;
-
 	/** Cache of gate arm array proxy objects */
 	private final TypeCache<GateArmArray> cache;
 
 	/** Selection model */
 	private final ProxySelectionModel<GateArmArray> sel_model;
-
-	/** Gate arm proxy listener */
-	private final ProxyListener<GateArm> ga_listener =
-		new ProxyListener<GateArm>()
-	{
-		public void proxyAdded(GateArm ga) { }
-		public void enumerationComplete() { }
-		public void proxyRemoved(GateArm ga) { }
-		public void proxyChanged(final GateArm ga, final String a) {
-			if(ga.getGaArray() == watching) {
-				runSwing(new Runnable() {
-					public void run() {
-						updateArmState(ga, a);
-					}
-				});
-			}
-		}
-	};
 
 	/** Proxy listener */
 	private final ProxyListener<GateArmArray> p_listener =
@@ -215,8 +194,6 @@ public class GateArmArrayDispatcher extends IPanel {
 	/** Create a new gate arm array dispatcher */
 	public GateArmArrayDispatcher(Session s, GateArmArrayManager manager) {
 		session = s;
-		ga_cache = s.getSonarState().getGateArms();
-		ga_cache.addProxyListener(ga_listener);
 		cache = s.getSonarState().getGateArmArrays();
 		cache.addProxyListener(p_listener);
 		sel_model = manager.getSelectionModel();
@@ -314,7 +291,6 @@ public class GateArmArrayDispatcher extends IPanel {
 	/** Dispose of the dispatcher */
 	public void dispose() {
 		cache.removeProxyListener(p_listener);
-		ga_cache.removeProxyListener(ga_listener);
 		sel_model.removeProxySelectionListener(sel_listener);
 		removeAll();
 		stream_pnl.dispose();
@@ -353,9 +329,8 @@ public class GateArmArrayDispatcher extends IPanel {
 			updateApproachStream(ga);
 		if(a == null || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
-		if(a == null || a.equals("styles")) {
-			// do something?
-		}
+		if(a == null || a.equals("styles"))
+			updateGateArms(ga);
 		if(a == null || a.equals("armState")) {
 			arm_state_lbl.setText(" " + GateArmState.fromOrdinal(
 				ga.getArmState()).toString() + " ");
@@ -513,21 +488,17 @@ public class GateArmArrayDispatcher extends IPanel {
 		while(it.hasNext()) {
 			GateArm g = it.next();
 			if(g.getGaArray() == ga)
-				updateArmState(g, null);
+				updateArmState(g);
 		}
 	}
 
-	/** Update one (or all) attribute(s) on the form.
-	 * @param ga The newly selected gate arm.  May not be null.
-	 * @param a Attribute to update, null for all attributes. */
-	private void updateArmState(GateArm ga, String a) {
+	/** Update individual gate arm states.
+	 * @param ga The gate arm.  May not be null. */
+	private void updateArmState(GateArm ga) {
 		int i = ga.getIdx() - 1;
-		if(i < 0 || i >= MAX_ARMS)
-			return;
-		if(a == null || a.equals("name"))
+		if(i >= 0 && i < MAX_ARMS) {
 			gate_lbl[i].setText(ga.getName());
-		if(a == null || a.equals("armState")) {
-			state_lbl[i].setText(trim(getArmState(ga), 16));
+			state_lbl[i].setText(trim(getArmState(ga), 12));
 			updateStateColor(ga, i);
 		}
 	}
