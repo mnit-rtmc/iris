@@ -94,7 +94,7 @@ public class GateArmSystem {
 		if(ENABLED)
 			setEnabled(false);
 		logStderr(CONFIG_ENABLE_FILE.toString() + ": " + reason +
-			" (" + DELETE_FLAG + ")");
+			" (DELETE_FLAG: " + DELETE_FLAG + ")");
 	}
 
 	/** Check if config is enabled (and enable if required) */
