@@ -92,6 +92,7 @@ public class MainServer {
 			district = props.getProperty("district", "tms");
 			initProxySelector(props);
 			store = createStore(props);
+			BaseEvent.store = store;
 			I18N.initialize(props);
 			ServerNamespace ns = createNamespace();
 			IrisCapabilityImpl.lookup(store, ns);
@@ -99,7 +100,6 @@ public class MainServer {
 			IrisRoleImpl.lookup(store, ns);
 			IrisUserImpl.lookup(store, ns);
 			BaseObjectImpl.loadAll(store, ns);
-			BaseEvent.store = store;
 			scheduleTimerJobs();
 			scheduleFlushJobs();
 			server = new Server(ns, props, new AccessLogger(FLUSH));
