@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.Color;
+import java.util.Iterator;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -26,7 +27,10 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
+import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
+import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -55,10 +59,31 @@ public class GateArmArrayDispatcher extends IPanel {
 	private final Session session;
 
 	/** Cache of gate arm proxy objects */
+	private final TypeCache<GateArm> ga_cache;
+
+	/** Cache of gate arm array proxy objects */
 	private final TypeCache<GateArmArray> cache;
 
 	/** Selection model */
 	private final ProxySelectionModel<GateArmArray> sel_model;
+
+	/** Gate arm proxy listener */
+	private final ProxyListener<GateArm> ga_listener =
+		new ProxyListener<GateArm>()
+	{
+		public void proxyAdded(GateArm ga) { }
+		public void enumerationComplete() { }
+		public void proxyRemoved(GateArm ga) { }
+		public void proxyChanged(final GateArm ga, final String a) {
+			if(ga.getGaArray() == watching) {
+				runSwing(new Runnable() {
+					public void run() {
+						updateArmState(ga, a);
+					}
+				});
+			}
+		}
+	};
 
 	/** Proxy listener */
 	private final ProxyListener<GateArmArray> p_listener =
@@ -112,13 +137,16 @@ public class GateArmArrayDispatcher extends IPanel {
 	};
 
 	/** Status component */
-	private final JLabel status_lbl = IPanel.createValueLabel();
+	private final JLabel status_lbl = createValueLabel();
 
-	/** Operation description label */
-	private final JLabel op_lbl = IPanel.createValueLabel();
+	/** Gate arm labels */
+	private final JLabel[] gate_lbl = new JLabel[MAX_ARMS];
 
-	/** Arm state label */
-	private final JLabel arm_state_lbl = IPanel.createValueLabel();
+	/** Gate arm state labels */
+	private final JLabel[] state_lbl = new JLabel[MAX_ARMS];
+
+	/** Array Arm state label */
+	private final JLabel arm_state_lbl = createValueLabel();
 
 	/** Interlock label */
 	private final JLabel interlock_lbl = new JLabel();
@@ -189,6 +217,8 @@ public class GateArmArrayDispatcher extends IPanel {
 	/** Create a new gate arm array dispatcher */
 	public GateArmArrayDispatcher(Session s, GateArmArrayManager manager) {
 		session = s;
+		ga_cache = s.getSonarState().getGateArms();
+		ga_cache.addProxyListener(ga_listener);
 		cache = s.getSonarState().getGateArmArrays();
 		cache.addProxyListener(p_listener);
 		sel_model = manager.getSelectionModel();
@@ -197,8 +227,12 @@ public class GateArmArrayDispatcher extends IPanel {
 		stream_pnl = createStreamPanel(stream_ptz, MEDIUM);
 		thumb_ptz = new CameraPTZ(s);
 		thumb_pnl = createStreamPanel(thumb_ptz, THUMBNAIL);
-		// Make label opaque so that we can set the background color
-		status_lbl.setOpaque(true);
+		for(int i = 0; i < MAX_ARMS; i++) {
+			gate_lbl[i] = new JLabel();
+			state_lbl[i] = createValueLabel();
+			// Make label opaque to allow setting background color
+			state_lbl[i].setOpaque(true);
+		}
 		interlock_lbl.setOpaque(true);
 		interlock_lbl.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createLineBorder(Color.BLACK),
@@ -209,15 +243,30 @@ public class GateArmArrayDispatcher extends IPanel {
 		add("location");
 		add(location_lbl, Stretch.LAST);
 		add(createStreamsBox(), Stretch.FULL);
-		add("device.operation");
-		add(op_lbl, Stretch.WIDE);
-		add(interlock_lbl, Stretch.TALL);
-		add("device.status");
-		add(status_lbl, Stretch.WIDE);
-		add(new JLabel(), Stretch.LEFT);
+		add("gate.arm.short");
 		add("gate.arm.state");
-		add(arm_state_lbl);
-		add(buildButtonBox(), Stretch.RIGHT);
+		add("gate.arm.short");
+		add("gate.arm.state");
+		add(new JLabel(), Stretch.LAST);
+		add(gate_lbl[0], Stretch.NONE);
+		add(state_lbl[0]);
+		add(gate_lbl[4], Stretch.NONE);
+		add(state_lbl[4]);
+		add(arm_state_lbl, Stretch.NONE);
+		add(interlock_lbl, Stretch.TALL);
+		add(gate_lbl[1], Stretch.NONE);
+		add(state_lbl[1]);
+		add(gate_lbl[5], Stretch.NONE);
+		add(state_lbl[5], Stretch.LAST);
+		add(gate_lbl[2], Stretch.NONE);
+		add(state_lbl[2]);
+		add(gate_lbl[6], Stretch.NONE);
+		add(state_lbl[6]);
+		add(buildButtonBox(), Stretch.TALL);
+		add(gate_lbl[3], Stretch.NONE);
+		add(state_lbl[3]);
+		add(gate_lbl[7], Stretch.NONE);
+		add(state_lbl[7], Stretch.LAST);
 		clear();
 	}
 
@@ -262,6 +311,7 @@ public class GateArmArrayDispatcher extends IPanel {
 	/** Dispose of the dispatcher */
 	public void dispose() {
 		cache.removeProxyListener(p_listener);
+		ga_cache.removeProxyListener(ga_listener);
 		sel_model.removeProxySelectionListener(sel_listener);
 		removeAll();
 		stream_pnl.dispose();
@@ -276,9 +326,10 @@ public class GateArmArrayDispatcher extends IPanel {
 		final GateArmArray p = watching;
 		watch(ga);
 		if(ga != p) {
-			if(ga != null)
+			if(ga != null) {
 				updateAttribute(ga, null);
-			else
+				updateGateArms(ga);
+			} else
 				clear();
 		}
 	}
@@ -299,7 +350,7 @@ public class GateArmArrayDispatcher extends IPanel {
 			updateApproachStream(ga);
 		if(a == null || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
-		if(a == null || a.equals("operation") || a.equals("styles"))
+		if(a == null || a.equals("styles"))
 			updateStatus(ga);
 		if(a == null || a.equals("armState")) {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
@@ -343,7 +394,6 @@ public class GateArmArrayDispatcher extends IPanel {
 			status_lbl.setText(getStatus(ga));
 		} else
 			updateCritical(ga);
-		op_lbl.setText(ga.getOperation());
 	}
 
 	/** Get gate arm controller communication status */
@@ -474,15 +524,49 @@ public class GateArmArrayDispatcher extends IPanel {
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
 		status_lbl.setText("");
-		op_lbl.setText("");
 		arm_state_lbl.setText("");
 		interlock_lbl.setForeground(null);
 		interlock_lbl.setBackground(null);
 		interlock_lbl.setText(" ");
+		clearArms();
 		swap_act.setEnabled(false);
 		open_arm.setEnabled(false);
 		warn_close_arm.setEnabled(false);
 		close_arm.setEnabled(false);
 		thumb_pnl.setCamera(null);
+	}
+
+	/** Clear gate arms */
+	private void clearArms() {
+		for(int i = 0; i < MAX_ARMS; i++) {
+			gate_lbl[i].setText(" ");
+			state_lbl[i].setText(" ");
+		}
+	}
+
+	/** Update gate arms */
+	private void updateGateArms(GateArmArray ga) {
+		clearArms();
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while(it.hasNext()) {
+			GateArm g = it.next();
+			if(g.getGaArray() == ga)
+				updateArmState(g, null);
+		}
+	}
+
+	/** Update one (or all) attribute(s) on the form.
+	 * @param ga The newly selected gate arm.  May not be null.
+	 * @param a Attribute to update, null for all attributes. */
+	private void updateArmState(GateArm ga, String a) {
+		int i = ga.getIdx() - 1;
+		if(i < 0 || i >= MAX_ARMS)
+			return;
+		if(a == null || a.equals("name"))
+			gate_lbl[i].setText(ga.getName());
+		if(a == null || a.equals("armState")) {
+			state_lbl[i].setText(GateArmState.fromOrdinal(
+				ga.getArmState()).toString());
+		}
 	}
 }
