@@ -67,6 +67,7 @@ public enum CommandStatus {
 	/** Test if a command status is "normal" */
 	static public boolean isNormal(CommandStatus cs) {
 		switch(cs) {
+		case RESET:
 		case OPEN_IN_PROGRESS:
 		case OPEN_COMPLETE:
 		case CLOSE_IN_PROGRESS:
