@@ -12,6 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+import core.thread;
 import std.socket;
 import std.stdio;
 import protocol;
@@ -217,6 +218,7 @@ public:
 		Socket.select(r_set, w_set, null);
 		poll_listeners();
 		poll_clients();
+		Thread.sleep(dur!("msecs")(10));
 	}
 }
 
