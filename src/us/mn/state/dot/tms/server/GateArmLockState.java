@@ -47,10 +47,10 @@ public class GateArmLockState {
 		return gai != getInterlock();
 	}
 
-	/** Flag to indicate prerequisite gate arm closed */
+	/** Flag to indicate prerequisite gate arm closed (not fully open) */
 	private boolean prereq_closed = false;
 
-	/** Set flag to indicate prerequisite gate arm closed.
+	/** Set flag to indicate prerequisite gate arm closed (not fully open).
 	 * @param d True if prerequisite gate closed; false otherwise.
 	 * @return True if interlock value changed. */
 	public boolean setPrereqClosed(boolean c) {

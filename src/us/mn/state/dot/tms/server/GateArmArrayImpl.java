@@ -576,7 +576,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Check open/close state of prerequisite gate arm array */
 	private void checkPrerequisite() {
 		GateArmArrayImpl pr = getPrerequisite();
-		setPrereqClosed(pr != null && pr.isClosed());
+		setPrereqClosed(pr != null && !pr.isFullyOpen());
 	}
 
 	/** Set flag to indicate prerequisite closed */
@@ -708,6 +708,11 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Test if gate arm is (or may be) open */
 	public boolean isOpen() {
 		return isActive() && arm_state != GateArmState.CLOSED;
+	}
+
+	/** Test if gate arm is fully open */
+	public boolean isFullyOpen() {
+		return isOnline() && arm_state == GateArmState.OPEN;
 	}
 
 	/** Test if gate arm is moving */
