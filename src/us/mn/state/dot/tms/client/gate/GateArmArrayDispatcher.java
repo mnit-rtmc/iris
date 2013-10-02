@@ -26,6 +26,7 @@ import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
@@ -136,9 +137,6 @@ public class GateArmArrayDispatcher extends IPanel {
 		}
 	};
 
-	/** Status component */
-	private final JLabel status_lbl = createValueLabel();
-
 	/** Gate arm labels */
 	private final JLabel[] gate_lbl = new JLabel[MAX_ARMS];
 
@@ -233,6 +231,9 @@ public class GateArmArrayDispatcher extends IPanel {
 			// Make label opaque to allow setting background color
 			state_lbl[i].setOpaque(true);
 		}
+		arm_state_lbl.setOpaque(true);
+		arm_state_lbl.setBackground(Color.WHITE);
+		arm_state_lbl.setForeground(Color.BLACK);
 		interlock_lbl.setOpaque(true);
 		interlock_lbl.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createLineBorder(Color.BLACK),
@@ -252,12 +253,14 @@ public class GateArmArrayDispatcher extends IPanel {
 		add(state_lbl[0]);
 		add(gate_lbl[4], Stretch.NONE);
 		add(state_lbl[4]);
-		add(arm_state_lbl, Stretch.NONE);
+		add(new JLabel(), Stretch.NONE);
 		add(interlock_lbl, Stretch.TALL);
 		add(gate_lbl[1], Stretch.NONE);
 		add(state_lbl[1]);
 		add(gate_lbl[5], Stretch.NONE);
-		add(state_lbl[5], Stretch.LAST);
+		add(state_lbl[5]);
+		add(arm_state_lbl, Stretch.NONE);
+		add(new JLabel(), Stretch.LAST);
 		add(gate_lbl[2], Stretch.NONE);
 		add(state_lbl[2]);
 		add(gate_lbl[6], Stretch.NONE);
@@ -350,11 +353,12 @@ public class GateArmArrayDispatcher extends IPanel {
 			updateApproachStream(ga);
 		if(a == null || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
-		if(a == null || a.equals("styles"))
-			updateStatus(ga);
+		if(a == null || a.equals("styles")) {
+			// do something?
+		}
 		if(a == null || a.equals("armState")) {
-			arm_state_lbl.setText(GateArmState.fromOrdinal(
-				ga.getArmState()).toString());
+			arm_state_lbl.setText(" " + GateArmState.fromOrdinal(
+				ga.getArmState()).toString() + " ");
 		}
 		if(a == null || a.equals("interlock"))
 			updateInterlock(ga);
@@ -383,47 +387,6 @@ public class GateArmArrayDispatcher extends IPanel {
 		} else {
 			thumb_ptz.setCamera(c);
 			thumb_pnl.setCamera(c);
-		}
-	}
-
-	/** Update the status widgets */
-	private void updateStatus(GateArmArray ga) {
-		if(ControllerHelper.isFailed(ga.getController())) {
-			status_lbl.setForeground(Color.WHITE);
-			status_lbl.setBackground(Color.GRAY);
-			status_lbl.setText(getStatus(ga));
-		} else
-			updateCritical(ga);
-	}
-
-	/** Get gate arm controller communication status */
-	static private String getStatus(GateArmArray ga) {
-		return ControllerHelper.getStatus(ga.getController());
-	}
-
-	/** Update the critical error status */
-	private void updateCritical(GateArmArray ga) {
-		String critical = getStatus(ga);
-		if(critical.isEmpty())
-			updateMaintenance(ga);
-		else {
-			status_lbl.setForeground(Color.WHITE);
-			status_lbl.setBackground(Color.BLACK);
-			status_lbl.setText(critical);
-		}
-	}
-
-	/** Update the maintenance error status */
-	private void updateMaintenance(GateArmArray ga) {
-		String m = ControllerHelper.getMaintenance(ga.getController());
-		if(m.isEmpty()) {
-			status_lbl.setForeground(null);
-			status_lbl.setBackground(null);
-			status_lbl.setText("");
-		} else {
-			status_lbl.setForeground(Color.BLACK);
-			status_lbl.setBackground(Color.YELLOW);
-			status_lbl.setText(m);
 		}
 	}
 
@@ -521,10 +484,7 @@ public class GateArmArrayDispatcher extends IPanel {
 		name_lbl.setText("");
 		location_lbl.setText("");
 		stream_pnl.setCamera(null);
-		status_lbl.setForeground(null);
-		status_lbl.setBackground(null);
-		status_lbl.setText("");
-		arm_state_lbl.setText("");
+		arm_state_lbl.setText(" ");
 		interlock_lbl.setForeground(null);
 		interlock_lbl.setBackground(null);
 		interlock_lbl.setText(" ");
@@ -541,6 +501,8 @@ public class GateArmArrayDispatcher extends IPanel {
 		for(int i = 0; i < MAX_ARMS; i++) {
 			gate_lbl[i].setText(" ");
 			state_lbl[i].setText(" ");
+			state_lbl[i].setForeground(DARK_BLUE);
+			state_lbl[i].setBackground(null);
 		}
 	}
 
@@ -565,8 +527,43 @@ public class GateArmArrayDispatcher extends IPanel {
 		if(a == null || a.equals("name"))
 			gate_lbl[i].setText(ga.getName());
 		if(a == null || a.equals("armState")) {
-			state_lbl[i].setText(GateArmState.fromOrdinal(
-				ga.getArmState()).toString());
+			state_lbl[i].setText(trim(getArmState(ga), 16));
+			updateStateColor(ga, i);
+		}
+	}
+
+	/** Trim string to a maximum length */
+	static private String trim(String s, int len) {
+		assert(len >= 0);
+		return s.substring(0, Math.min(s.length(), len));
+	}
+
+	/** Get one gate arm state */
+	private String getArmState(GateArm ga) {
+		String cs = ControllerHelper.getStatus(ga.getController());
+		if(cs.length() > 0)
+			return cs;
+		String ms = ControllerHelper.getMaintenance(ga.getController());
+		if(ms.length() > 0)
+			return ms;
+		return GateArmState.fromOrdinal(ga.getArmState()).toString();
+	}
+
+	/** Update the status widgets */
+	private void updateStateColor(GateArm ga, int i) {
+		Controller c = ga.getController();
+		if(ControllerHelper.isFailed(c)) {
+			state_lbl[i].setForeground(Color.WHITE);
+			state_lbl[i].setBackground(Color.GRAY);
+		} else if(ControllerHelper.getStatus(c).length() > 0) {
+			state_lbl[i].setForeground(Color.WHITE);
+			state_lbl[i].setBackground(Color.BLACK);
+		} else if(ControllerHelper.getMaintenance(c).length() > 0) {
+			state_lbl[i].setForeground(Color.BLACK);
+			state_lbl[i].setBackground(Color.YELLOW);
+		} else {
+			state_lbl[i].setForeground(DARK_BLUE);
+			state_lbl[i].setBackground(null);
 		}
 	}
 }

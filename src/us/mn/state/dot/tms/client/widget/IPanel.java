@@ -77,7 +77,7 @@ public class IPanel extends JPanel {
 	}
 
 	/** Color for value label text */
-	static private final Color DARK_BLUE = new Color(0, 0, 128);
+	static protected final Color DARK_BLUE = new Color(0, 0, 128);
 
 	/** Create a value label */
 	static public JLabel createValueLabel() {
