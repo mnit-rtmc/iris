@@ -165,16 +165,16 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return geo_loc;
 	}
 
-	/** Prerequesite gate arm array */
+	/** Prerequisite gate arm array */
 	private String prereq;
 
-	/** Set the prerequesite gate arm array */
+	/** Set the prerequisite gate arm array */
 	@Override public void setPrereq(String pr) {
 		GateArmSystem.disable(name + ": prereq");
 		prereq = pr;
 	}
 
-	/** Set the prerequesite gate arm array */
+	/** Set the prerequisite gate arm array */
 	public void doSetPrereq(String pr) throws TMSException {
 		if("".equals(pr))
 			pr = null;
@@ -185,12 +185,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		}
 	}
 
-	/** Get prerequesite gate arm array */
+	/** Get prerequisite gate arm array */
 	@Override public String getPrereq() {
 		return prereq;
 	}
 
-	/** Get prerequesite gate arm array */
+	/** Get prerequisite gate arm array */
 	private GateArmArrayImpl getPrerequisite() {
 		return (GateArmArrayImpl)GateArmArrayHelper.lookup(prereq);
 	}
@@ -531,7 +531,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override public void updateStyles() {
 		setStyles(calculateStyles());
 		GateArmSystem.checkInterlocks(getRoad());
-		checkPrerequesite();
 		GateArmSystem.updateDependants();
 		setSystemEnable(checkEnabled());
 		setOpenConflict(lock_state.isOpenDenied() && isOpen());
@@ -574,8 +573,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return lock_state.isOpenInterlock();
 	}
 
-	/** Check open/close state of prerequesite gate arm array */
-	private void checkPrerequesite() {
+	/** Check open/close state of prerequisite gate arm array */
+	private void checkPrerequisite() {
 		GateArmArrayImpl pr = getPrerequisite();
 		setPrereqClosed(pr != null && pr.isClosed());
 	}
@@ -604,6 +603,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set dependant open state */
 	public void setDependant() {
 		setDependantOpen(dep_open);
+		checkPrerequisite();
 	}
 
 	/** Set flag to indicate dependant gate arm open */

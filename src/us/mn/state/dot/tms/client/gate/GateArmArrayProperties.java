@@ -84,7 +84,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Approach camera combo box */
 	private final JComboBox approach_cbx = new JComboBox();
 
-	/** Prerequesite gate arm array */
+	/** Prerequisite gate arm array */
 	private final IAction prereq = new IAction("gate.arm.prereq") {
 		protected void do_perform() {
 			GateArmArray ga =
