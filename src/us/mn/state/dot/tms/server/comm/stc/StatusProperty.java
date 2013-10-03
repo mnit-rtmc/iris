@@ -267,7 +267,7 @@ public class StatusProperty extends STCProperty {
 		else if(isClosed() && !isOpen())
 			return GateArmState.CLOSED;
 		else
-			return GateArmState.UNKNOWN;
+			return GateArmState.FAULT;
 	}
 
 	/** Test if the gate arm has faults */

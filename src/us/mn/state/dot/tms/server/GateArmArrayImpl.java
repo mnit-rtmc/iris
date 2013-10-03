@@ -496,12 +496,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 				}
 			}
 		}
+		if(unknown)
+			return GateArmState.UNKNOWN;
 		if(timeout)
 			return GateArmState.TIMEOUT;
 		if(fault)
 			return GateArmState.FAULT;
-		if(unknown)
-			return GateArmState.UNKNOWN;
 		if(opening && !closing)
 			return GateArmState.OPENING;
 		if(closing && !opening)
@@ -510,10 +510,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			return GateArmState.OPEN;
 		if(closed && !(open || opening || closing))
 			return GateArmState.CLOSED;
-		if(opening || open || closing || closed)
-			return GateArmState.FAULT;
-		else
-			return GateArmState.UNKNOWN;
+		return GateArmState.FAULT;
 	}
 
 	/** Get the arm state */
@@ -722,7 +719,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Test if gate arm is possibly open */
 	public boolean isPossiblyOpen() {
-		return isActive() && arm_state != GateArmState.CLOSED;
+		return isActive() &&
+		       arm_state != GateArmState.CLOSED &&
+		       arm_state != GateArmState.UNKNOWN;
 	}
 
 	/** Test if gate arm is open */
