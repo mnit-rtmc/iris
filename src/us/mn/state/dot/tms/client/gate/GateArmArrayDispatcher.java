@@ -300,8 +300,8 @@ public class GateArmArrayDispatcher extends IPanel {
 		watch(ga);
 		if(ga != p) {
 			if(ga != null) {
-				updateAttribute(ga, null);
-				updateGateArms(ga);
+				// other attributes updated by watch
+				updateAttribute(ga, "name");
 			} else
 				clear();
 		}
