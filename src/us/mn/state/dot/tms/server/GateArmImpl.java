@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
+import static us.mn.state.dot.tms.GateArmState.TIMEOUT;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -34,6 +35,9 @@ import us.mn.state.dot.tms.server.comm.MessagePoller;
  * @author Douglas Lau
  */
 public class GateArmImpl extends DeviceImpl implements GateArm {
+
+	/** Timeout (ms) for a comm failure to result in TIMEOUT status */
+	static private final long FAIL_TIMEOUT_MS = 90 * 1000;
 
 	/** Load all the gate arms */
 	static protected void loadAll() throws TMSException {
@@ -179,9 +183,19 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override public void setDeviceRequest(int r) {
 		DeviceRequest req = GateArmSystem.checkRequest(r);
 		if(GateArmSystem.checkEnabled() && req != null) {
+			checkTimeout();
 			GateArmPoller p = getGateArmPoller();
 			if(p != null)
 				p.sendRequest(this, req);
+		}
+	}
+
+	/** Check for comm timeout */
+	public void checkTimeout() {
+		ControllerImpl c = (ControllerImpl)getController();
+		if(c != null) {
+			if(c.getFailMillis() > FAIL_TIMEOUT_MS)
+				setArmStateNotify(TIMEOUT, null);
 		}
 	}
 
