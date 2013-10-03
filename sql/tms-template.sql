@@ -1780,6 +1780,7 @@ email_smtp_host
 email_recipient_aws	
 email_recipient_bugs	
 email_recipient_gate_arm	
+gate_arm_alert_timeout_secs	90
 help_trouble_ticket_enable	false
 help_trouble_ticket_url	
 incident_clear_secs	600

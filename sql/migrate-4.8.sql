@@ -5,6 +5,8 @@ SET SESSION AUTHORIZATION 'tms';
 UPDATE iris.system_attribute SET value = '4.8.0'
 	WHERE name = 'database_version';
 
+INSERT INTO iris.system_attribute (name, value) VALUES ('gate_arm_alert_timeout_secs', 90);
+
 CREATE TABLE iris._gate_arm_array (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,

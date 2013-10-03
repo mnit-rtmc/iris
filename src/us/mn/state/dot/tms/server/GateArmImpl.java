@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
 import static us.mn.state.dot.tms.GateArmState.TIMEOUT;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -37,7 +38,9 @@ import us.mn.state.dot.tms.server.comm.MessagePoller;
 public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Timeout (ms) for a comm failure to result in TIMEOUT status */
-	static private final long FAIL_TIMEOUT_MS = 90 * 1000;
+	static private final long failTimeoutMS() {
+		return 1000*SystemAttrEnum.GATE_ARM_ALERT_TIMEOUT_SECS.getInt();
+	}
 
 	/** Load all the gate arms */
 	static protected void loadAll() throws TMSException {
@@ -194,7 +197,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	public void checkTimeout() {
 		ControllerImpl c = (ControllerImpl)getController();
 		if(c != null) {
-			if(c.getFailMillis() > FAIL_TIMEOUT_MS)
+			if(c.getFailMillis() > failTimeoutMS())
 				setArmStateNotify(TIMEOUT, null);
 		}
 	}
