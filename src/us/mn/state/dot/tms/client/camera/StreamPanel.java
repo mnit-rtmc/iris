@@ -29,7 +29,6 @@ import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.utils.I18N;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -63,11 +62,7 @@ public class StreamPanel extends JPanel {
 	/** Timer listener for updating video status */
 	private class StatusUpdater implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			VideoStream vs = stream;
-			if(vs != null && vs.isPlaying())
-				status_lbl.setText(vs.getStatus());
-			else
-				clearStream();
+			updateStatus();
 		}
 	};
 
@@ -130,18 +125,32 @@ public class StreamPanel extends JPanel {
 		return p;
 	}
 
+	/** Update stream status */
+	private void updateStatus() {
+		STREAMER.addJob(new Job() {
+			public void perform() {
+				VideoStream vs = stream;
+				if(vs != null && vs.isPlaying())
+					status_lbl.setText(vs.getStatus());
+				else
+					clearStream();
+			}
+		});
+	}
+
 	/** Set the camera to stream */
 	public void setCamera(final Camera c) {
-		if(stream != null)
-			clearStream();
-		if(c != null) {
-			status_lbl.setText(I18N.get("camera.stream.opening"));
-			STREAMER.addJob(new Job() {
-				public void perform() {
+		STREAMER.addJob(new Job() {
+			public void perform() {
+				if(stream != null)
+					clearStream();
+				if(c != null) {
+					status_lbl.setText(I18N.get(
+						"camera.stream.opening"));
 					requestStream(c);
 				}
-			});
-		}
+			}
+		});
 	}
 
 	/** Request a new video stream */
@@ -182,19 +191,15 @@ public class StreamPanel extends JPanel {
 
 	/** Clear the video stream */
 	private void clearStream() {
-		screen_pnl.removeAll();
 		timer.stop();
+		screen_pnl.removeAll();
+		screen_pnl.repaint();
 		VideoStream vs = stream;
 		if(vs != null) {
 			vs.dispose();
 			stream = null;
 		}
 		status_lbl.setText(null);
-		runSwing(new Runnable() {
-			public void run() {
-				screen_pnl.repaint();
-			}
-		});
 	}
 
 	/** Dispose of the stream panel */
