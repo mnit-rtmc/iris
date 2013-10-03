@@ -545,7 +545,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		GateArmSystem.checkInterlocks(getRoad());
 		GateArmSystem.updateDependants();
 		setSystemEnable(checkEnabled());
-		setOpenConflict(lock_state.isOpenDenied() && isOpen());
+		setOpenConflict(lock_state.isOpenDenied() &&
+			(isOpen() || isTimeout()));
 		setCloseConflict(lock_state.isCloseDenied() && isClosed());
 	}
 
@@ -726,10 +727,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Test if gate arm is open */
 	private boolean isOpen() {
-		// After comm. failure, arm state will go to TIMEOUT after 90
-		// seconds.  At that point, we must assume that it is open.
-		return (isOnline() && isPossiblyOpen()) ||
-		       (isActive() && arm_state == GateArmState.TIMEOUT);
+		return isOnline() && isPossiblyOpen();
+	}
+
+	/** Test if gate arm is in TIMEOUT state */
+	private boolean isTimeout() {
+		return isActive() && arm_state == GateArmState.TIMEOUT;
 	}
 
 	/** Test if gate arm is fully open */
