@@ -235,6 +235,8 @@ INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (306, 'Gate Arm CLOSING');
 INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (307, 'Gate Arm CLOSED');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (308, 'Gate Arm TIMEOUT');
 
 CREATE TABLE event.gate_arm_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),

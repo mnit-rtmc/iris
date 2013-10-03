@@ -24,13 +24,14 @@ package us.mn.state.dot.tms;
 public enum GateArmState {
 
 	/** Gate Arm states */
-	UNKNOWN,	/* comm. failure	no change allowed */
+	UNKNOWN,	/* initial unknown	no change allowed */
 	FAULT,		/* open / close fault	user: CLOSING */
 	OPENING,	/* open in progress	system: OPEN or FAULT */
 	OPEN,		/* gate open		user: WARN_CLOSE */
 	WARN_CLOSE,	/* gate open, DMS warn	user: CLOSING or OPENING */
 	CLOSING,	/* close in progress	system: CLOSED or FAULT */
-	CLOSED;		/* gate closed		user: OPENING */
+	CLOSED,		/* gate closed		user: OPENING */
+	TIMEOUT;	/* comm. timeout	no change allowed */
 
 	/** Get gate arm state from an ordinal value */
 	static public GateArmState fromOrdinal(int o) {

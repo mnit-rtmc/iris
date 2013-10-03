@@ -2088,6 +2088,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 305	Gate Arm WARN CLOSE
 306	Gate Arm CLOSING
 307	Gate Arm CLOSED
+308	Gate Arm TIMEOUT
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;

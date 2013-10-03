@@ -182,7 +182,7 @@ public class GateArmSystem {
 			GateArmArray g = it.next();
 			if(g instanceof GateArmArrayImpl) {
 				GateArmArrayImpl ga = (GateArmArrayImpl)g;
-				if(ga.isOpen()) {
+				if(ga.isPossiblyOpen()) {
 					Road gr = ga.getRoad();
 					if(gr == r) {
 						int gd = ga.getRoadDir();

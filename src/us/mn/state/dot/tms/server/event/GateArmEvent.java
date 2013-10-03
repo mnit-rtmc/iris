@@ -41,6 +41,8 @@ public class GateArmEvent extends BaseEvent {
 			return EventType.GATE_ARM_CLOSING;
 		case CLOSED:
 			return EventType.GATE_ARM_CLOSED;
+		case TIMEOUT:
+			return EventType.GATE_ARM_TIMEOUT;
 		default:
 			return EventType.GATE_ARM_UNKNOWN;
 		}

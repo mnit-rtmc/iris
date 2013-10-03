@@ -460,18 +460,24 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Get the aggregate arm state for all arms in the array */
 	private GateArmState aggregateArmState() {
+		boolean unknown = false;
+		boolean fault = false;
 		boolean opening = false;
 		boolean open = false;
 		boolean closing = false;
 		boolean closed = false;
+		boolean timeout = false;
 		for(int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
 			if(ga != null && ga.isActive()) {
 				GateArmState gas = ga.getArmStateEnum();
 				switch(gas) {
 				case UNKNOWN:
+					unknown = true;
+					break;
 				case FAULT:
-					return gas;
+					fault = true;
+					break;
 				case OPENING:
 					opening = true;
 					break;
@@ -484,12 +490,21 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 				case CLOSED:
 					closed = true;
 					break;
+				case TIMEOUT:
+					timeout = true;
+					break;
 				}
 			}
 		}
-		if(opening && !(closing || closed))
+		if(timeout)
+			return GateArmState.TIMEOUT;
+		if(fault)
+			return GateArmState.FAULT;
+		if(unknown)
+			return GateArmState.UNKNOWN;
+		if(opening && !closing)
 			return GateArmState.OPENING;
-		if(closing && !(opening || open))
+		if(closing && !opening)
 			return GateArmState.CLOSING;
 		if(open && !(closed || opening || closing))
 			return GateArmState.OPEN;
@@ -512,9 +527,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Calculate item styles */
 	private long calculateStyles() {
 		long s = ItemStyle.ALL.bit();
-		if(isOnline() && isClosed())
+		if(isClosed())
 			s |= ItemStyle.CLOSED.bit();
-		if(isOnline() && isOpen())
+		if(isOpen())
 			s |= ItemStyle.OPEN.bit();
 		if(isMoving())
 			s |= ItemStyle.MOVING.bit();
@@ -597,7 +612,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	public void checkDependant() {
 		GateArmArrayImpl pr = getPrerequisite();
 		if(pr != null)
-			pr.dep_open = (pr.dep_open || isOpen());
+			pr.dep_open = (pr.dep_open || isPossiblyOpen());
 	}
 
 	/** Set dependant open state */
@@ -702,12 +717,20 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Test if gate arm is closed */
 	private boolean isClosed() {
-		return isActive() && arm_state == GateArmState.CLOSED;
+		return isOnline() && arm_state == GateArmState.CLOSED;
 	}
 
-	/** Test if gate arm is (or may be) open */
-	public boolean isOpen() {
+	/** Test if gate arm is possibly open */
+	public boolean isPossiblyOpen() {
 		return isActive() && arm_state != GateArmState.CLOSED;
+	}
+
+	/** Test if gate arm is open */
+	private boolean isOpen() {
+		// After comm. failure, arm state will go to TIMEOUT after 90
+		// seconds.  At that point, we must assume that it is open.
+		return (isOnline() && isPossiblyOpen()) ||
+		       (isActive() && arm_state == GateArmState.TIMEOUT);
 	}
 
 	/** Test if gate arm is fully open */

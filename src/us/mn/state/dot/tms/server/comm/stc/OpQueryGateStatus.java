@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.stc;
 
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
-import static us.mn.state.dot.tms.GateArmState.UNKNOWN;
+import static us.mn.state.dot.tms.GateArmState.TIMEOUT;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQueryGateStatus extends OpSTC {
 
-	/** Timeout (ms) for a comm failure to result in UNKNOWN status */
+	/** Timeout (ms) for a comm failure to result in TIMEOUT status */
 	static private final long FAIL_TIMEOUT_MS = 90 * 1000;
 
 	/** Status property */
@@ -95,7 +95,7 @@ public class OpQueryGateStatus extends OpSTC {
 	@Override public void cleanup() {
 		super.cleanup();
 		if(!isSuccess() && isFailThresholdExpired())
-			gate_arm.setArmStateNotify(UNKNOWN, null);
+			gate_arm.setArmStateNotify(TIMEOUT, null);
 	}
 
 	/** Test if comm has failed for longer than threshold */
