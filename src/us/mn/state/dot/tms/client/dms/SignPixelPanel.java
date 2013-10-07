@@ -37,40 +37,40 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class SignPixelPanel extends JPanel {
 
 	/** Flag to turn on antialiasing */
-	protected final boolean antialias;
+	private final boolean antialias;
 
 	/** Color of sign face */
-	protected final Color face_color;
+	private final Color face_color;
 
 	/** Sign width (mm) */
-	protected int width_mm = 0;
+	private int width_mm = 0;
 
 	/** Sign height (mm) */
-	protected int height_mm = 0;
+	private int height_mm = 0;
 
 	/** Width of horizontal border (mm) */
-	protected int hborder_mm;
+	private int hborder_mm;
 
 	/** Height of vertical border (mm) */
-	protected int vborder_mm;
+	private int vborder_mm;
 
 	/** Width of individual pixels (mm) */
-	protected int hpitch_mm = 1;
+	private int hpitch_mm = 1;
 
 	/** Height of individual pixels (mm) */
-	protected int vpitch_mm = 1;
+	private int vpitch_mm = 1;
 
 	/** Sign pixel width */
-	protected int width_pix = 0;
+	private int width_pix = 0;
 
 	/** Sign pixel height */
-	protected int height_pix = 0;
+	private int height_pix = 0;
 
 	/** Width of characters (pixels), zero for variable */
-	protected int width_char;
+	private int width_char;
 
 	/** Height of lines (pixels), zero for variable */
-	protected int height_line;
+	private int height_line;
 
 	/** Transform from user (mm) to screen coordinates */
 	private AffineTransform transform;
@@ -82,10 +82,10 @@ public class SignPixelPanel extends JPanel {
 	private BufferedImage buffer;
 
 	/** Bloom size relative to pixel size (0 means no blooming) */
-	protected float bloom = 0f;
+	private float bloom = 0f;
 
 	/** Flag that determines if buffer needs repainting */
-	protected boolean dirty = false;
+	private boolean dirty = false;
 
 	/** Create a new sign pixel panel.
 	 * @param h Height of panel.
@@ -113,26 +113,12 @@ public class SignPixelPanel extends JPanel {
 		setSizes(h, w);
 	}
 
-	/** Set the physical sign dimensions */
-	public void setPhysicalDimensions(int w, int h, int hb, int vb, int hp,
-		int vp)
-	{
-		width_mm = Math.max(0, w);
-		height_mm = Math.max(0, h);
-		hborder_mm = Math.max(0, hb);
-		vborder_mm = Math.max(0, vb);
-		hpitch_mm = Math.max(1, hp);
-		vpitch_mm = Math.max(1, vp);
-		dirty = true;
-	}
-
-	/** Set the logical sign dimensions */
-	public void setLogicalDimensions(int w, int h, int wc, int hl) {
-		width_pix = Math.max(0, w);
-		height_pix = Math.max(0, h);
-		width_char = Math.max(0, wc);
-		height_line = Math.max(0, hl);
-		dirty = true;
+	/** Set the panel size */
+	private void setSizes(int height, int width) {
+		Dimension d = UI.dimension(width, height);
+		setMinimumSize(d);
+		setPreferredSize(d);
+		setMaximumSize(d);
 	}
 
 	/** Clear the pixel panel */
@@ -150,7 +136,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Paint this on the screen */
-	public void paintComponent(Graphics g) {
+	@Override public void paintComponent(Graphics g) {
 		while(dirty)
 			updateBuffer(graphic);
 		BufferedImage b = buffer;	// Avoid NPE race
@@ -180,7 +166,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Rescale when the component is resized or the sign changes */
-	protected void rescale() {
+	private void rescale() {
 		int wp = getWidth();
 		int hp = getHeight();
 		if(wp > 0 && hp > 0)
@@ -188,7 +174,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Rescale the component to the specified size */
-	protected void rescale(double w, double h) {
+	private void rescale(double w, double h) {
 		int w_mm = width_mm;
 		int h_mm = height_mm;
 		if(w_mm > 0 && h_mm > 0) {
@@ -232,7 +218,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Paint the unlit pixels */
-	protected void paintUnlitPixels(Graphics2D g, RasterGraphic rg) {
+	private void paintUnlitPixels(Graphics2D g, RasterGraphic rg) {
 		if(antialias)
 			setBloom(0);
 		else
@@ -251,7 +237,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Paint the lit pixels */
-	protected void paintLitPixels(Graphics2D g, RasterGraphic rg) {
+	private void paintLitPixels(Graphics2D g, RasterGraphic rg) {
 		if(antialias)
 			setBloom(0.6f);
 		else
@@ -272,23 +258,23 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Set the bloom factor */
-	protected void setBloom(float b) {
+	private void setBloom(float b) {
 		bloom = b;
 	}
 
 	/** Get the bloom in the x-direction */
-	protected float getBloomX() {
+	private float getBloomX() {
 		return getHorizontalPitch() * bloom / 2;
 	}
 
 	/** Get the x-distance to the given pixel */
-	protected float getPixelX(int x) {
+	private float getPixelX(int x) {
 		return getHorizontalBorder() + getCharacterOffset(x) +
 			getHorizontalPitch() * x - getBloomX() / 2;
 	}
 
 	/** Get the character offset (for character-matrix signs only) */
-	protected float getCharacterOffset(int x) {
+	private float getCharacterOffset(int x) {
 		if(width_char > 0)
 			return (x / width_char) * calculateCharGap();
 		else
@@ -296,7 +282,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Calculate the width of the gap between characters (mm) */
-	protected float calculateCharGap() {
+	private float calculateCharGap() {
 		float excess = width_mm - 2 * getHorizontalBorder() -
 			width_pix * getHorizontalPitch();
 		int gaps = getCharacterGaps();
@@ -308,7 +294,7 @@ public class SignPixelPanel extends JPanel {
 
 	/** Get the horizontal border (mm).  This does some sanity checks in
 	 * case the sign vendor supplies stupid values. */
-	protected float getHorizontalBorder() {
+	private float getHorizontalBorder() {
 		float excess = width_mm - getHorizontalPitch() *
 			(width_pix + getCharacterGaps());
 		return Math.min(hborder_mm, Math.max(0, excess / 2));
@@ -316,31 +302,31 @@ public class SignPixelPanel extends JPanel {
 
 	/** Get the horizontal pitch (mm).  This does some sanity checks in
 	 * case the sign vendor supplies stupid values. */
-	protected float getHorizontalPitch() {
+	private float getHorizontalPitch() {
 		float gaps = width_pix + getCharacterGaps();
 		float mx = gaps > 0 ? width_mm / gaps : width_mm;
 		return Math.min(hpitch_mm, mx);
 	}
 
 	/** Get the number of gaps between characters */
-	protected int getCharacterGaps() {
+	private int getCharacterGaps() {
 		return (width_char > 1 && width_pix > width_char) ?
 			width_pix / width_char - 1 : 0;
 	}
 
 	/** Get the bloom in the y-direction */
-	protected float getBloomY() {
+	private float getBloomY() {
 		return getVerticalPitch() * bloom / 2;
 	}
 
 	/** Get the y-distance to the given pixel */
-	protected float getPixelY(int y) {
+	private float getPixelY(int y) {
 		return getVerticalBorder() + getLineOffset(y) +
 			getVerticalPitch() * y - getBloomY() / 2;
 	}
 
 	/** Get the line offset (for line- or character-matrix signs) */
-	protected float getLineOffset(int y) {
+	private float getLineOffset(int y) {
 		if(height_line > 0)
 			return (y / height_line) * calculateLineGap();
 		else
@@ -348,7 +334,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Calculate the height of the gap between lines (mm) */
-	protected float calculateLineGap() {
+	private float calculateLineGap() {
 		float excess = height_mm - 2 * getVerticalBorder() -
 			height_pix * getVerticalPitch();
 		int gaps = getLineGaps();
@@ -360,7 +346,7 @@ public class SignPixelPanel extends JPanel {
 
 	/** Get the vertical border (mm).  This does some sanity checks in case
 	 * the sign vendor supplies stupid values. */
-	protected float getVerticalBorder() {
+	private float getVerticalBorder() {
 		float excess = height_mm - getVerticalPitch() *
 			(height_pix + getLineGaps());
 		return Math.min(vborder_mm, Math.max(0, excess / 2));
@@ -368,24 +354,16 @@ public class SignPixelPanel extends JPanel {
 
 	/** Get the vertical pitch (mm).  This does some sanity checks in case
 	 * the sign vendor supplies stupid values. */
-	protected float getVerticalPitch() {
+	private float getVerticalPitch() {
 		float gaps = height_pix + getLineGaps();
 		float mx = gaps > 0 ? height_mm / gaps : height_mm;
 		return Math.min(vpitch_mm, mx);
 	}
 
 	/** Get the number of gaps between lines */
-	protected int getLineGaps() {
+	private int getLineGaps() {
 		return (height_line > 1 && height_pix > height_line) ?
 			height_pix / height_line - 1 : 0;
-	}
-
-	/** Set the panel size */
-	private void setSizes(int height, int width) {
-		Dimension d = UI.dimension(width, height);
-		setMinimumSize(d);
-		setPreferredSize(d);
-		setMaximumSize(d);
 	}
 
 	/** Set the dimensions from a DMS */
@@ -410,6 +388,19 @@ public class SignPixelPanel extends JPanel {
 			setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 	}
 
+	/** Set the physical sign dimensions */
+	public void setPhysicalDimensions(int w, int h, int hb, int vb, int hp,
+		int vp)
+	{
+		width_mm = Math.max(0, w);
+		height_mm = Math.max(0, h);
+		hborder_mm = Math.max(0, hb);
+		vborder_mm = Math.max(0, vb);
+		hpitch_mm = Math.max(1, hp);
+		vpitch_mm = Math.max(1, vp);
+		dirty = true;
+	}
+
 	/** Set the logical dimensions from a DMS */
 	private void setLogicalDimensions(DMS dms) {
 		Integer wp = dms.getWidthPixels();
@@ -420,5 +411,14 @@ public class SignPixelPanel extends JPanel {
 			setLogicalDimensions(wp, hp, cw, ch);
 		else
 			setLogicalDimensions(0, 0, 0, 0);
+	}
+
+	/** Set the logical sign dimensions */
+	public void setLogicalDimensions(int w, int h, int wc, int hl) {
+		width_pix = Math.max(0, w);
+		height_pix = Math.max(0, h);
+		width_char = Math.max(0, wc);
+		height_line = Math.max(0, hl);
+		dirty = true;
 	}
 }
