@@ -106,4 +106,20 @@ public class PageTimeHelper {
 		}
 		return value;
 	}
+
+	/** Get the page-on intervals for the specified MULTI string.
+	 * @param ms MULTI string.
+	 * @return Array of page-on intervals (for each page). */
+	static public Interval[] pageOnIntervals(String ms) {
+		MultiString m = new MultiString(ms);
+		return m.pageOnIntervals(defaultPageOnInterval(m.singlePage()));
+	}
+
+	/** Get the page-off intervals for the specified MULTI string.
+	 * @param ms MULTI string.
+	 * @return Array of page-off intervals (for each page). */
+	static public Interval[] pageOffIntervals(String ms) {
+		MultiString m = new MultiString(ms);
+		return m.pageOffIntervals(defaultPageOffInterval());
+	}
 }

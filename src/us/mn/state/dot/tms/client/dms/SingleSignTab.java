@@ -391,8 +391,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		if(rg != null) {
 			String ms = getMultiString(dms);
 			current_pnl.setDimensions(dms);
-			setPager(new DMSPanelPager(current_pnl, rg,
-			         pageOnIntervals(ms), pageOffIntervals(ms)));
+			setPager(new DMSPanelPager(current_pnl, rg, ms));
 		} else {
 			setPager(null);
 			current_pnl.clear();
@@ -404,23 +403,6 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		adjusting++;
 		dispatcher.setMessage(getMultiString(dms));
 		adjusting--;
-	}
-
-	/** Get the page-on intervals for the specified MULTI string.
-	 * @param m MULTI string.
-	 * @return Array of page-on intervals (for each page). */
-	private Interval[] pageOnIntervals(String m) {
-		MultiString ms = new MultiString(m);
-		return ms.pageOnIntervals(PageTimeHelper.defaultPageOnInterval(
-			ms.singlePage()));
-	}
-
-	/** Get the page-off intervals for the specified MULTI string.
-	 * @param ms MULTI string.
-	 * @return Array of page-off intervals (for each page). */
-	private Interval[] pageOffIntervals(String ms) {
-		return new MultiString(ms).pageOffIntervals(
-			PageTimeHelper.defaultPageOffInterval());
 	}
 
 	/** Get the MULTI string currently on the specified dms.
@@ -447,11 +429,10 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 	/** Create a preview panel pager */
 	private DMSPanelPager createPreviewPager() {
-		String ms = dispatcher.getMessage();
 		RasterGraphic[] rg = dispatcher.getPixmaps();
 		if(rg != null) {
-			return new DMSPanelPager(preview_pnl, rg,
-				pageOnIntervals(ms), pageOffIntervals(ms));
+			String ms = dispatcher.getMessage();
+			return new DMSPanelPager(preview_pnl, rg, ms);
 		} else
 			return null;
 	}

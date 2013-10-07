@@ -65,20 +65,17 @@ public class DMSPanelPager {
 	/** Create a new DMS panel pager.
 	 * @param p SignPixelPanel.
 	 * @param rg Array of raster graphics, one per page.
-	 * @param p_on Array of page-on times, one per page.
-	 * @param p_off Array of page-off times, one per page. */
-	public DMSPanelPager(SignPixelPanel p, RasterGraphic[] rg,
-		Interval[] p_on, Interval[] p_off)
-	{
+	 * @param ms MULTI string. */
+	public DMSPanelPager(SignPixelPanel p, RasterGraphic[] rg, String ms) {
 		pixel_pnl = p;
 		rasters = rg;
-		page_on = p_on;
-		page_off = p_off;
+		page_on = PageTimeHelper.pageOnIntervals(ms);
+		page_off = PageTimeHelper.pageOffIntervals(ms);
 		// These array lengths should always be the same length, but
 		// there is a short race which could make them different.  Use
 		// the smallest to prevent walking off the end of one.
-		n_pages = Math.min(rg.length, Math.min(p_on.length,
-			p_off.length));
+		n_pages = Math.min(rg.length, Math.min(page_on.length,
+			page_off.length));
 		assert n_pages > 0;
 		pixel_pnl.setGraphic(rasters[page]);
 		timer = new Timer(TIMER_TICK_MS, new ActionListener() {
