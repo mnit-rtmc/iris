@@ -413,7 +413,10 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private synchronized void requestArmState(GateArmState rs, User o)
 		throws TMSException
 	{
-		setArmState(rs);
+		if(rs == GateArmState.WARN_CLOSE) {
+			setArmState(rs);
+			return;
+		}
 		for(int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
 			if(ga != null)
