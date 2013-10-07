@@ -150,6 +150,17 @@ public class DMSHelper extends BaseHelper {
 		return "";
 	}
 
+	/** Get the MULTI string currently on the specified dms.
+	 * @param dms DMS to lookup. */
+	static public String getMultiString(DMS dms) {
+		if(dms != null) {
+			SignMessage sm = dms.getMessageCurrent();
+			if(sm != null)
+				return sm.getMulti();
+		}
+		return "";
+	}
+
 	/** Get the default font number for a DMS */
 	static public int getDefaultFontNumber(DMS dms) {
 		if(dms != null) {

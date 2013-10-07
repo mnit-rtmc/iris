@@ -389,7 +389,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	private void updateCurrentPanel(DMS dms) {
 		RasterGraphic[] rg = DMSHelper.getRasters(dms);
 		if(rg != null) {
-			String ms = getMultiString(dms);
+			String ms = DMSHelper.getMultiString(dms);
 			current_pnl.setDimensions(dms);
 			setPager(new DMSPanelPager(current_pnl, rg, ms));
 		} else {
@@ -401,18 +401,8 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Update the current message */
 	private void updateMessageCurrent(DMS dms) {
 		adjusting++;
-		dispatcher.setMessage(getMultiString(dms));
+		dispatcher.setMessage(DMSHelper.getMultiString(dms));
 		adjusting--;
-	}
-
-	/** Get the MULTI string currently on the specified dms.
-	 * @param dms DMS to lookup, may not be null. */
-	private String getMultiString(DMS dms) {
-		SignMessage sm = dms.getMessageCurrent();
-		if(sm != null)
-			return sm.getMulti();
-		else
-			return "";
 	}
 
 	/** Update the preview panel */
