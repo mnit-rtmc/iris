@@ -28,6 +28,8 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
@@ -36,6 +38,7 @@ import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraPTZ;
@@ -43,6 +46,8 @@ import us.mn.state.dot.tms.client.camera.StreamPanel;
 import us.mn.state.dot.tms.client.camera.VideoRequest;
 import static us.mn.state.dot.tms.client.camera.VideoRequest.Size.MEDIUM;
 import static us.mn.state.dot.tms.client.camera.VideoRequest.Size.THUMBNAIL;
+import us.mn.state.dot.tms.client.dms.DMSPanelPager;
+import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -63,6 +68,9 @@ public class GateArmArrayDispatcher extends IPanel {
 	/** Cache of gate arm array proxy objects */
 	private final TypeCache<GateArmArray> cache;
 
+	/** Cache of DMS proxy objects */
+	private final TypeCache<DMS> dms_cache;
+
 	/** Selection model */
 	private final ProxySelectionModel<GateArmArray> sel_model;
 
@@ -78,6 +86,24 @@ public class GateArmArrayDispatcher extends IPanel {
 				runSwing(new Runnable() {
 					public void run() {
 						updateAttribute(ga, a);
+					}
+				});
+			}
+		}
+	};
+
+	/** DMS Proxy listener */
+	private final ProxyListener<DMS> dms_listener =
+		new ProxyListener<DMS>()
+	{
+		public void proxyAdded(DMS d) { }
+		public void enumerationComplete() { }
+		public void proxyRemoved(DMS d) { }
+		public void proxyChanged(final DMS d, final String a) {
+			if(d == watching_dms && "messageCurrent".equals(a)) {
+				runSwing(new Runnable() {
+					public void run() {
+						updateDms(d);
 					}
 				});
 			}
@@ -116,6 +142,13 @@ public class GateArmArrayDispatcher extends IPanel {
 			}
 		}
 	};
+
+	/** Sign pixel panel */
+	private final SignPixelPanel current_pnl = new SignPixelPanel(80, 132,
+		true);
+
+	/** DMS panel pager */
+	private DMSPanelPager dms_pager;
 
 	/** Gate arm labels */
 	private final JLabel[] gate_lbl = new JLabel[MAX_ARMS];
@@ -192,11 +225,26 @@ public class GateArmArrayDispatcher extends IPanel {
 		}
 	};
 
+	/** Currently selected DMS */
+	private DMS watching_dms;
+
+	/** Watch a DMS */
+	private void watch_dms(final DMS nw) {
+		final DMS ow = watching_dms;
+		if(ow != null)
+			dms_cache.ignoreObject(ow);
+		watching_dms = nw;
+		if(nw != null)
+			dms_cache.watchObject(nw);
+	}
+
 	/** Create a new gate arm array dispatcher */
 	public GateArmArrayDispatcher(Session s, GateArmArrayManager manager) {
 		session = s;
 		cache = s.getSonarState().getGateArmArrays();
 		cache.addProxyListener(p_listener);
+		dms_cache = s.getSonarState().getDmsCache().getDMSs();
+		dms_cache.addProxyListener(dms_listener);
 		sel_model = manager.getSelectionModel();
 		sel_model.addProxySelectionListener(sel_listener);
 		stream_ptz = new CameraPTZ(s);
@@ -248,6 +296,8 @@ public class GateArmArrayDispatcher extends IPanel {
 	private Box createStreamsBox() {
 		Box vb = Box.createVerticalBox();
 		vb.add(Box.createVerticalGlue());
+		vb.add(current_pnl);
+		vb.add(Box.createVerticalStrut(UI.hgap));
 		vb.add(thumb_pnl);
 		vb.add(Box.createVerticalStrut(UI.hgap));
 		vb.add(new JButton(swap_act));
@@ -284,7 +334,9 @@ public class GateArmArrayDispatcher extends IPanel {
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
+		dms_cache.removeProxyListener(dms_listener);
 		cache.removeProxyListener(p_listener);
+		setPager(null);
 		sel_model.removeProxySelectionListener(sel_listener);
 		removeAll();
 		stream_pnl.dispose();
@@ -321,6 +373,11 @@ public class GateArmArrayDispatcher extends IPanel {
 			updateCameraStream(ga);
 		if(a == null || a.equals("approach"))
 			updateApproachStream(ga);
+		if(a == null || a.equals("dms")) {
+			DMS dms = ga.getDms();
+			watch_dms(dms);
+			updateDms(dms);
+		}
 		if(a == null || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
 		if(a == null || a.equals("styles")) {
@@ -365,6 +422,27 @@ public class GateArmArrayDispatcher extends IPanel {
 			thumb_ptz.setCamera(c);
 			thumb_pnl.setCamera(c);
 		}
+	}
+
+	/** Update the DMS */
+	private void updateDms(DMS dms) {
+		RasterGraphic[] rg = DMSHelper.getRasters(dms);
+		if(rg != null) {
+			String ms = DMSHelper.getMultiString(dms);
+			current_pnl.setDimensions(dms);
+			setPager(new DMSPanelPager(current_pnl, rg, ms));
+		} else {
+			setPager(null);
+			current_pnl.clear();
+		}
+	}
+
+	/** Set the DMS panel pager */
+	private void setPager(DMSPanelPager p) {
+		DMSPanelPager op = dms_pager;
+		if(op != null)
+			op.dispose();
+		dms_pager = p;
 	}
 
 	/** Update the interlock label */
@@ -468,6 +546,9 @@ public class GateArmArrayDispatcher extends IPanel {
 		interlock_lbl.setBackground(null);
 		interlock_lbl.setText(" ");
 		clearArms();
+		watch_dms(null);
+		setPager(null);
+		current_pnl.clear();
 		swap_act.setEnabled(false);
 		open_arm.setEnabled(false);
 		warn_close_arm.setEnabled(false);
