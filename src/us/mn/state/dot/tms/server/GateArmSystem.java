@@ -44,7 +44,7 @@ public class GateArmSystem {
 
 	/** Log a message to stderr */
 	static private void logStderr(String msg) {
-		System.err.println(TimeSteward.currentDateTimeString(false) +
+		System.err.println(TimeSteward.currentDateTimeString(true) +
 			" Gate Arm System " + msg);
 	}
 

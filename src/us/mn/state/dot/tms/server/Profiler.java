@@ -157,7 +157,7 @@ public class Profiler {
 	/** Create a log entry */
 	private String createLogEntry() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(TimeSteward.currentDateTimeString(false));
+		sb.append(TimeSteward.currentDateTimeString(true));
 		sb.append(',');
 		sb.append(getLoadAvg());
 		sb.append(',');
