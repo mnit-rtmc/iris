@@ -9,6 +9,42 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.8.0 (7 Oct 2013)</dt>
+	<dd><ul>
+		<li>
+			Added Gate Arm device types, with new user interface.
+		</li>
+		<li>
+			Added STC gate arm driver (HySecurity STC).
+		</li>
+		<li>
+			Removed hard-coded sample file extensions by adding
+			SampleArchiveFactory.hasKnownExtension.
+		</li>
+		<li>
+			Added incident_view to database.
+		</li>
+		<li>
+			Added infinova debug log.
+		</li>
+		<li>
+			Fixed ramp meter showing as "METERING" when failed.
+		</li>
+		<li>
+			Updated SQL template to use more modern techniques.
+		</li>
+		<li>
+			Cleaned up user interface code.
+		</li>
+		<li>
+			Added simple protocol emulator (protest) in D.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.8.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>4.7.0 (29 May 2013)</dt>
 	<dd><ul>
 		<li>
