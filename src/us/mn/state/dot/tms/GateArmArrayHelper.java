@@ -39,4 +39,15 @@ public class GateArmArrayHelper extends BaseHelper {
 		return new IteratorWrapper<GateArmArray>(namespace.iterator(
 			GateArmArray.SONAR_TYPE));
 	}
+
+	/** Check if a DMS is associated with a gate arm array */
+	static public boolean checkDMS(DMS dms) {
+		Iterator<GateArmArray> it = iterator();
+		while(it.hasNext()) {
+			GateArmArray ga = it.next();
+			if(dms == ga.getDms())
+				return true;
+		}
+		return false;
+	}
 }

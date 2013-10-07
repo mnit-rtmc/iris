@@ -46,6 +46,7 @@ import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
+import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
@@ -1535,6 +1536,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return LCSHelper.lookup(name) != null;
 	}
 
+	/** Test if DMS is associated with a gate arm array */
+	private boolean isForGateArm() {
+		return GateArmArrayHelper.checkDMS(this);
+	}
+
 	/** Test if DMS is online (active and not failed) */
 	private boolean isOnline() {
 		return isActive() && !isFailed();
@@ -1622,24 +1628,26 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(isLCS())
 			s |= ItemStyle.LCS.bit();
 		else {
-			if(isAvailable())
-				s |= ItemStyle.AVAILABLE.bit();
-			if(isUserDeployed())
-				s |= ItemStyle.DEPLOYED.bit();
-			if(isTravelTimeDeployed())
-				s |= ItemStyle.TRAVEL_TIME.bit();
-			if(isScheduleDeployed())
-				s |= ItemStyle.SCHEDULED.bit();
-			if(isAwsDeployed())
-				s |= ItemStyle.AWS_DEPLOYED.bit();
-			if(isAwsControlled())
-				s |= ItemStyle.AWS_CONTROLLED.bit();
 			if(needsMaintenance())
 				s |= ItemStyle.MAINTENANCE.bit();
 			if(isActive() && isFailed())
 				s |= ItemStyle.FAILED.bit();
 			if(!isActive())
 				s |= ItemStyle.INACTIVE.bit();
+			if(!isForGateArm()) {
+				if(isAvailable())
+					s |= ItemStyle.AVAILABLE.bit();
+				if(isUserDeployed())
+					s |= ItemStyle.DEPLOYED.bit();
+				if(isTravelTimeDeployed())
+					s |= ItemStyle.TRAVEL_TIME.bit();
+				if(isScheduleDeployed())
+					s |= ItemStyle.SCHEDULED.bit();
+				if(isAwsDeployed())
+					s |= ItemStyle.AWS_DEPLOYED.bit();
+				if(isAwsControlled())
+					s |= ItemStyle.AWS_CONTROLLED.bit();
+			}
 		}
 		setStyles(s);
 	}
