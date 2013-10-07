@@ -1054,7 +1054,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public void sendMessage(String m, DMSMessagePriority ap,
 		DMSMessagePriority rp)
 	{
-		SignMessage sm = createMessage(m, ap, rp, null);
+		SignMessage sm = createMessage(m, ap, rp, false, null);
 		try {
 			if(!isMessageCurrentEquivalent(sm))
 				doSetMessageNext(sm, null);
