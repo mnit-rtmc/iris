@@ -225,9 +225,16 @@ public:
 /** Main entry point */
 int main(char[][] args) {
 	Server srv = new Server();
-	srv.add_listener(1234, new STCDriver());
-	srv.add_listener(1235, new STCDriver());
-	srv.add_listener(1236, new STCDriver());
+	srv.add_listener(8001, new STCDriver());
+	srv.add_listener(8002, new STCDriver());
+	srv.add_listener(8003, new STCDriver());
+	srv.add_listener(8004, new STCDriver());
+	srv.add_listener(8005, new STCDriver());
+	srv.add_listener(8006, new STCDriver());
+	srv.add_listener(8007, new STCDriver());
+	srv.add_listener(8008, new STCDriver());
+	srv.add_listener(8009, new STCDriver());
+	srv.add_listener(8010, new STCDriver());
 	while(true)
 		srv.poll();
 	return 0;
