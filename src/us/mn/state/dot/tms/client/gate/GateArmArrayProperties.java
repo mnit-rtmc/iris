@@ -89,7 +89,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		protected void do_perform() {
 			GateArmArray ga =
 				(GateArmArray)prereq_cbx.getSelectedItem();
-			proxy.setPrereq(ga != null ? ga.getName() : "");
+			proxy.setPrereq(ga != null ? ga.getName() : null);
 		}
 	};
 
@@ -238,7 +238,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Create gate arm setup panel */
 	private JPanel createSetupPanel() {
 		prereq_cbx.setModel(new WrapperComboBoxModel(
-			state.getGateArmArrayModel()));
+			state.getGateArmArrayModel(), true, true));
 		dms_cbx.setModel(new WrapperComboBoxModel(
 			state.getDmsCache().getDMSModel()));
 		IPanel p = new IPanel();

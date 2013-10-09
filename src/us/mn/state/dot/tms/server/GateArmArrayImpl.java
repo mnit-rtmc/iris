@@ -176,8 +176,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set the prerequisite gate arm array */
 	public void doSetPrereq(String pr) throws TMSException {
-		if("".equals(pr))
-			pr = null;
 		if((pr == null && prereq != null) ||
 		   (pr != null && !pr.equals(prereq))) {
 			store.update(this, "prereq", pr);
