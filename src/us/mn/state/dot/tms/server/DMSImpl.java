@@ -1574,7 +1574,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Test if a DMS is active, not failed and deployed */
-	private boolean isMsgDeployed() {
+	public boolean isMsgDeployed() {
 		return isOnline() && !isMsgBlank();
 	}
 
@@ -1584,7 +1584,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Test if a DMS has been deployed by schedule */
-	private boolean isScheduleDeployed() {
+	public boolean isScheduleDeployed() {
 		return isMsgDeployed() && isMsgScheduled();
 	}
 
@@ -1604,7 +1604,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Test if DMS needs maintenance */
-	private boolean needsMaintenance() {
+	public boolean needsMaintenance() {
 		if(!isOnline())
 			return false;
 		if(hasCriticalError())

@@ -54,4 +54,7 @@ public interface LCSArray extends Device {
 
 	/** Get the operation description */
 	String getOperation();
+
+	/** Get item style bits */
+	long getStyles();
 }

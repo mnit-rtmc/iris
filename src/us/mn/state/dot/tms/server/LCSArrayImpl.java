@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -79,8 +80,9 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		map.put("pin", pin);
 		map.put("notes", notes);
 		map.put("shift", shift);
-		if(lcs_lock != null)
-			map.put("lcs_lock", lcs_lock.ordinal());
+		LCSArrayLock lock = lcs_lock;
+		if(lock != null)
+			map.put("lcs_lock", lock.ordinal());
 		return map;
 	}
 
@@ -180,6 +182,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		else
 			store.update(this, "lcs_lock", null);
 		lcs_lock = l;
+		updateStyles();
 	}
 
 	/** Set the lock status */
@@ -191,10 +194,8 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Get the lock status */
 	public Integer getLcsLock() {
-		if(lcs_lock != null)
-			return lcs_lock.ordinal();
-		else
-			return null;
+		LCSArrayLock lock = lcs_lock;
+		return lock != null ? lock.ordinal() : null;
 	}
 
 	/** Next indications owner */
@@ -293,6 +294,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		ownerCurrent = o;
 		notifyAttribute("ownerCurrent");
 		setIndicationsNext(null);
+		updateStyles();
 	}
 
 	/** Log indications in event db */
@@ -350,7 +352,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	protected transient LCSImpl[] lanes = new LCSImpl[0];
 
 	/** Get the LCS for all lanes (right-to-left) */
-	public synchronized LCSImpl[] getLanes() {
+	private synchronized LCSImpl[] getLanes() {
 		return Arrays.copyOf(lanes, lanes.length);
 	}
 
@@ -371,6 +373,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			ind[lane - 1] = null;	// Unknown indication
 		indicationsCurrent = ind;
 		notifyAttribute("indicationsCurrent");
+		updateStyles();
 	}
 
 	/** Create an array of LCS for all lanes, by altering one lane.
@@ -427,10 +430,10 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Get an array of the DMS */
 	protected DMSImpl[] getDMSArray() {
-		LCS[] lcss = getLanes();
-		DMSImpl[] signs = new DMSImpl[lcss.length];
-		for(int i = 0; i < lcss.length; i++) {
-			LCS lcs = lcss[i];
+		LCSImpl[] lns = getLanes();
+		DMSImpl[] signs = new DMSImpl[lns.length];
+		for(int i = 0; i < lns.length; i++) {
+			LCS lcs = lns[i];
 			if(lcs != null) {
 				DMSImpl dms = (DMSImpl)namespace.lookupObject(
 					DMS.SONAR_TYPE, lcs.getName());
@@ -439,5 +442,145 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			}
 		}
 		return signs;
+	}
+
+	/** Test if LCS array is locked */
+	private boolean isLocked() {
+		return lcs_lock != null;
+	}
+
+	/** Interface to check the DMS in an LCS array */
+	private interface DMSChecker {
+		boolean check(DMSImpl dms);
+	}
+
+	/** Check each DMS in an LCS array */
+	private DMSImpl forEachDMS(DMSChecker chk) {
+		LCSImpl[] lns = getLanes();
+		for(int i = 0; i < lns.length; i++) {
+			LCSImpl lcs = lns[i];
+			if(lcs != null) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms instanceof DMSImpl) {
+					DMSImpl d = (DMSImpl)dms;
+					if(chk.check(d))
+						return d;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Check if LCS array is active */
+	@Override public boolean isActive() {
+		return forEachDMS(new DMSChecker() {
+			public boolean check(DMSImpl dms) {
+				return dms.isActive();
+			}
+		}) != null;
+	}
+
+	/** Check if LCS array is failed */
+	@Override public boolean isFailed() {
+		return forEachDMS(new DMSChecker() {
+			public boolean check(DMSImpl dms) {
+				return dms.isFailed();
+			}
+		}) != null;
+	}
+
+	/** Check if all LCSs in an array are failed */
+	private boolean isAllFailed() {
+		return forEachDMS(new DMSChecker() {
+			public boolean check(DMSImpl dms) {
+				return !dms.isFailed();
+			}
+		}) == null;
+	}
+
+	/** Test if LCS array is deployed */
+	private boolean isDeployed() {
+		if(isAllFailed())
+			return false;
+		// First, check the indications
+		Integer[] ind = getIndicationsCurrent();
+		for(Integer i: ind) {
+			if(i != null && i != LaneUseIndication.DARK.ordinal())
+				return true;
+		}
+		// There might be something else on the sign that is not
+		// a lane use indication -- check DMS deployed states
+		return forEachDMS(new DMSChecker() {
+			public boolean check(DMSImpl dms) {
+				return dms.isMsgDeployed();
+			}
+		}) != null;
+	}
+
+	/** Check if LCS array is user deployed */
+	private boolean isUserDeployed() {
+		return isDeployed() && !isScheduleDeployed();
+	}
+
+	/** Check if LCS array is schedule deployed */
+	private boolean isScheduleDeployed() {
+		return forEachDMS(new DMSChecker() {
+			public boolean check(DMSImpl dms) {
+				return dms.isScheduleDeployed();
+			}
+		}) != null;
+	}
+
+	/** Test if LCS array needs maintenance */
+	private boolean needsMaintenance() {
+		LCSArrayLock lock = lcs_lock;
+		if(lock == LCSArrayLock.MAINTENANCE)
+			return true;
+		return forEachDMS(new DMSChecker() {
+			public boolean check(DMSImpl dms) {
+				return dms.needsMaintenance();
+			}
+		}) != null;
+	}
+
+	/** Test if LCS array is available */
+	private boolean isAvailable() {
+		return !isLocked() &&
+		        isActive() &&
+		       !isFailed() &&
+		       !isDeployed() &&
+		       !needsMaintenance();
+	}
+
+	/** Item style bits */
+	private transient long styles = 0;
+
+	/** Update the LCS array styles */
+	public void updateStyles() {
+		long s = ItemStyle.ALL.bit();
+		if(isAvailable())
+			s |= ItemStyle.AVAILABLE.bit();
+		if(isUserDeployed())
+			s |= ItemStyle.DEPLOYED.bit();
+		if(isScheduleDeployed())
+			s |= ItemStyle.SCHEDULED.bit();
+		if(needsMaintenance())
+			s |= ItemStyle.MAINTENANCE.bit();
+		if(isActive() && isFailed())
+			s |= ItemStyle.FAILED.bit();
+		setStyles(s);
+	}
+
+	/** Set the item style bits (and notify clients) */
+	private void setStyles(long s) {
+		if(s != styles) {
+			styles = s;
+			notifyAttribute("styles");
+		}
+	}
+
+	/** Get item style bits */
+	public long getStyles() {
+		return styles;
 	}
 }
