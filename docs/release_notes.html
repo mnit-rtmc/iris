@@ -9,6 +9,21 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.9.0 (10 Oct 2013)</dt>
+	<dd><ul>
+		<li>
+			Updated SONAR wire-protocol to allow null references
+			to be encoded properly.
+		</li>
+		<li>
+			Added "styles" attribute to LCS arrays.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-4.9.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>4.8.0 (7 Oct 2013)</dt>
 	<dd><ul>
 		<li>
