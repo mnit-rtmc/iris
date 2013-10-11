@@ -315,7 +315,7 @@ public class GateArmArrayDispatcher extends IPanel {
 	{
 		VideoRequest vr = new VideoRequest(session.getProperties(), sz);
 		SonarState st = session.getSonarState();
-		Connection c = st.lookupConnection(st.getConnection());
+		Connection c = st.lookupConnection();
 		vr.setSonarSessionId(c.getSessionId());
 		vr.setRate(30);
 		return new StreamPanel(ptz, vr);

@@ -132,7 +132,7 @@ public class CameraViewer extends IPanel
 	private StreamPanel createStreamPanel() {
 		VideoRequest vr = new VideoRequest(session.getProperties(),
 			SIZE);
-		Connection c = state.lookupConnection(state.getConnection());
+		Connection c = state.lookupConnection();
 		vr.setSonarSessionId(c.getSessionId());
 		vr.setRate(30);
 		return new StreamPanel(cam_ptz, vr);

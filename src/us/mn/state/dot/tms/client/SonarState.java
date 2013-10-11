@@ -520,7 +520,12 @@ public class SonarState extends Client {
 	}
 
 	/** Look up the specified connection */
-	public Connection lookupConnection(String name) {
+	private Connection lookupConnection(String name) {
 		return connections.lookupObject(name);
+	}
+
+	/** Lookup the current connection */
+	public Connection lookupConnection() {
+		return lookupConnection(getConnection());
 	}
 }
