@@ -105,6 +105,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return null;
 	}
 
+	/** Compare two (possibly-null) integers for equality */
+	static protected boolean integerEquals(Integer i0, Integer i1) {
+		if(i0 == null)
+			return i1 == null;
+		else
+			return i0.equals(i1);
+	}
+
 	/** Get the primary key name */
 	public String getKeyName() {
 		return "name";

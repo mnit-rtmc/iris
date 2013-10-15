@@ -94,14 +94,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** DMS name, e.g. CMS or DMS */
 	static private final String DMSABBR = I18N.get("dms");
 
-	/** Compare two (possibly-null) integers for equality */
-	static protected boolean integerEquals(Integer i0, Integer i1) {
-		if(i0 == null)
-			return i1 == null;
-		else
-			return i0.equals(i1);
-	}
-
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);

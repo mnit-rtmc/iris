@@ -40,15 +40,6 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  */
 public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
-	/** Compare two (possibly-null) integers for equality */
-	//FIXME: move to base class (DMSImpl also)
-	static protected boolean integerEquals(Integer i0, Integer i1) {
-		if(i0 == null)
-			return i1 == null;
-		else
-			return i0.equals(i1);
-	}
-
 	/** Sample period for weather sensors (seconds) */
 	static protected final int SAMPLE_PERIOD_SEC = 60;
 
