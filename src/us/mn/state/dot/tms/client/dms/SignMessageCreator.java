@@ -16,13 +16,12 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
@@ -38,8 +37,8 @@ public class SignMessageCreator {
 	/** Sign message type cache */
 	private final TypeCache<SignMessage> sign_messages;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
+	/** User session */
+	private final Session session;
 
 	/** SONAR User for permission checks */
 	protected final User user;
@@ -48,9 +47,10 @@ public class SignMessageCreator {
 	protected int uid = 0;
 
 	/** Create a new sign message creator */
-	public SignMessageCreator(SonarState st, User u) {
-		sign_messages = st.getDmsCache().getSignMessages();
-		namespace = st.getNamespace();
+	public SignMessageCreator(Session s, User u) {
+		session = s;
+		sign_messages =
+			s.getSonarState().getDmsCache().getSignMessages();
 		user = u;
 	}
 
@@ -132,12 +132,6 @@ public class SignMessageCreator {
 			return null;
 	}
 
-	/** Check if the user can add the named sign message */
-	public boolean canAddSignMessage(String name) {
-		return name != null && namespace.canAdd(user,
-			new Name(SignMessage.SONAR_TYPE, name));
-	}
-
 	/** 
 	 * Create a SignMessage name, which is in this form: 
 	 *    user.name + "_" + uniqueid
@@ -181,9 +175,13 @@ public class SignMessageCreator {
 		return names;
 	}
 
+	/** Check if the user can add the named sign message */
+	public boolean canAddSignMessage(String name) {
+		return session.canAdd(SignMessage.SONAR_TYPE, name);
+	}
+
 	/** Check if the user can create a sign message */
 	public boolean canCreate() {
-		Name n = new Name(SignMessage.SONAR_TYPE, createName(0));
-		return namespace.canAdd(user, n);
+		return canAddSignMessage(createName(0));
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,8 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.VideoMonitor;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
@@ -30,28 +27,19 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  */
 public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 
-	/** Create a SONAR name to check for allowed updates */
-	static protected Name createAttrName(VideoMonitor proxy) {
-		return new Name(proxy, "camera");
-	}
-
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR User for permission checks */
-	protected final User user;
+	/** User Session */
+	private final Session session;
 
 	/** Create a new filtered monitor model */
-	public FilteredMonitorModel(User u, SonarState st) {
-		super(st.getCamCache().getVideoMonitors());
-		namespace = st.getNamespace();
-		user = u;
+	public FilteredMonitorModel(Session s) {
+		super(s.getSonarState().getCamCache().getVideoMonitors());
+		session = s;
 		initialize();
 	}
 
 	/** Add a new proxy to the list model */
 	protected int doProxyAdded(VideoMonitor proxy) {
-		if(namespace.canUpdate(user, createAttrName(proxy)))
+		if(session.canUpdate(proxy, "camera"))
 			return super.doProxyAdded(proxy);
 		else
 			return -1;

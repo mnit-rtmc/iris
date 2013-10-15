@@ -16,16 +16,13 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.util.HashMap;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
 import static us.mn.state.dot.tms.R_Node.MID_SHIFT;
 import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.Session;
 
 /**
  * This is a utility class to create new r_nodes. It creates both a GeoLoc and
@@ -40,18 +37,8 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	 * done asynchronously. */
 	static protected final int MAX_IN_PROCESS_NAMES = 8;
 
-	/** Create a SONAR name to check for adding a geo_loc object */
-	static protected Name createGeoLocName(String oname) {
-		return new Name(GeoLoc.SONAR_TYPE, oname);
-	}
-
-	/** Create a SONAR name to check for adding an r_node object */
-	static protected Name createR_NodeName(String oname) {
-		return new Name(R_Node.SONAR_TYPE, oname);
-	}
-
-	/** SONAR namespace */
-	protected final Namespace namespace;
+	/** User session */
+	private final Session session;
 
 	/** R_Node type cache */
 	protected final TypeCache<R_Node> r_nodes;
@@ -69,9 +56,6 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 		return geo_locs;
 	}
 
-	/** SONAR User for permission checks */
-	protected final User user;
-
 	/** Unique ID for r_node naming */
 	protected int uid = 0;
 
@@ -80,11 +64,10 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 		new HashMap<String, HashMap<String, Object>>();
 
 	/** Create a new r_node creator */
-	public R_NodeCreator(SonarState st, User u) {
-		namespace = st.getNamespace();
-		r_nodes = st.getDetCache().getR_Nodes();
-		geo_locs = st.getGeoLocs();
-		user = u;
+	public R_NodeCreator(Session s) {
+		session = s;
+		r_nodes = s.getSonarState().getDetCache().getR_Nodes();
+		geo_locs = s.getSonarState().getGeoLocs();
 		geo_locs.addProxyListener(this);
 	}
 
@@ -147,9 +130,8 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 
 	/** Check if the user can add the named r_node */
 	public boolean canAdd(String oname) {
-		return oname != null &&
-			namespace.canAdd(user, createGeoLocName(oname)) &&
-			namespace.canAdd(user, createR_NodeName(oname));
+		return session.canAdd(GeoLoc.SONAR_TYPE, oname) &&
+		       session.canAdd(R_Node.SONAR_TYPE, oname);
 	}
 
 	/** Called when a new GeoLoc is added */

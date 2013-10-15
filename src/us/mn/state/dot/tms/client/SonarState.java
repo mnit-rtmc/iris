@@ -429,7 +429,7 @@ public class SonarState extends Client {
 
 	/** Check if the user can read a type */
 	public boolean canRead(String tname) {
-		return getNamespace().canRead(user, new Name(tname));
+		return getNamespace().canRead(new Name(tname), user);
 	}
 
 	/** Login to the SONAR server */

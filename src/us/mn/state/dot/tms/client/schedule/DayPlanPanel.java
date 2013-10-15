@@ -26,9 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DayPlan;
@@ -149,17 +146,13 @@ public class DayPlanPanel extends JPanel {
 		}
 	};
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** Logged-in user */
-	protected final User user;
+	/** User session */
+	private final Session session;
 
 	/** Create a new day plan panel */
 	public DayPlanPanel(Session s) {
 		super(new GridBagLayout());
-		namespace = s.getSonarState().getNamespace();
-		user = s.getUser();
+		session = s;
 		cache = s.getSonarState().getDayPlans();
 		ListModel m = s.getSonarState().getDayModel();
 		day_cbox.setAction(day);
@@ -359,21 +352,16 @@ public class DayPlanPanel extends JPanel {
 
 	/** Check if the user can add */
 	protected boolean canAdd(String oname) {
-		return namespace.canAdd(user, new Name(DayPlan.SONAR_TYPE,
-		       oname));
+		return session.canAdd(DayPlan.SONAR_TYPE, oname);
 	}
 
 	/** Check if the user can update */
 	public boolean canUpdate() {
-		return namespace.canUpdate(user, new Name(DayPlan.SONAR_TYPE,
-			"oname", "aname"));
+		return session.canUpdate(DayPlan.SONAR_TYPE, "aname");
 	}
 
 	/** Check if the user can remove a day plan */
 	public boolean canRemove(DayPlan dp) {
-		if(dp == null)
-			return false;
-		return namespace.canRemove(user, new Name(DayPlan.SONAR_TYPE,
-		       dp.getName()));
+		return session.canRemove(dp);
 	}
 }

@@ -16,9 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
@@ -36,28 +33,19 @@ public class SignTextCreator {
 	/** Maximum number of lines for a sign */
 	static protected final int MAX_LINES = 12;
 
-	/** Create a SONAR name to check for allowed updates */
-	static protected Name createSignTextName(String oname) {
-		return new Name(SignText.SONAR_TYPE, oname);
-	}
-
 	/** Sign text type cache, list of all sign text lines */
 	private final TypeCache<SignText> sign_text;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR User for permission checks */
-	protected final User user;
+	/** User session */
+	private final Session session;
 
 	/** Unique ID for sign text naming */
 	protected int uid = 0;
 
 	/** Create a new sign text creator */
 	public SignTextCreator(Session s) {
+		session = s;
 		sign_text = s.getSonarState().getDmsCache().getSignText();
-		namespace = s.getSonarState().getNamespace();
-		user = s.getUser();
 	}
 
 	/** 
@@ -85,14 +73,7 @@ public class SignTextCreator {
 
 	/** Check if the user can add the named sign text */
 	public boolean canAddSignText(String name) {
-		return name != null && namespace.canAdd(user,
-			createSignTextName(name));
-	}
-
-	/** Check if the user can update the named sign text */
-	public boolean canUpdateSignText(String name) {
-		return name != null && namespace.canUpdate(user,
-			createSignTextName(name));
+		return session.canAdd(SignText.SONAR_TYPE, name);
 	}
 
 	/** 

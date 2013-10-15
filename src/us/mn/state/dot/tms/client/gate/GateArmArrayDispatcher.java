@@ -22,7 +22,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import static us.mn.state.dot.sched.SwingRunner.runSwing;
-import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
@@ -40,7 +39,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraPTZ;
 import us.mn.state.dot.tms.client.camera.StreamPanel;
 import us.mn.state.dot.tms.client.camera.VideoRequest;
@@ -314,9 +312,7 @@ public class GateArmArrayDispatcher extends IPanel {
 		VideoRequest.Size sz)
 	{
 		VideoRequest vr = new VideoRequest(session.getProperties(), sz);
-		SonarState st = session.getSonarState();
-		Connection c = st.lookupConnection();
-		vr.setSonarSessionId(c.getSessionId());
+		vr.setSonarSessionId(session.getSessionId());
 		vr.setRate(30);
 		return new StreamPanel(ptz, vr);
 	}

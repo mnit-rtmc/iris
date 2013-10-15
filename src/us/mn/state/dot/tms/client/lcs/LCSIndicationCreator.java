@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,10 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.client.Session;
 
 /**
  * This is a utility class to create LCS indications.
@@ -30,33 +28,22 @@ import us.mn.state.dot.tms.LCSIndication;
  */
 public class LCSIndicationCreator {
 
-	/** Create a SONAR name to check for allowed updates */
-	static protected Name createLCSIName(String oname) {
-		return new Name(LCSIndication.SONAR_TYPE, oname);
-	}
-
-	/** SONAR namespace */
-	protected final Namespace namespace;
+	/** User session */
+	private final Session session;
 
 	/** LCS indication type cache */
 	protected final TypeCache<LCSIndication> indications;
-
-	/** SONAR User for permission checks */
-	protected final User user;
 
 	/** Unique ID for naming */
 	protected int uid = 0;
 
 	/** Create a new LCS indication creator */
-	public LCSIndicationCreator(Namespace ns, TypeCache<LCSIndication> tc,
-		User u)
-	{
-		namespace = ns;
+	public LCSIndicationCreator(Session s, TypeCache<LCSIndication> tc) {
+		session = s;
 		indications = tc;
-		user = u;
 	}
 
-	/** 
+	/**
 	 * Create a new LCS indication.
 	 * @param lcs LCS association
 	 * @param ind LaneUseIndication ordinal
@@ -74,14 +61,12 @@ public class LCSIndicationCreator {
 
 	/** Check if the user can add the named LCS indication */
 	public boolean canAdd(String oname) {
-		return oname != null &&
-			namespace.canAdd(user, createLCSIName(oname));
+		return session.canAdd(LCSIndication.SONAR_TYPE, oname);
 	}
 
 	/** Check if the user can update the named LCS indication */
 	public boolean canRemove(String oname) {
-		return oname != null &&
-			namespace.canRemove(user, createLCSIName(oname));
+		return session.canRemove(LCSIndication.SONAR_TYPE, oname);
 	}
 
 	/** Create a LCSIndication name */

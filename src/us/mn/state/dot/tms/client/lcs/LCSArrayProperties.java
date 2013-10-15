@@ -31,7 +31,6 @@ import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
@@ -122,9 +121,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	public LCSArrayProperties(Session s, LCSArray proxy) {
 		super(I18N.get("lcs.array") + ": ", s, proxy);
 		state = s.getSonarState();
-		User user = s.getUser();
-		creator = new LCSIndicationCreator(state.getNamespace(),
-			state.getLcsCache().getLCSIndications(), user);
+		creator = new LCSIndicationCreator(s,
+			state.getLcsCache().getLCSIndications());
 		table_model = new LCSTableModel(s, proxy);
 		table_model.initialize();
 	}

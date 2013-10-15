@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.map.TileLayer;
+import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
@@ -295,17 +296,17 @@ public class Session {
 	/** Check if the user can add an object */
 	public boolean canAdd(String tname, String oname) {
 		return oname != null &&
-		       namespace.canAdd(user, new Name(tname, oname));
+		       namespace.canAdd(new Name(tname, oname), user);
 	}
 
 	/** Check if the user can read a type */
 	public boolean canRead(String tname) {
-		return namespace.canRead(user, new Name(tname));
+		return namespace.canRead(new Name(tname), user);
 	}
 
 	/** Check if the user can update an attribute */
 	public boolean canUpdate(String tname, String aname) {
-		return namespace.canUpdate(user, new Name(tname,"oname",aname));
+		return namespace.canUpdate(new Name(tname,"oname",aname), user);
 	}
 
 	/** Check if the user can update an attribute */
@@ -316,24 +317,24 @@ public class Session {
 	/** Check if the user can update a proxy */
 	public boolean canUpdate(SonarObject proxy) {
 		return proxy != null &&
-		       namespace.canUpdate(user, new Name(proxy));
+		       namespace.canUpdate(new Name(proxy), user);
 	}
 
 	/** Check if the user can update a proxy */
 	public boolean canUpdate(SonarObject proxy, String aname) {
 		return proxy != null &&
-		       namespace.canUpdate(user, new Name(proxy, aname));
+		       namespace.canUpdate(new Name(proxy, aname), user);
 	}
 
 	/** Check if the user can remove a proxy */
 	public boolean canRemove(SonarObject proxy) {
 		return proxy != null &&
-		       namespace.canRemove(user, new Name(proxy));
+		       namespace.canRemove(new Name(proxy), user);
 	}
 
 	/** Check if the user can remove a proxy */
 	public boolean canRemove(String tname, String oname) {
-		return namespace.canRemove(user, new Name(tname, oname));
+		return namespace.canRemove(new Name(tname, oname), user);
 	}
 
 	/** Dispose of the session */
@@ -359,5 +360,11 @@ public class Session {
 		inc_manager.dispose();
 		loc_manager.dispose();
 		state.quit();
+	}
+
+	/** Get the session ID */
+	public long getSessionId() {
+		Connection c = state.lookupConnection();
+		return c != null ? c.getSessionId() : 0;
 	}
 }

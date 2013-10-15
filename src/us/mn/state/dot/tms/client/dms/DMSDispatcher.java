@@ -21,8 +21,6 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -53,8 +51,8 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 {
-	/** SONAR namespace */
-	private final Namespace namespace;
+	/** User session */
+	private final Session session;
 
 	/** Currently logged in user */
 	private final User user;
@@ -84,11 +82,11 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	private String message = "";
 
 	/** Create a new DMS dispatcher */
-	public DMSDispatcher(Session session, DMSManager manager) {
+	public DMSDispatcher(Session s, DMSManager manager) {
 		super(new BorderLayout());
+		session = s;
 		SonarState st = session.getSonarState();
 		DmsCache dms_cache = st.getDmsCache();
-		namespace = st.getNamespace();
 		user = session.getUser();
 		creator = new SignMessageCreator(st, user);
 		selectionModel = manager.getSelectionModel();
@@ -457,10 +455,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Can a message be sent to the specified DMS? */
 	public boolean canSend(DMS dms) {
-		return dms != null &&
-		       creator.canCreate() &&
-		       namespace.canUpdate(user, new Name(dms, "ownerNext")) &&
-		       namespace.canUpdate(user, new Name(dms, "messageNext"));
+		return creator.canCreate() &&
+		       session.canUpdate(dms, "ownerNext") &&
+		       session.canUpdate(dms, "messageNext");
 	}
 
 	/** Can a device request be sent to all selected DMS? */
@@ -477,13 +474,12 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Can a device request be sent to the specified DMS? */
 	public boolean canRequest(DMS dms) {
-		return dms != null && namespace.canUpdate(user,
-			new Name(dms, "deviceRequest"));
+		return session.canUpdate(dms, "deviceRequest");
 	}
 
 	/** Check if AWS is allowed and user has permission to change */
 	public boolean isAwsPermitted(DMS dms) {
-		Name name = new Name(dms, "awsControlled");
-		return dms.getAwsAllowed() && namespace.canUpdate(user, name);
+		return dms.getAwsAllowed() &&
+		       session.canUpdate(dms, "awsControlled");
 	}
 }

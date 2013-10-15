@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.client.camera;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sonar.Connection;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -26,6 +24,7 @@ import us.mn.state.dot.tms.VideoMonitor;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -57,11 +56,8 @@ public class CameraViewer extends IPanel
 	/** User session */
 	private final Session session;
 
-	/** Sonar state */
-	private final SonarState state;
-
-	/** Logged in user */
-	private final User user;
+	/** Camera list model */
+	private final ProxyListModel<Camera> model;
 
 	/** Camera name label */
 	private final JLabel name_lbl = createValueLabel();
@@ -98,11 +94,10 @@ public class CameraViewer extends IPanel
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
 		session = s;
+		model = session.getSonarState().getCamCache().getCameraModel();
 		cam_ptz = new CameraPTZ(s);
 		joy_ptz = new JoystickPTZ(cam_ptz);
 		preset_pnl = new PresetPanel();
-		state = session.getSonarState();
-		user = session.getUser();
 		stream_pnl = createStreamPanel();
 		output_cbx = createOutputCombo();
 		output_cbx.addActionListener(new ActionJob(WORKER) {
@@ -132,8 +127,7 @@ public class CameraViewer extends IPanel
 	private StreamPanel createStreamPanel() {
 		VideoRequest vr = new VideoRequest(session.getProperties(),
 			SIZE);
-		Connection c = state.lookupConnection();
-		vr.setSonarSessionId(c.getSessionId());
+		vr.setSonarSessionId(session.getSessionId());
 		vr.setRate(30);
 		return new StreamPanel(cam_ptz, vr);
 	}
@@ -141,7 +135,7 @@ public class CameraViewer extends IPanel
 	/** Create the video output selection combo box */
 	private JComboBox createOutputCombo() {
 		JComboBox box = new JComboBox();
-		FilteredMonitorModel m = new FilteredMonitorModel(user, state);
+		FilteredMonitorModel m = new FilteredMonitorModel(session);
 		box.setModel(new WrapperComboBoxModel(m));
 		if(m.getSize() > 1)
 			box.setSelectedIndex(1);
@@ -160,16 +154,14 @@ public class CameraViewer extends IPanel
 
 	/** Select the next camera */
 	private void selectNextCamera() {
-		Camera cam = state.getCamCache().getCameraModel().higher(
-			selected);
+		Camera cam = model.higher(selected);
 		if(cam != null)
 			manager.getSelectionModel().setSelected(cam);
 	}
 
 	/** Select the previous camera */
 	private void selectPreviousCamera() {
-		Camera cam = state.getCamCache().getCameraModel().lower(
-			selected);
+		Camera cam = model.lower(selected);
 		if(cam != null)
 			manager.getSelectionModel().setSelected(cam);
 	}
@@ -217,9 +209,9 @@ public class CameraViewer extends IPanel
 
 	/** Called whenever a camera is removed from the selection */
 	public void selectionRemoved(Camera c) {
-		ProxySelectionModel<Camera> model = manager.getSelectionModel();
-		if(model.getSelectedCount() == 1) {
-			for(Camera cam: model.getSelected())
+		ProxySelectionModel<Camera> mdl = manager.getSelectionModel();
+		if(mdl.getSelectedCount() == 1) {
+			for(Camera cam: mdl.getSelected())
 				setSelected(cam);
 		} else if(c == selected)
 			setSelected(null);
