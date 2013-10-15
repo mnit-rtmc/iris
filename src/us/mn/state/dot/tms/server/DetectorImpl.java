@@ -480,7 +480,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 				f = null;
 			}
 		}
-		if(f == fake || (f != null && f.equals(fake)))
+		if(stringEquals(f, fake))
 			return;
 		store.update(this, "fake", f);
 		fake_det = fd;

@@ -211,7 +211,7 @@ public class R_NodeSetupPanel extends IPanel {
 	protected void setStationID(String s) {
 		R_Node n = node;
 		if(n != null)
-			n.setStationID(s);
+			n.setStationID(s.length() > 0 ? s : null);
 	}
 
 	/** Set the speed limit */

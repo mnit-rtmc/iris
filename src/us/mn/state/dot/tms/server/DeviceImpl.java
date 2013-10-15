@@ -169,7 +169,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 
 	/** Set the administrator notes */
 	public void doSetNotes(String n) throws TMSException {
-		if(n.equals(notes))
+		if(stringEquals(n, notes))
 			return;
 		store.update(this, "notes", n);
 		setNotes(n);

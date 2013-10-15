@@ -434,10 +434,10 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Set the station ID */
 	public void doSetStationID(String s) throws TMSException {
-		if("".equals(s))
-			s = null;
-		if(s == station_id || (s != null && s.equals(station_id)))
+		if(stringEquals(s, station_id))
 			return;
+		if(s != null && s.equals(""))
+			throw new ChangeVetoException("Invalid Station ID");
 		store.update(this, "station_id", s);
 		StationImpl stat = createStation(s);
 		updateStation(station, stat);
