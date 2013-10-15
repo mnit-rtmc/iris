@@ -60,4 +60,19 @@ public class CIDRAddressTest extends TestCase {
 			assertTrue(false);
 		}
 	}
+
+	public void test3() {
+		try {
+			CIDRAddress a = new CIDRAddress("192.168.1.1/32");
+			assertTrue(a.matches(addr("192.168.1.1")));
+			assertFalse(a.matches(addr("192.168.1.254")));
+			assertFalse(a.matches(addr("192.168.2.1")));
+			assertFalse(a.matches(addr("192.168.16.1")));
+			assertFalse(a.matches(addr("10.1.1.1")));
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			assertTrue(false);
+		}
+	}
 }
