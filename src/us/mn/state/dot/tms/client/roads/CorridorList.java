@@ -184,7 +184,7 @@ public class CorridorList extends JPanel {
 		session = s;
 		manager = m;
 		panel = p;
-		creator = new R_NodeCreator(s.getSonarState(), s.getUser());
+		creator = new R_NodeCreator(s);
 		client = s.getDesktop().client;
 		layer = m.getLayer();
 		r_nodes = creator.getR_Nodes();

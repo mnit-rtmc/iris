@@ -88,7 +88,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		SonarState st = session.getSonarState();
 		DmsCache dms_cache = st.getDmsCache();
 		user = session.getUser();
-		creator = new SignMessageCreator(st, user);
+		creator = new SignMessageCreator(s, user);
 		selectionModel = manager.getSelectionModel();
 		singleTab = new SingleSignTab(session, this);
 		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
