@@ -113,6 +113,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return i0.equals(i1);
 	}
 
+	/** Compare two (possibly-null) strings for equality */
+	static protected boolean stringEquals(String s0, String s1) {
+		if(s0 == null)
+			return s1 == null;
+		else
+			return s0.equals(s1);
+	}
+
 	/** Get the primary key name */
 	public String getKeyName() {
 		return "name";
