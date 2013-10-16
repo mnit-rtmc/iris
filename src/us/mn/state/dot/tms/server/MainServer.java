@@ -20,12 +20,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.ProxySelector;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Properties;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Station;
@@ -94,7 +94,7 @@ public class MainServer {
 			store = createStore(props);
 			BaseEvent.store = store;
 			I18N.initialize(props);
-			ServerNamespace ns = createNamespace();
+			WhitelistNamespace ns = createNamespace(props);
 			IrisCapabilityImpl.lookup(store, ns);
 			IrisPrivilegeImpl.lookup(store, ns);
 			IrisRoleImpl.lookup(store, ns);
@@ -168,8 +168,10 @@ public class MainServer {
 	}
 
 	/** Create the server namespace */
-	static private ServerNamespace createNamespace() {
-		ServerNamespace ns = new ServerNamespace();
+	static private WhitelistNamespace createNamespace(Properties props)
+		throws UnknownHostException, NumberFormatException
+	{
+		WhitelistNamespace ns = new WhitelistNamespace(props);
 		// FIXME: static namespace hacks
 		BaseHelper.namespace = ns;
 		ns.registerType(Station.SONAR_TYPE, StationImpl.class);
