@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.utils;
 
-import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
@@ -85,11 +84,14 @@ public class SEmail {
 
 	/** Build message text */
 	private String buildText() {
-		StringWriter w = new StringWriter();
-		w.write(new Date().toString() + ": ");
-		w.write("Host: " + getHostName() + '\n');
-		w.write(text + '\n');
-		return w.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append(new Date().toString());
+		sb.append(": Host: ");
+		sb.append(getHostName());
+		sb.append('\n');
+		sb.append(text);
+		sb.append('\n');
+		return sb.toString();
 	}
 
 	/** Get the local host name */
