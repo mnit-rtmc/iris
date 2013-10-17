@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,9 +24,9 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.utils.Emailer;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
-import us.mn.state.dot.tms.utils.SEmail;
 
 /**
  * DMS XML message. A Message represents the bytes sent and
@@ -359,23 +359,22 @@ class Message implements CommMessage
 			errmsg);
 
 		// build email
-		String sender = SystemAttrEnum.
-			EMAIL_SENDER_SERVER.getString();
-		String recipient = SystemAttrEnum.
-			EMAIL_RECIPIENT_AWS.getString();
+		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
+		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
+		String recip = SystemAttrEnum.EMAIL_RECIPIENT_AWS.getString();
 		String subject = "IRIS could not send AWS message to DMS";
 
 		// send
-		if(recipient == null || sender == null ||
-			recipient.length() <= 0 || sender.length() <= 0)
+		if(host == null || host.length() <= 0 ||
+		   recip == null || recip.length() <= 0 ||
+		   sender == null || sender.length() <= 0)
 		{
 			Log.warning("Message.handleAwsFailure(): didn't" +
 				"try to send AWS error email.");
 		} else {
-			SEmail email = new SEmail(sender, recipient, subject,
-				errmsg);
 			try {
-				email.send();
+				Emailer email = new Emailer(host, sender,recip);
+				email.send(subject, errmsg);
 				Log.finest("Message.handleAwsFailure(): " + 
 					"sent email");
 			}

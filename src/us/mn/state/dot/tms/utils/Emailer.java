@@ -24,66 +24,54 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A simple email abstraction.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
-public class SEmail {
+public class Emailer {
+
+	/** Email properties */
+	private final Properties props = new Properties();
 
 	/** Address of sender */
-	protected final String sender;
+	private final InternetAddress sender;
 
-	/** Address of recipient */
-	protected final String recipient;
+	/** Address of recipient(s) */
+	private final InternetAddress[] recip;
 
-	/** Message subject */
-	protected final String subject;
-
-	/** Message text */
-	protected final String text;
-
-	/** Create a new email.
-	 * @param snd Sender (e.g. bob@example.com)
-	 * @param rcp Recipient (e.g. bob@example.com)
-	 * @param sbj Message subject
-	 * @param txt Message text */
-	public SEmail(String snd, String rcp, String sbj, String txt) {
-		assert snd != null;
-		assert rcp != null;
-		assert sbj != null;
-		assert txt != null;
-		sender = snd;
-		recipient = rcp;
-		subject = sbj;
-		text = txt;
+	/** Create a new emailer.
+	 * @param h Email host.
+	 * @param s Sender email address.
+	 * @param r Recipient email address(es). */
+	public Emailer(String h, String s, String r) throws MessagingException {
+		props.setProperty("mail.smtp.host", h);
+		sender = new InternetAddress(s);
+		recip = InternetAddress.parse(r);
 	}
 
-	/** Send the email */
-	public void send() throws MessagingException {
-		MimeMessage message = createMessage();
-		message.setFrom(new InternetAddress(sender));
-		InternetAddress[] to = InternetAddress.parse(recipient);
-		message.addRecipients(Message.RecipientType.TO, to);
-		message.setSubject(subject);
-		message.setText(buildText());
-		Transport.send(message);
+	/** Send an email.
+	 * @param subject Subject of mail.
+	 * @param text Text of mail. */
+	public void send(String subject, String text) throws MessagingException{
+		MimeMessage mm = createMessage();
+		mm.setSubject(subject);
+		mm.setText(buildText(text));
+		Transport.send(mm);
 	}
 
 	/** Create a MIME Message */
-	protected MimeMessage createMessage() {
-		Properties props = new Properties();
-		props.setProperty("mail.smtp.host",
-			SystemAttrEnum.EMAIL_SMTP_HOST.getString());
+	private MimeMessage createMessage() throws MessagingException {
 		Session session = Session.getInstance(props, null);
-		return new MimeMessage(session);
+		MimeMessage mm = new MimeMessage(session);
+		mm.setFrom(sender);
+		mm.addRecipients(Message.RecipientType.TO, recip);
+		return mm;
 	}
 
 	/** Build message text */
-	private String buildText() {
+	private String buildText(String text) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(new Date().toString());
 		sb.append(": Host: ");

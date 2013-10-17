@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import us.mn.state.dot.sonar.client.PermissionException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.SEmail;
+import us.mn.state.dot.tms.utils.Emailer;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.TextPanel;
@@ -186,25 +186,24 @@ public class ExceptionDialog extends JDialog {
 
 	/** Send an e-mail alert to the system administrators */
 	protected void sendEmailAlert(Exception e, TextPanel tpanel) {
+		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
 		String sender = SystemAttrEnum.EMAIL_SENDER_CLIENT.getString();
-		String recipient =
-			SystemAttrEnum.EMAIL_RECIPIENT_BUGS.getString();
-		if(sender != null && recipient != null) {
+		String recip = SystemAttrEnum.EMAIL_RECIPIENT_BUGS.getString();
+		if(host != null && sender != null && recip != null) {
 			String trace = getStackTrace(e);
 			tpanel.addSpacing();
 			try {
-				SEmail email = new SEmail(sender, recipient,
-					"IRIS Exception", trace);
-				email.send();
+				Emailer email = new Emailer(host, sender,recip);
+				email.send("IRIS Exception", trace);
 				tpanel.addText("A detailed error report");
 				tpanel.addText("has been emailed to:");
-				tpanel.addText(recipient);
+				tpanel.addText(recip);
 			}
 			catch(MessagingException ex) {
 				ex.printStackTrace();
 				tpanel.addText("Unable to send error");
 				tpanel.addText("report to:");
-				tpanel.addText(recipient);
+				tpanel.addText(recip);
 			}
 		}
 	}

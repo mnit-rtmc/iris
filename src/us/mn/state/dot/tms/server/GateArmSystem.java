@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.event.GateArmEvent;
-import us.mn.state.dot.tms.utils.SEmail;
+import us.mn.state.dot.tms.utils.Emailer;
 
 /**
  * The Gate Arm System contains static methods which act on the entire gate
@@ -133,21 +133,26 @@ public class GateArmSystem {
 
 	/** Send an email alert */
 	static public void sendEmailAlert(String msg) {
+		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
+		if(host == null || host.length() <= 0) {
+			logEmailError(msg, "invalid host");
+			return;
+		}
 		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
 		if(sender == null || sender.length() <= 0) {
 			logEmailError(msg, "invalid sender");
 			return;
 		}
-		String recipient =
+		String recip =
 			SystemAttrEnum.EMAIL_RECIPIENT_GATE_ARM.getString();
-		if(recipient == null || recipient.length() <= 0) {
+		if(recip == null || recip.length() <= 0) {
 			logEmailError(msg, "invalid recipient");
 			return;
 		}
 		String subject = "Gate arm ALERT";
-		SEmail email = new SEmail(sender, recipient, subject, msg);
 		try {
-			email.send();
+			Emailer email = new Emailer(host, sender, recip);
+			email.send(subject, msg);
 		}
 		catch(MessagingException e) {
 			logEmailError(msg, "email failed: " + e.getMessage());
