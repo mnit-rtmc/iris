@@ -112,12 +112,15 @@ public class GateArmSystem {
 	static public DeviceRequest checkRequest(int r) {
 		DeviceRequest req = DeviceRequest.fromOrdinal(r);
 		switch(req) {
-		case SEND_SETTINGS:
 		case QUERY_STATUS:
-		case RESET_DEVICE:
+			// Allow querying status even when system disabled
 			return req;
+		case SEND_SETTINGS:
+		case RESET_DEVICE:
+			return checkEnabled() ? req : null;
+		default:
+			return null;
 		}
-		return null;
 	}
 
 	/** Log a gate arm state event */
