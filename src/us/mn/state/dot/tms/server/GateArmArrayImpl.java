@@ -108,6 +108,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
+		GateArmSystem.disable(n + ": create array");
 	}
 
 	/** Create a gate arm array */
@@ -144,7 +145,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override public void doDestroy() throws TMSException {
 		super.doDestroy();
 		geo_loc.notifyRemove();
-		GateArmSystem.disable(name + ": destroy");
+		GateArmSystem.disable(name + ": destroy array");
 	}
 
 	/** Set the controller of the device */
@@ -197,6 +198,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set the verification camera */
 	@Override public void setCamera(Camera c) {
+		GateArmSystem.disable(name + ": camera");
 		camera = c;
 	}
 
@@ -218,6 +220,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set the approach camera */
 	@Override public void setApproach(Camera c) {
+		GateArmSystem.disable(name + ": approach");
 		approach = c;
 	}
 
