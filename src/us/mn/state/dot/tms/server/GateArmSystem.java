@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
@@ -247,6 +248,24 @@ public class GateArmSystem {
 			if(g instanceof GateArmArrayImpl) {
 				GateArmArrayImpl ga = (GateArmArrayImpl)g;
 				ga.setDependant();
+			}
+		}
+	}
+
+	/** Check all gate arm arrays for a GeoLoc change.  This needs to be
+	 * fast, but the current algorithm is a linear scan...
+	 * @param loc GeoLoc to check.
+	 * @param reason Reason for check. */
+	static public void checkDisable(GeoLoc loc, String reason) {
+		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
+		while(it.hasNext()) {
+			GateArmArray g = it.next();
+			if(g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl)g;
+				if(loc == ga.getGeoLoc()) {
+					disable("geo_loc " + reason);
+					break;
+				}
 			}
 		}
 	}
