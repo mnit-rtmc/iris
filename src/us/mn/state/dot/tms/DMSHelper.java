@@ -44,54 +44,12 @@ public class DMSHelper extends BaseHelper {
 
 	/** Test if a DMS is active */
 	static public boolean isActive(DMS proxy) {
-		return ControllerHelper.isActive(proxy.getController());
-	}
-
-	/** Test if a DMS has a scheduled message deployed */
-	static public boolean isScheduled(DMS proxy) {
-		SignMessage sm = proxy.getMessageCurrent();
-		// messageCurrent should never be null unless the
-		// client proxy has just been removed
-		return sm != null && sm.getScheduled();
-	}
-
-	/** Test if a DMS is deployed */
-	static public boolean isDeployed(DMS proxy) {
-		SignMessage m = proxy.getMessageCurrent();
-		if(m != null)
-			return !SignMessageHelper.isBlank(m);
-		else {
-			// messageCurrent should never be null, so this means
-			// the proxy has just been removed
-			return false;
-		}
-	}
-
-	/** Test if a DMS is active, not failed and deployed */
-	static public boolean isMessageDeployed(DMS proxy) {
-		return isActive(proxy) &&
-		       !isFailed(proxy) &&
-		       isDeployed(proxy);
-	}
-
-	/** Test if a DMS has been deployed by schedule */
-	static public boolean isScheduleDeployed(DMS proxy) {
-		return isMessageDeployed(proxy) &&
-		       isScheduled(proxy);
+		return ItemStyle.FAILED.checkBit(proxy.getStyles());
 	}
 
 	/** Get the maintenance status of a DMS */
 	static public String getMaintenance(DMS proxy) {
 		return ControllerHelper.getMaintenance(proxy.getController());
-	}
-
-	/** Test if a DMS needs maintenance */
-	static public boolean needsMaintenance(DMS proxy) {
-		if(isFailed(proxy) || !isActive(proxy))
-			return false;
-		if(hasCriticalError(proxy))
-			return true;
-		return !getMaintenance(proxy).isEmpty();
 	}
 
 	/** Test if a DMS has a critical error */
@@ -116,7 +74,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Test if a DMS is failed */
 	static public boolean isFailed(DMS proxy) {
-		return ControllerHelper.isFailed(proxy.getController());
+		return ItemStyle.FAILED.checkBit(proxy.getStyles());
 	}
 
 	/** Get a string that contains all active DMS styles,

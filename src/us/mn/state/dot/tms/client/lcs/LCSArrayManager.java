@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
-import us.mn.state.dot.tms.LCSArrayLock;
 import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -61,45 +60,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** LCS array map object marker */
 	static protected final LcsMarker MARKER = new LcsMarker();
 
-	/** Test if an LCS array is active */
-	static protected boolean isActive(LCSArray proxy) {
-		return LCSArrayHelper.isActive(proxy);
-	}
-
-	/** Test if an LCS array is failed */
-	static protected boolean isFailed(LCSArray proxy) {
-		return LCSArrayHelper.isFailed(proxy);
-	}
-
-	/** Test if an LCS array is locked */
-	static protected boolean isLocked(LCSArray proxy) {
-		return proxy.getLcsLock() != null;
-	}
-
-	/** Test if an LCS array needs maintenance */
-	static protected boolean needsMaintenance(LCSArray proxy) {
-		LCSArrayLock lck = LCSArrayLock.fromOrdinal(proxy.getLcsLock());
-		return (lck == LCSArrayLock.MAINTENANCE) ||
-		       LCSArrayHelper.needsMaintenance(proxy);
-	}
-
-	/** Test if an LCS array is deployed */
-	static protected boolean isDeployed(LCSArray proxy) {
-		if(LCSArrayHelper.isAllFailed(proxy))
-			return false;
-		return LCSArrayHelper.isDeployed(proxy);
-	}
-
-	/** Test if an LCS has been deployed by a user */
-	static protected boolean isUserDeployed(LCSArray proxy) {
-		return LCSArrayHelper.isUserDeployed(proxy);
-	}
-
-	/** Test if an LCS has been deployed by schedule */
-	static protected boolean isScheduleDeployed(LCSArray proxy) {
-		return LCSArrayHelper.isScheduleDeployed(proxy);
-	}
-
 	/** Simple class to wait until all LCS have been enumerated */
 	static protected class LCSWaiter implements ProxyListener<LCS> {
 		protected boolean enumerated = false;
@@ -120,15 +80,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 				}
 			}
 		}
-	}
-
-	/** Test if an LCS array is available */
-	protected boolean isAvailable(LCSArray proxy) {
-		return !isLocked(proxy) &&
-		       isActive(proxy) &&
-		       !isFailed(proxy) &&
-		       !isDeployed(proxy) &&
-		       !needsMaintenance(proxy);
 	}
 
 	/** Action to blank the selected LCS array */
@@ -266,23 +217,13 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(ItemStyle is, LCSArray proxy) {
-		switch(is) {
-		case AVAILABLE:
-			return isAvailable(proxy);
-		case DEPLOYED:
-			return isUserDeployed(proxy);
-		case SCHEDULED:
-			return isScheduleDeployed(proxy);
-		case MAINTENANCE:
-			return needsMaintenance(proxy);
-		case FAILED:
-			return isFailed(proxy);
-		case ALL:
-			return true;
-		default:
-			return false;
+	@Override public boolean checkStyle(ItemStyle is, LCSArray proxy) {
+		long styles = proxy.getStyles();
+		for(ItemStyle s: ItemStyle.toStyles(styles)) {
+			if(s == is)
+				return true;
 		}
+		return false;
 	}
 
 	/** Show the properties form for the selected proxy */
@@ -324,7 +265,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		p.add(new MapAction(desktop.client, la,
 			LCSArrayHelper.lookupGeoLoc(la)));
 		p.addSeparator();
-		if(isDeployed(la) && blankAction != null)
+		if(LCSArrayHelper.isDeployed(la) && blankAction != null)
 			p.add(blankAction);
 		if(TeslaAction.isConfigured()) {
 			p.addSeparator();

@@ -125,103 +125,14 @@ public class LCSArrayHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Check if an LCS array is active */
-	static public boolean isActive(LCSArray lcs_array) {
-		Iterator<LCS> it = LCSHelper.iterator();
-		while(it.hasNext()) {
-			LCS lcs = it.next();
-			if(lcs.getArray() == lcs_array) {
-				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms != null && DMSHelper.isActive(dms))
-					return true;
-			}
-		}
-		return false;
-	}
-
 	/** Check if an LCS array is failed */
 	static public boolean isFailed(LCSArray lcs_array) {
-		Iterator<LCS> it = LCSHelper.iterator();
-		while(it.hasNext()) {
-			LCS lcs = it.next();
-			if(lcs.getArray() == lcs_array) {
-				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms != null && DMSHelper.isFailed(dms))
-					return true;
-			}
-		}
-		return false;
-	}
-
-	/** Check if all LCSs in an array are failed */
-	static public boolean isAllFailed(LCSArray lcs_array) {
-		Iterator<LCS> it = LCSHelper.iterator();
-		while(it.hasNext()) {
-			LCS lcs = it.next();
-			if(lcs.getArray() == lcs_array) {
-				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms != null && !DMSHelper.isFailed(dms))
-					return false;
-			}
-		}
-		return true;
+		return ItemStyle.FAILED.checkBit(lcs_array.getStyles());
 	}
 
 	/** Check if an LCS array is deployed */
 	static public boolean isDeployed(LCSArray lcs_array) {
-		// First, check the indications
-		Integer[] ind = lcs_array.getIndicationsCurrent();
-		for(Integer i: ind) {
-			if(i != null && i != LaneUseIndication.DARK.ordinal())
-				return true;
-		}
-		// There might be something else on the sign that is not
-		// a lane use indication -- check DMS deployed states
-		Iterator<LCS> it = LCSHelper.iterator();
-		while(it.hasNext()) {
-			LCS lcs = it.next();
-			if(lcs.getArray() == lcs_array) {
-				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms != null && DMSHelper.isDeployed(dms))
-					return true;
-			}
-		}
-		return false;
-	}
-
-	/** Check if an LCS array is user deployed */
-	static public boolean isUserDeployed(LCSArray lcs_array) {
-		return isDeployed(lcs_array) && !isScheduleDeployed(lcs_array);
-	}
-
-	/** Check if an LCS array is schedule deployed */
-	static public boolean isScheduleDeployed(LCSArray lcs_array) {
-		Iterator<LCS> it = LCSHelper.iterator();
-		while(it.hasNext()) {
-			LCS lcs = it.next();
-			if(lcs.getArray() == lcs_array) {
-				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms != null &&
-				   DMSHelper.isScheduleDeployed(dms))
-					return true;
-			}
-		}
-		return false;
-	}
-
-	/** Check if any LCSs in an array need maintenance */
-	static public boolean needsMaintenance(LCSArray lcs_array) {
-		Iterator<LCS> it = LCSHelper.iterator();
-		while(it.hasNext()) {
-			LCS lcs = it.next();
-			if(lcs.getArray() == lcs_array) {
-				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms != null &&
-				   DMSHelper.needsMaintenance(dms))
-					return true;
-			}
-		}
-		return false;
+		return ItemStyle.DEPLOYED.checkBit(lcs_array.getStyles());
 	}
 
 	/** Get controller critical error */
