@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.stc;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -26,11 +27,14 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQueryGateStatus extends OpSTC {
 
+	/** Interval to update controller operation count */
+	static private final long OP_COUNT_INTERVAL_MS = 30 * 1000;
+
 	/** Status property */
 	private final StatusProperty status;
 
-	/** Flag for controller status update */
-	private boolean status_update = true;
+	/** Time to update operation counts */
+	private long op_time = TimeSteward.currentTimeMillis();
 
 	/** Create a new gate arm query status operation */
 	public OpQueryGateStatus(GateArmImpl d) {
@@ -81,9 +85,15 @@ public class OpQueryGateStatus extends OpSTC {
 		gate_arm.setArmStateNotify(status.getState(), null);
 		setMaintStatus(status.getMaintStatus());
 		updateMaintStatus();
-		if(status_update)
+		if(shouldUpdateOpCount()) {
 			controller.completeOperation(id, isSuccess());
-		status_update = false;
+			op_time += OP_COUNT_INTERVAL_MS;
+		}
+	}
+
+	/** Check if we should update the controller operation count */
+	private boolean shouldUpdateOpCount() {
+		return TimeSteward.currentTimeMillis() >= op_time;
 	}
 
 	/** Cleanup the operation */
