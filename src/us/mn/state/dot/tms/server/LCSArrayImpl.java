@@ -286,14 +286,16 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	public synchronized void setIndicationsCurrent(Integer[] ind, User o) {
 		if(ind.length != lanes.length)
 			return;
-		if(Arrays.equals(ind, indicationsCurrent))
-			return;
-		logIndications(ind, o);
-		indicationsCurrent = ind;
-		notifyAttribute("indicationsCurrent");
-		ownerCurrent = o;
-		notifyAttribute("ownerCurrent");
-		setIndicationsNext(null);
+		if(!Arrays.equals(ind, indicationsCurrent)) {
+			logIndications(ind, o);
+			indicationsCurrent = ind;
+			notifyAttribute("indicationsCurrent");
+			ownerCurrent = o;
+			notifyAttribute("ownerCurrent");
+			setIndicationsNext(null);
+		}
+		// Update styles even if indications don't change.  This is
+		// needed because DMS status might have changed.
 		updateStyles();
 	}
 
