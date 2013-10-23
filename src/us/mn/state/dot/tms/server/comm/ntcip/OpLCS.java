@@ -64,7 +64,7 @@ abstract public class OpLCS extends OpNtcip {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(!Arrays.equals(ind_before, ind_after))
+		if(isSuccess())
 			lcs_array.setIndicationsCurrent(ind_after, user);
 		for(DMSImpl dms: dmss) {
 			if(dms == null || dms.isFailed())
