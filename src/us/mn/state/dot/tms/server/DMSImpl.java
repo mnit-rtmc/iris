@@ -88,8 +88,8 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
-	/** Action debug log */
-	static private final DebugLog ACTION_LOG = new DebugLog("action");
+	/** DMS debug log */
+	static private final DebugLog DMS_LOG = new DebugLog("dms");
 
 	/** DMS name, e.g. CMS or DMS */
 	static private final String DMSABBR = I18N.get("dms");
@@ -910,7 +910,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				return sched;
 			}
 			catch(TMSException e) {
-				logAction("sched msg not valid: " +
+				logError("sched msg not valid: " +
 					e.getMessage());
 				// Ok, go ahead and blank the sign
 			}
@@ -1053,7 +1053,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				doSetMessageNext(sm, null);
 		}
 		catch(TMSException e) {
-			logAction(e.getMessage());
+			logError(e.getMessage());
 		}
 	}
 
@@ -1227,7 +1227,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			BrightnessSample.lookup(this, bh);
 		}
 		catch(TMSException e) {
-			e.printStackTrace();
+			logError("brightness feedback: " + e.getMessage());
 		}
 	}
 
@@ -1280,7 +1280,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				return createMessageB(m, pages, ap, rp, s, d);
 			}
 			catch(InvalidMessageException e) {
-				// probably a MultiSyntaxError ...
+				logError("invalid msg: " + e.getMessage());
 			}
 		}
 		return null;
@@ -1389,7 +1389,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			// processor does not store the sign message within 30
 			// seconds.  It *shouldn't* happen, but there may be
 			// a rare bug which triggers it.
-			e.printStackTrace();
+			logError("createMessageC: " + e.getMessage());
 			return null;
 		}
 	}
@@ -1480,28 +1480,28 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return 1;
 	}
 
-	/** Log an action */
-	private void logAction(String msg) {
-		ACTION_LOG.log(getName() + ": " + msg);
+	/** Log a DMS message */
+	private void logError(String msg) {
+		DMS_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Update the scheduled message on the sign */
 	public void updateScheduledMessage() {
 		if(!is_scheduled) {
-			logAction("no message scheduled");
+			logError("no message scheduled");
 			setMessageSched(createBlankScheduledMessage());
 		}
 		SignMessage sm = messageSched;
 		if(shouldActivate(sm)) {
 			try {
-				logAction("set message to " + sm.getMulti());
+				logError("set message to " + sm.getMulti());
 				doSetMessageNext(sm, null);
 			}
 			catch(TMSException e) {
-				logAction(e.getMessage());
+				logError(e.getMessage());
 			}
 		} else if(sm != null)
-			logAction("sched msg not sent " + sm.getMulti());
+			logError("sched msg not sent " + sm.getMulti());
 		is_scheduled = false;
 	}
 
