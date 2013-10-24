@@ -176,7 +176,9 @@ public class RasterBuilder {
 		MultiParser.parse(multi, mr);
 		mr.complete();
 		MultiSyntaxError err = mr.getSyntaxError();
-		if(err != MultiSyntaxError.none)
-			throw new InvalidMessageException(err.toString());
+		if(err != MultiSyntaxError.none) {
+			throw new InvalidMessageException(err.toString() +
+				": \"" + ms + '"');
+		}
 	}
 }

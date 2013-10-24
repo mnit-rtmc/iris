@@ -108,7 +108,7 @@ public class FontHelper extends BaseHelper {
 			if(gr != null)
 				return gr;
 		}
-		throw new InvalidMessageException("Invalid code point");
+		throw new InvalidMessageException("Invalid code point:" + cp);
 	}
 
 	/** Calculate the width of a span of text.
