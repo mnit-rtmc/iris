@@ -535,7 +535,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			s |= ItemStyle.MOVING.bit();
 		if(needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
-		if(isActive() && isFailed())
+		if(isFailed())
 			s |= ItemStyle.FAILED.bit();
 		if(!isActive())
 			s |= ItemStyle.INACTIVE.bit();
@@ -685,27 +685,21 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			setInterlockNotify();
 	}
 
-	/** Get the active status.  Tests that at least one gate arm is
-	 * assigned to the array and all are active. */
+	/** Get the active status */
 	@Override public boolean isActive() {
-		boolean any = false;
-		boolean all = true;
 		for(int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
-			if(ga != null) {
-				boolean a = ga.isActive();
-				any = (any || a);
-				all = (all && a);
-			}
+			if(ga != null && ga.isActive())
+				return true;
 		}
-		return any && all;
+		return false;
 	}
 
 	/** Get the failure status */
 	@Override public boolean isFailed() {
 		for(int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
-			if(ga != null && ga.isFailed())
+			if(ga != null && ga.isActive() && ga.isFailed())
 				return true;
 		}
 		return false;
