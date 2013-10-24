@@ -47,18 +47,22 @@ public enum OperatorStatus {
 	FAULT_RUN_TIMEOUT,		/* 24    stopped; FAULT_1 */
 	FAULT_PHOTO_EYE,		/* 25    stopped; FAULT_2 */
 	FAULT_VOLTAGE_SAG,		/* 26    stopped; FAULT_3 */
-	FAULT_OPEN_CLOSE_LIMIT,		/* 27    stopped; FAULT_5 */
-	ERROR_DIRECTION,		/* 28    stopped; ERROR_1 */
-	ERROR_DISCONNECTED_IES,		/* 29    inherent entrapment sensor */
-	ERROR_RS_485_BOARD,		/* 30    stopped; ERROR_6 */
-	ERROR_RPM_SENSOR,		/* 31    stopped; ERROR_8 */
-	ERROR_DISCONNECTED_BATT,	/* 32    stopped; ERROR_9 */
-	ERROR_SLOWDOWN_SWITCH,		/* 33    stopped; ERROR_10 */
-	ALERT_GATE_FORCED_OPEN,		/* 34    stopped; ALERT_1 */
-	ALERT_GATE_DRIFT_CLOSED,	/* 35    stopped; ALERT_2 */
-	ALERT_MOTOR_THERMAL_OVERLOAD,	/* 36    stopped; ALERT_4 */
-	ALERT_BOTH_LIMITS_TRIGGERED,	/* 37    stopped; ALERT_5 */
-	ALERT_NO_MOTION;		/* 38    stopped; ALERT_6 */
+	FAULT_GATE_NO_LOAD,		/* 27    stopped; FAULT_4 */
+	FAULT_OPEN_CLOSE_LIMIT,		/* 28    stopped; FAULT_5 */
+	FAULT_EXCESSIVE_STUCK_ALERTS,	/* 29    stopped; FAULT_14 */
+	FAULT_15,			/* 30    spare */
+	ERROR_DIRECTION,		/* 31    stopped; ERROR_1 */
+	ERROR_DISCONNECTED_IES,		/* 32    inherent entrapment sensor */
+	ERROR_RS_485_BOARD,		/* 33    stopped; ERROR_6 */
+	ERROR_RPM_SENSOR,		/* 34    stopped; ERROR_8 */
+	ERROR_DISCONNECTED_BATT,	/* 35    stopped; ERROR_9 */
+	ERROR_SLOWDOWN_SWITCH,		/* 36    stopped; ERROR_10 */
+	ALERT_GATE_FORCED_OPEN,		/* 37    stopped; ALERT_1 */
+	ALERT_GATE_DRIFT_CLOSED,	/* 38    stopped; ALERT_2 */
+	ALERT_MOTOR_THERMAL_OVERLOAD,	/* 39    stopped; ALERT_4 */
+	ALERT_BOTH_LIMITS_TRIGGERED,	/* 40    stopped; ALERT_5 */
+	ALERT_NO_MOTION,		/* 41    stopped; ALERT_6 */
+	ALERT_VFD_DRIVE_TRIPPED;	/* 42    stopped; ALERT_21 */
 
 	/** Lookup a gate operator status from ordinal */
 	static public OperatorStatus fromOrdinal(int o) {
@@ -75,7 +79,10 @@ public enum OperatorStatus {
 		case FAULT_RUN_TIMEOUT:
 		case FAULT_PHOTO_EYE:
 		case FAULT_VOLTAGE_SAG:
+		case FAULT_GATE_NO_LOAD:
 		case FAULT_OPEN_CLOSE_LIMIT:
+		case FAULT_EXCESSIVE_STUCK_ALERTS:
+		case FAULT_15:
 		case ERROR_DIRECTION:
 		case ERROR_DISCONNECTED_IES:
 		case ERROR_RS_485_BOARD:
@@ -87,6 +94,7 @@ public enum OperatorStatus {
 		case ALERT_MOTOR_THERMAL_OVERLOAD:
 		case ALERT_BOTH_LIMITS_TRIGGERED:
 		case ALERT_NO_MOTION:
+		case ALERT_VFD_DRIVE_TRIPPED:
 			return true;
 		default:
 			return false;
