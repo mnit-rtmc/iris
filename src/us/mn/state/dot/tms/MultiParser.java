@@ -36,7 +36,7 @@ public class MultiParser {
 
 	/** Regular expression to match text between MULTI tags */
 	static private final Pattern TEXT_PATTERN = Pattern.compile(
-		"[' !#$%&()*+,-./0-9:;<=>?@A-Za-z^_`]*");
+		"[' !#$%&()*+,-./0-9:;<=>?@A-Z^_`a-z{|}]*");
 
 	/** Don't allow instantiation */
 	private MultiParser() { }
