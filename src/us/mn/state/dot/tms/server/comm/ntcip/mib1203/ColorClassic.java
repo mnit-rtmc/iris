@@ -14,13 +14,32 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
+import us.mn.state.dot.tms.DmsColor;
+
 /**
  * Enumeration of "classic" (v1) color scheme values.
  *
  * @author Douglas Lau
  */
 public enum ColorClassic {
-	black, red, yellow, green, cyan, blue, magenta, white, orange, amber;
+	black(DmsColor.BLACK),
+	red(DmsColor.RED),
+	yellow(DmsColor.YELLOW),
+	green(DmsColor.GREEN),
+	cyan(DmsColor.CYAN),
+	blue(DmsColor.BLUE),
+	magenta(DmsColor.MAGENTA),
+	white(DmsColor.WHITE),
+	orange(DmsColor.ORANGE),
+	amber(DmsColor.AMBER);
+
+	/** Create a new classic color */
+	private ColorClassic(DmsColor c) {
+		clr = c;
+	}
+
+	/** DMS color value */
+	public DmsColor clr;
 
 	/** Get classic color from an ordinal value */
 	static public ColorClassic fromOrdinal(int o) {

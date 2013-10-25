@@ -23,13 +23,42 @@ import java.awt.Color;
  */
 public class DmsColor {
 
+	/** Get a DMS color from an AWT color */
+	static private DmsColor fromColor(Color c) {
+		return new DmsColor(c.getRed(), c.getGreen(), c.getBlue());
+	}
+
 	/** Clamp one color component to valid range */
 	static private int clampComponent(int c) {
 		return c > 0 ? (c < 255 ? c : 255) : 0;
 	}
 
 	/** Black color */
-	static public final DmsColor BLACK = new DmsColor(0, 0, 0);
+	static public final DmsColor BLACK = fromColor(Color.BLACK);
+
+	/** Red color */
+	static public final DmsColor RED = fromColor(Color.RED);
+
+	/** Yellow color */
+	static public final DmsColor YELLOW = fromColor(Color.YELLOW);
+
+	/** Green color */
+	static public final DmsColor GREEN = fromColor(Color.GREEN);
+
+	/** Cyan color */
+	static public final DmsColor CYAN = fromColor(Color.CYAN);
+
+	/** Blue color */
+	static public final DmsColor BLUE = fromColor(Color.BLUE);
+
+	/** Magenta color */
+	static public final DmsColor MAGENTA = fromColor(Color.MAGENTA);
+
+	/** White color */
+	static public final DmsColor WHITE = fromColor(Color.WHITE);
+
+	/** Orange color */
+	static public final DmsColor ORANGE = fromColor(Color.ORANGE);
 
 	/** Amber color (Standard traffic amber) */
 	static public final DmsColor AMBER = new DmsColor(255, 208, 0);
