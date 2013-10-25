@@ -70,6 +70,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		} else {
 			/* The source table is not valid.  What??! */
 			logError("INVALID SOURCE");
+			setErrorStatus(source.toString());
 		}
 		return null;
 	}
