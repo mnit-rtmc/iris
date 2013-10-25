@@ -100,7 +100,7 @@ public class PropMessages extends JPanel {
 
 	/** Sign pixel panel */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400,
-		true, new Color(0, 0, 0.4f));
+		true);
 
 	/** Default font combo box */
 	private final JComboBox font_cbx = new JComboBox();
@@ -232,6 +232,7 @@ public class PropMessages extends JPanel {
 
 	/** Create a message preview panel */
 	private JPanel createPreviewPanel() {
+		pixel_pnl.setFaceColor(new Color(0, 0, 0.4f));
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("dms.message.preview")));

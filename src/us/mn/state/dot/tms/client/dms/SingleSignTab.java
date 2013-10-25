@@ -109,7 +109,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 	/** Panel for drawing preview pixel status */
 	private final SignPixelPanel preview_pnl = new SignPixelPanel(100, 400,
-		true, new Color(0, 0, 0.4f));
+		true);
 
 	/** Pager for selected DMS panel */
 	private DMSPanelPager pnlPager;
@@ -167,6 +167,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 			EtchedBorder.LOWERED));
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
+		preview_pnl.setFaceColor(new Color(0, 0, 0.4f));
 
 		add("device.name");
 		add(name_lbl);

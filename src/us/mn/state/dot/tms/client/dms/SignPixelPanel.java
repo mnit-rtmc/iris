@@ -40,7 +40,7 @@ public class SignPixelPanel extends JPanel {
 	private final boolean antialias;
 
 	/** Color of sign face */
-	private final Color face_color;
+	private Color face_color;
 
 	/** Sign width (mm) */
 	private int width_mm = 0;
@@ -92,18 +92,9 @@ public class SignPixelPanel extends JPanel {
 	 * @param w Width of panel.
 	 * @param a If true, render with antialiasing. */
 	public SignPixelPanel(int h, int w, boolean a) {
-		this(h, w, a, Color.BLACK);
-	}
-
-	/** Create a new sign pixel panel.
-	 * @param h Height of panel.
-	 * @param w Width of panel.
-	 * @param a If true, render with antialiasing.
-	 * @param f Face color of sign. */
-	public SignPixelPanel(int h, int w, boolean a, Color f) {
 		super(true);
 		antialias = a;
-		face_color = f;
+		face_color = Color.BLACK;
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				dirty = true;
@@ -111,6 +102,14 @@ public class SignPixelPanel extends JPanel {
 			}
 		});
 		setSizes(h, w);
+	}
+
+	/** Set the sign face color.
+	 * @param fc Face color of sign. */
+	public void setFaceColor(Color fc) {
+		face_color = fc;
+		dirty = true;
+		repaint();
 	}
 
 	/** Set the panel size */
