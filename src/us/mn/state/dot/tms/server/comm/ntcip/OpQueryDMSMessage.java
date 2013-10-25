@@ -38,15 +38,15 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	@Override protected Phase phaseTwo() {
 		return new QueryMessageSource();
 	}
 
 	/** Source table (memory type) or the currently displayed message */
-	protected final DmsMsgTableSource source = new DmsMsgTableSource();
+	private final DmsMsgTableSource source = new DmsMsgTableSource();
 
 	/** Process the message table source from the sign controller */
-	protected Phase processMessageSource() {
+	private Phase processMessageSource() {
 		SignMessage sm = dms.getMessageCurrent();
 		/* We have to test isBlank before isValid, because some
 		 * signs use 'undefined' source for blank messages. */
@@ -56,11 +56,16 @@ public class OpQueryDMSMessage extends OpDMS {
 			 * needs to be updated */
 			if(!SignMessageHelper.isBlank(sm))
 				setCurrentMessage(dms.createBlankMessage());
-		} else if(source.isValid()) {
+		} else if(source.getMemoryType().isValid()) {
 			/* The sign is not blank. If IRIS says it
 			 * should be blank, then we need to query the
 			 * current message on the sign. */
 			if(SignMessageHelper.isBlank(sm))
+				return new QueryCurrentMessage();
+			/* Compare the CRC of the message on the sign to the
+			 * CRC of the message IRIS knows about */
+			int crc = DmsMessageCRC.calculate(sm.getMulti(), 0, 0);
+			if(crc != source.getCrc())
 				return new QueryCurrentMessage();
 		} else {
 			/* The source table is not valid.  What??! */
@@ -117,14 +122,14 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	protected void setCurrentMessage(String multi, DMSMessagePriority p,
+	private void setCurrentMessage(String multi, DMSMessagePriority p,
 		Integer duration)
 	{
 		setCurrentMessage(dms.createMessage(multi, p, p, duration));
 	}
 
 	/** Set the current message on the sign */
-	protected void setCurrentMessage(SignMessage sm) {
+	private void setCurrentMessage(SignMessage sm) {
 		if(sm != null)
 			dms.setMessageCurrent(sm, null);
 	}

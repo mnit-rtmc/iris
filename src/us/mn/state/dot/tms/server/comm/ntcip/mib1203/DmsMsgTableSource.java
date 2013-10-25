@@ -25,17 +25,4 @@ public class DmsMsgTableSource extends MessageIDCode {
 	public DmsMsgTableSource() {
 		super(MIB1203.signControl.create(new int[] {5, 0}));
 	}
-
-	/** Test if the message table source is valid */
-	public boolean isValid() {
-		switch(getMemoryType()) {
-		case permanent:
-		case changeable:
-		case _volatile:
-		case blank:
-			return true;
-		default:
-			return false;
-		}
-	}
 }

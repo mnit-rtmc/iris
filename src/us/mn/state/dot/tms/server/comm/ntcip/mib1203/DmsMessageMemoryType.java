@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,20 @@ public class DmsMessageMemoryType extends ASN1Integer {
 		 	// For some vendors (1203v1), blank messages are
 		 	// undefined in dmsMsgTableSource
 			return this == blank || this == undefined;
+		}
+
+		/** Test if a message memory type is "valid" */
+		public boolean isValid() {
+			switch(this) {
+			case permanent:
+			case changeable:
+			case _volatile:
+			case schedule:
+			case blank:
+				return true;
+			default:
+				return false;
+			}
 		}
 	}
 
