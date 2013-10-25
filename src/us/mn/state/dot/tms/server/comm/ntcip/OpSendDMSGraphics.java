@@ -136,26 +136,10 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected boolean shouldSend(Integer g_num, Graphic g) {
 		Integer w = dms.getWidthPixels();
 		Integer h = dms.getHeightPixels();
-		int bpp = getBpp();
+		int bpp = color_scheme.getEnum().getBpp();
 		return (g_num != null && w != null && h != null) &&
 		       (g.getWidth() <= w) && (g.getHeight() <= h) &&
 		       (g.getBpp() == 1 || g.getBpp() == bpp);
-	}
-
-	/** Get the bpp of the sign's color scheme */
-	protected int getBpp() {
-		switch(color_scheme.getEnum()) {
-		case monochrome1bit:
-			return 1;
-		case monochrome8bit:
-			return 8;
-		case colorClassic:
-			return 8;
-		case color24bit:
-			return 24;
-		default:
-			return 0;
-		}
 	}
 
 	/** Phase to query all graphic numbers */

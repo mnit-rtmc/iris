@@ -53,6 +53,22 @@ public class DmsColorScheme extends ASN1Integer {
 			}
 			return undefined;
 		}
+
+		/** Get the bpp of the color scheme */
+		public int getBpp() {
+			switch(this) {
+			case monochrome1bit:
+				return 1;
+			case monochrome8bit:
+				return 8;
+			case colorClassic:
+				return 8;
+			case color24bit:
+				return 24;
+			default:
+				return 0;
+			}
+		}
 	}
 
 	/** Create a new DmsColorScheme object */
