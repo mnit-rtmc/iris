@@ -111,6 +111,7 @@ public class GateArmSystem {
 
 	/** Check a device request for valid gate arm requests */
 	static public DeviceRequest checkRequest(int r) {
+		boolean e = checkEnabled();
 		DeviceRequest req = DeviceRequest.fromOrdinal(r);
 		switch(req) {
 		case QUERY_STATUS:
@@ -118,7 +119,7 @@ public class GateArmSystem {
 			return req;
 		case SEND_SETTINGS:
 		case RESET_DEVICE:
-			return checkEnabled() ? req : null;
+			return e ? req : null;
 		default:
 			return null;
 		}
