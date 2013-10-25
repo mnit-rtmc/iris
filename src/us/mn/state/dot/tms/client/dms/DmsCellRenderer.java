@@ -207,6 +207,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			String loc = GeoLocHelper.getDescription(
 				dms.getGeoLoc());
 			loc_lbl.setText(loc);
+			pixel_pnl.setFilterColor(
+				SignPixelPanel.filterColor(dms));
 			pixel_pnl.setDimensions(dms);
 			pixel_pnl.setGraphic(getPageOne(dms));
 			updateToolTip(dms, name, loc);

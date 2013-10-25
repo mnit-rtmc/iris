@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -36,11 +37,36 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  */
 public class SignPixelPanel extends JPanel {
 
+	/** Create a filter color */
+	static private Color filterColor(Color clr, int alpha) {
+		return new Color(clr.getRed(), clr.getGreen(), clr.getBlue(),
+			alpha);
+	}
+
+	/** Filter color for failed DMS */
+	static private final Color FILTER_FAILED = filterColor(Color.GRAY, 64);
+
+	/** Filter color for DMS with controller errors */
+	static private final Color FILTER_ERROR = new Color(255, 64, 0, 64);
+
+	/** Get the filter color for a DMS */
+	static public Color filterColor(DMS dms) {
+		if(DMSHelper.isFailed(dms))
+			return FILTER_FAILED;
+		else if(DMSHelper.getCriticalError(dms).length() > 0)
+			return FILTER_ERROR;
+		else
+			return null;
+	}
+
 	/** Flag to turn on antialiasing */
 	private final boolean antialias;
 
 	/** Color of sign face */
 	private Color face_color;
+
+	/** Color if filter mask */
+	private Color filter_color;
 
 	/** Sign width (mm) */
 	private int width_mm = 0;
@@ -108,6 +134,14 @@ public class SignPixelPanel extends JPanel {
 	 * @param fc Face color of sign. */
 	public void setFaceColor(Color fc) {
 		face_color = fc;
+		dirty = true;
+		repaint();
+	}
+
+	/** Set the sign filter color.
+	 * @param fc Filter color of sign. */
+	public void setFilterColor(Color fc) {
+		filter_color = fc;
 		dirty = true;
 		repaint();
 	}
@@ -201,6 +235,11 @@ public class SignPixelPanel extends JPanel {
 			g.fillRect(0, 0, width_mm, height_mm);
 			if(rg != null)
 				paintPixels(g, rg);
+			Color fc = filter_color;
+			if(fc != null) {
+				g.setColor(fc);
+				g.fillRect(0, 0, width_mm, height_mm);
+			}
 		}
 	}
 

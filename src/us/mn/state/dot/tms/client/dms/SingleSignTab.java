@@ -167,7 +167,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 			EtchedBorder.LOWERED));
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
-		preview_pnl.setFaceColor(new Color(0, 0, 0.4f));
+		preview_pnl.setFilterColor(new Color(0, 0, 255, 48));
 
 		add("device.name");
 		add(name_lbl);
@@ -288,6 +288,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Clear the selected DMS */
 	private void clearSelected() {
 		setPager(null);
+		current_pnl.setFilterColor(null);
 		current_pnl.clear();
 		preview_pnl.clear();
 		name_lbl.setText("");
@@ -350,6 +351,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 	/** Update the status widgets */
 	private void updateStatus(DMS dms) {
+		current_pnl.setFilterColor(SignPixelPanel.filterColor(dms));
 		if(DMSHelper.isFailed(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);

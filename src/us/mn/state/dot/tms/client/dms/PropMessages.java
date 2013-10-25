@@ -232,7 +232,7 @@ public class PropMessages extends JPanel {
 
 	/** Create a message preview panel */
 	private JPanel createPreviewPanel() {
-		pixel_pnl.setFaceColor(new Color(0, 0, 0.4f));
+		pixel_pnl.setFilterColor(new Color(0, 0, 255, 48));
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("dms.message.preview")));
