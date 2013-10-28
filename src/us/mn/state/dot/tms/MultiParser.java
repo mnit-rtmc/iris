@@ -152,9 +152,12 @@ public class MultiParser {
 		Integer r = parseInt(args, 4);
 		Integer g = parseInt(args, 5);
 		Integer b = parseInt(args, 6);
-		if(x != null && y != null && w != null && h != null &&
-		   r != null && g != null && b != null)
-			cb.addColorRectangle(x, y, w, h, r, g, b);
+		if(x != null && y != null && w != null && h !=null && r !=null){
+			if(g != null && b != null)
+				cb.addColorRectangle(x, y, w, h, r, g, b);
+			else
+				cb.addColorRectangle(x, y, w, h, r);
+		}
 	}
 
 	/** Parse a font number from an [fox] or [fox,cccc] tag.
@@ -343,6 +346,8 @@ public class MultiParser {
 			public void setColorBackground(int x) {}
 			public void setPageBackground(int z) {}
 			public void setPageBackground(int r, int g, int b) {}
+			public void addColorRectangle(int x, int y, int w,
+				int h, int z) {}
 			public void addColorRectangle(int x, int y, int w,
 				int h, int r, int g, int b) {}
 			public void addGraphic(int g_num, Integer x, Integer y,

@@ -55,7 +55,25 @@ public interface Multi {
 	 * @param b Blue component (0-255). */
 	void setColorForeground(int r, int g, int b);
 
-	/** Add a color rectangle */
+	/** Add a color rectangle for monochrome1bit, monochrome8bit, and
+	 * colorClassic color schemes.
+	 * @param x X pixel position of upper left corner.
+	 * @param y Y pixel position of upper left corner.
+	 * @param w Width in pixels.
+	 * @param h Height in pixels.
+	 * @param z Color of rectangle (0-1 for monochrome1bit),
+	 *                             (0-255 for monochrome8bit),
+	 *                             (0-9 for colorClassic). */
+	void addColorRectangle(int x, int y, int w, int h, int z);
+
+	/** Add a color rectangle for color24bit color scheme.
+	 * @param x X pixel position of upper left corner.
+	 * @param y Y pixel position of upper left corner.
+	 * @param w Width in pixels.
+	 * @param h Height in pixels.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
 	void addColorRectangle(int x, int y, int w, int h, int r, int g, int b);
 
 	/** Set the font number.

@@ -75,6 +75,15 @@ public class MultiAdapter implements Multi {
 	/** Page background color */
 	protected DmsColor ms_background = DmsColor.BLACK;
 
+	/** Get a color for the color scheme.
+	 * @param x Color value.
+	 * @return DmsColor or null for invalid color. */
+	protected DmsColor schemeColor(int x) {
+		// FIXME: add support for monochrome color schemes
+		ColorClassic cc = ColorClassic.fromOrdinal(x);
+		return cc != null ? cc.clr : null;
+	}
+
 	/** Set the (deprecated) message background color.
 	 * @param x Background color (0-9; colorClassic value). */
 	public void setColorBackground(int x) {
@@ -89,10 +98,9 @@ public class MultiAdapter implements Multi {
 	 *                           (0-255 for monochrome8bit),
 	 *                           (0-9 for colorClassic). */
 	public void setPageBackground(int z) {
-		// FIXME: add support for monochrome color schemes
-		ColorClassic cc = ColorClassic.fromOrdinal(z);
-		if(cc != null)
-			ms_background = cc.clr;
+		DmsColor clr = schemeColor(z);
+		if(clr != null)
+			ms_background = clr;
 	}
 
 	/** Set the page background color for color24bit color scheme.
@@ -112,10 +120,9 @@ public class MultiAdapter implements Multi {
 	 *                           (0-255 for monochrome8bit),
 	 *                           (0-9 for colorClassic). */
 	public void setColorForeground(int x) {
-		// FIXME: add support for monochrome color schemes
-		ColorClassic cc = ColorClassic.fromOrdinal(x);
-		if(cc != null)
-			ms_foreground = cc.clr;
+		DmsColor clr = schemeColor(x);
+		if(clr != null)
+			ms_foreground = clr;
 	}
 
 	/** Set the foreground color for color24bit color scheme.
@@ -126,7 +133,27 @@ public class MultiAdapter implements Multi {
 		ms_foreground = new DmsColor(r, g, b);
 	}
 
-	/** Add a color rectangle */
+	/** Add a color rectangle for monochrome1bit, monochrome8bit, and
+	 * colorClassic color schemes.
+	 * @param x X pixel position of upper left corner.
+	 * @param y Y pixel position of upper left corner.
+	 * @param w Width in pixels.
+	 * @param h Height in pixels.
+	 * @param z Color of rectangle (0-1 for monochrome1bit),
+	 *                             (0-255 for monochrome8bit),
+	 *                             (0-9 for colorClassic). */
+	public void addColorRectangle(int x, int y, int w, int h, int z) {
+		// subclass must handle
+	}
+
+	/** Add a color rectangle for color24bit color scheme.
+	 * @param x X pixel position of upper left corner.
+	 * @param y Y pixel position of upper left corner.
+	 * @param w Width in pixels.
+	 * @param h Height in pixels.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
 	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
 		int b)
 	{

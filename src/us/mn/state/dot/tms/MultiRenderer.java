@@ -136,7 +136,20 @@ public class MultiRenderer extends MultiAdapter {
 		fillBackground();
 	}
 
-	/** Set the page background color */
+	/** Set the page background color for monochrome1bit, monochrome8bit,
+	 * and colorClassic color schemes.
+	 * @param z Background color (0-1 for monochrome1bit),
+	 *                           (0-255 for monochrome8bit),
+	 *                           (0-9 for colorClassic). */
+	public void setPageBackground(int z) {
+		super.setPageBackground(z);
+		fillBackground();
+	}
+
+	/** Set the page background color for color24bit color scheme.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
 	public void setPageBackground(int r, int g, int b) {
 		super.setPageBackground(r, g, b);
 		fillBackground();
@@ -148,7 +161,29 @@ public class MultiRenderer extends MultiAdapter {
 			ms_background);
 	}
 
-	/** Add a color rectangle */
+	/** Add a color rectangle for monochrome1bit, monochrome8bit, and
+	 * colorClassic color schemes.
+	 * @param x X pixel position of upper left corner.
+	 * @param y Y pixel position of upper left corner.
+	 * @param w Width in pixels.
+	 * @param h Height in pixels.
+	 * @param z Color of rectangle (0-1 for monochrome1bit),
+	 *                             (0-255 for monochrome8bit),
+	 *                             (0-9 for colorClassic). */
+	public void addColorRectangle(int x, int y, int w, int h, int z) {
+		DmsColor clr = schemeColor(z);
+		if(clr != null)
+			fillRectangle(x, y, w, h, clr);
+	}
+
+	/** Add a color rectangle for color24bit color scheme.
+	 * @param x X pixel position of upper left corner.
+	 * @param y Y pixel position of upper left corner.
+	 * @param w Width in pixels.
+	 * @param h Height in pixels.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
 	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
 		int b)
 	{
