@@ -32,7 +32,7 @@ public class MultiParser {
 
 	/** Regular expression to match supported MULTI tags */
 	static private final Pattern TAGS = Pattern.compile(
-		"(pb|cf|cr|fo|g|jl|jp|nl|np|pt|sc|tr|tt|vsa|slow|feed)(.*)");
+		"(cb|pb|cf|cr|fo|g|jl|jp|nl|np|pt|sc|tr|tt|vsa|slow|feed)(.*)");
 
 	/** Regular expression to match text between MULTI tags */
 	static private final Pattern TEXT_PATTERN = Pattern.compile(
@@ -64,7 +64,9 @@ public class MultiParser {
 		if(mtag.find()) {
 			String tid = mtag.group(1).toLowerCase();
 			String tparam = mtag.group(2);
-			if(tid.equals("pb"))
+			if(tid.equals("cb"))
+				parseColorBackground(tparam, cb);
+			else if(tid.equals("pb"))
 				parsePageBackground(tparam, cb);
 			else if(tid.equals("cf"))
 				parseColorForeground(tparam, cb);
@@ -97,6 +99,13 @@ public class MultiParser {
 			else if(tid.equals("feed"))
 				cb.addFeed(tparam);
 		}
+	}
+
+	/** Parse a (deprecated) background color tag */
+	static private void parseColorBackground(String v, Multi cb) {
+		Integer x = parseInt(v);
+		if(x != null)
+			cb.setColorBackground(x);
 	}
 
 	/** Parse a page background color tag */

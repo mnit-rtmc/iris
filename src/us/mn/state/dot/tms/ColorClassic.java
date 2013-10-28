@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms;
 
 /**
- * Enumeration of "classic" (v1) color scheme values.
+ * Enumeration of "classic" MULTI color scheme values.
  *
  * @author Douglas Lau
  */

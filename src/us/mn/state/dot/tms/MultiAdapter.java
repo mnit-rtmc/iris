@@ -75,6 +75,14 @@ public class MultiAdapter implements Multi {
 	/** Page background color */
 	protected DmsColor ms_background = DmsColor.BLACK;
 
+	/** Set the (deprecated) message background color.
+	 * @param x Background color (0-9; colorClassic value). */
+	public void setColorBackground(int x) {
+		ColorClassic cc = ColorClassic.fromOrdinal(x);
+		if(cc != null)
+			ms_background = cc.clr;
+	}
+
 	/** Set the page background color */
 	public void setPageBackground(int r, int g, int b) {
 		ms_background = new DmsColor(r, g, b);

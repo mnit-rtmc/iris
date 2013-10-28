@@ -25,6 +25,10 @@ public interface Multi {
 	/** Add a span of text */
 	void addSpan(String span);
 
+	/** Set the (deprecated) message background color.
+	 * @param x Background color (0-9; colorClassic value). */
+	void setColorBackground(int x);
+
 	/** Set the page background color */
 	void setPageBackground(int r, int g, int b);
 
