@@ -1211,7 +1211,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 <p>
 	A font is a set of bitmapped glyphs for displaying text on a dynamic
 	message sign (DMS).
-	Each font can contain any of the characters in the ASCII character set.
+	Each font can contain any of the printable characters in the ASCII
+	character set (0x20 to 0x7E).
 </p>
 <p>
 	When selecting a font, a few parameters must be considered, such as
@@ -1297,14 +1298,96 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	only font, IRIS will replace those characters with their equivalent.
 </p>
 <p>
-	Several sample fonts are included with IRIS as SQL scripts.
-	They can be imported from the command line (bash) into an IRIS database
-	with a command such as:
+	Fifteen fonts are included in the IRIS template SQL script.
+	These fonts are designed to have a similar visual style.
 </p>
-<pre class="code">psql tms -f /var/lib/iris/sql/fonts/F12_S2x1.sql</pre>
+<table>
+	<tr>
+	    <th>Number</th>
+	    <th>Font Name</th>
+            <th>Description</th>
+	</tr>
+	<tr>
+	    <td>1</td>
+	    <td>07_char</td>
+	    <td>7x5 character matrix</td>
+	</tr>
+	<tr>
+	    <td>2</td>
+	    <td>07_line</td>
+	    <td>7 pixel high line-matrix</td>
+	</tr>
+	<tr>
+	    <td>3</td>
+	    <td>08_full</td>
+	    <td>8 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>4</td>
+	    <td>09_full</td>
+	    <td>9 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>5</td>
+	    <td>10_full</td>
+	    <td>10 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>6</td>
+	    <td>11_full</td>
+	    <td>11 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>7</td>
+	    <td>12_full</td>
+	    <td>12 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>8</td>
+	    <td>12_full_bold</td>
+	    <td>12 pixel high full-matrix bold</td>
+	</tr>
+	<tr>
+	    <td>9</td>
+	    <td>13_full</td>
+	    <td>13 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>11</td>
+	    <td>14_full</td>
+	    <td>14 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>13</td>
+	    <td>16_full</td>
+	    <td>16 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>14</td>
+	    <td>18_full</td>
+	    <td>18 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>15</td>
+	    <td>20_full</td>
+	    <td>20 pixel high full-matrix (numerals only)</td>
+	</tr>
+	<tr>
+	    <td>16</td>
+	    <td>24_full</td>
+	    <td>24 pixel high full-matrix (numerals only)</td>
+	</tr>
+	<tr>
+	    <td>17</td>
+	    <td>_09_full_12</td>
+	    <td>9 pixel high (12 with lower case descenders)</td>
+	</tr>
+</table>
 <p>
-	The IRIS server will have to be restarted to have access to the imported
-	font.
+	The IRIS client also contains a font editor which can be used to design
+	new DMS fonts.
+	The font interface is found on the <span class="menu">View ➔
+	Message Signs ➔ DMS Fonts</span> menu item.
 </p>
 
 <h2 id="devices">Devices</h2>
