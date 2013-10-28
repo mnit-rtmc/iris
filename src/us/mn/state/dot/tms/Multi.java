@@ -29,7 +29,17 @@ public interface Multi {
 	 * @param x Background color (0-9; colorClassic value). */
 	void setColorBackground(int x);
 
-	/** Set the page background color */
+	/** Set the page background color for monochrome1bit, monochrome8bit,
+	 * and colorClassic color schemes.
+	 * @param z Background color (0-1 for monochrome1bit),
+	 *                           (0-255 for monochrome8bit),
+	 *                           (0-9 for colorClassic). */
+	void setPageBackground(int z);
+
+	/** Set the page background color for color24bit color scheme.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
 	void setPageBackground(int r, int g, int b);
 
 	/** Set the foreground color for monochrome1bit, monochrome8bit, and

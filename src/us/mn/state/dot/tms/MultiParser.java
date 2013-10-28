@@ -111,11 +111,17 @@ public class MultiParser {
 	/** Parse a page background color tag */
 	static private void parsePageBackground(String v, Multi cb) {
 		String[] args = v.split(",", 3);
-		Integer r = parseInt(args, 0);
-		Integer g = parseInt(args, 1);
-		Integer b = parseInt(args, 2);
-		if(r != null && g != null && b != null)
-			cb.setPageBackground(r, g, b);
+		if(args.length == 1) {
+			Integer z = parseInt(args, 0);
+			if(z != null)
+				cb.setPageBackground(z);
+		} else {
+			Integer r = parseInt(args, 0);
+			Integer g = parseInt(args, 1);
+			Integer b = parseInt(args, 2);
+			if(r != null && g != null && b != null)
+				cb.setPageBackground(r, g, b);
+		}
 	}
 
 	/** Parse a color foreground tag */
@@ -334,6 +340,8 @@ public class MultiParser {
 	static public String normalizeLine(String multi) {
 		// Strip tags which don't associate with a line
 		MultiString ms = new NormalMultiString() {
+			public void setColorBackground(int x) {}
+			public void setPageBackground(int z) {}
 			public void setPageBackground(int r, int g, int b) {}
 			public void addColorRectangle(int x, int y, int w,
 				int h, int r, int g, int b) {}

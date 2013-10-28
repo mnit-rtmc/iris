@@ -83,7 +83,22 @@ public class MultiAdapter implements Multi {
 			ms_background = cc.clr;
 	}
 
-	/** Set the page background color */
+	/** Set the page background color for monochrome1bit, monochrome8bit,
+	 * and colorClassic color schemes.
+	 * @param z Background color (0-1 for monochrome1bit),
+	 *                           (0-255 for monochrome8bit),
+	 *                           (0-9 for colorClassic). */
+	public void setPageBackground(int z) {
+		// FIXME: add support for monochrome color schemes
+		ColorClassic cc = ColorClassic.fromOrdinal(z);
+		if(cc != null)
+			ms_background = cc.clr;
+	}
+
+	/** Set the page background color for color24bit color scheme.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
 	public void setPageBackground(int r, int g, int b) {
 		ms_background = new DmsColor(r, g, b);
 	}
