@@ -229,7 +229,7 @@ public class GateArmArrayDispatcher extends IPanel {
 	private DMS watching_dms;
 
 	/** Watch a DMS */
-	private void watch_dms(final DMS nw) {
+	private synchronized void watch_dms(final DMS nw) {
 		final DMS ow = watching_dms;
 		if(ow != null)
 			dms_cache.ignoreObject(ow);
@@ -301,6 +301,7 @@ public class GateArmArrayDispatcher extends IPanel {
 	private void selectDms() {
 		DMS dms = watching_dms;
 		if(dms != null) {
+			watch_dms(null);
 			session.getDMSManager().getSelectionModel().
 				setSelected(dms);
 		}
