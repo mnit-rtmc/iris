@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
+import us.mn.state.dot.tms.ColorClassic;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**

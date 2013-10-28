@@ -12,9 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
-
-import us.mn.state.dot.tms.DmsColor;
+package us.mn.state.dot.tms;
 
 /**
  * Enumeration of "classic" (v1) color scheme values.

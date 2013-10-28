@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.tms.server.comm.ntcip.mib1203.ColorClassic;
-
 /**
  * Abstract MULTI string state adapter.
  *
