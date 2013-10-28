@@ -112,11 +112,17 @@ public class MultiParser {
 	/** Parse a color foreground tag */
 	static private void parseColorForeground(String v, Multi cb) {
 		String[] args = v.split(",", 3);
-		Integer r = parseInt(args, 0);
-		Integer g = parseInt(args, 1);
-		Integer b = parseInt(args, 2);
-		if(r != null && g != null && b != null)
-			cb.setColorForeground(r, g, b);
+		if(args.length == 1) {
+			Integer x = parseInt(args, 0);
+			if(x != null)
+				cb.setColorForeground(x);
+		} else {
+			Integer r = parseInt(args, 0);
+			Integer g = parseInt(args, 1);
+			Integer b = parseInt(args, 2);
+			if(r != null && g != null && b != null)
+				cb.setColorForeground(r, g, b);
+		}
 	}
 
 	/** Parse color rectangle from a [cr...] tag.

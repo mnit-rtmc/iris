@@ -169,7 +169,21 @@ public class MultiString implements Multi {
 		multi.append("]");
 	}
 
-	/** Set the color foreground */
+	/** Set the foreground color for monochrome1bit, monochrome8bit, and
+	 * colorClassic color schemes.
+	 * @param x Foreground color (0-1 for monochrome1bit),
+	 *                           (0-255 for monochrome8bit),
+	 *                           (0-9 for colorClassic). */
+	public void setColorForeground(int x) {
+		multi.append("[cf");
+		multi.append(x);
+		multi.append("]");
+	}
+
+	/** Set the foreground color for color24bit color scheme.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
 	public void setColorForeground(int red, int green, int blue) {
 		multi.append("[cf");
 		multi.append(red);

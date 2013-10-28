@@ -14,14 +14,16 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.tms.server.comm.ntcip.mib1203.ColorClassic;
+
 /**
  * Abstract MULTI string state adapter.
  *
  * Note: Fields in the class use the
  * "ms_" prefix to make it easier to distinguish their origin in subclasses.
  *
- * @author Michael Darter
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class MultiAdapter implements Multi {
 
@@ -83,7 +85,22 @@ public class MultiAdapter implements Multi {
 	/** Foreground color */
 	protected DmsColor ms_foreground = DmsColor.AMBER;
 
-	/** Set the foreground color */
+	/** Set the foreground color for monochrome1bit, monochrome8bit, and
+	 * colorClassic color schemes.
+	 * @param x Foreground color (0-1 for monochrome1bit),
+	 *                           (0-255 for monochrome8bit),
+	 *                           (0-9 for colorClassic). */
+	public void setColorForeground(int x) {
+		// FIXME: add support for monochrome color schemes
+		ColorClassic cc = ColorClassic.fromOrdinal(x);
+		if(cc != null)
+			ms_foreground = cc.clr;
+	}
+
+	/** Set the foreground color for color24bit color scheme.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
 	public void setColorForeground(int r, int g, int b) {
 		ms_foreground = new DmsColor(r, g, b);
 	}

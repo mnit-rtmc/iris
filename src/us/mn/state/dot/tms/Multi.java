@@ -17,8 +17,8 @@ package us.mn.state.dot.tms;
 /**
  * MULTI string state interface.
  *
- * @author Michael Darter
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public interface Multi {
 
@@ -28,7 +28,17 @@ public interface Multi {
 	/** Set the page background color */
 	void setPageBackground(int r, int g, int b);
 
-	/** Set the foreground color */
+	/** Set the foreground color for monochrome1bit, monochrome8bit, and
+	 * colorClassic color schemes.
+	 * @param x Foreground color (0-1 for monochrome1bit),
+	 *                           (0-255 for monochrome8bit),
+	 *                           (0-9 for colorClassic). */
+	void setColorForeground(int x);
+
+	/** Set the foreground color for color24bit color scheme.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
 	void setColorForeground(int r, int g, int b);
 
 	/** Add a color rectangle */
