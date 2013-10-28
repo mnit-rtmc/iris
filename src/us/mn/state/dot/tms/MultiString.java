@@ -45,7 +45,7 @@ public class MultiString implements Multi {
         }
 
 	/** Calculate a hash code for the MULTI string */
-	public int hashCode() {
+	@Override public int hashCode() {
 		return toString().hashCode();
 	}
 
@@ -69,13 +69,13 @@ public class MultiString implements Multi {
 	}
 
 	/** Add a span of text */
-	public void addSpan(String s) {
+	@Override public void addSpan(String s) {
 		if(s.length() > 0)
 			multi.append(s);
 	}
 
 	/** Add a new line */
-	public void addLine(Integer spacing) {
+	@Override public void addLine(Integer spacing) {
 		multi.append("[nl");
 		if(spacing != null)
 			multi.append(spacing);
@@ -83,14 +83,14 @@ public class MultiString implements Multi {
 	}
 
 	/** Add a new page */
-	public void addPage() {
+	@Override public void addPage() {
 		multi.append("[np]");
 	}
 
 	/** Set the page times.
 	 * @param pt_on Page on time (deciseconds; null means default)
 	 * @param pt_off Page off time (deciseconds; null means default) */
-	public void setPageTimes(Integer pt_on, Integer pt_off) {
+	@Override public void setPageTimes(Integer pt_on, Integer pt_off) {
 		multi.append("[pt");
 		if(pt_on != null)
 			multi.append(pt_on);
@@ -101,7 +101,7 @@ public class MultiString implements Multi {
 	}
 
 	/** Set the page justification */
-	public void setJustificationPage(JustificationPage jp) {
+	@Override public void setJustificationPage(JustificationPage jp) {
 		if(jp != JustificationPage.UNDEFINED) {
 			multi.append("[jp");
 			multi.append(jp.ordinal());
@@ -110,7 +110,7 @@ public class MultiString implements Multi {
 	}
 
 	/** Set the line justification */
-	public void setJustificationLine(JustificationLine jl) {
+	@Override public void setJustificationLine(JustificationLine jl) {
 		if(jl != JustificationLine.UNDEFINED) {
 			multi.append("[jl");
 			multi.append(jl.ordinal());
@@ -119,7 +119,9 @@ public class MultiString implements Multi {
 	}
 
 	/** Add a graphic */
-	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {
+	@Override public void addGraphic(int g_num, Integer x, Integer y,
+		String g_id)
+	{
 		multi.append("[g");
 		multi.append(g_num);
 		if(x != null && y != null) {
@@ -136,7 +138,7 @@ public class MultiString implements Multi {
 	}
 
 	/** Set a new font number */
-	public void setFont(int f_num, String f_id) {
+	@Override public void setFont(int f_num, String f_id) {
 		multi.append("[fo");
 		multi.append(f_num);
 		if(f_id != null) {
@@ -148,7 +150,7 @@ public class MultiString implements Multi {
 
 	/** Set the character spacing.
 	 * @param sc Character spacing (null means use font spacing) */
-	public void setCharSpacing(Integer sc) {
+	@Override public void setCharSpacing(Integer sc) {
 		multi.append("[");
 		if(sc != null) {
 			multi.append("sc");
@@ -160,7 +162,7 @@ public class MultiString implements Multi {
 
 	/** Set the (deprecated) message background color.
 	 * @param x Background color (0-9; colorClassic value). */
-	public void setColorBackground(int x) {
+	@Override public void setColorBackground(int x) {
 		multi.append("[cb");
 		multi.append(x);
 		multi.append("]");
@@ -171,7 +173,7 @@ public class MultiString implements Multi {
 	 * @param z Background color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
 	 *                           (0-9 for colorClassic). */
-	public void setPageBackground(int z) {
+	@Override public void setPageBackground(int z) {
 		multi.append("[pb");
 		multi.append(z);
 		multi.append("]");
@@ -181,7 +183,7 @@ public class MultiString implements Multi {
 	 * @param r Red component (0-255).
 	 * @param g Green component (0-255).
 	 * @param b Blue component (0-255). */
-	public void setPageBackground(int red, int green, int blue) {
+	@Override public void setPageBackground(int red, int green, int blue) {
 		multi.append("[pb");
 		multi.append(red);
 		multi.append(',');
@@ -196,7 +198,7 @@ public class MultiString implements Multi {
 	 * @param x Foreground color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
 	 *                           (0-9 for colorClassic). */
-	public void setColorForeground(int x) {
+	@Override public void setColorForeground(int x) {
 		multi.append("[cf");
 		multi.append(x);
 		multi.append("]");
@@ -206,7 +208,7 @@ public class MultiString implements Multi {
 	 * @param r Red component (0-255).
 	 * @param g Green component (0-255).
 	 * @param b Blue component (0-255). */
-	public void setColorForeground(int red, int green, int blue) {
+	@Override public void setColorForeground(int red, int green, int blue) {
 		multi.append("[cf");
 		multi.append(red);
 		multi.append(',');
@@ -225,7 +227,9 @@ public class MultiString implements Multi {
 	 * @param z Color of rectangle (0-1 for monochrome1bit),
 	 *                             (0-255 for monochrome8bit),
 	 *                             (0-9 for colorClassic). */
-	public void addColorRectangle(int x, int y, int w, int h, int z) {
+	@Override public void addColorRectangle(int x, int y, int w, int h,
+		int z)
+	{
 		multi.append("[cr");
 		multi.append(x);
 		multi.append(',');
@@ -247,8 +251,8 @@ public class MultiString implements Multi {
 	 * @param r Red component (0-255).
 	 * @param g Green component (0-255).
 	 * @param b Blue component (0-255). */
-	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
-		int b)
+	@Override public void addColorRectangle(int x, int y, int w, int h,
+		int r, int g, int b)
 	{
 		multi.append("[cr");
 		multi.append(x);
@@ -268,7 +272,7 @@ public class MultiString implements Multi {
 	}
 
 	/** Set the text rectangle */
-	public void setTextRectangle(int x, int y, int w, int h) {
+	@Override public void setTextRectangle(int x, int y, int w, int h) {
 		multi.append("[tr");
 		multi.append(x);
 		multi.append(',');
@@ -281,14 +285,14 @@ public class MultiString implements Multi {
 	}
 
 	/** Add a travel time destination */
-	public void addTravelTime(String sid) {
+	@Override public void addTravelTime(String sid) {
 		multi.append("[tt");
 		multi.append(sid);
 		multi.append("]");
 	}
 
 	/** Add a speed advisory */
-	public void addSpeedAdvisory() {
+	@Override public void addSpeedAdvisory() {
 		multi.append("[vsa]");
 	}
 
@@ -297,7 +301,9 @@ public class MultiString implements Multi {
 	 * @param b Distance to end of backup (negative indicates upstream).
 	 * @param units Units for speed (mph or kph).
 	 * @param dist If true, replace tag with distance to slow station. */
-	public void addSlowWarning(int spd, int b, String units, boolean dist) {
+	@Override public void addSlowWarning(int spd, int b, String units,
+		boolean dist)
+	{
 		multi.append("[slow");
 		multi.append(spd);
 		multi.append(',');
@@ -312,7 +318,7 @@ public class MultiString implements Multi {
 	}
 
 	/** Add a feed message */
-	public void addFeed(String fid) {
+	@Override public void addFeed(String fid) {
 		multi.append("[feed");
 		multi.append(fid);
 		multi.append("]");

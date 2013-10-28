@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Set the page justification */
-	public void setJustificationPage(JustificationPage jp) {
+	@Override public void setJustificationPage(JustificationPage jp) {
 		super.setJustificationPage(jp);
 		Block block = new Block();
 		Block cb = currentBlock();
@@ -98,12 +98,12 @@ public class MultiRenderer extends MultiAdapter {
 
 	/** Set the character spacing.
 	 * @param sc Character spacing (null means use font spacing) */
-	public void setCharSpacing(Integer sc) {
+	@Override public void setCharSpacing(Integer sc) {
 		char_spacing = sc;
 	}
 
 	/** Add a span of text */
-	public void addSpan(String span) {
+	@Override public void addSpan(String span) {
 		if(page == ms_page) {
 			Span s = new Span(span);
 			if(s.font != null) {
@@ -115,7 +115,7 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Add a new line */
-	public void addLine(Integer spacing) {
+	@Override public void addLine(Integer spacing) {
 		super.addLine(spacing);
 		Block block = currentBlock();
 		block.addLine(spacing);
@@ -129,7 +129,7 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Add a page */
-	public void addPage() {
+	@Override public void addPage() {
 		renderText();
 		resetTextRectangle();
 		super.addPage();
@@ -141,7 +141,7 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param z Background color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
 	 *                           (0-9 for colorClassic). */
-	public void setPageBackground(int z) {
+	@Override public void setPageBackground(int z) {
 		super.setPageBackground(z);
 		fillBackground();
 	}
@@ -150,7 +150,7 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param r Red component (0-255).
 	 * @param g Green component (0-255).
 	 * @param b Blue component (0-255). */
-	public void setPageBackground(int r, int g, int b) {
+	@Override public void setPageBackground(int r, int g, int b) {
 		super.setPageBackground(r, g, b);
 		fillBackground();
 	}
@@ -170,7 +170,9 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param z Color of rectangle (0-1 for monochrome1bit),
 	 *                             (0-255 for monochrome8bit),
 	 *                             (0-9 for colorClassic). */
-	public void addColorRectangle(int x, int y, int w, int h, int z) {
+	@Override public void addColorRectangle(int x, int y, int w, int h,
+		int z)
+	{
 		DmsColor clr = schemeColor(z);
 		if(clr != null)
 			fillRectangle(x, y, w, h, clr);
@@ -184,8 +186,8 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param r Red component (0-255).
 	 * @param g Green component (0-255).
 	 * @param b Blue component (0-255). */
-	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
-		int b)
+	@Override public void addColorRectangle(int x, int y, int w, int h,
+		int r, int g, int b)
 	{
 		fillRectangle(x, y, w, h, new DmsColor(r, g, b));
 	}
@@ -203,7 +205,7 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Set the text rectangle */
-	public void setTextRectangle(int x, int y, int w, int h) {
+	@Override public void setTextRectangle(int x, int y, int w, int h) {
 		renderText();
 		tr_x = x;
 		tr_y = y;
@@ -247,7 +249,9 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Add a graphic */
-	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {
+	@Override public void addGraphic(int g_num, Integer x, Integer y,
+		String g_id)
+	{
 		if(page != ms_page)
 			return;
 		Graphic graphic = GraphicHelper.find(g_num);
