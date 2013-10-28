@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Iterator;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -288,6 +290,20 @@ public class GateArmArrayDispatcher extends IPanel {
 		add(gate_lbl[7], Stretch.NONE);
 		add(state_lbl[7], Stretch.LAST);
 		clear();
+		current_pnl.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				selectDms();
+			}
+		});
+	}
+
+	/** Select the DMS */
+	private void selectDms() {
+		DMS dms = watching_dms;
+		if(dms != null) {
+			session.getDMSManager().getSelectionModel().
+				setSelected(dms);
+		}
 	}
 
 	/** Create streams box */
