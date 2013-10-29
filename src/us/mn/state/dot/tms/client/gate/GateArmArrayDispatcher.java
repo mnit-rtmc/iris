@@ -62,6 +62,11 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class GateArmArrayDispatcher extends IPanel {
 
+	/** Get the filter color for a DMS */
+	static private Color filterColor(DMS dms) {
+		return dms != null ? SignPixelPanel.filterColor(dms) : null;
+	}
+
 	/** SONAR session */
 	private final Session session;
 
@@ -100,7 +105,7 @@ public class GateArmArrayDispatcher extends IPanel {
 		public void enumerationComplete() { }
 		public void proxyRemoved(DMS d) { }
 		public void proxyChanged(final DMS d, final String a) {
-			if(d == watching_dms && "messageCurrent".equals(a)) {
+			if(d == watching_dms && "styles".equals(a)) {
 				runSwing(new Runnable() {
 					public void run() {
 						updateDms(d);
@@ -439,6 +444,7 @@ public class GateArmArrayDispatcher extends IPanel {
 
 	/** Update the DMS */
 	private void updateDms(DMS dms) {
+		current_pnl.setFilterColor(filterColor(dms));
 		RasterGraphic[] rg = DMSHelper.getRasters(dms);
 		if(rg != null) {
 			String ms = DMSHelper.getMultiString(dms);
@@ -561,6 +567,7 @@ public class GateArmArrayDispatcher extends IPanel {
 		clearArms();
 		watch_dms(null);
 		setPager(null);
+		current_pnl.setFilterColor(null);
 		current_pnl.clear();
 		swap_act.setEnabled(false);
 		open_arm.setEnabled(false);
