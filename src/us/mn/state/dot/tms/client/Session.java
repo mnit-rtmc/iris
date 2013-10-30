@@ -344,8 +344,13 @@ public class Session {
 	}
 
 	/** Check if the user can update a proxy */
+	public boolean canUpdate(SonarObject proxy, boolean can_edit) {
+		return proxy != null && canUpdate(new Name(proxy), can_edit);
+	}
+
+	/** Check if the user can update a proxy */
 	public boolean canUpdate(SonarObject proxy) {
-		return proxy != null && canUpdate(new Name(proxy), edit_mode);
+		return canUpdate(proxy, edit_mode);
 	}
 
 	/** Check if the user can update a proxy */

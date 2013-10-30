@@ -575,12 +575,12 @@ public class IncidentDispatcher extends JPanel
 
 	/** Check if the user can add the named incident */
 	public boolean canAdd(String oname) {
-		return session.canAdd(Incident.SONAR_TYPE, oname);
+		return session.canAdd(Incident.SONAR_TYPE, oname, true);
 	}
 
 	/** Check if the user can update the given incident */
 	private boolean canUpdate(Incident inc) {
-		return session.canUpdate(inc);
+		return session.canUpdate(inc, true);
 	}
 
 	/** Check if the user can deploy signs for an incident */
@@ -595,7 +595,12 @@ public class IncidentDispatcher extends JPanel
 
 	/** Check if the user can send LCS array indications */
 	private boolean canSendIndications() {
-		return session.canUpdate(LCSArray.SONAR_TYPE, "indicationsNext")
-		    && session.canUpdate(LCSArray.SONAR_TYPE, "ownerNext");
+		return canUpdateLcs("indicationsNext")
+		    && canUpdateLcs("ownerNext");
+	}
+
+	/** Check if the user can update an LCS array attribute */
+	private boolean canUpdateLcs(String a) {
+		return session.canUpdate(LCSArray.SONAR_TYPE, a, true);
 	}
 }
