@@ -430,6 +430,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		notifyAttribute("armState");
 		updateStyles();
 		updateDmsMessage();
+		if(gas == GateArmState.TIMEOUT)
+			sendEmailAlert("COMMUNICATION FAILED: " + name);
 	}
 
 	/** Update the message displayed on the DMS */
