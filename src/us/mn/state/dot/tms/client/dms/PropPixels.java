@@ -181,7 +181,7 @@ public class PropPixels extends IPanel {
 
 	/** Check if the user can update an attribute */
 	private boolean canUpdate(String aname) {
-		return session.canUpdate(dms, aname);
+		return session.canUpdate(dms, aname, true);
 	}
 
 	/** Check if the user can make device requests */

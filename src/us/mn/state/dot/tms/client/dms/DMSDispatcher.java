@@ -457,8 +457,13 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Can a message be sent to the specified DMS? */
 	public boolean canSend(DMS dms) {
 		return creator.canCreate() &&
-		       session.canUpdate(dms, "ownerNext") &&
-		       session.canUpdate(dms, "messageNext");
+		       canUpdate(dms, "ownerNext") &&
+		       canUpdate(dms, "messageNext");
+	}
+
+	/** Can a DMS attribute be updated */
+	private boolean canUpdate(DMS dms, String a) {
+		return session.canUpdate(dms, a, true);
 	}
 
 	/** Can a device request be sent to all selected DMS? */
@@ -475,12 +480,12 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Can a device request be sent to the specified DMS? */
 	public boolean canRequest(DMS dms) {
-		return session.canUpdate(dms, "deviceRequest");
+		return canUpdate(dms, "deviceRequest");
 	}
 
 	/** Check if AWS is allowed and user has permission to change */
 	public boolean isAwsPermitted(DMS dms) {
 		return dms.getAwsAllowed() &&
-		       session.canUpdate(dms, "awsControlled");
+		       canUpdate(dms, "awsControlled");
 	}
 }

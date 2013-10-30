@@ -354,9 +354,16 @@ public class Session {
 	}
 
 	/** Check if the user can update a proxy */
-	public boolean canUpdate(SonarObject proxy, String aname) {
+	public boolean canUpdate(SonarObject proxy, String aname,
+		boolean can_edit)
+	{
 		return proxy != null &&
-		       canUpdate(new Name(proxy, aname), edit_mode);
+		       canUpdate(new Name(proxy, aname), can_edit);
+	}
+
+	/** Check if the user can update a proxy */
+	public boolean canUpdate(SonarObject proxy, String aname) {
+		return canUpdate(proxy, aname, edit_mode);
 	}
 
 	/** Check if the user can remove a proxy */
