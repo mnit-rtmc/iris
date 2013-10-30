@@ -159,6 +159,7 @@ public class SignPixelPanel extends JPanel {
 		setPhysicalDimensions(0, 0, 0, 0, 1, 1);
 		setLogicalDimensions(0, 0, 0, 0);
 		dirty = true;
+		repaint();
 	}
 
 	/** Set the graphic displayed */
