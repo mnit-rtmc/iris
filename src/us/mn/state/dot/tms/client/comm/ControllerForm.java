@@ -251,7 +251,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Can a controller request be made */
 	private boolean canRequest() {
-		return canUpdate("counters") && canUpdate("download");
+		return canUpdate("counters", true) &&
+		       canUpdate("download", true);
 	}
 
 	/** Create the jobs for the setup panel */
@@ -375,8 +376,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	@Override protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("commLink")) {
 			comm_link_cbx.setAction(null);
-			comm_link_cbx.setEnabled(canUpdate("commLink"));
 			comm_link_cbx.setSelectedItem(proxy.getCommLink());
+			comm_link.setEnabled(canUpdate("commLink"));
 			comm_link_cbx.setAction(comm_link);
 			drop_model = new DropNumberModel(
 				proxy.getCommLink(), getTypeCache(),
@@ -442,8 +443,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 		if(a == null || a.equals("style")) {
 			cab_style_cbx.setAction(null);
-			cab_style_cbx.setEnabled(canUpdateCabinet("style"));
 			cab_style_cbx.setSelectedItem(cabinet.getStyle());
+			cab_style.setEnabled(canUpdateCabinet("style"));
 			cab_style_cbx.setAction(cab_style);
 		}
 	}
