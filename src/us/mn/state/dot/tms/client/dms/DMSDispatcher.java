@@ -364,6 +364,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Clear the selection */
 	private void clearSelected() {
 		setEnabled(false);
+		composer.setSign(null, null);
 		setMessage("");
 		singleTab.setSelected(null);
 		selectSingleTab();

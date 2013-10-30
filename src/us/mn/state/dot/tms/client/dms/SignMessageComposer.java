@@ -434,10 +434,8 @@ public class SignMessageComposer extends JPanel {
 	/** Enable or Disable the message selector */
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
-		if(!b) {
-			setSign(null, null);
+		if(!b)
 			setMultiple(false);
-		}
 		setTabPage(0);
 		clear.setEnabled(b);
 		adjusting++;
