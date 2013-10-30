@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ public class IncidentDetailForm extends ProxyTableForm<IncidentDetail> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canUpdate(IncidentDetail.SONAR_TYPE);
+		return s.canUpdate(IncidentDetail.SONAR_TYPE, true);
 	}
 
 	/** Create a new incident detail form */

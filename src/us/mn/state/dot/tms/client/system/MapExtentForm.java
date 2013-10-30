@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ public class MapExtentForm extends ProxyTableForm<MapExtent> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canUpdate(MapExtent.SONAR_TYPE);
+		return s.canUpdate(MapExtent.SONAR_TYPE, true);
 	}
 
 	/** Create a new map extent form */

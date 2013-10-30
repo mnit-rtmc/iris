@@ -61,6 +61,14 @@ public class Session {
 		return user;
 	}
 
+	/** "Edit" mode */
+	private boolean edit_mode = false;
+
+	/** Set the edit mode */
+	public void setEditMode(boolean m) {
+		edit_mode = m;
+	}
+
 	/** SONAR state */
 	private final SonarState state;
 
@@ -289,14 +297,20 @@ public class Session {
 	}
 
 	/** Check if the user can add an object */
-	public boolean canAdd(String tname) {
-		return canAdd(tname, "oname");
+	public boolean canAdd(String tname, String oname, boolean can_edit) {
+		return can_edit &&
+		       oname != null &&
+		       namespace.canAdd(new Name(tname, oname), user);
 	}
 
 	/** Check if the user can add an object */
 	public boolean canAdd(String tname, String oname) {
-		return oname != null &&
-		       namespace.canAdd(new Name(tname, oname), user);
+		return canAdd(tname, oname, edit_mode);
+	}
+
+	/** Check if the user can add an object */
+	public boolean canAdd(String tname) {
+		return canAdd(tname, "oname");
 	}
 
 	/** Check if the user can read a type */
@@ -305,36 +319,54 @@ public class Session {
 	}
 
 	/** Check if the user can update an attribute */
+	private boolean canUpdate(Name name, boolean can_edit) {
+		return can_edit && namespace.canUpdate(name, user);
+	}
+
+	/** Check if the user can update an attribute */
+	public boolean canUpdate(String tname, String aname, boolean can_edit) {
+		return canUpdate(new Name(tname, "oname", aname), can_edit);
+	}
+
+	/** Check if the user can update an attribute */
+	public boolean canUpdate(String tname, boolean can_edit) {
+		return canUpdate(tname, "aname", can_edit);
+	}
+
+	/** Check if the user can update an attribute */
 	public boolean canUpdate(String tname, String aname) {
-		return namespace.canUpdate(new Name(tname,"oname",aname), user);
+		return canUpdate(tname, aname, edit_mode);
 	}
 
 	/** Check if the user can update an attribute */
 	public boolean canUpdate(String tname) {
-		return canUpdate(tname, "aname");
+		return canUpdate(tname, edit_mode);
 	}
 
 	/** Check if the user can update a proxy */
 	public boolean canUpdate(SonarObject proxy) {
-		return proxy != null &&
-		       namespace.canUpdate(new Name(proxy), user);
+		return proxy != null && canUpdate(new Name(proxy), edit_mode);
 	}
 
 	/** Check if the user can update a proxy */
 	public boolean canUpdate(SonarObject proxy, String aname) {
 		return proxy != null &&
-		       namespace.canUpdate(new Name(proxy, aname), user);
+		       canUpdate(new Name(proxy, aname), edit_mode);
+	}
+
+	/** Check if the user can remove a proxy */
+	private boolean canRemove(Name name, boolean can_edit) {
+		return can_edit && namespace.canRemove(name, user);
 	}
 
 	/** Check if the user can remove a proxy */
 	public boolean canRemove(SonarObject proxy) {
-		return proxy != null &&
-		       namespace.canRemove(new Name(proxy), user);
+		return proxy != null && canRemove(new Name(proxy), edit_mode);
 	}
 
 	/** Check if the user can remove a proxy */
 	public boolean canRemove(String tname, String oname) {
-		return namespace.canRemove(new Name(tname, oname), user);
+		return canRemove(new Name(tname, oname), edit_mode);
 	}
 
 	/** Dispose of the session */

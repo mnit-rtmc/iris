@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ public class RoadForm extends ProxyTableForm<Road> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canUpdate(Road.SONAR_TYPE);
+		return s.canUpdate(Road.SONAR_TYPE, true);
 	}
 
 	/** Create a new road form */

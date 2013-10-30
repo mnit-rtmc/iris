@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@ public class UserRoleForm extends AbstractForm {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canUpdate(User.SONAR_TYPE) ||
-		       s.canUpdate(Role.SONAR_TYPE) ||
-		       s.canUpdate(Capability.SONAR_TYPE) ||
-		       s.canUpdate(Privilege.SONAR_TYPE);
+		return s.canUpdate(User.SONAR_TYPE, true) ||
+		       s.canUpdate(Role.SONAR_TYPE, true) ||
+		       s.canUpdate(Capability.SONAR_TYPE, true) ||
+		       s.canUpdate(Privilege.SONAR_TYPE, true);
 	}
 
 	/** Tabbed pane */
