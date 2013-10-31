@@ -48,7 +48,7 @@ public class SignTextCreator {
 		sign_text = s.getSonarState().getDmsCache().getSignText();
 	}
 
-	/** 
+	/**
 	 * Create a new sign text and add to the sign text library.
 	 * @param sg SignGroup the new message will be associated with.
 	 * @param line Combobox line number.
@@ -60,7 +60,7 @@ public class SignTextCreator {
 	{
 		multi = MultiParser.normalize(multi);
 		String name = createUniqueSignTextName(sg);
-		if(canAddSignText(name)) {
+		if(isAddPermitted(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("sign_group", sg);
@@ -71,13 +71,18 @@ public class SignTextCreator {
 		}
 	}
 
-	/** Check if the user can add the named sign text */
-	public boolean canAddSignText(String name) {
+	/** Check if the user is permitted to add the named sign text */
+	public boolean isAddPermitted(String name) {
 		return session.isAddPermitted(SignText.SONAR_TYPE, name);
 	}
 
-	/** 
-	 * Create a SignText name, which is in this form: 
+	/** Check if the user can add the named sign text */
+	public boolean canAddSignText(String name) {
+		return session.canAdd(SignText.SONAR_TYPE, name);
+	}
+
+	/**
+	 * Create a SignText name, which is in this form:
 	 *    sign_group.name + "_" + uniqueid
 	 *    where uniqueid is a sequential integer.
 	 * @return A unique string for a new SignText entry, e.g. V1_23
@@ -99,7 +104,7 @@ public class SignTextCreator {
 		return null;
 	}
 
-	/** 
+	/**
 	 * Create a HashSet containing all SignText names for the given
 	 * sign group.
 	 * @param sg Sign group to search

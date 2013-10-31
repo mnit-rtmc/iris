@@ -29,9 +29,9 @@ import us.mn.state.dot.tms.client.SonarState;
 /**
  * Model for sign text messages.  This class is instantiated and contained by
  * SignMessageComposer.  One SignTextModel is associated with a single DMS.
- * It creates and contains SignTextComboBoxModel objects for each combobox 
- * in SignMessageComposer.  This object listens for changes to sign_text and 
- * dms_sign_groups and is responsible for updating its model accordingly. 
+ * It creates and contains SignTextComboBoxModel objects for each combobox
+ * in SignMessageComposer.  This object listens for changes to sign_text and
+ * dms_sign_groups and is responsible for updating its model accordingly.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -123,7 +123,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		return g != null && groups.contains(g.getName());
 	}
 
-	/** 
+	/**
 	 * Get the local SignGroup for the DMS.
 	 * @return local SignGroup if it exists, otherwise null
 	 */
@@ -140,7 +140,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		return g.getDms() == dms && g.getSignGroup().getLocal();
 	}
 
-	/** 
+	/**
 	 * Create a new sign text and add to the local sign text library.
 	 * @param line Combobox line number.
 	 * @param multi MULTI string for line.
@@ -154,17 +154,17 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		}
 	}
 
-	/** Check if the user can add a sign text to the local sign group */
-	public boolean canAddLocalSignText() {
+	/** Check if user is permitted to add sign text to local sign group */
+	public boolean isLocalSignTextAddPermitted() {
 		SignGroup sg = getLocalSignGroup();
 		if(sg != null) {
 			String oname = sg.getName() + "_XX";
-			return creator.canAddSignText(oname);
+			return creator.isAddPermitted(oname);
 		} else
 			return false;
 	}
 
-	/** 
+	/**
 	 * Called when the DMS associated with this object is added to a
 	 * new sign group. New SignText lines from the new sign group are
 	 * added to each SignTextComboBoxModel.
@@ -178,9 +178,9 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		}
 	}
 
-	/** 
+	/**
 	 * Called when the DMS associated with this object is removed
-	 * from a sign group. 
+	 * from a sign group.
 	 */
 	private void removeGroup(SignGroup g) {
 		groups.remove(g.getName());

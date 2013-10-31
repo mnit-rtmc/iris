@@ -416,7 +416,7 @@ public class SignMessageComposer extends JPanel {
 	private boolean canAddMessages() {
 		SignTextModel stm = st_model;
 		if(stm != null)
-			return stm.canAddLocalSignText();
+			return stm.isLocalSignTextAddPermitted();
 		else
 			return false;
 	}
