@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.toolbar;
 
-import java.awt.FlowLayout;
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 /**
@@ -26,7 +26,7 @@ abstract public class ToolPanel extends JPanel {
 
 	/** Create a new tool panel */
 	public ToolPanel() {
-		super(new FlowLayout());
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 	}
 
 	/** Dispose of the tool panel */
