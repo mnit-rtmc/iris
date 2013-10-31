@@ -32,10 +32,10 @@ public class UserRoleForm extends AbstractForm {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canUpdate(User.SONAR_TYPE, true) ||
-		       s.canUpdate(Role.SONAR_TYPE, true) ||
-		       s.canUpdate(Capability.SONAR_TYPE, true) ||
-		       s.canUpdate(Privilege.SONAR_TYPE, true);
+		return s.isUpdatePermitted(User.SONAR_TYPE) ||
+		       s.isUpdatePermitted(Role.SONAR_TYPE) ||
+		       s.isUpdatePermitted(Capability.SONAR_TYPE) ||
+		       s.isUpdatePermitted(Privilege.SONAR_TYPE);
 	}
 
 	/** Tabbed pane */

@@ -29,7 +29,7 @@ public class MapExtentForm extends ProxyTableForm<MapExtent> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canUpdate(MapExtent.SONAR_TYPE, true);
+		return s.isUpdatePermitted(MapExtent.SONAR_TYPE);
 	}
 
 	/** Create a new map extent form */

@@ -28,7 +28,7 @@ public class RoadForm extends ProxyTableForm<Road> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canUpdate(Road.SONAR_TYPE, true);
+		return s.isUpdatePermitted(Road.SONAR_TYPE);
 	}
 
 	/** Create a new road form */

@@ -31,7 +31,7 @@ public class SystemAttributeForm extends ProxyTableForm<SystemAttribute> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canUpdate(SystemAttribute.SONAR_TYPE, true);
+		return s.isUpdatePermitted(SystemAttribute.SONAR_TYPE);
 	}
 
 	/** Create a new system attribute form */

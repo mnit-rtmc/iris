@@ -354,8 +354,16 @@ public class Session {
 	 * @param tname Type name of attribute to update.
 	 * @param can_edit Flag to allow editing.
 	 * @return true if user can update the attribute */
-	public boolean canUpdate(String tname, boolean can_edit) {
+	private boolean canUpdate(String tname, boolean can_edit) {
 		return canUpdate(tname, "aname", can_edit);
+	}
+
+	/** Check if the user is permitted to update an attribute, regardless of
+	 * EDIT mode.
+	 * @param tname Type name of attribute to update.
+	 * @return true if user can update the attribute */
+	public boolean isUpdatePermitted(String tname) {
+		return canUpdate(tname, true);
 	}
 
 	/** Check if the user can update an attribute.
