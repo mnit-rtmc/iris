@@ -97,6 +97,9 @@ public class MeterStatusPanel extends IPanel
 	/** Queue grow button */
 	private final JButton grow_btn = new JButton();
 
+	/** Lock meter action */
+	private LockMeterAction lock_act;
+
 	/** Reason the meter was locked */
 	private final JComboBox lock_cbx = new JComboBox(
 		RampMeterLock.getDescriptions());
@@ -244,16 +247,21 @@ public class MeterStatusPanel extends IPanel
 			release_lbl.setText("");
 			cycle_lbl.setText("");
 			queue_lbl.setText("");
+			lock_act = null;
 			lock_cbx.setAction(null);
 			lock_cbx.setSelectedIndex(0);
 		}
-		setEnabled(canUpdate(proxy));
+		setEnabled(isUpdatePermitted(proxy));
 	}
 
 	/** Enable or disable the status panel */
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		lock_cbx.setEnabled(enabled);
+		LockMeterAction a = lock_act;
+		if(a != null)
+			a.setEnabled(enabled);
+		else
+			lock_cbx.setEnabled(enabled);
 		on_btn.setEnabled(enabled);
 		off_btn.setEnabled(enabled);
 	}
@@ -286,8 +294,9 @@ public class MeterStatusPanel extends IPanel
 				on_btn.setSelected(true);
 			else
 				off_btn.setSelected(true);
-			shrink_btn.setEnabled(canUpdate(meter) && rate != null);
-			grow_btn.setEnabled(canUpdate(meter) && rate != null);
+			boolean up = isUpdatePermitted(meter) && rate != null;
+			shrink_btn.setEnabled(up);
+			grow_btn.setEnabled(up);
 		}
 		if(a == null || a.equals("queue")) {
 			RampMeterQueue q = RampMeterQueue.fromOrdinal(
@@ -297,7 +306,10 @@ public class MeterStatusPanel extends IPanel
 		if(a == null || a.equals("mLock")) {
 			lock_cbx.setAction(null);
 			lock_cbx.setSelectedIndex(getMLock(meter));
-			lock_cbx.setAction(new LockMeterAction(meter,lock_cbx));
+			LockMeterAction ma =new LockMeterAction(meter,lock_cbx);
+			ma.setEnabled(isUpdatePermitted(meter));
+			lock_cbx.setAction(ma);
+			lock_act = ma;
 		}
 		if(a == null || a.equals("styles")) {
 			if(ItemStyle.FAILED.checkBit(meter.getStyles())) {
@@ -316,9 +328,9 @@ public class MeterStatusPanel extends IPanel
 		return ml != null ? ml : 0;
 	}
 
-	/** Check if the user can update the given ramp meter */
-	private boolean canUpdate(RampMeter meter) {
-		return session.canUpdate(meter, "rateNext") &&
-		       session.canUpdate(meter, "mLock");
+	/** Check if the user is permitted to update the given ramp meter */
+	private boolean isUpdatePermitted(RampMeter meter) {
+		return session.isUpdatePermitted(meter, "rateNext") &&
+		       session.isUpdatePermitted(meter, "mLock");
 	}
 }
