@@ -189,9 +189,9 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 			enc_chn_spn.setValue(proxy.getEncoderChannel());
 		}
 		if(a == null || a.equals("encoderType")) {
-			enc_type_cbx.setEnabled(canUpdate("encoderType"));
 			enc_type_cbx.setAction(null);
 			enc_type_cbx.setSelectedIndex(proxy.getEncoderType());
+			encoder_type.setEnabled(canUpdate("encoderType"));
 			enc_type_cbx.setAction(encoder_type);
 		}
 		if(a == null || a.equals("publish")) {
