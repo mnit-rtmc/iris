@@ -271,7 +271,7 @@ public class IncidentDispatcher extends JPanel
 	/** Create a new incident */
 	private void create(ClientIncident inc) {
 		String name = createUniqueIncidentName();
-		if(canAdd(name)) {
+		if(isAddPermitted(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			Incident rpl = getReplaces(inc);
@@ -493,7 +493,7 @@ public class IncidentDispatcher extends JPanel
 	/** Enable the dispatcher widgets */
 	private void enableWidgets(Incident inc) {
 		if(inc instanceof ClientIncident) {
-			boolean create = canAdd("oname");
+			boolean create = isAddPermitted("oname");
 			detail_cbx.setEnabled(create);
 			camera_cbx.setEnabled(create);
 			cam_cards.show(cam_pnl, CAMERA_CBOX);
@@ -573,9 +573,9 @@ public class IncidentDispatcher extends JPanel
 		return model;
 	}
 
-	/** Check if the user can add the named incident */
-	public boolean canAdd(String oname) {
-		return session.canAdd(Incident.SONAR_TYPE, oname, true);
+	/** Check if the user is permitted to add the named incident */
+	public boolean isAddPermitted(String oname) {
+		return session.isAddPermitted(Incident.SONAR_TYPE, oname);
 	}
 
 	/** Check if the user is permitted to update the given incident */

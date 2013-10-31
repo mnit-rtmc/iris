@@ -309,7 +309,7 @@ public class Session {
 	 * @param oname Name of object to add.
 	 * @param can_edit Flag to allow editing.
 	 * @return true if user can add the object */
-	public boolean canAdd(String tname, String oname, boolean can_edit) {
+	private boolean canAdd(String tname, String oname, boolean can_edit) {
 		return oname != null && canAdd(new Name(tname,oname), can_edit);
 	}
 
@@ -326,6 +326,15 @@ public class Session {
 	 * @return true if user can add the object */
 	public boolean canAdd(String tname) {
 		return canAdd(tname, "oname");
+	}
+
+	/** Check if the user is permitted to add an object, regardless of
+	 * EDIT mode.
+	 * @param tname Type name of object to add.
+	 * @param oname Name of object to add.
+	 * @return true if user can add the object */
+	public boolean isAddPermitted(String tname, String oname) {
+		return canAdd(tname, oname, true);
 	}
 
 	/** Check if the user can read a type */

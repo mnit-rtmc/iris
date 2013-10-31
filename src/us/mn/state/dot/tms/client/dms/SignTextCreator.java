@@ -73,7 +73,7 @@ public class SignTextCreator {
 
 	/** Check if the user can add the named sign text */
 	public boolean canAddSignText(String name) {
-		return session.canAdd(SignText.SONAR_TYPE, name, true);
+		return session.isAddPermitted(SignText.SONAR_TYPE, name);
 	}
 
 	/** 

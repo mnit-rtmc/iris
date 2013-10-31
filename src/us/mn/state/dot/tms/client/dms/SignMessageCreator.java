@@ -177,7 +177,7 @@ public class SignMessageCreator {
 
 	/** Check if the user can add the named sign message */
 	public boolean canAddSignMessage(String name) {
-		return session.canAdd(SignMessage.SONAR_TYPE, name, true);
+		return session.isAddPermitted(SignMessage.SONAR_TYPE, name);
 	}
 
 	/** Check if the user can create a sign message */
