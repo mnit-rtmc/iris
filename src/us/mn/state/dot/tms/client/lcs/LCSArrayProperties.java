@@ -142,7 +142,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
-		settings.setEnabled(canUpdate("deviceRequest"));
+		settings.setEnabled(isUpdatePermitted("deviceRequest"));
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -339,13 +339,13 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		}
 		if(a == null || a.equals("lcsLock")) {
 			lock_cmb.setAction(null);
-			lock_cmb.setEnabled(canUpdate("lcsLock"));
 			Integer lk = proxy.getLcsLock();
 			if(lk != null)
 				lock_cmb.setSelectedIndex(lk);
 			else
 				lock_cmb.setSelectedIndex(0);
-			lock_cmb.setAction(new LockLcsAction(proxy, lock_cmb));
+			lock_cmb.setEnabled(canUpdate("lcsLock"));
+//			lock_cmb.setAction(new LockLcsAction(proxy, lock_cmb));
 		}
 		if(a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());
