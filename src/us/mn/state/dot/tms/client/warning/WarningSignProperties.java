@@ -153,8 +153,8 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		}
 		if(a == null || a.equals("camera")) {
 			camera_cbx.setAction(null);
-			camera_cbx.setEnabled(canUpdate("camera"));
 			camera_cbx.setSelectedItem(proxy.getCamera());
+			camera.setEnabled(canUpdate("camera"));
 			camera_cbx.setAction(camera);
 		}
 		if(a == null || a.equals("message")) {
