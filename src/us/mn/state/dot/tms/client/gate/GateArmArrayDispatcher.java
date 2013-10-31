@@ -508,7 +508,7 @@ public class GateArmArrayDispatcher extends IPanel {
 
 	/** Update the button enabled states */
 	private void updateButtons(GateArmArray ga) {
-		boolean e = session.canUpdate(ga, "armState");
+		boolean e = session.isUpdatePermitted(ga, "armState");
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
 		open_arm.setEnabled(e && gas == GateArmState.CLOSED &&
 			isOpenAllowed(ga));

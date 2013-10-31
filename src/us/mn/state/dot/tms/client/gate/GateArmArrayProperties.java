@@ -193,7 +193,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
-		settings.setEnabled(canUpdate("deviceRequest"));
+		settings.setEnabled(isUpdatePermitted("deviceRequest"));
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -322,27 +322,27 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		}
 		if(a == null || a.equals("camera")) {
 			camera_cbx.setAction(null);
-			camera_cbx.setEnabled(canUpdate("camera"));
 			camera_cbx.setSelectedItem(proxy.getCamera());
+			camera.setEnabled(canUpdate("camera"));
 			camera_cbx.setAction(camera);
 		}
 		if(a == null || a.equals("approach")) {
 			approach_cbx.setAction(null);
-			approach_cbx.setEnabled(canUpdate("approach"));
 			approach_cbx.setSelectedItem(proxy.getApproach());
+			approach.setEnabled(canUpdate("approach"));
 			approach_cbx.setAction(approach);
 		}
 		if(a == null || a.equals("prereq")) {
 			prereq_cbx.setAction(null);
-			prereq_cbx.setEnabled(canUpdate("prereq"));
 			prereq_cbx.setSelectedItem(GateArmArrayHelper.lookup(
 				proxy.getPrereq()));
+			prereq.setEnabled(canUpdate("prereq"));
 			prereq_cbx.setAction(prereq);
 		}
 		if(a == null || a.equals("dms")) {
 			dms_cbx.setAction(null);
-			dms_cbx.setEnabled(canUpdate("dms"));
 			dms_cbx.setSelectedItem(proxy.getDms());
+			dms.setEnabled(canUpdate("dms"));
 			dms_cbx.setAction(dms);
 		}
 		if(a == null || a.equals("openMsg")) {
