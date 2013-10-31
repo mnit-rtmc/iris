@@ -145,8 +145,8 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		return session.canUpdate(proxy, aname);
 	}
 
-	/** Check if the user can update an attribute */
-	protected boolean canUpdate(String aname, boolean can_edit) {
-		return session.canUpdate(proxy, aname, can_edit);
+	/** Check if the user is permitted to update an attribute */
+	protected boolean isUpdatePermitted(String aname) {
+		return session.isUpdatePermitted(proxy, aname);
 	}
 }

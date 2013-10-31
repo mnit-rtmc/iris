@@ -346,7 +346,7 @@ public class Session {
 	 * @param aname Name of attribute to update.
 	 * @param can_edit Flag to allow editing.
 	 * @return true if user can update the attribute */
-	public boolean canUpdate(String tname, String aname, boolean can_edit) {
+	private boolean canUpdate(String tname, String aname, boolean can_edit) {
 		return canUpdate(new Name(tname, "oname", aname), can_edit);
 	}
 
@@ -358,12 +358,24 @@ public class Session {
 		return canUpdate(tname, "aname", can_edit);
 	}
 
-	/** Check if the user is permitted to update an attribute, regardless of
-	 * EDIT mode.
-	 * @param tname Type name of attribute to update.
+	/** Check if the user can update a proxy attribute.
+	 * @param proxy Proxy object to check.
+	 * @param can_edit Flag to allow editing.
 	 * @return true if user can update the attribute */
-	public boolean isUpdatePermitted(String tname) {
-		return canUpdate(tname, true);
+	private boolean canUpdate(SonarObject proxy, boolean can_edit) {
+		return proxy != null && canUpdate(new Name(proxy), can_edit);
+	}
+
+	/** Check if the user can update a proxy attribute.
+	 * @param proxy Proxy object to check.
+	 * @param aname Name of attribute to update.
+	 * @param can_edit Flag to allow editing.
+	 * @return true if user can update the attribute */
+	private boolean canUpdate(SonarObject proxy, String aname,
+		boolean can_edit)
+	{
+		return proxy != null &&
+		       canUpdate(new Name(proxy, aname), can_edit);
 	}
 
 	/** Check if the user can update an attribute.
@@ -383,14 +395,6 @@ public class Session {
 
 	/** Check if the user can update a proxy attribute.
 	 * @param proxy Proxy object to check.
-	 * @param can_edit Flag to allow editing.
-	 * @return true if user can update the attribute */
-	public boolean canUpdate(SonarObject proxy, boolean can_edit) {
-		return proxy != null && canUpdate(new Name(proxy), can_edit);
-	}
-
-	/** Check if the user can update a proxy attribute.
-	 * @param proxy Proxy object to check.
 	 * @return true if user can update the attribute */
 	public boolean canUpdate(SonarObject proxy) {
 		return canUpdate(proxy, edit_mode);
@@ -399,21 +403,43 @@ public class Session {
 	/** Check if the user can update a proxy attribute.
 	 * @param proxy Proxy object to check.
 	 * @param aname Name of attribute to update.
-	 * @param can_edit Flag to allow editing.
-	 * @return true if user can update the attribute */
-	public boolean canUpdate(SonarObject proxy, String aname,
-		boolean can_edit)
-	{
-		return proxy != null &&
-		       canUpdate(new Name(proxy, aname), can_edit);
-	}
-
-	/** Check if the user can update a proxy attribute.
-	 * @param proxy Proxy object to check.
-	 * @param aname Name of attribute to update.
 	 * @return true if user can update the attribute */
 	public boolean canUpdate(SonarObject proxy, String aname) {
 		return canUpdate(proxy, aname, edit_mode);
+	}
+
+	/** Check if the user is permitted to update an attribute, regardless of
+	 * EDIT mode.
+	 * @param tname Type name of attribute to update.
+	 * @param aname Name of attribute to update.
+	 * @return true if user can update the attribute */
+	public boolean isUpdatePermitted(String tname, String aname) {
+		return canUpdate(new Name(tname, "oname", aname), true);
+	}
+
+	/** Check if the user is permitted to update an attribute, regardless of
+	 * EDIT mode.
+	 * @param tname Type name of attribute to update.
+	 * @return true if user can update the attribute */
+	public boolean isUpdatePermitted(String tname) {
+		return canUpdate(tname, true);
+	}
+
+	/** Check if the user is permitted to update a proxy attribute,
+	 * regardless of EDIT mode.
+	 * @param proxy Proxy object to check.
+	 * @return true if user can update the attribute */
+	public boolean isUpdatePermitted(SonarObject proxy) {
+		return canUpdate(proxy, true);
+	}
+
+	/** Check if the user is permitted to update a proxy attribute,
+	 * regardless of EDIT mode.
+	 * @param proxy Proxy object to check.
+	 * @param aname Name of attribute to update.
+	 * @return true if user can update the attribute */
+	public boolean isUpdatePermitted(SonarObject proxy, String aname) {
+		return canUpdate(proxy, aname, true);
 	}
 
 	/** Check if the user can remove a proxy */

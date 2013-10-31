@@ -502,7 +502,7 @@ public class IncidentDispatcher extends JPanel
 			clear_inc.setEnabled(false);
 			edit_inc.setEnabled(false);
 		} else {
-			boolean update = canUpdate(inc);
+			boolean update = isUpdatePermitted(inc);
 			detail_cbx.setEnabled(false);
 			camera_cbx.setEnabled(false);
 			cam_cards.show(cam_pnl, CAMERA_BTN);
@@ -578,9 +578,9 @@ public class IncidentDispatcher extends JPanel
 		return session.canAdd(Incident.SONAR_TYPE, oname, true);
 	}
 
-	/** Check if the user can update the given incident */
-	private boolean canUpdate(Incident inc) {
-		return session.canUpdate(inc, true);
+	/** Check if the user is permitted to update the given incident */
+	private boolean isUpdatePermitted(Incident inc) {
+		return session.isUpdatePermitted(inc);
 	}
 
 	/** Check if the user can deploy signs for an incident */
@@ -595,12 +595,12 @@ public class IncidentDispatcher extends JPanel
 
 	/** Check if the user can send LCS array indications */
 	private boolean canSendIndications() {
-		return canUpdateLcs("indicationsNext")
-		    && canUpdateLcs("ownerNext");
+		return isLcsUpdatePermitted("indicationsNext")
+		    && isLcsUpdatePermitted("ownerNext");
 	}
 
-	/** Check if the user can update an LCS array attribute */
-	private boolean canUpdateLcs(String a) {
-		return session.canUpdate(LCSArray.SONAR_TYPE, a, true);
+	/** Check if the user is permitted to update an LCS array attribute */
+	private boolean isLcsUpdatePermitted(String a) {
+		return session.isUpdatePermitted(LCSArray.SONAR_TYPE, a);
 	}
 }

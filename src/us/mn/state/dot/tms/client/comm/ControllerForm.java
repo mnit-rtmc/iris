@@ -251,8 +251,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Can a controller request be made */
 	private boolean canRequest() {
-		return canUpdate("counters", true) &&
-		       canUpdate("download", true);
+		return isUpdatePermitted("counters") &&
+		       isUpdatePermitted("download");
 	}
 
 	/** Create the jobs for the setup panel */

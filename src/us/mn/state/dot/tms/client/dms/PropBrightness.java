@@ -139,13 +139,13 @@ public class PropBrightness extends IPanel {
 		bright_high.setEnabled(enable);
 	}
 
-	/** Check if the user can update an attribute */
-	private boolean canUpdate(String aname) {
-		return session.canUpdate(dms, aname, true);
+	/** Check if the user is permitted to update an attribute */
+	private boolean isUpdatePermitted(String aname) {
+		return session.isUpdatePermitted(dms, aname);
 	}
 
 	/** Check if the user can make device requests */
 	private boolean canRequest() {
-		return canUpdate("deviceRequest");
+		return isUpdatePermitted("deviceRequest");
 	}
 }
