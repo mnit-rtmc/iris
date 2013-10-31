@@ -270,8 +270,8 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		}
 		if(a == null || a.equals("laneType")) {
 			type_cbx.setAction(null);
-			type_cbx.setEnabled(watcher.canUpdate(d, "laneType"));
 			type_cbx.setSelectedIndex(d.getLaneType());
+			lane_type.setEnabled(watcher.canUpdate(d, "laneType"));
 			type_cbx.setAction(lane_type);
 		}
 		if(a == null || a.equals("laneNumber")) {
