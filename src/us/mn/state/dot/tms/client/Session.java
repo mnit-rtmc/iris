@@ -296,19 +296,34 @@ public class Session {
 			mm.addLayer(r_node_manager.createState(mb));
 	}
 
-	/** Check if the user can add an object */
-	public boolean canAdd(String tname, String oname, boolean can_edit) {
-		return can_edit &&
-		       oname != null &&
-		       namespace.canAdd(new Name(tname, oname), user);
+	/** Check if the user can add an object.
+	 * @param name Name of object to add.
+	 * @param can_edit Flag to allow editing.
+	 * @return true if user can add the object */
+	private boolean canAdd(Name name, boolean can_edit) {
+		return can_edit && namespace.canAdd(name, user);
 	}
 
-	/** Check if the user can add an object */
+	/** Check if the user can add an object.
+	 * @param tname Type name of object to add.
+	 * @param oname Name of object to add.
+	 * @param can_edit Flag to allow editing.
+	 * @return true if user can add the object */
+	public boolean canAdd(String tname, String oname, boolean can_edit) {
+		return oname != null && canAdd(new Name(tname,oname), can_edit);
+	}
+
+	/** Check if the user can add an object.
+	 * @param tname Type name of object to add.
+	 * @param oname Name of object to add.
+	 * @return true if user can add the object */
 	public boolean canAdd(String tname, String oname) {
 		return canAdd(tname, oname, edit_mode);
 	}
 
-	/** Check if the user can add an object */
+	/** Check if the user can add an object.
+	 * @param tname Type name of object to add.
+	 * @return true if user can add the object */
 	public boolean canAdd(String tname) {
 		return canAdd(tname, "oname");
 	}
@@ -318,42 +333,66 @@ public class Session {
 		return namespace.canRead(new Name(tname), user);
 	}
 
-	/** Check if the user can update an attribute */
+	/** Check if the user can update an attribute.
+	 * @param name Name of object/attribute to update.
+	 * @param can_edit Flag to allow editing.
+	 * @return true if user can update the attribute */
 	private boolean canUpdate(Name name, boolean can_edit) {
 		return can_edit && namespace.canUpdate(name, user);
 	}
 
-	/** Check if the user can update an attribute */
+	/** Check if the user can update an attribute.
+	 * @param tname Type name of attribute to update.
+	 * @param aname Name of attribute to update.
+	 * @param can_edit Flag to allow editing.
+	 * @return true if user can update the attribute */
 	public boolean canUpdate(String tname, String aname, boolean can_edit) {
 		return canUpdate(new Name(tname, "oname", aname), can_edit);
 	}
 
-	/** Check if the user can update an attribute */
+	/** Check if the user can update an attribute.
+	 * @param tname Type name of attribute to update.
+	 * @param can_edit Flag to allow editing.
+	 * @return true if user can update the attribute */
 	public boolean canUpdate(String tname, boolean can_edit) {
 		return canUpdate(tname, "aname", can_edit);
 	}
 
-	/** Check if the user can update an attribute */
+	/** Check if the user can update an attribute.
+	 * @param tname Type name of attribute to update.
+	 * @param aname Name of attribute to update.
+	 * @return true if user can update the attribute */
 	public boolean canUpdate(String tname, String aname) {
 		return canUpdate(tname, aname, edit_mode);
 	}
 
-	/** Check if the user can update an attribute */
+	/** Check if the user can update an attribute.
+	 * @param tname Type name of attribute to update.
+	 * @return true if user can update the attribute */
 	public boolean canUpdate(String tname) {
 		return canUpdate(tname, edit_mode);
 	}
 
-	/** Check if the user can update a proxy */
+	/** Check if the user can update a proxy attribute.
+	 * @param proxy Proxy object to check.
+	 * @param can_edit Flag to allow editing.
+	 * @return true if user can update the attribute */
 	public boolean canUpdate(SonarObject proxy, boolean can_edit) {
 		return proxy != null && canUpdate(new Name(proxy), can_edit);
 	}
 
-	/** Check if the user can update a proxy */
+	/** Check if the user can update a proxy attribute.
+	 * @param proxy Proxy object to check.
+	 * @return true if user can update the attribute */
 	public boolean canUpdate(SonarObject proxy) {
 		return canUpdate(proxy, edit_mode);
 	}
 
-	/** Check if the user can update a proxy */
+	/** Check if the user can update a proxy attribute.
+	 * @param proxy Proxy object to check.
+	 * @param aname Name of attribute to update.
+	 * @param can_edit Flag to allow editing.
+	 * @return true if user can update the attribute */
 	public boolean canUpdate(SonarObject proxy, String aname,
 		boolean can_edit)
 	{
@@ -361,7 +400,10 @@ public class Session {
 		       canUpdate(new Name(proxy, aname), can_edit);
 	}
 
-	/** Check if the user can update a proxy */
+	/** Check if the user can update a proxy attribute.
+	 * @param proxy Proxy object to check.
+	 * @param aname Name of attribute to update.
+	 * @return true if user can update the attribute */
 	public boolean canUpdate(SonarObject proxy, String aname) {
 		return canUpdate(proxy, aname, edit_mode);
 	}
