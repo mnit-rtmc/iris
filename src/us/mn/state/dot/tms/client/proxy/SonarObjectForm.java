@@ -116,8 +116,12 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	{
 		if(a == null || a.equals(an)) {
 			cmb.setAction(null);
-			cmb.setEnabled(canUpdate(an));
 			cmb.setSelectedIndex(idx);
+			boolean up = canUpdate(an);
+			if(act != null)
+				act.setEnabled(up);
+			else
+				cmb.setEnabled(up);
 			cmb.setAction(act);
 		}
 	}

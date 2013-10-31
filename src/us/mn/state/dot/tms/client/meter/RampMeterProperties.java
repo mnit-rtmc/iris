@@ -176,7 +176,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
-		settings.setEnabled(canUpdate("deviceRequest"));
+		settings.setEnabled(isUpdatePermitted("deviceRequest"));
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -271,10 +271,14 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	@Override protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
-		if(a == null || a.equals("notes"))
+		if(a == null || a.equals("notes")) {
+			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(proxy.getNotes());
-		if(a == null || a.equals("camera"))
+		}
+		if(a == null || a.equals("camera")) {
+			camera.setEnabled(canUpdate("camera"));
 			camera_cbx.setSelectedItem(proxy.getCamera());
+		}
 		updateComboBox(a, "meterType", meter_type_cbx,
 			proxy.getMeterType(), meter_type);
 		if(a == null || a.equals("storage")) {
