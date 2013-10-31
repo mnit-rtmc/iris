@@ -162,7 +162,7 @@ public class FontForm extends AbstractForm {
 		f_model = new FontModel(s);
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
 		graphics = s.getSonarState().getGraphics();
-		glyph_pnl = new GlyphPanel(glyphs, graphics);
+		glyph_pnl = new GlyphPanel(s);
 		glist.setCellRenderer(renderer);
 	}
 

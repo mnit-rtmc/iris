@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
@@ -41,6 +42,9 @@ public class GlyphPanel extends JPanel {
 
 	/** Maximum width of glyphs */
 	static private final int MAX_GLYPH_WIDTH = 16;
+
+	/** User session */
+	private final Session session;
 
 	/** Glyph type cache */
 	private final TypeCache<Glyph> glyphs;
@@ -88,10 +92,11 @@ public class GlyphPanel extends JPanel {
 	});
 
 	/** Create a glyph panel */
-	public GlyphPanel(TypeCache<Glyph> gl, TypeCache<Graphic> gr) {
+	public GlyphPanel(Session s) {
 		super(new GridBagLayout());
-		glyphs = gl;
-		graphics = gr;
+		session = s;
+		glyphs = s.getSonarState().getDmsCache().getGlyphs();
+		graphics = s.getSonarState().getGraphics();
 		ginfo = new GlyphInfo();
 		updateButtons();
 		setBorder(BorderFactory.createTitledBorder(
@@ -139,7 +144,7 @@ public class GlyphPanel extends JPanel {
 	private void updateButtons() {
 		GlyphInfo gi = ginfo;
 		BitmapGraphic bg = bmap;
-		boolean e = fontHeight() > 0;
+		boolean e = fontHeight() > 0 && canAddAndUpdate();
 		narrow_btn.setEnabled(e && bg.getWidth() > 0);
 		widen_btn.setEnabled(e && bg.getWidth() < MAX_GLYPH_WIDTH);
 		apply_btn.setEnabled(e);
@@ -234,5 +239,13 @@ public class GlyphPanel extends JPanel {
 			attrs.put("graphic", name);
 			glyphs.createObject(name, attrs);
 		}
+	}
+
+	/** Check if the user can add and update a glyph */
+	private boolean canAddAndUpdate() {
+		return session.canAdd(Glyph.SONAR_TYPE) &&
+		       session.canAdd(Graphic.SONAR_TYPE) &&
+		       session.canUpdate(Graphic.SONAR_TYPE, "width") &&
+		       session.canUpdate(Graphic.SONAR_TYPE, "pixels");
 	}
 }
