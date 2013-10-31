@@ -259,7 +259,7 @@ public class Session {
 			tabs.add(meter_manager.createTab());
 		if(gate_arm_manager.canRead())
 			tabs.add(gate_arm_manager.createTab());
-		if(r_node_manager.canAdd())
+		if(r_node_manager.isAddPermitted())
 			tabs.add(r_node_manager.createTab());
 		if(plan_manager.canRead())
 			tabs.add(plan_manager.createTab());
@@ -292,7 +292,7 @@ public class Session {
 			mm.addLayer(warn_manager.createState(mb));
 		if(inc_manager.canRead())
 			mm.addLayer(inc_manager.createState(mb));
-		if(r_node_manager.canAdd())
+		if(r_node_manager.isAddPermitted())
 			mm.addLayer(r_node_manager.createState(mb));
 	}
 
@@ -334,7 +334,15 @@ public class Session {
 	 * @param oname Name of object to add.
 	 * @return true if user can add the object */
 	public boolean isAddPermitted(String tname, String oname) {
-		return canAdd(tname, oname, true);
+		return canAdd(new Name(tname, oname), true);
+	}
+
+	/** Check if the user is permitted to add an object, regardless of
+	 * EDIT mode.
+	 * @param tname Type name of object to add.
+	 * @return true if user can add the object */
+	public boolean isAddPermitted(String tname) {
+		return canAdd(tname, "oname", true);
 	}
 
 	/** Check if the user can read a type */

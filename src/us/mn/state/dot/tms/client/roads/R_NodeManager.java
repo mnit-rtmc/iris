@@ -119,9 +119,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return new R_NodeTab(session, this);
 	}
 
-	/** Check if user can add r_nodes */
-	public boolean canAdd() {
-		return session.canAdd(R_Node.SONAR_TYPE);
+	/** Check if user is permitted to add r_nodes */
+	public boolean isAddPermitted() {
+		return session.isAddPermitted(R_Node.SONAR_TYPE);
 	}
 
 	/** Add a new proxy to the r_node manager */
