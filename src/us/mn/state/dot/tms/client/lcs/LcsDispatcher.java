@@ -251,7 +251,7 @@ public class LcsDispatcher extends IPanel implements ProxyListener<LCSArray>,
 	/** Set the selected LCS array */
 	public void setSelected(LCSArray lcs_array) {
 		watch(lcs_array);
-		boolean update = canUpdate(lcs_array);
+		boolean update = isUpdatePermitted(lcs_array);
 		lane_config.setConfiguration(manager.laneConfiguration(
 			lcs_array));
 		ind_selector.setLCSArray(lcs_array);
@@ -311,7 +311,7 @@ public class LcsDispatcher extends IPanel implements ProxyListener<LCSArray>,
 			// These operations can be very slow -- discourage
 			// users from sending multiple operations at once
 			// RE: None -- see server.DeviceImpl.getOperation()
-			send.setEnabled(canUpdate(lcs_array) &&
+			send.setEnabled(isUpdatePermitted(lcs_array) &&
 				op.equals("None"));
 		}
 		if(a == null || a.equals("lcsLock")) {
@@ -400,9 +400,14 @@ public class LcsDispatcher extends IPanel implements ProxyListener<LCSArray>,
 		}
 	}
 
-	/** Check if the user can update the given LCS array */
-	private boolean canUpdate(LCSArray lcs_array) {
-		return session.canUpdate(lcs_array, "indicationsNext") &&
-		       session.canUpdate(lcs_array, "ownerNext");
+	/** Check if the user is permitted to update the given LCS array */
+	private boolean isUpdatePermitted(LCSArray lcs_array) {
+		return isUpdatePermitted(lcs_array, "indicationsNext") &&
+		       isUpdatePermitted(lcs_array, "ownerNext");
+	}
+
+	/** Check if the user is permitted to update a given LCS attribute */
+	private boolean isUpdatePermitted(LCSArray lcs_array, String aname) {
+		return session.isUpdatePermitted(lcs_array, aname);
 	}
 }
