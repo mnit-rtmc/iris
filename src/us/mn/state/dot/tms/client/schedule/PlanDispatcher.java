@@ -187,7 +187,7 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 			phaseCmb.setModel(new DefaultComboBoxModel());
 			phaseCmb.setSelectedItem(null);
 		}
-		setEnabled(canUpdate(proxy));
+		setEnabled(isUpdatePermitted(proxy));
 	}
 
 	/** Create a combo box model for plan phases */
@@ -328,8 +328,9 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 		return plan_meters.size();
 	}
 
-	/** Check if the user can update the given action plan */
-	private boolean canUpdate(ActionPlan plan) {
-		return session.canUpdate(plan, "phase") && plan.getActive();
+	/** Check if the user is permitted to update the given action plan */
+	private boolean isUpdatePermitted(ActionPlan plan) {
+		return session.isUpdatePermitted(plan, "phase") &&
+		       plan.getActive();
 	}
 }

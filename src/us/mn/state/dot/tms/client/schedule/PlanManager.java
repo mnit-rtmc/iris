@@ -112,7 +112,7 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(ItemStyle is, ActionPlan proxy) {
-		if(!canUpdate(proxy))
+		if(!isUpdatePermitted(proxy))
 			return false;
 		switch(is) {
 		case DMS:
@@ -132,9 +132,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		}
 	}
 
-	/** Check if the user can update the given action plan */
-	private boolean canUpdate(ActionPlan plan) {
-		return session.canUpdate(plan, "phase");
+	/** Check if the user is permitted to update the given action plan */
+	private boolean isUpdatePermitted(ActionPlan plan) {
+		return session.isUpdatePermitted(plan, "phase");
 	}
 
 	/** Test if an action plan has time actions */
