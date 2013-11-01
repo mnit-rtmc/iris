@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,10 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 public class MIBNode {
 
 	/** Parent node */
-	protected final MIBNode parent;
+	private final MIBNode parent;
 
 	/** Node ID */
-	protected final int[] nid;
+	private final int[] nid;
 
 	/** Create a node in a MIB */
 	protected MIBNode(MIBNode p, int[] n) {
@@ -49,7 +49,7 @@ public class MIBNode {
 	}
 
 	/** Fill an Object Identifier */
-	protected int[] fillOID(int length) {
+	private int[] fillOID(int length) {
 		int[] oid = createOID(length);
 		int s = oid.length - length - nid.length;
 		System.arraycopy(nid, 0, oid, s, nid.length);
@@ -57,7 +57,7 @@ public class MIBNode {
 	}
 
 	/** Create an Object Identifier */
-	protected int[] createOID(int length) {
+	private int[] createOID(int length) {
 		if(parent == null)
 			return new int[length + nid.length];
 		else
