@@ -43,10 +43,10 @@ import us.mn.state.dot.tms.client.widget.Screen;
 public class SmartDesktop extends JDesktopPane {
 
 	/** Layer which contains all internal frames */
-	static protected final Integer FRAME_LAYER = new Integer(1);
+	static private final Integer FRAME_LAYER = new Integer(1);
 
 	/** Select the given frame */
-	static protected void selectFrame(JInternalFrame frame) {
+	static private void selectFrame(JInternalFrame frame) {
 		try {
 			frame.setIcon(false);
 			frame.setSelected(true);
@@ -57,7 +57,7 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Main desktop screen */
-	protected final Screen screen;
+	private final Screen screen;
 
 	/** Iris client */
 	public final IrisClient client;
@@ -73,12 +73,12 @@ public class SmartDesktop extends JDesktopPane {
 			public void actionPerformed(ActionEvent e) {
 				invokeHelp();
 			}
-		}, Help.getSystemHelpKey(), 
+		}, Help.getSystemHelpKey(),
 			JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 	}
 
 	/** Invoke the help system */
-	protected void invokeHelp() {
+	private void invokeHelp() {
 		client.WORKER.addJob(new Job() {
 			public void perform() throws IOException {
 				AbstractForm cf = findTopFrame();
@@ -91,7 +91,7 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Create a new internal frame */
-	protected JInternalFrame createFrame(final AbstractForm form) {
+	private JInternalFrame createFrame(final AbstractForm form) {
 		final JInternalFrame frame = new JInternalFrame();
 		frame.setTitle(form.getTitle());
 		frame.setClosable(true);
@@ -113,18 +113,18 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** This method is being invoked to solve a subtle problem with
-	 *  help system invocation--if an JInternalFrame is created, then
-	 *  closed, then the help key pressed, the Help.actionPerformed() 
-	 *  listener doesn't get notification, and the help page isn't 
-	 *  opened. The solution is to set the focus to the JDesktopPane
-	 *  explicitly as each JInternalFrame is closing. This seems to 
-	 *  work. */
-	protected void smartDesktopRequestFocus() {
+	 * help system invocation--if an JInternalFrame is created, then
+	 * closed, then the help key pressed, the Help.actionPerformed()
+	 * listener doesn't get notification, and the help page isn't
+	 * opened. The solution is to set the focus to the JDesktopPane
+	 * explicitly as each JInternalFrame is closing. This seems to
+	 * work. */
+	private void smartDesktopRequestFocus() {
 		this.requestFocus();
 	}
 
 	/** Add an abstract form to the desktop pane */
-	protected JInternalFrame addForm(AbstractForm form) {
+	private JInternalFrame addForm(AbstractForm form) {
 		form.initialize();
 		JInternalFrame frame = createFrame(form);
 		frame.pack();
@@ -133,7 +133,7 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Find a frame with a specific title */
-	protected JInternalFrame find(String title) {
+	private JInternalFrame find(String title) {
 		for(JInternalFrame frame: getAllFrames()) {
 			if(title.equals(frame.getTitle()))
 				return frame;
@@ -151,7 +151,7 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Show the specified form */
-	protected void doShow(AbstractForm form) {
+	private void doShow(AbstractForm form) {
 		JInternalFrame frame = find(form.getTitle());
 		if(frame != null)
 			selectFrame(frame);
@@ -180,7 +180,7 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Find the top level frame */
-	protected AbstractForm findTopFrame() {
+	private AbstractForm findTopFrame() {
 		for(JInternalFrame f: getAllFrames())
 			if(f.getFocusOwner() != null)
 				if(f.getContentPane() instanceof AbstractForm)
