@@ -44,7 +44,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Filter color for failed DMS */
-	static private final Color FILTER_FAILED = filterColor(Color.GRAY, 64);
+	static private final Color FILTER_FAILED = filterColor(Color.GRAY, 192);
 
 	/** Filter color for DMS with controller errors */
 	static private final Color FILTER_ERROR = new Color(255, 64, 0, 64);
