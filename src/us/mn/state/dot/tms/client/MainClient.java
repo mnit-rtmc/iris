@@ -42,14 +42,6 @@ public class MainClient {
 			return DEFAULT_PROPERTIES;
 	}
 
-	/** Agency district property */
-	static private String district = "tms";
-
-	/** Get the district ID */
-	static public String districtId() {
-		return district;
-	}
-
 	/** Main IRIS client entry point.
 	 * @param args Arguments passed to the application. */
 	static public void main(final String[] args) {
@@ -91,7 +83,6 @@ public class MainClient {
 	{
 		Properties props = PropertyLoader.load(loc);
 		updateProxySelector(props);
-		district = props.getProperty("district", "tms");
 		I18N.initialize(props);
 		return new IrisClient(props, handler);
 	}

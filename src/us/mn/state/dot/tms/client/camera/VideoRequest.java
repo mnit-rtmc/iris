@@ -125,12 +125,16 @@ public class VideoRequest {
 	/** The base URL of the video server */
 	private final String base_url;
 
+	/** District ID */
+	private final String district;
+
 	/** Servlet type */
 	private final ServletType servlet_type = ServletType.STREAM;
 
 	/** Create a new video request */
 	public VideoRequest(Properties p, Size sz) {
 		base_url = createBaseUrl(p);
+		district = p.getProperty("district", "tms");
 		size = sz;
 	}
 
@@ -146,7 +150,7 @@ public class VideoRequest {
 	protected String getServletUrl(Camera cam) {
 		return new String("http://" + base_url +
 			"/video/" + servlet_type.servlet +
-			"/" + MainClient.districtId() +
+			"/" + district +
 			"/" + cam.getName() +
 			"?size=" + size.code +
 			"&ssid=" + sonarSessionId);
