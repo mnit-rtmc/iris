@@ -14,13 +14,11 @@
  */
 package us.mn.state.dot.tms.client;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.util.Properties;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.tms.client.widget.Widgets;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.utils.HTTPProxySelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
@@ -44,25 +42,6 @@ public class MainClient {
 			return DEFAULT_PROPERTIES;
 	}
 
-	/** Update the proxy selector with the given property set */
-	static private void updateProxySelector(Properties props) {
-		HTTPProxySelector ps = new HTTPProxySelector(props);
-		if(ps.hasProxies())
-			ProxySelector.setDefault(ps);
-	}
-
-	/** Create the IRIS client */
-	static protected IrisClient createClient(String[] args,
-		SimpleHandler handler, UserProperties up) throws IOException
-	{
-		String loc = getPropertyFile(args);
-		Properties props = PropertyLoader.load(loc);
-		updateProxySelector(props);
-		district = props.getProperty("district", "tms");
-		I18N.initialize(props);
-		return new IrisClient(props, handler, up);
-	}
-
 	/** Agency district property */
 	static private String district = "tms";
 
@@ -71,31 +50,16 @@ public class MainClient {
 		return district;
 	}
 
-	/**
-	 * Main IRIS client entry point.
-	 *
-	 * @param args Arguments passed to the application.
-	 */
-	static public void main(String[] args) {
-		DialogHandler handler = new DialogHandler();
-		Scheduler.setHandler(handler);
+	/** Main IRIS client entry point.
+	 * @param args Arguments passed to the application. */
+	static public void main(final String[] args) {
 		checkAssert();
-		try {
-			final UserProperties user_props = new UserProperties();
-			Widgets.init(user_props.getScale());
-			final IrisClient c = createClient(args, handler,
-				user_props);
-			c.addWindowListener(new WindowAdapter() {
-				public void windowClosing(WindowEvent e) {
-					quit(c, user_props);
-				}
-			});
-			handler.setOwner(c);
-			c.setVisible(true);
-		}
-		catch(IOException e) {
-			handler.handle(e);
-		}
+		final String loc = getPropertyFile(args);
+		runSwing(new Runnable() {
+			public void run() {
+				mainSwing(loc);
+			}
+		});
 	}
 
 	/** Check assertion status */
@@ -107,15 +71,35 @@ public class MainClient {
 			(assertsEnabled ? "on" : "off") + ".");
 	}
 
-	/** Quit the client application */
-	static private void quit(IrisClient c, UserProperties user_props) {
-		user_props.setWindowProperties(c);
+	/** Main IRIS client entry point for swing */
+	static private void mainSwing(String loc) {
+		DialogHandler handler = new DialogHandler();
+		Scheduler.setHandler(handler);
 		try {
-			user_props.write();
+			IrisClient c = createClient(loc, handler);
+			handler.setOwner(c);
+			c.setVisible(true);
 		}
 		catch(IOException e) {
-			e.printStackTrace();
+			handler.handle(e);
 		}
-		System.exit(0);
+	}
+
+	/** Create the IRIS client */
+	static private IrisClient createClient(String loc,
+		SimpleHandler handler) throws IOException
+	{
+		Properties props = PropertyLoader.load(loc);
+		updateProxySelector(props);
+		district = props.getProperty("district", "tms");
+		I18N.initialize(props);
+		return new IrisClient(props, handler);
+	}
+
+	/** Update the proxy selector with the given property set */
+	static private void updateProxySelector(Properties props) {
+		HTTPProxySelector ps = new HTTPProxySelector(props);
+		if(ps.hasProxies())
+			ProxySelector.setDefault(ps);
 	}
 }

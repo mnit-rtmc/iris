@@ -19,6 +19,7 @@ import java.awt.Cursor;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.Iterator;
@@ -43,13 +44,14 @@ import us.mn.state.dot.tms.client.system.LoginForm;
 import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.ScreenLayout;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The main window for the IRIS client application.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Erik Engstrom
  * @author Michael Darter
  */
 public class IrisClient extends JFrame {
@@ -104,13 +106,12 @@ public class IrisClient extends JFrame {
 	protected Session session;
 
 	/** Create a new Iris client */
-	public IrisClient(Properties props, SimpleHandler h, UserProperties up)
-		throws IOException
-	{
+	public IrisClient(Properties props, SimpleHandler h) {
 		super(createTitle(I18N.get("iris.logged.out")));
 		this.props = props;
 		handler = h;
-		user_props = up;
+		user_props = new UserProperties();
+		Widgets.init(user_props.getScale());
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
@@ -121,6 +122,23 @@ public class IrisClient extends JFrame {
 		menu_bar = new IMenuBar(this, desktop);
 		setMenuBar();
 		autoLogin();
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				doQuit();
+			}
+		});
+	}
+
+	/** Quit the IRIS client application */
+	private void doQuit() {
+		user_props.setWindowProperties(this);
+		try {
+			user_props.write();
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		System.exit(0);
 	}
 
 	/** Quit the IRIS client */
@@ -165,7 +183,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Make the frame displayable (called by window toolkit) */
-	public void addNotify() {
+	@Override public void addNotify() {
 		super.addNotify();
 		setPosition();
 	}
