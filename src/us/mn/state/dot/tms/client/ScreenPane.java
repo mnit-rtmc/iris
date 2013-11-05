@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
+import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -104,7 +105,8 @@ public class ScreenPane extends JPanel {
 		add(side_panel, BorderLayout.WEST);
 		map = new MapBean(true);
 		map.setBackground(new Color(208, 216, 208));
-		map_bar = createMapToolBar();
+		map_bar = new MapToolBar(map);
+		map_bar.setFloatable(false);
 		tool_bar = new IrisToolBar(map);
 		tool_bar.setFloatable(false);
 		map_panel = createMapPanel();
@@ -234,30 +236,28 @@ public class ScreenPane extends JPanel {
 		return mp;
 	}
 
-	/** Create a map tool bar with appropriate view buttons */
-	protected MapToolBar createMapToolBar() {
-		MapToolBar b = new MapToolBar(map);
-		b.setFloatable(false);
-		return b;
-	}
-
 	/** Create the tool panels */
 	public void createToolPanels(Session s) {
-		TypeCache<MapExtent> tc = s.getSonarState().getMapExtents();
-		for(MapExtent me: tc) {
+		TreeMap<String, MapExtent> extents = buildExtents(s);
+		for(String n: extents.keySet()) {
+			MapExtent me = extents.get(n);
 			map_bar.addButton(createMapButton(me));
 		}
 		tool_bar.createToolPanels(s);
 	}
 
-	/** Clear the tool panels */
-	public void clearToolPanels() {
-		map_bar.clear();
-		tool_bar.clear();
+	/** Build a mapping of extent names to map extents */
+	private TreeMap<String, MapExtent> buildExtents(Session s) {
+		TypeCache<MapExtent> tc = s.getSonarState().getMapExtents();
+		TreeMap<String, MapExtent> extents =
+			new TreeMap<String, MapExtent>();
+		for(MapExtent me: tc)
+			extents.put(me.getName(), me);
+		return extents;
 	}
 
 	/** Create a map extent button */
-	protected JButton createMapButton(final MapExtent me) {
+	private JButton createMapButton(final MapExtent me) {
 		JButton b = new JButton(me.getName());
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
@@ -281,5 +281,11 @@ public class ScreenPane extends JPanel {
 	public void setMapExtent(ZoomLevel zoom, float lat, float lon) {
 		Point2D ctr = createPoint(lat, lon);
 		map.getModel().setExtent(ctr, zoom);
+	}
+
+	/** Clear the tool panels */
+	public void clearToolPanels() {
+		map_bar.clear();
+		tool_bar.clear();
 	}
 }
