@@ -63,13 +63,13 @@ public class IrisClient extends JFrame {
 	static private final Scheduler LOGIN = new Scheduler("login");
 
 	/** Create the window title */
-	static protected String createTitle(String suffix) {
+	static private String createTitle(String suffix) {
 		return SystemAttrEnum.WINDOW_TITLE.getString() + suffix;
 	}
 
 	/** Create the window title.
 	 * @param s Current session, or null if not logged in. */
-	static protected String createTitle(Session s) {
+	static private String createTitle(Session s) {
 		if(s != null) {
 			User u = s.getUser();
 			return createTitle(u.getName() + " (" +
@@ -79,22 +79,22 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Array of screens to display client */
-	protected final Screen[] screens;
+	private final Screen[] screens;
 
 	/** Array of screen panes */
-	protected final ScreenPane[] s_panes;
+	private final ScreenPane[] s_panes;
 
 	/** Desktop pane */
-	protected final SmartDesktop desktop;
+	private final SmartDesktop desktop;
 
 	/** Screen layout for desktop pane */
-	protected final ScreenLayout layout;
+	private final ScreenLayout layout;
 
 	/** Client properties */
-	protected final Properties props;
+	private final Properties props;
 
 	/** Exception handler */
-	protected final SimpleHandler handler;
+	private final SimpleHandler handler;
 
 	/** Mutable user properties stored on client workstation */
 	private final UserProperties user_props;
@@ -103,7 +103,7 @@ public class IrisClient extends JFrame {
 	private final IMenuBar menu_bar;
 
 	/** Login session information */
-	protected Session session;
+	private Session session;
 
 	/** Create a new Iris client */
 	public IrisClient(Properties props, SimpleHandler h) {
@@ -166,7 +166,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Initialize the screen panes */
-	protected void initializeScreenPanes() {
+	private void initializeScreenPanes() {
 		for(int s = 0; s < s_panes.length; s++)
 			s_panes[s] = new ScreenPane();
 		for(ScreenPane sp: s_panes) {
@@ -201,7 +201,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Auto-login the user if enabled */
-	protected void autoLogin() {
+	private void autoLogin() {
 		String user = props.getProperty("autologin.username");
 		String pws = props.getProperty("autologin.password");
 		if(user != null && pws != null) {
@@ -223,7 +223,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Arrange the tabs on the visible screen panes */
-	protected void arrangeTabs() {
+	private void arrangeTabs() {
 		setMenuBar();
 		removeTabs();
 		Session s = session;
@@ -241,7 +241,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Arrange the tabs on the visible screen panes */
-	protected void arrangeTabs(Session s) {
+	private void arrangeTabs(Session s) {
 		LinkedList<ScreenPane> visible = getVisiblePanes();
 		if(visible.isEmpty())
 			return;
@@ -271,7 +271,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Login a user */
-	protected void doLogin(String user, char[] pwd) throws Exception {
+	private void doLogin(String user, char[] pwd) throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle(createTitle(I18N.get("iris.logging.in")));
 		menu_bar.disableSessionMenu();
@@ -305,14 +305,14 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Create a new SONAR state */
-	protected SonarState createSonarState() throws IOException,
+	private SonarState createSonarState() throws IOException,
 		SonarException, NoSuchFieldException, IllegalAccessException
 	{
 		return new SonarState(props, handler);
 	}
 
 	/** Update the maps on all screen panes */
-	protected void updateMaps(Session s) {
+	private void updateMaps(Session s) {
 		for(ScreenPane sp: s_panes) {
 			MapBean mb = sp.getMap();
 			mb.setModel(createMapModel(mb, s));
@@ -343,7 +343,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Create a new map model */
-	protected MapModel createMapModel(MapBean mb, Session s) {
+	private MapModel createMapModel(MapBean mb, Session s) {
 		MapModel mm = new MapModel();
 		if(s != null)
 			s.createLayers(mb, mm);
@@ -367,7 +367,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Clean up when the user logs out */
-	protected void doLogout() {
+	private void doLogout() {
 		menu_bar.setSession(null);
 		removeTabs();
 		closeSession();
@@ -377,7 +377,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Close the session */
-	protected void closeSession() {
+	private void closeSession() {
 		Session s = session;
 		if(s != null)
 			s.dispose();
@@ -385,7 +385,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Removed all the tabs */
-	protected void removeTabs() {
+	private void removeTabs() {
 		for(ScreenPane sp: s_panes)
 			sp.removeTabs();
 	}
