@@ -110,7 +110,7 @@ public class IrisClient extends JFrame {
 		super(createTitle(I18N.get("iris.logged.out")));
 		this.props = props;
 		handler = h;
-		user_props = new UserProperties();
+		user_props = new UserProperties(h);
 		Widgets.init(user_props.getScale());
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
