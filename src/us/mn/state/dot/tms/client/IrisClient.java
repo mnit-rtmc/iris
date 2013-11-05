@@ -39,7 +39,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.system.ChangePasswordForm;
 import us.mn.state.dot.tms.client.system.LoginForm;
 import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.ScreenLayout;
@@ -104,6 +103,11 @@ public class IrisClient extends JFrame {
 
 	/** Login session information */
 	private Session session;
+
+	/** Get the current user session */
+	public Session getSession() {
+		return session;
+	}
 
 	/** Create a new Iris client */
 	public IrisClient(Properties props, SimpleHandler h) {
@@ -389,20 +393,6 @@ public class IrisClient extends JFrame {
 	private void removeTabs() {
 		for(ScreenPane sp: s_panes)
 			sp.removeTabs();
-	}
-
-	/** Change the password */
-	public void changePassword() {
-		desktop.show(new ChangePasswordForm(this));
-	}
-
-	/** Change the password */
-	public void changePassword(char[] o_pwd, char[] n_pwd) {
-		Session s = session;
-		if(s != null) {
-			s.getSonarState().changePassword(new String(o_pwd),
-				new String(n_pwd));
-		}
 	}
 
 	/** Set the point selector for all map beans */

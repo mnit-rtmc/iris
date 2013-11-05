@@ -19,7 +19,7 @@ import java.util.Arrays;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.client.IrisClient;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -49,13 +49,13 @@ public class ChangePasswordForm extends AbstractForm {
 		}
 	};
 
-	/** Iris client */
-	private final IrisClient client;
+	/** User session */
+	private final Session session;
 
 	/** Create a new login form */
-	public ChangePasswordForm(IrisClient ic) {
+	public ChangePasswordForm(Session s) {
 		super(I18N.get("user.password.change"));
-		client = ic;
+		session = s;
 	}
 
 	/** Initialize the form */
@@ -84,6 +84,7 @@ public class ChangePasswordForm extends AbstractForm {
 		n_pwd_txt.setText("");
 		v_pwd_txt.setText("");
 		close();
-		client.changePassword(o_pwd, n_pwd);
+		session.getSonarState().changePassword(new String(o_pwd),
+			new String(n_pwd));
 	}
 }
