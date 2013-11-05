@@ -214,11 +214,12 @@ public class IrisClient extends JFrame {
 
 	/** Get a list of all visible screen panes. Will return an empty
 	 * list if IRIS is minimized. */
-	public LinkedList<ScreenPane> getVisiblePanes() {
+	private LinkedList<ScreenPane> getVisiblePanes() {
 		LinkedList<ScreenPane> visible = new LinkedList<ScreenPane>();
-		for(ScreenPane s: s_panes)
+		for(ScreenPane s: s_panes) {
 			if(s.isVisible())
 				visible.add(s);
+		}
 		return visible;
 	}
 
