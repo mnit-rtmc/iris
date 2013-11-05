@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,32 +28,24 @@ import us.mn.state.dot.tms.utils.PropertyLoader;
 /**
  * Main entry point for IrisClient.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
 public class MainClient {
 
 	/** Name of default properties file to load */
-	static protected final String DEFAULT_PROPERTIES =
+	static private final String DEFAULT_PROPERTIES =
 		"iris-client.properties";
 
 	/** Get the name of the property file to use */
-	static protected String getPropertyFile(String[] args) {
+	static private String getPropertyFile(String[] args) {
 		if(args.length > 0)
 			return args[0];
 		else
 			return DEFAULT_PROPERTIES;
 	}
 
-	/** Set a system property if it's defined in a property set */
-	static protected void setSystemProperty(String name, Properties props) {
-		String value = props.getProperty(name);
-		if(value != null)
-			System.setProperty(name, value);
-	}
-
-	/** Update the system properties with the given property set */
-	static protected void updateSystemProperties(Properties props) {
+	/** Update the proxy selector with the given property set */
+	static private void updateProxySelector(Properties props) {
 		HTTPProxySelector ps = new HTTPProxySelector(props);
 		if(ps.hasProxies())
 			ProxySelector.setDefault(ps);
@@ -65,14 +57,14 @@ public class MainClient {
 	{
 		String loc = getPropertyFile(args);
 		Properties props = PropertyLoader.load(loc);
-		updateSystemProperties(props);
+		updateProxySelector(props);
 		district = props.getProperty("district", "tms");
 		I18N.initialize(props);
 		return new IrisClient(props, handler, up);
 	}
 
 	/** Agency district property */
-	static protected String district = "tms";
+	static private String district = "tms";
 
 	/** Get the district ID */
 	static public String districtId() {
@@ -107,7 +99,7 @@ public class MainClient {
 	}
 
 	/** Check assertion status */
-	static protected void checkAssert() {
+	static private void checkAssert() {
 		boolean assertsEnabled = false;
 		// Intentional assignment side-effect
 		assert assertsEnabled = true;
