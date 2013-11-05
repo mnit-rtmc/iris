@@ -238,6 +238,7 @@ public class ScreenPane extends JPanel {
 
 	/** Create the tool panels */
 	public void createToolPanels(Session s) {
+		map_bar.addMenu();
 		TreeMap<String, MapExtent> extents = buildExtents(s);
 		for(String n: extents.keySet()) {
 			MapExtent me = extents.get(n);
