@@ -343,19 +343,23 @@ public class MultiString implements Multi {
 	public boolean isBlank() {
 		final StringBuilder _b = new StringBuilder();
 		MultiParser.parse(toString(), new MultiAdapter() {
+			@Override
 			public void addSpan(String span) {
 				_b.append(span);
 			}
+			@Override
 			public void setPageBackground(int red, int green,
 				int blue)
 			{
 				_b.append("PB");
 			}
+			@Override
 			public void addColorRectangle(int x, int y, int w,
 				int h, int r, int g, int b)
 			{
 				_b.append("CR");
 			}
+			@Override
 			public void addGraphic(int g_num, Integer x, Integer y,
 				String g_id)
 			{
@@ -398,6 +402,7 @@ public class MultiString implements Multi {
 		for(int i = 0; i < ret.length; i++)
 			ret[i] = f_num;
 		MultiAdapter msa = new MultiAdapter() {
+			@Override
 			public void addSpan(String span) {
 				// note: fields in span use ms prefix
 				if(ms_page >= 0 && ms_page < ret.length)
@@ -466,6 +471,7 @@ public class MultiString implements Multi {
 			return ms.toString() + multi;
 		}
 		MultiString ms = new MultiString() {
+			@Override
 			public void setPageTimes(Integer on, Integer off) {
 				super.setPageTimes(pt_on, off);
 			}
@@ -481,7 +487,8 @@ public class MultiString implements Multi {
 	public String[] getText(final int n_lines) {
 		final LinkedList<String> ls = new LinkedList<String>();
 		MultiParser.parse(toString(), new MultiAdapter() {
-			@Override public void addSpan(String span) {
+			@Override
+			public void addSpan(String span) {
 				// note: fields in span use ms prefix
 				int n_total = (ms_page + 1) * n_lines;
 				while(ls.size() < n_total)
@@ -534,6 +541,7 @@ public class MultiString implements Multi {
 	public String asText() {
 		final StringBuilder sb = new StringBuilder();
 		MultiParser.parse(toString(), new MultiAdapter() {
+			@Override
 			public void addSpan(String span) {
 				if(sb.length() > 0 &&
 				   sb.charAt(sb.length() - 1) != ' ')

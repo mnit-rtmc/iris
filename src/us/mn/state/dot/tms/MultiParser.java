@@ -332,7 +332,8 @@ public class MultiParser {
 
 	/** A MULTI string which is automatically normalized */
 	static private class NormalMultiString extends MultiString {
-		@Override public void addSpan(String s) {
+		@Override
+		public void addSpan(String s) {
 			Matcher m = TEXT_PATTERN.matcher(s);
 			while(m.find())
 				super.addSpan(m.group());
@@ -343,27 +344,40 @@ public class MultiParser {
 	static public String normalizeLine(String multi) {
 		// Strip tags which don't associate with a line
 		MultiString ms = new NormalMultiString() {
+			@Override
 			public void setColorBackground(int x) {}
+			@Override
 			public void setPageBackground(int z) {}
+			@Override
 			public void setPageBackground(int r, int g, int b) {}
+			@Override
 			public void addColorRectangle(int x, int y, int w,
 				int h, int z) {}
+			@Override
 			public void addColorRectangle(int x, int y, int w,
 				int h, int r, int g, int b) {}
+			@Override
 			public void addGraphic(int g_num, Integer x, Integer y,
 				String g_id) {}
+			@Override
 			public void setFont(int f_num, String f_id) {
 				// including font tags in line text interferes
 				// with the font-per-page interface in
 				// SignMessageComposer, so strip them
 			}
+			@Override
 			public void setJustificationPage(
 				Multi.JustificationPage jp) {}
+			@Override
 			public void addLine(Integer spacing) {}
+			@Override
 			public void addPage() {}
+			@Override
 			public void setPageTimes(Integer on, Integer off) {}
+			@Override
 			public void setTextRectangle(int x, int y, int w,
 				int h) {}
+			@Override
 			public void addFeed(String fid) {}
 		};
 		parse(multi, ms);
