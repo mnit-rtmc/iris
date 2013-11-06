@@ -123,6 +123,8 @@ public class MultiStringTest extends TestCase {
 			new MultiString("ABC[nl]DEF").getText(3)));
 		assertTrue(Arrays.equals(new String[] {"ABC", "DEF", "GHI"},
 			new MultiString("ABC[nl]DEF[nl]GHI").getText(3)));
+		assertTrue(Arrays.equals(new String[] {"ABC", "DEF", "GHI"},
+			new MultiString("ABC[nl]DEF[nl]GHI[nl]JKL").getText(3)));
 		// Multi-page tests
 		assertTrue(Arrays.equals(new String[] { "ABC" },
 			new MultiString("ABC[np]").getText(3)));
@@ -140,6 +142,10 @@ public class MultiStringTest extends TestCase {
 			new String[] { "ABC", "DEF", "", "GHI", "", "123" },
 			new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123")
 			.getText(3)));
+		assertTrue(Arrays.equals(
+			new String[] { "ABC", "DEF", "GHI" },
+			new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123")
+			.getText(2)));
 		// tags contained in a span
 		assertTrue(Arrays.equals(new String[] {"ABC", "D E F", "GHI"},
 			new MultiString("ABC[nl]D[j1x]E[j1x]F[nl]GHI")
@@ -187,9 +193,9 @@ public class MultiStringTest extends TestCase {
 		assertTrue(MultiString.normalize("SPACE SPACE").
 			equals("SPACE SPACE"));
 		assertTrue(MultiString.normalize("AB|C").
-			equals("ABC"));
+			equals("AB|C"));
 		assertTrue(MultiString.normalize("AB|{}{}C{}").
-			equals("ABC"));
+			equals("AB|{}{}C{}"));
 		assertTrue(MultiString.normalize("ABC DEF").
 			equals("ABC DEF"));
 		assertTrue(MultiString.normalize("ABC[bad]DEF").

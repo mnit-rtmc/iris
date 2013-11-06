@@ -483,11 +483,18 @@ public class MultiString implements Multi {
 		MultiParser.parse(toString(), new MultiAdapter() {
 			public void addSpan(String span) {
 				// note: fields in span use ms prefix
-				while(ls.size() < (ms_page + 1) * n_lines)
+				int n_total = (ms_page + 1) * n_lines;
+				while(ls.size() < n_total)
 					ls.add("");
 				int i = ms_page * n_lines + ms_line;
-				String v = ls.get(i);
-				ls.set(i, SString.trimJoin(v, span));
+				if(i < n_total) {
+					String v = ls.get(i);
+					ls.set(i, SString.trimJoin(v, span));
+				} else {
+					// MULTI string defines more than
+					// n_lines on this page.  We'll just
+					// have to ignore this span.
+				}
 			}
 		});
 		while("".equals(ls.peekLast()))
