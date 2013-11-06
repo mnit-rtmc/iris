@@ -480,35 +480,6 @@ public class MultiString implements Multi {
 		return ms.toString();
 	}
 
-	/** Get message text as an array of strings (with no tags).
-	 * Every n_lines elements in the returned array represent one page.
-	 * @param n_lines Number of lines per page.
-	 * @return A string array containing text for each line. */
-	public String[] getText(final int n_lines) {
-		final LinkedList<String> ls = new LinkedList<String>();
-		MultiParser.parse(toString(), new MultiAdapter() {
-			@Override
-			public void addSpan(String span) {
-				// note: fields in span use ms prefix
-				int n_total = (ms_page + 1) * n_lines;
-				while(ls.size() < n_total)
-					ls.add("");
-				int i = ms_page * n_lines + ms_line;
-				if(i < n_total) {
-					String v = ls.get(i);
-					ls.set(i, SString.trimJoin(v, span));
-				} else {
-					// MULTI string defines more than
-					// n_lines on this page.  We'll just
-					// have to ignore this span.
-				}
-			}
-		});
-		while("".equals(ls.peekLast()))
-			ls.removeLast();
-		return ls.toArray(new String[0]);
-	}
-
 	/** Get message lines as an array of strings (with tags).
 	 * Every n_lines elements in the returned array represent one page.
 	 * @param n_lines Number of lines per page.
