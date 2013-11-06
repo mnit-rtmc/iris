@@ -111,50 +111,45 @@ public class MultiStringTest extends TestCase {
 
 	public void testGetText() {
 		// Single page tests
-		assertTrue(Arrays.equals(new String[0],
-			new MultiString("").getText(3)));
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-			new MultiString("ABC").getText(3)));
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-			new MultiString("ABC[nl]").getText(3)));
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-			new MultiString("ABC[nl][nl]").getText(3)));
-		assertTrue(Arrays.equals(new String[] { "ABC", "DEF" },
-			new MultiString("ABC[nl]DEF").getText(3)));
-		assertTrue(Arrays.equals(new String[] {"ABC", "DEF", "GHI"},
-			new MultiString("ABC[nl]DEF[nl]GHI").getText(3)));
-		assertTrue(Arrays.equals(new String[] {"ABC", "DEF", "GHI"},
-			new MultiString("ABC[nl]DEF[nl]GHI[nl]JKL").getText(3)));
+		checkGetText("", 3, new String[0]);
+		checkGetText("ABC", 3, new String[] { "ABC" });
+		checkGetText("ABC[nl]", 3, new String[] { "ABC" });
+		checkGetText("ABC[nl][nl]", 3, new String[] { "ABC" });
+		checkGetText("ABC[nl]DEF", 3, new String[] { "ABC", "DEF" });
+		checkGetText("ABC[nl]DEF", 1, new String[] { "ABC" });
+		checkGetText("ABC[nl]DEF[nl]GHI", 3,
+			new String[] {"ABC", "DEF", "GHI"});
+		checkGetText("ABC[nl]DEF[nl]GHI[nl]JKL", 3,
+			new String[] {"ABC", "DEF", "GHI"});
 		// Multi-page tests
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-			new MultiString("ABC[np]").getText(3)));
-		assertTrue(Arrays.equals(new String[] { "ABC" },
-			new MultiString("ABC[np][nl]").getText(3)));
-		assertTrue(Arrays.equals(new String[] {"ABC", "", "DEF"},
-			new MultiString("ABC[nl][nl]DEF[np][nl]").getText(3)));
-		assertTrue(Arrays.equals(new String[] { "ABC", "", "", "DEF" },
-			new MultiString("ABC[np]DEF").getText(3)));
-		assertTrue(Arrays.equals(new String[] { "ABC", "", "", "DEF" },
-			new MultiString("ABC[nl][np]DEF").getText(3)));
-		assertTrue(Arrays.equals(new String[] { "ABC", "", "", "DEF" },
-			new MultiString("ABC[nl][np]DEF[np]").getText(3)));
-		assertTrue(Arrays.equals(
-			new String[] { "ABC", "DEF", "", "GHI", "", "123" },
-			new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123")
-			.getText(3)));
-		assertTrue(Arrays.equals(
-			new String[] { "ABC", "DEF", "GHI" },
-			new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123")
-			.getText(2)));
+		checkGetText("ABC[np]", 3, new String[] { "ABC" });
+		checkGetText("ABC[np][nl]", 3,
+			new String[] { "ABC" });
+		checkGetText("ABC[nl][nl]DEF[np][nl]", 3,
+			new String[] {"ABC", "", "DEF"});
+		checkGetText("ABC[np]DEF", 3,
+			new String[] { "ABC", "", "", "DEF" });
+		checkGetText("ABC[nl][np]DEF", 3,
+			new String[] { "ABC", "", "", "DEF" });
+		checkGetText("ABC[nl][np]DEF[np]", 3,
+			new String[] { "ABC", "", "", "DEF" });
+		checkGetText("ABC[nl]DEF[np]GHI[nl][nl]123", 3,
+			new String[] { "ABC", "DEF", "", "GHI", "", "123" });
+		checkGetText("ABC[nl]DEF[np]GHI[nl][nl]123", 2,
+			new String[] { "ABC", "DEF", "GHI" });
+		checkGetText("ABC[nl]DEF[np]GHI[nl]JKL[nl]123", 2,
+			new String[] { "ABC", "DEF", "GHI", "JKL" });
 		// tags contained in a span
-		assertTrue(Arrays.equals(new String[] {"ABC", "D E F", "GHI"},
-			new MultiString("ABC[nl]D[j1x]E[j1x]F[nl]GHI")
-			.getText(3)));
-		assertTrue(Arrays.equals(new String[] {"ABC", "D E F", "GHI"},
-			new MultiString("ABC[nl][jl2]D[jl3]E[jl4]F[nl]GHI")
-			.getText(3)));
-		assertTrue(Arrays.equals(new String[] {"ABC" },
-			new MultiString("[fo1]ABC").getText(3)));
+		checkGetText("ABC[nl]D[j1x]E[j1x]F[nl]GHI", 3,
+			new String[] {"ABC", "D E F", "GHI"});
+		checkGetText("ABC[nl][jl2]D[jl3]E[jl4]F[nl]GHI", 3,
+			new String[] {"ABC", "D E F", "GHI"});
+		checkGetText("[fo1]ABC", 3, new String[] {"ABC" });
+	}
+
+	private void checkGetText(String multi, int n_lines, String[] text) {
+		assertTrue(Arrays.equals(new MultiString(multi).getText(
+			n_lines), text));
 	}
 
 	public void testEquals() {
