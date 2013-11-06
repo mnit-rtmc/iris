@@ -2129,6 +2129,7 @@ COPY iris.font (name, f_number, height, width, line_spacing, char_spacing, versi
 20_full	15	20	0	5	3	0
 24_full	16	24	0	5	4	0
 _09_full_12	17	12	0	2	2	0
+_7_full	18	7	0	3	2	0
 \.
 
 COPY iris.graphic (name, g_number, bpp, height, width, pixels) FROM stdin;
@@ -3014,6 +3015,70 @@ _09_full_12_122	\N	1	12	5	AAHxERD4AAA=
 _09_full_12_123	\N	1	12	3	aSiSYAA=
 _09_full_12_124	\N	1	12	1	94A=
 _09_full_12_125	\N	1	12	3	ySKSwAA=
+_7_full_32	\N	1	7	1	AA==
+_7_full_33	\N	1	7	2	qog=
+_7_full_34	\N	1	7	3	tAAA
+_7_full_35	\N	1	7	5	Ur6vqUA=
+_7_full_36	\N	1	7	5	I6jiuIA=
+_7_full_37	\N	1	7	5	xkRETGA=
+_7_full_38	\N	1	7	5	RSiKyaA=
+_7_full_39	\N	1	7	1	wA==
+_7_full_40	\N	1	7	3	KkiI
+_7_full_41	\N	1	7	3	iJKg
+_7_full_42	\N	1	7	7	EFEUFEUEAA==
+_7_full_43	\N	1	7	5	AQnyEAA=
+_7_full_44	\N	1	7	3	AACg
+_7_full_45	\N	1	7	4	AA8AAA==
+_7_full_46	\N	1	7	2	AAg=
+_7_full_47	\N	1	7	5	AEREQAA=
+_7_full_48	\N	1	7	4	aZmZYA==
+_7_full_49	\N	1	7	3	WSS4
+_7_full_50	\N	1	7	4	aRJI8A==
+_7_full_51	\N	1	7	4	aRYZYA==
+_7_full_52	\N	1	7	5	EZUviEA=
+_7_full_53	\N	1	7	4	+IYZYA==
+_7_full_54	\N	1	7	4	aY6ZYA==
+_7_full_55	\N	1	7	4	8RIkQA==
+_7_full_56	\N	1	7	4	aZaZYA==
+_7_full_57	\N	1	7	4	aZcZYA==
+_7_full_58	\N	1	7	2	CIA=
+_7_full_59	\N	1	7	3	AQUA
+_7_full_60	\N	1	7	4	EkhCEA==
+_7_full_61	\N	1	7	4	APDwAA==
+_7_full_62	\N	1	7	4	hCEkgA==
+_7_full_63	\N	1	7	4	aRIgIA==
+_7_full_64	\N	1	7	5	dGdZwcA=
+_7_full_65	\N	1	7	4	aZ+ZkA==
+_7_full_66	\N	1	7	4	6Z6Z4A==
+_7_full_67	\N	1	7	4	aYiJYA==
+_7_full_68	\N	1	7	4	6ZmZ4A==
+_7_full_69	\N	1	7	4	+I6I8A==
+_7_full_70	\N	1	7	4	+I6IgA==
+_7_full_71	\N	1	7	4	aYuZcA==
+_7_full_72	\N	1	7	4	mZ+ZkA==
+_7_full_73	\N	1	7	3	6SS4
+_7_full_74	\N	1	7	4	EREZYA==
+_7_full_75	\N	1	7	4	maypkA==
+_7_full_76	\N	1	7	4	iIiI8A==
+_7_full_77	\N	1	7	7	g46smTBggA==
+_7_full_78	\N	1	7	5	jnNZziA=
+_7_full_79	\N	1	7	4	aZmZYA==
+_7_full_80	\N	1	7	4	6Z6IgA==
+_7_full_81	\N	1	7	5	dGMayaA=
+_7_full_82	\N	1	7	4	6Z6pkA==
+_7_full_83	\N	1	7	4	aYYZYA==
+_7_full_84	\N	1	7	5	+QhCEIA=
+_7_full_85	\N	1	7	4	mZmZYA==
+_7_full_86	\N	1	7	5	jGMVKIA=
+_7_full_87	\N	1	7	7	gwYMmrVRAA==
+_7_full_88	\N	1	7	5	jFRFRiA=
+_7_full_89	\N	1	7	5	jFRCEIA=
+_7_full_90	\N	1	7	5	+EREQ+A=
+_7_full_91	\N	1	7	3	8kk4
+_7_full_92	\N	1	7	5	BBBBBAA=
+_7_full_93	\N	1	7	3	5JJ4
+_7_full_94	\N	1	7	5	IqIAAAA=
+_7_full_95	\N	1	7	5	AAAAA+A=
 \.
 
 COPY iris.glyph (name, font, code_point, graphic) FROM stdin;
@@ -3899,4 +3964,68 @@ _09_full_12_122	_09_full_12	122	_09_full_12_122
 _09_full_12_123	_09_full_12	123	_09_full_12_123
 _09_full_12_124	_09_full_12	124	_09_full_12_124
 _09_full_12_125	_09_full_12	125	_09_full_12_125
+_7_full_32	_7_full	32	_7_full_32
+_7_full_33	_7_full	33	_7_full_33
+_7_full_34	_7_full	34	_7_full_34
+_7_full_35	_7_full	35	_7_full_35
+_7_full_36	_7_full	36	_7_full_36
+_7_full_37	_7_full	37	_7_full_37
+_7_full_38	_7_full	38	_7_full_38
+_7_full_39	_7_full	39	_7_full_39
+_7_full_40	_7_full	40	_7_full_40
+_7_full_41	_7_full	41	_7_full_41
+_7_full_42	_7_full	42	_7_full_42
+_7_full_43	_7_full	43	_7_full_43
+_7_full_44	_7_full	44	_7_full_44
+_7_full_45	_7_full	45	_7_full_45
+_7_full_46	_7_full	46	_7_full_46
+_7_full_47	_7_full	47	_7_full_47
+_7_full_48	_7_full	48	_7_full_48
+_7_full_49	_7_full	49	_7_full_49
+_7_full_50	_7_full	50	_7_full_50
+_7_full_51	_7_full	51	_7_full_51
+_7_full_52	_7_full	52	_7_full_52
+_7_full_53	_7_full	53	_7_full_53
+_7_full_54	_7_full	54	_7_full_54
+_7_full_55	_7_full	55	_7_full_55
+_7_full_56	_7_full	56	_7_full_56
+_7_full_57	_7_full	57	_7_full_57
+_7_full_58	_7_full	58	_7_full_58
+_7_full_59	_7_full	59	_7_full_59
+_7_full_60	_7_full	60	_7_full_60
+_7_full_61	_7_full	61	_7_full_61
+_7_full_62	_7_full	62	_7_full_62
+_7_full_63	_7_full	63	_7_full_63
+_7_full_64	_7_full	64	_7_full_64
+_7_full_65	_7_full	65	_7_full_65
+_7_full_66	_7_full	66	_7_full_66
+_7_full_67	_7_full	67	_7_full_67
+_7_full_68	_7_full	68	_7_full_68
+_7_full_69	_7_full	69	_7_full_69
+_7_full_70	_7_full	70	_7_full_70
+_7_full_71	_7_full	71	_7_full_71
+_7_full_72	_7_full	72	_7_full_72
+_7_full_73	_7_full	73	_7_full_73
+_7_full_74	_7_full	74	_7_full_74
+_7_full_75	_7_full	75	_7_full_75
+_7_full_76	_7_full	76	_7_full_76
+_7_full_77	_7_full	77	_7_full_77
+_7_full_78	_7_full	78	_7_full_78
+_7_full_79	_7_full	79	_7_full_79
+_7_full_80	_7_full	80	_7_full_80
+_7_full_81	_7_full	81	_7_full_81
+_7_full_82	_7_full	82	_7_full_82
+_7_full_83	_7_full	83	_7_full_83
+_7_full_84	_7_full	84	_7_full_84
+_7_full_85	_7_full	85	_7_full_85
+_7_full_86	_7_full	86	_7_full_86
+_7_full_87	_7_full	87	_7_full_87
+_7_full_88	_7_full	88	_7_full_88
+_7_full_89	_7_full	89	_7_full_89
+_7_full_90	_7_full	90	_7_full_90
+_7_full_91	_7_full	91	_7_full_91
+_7_full_92	_7_full	92	_7_full_92
+_7_full_93	_7_full	93	_7_full_93
+_7_full_94	_7_full	94	_7_full_94
+_7_full_95	_7_full	95	_7_full_95
 \.
