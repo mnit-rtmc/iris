@@ -1685,10 +1685,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public String getPlacemarkDesc() {
 		StringBuilder desc = new StringBuilder();
 
-		desc.append(Kml.descItem("Location", 
+		desc.append(Kml.descItem("Location",
 			GeoLocHelper.getDescription(getGeoLoc())));
 
-		desc.append(Kml.descItem(DMSABBR + " Status", 
+		desc.append(Kml.descItem(DMSABBR + " Status",
 			DMSHelper.getAllStyles(this)));
 
 		SignMessage sm = getMessageCurrent();
@@ -1697,12 +1697,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			desc.append(Kml.descItem("Messages Lines", "none"));
 		else {
 			for(int i = 0; i < ml.length; ++i) {
-				desc.append(Kml.descItem("Message Line " + 
+				desc.append(Kml.descItem("Message Line " +
 					(i + 1), ml[i]));
 			}
 		}
 
-		String owner = (getOwnerCurrent() == null ? "none" : 
+		String owner = (getOwnerCurrent() == null ? "none" :
 			getOwnerCurrent().getFullName());
 		desc.append(Kml.descItem("Author", owner));
 
@@ -1712,7 +1712,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		desc.append(Kml.descItem("Notes", getNotes()));
 		desc.append(Kml.descItem("Last Operation", getOpStatus()));
 
-		desc.append("<br>Updated by IRIS " + 
+		desc.append("<br>Updated by IRIS " +
 			TimeSteward.getDateInstance() + "<br><br>");
 
 		desc.append("<br>");
