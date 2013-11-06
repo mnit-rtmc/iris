@@ -172,11 +172,12 @@ public class MessagePollerFactory {
 	private InetSocketAddress createSocketAddress(URI u) throws IOException{
 		String host = u.getHost();
 		int p = u.getPort();
-		if(host == null)
-			throw new IOException("INVALID SOCKET ADDRESS");
-		if(p <= 0)
-			throw new IOException("INVALID PORT: " + p);
-		return new InetSocketAddress(host, p);
+		try {
+			return new InetSocketAddress(host, p);
+		}
+		catch(IllegalArgumentException e) {
+			throw new IOException(e);
+		}
 	}
 
 	/** Create a modem messenger */
