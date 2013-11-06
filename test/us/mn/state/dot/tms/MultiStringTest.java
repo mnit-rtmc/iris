@@ -46,6 +46,7 @@ public class MultiStringTest extends TestCase {
 		checkGetLines("", 1, new String[] { "" });
 		checkGetLines("", 3, new String[] { "", "", "" });
 		checkGetLines("ABC", 3, new String[] { "ABC", "", "" });
+		checkGetLines("ABC[nl]DEF", 1, new String[] { "ABC" });
 		checkGetLines("ABC[nl][nl]", 3, new String[] { "ABC", "", "" });
 		checkGetLines("ABC[nl][np]", 3, new String[] { "ABC", "", "" });
 		checkGetLines("ABC[nl][np]DEF", 3,
@@ -54,6 +55,8 @@ public class MultiStringTest extends TestCase {
 			new String[] { "ABC", "", "", "DEF", "", "" });
 		checkGetLines("ABC[nl]DEF[nl2]GHI", 3,
 			new String[] { "ABC", "DEF", "GHI" });
+		checkGetLines("ABC[nl]DEF[nl2]GHI", 2,
+			new String[] { "ABC", "DEF" });
 		checkGetLines("ABC[nl]DEF[np]GHI[nl]JKL", 2,
 			new String[] { "ABC", "DEF", "GHI", "JKL" });
 		checkGetLines("ABC[nl]DEF[np]GHI[nl]JKL", 3,

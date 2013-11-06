@@ -481,7 +481,7 @@ public class MultiString implements Multi {
 	public String[] getText(final int n_lines) {
 		final LinkedList<String> ls = new LinkedList<String>();
 		MultiParser.parse(toString(), new MultiAdapter() {
-			public void addSpan(String span) {
+			@Override public void addSpan(String span) {
 				// note: fields in span use ms prefix
 				int n_total = (ms_page + 1) * n_lines;
 				while(ls.size() < n_total)
@@ -508,14 +508,23 @@ public class MultiString implements Multi {
 	 * @return A string array containing text for each line. */
 	public String[] getLines(int n_lines) {
 		String[] pages = multi.toString().split("\\[np\\]");
-		String[] lines = new String[n_lines * pages.length];
+		int n_total = n_lines * pages.length;
+		String[] lines = new String[n_total];
 		for(int i = 0; i < lines.length; i++)
 			lines[i] = "";
 		for(int i = 0; i < pages.length; i++) {
+			int p = i * n_lines;
 			String[] lns = pages[i].split("\\[nl.?\\]");
 			for(int ln = 0; ln < lns.length; ln++) {
-				lines[i * n_lines + ln] =
-					MultiParser.normalizeLine(lns[ln]);
+				int j = p + ln;
+				if(j < n_total) {
+					lines[j] = MultiParser.normalizeLine(
+						lns[ln]);
+				} else {
+					// MULTI string defines more than
+					// n_lines on this page.  We'll just
+					// have to ignore this span.
+				}
 			}
 		}
 		return lines;
