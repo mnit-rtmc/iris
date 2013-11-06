@@ -156,32 +156,19 @@ public class DMSHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Return a single string which is formated to be readable 
-	 *  by the user and contains all sign message lines on the 
-	 *  specified DMS. */
-	static public String buildMsgLine(DMS proxy) {
-		String[] lines = getText(proxy);
-		StringBuilder ret = new StringBuilder();
-		for(int i = 0; i < lines.length; ++i) {
-			if(lines[i] != null)
-				ret.append(lines[i]);
-			if(i + 1 < lines.length)
-				ret.append(" / ");
-		}
-		return ret.toString();
-	}
-
-	/** Get current sign message text as an array of strings */
-	static private String[] getText(DMS proxy) {
-		SignMessage sm = proxy.getMessageCurrent();
+	/** Return a single string which is formated to be readable
+	 * by the user and contains all sign message lines on the
+	 * specified DMS.
+	 * @param dms The DMS containing the message.
+	 * @return Text of message on the DMS. */
+	static public String buildMsgLine(DMS dms) {
+		SignMessage sm = dms.getMessageCurrent();
 		if(sm != null) {
 			String multi = sm.getMulti();
-			if(multi != null) {
-				int n_lines = getLineCount(proxy);
-				return new MultiString(multi).getText(n_lines);
-			}
+			if(multi != null)
+				return new MultiString(multi).asText();
 		}
-		return new String[0];
+		return "";
 	}
 
 	/** Messages lines that flag no DMS message text available */
@@ -190,23 +177,23 @@ public class DMSHelper extends BaseHelper {
 	public final static String NOTXT_L3 = "_MESSAGE_";
 
 	/** Filter the specified multi. If certain keywords are present then
-	 * a blank multi is returned. The keywords indicate no text is 
+	 * a blank multi is returned. The keywords indicate no text is
 	 * available for the associated bitmap.
-	 * @return A blank multi if the argument multi flags no text, 
+	 * @return A blank multi if the argument multi flags no text,
 	 *         else the specified multi. */
 	static public MultiString ignoreFilter(MultiString ms) {
 		String s = ms.toString();
-		boolean ignore = s.contains(NOTXT_L1) && s.contains(NOTXT_L2) 
+		boolean ignore = s.contains(NOTXT_L1) && s.contains(NOTXT_L2)
 			&& s.contains(NOTXT_L3);
 		if(ignore)
 			ms = new MultiString();
 		return ms;
 	}
 
-	/** 
-	 * Return true if the specified message line should be ignored. 
-	 * By convention, a line begining and ending with an underscore 
-	 * is to be ignored. IRIS assumes non-blank DMS messages have 
+	/**
+	 * Return true if the specified message line should be ignored.
+	 * By convention, a line begining and ending with an underscore
+	 * is to be ignored. IRIS assumes non-blank DMS messages have
 	 * both a bitmap and multistring, which is not the case for all
 	 * DMS protocols.
 	 */

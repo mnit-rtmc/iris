@@ -40,6 +40,12 @@ public class MultiStringTest extends TestCase {
 			"ABC [sc4]DEF").asText()));
 		assertTrue("ABC DEF".equals(new MultiString(
 			"ABC[jl4]DEF").asText()));
+		assertTrue("ABC  DEF".equals(new MultiString(
+			"ABC[nl]DEF").asText()));
+		assertTrue("ABC   DEF".equals(new MultiString(
+			"ABC[nl][nl]DEF").asText()));
+		assertTrue("ABC  DEF".equals(new MultiString(
+			"ABC[np]DEF").asText()));
 	}
 
 	public void testGetLines() {

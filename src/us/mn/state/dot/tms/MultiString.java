@@ -543,13 +543,19 @@ public class MultiString implements Multi {
 		MultiParser.parse(toString(), new MultiAdapter() {
 			@Override
 			public void addSpan(String span) {
-				if(sb.length() > 0 &&
-				   sb.charAt(sb.length() - 1) != ' ')
-					sb.append(' ');
-				sb.append(span);
+				sb.append(span.trim());
+				sb.append(' ');
+			}
+			@Override
+			public void addLine(Integer s) {
+				sb.append(' ');
+			}
+			@Override
+			public void addPage() {
+				sb.append(' ');
 			}
 		});
-		return sb.toString();
+		return sb.toString().trim();
 	}
 
 	/** Normalize a MULTI string */
