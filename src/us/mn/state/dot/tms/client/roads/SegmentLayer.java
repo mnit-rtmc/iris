@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerChange;
-import us.mn.state.dot.map.LayerChangedEvent;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.CorridorBase;
@@ -96,20 +95,13 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	/** Complete one sample update */
 	public void completeSamples() {
 		samples.swapSamples();
-		notifyLayerChanged();
+		fireLayerChanged(LayerChange.status);
 	}
 
 	/** Clear all sample data */
 	public void clearSamples() {
 		samples.clearSamples();
-		notifyLayerChanged();
-	}
-
-	/** Notify listeners that the layer has changed status */
-	private void notifyLayerChanged() {
-		LayerChangedEvent ev = new LayerChangedEvent(this,
-			LayerChange.status);
-		notifyLayerChangedListeners(ev);
+		fireLayerChanged(LayerChange.status);
 	}
 
 	/** Update a corridor on the segment layer */

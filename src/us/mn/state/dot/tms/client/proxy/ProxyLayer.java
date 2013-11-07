@@ -18,7 +18,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerChange;
-import us.mn.state.dot.map.LayerChangedEvent;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
@@ -78,16 +77,10 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 
 	/** Add a new proxy to the layer */
 	@Override public void proxyAdded(T proxy) {
-		// Don't hog the SONAR TaskProcessor thread
 		if(complete) {
 			// NOTE: this also gets called when we "watch" an
 			//       object after it is selected.
-			WORKER.addJob(new Job() {
-				public void perform() {
-					notifyLayerChanged(
-						LayerChange.geometry);
-				}
-			});
+			fireLayerChanged(LayerChange.geometry);
 		}
 	}
 
@@ -104,24 +97,12 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 
 	/** Remove a proxy from the model */
 	@Override public void proxyRemoved(T proxy) {
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				notifyLayerChanged(
-					LayerChange.geometry);
-			}
-		});
+		fireLayerChanged(LayerChange.geometry);
 	}
 
 	/** Change a proxy in the model */
 	@Override public void proxyChanged(T proxy, String attrib) {
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				// Can an attribute change affect the layer?
-				notifyLayerChanged(LayerChange.status);
-			}
-		});
+		fireLayerChanged(LayerChange.status);
 	}
 
 	/** Update the layer extent */
@@ -130,7 +111,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 		manager.forEach(calc, 1);
 		if(calc.extent != null)
 			extent.setRect(calc.extent);
-		notifyLayerChanged(LayerChange.extent);
+		fireLayerChanged(LayerChange.extent);
 	}
 
 	/** Class to calculate the extent of the layer */
@@ -148,16 +129,6 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 				extent.add(b);
 			return false;
 		}
-	}
-
-	/** Notify listeners that the layer has changed */
-	protected void notifyLayerChanged(LayerChange reason) {
-		final LayerChangedEvent e = new LayerChangedEvent(this, reason);
-		runSwing(new Runnable() {
-			public void run() {
-				notifyLayerChangedListeners(e);
-			}
-		});
 	}
 
 	/** Create a new layer state */

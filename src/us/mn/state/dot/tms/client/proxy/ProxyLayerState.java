@@ -91,7 +91,7 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 			model.clearSelection();
 		tab_selected = ts;
 		if(getVisible() == null)
-			notifyLayerChangedListeners(LayerChange.visibility);
+			fireLayerChanged(LayerChange.visibility);
 	}
 
 	/** Get the visibility flag */
