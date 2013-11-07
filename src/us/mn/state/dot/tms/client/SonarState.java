@@ -503,6 +503,8 @@ public class SonarState extends Client {
 			weather_sensors.ignoreAttribute("stamp");
 		}
 		populateReadable(gate_arm_arrays);
+		if(canRead(GateArmArray.SONAR_TYPE))
+			gate_arm_arrays.ignoreAttribute("armState");
 		populateReadable(gate_arms);
 		if(canRead(GateArm.SONAR_TYPE))
 			gate_arms.ignoreAttribute("operation");
