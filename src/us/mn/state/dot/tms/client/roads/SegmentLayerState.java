@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,11 +41,10 @@ public class SegmentLayerState extends LayerState {
 	}
 
 	/** Get the visibility flag */
+	@Override
 	public boolean isVisible() {
-		if(visible == null)
-			return isZoomVisible();
-		else
-			return visible;
+		Boolean v = getVisible();
+		return v != null ? v : isZoomVisible();
 	}
 
 	/** Is the layer visible at the current zoom level? */

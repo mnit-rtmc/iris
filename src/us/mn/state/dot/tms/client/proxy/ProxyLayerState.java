@@ -90,16 +90,15 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 		if(tab_selected && !ts)
 			model.clearSelection();
 		tab_selected = ts;
-		if(visible == null)
+		if(getVisible() == null)
 			notifyLayerChangedListeners(LayerChange.visibility);
 	}
 
 	/** Get the visibility flag */
+	@Override
 	public boolean isVisible() {
-		if(visible == null)
-			return tab_selected || isZoomVisible();
-		else
-			return visible;
+		Boolean v = getVisible();
+		return v != null ? v : tab_selected || isZoomVisible();
 	}
 
 	/** Is the layer visible at the current zoom level? */
