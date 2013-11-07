@@ -152,6 +152,10 @@ public class DmsCache {
 			dmss.ignoreAttribute("lightOutput");
 			dmss.ignoreAttribute("photocellStatus");
 			dmss.ignoreAttribute("powerStatus");
+			dmss.ignoreAttribute("ownerCurrent");
+			dmss.ignoreAttribute("messageCurrent");
+			dmss.ignoreAttribute("messageSched");
+			dmss.ignoreAttribute("deployTime");
 			dmss.ignoreAttribute("heatTapeStatus");
 		}
 		client.populateReadable(sign_groups);
