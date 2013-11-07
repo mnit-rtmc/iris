@@ -102,7 +102,17 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 
 	/** Change a proxy in the model */
 	@Override public void proxyChanged(T proxy, String attrib) {
-		fireLayerChanged(LayerChange.status);
+		if(isStatusAttrib(attrib))
+			fireLayerChanged(LayerChange.status);
+	}
+
+	/** Check if an attribute causes a layer status update */
+	private boolean isStatusAttrib(String attrib) {
+		return "styles".equals(attrib) ||   // dms, lcs, meter, gate arm
+		       "cleared".equals(attrib) ||  // incidents
+		       "publish".equals(attrib) ||  // cameras
+		       "failTime".equals(attrib) || // controllers
+		       "maint".equals(attrib);      // controllers
 	}
 
 	/** Update the layer extent */
