@@ -68,8 +68,9 @@ public class IncidentTab extends MapTab<Incident> {
 
 	/** Set the map for this tab */
 	@Override public void setMap(MapBean m) {
+		assert m != null;
 		super.setMap(m);
-		creator.setEnabled(isAddPermitted() && m != null);
+		creator.setEnabled(isAddPermitted());
 	}
 
 	/** Check if the user is permitted to add an incident */
