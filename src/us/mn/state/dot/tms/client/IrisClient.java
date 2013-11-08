@@ -154,9 +154,9 @@ public class IrisClient extends JFrame {
 	/** Set the currently selected tab in each screen pane, using the
 	 * persistently stored tab index. */
 	private void setSelectedTabViaPersist() {
-		Object[] sti = user_props.getSelectedTabs();
+		Integer[] sti = user_props.getSelectedTabs();
 		for(int i = 0; i < s_panes.length && i < sti.length; ++i) {
-			int ti = ((Integer)sti[i]).intValue();
+			int ti = sti[i].intValue();
 			s_panes[i].setSelectedTabIndex(ti);
 		}
 	}

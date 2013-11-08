@@ -152,7 +152,7 @@ public class UserProperties {
 	}
 
 	/** Get array of currently selected tabs (as Integers) in each pane */
-	public Object[] getSelectedTabs() {
+	public Integer[] getSelectedTabs() {
 		ArrayList<Integer> sti = new ArrayList<Integer>();
 		for(int i = 0; ; i++) {
 			String pn = getTabPropName(i);
@@ -162,7 +162,7 @@ public class UserProperties {
 			else
 				break;
 		}
-		return sti.toArray();
+		return sti.toArray(new Integer[0]);
 	}
 
 	/** Get the user interface scale factor */
