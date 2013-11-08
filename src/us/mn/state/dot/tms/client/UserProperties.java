@@ -95,32 +95,44 @@ public class UserProperties {
 		}
 	}
 
-	/** Set a property */
-	private void setProp(String name, int i) {
-		props.setProperty(name, new Integer(i).toString());
+	/** Set a string property */
+	private void setProp(String name, String v) {
+		props.setProperty(name, v);
 	}
 
-	/** Set a property */
+	/** Set an integer property */
+	private void setProp(String name, int i) {
+		setProp(name, Integer.toString(i));
+	}
+
+	/** Set a float property */
 	private void setProp(String name, float f) {
-		props.setProperty(name, new Float(f).toString());
+		setProp(name, Float.toString(f));
+	}
+
+	/** Get a string property */
+	private String getPropString(String name) {
+		return props.getProperty(name, "").trim();
 	}
 
 	/** Get an integer property */
 	private Integer getPropInt(String name) {
-		String p = props.getProperty(name);
-		if(p != null)
-			return Integer.parseInt(p.trim());
-		else
+		try {
+			return Integer.parseInt(getPropString(name));
+		}
+		catch(NumberFormatException e) {
 			return null;
+		}
 	}
 
 	/** Get a float property */
 	private Float getPropFloat(String name) {
-		String p = props.getProperty(name);
-		if(p != null)
-			return Float.parseFloat(p.trim());
-		else
+		try {
+			return Float.parseFloat(getPropString(name));
+		}
+		catch(NumberFormatException e) {
 			return null;
+		}
 	}
 
 	/** Get window position from properties.
@@ -151,18 +163,18 @@ public class UserProperties {
 		return TAB_SEL + "." + String.valueOf(i);
 	}
 
-	/** Get array of currently selected tabs (as Integers) in each pane */
-	public Integer[] getSelectedTabs() {
-		ArrayList<Integer> sti = new ArrayList<Integer>();
+	/** Get array of currently selected tabs in each pane */
+	public String[] getSelectedTabs() {
+		ArrayList<String> st = new ArrayList<String>();
 		for(int i = 0; ; i++) {
 			String pn = getTabPropName(i);
-			Integer t = getPropInt(pn);
-			if(t != null)
-				sti.add(t);
+			String t = getPropString(pn);
+			if(t.length() > 0)
+				st.add(t);
 			else
 				break;
 		}
-		return sti.toArray(new Integer[0]);
+		return st.toArray(new String[0]);
 	}
 
 	/** Get the user interface scale factor */
@@ -183,8 +195,8 @@ public class UserProperties {
 		setProp(WIN_Y, r.y);
 		setProp(WIN_WIDTH, r.width);
 		setProp(WIN_HEIGHT, r.height);
-		int[] sti = frame.getSelectedTabIndex();
-		for(int i = 0; i < sti.length; ++i)
-			setProp(getTabPropName(i), sti[i]);
+		String[] st = frame.getSelectedTabs();
+		for(int i = 0; i < st.length; i++)
+			setProp(getTabPropName(i), st[i]);
 	}
 }

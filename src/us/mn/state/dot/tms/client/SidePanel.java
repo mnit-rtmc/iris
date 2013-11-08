@@ -46,6 +46,12 @@ public class SidePanel extends JPanel {
 	private final LinkedList<TabSwitcher> switchers =
 		new LinkedList<TabSwitcher>();
 
+	/** Most recently selected map tab */
+	private MapTab sel_tab;
+
+	/** Most recently selected layer */
+	private ProxyLayerState sel_layer;
+
 	/** Create a new side panel */
 	public SidePanel(MapBean m) {
 		super(new BorderLayout());
@@ -56,32 +62,43 @@ public class SidePanel extends JPanel {
 		add(tab_pane, BorderLayout.CENTER);
 		tab_pane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				map.setPointSelector(null);
-				setSelectedLayer(getSelectedHomeLayer());
+				updateSelectedTab();
 			}
 		});
 	}
 
-	/** Get the currently selected tab's home layer */
-	private ProxyLayerState getSelectedHomeLayer() {
+	/** Update the selected tab */
+	private void updateSelectedTab() {
+		map.setPointSelector(null);
+		MapTab mt = getSelectedTab();
+		if(mt != null) {
+			setSelectedLayer(getHomeProxyLayerState(mt));
+			sel_tab = mt;
+		}
+	}
+
+	/** Get the selected map tab */
+	public MapTab getSelectedTab() {
 		Component tab = tab_pane.getSelectedComponent();
 		if(tab instanceof MapTab)
-			return getHomeProxyLayerState((MapTab)tab);
+			return (MapTab)tab;
 		else
-			return null;
+			return sel_tab;
+	}
+
+	/** Set the selected map tab */
+	public void setSelectedTab(MapTab mt) {
+		tab_pane.setSelectedComponent(mt);
 	}
 
 	/** Get the home proxy layer state for a map tab */
 	private ProxyLayerState getHomeProxyLayerState(MapTab mt) {
-		LayerState ls = mt.getHomeLayer();
+		LayerState ls = mt.getHomeLayer(map);
 		if(ls instanceof ProxyLayerState)
 			return (ProxyLayerState)ls;
 		else
 			return null;
 	}
-
-	/** Most recently selected layer */
-	private ProxyLayerState sel_layer;
 
 	/** Set the selected layer */
 	private void setSelectedLayer(ProxyLayerState sel) {
@@ -90,26 +107,6 @@ public class SidePanel extends JPanel {
 		if(sel != null)
 			sel.setTabSelected(true);
 		sel_layer = sel;
-		int ti = tab_pane.getSelectedIndex();
-		if(ti >= 0)
-			sel_tab = ti;
-	}
-
-	/** Last selected tab, which stores the index of last user selected
-	 * tab. A field is used to track this, rather than dynamically
-	 * calling tab_pane.getSelectedIndex() because if the method is
-	 * called during app shutdown, it can erroneously return a -1. */
-	private int sel_tab;
-
-	/** Get the index of the currently selected tab */
-	public int getSelectedTabIndex() {
-		return sel_tab;
-	}
-
-	/** Set the currently selected tab */
-	public void setSelectedTabIndex(int i) {
-		if(i >= 0 && i < tab_pane.getTabCount())
-			tab_pane.setSelectedIndex(i);
 	}
 
 	/** Add a tab to the screen pane */
@@ -140,7 +137,7 @@ public class SidePanel extends JPanel {
 		}
 		@Override
 		public void selectionAdded(SonarObject proxy) {
-			tab_pane.setSelectedComponent(tab);
+			setSelectedTab(tab);
 		}
 		@Override
 		public void selectionRemoved(SonarObject proxy) { }
@@ -151,6 +148,8 @@ public class SidePanel extends JPanel {
 		for(TabSwitcher ts: switchers)
 			ts.dispose();
 		switchers.clear();
+		sel_layer = null;
+		sel_tab = null;
 		tab_pane.removeAll();
 	}
 

@@ -151,12 +151,12 @@ public class IrisClient extends JFrame {
 			WindowEvent.WINDOW_CLOSING));
 	}
 
-	/** Get the currently selected tab in each screen pane */
-	public int[] getSelectedTabIndex() {
-		int[] sti = new int[s_panes.length];
-		for(int i = 0; i < sti.length; ++i)
-			sti[i] = s_panes[i].getSelectedTabIndex();
-		return sti;
+	/** Get the currently selected tabs in each screen pane */
+	public String[] getSelectedTabs() {
+		String[] st = new String[s_panes.length];
+		for(int i = 0; i < st.length; i++)
+			st[i] = s_panes[i].getSelectedTabID();
+		return st;
 	}
 
 	/** Initialize the screen panes */
@@ -241,23 +241,32 @@ public class IrisClient extends JFrame {
 		if(visible.isEmpty())
 			return;
 		Iterator<ScreenPane> it = visible.iterator();
-		for(MapTab tab: s.getTabs()) {
+		for(MapTab mt: s.getTabs()) {
 			if(!it.hasNext())
 				it = visible.iterator();
 			ScreenPane sp = it.next();
-			sp.addTab(tab);
+			sp.addTab(mt);
 		}
-		setSelectedTabViaPersist();
+		setSelectedTabs(s);
 	}
 
-	/** Set the currently selected tab in each screen pane, using the
-	 * persistently stored tab index. */
-	private void setSelectedTabViaPersist() {
-		Integer[] sti = user_props.getSelectedTabs();
-		for(int i = 0; i < s_panes.length && i < sti.length; ++i) {
-			int ti = sti[i].intValue();
-			s_panes[i].setSelectedTabIndex(ti);
+	/** Set the selected tab in each screen pane */
+	private void setSelectedTabs(Session s) {
+		String[] st = user_props.getSelectedTabs();
+		for(int i = 0; i < s_panes.length && i < st.length; i++) {
+			MapTab mt = lookupTab(s, st[i]);
+			if(mt != null)
+				s_panes[i].setSelectedTab(mt);
 		}
+	}
+
+	/** Lookup a map tab */
+	private MapTab lookupTab(Session s, String tid) {
+		for(MapTab mt: s.getTabs()) {
+			if(mt.getTextId().equals(tid))
+				return mt;
+		}
+		return null;
 	}
 
 	/** Show the login form */

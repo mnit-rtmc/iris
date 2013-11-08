@@ -34,6 +34,14 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
+	/** Map tab ID */
+	private final String text_id;
+
+	/** Get the text ID */
+	public String getTextId() {
+		return text_id;
+	}
+
 	/** Name of side panel tab */
 	private final String name;
 
@@ -51,8 +59,9 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	}
 
 	/** Create a new map tab */
-	public MapTab(ProxyManager<T> m, String text_id) {
+	public MapTab(ProxyManager<T> m, String id) {
 		super(new BorderLayout());
+		text_id = id;
 		manager = m;
 		name = I18N.get(text_id);
 		tip = I18N.get(text_id + ".tab");
@@ -77,13 +86,10 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	}
 
 	/** Get the home layer for the tab */
-	public LayerState getHomeLayer() {
-		MapBean m = map;
-		if(m != null) {
-			for(LayerState ls: m.getLayers()) {
-				if(isHomeLayer(ls.getLayer()))
-					return ls;
-			}
+	public LayerState getHomeLayer(MapBean m) {
+		for(LayerState ls: m.getLayers()) {
+			if(isHomeLayer(ls.getLayer()))
+				return ls;
 		}
 		return null;
 	}

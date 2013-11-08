@@ -88,14 +88,15 @@ public class ScreenPane extends JPanel {
 		add(map_panel, BorderLayout.CENTER);
 	}
 
-	/** Get the index of the currently selected tab */
-	public int getSelectedTabIndex() {
-		return side_panel.getSelectedTabIndex();
+	/** Get the ID of the currently selected tab */
+	public String getSelectedTabID() {
+		MapTab mt = side_panel.getSelectedTab();
+		return mt != null ? mt.getTextId() : "";
 	}
 
 	/** Set the currently selected tab */
-	public void setSelectedTabIndex(int i) {
-		side_panel.setSelectedTabIndex(i);
+	public void setSelectedTab(MapTab mt) {
+		side_panel.setSelectedTab(mt);
 	}
 
 	/** Add a tab to the screen pane */
