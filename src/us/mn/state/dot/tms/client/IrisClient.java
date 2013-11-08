@@ -155,7 +155,7 @@ public class IrisClient extends JFrame {
 	public String[] getSelectedTabs() {
 		String[] st = new String[s_panes.length];
 		for(int i = 0; i < st.length; i++)
-			st[i] = s_panes[i].getSelectedTabID();
+			st[i] = s_panes[i].getSelectedTabId();
 		return st;
 	}
 
@@ -382,6 +382,7 @@ public class IrisClient extends JFrame {
 
 	/** Clean up when the user logs out */
 	private void doLogout() {
+		user_props.setWindowProperties(this);
 		menu_bar.setSession(null);
 		removeTabs();
 		closeSession();

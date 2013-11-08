@@ -46,8 +46,14 @@ public class SidePanel extends JPanel {
 	private final LinkedList<TabSwitcher> switchers =
 		new LinkedList<TabSwitcher>();
 
-	/** Most recently selected map tab */
-	private MapTab sel_tab;
+	/** Most recently selected map tab ID.  This is not cleared when tabs
+	 * are removed, so that tab is remembered even after logout. */
+	private String sel_tab = "";
+
+	/** Get the most recently selected map tab ID */
+	public String getSelectedTabId() {
+		return sel_tab;
+	}
 
 	/** Most recently selected layer */
 	private ProxyLayerState sel_layer;
@@ -73,17 +79,17 @@ public class SidePanel extends JPanel {
 		MapTab mt = getSelectedTab();
 		if(mt != null) {
 			setSelectedLayer(getHomeProxyLayerState(mt));
-			sel_tab = mt;
+			sel_tab = mt.getTextId();
 		}
 	}
 
 	/** Get the selected map tab */
-	public MapTab getSelectedTab() {
+	private MapTab getSelectedTab() {
 		Component tab = tab_pane.getSelectedComponent();
 		if(tab instanceof MapTab)
 			return (MapTab)tab;
 		else
-			return sel_tab;
+			return null;
 	}
 
 	/** Set the selected map tab */
@@ -149,7 +155,6 @@ public class SidePanel extends JPanel {
 			ts.dispose();
 		switchers.clear();
 		sel_layer = null;
-		sel_tab = null;
 		tab_pane.removeAll();
 	}
 

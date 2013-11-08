@@ -89,9 +89,8 @@ public class ScreenPane extends JPanel {
 	}
 
 	/** Get the ID of the currently selected tab */
-	public String getSelectedTabID() {
-		MapTab mt = side_panel.getSelectedTab();
-		return mt != null ? mt.getTextId() : "";
+	public String getSelectedTabId() {
+		return side_panel.getSelectedTabId();
 	}
 
 	/** Set the currently selected tab */
