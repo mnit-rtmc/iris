@@ -151,16 +151,6 @@ public class IrisClient extends JFrame {
 			WindowEvent.WINDOW_CLOSING));
 	}
 
-	/** Set the currently selected tab in each screen pane, using the
-	 * persistently stored tab index. */
-	private void setSelectedTabViaPersist() {
-		Integer[] sti = user_props.getSelectedTabs();
-		for(int i = 0; i < s_panes.length && i < sti.length; ++i) {
-			int ti = sti[i].intValue();
-			s_panes[i].setSelectedTabIndex(ti);
-		}
-	}
-
 	/** Get the currently selected tab in each screen pane */
 	public int[] getSelectedTabIndex() {
 		int[] sti = new int[s_panes.length];
@@ -258,6 +248,16 @@ public class IrisClient extends JFrame {
 			sp.addTab(tab);
 		}
 		setSelectedTabViaPersist();
+	}
+
+	/** Set the currently selected tab in each screen pane, using the
+	 * persistently stored tab index. */
+	private void setSelectedTabViaPersist() {
+		Integer[] sti = user_props.getSelectedTabs();
+		for(int i = 0; i < s_panes.length && i < sti.length; ++i) {
+			int ti = sti[i].intValue();
+			s_panes[i].setSelectedTabIndex(ti);
+		}
 	}
 
 	/** Show the login form */
