@@ -58,7 +58,6 @@ public class SidePanel extends JPanel {
 			public void stateChanged(ChangeEvent e) {
 				map.setPointSelector(null);
 				setSelectedLayer(getSelectedHomeLayer());
-				storeSelectedTabIndex();
 			}
 		});
 	}
@@ -91,6 +90,9 @@ public class SidePanel extends JPanel {
 		if(sel != null)
 			sel.setTabSelected(true);
 		sel_layer = sel;
+		int ti = tab_pane.getSelectedIndex();
+		if(ti >= 0)
+			sel_tab = ti;
 	}
 
 	/** Last selected tab, which stores the index of last user selected
@@ -98,14 +100,6 @@ public class SidePanel extends JPanel {
 	 * calling tab_pane.getSelectedIndex() because if the method is
 	 * called during app shutdown, it can erroneously return a -1. */
 	private int sel_tab;
-
-	/** Store the currently selected tab index. If no tab is
-	 *  selected (e.g. during tear down), the change is ignored. */
-	private void storeSelectedTabIndex() {
-		int sel = tab_pane.getSelectedIndex();
-		if(sel >= 0)
-			sel_tab = sel;
-	}
 
 	/** Get the index of the currently selected tab */
 	public int getSelectedTabIndex() {
