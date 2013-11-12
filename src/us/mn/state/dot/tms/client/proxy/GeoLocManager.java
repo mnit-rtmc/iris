@@ -36,7 +36,7 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 	private final Session session;
 
 	/** Map of all GeoLocs */
-	protected final HashMap<String, MapGeoLoc> proxies =
+	private final HashMap<String, MapGeoLoc> proxies =
 		new HashMap<String, MapGeoLoc>();
 
 	/** Create a new GeoLoc manager */
