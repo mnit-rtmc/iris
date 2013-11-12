@@ -77,8 +77,8 @@ public class LcsCache {
 		client.populateReadable(lcs_arrays);
 		if(client.canRead(LCSArray.SONAR_TYPE)) {
 			lcs_arrays.ignoreAttribute("operation");
-			lcs_arrays.ignoreAttribute("indicationsCurrent");
-			lcs_arrays.ignoreAttribute("ownerCurrent");
+			// We can't ignore indicationsCurrent and ownerCurrent,
+			// because LCSArrayCellRenderer lists need the updates
 		}
 		client.populateReadable(lcss);
 		client.populateReadable(lcs_indications);
