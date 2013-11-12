@@ -34,7 +34,7 @@ public final class ProxyMapCache<T extends SonarObject> {
 		new HashMap<Integer, T>();
 
 	/** Dispose of the proxy map cache */
-	public void dispose() {
+	public synchronized void dispose() {
 		map_proxies.clear();
 	}
 
