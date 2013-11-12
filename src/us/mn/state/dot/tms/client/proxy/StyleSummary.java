@@ -284,7 +284,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** The cell renderer has changed sizes, update cell renderers. */
-	protected void updateRenderer(CellRendererSize size) {
+	private void updateRenderer(CellRendererSize size) {
 		manager.setCellSize(size);
 		ListCellRenderer renderer = manager.createCellRenderer();
 		p_list.setCellRenderer(renderer);

@@ -26,6 +26,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
@@ -62,8 +63,8 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Color definition for AWS controlled style */
 	static protected final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
 
-	/** Mapping of DMS names to cell renderers */
-	protected final HashMap<String, DmsCellRenderer> renderers =
+	/** Mapping of DMS names to cell renderers.  Owned by EDT. */
+	private final HashMap<String, DmsCellRenderer> renderers =
 		new HashMap<String, DmsCellRenderer>();
 
 	/** Action to blank the selected DMS */
@@ -147,7 +148,8 @@ public class DMSManager extends ProxyManager<DMS> {
 		};
 	}
 
-	/** Lookup a DMS cell renderer */
+	/** Lookup a DMS cell renderer.
+	 * This must be called on the EDT. */
 	private DmsCellRenderer lookupRenderer(Object value) {
 		if(value instanceof DMS) {
 			DMS dms = (DMS)value;
@@ -157,11 +159,15 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Add a proxy to the manager */
-	@Override protected void proxyAddedSlow(DMS dms) {
+	@Override protected void proxyAddedSlow(final DMS dms) {
 		super.proxyAddedSlow(dms);
-		DmsCellRenderer r = newCellRenderer();
-		r.setDms(dms);
-		renderers.put(dms.getName(), r);
+		runSwing(new Runnable() {
+			public void run() {
+				DmsCellRenderer r = newCellRenderer();
+				r.setDms(dms);
+				renderers.put(dms.getName(), r);
+			}
+		});
 	}
 
 	/** Create a cell renderer */
@@ -188,7 +194,8 @@ public class DMSManager extends ProxyManager<DMS> {
 		return list;
 	}
 
-	/** Set the current cell size */
+	/** Set the current cell size.
+	 * This must be called on the EDT. */
 	@Override public void setCellSize(CellRendererSize size) {
 		super.setCellSize(size);
 		// update all cell renderers
