@@ -101,12 +101,12 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(AffineTransform at) {
+	@Override protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for DMSs */
-	protected ProxyTheme<DMS> createTheme() {
+	@Override protected ProxyTheme<DMS> createTheme() {
 		// NOTE: the ordering of themes controls which color is used
 		//       to render the sign icon on the map
 		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this, MARKER);
@@ -130,7 +130,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Create a list cell renderer */
-	public ListCellRenderer createCellRenderer() {
+	@Override public ListCellRenderer createCellRenderer() {
 		return new ListCellRenderer() {
 			public Component getListCellRendererComponent(
 				JList list, Object value, int index,
@@ -148,16 +148,16 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Lookup a DMS cell renderer */
-	protected DmsCellRenderer lookupRenderer(Object value) {
+	private DmsCellRenderer lookupRenderer(Object value) {
 		if(value instanceof DMS) {
 			DMS dms = (DMS)value;
 			return renderers.get(dms.getName());
-		}
-		return null;
+		} else
+			return null;
 	}
 
 	/** Add a proxy to the manager */
-	protected void proxyAddedSlow(DMS dms) {
+	@Override protected void proxyAddedSlow(DMS dms) {
 		super.proxyAddedSlow(dms);
 		DmsCellRenderer r = newCellRenderer();
 		r.setDms(dms);
@@ -170,7 +170,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Called when a proxy attribute has changed */
-	public void proxyChanged(DMS dms, String a) {
+	@Override public void proxyChanged(DMS dms, String a) {
 		if("messageCurrent".equals(a) ||
 		   "ownerCurrent".equals(a))
 		{
@@ -181,7 +181,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Create a proxy JList */
-	public ProxyJList<DMS> createList() {
+	@Override public ProxyJList<DMS> createList() {
 		ProxyJList<DMS> list = super.createList();
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.setVisibleRowCount(0);
@@ -189,7 +189,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Set the current cell size */
-	public void setCellSize(CellRendererSize size) {
+	@Override public void setCellSize(CellRendererSize size) {
 		super.setCellSize(size);
 		// update all cell renderers
 		for(String dms_id: renderers.keySet()) {
@@ -200,7 +200,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Show the properties form for the selected proxy */
-	public void showPropertiesForm() {
+	@Override public void showPropertiesForm() {
 		if(s_model.getSelectedCount() == 1) {
 			for(DMS dms: s_model.getSelected())
 				showPropertiesForm(dms);
@@ -252,7 +252,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Find the map geo location for a DMS */
-	public MapGeoLoc findGeoLoc(DMS proxy) {
+	@Override public MapGeoLoc findGeoLoc(DMS proxy) {
 		if(ItemStyle.LCS.checkBit(proxy.getStyles()))
 			return null;
 		else
@@ -260,12 +260,12 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Find the map geo location for a proxy */
-	protected GeoLoc getGeoLoc(DMS proxy) {
+	@Override protected GeoLoc getGeoLoc(DMS proxy) {
 		return proxy.getGeoLoc();
 	}
 
 	/** Check the style of the specified proxy */
-	public boolean checkStyle(ItemStyle is, DMS proxy) {
+	@Override public boolean checkStyle(ItemStyle is, DMS proxy) {
 		long styles = proxy.getStyles();
 		for(ItemStyle s: ItemStyle.toStyles(styles)) {
 			if(s == is)
@@ -275,7 +275,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Get the layer zoom visibility threshold */
-	protected int getZoomThreshold() {
+	@Override protected int getZoomThreshold() {
 		return 12;
 	}
 }
