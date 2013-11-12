@@ -152,8 +152,8 @@ public class DmsCache {
 			dmss.ignoreAttribute("lightOutput");
 			dmss.ignoreAttribute("photocellStatus");
 			dmss.ignoreAttribute("powerStatus");
-			dmss.ignoreAttribute("ownerCurrent");
-			dmss.ignoreAttribute("messageCurrent");
+			// We can't ignore messageCurrent and ownerCurrent,
+			// because DmsCellRenderer lists need the updates
 			dmss.ignoreAttribute("messageSched");
 			dmss.ignoreAttribute("deployTime");
 			dmss.ignoreAttribute("heatTapeStatus");
