@@ -35,13 +35,13 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	/** The maximum number of new r_node names which can be created
 	 * before the TypeCache must be updated.  Creating new r_nodes is
 	 * done asynchronously. */
-	static protected final int MAX_IN_PROCESS_NAMES = 8;
+	static private final int MAX_IN_PROCESS_NAMES = 8;
 
 	/** User session */
 	private final Session session;
 
 	/** R_Node type cache */
-	protected final TypeCache<R_Node> r_nodes;
+	private final TypeCache<R_Node> r_nodes;
 
 	/** Get the r_node type cache */
 	public TypeCache<R_Node> getR_Nodes() {
@@ -49,7 +49,7 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Geo loc type cache */
-	protected final TypeCache<GeoLoc> geo_locs;
+	private final TypeCache<GeoLoc> geo_locs;
 
 	/** Get the location type cache */
 	public TypeCache<GeoLoc> getGeoLocs() {
@@ -57,10 +57,10 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Unique ID for r_node naming */
-	protected int uid = 0;
+	private int uid = 0;
 
 	/** Mapping of names which are in process of being created */
-	protected HashMap<String, HashMap<String, Object>> in_process =
+	private HashMap<String, HashMap<String, Object>> in_process =
 		new HashMap<String, HashMap<String, Object>>();
 
 	/** Create a new r_node creator */
@@ -96,7 +96,7 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Put a set of attributes for an in-process name */
-	protected void putAttrs(String name, int lanes, int shift) {
+	private void putAttrs(String name, int lanes, int shift) {
 		HashMap<String, Object> attrs =
 			new HashMap<String, Object>();
 		attrs.put("lanes", lanes);
@@ -112,7 +112,7 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Create a unique R_Node name */
-	protected String createUniqueR_NodeName() {
+	private String createUniqueR_NodeName() {
 		// NOTE: uid needs to persist between calls so that calling
 		// this method twice in a row doesn't return the same name
 		final int uid_max = r_nodes.size() + MAX_IN_PROCESS_NAMES;
@@ -135,7 +135,7 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Called when a new GeoLoc is added */
-	public void proxyAdded(GeoLoc loc) {
+	@Override public void proxyAdded(GeoLoc loc) {
 		String name = loc.getName();
 		HashMap<String, Object> attrs = getAttrs(name);
 		if(attrs != null) {
@@ -145,24 +145,24 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Get a set of attributes for an in-process name */
-	protected HashMap<String, Object> getAttrs(String name) {
+	private HashMap<String, Object> getAttrs(String name) {
 		synchronized(in_process) {
 			return in_process.remove(name);
 		}
 	}
 
 	/** Called after enumeration is complete */
-	public void enumerationComplete() {
+	@Override public void enumerationComplete() {
 		// not interested
 	}
 
 	/** Called when a GeoLoc is removed */
-	public void proxyRemoved(GeoLoc loc) {
+	@Override public void proxyRemoved(GeoLoc loc) {
 		// not interested
 	}
 
 	/** Called when a GeoLoc attribute changes */
-	public void proxyChanged(GeoLoc loc, String a) {
+	@Override public void proxyChanged(GeoLoc loc, String a) {
 		// not interested
 	}
 }
