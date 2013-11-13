@@ -405,6 +405,7 @@ public class CorridorList extends JPanel {
 	protected void updateNodeSelection(R_Node proxy) {
 		client.setPointSelector(null);
 		panel.setR_Node(proxy);
+		add_node.setEnabled(canAdd());
 		delete_node.setEnabled(canRemove(proxy));
 	}
 
