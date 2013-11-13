@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -100,8 +100,8 @@ public class CameraViewer extends IPanel
 		preset_pnl = new PresetPanel();
 		stream_pnl = createStreamPanel();
 		output_cbx = createOutputCombo();
-		output_cbx.addActionListener(new ActionJob(WORKER) {
-			public void perform() {
+		output_cbx.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				monitorSelected();
 			}
 		});
@@ -193,8 +193,7 @@ public class CameraViewer extends IPanel
 			location_lbl.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
 			stream_pnl.setCamera(camera);
-			if(video_monitor != null)
-				video_monitor.setCamera(camera);
+			selectCamera();
 			preset_pnl.setCamera(camera);
 			preset_pnl.setEnabled(cam_ptz.canControlPtz());
 		} else
@@ -219,13 +218,19 @@ public class CameraViewer extends IPanel
 
 	/** Called when a video monitor is selected */
 	private void monitorSelected() {
-		Camera camera = selected;
 		Object o = output_cbx.getSelectedItem();
 		if(o instanceof VideoMonitor) {
 			video_monitor = (VideoMonitor)o;
-			video_monitor.setCamera(camera);
+			selectCamera();
 		} else
 			video_monitor = null;
+	}
+
+	/** Select a camera on a video monitor */
+	private void selectCamera() {
+		VideoMonitor vm = video_monitor;
+		if(vm != null)
+			vm.setCamera(selected);
 	}
 
 	/** Clear all of the fields */
