@@ -203,15 +203,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, Incident proxy) {
-		// FIXME: this should not be necessary, but we're getting
-		//        NullPointerExceptions here...
-		if(proxy == null)
+		EventType et = getEventType(proxy);
+		if(et == null)
 			return false;
-		Integer iet = proxy.getEventType();
-		if(iet == null)
-			return false;
-		EventType et = EventType.fromId(iet);
 		switch(is) {
 		case CRASH:
 			return et == EventType.INCIDENT_CRASH;
@@ -230,8 +226,23 @@ public class IncidentManager extends ProxyManager<Incident> {
 		}
 	}
 
+	/** Get the event type of an incident */
+	static private EventType getEventType(Incident proxy) {
+		try {
+			Integer iet = proxy.getEventType();
+			return iet != null ? EventType.fromId(iet) : null;
+		}
+		catch(NullPointerException e) {
+			// FIXME: there is a sonar bug which throws NPE when
+			//        an incident proxy object is deleted
+			return null;
+		}
+	}
+
 	/** Get the style for an event type */
-	public String getStyle(EventType et) {
+	static private String getStyle(EventType et) {
+		if(et == null)
+			return null;
 		switch(et) {
 		case INCIDENT_CRASH:
 			return ItemStyle.CRASH.toString();
@@ -258,8 +269,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Get the incident type description */
 	public String getTypeDesc(Incident inc) {
-		EventType et = EventType.fromId(inc.getEventType());
-		String sty = getStyle(et);
+		String sty = getStyle(getEventType(inc));
 		if(sty != null) {
 			LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
 			return getTypeDesc(sty, getLaneType(lt));
@@ -293,8 +303,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Get the symbol for an incident */
 	public Symbol getSymbol(Incident inc) {
-		EventType et = EventType.fromId(inc.getEventType());
-		String sty = getStyle(et);
+		String sty = getStyle(getEventType(inc));
 		if(sty != null)
 			return getTheme().getSymbol(sty);
 		else
