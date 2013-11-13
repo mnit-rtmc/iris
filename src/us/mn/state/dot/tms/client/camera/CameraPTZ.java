@@ -41,7 +41,7 @@ public class CameraPTZ {
 
 	/** Can a ptz control be made */
 	public boolean canControlPtz() {
-		return session.canUpdate(camera, "ptz");
+		return session.isUpdatePermitted(camera, "ptz");
 	}
 
 	/** Set the camera */

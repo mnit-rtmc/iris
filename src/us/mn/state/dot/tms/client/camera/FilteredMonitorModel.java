@@ -39,7 +39,7 @@ public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 
 	/** Add a new proxy to the list model */
 	protected int doProxyAdded(VideoMonitor proxy) {
-		if(session.canUpdate(proxy, "camera"))
+		if(session.isUpdatePermitted(proxy, "camera"))
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
