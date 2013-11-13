@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -24,13 +26,13 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.EncoderType;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
@@ -154,18 +156,21 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create jobs */
 	private void createJobs() {
-		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		notes_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setNotes(notes_txt.getText());
 			}
 		});
-		encoder_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		encoder_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setEncoder(encoder_txt.getText());
 			}
 		});
-		enc_chn_spn.addChangeListener(new ChangeJob(WORKER) {
-			@Override public void perform() {
+		enc_chn_spn.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
 				Number c = (Number)enc_chn_spn.getValue();
 				proxy.setEncoderChannel(c.intValue());
 			}
