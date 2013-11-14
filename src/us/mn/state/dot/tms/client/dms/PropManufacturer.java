@@ -19,9 +19,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.ChangeJob;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.DMS;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -114,20 +114,23 @@ public class PropManufacturer extends IPanel {
 
 	/** Create the widget jobs */
 	private void createUpdateJobs() {
-		pot_base_spn.addChangeListener(new ChangeJob(WORKER) {
-			public void perform() {
+		pot_base_spn.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)pot_base_spn.getValue();
 				dms.setLdcPotBase(n.intValue());
 			}
 		});
-		current_low_spn.addChangeListener(new ChangeJob(WORKER) {
-			public void perform() {
+		current_low_spn.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)current_low_spn.getValue();
 				dms.setPixelCurrentLow(n.intValue());
 			}
 		});
-		current_high_spn.addChangeListener(new ChangeJob(WORKER) {
-			public void perform() {
+		current_high_spn.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)current_high_spn.getValue();
 				dms.setPixelCurrentHigh(n.intValue());
 			}
