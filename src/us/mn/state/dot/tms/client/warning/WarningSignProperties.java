@@ -15,18 +15,18 @@
 package us.mn.state.dot.tms.client.warning;
 
 import java.awt.Color;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.ListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.WarningSign;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -112,13 +112,15 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
 	/** Create jobs for updating */
 	private void createUpdateJobs() {
-		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		notes_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setNotes(notes_txt.getText());
 			}
 		});
-		message_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		message_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setMessage(message_txt.getText());
 			}
 		});
