@@ -34,7 +34,6 @@ import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.sched.Job;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -49,6 +48,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -275,13 +275,19 @@ public class CorridorList extends JPanel {
 
 	/** Called when a GeoLoc proxy attribute has changed */
 	private void geoLocChanged(final GeoLoc loc, String a) {
-		// Don't hog the SONAR TaskProcessor thread
-		client.WORKER.addJob(new Job() {
-			public void perform() {
-				if(checkCorridor(loc))
+		IWorker<Boolean> worker = new IWorker<Boolean>() {
+			@Override
+			public Boolean doInBackground() {
+				return checkCorridor(loc);
+			}
+			@Override
+			public void done() {
+				Boolean c = getResult();
+				if(c != null && c)
 					updateListModel();
 			}
-		});
+		};
+		worker.execute();
 	}
 
 	/** Check the corridor for a geo location */
@@ -301,9 +307,9 @@ public class CorridorList extends JPanel {
 	/** Check the node list for a geo location. This is needed in case
 	 * the geo location has changed to a different corridor. */
 	private boolean checkNodeList(GeoLoc loc) {
-		ListModel lm = n_list.getModel();
-		for(int i = 0; i < lm.getSize(); i++) {
-			Object obj = lm.getElementAt(i);
+		R_NodeListModel mdl = n_model;
+		for(int i = 0; i < mdl.getSize(); i++) {
+			Object obj = mdl.get(i);
 			if(obj instanceof R_NodeModel) {
 				R_NodeModel m = (R_NodeModel)obj;
 				if(m.r_node.getGeoLoc() == loc)
@@ -338,46 +344,38 @@ public class CorridorList extends JPanel {
 
 	/** Update the corridor list model */
 	private void updateListModel() {
-		// Don't hog the SONAR TaskProcessor thread
-		client.WORKER.addJob(new Job() {
-			public void perform() {
-				doUpdateListModel();
+		IWorker<List<R_NodeModel>> worker =
+			new IWorker<List<R_NodeModel>>()
+		{
+			@Override
+			public List<R_NodeModel> doInBackground() {
+				return createNodeList(manager.createSet());
 			}
-		});
-	}
-
-	/** Update the corridor list model */
-	private void doUpdateListModel() {
-		if(smodel != null)
-			smodel.dispose();
-		Set<R_Node> node_s = manager.createSet();
-		n_model = createNodeList(node_s);
-		smodel = new R_NodeListSelectionModel(n_model, sel_model);
-		n_list.setModel(n_model);
-		n_list.setSelectionModel(smodel);
-		runSwing(new Runnable() {
-			public void run() {
-				n_list.ensureIndexIsVisible(
-					n_list.getLeadSelectionIndex());
+			@Override
+			public void done() {
+				List<R_NodeModel> nodes = getResult();
+				if(nodes != null)
+					setListModel(nodes);
 			}
-		});
+		};
+		worker.execute();
 	}
 
 	/** Create a list model of roadway node models for one corridor */
-	private R_NodeListModel createNodeList(Set<R_Node> node_s) {
+	private List<R_NodeModel> createNodeList(Set<R_Node> node_s) {
 		LinkedList<R_NodeModel> nodes = new LinkedList<R_NodeModel>();
 		List<R_NodeModel> no_loc = createNullLocList(node_s);
 		corridor = createCorridor(node_s);
 		if(corridor != null) {
 			R_NodeModel prev = null;
 			for(R_Node proxy: corridor) {
-				R_NodeModel mdl = new R_NodeModel(proxy, prev);
-				nodes.add(0, mdl);
-				prev = mdl;
+				R_NodeModel m = new R_NodeModel(proxy, prev);
+				nodes.add(0, m);
+				prev = m;
 			}
 		}
 		nodes.addAll(no_loc);
-		return new R_NodeListModel(nodes);
+		return nodes;
 	}
 
 	/** Create a list of r_node models with null locations.  The r_nodes
@@ -401,6 +399,18 @@ public class CorridorList extends JPanel {
 	/** Check if location is null or r_node is abandoned */
 	private boolean isNullOrAbandoned(R_Node n) {
 		return n.getAbandoned() || GeoLocHelper.isNull(n.getGeoLoc());
+	}
+
+	/** Set the corridor list model.
+	 * This must be called on the EDT. */
+	private void setListModel(List<R_NodeModel> nodes) {
+		if(smodel != null)
+			smodel.dispose();
+		n_model = new R_NodeListModel(nodes);
+		smodel = new R_NodeListSelectionModel(n_model, sel_model);
+		n_list.setModel(n_model);
+		n_list.setSelectionModel(smodel);
+		n_list.ensureIndexIsVisible(n_list.getLeadSelectionIndex());
 	}
 
 	/** Update the roadway node selection */
@@ -428,10 +438,10 @@ public class CorridorList extends JPanel {
 		if(c != null) {
 			int lanes = 2;
 			int shift = MID_SHIFT + 1;
-			R_NodeModel mdl = findModel(c, pos);
-			if(mdl != null) {
-				shift = mdl.getDownstreamLane(false);
-				lanes = shift - mdl.getDownstreamLane(true);
+			R_NodeModel m = findModel(c, pos);
+			if(m != null) {
+				shift = m.getDownstreamLane(false);
+				lanes = shift - m.getDownstreamLane(true);
 			}
 			creator.create(c.getRoadway(), c.getRoadDir(), pos,
 				lanes, shift);
@@ -450,12 +460,13 @@ public class CorridorList extends JPanel {
 	/** Find an r_node model near a point */
 	private R_NodeModel findModel(CorridorBase c, Position pos) {
 		R_Node found = c.findLastBefore(pos);
-		for(int i = 0; i < n_model.getSize(); i++) {
-			Object elem = n_model.get(i);
+		R_NodeListModel mdl = n_model;
+		for(int i = 0; i < mdl.getSize(); i++) {
+			Object elem = mdl.get(i);
 			if(elem instanceof R_NodeModel) {
-				R_NodeModel mdl = (R_NodeModel)elem;
-				if(mdl.r_node == found)
-					return mdl;
+				R_NodeModel m = (R_NodeModel)elem;
+				if(m.r_node == found)
+					return m;
 			}
 		}
 		return null;
