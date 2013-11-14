@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -22,7 +24,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -34,7 +35,6 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
@@ -197,31 +197,36 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create the widget jobs */
 	private void createUpdateJobs() {
-		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		notes_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setNotes(notes_txt.getText());
 			}
 		});
-		storage_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		storage_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setStorage(Integer.parseInt(
 					storage_txt.getText()));
 			}
 		});
-		max_wait_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		max_wait_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setMaxWait(Integer.parseInt(
 					max_wait_txt.getText()));
 			}
 		});
-		am_target_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		am_target_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setAmTarget(Integer.parseInt(
 					am_target_txt.getText()));
 			}
 		});
-		pm_target_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		pm_target_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setPmTarget(Integer.parseInt(
 					pm_target_txt.getText()));
 			}
