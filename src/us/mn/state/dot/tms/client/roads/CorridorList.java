@@ -60,31 +60,31 @@ import us.mn.state.dot.tms.utils.I18N;
 public class CorridorList extends JPanel {
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Roadway node manager */
-	protected final R_NodeManager manager;
+	private final R_NodeManager manager;
 
 	/** Selected r_node panel */
-	protected final R_NodePanel panel;
+	private final R_NodePanel panel;
 
 	/** Roadway node creator */
-	protected final R_NodeCreator creator;
+	private final R_NodeCreator creator;
 
 	/** Client frame */
-	protected final IrisClient client;
+	private final IrisClient client;
 
 	/** Roadway node type cache */
-	protected final TypeCache<R_Node> r_nodes;
+	private final TypeCache<R_Node> r_nodes;
 
 	/** Location type cache */
-	protected final TypeCache<GeoLoc> geo_locs;
+	private final TypeCache<GeoLoc> geo_locs;
 
 	/** Roadway node layer */
-	protected final ProxyLayer<R_Node> layer;
+	private final ProxyLayer<R_Node> layer;
 
 	/** Selected roadway corridor */
-	protected CorridorBase corridor;
+	private CorridorBase corridor;
 
 	/** Corridor action */
 	private final IAction corr_act = new IAction("r_node.corridor") {
@@ -115,22 +115,23 @@ public class CorridorList extends JPanel {
 	};
 
 	/** R_Node selection model */
-	protected final ProxySelectionModel<R_Node> sel_model;
+	private final ProxySelectionModel<R_Node> sel_model;
 
 	/** List component for nodes */
-	protected final JList n_list = new JList();
+	private final JList n_list = new JList();
 
 	/** Roadway node list model */
-	protected R_NodeListModel n_model = new R_NodeListModel();
+	private R_NodeListModel n_model = new R_NodeListModel();
 
 	/** R_Node list selection model */
-	protected R_NodeListSelectionModel smodel;
+	private R_NodeListSelectionModel smodel;
 
 	/** R_Node selection listener */
-	protected final ProxySelectionListener<R_Node> sel_listener =
+	private final ProxySelectionListener<R_Node> sel_listener =
 		new ProxySelectionListener<R_Node>()
 	{
-		protected R_Node r_node;
+		private R_Node r_node;
+		@Override
 		public void selectionAdded(R_Node proxy) {
 			if(!manager.checkCorridor(proxy)) {
 				CorridorBase cb = manager.getCorridor(proxy);
@@ -139,6 +140,7 @@ public class CorridorList extends JPanel {
 			updateNodeSelection(proxy);
 			r_node = proxy;
 		}
+		@Override
 		public void selectionRemoved(R_Node proxy) {
 			if(proxy == r_node)
 				updateNodeSelection(null);
@@ -146,10 +148,10 @@ public class CorridorList extends JPanel {
 	};
 
 	/** Listener for r_node changes */
-	protected final ProxyListener<R_Node> listener =
+	private final ProxyListener<R_Node> listener =
 		new ProxyListener<R_Node>()
 	{
-		protected boolean enumerated = false;
+		private boolean enumerated = false;
 		public void proxyAdded(R_Node proxy) {
 			if(enumerated)
 				nodeAdded(proxy);
@@ -167,7 +169,7 @@ public class CorridorList extends JPanel {
 	};
 
 	/** Listener for geo_loc changes */
-	protected final ProxyListener<GeoLoc> loc_listener =
+	private final ProxyListener<GeoLoc> loc_listener =
 		new ProxyListener<GeoLoc>()
 	{
 		public void proxyAdded(GeoLoc proxy) { }
@@ -232,11 +234,11 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Create the jobs */
-	protected void createJobs() {
+	private void createJobs() {
 	}
 
 	/** Set a new selected corridor */
-	protected void setCorridor(CorridorBase c) {
+	private void setCorridor(CorridorBase c) {
 		client.setPointSelector(null);
 		manager.setCorridor(c);
 		updateListModel();
@@ -252,19 +254,19 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Called when an r_node has been added */
-	protected void nodeAdded(R_Node proxy) {
+	private void nodeAdded(R_Node proxy) {
 		if(manager.checkCorridor(proxy))
 			updateListModel();
 	}
 
 	/** Called when an r_node has been removed */
-	protected void nodeRemoved(R_Node proxy) {
+	private void nodeRemoved(R_Node proxy) {
 		if(manager.checkCorridor(proxy))
 			updateListModel();
 	}
 
 	/** Called when an r_node attribute has changed */
-	protected void nodeChanged(R_Node proxy, String a) {
+	private void nodeChanged(R_Node proxy, String a) {
 		if(a.equals("abandoned"))
 			updateListModel();
 		else if(manager.checkCorridor(proxy))
@@ -272,7 +274,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Called when a GeoLoc proxy attribute has changed */
-	protected void geoLocChanged(final GeoLoc loc, String a) {
+	private void geoLocChanged(final GeoLoc loc, String a) {
 		// Don't hog the SONAR TaskProcessor thread
 		client.WORKER.addJob(new Job() {
 			public void perform() {
@@ -283,7 +285,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Check the corridor for a geo location */
-	protected boolean checkCorridor(GeoLoc loc) {
+	private boolean checkCorridor(GeoLoc loc) {
 		// NOTE: The fast path assumes that GeoLoc name matches R_Node
 		//       name.  If that is not the case, the GeoLoc should
 		//       still be found by checkNodeList(GeoLoc).
@@ -291,14 +293,14 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Check the corridor for an r_node with the given name */
-	protected boolean checkCorridor(String name) {
+	private boolean checkCorridor(String name) {
 		R_Node proxy = r_nodes.lookupObject(name);
 		return proxy != null && manager.checkCorridor(proxy);
 	}
 
 	/** Check the node list for a geo location. This is needed in case
 	 * the geo location has changed to a different corridor. */
-	protected boolean checkNodeList(GeoLoc loc) {
+	private boolean checkNodeList(GeoLoc loc) {
 		ListModel lm = n_list.getModel();
 		for(int i = 0; i < lm.getSize(); i++) {
 			Object obj = lm.getElementAt(i);
@@ -312,7 +314,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Create a sorted list of roadway nodes for one corridor */
-	static protected CorridorBase createCorridor(Set<R_Node> node_s) {
+	static private CorridorBase createCorridor(Set<R_Node> node_s) {
 		GeoLoc loc = getCorridorLoc(node_s);
 		if(loc != null) {
 			CorridorBase c = new CorridorBase(loc);
@@ -325,7 +327,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Get a location for a corridor */
-	static protected GeoLoc getCorridorLoc(Set<R_Node> node_s) {
+	static private GeoLoc getCorridorLoc(Set<R_Node> node_s) {
 		Iterator<R_Node> it = node_s.iterator();
 		if(it.hasNext()) {
 			R_Node n = it.next();
@@ -335,7 +337,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Update the corridor list model */
-	protected void updateListModel() {
+	private void updateListModel() {
 		// Don't hog the SONAR TaskProcessor thread
 		client.WORKER.addJob(new Job() {
 			public void perform() {
@@ -345,7 +347,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Update the corridor list model */
-	protected void doUpdateListModel() {
+	private void doUpdateListModel() {
 		if(smodel != null)
 			smodel.dispose();
 		Set<R_Node> node_s = manager.createSet();
@@ -362,7 +364,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Create a list model of roadway node models for one corridor */
-	protected R_NodeListModel createNodeList(Set<R_Node> node_s) {
+	private R_NodeListModel createNodeList(Set<R_Node> node_s) {
 		LinkedList<R_NodeModel> nodes = new LinkedList<R_NodeModel>();
 		List<R_NodeModel> no_loc = createNullLocList(node_s);
 		corridor = createCorridor(node_s);
@@ -382,7 +384,7 @@ public class CorridorList extends JPanel {
 	 * are then removed from the set passed in.
 	 * @param node_s Set of nodes on the corridor.
 	 * @return List of r_node models with null location. */
-	protected List<R_NodeModel> createNullLocList(Set<R_Node> node_s) {
+	private List<R_NodeModel> createNullLocList(Set<R_Node> node_s) {
 		LinkedList<R_NodeModel> no_loc =
 			new LinkedList<R_NodeModel>();
 		Iterator<R_Node> it = node_s.iterator();
@@ -402,7 +404,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Update the roadway node selection */
-	protected void updateNodeSelection(R_Node proxy) {
+	private void updateNodeSelection(R_Node proxy) {
 		client.setPointSelector(null);
 		panel.setR_Node(proxy);
 		add_node.setEnabled(canAdd());
@@ -410,7 +412,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Do the add node action */
-	protected void doAddNode() {
+	private void doAddNode() {
 		client.setPointSelector(new PointSelector() {
 			public boolean selectPoint(Point2D p) {
 				createNode(corridor, p);
@@ -421,7 +423,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Create a new node at a specified point */
-	protected void createNode(CorridorBase c, Point2D p) {
+	private void createNode(CorridorBase c, Point2D p) {
 		Position pos = getWgs84Position(p);
 		if(c != null) {
 			int lanes = 2;
@@ -460,7 +462,7 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Do the delete node action */
-	protected void doDeleteNode() {
+	private void doDeleteNode() {
 		R_Node proxy = getSelectedNode();
 		if(proxy != null) {
 			GeoLoc loc = proxy.getGeoLoc();
@@ -470,19 +472,19 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Get the selected roadway node */
-	protected R_Node getSelectedNode() {
+	private R_Node getSelectedNode() {
 		for(R_Node n: sel_model.getSelected())
 			return n;
 		return null;
 	}
 
 	/** Test if a new r_node can be added */
-	protected boolean canAdd() {
+	private boolean canAdd() {
 		return session.canAdd(R_Node.SONAR_TYPE);
 	}
 
 	/** Test if an r_node can be removed */
-	protected boolean canRemove(R_Node n) {
+	private boolean canRemove(R_Node n) {
 		return n != null && session.canRemove(n);
 	}
 }
