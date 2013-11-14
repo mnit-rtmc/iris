@@ -25,17 +25,16 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Holiday;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.CalendarWidget;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -253,9 +252,10 @@ public class DayPlanPanel extends JPanel {
 	/** Create jobs for widget actions */
 	protected void createWidgetJobs() {
 		h_table.getSelectionModel().addListSelectionListener(
-			new ListSelectionJob(WORKER)
+			new IListSelectionAdapter()
 		{
-			@Override public void perform() {
+			@Override
+			public void valueChanged() {
 				selectHoliday();
 			}
 		});

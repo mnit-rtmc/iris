@@ -16,11 +16,10 @@ package us.mn.state.dot.tms.client.schedule;
 
 import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -69,8 +68,9 @@ public class PlanTablePanel<T extends SonarObject> extends IPanel {
 	private void addJobs() {
 		final ListSelectionModel sm = table.getSelectionModel();
 		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		sm.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+		sm.addListSelectionListener(new IListSelectionAdapter() {
+			@Override
+			public void valueChanged() {
 				int row = sm.getMinSelectionIndex();
 				if(row >= 0)
 					selectRow(row);
