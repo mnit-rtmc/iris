@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
-import us.mn.state.dot.sched.FocusLostJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
@@ -84,8 +84,9 @@ public class PropLocation extends LocationPanel {
 	/** Create the widget jobs */
 	@Override protected void createJobs() {
 		super.createJobs();
-		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		notes_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				dms.setNotes(notes_txt.getText());
 			}
 		});
