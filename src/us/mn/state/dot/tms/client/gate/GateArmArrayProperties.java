@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.Color;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -23,8 +25,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.FocusLostJob;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -36,13 +36,13 @@ import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -216,19 +216,22 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Create the widget jobs */
 	private void createUpdateJobs() {
-		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
-			public void perform() {
+		notes_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setNotes(notes_txt.getText());
 			}
 		});
-		open_msg_txt.addFocusListener(new FocusLostJob(WORKER) {
-			public void perform() {
+		open_msg_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setOpenMsg(QuickMessageHelper.lookup(
 					open_msg_txt.getText()));
 			}
 		});
-		closed_msg_txt.addFocusListener(new FocusLostJob(WORKER) {
-			public void perform() {
+		closed_msg_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setClosedMsg(QuickMessageHelper.lookup(
 					closed_msg_txt.getText()));
 			}
@@ -268,8 +271,9 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		selectGateArm();
 		ListSelectionModel s = ga_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+		s.addListSelectionListener(new IListSelectionAdapter() {
+			@Override
+			public void valueChanged() {
 				selectGateArm();
 			}
 		});
