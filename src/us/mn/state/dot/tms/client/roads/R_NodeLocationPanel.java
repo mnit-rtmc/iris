@@ -14,12 +14,12 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.FocusLostJob;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.R_Node;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -45,7 +45,8 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Initialize the widgets on the panel */
-	@Override public void initialize() {
+	@Override
+	public void initialize() {
 		super.initialize();
 		add("device.notes");
 		add(notes_txt, Stretch.FULL);
@@ -54,10 +55,12 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Create the jobs */
-	@Override protected void createJobs() {
+	@Override
+	protected void createJobs() {
 		super.createJobs();
-		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		notes_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				setNotes(notes_txt.getText());
 			}
 		});
@@ -72,9 +75,8 @@ public class R_NodeLocationPanel extends LocationPanel {
 
 	/** Update one attribute */
 	public final void update(final R_Node n, final String a) {
-		// Serialize on WORKER thread
-		WORKER.addJob(new Job() {
-			public void perform() {
+		runSwing(new Runnable() {
+			public void run() {
 				doUpdate(n, a);
 			}
 		});
@@ -98,7 +100,8 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Clear all attributes */
-	@Override protected void doClear() {
+	@Override
+	protected void doClear() {
 		super.doClear();
 		node = null;
 		name_lbl.setText(I18N.get("r_node.name.none"));

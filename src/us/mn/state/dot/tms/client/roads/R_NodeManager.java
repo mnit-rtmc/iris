@@ -175,6 +175,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Called when proxy enumeration is complete */
+	@Override
 	public void enumerationComplete() {
 		// This needs to happen on the WORKER thread so it happens
 		// after all proxyAddedSlow calls on login

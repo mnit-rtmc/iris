@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.geom.Point2D;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -22,8 +24,7 @@ import javax.swing.JTextField;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.FocusLostJob;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
@@ -206,13 +207,15 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		lat_txt.addFocusListener(new FocusLostJob(client.WORKER) {
-			public void perform() {
+		lat_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				setLat(getTextDouble(lat_txt));
 			}
 		});
-		lon_txt.addFocusListener(new FocusLostJob(client.WORKER) {
-			public void perform() {
+		lon_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				setLon(getTextDouble(lon_txt));
 			}
 		});
@@ -240,16 +243,17 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Dispose of the location panel */
+	@Override
 	public void dispose() {
 		watcher.dispose();
 		super.dispose();
 	}
 
 	/** Update one attribute */
+	@Override
 	public final void update(final GeoLoc l, final String a) {
-		// Serialize on WORKER thread
-		client.WORKER.addJob(new Job() {
-			public void perform() {
+		runSwing(new Runnable() {
+			public void run() {
 				doUpdate(l, a);
 				// NOTE: this is needed to fix a problem where
 				//       a combo box displays the wrong entry
@@ -343,10 +347,10 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Clear all attributes */
+	@Override
 	public final void clear() {
-		// Serialize on WORKER thread
-		client.WORKER.addJob(new Job() {
-			public void perform() {
+		runSwing(new Runnable() {
+			public void run() {
 				doClear();
 			}
 		});
