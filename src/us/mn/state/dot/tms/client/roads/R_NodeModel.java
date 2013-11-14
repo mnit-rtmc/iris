@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ public class R_NodeModel {
 	public final R_Node r_node;
 
 	/** Upstream node model on corridor */
-	protected final R_NodeModel upstream;
+	private final R_NodeModel upstream;
 
 	/** Create a new roadway node model */
 	public R_NodeModel(R_Node n, R_NodeModel u) {
@@ -69,7 +69,7 @@ public class R_NodeModel {
 	/** Test if the given side is defined by the r_node.
 	 * @param side True for left side, false for right side.
 	 * @return True is the node defines the given side. */
-	protected boolean isSideDefined(boolean side) {
+	private boolean isSideDefined(boolean side) {
 		R_NodeType nt = R_NodeType.fromOrdinal(r_node.getNodeType());
 		return (nt == R_NodeType.STATION) ||
 		       (nt == R_NodeType.INTERSECTION) ||
@@ -87,7 +87,7 @@ public class R_NodeModel {
 	/** Get the fog lane for the given side of the road.
 	 * @param side True for left side, false for right side.
 	 * @return Shift for fog line. */
-	protected int getFogLane(boolean side) {
+	private int getFogLane(boolean side) {
 		int line = r_node.getShift();
 		if(side != r_node.getAttachSide()) {
 			if(side)
@@ -109,7 +109,7 @@ public class R_NodeModel {
 	}
 
 	/** Get a model for an upstream r_node */
-	protected R_NodeModel getUpstreamModel(R_Node up) {
+	private R_NodeModel getUpstreamModel(R_Node up) {
 		R_NodeModel other = upstream;
 		while(other != null) {
 			if(other.r_node == up)
@@ -127,7 +127,7 @@ public class R_NodeModel {
 	}
 
 	/** Clamp an upstream lane */
-	protected int clampUpstream(int sh) {
+	private int clampUpstream(int sh) {
 		return Math.min(getUpstreamLane(false),
 		       Math.max(getUpstreamLane(true), sh));
 	}
@@ -140,7 +140,7 @@ public class R_NodeModel {
 	}
 
 	/** Clamp a downstream lane */
-	protected int clampDownstream(int sh) {
+	private int clampDownstream(int sh) {
 		return Math.min(getDownstreamLane(false),
 		       Math.max(getDownstreamLane(true), sh));
 	}
