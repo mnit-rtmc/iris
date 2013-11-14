@@ -41,10 +41,10 @@ import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
@@ -244,8 +244,9 @@ public class PropMessages extends JPanel {
 	private void initGroupTable() {
 		final ListSelectionModel s = group_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+		s.addListSelectionListener(new IListSelectionAdapter() {
+			@Override
+			public void valueChanged() {
 				selectGroup();
 			}
 		});
@@ -319,8 +320,9 @@ public class PropMessages extends JPanel {
 		final ListSelectionModel s =
 			sign_text_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+		s.addListSelectionListener(new IListSelectionAdapter() {
+			@Override
+			public void valueChanged() {
 				selectSignText();
 			}
 		});
