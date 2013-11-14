@@ -16,11 +16,10 @@ package us.mn.state.dot.tms.client.system;
 
 import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Connection;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -66,8 +65,9 @@ public class ConnectionPanel extends IPanel {
 		c_model.initialize();
 		ListSelectionModel s = c_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+		s.addListSelectionListener(new IListSelectionAdapter() {
+			@Override
+			public void valueChanged() {
 				selectConnection();
 			}
 		});

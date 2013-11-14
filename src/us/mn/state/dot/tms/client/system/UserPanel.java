@@ -14,18 +14,18 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.FocusLostJob;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -154,14 +154,16 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 
 	/** Create the jobs */
 	private void createJobs() {
-		f_name_txt.addFocusListener(new FocusLostJob(WORKER) {
-			public void perform() {
+		f_name_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				String n = f_name_txt.getText();
 				setFullName(n.trim());
 			}
 		});
-		dn_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		dn_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				setDn(dn_txt.getText().trim());
 			}
 		});
@@ -184,9 +186,8 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 
 	/** Update one attribute */
 	@Override public final void update(final User u, final String a) {
-		// Serialize on WORKER thread
-		WORKER.addJob(new Job() {
-			public void perform() {
+		runSwing(new Runnable() {
+			public void run() {
 				doUpdate(u, a);
 			}
 		});
@@ -223,9 +224,8 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 
 	/** Clear all attributes */
 	@Override public final void clear() {
-		// Serialize on WORKER thread
-		WORKER.addJob(new Job() {
-			public void perform() {
+		runSwing(new Runnable() {
+			public void run() {
 				doClear();
 			}
 		});
