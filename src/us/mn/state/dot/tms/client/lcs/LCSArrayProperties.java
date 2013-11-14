@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.HashMap;
@@ -28,9 +30,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusLostJob;
-import us.mn.state.dot.sched.ListSelectionJob;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
@@ -41,11 +42,11 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.LCSIndicationHelper;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -180,8 +181,9 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	private void initTable() {
 		ListSelectionModel s = lcs_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionJob(WORKER) {
-			@Override public void perform() {
+		s.addListSelectionListener(new IListSelectionAdapter() {
+			@Override
+			public void valueChanged() {
 				selectLCS();
 			}
 		});
@@ -193,14 +195,16 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create jobs for updating widgets */
 	private void createUpdateJobs() {
-		shift_spn.addChangeListener(new ChangeJob(WORKER) {
-			@Override public void perform() {
+		shift_spn.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)shift_spn.getValue();
 				proxy.setShift(n.intValue());
 			}
 		});
-		notes_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		notes_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				proxy.setNotes(notes_txt.getText());
 			}
 		});
