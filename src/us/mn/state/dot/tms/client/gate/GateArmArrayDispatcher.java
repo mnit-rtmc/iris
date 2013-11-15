@@ -370,6 +370,7 @@ public class GateArmArrayDispatcher extends IPanel {
 		watch(ga);
 		if(ga != p) {
 			if(ga != null) {
+				swap_streams = false;
 				// other attributes updated by watch
 				updateAttribute(ga, "name");
 			} else
@@ -555,25 +556,28 @@ public class GateArmArrayDispatcher extends IPanel {
 
 	/** Clear all of the fields */
 	private void clear() {
+		swap_act.setEnabled(false);
+		open_arm.setEnabled(false);
+		warn_close_arm.setEnabled(false);
+		close_arm.setEnabled(false);
+		swap_streams = false;
+		stream_pnl.setCamera(null);
+		stream_ptz.setCamera(null);
+		thumb_pnl.setCamera(null);
+		thumb_ptz.setCamera(null);
 		name_lbl.setText("");
 		location_lbl.setText("");
-		stream_pnl.setCamera(null);
 		arm_state_lbl.setText(" ");
 		arm_state_lbl.setBackground(null);
 		arm_state_lbl.setForeground(null);
+		interlock_lbl.setText(" ");
 		interlock_lbl.setForeground(null);
 		interlock_lbl.setBackground(null);
-		interlock_lbl.setText(" ");
 		clearArms();
 		watch_dms(null);
 		setPager(null);
 		current_pnl.setFilterColor(null);
 		current_pnl.clear();
-		swap_act.setEnabled(false);
-		open_arm.setEnabled(false);
-		warn_close_arm.setEnabled(false);
-		close_arm.setEnabled(false);
-		thumb_pnl.setCamera(null);
 	}
 
 	/** Clear gate arms */
