@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JButton;
@@ -41,7 +42,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -64,8 +65,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Camera action */
-	private final IAction camera = new IAction("camera") {
-		protected void do_perform() {
+	private final IAction2 camera = new IAction2("camera") {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setCamera((Camera)camera_cbx.getSelectedItem());
 		}
 	};
@@ -74,8 +75,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final JComboBox camera_cbx = new JComboBox();
 
 	/** Approach camera action */
-	private final IAction approach = new IAction("gate.arm.approach") {
-		protected void do_perform() {
+	private final IAction2 approach = new IAction2("gate.arm.approach") {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setApproach(
 				(Camera)approach_cbx.getSelectedItem());
 		}
@@ -85,8 +86,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final JComboBox approach_cbx = new JComboBox();
 
 	/** Prerequisite gate arm array */
-	private final IAction prereq = new IAction("gate.arm.prereq") {
-		protected void do_perform() {
+	private final IAction2 prereq = new IAction2("gate.arm.prereq") {
+		protected void doActionPerformed(ActionEvent e) {
 			GateArmArray ga =
 				(GateArmArray)prereq_cbx.getSelectedItem();
 			proxy.setPrereq(ga != null ? ga.getName() : null);
@@ -97,8 +98,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final JComboBox prereq_cbx = new JComboBox();
 
 	/** Warning DMS action */
-	private final IAction dms = new IAction("gate.arm.dms") {
-		protected void do_perform() {
+	private final IAction2 dms = new IAction2("gate.arm.dms") {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setDms((DMS)dms_cbx.getSelectedItem());
 		}
 	};
@@ -119,8 +120,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final ZTable ga_table = new ZTable();
 
 	/** Gate arm controller action */
-	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
+	private final IAction2 controller = new IAction2("controller") {
+		protected void doActionPerformed(ActionEvent e) {
 			GateArm ga = getSelectedGateArm();
 			if(ga != null) {
 				Controller c = ga.getController();
@@ -133,8 +134,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	};
 
 	/** Action to delete the selected LCS */
-	private final IAction delete_ga = new IAction("gate.arm.delete") {
-		protected void do_perform() {
+	private final IAction2 delete_ga = new IAction2("gate.arm.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			GateArm ga = getSelectedGateArm();
 			if(ga != null)
 				ga.destroy();
@@ -157,8 +158,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final JLabel status_lbl = IPanel.createValueLabel();
 
 	/** Send settings action */
-	private final IAction settings = new IAction("device.send.settings") {
-		protected void do_perform() {
+	private final IAction2 settings = new IAction2("device.send.settings") {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
 		}

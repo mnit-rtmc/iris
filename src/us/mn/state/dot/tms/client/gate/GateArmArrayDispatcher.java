@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
@@ -50,7 +51,7 @@ import us.mn.state.dot.tms.client.dms.DMSPanelPager;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
@@ -137,8 +138,8 @@ public class GateArmArrayDispatcher extends IPanel {
 	private boolean swap_streams = false;
 
 	/** Action to swap main / thumbnail stream panels */
-	private final IAction swap_act = new IAction("gate.arm.stream.swap") {
-		protected void do_perform() {
+	private final IAction2 swap_act = new IAction2("gate.arm.stream.swap") {
+		protected void doActionPerformed(ActionEvent e) {
 			swap_streams = !swap_streams;
 			GateArmArray ga = watching;
 			if(ga != null) {
@@ -168,24 +169,24 @@ public class GateArmArrayDispatcher extends IPanel {
 	private final JLabel interlock_lbl = new JLabel();
 
 	/** Action to open the gate arm */
-	private final IAction open_arm = new IAction("gate.arm.open") {
-		protected void do_perform() {
+	private final IAction2 open_arm = new IAction2("gate.arm.open") {
+		protected void doActionPerformed(ActionEvent e) {
 			requestState(GateArmState.OPENING);
 		}
 	};
 
 	/** Action to warn before closing gate arm */
-	private final IAction warn_close_arm = new IAction(
+	private final IAction2 warn_close_arm = new IAction2(
 		"gate.arm.warn.close")
 	{
-		protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			requestState(GateArmState.WARN_CLOSE);
 		}
 	};
 
 	/** Action to close the gate arm */
-	private final IAction close_arm = new IAction("gate.arm.close") {
-		protected void do_perform() {
+	private final IAction2 close_arm = new IAction2("gate.arm.close") {
+		protected void doActionPerformed(ActionEvent e) {
 			requestState(GateArmState.CLOSING);
 		}
 	};
