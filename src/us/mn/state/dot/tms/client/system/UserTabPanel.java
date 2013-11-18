@@ -14,11 +14,12 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -40,8 +41,8 @@ public class UserTabPanel extends IPanel {
 	private final UserPanel user_pnl;
 
 	/** Action to delete the selected user */
-	private final IAction del_user = new IAction("user.delete") {
-		protected void do_perform() {
+	private final IAction2 del_user = new IAction2("user.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = u_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)

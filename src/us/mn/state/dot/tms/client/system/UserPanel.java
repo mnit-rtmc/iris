@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JButton;
@@ -30,7 +31,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -43,11 +44,11 @@ import us.mn.state.dot.tms.utils.I18N;
 public class UserPanel extends IPanel implements ProxyView<User> {
 
 	/** User action */
-	abstract private class UAction extends IAction {
+	abstract private class UAction extends IAction2 {
 		protected UAction(String text_id) {
 			super(text_id);
 		}
-		@Override protected final void do_perform() {
+		protected final void doActionPerformed(ActionEvent e) {
 			User u = user;
 			if(u != null)
 				do_perform(u);
@@ -79,7 +80,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	private final UAction change_pwd = new UAction(
 		"user.password.change")
 	{
-		@Override protected void do_perform(User u) {
+		protected void do_perform(User u) {
 			String p = new String(passwd_txt.getPassword()).trim();
 			passwd_txt.setText("");
 			u.setPassword(p);

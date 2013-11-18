@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -23,7 +24,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -36,20 +37,20 @@ import us.mn.state.dot.tms.client.widget.ZTable;
 public class RolePanel extends JPanel {
 
 	/** Table model for roles */
-	protected final RoleModel r_model;
+	private final RoleModel r_model;
 
 	/** Table to hold the role list */
-	protected final ZTable r_table = new ZTable();
+	private final ZTable r_table = new ZTable();
 
 	/** Table model for role capabilities */
-	protected final RoleCapabilityModel rc_model;
+	private final RoleCapabilityModel rc_model;
 
 	/** Table to hold the role capability list */
-	protected final ZTable rc_table = new ZTable();
+	private final ZTable rc_table = new ZTable();
 
 	/** Action to delete the selected role */
-	private final IAction del_role = new IAction("role.delete") {
-		protected void do_perform() {
+	private final IAction2 del_role = new IAction2("role.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = r_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -111,7 +112,7 @@ public class RolePanel extends JPanel {
 	}
 
 	/** Change the selected role */
-	protected void selectRole() {
+	private void selectRole() {
 		ListSelectionModel s = r_table.getSelectionModel();
 		Role r = r_model.getProxy(s.getMinSelectionIndex());
 		del_role.setEnabled(r_model.canRemove(r));

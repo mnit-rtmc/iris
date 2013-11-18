@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -23,7 +24,7 @@ import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -36,20 +37,20 @@ import us.mn.state.dot.tms.client.widget.ZTable;
 public class CapabilityPanel extends JPanel {
 
 	/** Table model for capabilities */
-	protected final CapabilityModel cap_model;
+	private final CapabilityModel cap_model;
 
 	/** Table model for privileges */
-	protected PrivilegeModel p_model;
+	private PrivilegeModel p_model;
 
 	/** Table to hold the capability list */
-	protected final ZTable cap_table = new ZTable();
+	private final ZTable cap_table = new ZTable();
 
 	/** Table to hold the privilege list */
-	protected final ZTable p_table = new ZTable();
+	private final ZTable p_table = new ZTable();
 
 	/** Action to delete the selected capability */
-	private final IAction del_capability = new IAction("capability.delete"){
-		protected void do_perform() {
+	private final IAction2 del_cap = new IAction2("capability.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = cap_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -58,8 +59,8 @@ public class CapabilityPanel extends JPanel {
 	};
 
 	/** Aciton to delete the selected privilege */
-	private final IAction del_privilege = new IAction("privilege.delete") {
-		protected void do_perform() {
+	private final IAction2 del_priv = new IAction2("privilege.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel sp = p_table.getSelectionModel();
 			int row = sp.getMinSelectionIndex();
 			if(row >= 0)
@@ -68,7 +69,7 @@ public class CapabilityPanel extends JPanel {
 	};
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Create a new capability panel */
 	public CapabilityPanel(Session s) {
@@ -94,13 +95,13 @@ public class CapabilityPanel extends JPanel {
 		p_table.setVisibleRowCount(16);
 		pane = new JScrollPane(p_table);
 		add(pane, bag);
-		del_capability.setEnabled(false);
+		del_cap.setEnabled(false);
 		bag.gridx = 0;
 		bag.gridy = 1;
-		add(new JButton(del_capability), bag);
-		del_privilege.setEnabled(false);
+		add(new JButton(del_cap), bag);
+		del_priv.setEnabled(false);
 		bag.gridx = 1;
-		add(new JButton(del_privilege), bag);
+		add(new JButton(del_priv), bag);
 	}
 
 	/** Initializze the panel */
@@ -132,10 +133,10 @@ public class CapabilityPanel extends JPanel {
 	}
 
 	/** Change the selected capability */
-	protected void selectCapability() {
+	private void selectCapability() {
 		ListSelectionModel s = cap_table.getSelectionModel();
 		Capability c = cap_model.getProxy(s.getMinSelectionIndex());
-		del_capability.setEnabled(cap_model.canRemove(c));
+		del_cap.setEnabled(cap_model.canRemove(c));
 		p_table.clearSelection();
 		final PrivilegeModel pm = p_model;
 		p_model = new PrivilegeModel(session, c);
@@ -145,13 +146,13 @@ public class CapabilityPanel extends JPanel {
 	}
 
 	/** Select a privilege */
-	protected void selectPrivilege() {
+	private void selectPrivilege() {
 		Privilege p = getSelectedPrivilege();
-		del_privilege.setEnabled(p_model.canRemove(p));
+		del_priv.setEnabled(p_model.canRemove(p));
 	}
 
 	/** Get the selected privilege */
-	protected Privilege getSelectedPrivilege() {
+	private Privilege getSelectedPrivilege() {
 		final PrivilegeModel pm = p_model;	// Avoid race
 		ListSelectionModel s = p_table.getSelectionModel();
 		return pm.getProxy(s.getMinSelectionIndex());

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,12 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.RoadForm;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -61,8 +62,8 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createSystemAttributesItem() {
 		if(!SystemAttributeForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("system.attributes") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("system.attributes") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new SystemAttributeForm(session));
 			}
 		});
@@ -72,8 +73,8 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createIncidentDetailItem() {
 		if(!IncidentDetailForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("incident.details") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("incident.details") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new IncidentDetailForm(session));
 			}
 		});
@@ -83,8 +84,8 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createUsersAndRolesItem() {
 		if(!UserRoleForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("user.menu") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("user.menu") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new UserRoleForm(session));
 			}
 		});
@@ -94,8 +95,8 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createMapExtentsItem() {
 		if(!MapExtentForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("location.map.extents") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("location.map.extents") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new MapExtentForm(session,
 					desktop.client));
 			}
@@ -106,8 +107,8 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createRoadItem() {
 		if(!RoadForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("location.road.plural") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("location.road.plural") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new RoadForm(session));
 			}
 		});

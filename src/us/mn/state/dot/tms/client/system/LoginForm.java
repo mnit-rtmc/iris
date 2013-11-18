@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JButton;
@@ -21,7 +22,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -41,8 +42,8 @@ public class LoginForm extends AbstractForm {
 	private final JPasswordField passwd_txt = new JPasswordField(16);
 
 	/** Log in action */
-	private final IAction login = new IAction("connection.login") {
-		protected void do_perform() {
+	private final IAction2 login = new IAction2("connection.login") {
+		protected void doActionPerformed(ActionEvent e) {
 			doLogin();
 		}
 	};
@@ -61,7 +62,8 @@ public class LoginForm extends AbstractForm {
 	}
 
 	/** Initialize the form */
-	@Override protected void initialize() {
+	@Override
+	protected void initialize() {
 		final JButton login_btn = new JButton(login);
 		passwd_txt.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
@@ -79,7 +81,7 @@ public class LoginForm extends AbstractForm {
 	}
 
 	/** Do the login authentication */
-	protected void doLogin() {
+	private void doLogin() {
 		char[] pwd = passwd_txt.getPassword();
 		passwd_txt.setText("");
 		close();
