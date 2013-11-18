@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.marking;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JButton;
@@ -28,7 +29,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -46,8 +47,8 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Controller action */
-	private final IAction controller = new IAction("controller") {
-		@Override protected void do_perform() {
+	private final IAction2 controller = new IAction2("controller") {
+		protected void doActionPerformed(ActionEvent e) {
 			Controller c = proxy.getController();
 			if(c != null)
 				showForm(new ControllerForm(session, c));
