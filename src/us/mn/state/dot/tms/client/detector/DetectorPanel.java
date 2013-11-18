@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -34,7 +35,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -46,16 +47,16 @@ import us.mn.state.dot.tms.utils.I18N;
 public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 
 	/** Detector action */
-	abstract private class DAction extends IAction {
+	abstract private class DAction extends IAction2 {
 		protected DAction(String text_id) {
 			super(text_id);
 		}
-		protected final void do_perform() {
+		protected final void doActionPerformed(ActionEvent e) {
 			Detector d = detector;
 			if(d != null)
 				do_perform(d);
 		}
-		abstract void do_perform(Detector d);
+		abstract protected void do_perform(Detector d);
 	}
 
 	/** Lane type action */
