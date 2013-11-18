@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.event.ActionEvent;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
@@ -49,7 +50,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.LaneConfigurationPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
@@ -124,8 +125,8 @@ public class IncidentDispatcher extends JPanel
 	private final ImpactPanel impact_pnl = new ImpactPanel(LANE_SIZE);
 
 	/** Action to log an incident change */
-	private final IAction log_inc = new IAction("incident.log") {
-		protected void do_perform() {
+	private final IAction2 log_inc = new IAction2("incident.log") {
+		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = selectionModel.getSingleSelection();
 			if(inc instanceof ClientIncident)
 				create((ClientIncident)inc);
@@ -135,8 +136,8 @@ public class IncidentDispatcher extends JPanel
 	};
 
 	/** Action to deploy devices */
-	private final IAction deploy_inc = new IAction("incident.deploy") {
-		protected void do_perform() {
+	private final IAction2 deploy_inc = new IAction2("incident.deploy") {
+		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = selectionModel.getSingleSelection();
 			if(inc != null &&
 			   !(inc instanceof ClientIncident))
@@ -145,8 +146,8 @@ public class IncidentDispatcher extends JPanel
 	};
 
 	/** Action to clear an incident */
-	private final IAction clear_inc = new IAction("incident.clear") {
-		protected void do_perform() {
+	private final IAction2 clear_inc = new IAction2("incident.clear") {
+		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = selectionModel.getSingleSelection();
 			if(inc != null &&
 			   !(inc instanceof ClientIncident))
@@ -158,8 +159,8 @@ public class IncidentDispatcher extends JPanel
 	private final JCheckBox clear_btn = new JCheckBox(clear_inc);
 
 	/** Action to edit incident */
-	private final IAction edit_inc = new IAction("incident.edit") {
-		protected void do_perform() {
+	private final IAction2 edit_inc = new IAction2("incident.edit") {
+		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = selectionModel.getSingleSelection();
 			if(inc != null)
 				editIncident(inc);
@@ -391,22 +392,26 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** A new proxy has been added */
+	@Override
 	public void proxyAdded(Incident proxy) {
 		// we're not interested
 	}
 
 	/** Enumeration of the proxy type has completed */
+	@Override
 	public void enumerationComplete() {
 		// we're not interested
 	}
 
 	/** A proxy has been removed */
+	@Override
 	public void proxyRemoved(Incident proxy) {
 		// Note: the IncidentManager will remove the proxy from the
 		//       ProxySelectionModel, so we can ignore this.
 	}
 
 	/** A proxy has been changed */
+	@Override
 	public void proxyChanged(Incident proxy, String a) {
 		if(proxy == selectionModel.getSingleSelection())
 			updateAttribute(proxy, a);
