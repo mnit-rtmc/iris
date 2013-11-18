@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.geom.Point2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -22,12 +24,12 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -57,28 +59,28 @@ import us.mn.state.dot.tms.utils.I18N;
 public class IncidentCreator extends JPanel {
 
 	/** Button to create a "crash" incident */
-	protected final JToggleButton crash_btn;
+	private final JToggleButton crash_btn;
 
 	/** Button to create a "stall" incident */
-	protected final JToggleButton stall_btn;
+	private final JToggleButton stall_btn;
 
 	/** Button to create a "road work" incident */
-	protected final JToggleButton work_btn;
+	private final JToggleButton work_btn;
 
 	/** Button to create a "hazard" incident */
-	protected final JToggleButton hazard_btn;
+	private final JToggleButton hazard_btn;
 
 	/** Lane type combo box */
-	protected final JComboBox ltype_cbox;
+	private final JComboBox ltype_cbox;
 
 	/** Incident selection model */
-	protected final ProxySelectionModel<Incident> selectionModel;
+	private final ProxySelectionModel<Incident> selectionModel;
 
 	/** R_Node manager */
-	protected final R_NodeManager r_node_manager;
+	private final R_NodeManager r_node_manager;
 
 	/** Iris client */
-	protected final IrisClient client;
+	private final IrisClient client;
 
 	/** Listener for proxy selection events */
 	private final ProxySelectionListener<Incident> sel_listener =
@@ -131,7 +133,7 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Create the lane type combo box */
-	protected JComboBox createLaneTypeCombo() {
+	private JComboBox createLaneTypeCombo() {
 		return new JComboBox(new LaneType[] {
 			LaneType.MAINLINE,
 			LaneType.EXIT,
@@ -148,13 +150,13 @@ public class IncidentCreator extends JPanel {
 		Symbol sym = theme.getSymbol(sty);
 		final JToggleButton btn = new JToggleButton(sty,
 			sym.getLegend());
-		btn.addChangeListener(new ChangeJob(client.WORKER) {
-			public void perform() {
+		btn.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
 				buttonChanged(btn, et);
 			}
 		});
-		btn.addActionListener(new ActionJob(client.WORKER) {
-			public void perform() {
+		btn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent a) {
 				createIncident(btn, et);
 			}
 		});
@@ -163,7 +165,7 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Handler for button changed events */
-	protected void buttonChanged(JToggleButton btn, EventType et) {
+	private void buttonChanged(JToggleButton btn, EventType et) {
 		if(btn.isSelected()) {
 			selectionModel.clearSelection();
 			// NOTE: cannot use ButtonGroup for this because it
@@ -181,7 +183,7 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Create a incident */
-	protected void createIncident(final JToggleButton btn,
+	private void createIncident(final JToggleButton btn,
 		final EventType et)
 	{
 		assert et == EventType.INCIDENT_CRASH ||
@@ -312,7 +314,7 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Create an impact string for the given number of lanes */
-	protected String createImpact(int n_lanes) {
+	private String createImpact(int n_lanes) {
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < n_lanes + 2; i++)
 			sb.append(FREE_FLOWING._char);
@@ -320,7 +322,7 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Get the selected toggle button */
-	protected JToggleButton getSelected() {
+	private JToggleButton getSelected() {
 		if(crash_btn.isSelected())
 			return crash_btn;
 		if(stall_btn.isSelected())
