@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sonar.User;
@@ -28,7 +29,7 @@ import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.weather.WeatherSensorForm;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -40,10 +41,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class ViewMenu extends JMenu {
 
 	/** User Session */
-	protected final Session session;
+	private final Session session;
 
 	/** Smart desktop */
-	protected final SmartDesktop desktop;
+	private final SmartDesktop desktop;
 
 	/** Create a new view menu */
 	public ViewMenu(Session s) {
@@ -86,10 +87,10 @@ public class ViewMenu extends JMenu {
 	}
 
 	/** Create the detector menu item */
-	protected JMenuItem createDetectorItem() {
+	private JMenuItem createDetectorItem() {
 		if(DetectorForm.isPermitted(session)) {
-			return new JMenuItem(new IAction("detector.plural") {
-				protected void do_perform() {
+			return new JMenuItem(new IAction2("detector.plural") {
+				protected void doActionPerformed(ActionEvent e){
 					desktop.show(new DetectorForm(session));
 				}
 			});
@@ -98,44 +99,44 @@ public class ViewMenu extends JMenu {
 	}
 
 	/** Create the station menu item */
-	protected JMenuItem createStationItem() {
+	private JMenuItem createStationItem() {
 		if(!StationForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("detector.station.plural") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("detector.station.plural") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new StationForm(session));
 			}
 		});
 	}
 
 	/** Create the ramp meter menu item */
-	protected JMenuItem createMeterItem() {
+	private JMenuItem createMeterItem() {
 		if(!RampMeterForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("ramp.meter.long.plural") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("ramp.meter.long.plural") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new RampMeterForm(session));
 			}
 		});
 	}
 
 	/** Create the schedule menu item */
-	protected JMenuItem createScheduleItem() {
+	private JMenuItem createScheduleItem() {
 		if(!ScheduleForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("action.plan.schedule.title") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("action.plan.schedule.title"){
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new ScheduleForm(session));
 			}
 		});
 	}
 
 	/** Create the weather sensor menu item */
-	protected JMenuItem createWeatherItem() {
+	private JMenuItem createWeatherItem() {
 		if(!WeatherSensorForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("weather.sensors") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("weather.sensors") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new WeatherSensorForm(session));
 			}
 		});
@@ -145,8 +146,8 @@ public class ViewMenu extends JMenu {
 	private JMenuItem createGateArmItem() {
 		if(!GateArmArrayForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("gate.arms") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("gate.arms") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new GateArmArrayForm(session));
 			}
 		});
