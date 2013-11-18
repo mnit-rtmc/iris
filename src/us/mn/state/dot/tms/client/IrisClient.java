@@ -39,7 +39,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.system.LoginForm;
 import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.ScreenLayout;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -85,6 +84,11 @@ public class IrisClient extends JFrame {
 
 	/** Desktop pane */
 	private final SmartDesktop desktop;
+
+	/** Get the desktop */
+	public SmartDesktop getDesktop() {
+		return desktop;
+	}
 
 	/** Screen layout for desktop pane */
 	private final ScreenLayout layout;
@@ -267,12 +271,6 @@ public class IrisClient extends JFrame {
 				return mt;
 		}
 		return null;
-	}
-
-	/** Show the login form */
-	public void login() {
-		if(session == null)
-			desktop.show(new LoginForm(this, desktop));
 	}
 
 	/** Login a user */

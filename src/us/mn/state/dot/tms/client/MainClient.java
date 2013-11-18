@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client;
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.util.Properties;
+import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Scheduler;
 import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.utils.HTTPProxySelector;
@@ -63,9 +64,17 @@ public class MainClient {
 			(assertsEnabled ? "on" : "off") + ".");
 	}
 
+	/** Exception handler */
+	static private DialogHandler handler;
+
+	/** Get the exception handler */
+	static public ExceptionHandler getHandler() {
+		return handler;
+	}
+
 	/** Main IRIS client entry point for swing */
 	static private void mainSwing(String loc) {
-		DialogHandler handler = new DialogHandler();
+		handler = new DialogHandler();
 		Scheduler.setHandler(handler);
 		try {
 			IrisClient c = createClient(loc, handler);

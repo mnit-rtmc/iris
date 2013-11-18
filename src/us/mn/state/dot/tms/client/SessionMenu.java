@@ -14,15 +14,17 @@
  */
 package us.mn.state.dot.tms.client;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import us.mn.state.dot.tms.client.system.ChangePasswordForm;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.system.LoginForm;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
-/** 
+/**
  * The sessoin menu contains menu items for logging in, logging out and exiting
  * the IRIS client.
  *
@@ -31,45 +33,49 @@ import us.mn.state.dot.tms.utils.I18N;
 public class SessionMenu extends JMenu {
 
 	/** Log in action */
-	private final IAction log_in = new IAction("connection.login") {
-		protected void do_perform() throws Exception {
-			client.login();
+	private final IAction2 log_in = new IAction2("connection.login") {
+		protected void doActionPerformed(ActionEvent e) {
+			Session s = client.getSession();
+			if(s == null)
+				desktop.show(new LoginForm(client, desktop));
 		}
 	};
 
 	/** Logout action */
-	private final IAction log_out = new IAction("connection.logout") {
-		protected void do_perform() throws Exception {
+	private final IAction2 log_out = new IAction2("connection.logout") {
+		protected void doActionPerformed(ActionEvent e) {
 			client.logout();
 		}
 	};
 
 	/** Change password action */
-	private final IAction pwd_change = new IAction("user.password.change") {
-		protected void do_perform() throws Exception {
+	private final IAction2 pwd_change =new IAction2("user.password.change"){
+		protected void doActionPerformed(ActionEvent e) {
 			Session s = client.getSession();
-			if(s != null) {
-				SmartDesktop desktop = s.getDesktop();
+			if(s != null)
 				desktop.show(new ChangePasswordForm(s));
-			}
 		}
 	};
 
 	/** IRIS client */
 	private final IrisClient client;
-	
-	/** Create a new session menu */	
+
+	/** Desktop pane */
+	private final SmartDesktop desktop;
+
+	/** Create a new session menu */
 	public SessionMenu(final IrisClient ic) {
 		super(I18N.get("session"));
 		client = ic;
+		desktop = client.getDesktop();
 		setLoggedIn(false);
 		add(new JMenuItem(log_in));
 		add(new JMenuItem(log_out));
 		add(new JSeparator());
 		add(new JMenuItem(pwd_change));
 		add(new JSeparator());
-		add(new JMenuItem(new IAction("session.exit") {
-			protected void do_perform() throws Exception {
+		add(new JMenuItem(new IAction2("session.exit") {
+			protected void doActionPerformed(ActionEvent e) {
 				client.quit();
 			}
 		}));
