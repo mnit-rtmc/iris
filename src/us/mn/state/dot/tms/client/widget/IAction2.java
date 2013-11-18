@@ -75,11 +75,19 @@ abstract public class IAction2 extends AbstractAction {
 	/** Perform the action */
 	@Override
 	public final void actionPerformed(ActionEvent ev) {
+		long start = System.currentTimeMillis();
 		try {
 			doActionPerformed(ev);
 		}
 		catch(Exception ex) {
 			getHandler().handle(ex);
+		}
+		finally {
+			long e = System.currentTimeMillis() - start;
+			if(e > 50) {
+				System.err.println("IAction took " + e + " ms");
+				System.err.println("  from: " + getClass());
+			}
 		}
 	}
 
