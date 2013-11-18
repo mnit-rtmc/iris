@@ -124,11 +124,11 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
-		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		loc_pnl.initialize();
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
 		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
+		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
 	}
 

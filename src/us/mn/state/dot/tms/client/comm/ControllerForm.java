@@ -292,11 +292,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create the cabinet panel */
 	private JPanel createCabinetPanel() {
 		loc_pnl.initialize();
-		loc_pnl.setGeoLoc(cabinet.getGeoLoc());
 		loc_pnl.add("cabinet.milepoint");
 		loc_pnl.add(mile_txt, Stretch.LAST);
 		loc_pnl.add("cabinet.style");
 		loc_pnl.add(cab_style_cbx, Stretch.LAST);
+		loc_pnl.setGeoLoc(cabinet.getGeoLoc());
 		return loc_pnl;
 	}
 

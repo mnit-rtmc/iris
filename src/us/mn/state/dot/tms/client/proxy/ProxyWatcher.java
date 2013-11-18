@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.client.Session;
 public class ProxyWatcher<T extends SonarObject> {
 
 	/** SONAR namespace */
-	protected final Session session;
+	private final Session session;
 
 	/** Check if the user can update an attribute */
 	public boolean canUpdate(T p, String aname) {
@@ -38,7 +38,7 @@ public class ProxyWatcher<T extends SonarObject> {
 	}
 
 	/** Proxy listener */
-	protected final ProxyListener<T> listener = new ProxyListener<T>() {
+	private final ProxyListener<T> listener = new ProxyListener<T>() {
 		public void proxyAdded(T p) { }
 		public void enumerationComplete() { }
 		public void proxyRemoved(T p) {
@@ -54,7 +54,7 @@ public class ProxyWatcher<T extends SonarObject> {
 	};
 
 	/** Proxy being watched */
-	protected T proxy;
+	private T proxy;
 
 	/** Set a new proxy to watch */
 	public void setProxy(T p) {
@@ -73,13 +73,13 @@ public class ProxyWatcher<T extends SonarObject> {
 	}
 
 	/** Proxy view */
-	protected final ProxyView<T> view;
+	private final ProxyView<T> view;
 
 	/** Proxy cache */
-	protected final TypeCache<T> cache;
+	private final TypeCache<T> cache;
 
 	/** Flag to watch proxy */
-	protected final boolean watch;
+	private final boolean watch;
 
 	/** Create the proxy watcher */
 	public ProxyWatcher(Session s, ProxyView<T> pv, TypeCache<T> c,
@@ -93,9 +93,8 @@ public class ProxyWatcher<T extends SonarObject> {
 
 	/** Initialize the watcher */
 	public void initialize() {
-		T p = proxy;
-		if(watch && p != null)
-			cache.watchObject(p);
+		if(proxy != null)
+			throw new IllegalStateException("Must init first");
 		cache.addProxyListener(listener);
 	}
 

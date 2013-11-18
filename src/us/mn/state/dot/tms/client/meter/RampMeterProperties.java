@@ -186,13 +186,13 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		camera_cbx.setAction(camera);
 		camera_cbx.setModel(new WrapperComboBoxModel(
 			state.getCamCache().getCameraModel()));
-		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		loc_pnl.initialize();
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
 		loc_pnl.add("camera");
 		loc_pnl.add(camera_cbx, Stretch.LAST);
 		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
+		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
 	}
 

@@ -204,7 +204,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 			state.getCamCache().getCameraModel()));
 		approach_cbx.setModel(new WrapperComboBoxModel(
 			state.getCamCache().getCameraModel()));
-		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		loc_pnl.initialize();
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
@@ -212,6 +211,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		loc_pnl.add(camera_cbx, Stretch.LAST);
 		loc_pnl.add("gate.arm.approach");
 		loc_pnl.add(approach_cbx, Stretch.LAST);
+		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
 	}
 
