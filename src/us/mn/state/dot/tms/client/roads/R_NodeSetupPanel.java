@@ -15,14 +15,16 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusLostJob;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.R_Node;
 import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
@@ -168,26 +170,27 @@ public class R_NodeSetupPanel extends IPanel {
 
 	/** Create the jobs */
 	protected void createJobs() {
-		lane_spn.addChangeListener(new ChangeJob(WORKER) {
-			@Override public void perform() {
+		lane_spn.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)lane_spn.getValue();
 				setLanes(n.intValue());
 			}
 		});
-		shift_spn.addChangeListener(new ChangeJob(WORKER) {
-			@Override public void perform() {
+		shift_spn.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)shift_spn.getValue();
 				setShift(n.intValue());
 			}
 		});
-		station_txt.addFocusListener(new FocusLostJob(WORKER) {
-			@Override public void perform() {
+		station_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				String s = station_txt.getText().trim();
 				setStationID(s);
 			}
 		});
-		speed_spn.addChangeListener(new ChangeJob(WORKER) {
-			@Override public void perform() {
+		speed_spn.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)speed_spn.getValue();
 				setSpeedLimit(n.intValue());
 			}
@@ -224,9 +227,8 @@ public class R_NodeSetupPanel extends IPanel {
 
 	/** Update one attribute */
 	public final void update(final R_Node n, final String a) {
-		// Serialize on WORKER thread
-		WORKER.addJob(new Job() {
-			@Override public void perform() {
+		runSwing(new Runnable() {
+			public void run() {
 				doUpdate(n, a);
 			}
 		});
@@ -289,9 +291,8 @@ public class R_NodeSetupPanel extends IPanel {
 
 	/** Clear all attributes */
 	public final void clear() {
-		// Serialize on WORKER thread
-		WORKER.addJob(new Job() {
-			@Override public void perform() {
+		runSwing(new Runnable() {
+			public void run() {
 				doClear();
 			}
 		});
