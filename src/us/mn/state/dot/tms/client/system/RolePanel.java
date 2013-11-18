@@ -24,7 +24,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -49,7 +49,7 @@ public class RolePanel extends JPanel {
 	private final ZTable rc_table = new ZTable();
 
 	/** Action to delete the selected role */
-	private final IAction2 del_role = new IAction2("role.delete") {
+	private final IAction del_role = new IAction("role.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = r_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();

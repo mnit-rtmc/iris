@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.warning.WarningSignForm;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -64,7 +64,7 @@ public class SignMenu extends JMenu {
 	private JMenuItem createDmsItem() {
 		if(!DMSForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("dms") {
+		return new JMenuItem(new IAction("dms") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(createDMSForm());
 			}
@@ -83,7 +83,7 @@ public class SignMenu extends JMenu {
 	private JMenuItem createFontItem() {
 		if(!FontForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("font.title") {
+		return new JMenuItem(new IAction("font.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new FontForm(session));
 			}
@@ -94,7 +94,7 @@ public class SignMenu extends JMenu {
 	private JMenuItem createGraphicItem() {
 		if(!GraphicForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("graphics") {
+		return new JMenuItem(new IAction("graphics") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new GraphicForm(session));
 			}
@@ -105,7 +105,7 @@ public class SignMenu extends JMenu {
 	private JMenuItem createQuickMessageItem() {
 		if(!QuickMessageForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("quick.messages") {
+		return new JMenuItem(new IAction("quick.messages") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new QuickMessageForm(session));
 			}
@@ -116,7 +116,7 @@ public class SignMenu extends JMenu {
 	private JMenuItem createWarningSignItem() {
 		if(!WarningSignForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("warning.signs") {
+		return new JMenuItem(new IAction("warning.signs") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new WarningSignForm(session));
 			}

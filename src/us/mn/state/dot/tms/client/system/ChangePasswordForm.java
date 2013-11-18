@@ -22,7 +22,7 @@ import javax.swing.JPasswordField;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
@@ -44,7 +44,7 @@ public class ChangePasswordForm extends AbstractForm {
 	private final JPasswordField v_pwd_txt = new JPasswordField(16);
 
 	/** Password change action */
-	private final IAction2 change = new IAction2("user.password.change") {
+	private final IAction change = new IAction("user.password.change") {
 		protected void doActionPerformed(ActionEvent e)
 			throws Exception
 		{

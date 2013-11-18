@@ -20,7 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import us.mn.state.dot.tms.client.system.ChangePasswordForm;
 import us.mn.state.dot.tms.client.system.LoginForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class SessionMenu extends JMenu {
 
 	/** Log in action */
-	private final IAction2 log_in = new IAction2("connection.login") {
+	private final IAction log_in = new IAction("connection.login") {
 		protected void doActionPerformed(ActionEvent e) {
 			Session s = client.getSession();
 			if(s == null)
@@ -42,14 +42,14 @@ public class SessionMenu extends JMenu {
 	};
 
 	/** Logout action */
-	private final IAction2 log_out = new IAction2("connection.logout") {
+	private final IAction log_out = new IAction("connection.logout") {
 		protected void doActionPerformed(ActionEvent e) {
 			client.logout();
 		}
 	};
 
 	/** Change password action */
-	private final IAction2 pwd_change =new IAction2("user.password.change"){
+	private final IAction pwd_change = new IAction("user.password.change") {
 		protected void doActionPerformed(ActionEvent e) {
 			Session s = client.getSession();
 			if(s != null)
@@ -74,7 +74,7 @@ public class SessionMenu extends JMenu {
 		add(new JSeparator());
 		add(new JMenuItem(pwd_change));
 		add(new JSeparator());
-		add(new JMenuItem(new IAction2("session.exit") {
+		add(new JMenuItem(new IAction("session.exit") {
 			protected void doActionPerformed(ActionEvent e) {
 				client.quit();
 			}

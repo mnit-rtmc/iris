@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
@@ -64,7 +64,7 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** GeoLoc action */
-	abstract private class LAction extends IAction2 {
+	abstract private class LAction extends IAction {
 		protected LAction(String text_id) {
 			super(text_id);
 		}
@@ -169,7 +169,7 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	};
 
 	/** Action to select a point from the map */
-	private final IAction2 select_pt = new IAction2("location.select") {
+	private final IAction select_pt = new IAction("location.select") {
 		protected void doActionPerformed(ActionEvent e) {
 			client.setPointSelector(point_sel);
 		}

@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.lcs.LCSArrayCellRenderer;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.units.Distance;
@@ -72,7 +72,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	private final JList list = new JList(model);
 
 	/** Action to send device messages */
-	private final IAction2 send = new IAction2("incident.send") {
+	private final IAction send = new IAction("incident.send") {
 		protected void doActionPerformed(ActionEvent e) {
 			sendIndications();
 			closeForm();

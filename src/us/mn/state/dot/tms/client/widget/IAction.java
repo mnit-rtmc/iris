@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-abstract public class IAction2 extends AbstractAction {
+abstract public class IAction extends AbstractAction {
 
 	/** Get the exception handler */
 	static private ExceptionHandler getHandler() {
@@ -40,7 +40,7 @@ abstract public class IAction2 extends AbstractAction {
 	/** Create a new action.
 	 * @param text_id Text ID of I18N string.
 	 * @param sa Boolean attribute to determine if the action is enabled. */
-	protected IAction2(String text_id, SystemAttrEnum sa) {
+	protected IAction(String text_id, SystemAttrEnum sa) {
 		attr = sa;
 		String name = text_id != null ? I18N.get(text_id) : "";
 		putValue(Action.NAME, name);
@@ -60,7 +60,7 @@ abstract public class IAction2 extends AbstractAction {
 
 	/** Create a new action.
 	 * @param text_id Text ID of I18N string. */
-	protected IAction2(String text_id) {
+	protected IAction(String text_id) {
 		this(text_id, null);
 	}
 

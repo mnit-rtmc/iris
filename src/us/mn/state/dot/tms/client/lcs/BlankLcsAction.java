@@ -19,14 +19,14 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * Action to blank all selected LCS arrays.
  *
  * @author Douglas Lau
  */
-public class BlankLcsAction extends IAction2 {
+public class BlankLcsAction extends IAction {
 
 	/** Selection model */
 	private final ProxySelectionModel<LCSArray> selectionModel;

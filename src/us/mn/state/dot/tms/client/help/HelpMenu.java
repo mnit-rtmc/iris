@@ -18,7 +18,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -33,7 +33,7 @@ public class HelpMenu extends JMenu {
 	private final SmartDesktop desktop;
 
 	/** Open trouble ticket menu item */
-	private final JMenuItem ticket_item = new JMenuItem(new IAction2(
+	private final JMenuItem ticket_item = new JMenuItem(new IAction(
 		"help.trouble.ticket")
 	{
 		protected void doActionPerformed(ActionEvent e)throws Exception{
@@ -52,7 +52,7 @@ public class HelpMenu extends JMenu {
 
 	/** Add support menu item */
 	private void addSupportItem() {
-		add(new JMenuItem(new IAction2("help.support") {
+		add(new JMenuItem(new IAction("help.support") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new SupportForm());
 			}
@@ -61,7 +61,7 @@ public class HelpMenu extends JMenu {
 
 	/** Add about menu item */
 	private void addAboutItem() {
-		add(new JMenuItem(new IAction2("iris.about") {
+		add(new JMenuItem(new IAction("iris.about") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new AboutForm());
 			}

@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -44,7 +44,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class UserPanel extends IPanel implements ProxyView<User> {
 
 	/** User action */
-	abstract private class UAction extends IAction2 {
+	abstract private class UAction extends IAction {
 		protected UAction(String text_id) {
 			super(text_id);
 		}

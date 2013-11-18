@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -67,7 +67,7 @@ public class GlyphPanel extends JPanel {
 
 	/** "Narrow" button */
 	private final JButton narrow_btn = new JButton(
-		new IAction2("font.glyph.narrow")
+		new IAction("font.glyph.narrow")
 	{
 		protected void doActionPerformed(ActionEvent e) {
 			narrowPressed();
@@ -76,7 +76,7 @@ public class GlyphPanel extends JPanel {
 
 	/** "Widen" button */
 	private final JButton widen_btn = new JButton(
-		new IAction2("font.glyph.widen")
+		new IAction("font.glyph.widen")
 	{
 		protected void doActionPerformed(ActionEvent e) {
 			widenPressed();
@@ -85,7 +85,7 @@ public class GlyphPanel extends JPanel {
 
 	/** Apply button */
 	private final JButton apply_btn = new JButton(
-		new IAction2("font.glyph.apply")
+		new IAction("font.glyph.apply")
 	{
 		protected void doActionPerformed(ActionEvent e) {
 			applyPressed();

@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -45,7 +45,7 @@ public class PropLocation extends LocationPanel {
 	private final JComboBox camera_cbx = new JComboBox();
 
 	/** Controller action */
-	private final IAction2 controller = new IAction2("controller") {
+	private final IAction controller = new IAction("controller") {
 		protected void doActionPerformed(ActionEvent e) {
 			controllerPressed();
 		}
@@ -91,7 +91,7 @@ public class PropLocation extends LocationPanel {
 				dms.setNotes(notes_txt.getText());
 			}
 		});
-		camera_cbx.setAction(new IAction2("camera") {
+		camera_cbx.setAction(new IAction("camera") {
 			protected void doActionPerformed(ActionEvent e) {
 				dms.setCamera(
 					(Camera)camera_cbx.getSelectedItem());

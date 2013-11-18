@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.client.warning;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * Action to undeploy a warning sign.
  *
  * @author Douglas Lau
  */
-public class UndeployAction extends IAction2 {
+public class UndeployAction extends IAction {
 
 	/** Proxy selection model */
 	private final ProxySelectionModel<WarningSign> s_model;

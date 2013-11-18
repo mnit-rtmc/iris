@@ -50,7 +50,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.LaneConfigurationPanel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
@@ -125,7 +125,7 @@ public class IncidentDispatcher extends JPanel
 	private final ImpactPanel impact_pnl = new ImpactPanel(LANE_SIZE);
 
 	/** Action to log an incident change */
-	private final IAction2 log_inc = new IAction2("incident.log") {
+	private final IAction log_inc = new IAction("incident.log") {
 		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = selectionModel.getSingleSelection();
 			if(inc instanceof ClientIncident)
@@ -136,7 +136,7 @@ public class IncidentDispatcher extends JPanel
 	};
 
 	/** Action to deploy devices */
-	private final IAction2 deploy_inc = new IAction2("incident.deploy") {
+	private final IAction deploy_inc = new IAction("incident.deploy") {
 		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = selectionModel.getSingleSelection();
 			if(inc != null &&
@@ -146,7 +146,7 @@ public class IncidentDispatcher extends JPanel
 	};
 
 	/** Action to clear an incident */
-	private final IAction2 clear_inc = new IAction2("incident.clear") {
+	private final IAction clear_inc = new IAction("incident.clear") {
 		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = selectionModel.getSingleSelection();
 			if(inc != null &&
@@ -159,7 +159,7 @@ public class IncidentDispatcher extends JPanel
 	private final JCheckBox clear_btn = new JCheckBox(clear_inc);
 
 	/** Action to edit incident */
-	private final IAction2 edit_inc = new IAction2("incident.edit") {
+	private final IAction edit_inc = new IAction("incident.edit") {
 		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = selectionModel.getSingleSelection();
 			if(inc != null)

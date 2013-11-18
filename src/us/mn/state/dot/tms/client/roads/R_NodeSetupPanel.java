@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 
 /**
@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.client.widget.IPanel;
 public class R_NodeSetupPanel extends IPanel {
 
 	/** R_Node action */
-	abstract private class NAction extends IAction2 {
+	abstract private class NAction extends IAction {
 		protected NAction(String text_id) {
 			super(text_id);
 		}

@@ -19,7 +19,7 @@ import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -38,7 +38,7 @@ public class ConnectionPanel extends IPanel {
 	private final ZTable c_table = new ZTable();
 
 	/** Action to delete the selected connection */
-	private final IAction2 del_conn = new IAction2("connection.disconnect"){
+	private final IAction del_conn = new IAction("connection.disconnect") {
 		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = c_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();

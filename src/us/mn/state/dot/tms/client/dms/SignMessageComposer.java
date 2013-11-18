@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.units.Interval;
@@ -122,7 +122,7 @@ public class SignMessageComposer extends JPanel {
 	private final JCheckBox alert_chx = new JCheckBox();
 
 	/** Clear action */
-	private final IAction2 clear = new IAction2("dms.clear") {
+	private final IAction clear = new IAction("dms.clear") {
 		protected void doActionPerformed(ActionEvent e) {
 			clearWidgets();
 		}
@@ -132,7 +132,7 @@ public class SignMessageComposer extends JPanel {
 	private final JButton clear_btn = new JButton(clear);
 
 	/** Action used to send a message to the DMS */
-	private final IAction2 send_msg = new IAction2("dms.send") {
+	private final IAction send_msg = new IAction("dms.send") {
 		protected void doActionPerformed(ActionEvent e) {
 			dispatcher.sendSelectedMessage();
 		}
@@ -148,7 +148,7 @@ public class SignMessageComposer extends JPanel {
 	private final JButton blank_btn;
 
 	/** Action to query the DMS message (optional) */
-	private final IAction2 query_msg = new IAction2("dms.query.msg",
+	private final IAction query_msg = new IAction("dms.query.msg",
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
 	{
 		protected void doActionPerformed(ActionEvent e) {

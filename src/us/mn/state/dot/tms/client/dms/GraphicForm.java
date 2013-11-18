@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.PixmapGraphic;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -118,7 +118,7 @@ public class GraphicForm extends AbstractForm {
 	private final ZTable table = new ZTable();
 
 	/** Action to create a new graphic */
-	private final IAction2 create_gr = new IAction2("graphic.create") {
+	private final IAction create_gr = new IAction("graphic.create") {
 		protected void doActionPerformed(ActionEvent e)
 			throws Exception
 		{
@@ -127,7 +127,7 @@ public class GraphicForm extends AbstractForm {
 	};
 
 	/** Action to delete the selected proxy */
-	private final IAction2 del_gr = new IAction2("graphic.delete") {
+	private final IAction del_gr = new IAction("graphic.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = table.getSelectionModel();
 			int row = s.getMinSelectionIndex();

@@ -19,7 +19,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.RoadForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -62,7 +62,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createSystemAttributesItem() {
 		if(!SystemAttributeForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("system.attributes") {
+		return new JMenuItem(new IAction("system.attributes") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new SystemAttributeForm(session));
 			}
@@ -73,7 +73,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createIncidentDetailItem() {
 		if(!IncidentDetailForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("incident.details") {
+		return new JMenuItem(new IAction("incident.details") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new IncidentDetailForm(session));
 			}
@@ -84,7 +84,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createUsersAndRolesItem() {
 		if(!UserRoleForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("user.menu") {
+		return new JMenuItem(new IAction("user.menu") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new UserRoleForm(session));
 			}
@@ -95,7 +95,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createMapExtentsItem() {
 		if(!MapExtentForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("location.map.extents") {
+		return new JMenuItem(new IAction("location.map.extents") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new MapExtentForm(session,
 					desktop.client));
@@ -107,7 +107,7 @@ public class SystemMenu extends JMenu {
 	protected JMenuItem createRoadItem() {
 		if(!RoadForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("location.road.plural") {
+		return new JMenuItem(new IAction("location.road.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new RoadForm(session));
 			}

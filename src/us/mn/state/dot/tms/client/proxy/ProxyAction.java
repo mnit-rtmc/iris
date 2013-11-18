@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * ProxyAction is an abstract action which is associated with one type
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.client.widget.IAction2;
  *
  * @author Douglas Lau
  */
-abstract public class ProxyAction<T extends SonarObject> extends IAction2 {
+abstract public class ProxyAction<T extends SonarObject> extends IAction {
 
 	/** Sonar proxy */
 	protected final T proxy;

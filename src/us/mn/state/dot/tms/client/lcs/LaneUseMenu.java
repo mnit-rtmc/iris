@@ -19,7 +19,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -56,7 +56,7 @@ public class LaneUseMenu extends JMenu {
 	protected JMenuItem createLcsItem() {
 		if(!LcsForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("lcs") {
+		return new JMenuItem(new IAction("lcs") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new LcsForm(session));
 			}
@@ -67,7 +67,7 @@ public class LaneUseMenu extends JMenu {
 	protected JMenuItem createLaneUseMultiItem() {
 		if(!LaneUseMultiForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("lane.use.multi") {
+		return new JMenuItem(new IAction("lane.use.multi") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new LaneUseMultiForm(session));
 			}
@@ -78,7 +78,7 @@ public class LaneUseMenu extends JMenu {
 	protected JMenuItem createLaneMarkingItem() {
 		if(!LaneMarkingForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("lane.markings") {
+		return new JMenuItem(new IAction("lane.markings") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new LaneMarkingForm(session));
 			}

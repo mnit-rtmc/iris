@@ -25,7 +25,7 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.SonarObject;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -46,7 +46,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	protected final ZTable table;
 
 	/** Action to display the proxy properties */
-	private final IAction2 show_props = new IAction2("device.properties") {
+	private final IAction show_props = new IAction("device.properties") {
 		protected void doActionPerformed(ActionEvent e) {
 			T proxy = getSelectedProxy();
 			if(proxy != null)
@@ -58,7 +58,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	private final JButton prop_btn = new JButton(show_props);
 
 	/** Action to delete the selected proxy */
-	private final IAction2 del_obj = new IAction2("device.delete") {
+	private final IAction del_obj = new IAction("device.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			T proxy = getSelectedProxy();
 			if(proxy != null)

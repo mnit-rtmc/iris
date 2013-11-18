@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -47,7 +47,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Controller action */
-	private final IAction2 controller = new IAction2("controller") {
+	private final IAction controller = new IAction("controller") {
 		protected void doActionPerformed(ActionEvent e) {
 			controllerPressed();
 		}

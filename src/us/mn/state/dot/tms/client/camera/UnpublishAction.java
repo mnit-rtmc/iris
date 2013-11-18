@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * This is an action to unpublish a set of cameras.
  *
  * @author Douglas Lau
  */
-public class UnpublishAction extends IAction2 {
+public class UnpublishAction extends IAction {
 
 	/** Proxy selection model */
 	private final ProxySelectionModel<Camera> s_model;

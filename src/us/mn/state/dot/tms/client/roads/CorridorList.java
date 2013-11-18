@@ -47,7 +47,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
@@ -88,7 +88,7 @@ public class CorridorList extends JPanel {
 	private CorridorBase corridor;
 
 	/** Corridor action */
-	private final IAction2 corr_act = new IAction2("r_node.corridor") {
+	private final IAction corr_act = new IAction("r_node.corridor") {
 		protected void doActionPerformed(ActionEvent e) {
 			Object s = corridor_cbx.getSelectedItem();
 			if(s instanceof CorridorBase)
@@ -102,14 +102,14 @@ public class CorridorList extends JPanel {
 	private final JComboBox corridor_cbx = new JComboBox();
 
 	/** Action to add a new roadway node */
-	private final IAction2 add_node = new IAction2("r_node.add") {
+	private final IAction add_node = new IAction("r_node.add") {
 		protected void doActionPerformed(ActionEvent e) {
 			doAddNode();
 		}
 	};
 
 	/** Action to delete the currently selected roadway node */
-	private final IAction2 delete_node = new IAction2("r_node.delete") {
+	private final IAction delete_node = new IAction("r_node.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			doDeleteNode();
 		}

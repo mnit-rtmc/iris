@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
@@ -38,10 +38,10 @@ public class StationForm extends ProxyTableForm<Station> {
 	}
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Action to display the r_node */
-	private final IAction2 r_node = new IAction2("r_node") {
+	private final IAction r_node = new IAction("r_node") {
 		protected void doActionPerformed(ActionEvent e) {
 			showRNode();
 		}

@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.detector.DetectorPanel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -70,7 +70,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	private final JLabel det_lbl = new JLabel();
 
 	/** Action to create a new detector */
-	private final IAction2 create_det = new IAction2("detector.create") {
+	private final IAction create_det = new IAction("detector.create") {
 		protected void doActionPerformed(ActionEvent e) {
 			R_NodeDetectorModel m = det_model;
 			if(m != null)
@@ -84,7 +84,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	private final JButton create_btn = new JButton(create_det);
 
 	/** Action to transfer a detector */
-	private final IAction2 transfer_det = new IAction2("detector.transfer"){
+	private final IAction transfer_det = new IAction("detector.transfer") {
 		protected void doActionPerformed(ActionEvent e) {
 			R_NodeDetectorModel m = det_model;
 			if(m != null) {
@@ -99,7 +99,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	};
 
 	/** Action to delete a detector */
-	private final IAction2 delete_det = new IAction2("detector.delete") {
+	private final IAction delete_det = new IAction("detector.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			Detector det = getSelectedDetector();
 			if(det != null)

@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.units.Temperature;
@@ -95,7 +95,7 @@ public class PropStatus extends IPanel {
 	private final JLabel operation_lbl = createValueLabel();
 
 	/** Query message action */
-	private final IAction2 query_msg = new IAction2("dms.query.msg",
+	private final IAction query_msg = new IAction("dms.query.msg",
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
 	{
 		protected void doActionPerformed(ActionEvent e) {
@@ -105,7 +105,7 @@ public class PropStatus extends IPanel {
 	};
 
 	/** Reset DMS action */
-	private final IAction2 reset = new IAction2("dms.reset",
+	private final IAction reset = new IAction("dms.reset",
 		SystemAttrEnum.DMS_RESET_ENABLE)
 	{
 		protected void doActionPerformed(ActionEvent e) {
@@ -115,7 +115,7 @@ public class PropStatus extends IPanel {
 	};
 
 	/** Query status action */
-	private final IAction2 query_status = new IAction2("dms.query.status") {
+	private final IAction query_status = new IAction("dms.query.status") {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				QUERY_STATUS.ordinal());
@@ -123,7 +123,7 @@ public class PropStatus extends IPanel {
 	};
 
 	/** Send settings action */
-	private final IAction2 settings = new IAction2("device.send.settings") {
+	private final IAction settings = new IAction("device.send.settings") {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());

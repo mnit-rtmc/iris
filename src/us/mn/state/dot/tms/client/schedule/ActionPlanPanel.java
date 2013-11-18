@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -63,7 +63,7 @@ public class ActionPlanPanel extends JPanel {
 	private final ZTable p_table = new ZTable();
 
 	/** Action to delete the selected action plan */
-	private final IAction2 del_plan = new IAction2("action.plan.delete") {
+	private final IAction del_plan = new IAction("action.plan.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel sm = p_table.getSelectionModel();
 			int row = sm.getMinSelectionIndex();

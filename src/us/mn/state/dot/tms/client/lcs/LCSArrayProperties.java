@@ -46,7 +46,7 @@ import us.mn.state.dot.tms.LCSIndicationHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -77,14 +77,14 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	private final ZTable lcs_table = new ZTable();
 
 	/** Action to edit the selected LCS */
-	private final IAction2 edit_lcs = new IAction2("lcs.edit") {
+	private final IAction edit_lcs = new IAction("lcs.edit") {
 		protected void doActionPerformed(ActionEvent e) {
 			editPressed();
 		}
 	};
 
 	/** Action to delete the selected LCS */
-	private final IAction2 delete_lcs = new IAction2("lcs.delete") {
+	private final IAction delete_lcs = new IAction("lcs.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = lcs_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
@@ -112,7 +112,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	private final JLabel op_lbl = new JLabel();
 
 	/** Action to send settings */
-	private final IAction2 settings = new IAction2("device.send.settings") {
+	private final IAction settings = new IAction("device.send.settings") {
 		protected void doActionPerformed(ActionEvent e) {
 			proxy.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
@@ -233,7 +233,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		for(LaneUseIndication i: LaneUseIndication.values()) {
 			final int ind = i.ordinal();
 			JCheckBox btn = new JCheckBox();
-			btn.setAction(new IAction2(null) {
+			btn.setAction(new IAction(null) {
 				protected void doActionPerformed(ActionEvent e){
 					toggleIndication(ind);
 				}

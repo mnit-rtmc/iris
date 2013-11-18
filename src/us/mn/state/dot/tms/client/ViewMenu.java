@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.weather.WeatherSensorForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -89,7 +89,7 @@ public class ViewMenu extends JMenu {
 	/** Create the detector menu item */
 	private JMenuItem createDetectorItem() {
 		if(DetectorForm.isPermitted(session)) {
-			return new JMenuItem(new IAction2("detector.plural") {
+			return new JMenuItem(new IAction("detector.plural") {
 				protected void doActionPerformed(ActionEvent e){
 					desktop.show(new DetectorForm(session));
 				}
@@ -102,7 +102,7 @@ public class ViewMenu extends JMenu {
 	private JMenuItem createStationItem() {
 		if(!StationForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("detector.station.plural") {
+		return new JMenuItem(new IAction("detector.station.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new StationForm(session));
 			}
@@ -113,7 +113,7 @@ public class ViewMenu extends JMenu {
 	private JMenuItem createMeterItem() {
 		if(!RampMeterForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("ramp.meter.long.plural") {
+		return new JMenuItem(new IAction("ramp.meter.long.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new RampMeterForm(session));
 			}
@@ -124,7 +124,7 @@ public class ViewMenu extends JMenu {
 	private JMenuItem createScheduleItem() {
 		if(!ScheduleForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("action.plan.schedule.title"){
+		return new JMenuItem(new IAction("action.plan.schedule.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new ScheduleForm(session));
 			}
@@ -135,7 +135,7 @@ public class ViewMenu extends JMenu {
 	private JMenuItem createWeatherItem() {
 		if(!WeatherSensorForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("weather.sensors") {
+		return new JMenuItem(new IAction("weather.sensors") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new WeatherSensorForm(session));
 			}
@@ -146,7 +146,7 @@ public class ViewMenu extends JMenu {
 	private JMenuItem createGateArmItem() {
 		if(!GateArmArrayForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("gate.arms") {
+		return new JMenuItem(new IAction("gate.arms") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new GateArmArrayForm(session));
 			}

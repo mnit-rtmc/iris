@@ -15,14 +15,14 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
  * Action to blank all selected DMS.
  *
  * @author Douglas Lau
  */
-public class BlankDmsAction extends IAction2 {
+public class BlankDmsAction extends IAction {
 
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;

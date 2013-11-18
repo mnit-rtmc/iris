@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -66,7 +66,7 @@ public class FontForm extends AbstractForm {
 	private final ZTable f_table = new ZTable();
 
 	/** Action to delete the selected font */
-	private final IAction2 del_font = new IAction2("font.delete") {
+	private final IAction del_font = new IAction("font.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = f_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();

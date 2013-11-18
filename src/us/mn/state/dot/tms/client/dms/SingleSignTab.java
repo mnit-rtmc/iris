@@ -47,7 +47,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.units.Interval;
@@ -78,7 +78,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 	/** AWS controlled checkbox (optional) */
 	private final JCheckBox aws_control_chk = new JCheckBox(
-		new IAction2("item.style.aws.controlled")
+		new IAction("item.style.aws.controlled")
 	{
 		protected void doActionPerformed(ActionEvent e) {
 			DMS proxy = watching;

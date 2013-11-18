@@ -18,7 +18,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -52,7 +52,7 @@ public class VideoMenu extends JMenu {
 	private JMenuItem createCameraItem() {
 		if(!CameraForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("camera.plural") {
+		return new JMenuItem(new IAction("camera.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new CameraForm(session));
 			}
@@ -63,7 +63,7 @@ public class VideoMenu extends JMenu {
 	private JMenuItem createVideoMonitorItem() {
 		if(!VideoMonitorForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction2("video.monitor") {
+		return new JMenuItem(new IAction("video.monitor") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new VideoMonitorForm(session));
 			}

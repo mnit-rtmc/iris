@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.CalendarWidget;
-import us.mn.state.dot.tms.client.widget.IAction2;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
@@ -71,7 +71,7 @@ public class DayPlanPanel extends JPanel {
 	private final ProxyListener<DayPlan> listener;
 
 	/** Action for day plans */
-	private final IAction2 day = new IAction2("action.plan.day") {
+	private final IAction day = new IAction("action.plan.day") {
 		protected void doActionPerformed(ActionEvent e) {
 			selectDayPlan();
 		}
@@ -81,7 +81,7 @@ public class DayPlanPanel extends JPanel {
 	private final JComboBox day_cbox = new JComboBox();
 
 	/** Action to delete the selected day plan */
-	private final IAction2 del_plan = new IAction2("action.plan.day.delete") {
+	private final IAction del_plan = new IAction("action.plan.day.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			deleteSelectedPlan();
 		}
@@ -91,7 +91,7 @@ public class DayPlanPanel extends JPanel {
 	private final Calendar month = Calendar.getInstance();
 
 	/** Action to select previous month */
-	private final IAction2 prev_month =new IAction2("action.plan.month.prev"){
+	private final IAction prev_month =new IAction("action.plan.month.prev"){
 		protected void doActionPerformed(ActionEvent e) {
 			month.add(Calendar.MONTH, -1);
 			updateCalendarWidget();
@@ -102,7 +102,7 @@ public class DayPlanPanel extends JPanel {
 	private final JLabel month_lbl = new JLabel();
 
 	/** Action to select next month */
-	private final IAction2 next_month =new IAction2("action.plan.month.next"){
+	private final IAction next_month =new IAction("action.plan.month.next"){
 		protected void doActionPerformed(ActionEvent e) {
 			month.add(Calendar.MONTH, 1);
 			updateCalendarWidget();
@@ -110,7 +110,7 @@ public class DayPlanPanel extends JPanel {
 	};
 
 	/** Action to select previous year */
-	private final IAction2 prev_year = new IAction2("action.plan.year.prev") {
+	private final IAction prev_year = new IAction("action.plan.year.prev") {
 		protected void doActionPerformed(ActionEvent e) {
 			month.add(Calendar.YEAR, -1);
 			updateCalendarWidget();
@@ -121,7 +121,7 @@ public class DayPlanPanel extends JPanel {
 	private final JLabel year_lbl = new JLabel();
 
 	/** Action to select next year */
-	private final IAction2 next_year = new IAction2("action.plan.year.next") {
+	private final IAction next_year = new IAction("action.plan.year.next") {
 		protected void doActionPerformed(ActionEvent e) {
 			month.add(Calendar.YEAR, 1);
 			updateCalendarWidget();
@@ -138,7 +138,7 @@ public class DayPlanPanel extends JPanel {
 	private final ZTable h_table = new ZTable();
 
 	/** Action to delete the selected holiday */
-	private final IAction2 del_holiday = new IAction2(
+	private final IAction del_holiday = new IAction(
 		"action.plan.holiday.delete")
 	{
 		protected void doActionPerformed(ActionEvent e) {
@@ -221,7 +221,7 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Create a calendar button */
-	private JButton createCalButton(IAction2 a) {
+	private JButton createCalButton(IAction a) {
 		JButton btn = new JButton(a);
 		btn.setContentAreaFilled(false);
 		btn.setRolloverEnabled(true);
