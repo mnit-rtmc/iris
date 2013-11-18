@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 
 /**
  * ProxyAction is an abstract action which is associated with one type
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.client.widget.IAction;
  *
  * @author Douglas Lau
  */
-abstract public class ProxyAction<T extends SonarObject> extends IAction {
+abstract public class ProxyAction<T extends SonarObject> extends IAction2 {
 
 	/** Sonar proxy */
 	protected final T proxy;

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -132,7 +133,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 		if(TeslaAction.isConfigured())
 			p.add(new TeslaAction<Controller>(proxy));
 		p.add(new PropertiesAction<Controller>(proxy) {
-			protected void do_perform() {
+			protected void doActionPerformed(ActionEvent e) {
 				showPropertiesForm();
 			}
 		});

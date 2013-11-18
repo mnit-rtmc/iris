@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -144,7 +145,7 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		}
 		p.addSeparator();
 		p.add(new PropertiesAction<GateArmArray>(ga) {
-			protected void do_perform() {
+			protected void doActionPerformed(ActionEvent e) {
 				showPropertiesForm(ga);
 			}
 		});

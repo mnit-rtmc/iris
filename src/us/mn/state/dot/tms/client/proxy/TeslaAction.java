@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URL;
 import javax.swing.Action;
@@ -44,7 +45,7 @@ public class TeslaAction<T extends SonarObject> extends ProxyAction {
 	}
 
 	/** Actually perform the action */
-	protected void do_perform() throws IOException {
+	protected void doActionPerformed(ActionEvent e) throws IOException {
 		String host = SystemAttrEnum.TESLA_HOST.getString();
 		if(host != null && host.trim().length() > 0) {
 			WebBrowser.open(new URL("http://" + host +

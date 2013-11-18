@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.Comparator;
 import java.util.TreeSet;
@@ -277,7 +278,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		}
 		p.addSeparator();
 		p.add(new PropertiesAction<LCSArray>(la) {
-			protected void do_perform() {
+			protected void doActionPerformed(ActionEvent e) {
 				showPropertiesForm(la);
 			}
 		});

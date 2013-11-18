@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.List;
 import java.util.HashSet;
@@ -174,7 +175,7 @@ public class CameraManager extends ProxyManager<Camera> {
 		if(TeslaAction.isConfigured())
 			p.add(new TeslaAction<Camera>(proxy));
 		p.add(new PropertiesAction<Camera>(proxy) {
-			protected void do_perform() {
+			protected void doActionPerformed(ActionEvent e) {
 				showPropertiesForm();
 			}
 		});

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -112,6 +113,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, RampMeter proxy) {
 		long styles = proxy.getStyles();
 		for(ItemStyle s: ItemStyle.toStyles(styles)) {
@@ -172,7 +174,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		}
 		p.addSeparator();
 		p.add(new PropertiesAction<RampMeter>(meter) {
-			protected void do_perform() {
+			protected void doActionPerformed(ActionEvent e) {
 				showPropertiesForm(meter);
 			}
 		});
@@ -191,6 +193,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 15;
 	}

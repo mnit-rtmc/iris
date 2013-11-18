@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.warning;
 
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -138,7 +139,7 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		p.add(new UndeployAction(s_model));
 		p.addSeparator();
 		p.add(new PropertiesAction<WarningSign>(proxy) {
-			protected void do_perform() {
+			protected void doActionPerformed(ActionEvent e) {
 				showPropertiesForm();
 			}
 		});

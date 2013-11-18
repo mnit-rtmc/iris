@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import us.mn.state.dot.geokit.ZoomLevel;
 import us.mn.state.dot.sonar.SonarObject;
@@ -51,7 +52,7 @@ public class MapAction<T extends SonarObject> extends ProxyAction {
 	}
 
 	/** Actually perform the action */
-	protected void do_perform() {
+	protected void doActionPerformed(ActionEvent e) {
 		if(lat != null && lon != null) {
 			client.setMapExtent(ZoomLevel.FIFTEEN, lat.floatValue(),
 				lon.floatValue());

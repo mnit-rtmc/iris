@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import javax.swing.JLabel;
@@ -251,7 +252,7 @@ public class DMSManager extends ProxyManager<DMS> {
 		if(TeslaAction.isConfigured())
 			p.add(new TeslaAction<DMS>(proxy));
 		p.add(new PropertiesAction<DMS>(proxy) {
-			protected void do_perform() {
+			protected void doActionPerformed(ActionEvent e) {
 				showPropertiesForm();
 			}
 		});
