@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JButton;
@@ -40,7 +41,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -61,8 +62,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Camera action */
-	private final IAction camera = new IAction("camera") {
-		protected void do_perform() {
+	private final IAction2 camera = new IAction2("camera") {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setCamera((Camera)camera_cbx.getSelectedItem());
 		}
 	};
@@ -71,8 +72,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JComboBox camera_cbx = new JComboBox();
 
 	/** Controller action */
-	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
+	private final IAction2 controller = new IAction2("controller") {
+		protected void doActionPerformed(ActionEvent e) {
 			Controller c = proxy.getController();
 			if(c != null) {
 				SmartDesktop sd = session.getDesktop();
@@ -82,8 +83,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	};
 
 	/** Meter type action */
-	private final IAction meter_type = new IAction("ramp.meter.type") {
-		protected void do_perform() {
+	private final IAction2 meter_type = new IAction2("ramp.meter.type") {
+		protected void doActionPerformed(ActionEvent e) {
 			int t = meter_type_cbx.getSelectedIndex();
 			if(t >= 0)
 				proxy.setMeterType(t);
@@ -101,8 +102,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JTextField max_wait_txt = new JTextField(5);
 
 	/** Metering algorithm action */
-	private final IAction algorithm = new IAction("ramp.meter.algorithm") {
-		protected void do_perform() {
+	private final IAction2 algorithm = new IAction2("ramp.meter.algorithm"){
+		protected void doActionPerformed(ActionEvent e) {
 			int a = algorithm_cbx.getSelectedIndex();
 			if(a >= 0)
 				proxy.setAlgorithm(a);
@@ -142,8 +143,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JLabel status_lbl = new JLabel();
 
 	/** Send settings action */
-	private final IAction settings = new IAction("device.send.settings") {
-		protected void do_perform() {
+	private final IAction2 settings = new IAction2("device.send.settings") {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
 		}
