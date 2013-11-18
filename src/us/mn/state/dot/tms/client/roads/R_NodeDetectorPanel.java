@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.BoxLayout;
@@ -27,7 +28,7 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.detector.DetectorPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -43,7 +44,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class R_NodeDetectorPanel extends JPanel {
 
 	/** Filter a string name */
-	static protected String filterName(String n, int max_len) {
+	static private String filterName(String n, int max_len) {
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < n.length(); i++) {
 			char c = n.charAt(i);
@@ -60,17 +61,17 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Detector table */
-	protected final ZTable det_table = new ZTable();
+	private final ZTable det_table = new ZTable();
 
 	/** Detector ID text field */
-	protected final JTextField det_txt = new JTextField(6);
+	private final JTextField det_txt = new JTextField(6);
 
 	/** Detector label */
-	protected final JLabel det_lbl = new JLabel();
+	private final JLabel det_lbl = new JLabel();
 
 	/** Action to create a new detector */
-	private final IAction create_det = new IAction("detector.create") {
-		@Override protected void do_perform() {
+	private final IAction2 create_det = new IAction2("detector.create") {
+		protected void doActionPerformed(ActionEvent e) {
 			R_NodeDetectorModel m = det_model;
 			if(m != null)
 				m.create(getDetectorName());
@@ -83,8 +84,8 @@ public class R_NodeDetectorPanel extends JPanel {
 	private final JButton create_btn = new JButton(create_det);
 
 	/** Action to transfer a detector */
-	private final IAction transfer_det = new IAction("detector.transfer") {
-		@Override protected void do_perform() {
+	private final IAction2 transfer_det = new IAction2("detector.transfer"){
+		protected void doActionPerformed(ActionEvent e) {
 			R_NodeDetectorModel m = det_model;
 			if(m != null) {
 				Detector det = DetectorHelper.lookup(
@@ -98,8 +99,8 @@ public class R_NodeDetectorPanel extends JPanel {
 	};
 
 	/** Action to delete a detector */
-	private final IAction delete_det = new IAction("detector.delete") {
-		@Override protected void do_perform() {
+	private final IAction2 delete_det = new IAction2("detector.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			Detector det = getSelectedDetector();
 			if(det != null)
 				det.destroy();
@@ -107,10 +108,10 @@ public class R_NodeDetectorPanel extends JPanel {
 	};
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** R_Node detector model */
-	protected R_NodeDetectorModel det_model;
+	private R_NodeDetectorModel det_model;
 
 	/** Set the r_node */
 	public void setR_Node(R_Node n) {
@@ -127,7 +128,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Detector panel */
-	protected final DetectorPanel det_pnl;
+	private final DetectorPanel det_pnl;
 
 	/** Create a new roadway node detector panel */
 	public R_NodeDetectorPanel(Session s) {
@@ -159,7 +160,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Create Gui jobs */
-	protected void createJobs() {
+	private void createJobs() {
 		ListSelectionModel s = det_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new IListSelectionAdapter() {
@@ -183,7 +184,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Get the entered detector name */
-	protected String getDetectorName() {
+	private String getDetectorName() {
 		String name = det_txt.getText();
 		String n = filterName(name, 10);
 		if(!n.equals(name))
@@ -192,7 +193,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Lookup the detector */
-	protected void lookupDetector() {
+	private void lookupDetector() {
 		String name = getDetectorName();
 		Detector det = DetectorHelper.lookup(name);
 		if(name.length() > 0)
@@ -204,7 +205,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Lookup a detector label */
-	protected String lookupLabel(Detector det) {
+	private String lookupLabel(Detector det) {
 		if(det != null)
 			return DetectorHelper.getLabel(det);
 		else
@@ -212,7 +213,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Select a detector */
-	protected void selectDetector() {
+	private void selectDetector() {
 		Detector det = getSelectedDetector();
 		det_pnl.setDetector(det);
 		if(det != null) {
@@ -223,7 +224,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Get the currently selected detector */
-	protected Detector getSelectedDetector() {
+	private Detector getSelectedDetector() {
 		R_NodeDetectorModel m = det_model;
 		if(m != null)
 			return m.getProxy(det_table.getSelectedRow());
@@ -240,22 +241,22 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Test if the user can add a detector */
-	protected boolean canAddDetector(R_Node n) {
+	private boolean canAddDetector(R_Node n) {
 		return n != null && session.canAdd(Detector.SONAR_TYPE);
 	}
 
 	/** Test if the user can add a detector */
-	protected boolean canAddDetector(String n) {
+	private boolean canAddDetector(String n) {
 		return n.length() > 0 && session.canAdd(Detector.SONAR_TYPE, n);
 	}
 
 	/** Test if the user can update a detector r_node association */
-	protected boolean canUpdateDetector(Detector d) {
+	private boolean canUpdateDetector(Detector d) {
 		return session.canUpdate(d, "r_node");
 	}
 
 	/** Test if the user can remove a detector */
-	protected boolean canRemoveDetector(Detector d) {
+	private boolean canRemoveDetector(Detector d) {
 		return session.canRemove(d) && d.getController() == null;
 	}
 }

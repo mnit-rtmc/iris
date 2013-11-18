@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.geom.Point2D;
@@ -35,7 +36,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
@@ -63,11 +64,11 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** GeoLoc action */
-	abstract private class LAction extends IAction {
+	abstract private class LAction extends IAction2 {
 		protected LAction(String text_id) {
 			super(text_id);
 		}
-		protected final void do_perform() {
+		protected final void doActionPerformed(ActionEvent e) {
 			GeoLoc l = loc;
 			if(l != null)
 				do_perform(l);
@@ -168,8 +169,8 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	};
 
 	/** Action to select a point from the map */
-	private final IAction select_pt = new IAction("location.select") {
-		protected void do_perform() {
+	private final IAction2 select_pt = new IAction2("location.select") {
+		protected void doActionPerformed(ActionEvent e) {
 			client.setPointSelector(point_sel);
 		}
 	};

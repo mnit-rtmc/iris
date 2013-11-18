@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
@@ -30,7 +31,7 @@ import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 
 /**
@@ -41,11 +42,11 @@ import us.mn.state.dot.tms.client.widget.IPanel;
 public class R_NodeSetupPanel extends IPanel {
 
 	/** R_Node action */
-	abstract private class NAction extends IAction {
+	abstract private class NAction extends IAction2 {
 		protected NAction(String text_id) {
 			super(text_id);
 		}
-		@Override protected final void do_perform() {
+		protected final void doActionPerformed(ActionEvent e) {
 			R_Node n = node;
 			if(n != null)
 				do_perform(n);
@@ -105,37 +106,37 @@ public class R_NodeSetupPanel extends IPanel {
 	/** Initialize the panel */
 	public void initialize() {
 		type_cbx.setAction(new NAction("r_node.type") {
-			@Override protected void do_perform(R_Node n) {
+			protected void do_perform(R_Node n) {
 				n.setNodeType(type_cbx.getSelectedIndex());
 			}
 		});
 		pick_chk.setAction(new NAction(null) {
-			@Override protected void do_perform(R_Node n) {
+			protected void do_perform(R_Node n) {
 				n.setPickable(pick_chk.isSelected());
 			}
 		});
 		trans_cbx.setAction(new NAction("r_node.transition") {
-			@Override protected void do_perform(R_Node n) {
+			protected void do_perform(R_Node n) {
 				n.setTransition(trans_cbx.getSelectedIndex());
 			}
 		});
 		above_chk.setAction(new NAction(null) {
-			@Override protected void do_perform(R_Node n) {
+			protected void do_perform(R_Node n) {
 				n.setAbove(above_chk.isSelected());
 			}
 		});
 		attach_chk.setAction(new NAction(null) {
-			@Override protected void do_perform(R_Node n) {
+			protected void do_perform(R_Node n) {
 				n.setAttachSide(attach_chk.isSelected());
 			}
 		});
 		active_chk.setAction(new NAction(null) {
-			@Override protected void do_perform(R_Node n) {
+			protected void do_perform(R_Node n) {
 				n.setActive(active_chk.isSelected());
 			}
 		});
 		abandoned_chk.setAction(new NAction(null) {
-			@Override protected void do_perform(R_Node n) {
+			protected void do_perform(R_Node n) {
 				n.setAbandoned(abandoned_chk.isSelected());
 			}
 		});
