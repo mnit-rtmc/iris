@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -40,7 +41,7 @@ import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.LaneConfigurationPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
@@ -100,8 +101,8 @@ public class LcsDispatcher extends IPanel implements ProxyListener<LCSArray>,
 		new IndicationSelector(LCS_SIZE);
 
 	/** Action to send new indications to the LCS array */
-	private final IAction send = new IAction("lcs.send") {
-		protected void do_perform() {
+	private final IAction2 send = new IAction2("lcs.send") {
+		protected void doActionPerformed(ActionEvent e) {
 			sendIndications();
 		}
 	};
