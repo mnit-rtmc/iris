@@ -84,20 +84,20 @@ public class R_NodeSetupPanel extends IPanel {
 	private final JCheckBox active_chk = new JCheckBox();
 
 	/** Station ID text field */
-	protected final JTextField station_txt = new JTextField(8);
+	private final JTextField station_txt = new JTextField(8);
 
 	/** Abandoned check box */
 	private final JCheckBox abandoned_chk = new JCheckBox();
 
 	/** Component for speed limit */
-	protected final JSpinner speed_spn = new JSpinner(
+	private final JSpinner speed_spn = new JSpinner(
 		new SpinnerNumberModel(55, 25, 120, 5));
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Node being edited */
-	protected R_Node node;
+	private R_Node node;
 
 	/** Create the roadway node setup panel */
 	public R_NodeSetupPanel(Session s) {
@@ -168,7 +168,7 @@ public class R_NodeSetupPanel extends IPanel {
 	}
 
 	/** Create the jobs */
-	protected void createJobs() {
+	private void createJobs() {
 		lane_spn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)lane_spn.getValue();
@@ -197,28 +197,28 @@ public class R_NodeSetupPanel extends IPanel {
 	}
 
 	/** Set the number of lanes */
-	protected void setLanes(int l) {
+	private void setLanes(int l) {
 		R_Node n = node;
 		if(n != null)
 			n.setLanes(l);
 	}
 
 	/** Set the lane shift */
-	protected void setShift(int s) {
+	private void setShift(int s) {
 		R_Node n = node;
 		if(n != null)
 			n.setShift(s);
 	}
 
 	/** Set the station ID */
-	protected void setStationID(String s) {
+	private void setStationID(String s) {
 		R_Node n = node;
 		if(n != null)
 			n.setStationID(s.length() > 0 ? s : null);
 	}
 
 	/** Set the speed limit */
-	protected void setSpeedLimit(int s) {
+	private void setSpeedLimit(int s) {
 		R_Node n = node;
 		if(n != null)
 			n.setSpeedLimit(s);
@@ -234,7 +234,7 @@ public class R_NodeSetupPanel extends IPanel {
 	}
 
 	/** Update one attribute */
-	protected void doUpdate(R_Node n, String a) {
+	private void doUpdate(R_Node n, String a) {
 		if(a == null)
 			node = n;
 		if(a == null || a.equals("nodeType")) {
@@ -284,7 +284,7 @@ public class R_NodeSetupPanel extends IPanel {
 	}
 
 	/** Test if the user can update an attribute */
-	protected boolean canUpdate(R_Node n, String a) {
+	private boolean canUpdate(R_Node n, String a) {
 		return session.canUpdate(n, a);
 	}
 
@@ -298,7 +298,7 @@ public class R_NodeSetupPanel extends IPanel {
 	}
 
 	/** Clear all attributes */
-	protected void doClear() {
+	private void doClear() {
 		node = null;
 		type_cbx.setEnabled(false);
 		type_cbx.setSelectedIndex(0);
