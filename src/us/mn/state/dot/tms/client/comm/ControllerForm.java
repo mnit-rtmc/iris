@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -28,15 +30,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusLostJob;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -259,16 +260,17 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create the jobs for the setup panel */
 	private void createSetupJobs() {
 		if(canUpdate("drop")) {
-			drop_spn.addChangeListener(new ChangeJob(WORKER) {
-				public void perform() {
+			drop_spn.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
 					Number n = (Number)drop_spn.getValue();
 					proxy.setDrop(n.shortValue());
 				}
 			});
 		}
 		if(canUpdate("password")) {
-			password.addFocusListener(new FocusLostJob(WORKER) {
-				public void perform() {
+			password.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent e) {
 					String pwd = new String(
 						password.getPassword()).trim();
 					password.setText("");
@@ -281,8 +283,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			clear_pwd.setEnabled(false);
 		}
 		if(canUpdate("notes")) {
-			notes_txt.addFocusListener(new FocusLostJob(WORKER) {
-				public void perform() {
+			notes_txt.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent e) {
 					proxy.setNotes(notes_txt.getText());
 				}
 			});
@@ -302,8 +305,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the jobs for the cabinet panel */
 	private void createCabinetJobs() {
-		mile_txt.addFocusListener(new FocusLostJob(WORKER) {
-			public void perform() {
+		mile_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				cabinet.setMile(parseMile());
 			}
 		});
