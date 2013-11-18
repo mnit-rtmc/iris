@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.client.toolbar;
 
 import javax.swing.JToggleButton;
-import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.tms.client.IrisClient;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -40,20 +40,16 @@ public class EditModePanel extends ToolPanel {
 	/** User session */
 	private final Session session;
 
-	/** Iris client */
-	private final IrisClient client;
-
 	/** Button to toggle edit mode */
 	private final JToggleButton edit_btn = new JToggleButton();
 
 	/** Create a new edit mode panel */
 	public EditModePanel(Session s) {
 		session = s;
-		client = s.getDesktop().client;
 		buttonChanged();
 		add(edit_btn);
-		edit_btn.addChangeListener(new ChangeJob(client.WORKER) {
-			public void perform() {
+		edit_btn.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
 				buttonChanged();
 			}
 		});
