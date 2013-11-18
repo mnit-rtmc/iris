@@ -14,11 +14,12 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -42,10 +43,10 @@ public class PlanTablePanel<T extends SonarObject> extends IPanel {
 	private final ZTable table = new ZTable();
 
 	/** Action to delete the selected action */
-	private final IAction del_action = new IAction(
+	private final IAction2 del_action = new IAction2(
 		"action.plan.action.delete")
 	{
-		protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel sm = table.getSelectionModel();
 			int row = sm.getMinSelectionIndex();
 			if(row >= 0)

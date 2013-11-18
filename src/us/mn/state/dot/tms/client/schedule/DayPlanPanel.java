@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.JButton;
@@ -32,7 +33,7 @@ import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.CalendarWidget;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
@@ -56,22 +57,22 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Formatter for month labels */
-	static protected final SimpleDateFormat MONTH_LBL =
+	static private final SimpleDateFormat MONTH_LBL =
 		new SimpleDateFormat("MMMM");
 
 	/** Formatter for year labels */
-	static protected final SimpleDateFormat YEAR_LBL =
+	static private final SimpleDateFormat YEAR_LBL =
 		new SimpleDateFormat("yyyy");
 
 	/** Cache of day plans */
-	protected final TypeCache<DayPlan> cache;
+	private final TypeCache<DayPlan> cache;
 
 	/** Proxy listener to update day plan holiday model */
-	protected final ProxyListener<DayPlan> listener;
+	private final ProxyListener<DayPlan> listener;
 
 	/** Action for day plans */
-	private final IAction day = new IAction("action.plan.day") {
-		@Override protected void do_perform() {
+	private final IAction2 day = new IAction2("action.plan.day") {
+		protected void doActionPerformed(ActionEvent e) {
 			selectDayPlan();
 		}
 	};
@@ -80,67 +81,67 @@ public class DayPlanPanel extends JPanel {
 	private final JComboBox day_cbox = new JComboBox();
 
 	/** Action to delete the selected day plan */
-	private final IAction del_plan = new IAction("action.plan.day.delete") {
-		@Override protected void do_perform() {
+	private final IAction2 del_plan = new IAction2("action.plan.day.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			deleteSelectedPlan();
 		}
 	};
 
 	/** Month to display on calendar widget */
-	protected final Calendar month = Calendar.getInstance();
+	private final Calendar month = Calendar.getInstance();
 
 	/** Action to select previous month */
-	private final IAction prev_month =new IAction("action.plan.month.prev"){
-		@Override protected void do_perform() {
+	private final IAction2 prev_month =new IAction2("action.plan.month.prev"){
+		protected void doActionPerformed(ActionEvent e) {
 			month.add(Calendar.MONTH, -1);
 			updateCalendarWidget();
 		}
 	};
 
 	/** Month label */
-	protected final JLabel month_lbl = new JLabel();
+	private final JLabel month_lbl = new JLabel();
 
 	/** Action to select next month */
-	private final IAction next_month =new IAction("action.plan.month.next"){
-		@Override protected void do_perform() {
+	private final IAction2 next_month =new IAction2("action.plan.month.next"){
+		protected void doActionPerformed(ActionEvent e) {
 			month.add(Calendar.MONTH, 1);
 			updateCalendarWidget();
 		}
 	};
 
 	/** Action to select previous year */
-	private final IAction prev_year = new IAction("action.plan.year.prev") {
-		@Override protected void do_perform() {
+	private final IAction2 prev_year = new IAction2("action.plan.year.prev") {
+		protected void doActionPerformed(ActionEvent e) {
 			month.add(Calendar.YEAR, -1);
 			updateCalendarWidget();
 		}
 	};
 
 	/** Year label */
-	protected final JLabel year_lbl = new JLabel();
+	private final JLabel year_lbl = new JLabel();
 
 	/** Action to select next year */
-	private final IAction next_year = new IAction("action.plan.year.next") {
-		@Override protected void do_perform() {
+	private final IAction2 next_year = new IAction2("action.plan.year.next") {
+		protected void doActionPerformed(ActionEvent e) {
 			month.add(Calendar.YEAR, 1);
 			updateCalendarWidget();
 		}
 	};
 
 	/** Calendar widget */
-	protected final CalendarWidget cal_widget = new CalendarWidget();
+	private final CalendarWidget cal_widget = new CalendarWidget();
 
 	/** Table model for holidays */
-	protected final HolidayModel h_model;
+	private final HolidayModel h_model;
 
 	/** Table to hold the holiday list */
-	protected final ZTable h_table = new ZTable();
+	private final ZTable h_table = new ZTable();
 
 	/** Action to delete the selected holiday */
-	private final IAction del_holiday = new IAction(
+	private final IAction2 del_holiday = new IAction2(
 		"action.plan.holiday.delete")
 	{
-		@Override protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			deleteSelectedHoliday();
 		}
 	};
@@ -220,7 +221,7 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Create a calendar button */
-	private JButton createCalButton(IAction a) {
+	private JButton createCalButton(IAction2 a) {
 		JButton btn = new JButton(a);
 		btn.setContentAreaFilled(false);
 		btn.setRolloverEnabled(true);
@@ -229,7 +230,7 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Create a proxy listener to update day plan holiday model */
-	protected ProxyListener<DayPlan> createDayPlanListener() {
+	private ProxyListener<DayPlan> createDayPlanListener() {
 		return new ProxyListener<DayPlan>() {
 			public void proxyAdded(DayPlan dp) {}
 			public void enumerationComplete() {}
@@ -250,7 +251,7 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Create jobs for widget actions */
-	protected void createWidgetJobs() {
+	private void createWidgetJobs() {
 		h_table.getSelectionModel().addListSelectionListener(
 			new IListSelectionAdapter()
 		{
@@ -271,7 +272,7 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Update the calendar widget */
-	protected void updateCalendarWidget() {
+	private void updateCalendarWidget() {
 		setMonthLabel();
 		setYearLabel();
 		cal_widget.setMonth(month);
@@ -281,17 +282,17 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Set the month label */
-	protected void setMonthLabel() {
+	private void setMonthLabel() {
 		month_lbl.setText(MONTH_LBL.format(month.getTime()));
 	}
 
 	/** Set the year label */
-	protected void setYearLabel() {
+	private void setYearLabel() {
 		year_lbl.setText(YEAR_LBL.format(month.getTime()));
 	}
 
 	/** Select a day plan */
-	protected void selectDayPlan() {
+	private void selectDayPlan() {
 		Object item = day_cbox.getSelectedItem();
 		if(item != null) {
 			DayPlan dp = getSelectedPlan();
@@ -311,7 +312,7 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Get the selected day plan */
-	protected DayPlan getSelectedPlan() {
+	private DayPlan getSelectedPlan() {
 		Object item = day_cbox.getSelectedItem();
 		if(item != null)
 			return DayPlanHelper.lookup(item.toString().trim());
@@ -320,7 +321,7 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Delete the selected day plan */
-	protected void deleteSelectedPlan() {
+	private void deleteSelectedPlan() {
 		Object item = day_cbox.getSelectedItem();
 		if(item != null) {
 			String name = item.toString();
@@ -332,13 +333,13 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Change the selected holiday */
-	protected void selectHoliday() {
+	private void selectHoliday() {
 		Holiday h = h_model.getProxy(h_table.getSelectedRow());
 		del_holiday.setEnabled(h_model.canRemove(h));
 	}
 
 	/** Delete the selected holiday */
-	protected void deleteSelectedHoliday() {
+	private void deleteSelectedHoliday() {
 		ListSelectionModel s = h_table.getSelectionModel();
 		int row = s.getMinSelectionIndex();
 		if(row >= 0)
@@ -351,7 +352,7 @@ public class DayPlanPanel extends JPanel {
 	}
 
 	/** Check if the user can add */
-	protected boolean canAdd(String oname) {
+	private boolean canAdd(String oname) {
 		return session.canAdd(DayPlan.SONAR_TYPE, oname);
 	}
 
