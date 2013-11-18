@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.detector;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -22,15 +24,14 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sched.FocusLostJob;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -167,25 +168,27 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 
 	/** Create the jobs */
 	private void createJobs() {
-		lane_spn.addChangeListener(new ChangeJob(WORKER) {
-			public void perform() {
+		lane_spn.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)lane_spn.getValue();
 				setLaneNumber(n.shortValue());
 			}
 		});
-		field_spn.addChangeListener(new ChangeJob(WORKER) {
-			public void perform() {
+		field_spn.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
 				Number n = (Number)field_spn.getValue();
 				setFieldLength(n.floatValue());
 			}
 		});
-		fake_txt.addFocusListener(new FocusLostJob(WORKER) {
-			public void perform() {
+		fake_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				setFake(fake_txt.getText().trim());
 			}
 		});
-		note_txt.addFocusListener(new FocusLostJob(WORKER) {
-			public void perform() {
+		note_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
 				setNotes(note_txt.getText().trim());
 			}
 		});
@@ -253,9 +256,8 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 
 	/** Update one attribute */
 	public final void update(final Detector d, final String a) {
-		// Serialize on WORKER thread
-		WORKER.addJob(new Job() {
-			public void perform() {
+		runSwing(new Runnable() {
+			public void run() {
 				doUpdate(d, a);
 			}
 		});
@@ -304,9 +306,8 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 
 	/** Clear all attributes */
 	public final void clear() {
-		// Serialize on WORKER thread
-		WORKER.addJob(new Job() {
-			public void perform() {
+		runSwing(new Runnable() {
+			public void run() {
 				doClear();
 			}
 		});
