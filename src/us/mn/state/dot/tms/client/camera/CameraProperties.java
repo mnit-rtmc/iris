@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JButton;
@@ -38,7 +39,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
@@ -57,8 +58,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Controller action */
-	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
+	private final IAction2 controller = new IAction2("controller") {
+		protected void doActionPerformed(ActionEvent e) {
 			controllerPressed();
 		}
 	};
@@ -78,15 +79,15 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		new JComboBox(EncoderType.getDescriptions());
 
 	/** Encoder type action */
-	private final IAction encoder_type = new IAction("camera.encoder.type"){
-		protected void do_perform() {
+	private final IAction2 encoder_type = new IAction2("camera.encoder.type"){
+		protected void doActionPerformed(ActionEvent e) {
 		      proxy.setEncoderType(enc_type_cbx.getSelectedIndex());
 		}
 	};
 
 	/** Checkbox to allow publishing camera images */
-	private final JCheckBox publish_chk = new JCheckBox(new IAction(null) {
-		protected void do_perform() {
+	private final JCheckBox publish_chk = new JCheckBox(new IAction2(null) {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setPublish(publish_chk.isSelected());
 		}
 	});

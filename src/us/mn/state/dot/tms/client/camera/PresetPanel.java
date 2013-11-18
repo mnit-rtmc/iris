@@ -15,11 +15,12 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 
 /**
  * A panel containing buttons for recalling and storing camera presets.
@@ -49,8 +50,8 @@ public class PresetPanel extends JPanel {
 
 	/** Create a preset button */
 	private JButton createPresetButton(final int num) {
-		JButton btn = new JButton(new IAction("camera.preset") {
-			protected void do_perform() {
+		JButton btn = new JButton(new IAction2("camera.preset") {
+			protected void doActionPerformed(ActionEvent e) {
 				Camera c = camera;
 				if(c != null)
 					c.setRecallPreset(num);

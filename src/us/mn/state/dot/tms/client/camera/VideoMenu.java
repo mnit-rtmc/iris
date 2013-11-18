@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,11 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -29,10 +30,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class VideoMenu extends JMenu {
 
 	/** User Session */
-	protected final Session session;
+	private final Session session;
 
 	/** Desktop */
-	protected final SmartDesktop desktop;
+	private final SmartDesktop desktop;
 
 	/** Create a new video menu */
 	public VideoMenu(final Session s) {
@@ -48,22 +49,22 @@ public class VideoMenu extends JMenu {
 	}
 
 	/** Create the camera menu item */
-	protected JMenuItem createCameraItem() {
+	private JMenuItem createCameraItem() {
 		if(!CameraForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("camera.plural") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("camera.plural") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new CameraForm(session));
 			}
 		});
 	}
 
 	/** Create the video monitor menu item */
-	protected JMenuItem createVideoMonitorItem() {
+	private JMenuItem createVideoMonitorItem() {
 		if(!VideoMonitorForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("video.monitor") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("video.monitor") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new VideoMonitorForm(session));
 			}
 		});
