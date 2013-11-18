@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -40,7 +41,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
@@ -58,8 +59,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	static private final int ROW_HEIGHT = 24;
 
 	/** Comm link action */
-	private final IAction comm_link = new IAction("comm.link") {
-		protected void do_perform() {
+	private final IAction2 comm_link = new IAction2("comm.link") {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setCommLink(
 				(CommLink)comm_link_cbx.getSelectedItem());
 		}
@@ -81,17 +82,17 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final JPasswordField password = new JPasswordField(16);
 
 	/** Action to clear the access password */
-	private final IAction clear_pwd = new IAction(
+	private final IAction2 clear_pwd = new IAction2(
 		"controller.password.clear")
 	{
-		protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setPassword(null);
 		}
 	};
 
 	/** Active checkbox */
-	private final JCheckBox active_chk = new JCheckBox(new IAction(null) {
-		protected void do_perform() {
+	private final JCheckBox active_chk = new JCheckBox(new IAction2(null) {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setActive(active_chk.isSelected());
 		}
 	});
@@ -103,8 +104,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final JTextField mile_txt = new JTextField(10);
 
 	/** Cabinet style action */
-	private final IAction cab_style = new IAction("cabinet.style") {
-		protected void do_perform() {
+	private final IAction2 cab_style = new IAction2("cabinet.style") {
+		protected void doActionPerformed(ActionEvent e) {
 			cabinet.setStyle((CabinetStyle)
 				cab_style_cbx.getSelectedItem());
 		}
@@ -156,15 +157,17 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final JLabel failed_lbl = IPanel.createValueLabel();
 
 	/** Clear error status action */
-	private final IAction clear_err = new IAction("controller.error.clear"){
-		protected void do_perform() {
+	private final IAction2 clear_err =
+		new IAction2("controller.error.clear")
+	{
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setCounters(true);
 		}
 	};
 
 	/** Reset action */
-	private final IAction reset = new IAction("controller.reset") {
-		protected void do_perform() {
+	private final IAction2 reset = new IAction2("controller.reset") {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setDownload(true);
 		}
 	};

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,11 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -29,10 +30,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class MaintenanceMenu extends JMenu {
 
 	/** User Session */
-	protected final Session session;
+	private final Session session;
 
 	/** Desktop */
-	protected final SmartDesktop desktop;
+	private final SmartDesktop desktop;
 
 	/** Create a new maintenance menu */
 	public MaintenanceMenu(final Session s) {
@@ -54,44 +55,44 @@ public class MaintenanceMenu extends JMenu {
 	}
 
 	/** Create the comm link menu item */
-	protected JMenuItem createCommLinkItem() {
+	private JMenuItem createCommLinkItem() {
 		if(!CommLinkForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("comm.links") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("comm.links") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new CommLinkForm(session));
 			}
 		});
 	}
 
 	/** Create the modem menu item */
-	protected JMenuItem createModemItem() {
+	private JMenuItem createModemItem() {
 		if(!ModemForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("modems") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("modems") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new ModemForm(session));
 			}
 		});
 	}
 
 	/** Create the alarm menu item */
-	protected JMenuItem createAlarmItem() {
+	private JMenuItem createAlarmItem() {
 		if(!AlarmForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("alarm.plural") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("alarm.plural") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new AlarmForm(session));
 			}
 		});
 	}
 
 	/** Create the cabinet style menu item */
-	protected JMenuItem createCabinetStyleItem() {
+	private JMenuItem createCabinetStyleItem() {
 		if(!CabinetStyleForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("cabinet.styles") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("cabinet.styles") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new CabinetStyleForm(session));
 			}
 		});

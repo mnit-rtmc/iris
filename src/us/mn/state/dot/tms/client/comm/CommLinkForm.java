@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.comm;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
@@ -38,7 +39,7 @@ import us.mn.state.dot.tms.ControllerHelper;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -80,8 +81,8 @@ public class CommLinkForm extends AbstractForm {
 	private final JLabel link_status = new JLabel();
 
 	/** Action to delete the selected comm link */
-	private final IAction delete_link = new IAction("comm.link.delete") {
-		protected void do_perform() {
+	private final IAction2 delete_link = new IAction2("comm.link.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -102,8 +103,8 @@ public class CommLinkForm extends AbstractForm {
 	private final RowFilter<FailedControllerModel, Integer> filter;
 
 	/** Action to show controller properties */
-	private final IAction controller = new IAction("controller") {
-		protected void do_perform() {
+	private final IAction2 controller = new IAction2("controller") {
+		protected void doActionPerformed(ActionEvent e) {
 			doPropertiesAction();
 		}
 	};
@@ -112,8 +113,8 @@ public class CommLinkForm extends AbstractForm {
 	private final JButton ctr_props = new JButton(controller);
 
 	/** Action to delete the selected controller */
-	private final IAction del_ctr = new IAction("controller.delete") {
-		protected void do_perform() {
+	private final IAction2 del_ctr = new IAction2("controller.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel cs = ctable.getSelectionModel();
 			int row = cs.getMinSelectionIndex();
 			if(row >= 0)
@@ -122,8 +123,8 @@ public class CommLinkForm extends AbstractForm {
 	};
 
 	/** Action to go to a failed controller */
-	private final IAction go_ctrl = new IAction("controller.go") {
-		protected void do_perform() {
+	private final IAction2 go_ctrl = new IAction2("controller.go") {
+		protected void doActionPerformed(ActionEvent e) {
 			goFailedController();
 		}
 	};
