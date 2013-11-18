@@ -31,15 +31,14 @@ import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.table.TableRowSorter;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -184,15 +183,17 @@ public class CommLinkForm extends AbstractForm {
 	private void createJobs() {
 		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionJob(WORKER) {
-			public void perform() {
+		s.addListSelectionListener(new IListSelectionAdapter() {
+			@Override
+			public void valueChanged() {
 				selectCommLink();
 			}
 		});
 		ListSelectionModel cs = ctable.getSelectionModel();
 		cs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		cs.addListSelectionListener(new ListSelectionJob(WORKER) {
-			public void perform() {
+		cs.addListSelectionListener(new IListSelectionAdapter() {
+			@Override
+			public void valueChanged() {
 				selectController();
 			}
 		});
