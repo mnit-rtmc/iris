@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,17 @@
  */
 package us.mn.state.dot.tms.client.warning;
 
+import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 
 /**
  * Action to deploy a warning sign.
  *
  * @author Douglas Lau
  */
-public class DeployAction extends IAction {
+public class DeployAction extends IAction2 {
 
 	/** Proxy selection model */
 	private final ProxySelectionModel<WarningSign> s_model;
@@ -35,7 +36,7 @@ public class DeployAction extends IAction {
 	}
 
 	/** Actually perform the action */
-	protected void do_perform() {
+	protected void doActionPerformed(ActionEvent e) {
 		for(WarningSign s: s_model.getSelected())
 			s.setDeployed(true);
 		s_model.clearSelection();
