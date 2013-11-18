@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,14 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.warning.WarningSignForm;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -32,10 +33,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class SignMenu extends JMenu {
 
 	/** User Session */
-	protected final Session session;
+	private final Session session;
 
 	/** Desktop */
-	protected final SmartDesktop desktop;
+	private final SmartDesktop desktop;
 
 	/** Create a new sign menu */
 	public SignMenu(final Session s) {
@@ -60,18 +61,18 @@ public class SignMenu extends JMenu {
 	}
 
 	/** Create the DMS menu item */
-	protected JMenuItem createDmsItem() {
+	private JMenuItem createDmsItem() {
 		if(!DMSForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("dms") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("dms") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(createDMSForm());
 			}
 		});
 	}
 
 	/** Create the DMS form */
-	protected AbstractForm createDMSForm() {
+	private AbstractForm createDMSForm() {
 		if(SystemAttrEnum.DMS_FORM.getInt() == 2)
 			return new DMSForm2(session);
 		else
@@ -79,11 +80,11 @@ public class SignMenu extends JMenu {
 	}
 
 	/** Create the font menu item */
-	protected JMenuItem createFontItem() {
+	private JMenuItem createFontItem() {
 		if(!FontForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("font.title") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("font.title") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new FontForm(session));
 			}
 		});
@@ -93,30 +94,30 @@ public class SignMenu extends JMenu {
 	private JMenuItem createGraphicItem() {
 		if(!GraphicForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("graphics") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("graphics") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new GraphicForm(session));
 			}
 		});
 	}
 
 	/** Create the quick message menu item */
-	protected JMenuItem createQuickMessageItem() {
+	private JMenuItem createQuickMessageItem() {
 		if(!QuickMessageForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("quick.messages") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("quick.messages") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new QuickMessageForm(session));
 			}
 		});
 	}
 
 	/** Create the warning sign menu item */
-	protected JMenuItem createWarningSignItem() {
+	private JMenuItem createWarningSignItem() {
 		if(!WarningSignForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("warning.signs") {
-			protected void do_perform() {
+		return new JMenuItem(new IAction2("warning.signs") {
+			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new WarningSignForm(session));
 			}
 		});

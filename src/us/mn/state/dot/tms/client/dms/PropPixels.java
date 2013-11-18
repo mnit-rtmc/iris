@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -26,7 +27,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
@@ -54,16 +55,16 @@ public class PropPixels extends IPanel {
 		400, true);
 
 	/** Action to query pixel failures */
-	private final IAction query_pixels = new IAction("dms.query.pixels") {
-		@Override protected void do_perform() {
+	private final IAction2 query_pixels = new IAction2("dms.query.pixels") {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				QUERY_PIXEL_FAILURES.ordinal());
 		}
 	};
 
 	/** Action to test pixel failures */
-	private final IAction test_pixels = new IAction("dms.test.pixels") {
-		@Override protected void do_perform() {
+	private final IAction2 test_pixels = new IAction2("dms.test.pixels") {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(
 				DeviceRequest.TEST_PIXELS.ordinal());
 		}

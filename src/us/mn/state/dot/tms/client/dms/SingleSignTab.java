@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -46,7 +47,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.units.Interval;
@@ -77,9 +78,9 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 	/** AWS controlled checkbox (optional) */
 	private final JCheckBox aws_control_chk = new JCheckBox(
-		new IAction("item.style.aws.controlled")
+		new IAction2("item.style.aws.controlled")
 	{
-		protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			DMS proxy = watching;
 			if(proxy != null) {
 				proxy.setAwsControlled(

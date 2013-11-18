@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -21,7 +22,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -108,8 +109,8 @@ public class PropConfiguration extends IPanel {
 	private final JLabel c_height_lbl = createValueLabel();
 
 	/** Button to query configuration */
-	private final IAction config = new IAction("dms.query.config") {
-		@Override protected void do_perform() {
+	private final IAction2 config = new IAction2("dms.query.config") {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				QUERY_CONFIGURATION.ordinal());
 		}

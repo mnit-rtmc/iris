@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.IOException;
@@ -37,7 +38,7 @@ import us.mn.state.dot.tms.PixmapGraphic;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -111,21 +112,23 @@ public class GraphicForm extends AbstractForm {
 	}
 
 	/** Table model for graphics */
-	protected final GraphicModel model;
+	private final GraphicModel model;
 
 	/** Table to hold the Graphic list */
-	protected final ZTable table = new ZTable();
+	private final ZTable table = new ZTable();
 
 	/** Action to create a new graphic */
-	private final IAction create_gr = new IAction("graphic.create") {
-		@Override protected void do_perform() throws Exception {
+	private final IAction2 create_gr = new IAction2("graphic.create") {
+		protected void doActionPerformed(ActionEvent e)
+			throws Exception
+		{
 			createGraphic();
 		}
 	};
 
 	/** Action to delete the selected proxy */
-	private final IAction del_gr = new IAction("graphic.delete") {
-		@Override protected void do_perform() {
+	private final IAction2 del_gr = new IAction2("graphic.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)
@@ -134,10 +137,10 @@ public class GraphicForm extends AbstractForm {
 	};
 
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Type cache */
-	protected final TypeCache<Graphic> cache;
+	private final TypeCache<Graphic> cache;
 
 	/** Create a new graphic form */
 	public GraphicForm(Session s) {
@@ -160,7 +163,7 @@ public class GraphicForm extends AbstractForm {
 	}
 
 	/** Create graphic panel */
-	protected JPanel createGraphicPanel() {
+	private JPanel createGraphicPanel() {
 		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new IListSelectionAdapter() {
@@ -183,7 +186,7 @@ public class GraphicForm extends AbstractForm {
 	}
 
 	/** Change the selected proxy */
-	protected void selectProxy() {
+	private void selectProxy() {
 		Graphic proxy = model.getProxy(table.getSelectedRow());
 		del_gr.setEnabled(model.canRemove(proxy));
 	}

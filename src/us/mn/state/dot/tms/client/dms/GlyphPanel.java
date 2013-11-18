@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -28,7 +29,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -66,27 +67,27 @@ public class GlyphPanel extends JPanel {
 
 	/** "Narrow" button */
 	private final JButton narrow_btn = new JButton(
-		new IAction("font.glyph.narrow")
+		new IAction2("font.glyph.narrow")
 	{
-		protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			narrowPressed();
 		}
 	});
 
 	/** "Widen" button */
 	private final JButton widen_btn = new JButton(
-		new IAction("font.glyph.widen")
+		new IAction2("font.glyph.widen")
 	{
-		protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			widenPressed();
 		}
 	});
 
 	/** Apply button */
 	private final JButton apply_btn = new JButton(
-		new IAction("font.glyph.apply")
+		new IAction2("font.glyph.apply")
 	{
-		protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			applyPressed();
 		}
 	});

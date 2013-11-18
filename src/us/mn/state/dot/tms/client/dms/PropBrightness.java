@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.event.ActionEvent;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -22,7 +23,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -45,24 +46,24 @@ public class PropBrightness extends IPanel {
 	private final JLabel output_lbl = createValueLabel();
 
 	/** Current brightness low feedback action */
-	private final IAction bright_low = new IAction("dms.brightness.low") {
-		protected void do_perform() {
+	private final IAction2 bright_low = new IAction2("dms.brightness.low") {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				BRIGHTNESS_TOO_DIM.ordinal());
 		}
 	};
 
 	/** Current brightness good feedback action */
-	private final IAction bright_good = new IAction("dms.brightness.good") {
-		protected void do_perform() {
+	private final IAction2 bright_good = new IAction2("dms.brightness.good") {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				BRIGHTNESS_GOOD.ordinal());
 		}
 	};
 
 	/** Current brightness high feedback action */
-	private final IAction bright_high = new IAction("dms.brightness.high") {
-		protected void do_perform() {
+	private final IAction2 bright_high = new IAction2("dms.brightness.high") {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				BRIGHTNESS_TOO_BRIGHT.ordinal());
 		}

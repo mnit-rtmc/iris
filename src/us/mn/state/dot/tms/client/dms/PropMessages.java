@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -42,7 +43,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -75,8 +76,8 @@ public class PropMessages extends JPanel {
 	private final ZTable group_table = new ZTable();
 
 	/** Action to delete a sign group */
-	private final IAction delete_group = new IAction("dms.group.delete") {
-		@Override protected void do_perform() {
+	private final IAction2 delete_group = new IAction2("dms.group.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			SignGroup group = getSelectedGroup();
 			if(group != null)
 				group.destroy();
@@ -90,8 +91,8 @@ public class PropMessages extends JPanel {
 	private final ZTable sign_text_table = new ZTable();
 
 	/** Action to delete sign text message */
-	private final IAction delete_text = new IAction("dms.message.delete") {
-		@Override protected void do_perform() {
+	private final IAction2 delete_text = new IAction2("dms.message.delete") {
+		 protected void doActionPerformed(ActionEvent e) {
 			SignText sign_text = getSelectedSignText();
 			if(sign_text != null)
 				sign_text.destroy();
@@ -110,18 +111,18 @@ public class PropMessages extends JPanel {
 
 	/** AWS allowed check box */
 	private final JCheckBox aws_allowed_chk = new JCheckBox(
-		new IAction("dms.aws.allowed")
+		new IAction2("dms.aws.allowed")
 	{
-		@Override protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setAwsAllowed(aws_allowed_chk.isSelected());
 		}
 	});
 
 	/** AWS controlled check box */
 	private final JCheckBox aws_control_chk = new JCheckBox(
-		new IAction("item.style.aws.controlled")
+		new IAction2("item.style.aws.controlled")
 	{
-		@Override protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			proxy.setAwsControlled(aws_control_chk.isSelected());
 		}
 	});
@@ -150,8 +151,8 @@ public class PropMessages extends JPanel {
 		sign_group_model.initialize();
 		initGroupTable();
 		initSignTextTable();
-		font_cbx.setAction(new IAction("font") {
-			@Override protected void do_perform() {
+		font_cbx.setAction(new IAction2("font") {
+			protected void doActionPerformed(ActionEvent e) {
 				proxy.setDefaultFont(
 					(Font)font_cbx.getSelectedItem());
 			}

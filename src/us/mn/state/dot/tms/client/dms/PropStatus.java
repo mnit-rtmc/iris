@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.event.ActionEvent;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -23,7 +24,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.units.Temperature;
@@ -94,36 +95,36 @@ public class PropStatus extends IPanel {
 	private final JLabel operation_lbl = createValueLabel();
 
 	/** Query message action */
-	private final IAction query_msg = new IAction("dms.query.msg",
+	private final IAction2 query_msg = new IAction2("dms.query.msg",
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
 	{
-		protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				QUERY_MESSAGE.ordinal());
 		}
 	};
 
 	/** Reset DMS action */
-	private final IAction reset = new IAction("dms.reset",
+	private final IAction2 reset = new IAction2("dms.reset",
 		SystemAttrEnum.DMS_RESET_ENABLE)
 	{
-		protected void do_perform() {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				RESET_DEVICE.ordinal());
 		}
 	};
 
 	/** Query status action */
-	private final IAction query_status = new IAction("dms.query.status") {
-		protected void do_perform() {
+	private final IAction2 query_status = new IAction2("dms.query.status") {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				QUERY_STATUS.ordinal());
 		}
 	};
 
 	/** Send settings action */
-	private final IAction settings = new IAction("device.send.settings") {
-		protected void do_perform() {
+	private final IAction2 settings = new IAction2("device.send.settings") {
+		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
 		}

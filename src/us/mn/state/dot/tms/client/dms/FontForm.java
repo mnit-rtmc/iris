@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
@@ -38,7 +39,7 @@ import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IAction2;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -65,8 +66,8 @@ public class FontForm extends AbstractForm {
 	private final ZTable f_table = new ZTable();
 
 	/** Action to delete the selected font */
-	private final IAction del_font = new IAction("font.delete") {
-		@Override protected void do_perform() {
+	private final IAction2 del_font = new IAction2("font.delete") {
+		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = f_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
 			if(row >= 0)

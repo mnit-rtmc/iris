@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,15 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.tms.client.widget.IAction;
+import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.client.widget.IAction2;
 
 /**
  * Action to blank all selected DMS.
  *
  * @author Douglas Lau
  */
-public class BlankDmsAction extends IAction {
+public class BlankDmsAction extends IAction2 {
 
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
@@ -33,7 +34,7 @@ public class BlankDmsAction extends IAction {
 	}
 
 	/** Actually perform the action */
-	protected void do_perform() {
+	protected void doActionPerformed(ActionEvent e) {
 		dispatcher.sendBlankMessage();
 	}
 }
