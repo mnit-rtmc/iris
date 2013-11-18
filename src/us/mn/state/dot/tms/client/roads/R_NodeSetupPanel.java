@@ -31,7 +31,6 @@ import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
 import static us.mn.state.dot.tms.R_Node.MIN_SHIFT;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
