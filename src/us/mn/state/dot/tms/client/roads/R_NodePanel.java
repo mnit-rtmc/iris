@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,22 +33,22 @@ import us.mn.state.dot.tms.utils.I18N;
 public class R_NodePanel extends JPanel {
 
 	/** Proxy watcher */
-	protected final ProxyWatcher<R_Node> watcher;
+	private final ProxyWatcher<R_Node> watcher;
 
 	/** Tabbed pane */
-	protected final JTabbedPane tab = new JTabbedPane();
+	private final JTabbedPane tab = new JTabbedPane();
 
 	/** Location panel */
-	protected final R_NodeLocationPanel loc_pnl;
+	private final R_NodeLocationPanel loc_pnl;
 
 	/** Setup panel */
-	protected final R_NodeSetupPanel setup_pnl;
+	private final R_NodeSetupPanel setup_pnl;
 
 	/** Detector panel */
-	protected final R_NodeDetectorPanel det_pnl;
+	private final R_NodeDetectorPanel det_pnl;
 
 	/** Proxy view */
-	protected final ProxyView<R_Node> view = new ProxyView<R_Node>() {
+	private final ProxyView<R_Node> view = new ProxyView<R_Node>() {
 		public void update(R_Node n, String a) {
 			loc_pnl.update(n, a);
 			setup_pnl.update(n, a);
