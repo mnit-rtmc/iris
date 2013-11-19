@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Ramp meter helper methods.
@@ -46,5 +47,24 @@ public class RampMeterHelper extends BaseHelper {
 			return meter.getCamera();
 		else
 			return null;
+	}
+
+	/** Format the meter release rate */
+	static public String formatRelease(Integer rate) {
+		if(rate !=  null) {
+			return rate.toString() + " " +
+				I18N.get("units.vehicles.per.hour");
+		} else
+			return I18N.get("units.na");
+	}
+
+	/** Format the meter cycle time from the given release rate */
+	static public String formatCycle(Integer rate) {
+		if(rate != null) {
+			int c = Math.round(36000f / rate);
+			return "" + (c / 10) + "." + (c % 10) + " " +
+				I18N.get("units.s");
+		} else
+			return I18N.get("units.na");
 	}
 }

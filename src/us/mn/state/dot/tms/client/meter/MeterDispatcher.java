@@ -51,25 +51,6 @@ import us.mn.state.dot.tms.utils.I18N;
 public class MeterDispatcher extends IPanel
 	implements ProxyListener<RampMeter>, ProxySelectionListener<RampMeter>
 {
-	/** Format the meter release rate */
-	static public String formatRelease(Integer rate) {
-		if(rate !=  null) {
-			return rate.toString() + " " +
-				I18N.get("units.vehicles.per.hour");
-		} else
-			return I18N.get("units.na");
-	}
-
-	/** Format the meter cycle time from the given release rate */
-	static public String formatCycle(Integer rate) {
-		if(rate != null) {
-			int c = Math.round(36000f / rate);
-			return "" + (c / 10) + "." + (c % 10) + " " +
-				I18N.get("units.s");
-		} else
-			return I18N.get("units.na");
-	}
-
 	/** Name component */
 	private final JLabel name_lbl = createValueLabel();
 
@@ -287,14 +268,14 @@ public class MeterDispatcher extends IPanel
 		if(a == null || a.equals("operation"))
 			operation_lbl.setText(meter.getOperation());
 		if(a == null || a.equals("rate")) {
-			Integer rate = meter.getRate();
-			release_lbl.setText(formatRelease(rate));
-			cycle_lbl.setText(formatCycle(rate));
-			if(rate != null)
+			Integer rt = meter.getRate();
+			release_lbl.setText(RampMeterHelper.formatRelease(rt));
+			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
+			if(rt != null)
 				on_btn.setSelected(true);
 			else
 				off_btn.setSelected(true);
-			boolean up = isUpdatePermitted(meter) && rate != null;
+			boolean up = isUpdatePermitted(meter) && rt != null;
 			shrink_btn.setEnabled(up);
 			grow_btn.setEnabled(up);
 		}

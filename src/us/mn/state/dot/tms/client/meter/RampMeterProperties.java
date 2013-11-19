@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.MeterAlgorithm;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
@@ -306,10 +307,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			pm_target_txt.setText("" + proxy.getPmTarget());
 		}
 		if(a == null || a.equals("rate")) {
-			Integer rate = proxy.getRate();
-			cycle_lbl.setText(MeterDispatcher.formatCycle(rate));
-			release_lbl.setText(MeterDispatcher.formatRelease(
-				rate));
+			Integer rt = proxy.getRate();
+			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
+			release_lbl.setText(RampMeterHelper.formatRelease(rt));
 		}
 		if(a == null || a.equals("queue")) {
 			RampMeterQueue q = RampMeterQueue.fromOrdinal(
