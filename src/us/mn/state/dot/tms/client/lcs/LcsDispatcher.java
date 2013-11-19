@@ -129,7 +129,6 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray>,
 		TypeCache<LCSArray> cache =
 			session.getSonarState().getLcsCache().getLCSArrays();
 		watcher = new ProxyWatcher<LCSArray>(cache, this, true);
-		sel_model.addProxySelectionListener(this);
 	}
 
 	/** Initialize the widgets on the panel */
@@ -155,6 +154,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray>,
 		add(createButtonPanel(), Stretch.RIGHT);
 		watcher.initialize();
 		clear();
+		sel_model.addProxySelectionListener(this);
 	}
 
 	/** Build the indication selector */
@@ -177,23 +177,24 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray>,
 	}
 
 	/** Dispose of the LCS dispatcher */
+	@Override
 	public void dispose() {
 		watcher.dispose();
 		sel_model.removeProxySelectionListener(this);
 		ind_selector.dispose();
 		clear();
-		removeAll();
+		super.dispose();
 	}
 
 	/** Called whenever a sign is added to the selection */
 	@Override
-	public void selectionAdded(LCSArray s) {
+	public void selectionAdded(LCSArray la) {
 		setSelected(getSelected());
 	}
 
 	/** Called whenever a sign is removed from the selection */
 	@Override
-	public void selectionRemoved(LCSArray s) {
+	public void selectionRemoved(LCSArray la) {
 		setSelected(getSelected());
 	}
 
