@@ -28,8 +28,8 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  */
 public class RampMeterTab extends MapTab<RampMeter> {
 
-	/** Meter status panel */
-	private final MeterStatusPanel statusPanel;
+	/** Ramp meter dispatcher */
+	private final MeterDispatcher dispatcher;
 
 	/** Summary of meters of each status */
 	private final StyleSummary<RampMeter> summary;
@@ -37,9 +37,9 @@ public class RampMeterTab extends MapTab<RampMeter> {
 	/** Create a new ramp meter tab */
   	public RampMeterTab(Session session, MeterManager man) {
 		super(man);
-		statusPanel = new MeterStatusPanel(session, man);
+		dispatcher = new MeterDispatcher(session, man);
 		summary = man.createStyleSummary();
-		add(statusPanel, BorderLayout.NORTH);
+		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}
 
@@ -48,6 +48,6 @@ public class RampMeterTab extends MapTab<RampMeter> {
 		super.dispose();
 		manager.getSelectionModel().clearSelection();
 		summary.dispose();
-		statusPanel.dispose();
+		dispatcher.dispose();
 	}
 }

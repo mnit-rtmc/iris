@@ -307,8 +307,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		}
 		if(a == null || a.equals("rate")) {
 			Integer rate = proxy.getRate();
-			cycle_lbl.setText(MeterStatusPanel.formatCycle(rate));
-			release_lbl.setText(MeterStatusPanel.formatRelease(
+			cycle_lbl.setText(MeterDispatcher.formatCycle(rate));
+			release_lbl.setText(MeterDispatcher.formatRelease(
 				rate));
 		}
 		if(a == null || a.equals("queue")) {

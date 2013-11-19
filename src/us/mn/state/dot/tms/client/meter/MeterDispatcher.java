@@ -42,13 +42,13 @@ import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * The MeterStatusPanel provides a GUI representation for RampMeter status
+ * The MeterDispatcher provides a GUI representation for RampMeter status
  * information.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class MeterStatusPanel extends IPanel
+public class MeterDispatcher extends IPanel
 	implements ProxyListener<RampMeter>, ProxySelectionListener<RampMeter>
 {
 	/** Format the meter release rate */
@@ -127,8 +127,8 @@ public class MeterStatusPanel extends IPanel
 	/** Selected ramp meter */
 	private RampMeter selected = null;
 
-	/** Create a new MeterStatusPanel */
-	public MeterStatusPanel(Session s, MeterManager m) {
+	/** Create a new ramp meter dispatcher */
+	public MeterDispatcher(Session s, MeterManager m) {
 		session = s;
 		manager = m;
 		selectionModel = manager.getSelectionModel();
