@@ -410,7 +410,7 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Update an attribute for the given proxy.
-	 * FIXME: this should be in ProxyDispatcher base class */
+	 * FIXME: this should use ProxyWatcher */
 	protected void updateAttribute(final Incident proxy, final String a) {
 		runSwing(new Runnable() {
 			public void run() {
