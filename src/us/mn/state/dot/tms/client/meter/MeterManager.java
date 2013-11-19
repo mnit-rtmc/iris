@@ -43,19 +43,19 @@ import us.mn.state.dot.tms.utils.I18N;
 public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Ramp meter map object marker */
-	static protected final MeterMarker MARKER = new MeterMarker();
+	static private final MeterMarker MARKER = new MeterMarker();
 
 	/** Color to display available meters */
-	static protected final Color COLOR_AVAILABLE = new Color(64, 64, 192);
+	static private final Color COLOR_AVAILABLE = new Color(64, 64, 192);
 
 	/** Color to display warning meters */
-	static protected final Color COLOR_WARNING = new Color(192, 96, 0);
+	static private final Color COLOR_WARNING = new Color(192, 96, 0);
 
 	/** Color to display deployed meters */
-	static protected final Color COLOR_DEPLOYED = new Color(192, 192, 0);
+	static private final Color COLOR_DEPLOYED = new Color(192, 192, 0);
 
 	/** Color to display metering meters */
-	static protected final Color COLOR_METERING = new Color(0, 192, 0);
+	static private final Color COLOR_METERING = new Color(0, 192, 0);
 
 	/** Create a new meter manager */
 	public MeterManager(Session s, GeoLocManager lm) {
@@ -69,12 +69,14 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Get longer proxy type name for display */
-	@Override public String getLongProxyType() {
+	@Override
+	public String getLongProxyType() {
 		return "ramp.meter.long";
 	}
 
 	/** Get the ramp meter cache */
-	@Override public TypeCache<RampMeter> getCache() {
+	@Override
+	public TypeCache<RampMeter> getCache() {
 		return session.getSonarState().getRampMeters();
 	}
 
@@ -89,11 +91,13 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for ramp meters */
+	@Override
 	protected ProxyTheme<RampMeter> createTheme() {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
 			MARKER);
@@ -124,6 +128,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Show the properties form for the selected proxy */
+	@Override
 	public void showPropertiesForm() {
 		if(s_model.getSelectedCount() == 1) {
 			for(RampMeter meter: s_model.getSelected())
@@ -132,12 +137,13 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Show the properteis form for the given proxy */
-	protected void showPropertiesForm(RampMeter meter) {
+	private void showPropertiesForm(RampMeter meter) {
 		SmartDesktop desktop = session.getDesktop();
 		desktop.show(new RampMeterProperties(session, meter));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		int n_selected = s_model.getSelectedCount();
 		if(n_selected < 1)
@@ -155,7 +161,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Create a popup menu for a single ramp meter selection */
-	protected JPopupMenu createSinglePopup(final RampMeter meter) {
+	private JPopupMenu createSinglePopup(final RampMeter meter) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(meter)));
@@ -184,11 +190,13 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(RampMeter proxy) {
 		return proxy.getGeoLoc();
 	}
 
 	/** Get the description of a proxy */
+	@Override
 	public String getDescription(RampMeter proxy) {
 		return proxy.getName() + " - " +
 			GeoLocHelper.getOnRampDescription(getGeoLoc(proxy));
