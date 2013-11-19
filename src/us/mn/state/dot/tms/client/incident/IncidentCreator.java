@@ -52,7 +52,8 @@ import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * GUI for creating new incidents.
+ * GUI for creating new incidents.  These incidents are created as "client"
+ * incidents, which may be edited before sending to the server.
  *
  * @author Douglas Lau
  */
@@ -71,10 +72,10 @@ public class IncidentCreator extends JPanel {
 	private final JToggleButton hazard_btn;
 
 	/** Lane type combo box */
-	private final JComboBox ltype_cbox;
+	private final JComboBox ltype_cbx;
 
 	/** Incident selection model */
-	private final ProxySelectionModel<Incident> selectionModel;
+	private final ProxySelectionModel<Incident> sel_model;
 
 	/** R_Node manager */
 	private final R_NodeManager r_node_manager;
@@ -94,10 +95,10 @@ public class IncidentCreator extends JPanel {
 
 	/** Create a new incident creator */
 	public IncidentCreator(Session s, ProxyTheme<Incident> theme,
-		ProxySelectionModel<Incident> sel_model)
+		ProxySelectionModel<Incident> sm)
 	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		selectionModel = sel_model;
+		sel_model = sm;
 		r_node_manager = s.getR_NodeManager();
 		client = s.getDesktop().client;
 		setBorder(BorderFactory.createTitledBorder(
@@ -110,7 +111,7 @@ public class IncidentCreator extends JPanel {
 			EventType.INCIDENT_ROADWORK, theme);
 		hazard_btn = createButton(ItemStyle.HAZARD,
 			EventType.INCIDENT_HAZARD, theme);
-		ltype_cbox = createLaneTypeCombo();
+		ltype_cbx = createLaneTypeCombo();
 		Box box = Box.createHorizontalBox();
 		box.add(crash_btn);
 		box.add(Box.createHorizontalStrut(4));
@@ -125,11 +126,11 @@ public class IncidentCreator extends JPanel {
 		box.add(Box.createHorizontalGlue());
 		box.add(new ILabel("incident.lane_type"));
 		box.add(Box.createHorizontalStrut(4));
-		box.add(ltype_cbox);
+		box.add(ltype_cbx);
 		box.add(Box.createHorizontalGlue());
 		add(box);
 		setEnabled(false);
-		selectionModel.addProxySelectionListener(sel_listener);
+		sel_model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Create the lane type combo box */
@@ -167,7 +168,7 @@ public class IncidentCreator extends JPanel {
 	/** Handler for button changed events */
 	private void buttonChanged(JToggleButton btn, EventType et) {
 		if(btn.isSelected()) {
-			selectionModel.clearSelection();
+			sel_model.clearSelection();
 			// NOTE: cannot use ButtonGroup for this because it
 			// will not let the user deselect a button by clicking
 			// on it once it has been selected.  Arrgh!
@@ -227,7 +228,7 @@ public class IncidentCreator extends JPanel {
 	private void createIncident(String replaces, EventType et,
 		SphericalMercatorPosition smp)
 	{
-		LaneType lt = (LaneType)ltype_cbox.getSelectedItem();
+		LaneType lt = (LaneType)ltype_cbx.getSelectedItem();
 		if(lt != null) {
 			createIncident(replaces, et, (IncidentDetail)null, lt,
 				smp);
@@ -259,7 +260,7 @@ public class IncidentCreator extends JPanel {
 				(float)pos.getLatitude(),
 				(float)pos.getLongitude(),
 				createImpact(n_lanes));
-			selectionModel.setSelected(ci);
+			sel_model.setSelected(ci);
 		}
 	}
 
@@ -345,7 +346,7 @@ public class IncidentCreator extends JPanel {
 			work_btn.setSelected(false);
 		if(hazard_btn.isSelected())
 			hazard_btn.setSelected(false);
-		ltype_cbox.setSelectedItem(LaneType.MAINLINE);
+		ltype_cbx.setSelectedItem(LaneType.MAINLINE);
 	}
 
 	/** Set enabled */
@@ -354,12 +355,12 @@ public class IncidentCreator extends JPanel {
 		stall_btn.setEnabled(e);
 		work_btn.setEnabled(e);
 		hazard_btn.setEnabled(e);
-		ltype_cbox.setEnabled(e);
+		ltype_cbx.setEnabled(e);
 	}
 
 	/** Dispose of the incident creator */
 	public void dispose() {
-		selectionModel.removeProxySelectionListener(sel_listener);
+		sel_model.removeProxySelectionListener(sel_listener);
 		removeAll();
 	}
 }
