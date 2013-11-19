@@ -159,7 +159,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		super(I18N.get("ramp.meter.long") + ": ", s, meter);
 		state = s.getSonarState();
 		loc_pnl = new LocationPanel(s);
-		lock_action = new LockMeterAction(meter, lock_cmb);
+		lock_action = new LockMeterAction(meter, lock_cmb,
+			isUpdatePermitted("mLock"));
 	}
 
 	/** Get the SONAR type cache */

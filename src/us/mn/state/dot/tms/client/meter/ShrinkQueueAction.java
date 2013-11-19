@@ -27,8 +27,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyAction;
 public class ShrinkQueueAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action the shrink the queue at the selected meter */
-	public ShrinkQueueAction(RampMeter p) {
-		super("ramp.meter.shrink", p);
+	public ShrinkQueueAction(RampMeter rm, boolean e) {
+		super("ramp.meter.shrink", rm);
+		setEnabled(e);
 	}
 
 	/** Actually perform the action */

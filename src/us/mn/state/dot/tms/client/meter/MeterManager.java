@@ -161,13 +161,15 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		p.add(makeMenuLabel(getDescription(meter)));
 		p.addSeparator();
 		p.add(new MapAction(desktop.client, meter, meter.getGeoLoc()));
-		p.addSeparator();
-		if(meter.getRate() != null) {
-			p.add(new ShrinkQueueAction(meter));
-			p.add(new GrowQueueAction(meter));
-			p.add(new TurnOffAction(meter));
-		} else
-			p.add(new TurnOnAction(meter));
+		if(session.isUpdatePermitted(meter)) {
+			p.addSeparator();
+			if(meter.getRate() != null) {
+				p.add(new ShrinkQueueAction(meter, true));
+				p.add(new GrowQueueAction(meter, true));
+				p.add(new TurnOffAction(meter, true));
+			} else
+				p.add(new TurnOnAction(meter, true));
+		}
 		if(TeslaAction.isConfigured()) {
 			p.addSeparator();
 			p.add(new TeslaAction<RampMeter>(meter));

@@ -31,19 +31,22 @@ public class LockMeterAction extends ProxyAction<RampMeter> {
 	private final JComboBox lock_cbx;
 
 	/** Create a new action to lock the selected ramp meter */
-	public LockMeterAction(RampMeter p, JComboBox c) {
-		super("ramp.meter.locked", p);
+	public LockMeterAction(RampMeter rm, JComboBox c, boolean e) {
+		super("ramp.meter.locked", rm);
 		lock_cbx = c;
+		setEnabled(e);
 	}
 
 	/** Actually perform the action */
 	protected void doActionPerformed(ActionEvent e) {
-		int s = lock_cbx.getSelectedIndex();
-		if(s >= 0) {
-			Integer lk = new Integer(s);
-			if(s == 0)
-				lk = null;
-			proxy.setMLock(lk);
+		if(proxy != null) {
+			int s = lock_cbx.getSelectedIndex();
+			if(s >= 0) {
+				Integer lk = new Integer(s);
+				if(s == 0)
+					lk = null;
+				proxy.setMLock(lk);
+			}
 		}
 	}
 }

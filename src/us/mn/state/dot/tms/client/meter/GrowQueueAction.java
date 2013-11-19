@@ -27,8 +27,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyAction;
 public class GrowQueueAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action to grow the queue at the selected meter */
-	public GrowQueueAction(RampMeter p) {
-		super("ramp.meter.grow", p);
+	public GrowQueueAction(RampMeter rm, boolean e) {
+		super("ramp.meter.grow", rm);
+		setEnabled(e);
 	}
 
 	/** Actually perform the action */

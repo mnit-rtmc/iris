@@ -28,12 +28,16 @@ import us.mn.state.dot.tms.client.proxy.ProxyAction;
 public class TurnOnAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action to turn on the selected ramp meter */
-	public TurnOnAction(RampMeter p) {
-		super("ramp.meter.on", p);
+	public TurnOnAction(RampMeter rm, boolean e) {
+		super("ramp.meter.on", rm);
+		setEnabled(e);
 	}
 
 	/** Actually perform the action */
 	protected void doActionPerformed(ActionEvent e) {
-		proxy.setRateNext(SystemAttributeHelper.getMeterMaxRelease());
+		if(proxy != null) {
+			proxy.setRateNext(
+				SystemAttributeHelper.getMeterMaxRelease());
+		}
 	}
 }

@@ -27,12 +27,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyAction;
 public class TurnOffAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action to turn off the selected ramp meter */
-	public TurnOffAction(RampMeter p) {
-		super("ramp.meter.off", p);
+	public TurnOffAction(RampMeter rm, boolean e) {
+		super("ramp.meter.off", rm);
+		setEnabled(e);
 	}
 
 	/** Actually perform the action */
 	protected void doActionPerformed(ActionEvent e) {
-		proxy.setRateNext(null);
+		if(proxy != null)
+			proxy.setRateNext(null);
 	}
 }
