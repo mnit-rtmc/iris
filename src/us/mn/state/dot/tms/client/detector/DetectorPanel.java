@@ -141,7 +141,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		r_node_btn.setVisible(r);
 		TypeCache<Detector> cache =
 			s.getSonarState().getDetCache().getDetectors();
-		watcher = new ProxyWatcher<Detector>(s, this, cache, false);
+		watcher = new ProxyWatcher<Detector>(cache, this, false);
 	}
 
 	/** Initialize the panel */
@@ -274,33 +274,33 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		if(a == null || a.equals("laneType")) {
 			type_cbx.setAction(null);
 			type_cbx.setSelectedIndex(d.getLaneType());
-			lane_type.setEnabled(watcher.canUpdate(d, "laneType"));
+			lane_type.setEnabled(session.canUpdate(d, "laneType"));
 			type_cbx.setAction(lane_type);
 		}
 		if(a == null || a.equals("laneNumber")) {
 			lane_spn.setValue(d.getLaneNumber());
-			lane_spn.setEnabled(watcher.canUpdate(d, "laneNumber"));
+			lane_spn.setEnabled(session.canUpdate(d, "laneNumber"));
 		}
 		if(a == null || a.equals("abandoned")) {
-			aband_chk.setEnabled(watcher.canUpdate(d, "abandoned"));
+			aband_chk.setEnabled(session.canUpdate(d, "abandoned"));
 			aband_chk.setSelected(d.getAbandoned());
 		}
 		if(a == null || a.equals("forceFail")) {
-			fail_chk.setEnabled(watcher.canUpdate(d, "forceFail"));
+			fail_chk.setEnabled(session.canUpdate(d, "forceFail"));
 			fail_chk.setSelected(d.getForceFail());
 		}
 		if(a == null || a.equals("fieldLength")) {
-			field_spn.setEnabled(watcher.canUpdate(d,
+			field_spn.setEnabled(session.canUpdate(d,
 				"fieldLength"));
 			field_spn.setValue(d.getFieldLength());
 		}
 		if(a == null || a.equals("fake")) {
 			fake_txt.setText(d.getFake());
-			fake_txt.setEnabled(watcher.canUpdate(d, "fake"));
+			fake_txt.setEnabled(session.canUpdate(d, "fake"));
 		}
 		if(a == null || a.equals("notes")) {
 			note_txt.setText(d.getNotes());
-			note_txt.setEnabled(watcher.canUpdate(d, "notes"));
+			note_txt.setEnabled(session.canUpdate(d, "notes"));
 		}
 	}
 

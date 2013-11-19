@@ -181,7 +181,7 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		client = s.getDesktop().client;
 		state = s.getSonarState();
 		TypeCache<GeoLoc> cache = state.getGeoLocs();
-		watcher = new ProxyWatcher<GeoLoc>(s, this, cache, false);
+		watcher = new ProxyWatcher<GeoLoc>(cache, this, false);
 	}
 
 	/** Initialize the location panel */

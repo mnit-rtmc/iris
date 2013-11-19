@@ -78,7 +78,7 @@ public class R_NodePanel extends JPanel {
 		det_pnl = new R_NodeDetectorPanel(s);
 		TypeCache<R_Node> cache =
 			s.getSonarState().getDetCache().getR_Nodes();
-		watcher = new ProxyWatcher<R_Node>(s, view, cache, false);
+		watcher = new ProxyWatcher<R_Node>(cache, view, false);
 		setBorder(BorderFactory.createTitledBorder(I18N.get(
 			"r_node.selected")));
 	}

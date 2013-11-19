@@ -121,7 +121,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	public UserPanel(Session s) {
 		session = s;
 		TypeCache<User> cache = s.getSonarState().getUsers();
-		watcher = new ProxyWatcher<User>(s, this, cache, false);
+		watcher = new ProxyWatcher<User>(cache, this, false);
 		r_list = new ProxyListModel<Role>(s.getSonarState().getRoles());
 		role_mdl = new WrapperComboBoxModel(r_list, true);
 		role_cbx = new JComboBox(role_mdl);
@@ -199,25 +199,25 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		if(a == null)
 			user = u;
 		if(a == null || a.equals("fullName")) {
-			f_name_txt.setEnabled(watcher.canUpdate(u, "fullName"));
+			f_name_txt.setEnabled(session.canUpdate(u, "fullName"));
 			f_name_txt.setText(u.getFullName());
 		}
 		if(a == null || a.equals("password")) {
-			boolean cu = watcher.canUpdate(u, "password");
+			boolean cu = session.canUpdate(u, "password");
 			passwd_txt.setEnabled(cu);
 			passwd_txt.setText("");
 			change_pwd.setEnabled(cu);
 		}
 		if(a == null || a.equals("dn")) {
-			dn_txt.setEnabled(watcher.canUpdate(u, "dn"));
+			dn_txt.setEnabled(session.canUpdate(u, "dn"));
 			dn_txt.setText(u.getDn());
 		}
 		if(a == null || a.equals("role")) {
-			role_cbx.setEnabled(watcher.canUpdate(u, "role"));
+			role_cbx.setEnabled(session.canUpdate(u, "role"));
 			role_cbx.setSelectedItem(u.getRole());
 		}
 		if(a == null || a.equals("enabled")) {
-			enabled_chk.setEnabled(watcher.canUpdate(u, "enabled"));
+			enabled_chk.setEnabled(session.canUpdate(u, "enabled"));
 			enabled_chk.setSelected(u.getEnabled());
 		}
 		repaint();

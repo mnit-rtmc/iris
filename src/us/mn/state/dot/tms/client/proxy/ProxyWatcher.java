@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.proxy;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.client.Session;
 
 /**
  * A class for watching attributes of a sonar object.
@@ -25,9 +24,6 @@ import us.mn.state.dot.tms.client.Session;
  * @author Douglas Lau
  */
 public class ProxyWatcher<T extends SonarObject> {
-
-	/** SONAR namespace */
-	private final Session session;
 
 	/** Proxy cache */
 	private final TypeCache<T> cache;
@@ -74,16 +70,12 @@ public class ProxyWatcher<T extends SonarObject> {
 	}
 
 	/** Create a new proxy watcher.
-	 * @param s User session.
-	 * @param pv ProxyView to update.
 	 * @param c TypeCache of proxy type.
+	 * @param pv ProxyView to update.
 	 * @param w true to watch/ignore selected proxy. */
-	public ProxyWatcher(Session s, ProxyView<T> pv, TypeCache<T> c,
-		boolean w)
-	{
-		session = s;
-		view = pv;
+	public ProxyWatcher(TypeCache<T> c, ProxyView<T> pv, boolean w) {
 		cache = c;
+		view = pv;
 		watch = w;
 	}
 
@@ -98,10 +90,5 @@ public class ProxyWatcher<T extends SonarObject> {
 	public void dispose() {
 		cache.removeProxyListener(listener);
 		setProxy(null);
-	}
-
-	/** Check if the user can update an attribute */
-	public boolean canUpdate(T p, String aname) {
-		return session.canUpdate(p, aname);
 	}
 }
