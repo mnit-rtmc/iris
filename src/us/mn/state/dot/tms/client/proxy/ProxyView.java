@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,8 @@ package us.mn.state.dot.tms.client.proxy;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * An interface for watching proxy objects.
+ * An interface for watching proxy objects.  These methods will be called on the
+ * event dispatch thread (EDT).
  *
  * @author Douglas Lau
  */

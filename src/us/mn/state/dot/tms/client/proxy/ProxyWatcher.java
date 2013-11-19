@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -28,7 +29,7 @@ public class ProxyWatcher<T extends SonarObject> {
 	/** Proxy cache */
 	private final TypeCache<T> cache;
 
-	/** Proxy view */
+	/** Proxy view to be updated on EDT */
 	private final ProxyView<T> view;
 
 	/** Flag to watch proxy */
@@ -41,12 +42,12 @@ public class ProxyWatcher<T extends SonarObject> {
 		public void proxyRemoved(T p) {
 			if(proxy == p) {
 				proxy = null;
-				view.clear();
+				clear();
 			}
 		}
 		public void proxyChanged(T p, final String a) {
 			if(proxy == p)
-				view.update(p, a);
+				update(p, a);
 		}
 	};
 
@@ -63,9 +64,9 @@ public class ProxyWatcher<T extends SonarObject> {
 				cache.watchObject(p);
 		}
 		if(p != null)
-			view.update(p, null);
+			update(p, null);
 		else
-			view.clear();
+			clear();
 		proxy = p;
 	}
 
@@ -90,5 +91,23 @@ public class ProxyWatcher<T extends SonarObject> {
 	public void dispose() {
 		cache.removeProxyListener(listener);
 		setProxy(null);
+	}
+
+	/** Update attribute on view (on EDT) */
+	private void update(final T p, final String a) {
+		runSwing(new Runnable() {
+			public void run() {
+				view.update(p, a);
+			}
+		});
+	}
+
+	/** Clear the view (on EDT) */
+	private void clear() {
+		runSwing(new Runnable() {
+			public void run() {
+				view.clear();
+			}
+		});
 	}
 }

@@ -26,7 +26,6 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
@@ -164,6 +163,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		add(r_node_btn, Stretch.LAST);
 		createJobs();
 		watcher.initialize();
+		clear();
 	}
 
 	/** Create the jobs */
@@ -254,17 +254,9 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		super.dispose();
 	}
 
-	/** Update one attribute */
-	public final void update(final Detector d, final String a) {
-		runSwing(new Runnable() {
-			public void run() {
-				doUpdate(d, a);
-			}
-		});
-	}
-
-	/** Update one attribute */
-	private void doUpdate(Detector d, String a) {
+	/** Update one attribute (from ProxyView). */
+	@Override
+	public void update(Detector d, String a) {
 		if(a == null) {
 			detector = d;
 			controller_btn.setEnabled(d != null &&
@@ -304,17 +296,9 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		}
 	}
 
-	/** Clear all attributes */
-	public final void clear() {
-		runSwing(new Runnable() {
-			public void run() {
-				doClear();
-			}
-		});
-	}
-
-	/** Clear all attributes */
-	private void doClear() {
+	/** Clear all attributes (from ProxyView). */
+	@Override
+	public void clear() {
 		detector = null;
 		type_cbx.setEnabled(false);
 		type_cbx.setSelectedIndex(0);

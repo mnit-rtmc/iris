@@ -23,7 +23,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -143,7 +142,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		createJobs();
 		watcher.initialize();
 		r_list.initialize();
-		doClear();
+		clear();
 	}
 
 	/** Dispose of the panel */
@@ -185,17 +184,9 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 			u.setDn(n);
 	}
 
-	/** Update one attribute */
-	@Override public final void update(final User u, final String a) {
-		runSwing(new Runnable() {
-			public void run() {
-				doUpdate(u, a);
-			}
-		});
-	}
-
-	/** Update one attribute */
-	private void doUpdate(User u, String a) {
+	/** Update one attribute (from ProxyView). */
+	@Override
+	public void update(User u, String a) {
 		if(a == null)
 			user = u;
 		if(a == null || a.equals("fullName")) {
@@ -223,17 +214,9 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		repaint();
 	}
 
-	/** Clear all attributes */
-	@Override public final void clear() {
-		runSwing(new Runnable() {
-			public void run() {
-				doClear();
-			}
-		});
-	}
-
-	/** Clear all attributes */
-	private void doClear() {
+	/** Clear all attributes (from ProxyView). */
+	@Override
+	public void clear() {
 		user = null;
 		f_name_txt.setEnabled(false);
 		f_name_txt.setText("");

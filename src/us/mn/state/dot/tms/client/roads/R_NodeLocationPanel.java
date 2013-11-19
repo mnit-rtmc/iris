@@ -18,9 +18,9 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -74,16 +74,7 @@ public class R_NodeLocationPanel extends LocationPanel {
 	}
 
 	/** Update one attribute */
-	public final void update(final R_Node n, final String a) {
-		runSwing(new Runnable() {
-			public void run() {
-				doUpdate(n, a);
-			}
-		});
-	}
-
-	/** Update one attribute */
-	private void doUpdate(R_Node n, String a) {
+	public void update(R_Node n, String a) {
 		if(a == null) {
 			node = n;
 			name_lbl.setText(n.getName());
@@ -94,18 +85,18 @@ public class R_NodeLocationPanel extends LocationPanel {
 		}
 	}
 
-	/** Test if the user can update an attribute */
-	private boolean canUpdate(R_Node n, String a) {
-		return session.canUpdate(n, a);
-	}
-
 	/** Clear all attributes */
 	@Override
-	protected void doClear() {
-		super.doClear();
+	public void clear() {
+		super.clear();
 		node = null;
 		name_lbl.setText(I18N.get("r_node.name.none"));
 		notes_txt.setEnabled(false);
 		notes_txt.setText("");
+	}
+
+	/** Test if the user can update an attribute */
+	private boolean canUpdate(R_Node n, String a) {
+		return session.canUpdate(n, a);
 	}
 }

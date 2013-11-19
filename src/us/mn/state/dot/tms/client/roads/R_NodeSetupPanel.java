@@ -24,7 +24,6 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.R_Node;
 import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
@@ -32,6 +31,7 @@ import static us.mn.state.dot.tms.R_Node.MIN_SHIFT;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 
@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.client.widget.IPanel;
  *
  * @author Douglas Lau
  */
-public class R_NodeSetupPanel extends IPanel {
+public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 
 	/** R_Node action */
 	abstract private class NAction extends IAction {
@@ -224,17 +224,9 @@ public class R_NodeSetupPanel extends IPanel {
 			n.setSpeedLimit(s);
 	}
 
-	/** Update one attribute */
-	public final void update(final R_Node n, final String a) {
-		runSwing(new Runnable() {
-			public void run() {
-				doUpdate(n, a);
-			}
-		});
-	}
-
-	/** Update one attribute */
-	private void doUpdate(R_Node n, String a) {
+	/** Update one attribute (from ProxyView). */
+	@Override
+	public void update(R_Node n, String a) {
 		if(a == null)
 			node = n;
 		if(a == null || a.equals("nodeType")) {
@@ -283,22 +275,9 @@ public class R_NodeSetupPanel extends IPanel {
 		}
 	}
 
-	/** Test if the user can update an attribute */
-	private boolean canUpdate(R_Node n, String a) {
-		return session.canUpdate(n, a);
-	}
-
-	/** Clear all attributes */
-	public final void clear() {
-		runSwing(new Runnable() {
-			public void run() {
-				doClear();
-			}
-		});
-	}
-
-	/** Clear all attributes */
-	private void doClear() {
+	/** Clear all attributes (from ProxyView). */
+	@Override
+	public void clear() {
 		node = null;
 		type_cbx.setEnabled(false);
 		type_cbx.setSelectedIndex(0);
@@ -322,5 +301,10 @@ public class R_NodeSetupPanel extends IPanel {
 		abandoned_chk.setSelected(false);
 		speed_spn.setEnabled(false);
 		speed_spn.setValue(55);
+	}
+
+	/** Test if the user can update an attribute */
+	private boolean canUpdate(R_Node n, String a) {
+		return session.canUpdate(n, a);
 	}
 }

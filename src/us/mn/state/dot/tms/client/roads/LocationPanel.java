@@ -25,7 +25,6 @@ import javax.swing.JTextField;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
@@ -250,22 +249,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		super.dispose();
 	}
 
-	/** Update one attribute */
+	/** Update one attribute (from ProxyView). */
 	@Override
-	public final void update(final GeoLoc l, final String a) {
-		runSwing(new Runnable() {
-			public void run() {
-				doUpdate(l, a);
-				// NOTE: this is needed to fix a problem where
-				//       a combo box displays the wrong entry
-				//       after a call to setSelectedItem
-				repaint();
-			}
-		});
-	}
-
-	/** Update one attribute */
-	private void doUpdate(GeoLoc l, String a) {
+	public void update(GeoLoc l, String a) {
 		if(a == null)
 			loc = l;
 		if(a == null || a.equals("roadway"))
@@ -290,6 +276,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 			lon_txt.setText(asText(l.getLon()));
 			select_pt.setEnabled(p);
 		}
+		// NOTE: this was needed to fix a problem where a combo box
+		//       displays the wrong entry after call to setSelectedItem
+		repaint();
 	}
 
 	/** Update roadway attribute */
@@ -347,18 +336,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		return session.canUpdate(l, a);
 	}
 
-	/** Clear all attributes */
+	/** Clear all attributes (from ProxyView). */
 	@Override
-	public final void clear() {
-		runSwing(new Runnable() {
-			public void run() {
-				doClear();
-			}
-		});
-	}
-
-	/** Clear all attributes */
-	protected void doClear() {
+	public void clear() {
 		loc = null;
 		roadway_cbx.setAction(null);
 		roadway_cbx.setEnabled(false);
