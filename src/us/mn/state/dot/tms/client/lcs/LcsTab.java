@@ -38,6 +38,7 @@ public class LcsTab extends MapTab<LCSArray> {
 	public LcsTab(Session session, LCSArrayManager man) {
 		super(man);
 		dispatcher = new LcsDispatcher(session, man);
+		dispatcher.initialize();
 		summary = man.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
