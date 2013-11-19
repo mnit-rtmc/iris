@@ -429,11 +429,13 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Called whenever an object is added to the selection */
+	@Override
 	public void selectionAdded(Incident s) {
 		updateSelected();
 	}
 
 	/** Called whenever an object is removed from the selection */
+	@Override
 	public void selectionRemoved(Incident inc) {
 		updateSelected();
 		if(inc instanceof ClientIncident)
