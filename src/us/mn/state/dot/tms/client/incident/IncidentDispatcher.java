@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.text.SimpleDateFormat;
@@ -62,7 +61,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class IncidentDispatcher extends JPanel
+public class IncidentDispatcher extends IPanel
 	implements ProxyListener<Incident>, ProxySelectionListener<Incident>
 {
 	/** Size in pixels for each lane */
@@ -84,14 +83,14 @@ public class IncidentDispatcher extends JPanel
 	/** Incident manager */
 	private final IncidentManager manager;
 
+	/** Selection model */
+	private final ProxySelectionModel<Incident> sel_model;
+
 	/** Incident creator */
 	private final IncidentCreator creator;
 
 	/** Cache of incident proxy objects */
 	private final TypeCache<Incident> cache;
-
-	/** Selection model */
-	private final ProxySelectionModel<Incident> selectionModel;
 
 	/** Type label */
 	private final JLabel type_lbl;
@@ -103,7 +102,7 @@ public class IncidentDispatcher extends JPanel
 	private final JComboBox detail_cbx = new JComboBox();
 
 	/** Location of incident */
-	private final JLabel location_lbl = IPanel.createValueLabel();
+	private final JLabel location_lbl = createValueLabel();
 
 	/** Card layout for camera widgets */
 	private final CardLayout cam_cards = new CardLayout();
@@ -127,7 +126,7 @@ public class IncidentDispatcher extends JPanel
 	/** Action to log an incident change */
 	private final IAction log_inc = new IAction("incident.log") {
 		protected void doActionPerformed(ActionEvent e) {
-			Incident inc = selectionModel.getSingleSelection();
+			Incident inc = sel_model.getSingleSelection();
 			if(inc instanceof ClientIncident)
 				create((ClientIncident)inc);
 			else if(inc != null)
@@ -138,7 +137,7 @@ public class IncidentDispatcher extends JPanel
 	/** Action to deploy devices */
 	private final IAction deploy_inc = new IAction("incident.deploy") {
 		protected void doActionPerformed(ActionEvent e) {
-			Incident inc = selectionModel.getSingleSelection();
+			Incident inc = sel_model.getSingleSelection();
 			if(inc != null &&
 			   !(inc instanceof ClientIncident))
 				showDeployForm(inc);
@@ -148,7 +147,7 @@ public class IncidentDispatcher extends JPanel
 	/** Action to clear an incident */
 	private final IAction clear_inc = new IAction("incident.clear") {
 		protected void doActionPerformed(ActionEvent e) {
-			Incident inc = selectionModel.getSingleSelection();
+			Incident inc = sel_model.getSingleSelection();
 			if(inc != null &&
 			   !(inc instanceof ClientIncident))
 				inc.setCleared(clear_btn.isSelected());
@@ -161,7 +160,7 @@ public class IncidentDispatcher extends JPanel
 	/** Action to edit incident */
 	private final IAction edit_inc = new IAction("incident.edit") {
 		protected void doActionPerformed(ActionEvent e) {
-			Incident inc = selectionModel.getSingleSelection();
+			Incident inc = sel_model.getSingleSelection();
 			if(inc != null)
 				editIncident(inc);
 		}
@@ -184,7 +183,6 @@ public class IncidentDispatcher extends JPanel
 	public IncidentDispatcher(Session s, IncidentManager man,
 		IncidentCreator ic)
 	{
-		super(new BorderLayout());
 		session = s;
 		manager = man;
 		creator = ic;
@@ -193,38 +191,35 @@ public class IncidentDispatcher extends JPanel
 		dtl_model = new ProxyListModel<IncidentDetail>(
 			st.getIncidentDetails());
 		dtl_model.initialize();
-		type_lbl = IPanel.createValueLabel();
+		type_lbl = createValueLabel();
 		detail_cbx.setRenderer(new IncidentDetailRenderer());
 		detail_cbx.setModel(new WrapperComboBoxModel(dtl_model, true,
 			true));
-		selectionModel = manager.getSelectionModel();
+		sel_model = manager.getSelectionModel();
 		cache.addProxyListener(this);
-		selectionModel.addProxySelectionListener(this);
-		add(createMainPanel());
+		sel_model.addProxySelectionListener(this);
 		clearSelected();
 		createButtonJobs();
 	}
 
-	/** Create the main panel */
-	private JPanel createMainPanel() {
+	/** Initialize the widgets on the panel */
+	public void initialize() {
 		type_lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		cam_pnl.add(camera_cbx, CAMERA_CBOX);
 		cam_pnl.add(camera_btn, CAMERA_BTN);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
-		IPanel p = new IPanel();
-		p.setTitle(I18N.get("incident.selected"));
-		p.add("incident.type");
-		p.add(type_lbl, Stretch.LAST);
-		p.add("incident.detail");
-		p.add(detail_cbx, Stretch.LAST);
-		p.add("location");
-		p.add(location_lbl, Stretch.LAST);
-		p.add("camera");
-		p.add(cam_pnl, Stretch.LAST);
-		p.add(buildImpactBox(), Stretch.FULL);
-		p.add(buildButtonBox(), Stretch.RIGHT);
-		return p;
+		setTitle(I18N.get("incident.selected"));
+		add("incident.type");
+		add(type_lbl, Stretch.LAST);
+		add("incident.detail");
+		add(detail_cbx, Stretch.LAST);
+		add("location");
+		add(location_lbl, Stretch.LAST);
+		add("camera");
+		add(cam_pnl, Stretch.LAST);
+		add(buildImpactBox(), Stretch.FULL);
+		add(buildButtonBox(), Stretch.RIGHT);
 	}
 
 	/** Build the impact box */
@@ -265,7 +260,7 @@ public class IncidentDispatcher extends JPanel
 			inc.getEventType(), inc.getDetail(), inc.getLaneType(),
 			inc.getRoad(), inc.getDir(), inc.getLat(),
 			inc.getLon(), inc.getImpact());
-		selectionModel.setSelected(ci);
+		sel_model.setSelected(ci);
 		creator.replaceIncident(inc);
 	}
 
@@ -299,9 +294,9 @@ public class IncidentDispatcher extends JPanel
 			cache.createObject(name, attrs);
 			Incident proxy = getProxy(name);
 			if(proxy != null)
-				selectionModel.setSelected(proxy);
+				sel_model.setSelected(proxy);
 			else
-				selectionModel.clearSelection();
+				sel_model.clearSelection();
 		}
 	}
 
@@ -413,7 +408,7 @@ public class IncidentDispatcher extends JPanel
 	/** A proxy has been changed */
 	@Override
 	public void proxyChanged(Incident proxy, String a) {
-		if(proxy == selectionModel.getSingleSelection())
+		if(proxy == sel_model.getSingleSelection())
 			updateAttribute(proxy, a);
 	}
 
@@ -429,7 +424,7 @@ public class IncidentDispatcher extends JPanel
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
-		selectionModel.removeProxySelectionListener(this);
+		sel_model.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
 		clearSelected();
 		removeAll();
@@ -449,7 +444,7 @@ public class IncidentDispatcher extends JPanel
 
 	/** Update the selected object(s) */
 	private void updateSelected() {
-		Incident inc = selectionModel.getSingleSelection();
+		Incident inc = sel_model.getSingleSelection();
 		if(inc != null)
 			setSelected(inc);
 		else
