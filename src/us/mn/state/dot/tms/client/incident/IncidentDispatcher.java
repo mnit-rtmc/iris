@@ -43,7 +43,6 @@ import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -92,11 +91,11 @@ public class IncidentDispatcher extends IPanel
 	/** Cache of incident proxy objects */
 	private final TypeCache<Incident> cache;
 
-	/** Type label */
-	private final JLabel type_lbl;
-
 	/** Incident detail proxy list model */
 	private final ProxyListModel<IncidentDetail> dtl_model;
+
+	/** Type label */
+	private final JLabel type_lbl = createValueLabel();
 
 	/** Incident detail combo box */
 	private final JComboBox detail_cbx = new JComboBox();
@@ -185,25 +184,19 @@ public class IncidentDispatcher extends IPanel
 	{
 		session = s;
 		manager = man;
-		creator = ic;
-		SonarState st = session.getSonarState();
-		cache = st.getIncidents();
-		dtl_model = new ProxyListModel<IncidentDetail>(
-			st.getIncidentDetails());
-		dtl_model.initialize();
-		type_lbl = createValueLabel();
-		detail_cbx.setRenderer(new IncidentDetailRenderer());
-		detail_cbx.setModel(new WrapperComboBoxModel(dtl_model, true,
-			true));
 		sel_model = manager.getSelectionModel();
-		cache.addProxyListener(this);
-		sel_model.addProxySelectionListener(this);
-		clearSelected();
-		createButtonJobs();
+		creator = ic;
+		cache = s.getSonarState().getIncidents();
+		dtl_model = new ProxyListModel<IncidentDetail>(
+			s.getSonarState().getIncidentDetails());
 	}
 
 	/** Initialize the widgets on the panel */
 	public void initialize() {
+		dtl_model.initialize();
+		detail_cbx.setRenderer(new IncidentDetailRenderer());
+		detail_cbx.setModel(new WrapperComboBoxModel(dtl_model, true,
+			true));
 		type_lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		cam_pnl.add(camera_cbx, CAMERA_CBOX);
 		cam_pnl.add(camera_btn, CAMERA_BTN);
@@ -220,6 +213,10 @@ public class IncidentDispatcher extends IPanel
 		add(cam_pnl, Stretch.LAST);
 		add(buildImpactBox(), Stretch.FULL);
 		add(buildButtonBox(), Stretch.RIGHT);
+		createButtonJobs();
+		cache.addProxyListener(this);
+		clearSelected();
+		sel_model.addProxySelectionListener(this);
 	}
 
 	/** Build the impact box */
@@ -423,11 +420,12 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Dispose of the dispatcher */
+	@Override
 	public void dispose() {
 		sel_model.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
 		clearSelected();
-		removeAll();
+		super.dispose();
 	}
 
 	/** Called whenever an object is added to the selection */
