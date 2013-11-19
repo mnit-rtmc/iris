@@ -73,7 +73,11 @@ public class ProxyWatcher<T extends SonarObject> {
 		proxy = p;
 	}
 
-	/** Create the proxy watcher */
+	/** Create a new proxy watcher.
+	 * @param s User session.
+	 * @param pv ProxyView to update.
+	 * @param c TypeCache of proxy type.
+	 * @param w true to watch/ignore selected proxy. */
 	public ProxyWatcher(Session s, ProxyView<T> pv, TypeCache<T> c,
 		boolean w)
 	{
@@ -83,19 +87,17 @@ public class ProxyWatcher<T extends SonarObject> {
 		watch = w;
 	}
 
-	/** Initialize the watcher */
+	/** Initialize a proxy watcher */
 	public void initialize() {
 		if(proxy != null)
 			throw new IllegalStateException("Must init first");
 		cache.addProxyListener(listener);
 	}
 
-	/** Dispose of the watcher */
+	/** Dispose of a proxy watcher */
 	public void dispose() {
 		cache.removeProxyListener(listener);
-		T p = proxy;
-		if(watch && p != null)
-			cache.ignoreObject(p);
+		setProxy(null);
 	}
 
 	/** Check if the user can update an attribute */
