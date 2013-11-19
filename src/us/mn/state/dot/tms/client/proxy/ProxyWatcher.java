@@ -29,13 +29,14 @@ public class ProxyWatcher<T extends SonarObject> {
 	/** SONAR namespace */
 	private final Session session;
 
-	/** Check if the user can update an attribute */
-	public boolean canUpdate(T p, String aname) {
-		if(p != null)
-			return session.canUpdate(p, aname);
-		else
-			return false;
-	}
+	/** Proxy cache */
+	private final TypeCache<T> cache;
+
+	/** Proxy view */
+	private final ProxyView<T> view;
+
+	/** Flag to watch proxy */
+	private final boolean watch;
 
 	/** Proxy listener */
 	private final ProxyListener<T> listener = new ProxyListener<T>() {
@@ -72,15 +73,6 @@ public class ProxyWatcher<T extends SonarObject> {
 		proxy = p;
 	}
 
-	/** Proxy view */
-	private final ProxyView<T> view;
-
-	/** Proxy cache */
-	private final TypeCache<T> cache;
-
-	/** Flag to watch proxy */
-	private final boolean watch;
-
 	/** Create the proxy watcher */
 	public ProxyWatcher(Session s, ProxyView<T> pv, TypeCache<T> c,
 		boolean w)
@@ -104,5 +96,10 @@ public class ProxyWatcher<T extends SonarObject> {
 		T p = proxy;
 		if(watch && p != null)
 			cache.ignoreObject(p);
+	}
+
+	/** Check if the user can update an attribute */
+	public boolean canUpdate(T p, String aname) {
+		return session.canUpdate(p, aname);
 	}
 }
