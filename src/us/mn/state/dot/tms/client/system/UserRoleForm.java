@@ -39,19 +39,19 @@ public class UserRoleForm extends AbstractForm {
 	}
 
 	/** Tabbed pane */
-	protected final JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
+	private final JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 
 	/** User tab panel */
-	protected final UserTabPanel u_panel;
+	private final UserTabPanel u_panel;
 
 	/** Role panel */
-	protected final RolePanel r_panel;
+	private final RolePanel r_panel;
 
 	/** Capability panel */
-	protected final CapabilityPanel cap_panel;
+	private final CapabilityPanel cap_panel;
 
 	/** Connection panel */
-	protected final ConnectionPanel c_panel;
+	private final ConnectionPanel c_panel;
 
 	/** Create a new user role form */
 	public UserRoleForm(Session s) {
@@ -64,6 +64,7 @@ public class UserRoleForm extends AbstractForm {
 	}
 
 	/** Initializze the widgets in the form */
+	@Override
 	protected void initialize() {
 		u_panel.initialize();
 		r_panel.initialize();
@@ -77,6 +78,7 @@ public class UserRoleForm extends AbstractForm {
 	}
 
 	/** Close the form */
+	@Override
 	protected void close() {
 		super.close();
 		u_panel.dispose();

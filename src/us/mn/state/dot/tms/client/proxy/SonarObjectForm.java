@@ -18,7 +18,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.Action;
 import javax.swing.JComboBox;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.Session;
@@ -58,6 +57,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	}
 
 	/** Initialize the widgets on the form */
+	@Override
 	protected void initialize() {
 		watcher.initialize();
 		watcher.setProxy(proxy);
@@ -80,11 +80,6 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** Clear the proxy view */
 	@Override
 	public final void clear() {
-		closeForm();
-	}
-
-	/** Close the form */
-	protected void closeForm() {
 		close();
 	}
 
@@ -110,6 +105,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	}
 
 	/** Dispose of the form */
+	@Override
 	protected void dispose() {
 		watcher.dispose();
 	}

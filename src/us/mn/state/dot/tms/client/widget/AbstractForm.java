@@ -32,9 +32,6 @@ abstract public class AbstractForm extends JPanel {
 	/** Form title */
 	private final String title;
 
-	/** Help page name, which is an I18N string */
-	private String helpPageName = Help.DEFAULT_HELP_PAGE_NAME;
-
 	/** Create a new abstract form */
 	protected AbstractForm(String t) {
 		title = t;
@@ -64,17 +61,20 @@ abstract public class AbstractForm extends JPanel {
 	private JInternalFrame frame;
 
 	/** Set the frame holding the form */
-	public void setFrame(JInternalFrame f) {
+	public final void setFrame(JInternalFrame f) {
 		frame = f;
 	}
 
-	/** get the form's help URL */
-	public String getHelpPageUrl() {
+	/** Help page name, which is an I18N string */
+	private String helpPageName = Help.DEFAULT_HELP_PAGE_NAME;
+
+	/** Get the form's help URL */
+	public final String getHelpPageUrl() {
 		return I18N.get(helpPageName);
 	}
 
-	/** set the form's help page name, which is an I18N name */
-	public void setHelpPageName(String n) {
+	/** Set the form's help page name, which is an I18N name */
+	public final void setHelpPageName(String n) {
 		helpPageName = n;
 	}
 }

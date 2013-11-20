@@ -75,7 +75,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	private final IAction send = new IAction("incident.send") {
 		protected void doActionPerformed(ActionEvent e) {
 			sendIndications();
-			closeForm();
+			close();
 		}
 	};
 
@@ -226,6 +226,6 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	@Override
 	protected void doUpdateAttribute(String a) {
 		if("cleared".equals(a) && proxy.getCleared())
-			closeForm();
+			close();
 	}
 }
