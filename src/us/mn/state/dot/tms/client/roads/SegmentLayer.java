@@ -29,6 +29,7 @@ import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerChange;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -95,13 +96,22 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	/** Complete one sample update */
 	public void completeSamples() {
 		samples.swapSamples();
-		fireLayerChanged(LayerChange.status);
+		updateStatus();
 	}
 
 	/** Clear all sample data */
 	public void clearSamples() {
 		samples.clearSamples();
-		fireLayerChanged(LayerChange.status);
+		updateStatus();
+	}
+
+	/** Update the layer status */
+	private void updateStatus() {
+		runSwing(new Runnable() {
+			public void run() {
+				fireLayerChanged(LayerChange.status);
+			}
+		});
 	}
 
 	/** Update a corridor on the segment layer */
