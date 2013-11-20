@@ -53,12 +53,14 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "controller";
 	}
 
 	/** Get the controller cache */
-	@Override public TypeCache<Controller> getCache() {
+	@Override
+	public TypeCache<Controller> getCache() {
 		return session.getSonarState().getConCache().getControllers();
 	}
 
@@ -74,17 +76,20 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Get the tangent angle for the given location */
+	@Override
 	protected Double getTangentAngle(MapGeoLoc loc) {
 		// Don't rotate markers by direction-of-travel
 		return MapGeoLoc.northTangent();
 	}
 
 	/** Create a theme for controllers */
+	@Override
 	protected ProxyTheme<Controller> createTheme() {
 		ControllerTheme theme = new ControllerTheme(this, MARKER);
 		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
@@ -96,6 +101,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Show the properties form for the selected proxy */
+	@Override
 	public void showPropertiesForm() {
 		if(s_model.getSelectedCount() == 1) {
 			for(Controller ctrl: s_model.getSelected())
@@ -110,6 +116,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		int n_selected = s_model.getSelectedCount();
 		if(n_selected < 1)
@@ -126,7 +133,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Create a popup menu for a single controller selection */
-	protected JPopupMenu createSinglePopup(Controller proxy) {
+	private JPopupMenu createSinglePopup(Controller proxy) {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
@@ -141,6 +148,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(Controller proxy) {
 		Cabinet cab = proxy.getCabinet();
 		if(cab != null)
@@ -150,6 +158,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, Controller proxy) {
 		switch(is) {
 		case ACTIVE:
@@ -166,6 +175,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 16;
 	}
