@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,16 +32,16 @@ import us.mn.state.dot.tms.GeoLocHelper;
 public class MapGeoLoc implements MapObject {
 
 	/** Radians to rotate marker for a Northbound device */
-	static protected final double RAD_NORTH = Math.toRadians(0);
+	static private final double RAD_NORTH = Math.toRadians(0);
 
 	/** Radians to rotate marker for a Southbound device */
-	static protected final double RAD_SOUTH = Math.toRadians(180);
+	static private final double RAD_SOUTH = Math.toRadians(180);
 
 	/** Radians to rotate marker for an Eastbound device */
-	static protected final double RAD_EAST = Math.toRadians(270);
+	static private final double RAD_EAST = Math.toRadians(270);
 
 	/** Radians to rotate marker for a Westbound device */
-	static protected final double RAD_WEST = Math.toRadians(90);
+	static private final double RAD_WEST = Math.toRadians(90);
 
 	/** Get tangent value for "north" direction */
 	static public double northTangent() {
@@ -49,10 +49,10 @@ public class MapGeoLoc implements MapObject {
 	}
 
 	/** Geo location */
-	protected final GeoLoc loc;
+	private final GeoLoc loc;
 
 	/** Spherical mercator position */
-	protected SphericalMercatorPosition pos;
+	private SphericalMercatorPosition pos;
 
 	/** Get the geo location */
 	public GeoLoc getGeoLoc() {
@@ -72,7 +72,7 @@ public class MapGeoLoc implements MapObject {
 	}
 
 	/** Get the default angle (radians) */
-	protected double getDefaultAngle() {
+	private double getDefaultAngle() {
 		switch(Direction.fromOrdinal(loc.getRoadDir())) {
 		case NORTH:
 			return RAD_NORTH;
@@ -88,7 +88,7 @@ public class MapGeoLoc implements MapObject {
 	}
 
 	/** Tangent angle (radians) */
-	protected Double tangent = null;
+	private Double tangent = null;
 
 	/** Set the tangent angle (radians) */
 	public void setTangent(double t) {
@@ -102,7 +102,7 @@ public class MapGeoLoc implements MapObject {
 	}
 
 	/** Get the tangent angle (radians) */
-	protected double getTangent() {
+	public double getTangent() {
 		if(tangent != null)
 			return tangent;
 		else
@@ -131,10 +131,10 @@ public class MapGeoLoc implements MapObject {
 	}
 
 	/** Transform for drawing device on map */
-	protected final AffineTransform transform = new AffineTransform();
+	private final AffineTransform transform = new AffineTransform();
 
 	/** Update the traffic device transform */
-	protected void updateTransform() {
+	private void updateTransform() {
 		pos = GeoLocHelper.getPosition(loc);
 		if(pos != null)
 			transform.setToTranslation(pos.getX(), pos.getY());
@@ -149,10 +149,10 @@ public class MapGeoLoc implements MapObject {
 	}
 
 	/** Inverse transform */
-	protected final AffineTransform itransform = new AffineTransform();
+	private final AffineTransform itransform = new AffineTransform();
 
 	/** Update the inverse transform */
-	protected void updateInverseTransform() {
+	private void updateInverseTransform() {
 		try {
 			itransform.setTransform(transform.createInverse());
 		}
@@ -172,7 +172,7 @@ public class MapGeoLoc implements MapObject {
 	}
 
 	/** Shape to draw map object */
-	protected Shape shape = null;
+	private Shape shape = null;
 
 	/** Get the map object shape */
 	public Shape getShape() {
