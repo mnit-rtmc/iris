@@ -48,17 +48,17 @@ import us.mn.state.dot.tms.utils.I18N;
 public class SegmentLayer extends Layer implements Iterable<Segment> {
 
 	/** Mapping of corridor names to segment lists */
-	protected final ConcurrentSkipListMap<String, List<Segment>> cor_segs =
+	private final ConcurrentSkipListMap<String, List<Segment>> cor_segs =
 		new ConcurrentSkipListMap<String, List<Segment>>();
 
 	/** R_Node manager */
-	protected final R_NodeManager manager;
+	private final R_NodeManager manager;
 
 	/** Client session */
-	protected final Session session;
+	private final Session session;
 
 	/** Sample data set */
-	protected final SampleDataSet samples = new SampleDataSet();
+	private final SampleDataSet samples = new SampleDataSet();
 
 	/** Sensor reader */
 	private SensorReader reader;
@@ -146,7 +146,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	}
 
 	/** Get a set of detectors for an r_node */
-	protected Set<Detector> getDetectors(R_Node n) {
+	private Set<Detector> getDetectors(R_Node n) {
 		return session.getDetectorManager().getDetectors(n);
 	}
 
