@@ -337,7 +337,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Set initial map extent */
-	public void setInitExtent() {
+	private void setInitExtent() {
 		MapExtent me = MapExtentHelper.lookup("Home");
 		if(me != null) {
 			for(ScreenPane sp: s_panes)
