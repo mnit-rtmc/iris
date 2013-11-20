@@ -232,8 +232,17 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	{
 		double t = GeoLocHelper.calculateBearing(loc_a.getGeoLoc(),
 			loc_b.getGeoLoc());
-		if(!Double.isInfinite(t) && !Double.isNaN(t))
+		if(!Double.isInfinite(t) && !Double.isNaN(t)) {
 			loc.setTangent(t - NORTH_ANGLE);
+			loc.doUpdate();
+		}
+	}
+
+	/** Get the tangent angle for the given location */
+	@Override
+	public Double getTangentAngle(MapGeoLoc loc) {
+		// tangent angle is handled specially for r_nodes
+		return null;
 	}
 
 	/** Create an iterator for MapGeoLocs on a corridor.

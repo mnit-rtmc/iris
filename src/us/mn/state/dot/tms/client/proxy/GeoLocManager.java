@@ -96,8 +96,10 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 				synchronized(proxies) {
 					loc = proxies.get(proxy.getName());
 				}
-				if(loc != null)
+				if(loc != null) {
 					loc.doUpdate();
+					loc.updateGeometry();
+				}
 			}
 		});
 	}

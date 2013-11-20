@@ -151,15 +151,14 @@ abstract public class ProxyManager<T extends SonarObject>
 	protected void proxyAddedSlow(T proxy) {
 		MapGeoLoc loc = findGeoLoc(proxy);
 		if(loc != null) {
+			loc.setManager(this);
+			loc.doUpdate();
 			map_cache.put(loc, proxy);
-			Double tan = getTangentAngle(loc);
-			if(tan != null)
-				loc.setTangent(tan);
 		}
 	}
 
 	/** Get the tangent angle for the given location */
-	protected Double getTangentAngle(MapGeoLoc loc) {
+	public Double getTangentAngle(MapGeoLoc loc) {
 		return loc_manager.getTangentAngle(loc);
 	}
 
@@ -228,6 +227,19 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Get a transformed marker shape */
 	abstract protected Shape getShape(AffineTransform at);
+
+	/** Current marker shape */
+	private Shape shape;
+
+	/** Get current marker shape */
+	public final Shape getShape() {
+		return shape;
+	}
+
+	/** Set the current marker shape */
+	public final void setShape(Shape s) {
+		shape = s;
+	}
 
 	/** Current cell renderer size */
 	private CellRendererSize m_cellSize = CellRendererSize.LARGE;
@@ -314,11 +326,10 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Iterate through all proxy objects */
 	private MapObject forEach(MapSearcher ms, AffineTransform at) {
-		Shape shp = getShape(at);
+		shape = getShape(at);
 		for(T proxy: getCache()) {
 			MapGeoLoc loc = findGeoLoc(proxy);
 			if(isLocationSet(loc)) {
-				loc.setShape(shp);
 				if(ms.next(loc))
 					return loc;
 			}

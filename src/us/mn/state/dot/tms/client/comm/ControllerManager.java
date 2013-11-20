@@ -83,7 +83,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Get the tangent angle for the given location */
 	@Override
-	protected Double getTangentAngle(MapGeoLoc loc) {
+	public Double getTangentAngle(MapGeoLoc loc) {
 		// Don't rotate markers by direction-of-travel
 		return MapGeoLoc.northTangent();
 	}

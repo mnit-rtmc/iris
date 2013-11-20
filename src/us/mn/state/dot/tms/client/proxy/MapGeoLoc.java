@@ -20,6 +20,7 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.MapObject;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -67,8 +68,19 @@ public class MapGeoLoc implements MapObject {
 
 	/** Update the geo loc map object */
 	public void doUpdate() {
+		if(manager != null) {
+			Double tan = manager.getTangentAngle(this);
+			if(tan != null)
+				setTangent(tan);
+		}
 		updateTransform();
 		updateInverseTransform();
+	}
+
+	/** Update the layer geometry */
+	public void updateGeometry() {
+		if(manager != null)
+			manager.getLayer().updateGeometry();
 	}
 
 	/** Get the default angle (radians) */
@@ -92,13 +104,10 @@ public class MapGeoLoc implements MapObject {
 
 	/** Set the tangent angle (radians) */
 	public void setTangent(double t) {
-		if(Double.isInfinite(t) || Double.isNaN(t)) {
+		if(Double.isInfinite(t) || Double.isNaN(t))
 			System.err.println("MapGeoLoc.setTangent: Bad tangent");
-		} else {
+		else
 			tangent = t;
-			updateTransform();
-			updateInverseTransform();
-		}
 	}
 
 	/** Get the tangent angle (radians) */
@@ -171,21 +180,21 @@ public class MapGeoLoc implements MapObject {
 		return GeoLocHelper.getDescription(loc);
 	}
 
-	/** Shape to draw map object */
-	private Shape shape = null;
+	/** Proxy manager */
+	private ProxyManager<? extends SonarObject> manager;
+
+	/** Set the proxy manager */
+	public void setManager(ProxyManager<? extends SonarObject> m) {
+		manager = m;
+	}
 
 	/** Get the map object shape */
 	public Shape getShape() {
-		return shape;
-	}
-
-	/** Set the map object shape */
-	public void setShape(Shape s) {
-		shape = s;
+		return manager != null ? manager.getShape() : null;
 	}
 
 	/** Get the outline shape */
 	public Shape getOutlineShape() {
-		return shape;
+		return getShape();
 	}
 }

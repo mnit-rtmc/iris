@@ -155,9 +155,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return locations.get(name);
 		IncidentGeoLoc loc = new IncidentGeoLoc(proxy,
 			getGeoLoc(proxy));
-		Double tan = loc_manager.getTangentAngle(loc);
-		if(tan != null)
-			loc.setTangent(tan);
+		loc.setManager(this);
+		loc.doUpdate();
 		locations.put(name, loc);
 		return loc;
 	}

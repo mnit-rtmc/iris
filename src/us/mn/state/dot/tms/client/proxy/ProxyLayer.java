@@ -87,7 +87,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 	}
 
 	/** Update the layer geometry */
-	private void updateGeometry() {
+	public void updateGeometry() {
 		runSwing(new Runnable() {
 			public void run() {
 				fireLayerChanged(LayerChange.geometry);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 public class IncidentTheme extends ProxyTheme<Incident> {
 
 	/** Incident Map object marker */
-	static protected final IncidentMarker MARKER = new IncidentMarker();
+	static private final IncidentMarker MARKER = new IncidentMarker();
 
 	/** Create a new incident theme */
 	public IncidentTheme(IncidentManager man) {
@@ -48,25 +48,21 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	}
 
 	/** Draw a map object */
+	@Override
 	public void draw(Graphics2D g, MapObject mo, float scale) {
-		if(mo instanceof IncidentGeoLoc) {
-			IncidentGeoLoc loc = (IncidentGeoLoc)mo;
-			loc.setShape(getShape(scale));
-		}
+		manager.setShape(getShape(scale));
 		super.draw(g, mo, scale);
 	}
 
 	/** Draw a selected map object */
+	@Override
 	public void drawSelected(Graphics2D g, MapObject mo, float scale) {
-		if(mo instanceof IncidentGeoLoc) {
-			IncidentGeoLoc loc = (IncidentGeoLoc)mo;
-			loc.setShape(getShape(scale));
-		}
+		manager.setShape(getShape(scale));
 		super.drawSelected(g, mo, scale);
 	}
 
 	/** Get the shape for a specified scale */
-	protected Shape getShape(float scale) {
+	private Shape getShape(float scale) {
 		float sc = ProxyManager.adjustScale(scale);
 		AffineTransform at = new AffineTransform();
 		at.setToScale(sc, sc);
