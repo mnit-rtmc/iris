@@ -19,11 +19,14 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
+import static us.mn.state.dot.tms.CorridorBase.nodeDistance;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.KILOMETERS;
 
 /**
  * Manager for GeoLoc proxy objects.
@@ -31,6 +34,9 @@ import us.mn.state.dot.tms.client.roads.R_NodeManager;
  * @author Douglas Lau
  */
 public class GeoLocManager implements ProxyListener<GeoLoc> {
+
+	/** Maximum distance from an r_node to calculate tangent angle */
+	static private final Distance TANGENT_DIST = new Distance(2,KILOMETERS);
 
 	/** User session */
 	private final Session session;
@@ -126,7 +132,9 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 		CorridorBase c = n_man.lookupCorridor(loc);
 		if(c != null) {
 			R_Node r_node = c.findNearest(loc);
-			if(r_node != null) {
+			if(r_node != null &&
+			   nodeDistance(r_node, loc).m() < TANGENT_DIST.m())
+			{
 				MapGeoLoc n_loc = n_man.findGeoLoc(r_node);
 				if(n_loc != null)
 					return n_loc.getTangent();
