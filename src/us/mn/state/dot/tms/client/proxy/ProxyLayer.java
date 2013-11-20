@@ -38,14 +38,14 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	implements ProxyListener<T>
 {
 	/** Shape used for calculating the layer extent */
-	static protected final Rectangle2D EXTENT_SHAPE =
+	static private final Rectangle2D EXTENT_SHAPE =
 		new Rectangle2D.Float(-500, -500, 1000, 1000);
 
 	/** Proxy manager for the layer */
-	protected final ProxyManager<T> manager;
+	private final ProxyManager<T> manager;
 
 	/** Proxy type cache */
-	protected final TypeCache<T> cache;
+	private final TypeCache<T> cache;
 
 	/** Get the proxy manager for the layer */
 	public ProxyManager<T> getManager() {
@@ -60,7 +60,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Enumeration complete flag */
-	protected boolean complete;
+	private boolean complete;
 
 	/** Initialize the layer. This cannot be done in the constructor
 	 * because subclasses may not be fully constructed. */
@@ -119,13 +119,12 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 		ExtentCalculator calc = new ExtentCalculator();
 		manager.forEach(calc, 1);
 		if(calc.extent != null)
-			extent.setRect(calc.extent);
-		fireLayerChanged(LayerChange.extent);
+			setExtent(calc.extent);
 	}
 
 	/** Class to calculate the extent of the layer */
-	protected class ExtentCalculator implements MapSearcher {
-		protected Rectangle2D extent = null;
+	private class ExtentCalculator implements MapSearcher {
+		private Rectangle2D extent = null;
 
 		public boolean next(MapObject o) {
 			AffineTransform t = o.getTransform();
