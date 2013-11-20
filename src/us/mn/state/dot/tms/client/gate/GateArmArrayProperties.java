@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.gate;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -38,7 +37,6 @@ import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
@@ -165,37 +163,33 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		}
 	};
 
-	/** Sonar state */
-	private final SonarState state;
-
 	/** Create a new gate arm array properties form */
 	public GateArmArrayProperties(Session s, GateArmArray ga) {
 		super(I18N.get("gate.arm.array") + ": ", s, ga);
-		state = s.getSonarState();
 		loc_pnl = new LocationPanel(s);
 		table_model = new GateArmTableModel(s, proxy);
 		table_model.initialize();
 	}
 
 	/** Get the SONAR type cache */
-	@Override protected TypeCache<GateArmArray> getTypeCache() {
+	@Override
+	protected TypeCache<GateArmArray> getTypeCache() {
 		return state.getGateArmArrays();
 	}
 
 	/** Initialize the widgets on the form */
-	@Override protected void initialize() {
-		super.initialize();
+	@Override
+	protected void initialize() {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
 		tab.add(I18N.get("device.setup"), createSetupPanel());
 		tab.add(I18N.get("gate.arms"), createGateArmPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
-		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
 		settings.setEnabled(isUpdatePermitted("deviceRequest"));
-		setBackground(Color.LIGHT_GRAY);
+		super.initialize();
 	}
 
 	/** Create the location panel */
@@ -314,13 +308,15 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	}
 
 	/** Dispose of the form */
-	@Override protected void dispose() {
+	@Override
+	protected void dispose() {
 		table_model.dispose();
 		super.dispose();
 	}
 
 	/** Update one attribute on the form */
-	@Override protected void doUpdateAttribute(String a) {
+	@Override
+	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("notes")) {
 			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(proxy.getNotes());

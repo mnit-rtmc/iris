@@ -122,7 +122,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final TypeCache<Cabinet> cabinets;
 
 	/** Cabinet listener */
-	private CabinetListener cab_listener;
+	private final CabinetListener cab_listener;
 
 	/** Controller IO model */
 	private ControllerIOModel io_model;
@@ -195,8 +195,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Initialize the widgets on the form */
-	@Override protected void initialize() {
-		super.initialize();
+	@Override
+	protected void initialize() {
 		io_model = new ControllerIOModel(session, proxy);
 		io_model.initialize();
 		cabinets.addProxyListener(cab_listener);
@@ -210,7 +210,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		tab.add(I18N.get("controller.io"), createIOPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
-		updateAttribute(null);
 		createSetupJobs();
 		if(canUpdateCabinet("mile"))
 			createCabinetJobs();
@@ -219,10 +218,12 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			reset.setEnabled(false);
 		}
 		setBackground(Color.LIGHT_GRAY);
+		super.initialize();
 	}
 
 	/** Dispose of the form */
-	@Override protected void dispose() {
+	@Override
+	protected void dispose() {
 		io_model.dispose();
 		cabinets.removeProxyListener(cab_listener);
 		loc_pnl.dispose();
@@ -330,7 +331,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		public void proxyRemoved(Cabinet p) {}
 		public void proxyChanged(Cabinet p, final String a) {
 			if(p == cabinet)
-				updateAttribute(a);
+				doUpdateAttribute(a);
 		}
 	}
 
@@ -378,7 +379,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Update one attribute on the form */
-	@Override protected void doUpdateAttribute(String a) {
+	@Override
+	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("commLink")) {
 			comm_link_cbx.setAction(null);
 			comm_link_cbx.setSelectedItem(proxy.getCommLink());

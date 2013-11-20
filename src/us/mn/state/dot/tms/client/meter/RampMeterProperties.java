@@ -38,7 +38,6 @@ import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
@@ -151,36 +150,32 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		}
 	};
 
-	/** Sonar state */
-	private final SonarState state;
-
 	/** Create a new ramp meter properties form */
 	public RampMeterProperties(Session s, RampMeter meter) {
 		super(I18N.get("ramp.meter.long") + ": ", s, meter);
-		state = s.getSonarState();
 		loc_pnl = new LocationPanel(s);
 		lock_action = new LockMeterAction(meter, lock_cmb,
 			isUpdatePermitted("mLock"));
 	}
 
 	/** Get the SONAR type cache */
-	@Override protected TypeCache<RampMeter> getTypeCache() {
+	@Override
+	protected TypeCache<RampMeter> getTypeCache() {
 		return state.getRampMeters();
 	}
 
 	/** Initialize the widgets on the form */
-	@Override protected void initialize() {
-		super.initialize();
+	@Override
+	protected void initialize() {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
 		tab.add(I18N.get("device.setup"), createSetupPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
-		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
 		settings.setEnabled(isUpdatePermitted("deviceRequest"));
-		setBackground(Color.LIGHT_GRAY);
+		super.initialize();
 	}
 
 	/** Create the location panel */
@@ -276,7 +271,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	}
 
 	/** Update one attribute on the form */
-	@Override protected void doUpdateAttribute(String a) {
+	@Override
+	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes")) {

@@ -57,6 +57,7 @@ public class ProxyWatcher<T extends SonarObject> {
 	/** Set a new proxy to watch */
 	public void setProxy(T p) {
 		T op = proxy;
+		proxy = p;
 		if(watch) {
 			if(op != null)
 				cache.ignoreObject(op);
@@ -65,9 +66,8 @@ public class ProxyWatcher<T extends SonarObject> {
 		}
 		if(p != null)
 			update(p, null);
-		else
+		else if(op != null)
 			clear();
-		proxy = p;
 	}
 
 	/** Create a new proxy watcher.

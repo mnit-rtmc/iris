@@ -104,11 +104,7 @@ public class SmartDesktop extends JDesktopPane {
 			}
 		});
 		frame.setContentPane(form);
-		form.addFormCloseListener(new FormCloseListener() {
-			public void formClosed(FormCloseEvent e) {
-				frame.dispose();
-			}
-		});
+		form.setFrame(frame);
 		return frame;
 	}
 

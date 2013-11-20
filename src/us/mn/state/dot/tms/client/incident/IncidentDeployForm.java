@@ -88,13 +88,14 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Get the SONAR type cache */
-	@Override protected TypeCache<Incident> getTypeCache() {
+	@Override
+	protected TypeCache<Incident> getTypeCache() {
 		return state.getIncidents();
 	}
 
 	/** Initialize the widgets on the form */
-	@Override protected void initialize() {
-		super.initialize();
+	@Override
+	protected void initialize() {
 		list.setCellRenderer(new LCSArrayCellRenderer(
 			session.getLCSArrayManager())
 		{
@@ -109,6 +110,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		});
 		populateList();
 		add(createPanel());
+		super.initialize();
 	}
 
 	/** Populate the list model with LCS array indications to display */
@@ -221,7 +223,8 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	}
 
 	/** Update one attribute on the form */
-	@Override protected void doUpdateAttribute(String a) {
+	@Override
+	protected void doUpdateAttribute(String a) {
 		if("cleared".equals(a) && proxy.getCleared())
 			closeForm();
 	}

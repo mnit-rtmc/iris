@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -44,7 +43,6 @@ import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.LCSIndicationHelper;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
@@ -63,9 +61,6 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Size in pixels for each indication icon */
 	static private final int LCS_SIZE = UI.scaled(18);
-
-	/** SONAR state */
-	private final SonarState state;
 
 	/** LCS Indication creator */
 	private final LCSIndicationCreator creator;
@@ -122,7 +117,6 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	/** Create a new lane control signal properties form */
 	public LCSArrayProperties(Session s, LCSArray proxy) {
 		super(I18N.get("lcs.array") + ": ", s, proxy);
-		state = s.getSonarState();
 		creator = new LCSIndicationCreator(s,
 			state.getLcsCache().getLCSIndications());
 		table_model = new LCSTableModel(s, proxy);
@@ -130,26 +124,27 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Get the SONAR type cache */
-	@Override protected TypeCache<LCSArray> getTypeCache() {
+	@Override
+	protected TypeCache<LCSArray> getTypeCache() {
 		return state.getLcsCache().getLCSArrays();
 	}
 
 	/** Initialize the widgets on the form */
-	@Override protected void initialize() {
-		super.initialize();
+	@Override
+	protected void initialize() {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("device.setup"), createSetupPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
-		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
 		settings.setEnabled(isUpdatePermitted("deviceRequest"));
-		setBackground(Color.LIGHT_GRAY);
+		super.initialize();
 	}
 
 	/** Dispose of the form */
-	@Override protected void dispose() {
+	@Override
+	protected void dispose() {
 		table_model.dispose();
 		super.dispose();
 	}
@@ -333,7 +328,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	}
 
 	/** Update one attribute on the form */
-	@Override protected void doUpdateAttribute(String a) {
+	@Override
+	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("shift")) {
 			shift_spn.setEnabled(canUpdate("shift"));
 			shift_spn.setValue(proxy.getShift());

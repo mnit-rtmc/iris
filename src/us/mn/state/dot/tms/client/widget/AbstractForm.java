@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,7 @@
  */
 package us.mn.state.dot.tms.client.widget;
 
-import java.util.LinkedList;
-import java.util.List;
+import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.client.help.Help;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -31,10 +30,10 @@ import us.mn.state.dot.tms.utils.I18N;
 abstract public class AbstractForm extends JPanel {
 
 	/** Form title */
-	protected final String title;
+	private final String title;
 
 	/** Help page name, which is an I18N string */
-	protected String helpPageName = Help.DEFAULT_HELP_PAGE_NAME;
+	private String helpPageName = Help.DEFAULT_HELP_PAGE_NAME;
 
 	/** Create a new abstract form */
 	protected AbstractForm(String t) {
@@ -55,28 +54,18 @@ abstract public class AbstractForm extends JPanel {
 
 	/** Close the form */
 	protected void close() {
-		fireFormClosed(new FormCloseEvent(this));
-		listeners.clear();
+		JInternalFrame f = frame;
+		if(f != null)
+			f.dispose();
+		frame = null;
 	}
 
-	/** The listeners of this form */
-	protected final List<FormCloseListener> listeners =
-		new LinkedList<FormCloseListener>();
+	/** Frame holding the form */
+	private JInternalFrame frame;
 
-	/** Add a FormCloseListener */
-	public void addFormCloseListener(FormCloseListener l) {
-		listeners.add(l);
-	}
-
-	/** Remove a FormCloseListener */
-	public void removeFormCloseListener(FormCloseListener l) {
-		listeners.remove(l);
-	}
-
-	/** Fire a form closed event to all listeners */
-	protected void fireFormClosed(FormCloseEvent e) {
-		for(FormCloseListener l: listeners) 
-			l.formClosed(e);
+	/** Set the frame holding the form */
+	public void setFrame(JInternalFrame f) {
+		frame = f;
 	}
 
 	/** get the form's help URL */

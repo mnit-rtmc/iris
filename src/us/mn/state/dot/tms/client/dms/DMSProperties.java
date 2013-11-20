@@ -14,13 +14,11 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Color;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -54,14 +52,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Manufacturer panel */
 	private final PropManufacturer manufacturer_pnl;
 
-	/** Sonar state */
-	private final SonarState state;
-
 	/** Create a new DMS properties form */
 	public DMSProperties(Session s, DMS sign) {
 		super(I18N.get("dms") + ": ", s, sign);
 		setHelpPageName("help.dmsproperties");
-		state = s.getSonarState();
 		location_pnl = new PropLocation(s, sign);
 		messages_pnl = new PropMessages(s, sign);
 		config_pnl = new PropConfiguration(s, sign);
@@ -72,13 +66,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Get the SONAR type cache */
-	@Override protected TypeCache<DMS> getTypeCache() {
+	@Override
+	protected TypeCache<DMS> getTypeCache() {
 		return state.getDmsCache().getDMSs();
 	}
 
 	/** Initialize the widgets on the form */
-	@Override protected void initialize() {
-		super.initialize();
+	@Override
+	protected void initialize() {
 		location_pnl.initialize();
 		config_pnl.initialize();
 		status_pnl.initialize();
@@ -97,19 +92,20 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.manufacturer"), manufacturer_pnl);
 		add(tab);
-		setBackground(Color.LIGHT_GRAY);
-		updateAttribute(null);
+		super.initialize();
 	}
 
 	/** Dispose of the form */
-	@Override protected void dispose() {
+	@Override
+	protected void dispose() {
 		location_pnl.dispose();
 		messages_pnl.dispose();
 		super.dispose();
 	}
 
 	/** Update one attribute on the form */
-	@Override protected void doUpdateAttribute(String a) {
+	@Override
+	protected void doUpdateAttribute(String a) {
 		location_pnl.updateAttribute(a);
 		messages_pnl.updateAttribute(a);
 		config_pnl.updateAttribute(a);

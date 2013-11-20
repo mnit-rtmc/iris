@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import javax.swing.Action;
 import javax.swing.JComboBox;
 import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
  * @author Douglas Lau
  */
 abstract public class SonarObjectForm<T extends SonarObject>
-	extends AbstractForm implements ProxyListener<T>
+	extends AbstractForm implements ProxyView<T>
 {
 	/** SONAR object proxy */
 	protected final T proxy;
@@ -43,67 +43,50 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** SONAR state */
 	protected final SonarState state;
 
+	/** Proxy watcher */
+	private final ProxyWatcher<T> watcher;
+
 	/** Create a new SONAR object form */
 	protected SonarObjectForm(String prefix, Session s, T p) {
 		super(prefix + p.getName());
 		proxy = p;
 		session = s;
 		state = s.getSonarState();
+		watcher = new ProxyWatcher<T>(getTypeCache(), this, true);
+		setLayout(new BorderLayout());
+		setBackground(Color.LIGHT_GRAY);
 	}
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
-		setLayout(new BorderLayout());
-		TypeCache<T> cache = getTypeCache();
-		cache.watchObject(proxy);
-		cache.addProxyListener(this);
+		watcher.initialize();
+		watcher.setProxy(proxy);
+		doUpdateAttribute(null);
 	}
 
 	/** Get the SONAR type cache */
 	abstract protected TypeCache<T> getTypeCache();
 
-	/** A new proxy has been added */
-	public void proxyAdded(T p) {
-		// we're not interested
-	}
-
-	/** Enumeration of the proxy type has completed */
-	public void enumerationComplete() {
-		// we're not interested
-	}
-
-	/** A proxy has been removed */
-	public void proxyRemoved(T p) {
-		if(proxy == p)
-			closeForm();
-	}
-
-	/** Close the form */
-	protected void closeForm() {
-		runSwing(new Runnable() {
-			public void run() {
-				close();
-			}
-		});
-	}
-
-	/** A proxy has been changed */
-	public void proxyChanged(T p, final String a) {
-		if(proxy == p)
-			updateAttribute(a);
-	}
-
 	/** Update one attribute on the form */
-	protected final void updateAttribute(final String a) {
-		runSwing(new Runnable() {
-			public void run() {
-				doUpdateAttribute(a);
-			}
-		});
+	@Override
+	public final void update(T p, String a) {
+		if(proxy == p)
+			doUpdateAttribute(a);
 	}
 
 	/** Update one attribute on the form */
 	abstract protected void doUpdateAttribute(String a);
+
+	/** Clear the proxy view */
+	@Override
+	public final void clear() {
+		closeForm();
+	}
+
+	/** Close the form */
+	protected void closeForm() {
+		close();
+	}
 
 	/** Update one combo box attribute on the form.
 	 * @param a Name of current attribute.
@@ -128,9 +111,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 
 	/** Dispose of the form */
 	protected void dispose() {
-		TypeCache<T> cache = getTypeCache();
-		cache.removeProxyListener(this);
-		cache.ignoreObject(proxy);
+		watcher.dispose();
 	}
 
 	/** Show another form */

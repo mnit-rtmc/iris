@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.marking;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -62,24 +61,25 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	}
 
 	/** Get the SONAR type cache */
-	@Override protected TypeCache<LaneMarking> getTypeCache() {
+	@Override
+	protected TypeCache<LaneMarking> getTypeCache() {
 		return state.getLaneMarkings();
 	}
 
 	/** Initialize the widgets on the form */
-	@Override protected void initialize() {
-		super.initialize();
+	@Override
+	protected void initialize() {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
 		add(tab);
-		updateAttribute(null);
 		if(canUpdate())
 			createUpdateJobs();
-		setBackground(Color.LIGHT_GRAY);
+		super.initialize();
 	}
 
 	/** Dispose of the form */
-	@Override protected void dispose() {
+	@Override
+	protected void dispose() {
 		loc_pnl.dispose();
 		super.dispose();
 	}
@@ -105,7 +105,8 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	}
 
 	/** Update one attribute on the form */
-	@Override protected void doUpdateAttribute(String a) {
+	@Override
+	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
