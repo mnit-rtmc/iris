@@ -51,10 +51,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Incident Map object marker */
-	static protected final IncidentMarker MARKER = new IncidentMarker();
+	static private final IncidentMarker MARKER = new IncidentMarker();
 
 	/** Location mapping */
-	protected final HashMap<String, IncidentGeoLoc> locations =
+	private final HashMap<String, IncidentGeoLoc> locations =
 		new HashMap<String, IncidentGeoLoc>();
 
 	/** Create a new incident manager */
@@ -64,12 +64,14 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "incident";
 	}
 
 	/** Get the incident cache */
-	@Override public TypeCache<Incident> getCache() {
+	@Override
+	public TypeCache<Incident> getCache() {
 		return session.getSonarState().getIncidents();
 	}
 
@@ -84,16 +86,19 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Create a list cell renderer */
+	@Override
 	public ListCellRenderer createCellRenderer() {
 		return new IncidentCellRenderer(this);
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for incidents */
+	@Override
 	protected IncidentTheme createTheme() {
 		IncidentTheme theme = new IncidentTheme(this);
 		theme.addStyle(ItemStyle.CLEARED, new Color(128, 255, 128));
@@ -106,11 +111,13 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Show the properties form for the selected proxy */
+	@Override
 	public void showPropertiesForm() {
 		// There is no incident properties form
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		int n_selected = s_model.getSelectedCount();
 		if(n_selected < 1)
@@ -128,7 +135,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Create a popup menu for a single incident selection */
-	protected JPopupMenu createSinglePopup(Incident proxy) {
+	private JPopupMenu createSinglePopup(Incident proxy) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
@@ -141,6 +148,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	public MapGeoLoc findGeoLoc(Incident proxy) {
 		String name = proxy.getName();
 		if(locations.containsKey(name))
@@ -160,6 +168,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected IncidentLoc getGeoLoc(Incident proxy) {
 		IncidentLoc loc = new IncidentLoc(proxy);
 		CorridorBase cb = lookupCorridor(loc);
@@ -258,6 +267,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Get the description of an incident */
+	@Override
 	public String getDescription(Incident inc) {
 		String td = getTypeDesc(inc);
 		if(td.length() > 0) {
@@ -278,7 +288,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Get the lane type description */
-	protected String getLaneType(LaneType lt) {
+	private String getLaneType(LaneType lt) {
 		switch(lt) {
 		case MAINLINE:
 		case EXIT:
@@ -294,7 +304,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	 * @param sty Style of incident.
 	 * @param ltd Lane type description (may be null).
 	 * @return Description of incident type. */
-	protected String getTypeDesc(String sty, String ltd) {
+	private String getTypeDesc(String sty, String ltd) {
 		if(ltd != null)
 			return sty + " " + I18N.get("incident.on") + " " + ltd;
 		else
@@ -322,6 +332,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 10;
 	}
