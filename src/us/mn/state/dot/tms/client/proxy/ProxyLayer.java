@@ -22,21 +22,19 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
-import us.mn.state.dot.sched.Job;
+import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.utils.I18N;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 
 /**
  * Layer for drawing SONAR proxy objects on the map.
  *
  * @author Douglas Lau
  */
-public class ProxyLayer<T extends SonarObject> extends Layer
-	implements ProxyListener<T>
-{
+public class ProxyLayer<T extends SonarObject> extends Layer {
+
 	/** Shape used for calculating the layer extent */
 	static private final Rectangle2D EXTENT_SHAPE =
 		new Rectangle2D.Float(-500, -500, 1000, 1000);
@@ -44,65 +42,66 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	/** Proxy manager for the layer */
 	private final ProxyManager<T> manager;
 
-	/** Proxy type cache */
-	private final TypeCache<T> cache;
-
 	/** Get the proxy manager for the layer */
 	public ProxyManager<T> getManager() {
 		return manager;
 	}
 
+	/** Proxy listener */
+	private final ProxyListener<T> listener = new ProxyListener<T>() {
+		private boolean complete;
+		public void proxyAdded(T proxy) {
+			// NOTE: this also gets called when we "watch" an
+			//       object after it is selected.
+			if(complete)
+				updateGeometry();
+		}
+		public void enumerationComplete() {
+			complete = true;
+			updateExtent();
+		}
+		public void proxyRemoved(T proxy) {
+			updateGeometry();
+		}
+		public void proxyChanged(T proxy, String attrib) {
+			if(isStatusAttrib(attrib))
+				updateStatus();
+		}
+	};
+
 	/** Create a new SONAR map layer */
 	public ProxyLayer(ProxyManager<T> m) {
 		super(I18N.get(m.getProxyType()));
 		manager = m;
-		cache = manager.getCache();
 	}
-
-	/** Enumeration complete flag */
-	private boolean complete;
 
 	/** Initialize the layer. This cannot be done in the constructor
 	 * because subclasses may not be fully constructed. */
 	public void initialize() {
-		complete = false;
-		cache.addProxyListener(this);
+		manager.getCache().addProxyListener(listener);
 	}
 
 	/** Dispose of the layer */
 	public void dispose() {
-		cache.removeProxyListener(this);
+		manager.getCache().removeProxyListener(listener);
 	}
 
-	/** Add a new proxy to the layer */
-	@Override public void proxyAdded(T proxy) {
-		if(complete) {
-			// NOTE: this also gets called when we "watch" an
-			//       object after it is selected.
-			fireLayerChanged(LayerChange.geometry);
-		}
-	}
-
-	/** Enumeration of all proxies is complete */
-	@Override public void enumerationComplete() {
-		complete = true;
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				updateExtent();
+	/** Update the layer geometry */
+	private void updateGeometry() {
+		runSwing(new Runnable() {
+			public void run() {
+				fireLayerChanged(LayerChange.geometry);
 			}
 		});
 	}
 
-	/** Remove a proxy from the model */
-	@Override public void proxyRemoved(T proxy) {
-		fireLayerChanged(LayerChange.geometry);
-	}
-
-	/** Change a proxy in the model */
-	@Override public void proxyChanged(T proxy, String attrib) {
-		if(isStatusAttrib(attrib))
-			fireLayerChanged(LayerChange.status);
+	/** Update the layer status */
+	private void updateStatus() {
+		runSwing(new Runnable() {
+			public void run() {
+				fireLayerChanged(LayerChange.status);
+			}
+		});
 	}
 
 	/** Check if an attribute causes a layer status update */
@@ -116,10 +115,21 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 
 	/** Update the layer extent */
 	public void updateExtent() {
-		ExtentCalculator calc = new ExtentCalculator();
-		manager.forEach(calc, 1);
-		if(calc.extent != null)
-			setExtent(calc.extent);
+		IWorker<Rectangle2D> worker = new IWorker<Rectangle2D>() {
+			@Override
+			public Rectangle2D doInBackground() {
+				ExtentCalculator calc = new ExtentCalculator();
+				manager.forEach(calc, 1);
+				return calc.extent;
+			}
+			@Override
+			public void done() {
+				Rectangle2D e = getResult();
+				if(e != null)
+					setExtent(e);
+			}
+		};
+		worker.execute();
 	}
 
 	/** Class to calculate the extent of the layer */
