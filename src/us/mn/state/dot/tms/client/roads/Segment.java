@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class Segment {
 
 	/** R_Node model */
-	protected final R_NodeModel model;
+	private final R_NodeModel model;
 
 	/** Get the r_node model */
 	public R_NodeModel getModel() {
@@ -41,10 +41,10 @@ public class Segment {
 	}
 
 	/** Upstream mainline node */
-	protected final R_Node upstream;
+	private final R_Node upstream;
 
 	/** Shift from upstream node to end of segment */
-	protected final int shift;
+	private final int shift;
 
 	/** Get the segment label */
 	public String getLabel(Integer lane) {
@@ -58,19 +58,22 @@ public class Segment {
 	public final MapGeoLoc loc_dn;
 
 	/** Sample data set */
-	protected final SampleDataSet samples;
+	private final SampleDataSet samples;
+
+	/** Flag to indicate too distant from upstream node */
+	private final boolean too_distant;
 
 	/** Mapping of lane numbers to labels */
-	protected final HashMap<Integer, String> labels =
+	private final HashMap<Integer, String> labels =
 		new HashMap<Integer, String>();
 
 	/** Mapping of sensor ID to lane number */
-	protected final HashMap<String, Integer> lane_sensors =
+	private final HashMap<String, Integer> lane_sensors =
 		new HashMap<String, Integer>();
 
 	/** Create a new segment */
 	public Segment(R_NodeModel m, R_Node u, MapGeoLoc lu, MapGeoLoc ld,
-		SampleDataSet sds)
+		SampleDataSet sds, boolean td)
 	{
 		assert m != null;
 		assert u != null;
@@ -81,12 +84,14 @@ public class Segment {
 		loc_up = lu;
 		loc_dn = ld;
 		samples = sds;
+		too_distant = td;
 		shift = model.getShift(upstream);
-		labels.put(null, getStationLabel());
+		if(!too_distant)
+			labels.put(null, getStationLabel());
 	}
 
 	/** Get label for a station segment */
-	protected String getStationLabel() {
+	private String getStationLabel() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(I18N.get("detector.station"));
 		sb.append(" ");
@@ -112,7 +117,7 @@ public class Segment {
 	}
 
 	/** Add a detector label */
-	protected void addDetectorLabel(Detector det) {
+	private void addDetectorLabel(Detector det) {
 		int ln = det.getLaneNumber();
 		StringBuilder sb = new StringBuilder();
 		String lbl = labels.get(ln);
@@ -125,7 +130,7 @@ public class Segment {
 	}
 
 	/** Get label for a detector segment */
-	protected String getDetectorLabel(Detector det) {
+	private String getDetectorLabel(Detector det) {
 		StringBuilder sb = new StringBuilder();
 		sb.append('D');
 		sb.append(det.getName());

@@ -131,10 +131,11 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 				if(R_NodeHelper.isJoined(n) &&
 				   !isTooDistant(ploc, loc))
 				{
+					boolean td = isTooDistant(uloc, loc);
 					mdl = new R_NodeModel(n, mdl);
 					Segment seg = new Segment(mdl, un,
-						ploc, loc, samples);
-					if(!isTooDistant(uloc, loc))
+						ploc, loc, samples, td);
+					if(!td)
 					   seg.addDetection(getDetectors(un));
 					if(n.getAbove())
 						above.add(seg);
