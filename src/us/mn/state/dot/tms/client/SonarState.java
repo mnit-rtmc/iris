@@ -23,6 +23,7 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -443,7 +444,9 @@ public class SonarState extends Client {
 	}
 
 	/** Populate the specified type cache */
-	public void populateReadable(TypeCache tc, boolean do_wait) {
+	public void populateReadable(TypeCache<? extends SonarObject> tc,
+		boolean do_wait)
+	{
 		if(canRead(tc.tname))
 			populate(tc, do_wait);
 		else
@@ -451,7 +454,7 @@ public class SonarState extends Client {
 	}
 
 	/** Populate the specified type cache */
-	public void populateReadable(TypeCache tc) {
+	public void populateReadable(TypeCache<? extends SonarObject> tc) {
 		populateReadable(tc, false);
 	}
 
