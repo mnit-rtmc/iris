@@ -26,20 +26,21 @@ import us.mn.state.dot.tms.client.Session;
  */
 public class CameraTab extends MapTab<Camera> {
 
-	/** Camera viewer */
-	private final CameraViewer viewer;
+	/** Camera dispatcher */
+	private final CameraDispatcher dispatcher;
 
 	/** Create a new camera tab for the IRIS client */
 	public CameraTab(Session session, CameraManager man) {
 		super(man);
-		viewer = new CameraViewer(session, man);
-		add(viewer, BorderLayout.NORTH);
+		dispatcher = new CameraDispatcher(session, man);
+		add(dispatcher, BorderLayout.NORTH);
 		add(man.createStyleSummary(), BorderLayout.CENTER);
 	}
 
 	/** Perform any clean up necessary */
-	@Override public void dispose() {
+	@Override
+	public void dispose() {
 		super.dispose();
-		viewer.dispose();
+		dispatcher.dispose();
 	}
 }

@@ -32,12 +32,12 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * GUI for viewing camera images
+ * GUI for viewing camera images.
  *
  * @author Douglas Lau
  * @author Tim Johnson
  */
-public class CameraViewer extends IPanel
+public class CameraDispatcher extends IPanel
 	implements ProxySelectionListener<Camera>
 {
 	/** The system attribute for the number of button presets */
@@ -89,8 +89,8 @@ public class CameraViewer extends IPanel
 	/** Joystick PTZ handler */
 	private final JoystickPTZ joy_ptz;
 
-	/** Create a new camera viewer */
-	public CameraViewer(Session s, CameraManager man) {
+	/** Create a new camera dispatcher */
+	public CameraDispatcher(Session s, CameraManager man) {
 		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
 		session = s;
