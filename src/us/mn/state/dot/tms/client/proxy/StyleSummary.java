@@ -124,6 +124,10 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			count_lbl = new JLabel();
 			n_count = 0;
 		}
+		private void countProxy(T proxy) {
+			if(manager.checkStyle(istyle, proxy))
+				n_count++;
+		}
 		private void updateCountLabel() {
 			// Capture current count in case it's updated
 			final String c = Integer.toString(n_count);
@@ -239,10 +243,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		Iterator<T> it = manager.getCache().iterator();
 		while(it.hasNext() && !start_over) {
 			T proxy = it.next();
-			for(StyleWidgets sw: widgets.values()) {
-				if(manager.checkStyle(sw.istyle, proxy))
-					sw.n_count++;
-			}
+			for(StyleWidgets sw: widgets.values())
+				sw.countProxy(proxy);
 		}
 		if(!start_over) {
 			for(StyleWidgets sw: widgets.values())
