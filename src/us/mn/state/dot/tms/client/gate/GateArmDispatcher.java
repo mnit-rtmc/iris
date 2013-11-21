@@ -57,11 +57,11 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * GateArmArrayDispatcher is a GUI component for deploying gate arms.
+ * GateArmDispatcher is a GUI component for deploying gate arms.
  *
  * @author Douglas Lau
  */
-public class GateArmArrayDispatcher extends IPanel {
+public class GateArmDispatcher extends IPanel {
 
 	/** Get the filter color for a DMS */
 	static private Color filterColor(DMS dms) {
@@ -244,8 +244,8 @@ public class GateArmArrayDispatcher extends IPanel {
 			dms_cache.watchObject(nw);
 	}
 
-	/** Create a new gate arm array dispatcher */
-	public GateArmArrayDispatcher(Session s, GateArmArrayManager manager) {
+	/** Create a new gate arm dispatcher */
+	public GateArmDispatcher(Session s, GateArmArrayManager manager) {
 		session = s;
 		cache = s.getSonarState().getGateArmArrays();
 		cache.addProxyListener(p_listener);
