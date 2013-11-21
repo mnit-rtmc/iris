@@ -29,7 +29,6 @@ import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import us.mn.state.dot.sched.Job;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.help.Help;
 import us.mn.state.dot.tms.client.widget.Screen;
@@ -139,7 +138,7 @@ public class SmartDesktop extends JDesktopPane {
 
 	/** Show the specified form */
 	public void show(final AbstractForm form) {
-		runSwing(new Runnable() {
+		SwingRunner.runSwing(new Runnable() {
 			public void run() {
 				doShow(form);
 			}

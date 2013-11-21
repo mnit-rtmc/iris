@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client;
 
 import java.awt.Frame;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.client.help.ExceptionDialog;
 
 /**

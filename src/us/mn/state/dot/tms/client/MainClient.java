@@ -19,7 +19,7 @@ import java.net.ProxySelector;
 import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Scheduler;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.utils.HTTPProxySelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;

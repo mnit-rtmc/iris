@@ -29,7 +29,7 @@ import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerChange;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.GeoLocHelper;

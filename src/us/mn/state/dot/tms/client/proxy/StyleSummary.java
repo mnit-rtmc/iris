@@ -41,7 +41,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.TitledBorder;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.Job;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.tms.ItemStyle;

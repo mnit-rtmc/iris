@@ -18,7 +18,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignText;
