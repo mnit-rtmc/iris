@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 public class DmsCache {
 
 	/** Cache of font proxies */
-	protected final TypeCache<Font> fonts;
+	private final TypeCache<Font> fonts;
 
 	/** Get the font type cache */
 	public TypeCache<Font> getFonts() {
@@ -42,7 +42,7 @@ public class DmsCache {
 	}
 
 	/** Font proxy list model */
-	protected final ProxyListModel<Font> font_model;
+	private final ProxyListModel<Font> font_model;
 
 	/** Get the font list model */
 	public ProxyListModel<Font> getFontModel() {
@@ -50,7 +50,7 @@ public class DmsCache {
 	}
 
 	/** Cache of glyph proxies */
-	protected final TypeCache<Glyph> glyphs;
+	private final TypeCache<Glyph> glyphs;
 
 	/** Get the glyph type cache */
 	public TypeCache<Glyph> getGlyphs() {
@@ -58,7 +58,7 @@ public class DmsCache {
 	}
 
 	/** Cache of sign messages */
-	protected final TypeCache<SignMessage> sign_messages;
+	private final TypeCache<SignMessage> sign_messages;
 
 	/** Get the sign message cache */
 	public TypeCache<SignMessage> getSignMessages() {
@@ -66,7 +66,7 @@ public class DmsCache {
 	}
 
 	/** Cache of quick messages */
-	protected final TypeCache<QuickMessage> quick_messages;
+	private final TypeCache<QuickMessage> quick_messages;
 
 	/** Get the quick message cache */
 	public TypeCache<QuickMessage> getQuickMessages() {
@@ -74,7 +74,7 @@ public class DmsCache {
 	}
 
 	/** Cache of dynamic message signs */
-	protected final TypeCache<DMS> dmss;
+	private final TypeCache<DMS> dmss;
 
 	/** Get the dynamic message sign cache */
 	public TypeCache<DMS> getDMSs() {
@@ -90,7 +90,7 @@ public class DmsCache {
 	}
 
 	/** Cache of sign groups */
-	protected final TypeCache<SignGroup> sign_groups;
+	private final TypeCache<SignGroup> sign_groups;
 
 	/** Get the sign group cache */
 	public TypeCache<SignGroup> getSignGroups() {
@@ -98,7 +98,7 @@ public class DmsCache {
 	}
 
 	/** Cache of DMS sign groups */
-	protected final TypeCache<DmsSignGroup> dms_sign_groups;
+	private final TypeCache<DmsSignGroup> dms_sign_groups;
 
 	/** Get the DMS sign group cache */
 	public TypeCache<DmsSignGroup> getDmsSignGroups() {
@@ -106,7 +106,7 @@ public class DmsCache {
 	}
 
 	/** Cache of sign text */
-	protected final TypeCache<SignText> sign_text;
+	private final TypeCache<SignText> sign_text;
 
 	/** Get the sign text cache */
 	public TypeCache<SignText> getSignText() {
