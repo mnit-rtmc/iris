@@ -64,7 +64,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 			updateGeometry();
 		}
 		public void proxyChanged(T proxy, String attrib) {
-			if(isStatusAttrib(attrib))
+			if(manager.isStyleAttrib(attrib))
 				updateStatus();
 		}
 	};
@@ -102,15 +102,6 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 				fireLayerChanged(LayerChange.status);
 			}
 		});
-	}
-
-	/** Check if an attribute causes a layer status update */
-	private boolean isStatusAttrib(String attrib) {
-		return "styles".equals(attrib) ||   // dms, lcs, meter, gate arm
-		       "cleared".equals(attrib) ||  // incidents
-		       "publish".equals(attrib) ||  // cameras
-		       "failTime".equals(attrib) || // controllers
-		       "maint".equals(attrib);      // controllers
 	}
 
 	/** Update the layer extent */

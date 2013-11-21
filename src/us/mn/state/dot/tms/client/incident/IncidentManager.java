@@ -210,6 +210,12 @@ public class IncidentManager extends ProxyManager<Incident> {
 		return new Position(inc.getLat(), inc.getLon());
 	}
 
+	/** Check if a given attribute affects a proxy style */
+	@Override
+	public boolean isStyleAttrib(String a) {
+		return "cleared".equals(a);
+	}
+
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, Incident proxy) {

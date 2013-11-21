@@ -102,7 +102,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			updateCounts();
 		}
 		@Override public void proxyChanged(T proxy, String attrib) {
-			updateCounts();
+			if(manager.isStyleAttrib(attrib))
+				updateCounts();
 		}
 	};
 

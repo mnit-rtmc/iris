@@ -63,12 +63,14 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "camera";
 	}
 
 	/** Get the camera cache */
-	@Override public TypeCache<Camera> getCache() {
+	@Override
+	public TypeCache<Camera> getCache() {
 		return session.getSonarState().getCamCache().getCameras();
 	}
 
@@ -83,11 +85,13 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for cameras */
+	@Override
 	protected ProxyTheme<Camera> createTheme() {
 		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this, MARKER);
 		theme.addStyle(ItemStyle.UNPUBLISHED,
@@ -100,7 +104,14 @@ public class CameraManager extends ProxyManager<Camera> {
 		return theme;
 	}
 
+	/** Check if a given attribute affects a proxy style */
+	@Override
+	public boolean isStyleAttrib(String a) {
+		return "publish".equals(a);
+	}
+
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, Camera proxy) {
 		switch(is) {
 		case ACTIVE:
@@ -122,6 +133,7 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Show the properties form for the selected proxy */
+	@Override
 	public void showPropertiesForm() {
 		if(s_model.getSelectedCount() == 1) {
 			for(Camera cam: s_model.getSelected())
@@ -206,11 +218,13 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(Camera proxy) {
 		return proxy.getGeoLoc();
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 13;
 	}

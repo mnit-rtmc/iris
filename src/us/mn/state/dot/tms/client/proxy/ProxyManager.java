@@ -296,6 +296,11 @@ abstract public class ProxyManager<T extends SonarObject>
 			return null;
 	}
 
+	/** Check if a given attribute affects a proxy style */
+	public boolean isStyleAttrib(String a) {
+		return "styles".equals(a);
+	}
+
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(ItemStyle is, T proxy) {
 		return false;

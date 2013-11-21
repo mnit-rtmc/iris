@@ -157,6 +157,12 @@ public class ControllerManager extends ProxyManager<Controller> {
 			return null;
 	}
 
+	/** Check if a given attribute affects a proxy style */
+	@Override
+	public boolean isStyleAttrib(String a) {
+		return "failTime".equals(a) || "maint".equals(a);
+	}
+
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, Controller proxy) {
