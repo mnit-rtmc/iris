@@ -39,6 +39,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.ScreenLayout;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -56,9 +57,6 @@ public class IrisClient extends JFrame {
 
 	/** Worker thread */
 	static public final Scheduler WORKER = new Scheduler("worker");
-
-	/** Login scheduler */
-	static private final Scheduler LOGIN = new Scheduler("login");
 
 	/** Create the window title */
 	static private String createTitle(String suffix) {
@@ -275,52 +273,47 @@ public class IrisClient extends JFrame {
 
 	/** Login a user */
 	public void login(final String user, final char[] pwd) {
-		LOGIN.addJob(new Job() {
-			public void perform() throws Exception {
-				doLogin(user, pwd);
-			}
-		});
-	}
-
-	/** Login a user */
-	private void doLogin(String user, char[] pwd) throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle(createTitle(I18N.get("iris.logging.in")));
 		menu_bar.disableSessionMenu();
 		closeSession();
-		try {
-			session = createSession(user, pwd);
-		}
-		finally {
-			for(int i = 0; i < pwd.length; ++i)
-				pwd[i] = ' ';
-			menu_bar.setSession(session);
-			updateMaps(session);
-			arrangeTabs();
-			setTitle(createTitle(session));
-			setCursor(null);
-			invalidate();
-		}
+		IWorker<Session> worker = new IWorker<Session>() {
+			@Override
+			public Session doInBackground() {
+				return createSession(user, pwd);
+			}
+			@Override
+			public void done() {
+				session = getResult();
+				for(int i = 0; i < pwd.length; ++i)
+					pwd[i] = ' ';
+				menu_bar.setSession(session);
+				updateMaps(session);
+				arrangeTabs();
+				setTitle(createTitle(session));
+				setCursor(null);
+				invalidate();
+			}
+		};
+		worker.execute();
 	}
 
 	/** Create a new session */
-	private Session createSession(String user, char[] pwd) throws Exception{
-		SonarState state = createSonarState();
-		state.login(user, new String(pwd));
-		if(state.isLoggedIn()) {
-			state.populateCaches();
-			Session s = new Session(state, desktop, props);
-			s.initialize();
-			return s;
-		} else
-			return null;
-	}
-
-	/** Create a new SONAR state */
-	private SonarState createSonarState() throws IOException,
-		SonarException, NoSuchFieldException, IllegalAccessException
-	{
-		return new SonarState(props, handler);
+	private Session createSession(String user, char[] pwd) {
+		try {
+			SonarState st = new SonarState(props, handler);
+			st.login(user, new String(pwd));
+			if(st.isLoggedIn()) {
+				st.populateCaches();
+				Session s = new Session(st, desktop, props);
+				s.initialize();
+				return s;
+			}
+		}
+		catch(Exception e) {
+			handler.handle(e);
+		}
+		return null;
 	}
 
 	/** Update the maps on all screen panes */
@@ -371,15 +364,6 @@ public class IrisClient extends JFrame {
 
 	/** Logout of the current session */
 	public void logout() {
-		LOGIN.addJob(new Job() {
-			public void perform() {
-				doLogout();
-			}
-		});
-	}
-
-	/** Clean up when the user logs out */
-	private void doLogout() {
 		user_props.setWindowProperties(this);
 		menu_bar.setSession(null);
 		removeTabs();
