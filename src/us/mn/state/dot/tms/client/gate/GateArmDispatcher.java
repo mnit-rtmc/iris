@@ -24,8 +24,6 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import static us.mn.state.dot.sched.SwingRunner.runSwing;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -74,27 +72,19 @@ public class GateArmDispatcher extends IPanel
 	/** SONAR session */
 	private final Session session;
 
-	/** Cache of DMS proxy objects */
-	private final TypeCache<DMS> dms_cache;
-
 	/** Selection model */
 	private final ProxySelectionModel<GateArmArray> sel_model;
 
-	/** DMS Proxy listener */
-	private final ProxyListener<DMS> dms_listener =
-		new ProxyListener<DMS>()
-	{
-		public void proxyAdded(DMS d) { }
-		public void enumerationComplete() { }
-		public void proxyRemoved(DMS d) { }
-		public void proxyChanged(final DMS d, final String a) {
-			if(d == watching_dms && "styles".equals(a)) {
-				runSwing(new Runnable() {
-					public void run() {
-						updateDms(d);
-					}
-				});
-			}
+	/** DMS Proxy view */
+	private final ProxyView<DMS> dms_view = new ProxyView<DMS>() {
+		public void update(DMS d, String a) {
+			if(a == null ||
+			   "styles".equals(a) ||
+			   "messageCurrent".equals(a))
+				updateDms(d);
+		}
+		public void clear() {
+			clearDms();
 		}
 	};
 
@@ -200,18 +190,11 @@ public class GateArmDispatcher extends IPanel
 		}
 	};
 
-	/** Currently selected DMS */
-	private DMS watching_dms;
+	/** DMS Proxy watcher */
+	private final ProxyWatcher<DMS> dms_watcher;
 
-	/** Watch a DMS */
-	private synchronized void watch_dms(final DMS nw) {
-		final DMS ow = watching_dms;
-		if(ow != null)
-			dms_cache.ignoreObject(ow);
-		watching_dms = nw;
-		if(nw != null)
-			dms_cache.watchObject(nw);
-	}
+	/** Currently selected DMS */
+	private DMS dms;
 
 	/** Create a new gate arm dispatcher */
 	public GateArmDispatcher(Session s, GateArmArrayManager manager) {
@@ -219,8 +202,9 @@ public class GateArmDispatcher extends IPanel
 		TypeCache<GateArmArray> cache =
 			s.getSonarState().getGateArmArrays();
 		watcher = new ProxyWatcher<GateArmArray>(cache, this, true);
-		dms_cache = s.getSonarState().getDmsCache().getDMSs();
-		dms_cache.addProxyListener(dms_listener);
+		TypeCache<DMS> dms_cache =
+			s.getSonarState().getDmsCache().getDMSs();
+		dms_watcher = new ProxyWatcher<DMS>(dms_cache, dms_view, false);
 		sel_model = manager.getSelectionModel();
 		stream_ptz = new CameraPTZ(s);
 		stream_pnl = createStreamPanel(stream_ptz, MEDIUM);
@@ -274,17 +258,18 @@ public class GateArmDispatcher extends IPanel
 			}
 		});
 		watcher.initialize();
+		dms_watcher.initialize();
 		clear();
 		sel_model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Select the DMS */
 	private void selectDms() {
-		DMS dms = watching_dms;
-		if(dms != null) {
-			watch_dms(null);
+		DMS d = dms;
+		if(d != null) {
+			dms_watcher.setProxy(null);
 			session.getDMSManager().getSelectionModel().
-				setSelected(dms);
+				setSelected(d);
 		}
 	}
 
@@ -329,8 +314,8 @@ public class GateArmDispatcher extends IPanel
 	/** Dispose of the dispatcher */
 	@Override
 	public void dispose() {
+		dms_watcher.dispose();
 		watcher.dispose();
-		dms_cache.removeProxyListener(dms_listener);
 		setPager(null);
 		sel_model.removeProxySelectionListener(sel_listener);
 		stream_pnl.dispose();
@@ -373,11 +358,8 @@ public class GateArmDispatcher extends IPanel
 			updateCameraStream(ga);
 		if(a == null || a.equals("approach"))
 			updateApproachStream(ga);
-		if(a == null || a.equals("dms")) {
-			DMS dms = ga.getDms();
-			watch_dms(dms);
-			updateDms(dms);
-		}
+		if(a == null || a.equals("dms"))
+			dms_watcher.setProxy(ga.getDms());
 		if(a == null || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
 		if(a == null || a.equals("styles")) {
@@ -425,17 +407,23 @@ public class GateArmDispatcher extends IPanel
 	}
 
 	/** Update the DMS */
-	private void updateDms(DMS dms) {
-		current_pnl.setFilterColor(filterColor(dms));
-		RasterGraphic[] rg = DMSHelper.getRasters(dms);
+	private void updateDms(DMS d) {
+		dms = d;
+		current_pnl.setFilterColor(filterColor(d));
+		RasterGraphic[] rg = DMSHelper.getRasters(d);
 		if(rg != null) {
-			String ms = DMSHelper.getMultiString(dms);
-			current_pnl.setDimensions(dms);
+			String ms = DMSHelper.getMultiString(d);
+			current_pnl.setDimensions(d);
 			setPager(new DMSPanelPager(current_pnl, rg, ms));
-		} else {
-			setPager(null);
-			current_pnl.clear();
-		}
+		} else
+			clearDms();
+	}
+
+	/** Clear the DMS */
+	private void clearDms() {
+		setPager(null);
+		current_pnl.setFilterColor(null);
+		current_pnl.clear();
 	}
 
 	/** Set the DMS panel pager */
@@ -557,10 +545,7 @@ public class GateArmDispatcher extends IPanel
 		interlock_lbl.setForeground(null);
 		interlock_lbl.setBackground(null);
 		clearArms();
-		watch_dms(null);
-		setPager(null);
-		current_pnl.setFilterColor(null);
-		current_pnl.clear();
+		dms_watcher.setProxy(null);
 	}
 
 	/** Clear gate arms */
