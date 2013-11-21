@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -200,9 +199,8 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray>,
 
 	/** Get the selected LCS array */
 	private LCSArray getSelected() {
-		List<LCSArray> sel = sel_model.getSelected();
-		if(sel.size() == 1) {
-			for(LCSArray la: sel)
+		if(sel_model.getSelectedCount() == 1) {
+			for(LCSArray la: sel_model.getSelected())
 				return la;
 		}
 		return null;

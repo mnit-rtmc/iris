@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
 import java.awt.GridLayout;
-import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -173,9 +172,8 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter>,
 
 	/** Get the selected ramp meter */
 	private RampMeter getSelected() {
-		List<RampMeter> sel = sel_model.getSelected();
-		if(sel.size() == 1) {
-			for(RampMeter rm: sel)
+		if(sel_model.getSelectedCount() == 1) {
+			for(RampMeter rm: sel_model.getSelected())
 				return rm;
 		}
 		return null;
