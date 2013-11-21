@@ -56,23 +56,23 @@ import us.mn.state.dot.tms.utils.I18N;
 public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Number of style columns in summary */
-	static protected final int STYLE_COLS = 3;
+	static private final int STYLE_COLS = 3;
 
 	/** Number of grid columns for each style column */
-	static protected final int GRID_COLS = 4;
+	static private final int GRID_COLS = 4;
 
 	/** Proxy manager */
-	protected final ProxyManager<T> manager;
+	private final ProxyManager<T> manager;
 
 	/** Radio button group */
-	protected final ButtonGroup r_buttons = new ButtonGroup();
+	private final ButtonGroup r_buttons = new ButtonGroup();
 
 	/** Mapping of style names to widgets */
 	private final HashMap<String, StyleWidgets> widgets =
 		new HashMap<String, StyleWidgets>();
 
 	/** Titled border */
-	protected final TitledBorder border;
+	private final TitledBorder border;
 
 	/** Dummy list selection model */
 	private final DefaultListSelectionModel dummy_model =
@@ -87,18 +87,22 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Style status counter */
 	private final ProxyListener<T> counter = new ProxyListener<T>() {
 		private boolean complete = false;
-		@Override public void proxyAdded(T proxy) {
+		@Override
+		public void proxyAdded(T proxy) {
 			if(complete)
 				updateCounts();
 		}
-		@Override public void enumerationComplete() {
+		@Override
+		public void enumerationComplete() {
 			complete = true;
 			updateCounts();
 		}
-		@Override public void proxyRemoved(T proxy) {
+		@Override
+		public void proxyRemoved(T proxy) {
 			updateCounts();
 		}
-		@Override public void proxyChanged(T proxy, String attrib) {
+		@Override
+		public void proxyChanged(T proxy, String attrib) {
 			if(manager.isStyleAttrib(attrib))
 				updateCounts();
 		}
@@ -202,7 +206,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** Create a radio button for the given style list model */
-	protected JRadioButton createRadioButton(final String style) {
+	private JRadioButton createRadioButton(final String style) {
 		final JRadioButton btn = new JRadioButton(style);
 		r_buttons.add(btn);
 		btn.addActionListener(new ActionListener() {
@@ -312,7 +316,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Dispose of the widget */
 	public void dispose() {
-		removeAll();
 		manager.getCache().removeProxyListener(counter);
+		removeAll();
 	}
 }
