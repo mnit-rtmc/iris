@@ -424,6 +424,7 @@ public class SonarState extends Client {
 	}
 
 	/** Login to the SONAR server */
+	@Override
 	public void login(String u, String p) throws SonarException {
 		final int n_login = handler.getFailedLoginCount();
 		super.login(u, p);
