@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2013  Minnesota Department of Transportation
- * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +15,6 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.ConfigurationError;
@@ -62,15 +60,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * Holds the state of the SONAR client
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class SonarState extends Client {
 
 	/** Exception handler */
-	protected final SimpleHandler handler;
+	private final SimpleHandler handler;
 
 	/** Cache of capability proxies */
-	protected final TypeCache<Capability> capabilities;
+	private final TypeCache<Capability> capabilities;
 
 	/** Get the capability type cache */
 	public TypeCache<Capability> getCapabilities() {
@@ -78,7 +75,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of privilege proxies */
-	protected final TypeCache<Privilege> privileges;
+	private final TypeCache<Privilege> privileges;
 
 	/** Get the privilege type cache */
 	public TypeCache<Privilege> getPrivileges() {
@@ -86,7 +83,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of role proxies */
-	protected final TypeCache<Role> roles;
+	private final TypeCache<Role> roles;
 
 	/** Get the role type cache */
 	public TypeCache<Role> getRoles() {
@@ -94,7 +91,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of user proxies */
-	protected final TypeCache<User> users;
+	private final TypeCache<User> users;
 
 	/** Get the user type cache */
 	public TypeCache<User> getUsers() {
@@ -102,7 +99,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of connection proxies */
-	protected final TypeCache<Connection> connections;
+	private final TypeCache<Connection> connections;
 
 	/** Get the connection type cache */
 	public TypeCache<Connection> getConnections() {
@@ -110,7 +107,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of system attributes */
-	protected final TypeCache<SystemAttribute> system_attributes;
+	private final TypeCache<SystemAttribute> system_attributes;
 
 	/** Get the system attribute type cache */
 	public TypeCache<SystemAttribute> getSystemAttributes() {
@@ -118,7 +115,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of graphic proxies */
-	protected final TypeCache<Graphic> graphics;
+	private final TypeCache<Graphic> graphics;
 
 	/** Get the graphic type cache */
 	public TypeCache<Graphic> getGraphics() {
@@ -126,7 +123,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of road proxies */
-	protected final TypeCache<Road> roads;
+	private final TypeCache<Road> roads;
 
 	/** Get the road type cache */
 	public TypeCache<Road> getRoads() {
@@ -134,7 +131,7 @@ public class SonarState extends Client {
 	}
 
 	/** Road proxy list model */
-	protected final ProxyListModel<Road> road_model;
+	private final ProxyListModel<Road> road_model;
 
 	/** Get the road list model */
 	public ProxyListModel<Road> getRoadModel() {
@@ -142,7 +139,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of geo locations */
-	protected final TypeCache<GeoLoc> geo_locs;
+	private final TypeCache<GeoLoc> geo_locs;
 
 	/** Get the geo location cache */
 	public TypeCache<GeoLoc> getGeoLocs() {
@@ -150,7 +147,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of map extents */
-	protected final TypeCache<MapExtent> map_extents;
+	private final TypeCache<MapExtent> map_extents;
 
 	/** Get the map extent cache */
 	public TypeCache<MapExtent> getMapExtents() {
@@ -158,7 +155,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of alarms */
-	protected final TypeCache<Alarm> alarms;
+	private final TypeCache<Alarm> alarms;
 
 	/** Get the alarm cache */
 	public TypeCache<Alarm> getAlarms() {
@@ -166,7 +163,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of warning signs */
-	protected final TypeCache<WarningSign> warn_signs;
+	private final TypeCache<WarningSign> warn_signs;
 
 	/** Get the warning sign cache */
 	public TypeCache<WarningSign> getWarningSigns() {
@@ -174,7 +171,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of ramp meters */
-	protected final TypeCache<RampMeter> ramp_meters;
+	private final TypeCache<RampMeter> ramp_meters;
 
 	/** Get the ramp meter cache */
 	public TypeCache<RampMeter> getRampMeters() {
@@ -182,7 +179,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of controller objects */
-	protected final ConCache con_cache;
+	private final ConCache con_cache;
 
 	/** Get the controller object cache */
 	public ConCache getConCache() {
@@ -190,7 +187,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of camera objects */
-	protected final CamCache cam_cache;
+	private final CamCache cam_cache;
 
 	/** Get the camera object cache */
 	public CamCache getCamCache() {
@@ -198,7 +195,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of detector objects */
-	protected final DetCache det_cache;
+	private final DetCache det_cache;
 
 	/** Get the detector object cache */
 	public DetCache getDetCache() {
@@ -206,7 +203,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of DMS objects */
-	protected final DmsCache dms_cache;
+	private final DmsCache dms_cache;
 
 	/** Get the DMS object cache */
 	public DmsCache getDmsCache() {
@@ -214,7 +211,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of LCS objects */
-	protected final LcsCache lcs_cache;
+	private final LcsCache lcs_cache;
 
 	/** Get the LCS object cache */
 	public LcsCache getLcsCache() {
@@ -222,7 +219,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of lane markings */
-	protected final TypeCache<LaneMarking> lane_markings;
+	private final TypeCache<LaneMarking> lane_markings;
 
 	/** Get the lane marking cache */
 	public TypeCache<LaneMarking> getLaneMarkings() {
@@ -230,7 +227,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of weather sensors */
-	protected final TypeCache<WeatherSensor> weather_sensors;
+	private final TypeCache<WeatherSensor> weather_sensors;
 
 	/** Get the weather sensor cache */
 	public TypeCache<WeatherSensor> getWeatherSensors() {
@@ -262,7 +259,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of incident details */
-	protected final TypeCache<IncidentDetail> inc_details;
+	private final TypeCache<IncidentDetail> inc_details;
 
 	/** Get the incident details object cache */
 	public TypeCache<IncidentDetail> getIncidentDetails() {
@@ -270,7 +267,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of incidents */
-	protected final TypeCache<Incident> incidents;
+	private final TypeCache<Incident> incidents;
 
 	/** Get the incident object cache */
 	public TypeCache<Incident> getIncidents() {
@@ -278,7 +275,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of holiday proxies */
-	protected final TypeCache<Holiday> holidays;
+	private final TypeCache<Holiday> holidays;
 
 	/** Get the holiday type cache */
 	public TypeCache<Holiday> getHolidays() {
@@ -286,7 +283,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of day plans */
-	protected final TypeCache<DayPlan> day_plans;
+	private final TypeCache<DayPlan> day_plans;
 
 	/** Get the day plan cache */
 	public TypeCache<DayPlan> getDayPlans() {
@@ -294,7 +291,7 @@ public class SonarState extends Client {
 	}
 
 	/** Day plan proxy list model */
-	protected final ProxyListModel<DayPlan> day_model;
+	private final ProxyListModel<DayPlan> day_model;
 
 	/** Get the day list model */
 	public ProxyListModel<DayPlan> getDayModel() {
@@ -302,7 +299,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of plan phases */
-	protected final TypeCache<PlanPhase> plan_phases;
+	private final TypeCache<PlanPhase> plan_phases;
 
 	/** Get the plan phase cache */
 	public TypeCache<PlanPhase> getPlanPhases() {
@@ -318,7 +315,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of action plans */
-	protected final TypeCache<ActionPlan> action_plans;
+	private final TypeCache<ActionPlan> action_plans;
 
 	/** Get the action plan cache */
 	public TypeCache<ActionPlan> getActionPlans() {
@@ -326,7 +323,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of time actions */
-	protected final TypeCache<TimeAction> time_actions;
+	private final TypeCache<TimeAction> time_actions;
 
 	/** Get the time action cache */
 	public TypeCache<TimeAction> getTimeActions() {
@@ -334,7 +331,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of DMS actions */
-	protected final TypeCache<DmsAction> dms_actions;
+	private final TypeCache<DmsAction> dms_actions;
 
 	/** Get the DMS action cache */
 	public TypeCache<DmsAction> getDmsActions() {
@@ -342,7 +339,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of lane actions */
-	protected final TypeCache<LaneAction> lane_actions;
+	private final TypeCache<LaneAction> lane_actions;
 
 	/** Get the lane action cache */
 	public TypeCache<LaneAction> getLaneActions() {
@@ -350,7 +347,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of meter actions */
-	protected final TypeCache<MeterAction> meter_actions;
+	private final TypeCache<MeterAction> meter_actions;
 
 	/** Get the meter action cache */
 	public TypeCache<MeterAction> getMeterActions() {
@@ -417,10 +414,10 @@ public class SonarState extends Client {
 	}
 
 	/** Logged-in user name */
-	protected String user_name;
+	private String user_name;
 
 	/** Logged-in user */
-	protected User user;
+	private User user;
 
 	/** Get the logged-in user */
 	public User getUser() {
