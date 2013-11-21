@@ -24,7 +24,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -40,12 +39,10 @@ import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.TitledBorder;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sched.Job;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.ItemStyle;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -129,13 +126,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 				n_count++;
 		}
 		private void updateCountLabel() {
-			// Capture current count in case it's updated
-			final String c = Integer.toString(n_count);
-			runSwing(new Runnable() {
-				public void run() {
-					count_lbl.setText(c);
-				}
-			});
+			count_lbl.setText(Integer.toString(n_count));
 		}
 	}
 
@@ -224,31 +215,29 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Update the count labels for each style status */
 	private void updateCounts() {
-		start_over = true;
-		WORKER.addJob(new Job() {
-			public void perform() {
-				start_over = false;
+		IWorker<Void> worker = new IWorker<Void>() {
+			@Override
+			public Void doInBackground() {
 				doUpdateCounts();
+				return null;
 			}
-		});
+			@Override
+			public void done() {
+				for(StyleWidgets sw: widgets.values())
+					sw.updateCountLabel();
+			}
+		};
+		worker.execute();
 	}
 
-	/** Flag to start over style status counts */
-	private boolean start_over = false;
-
-	/** Update the count labels for each style status */
-	private void doUpdateCounts() {
+	/** Update the count labels for each style status.  Must be synchronized
+	 * in case multiple IWorkers are created. */
+	private synchronized void doUpdateCounts() {
 		for(StyleWidgets sw: widgets.values())
 			sw.n_count = 0;
-		Iterator<T> it = manager.getCache().iterator();
-		while(it.hasNext() && !start_over) {
-			T proxy = it.next();
+		for(T proxy: manager.getCache()) {
 			for(StyleWidgets sw: widgets.values())
 				sw.countProxy(proxy);
-		}
-		if(!start_over) {
-			for(StyleWidgets sw: widgets.values())
-				sw.updateCountLabel();
 		}
 	}
 
