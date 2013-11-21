@@ -67,7 +67,8 @@ public class SonarState extends Client {
 	private final SimpleHandler handler;
 
 	/** Cache of capability proxies */
-	private final TypeCache<Capability> capabilities;
+	private final TypeCache<Capability> capabilities =
+		new TypeCache<Capability>(Capability.class, this);
 
 	/** Get the capability type cache */
 	public TypeCache<Capability> getCapabilities() {
@@ -75,7 +76,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of privilege proxies */
-	private final TypeCache<Privilege> privileges;
+	private final TypeCache<Privilege> privileges =
+		new TypeCache<Privilege>(Privilege.class, this);
 
 	/** Get the privilege type cache */
 	public TypeCache<Privilege> getPrivileges() {
@@ -83,7 +85,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of role proxies */
-	private final TypeCache<Role> roles;
+	private final TypeCache<Role> roles =
+		new TypeCache<Role>(Role.class, this);
 
 	/** Get the role type cache */
 	public TypeCache<Role> getRoles() {
@@ -91,7 +94,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of user proxies */
-	private final TypeCache<User> users;
+	private final TypeCache<User> users =
+		new TypeCache<User>(User.class, this);
 
 	/** Get the user type cache */
 	public TypeCache<User> getUsers() {
@@ -99,7 +103,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of connection proxies */
-	private final TypeCache<Connection> connections;
+	private final TypeCache<Connection> connections =
+		new TypeCache<Connection>(Connection.class, this);
 
 	/** Get the connection type cache */
 	public TypeCache<Connection> getConnections() {
@@ -107,7 +112,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of system attributes */
-	private final TypeCache<SystemAttribute> system_attributes;
+	private final TypeCache<SystemAttribute> system_attributes =
+		new TypeCache<SystemAttribute>(SystemAttribute.class, this);
 
 	/** Get the system attribute type cache */
 	public TypeCache<SystemAttribute> getSystemAttributes() {
@@ -115,7 +121,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of graphic proxies */
-	private final TypeCache<Graphic> graphics;
+	private final TypeCache<Graphic> graphics =
+		new TypeCache<Graphic>(Graphic.class, this);
 
 	/** Get the graphic type cache */
 	public TypeCache<Graphic> getGraphics() {
@@ -123,7 +130,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of road proxies */
-	private final TypeCache<Road> roads;
+	private final TypeCache<Road> roads =
+		new TypeCache<Road>(Road.class, this);
 
 	/** Get the road type cache */
 	public TypeCache<Road> getRoads() {
@@ -139,7 +147,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of geo locations */
-	private final TypeCache<GeoLoc> geo_locs;
+	private final TypeCache<GeoLoc> geo_locs =
+		new TypeCache<GeoLoc>(GeoLoc.class, this);
 
 	/** Get the geo location cache */
 	public TypeCache<GeoLoc> getGeoLocs() {
@@ -147,7 +156,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of map extents */
-	private final TypeCache<MapExtent> map_extents;
+	private final TypeCache<MapExtent> map_extents =
+		new TypeCache<MapExtent>(MapExtent.class, this);
 
 	/** Get the map extent cache */
 	public TypeCache<MapExtent> getMapExtents() {
@@ -155,7 +165,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of alarms */
-	private final TypeCache<Alarm> alarms;
+	private final TypeCache<Alarm> alarms =
+		new TypeCache<Alarm>(Alarm.class, this);
 
 	/** Get the alarm cache */
 	public TypeCache<Alarm> getAlarms() {
@@ -163,7 +174,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of warning signs */
-	private final TypeCache<WarningSign> warn_signs;
+	private final TypeCache<WarningSign> warn_signs =
+		new TypeCache<WarningSign>(WarningSign.class, this);
 
 	/** Get the warning sign cache */
 	public TypeCache<WarningSign> getWarningSigns() {
@@ -171,7 +183,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of ramp meters */
-	private final TypeCache<RampMeter> ramp_meters;
+	private final TypeCache<RampMeter> ramp_meters =
+		new TypeCache<RampMeter>(RampMeter.class, this);
 
 	/** Get the ramp meter cache */
 	public TypeCache<RampMeter> getRampMeters() {
@@ -219,7 +232,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of lane markings */
-	private final TypeCache<LaneMarking> lane_markings;
+	private final TypeCache<LaneMarking> lane_markings =
+		new TypeCache<LaneMarking>(LaneMarking.class, this);
 
 	/** Get the lane marking cache */
 	public TypeCache<LaneMarking> getLaneMarkings() {
@@ -227,7 +241,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of weather sensors */
-	private final TypeCache<WeatherSensor> weather_sensors;
+	private final TypeCache<WeatherSensor> weather_sensors =
+		new TypeCache<WeatherSensor>(WeatherSensor.class, this);
 
 	/** Get the weather sensor cache */
 	public TypeCache<WeatherSensor> getWeatherSensors() {
@@ -235,7 +250,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of gate arm arrays */
-	private final TypeCache<GateArmArray> gate_arm_arrays;
+	private final TypeCache<GateArmArray> gate_arm_arrays =
+		new TypeCache<GateArmArray>(GateArmArray.class, this);
 
 	/** Get the gate arm array cache */
 	public TypeCache<GateArmArray> getGateArmArrays() {
@@ -251,7 +267,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of gate arms */
-	private final TypeCache<GateArm> gate_arms;
+	private final TypeCache<GateArm> gate_arms =
+		new TypeCache<GateArm>(GateArm.class, this);
 
 	/** Get the gate arm cache */
 	public TypeCache<GateArm> getGateArms() {
@@ -259,7 +276,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of incident details */
-	private final TypeCache<IncidentDetail> inc_details;
+	private final TypeCache<IncidentDetail> inc_details =
+		new TypeCache<IncidentDetail>(IncidentDetail.class, this);
 
 	/** Get the incident details object cache */
 	public TypeCache<IncidentDetail> getIncidentDetails() {
@@ -267,7 +285,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of incidents */
-	private final TypeCache<Incident> incidents;
+	private final TypeCache<Incident> incidents =
+		new TypeCache<Incident>(Incident.class, this);
 
 	/** Get the incident object cache */
 	public TypeCache<Incident> getIncidents() {
@@ -275,7 +294,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of holiday proxies */
-	private final TypeCache<Holiday> holidays;
+	private final TypeCache<Holiday> holidays =
+		new TypeCache<Holiday>(Holiday.class, this);
 
 	/** Get the holiday type cache */
 	public TypeCache<Holiday> getHolidays() {
@@ -283,7 +303,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of day plans */
-	private final TypeCache<DayPlan> day_plans;
+	private final TypeCache<DayPlan> day_plans =
+		new TypeCache<DayPlan>(DayPlan.class, this);
 
 	/** Get the day plan cache */
 	public TypeCache<DayPlan> getDayPlans() {
@@ -299,7 +320,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of plan phases */
-	private final TypeCache<PlanPhase> plan_phases;
+	private final TypeCache<PlanPhase> plan_phases =
+		new TypeCache<PlanPhase>(PlanPhase.class, this);
 
 	/** Get the plan phase cache */
 	public TypeCache<PlanPhase> getPlanPhases() {
@@ -315,7 +337,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of action plans */
-	private final TypeCache<ActionPlan> action_plans;
+	private final TypeCache<ActionPlan> action_plans =
+		new TypeCache<ActionPlan>(ActionPlan.class, this);
 
 	/** Get the action plan cache */
 	public TypeCache<ActionPlan> getActionPlans() {
@@ -323,7 +346,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of time actions */
-	private final TypeCache<TimeAction> time_actions;
+	private final TypeCache<TimeAction> time_actions =
+		new TypeCache<TimeAction>(TimeAction.class, this);
 
 	/** Get the time action cache */
 	public TypeCache<TimeAction> getTimeActions() {
@@ -331,7 +355,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of DMS actions */
-	private final TypeCache<DmsAction> dms_actions;
+	private final TypeCache<DmsAction> dms_actions =
+		new TypeCache<DmsAction>(DmsAction.class, this);
 
 	/** Get the DMS action cache */
 	public TypeCache<DmsAction> getDmsActions() {
@@ -339,7 +364,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of lane actions */
-	private final TypeCache<LaneAction> lane_actions;
+	private final TypeCache<LaneAction> lane_actions =
+		new TypeCache<LaneAction>(LaneAction.class, this);
 
 	/** Get the lane action cache */
 	public TypeCache<LaneAction> getLaneActions() {
@@ -347,7 +373,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of meter actions */
-	private final TypeCache<MeterAction> meter_actions;
+	private final TypeCache<MeterAction> meter_actions =
+		new TypeCache<MeterAction>(MeterAction.class, this);
 
 	/** Get the meter action cache */
 	public TypeCache<MeterAction> getMeterActions() {
@@ -361,54 +388,20 @@ public class SonarState extends Client {
 	{
 		super(props, h);
 		handler = h;
-		capabilities = new TypeCache<Capability>(Capability.class,this);
-		privileges = new TypeCache<Privilege>(Privilege.class, this);
-		roles = new TypeCache<Role>(Role.class, this);
-		users = new TypeCache<User>(User.class, this);
-		connections = new TypeCache<Connection>(Connection.class, this);
-		system_attributes = new TypeCache<SystemAttribute>(
-			SystemAttribute.class, this);
-		graphics = new TypeCache<Graphic>(Graphic.class, this);
-		roads = new TypeCache<Road>(Road.class, this);
 		road_model = new ProxyListModel<Road>(roads);
 		road_model.initialize();
-		geo_locs = new TypeCache<GeoLoc>(GeoLoc.class, this);
-		map_extents = new TypeCache<MapExtent>(MapExtent.class, this);
-		inc_details = new TypeCache<IncidentDetail>(
-			IncidentDetail.class, this);
-		alarms = new TypeCache<Alarm>(Alarm.class, this);
-		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
-			this);
-		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
 		cam_cache = new CamCache(this);
 		con_cache = new ConCache(this);
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
 		lcs_cache = new LcsCache(this);
-		lane_markings = new TypeCache<LaneMarking>(LaneMarking.class,
-			this);
-		weather_sensors = new TypeCache<WeatherSensor>(
-			WeatherSensor.class, this);
-		gate_arm_arrays = new TypeCache<GateArmArray>(
-			GateArmArray.class, this);
 		gate_arm_array_model = new ProxyListModel<GateArmArray>(
 			gate_arm_arrays);
 		gate_arm_array_model.initialize();
-		gate_arms = new TypeCache<GateArm>(GateArm.class, this);
-		incidents = new TypeCache<Incident>(Incident.class, this);
-		holidays = new TypeCache<Holiday>(Holiday.class, this);
-		day_plans = new TypeCache<DayPlan>(DayPlan.class, this);
 		day_model = new ProxyListModel<DayPlan>(day_plans);
 		day_model.initialize();
-		plan_phases = new TypeCache<PlanPhase>(PlanPhase.class, this);
 		phase_model = new ProxyListModel<PlanPhase>(plan_phases);
 		phase_model.initialize();
-		action_plans = new TypeCache<ActionPlan>(ActionPlan.class,this);
-		time_actions = new TypeCache<TimeAction>(TimeAction.class,this);
-		dms_actions = new TypeCache<DmsAction>(DmsAction.class, this);
-		lane_actions = new TypeCache<LaneAction>(LaneAction.class,this);
-		meter_actions = new TypeCache<MeterAction>(MeterAction.class,
-			this);
 		// FIXME: this is an ugly hack
 		BaseHelper.namespace = getNamespace();
 	}
