@@ -51,6 +51,8 @@ import us.mn.state.dot.tms.client.dms.DMSPanelPager;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -61,8 +63,9 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class GateArmDispatcher extends IPanel {
-
+public class GateArmDispatcher extends IPanel
+	implements ProxyView<GateArmArray>
+{
 	/** Get the filter color for a DMS */
 	static private Color filterColor(DMS dms) {
 		return dms != null ? SignPixelPanel.filterColor(dms) : null;
@@ -71,32 +74,11 @@ public class GateArmDispatcher extends IPanel {
 	/** SONAR session */
 	private final Session session;
 
-	/** Cache of gate arm array proxy objects */
-	private final TypeCache<GateArmArray> cache;
-
 	/** Cache of DMS proxy objects */
 	private final TypeCache<DMS> dms_cache;
 
 	/** Selection model */
 	private final ProxySelectionModel<GateArmArray> sel_model;
-
-	/** Proxy listener */
-	private final ProxyListener<GateArmArray> p_listener =
-		new ProxyListener<GateArmArray>()
-	{
-		public void proxyAdded(GateArmArray ga) { }
-		public void enumerationComplete() { }
-		public void proxyRemoved(GateArmArray ga) { }
-		public void proxyChanged(final GateArmArray ga, final String a) {
-			if(ga == watching) {
-				runSwing(new Runnable() {
-					public void run() {
-						updateAttribute(ga, a);
-					}
-				});
-			}
-		}
-	};
 
 	/** DMS Proxy listener */
 	private final ProxyListener<DMS> dms_listener =
@@ -141,7 +123,7 @@ public class GateArmDispatcher extends IPanel {
 	private final IAction swap_act = new IAction("gate.arm.stream.swap") {
 		protected void doActionPerformed(ActionEvent e) {
 			swap_streams = !swap_streams;
-			GateArmArray ga = watching;
+			GateArmArray ga = ga_array;
 			if(ga != null) {
 				updateCameraStream(ga);
 				updateApproachStream(ga);
@@ -193,41 +175,28 @@ public class GateArmDispatcher extends IPanel {
 
 	/** Request a gate arm state change */
 	private void requestState(GateArmState gas) {
-		GateArmArray ga = watching;
+		GateArmArray ga = ga_array;
 		if(ga != null) {
 			ga.setOwnerNext(session.getUser());
 			ga.setArmStateNext(gas.ordinal());
 		}
 	}
 
-	/** Currently selected gate arm.  This will be null if there are zero or
-	 * multiple devices selected. */
-	private GateArmArray watching;
+	/** Proxy watcher */
+	private final ProxyWatcher<GateArmArray> watcher;
 
-	/** Watch a gate arm */
-	private void watch(final GateArmArray nw) {
-		final GateArmArray ow = watching;
-		if(ow != null)
-			cache.ignoreObject(ow);
-		watching = nw;
-		if(nw != null)
-			cache.watchObject(nw);
-	}
+	/** Currently selected gate arm array */
+	private GateArmArray ga_array;
 
 	/** Selection listener */
 	private final ProxySelectionListener<GateArmArray> sel_listener =
 		new ProxySelectionListener<GateArmArray>()
 	{
 		public void selectionAdded(GateArmArray ga) {
-			if(sel_model.getSelectedCount() <= 1)
-				setSelected(ga);
+			setSelected(getSelected());
 		}
 		public void selectionRemoved(GateArmArray ga) {
-			if(sel_model.getSelectedCount() == 1) {
-				for(GateArmArray g: sel_model.getSelected())
-					setSelected(g);
-			} else if(ga == watching)
-				setSelected(null);
+			setSelected(getSelected());
 		}
 	};
 
@@ -247,12 +216,12 @@ public class GateArmDispatcher extends IPanel {
 	/** Create a new gate arm dispatcher */
 	public GateArmDispatcher(Session s, GateArmArrayManager manager) {
 		session = s;
-		cache = s.getSonarState().getGateArmArrays();
-		cache.addProxyListener(p_listener);
+		TypeCache<GateArmArray> cache =
+			s.getSonarState().getGateArmArrays();
+		watcher = new ProxyWatcher<GateArmArray>(cache, this, true);
 		dms_cache = s.getSonarState().getDmsCache().getDMSs();
 		dms_cache.addProxyListener(dms_listener);
 		sel_model = manager.getSelectionModel();
-		sel_model.addProxySelectionListener(sel_listener);
 		stream_ptz = new CameraPTZ(s);
 		stream_pnl = createStreamPanel(stream_ptz, MEDIUM);
 		thumb_ptz = new CameraPTZ(s);
@@ -265,6 +234,10 @@ public class GateArmDispatcher extends IPanel {
 		}
 		arm_state_lbl.setOpaque(true);
 		interlock_lbl.setOpaque(true);
+	}
+
+	/** Initialize the widgets on the panel */
+	public void initialize() {
 		interlock_lbl.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createLineBorder(Color.BLACK),
 			UI.panelBorder()));
@@ -295,12 +268,14 @@ public class GateArmDispatcher extends IPanel {
 		add(state_lbl[3]);
 		add(gate_lbl[7], Stretch.NONE);
 		add(state_lbl[7], Stretch.LAST);
-		clear();
 		current_pnl.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				selectDms();
 			}
 		});
+		watcher.initialize();
+		clear();
+		sel_model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Select the DMS */
@@ -352,37 +327,42 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Dispose of the dispatcher */
+	@Override
 	public void dispose() {
+		watcher.dispose();
 		dms_cache.removeProxyListener(dms_listener);
-		cache.removeProxyListener(p_listener);
 		setPager(null);
 		sel_model.removeProxySelectionListener(sel_listener);
-		removeAll();
 		stream_pnl.dispose();
 		stream_ptz.setCamera(null);
 		thumb_pnl.dispose();
 		thumb_ptz.setCamera(null);
-		setSelected(null);
+		clear();
+		super.dispose();
 	}
 
-	/** Set the selected gate arm */
-	private void setSelected(final GateArmArray ga) {
-		final GateArmArray p = watching;
-		watch(ga);
-		if(ga != p) {
-			if(ga != null) {
-				swap_streams = false;
-				// other attributes updated by watch
-				updateAttribute(ga, "name");
-			} else
-				clear();
+	/** Get the selected gate arm array */
+	private GateArmArray getSelected() {
+		if(sel_model.getSelectedCount() == 1) {
+			for(GateArmArray ga: sel_model.getSelected())
+				return ga;
 		}
+		return null;
+	}
+
+	/** Set the selected gate arm array */
+	public void setSelected(GateArmArray ga) {
+		watcher.setProxy(ga);
 	}
 
 	/** Update one (or all) attribute(s) on the form.
 	 * @param ga The newly selected gate arm.  May not be null.
 	 * @param a Attribute to update, null for all attributes. */
-	private void updateAttribute(GateArmArray ga, String a) {
+	@Override
+	public void update(GateArmArray ga, String a) {
+		ga_array = ga;
+		if(a == null)
+			swap_streams = false;
 		if(a == null || a.equals("name"))
 			name_lbl.setText(ga.getName());
 		if(a == null || a.equals("geoLoc")) {
@@ -556,7 +536,9 @@ public class GateArmDispatcher extends IPanel {
 	}
 
 	/** Clear all of the fields */
-	private void clear() {
+	@Override
+	public void clear() {
+		ga_array = null;
 		swap_act.setEnabled(false);
 		open_arm.setEnabled(false);
 		warn_close_arm.setEnabled(false);

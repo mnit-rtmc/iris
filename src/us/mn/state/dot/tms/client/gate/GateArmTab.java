@@ -37,13 +37,15 @@ public class GateArmTab extends MapTab<GateArmArray> {
   	public GateArmTab(Session session, GateArmArrayManager man) {
 		super(man, "gate.arm");
 		dispatcher = new GateArmDispatcher(session, man);
+		dispatcher.initialize();
 		summary = man.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}
 
 	/** Dispose of the tab */
-	@Override public void dispose() {
+	@Override
+	public void dispose() {
 		super.dispose();
 		manager.getSelectionModel().clearSelection();
 		summary.dispose();
