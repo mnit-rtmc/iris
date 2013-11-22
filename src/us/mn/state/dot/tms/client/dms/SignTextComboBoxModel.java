@@ -22,7 +22,6 @@ import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.SignGroup;
 
 /**
  * Model for a sign text line combo box.
@@ -47,15 +46,10 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** Sign text line number */
 	private final short line;
 
-	/** Owning sign text model */
-	private final SignTextModel model;
-
 	/** Create a new sign text combo box model.
-	 * @param ln Sign text line number.
-	 * @param stm Sign text model. */
-	protected SignTextComboBoxModel(short ln, SignTextModel stm) {
+	 * @param ln Sign text line number. */
+	protected SignTextComboBoxModel(short ln) {
 		line = ln;
-		model = stm;
 		items.add(BLANK_SIGN_TEXT);
 	}
 
@@ -112,15 +106,14 @@ public class SignTextComboBoxModel extends AbstractListModel
 
 	/** Get or create a sign text for the given string */
 	private SignText getSignText(String s) {
-		if(s.length() == 0)
+		String m = MultiParser.normalize(s.trim());
+		if(m.length() == 0)
 			return BLANK_SIGN_TEXT;
-		SignText st = lookupMessage(s);
+		SignText st = lookupMessage(m);
 		if(st != null)
 			return st;
-		else {
-			return new ClientSignText(MultiParser.normalize(
-				s.trim()));
-		}
+		else
+			return new ClientSignText(m, line, ON_THE_FLY_RANK);
 	}
 
 	/** Lookup a sign text.
@@ -173,15 +166,12 @@ public class SignTextComboBoxModel extends AbstractListModel
 		}
 	}
 
-	/** Update the message library with the currently selected messages */
-	public void updateMessageLibrary() {
+	/** Get the edited sign text (if any) */
+	public SignText getEditedSignText() {
 		SignText st = selected;
 		if(st instanceof ClientSignText && st != BLANK_SIGN_TEXT)
-			addMsgToLib(st.getMulti());
-	}
-
-	/** Add a message to the local sign group library */
-	private void addMsgToLib(String multi) {
-		model.createSignText(line, multi, ON_THE_FLY_RANK);
+			return st;
+		else
+			return null;
 	}
 }

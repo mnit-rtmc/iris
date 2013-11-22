@@ -25,11 +25,28 @@ import us.mn.state.dot.tms.SignText;
 public class ClientSignText implements SignText {
 
 	/** Sign text MULTI string */
-	protected final String multi;
+	private final String multi;
 
-	/** Create a new client sign text */
-	public ClientSignText(String m) {
+	/** Sign text line number */
+	private final short line;
+
+	/** Sign text rank */
+	private final short rank;
+
+	/** Create a new client sign text.
+	 * @param m Multi string of sign text.
+	 * @param ln Line number.
+	 * @param r Message rank. */
+	public ClientSignText(String m, short ln, short r) {
 		multi = m;
+		line = ln;
+		rank = r;
+	}
+
+	/** Create a new client sign text.
+	 * @param m Multi string of sign text. */
+	public ClientSignText(String m) {
+		this(m, (short)0, (short)0);
 	}
 
 	/** Get the SONAR object name */
@@ -54,7 +71,7 @@ public class ClientSignText implements SignText {
 
 	/** Get the line */
 	public short getLine() {
-		return 0;
+		return line;
 	}
 
 	/** Set the MULTI string */
@@ -74,7 +91,7 @@ public class ClientSignText implements SignText {
 
 	/** Get the rank */
 	public short getRank() {
-		return 1;
+		return rank;
 	}
 
 	/** Destroy the object */

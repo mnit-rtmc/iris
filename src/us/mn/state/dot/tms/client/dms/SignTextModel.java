@@ -140,20 +140,6 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		return g.getDms() == dms && g.getSignGroup().getLocal();
 	}
 
-	/**
-	 * Create a new sign text and add to the local sign text library.
-	 * @param line Combobox line number.
-	 * @param multi MULTI string for line.
-	 * @param rank Message rank.
-	 */
-	protected void createSignText(short line, String multi, short rank) {
-		SignGroup sg = getLocalSignGroup();
-		if(sg != null) {
-			if(multi.length() > 0)
-				creator.create(sg, line, multi, rank);
-		}
-	}
-
 	/** Check if user is permitted to add sign text to local sign group */
 	public boolean isLocalSignTextAddPermitted() {
 		SignGroup sg = getLocalSignGroup();
@@ -201,7 +187,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 			return lines.get(line);
 		else {
 			SignTextComboBoxModel m = new SignTextComboBoxModel(
-				line, this);
+				line);
 			lines.put(line, m);
 			return m;
 		}
@@ -244,7 +230,20 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
 	/** Update the message library with the currently selected messages */
 	public void updateMessageLibrary() {
-		for(SignTextComboBoxModel m: lines.values())
-			m.updateMessageLibrary();
+		for(SignTextComboBoxModel m: lines.values()) {
+			SignText st = m.getEditedSignText();
+			if(st != null)
+				createSignText(st);
+		}
+	}
+
+	/** Add a SignText to the local sign text library.
+	 * @param st SignText to create (should be ClientSignText). */
+	private void createSignText(SignText st) {
+		SignGroup sg = getLocalSignGroup();
+		if(sg != null) {
+			creator.create(sg, st.getLine(), st.getMulti(),
+				st.getRank());
+		}
 	}
 }
