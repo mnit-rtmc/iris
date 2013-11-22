@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 
 	/** Lane marking map object marker */
-	static protected final LaneMarkingMarker MARKER =
+	static private final LaneMarkingMarker MARKER =
 		new LaneMarkingMarker();
 
 	/** Create a new lane marking manager */
@@ -44,21 +44,25 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "lane.marking";
 	}
 
 	/** Get the lane marking cache */
-	@Override public TypeCache<LaneMarking> getCache() {
+	@Override
+	public TypeCache<LaneMarking> getCache() {
 		return session.getSonarState().getLaneMarkings();
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for lane markings */
+	@Override
 	protected ProxyTheme<LaneMarking> createTheme() {
 		ProxyTheme<LaneMarking> theme = new ProxyTheme<LaneMarking>(
 			this, MARKER);
@@ -69,6 +73,7 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, LaneMarking proxy) {
 		switch(is) {
 		case NO_CONTROLLER:
@@ -81,22 +86,26 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	}
 
 	/** Show the properties form for the selected proxy */
-	public void showPropertiesForm() {
+	@Override
+	public void showPropertiesForm(LaneMarking proxy) {
 		// FIXME
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		// No popup
 		return null;
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(LaneMarking proxy) {
 		return proxy.getGeoLoc();
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 17;
 	}

@@ -71,15 +71,15 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	static public final Color COLOR_INACTIVE = Color.GRAY;
 
 	/** Marker to draw r_nodes */
-	static protected final R_NodeMarker MARKER =
+	static private final R_NodeMarker MARKER =
 		new R_NodeMarker();
 
 	/** Map to of corridor names to corridors */
-	protected final Map<String, CorridorBase> corridors =
+	private final Map<String, CorridorBase> corridors =
 		new TreeMap<String, CorridorBase>();
 
 	/** List model of all corridors */
-	protected final DefaultListModel model = new DefaultListModel();
+	private final DefaultListModel model = new DefaultListModel();
 
 	/** Get the corridor list model */
 	public ListModel getCorridorModel() {
@@ -87,10 +87,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Segment layer */
-	protected final SegmentLayer seg_layer;
+	private final SegmentLayer seg_layer;
 
 	/** Currently selected corridor */
-	protected CorridorBase corridor;
+	private CorridorBase corridor;
 
 	/** Select a new roadway corridor */
 	public void setCorridor(CorridorBase c) {
@@ -105,12 +105,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Get the proxy type */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "r_node";
 	}
 
 	/** Get the r_node cache */
-	@Override public TypeCache<R_Node> getCache() {
+	@Override
+	public TypeCache<R_Node> getCache() {
 		return session.getSonarState().getDetCache().getR_Nodes();
 	}
 
@@ -125,6 +127,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Add a new proxy to the r_node manager */
+	@Override
 	protected void proxyAddedSlow(R_Node n) {
 		super.proxyAddedSlow(n);
 		CorridorBase c = getCorridor(n);
@@ -152,7 +155,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Add a corridor to the corridor model */
-	protected void addCorridor(CorridorBase c) {
+	private void addCorridor(CorridorBase c) {
 		String cid = c.getName();
 		corridors.put(cid, c);
 		Iterator<String> it = corridors.keySet().iterator();
@@ -165,6 +168,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Called when an r_node has been removed */
+	@Override
 	protected void proxyRemovedSlow(R_Node n) {
 		super.proxyRemovedSlow(n);
 		CorridorBase c = getCorridor(n);
@@ -187,7 +191,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Call the enumerationComplete method of the super class */
-	protected void superComplete() {
+	private void superComplete() {
 		super.enumerationComplete();
 	}
 
@@ -198,7 +202,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Arrange a single corridor */
-	protected void arrangeCorridor(CorridorBase c) {
+	private void arrangeCorridor(CorridorBase c) {
 		c.arrangeNodes();
 		setTangentAngles(c);
 		if(c.getRoadDir() > 0)
@@ -206,7 +210,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Set the tangent angles for all the nodes in a corridor */
-	protected void setTangentAngles(CorridorBase c) {
+	private void setTangentAngles(CorridorBase c) {
 		MapGeoLoc loc_a = null;		// upstream location
 		MapGeoLoc loc = null;		// current location
 		Iterator<MapGeoLoc> it = mapLocationIterator(c);
@@ -285,11 +289,13 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Get a transformed marker shape */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, R_Node proxy) {
 		switch(is) {
 		case GPS:
@@ -306,14 +312,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create a style list model for the given symbol */
-	@Override protected StyleListModel<R_Node> createStyleListModel(
-		Symbol s)
-	{
+	@Override
+	protected StyleListModel<R_Node> createStyleListModel(Symbol s) {
 		// No style list models on roadway tab
 		return null;
 	}
 
 	/** Create a theme for r_nodes */
+	@Override
 	protected R_NodeMapTheme createTheme() {
 		R_NodeMapTheme theme = new R_NodeMapTheme(this);
 		theme.addStyle(ItemStyle.GPS, COLOR_GPS);
@@ -348,7 +354,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Check if an r_node is on the specified corridor */
-	protected boolean checkCorridor(CorridorBase cb, GeoLoc loc) {
+	private boolean checkCorridor(CorridorBase cb, GeoLoc loc) {
 		if(cb == null)
 			return loc != null && loc.getRoadway() == null;
 		else {
@@ -358,12 +364,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		}
 	}
 
-	/** Show the properties form for the selected proxy */
-	public void showPropertiesForm() {
+	/** Show the properties form for the specified proxy */
+	@Override
+	public void showPropertiesForm(R_Node r_node) {
 		// FIXME
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		int n_selected = s_model.getSelectedCount();
 		if(n_selected < 1)
@@ -379,13 +387,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create a popup menu for a single selection */
-	protected JPopupMenu createSinglePopup(R_Node proxy) {
+	private JPopupMenu createSinglePopup(R_Node proxy) {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		return p;
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	public MapGeoLoc findGeoLoc(R_Node proxy) {
 		if(corridor == null || checkCorridor(proxy))
 			return super.findGeoLoc(proxy);
@@ -456,7 +465,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Check if a given node is a continuity break */
-	protected boolean isContinuityBreak(R_Node n) {
+	private boolean isContinuityBreak(R_Node n) {
 		if(n.getNodeType() == R_NodeType.ACCESS.ordinal())
 			return true;
 		if(n.getTransition() == R_NodeTransition.COMMON.ordinal())
@@ -502,6 +511,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 18;
 	}

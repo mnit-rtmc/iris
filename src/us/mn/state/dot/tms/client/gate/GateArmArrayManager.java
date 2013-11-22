@@ -52,12 +52,14 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "gate.arm.array";
 	}
 
 	/** Get the gate arm array cache */
-	@Override public TypeCache<GateArmArray> getCache() {
+	@Override
+	public TypeCache<GateArmArray> getCache() {
 		return session.getSonarState().getGateArmArrays();
 	}
 
@@ -73,12 +75,14 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	}
 
 	/** Get the shape for a given proxy */
-	@Override protected Shape getShape(AffineTransform at) {
+	@Override
+	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for gate arms */
-	@Override protected ProxyTheme<GateArmArray> createTheme() {
+	@Override
+	protected ProxyTheme<GateArmArray> createTheme() {
 		ProxyTheme<GateArmArray> theme = new ProxyTheme<GateArmArray>(
 			this, MARKER);
 		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
@@ -92,7 +96,8 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	}
 
 	/** Check the style of the specified proxy */
-	@Override public boolean checkStyle(ItemStyle is, GateArmArray proxy) {
+	@Override
+	public boolean checkStyle(ItemStyle is, GateArmArray proxy) {
 		long styles = proxy.getStyles();
 		for(ItemStyle s: ItemStyle.toStyles(styles)) {
 			if(s == is)
@@ -101,22 +106,16 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		return false;
 	}
 
-	/** Show the properties form for the selected proxy */
-	@Override public void showPropertiesForm() {
-		if(s_model.getSelectedCount() == 1) {
-			for(GateArmArray ga: s_model.getSelected())
-				showPropertiesForm(ga);
-		}
-	}
-
 	/** Show the properteis form for the given proxy */
-	private void showPropertiesForm(GateArmArray ga) {
+	@Override
+	public void showPropertiesForm(GateArmArray ga) {
 		SmartDesktop desktop = session.getDesktop();
 		desktop.show(new GateArmArrayProperties(session, ga));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
-	@Override protected JPopupMenu createPopup() {
+	@Override
+	protected JPopupMenu createPopup() {
 		int n_selected = s_model.getSelectedCount();
 		if(n_selected < 1)
 			return null;
@@ -153,18 +152,21 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	}
 
 	/** Find the map geo location for a proxy */
-	@Override protected GeoLoc getGeoLoc(GateArmArray proxy) {
+	@Override
+	protected GeoLoc getGeoLoc(GateArmArray proxy) {
 		return proxy.getGeoLoc();
 	}
 
 	/** Get the description of a proxy */
-	@Override public String getDescription(GateArmArray proxy) {
+	@Override
+	public String getDescription(GateArmArray proxy) {
 		return proxy.getName() + " - " +
 			GeoLocHelper.getDescription(getGeoLoc(proxy));
 	}
 
 	/** Get the layer zoom visibility threshold */
-	@Override protected int getZoomThreshold() {
+	@Override
+	protected int getZoomThreshold() {
 		return 15;
 	}
 }

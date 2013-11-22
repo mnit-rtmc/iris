@@ -48,13 +48,13 @@ import us.mn.state.dot.tms.utils.I18N;
 public class CameraManager extends ProxyManager<Camera> {
 
 	/** Camera map object marker */
-	static protected final CameraMarker MARKER = new CameraMarker();
+	static private final CameraMarker MARKER = new CameraMarker();
 
 	/** Color for active camera style */
-	static protected final Color COLOR_ACTIVE = new Color(0, 192, 255);
+	static private final Color COLOR_ACTIVE = new Color(0, 192, 255);
 
 	/** Set of cameras in the playlist */
-	protected final HashSet<Camera> playlist = new HashSet<Camera>();
+	private final HashSet<Camera> playlist = new HashSet<Camera>();
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, GeoLocManager lm) {
@@ -132,22 +132,15 @@ public class CameraManager extends ProxyManager<Camera> {
 		}
 	}
 
-	/** Show the properties form for the selected proxy */
-	@Override
-	public void showPropertiesForm() {
-		if(s_model.getSelectedCount() == 1) {
-			for(Camera cam: s_model.getSelected())
-				showPropertiesForm(cam);
-		}
-	}
-
 	/** Show the properteis form for the given proxy */
-	protected void showPropertiesForm(Camera cam) {
+	@Override
+	public void showPropertiesForm(Camera cam) {
 		SmartDesktop desktop = session.getDesktop();
 		desktop.show(new CameraProperties(session, cam));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		int n_selected = s_model.getSelectedCount();
 		if(n_selected < 1)
@@ -169,26 +162,26 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Create a popup menu for a single camera selection */
-	protected JPopupMenu createSinglePopup(Camera proxy) {
+	private JPopupMenu createSinglePopup(final Camera c) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(proxy)));
+		p.add(makeMenuLabel(getDescription(c)));
 		p.addSeparator();
-		p.add(new MapAction(desktop.client, proxy, proxy.getGeoLoc()));
+		p.add(new MapAction(desktop.client, c, c.getGeoLoc()));
 		p.addSeparator();
 		p.add(new PublishAction(s_model));
 		p.add(new UnpublishAction(s_model));
 		p.addSeparator();
-		if(inPlaylist(proxy))
+		if(inPlaylist(c))
 			p.add(new RemovePlaylistAction(this, s_model));
 		else
 			p.add(new AddPlaylistAction(this, s_model));
 		p.addSeparator();
 		if(TeslaAction.isConfigured())
-			p.add(new TeslaAction<Camera>(proxy));
-		p.add(new PropertiesAction<Camera>(proxy) {
+			p.add(new TeslaAction<Camera>(c));
+		p.add(new PropertiesAction<Camera>(c) {
 			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm();
+				showPropertiesForm(c);
 			}
 		});
 		return p;

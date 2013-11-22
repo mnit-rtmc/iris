@@ -207,21 +207,15 @@ public class DMSManager extends ProxyManager<DMS> {
 		}
 	}
 
-	/** Show the properties form for the selected proxy */
-	@Override public void showPropertiesForm() {
-		if(s_model.getSelectedCount() == 1) {
-			for(DMS dms: s_model.getSelected())
-				showPropertiesForm(dms);
-		}
-	}
-
 	/** Show the properteis form for the given proxy */
+	@Override
 	public void showPropertiesForm(DMS dms) {
 		SmartDesktop desktop = session.getDesktop();
 		desktop.show(new DMSProperties(session, dms));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		int n_selected = s_model.getSelectedCount();
 		if(n_selected < 1)
@@ -240,20 +234,20 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Create a popup menu for a single DMS selection */
-	protected JPopupMenu createSinglePopup(DMS proxy) {
+	private JPopupMenu createSinglePopup(final DMS dms) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(proxy)));
+		p.add(makeMenuLabel(getDescription(dms)));
 		p.addSeparator();
-		p.add(new MapAction(desktop.client, proxy, proxy.getGeoLoc()));
+		p.add(new MapAction(desktop.client, dms, dms.getGeoLoc()));
 		p.addSeparator();
 		if(blankAction != null)
 			p.add(blankAction);
 		if(TeslaAction.isConfigured())
-			p.add(new TeslaAction<DMS>(proxy));
-		p.add(new PropertiesAction<DMS>(proxy) {
+			p.add(new TeslaAction<DMS>(dms));
+		p.add(new PropertiesAction<DMS>(dms) {
 			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm();
+				showPropertiesForm(dms);
 			}
 		});
 		return p;

@@ -46,10 +46,10 @@ import us.mn.state.dot.tms.client.roads.R_NodeManager;
 public class DetectorManager extends ProxyManager<Detector> {
 
 	/** Shape for map object rendering */
-	static protected final DetectorMarker MARKER = new DetectorMarker();
+	static private final DetectorMarker MARKER = new DetectorMarker();
 
 	/** R_Node manager */
-	protected final R_NodeManager r_node_manager;
+	private final R_NodeManager r_node_manager;
 
 	/** Create a new detector manager */
 	public DetectorManager(Session s, GeoLocManager lm, R_NodeManager r_man)
@@ -67,21 +67,25 @@ public class DetectorManager extends ProxyManager<Detector> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "detector";
 	}
 
 	/** Get the detector cache */
-	@Override public TypeCache<Detector> getCache() {
+	@Override
+	public TypeCache<Detector> getCache() {
 		return session.getSonarState().getDetCache().getDetectors();
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for detectors */
+	@Override
 	protected ProxyTheme<Detector> createTheme() {
 		ProxyTheme<Detector> theme = new ProxyTheme<Detector>(this,
 			MARKER);
@@ -95,6 +99,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, Detector proxy) {
 		switch(is) {
 		case ACTIVE:
@@ -111,26 +116,30 @@ public class DetectorManager extends ProxyManager<Detector> {
 		}
 	}
 
-	/** Show the properties form for the selected proxy */
-	public void showPropertiesForm() {
+	/** Show the properties form for the specified proxy */
+	@Override
+	public void showPropertiesForm(Detector proxy) {
 		// No detector properties form
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		return null;
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(Detector proxy) {
 		return DetectorHelper.getGeoLoc(proxy);
 	}
 
 	/** Mapping of r_node names to detector sets */
-	protected final HashMap<String, HashSet<Detector>> nodes =
+	private final HashMap<String, HashSet<Detector>> nodes =
 		new HashMap<String, HashSet<Detector>>();
 
 	/** Add a detector to the manager */
+	@Override
 	protected void proxyAddedSlow(Detector proxy) {
 		super.proxyAddedSlow(proxy);
 		R_Node n = proxy.getR_Node();
@@ -144,7 +153,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	}
 
 	/** Get a detector set for a node ID */
-	protected HashSet<Detector> getDetectors(String nid) {
+	private HashSet<Detector> getDetectors(String nid) {
 		synchronized(nodes) {
 			HashSet<Detector> dets = nodes.get(nid);
 			if(dets == null) {
@@ -156,6 +165,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	}
 
 	/** Called when a detector has been removed */
+	@Override
 	protected void proxyRemovedSlow(Detector proxy) {
 		super.proxyRemovedSlow(proxy);
 		R_Node n = proxy.getR_Node();
@@ -164,6 +174,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	}
 
 	/** Called when proxy enumeration is complete */
+	@Override
 	public void enumerationComplete() {
 		// Don't hog the SONAR TaskProcessor thread
 		WORKER.addJob(new Job() {
@@ -175,6 +186,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 18;
 	}

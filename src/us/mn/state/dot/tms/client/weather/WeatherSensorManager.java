@@ -44,21 +44,25 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "weather.sensor";
 	}
 
 	/** Get the weather sensor cache */
-	@Override public TypeCache<WeatherSensor> getCache() {
+	@Override
+	public TypeCache<WeatherSensor> getCache() {
 		return session.getSonarState().getWeatherSensors();
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for weather sensors */
+	@Override
 	protected ProxyTheme<WeatherSensor> createTheme() {
 		ProxyTheme<WeatherSensor> theme = new ProxyTheme<WeatherSensor>(
 			this, MARKER);
@@ -69,6 +73,7 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, WeatherSensor proxy) {
 		switch(is) {
 		case NO_CONTROLLER:
@@ -81,22 +86,26 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	}
 
 	/** Show the properties form for the selected proxy */
-	public void showPropertiesForm() {
+	@Override
+	public void showPropertiesForm(WeatherSensor ws) {
 		// FIXME
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		// No popup
 		return null;
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(WeatherSensor proxy) {
 		return proxy.getGeoLoc();
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 12;
 	}

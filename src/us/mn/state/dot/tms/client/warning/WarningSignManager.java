@@ -101,18 +101,15 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		}
 	}
 
-	/** Show the properties form for the selected proxy */
-	public void showPropertiesForm() {
-		if(s_model.getSelectedCount() == 1) {
-			SmartDesktop desktop = session.getDesktop();
-			for(WarningSign ws: s_model.getSelected()) {
-				desktop.show(new WarningSignProperties(
-					session, ws));
-			}
-		}
+	/** Show the properties form for the specified proxy */
+	@Override
+	public void showPropertiesForm(WarningSign ws) {
+		SmartDesktop desktop = session.getDesktop();
+		desktop.show(new WarningSignProperties(session, ws));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		int n_selected = s_model.getSelectedCount();
 		if(n_selected < 1)
@@ -131,16 +128,16 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	}
 
 	/** Create a popup menu for a single selection */
-	protected JPopupMenu createSinglePopup(WarningSign proxy) {
+	private JPopupMenu createSinglePopup(final WarningSign ws) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(proxy)));
+		p.add(makeMenuLabel(getDescription(ws)));
 		p.addSeparator();
 		p.add(new DeployAction(s_model));
 		p.add(new UndeployAction(s_model));
 		p.addSeparator();
-		p.add(new PropertiesAction<WarningSign>(proxy) {
+		p.add(new PropertiesAction<WarningSign>(ws) {
 			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm();
+				showPropertiesForm(ws);
 			}
 		});
 		return p;

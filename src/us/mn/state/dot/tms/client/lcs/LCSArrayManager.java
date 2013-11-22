@@ -108,12 +108,14 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "lcs";
 	}
 
 	/** Get the LCS array cache */
-	@Override public TypeCache<LCSArray> getCache() {
+	@Override
+	public TypeCache<LCSArray> getCache() {
 		LcsCache cache = session.getSonarState().getLcsCache();
 		return cache.getLCSArrays();
 	}
@@ -199,9 +201,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	};
 
 	/** Create a style list model for the given symbol */
-	@Override protected StyleListModel<LCSArray> createStyleListModel(
-		Symbol s)
-	{
+	@Override
+	protected StyleListModel<LCSArray> createStyleListModel(Symbol s) {
 		return new StyleListModel<LCSArray>(this, s.getLabel()) {
 			@Override protected TreeSet<LCSArray> createProxySet() {
 				return new TreeSet<LCSArray>(comparator);
@@ -210,6 +211,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Create a proxy JList */
+	@Override
 	public ProxyJList<LCSArray> createList() {
 		ProxyJList<LCSArray> list = super.createList();
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
@@ -218,7 +220,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Check the style of the specified proxy */
-	@Override public boolean checkStyle(ItemStyle is, LCSArray proxy) {
+	@Override
+	public boolean checkStyle(ItemStyle is, LCSArray proxy) {
 		long styles = proxy.getStyles();
 		for(ItemStyle s: ItemStyle.toStyles(styles)) {
 			if(s == is)
@@ -227,21 +230,15 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return false;
 	}
 
-	/** Show the properties form for the selected proxy */
-	public void showPropertiesForm() {
-		if(s_model.getSelectedCount() == 1) {
-			for(LCSArray la: s_model.getSelected())
-				showPropertiesForm(la);
-		}
-	}
-
 	/** Show the properteis form for the given proxy */
-	protected void showPropertiesForm(LCSArray la) {
+	@Override
+	public void showPropertiesForm(LCSArray la) {
 		SmartDesktop desktop = session.getDesktop();
 		desktop.show(new LCSArrayProperties(session, la));
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		int n_selected = s_model.getSelectedCount();
 		if(n_selected < 1)
@@ -258,7 +255,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Create a popup menu for a single LCS array selection */
-	protected JPopupMenu createSinglePopup(final LCSArray la) {
+	private JPopupMenu createSinglePopup(final LCSArray la) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(la)));
@@ -286,6 +283,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(final LCSArray proxy) {
 		LCS lcs = LCSArrayHelper.lookupLCS(proxy, 1);
 		if(lcs != null) {
@@ -298,6 +296,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 14;
 	}

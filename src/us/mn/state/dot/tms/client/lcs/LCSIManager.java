@@ -40,22 +40,26 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "lcs";
 	}
 
 	/** Get the LCS indication cache */
-	@Override public TypeCache<LCSIndication> getCache() {
+	@Override
+	public TypeCache<LCSIndication> getCache() {
 		LcsCache cache = session.getSonarState().getLcsCache();
 		return cache.getLCSIndications();
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return null;
 	}
 
 	/** Create a theme for LCS arrays */
+	@Override
 	protected ProxyTheme<LCSIndication> createTheme() {
 		ProxyTheme<LCSIndication> theme = new ProxyTheme<LCSIndication>(
 			this, new LcsMarker());
@@ -66,6 +70,7 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, LCSIndication proxy) {
 		switch(is) {
 		case NO_CONTROLLER:
@@ -77,23 +82,27 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 		}
 	}
 
-	/** Show the properties form for the selected proxy */
-	public void showPropertiesForm() {
+	/** Show the properties form for the specified proxy */
+	@Override
+	public void showPropertiesForm(LCSIndication proxy) {
 		// No properties form
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		// No popup
 		return null;
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(LCSIndication proxy) {
 		return null;
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 19;
 	}

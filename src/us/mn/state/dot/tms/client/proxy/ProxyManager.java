@@ -307,7 +307,15 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Show the properties form for the selected proxy */
-	abstract public void showPropertiesForm();
+	public final void showPropertiesForm() {
+		if(s_model.getSelectedCount() == 1) {
+			for(T proxy: s_model.getSelected())
+				showPropertiesForm(proxy);
+		}
+	}
+
+	/** Show the properties form for the specified proxy */
+	abstract public void showPropertiesForm(T proxy);
 
 	/** Show the popup menu for the selected proxy or proxies */
 	public void showPopupMenu(MouseEvent e) {

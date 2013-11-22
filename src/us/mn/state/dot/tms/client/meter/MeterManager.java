@@ -64,7 +64,8 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "ramp.meter";
 	}
 
@@ -127,17 +128,9 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return false;
 	}
 
-	/** Show the properties form for the selected proxy */
-	@Override
-	public void showPropertiesForm() {
-		if(s_model.getSelectedCount() == 1) {
-			for(RampMeter meter: s_model.getSelected())
-				showPropertiesForm(meter);
-		}
-	}
-
 	/** Show the properteis form for the given proxy */
-	private void showPropertiesForm(RampMeter meter) {
+	@Override
+	public void showPropertiesForm(RampMeter meter) {
 		SmartDesktop desktop = session.getDesktop();
 		desktop.show(new RampMeterProperties(session, meter));
 	}

@@ -100,16 +100,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 		return theme;
 	}
 
-	/** Show the properties form for the selected proxy */
-	@Override
-	public void showPropertiesForm() {
-		if(s_model.getSelectedCount() == 1) {
-			for(Controller ctrl: s_model.getSelected())
-				showPropertiesForm(ctrl);
-		}
-	}
-
 	/** Show the properteis form for the given proxy */
+	@Override
 	public void showPropertiesForm(Controller ctrl) {
 		SmartDesktop desktop = session.getDesktop();
 		desktop.show(new ControllerForm(session, ctrl));
@@ -133,15 +125,15 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Create a popup menu for a single controller selection */
-	private JPopupMenu createSinglePopup(Controller proxy) {
+	private JPopupMenu createSinglePopup(final Controller ctrl) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(proxy)));
+		p.add(makeMenuLabel(getDescription(ctrl)));
 		p.addSeparator();
 		if(TeslaAction.isConfigured())
-			p.add(new TeslaAction<Controller>(proxy));
-		p.add(new PropertiesAction<Controller>(proxy) {
+			p.add(new TeslaAction<Controller>(ctrl));
+		p.add(new PropertiesAction<Controller>(ctrl) {
 			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm();
+				showPropertiesForm(ctrl);
 			}
 		});
 		return p;

@@ -54,17 +54,20 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "action.plan";
 	}
 
 	/** Get longer proxy type name for display */
-	@Override public String getLongProxyType() {
+	@Override
+	public String getLongProxyType() {
 		return "action.plan.long";
 	}
 
 	/** Get the action plan cache */
-	@Override public TypeCache<ActionPlan> getCache() {
+	@Override
+	public TypeCache<ActionPlan> getCache() {
 		return session.getSonarState().getActionPlans();
 	}
 
@@ -79,16 +82,19 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(ActionPlan proxy) {
 		return null;
 	}
 
 	/** Get a transformed marker shape */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return null;
 	}
 
 	/** Create a theme for action plans */
+	@Override
 	protected PlanTheme createTheme() {
 		PlanTheme theme = new PlanTheme(this);
 		theme.addStyle(ItemStyle.DMS, new DmsMarker());
@@ -101,16 +107,19 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Show the properties form for the selected proxy */
-	public void showPropertiesForm() {
+	@Override
+	public void showPropertiesForm(ActionPlan proxy) {
 		// There is no action plan properties form
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
+	@Override
 	protected JPopupMenu createPopup() {
 		return null;
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, ActionPlan proxy) {
 		if(!isUpdatePermitted(proxy))
 			return false;
@@ -187,6 +196,7 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 10;
 	}
