@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
@@ -67,9 +66,6 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		}
 	};
 
-	/** SONAR User for permission checks */
-	private final User user;
-
 	/** Sign text creator */
 	private final SignTextCreator creator;
 
@@ -79,7 +75,6 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		SonarState st = s.getSonarState();
 		dms_sign_groups = st.getDmsCache().getDmsSignGroups();
 		sign_text = st.getDmsCache().getSignText();
-		user = s.getUser();
 		creator = new SignTextCreator(s);
 	}
 
