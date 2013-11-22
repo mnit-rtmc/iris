@@ -94,7 +94,12 @@ public class SidePanel extends JPanel {
 
 	/** Set the selected map tab */
 	public void setSelectedTab(MapTab mt) {
-		tab_pane.setSelectedComponent(mt);
+		try {
+			tab_pane.setSelectedComponent(mt);
+		}
+		catch(IllegalArgumentException e) {
+			// maybe that tab is on another screen?
+		}
 	}
 
 	/** Get the home proxy layer state for a map tab */
