@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 
 /**
  * Model for sign text messages.  This class is instantiated and contained by
@@ -39,7 +40,7 @@ import us.mn.state.dot.tms.client.SonarState;
 public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
 	/** DMS associated with this object */
-	protected final DMS dms;
+	private final DMS dms;
 
 	/** DMS sign group type cache, relates dms to sign groups */
 	private final TypeCache<DmsSignGroup> dms_sign_groups;
@@ -48,13 +49,29 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	private final TypeCache<SignText> sign_text;
 
 	/** Listener for sign text proxies */
-	protected final ProxyListener<SignText> listener;
+	private final ProxyListener<SignText> listener =
+		new ProxyListener<SignText>()
+	{
+		public void proxyAdded(SignText proxy) {
+			if(isMember(proxy.getSignGroup()))
+				doAddSignText(proxy);
+		}
+		public void enumerationComplete() { }
+		public void proxyRemoved(SignText proxy) {
+			if(isMember(proxy.getSignGroup()))
+				doRemoveSignText(proxy);
+		}
+		public void proxyChanged(SignText proxy, String a) {
+			if(isMember(proxy.getSignGroup()))
+				doChangeSignText(proxy);
+		}
+	};
 
 	/** SONAR User for permission checks */
-	protected final User user;
+	private final User user;
 
 	/** Sign text creator */
-	protected final SignTextCreator creator;
+	private final SignTextCreator creator;
 
 	/** Create a new sign text model */
 	public SignTextModel(Session s, DMS proxy) {
@@ -64,21 +81,53 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		sign_text = st.getDmsCache().getSignText();
 		user = s.getUser();
 		creator = new SignTextCreator(s);
-		listener = new ProxyListener<SignText>() {
-			public void proxyAdded(SignText proxy) {
-				if(isMember(proxy.getSignGroup()))
-					addSignText(proxy);
+	}
+
+	/** Add a SignText to the model */
+	private void doAddSignText(final SignText st) {
+		runSwing(new Runnable() {
+			public void run() {
+				addSignText(st);
 			}
-			public void enumerationComplete() { }
-			public void proxyRemoved(SignText proxy) {
-				if(isMember(proxy.getSignGroup()))
-					removeSignText(proxy);
+		});
+	}
+
+	/** Add a SignText to the model */
+	private void addSignText(SignText t) {
+		getLineModel(t.getLine()).add(t);
+	}
+
+	/** Remove a SignText from the model */
+	private void doRemoveSignText(final SignText st) {
+		runSwing(new Runnable() {
+			public void run() {
+				removeSignText(st);
 			}
-			public void proxyChanged(SignText proxy, String a) {
-				if(isMember(proxy.getSignGroup()))
-					changeSignText(proxy);
+		});
+	}
+
+	/** Remove a SignText from the model */
+	private void removeSignText(SignText t) {
+		getLineModel(t.getLine()).remove(t);
+	}
+
+	/** Change a SignText in the model */
+	private void doChangeSignText(final SignText st) {
+		runSwing(new Runnable() {
+			public void run() {
+				changeSignText(st);
 			}
-		};
+		});
+	}
+
+	/** Change a SignText in the model */
+	private void changeSignText(SignText t) {
+		// iterate through all combobox models because the line
+		// may have changed, moving it between comboboxes
+		for(SignTextComboBoxModel m: lines.values())
+			m.remove(t);
+		// add to associated model
+		addSignText(t);
 	}
 
 	/** Initialize the sign text model */
@@ -93,34 +142,56 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		dms_sign_groups.removeProxyListener(this);
 	}
 
+	/** Set of DMS member groups */
+	private final HashSet<String> groups = new HashSet<String>();
+
+	/** Is the DMS a member of the specified group? */
+	private boolean isMember(SignGroup g) {
+		return g != null && groups.contains(g.getName());
+	}
+
 	/** Add a new proxy to the model */
+	@Override
 	public void proxyAdded(DmsSignGroup proxy) {
 		if(dms == proxy.getDms())
 			addGroup(proxy.getSignGroup());
 	}
 
+	/** Add all SignText in one sign group to the model */
+	private void addGroup(SignGroup g) {
+		groups.add(g.getName());
+		for(SignText st: sign_text) {
+			if(st.getSignGroup() == g)
+				doAddSignText(st);
+		}
+	}
+
 	/** Enumeration of the proxy type is complete */
+	@Override
 	public void enumerationComplete() {
 		// We're not interested
 	}
 
 	/** Remove a proxy from the model */
+	@Override
 	public void proxyRemoved(DmsSignGroup proxy) {
 		if(dms == proxy.getDms())
 			removeGroup(proxy.getSignGroup());
 	}
 
-	/** Change a proxy in the model */
-	public void proxyChanged(DmsSignGroup proxy, String attrib) {
-		// NOTE: this should never happen
+	/** Remove all SignText in one sign group from the model */
+	private void removeGroup(SignGroup g) {
+		groups.remove(g.getName());
+		for(SignText st: sign_text) {
+			if(st.getSignGroup() == g)
+				doRemoveSignText(st);
+		}
 	}
 
-	/** Set of DMS member groups */
-	protected final HashSet<String> groups = new HashSet<String>();
-
-	/** Is the DMS a member of the specified group? */
-	protected boolean isMember(SignGroup g) {
-		return g != null && groups.contains(g.getName());
+	/** Change a proxy in the model */
+	@Override
+	public void proxyChanged(DmsSignGroup proxy, String attrib) {
+		// NOTE: this should never happen
 	}
 
 	/**
@@ -150,35 +221,8 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 			return false;
 	}
 
-	/**
-	 * Called when the DMS associated with this object is added to a
-	 * new sign group. New SignText lines from the new sign group are
-	 * added to each SignTextComboBoxModel.
-	 */
-	private void addGroup(SignGroup g) {
-		groups.add(g.getName());
-		// add new sign text lines in new group to combobox models
-		for(SignText st: sign_text) {
-			if(st.getSignGroup() == g)
-				addSignText(st);
-		}
-	}
-
-	/**
-	 * Called when the DMS associated with this object is removed
-	 * from a sign group.
-	 */
-	private void removeGroup(SignGroup g) {
-		groups.remove(g.getName());
-		// delete lines from combobox models associated with sign group
-		for(SignText st: sign_text) {
-			if(st.getSignGroup() == g)
-				removeSignText(st);
-		}
-	}
-
 	/** Mapping of line numbers to combo box models */
-	protected final HashMap<Short, SignTextComboBoxModel> lines =
+	private final HashMap<Short, SignTextComboBoxModel> lines =
 		new HashMap<Short, SignTextComboBoxModel>();
 
 	/** Get the combobox line model for the specified line */
@@ -199,33 +243,6 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		for(short i: lines.keySet())
 			m = (short)Math.max(i, m);
 		return m;
-	}
-
-	/** Add a sign message to the model, called by listener when sign_text
-	 * changes */
-	private void addSignText(SignText t) {
-		short line = t.getLine();
-		SignTextComboBoxModel m = getLineModel(line);
-		m.add(t);
-	}
-
-	/** Remove a sign message from the model, called by listener when
-	 * sign_text changes */
-	private void removeSignText(SignText t) {
-		short line = t.getLine();
-		SignTextComboBoxModel m = getLineModel(line);
-		m.remove(t);
-	}
-
-	/** Change a sign message in the model, called by listener when
-	 * sign_text changes */
-	protected void changeSignText(SignText t) {
-		// iterate through all combobox models because the line
-		// may have changed, moving it between comboboxes
-		for(SignTextComboBoxModel m: lines.values())
-			m.remove(t);
-		// add to associated model
-		addSignText(t);
 	}
 
 	/** Update the message library with the currently selected messages */

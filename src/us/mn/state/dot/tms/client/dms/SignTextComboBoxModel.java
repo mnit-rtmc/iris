@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignText;
@@ -140,29 +139,20 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** Add a SignText to the model */
 	public void add(SignText t) {
 		if(items.add(t)) {
-			final int i = find(t);
-			if(i >= 0) {
-				runSwing(new Runnable() {
-					public void run() {
-						fireIntervalAdded(this, i, i);
-					}
-				});
-			}
+			int i = find(t);
+			if(i >= 0)
+				fireIntervalAdded(this, i, i);
 		}
 	}
 
 	/** Remove a sign text from the model */
 	public void remove(SignText t) {
-		final int i = find(t);
+		int i = find(t);
 		if(i >= 0) {
 			items.remove(t);
 			if(t.equals(selected))
 				selected = null;
-			runSwing(new Runnable() {
-				public void run() {
-					fireIntervalRemoved(this, i, i);
-				}
-			});
+			fireIntervalRemoved(this, i, i);
 		}
 	}
 
