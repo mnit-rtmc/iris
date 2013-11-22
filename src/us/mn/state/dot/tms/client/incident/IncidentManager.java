@@ -110,12 +110,6 @@ public class IncidentManager extends ProxyManager<Incident> {
 		return theme;
 	}
 
-	/** Show the properties form for the specified proxy */
-	@Override
-	public void showPropertiesForm(Incident proxy) {
-		// There is no incident properties form
-	}
-
 	/** Create a popup menu for the selected proxy object(s) */
 	@Override
 	protected JPopupMenu createPopup() {

@@ -106,12 +106,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		return theme;
 	}
 
-	/** Show the properties form for the selected proxy */
-	@Override
-	public void showPropertiesForm(ActionPlan proxy) {
-		// There is no action plan properties form
-	}
-
 	/** Create a popup menu for the selected proxy object(s) */
 	@Override
 	protected JPopupMenu createPopup() {

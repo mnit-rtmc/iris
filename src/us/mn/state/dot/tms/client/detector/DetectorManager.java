@@ -116,12 +116,6 @@ public class DetectorManager extends ProxyManager<Detector> {
 		}
 	}
 
-	/** Show the properties form for the specified proxy */
-	@Override
-	public void showPropertiesForm(Detector proxy) {
-		// No detector properties form
-	}
-
 	/** Create a popup menu for the selected proxy object(s) */
 	@Override
 	protected JPopupMenu createPopup() {

@@ -33,7 +33,6 @@ import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -100,11 +99,10 @@ public class ControllerManager extends ProxyManager<Controller> {
 		return theme;
 	}
 
-	/** Show the properteis form for the given proxy */
+	/** Create a properties form for the specified proxy */
 	@Override
-	public void showPropertiesForm(Controller ctrl) {
-		SmartDesktop desktop = session.getDesktop();
-		desktop.show(new ControllerForm(session, ctrl));
+	protected ControllerForm createPropertiesForm(Controller ctrl) {
+		return new ControllerForm(session, ctrl);
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */

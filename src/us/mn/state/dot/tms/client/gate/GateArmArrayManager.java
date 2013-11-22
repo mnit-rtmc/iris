@@ -106,11 +106,10 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		return false;
 	}
 
-	/** Show the properteis form for the given proxy */
+	/** Create a properties form for the specified proxy */
 	@Override
-	public void showPropertiesForm(GateArmArray ga) {
-		SmartDesktop desktop = session.getDesktop();
-		desktop.show(new GateArmArrayProperties(session, ga));
+	protected GateArmArrayProperties createPropertiesForm(GateArmArray ga) {
+		return new GateArmArrayProperties(session, ga);
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */

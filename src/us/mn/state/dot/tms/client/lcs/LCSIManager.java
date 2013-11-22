@@ -82,12 +82,6 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 		}
 	}
 
-	/** Show the properties form for the specified proxy */
-	@Override
-	public void showPropertiesForm(LCSIndication proxy) {
-		// No properties form
-	}
-
 	/** Create a popup menu for the selected proxy object(s) */
 	@Override
 	protected JPopupMenu createPopup() {

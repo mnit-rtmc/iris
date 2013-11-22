@@ -85,12 +85,6 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 		}
 	}
 
-	/** Show the properties form for the selected proxy */
-	@Override
-	public void showPropertiesForm(LaneMarking proxy) {
-		// FIXME
-	}
-
 	/** Create a popup menu for the selected proxy object(s) */
 	@Override
 	protected JPopupMenu createPopup() {

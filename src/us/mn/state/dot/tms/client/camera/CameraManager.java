@@ -132,11 +132,10 @@ public class CameraManager extends ProxyManager<Camera> {
 		}
 	}
 
-	/** Show the properteis form for the given proxy */
+	/** Create a properties form for the specified proxy */
 	@Override
-	public void showPropertiesForm(Camera cam) {
-		SmartDesktop desktop = session.getDesktop();
-		desktop.show(new CameraProperties(session, cam));
+	protected CameraProperties createPropertiesForm(Camera cam) {
+		return new CameraProperties(session, cam);
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */

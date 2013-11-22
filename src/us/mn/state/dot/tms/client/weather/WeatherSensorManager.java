@@ -85,12 +85,6 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 		}
 	}
 
-	/** Show the properties form for the selected proxy */
-	@Override
-	public void showPropertiesForm(WeatherSensor ws) {
-		// FIXME
-	}
-
 	/** Create a popup menu for the selected proxy object(s) */
 	@Override
 	protected JPopupMenu createPopup() {

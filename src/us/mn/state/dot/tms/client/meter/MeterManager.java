@@ -128,11 +128,10 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return false;
 	}
 
-	/** Show the properteis form for the given proxy */
+	/** Create a properties form for the specified proxy */
 	@Override
-	public void showPropertiesForm(RampMeter meter) {
-		SmartDesktop desktop = session.getDesktop();
-		desktop.show(new RampMeterProperties(session, meter));
+	protected RampMeterProperties createPropertiesForm(RampMeter meter) {
+		return new RampMeterProperties(session, meter);
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */

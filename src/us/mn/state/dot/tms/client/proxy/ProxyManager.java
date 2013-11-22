@@ -315,7 +315,16 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Show the properties form for the specified proxy */
-	abstract public void showPropertiesForm(T proxy);
+	public final void showPropertiesForm(T proxy) {
+		SonarObjectForm<T> form = createPropertiesForm(proxy);
+		if(form != null)
+			session.getDesktop().show(form);
+	}
+
+	/** Create a properties form for the specified proxy */
+	protected SonarObjectForm<T> createPropertiesForm(T proxy) {
+		return null;
+	}
 
 	/** Show the popup menu for the selected proxy or proxies */
 	public void showPopupMenu(MouseEvent e) {

@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -101,11 +100,10 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		}
 	}
 
-	/** Show the properties form for the specified proxy */
+	/** Create a properties form for the specified proxy */
 	@Override
-	public void showPropertiesForm(WarningSign ws) {
-		SmartDesktop desktop = session.getDesktop();
-		desktop.show(new WarningSignProperties(session, ws));
+	protected WarningSignProperties createPropertiesForm(WarningSign ws) {
+		return new WarningSignProperties(session, ws);
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */

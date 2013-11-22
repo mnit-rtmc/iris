@@ -48,7 +48,6 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -362,12 +361,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			       cb.getRoadway() == loc.getRoadway() &&
 			       cb.getRoadDir() == loc.getRoadDir();
 		}
-	}
-
-	/** Show the properties form for the specified proxy */
-	@Override
-	public void showPropertiesForm(R_Node r_node) {
-		// FIXME
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
