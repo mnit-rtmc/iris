@@ -20,7 +20,6 @@ import java.awt.event.MouseEvent;
 import javax.swing.JList;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarObject;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 
 /**
  * A proxy JList is a special JList which contains SONAR proxy objects.
@@ -53,16 +52,12 @@ public class ProxyJList<T extends SonarObject> extends JList {
 	}
 
 	/** Respond to a double-click event */
-	protected void doDoubleClick() {
-		WORKER.addJob(new Job() {
-			public void perform() {
-				manager.showPropertiesForm();
-			}
-		});
+	private void doDoubleClick() {
+		manager.showPropertiesForm();
 	}
 
 	/** Popup a context-sensitive menu */
-	protected void popupMenu(MouseEvent e) {
+	private void popupMenu(MouseEvent e) {
 		int index = locationToIndex(e.getPoint());
 		if(index >= 0) {
 			Rectangle bounds = getCellBounds(index, index);
