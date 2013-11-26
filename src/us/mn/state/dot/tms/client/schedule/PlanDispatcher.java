@@ -22,8 +22,6 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DMS;
@@ -42,6 +40,8 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -50,7 +50,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
+public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 
 	/** Name component */
 	private final JLabel name_lbl = createValueLabel();
@@ -91,20 +91,21 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 		}
 	};
 
-	/** Action plan proxy cache */
-	private final TypeCache<ActionPlan> cache;
-
-	/** Selected action plan */
-	private ActionPlan selected = null;
+	/** Proxy watcher */
+	private final ProxyWatcher<ActionPlan> watcher;
 
 	/** Create a new plan dispatcher */
 	public PlanDispatcher(Session s, PlanManager m) {
 		session = s;
 		manager = m;
 		sel_model = manager.getSelectionModel();
-		cache = session.getSonarState().getActionPlans();
+		TypeCache<ActionPlan> cache =s.getSonarState().getActionPlans();
+		watcher = new ProxyWatcher<ActionPlan>(cache, this, true);
+	}
+
+	/** Initialize the widgets on the panel */
+	public void initialize() {
 		setTitle(I18N.get("action.plan.selected"));
-		setEnabled(false);
 		add("action.plan.name");
 		add(name_lbl, Stretch.LAST);
 		add("device.description");
@@ -117,54 +118,18 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 		add(meter_lbl, Stretch.LAST);
 		add("action.plan.phase");
 		add(phase_cbx, Stretch.LAST);
-		setSelected(null);
-		cache.addProxyListener(this);
+		watcher.initialize();
+		clear();
 		sel_model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Dispose of the panel */
 	@Override
 	public void dispose() {
+		watcher.dispose();
 		sel_model.removeProxySelectionListener(sel_listener);
-		cache.removeProxyListener(this);
-		setSelected(null);
+		clear();
 		super.dispose();
-	}
-
-	/** A new proxy has been added */
-	@Override
-	public void proxyAdded(ActionPlan proxy) {
-		// we're not interested
-	}
-
-	/** Enumeration of the proxy type has completed */
-	@Override
-	public void enumerationComplete() {
-		// we're not interested
-	}
-
-	/** A proxy has been removed */
-	@Override
-	public void proxyRemoved(ActionPlan proxy) {
-		if(proxy == selected) {
-			runSwing(new Runnable() {
-				public void run() {
-					setSelected(null);
-				}
-			});
-		}
-	}
-
-	/** A proxy has been changed */
-	@Override
-	public void proxyChanged(final ActionPlan proxy, final String a) {
-		if(proxy == selected) {
-			runSwing(new Runnable() {
-				public void run() {
-					updateAttribute(proxy, a);
-				}
-			});
-		}
 	}
 
 	/** Get the selected action plan */
@@ -176,63 +141,77 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 		return null;
 	}
 
-	/** Select a action plan to display */
-	public void setSelected(ActionPlan proxy) {
-		if(selected != null)
-			cache.ignoreObject(selected);
-		if(proxy != null)
-			cache.watchObject(proxy);
-		selected = proxy;
-		if(proxy != null) {
+	/** Set the selected action plan */
+	public void setSelected(ActionPlan ap) {
+		watcher.setProxy(ap);
+	}
+
+	/** Update one attribute on the form */
+	@Override
+	public void update(ActionPlan ap, String a) {
+		if(a == null) {
 			phase_cbx.setAction(null);
-			phase_cbx.setModel(createPhaseModel(proxy));
-			updateAttribute(proxy, null);
-		} else {
-			name_lbl.setText("");
-			description_lbl.setText("");
-			dms_lbl.setText("");
-			lane_lbl.setText("");
-			meter_lbl.setText("");
-			phase_cbx.setAction(null);
-			phase_cbx.setModel(new DefaultComboBoxModel());
-			phase_cbx.setSelectedItem(null);
+			phase_cbx.setModel(createPhaseModel(ap));
+			phase_cbx.setEnabled(isUpdatePermitted(ap));
 		}
-		setEnabled(isUpdatePermitted(proxy));
+		if(a == null || a.equals("name"))
+			name_lbl.setText(ap.getName());
+		if(a == null || a.equals("description"))
+			description_lbl.setText(ap.getDescription());
+		if(a == null || a.equals("active")) {
+			dms_lbl.setText(Integer.toString(countDMS(ap)));
+			lane_lbl.setText(Integer.toString(countLanes(ap)));
+			meter_lbl.setText(Integer.toString(countMeters(ap)));
+		}
+		if(a == null || a.equals("phase")) {
+			phase_cbx.setAction(null);
+			ComboBoxModel mdl = phase_cbx.getModel();
+			// We must call setSelectedItem on the model, because
+			// it might not contain the phase.  In that case,
+			// calling JComboBox.setSelectedItem will fail.
+			if(mdl instanceof DefaultComboBoxModel) {
+				DefaultComboBoxModel model =
+					(DefaultComboBoxModel)mdl;
+				model.setSelectedItem(ap.getPhase());
+			}
+			phase_cbx.setAction(new ChangePhaseAction(ap,
+				phase_cbx));
+		}
 	}
 
 	/** Create a combo box model for plan phases */
-	private DefaultComboBoxModel createPhaseModel(final ActionPlan plan) {
-		TreeSet<PlanPhase> phases = createPhaseSet(plan);
+	private DefaultComboBoxModel createPhaseModel(final ActionPlan ap) {
+		TreeSet<PlanPhase> phases = createPhaseSet(ap);
 		removeNextPhases(phases);
 		DefaultComboBoxModel model = new DefaultComboBoxModel();
-		model.addElement(plan.getDefaultPhase());
-		phases.remove(plan.getDefaultPhase());
+		model.addElement(ap.getDefaultPhase());
+		phases.remove(ap.getDefaultPhase());
 		for(PlanPhase p: phases)
 			model.addElement(p);
-		model.setSelectedItem(plan.getPhase());
+		model.setSelectedItem(ap.getPhase());
 		return model;
 	}
 
 	/** Create a set of phases for an action plan */
-	private TreeSet<PlanPhase> createPhaseSet(final ActionPlan plan) {
+	private TreeSet<PlanPhase> createPhaseSet(final ActionPlan ap) {
 		final TreeSet<PlanPhase> phases =
 			new TreeSet<PlanPhase>(comparator);
 		Iterator<DmsAction> dit = DmsActionHelper.iterator();
 		while(dit.hasNext()) {
 			DmsAction da = dit.next();
-			if(da.getActionPlan() == plan)
+			if(da.getActionPlan() == ap)
 				phases.add(da.getPhase());
 		}
 		Iterator<LaneAction> lit = LaneActionHelper.iterator();
 		while(lit.hasNext()) {
 			LaneAction la = lit.next();
-			if(la.getActionPlan() == plan)
+			if(la.getActionPlan() == ap)
 				phases.add(la.getPhase());
 		}
 		Iterator<MeterAction> mit = MeterActionHelper.iterator();
 		while(mit.hasNext()) {
 			MeterAction ma = mit.next();
-			if(ma.getActionPlan() == plan)
+			if(ma.getActionPlan() == ap)
 				phases.add(ma.getPhase());
 		}
 		return phases;
@@ -259,41 +238,6 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 				n_phases.add(np);
 		}
 		phases.removeAll(n_phases);
-	}
-
-	/** Enable or disable the panel */
-	@Override
-	public void setEnabled(boolean enabled) {
-		super.setEnabled(enabled);
-		phase_cbx.setEnabled(enabled);
-		phase_cbx.setAction(null);
-	}
-
-	/** Update one attribute on the form */
-	protected void updateAttribute(ActionPlan plan, String a) {
-		if(a == null || a.equals("name"))
-			name_lbl.setText(plan.getName());
-		if(a == null || a.equals("description"))
-			description_lbl.setText(plan.getDescription());
-		if(a == null || a.equals("active")) {
-			dms_lbl.setText(Integer.toString(countDMS(plan)));
-			lane_lbl.setText(Integer.toString(countLanes(plan)));
-			meter_lbl.setText(Integer.toString(countMeters(plan)));
-		}
-		if(a == null || a.equals("phase")) {
-			phase_cbx.setAction(null);
-			ComboBoxModel mdl = phase_cbx.getModel();
-			// We must call setSelectedItem on the model, because
-			// it might not contain the phase.  In that case,
-			// calling JComboBox.setSelectedItem will fail.
-			if(mdl instanceof DefaultComboBoxModel) {
-				DefaultComboBoxModel model =
-					(DefaultComboBoxModel)mdl;
-				model.setSelectedItem(plan.getPhase());
-			}
-			phase_cbx.setAction(new ChangePhaseAction(plan,
-				phase_cbx));
-		}
 	}
 
 	/** Get a count of DMS controlled by an action plan */
@@ -340,8 +284,21 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 	}
 
 	/** Check if the user is permitted to update the given action plan */
-	private boolean isUpdatePermitted(ActionPlan plan) {
-		return session.isUpdatePermitted(plan, "phase") &&
-		       plan.getActive();
+	private boolean isUpdatePermitted(ActionPlan ap) {
+		return session.isUpdatePermitted(ap, "phase") && ap.getActive();
+	}
+
+	/** Clear the proxy view */
+	@Override
+	public void clear() {
+		name_lbl.setText("");
+		description_lbl.setText("");
+		dms_lbl.setText("");
+		lane_lbl.setText("");
+		meter_lbl.setText("");
+		phase_cbx.setAction(null);
+		phase_cbx.setModel(new DefaultComboBoxModel());
+		phase_cbx.setSelectedItem(null);
+		phase_cbx.setEnabled(false);
 	}
 }

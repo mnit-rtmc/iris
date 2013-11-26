@@ -38,13 +38,15 @@ public class PlanTab extends MapTab<ActionPlan> {
   	public PlanTab(Session session, PlanManager m) {
 		super(m);
 		dispatcher = new PlanDispatcher(session, m);
+		dispatcher.initialize();
 		summary = m.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}
 
 	/** Dispose of the plan tab */
-	@Override public void dispose() {
+	@Override
+	public void dispose() {
 		super.dispose();
 		manager.getSelectionModel().clearSelection();
 		dispatcher.dispose();
