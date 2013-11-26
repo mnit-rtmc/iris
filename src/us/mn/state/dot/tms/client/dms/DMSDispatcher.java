@@ -308,6 +308,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Called whenever a sign is added to the selection */
+	@Override
 	public void selectionAdded(DMS dms) {
 		if(!checkDimensions(dms))
 			createBuilder(dms);
@@ -321,6 +322,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Called whenever a sign is removed from the selection */
+	@Override
 	public void selectionRemoved(DMS dms) {
 		if(!areBuilderAndComposerValid()) {
 			builder = null;
