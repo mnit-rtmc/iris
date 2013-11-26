@@ -50,9 +50,8 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
-	ProxySelectionListener<ActionPlan>
-{
+public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
+
 	/** Name component */
 	private final JLabel name_lbl = createValueLabel();
 
@@ -78,7 +77,19 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 	private final PlanManager manager;
 
 	/** Selection model */
-	private final ProxySelectionModel<ActionPlan> selectionModel;
+	private final ProxySelectionModel<ActionPlan> sel_model;
+
+	/** Selection listener */
+	private final ProxySelectionListener<ActionPlan> sel_listener =
+		new ProxySelectionListener<ActionPlan>()
+	{
+		public void selectionAdded(ActionPlan s) {
+			setSelected(getSelected());
+		}
+		public void selectionRemoved(ActionPlan s) {
+			setSelected(getSelected());
+		}
+	};
 
 	/** Action plan proxy cache */
 	private final TypeCache<ActionPlan> cache;
@@ -90,7 +101,7 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 	public PlanDispatcher(Session s, PlanManager m) {
 		session = s;
 		manager = m;
-		selectionModel = manager.getSelectionModel();
+		sel_model = manager.getSelectionModel();
 		cache = session.getSonarState().getActionPlans();
 		setTitle(I18N.get("action.plan.selected"));
 		setEnabled(false);
@@ -108,13 +119,13 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 		add(phaseCmb, Stretch.LAST);
 		setSelected(null);
 		cache.addProxyListener(this);
-		selectionModel.addProxySelectionListener(this);
+		sel_model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Dispose of the panel */
 	@Override
 	public void dispose() {
-		selectionModel.removeProxySelectionListener(this);
+		sel_model.removeProxySelectionListener(sel_listener);
 		cache.removeProxyListener(this);
 		setSelected(null);
 		super.dispose();
@@ -156,21 +167,13 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 		}
 	}
 
-	/** Called whenever a plan is added to the selection */
-	@Override
-	public void selectionAdded(ActionPlan s) {
-		if(selectionModel.getSelectedCount() <= 1)
-			setSelected(s);
-	}
-
-	/** Called whenever a plan is removed from the selection */
-	@Override
-	public void selectionRemoved(ActionPlan s) {
-		if(selectionModel.getSelectedCount() == 1) {
-			for(ActionPlan p: selectionModel.getSelected())
-				setSelected(p);
-		} else if(s == selected)
-			setSelected(null);
+	/** Get the selected action plan */
+	private ActionPlan getSelected() {
+		if(sel_model.getSelectedCount() == 1) {
+			for(ActionPlan ap: sel_model.getSelected())
+				return ap;
+		}
+		return null;
 	}
 
 	/** Select a action plan to display */
