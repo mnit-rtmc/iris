@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +28,10 @@ import us.mn.state.dot.sonar.SonarObject;
 public class ProxySelectionModel<T extends SonarObject> {
 
 	/** Currently selected proxy objects */
-	protected Set<T> selected = new HashSet<T>();
+	private final Set<T> selected = new HashSet<T>();
 
 	/** The listeners of this model */
-	protected final List<ProxySelectionListener<T>> listeners =
+	private final List<ProxySelectionListener<T>> listeners =
 		new LinkedList<ProxySelectionListener<T>>();
 
 	/** Add a proxy to the selection */
@@ -100,13 +100,13 @@ public class ProxySelectionModel<T extends SonarObject> {
 	}
 
 	/** Fire a selection added event to all listeners */
-	protected void fireSelectionAdded(T proxy) {
+	private void fireSelectionAdded(T proxy) {
 		for(ProxySelectionListener<T> l: listeners)
 			l.selectionAdded(proxy);
 	}
 
 	/** Fire a selection removed event to all listeners */
-	protected void fireSelectionRemoved(T proxy) {
+	private void fireSelectionRemoved(T proxy) {
 		for(ProxySelectionListener l: listeners)
 			l.selectionRemoved(proxy);
 	}
