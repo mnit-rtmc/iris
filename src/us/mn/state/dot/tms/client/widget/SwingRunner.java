@@ -39,20 +39,15 @@ public final class SwingRunner {
 		}
 	}
 
-	/** Invoke a Runnable later on the swing thread */
-	static private void invokeLater(final Runnable r) {
+	/** Invoke a Runnable on the swing thread */
+	static public void runSwing(final Runnable r) {
+		// NOTE: use invokeLater for 2 reasions:
+		//    1. Serialize on the EDT no matter which thread we're on.
+		//    2. Drop any held locks before invoking the Runnable.
 		SwingUtilities.invokeLater(new Runnable() {
-			@Override public void run() {
+			public void run() {
 				runNow(r);
 			}
 		});
-	}
-
-	/** Invoke a Runnable on the swing thread */
-	static public void runSwing(final Runnable r) {
-		if(SwingUtilities.isEventDispatchThread())
-			runNow(r);
-		else
-			invokeLater(r);
 	}
 }

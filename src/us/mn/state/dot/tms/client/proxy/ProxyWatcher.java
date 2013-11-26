@@ -39,13 +39,13 @@ public class ProxyWatcher<T extends SonarObject> {
 	private final ProxyListener<T> listener = new ProxyListener<T>() {
 		public void proxyAdded(T p) { }
 		public void enumerationComplete() { }
-		public void proxyRemoved(T p) {
+		public synchronized void proxyRemoved(T p) {
 			if(proxy == p) {
 				proxy = null;
 				clear();
 			}
 		}
-		public void proxyChanged(T p, final String a) {
+		public synchronized void proxyChanged(T p, final String a) {
 			if(proxy == p)
 				update(p, a);
 		}
@@ -56,18 +56,23 @@ public class ProxyWatcher<T extends SonarObject> {
 
 	/** Set a new proxy to watch */
 	public void setProxy(T p) {
-		T op = proxy;
-		proxy = p;
-		if(watch) {
-			if(op != null)
-				cache.ignoreObject(op);
+		// Need to synchronize in case sonar thread is calling
+		// proxyChanged after calling watchObject.  This happens
+		// when setProxy is called more than once quickly.
+		synchronized(listener) {
+			T op = proxy;
+			proxy = p;
+			if(watch) {
+				if(op != null)
+					cache.ignoreObject(op);
+				if(p != null)
+					cache.watchObject(p);
+			}
 			if(p != null)
-				cache.watchObject(p);
+				update(p, null);
+			else if(op != null)
+				clear();
 		}
-		if(p != null)
-			update(p, null);
-		else if(op != null)
-			clear();
 	}
 
 	/** Create a new proxy watcher.

@@ -123,5 +123,6 @@ public class LCSArrayPanel extends JPanel {
 	/** Clear the LCS panel */
 	public void clear() {
 		setIndications(new Integer[0], 0);
+		handler = null;
 	}
 }
