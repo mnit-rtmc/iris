@@ -466,6 +466,10 @@ public class MultiStringTest extends TestCase {
 			getFonts(255).length == 1);
 		assertTrue(new MultiString("[fo2]YA1").
 			getFonts(255)[0] == 2);
+		assertTrue(new MultiString("[fo10]ABC").
+			getFonts(255).length == 1);
+		assertTrue(new MultiString("[fo10]ABC").
+			getFonts(255)[0] == 10);
 
 		// mainline 2 page
 		assertTrue(new MultiString("[fo2]YA1[np][fo3]YA2").
