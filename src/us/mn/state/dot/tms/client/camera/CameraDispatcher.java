@@ -37,9 +37,8 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  * @author Tim Johnson
  */
-public class CameraDispatcher extends IPanel
-	implements ProxySelectionListener<Camera>
-{
+public class CameraDispatcher extends IPanel {
+
 	/** The system attribute for the number of button presets */
 	static private final int NUMBER_BUTTON_PRESETS =
 		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
@@ -55,6 +54,24 @@ public class CameraDispatcher extends IPanel
 
 	/** User session */
 	private final Session session;
+
+	/** Proxy manager for camera devices */
+	private final CameraManager manager;
+
+	/** Selection model */
+	private final ProxySelectionModel<Camera> sel_model;
+
+	/** Selection listener */
+	private final ProxySelectionListener<Camera> sel_listener =
+		new ProxySelectionListener<Camera>()
+	{
+		public void selectionAdded(Camera c) {
+			setSelected(getSelected());
+		}
+		public void selectionRemoved(Camera c) {
+			setSelected(getSelected());
+		}
+	};
 
 	/** Camera list model */
 	private final ProxyListModel<Camera> model;
@@ -80,9 +97,6 @@ public class CameraDispatcher extends IPanel
 	/** Panel for camera presets */
 	private final PresetPanel preset_pnl;
 
-	/** Proxy manager for camera devices */
-	private final CameraManager manager;
-
 	/** Currently selected camera */
 	private Camera selected = null;
 
@@ -91,36 +105,15 @@ public class CameraDispatcher extends IPanel
 
 	/** Create a new camera dispatcher */
 	public CameraDispatcher(Session s, CameraManager man) {
-		manager = man;
-		manager.getSelectionModel().addProxySelectionListener(this);
 		session = s;
+		manager = man;
+		sel_model = manager.getSelectionModel();
 		model = session.getSonarState().getCamCache().getCameraModel();
 		cam_ptz = new CameraPTZ(s);
 		joy_ptz = new JoystickPTZ(cam_ptz);
 		preset_pnl = new PresetPanel();
 		stream_pnl = createStreamPanel();
 		output_cbx = createOutputCombo();
-		output_cbx.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				monitorSelected();
-			}
-		});
-		joy_ptz.addJoystickListener(new JoystickListener() {
-			public void buttonChanged(JoystickButtonEvent ev) {
-				if(ev.pressed)
-					doJoyButton(ev);
-			}
-		});
-		setTitle(I18N.get("camera.selected"));
-		add("device.name");
-		add(name_lbl);
-		add("camera.output");
-		add(output_cbx, Stretch.LAST);
-		add("location");
-		add(location_lbl, Stretch.LAST);
-		add(stream_pnl, Stretch.FULL);
-		add(preset_pnl, Stretch.CENTER);
-		clear();
 	}
 
 	/** Create the stream panel */
@@ -142,6 +135,32 @@ public class CameraDispatcher extends IPanel
 		return box;
 	}
 
+	/** Initialize the widgets on the panel */
+	public void initialize() {
+		output_cbx.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				monitorSelected();
+			}
+		});
+		joy_ptz.addJoystickListener(new JoystickListener() {
+			public void buttonChanged(JoystickButtonEvent ev) {
+				if(ev.pressed)
+					doJoyButton(ev);
+			}
+		});
+		setTitle(I18N.get("camera.selected"));
+		add("device.name");
+		add(name_lbl);
+		add("camera.output");
+		add(output_cbx, Stretch.LAST);
+		add("location");
+		add(location_lbl, Stretch.LAST);
+		add(stream_pnl, Stretch.FULL);
+		add(preset_pnl, Stretch.CENTER);
+		clear();
+		sel_model.addProxySelectionListener(sel_listener);
+	}
+
 	/** Process a joystick button event */
 	private void doJoyButton(JoystickButtonEvent ev) {
 		if(ev.button == BUTTON_NEXT)
@@ -156,14 +175,14 @@ public class CameraDispatcher extends IPanel
 	private void selectNextCamera() {
 		Camera cam = model.higher(selected);
 		if(cam != null)
-			manager.getSelectionModel().setSelected(cam);
+			sel_model.setSelected(cam);
 	}
 
 	/** Select the previous camera */
 	private void selectPreviousCamera() {
 		Camera cam = model.lower(selected);
 		if(cam != null)
-			manager.getSelectionModel().setSelected(cam);
+			sel_model.setSelected(cam);
 	}
 
 	/** Command current camera to goto preset location */
@@ -174,12 +193,14 @@ public class CameraDispatcher extends IPanel
 	}
 
 	/** Dispose of the camera viewer */
+	@Override
 	public void dispose() {
-		removeAll();
+		sel_model.removeProxySelectionListener(sel_listener);
 		joy_ptz.dispose();
 		cam_ptz.setCamera(null);
 		stream_pnl.dispose();
 		selected = null;
+		super.dispose();
 	}
 
 	/** Set the selected camera */
@@ -200,20 +221,13 @@ public class CameraDispatcher extends IPanel
 			clear();
 	}
 
-	/** Called whenever a camera is added to the selection */
-	public void selectionAdded(Camera c) {
-		if(manager.getSelectionModel().getSelectedCount() <= 1)
-			setSelected(c);
-	}
-
-	/** Called whenever a camera is removed from the selection */
-	public void selectionRemoved(Camera c) {
-		ProxySelectionModel<Camera> mdl = manager.getSelectionModel();
-		if(mdl.getSelectedCount() == 1) {
-			for(Camera cam: mdl.getSelected())
-				setSelected(cam);
-		} else if(c == selected)
-			setSelected(null);
+	/** Get the selected camera */
+	private Camera getSelected() {
+		if(sel_model.getSelectedCount() == 1) {
+			for(Camera c: sel_model.getSelected())
+				return c;
+		}
+		return null;
 	}
 
 	/** Called when a video monitor is selected */
