@@ -47,9 +47,8 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class MeterDispatcher extends IPanel implements ProxyView<RampMeter>,
-	ProxySelectionListener<RampMeter>
-{
+public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
+
 	/** Current session */
 	private final Session session;
 
@@ -58,6 +57,18 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter>,
 
 	/** Selection model */
 	private final ProxySelectionModel<RampMeter> sel_model;
+
+	/** Selection listener */
+	private final ProxySelectionListener<RampMeter> sel_listener =
+		new ProxySelectionListener<RampMeter>()
+	{
+		public void selectionAdded(RampMeter rm) {
+			setSelected(getSelected());
+		}
+		public void selectionRemoved(RampMeter rm) {
+			setSelected(getSelected());
+		}
+	};
 
 	/** Name label */
 	private final JLabel name_lbl = createValueLabel();
@@ -146,28 +157,16 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter>,
 		add(b_pnl, Stretch.LAST);
 		watcher.initialize();
 		clear();
-		sel_model.addProxySelectionListener(this);
+		sel_model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Dispose of the panel */
 	@Override
 	public void dispose() {
 		watcher.dispose();
-		sel_model.removeProxySelectionListener(this);
+		sel_model.removeProxySelectionListener(sel_listener);
 		clear();
 		super.dispose();
-	}
-
-	/** Called whenever a meter is added to the selection */
-	@Override
-	public void selectionAdded(RampMeter rm) {
-		setSelected(getSelected());
-	}
-
-	/** Called whenever a meter is removed from the selection */
-	@Override
-	public void selectionRemoved(RampMeter rm) {
-		setSelected(getSelected());
 	}
 
 	/** Get the selected ramp meter */
