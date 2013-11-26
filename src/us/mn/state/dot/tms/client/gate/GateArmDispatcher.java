@@ -183,10 +183,10 @@ public class GateArmDispatcher extends IPanel
 		new ProxySelectionListener<GateArmArray>()
 	{
 		public void selectionAdded(GateArmArray ga) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 		public void selectionRemoved(GateArmArray ga) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 	};
 
@@ -324,15 +324,6 @@ public class GateArmDispatcher extends IPanel
 		thumb_ptz.setCamera(null);
 		clear();
 		super.dispose();
-	}
-
-	/** Get the selected gate arm array */
-	private GateArmArray getSelected() {
-		if(sel_model.getSelectedCount() == 1) {
-			for(GateArmArray ga: sel_model.getSelected())
-				return ga;
-		}
-		return null;
 	}
 
 	/** Set the selected gate arm array */

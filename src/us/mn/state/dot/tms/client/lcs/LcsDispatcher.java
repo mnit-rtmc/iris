@@ -68,10 +68,10 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		new ProxySelectionListener<LCSArray>()
 	{
 		public void selectionAdded(LCSArray la) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 		public void selectionRemoved(LCSArray la) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 	};
 
@@ -194,15 +194,6 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		ind_selector.dispose();
 		clear();
 		super.dispose();
-	}
-
-	/** Get the selected LCS array */
-	private LCSArray getSelected() {
-		if(sel_model.getSelectedCount() == 1) {
-			for(LCSArray la: sel_model.getSelected())
-				return la;
-		}
-		return null;
 	}
 
 	/** Set the selected LCS array */

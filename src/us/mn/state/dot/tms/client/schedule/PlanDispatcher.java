@@ -84,10 +84,10 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		new ProxySelectionListener<ActionPlan>()
 	{
 		public void selectionAdded(ActionPlan s) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 		public void selectionRemoved(ActionPlan s) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 	};
 
@@ -130,15 +130,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		sel_model.removeProxySelectionListener(sel_listener);
 		clear();
 		super.dispose();
-	}
-
-	/** Get the selected action plan */
-	private ActionPlan getSelected() {
-		if(sel_model.getSelectedCount() == 1) {
-			for(ActionPlan ap: sel_model.getSelected())
-				return ap;
-		}
-		return null;
 	}
 
 	/** Set the selected action plan */

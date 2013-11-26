@@ -63,10 +63,10 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		new ProxySelectionListener<RampMeter>()
 	{
 		public void selectionAdded(RampMeter rm) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 		public void selectionRemoved(RampMeter rm) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 	};
 
@@ -167,15 +167,6 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		sel_model.removeProxySelectionListener(sel_listener);
 		clear();
 		super.dispose();
-	}
-
-	/** Get the selected ramp meter */
-	private RampMeter getSelected() {
-		if(sel_model.getSelectedCount() == 1) {
-			for(RampMeter rm: sel_model.getSelected())
-				return rm;
-		}
-		return null;
 	}
 
 	/** Set the selected ramp meter */

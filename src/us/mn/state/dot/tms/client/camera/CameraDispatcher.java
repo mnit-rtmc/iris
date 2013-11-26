@@ -66,10 +66,10 @@ public class CameraDispatcher extends IPanel {
 		new ProxySelectionListener<Camera>()
 	{
 		public void selectionAdded(Camera c) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 		public void selectionRemoved(Camera c) {
-			setSelected(getSelected());
+			setSelected(sel_model.getSingleSelection());
 		}
 	};
 
@@ -219,15 +219,6 @@ public class CameraDispatcher extends IPanel {
 			preset_pnl.setEnabled(cam_ptz.canControlPtz());
 		} else
 			clear();
-	}
-
-	/** Get the selected camera */
-	private Camera getSelected() {
-		if(sel_model.getSelectedCount() == 1) {
-			for(Camera c: sel_model.getSelected())
-				return c;
-		}
-		return null;
 	}
 
 	/** Called when a video monitor is selected */
