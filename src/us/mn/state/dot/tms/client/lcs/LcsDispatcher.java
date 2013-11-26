@@ -49,9 +49,8 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class LcsDispatcher extends IPanel implements ProxyView<LCSArray>,
-	ProxySelectionListener<LCSArray>
-{
+public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
+
 	/** Size in pixels for each LCS in array */
 	static private final int LCS_SIZE = UI.scaled(44);
 
@@ -63,6 +62,18 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray>,
 
 	/** Selection model */
 	private final ProxySelectionModel<LCSArray> sel_model;
+
+	/** Selection listener */
+	private final ProxySelectionListener<LCSArray> sel_listener =
+		new ProxySelectionListener<LCSArray>()
+	{
+		public void selectionAdded(LCSArray la) {
+			setSelected(getSelected());
+		}
+		public void selectionRemoved(LCSArray la) {
+			setSelected(getSelected());
+		}
+	};
 
 	/** Name of the selected LCS array */
 	private final JLabel name_lbl = createValueLabel();
@@ -153,7 +164,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray>,
 		add(createButtonPanel(), Stretch.RIGHT);
 		watcher.initialize();
 		clear();
-		sel_model.addProxySelectionListener(this);
+		sel_model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Build the indication selector */
@@ -179,22 +190,10 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray>,
 	@Override
 	public void dispose() {
 		watcher.dispose();
-		sel_model.removeProxySelectionListener(this);
+		sel_model.removeProxySelectionListener(sel_listener);
 		ind_selector.dispose();
 		clear();
 		super.dispose();
-	}
-
-	/** Called whenever a sign is added to the selection */
-	@Override
-	public void selectionAdded(LCSArray la) {
-		setSelected(getSelected());
-	}
-
-	/** Called whenever a sign is removed from the selection */
-	@Override
-	public void selectionRemoved(LCSArray la) {
-		setSelected(getSelected());
 	}
 
 	/** Get the selected LCS array */
