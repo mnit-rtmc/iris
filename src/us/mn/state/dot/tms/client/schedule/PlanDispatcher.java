@@ -112,6 +112,7 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 	}
 
 	/** Dispose of the panel */
+	@Override
 	public void dispose() {
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
@@ -120,16 +121,19 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 	}
 
 	/** A new proxy has been added */
+	@Override
 	public void proxyAdded(ActionPlan proxy) {
 		// we're not interested
 	}
 
 	/** Enumeration of the proxy type has completed */
+	@Override
 	public void enumerationComplete() {
 		// we're not interested
 	}
 
 	/** A proxy has been removed */
+	@Override
 	public void proxyRemoved(ActionPlan proxy) {
 		if(proxy == selected) {
 			runSwing(new Runnable() {
@@ -141,6 +145,7 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 	}
 
 	/** A proxy has been changed */
+	@Override
 	public void proxyChanged(final ActionPlan proxy, final String a) {
 		if(proxy == selected) {
 			runSwing(new Runnable() {
@@ -152,12 +157,14 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 	}
 
 	/** Called whenever a plan is added to the selection */
+	@Override
 	public void selectionAdded(ActionPlan s) {
 		if(selectionModel.getSelectedCount() <= 1)
 			setSelected(s);
 	}
 
 	/** Called whenever a plan is removed from the selection */
+	@Override
 	public void selectionRemoved(ActionPlan s) {
 		if(selectionModel.getSelectedCount() == 1) {
 			for(ActionPlan p: selectionModel.getSelected())
@@ -252,6 +259,7 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>,
 	}
 
 	/** Enable or disable the panel */
+	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		phaseCmb.setEnabled(enabled);
