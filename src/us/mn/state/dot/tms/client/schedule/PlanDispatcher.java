@@ -68,7 +68,7 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 	private final JLabel meter_lbl = createValueLabel();
 
 	/** Plan phase combo box */
-	private final JComboBox phaseCmb = new JComboBox();
+	private final JComboBox phase_cbx = new JComboBox();
 
 	/** Current session */
 	private final Session session;
@@ -116,7 +116,7 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 		add("ramp.meter.long.plural");
 		add(meter_lbl, Stretch.LAST);
 		add("action.plan.phase");
-		add(phaseCmb, Stretch.LAST);
+		add(phase_cbx, Stretch.LAST);
 		setSelected(null);
 		cache.addProxyListener(this);
 		sel_model.addProxySelectionListener(sel_listener);
@@ -184,8 +184,8 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 			cache.watchObject(proxy);
 		selected = proxy;
 		if(proxy != null) {
-			phaseCmb.setAction(null);
-			phaseCmb.setModel(createPhaseModel(proxy));
+			phase_cbx.setAction(null);
+			phase_cbx.setModel(createPhaseModel(proxy));
 			updateAttribute(proxy, null);
 		} else {
 			name_lbl.setText("");
@@ -193,9 +193,9 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 			dms_lbl.setText("");
 			lane_lbl.setText("");
 			meter_lbl.setText("");
-			phaseCmb.setAction(null);
-			phaseCmb.setModel(new DefaultComboBoxModel());
-			phaseCmb.setSelectedItem(null);
+			phase_cbx.setAction(null);
+			phase_cbx.setModel(new DefaultComboBoxModel());
+			phase_cbx.setSelectedItem(null);
 		}
 		setEnabled(isUpdatePermitted(proxy));
 	}
@@ -265,8 +265,8 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		phaseCmb.setEnabled(enabled);
-		phaseCmb.setAction(null);
+		phase_cbx.setEnabled(enabled);
+		phase_cbx.setAction(null);
 	}
 
 	/** Update one attribute on the form */
@@ -281,8 +281,8 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 			meter_lbl.setText(Integer.toString(countMeters(plan)));
 		}
 		if(a == null || a.equals("phase")) {
-			phaseCmb.setAction(null);
-			ComboBoxModel mdl = phaseCmb.getModel();
+			phase_cbx.setAction(null);
+			ComboBoxModel mdl = phase_cbx.getModel();
 			// We must call setSelectedItem on the model, because
 			// it might not contain the phase.  In that case,
 			// calling JComboBox.setSelectedItem will fail.
@@ -291,8 +291,8 @@ public class PlanDispatcher extends IPanel implements ProxyListener<ActionPlan>{
 					(DefaultComboBoxModel)mdl;
 				model.setSelectedItem(plan.getPhase());
 			}
-			phaseCmb.setAction(new ChangePhaseAction(plan,
-				phaseCmb));
+			phase_cbx.setAction(new ChangePhaseAction(plan,
+				phase_cbx));
 		}
 	}
 
