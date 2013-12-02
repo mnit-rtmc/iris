@@ -56,8 +56,16 @@ public class VideoRequest {
 		public final int width;
 		public final int height;
 		public final char code;
+		/* For Axis Q1602, if the resolution is not between 160x90 and
+		 * 768x576 we will get HTTP error 400 (Bad Request) */
+		private int getWidthReq() {
+			return Math.max(160, Math.min(width, 768));
+		}
+		private int getHeightReq() {
+			return Math.max(90, Math.min(height, 576));
+		}
 		public String getResolution() {
-			return "" + width + 'x' + height;
+			return "" + getWidthReq() + 'x' + getHeightReq();
 		}
 	}
 
