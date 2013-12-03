@@ -108,6 +108,7 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	}
 
 	/** Iterate through all shapes in the layer */
+	@Override
 	public MapObject forEach(MapSearcher s) {
 		return manager.forEach(s, getScale());
 	}
