@@ -52,6 +52,7 @@ public class R_NodePanel extends JPanel {
 		public void update(R_Node n, String a) {
 			loc_pnl.update(n, a);
 			setup_pnl.update(n, a);
+			det_pnl.setR_Node(n);
 		}
 		public void clear() {
 			loc_pnl.clear();
@@ -66,7 +67,6 @@ public class R_NodePanel extends JPanel {
 			loc_pnl.setGeoLoc(n.getGeoLoc());
 		else
 			loc_pnl.setGeoLoc(null);
-		det_pnl.setR_Node(n);
 		watcher.setProxy(n);
 	}
 
