@@ -28,7 +28,7 @@ import us.mn.state.dot.map.MapSearcher;
 public class SegmentLayerState extends LayerState {
 
 	/** Segment layer */
-	protected final SegmentLayer seg_layer;
+	private final SegmentLayer seg_layer;
 
 	/** Create a new segment layer */
 	public SegmentLayerState(SegmentLayer sl, MapBean mb) {
@@ -53,6 +53,7 @@ public class SegmentLayerState extends LayerState {
 	}
 
 	/** Iterate through the segments in the layer */
+	@Override
 	public MapObject forEach(MapSearcher s) {
 		if(isPastLaneZoomThreshold())
 			return forEachLane(s);
@@ -61,12 +62,12 @@ public class SegmentLayerState extends LayerState {
 	}
 
 	/** Is the zoom level past the "individual lane" threshold? */
-	protected boolean isPastLaneZoomThreshold() {
+	private boolean isPastLaneZoomThreshold() {
 		return map.getModel().getZoomLevel().ordinal() >= 14;
 	}
 
 	/** Iterate through the stations in the layer */
-	protected MapObject forEachStation(MapSearcher s) {
+	private MapObject forEachStation(MapSearcher s) {
 		float scale = getScale();
 		for(Segment seg: seg_layer) {
 			MapSegment ms = new MapSegment(seg, scale);
@@ -79,7 +80,7 @@ public class SegmentLayerState extends LayerState {
 	/** Iterate through each lane segment in the layer.
 	 * @param s Map searcher callback.
 	 * @return Map object found, if any. */
-	protected MapObject forEachLane(MapSearcher s) {
+	private MapObject forEachLane(MapSearcher s) {
 		float scale = getScale();
 		for(Segment seg: seg_layer) {
 			for(int sh = seg.getLeftMin(); sh < seg.getRightMax();
