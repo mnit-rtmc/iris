@@ -70,8 +70,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	static public final Color COLOR_INACTIVE = Color.GRAY;
 
 	/** Marker to draw r_nodes */
-	static private final R_NodeMarker MARKER =
-		new R_NodeMarker();
+	static private final R_NodeMarker MARKER = new R_NodeMarker();
 
 	/** Map to of corridor names to corridors */
 	private final Map<String, CorridorBase> corridors =

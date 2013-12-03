@@ -48,7 +48,7 @@ public class SegmentLayerState extends LayerState {
 	}
 
 	/** Is the layer visible at the current zoom level? */
-	protected boolean isZoomVisible() {
+	private boolean isZoomVisible() {
 		return map.getModel().getZoomLevel().ordinal() >= 10;
 	}
 

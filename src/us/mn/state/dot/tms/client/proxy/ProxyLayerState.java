@@ -14,12 +14,10 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
-import java.awt.Component;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 import java.util.List;
-import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.LayerChange;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
@@ -35,10 +33,10 @@ import us.mn.state.dot.sonar.SonarObject;
 public class ProxyLayerState<T extends SonarObject> extends LayerState {
 
 	/** Proxy manager */
-	protected final ProxyManager<T> manager;
+	private final ProxyManager<T> manager;
 
 	/** Proxy selection model */
-	protected final ProxySelectionModel<T> model;
+	private final ProxySelectionModel<T> model;
 
 	/** Get the proxy selection model */
 	public ProxySelectionModel<T> getSelectionModel() {
@@ -46,26 +44,27 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	}
 
 	/** Listener for proxy selection events */
-	protected final ProxySelectionListener<T> listener;
+	private final ProxySelectionListener<T> listener =
+		new ProxySelectionListener<T>()
+	{
+		public void selectionAdded(T proxy) {
+			setSelection();
+		}
+		public void selectionRemoved(T proxy) {
+			setSelection();
+		}
+	};
 
 	/** Create a new sonar proxy layer state */
 	public ProxyLayerState(ProxyLayer<T> layer, MapBean mb) {
 		super(layer, mb);
 		manager = layer.getManager();
 		model = manager.getSelectionModel();
-		listener = new ProxySelectionListener<T>() {
-			public void selectionAdded(T proxy) {
-				setSelection();
-			}
-			public void selectionRemoved(T proxy) {
-				setSelection();
-			}
-		};
 		model.addProxySelectionListener(listener);
 	}
 
 	/** Set the selection */
-	protected void setSelection() {
+	private void setSelection() {
 		List<T> proxies = model.getSelected();
 		LinkedList<MapGeoLoc> sel = new LinkedList<MapGeoLoc>();
 		for(T proxy: proxies) {
@@ -77,13 +76,14 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	}
 
 	/** Dispose of the layer state */
+	@Override
 	public void dispose() {
 		super.dispose();
 		model.removeProxySelectionListener(listener);
 	}
 
 	/** Flag to indicate the tab is selected */
-	protected boolean tab_selected = false;
+	private boolean tab_selected = false;
 
 	/** Set the tab selected flag */
 	public void setTabSelected(boolean ts) {
@@ -102,7 +102,7 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	}
 
 	/** Is the layer visible at the current zoom level? */
-	protected boolean isZoomVisible() {
+	private boolean isZoomVisible() {
 		return manager.isVisible(
 			map.getModel().getZoomLevel().ordinal());
 	}
