@@ -138,7 +138,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Called when a proxy has been added */
-	@Override public void proxyAdded(final T proxy) {
+	@Override
+	public void proxyAdded(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		WORKER.addJob(new Job() {
 			public void perform() {
@@ -163,7 +164,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Called when proxy enumeration is complete */
-	@Override public synchronized void enumerationComplete() {
+	@Override
+	public synchronized void enumerationComplete() {
 		enumerated = true;
 		notify();
 	}
@@ -181,7 +183,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Called when a proxy has been removed */
-	@Override public void proxyRemoved(final T proxy) {
+	@Override
+	public void proxyRemoved(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		WORKER.addJob(new Job() {
 			public void perform() {
@@ -197,7 +200,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Called when a proxy attribute has changed */
-	@Override public void proxyChanged(T proxy, String a) {
+	@Override
+	public void proxyChanged(T proxy, String a) {
 		// not interested
 	}
 

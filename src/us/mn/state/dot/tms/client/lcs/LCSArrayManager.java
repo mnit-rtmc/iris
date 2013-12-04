@@ -137,11 +137,13 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for LCS arrays */
+	@Override
 	protected ProxyTheme<LCSArray> createTheme() {
 		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
 			MARKER);
@@ -156,6 +158,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Create a list cell renderer */
+	@Override
 	public ListCellRenderer createCellRenderer() {
 		return new LCSArrayCellRenderer(this);
 	}
