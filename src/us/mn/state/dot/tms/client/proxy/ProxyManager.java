@@ -125,7 +125,6 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Initialize the proxy manager. This cannot be done in the constructor
 	 * because subclasses may not be fully constructed. */
 	public void initialize() {
-		waitForEnumeration();
 		layer.initialize();
 	}
 
@@ -165,21 +164,8 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Called when proxy enumeration is complete */
 	@Override
-	public synchronized void enumerationComplete() {
+	public void enumerationComplete() {
 		enumerated = true;
-		notify();
-	}
-
-	/** Wait for the objects to be enumerated */
-	public synchronized void waitForEnumeration() {
-		while(!enumerated) {
-			try {
-				wait();
-			}
-			catch(InterruptedException e) {
-				// whoops, try again
-			}
-		}
 	}
 
 	/** Called when a proxy has been removed */
