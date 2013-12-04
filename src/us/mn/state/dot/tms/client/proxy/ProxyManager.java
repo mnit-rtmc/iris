@@ -44,9 +44,8 @@ import us.mn.state.dot.tms.client.Session;
  *
  * @author Douglas Lau
  */
-abstract public class ProxyManager<T extends SonarObject>
-	implements ProxyListener<T>
-{
+abstract public class ProxyManager<T extends SonarObject> {
+
 	/** Make a menu label */
 	static protected Box makeMenuLabel(String id) {
 		Box b = Box.createHorizontalBox();
@@ -78,6 +77,40 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Geo location manager */
 	protected final GeoLocManager loc_manager;
+
+	/** Listener for proxy events */
+	private final ProxyListener<T> listener = new ProxyListener<T>() {
+		public void proxyAdded(final T proxy) {
+			WORKER.addJob(new Job() {
+				public void perform() {
+					proxyAddedSlow(proxy);
+				}
+			});
+		}
+		public void enumerationComplete() {
+			WORKER.addJob(new Job() {
+				public void perform() {
+					enumerated = true;
+				}
+			});
+		}
+		public void proxyRemoved(final T proxy) {
+			WORKER.addJob(new Job() {
+				public void perform() {
+					proxyRemovedSlow(proxy);
+				}
+			});
+		}
+		public void proxyChanged(final T proxy, final String a) {
+			if(checkAttributeChange(a)) {
+				WORKER.addJob(new Job() {
+					public void perform() {
+						proxyChangedSlow(proxy, a);
+					}
+				});
+			}
+		}
+	};
 
 	/** Selection model */
 	protected final ProxySelectionModel<T> s_model =
@@ -115,7 +148,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Initialize the proxy manager. This cannot be done in the constructor
 	 * because subclasses may not be fully constructed. */
 	public void initialize() {
-		getCache().addProxyListener(this);
+		getCache().addProxyListener(listener);
 		layer.initialize();
 	}
 
@@ -124,7 +157,7 @@ abstract public class ProxyManager<T extends SonarObject>
 		layer.dispose();
 		s_model.dispose();
 		map_cache.dispose();
-		getCache().removeProxyListener(this);
+		getCache().removeProxyListener(listener);
 	}
 
 	/** Create a style list model for the given symbol */
@@ -135,17 +168,6 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Create a layer for this proxy type */
 	protected ProxyLayer<T> createLayer() {
 		return new ProxyLayer<T>(this);
-	}
-
-	/** Called when a proxy has been added */
-	@Override
-	public void proxyAdded(final T proxy) {
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				proxyAddedSlow(proxy);
-			}
-		});
 	}
 
 	/** Add a proxy to the manager */
@@ -163,33 +185,20 @@ abstract public class ProxyManager<T extends SonarObject>
 		return loc_manager.getTangentAngle(loc);
 	}
 
-	/** Called when proxy enumeration is complete */
-	@Override
-	public void enumerationComplete() {
-		enumerated = true;
-	}
-
-	/** Called when a proxy has been removed */
-	@Override
-	public void proxyRemoved(final T proxy) {
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				proxyRemovedSlow(proxy);
-			}
-		});
-	}
-
 	/** Called when a proxy has been removed */
 	protected void proxyRemovedSlow(T proxy) {
 		s_model.removeSelected(proxy);
 		map_cache.remove(proxy);
 	}
 
-	/** Called when a proxy attribute has changed */
-	@Override
-	public void proxyChanged(T proxy, String a) {
-		// not interested
+	/** Check if an attribute change is interesting */
+	protected boolean checkAttributeChange(String a) {
+		return false;
+	}
+
+	/** Called when a proxy has been changed */
+	protected void proxyChangedSlow(T proxy, String a) {
+		// subclasses may override
 	}
 
 	/** Get the proxy type name */

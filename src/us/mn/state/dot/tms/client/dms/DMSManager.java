@@ -181,16 +181,23 @@ public class DMSManager extends ProxyManager<DMS> {
 		return new DmsCellRenderer(getCellSize());
 	}
 
+	/** Check if an attribute change is interesting */
+	@Override
+	protected boolean checkAttributeChange(String a) {
+		return "messageCurrent".equals(a) ||
+		       "ownerCurrent".equals(a);
+	}
+
 	/** Called when a proxy attribute has changed */
 	@Override
-	public void proxyChanged(DMS dms, String a) {
-		if("messageCurrent".equals(a) ||
-		   "ownerCurrent".equals(a))
-		{
-			DmsCellRenderer r = lookupRenderer(dms);
-			if(r != null)
-				r.updateDms(dms, a);
-		}
+	protected void proxyChangedSlow(final DMS dms, final String a) {
+		runSwing(new Runnable() {
+			public void run() {
+				DmsCellRenderer r = lookupRenderer(dms);
+				if(r != null)
+					r.updateDms(dms, a);
+			}
+		});
 	}
 
 	/** Create a proxy JList */

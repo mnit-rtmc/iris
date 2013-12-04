@@ -31,7 +31,6 @@ import javax.swing.ListModel;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
@@ -41,7 +40,6 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RoadClass;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -180,23 +178,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			c.removeNode(n);
 			arrangeCorridor(c);
 		}
-	}
-
-	/** Called when proxy enumeration is complete */
-	@Override
-	public void enumerationComplete() {
-		// This needs to happen on the WORKER thread so it happens
-		// after all proxyAddedSlow calls on login
-		WORKER.addJob(new Job() {
-			public void perform() {
-				superComplete();
-			}
-		});
-	}
-
-	/** Call the enumerationComplete method of the super class */
-	private void superComplete() {
-		super.enumerationComplete();
 	}
 
 	/** Arrange the corridor mapping */
