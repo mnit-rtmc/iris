@@ -19,13 +19,10 @@ import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.R_Node;
@@ -34,19 +31,16 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.StyleListModel;
-import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
  * A detector manager is a container for SONAR detector objects.
+ * FIXME: this really shouldn't be a ProxyManager, since it doesn't do the
+ *        same thing as other ProxyManager subclasses.
  *
  * @author Douglas Lau
  */
 public class DetectorManager extends ProxyManager<Detector> {
-
-	/** Shape for map object rendering */
-	static private final DetectorMarker MARKER = new DetectorMarker();
 
 	/** R_Node manager */
 	private final R_NodeManager r_node_manager;
@@ -57,13 +51,6 @@ public class DetectorManager extends ProxyManager<Detector> {
 		super(s, lm, ItemStyle.ACTIVE);
 		r_node_manager = r_man;
 		getCache().addProxyListener(this);
-	}
-
-	/** Create a style list model for the given symbol */
-	@Override protected StyleListModel<Detector> createStyleListModel(
-		Symbol s)
-	{
-		return new StyleListModel<Detector>(this, s.getLabel());
 	}
 
 	/** Get the proxy type name */
@@ -81,39 +68,13 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Get the shape for a given proxy */
 	@Override
 	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
+		return null;
 	}
 
 	/** Create a theme for detectors */
 	@Override
 	protected ProxyTheme<Detector> createTheme() {
-		ProxyTheme<Detector> theme = new ProxyTheme<Detector>(this,
-			MARKER);
-		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
-			ProxyTheme.OUTLINE_INACTIVE);
-		theme.addStyle(ItemStyle.NO_CONTROLLER,
-			ProxyTheme.COLOR_NO_CONTROLLER);
-		theme.addStyle(ItemStyle.ALL);
-		return theme;
-	}
-
-	/** Check the style of the specified proxy */
-	@Override
-	public boolean checkStyle(ItemStyle is, Detector proxy) {
-		switch(is) {
-		case ACTIVE:
-			return ControllerHelper.isActive(proxy.getController());
-		case INACTIVE:
-			return !ControllerHelper.isActive(
-				proxy.getController());
-		case NO_CONTROLLER:
-			return proxy.getController() == null;
-		case ALL:
-			return true;
-		default:
-			return false;
-		}
+		return null;
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
@@ -135,7 +96,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Add a detector to the manager */
 	@Override
 	protected void proxyAddedSlow(Detector proxy) {
-		super.proxyAddedSlow(proxy);
+		// Don't call super.proxyAddedSlow ...
 		R_Node n = proxy.getR_Node();
 		if(n != null)
 			getDetectors(n).add(proxy);
@@ -161,7 +122,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Called when a detector has been removed */
 	@Override
 	protected void proxyRemovedSlow(Detector proxy) {
-		super.proxyRemovedSlow(proxy);
+		// Don't call super.proxyRemovedSlow
 		R_Node n = proxy.getR_Node();
 		if(n != null)
 			getDetectors(n).remove(proxy);
