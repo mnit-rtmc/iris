@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -106,17 +105,13 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Create a popup menu for a single controller selection */
 	@Override
-	protected JPopupMenu createPopupSingle(final Controller ctrl) {
+	protected JPopupMenu createPopupSingle(Controller ctrl) {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(ctrl)));
 		p.addSeparator();
 		if(TeslaAction.isConfigured())
 			p.add(new TeslaAction<Controller>(ctrl));
-		p.add(new PropertiesAction<Controller>(ctrl) {
-			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm(ctrl);
-			}
-		});
+		p.add(new PropertiesAction<Controller>(this, ctrl));
 		return p;
 	}
 

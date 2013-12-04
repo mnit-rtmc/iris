@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.Comparator;
 import java.util.TreeSet;
@@ -239,7 +238,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a popup menu for a single LCS array selection */
 	@Override
-	protected JPopupMenu createPopupSingle(final LCSArray la) {
+	protected JPopupMenu createPopupSingle(LCSArray la) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(la)));
@@ -258,11 +257,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 			}
 		}
 		p.addSeparator();
-		p.add(new PropertiesAction<LCSArray>(la) {
-			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm(la);
-			}
-		});
+		p.add(new PropertiesAction<LCSArray>(this, la));
 		return p;
 	}
 

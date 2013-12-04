@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.awt.event.ActionEvent;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
@@ -21,11 +22,24 @@ import us.mn.state.dot.sonar.SonarObject;
  *
  * @author Douglas Lau
  */
-abstract public class PropertiesAction<T extends SonarObject>
-	extends ProxyAction
-{
+public class PropertiesAction<T extends SonarObject> extends ProxyAction {
+
+	/** Proxy manager */
+	private final ProxyManager<T> manager;
+
+	/** Proxy object (compile error trying to use ProxyAction.proxy) */
+	private final T _proxy;
+
 	/** Create a new properties action */
-	public PropertiesAction(T p) {
+	public PropertiesAction(ProxyManager<T> m, T p) {
 		super("device.properties", p);
+		manager = m;
+		_proxy = p;
+	}
+
+	/** Perform action */
+	@Override
+	protected void doActionPerformed(ActionEvent e) {
+		manager.showPropertiesForm(_proxy);
 	}
 }

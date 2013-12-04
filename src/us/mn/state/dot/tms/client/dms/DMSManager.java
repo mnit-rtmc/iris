@@ -19,7 +19,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import javax.swing.JLabel;
@@ -230,7 +229,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a popup menu for a single DMS selection */
 	@Override
-	protected JPopupMenu createPopupSingle(final DMS dms) {
+	protected JPopupMenu createPopupSingle(DMS dms) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(dms)));
@@ -241,11 +240,7 @@ public class DMSManager extends ProxyManager<DMS> {
 			p.add(blankAction);
 		if(TeslaAction.isConfigured())
 			p.add(new TeslaAction<DMS>(dms));
-		p.add(new PropertiesAction<DMS>(dms) {
-			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm(dms);
-			}
-		});
+		p.add(new PropertiesAction<DMS>(this, dms));
 		return p;
 	}
 

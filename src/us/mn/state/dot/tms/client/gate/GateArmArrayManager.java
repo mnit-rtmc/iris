@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -113,7 +112,7 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 
 	/** Create a popup menu for a single gate arm selection */
 	@Override
-	protected JPopupMenu createPopupSingle(final GateArmArray ga) {
+	protected JPopupMenu createPopupSingle(GateArmArray ga) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(ga)));
@@ -125,11 +124,7 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 			p.add(new TeslaAction<GateArmArray>(ga));
 		}
 		p.addSeparator();
-		p.add(new PropertiesAction<GateArmArray>(ga) {
-			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm(ga);
-			}
-		});
+		p.add(new PropertiesAction<GateArmArray>(this, ga));
 		return p;
 	}
 

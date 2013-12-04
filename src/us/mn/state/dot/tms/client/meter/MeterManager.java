@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -135,7 +134,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Create a popup menu for a single ramp meter selection */
 	@Override
-	protected JPopupMenu createPopupSingle(final RampMeter meter) {
+	protected JPopupMenu createPopupSingle(RampMeter meter) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(meter)));
@@ -155,11 +154,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 			p.add(new TeslaAction<RampMeter>(meter));
 		}
 		p.addSeparator();
-		p.add(new PropertiesAction<RampMeter>(meter) {
-			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm(meter);
-			}
-		});
+		p.add(new PropertiesAction<RampMeter>(this, meter));
 		return p;
 	}
 

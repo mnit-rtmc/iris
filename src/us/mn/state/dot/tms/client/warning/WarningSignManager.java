@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.warning;
 
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -112,18 +111,14 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 
 	/** Create a popup menu for a single selection */
 	@Override
-	protected JPopupMenu createPopupSingle(final WarningSign ws) {
+	protected JPopupMenu createPopupSingle(WarningSign ws) {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(ws)));
 		p.addSeparator();
 		p.add(new DeployAction(s_model));
 		p.add(new UndeployAction(s_model));
 		p.addSeparator();
-		p.add(new PropertiesAction<WarningSign>(ws) {
-			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm(ws);
-			}
-		});
+		p.add(new PropertiesAction<WarningSign>(this, ws));
 		return p;
 	}
 

@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.List;
 import java.util.HashSet;
@@ -139,7 +138,7 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a popup menu for a single camera selection */
 	@Override
-	protected JPopupMenu createPopupSingle(final Camera c) {
+	protected JPopupMenu createPopupSingle(Camera c) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(c)));
@@ -156,11 +155,7 @@ public class CameraManager extends ProxyManager<Camera> {
 		p.addSeparator();
 		if(TeslaAction.isConfigured())
 			p.add(new TeslaAction<Camera>(c));
-		p.add(new PropertiesAction<Camera>(c) {
-			protected void doActionPerformed(ActionEvent e) {
-				showPropertiesForm(c);
-			}
-		});
+		p.add(new PropertiesAction<Camera>(this, c));
 		return p;
 	}
 
