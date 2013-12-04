@@ -360,7 +360,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Check if the location is set */
-	static protected boolean isLocationSet(MapGeoLoc loc) {
+	static private boolean isLocationSet(MapGeoLoc loc) {
 		return loc != null && !GeoLocHelper.isNull(loc.getGeoLoc());
 	}
 

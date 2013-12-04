@@ -128,11 +128,13 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	}
 
 	/** Do left-click event processing */
+	@Override
 	protected void doLeftClick(MouseEvent e, MapObject o) {
 		doClick(e, o);
 	}
 
 	/** Do right-click event processing */
+	@Override
 	protected void doRightClick(MouseEvent e, MapObject o) {
 		doClick(e, o);
 		manager.showPopupMenu(e);
