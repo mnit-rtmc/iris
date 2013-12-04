@@ -349,11 +349,12 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Iterate through all proxy objects */
 	private MapObject forEach(MapSearcher ms, AffineTransform at) {
 		shape = getShape(at);
-		for(T proxy: getCache()) {
-			MapGeoLoc loc = findGeoLoc(proxy);
-			if(isLocationSet(loc)) {
-				if(ms.next(loc))
-					return loc;
+		synchronized(map_cache) {
+			for(MapGeoLoc loc: map_cache) {
+				if(isLocationSet(loc)) {
+					if(ms.next(loc))
+						return loc;
+				}
 			}
 		}
 		return null;
@@ -378,7 +379,10 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Find a proxy matching the given map object */
 	public T findProxy(MapObject mo) {
-		return map_cache.lookup(mo);
+		if(mo instanceof MapGeoLoc)
+			return map_cache.lookup((MapGeoLoc)mo);
+		else
+			return null;
 	}
 
 	/** Get the description of a proxy */

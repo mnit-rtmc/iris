@@ -17,21 +17,21 @@ package us.mn.state.dot.tms.client.proxy;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A cache mapping from MapObject identityHashCode to proxy objects.  This cache
+ * A cache mapping from MapGeoLoc to proxy objects.  This cache
  * is an optimization to help ProxyManager.findProxy run fast.
  *
  * @author Douglas Lau
  */
-public final class ProxyMapCache<T extends SonarObject> {
-
-	/** Mapping from MapObject identityHashCode to proxy objects.  This is
-	 * an optimization cache to help findProxy run fast. */
-	private final HashMap<Integer, T> map_proxies =
-		new HashMap<Integer, T>();
+public final class ProxyMapCache<T extends SonarObject>
+	implements Iterable<MapGeoLoc>
+{
+	/** Mapping from MapGeoLoc to proxy objects.  This is an optimization
+	 * cache to help findProxy run fast. */
+	private final HashMap<MapGeoLoc, T> map_proxies =
+		new HashMap<MapGeoLoc, T>();
 
 	/** Dispose of the proxy map cache */
 	public synchronized void dispose() {
@@ -39,20 +39,19 @@ public final class ProxyMapCache<T extends SonarObject> {
 	}
 
 	/** Put an entry into cache.
-	 * @param mo Map object to associate with proxy.
+	 * @param loc Map object to associate with proxy.
 	 * @param proxy Proxy to associate with map object. */
-	public synchronized void put(MapObject mo, T proxy) {
-		int i = System.identityHashCode(mo);
-		map_proxies.put(i, proxy);
+	public synchronized void put(MapGeoLoc loc, T proxy) {
+		map_proxies.put(loc, proxy);
 	}
 
 	/** Remove an entry from cache.
 	 * @param proxy Proxy to remove from cache. */
 	public synchronized void remove(T proxy) {
-		Iterator<Map.Entry<Integer, T>> it =
+		Iterator<Map.Entry<MapGeoLoc, T>> it =
 			map_proxies.entrySet().iterator();
 		while(it.hasNext()) {
-			Map.Entry<Integer, T> ent = it.next();
+			Map.Entry<MapGeoLoc, T> ent = it.next();
 			if(ent.getValue() == proxy) {
 				it.remove();
 				break;
@@ -61,10 +60,14 @@ public final class ProxyMapCache<T extends SonarObject> {
 	}
 
 	/** Lookup a proxy in the cache.
-	 * @param mo Map object to find associated proxy.
+	 * @param loc Map object to find associated proxy.
 	 * @return Proxy associated with map object. */
-	public synchronized T lookup(MapObject mo) {
-		int i = System.identityHashCode(mo);
-		return map_proxies.get(i);
+	public synchronized T lookup(MapGeoLoc loc) {
+		return map_proxies.get(loc);
+	}
+
+	/** Get an iterator over the MapGeoLoc keys */
+	public Iterator<MapGeoLoc> iterator() {
+		return map_proxies.keySet().iterator();
 	}
 }
