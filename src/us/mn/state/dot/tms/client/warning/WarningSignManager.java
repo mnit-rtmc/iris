@@ -45,16 +45,17 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	/** Create a new warning sign manager */
 	public WarningSignManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
-	@Override public String getProxyType() {
+	@Override
+	public String getProxyType() {
 		return "warning.sign";
 	}
 
 	/** Get the warning sign cache */
-	@Override public TypeCache<WarningSign> getCache() {
+	@Override
+	public TypeCache<WarningSign> getCache() {
 		return session.getSonarState().getWarningSigns();
 	}
 
@@ -64,11 +65,13 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	}
 
 	/** Get the shape for a given proxy */
+	@Override
 	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for warning signs */
+	@Override
 	protected ProxyTheme<WarningSign> createTheme() {
 		ProxyTheme<WarningSign> theme =new ProxyTheme<WarningSign>(this,
 			MARKER);
@@ -82,6 +85,7 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	}
 
 	/** Check the style of the specified proxy */
+	@Override
 	public boolean checkStyle(ItemStyle is, WarningSign proxy) {
 		switch(is) {
 		case DEPLOYED:
@@ -142,11 +146,13 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	}
 
 	/** Find the map geo location for a proxy */
+	@Override
 	protected GeoLoc getGeoLoc(WarningSign proxy) {
 		return proxy.getGeoLoc();
 	}
 
 	/** Get the layer zoom visibility threshold */
+	@Override
 	protected int getZoomThreshold() {
 		return 15;
 	}

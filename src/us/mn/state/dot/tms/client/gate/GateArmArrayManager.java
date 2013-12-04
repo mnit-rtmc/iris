@@ -48,7 +48,6 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	/** Create a new gate arm array manager */
 	public GateArmArrayManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

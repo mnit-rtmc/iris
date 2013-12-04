@@ -89,7 +89,12 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Create a new LCS array manager */
 	public LCSArrayManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		getCache().addProxyListener(this);
+	}
+
+	/** Initialize the proxy manager */
+	@Override
+	public void initialize() {
+		super.initialize();
 		getLCSCache().addProxyListener(lcs_listener);
 	}
 

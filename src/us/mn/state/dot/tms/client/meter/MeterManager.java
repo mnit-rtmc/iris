@@ -60,7 +60,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Create a new meter manager */
 	public MeterManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

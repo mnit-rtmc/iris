@@ -60,7 +60,6 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Create a new incident manager */
 	public IncidentManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

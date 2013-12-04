@@ -40,7 +40,6 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	/** Create a new lane marking manager */
 	public LaneMarkingManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

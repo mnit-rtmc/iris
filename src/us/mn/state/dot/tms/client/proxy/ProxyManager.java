@@ -112,19 +112,10 @@ abstract public class ProxyManager<T extends SonarObject>
 		this(s, lm, ItemStyle.ALL);
 	}
 
-	/** Create a style list model for the given symbol */
-	protected StyleListModel<T> createStyleListModel(Symbol s) {
-		return new StyleListModel<T>(this, s.getLabel());
-	}
-
-	/** Create a layer for this proxy type */
-	protected ProxyLayer<T> createLayer() {
-		return new ProxyLayer<T>(this);
-	}
-
 	/** Initialize the proxy manager. This cannot be done in the constructor
 	 * because subclasses may not be fully constructed. */
 	public void initialize() {
+		getCache().addProxyListener(this);
 		layer.initialize();
 	}
 
@@ -134,6 +125,16 @@ abstract public class ProxyManager<T extends SonarObject>
 		s_model.dispose();
 		map_cache.dispose();
 		getCache().removeProxyListener(this);
+	}
+
+	/** Create a style list model for the given symbol */
+	protected StyleListModel<T> createStyleListModel(Symbol s) {
+		return new StyleListModel<T>(this, s.getLabel());
+	}
+
+	/** Create a layer for this proxy type */
+	protected ProxyLayer<T> createLayer() {
+		return new ProxyLayer<T>(this);
 	}
 
 	/** Called when a proxy has been added */

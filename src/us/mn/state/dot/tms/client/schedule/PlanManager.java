@@ -50,7 +50,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Create a new action plan manager */
 	public PlanManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

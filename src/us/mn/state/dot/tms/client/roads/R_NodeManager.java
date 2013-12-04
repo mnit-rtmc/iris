@@ -99,7 +99,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public R_NodeManager(Session s, GeoLocManager lm) {
 		super(s, lm);
 		seg_layer = new SegmentLayer(session, this);
-		getCache().addProxyListener(this);
 	}
 
 	/** Initialize the r_node manager */

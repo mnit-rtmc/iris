@@ -48,7 +48,6 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Create a new controller manager */
 	public ControllerManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

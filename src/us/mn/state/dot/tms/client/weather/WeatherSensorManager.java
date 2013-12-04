@@ -40,7 +40,6 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	/** Create a new weather sensor manager */
 	public WeatherSensorManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		getCache().addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
