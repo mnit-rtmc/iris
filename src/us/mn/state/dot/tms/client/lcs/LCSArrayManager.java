@@ -26,6 +26,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -39,6 +40,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import static us.mn.state.dot.tms.R_Node.MAX_LANES;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapAction;
@@ -59,32 +61,25 @@ import us.mn.state.dot.tms.utils.I18N;
 public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** LCS array map object marker */
-	static protected final LcsMarker MARKER = new LcsMarker();
+	static private final LcsMarker MARKER = new LcsMarker();
 
 	/** Simple class to wait until all LCS have been enumerated */
-	static protected class LCSWaiter implements ProxyListener<LCS> {
-		protected boolean enumerated = false;
-		public void proxyAdded(LCS proxy) {}
-		public synchronized void enumerationComplete() {
-			enumerated = true;
-			notify();
-		}
-		public void proxyRemoved(LCS proxy) {}
-		public void proxyChanged(LCS proxy, String a) {}
-		protected synchronized void waitForEnumeration() {
-			while(!enumerated) {
-				try {
-					wait();
+	private final ProxyListener<LCS> lcs_listener = new ProxyListener<LCS>()
+	{
+		public void proxyAdded(final LCS proxy) {
+			WORKER.addJob(new Job() {
+				public void perform() {
+					proxyAddedSlow(proxy.getArray());
 				}
-				catch(InterruptedException e) {
-					// uhhh ?
-				}
-			}
+			});
 		}
-	}
+		public void enumerationComplete() { }
+		public void proxyRemoved(LCS proxy) { }
+		public void proxyChanged(LCS proxy, String a) { }
+	};
 
 	/** Action to blank the selected LCS array */
-	protected BlankLcsAction blankAction;
+	private BlankLcsAction blankAction;
 
 	/** Set the blank LCS action */
 	public void setBlankAction(BlankLcsAction a) {
@@ -95,16 +90,14 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	public LCSArrayManager(Session s, GeoLocManager lm) {
 		super(s, lm);
 		getCache().addProxyListener(this);
-		waitForLCSEnumeration();
+		getLCSCache().addProxyListener(lcs_listener);
 	}
 
-	/** Wait for all LCS to be enumerated */
-	private void waitForLCSEnumeration() {
-		TypeCache<LCS> lc = getLCSCache();
-		LCSWaiter waiter = new LCSWaiter();
-		lc.addProxyListener(waiter);
-		waiter.waitForEnumeration();
-		lc.removeProxyListener(waiter);
+	/** Dispose of the proxy manager */
+	@Override
+	public void dispose() {
+		getLCSCache().removeProxyListener(lcs_listener);
+		super.dispose();
 	}
 
 	/** Get the proxy type name */
@@ -164,7 +157,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Comparator for ordering LCS arrays */
-	protected final Comparator<LCSArray> comparator =
+	private final Comparator<LCSArray> comparator =
 		new Comparator<LCSArray>()
 	{
 		// FIXME: if an LCS array is moved, that will break the sort
