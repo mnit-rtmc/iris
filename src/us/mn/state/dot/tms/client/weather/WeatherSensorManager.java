@@ -84,13 +84,6 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 		}
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		// No popup
-		return null;
-	}
-
 	/** Find the map geo location for a proxy */
 	@Override
 	protected GeoLoc getGeoLoc(WeatherSensor proxy) {

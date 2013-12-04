@@ -105,12 +105,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		return theme;
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		return null;
-	}
-
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, ActionPlan proxy) {

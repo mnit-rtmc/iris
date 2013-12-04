@@ -110,27 +110,9 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		return new WarningSignProperties(session, ws);
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected < 1)
-			return null;
-		if(n_selected == 1) {
-			for(WarningSign s: s_model.getSelected())
-				return createSinglePopup(s);
-		}
-		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("warning.signs")));
-		p.addSeparator();
-		p.add(new DeployAction(s_model));
-		p.add(new UndeployAction(s_model));
-		return p;
-	}
-
 	/** Create a popup menu for a single selection */
-	private JPopupMenu createSinglePopup(final WarningSign ws) {
+	@Override
+	protected JPopupMenu createPopupSingle(final WarningSign ws) {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(ws)));
 		p.addSeparator();
@@ -142,6 +124,18 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 				showPropertiesForm(ws);
 			}
 		});
+		return p;
+	}
+
+	/** Create a popup menu for multiple objects */
+	@Override
+	protected JPopupMenu createPopupMulti(int n_selected) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("warning.signs")));
+		p.addSeparator();
+		p.add(new DeployAction(s_model));
+		p.add(new UndeployAction(s_model));
 		return p;
 	}
 

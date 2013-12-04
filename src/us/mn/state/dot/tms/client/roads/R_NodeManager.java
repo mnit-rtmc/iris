@@ -349,26 +349,20 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		}
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
+	/** Create a popup menu for a single selection */
 	@Override
-	protected JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected < 1)
-			return null;
-		if(n_selected == 1) {
-			for(R_Node n: s_model.getSelected())
-				return createSinglePopup(n);
-		}
+	protected JPopupMenu createPopupSingle(R_Node proxy) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("r_node.plural")));
+		p.add(makeMenuLabel(getDescription(proxy)));
 		return p;
 	}
 
-	/** Create a popup menu for a single selection */
-	private JPopupMenu createSinglePopup(R_Node proxy) {
+	/** Create a popup menu for multiple objects */
+	@Override
+	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(proxy)));
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("r_node.plural")));
 		return p;
 	}
 

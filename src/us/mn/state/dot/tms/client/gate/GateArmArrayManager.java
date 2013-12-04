@@ -111,25 +111,9 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		return new GateArmArrayProperties(session, ga);
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected < 1)
-			return null;
-		if(n_selected == 1) {
-			for(GateArmArray ga: s_model.getSelected())
-				return createSinglePopup(ga);
-		}
-		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " + I18N.get(
-			"gate.arm.arrays")));
-		p.addSeparator();
-		return p;
-	}
-
 	/** Create a popup menu for a single gate arm selection */
-	private JPopupMenu createSinglePopup(final GateArmArray ga) {
+	@Override
+	protected JPopupMenu createPopupSingle(final GateArmArray ga) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(ga)));
@@ -146,6 +130,16 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 				showPropertiesForm(ga);
 			}
 		});
+		return p;
+	}
+
+	/** Create a popup menu for multiple objects */
+	@Override
+	protected JPopupMenu createPopupMulti(int n_selected) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel("" + n_selected + " " + I18N.get(
+			"gate.arm.arrays")));
+		p.addSeparator();
 		return p;
 	}
 

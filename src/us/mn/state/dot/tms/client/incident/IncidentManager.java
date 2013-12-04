@@ -109,32 +109,26 @@ public class IncidentManager extends ProxyManager<Incident> {
 		return theme;
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected < 1)
-			return null;
-		if(n_selected == 1) {
-			for(Incident inc: s_model.getSelected())
-				return createSinglePopup(inc);
-		}
-		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel(I18N.get("incident.plural") + ": " +
-			n_selected));
-		p.addSeparator();
-		// FIXME: add menu item to clear incident
-		return p;
-	}
-
 	/** Create a popup menu for a single incident selection */
-	private JPopupMenu createSinglePopup(Incident proxy) {
+	@Override
+	protected JPopupMenu createPopupSingle(Incident proxy) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
 		p.add(new MapAction(desktop.client, proxy, proxy.getLat(),
 			proxy.getLon()));
+		p.addSeparator();
+		// FIXME: add menu item to clear incident
+		return p;
+	}
+
+	/** Create a popup menu for multiple objects */
+	@Override
+	protected JPopupMenu createPopupMulti(int n_selected) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel(I18N.get("incident.plural") + ": " +
+			n_selected));
 		p.addSeparator();
 		// FIXME: add menu item to clear incident
 		return p;

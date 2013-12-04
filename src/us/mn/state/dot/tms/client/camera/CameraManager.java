@@ -137,30 +137,9 @@ public class CameraManager extends ProxyManager<Camera> {
 		return new CameraProperties(session, cam);
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected < 1)
-			return null;
-		if(n_selected == 1) {
-			for(Camera cam: s_model.getSelected())
-				return createSinglePopup(cam);
-		}
-		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("camera.plural")));
-		p.addSeparator();
-		p.add(new PublishAction(s_model));
-		p.add(new UnpublishAction(s_model));
-		p.addSeparator();
-		p.add(new AddPlaylistAction(this, s_model));
-		p.add(new RemovePlaylistAction(this, s_model));
-		return p;
-	}
-
 	/** Create a popup menu for a single camera selection */
-	private JPopupMenu createSinglePopup(final Camera c) {
+	@Override
+	protected JPopupMenu createPopupSingle(final Camera c) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(c)));
@@ -182,6 +161,21 @@ public class CameraManager extends ProxyManager<Camera> {
 				showPropertiesForm(c);
 			}
 		});
+		return p;
+	}
+
+	/** Create a popup menu for multiple objects */
+	@Override
+	protected JPopupMenu createPopupMulti(int n_selected) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("camera.plural")));
+		p.addSeparator();
+		p.add(new PublishAction(s_model));
+		p.add(new UnpublishAction(s_model));
+		p.addSeparator();
+		p.add(new AddPlaylistAction(this, s_model));
+		p.add(new RemovePlaylistAction(this, s_model));
 		return p;
 	}
 

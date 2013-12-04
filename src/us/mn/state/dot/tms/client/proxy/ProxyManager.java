@@ -336,7 +336,24 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
-	abstract protected JPopupMenu createPopup();
+	private JPopupMenu createPopup() {
+		int n_selected = s_model.getSelectedCount();
+		if(n_selected == 1) {
+			for(T proxy: s_model.getSelected())
+				return createPopupSingle(proxy);
+		}
+		return n_selected > 1 ? createPopupMulti(n_selected) : null;
+	}
+
+	/** Create a popup menu for a single object */
+	protected JPopupMenu createPopupSingle(T proxy) {
+		return null;
+	}
+
+	/** Create a popup menu for multiple objects */
+	protected JPopupMenu createPopupMulti(int n_selected) {
+		return null;
+	}
 
 	/** Iterate through all proxy objects */
 	public MapObject forEach(MapSearcher ms, float scale) {

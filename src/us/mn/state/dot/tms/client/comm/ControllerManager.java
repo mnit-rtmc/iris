@@ -104,25 +104,9 @@ public class ControllerManager extends ProxyManager<Controller> {
 		return new ControllerForm(session, ctrl);
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected < 1)
-			return null;
-		if(n_selected == 1) {
-			for(Controller ctrl: s_model.getSelected())
-				return createSinglePopup(ctrl);
-		}
-		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("controller.plural")));
-		p.addSeparator();
-		return p;
-	}
-
 	/** Create a popup menu for a single controller selection */
-	private JPopupMenu createSinglePopup(final Controller ctrl) {
+	@Override
+	protected JPopupMenu createPopupSingle(final Controller ctrl) {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(ctrl)));
 		p.addSeparator();
@@ -133,6 +117,16 @@ public class ControllerManager extends ProxyManager<Controller> {
 				showPropertiesForm(ctrl);
 			}
 		});
+		return p;
+	}
+
+	/** Create a popup menu for multiple objects */
+	@Override
+	protected JPopupMenu createPopupMulti(int n_selected) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("controller.plural")));
+		p.addSeparator();
 		return p;
 	}
 

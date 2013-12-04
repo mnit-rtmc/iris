@@ -133,26 +133,9 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return new RampMeterProperties(session, meter);
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected < 1)
-			return null;
-		if(n_selected == 1) {
-			for(RampMeter meter: s_model.getSelected())
-				return createSinglePopup(meter);
-		}
-		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " + I18N.get(
-			"ramp.meters.short")));
-		p.addSeparator();
-		// FIXME: add turn on/off all actions
-		return p;
-	}
-
 	/** Create a popup menu for a single ramp meter selection */
-	private JPopupMenu createSinglePopup(final RampMeter meter) {
+	@Override
+	protected JPopupMenu createPopupSingle(final RampMeter meter) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(meter)));
@@ -177,6 +160,17 @@ public class MeterManager extends ProxyManager<RampMeter> {
 				showPropertiesForm(meter);
 			}
 		});
+		return p;
+	}
+
+	/** Create a popup menu for multiple objects */
+	@Override
+	protected JPopupMenu createPopupMulti(int n_selected) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel("" + n_selected + " " + I18N.get(
+			"ramp.meters.short")));
+		p.addSeparator();
+		// FIXME: add turn on/off all actions
 		return p;
 	}
 

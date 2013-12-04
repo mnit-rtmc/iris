@@ -228,27 +228,9 @@ public class DMSManager extends ProxyManager<DMS> {
 		return new DMSProperties(session, dms);
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected < 1)
-			return null;
-		if(n_selected == 1) {
-			for(DMS dms: s_model.getSelected())
-				return createSinglePopup(dms);
-		}
-		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + ": " +
-			I18N.get("dms.plural")));
-		p.addSeparator();
-		if(blankAction != null)
-			p.add(blankAction);
-		return p;
-	}
-
 	/** Create a popup menu for a single DMS selection */
-	private JPopupMenu createSinglePopup(final DMS dms) {
+	@Override
+	protected JPopupMenu createPopupSingle(final DMS dms) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(dms)));
@@ -264,6 +246,18 @@ public class DMSManager extends ProxyManager<DMS> {
 				showPropertiesForm(dms);
 			}
 		});
+		return p;
+	}
+
+	/** Create a popup menu for multiple objects */
+	@Override
+	protected JPopupMenu createPopupMulti(int n_selected) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel("" + n_selected + ": " +
+			I18N.get("dms.plural")));
+		p.addSeparator();
+		if(blankAction != null)
+			p.add(blankAction);
 		return p;
 	}
 

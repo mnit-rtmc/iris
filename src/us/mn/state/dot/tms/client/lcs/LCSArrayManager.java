@@ -237,25 +237,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return new LCSArrayProperties(session, la);
 	}
 
-	/** Create a popup menu for the selected proxy object(s) */
-	@Override
-	protected JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected < 1)
-			return null;
-		if(n_selected == 1) {
-			for(LCSArray la: s_model.getSelected())
-				return createSinglePopup(la);
-		}
-		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("lcs.arrays")));
-		p.addSeparator();
-		return p;
-	}
-
 	/** Create a popup menu for a single LCS array selection */
-	private JPopupMenu createSinglePopup(final LCSArray la) {
+	@Override
+	protected JPopupMenu createPopupSingle(final LCSArray la) {
 		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(la)));
@@ -279,6 +263,16 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 				showPropertiesForm(la);
 			}
 		});
+		return p;
+	}
+
+	/** Create a popup menu for multiple objects */
+	@Override
+	protected JPopupMenu createPopupMulti(int n_selected) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel("" + n_selected + " " +
+			I18N.get("lcs.arrays")));
+		p.addSeparator();
 		return p;
 	}
 
