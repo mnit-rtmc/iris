@@ -63,7 +63,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** LCS array map object marker */
 	static private final LcsMarker MARKER = new LcsMarker();
 
-	/** Simple class to wait until all LCS have been enumerated */
+	/** Listener for LCS proxy events */
 	private final ProxyListener<LCS> lcs_listener = new ProxyListener<LCS>()
 	{
 		public void proxyAdded(final LCS proxy) {
