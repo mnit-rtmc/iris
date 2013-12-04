@@ -64,7 +64,6 @@ public class DetectorHash {
 			WORKER.addJob(new Job() {
 				public void perform() {
 					enumerationCompleteSlow();
-					r_node_manager.arrangeCorridors();
 				}
 			});
 		}
