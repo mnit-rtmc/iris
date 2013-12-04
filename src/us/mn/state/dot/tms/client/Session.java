@@ -30,7 +30,6 @@ import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.comm.ControllerManager;
-import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.gate.GateArmArrayManager;
 import us.mn.state.dot.tms.client.incident.IncidentManager;
@@ -138,14 +137,6 @@ public class Session {
 	/** Lane marking manager */
 	private final LaneMarkingManager lane_marking_manager;
 
-	/** Detector manager */
-	private final DetectorManager det_manager;
-
-	/** Get the detector manager */
-	public DetectorManager getDetectorManager() {
-		return det_manager;
-	}
-
 	/** R_Node manager */
 	private final R_NodeManager r_node_manager;
 
@@ -189,8 +180,6 @@ public class Session {
 		props = p;
 		loc_manager = new GeoLocManager(this);
 		r_node_manager = new R_NodeManager(this, loc_manager);
-		det_manager = new DetectorManager(this, loc_manager,
-			r_node_manager);
 		controller_manager = new ControllerManager(this, loc_manager);
 		cam_manager = new CameraManager(this, loc_manager);
 		dms_manager = new DMSManager(this, loc_manager);
@@ -230,7 +219,6 @@ public class Session {
 	/** Initialize all the proxy managers */
 	private void initializeManagers() {
 		r_node_manager.initialize();
-		det_manager.initialize();
 		controller_manager.initialize();
 		cam_manager.initialize();
 		dms_manager.initialize();
@@ -483,7 +471,6 @@ public class Session {
 		tabs.clear();
 		plan_manager.dispose();
 		r_node_manager.dispose();
-		det_manager.dispose();
 		gate_arm_manager.dispose();
 		cam_manager.dispose();
 		dms_manager.dispose();

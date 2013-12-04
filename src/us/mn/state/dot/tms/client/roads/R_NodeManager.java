@@ -98,8 +98,15 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create a new roadway node manager */
 	public R_NodeManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		seg_layer = new SegmentLayer(this, session);
+		seg_layer = new SegmentLayer(session, this);
 		getCache().addProxyListener(this);
+	}
+
+	/** Initialize the r_node manager */
+	@Override
+	public void initialize() {
+		super.initialize();
+		seg_layer.initialize();
 	}
 
 	/** Get the proxy type */

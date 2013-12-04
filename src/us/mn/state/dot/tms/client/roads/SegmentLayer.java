@@ -52,11 +52,14 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	private final ConcurrentSkipListMap<String, List<Segment>> cor_segs =
 		new ConcurrentSkipListMap<String, List<Segment>>();
 
+	/** Client session */
+	private final Session session;
+
 	/** R_Node manager */
 	private final R_NodeManager manager;
 
-	/** Client session */
-	private final Session session;
+	/** Detector hash */
+	private final DetectorHash det_hash;
 
 	/** Sample data set */
 	private final SampleDataSet samples = new SampleDataSet();
@@ -65,10 +68,16 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	private SensorReader reader;
 
 	/** Create a new segment layer */
-	public SegmentLayer(R_NodeManager m, Session s) {
+	public SegmentLayer(Session s, R_NodeManager m) {
 		super(I18N.get("detector.segments"));
 		manager = m;
 		session = s;
+		det_hash = new DetectorHash(s, m);
+	}
+
+	/** Initialize the segment layer */
+	public void initialize() {
+		det_hash.initialize();
 	}
 
 	/** Start reading sensor data */
@@ -86,6 +95,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		if(sr != null)
 			sr.dispose();
 		reader = null;
+		det_hash.dispose();
 	}
 
 	/** Update one sensor sample */
@@ -158,7 +168,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 
 	/** Get a set of detectors for an r_node */
 	private Set<Detector> getDetectors(R_Node n) {
-		return session.getDetectorManager().getDetectors(n);
+		return det_hash.getDetectors(n);
 	}
 
 	/** Check if two locations are too distant */
