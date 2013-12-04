@@ -30,20 +30,20 @@ public class AddPlaylistAction extends IAction {
 	private final CameraManager manager;
 
 	/** Proxy selection model */
-	private final ProxySelectionModel<Camera> s_model;
+	private final ProxySelectionModel<Camera> sel_model;
 
 	/** Create a new add playlist action */
 	public AddPlaylistAction(CameraManager m, ProxySelectionModel<Camera> s)
 	{
 		super("camera.playlist.add");
 		manager = m;
-		s_model = s;
+		sel_model = s;
 	}
 
 	/** Add the selected cameras to the playlist */
 	protected void doActionPerformed(ActionEvent e) {
-		for(Camera c: s_model.getSelected())
+		for(Camera c: sel_model.getSelected())
 			manager.addPlaylist(c);
-		s_model.clearSelection();
+		sel_model.clearSelection();
 	}
 }

@@ -27,18 +27,18 @@ import us.mn.state.dot.tms.client.widget.IAction;
 public class PublishAction extends IAction {
 
 	/** Proxy selection model */
-	private final ProxySelectionModel<Camera> s_model;
+	private final ProxySelectionModel<Camera> sel_model;
 
 	/** Create a new publish action */
 	public PublishAction(ProxySelectionModel<Camera> s) {
 		super("camera.publish");
-		s_model = s;
+		sel_model = s;
 	}
 
 	/** Publish the selected cameras */
 	protected void doActionPerformed(ActionEvent e) {
-		for(Camera c: s_model.getSelected())
+		for(Camera c: sel_model.getSelected())
 			c.setPublish(true);
-		s_model.clearSelection();
+		sel_model.clearSelection();
 	}
 }

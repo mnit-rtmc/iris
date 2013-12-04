@@ -30,7 +30,7 @@ public class RemovePlaylistAction extends IAction {
 	private final CameraManager manager;
 
 	/** Proxy selection model */
-	private final ProxySelectionModel<Camera> s_model;
+	private final ProxySelectionModel<Camera> sel_model;
 
 	/** Create a new remove playlist action */
 	public RemovePlaylistAction(CameraManager m,
@@ -38,13 +38,13 @@ public class RemovePlaylistAction extends IAction {
 	{
 		super("camera.playlist.remove");
 		manager = m;
-		s_model = s;
+		sel_model = s;
 	}
 
 	/** Remove the selected cameras from the playlist */
 	protected void doActionPerformed(ActionEvent e) {
-		for(Camera c: s_model.getSelected())
+		for(Camera c: sel_model.getSelected())
 			manager.removePlaylist(c);
-		s_model.clearSelection();
+		sel_model.clearSelection();
 	}
 }

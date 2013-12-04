@@ -27,18 +27,18 @@ import us.mn.state.dot.tms.client.widget.IAction;
 public class UndeployAction extends IAction {
 
 	/** Proxy selection model */
-	private final ProxySelectionModel<WarningSign> s_model;
+	private final ProxySelectionModel<WarningSign> sel_model;
 
 	/** Create a new undeploy action */
 	public UndeployAction(ProxySelectionModel<WarningSign> s) {
 		super("warning.sign.undeploy");
-		s_model = s;
+		sel_model = s;
 	}
 
 	/** Actually perform the action */
 	protected void doActionPerformed(ActionEvent e) {
-		for(WarningSign s: s_model.getSelected())
+		for(WarningSign s: sel_model.getSelected())
 			s.setDeployed(false);
-		s_model.clearSelection();
+		sel_model.clearSelection();
 	}
 }
