@@ -32,9 +32,8 @@ import us.mn.state.dot.tms.client.widget.Icons;
  *
  * @author Douglas Lau
  */
-public class MousePTZ extends MouseAdapter implements MouseMotionListener,
-	MouseWheelListener
-{
+public class MousePTZ {
+
 	/** Milliseconds between zoom ticks */
 	static private final int ZOOM_TICK = 250;
 
@@ -72,9 +71,6 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 
 	/** Size of stream panel widget */
 	private final Dimension size;
-
-	/** Component for cursors */
-	private Component component;
 
 	/** Left edge of dead zone */
 	private final int dead_left;
@@ -130,37 +126,45 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 		timer.start();
 	}
 
-	/** Set the component for cursors */
-	public void setComponent(Component c) {
-		component = c;
+	/** Set the component for mouse events */
+	public void setComponent(final Component c) {
+		MouseAdapter mouser = new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				updatePanTilt(e);
+			}
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				cancelPanTilt();
+			}
+			@Override
+			public void mouseExited(MouseEvent e) {
+				cancelPanTilt();
+			}
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				updatePanTilt(e);
+				c.setCursor(getCursor(e));
+			}
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				c.setCursor(getCursor(e));
+			}
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				n_zoom -= e.getWheelRotation();
+				zoom = calculateZoom();
+				cam_ptz.sendPtz(pan, tilt, zoom);
+			}
+		};
+		c.addMouseListener(mouser);
+		c.addMouseMotionListener(mouser);
+		c.addMouseWheelListener(mouser);
 	}
 
 	/** Dispose of the mouse PTZ handler */
 	public void dispose() {
 		timer.stop();
-	}
-
-	/** Handle a mouse pressed event */
-	@Override public void mousePressed(MouseEvent e) {
-		updatePanTilt(e);
-	}
-
-	/** Handle a moust released event */
-	@Override public void mouseReleased(MouseEvent e) {
-		cancelPanTilt();
-	}
-
-	/** Handle a mouse dragged event */
-	@Override public void mouseDragged(MouseEvent e) {
-		updatePanTilt(e);
-		if(component != null)
-			component.setCursor(getCursor(e));
-	}
-
-	/** Handle a mouse moved event */
-	@Override public void mouseMoved(MouseEvent e) {
-		if(component != null)
-			component.setCursor(getCursor(e));
 	}
 
 	/** Get the appropriate cursor */
@@ -239,12 +243,5 @@ public class MousePTZ extends MouseAdapter implements MouseMotionListener,
 			return -1;
 		else
 			return 0;
-	}
-
-	/** Respond to a mouse wheel event */
-	@Override public void mouseWheelMoved(MouseWheelEvent e) {
-		n_zoom -= e.getWheelRotation();
-		zoom = calculateZoom();
-		cam_ptz.sendPtz(pan, tilt, zoom);
 	}
 }

@@ -106,9 +106,6 @@ public class StreamPanel extends JPanel {
 	/** Create the screen panel */
 	private JPanel createScreenPanel(Dimension sz) {
 		JPanel p = new JPanel(new BorderLayout());
-		p.addMouseListener(mouse_ptz);
-		p.addMouseMotionListener(mouse_ptz);
-		p.addMouseWheelListener(mouse_ptz);
 		p.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
 		p.setPreferredSize(sz);
