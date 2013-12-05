@@ -33,7 +33,7 @@ import static us.mn.state.dot.tms.units.Distance.Units.KILOMETERS;
  *
  * @author Douglas Lau
  */
-public class GeoLocManager implements ProxyListener<GeoLoc> {
+public class GeoLocManager {
 
 	/** Maximum distance from an r_node to calculate tangent angle */
 	static private final Distance TANGENT_DIST = new Distance(2,KILOMETERS);
@@ -45,10 +45,40 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 	private final HashMap<String, MapGeoLoc> proxies =
 		new HashMap<String, MapGeoLoc>();
 
+	/** Listener for proxy events */
+	private final ProxyListener<GeoLoc> listener =
+		new ProxyListener<GeoLoc>()
+	{
+		public void proxyAdded(final GeoLoc proxy) {
+			WORKER.addJob(new Job() {
+				public void perform() {
+					proxyAddedSlow(proxy);
+				}
+			});
+		}
+		public void enumerationComplete() { }
+		public void proxyRemoved(GeoLoc proxy) {
+			// Get the name before the proxy is destroyed
+			final String name = proxy.getName();
+			WORKER.addJob(new Job() {
+				public void perform() {
+					proxyRemovedSlow(name);
+				}
+			});
+		}
+		public void proxyChanged(final GeoLoc proxy, final String a) {
+			WORKER.addJob(new Job() {
+				public void perform() {
+					proxyChangedSlow(proxy, a);
+				}
+			});
+		}
+	};
+
 	/** Create a new GeoLoc manager */
 	public GeoLocManager(Session s) {
 		session = s;
-		getCache().addProxyListener(this);
+		getCache().addProxyListener(listener);
 	}
 
 	/** Get the geo loc cache */
@@ -56,58 +86,36 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 		return session.getSonarState().getGeoLocs();
 	}
 
-	/** Dispose of the proxy model */
+	/** Dispose of the GeoLoc manager */
 	public void dispose() {
-		getCache().removeProxyListener(this);
+		getCache().removeProxyListener(listener);
 	}
 
 	/** Add a new GeoLoc to the manager */
-	public void proxyAdded(final GeoLoc proxy) {
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				MapGeoLoc loc = new MapGeoLoc(proxy);
-				synchronized(proxies) {
-					proxies.put(proxy.getName(), loc);
-				}
-			}
-		});
-	}
-
-	/** Enumeration of the proxy type has completed */
-	public void enumerationComplete() {
-		// We're not interested
+	private void proxyAddedSlow(GeoLoc proxy) {
+		MapGeoLoc loc = new MapGeoLoc(proxy);
+		synchronized(proxies) {
+			proxies.put(proxy.getName(), loc);
+		}
 	}
 
 	/** Remove a GeoLoc from the manager */
-	public void proxyRemoved(GeoLoc proxy) {
-		// Get the name before the proxy is destroyed
-		final String name = proxy.getName();
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				synchronized(proxies) {
-					proxies.remove(name);
-				}
-			}
-		});
+	private void proxyRemovedSlow(String name) {
+		synchronized(proxies) {
+			proxies.remove(name);
+		}
 	}
 
 	/** Change a proxy in the model */
-	public void proxyChanged(final GeoLoc proxy, String attrib) {
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				MapGeoLoc loc;
-				synchronized(proxies) {
-					loc = proxies.get(proxy.getName());
-				}
-				if(loc != null) {
-					loc.doUpdate();
-					loc.updateGeometry();
-				}
-			}
-		});
+	private void proxyChangedSlow(GeoLoc proxy, String attrib) {
+		MapGeoLoc loc;
+		synchronized(proxies) {
+			loc = proxies.get(proxy.getName());
+		}
+		if(loc != null) {
+			loc.doUpdate();
+			loc.updateGeometry();
+		}
 	}
 
 	/** Find the map location for the given proxy */
