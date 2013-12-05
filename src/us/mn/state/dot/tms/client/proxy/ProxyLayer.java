@@ -24,7 +24,6 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -47,43 +46,10 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 		return manager;
 	}
 
-	/** Proxy listener */
-	private final ProxyListener<T> listener = new ProxyListener<T>() {
-		private boolean complete;
-		public void proxyAdded(T proxy) {
-			// NOTE: this also gets called when we "watch" an
-			//       object after it is selected.
-			if(complete)
-				updateGeometry();
-		}
-		public void enumerationComplete() {
-			complete = true;
-			updateExtent();
-		}
-		public void proxyRemoved(T proxy) {
-			updateGeometry();
-		}
-		public void proxyChanged(T proxy, String attrib) {
-			if(manager.isStyleAttrib(attrib))
-				updateStatus();
-		}
-	};
-
 	/** Create a new SONAR map layer */
 	public ProxyLayer(ProxyManager<T> m) {
 		super(I18N.get(m.getProxyType()));
 		manager = m;
-	}
-
-	/** Initialize the layer. This cannot be done in the constructor
-	 * because subclasses may not be fully constructed. */
-	public void initialize() {
-		manager.getCache().addProxyListener(listener);
-	}
-
-	/** Dispose of the layer */
-	public void dispose() {
-		manager.getCache().removeProxyListener(listener);
 	}
 
 	/** Update the layer geometry */
@@ -96,7 +62,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 	}
 
 	/** Update the layer status */
-	private void updateStatus() {
+	public void updateStatus() {
 		runSwing(new Runnable() {
 			public void run() {
 				fireLayerChanged(LayerChange.status);

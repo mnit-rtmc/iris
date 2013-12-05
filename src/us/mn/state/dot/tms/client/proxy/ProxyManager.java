@@ -91,6 +91,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 			WORKER.addJob(new Job() {
 				public void perform() {
 					enumerated = true;
+					layer.updateExtent();
 				}
 			});
 		}
@@ -109,6 +110,8 @@ abstract public class ProxyManager<T extends SonarObject> {
 					}
 				});
 			}
+			if(isStyleAttrib(a))
+				layer.updateStatus();
 		}
 	};
 
@@ -149,12 +152,10 @@ abstract public class ProxyManager<T extends SonarObject> {
 	 * because subclasses may not be fully constructed. */
 	public void initialize() {
 		getCache().addProxyListener(listener);
-		layer.initialize();
 	}
 
 	/** Dispose of the proxy manager */
 	public void dispose() {
-		layer.dispose();
 		s_model.dispose();
 		map_cache.dispose();
 		getCache().removeProxyListener(listener);
@@ -172,12 +173,16 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Add a proxy to the manager */
 	protected void proxyAddedSlow(T proxy) {
+		// NOTE: this also gets called when we "watch" an
+		//       object after it is selected.
 		MapGeoLoc loc = findGeoLoc(proxy);
 		if(loc != null) {
 			loc.setManager(this);
 			loc.doUpdate();
 			map_cache.put(loc, proxy);
 		}
+		if(enumerated)
+			layer.updateGeometry();
 	}
 
 	/** Get the tangent angle for the given location */
@@ -189,6 +194,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	protected void proxyRemovedSlow(T proxy) {
 		s_model.removeSelected(proxy);
 		map_cache.remove(proxy);
+		layer.updateGeometry();
 	}
 
 	/** Check if an attribute change is interesting */
