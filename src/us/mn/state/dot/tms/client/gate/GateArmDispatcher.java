@@ -243,6 +243,18 @@ public class GateArmDispatcher extends IPanel
 		add(state_lbl[3]);
 		add(gate_lbl[7], Stretch.NONE);
 		add(state_lbl[7], Stretch.LAST);
+		stream_pnl.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				selectStream(swap_streams);
+			}
+		});
+		thumb_pnl.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				selectStream(!swap_streams);
+			}
+		});
 		current_pnl.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -253,6 +265,21 @@ public class GateArmDispatcher extends IPanel
 		dms_watcher.initialize();
 		clear();
 		sel_model.addProxySelectionListener(sel_listener);
+	}
+
+	/** Select a camera stream */
+	private void selectStream(boolean swap) {
+		GateArmArray ga = ga_array;
+		if(ga != null) {
+			Camera c = swap ? ga.getApproach() : ga.getCamera();
+			if(c != null)
+				selectCamera(c);
+		}
+	}
+
+	/** Select a camera */
+	private void selectCamera(Camera c) {
+		session.getCameraManager().getSelectionModel().setSelected(c);
 	}
 
 	/** Select the DMS */
