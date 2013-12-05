@@ -72,24 +72,29 @@ public class StreamPanel extends JPanel {
 	/** Stream progress timer */
 	private final Timer timer = new Timer(STATUS_DELAY, stat_updater);
 
-	/** Camera PTZ control */
-	private final CameraPTZ cam_ptz;
-
 	/** Mouse PTZ control */
 	private final MousePTZ mouse_ptz;
 
 	/** Current video stream */
 	private VideoStream stream = null;
 
+	/** Create a mouse PTZ */
+	static private MousePTZ createMousePTZ(CameraPTZ cam_ptz, Dimension sz,
+		JPanel screen_pnl)
+	{
+		return cam_ptz != null
+		     ? new MousePTZ(cam_ptz, sz, screen_pnl)
+		     : null;
+	}
+
 	/** Create a new stream panel */
-	public StreamPanel(CameraPTZ cptz, VideoRequest req) {
+	public StreamPanel(VideoRequest req, CameraPTZ cam_ptz) {
 		super(new GridBagLayout());
-		cam_ptz = cptz;
 		video_req = req;
 		VideoRequest.Size vsz = req.getSize();
 		Dimension sz = UI.dimension(vsz.width, vsz.height);
 		screen_pnl = createScreenPanel(sz);
-		mouse_ptz = new MousePTZ(cam_ptz, sz, screen_pnl);
+		mouse_ptz = createMousePTZ(cam_ptz, sz, screen_pnl);
 		status_pnl = createStatusPanel(vsz);
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
@@ -100,6 +105,11 @@ public class StreamPanel extends JPanel {
 		setPreferredSize(UI.dimension(vsz.width, vsz.height + 20));
 		setMinimumSize(UI.dimension(vsz.width, vsz.height + 20));
 		setMaximumSize(UI.dimension(vsz.width, vsz.height + 20));
+	}
+
+	/** Create a new stream panel */
+	public StreamPanel(VideoRequest req) {
+		this(req, null);
 	}
 
 	/** Create the screen panel */
@@ -201,6 +211,7 @@ public class StreamPanel extends JPanel {
 	/** Dispose of the stream panel */
 	public final void dispose() {
 		clearStream();
-		mouse_ptz.dispose();
+		if(mouse_ptz != null)
+			mouse_ptz.dispose();
 	}
 }

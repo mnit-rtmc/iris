@@ -122,7 +122,7 @@ public class CameraDispatcher extends IPanel {
 			SIZE);
 		vr.setSonarSessionId(session.getSessionId());
 		vr.setRate(30);
-		return new StreamPanel(cam_ptz, vr);
+		return new StreamPanel(vr, cam_ptz);
 	}
 
 	/** Create the video output selection combo box */

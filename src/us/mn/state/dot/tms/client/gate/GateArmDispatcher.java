@@ -40,7 +40,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.camera.CameraPTZ;
 import us.mn.state.dot.tms.client.camera.StreamPanel;
 import us.mn.state.dot.tms.client.camera.VideoRequest;
 import static us.mn.state.dot.tms.client.camera.VideoRequest.Size.MEDIUM;
@@ -97,14 +96,8 @@ public class GateArmDispatcher extends IPanel
 	/** Main stream panel */
 	private final StreamPanel stream_pnl;
 
-	/** Main stream PTZ control */
-	private final CameraPTZ stream_ptz;
-
 	/** Thumbnail stream panel */
 	private final StreamPanel thumb_pnl;
-
-	/** Thumbnail stream PTZ control */
-	private final CameraPTZ thumb_ptz;
 
 	/** Swap video streams */
 	private boolean swap_streams = false;
@@ -206,10 +199,8 @@ public class GateArmDispatcher extends IPanel
 			s.getSonarState().getDmsCache().getDMSs();
 		dms_watcher = new ProxyWatcher<DMS>(dms_cache, dms_view, false);
 		sel_model = manager.getSelectionModel();
-		stream_ptz = new CameraPTZ(s);
-		stream_pnl = createStreamPanel(stream_ptz, MEDIUM);
-		thumb_ptz = new CameraPTZ(s);
-		thumb_pnl = createStreamPanel(thumb_ptz, THUMBNAIL);
+		stream_pnl = createStreamPanel(MEDIUM);
+		thumb_pnl = createStreamPanel(THUMBNAIL);
 		for(int i = 0; i < MAX_ARMS; i++) {
 			gate_lbl[i] = new JLabel();
 			state_lbl[i] = createValueLabel();
@@ -253,6 +244,7 @@ public class GateArmDispatcher extends IPanel
 		add(gate_lbl[7], Stretch.NONE);
 		add(state_lbl[7], Stretch.LAST);
 		current_pnl.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				selectDms();
 			}
@@ -291,13 +283,11 @@ public class GateArmDispatcher extends IPanel
 	}
 
 	/** Create a stream panel */
-	private StreamPanel createStreamPanel(CameraPTZ ptz,
-		VideoRequest.Size sz)
-	{
+	private StreamPanel createStreamPanel(VideoRequest.Size sz) {
 		VideoRequest vr = new VideoRequest(session.getProperties(), sz);
 		vr.setSonarSessionId(session.getSessionId());
 		vr.setRate(30);
-		return new StreamPanel(ptz, vr);
+		return new StreamPanel(vr);
 	}
 
 	/** Build the button box */
@@ -319,9 +309,7 @@ public class GateArmDispatcher extends IPanel
 		setPager(null);
 		sel_model.removeProxySelectionListener(sel_listener);
 		stream_pnl.dispose();
-		stream_ptz.setCamera(null);
 		thumb_pnl.dispose();
-		thumb_ptz.setCamera(null);
 		clear();
 		super.dispose();
 	}
@@ -376,25 +364,19 @@ public class GateArmDispatcher extends IPanel
 	/** Update camera stream */
 	private void updateCameraStream(GateArmArray ga) {
 		Camera c = ga.getCamera();
-		if(swap_streams) {
-			thumb_ptz.setCamera(c);
+		if(swap_streams)
 			thumb_pnl.setCamera(c);
-		} else {
-			stream_ptz.setCamera(c);
+		else
 			stream_pnl.setCamera(c);
-		}
 	}
 
 	/** Update approach stream */
 	private void updateApproachStream(GateArmArray ga) {
 		Camera c = ga.getApproach();
-		if(swap_streams) {
-			stream_ptz.setCamera(c);
+		if(swap_streams)
 			stream_pnl.setCamera(c);
-		} else {
-			thumb_ptz.setCamera(c);
+		else
 			thumb_pnl.setCamera(c);
-		}
 	}
 
 	/** Update the DMS */
@@ -524,9 +506,7 @@ public class GateArmDispatcher extends IPanel
 		close_arm.setEnabled(false);
 		swap_streams = false;
 		stream_pnl.setCamera(null);
-		stream_ptz.setCamera(null);
 		thumb_pnl.setCamera(null);
-		thumb_ptz.setCamera(null);
 		name_lbl.setText("");
 		location_lbl.setText("");
 		arm_state_lbl.setText(" ");
