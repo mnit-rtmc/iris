@@ -356,7 +356,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Calculate the number of pages for the selected sign */
 	private int calculateSignPages(SignTextModel stm) {
-		int ml = stm != null ? stm.getMaxLine() : max_lines;
+		int ml = stm != null ? stm.getLastLine() : max_lines;
 		int np = calculateSignPages(ml, n_lines);
 		return Math.min(DMS_MESSAGE_MAX_PAGES, Math.max(np, min_pages));
 	}

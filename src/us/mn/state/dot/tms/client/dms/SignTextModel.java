@@ -232,8 +232,8 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		}
 	}
 
-	/** Get the maximum line number */
-	public short getMaxLine() {
+	/** Get the last line number with sign text */
+	public short getLastLine() {
 		short m = 0;
 		for(short i: lines.keySet())
 			m = (short)Math.max(i, m);
