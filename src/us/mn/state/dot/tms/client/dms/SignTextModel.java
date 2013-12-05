@@ -85,6 +85,9 @@ public class SignTextModel {
 	/** Sign text creator */
 	private final SignTextCreator creator;
 
+	/** Last line in model */
+	private short last_line = 1;
+
 	/** Create a new sign text model */
 	public SignTextModel(Session s, DMS proxy) {
 		dms = proxy;
@@ -108,6 +111,10 @@ public class SignTextModel {
 
 	/** Add a SignText to the model */
 	private void doAddSignText(final SignText st) {
+		// NOTE: updating last_line can't be deferred to the
+		//       swing thread, because getLastLine is called
+		//       before the Runnables get a chance to run.
+		last_line = (short)Math.max(last_line, st.getLine());
 		runSwing(new Runnable() {
 			public void run() {
 				addSignText(st);
@@ -224,10 +231,7 @@ public class SignTextModel {
 
 	/** Get the last line number with sign text */
 	public short getLastLine() {
-		short m = 0;
-		for(short i: lines.keySet())
-			m = (short)Math.max(i, m);
-		return m;
+		return last_line;
 	}
 
 	/** Update the message library with the currently selected messages */
