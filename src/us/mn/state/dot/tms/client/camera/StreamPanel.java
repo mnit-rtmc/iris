@@ -85,12 +85,11 @@ public class StreamPanel extends JPanel {
 	public StreamPanel(CameraPTZ cptz, VideoRequest req) {
 		super(new GridBagLayout());
 		cam_ptz = cptz;
+		video_req = req;
 		VideoRequest.Size vsz = req.getSize();
 		Dimension sz = UI.dimension(vsz.width, vsz.height);
-		mouse_ptz = new MousePTZ(cam_ptz, sz);
-		video_req = req;
 		screen_pnl = createScreenPanel(sz);
-		mouse_ptz.setComponent(screen_pnl);
+		mouse_ptz = new MousePTZ(cam_ptz, sz, screen_pnl);
 		status_pnl = createStatusPanel(vsz);
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;

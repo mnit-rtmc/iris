@@ -114,7 +114,7 @@ public class MousePTZ {
 	private final Timer timer = new Timer(ZOOM_TICK, new ZoomTimer());
 
 	/** Create a new mouse PTZ handler */
-	public MousePTZ(CameraPTZ cptz, Dimension sz) {
+	public MousePTZ(CameraPTZ cptz, Dimension sz, Component c) {
 		cam_ptz = cptz;
 		size = sz;
 		int deadx = sz.width / 12;
@@ -123,11 +123,12 @@ public class MousePTZ {
 		int deady = sz.height / 12;
 		dead_up = sz.height / 2 - deady;
 		dead_down = sz.height / 2 + deady;
+		setComponent(c);
 		timer.start();
 	}
 
 	/** Set the component for mouse events */
-	public void setComponent(final Component c) {
+	private void setComponent(final Component c) {
 		MouseAdapter mouser = new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
