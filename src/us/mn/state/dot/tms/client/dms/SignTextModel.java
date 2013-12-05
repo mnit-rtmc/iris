@@ -123,8 +123,8 @@ public class SignTextModel {
 	}
 
 	/** Add a SignText to the model */
-	private void addSignText(SignText t) {
-		getLineModel(t.getLine()).add(t);
+	private void addSignText(SignText st) {
+		getLineModel(st.getLine()).add(st);
 	}
 
 	/** Remove a SignText from the model */
@@ -137,8 +137,8 @@ public class SignTextModel {
 	}
 
 	/** Remove a SignText from the model */
-	private void removeSignText(SignText t) {
-		getLineModel(t.getLine()).remove(t);
+	private void removeSignText(SignText st) {
+		getLineModel(st.getLine()).remove(st);
 	}
 
 	/** Change a SignText in the model */
@@ -151,13 +151,13 @@ public class SignTextModel {
 	}
 
 	/** Change a SignText in the model */
-	private void changeSignText(SignText t) {
+	private void changeSignText(SignText st) {
 		// iterate through all combobox models because the line
 		// may have changed, moving it between comboboxes
 		for(SignTextComboBoxModel m: lines.values())
-			m.remove(t);
+			m.remove(st);
 		// add to associated model
-		addSignText(t);
+		addSignText(st);
 	}
 
 	/** Set of DMS member groups */
