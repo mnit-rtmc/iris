@@ -36,7 +36,7 @@ import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SignTextModel implements ProxyListener<DmsSignGroup> {
+public class SignTextModel {
 
 	/** DMS associated with this object */
 	private final DMS dms;
@@ -66,6 +66,22 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		}
 	};
 
+	/** Listener for DMS sign groups */
+	private final ProxyListener<DmsSignGroup> dsg_listener =
+		new ProxyListener<DmsSignGroup>()
+	{
+		public void proxyAdded(DmsSignGroup proxy) {
+			if(dms == proxy.getDms())
+				addGroup(proxy.getSignGroup());
+		}
+		public void enumerationComplete() { }
+		public void proxyRemoved(DmsSignGroup proxy) {
+			if(dms == proxy.getDms())
+				removeGroup(proxy.getSignGroup());
+		}
+		public void proxyChanged(DmsSignGroup proxy, String attrib) { }
+	};
+
 	/** Sign text creator */
 	private final SignTextCreator creator;
 
@@ -76,6 +92,18 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		dms_sign_groups = st.getDmsCache().getDmsSignGroups();
 		sign_text = st.getDmsCache().getSignText();
 		creator = new SignTextCreator(s);
+	}
+
+	/** Initialize the sign text model */
+	public void initialize() {
+		dms_sign_groups.addProxyListener(dsg_listener);
+		sign_text.addProxyListener(listener);
+	}
+
+	/** Dispose of the model */
+	public void dispose() {
+		sign_text.removeProxyListener(listener);
+		dms_sign_groups.removeProxyListener(dsg_listener);
 	}
 
 	/** Add a SignText to the model */
@@ -125,31 +153,12 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		addSignText(t);
 	}
 
-	/** Initialize the sign text model */
-	public void initialize() {
-		dms_sign_groups.addProxyListener(this);
-		sign_text.addProxyListener(listener);
-	}
-
-	/** Dispose of the model */
-	public void dispose() {
-		sign_text.removeProxyListener(listener);
-		dms_sign_groups.removeProxyListener(this);
-	}
-
 	/** Set of DMS member groups */
 	private final HashSet<String> groups = new HashSet<String>();
 
 	/** Is the DMS a member of the specified group? */
 	private boolean isMember(SignGroup g) {
 		return g != null && groups.contains(g.getName());
-	}
-
-	/** Add a new proxy to the model */
-	@Override
-	public void proxyAdded(DmsSignGroup proxy) {
-		if(dms == proxy.getDms())
-			addGroup(proxy.getSignGroup());
 	}
 
 	/** Add all SignText in one sign group to the model */
@@ -161,19 +170,6 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		}
 	}
 
-	/** Enumeration of the proxy type is complete */
-	@Override
-	public void enumerationComplete() {
-		// We're not interested
-	}
-
-	/** Remove a proxy from the model */
-	@Override
-	public void proxyRemoved(DmsSignGroup proxy) {
-		if(dms == proxy.getDms())
-			removeGroup(proxy.getSignGroup());
-	}
-
 	/** Remove all SignText in one sign group from the model */
 	private void removeGroup(SignGroup g) {
 		groups.remove(g.getName());
@@ -181,12 +177,6 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 			if(st.getSignGroup() == g)
 				doRemoveSignText(st);
 		}
-	}
-
-	/** Change a proxy in the model */
-	@Override
-	public void proxyChanged(DmsSignGroup proxy, String attrib) {
-		// NOTE: this should never happen
 	}
 
 	/**
