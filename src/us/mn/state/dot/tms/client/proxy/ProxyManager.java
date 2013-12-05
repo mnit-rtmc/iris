@@ -76,7 +76,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	protected final Session session;
 
 	/** Geo location manager */
-	protected final GeoLocManager loc_manager;
+	private final GeoLocManager loc_manager;
 
 	/** Listener for proxy events */
 	private final ProxyListener<T> listener = new ProxyListener<T>() {
