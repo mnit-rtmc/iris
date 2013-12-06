@@ -502,8 +502,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Test if LCS array is deployed */
 	private boolean isDeployed() {
-		return !isAllFailed() &&
-		       (isIndicationDeployed() || isMsgDeployed());
+		return isIndicationDeployed() || isMsgDeployed();
 	}
 
 	/** Check if LCS array indications are deployed.  This check is
@@ -530,11 +529,26 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Check if LCS array is user deployed */
 	private boolean isUserDeployed() {
-		return isDeployed() && !isScheduleDeployed();
+		return !isAllFailed() &&
+		       (isIndicationDeployed() || isAnyUserDeployed());
+	}
+
+	/** Check if any LCS in array are user deployed */
+	private boolean isAnyUserDeployed() {
+		return forEachDMS(new DMSChecker() {
+			public boolean check(DMSImpl dms) {
+				return dms.isUserDeployed();
+			}
+		}) != null;
+	}
+
+	/** Check if LCS array is schedule deployed */
+	private boolean isScheduleDeployed() {
+		return (!isAllFailed()) && isAnyScheduleDeployed();
 	}
 
 	/** Check if any LCS in array are schedule deployed */
-	private boolean isScheduleDeployed() {
+	private boolean isAnyScheduleDeployed() {
 		return forEachDMS(new DMSChecker() {
 			public boolean check(DMSImpl dms) {
 				return dms.isScheduleDeployed();

@@ -1571,7 +1571,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Test if a DMS has been deployed by a user */
-	private boolean isUserDeployed() {
+	public boolean isUserDeployed() {
 		return isMsgDeployed() && !isMsgScheduled() && !isMsgAws();
 	}
 
