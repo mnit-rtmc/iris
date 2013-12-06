@@ -1534,7 +1534,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Test if DMS is online (active and not failed) */
-	private boolean isOnline() {
+	public boolean isOnline() {
 		return isActive() && !isFailed();
 	}
 
