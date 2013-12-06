@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneUseIndication;
+import static us.mn.state.dot.tms.LaneUseIndication.DARK;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayLock;
@@ -278,7 +279,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	protected Integer[] createDarkIndications(int n_lanes) {
 		Integer[] ind = new Integer[n_lanes];
 		for(int i = 0; i < n_lanes; i++)
-			ind[i] = LaneUseIndication.DARK.ordinal();
+			ind[i] = DARK.ordinal();
 		return ind;
 	}
 
@@ -336,7 +337,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Test if all indications are DARK */
 	static protected boolean areAllDark(Integer[] ind) {
 		for(Integer i: ind) {
-			if(i == null || i != LaneUseIndication.DARK.ordinal())
+			if(i == null || i != DARK.ordinal())
 				return false;
 		}
 		return true;
@@ -453,20 +454,29 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Interface to check the DMS in an LCS array */
 	private interface DMSChecker {
-		boolean check(DMSImpl dms);
+		boolean check(DMSImpl dms, LaneUseIndication u);
 	}
 
 	/** Check each DMS in an LCS array */
 	private DMSImpl forEachDMS(DMSChecker chk) {
-		LCSImpl[] lns = getLanes();
-		for(int i = 0; i < lns.length; i++) {
+		LCSImpl[] lns;
+		Integer[] ind;
+		synchronized(this) {
+			lns = getLanes();
+			ind = getIndicationsCurrent();
+		}
+		int n_lns = Math.min(lns.length, ind.length);
+		for(int i = 0; i < n_lns; i++) {
 			LCSImpl lcs = lns[i];
 			if(lcs != null) {
 				DMS dms = DMSHelper.lookup(lcs.getName());
 				if(dms instanceof DMSImpl) {
 					DMSImpl d = (DMSImpl)dms;
-					if(chk.check(d))
+					if(chk.check(d, LaneUseIndication.
+					   fromOrdinal(ind[i])))
+					{
 						return d;
+					}
 				}
 			}
 		}
@@ -474,18 +484,20 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Check if LCS array is active */
-	@Override public boolean isActive() {
+	@Override
+	public boolean isActive() {
 		return forEachDMS(new DMSChecker() {
-			public boolean check(DMSImpl dms) {
+			public boolean check(DMSImpl dms, LaneUseIndication u) {
 				return dms.isActive();
 			}
 		}) != null;
 	}
 
 	/** Check if LCS array is failed */
-	@Override public boolean isFailed() {
+	@Override
+	public boolean isFailed() {
 		return forEachDMS(new DMSChecker() {
-			public boolean check(DMSImpl dms) {
+			public boolean check(DMSImpl dms, LaneUseIndication u) {
 				return dms.isFailed();
 			}
 		}) != null;
@@ -494,7 +506,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Check if all LCSs in an array are failed */
 	private boolean isAllFailed() {
 		return forEachDMS(new DMSChecker() {
-			public boolean check(DMSImpl dms) {
+			public boolean check(DMSImpl dms, LaneUseIndication u) {
 				return !dms.isFailed();
 			}
 		}) == null;
@@ -502,42 +514,26 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Test if LCS array is deployed */
 	private boolean isDeployed() {
-		return isIndicationDeployed() || isMsgDeployed();
-	}
-
-	/** Check if LCS array indications are deployed.  This check is
-	 * necessary for dumb LCS arrays, which have no DMS backing.  */
-	private boolean isIndicationDeployed() {
-		Integer[] ind = getIndicationsCurrent();
-		for(Integer i: ind) {
-			if(i != null && i != LaneUseIndication.DARK.ordinal())
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if LCS array is deployed as DMS messages.  There might be
-	 * something else on the sign that is not a lane use indication --
-	 * check DMS deployed states. */
-	private boolean isMsgDeployed() {
 		return forEachDMS(new DMSChecker() {
-			public boolean check(DMSImpl dms) {
-				return dms.isMsgDeployed();
+			public boolean check(DMSImpl dms, LaneUseIndication u) {
+				return (u != null && u != DARK) ||
+				        dms.isMsgDeployed();
 			}
 		}) != null;
 	}
 
 	/** Check if LCS array is user deployed */
 	private boolean isUserDeployed() {
-		return !isAllFailed() &&
-		       (isIndicationDeployed() || isAnyUserDeployed());
+		return (!isAllFailed()) && isAnyUserDeployed();
 	}
 
 	/** Check if any LCS in array are user deployed */
 	private boolean isAnyUserDeployed() {
 		return forEachDMS(new DMSChecker() {
-			public boolean check(DMSImpl dms) {
-				return dms.isUserDeployed();
+			public boolean check(DMSImpl dms, LaneUseIndication u) {
+				return dms.isUserDeployed() ||
+				     ((u != null && u != DARK) &&
+				      !dms.isScheduleDeployed());
 			}
 		}) != null;
 	}
@@ -550,7 +546,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Check if any LCS in array are schedule deployed */
 	private boolean isAnyScheduleDeployed() {
 		return forEachDMS(new DMSChecker() {
-			public boolean check(DMSImpl dms) {
+			public boolean check(DMSImpl dms, LaneUseIndication u) {
 				return dms.isScheduleDeployed();
 			}
 		}) != null;
@@ -562,7 +558,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		if(lock == LCSArrayLock.MAINTENANCE)
 			return true;
 		return forEachDMS(new DMSChecker() {
-			public boolean check(DMSImpl dms) {
+			public boolean check(DMSImpl dms, LaneUseIndication u) {
 				return dms.needsMaintenance();
 			}
 		}) != null;
