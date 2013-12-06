@@ -502,16 +502,25 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Test if LCS array is deployed */
 	private boolean isDeployed() {
-		if(isAllFailed())
-			return false;
-		// First, check the indications
+		return !isAllFailed() &&
+		       (isIndicationDeployed() || isMsgDeployed());
+	}
+
+	/** Check if LCS array indications are deployed.  This check is
+	 * necessary for dumb LCS arrays, which have no DMS backing.  */
+	private boolean isIndicationDeployed() {
 		Integer[] ind = getIndicationsCurrent();
 		for(Integer i: ind) {
 			if(i != null && i != LaneUseIndication.DARK.ordinal())
 				return true;
 		}
-		// There might be something else on the sign that is not
-		// a lane use indication -- check DMS deployed states
+		return false;
+	}
+
+	/** Check if LCS array is deployed as DMS messages.  There might be
+	 * something else on the sign that is not a lane use indication --
+	 * check DMS deployed states. */
+	private boolean isMsgDeployed() {
 		return forEachDMS(new DMSChecker() {
 			public boolean check(DMSImpl dms) {
 				return dms.isMsgDeployed();
@@ -524,7 +533,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		return isDeployed() && !isScheduleDeployed();
 	}
 
-	/** Check if LCS array is schedule deployed */
+	/** Check if any LCS in array are schedule deployed */
 	private boolean isScheduleDeployed() {
 		return forEachDMS(new DMSChecker() {
 			public boolean check(DMSImpl dms) {
