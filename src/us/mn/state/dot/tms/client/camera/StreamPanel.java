@@ -179,17 +179,7 @@ public class StreamPanel extends JPanel {
 		case MJPEG:
 			return new MJPEGStream(STREAMER, video_req, c);
 		case MPEG4:
-			try {
-				Class.forName("org.gstreamer.Gst");
-				Class.forName("com.sun.jna.Library");
-				return new GstStream(video_req, c);
-			}
-			catch(ClassNotFoundException cnfe) {
-				throw new IOException("Missing gstreamer");
-			}
-			catch(NoClassDefFoundError ncdfe) {
-				throw new IOException("Missing gstreamer");
-			}
+			throw new IOException("No decoder");
 		default:
 			throw new IOException("No encoder");
 		}
