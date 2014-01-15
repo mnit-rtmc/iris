@@ -266,6 +266,7 @@ public class PropMessages extends JPanel {
 			sign_text_model = new SignTextTableModel(session,
 				group);
 			sign_text_model.initialize();
+			sign_text_table.clearSelection();
 			sign_text_table.setColumnModel(
 				sign_text_model.createColumnModel());
 			sign_text_table.setModel(sign_text_model);
