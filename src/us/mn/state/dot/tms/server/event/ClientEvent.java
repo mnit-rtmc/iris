@@ -40,7 +40,7 @@ public class ClientEvent extends BaseEvent {
 		       e == EventType.CLIENT_FAIL_AUTHENTICATION ||
 		       e == EventType.CLIENT_DISCONNECT;
 		host_port = SString.truncate(hp, 64);
-		iris_user = SString.truncate(iu, 16);
+		iris_user = SString.truncate(iu, 15);
 	}
 
 	/** Get the database table name */
