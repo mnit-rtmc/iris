@@ -117,6 +117,7 @@ public class OpQueryMeterStatus extends Op170 {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
 		completer.completeTask(getKey());
 		super.cleanup();
