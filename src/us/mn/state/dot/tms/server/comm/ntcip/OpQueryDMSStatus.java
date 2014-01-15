@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,8 +51,23 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected final ShortErrorStatus shortError = new ShortErrorStatus();
 
 	/** Pixel failure table row count */
-	protected final PixelFailureTableNumRows pix_rows =
+	private final PixelFailureTableNumRows pix_rows =
 		new PixelFailureTableNumRows();
+
+	/** Number of rows in pixel failure table found by pixel testing */
+	private final DmsPixelFailureTestRows test_rows =
+		new DmsPixelFailureTestRows();
+
+	/** Number of rows in pixel failure table found by message display */
+	private final DmsPixelFailureMessageRows message_rows =
+		new DmsPixelFailureMessageRows();
+
+	/** Get the pixel error count */
+	public int getPixelErrorCount() {
+		int n_test = test_rows.getInteger();
+		int n_msg = message_rows.getInteger();
+		return Math.max(n_test, n_msg);
+	}
 
 	/** Create a new DMS query status object */
 	public OpQueryDMSStatus(DMSImpl d) {
@@ -235,6 +250,28 @@ public class OpQueryDMSStatus extends OpDMS {
 				logQuery(con);
 			if(shortError.checkError(ShortErrorStatus.PIXEL))
 				logQuery(pix_rows);
+			return new QueryTestAndMessageRows();
+		}
+	}
+
+	/** Phase to query (v2) test/message rows in pixel failure table */
+	protected class QueryTestAndMessageRows extends Phase {
+
+		/** Query test/message rows in pixel failure table */
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(test_rows);
+			mess.add(message_rows);
+			try {
+				mess.queryProps();
+				logQuery(test_rows);
+				logQuery(message_rows);
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// Must be 1203v1 only
+				int n_rows = pix_rows.getInteger();
+				test_rows.setInteger(n_rows);
+				message_rows.setInteger(n_rows);
+			}
 			return new PowerSupplyCount();
 		}
 	}
@@ -482,8 +519,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		if(shortError.isMaintenance())
 			return shortError.getValue();
 		if(shortError.checkError(ShortErrorStatus.PIXEL) &&
-		   pix_rows.getInteger() > pixelMaintThreshold())
-			return "Too many pixel errors: " +pix_rows.getInteger();
+		   getPixelErrorCount() > pixelMaintThreshold())
+			return "Too many pixel errors";
 		else
 			return "";
 	}
