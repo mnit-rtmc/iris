@@ -36,6 +36,8 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
@@ -50,7 +52,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class CommLinkForm extends AbstractForm {
+public class CommLinkForm extends AbstractForm implements ProxyView<CommLink> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -78,6 +80,19 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Comm link status */
 	private final JLabel link_status = new JLabel();
+
+	/** Update one attribute (from ProxyView). */
+	@Override
+	public void update(CommLink cl, String a) {
+		if(a == null || a.equals("status"))
+			link_status.setText(cl.getStatus());
+	}
+
+	/** Clear all attributes (from ProxyView). */
+	@Override
+	public void clear() {
+		link_status.setText("");
+	}
 
 	/** Action to delete the selected comm link */
 	private final IAction delete_link = new IAction("comm.link.delete") {
@@ -134,11 +149,17 @@ public class CommLinkForm extends AbstractForm {
 	/** User session */
 	private final Session session;
 
+	/** Proxy watcher */
+	private final ProxyWatcher<CommLink> watcher;
+
 	/** Create a new comm link form */
 	public CommLinkForm(Session s) {
 		super(I18N.get("comm.links"));
 		session = s;
 		model = new CommLinkModel(s);
+		watcher = new ProxyWatcher<CommLink>(
+			s.getSonarState().getConCache().getCommLinks(), this,
+			false);
 		fmodel = new FailedControllerModel(s);
 		sorter = new TableRowSorter<FailedControllerModel>(fmodel);
 		sorter.setSortsOnUpdates(true);
@@ -161,6 +182,7 @@ public class CommLinkForm extends AbstractForm {
 	/** Initializze the widgets in the form */
 	@Override protected void initialize() {
 		model.initialize();
+		watcher.initialize();
 		fmodel.initialize();
 		setLayout(new BorderLayout());
 		tab.add(I18N.get("comm.link.all"), createCommLinkPanel());
@@ -173,6 +195,7 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Dispose of the form */
 	@Override protected void dispose() {
+		watcher.dispose();
 		model.dispose();
 		fmodel.dispose();
 		if(cmodel != null)
@@ -246,10 +269,7 @@ public class CommLinkForm extends AbstractForm {
 	private void selectCommLink() {
 		int row = table.getSelectedRow();
 		CommLink cl = model.getProxy(row);
-		if(cl != null)
-			link_status.setText(cl.getStatus());
-		else
-			link_status.setText("");
+		watcher.setProxy(cl);
 		delete_link.setEnabled(model.canRemove(cl));
 		del_ctr.setEnabled(false);
 		ControllerModel old_model = cmodel;
