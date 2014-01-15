@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
@@ -252,6 +253,9 @@ public class CommLinkForm extends AbstractForm {
 			link_status.setText("");
 		delete_link.setEnabled(model.canRemove(cl));
 		del_ctr.setEnabled(false);
+		TableCellEditor editor = ctable.getCellEditor();
+		if(editor != null)
+			editor.cancelCellEditing();
 		ControllerModel old_model = cmodel;
 		cmodel = new ControllerModel(session, cl);
 		cmodel.initialize();
