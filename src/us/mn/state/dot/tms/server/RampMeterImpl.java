@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -808,20 +807,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return ds;
 	}
 
-	/** Get the detectors associated with the ramp meter */
-	public Detector[] getDetectors() {
-		DetectorImpl[] dets = getDetectorSet().toArray();
-		Detector[] ds = new Detector[dets.length];
-		for(int i = 0; i < dets.length; i++)
-			ds[i] = dets[i];
-		return ds;
-	}
-
 	/** Green count detector */
-	protected transient DetectorImpl green_det = null;
+	private transient DetectorImpl green_det = null;
 
 	/** Lookup the green count detector */
-	protected void lookupGreenDetector() {
+	private void lookupGreenDetector() {
 		DetectorImpl[] g = getDetectorSet().getDetectorSet(
 			LaneType.GREEN).toArray();
 		if(g.length > 0)
