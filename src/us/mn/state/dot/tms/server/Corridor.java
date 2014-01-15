@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -144,18 +145,18 @@ public class Corridor extends CorridorBase {
 		return null;
 	}
 
-	/** Get the ID of a linked CD road */
-	public String getLinkedCDRoad() {
-		// FIXME: there may be more than one linked CD road
+	/** Get the IDs of all linked CD roads */
+	public Iterator<String> getLinkedCDRoads() {
+		HashSet<String> cds = new HashSet<String>();
 		for(R_Node r_node: n_points.values()) {
 			if(R_NodeHelper.isCD(r_node)) {
 				GeoLoc l = r_node.getGeoLoc();
 				String c = GeoLocHelper.getLinkedCorridor(l);
 				if(c != null)
-					return c;
+					cds.add(c);
 			}
 		}
-		return null;
+		return cds.iterator();
 	}
 
 	/** Write out the corridor to an XML file */

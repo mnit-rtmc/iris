@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -199,6 +199,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Initialize the transient state */
+	@Override
 	public void initTransients() {
 		super.initTransients();
 		lookupGreenDetector();
@@ -206,6 +207,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Destroy an object */
+	@Override
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
 		geo_loc.notifyRemove();
@@ -795,8 +797,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		Corridor corridor = getCorridor();
 		if(corridor != null) {
 			corridor.findActiveNode(finder);
-			String cd = corridor.getLinkedCDRoad();
-			if(cd != null) {
+			Iterator<String> it = corridor.getLinkedCDRoads();
+			while(it.hasNext()) {
+				String cd = it.next();
 				Corridor cd_road = corridors.getCorridor(cd);
 				if(cd_road != null)
 					cd_road.findActiveNode(finder);
