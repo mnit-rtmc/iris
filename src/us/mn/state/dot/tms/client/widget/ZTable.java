@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import javax.swing.JTable;
+import javax.swing.table.TableCellEditor;
 
 /**
  * ZTable is a simple JTable extension which adds a setVisibleRowCount method
@@ -53,5 +54,14 @@ public class ZTable extends JTable {
 	/** Get tooltip text for a specific row and column */
 	public String getToolTipText(int row, int column) {
 		return null;
+	}
+
+	/** Clear the selection */
+	@Override
+	public void clearSelection() {
+		TableCellEditor editor = getCellEditor();
+		if(editor != null)
+			editor.cancelCellEditing();
+		super.clearSelection();
 	}
 }

@@ -30,7 +30,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
@@ -253,12 +252,10 @@ public class CommLinkForm extends AbstractForm {
 			link_status.setText("");
 		delete_link.setEnabled(model.canRemove(cl));
 		del_ctr.setEnabled(false);
-		TableCellEditor editor = ctable.getCellEditor();
-		if(editor != null)
-			editor.cancelCellEditing();
 		ControllerModel old_model = cmodel;
 		cmodel = new ControllerModel(session, cl);
 		cmodel.initialize();
+		ctable.clearSelection();
 		ctable.setModel(cmodel);
 		ctable.setColumnModel(cmodel.createColumnModel());
 		if(old_model != null)

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,10 +137,10 @@ public class CapabilityPanel extends JPanel {
 		ListSelectionModel s = cap_table.getSelectionModel();
 		Capability c = cap_model.getProxy(s.getMinSelectionIndex());
 		del_cap.setEnabled(cap_model.canRemove(c));
-		p_table.clearSelection();
 		final PrivilegeModel pm = p_model;
 		p_model = new PrivilegeModel(session, c);
 		p_model.initialize();
+		p_table.clearSelection();
 		p_table.setModel(p_model);
 		pm.dispose();
 	}
