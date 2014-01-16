@@ -119,7 +119,10 @@ public class OpSendSampleSettings extends Op170 {
 		/** Set the queue detector bitmap */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = getQueueBitmap();
-			mess.add(new MemoryProperty(Address.QUEUE_BITMAP,data));
+			MemoryProperty queue_mem = new MemoryProperty(
+				Address.QUEUE_BITMAP, data);
+			mess.add(queue_mem);
+			logStore(queue_mem);
 			mess.storeProps();
 			return null;
 		}

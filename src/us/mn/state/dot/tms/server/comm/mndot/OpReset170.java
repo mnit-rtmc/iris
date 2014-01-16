@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,8 +46,10 @@ public class OpReset170 extends Op170 {
 			// with "occupancy plateaus".  This can happen if there
 			// is a comm error during the ClearDetectors phase.
 			byte[] data = {Address.DETECTOR_RESET};
-			mess.add(new MemoryProperty(
-				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
+			MemoryProperty reset_mem = new MemoryProperty(
+				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data);
+			mess.add(reset_mem);
+			logStore(reset_mem);
 			mess.storeProps();
 			return new ClearDetectors();
 		}
@@ -59,8 +61,10 @@ public class OpReset170 extends Op170 {
 		/** Clear the detector reset */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[1];
-			mess.add(new MemoryProperty(
-				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
+			MemoryProperty reset_mem = new MemoryProperty(
+				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data);
+			mess.add(reset_mem);
+			logStore(reset_mem);
 			mess.storeProps();
 			return new Level1Restart();
 		}
