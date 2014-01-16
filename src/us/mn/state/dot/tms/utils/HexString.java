@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,182 +15,76 @@
 package us.mn.state.dot.tms.utils;
 
 /**
- * HexString class, provides both convienence methods and 
- * an instance of a HexString.
+ * Methods for converting byte arrays to and from hex string.
+ *
  * @author Michael Darter
+ * @author Douglas Lau
  */
-final public class HexString
-{
-	/** hex string */
-	protected String m_hexstring = "";
+public final class HexString {
 
-	/** Constructor */
-	public HexString(String s) {
-		m_hexstring = s;
+	/** Prevent instantiation */
+	private HexString() { }
+
+	/** Convert a byte to a string containing a hex value, and append to the
+	 * specified StringBuilder. e.g. 1 converts to "01". */
+	static private void appendHexString(StringBuilder sb, byte aByte) {
+		sb.append(Integer.toHexString((aByte >> 4) & 0x0F));
+		sb.append(Integer.toHexString(aByte & 0x0F));
 	}
 
-	/** Constructor */
-	public HexString(byte[] a) {
-		m_hexstring = toHexString(a);
+	/** Format a byte as a hex string.
+	 * e.g. 1 converts to "01". */
+	static public String format(byte aByte) {
+		StringBuilder sb = new StringBuilder(2);
+		appendHexString(sb, aByte);
+		return sb.toString().toUpperCase();
 	}
 
-	/** return the hex string */
-	public String toString() {
-		return m_hexstring;
+	 /** Format a byte array as a hex with no delimiter.
+	  * e.g. {0,1,2,3} to "00010203". */
+	static public String format(byte[] data) {
+		StringBuilder sb = new StringBuilder();
+		if(data != null) {
+			for(int i = 0; i < data.length; i++)
+				appendHexString(sb, data[i]);
+		}
+		return sb.toString().toUpperCase();
 	}
 
-	/** append another HexString */
-	public HexString append(HexString h) {
-		m_hexstring = m_hexstring + h.m_hexstring;
-		return this;
-	}
-
-	/** return the hex string */
-	public int length() {
-		return m_hexstring.length();
-	}
-
-	/** return the hex string as a byte array */
-	public byte[] toByteArray() {
-		return hexStringToByteArray(m_hexstring);
-	}
-
-	 /** Convert byte array to a string of hex values with whitespace 
-	  * delimiter e.g. {0,1,2,3} to "00 01 02 03". */
-	public static String toHexString(byte[] anArray) {
-		if(anArray == null)
-			return "";
-		StringBuffer output = new StringBuffer(anArray.length
-					      * 2 + 2);
-		if(anArray.length > 0) {
-			for(int i = 0; i < anArray.length; i++) {
-				output.append(
-				    Integer.toHexString(
-					    (byte) ((anArray[i] >> 4)
-						    & 0x0F)));
-				output.append(
-				    Integer.toHexString(
-					    (byte) (anArray[i]
-						    & 0x0F)));
+	/** Format a byte array as a hex string with specified delimiter. */
+	static public String format(byte[] data, char delim) {
+		StringBuilder sb = new StringBuilder();
+		if(data != null) {
+			for(int i = 0; i < data.length; i++) {
+				if(i > 0)
+					sb.append(delim);
+				appendHexString(sb, data[i]);
 			}
 		}
-		return output.toString().toUpperCase();
+		return sb.toString().toUpperCase();
 	}
 
-	/** Convert byte array to a string of hex values with specified 
-	 *  delimiter. */
-	public static String toHexString(byte[] anArray, char aDelimiter) {
-		if(anArray == null)
-			return "";
-		StringBuffer output = new StringBuffer(anArray.length
-					      * 2 + 2);
-		if(anArray.length > 0) {
-			for(int i = 0; i < anArray.length; i++) {
-				output.append(
-				    Integer.toHexString(
-					    (byte) ((anArray[i] >> 4)
-						    & 0x0F)));
-				output.append(
-				    Integer.toHexString(
-					    (byte) (anArray[i]
-						    & 0x0F)));
-				output.append(aDelimiter);
-			}
-			output.deleteCharAt(output.length() - 1);
-		}
-		return output.toString().toUpperCase();
-	}
-
-	/** Convert a string in hex format to a byte array. Note, because 
-	 *  java has no unsigned, ff will convert to 255 which is -1. e.g. 
-	 *  "000102ff" converts to {0,1,2,255}. */
-	public static byte[] hexStringToByteArray(String hs) {
-
-		// sanity checks
-		if((hs == null) || (hs.length() <= 0)
-			||!isEven(hs.length())) {
-			throw new IllegalArgumentException(
-			    "bogus arg to hexStringToByteArray");
-		}
-
+	/** Parse a hex string to a byte array.
+	 * @param hs Hex string to parse.
+	 * @return byte array of parsed hex string.
+	 * @throws NullPointerException if hs is null.
+	 * @throws IllegalArgumentException if length is not even.
+	 * @throws NumberFormatException if hex cannot be parsed. */
+	static public byte[] parse(String hs) {
+		if(!isEven(hs.length()))
+			throw new IllegalArgumentException("Length not even");
 		int len = hs.length() / 2;
 		byte[] ba = new byte[len];
-
-		for(int i = 0, j = 0; i < hs.length(); i += 2, j++) {
-			char c1 = hs.charAt(i);
-			char c2 = hs.charAt(i + 1);
-
-			ba[j] = (byte) hexToByte(c1, c2);
+		for(int i = 0; i < len; i++) {
+			int j = i * 2;
+			String ss = hs.substring(j, j + 2);
+			ba[i] = (byte)Integer.parseInt(ss, 16);
 		}
-
-		return (ba);
+		return ba;
 	}
-
-	/**
-	 * Convert two hex chars to a single byte. e.g. 'f' 'f' returns 255.
-	 */
-	public static int hexToByte(char ms, char ls) {
-		int msb = charToByte(ms);
-		int lsb = charToByte(ls);
-		int b = (int) ((msb << 4) | lsb);
-
-		assert(b >= 0) && (b < 256) : "bogus return value in hexToByte";
-
-		return (b);
-	}
-
-	/**
-	 * Convert ascii hex char to a single binary byte. e.g. 'f' returns 15.
-	 */
-	public static byte charToByte(char c) {
-		byte b = 0;
-
-		if((c >= '0') && (c <= '9')) {
-			b = (byte) ((byte) c - (byte) 48);
-		} else if((c == 'a') || (c == 'A')) {
-			b = 10;
-		} else if((c == 'b') || (c == 'B')) {
-			b = 11;
-		} else if((c == 'c') || (c == 'C')) {
-			b = 12;
-		} else if((c == 'd') || (c == 'D')) {
-			b = 13;
-		} else if((c == 'e') || (c == 'E')) {
-			b = 14;
-		} else if((c == 'f') || (c == 'F')) {
-			b = 15;
-		}
-
-		return (b);
-	}
-
-	/**
-	 * Convert a byte to a string containing a hex value, and append to the
-	 * specified StringBuilder. e.g. 1 converts to "01"
-	 */
-	public static StringBuilder appendToHexString(StringBuilder sb,
-		byte aByte) {
-		sb.append(Integer.toHexString((byte) ((aByte >> 4) & 0x0F)));
-		sb.append(Integer.toHexString((byte) (aByte & 0x0F)));
-
-		return (sb);
-	}
-
-	/** Convert a byte to a string containing a hex value e.g. 1 
-	 *  converts to "01". */
-	public static String toHexString(byte aByte) {
-		StringBuffer output = new StringBuffer(2);
-
-		output.append(Integer.toHexString((byte) ((aByte >> 4)
-			& 0x0F)));
-		output.append(Integer.toHexString((byte) (aByte & 0x0F)));
-
-		return output.toString().toUpperCase();
-	}
-
 
 	/** return true if the int is even else false */
-	public static boolean isEven(int n) {
-		return (n % 2 == 0);
+	static private boolean isEven(int n) {
+		return n % 2 == 0;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -202,7 +202,15 @@ class OpQueryMsg extends OpDms {
 	{
 		if(sbitmap == null)
 			return null;
-		byte[] argbitmap = new HexString(sbitmap).toByteArray();
+		byte[] argbitmap;
+		try {
+			argbitmap = HexString.parse(sbitmap);
+		}
+		catch(IllegalArgumentException e) {
+			Log.severe("WARNING: received invalid bitmap " +
+				e.getMessage());
+			return null;
+		}
 		if(argbitmap.length % BM_PGLEN_BYTES != 0) {
 			Log.severe("WARNING: received bogus bitmap " +
 				"size: len=" + argbitmap.length +

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,101 +12,101 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils;
 
+import java.util.Arrays;
 import junit.framework.TestCase;
 
 /** 
  * HexString test cases
+ *
  * @author Michael Darter, AHMCT
- * @created 05/06/09
+ * @author Douglas Lau
  */
 public class HexStringTest extends TestCase {
 
-	/** constructor */
 	public HexStringTest(String name) {
 		super(name);
 	}
 
-	/** test cases */
-	public void test() {
+	static private byte[] toBytes(int[] idata) {
+		byte[] data = new byte[idata.length];
+		for(int i = 0; i < data.length; i++)
+			data[i] = (byte)idata[i];
+		return data;
+	}
 
-		// charToByte
-		assertTrue(HexString.charToByte('0') == 0);
-		assertTrue(HexString.charToByte('1') == 1);
-		assertTrue(HexString.charToByte('2') == 2);
-		assertTrue(HexString.charToByte('3') == 3);
-		assertTrue(HexString.charToByte('4') == 4);
-		assertTrue(HexString.charToByte('5') == 5);
-		assertTrue(HexString.charToByte('a') == 10);
-		assertTrue(HexString.charToByte('B') == 11);
-		assertTrue(HexString.charToByte('c') == 12);
-		assertTrue(HexString.charToByte('D') == 13);
-		assertTrue(HexString.charToByte('e') == 14);
-		assertTrue(HexString.charToByte('F') == 15);
+	static private void checkFormat1(int idata, String hex) {
+		byte data = (byte)idata;
+		assertTrue(HexString.format(data).equals(hex));
+	}
 
-		// hexToByte
-		assertTrue(HexString.hexToByte('1', '1') == 17);
-		assertTrue(HexString.hexToByte('f', 'f') == 255);
-		assertTrue(HexString.hexToByte('0', '0') == 0);
-		assertTrue(HexString.hexToByte('1', '0') == 16);
-		assertTrue(HexString.hexToByte('0', '1') == 1);
-		assertTrue(HexString.hexToByte('E', 'E') == 238);
+	public void testFormat1() {
+		checkFormat1(0, "00");
+		checkFormat1(1, "01");
+		checkFormat1(10, "0A");
+		checkFormat1(11, "0B");
+		checkFormat1(12, "0C");
+		checkFormat1(13, "0D");
+		checkFormat1(14, "0E");
+		checkFormat1(15, "0F");
+		checkFormat1(16, "10");
+		checkFormat1(254, "FE");
+		checkFormat1(255, "FF");
+	}
 
-		// isEven
-		assertTrue(HexString.isEven(0));
-		assertTrue(HexString.isEven(2));
-		assertTrue(HexString.isEven(-2));
-		assertTrue(!HexString.isEven(1));
-		assertTrue(!HexString.isEven(3));
+	static private void checkFormat(int[] idata, char delim, String hex) {
+		byte[] data = toBytes(idata);
+		assertTrue(HexString.format(data, delim).equals(hex));
+	}
 
-		// toHexString
-		assertTrue(HexString.toHexString((byte) 0).
-			compareToIgnoreCase("00") == 0);
-		assertTrue(HexString.toHexString((byte) 1).
-			compareToIgnoreCase("01") == 0);
-		assertTrue(HexString.toHexString((byte) 10).
-			compareToIgnoreCase("0A") == 0);
-		assertTrue(HexString.toHexString((byte) 11).
-			compareToIgnoreCase("0B") == 0);
-		assertTrue(HexString.toHexString((byte) 12).
-			compareToIgnoreCase("0C") == 0);
-		assertTrue(HexString.toHexString((byte) 13).
-			compareToIgnoreCase("0D") == 0);
-		assertTrue(HexString.toHexString((byte) 14).
-			compareToIgnoreCase("0E") == 0);
-		assertTrue(HexString.toHexString((byte) 15).
-			compareToIgnoreCase("0F") == 0);
-		assertTrue(HexString.toHexString((byte) 16).
-			compareToIgnoreCase("10") == 0);
-		assertTrue(HexString.toHexString((byte) 254).
-			compareToIgnoreCase("FE") == 0);
-		assertTrue(HexString.toHexString((byte) 255).
-			compareToIgnoreCase("FF") == 0);
+	static private void checkFormat(int[] idata, String hex) {
+		byte[] data = toBytes(idata);
+		assertTrue(HexString.format(data).equals(hex));
+	}
 
-		// appendToHexString
-		StringBuilder sb = new StringBuilder(0);
-		sb = HexString.appendToHexString(sb, (byte) 255);
-		assertTrue(sb.length() == 2);
-		assertTrue(sb.toString().
-			compareToIgnoreCase("FF") == 0);
-		sb = HexString.appendToHexString(sb, (byte) 254);
-		assertTrue(sb.length() == 4);
-		assertTrue(sb.toString().
-			compareToIgnoreCase("FFFE") == 0);
+	public void testFormat() {
+		checkFormat(new int[] { 0 }, "00");
+		checkFormat(new int[] { 255 }, "FF");
+		checkFormat(new int[] { 0, 127, 128, 255 }, "007F80FF");
+		checkFormat(new int[] { 0, 127, 128, 255, 0 }, "007F80FF00");
+	}
 
-		// hexStringToByteArray
-		byte[] a = HexString.hexStringToByteArray("0001090a0A0b0fFFfe");
-		assertTrue(a.length == 9);
-		assertTrue(a[0] == 0);
-		assertTrue(a[1] == 1);
-		assertTrue(a[2] == 9);
-		assertTrue(a[3] == 10);
-		assertTrue(a[4] == 10);
-		assertTrue(a[5] == 11);
-		assertTrue(a[6] == 15);
-		assertTrue(a[7] == (byte) 255);
-		assertTrue(a[8] == (byte) 254);
+	public void testFormatDelim() {
+		checkFormat(new int[] { 0 }, ' ', "00");
+		checkFormat(new int[] { 255 }, ' ', "FF");
+		checkFormat(new int[] { 0, 127, 128, 255 }, ' ',"00 7F 80 FF");
+		checkFormat(new int[] { 0, 127, 128, 255 }, ':',"00:7F:80:FF");
+	}
+
+	private void checkParse(String hex, int[] idata) {
+		byte[] data = toBytes(idata);
+		assertTrue(Arrays.equals(HexString.parse(hex), data));
+	}
+
+	private void checkParseFail(String hex, int[] idata) {
+		try {
+			checkParse(hex, idata);
+			assertFalse(true);
+		}
+		catch(Exception e) {
+			// expected
+		}
+	}
+
+	public void testParse() {
+		checkParse("", new int[0]);
+		checkParse("00", new int[] { 0, } );
+		checkParse("01", new int[] { 1, } );
+		checkParse("0A", new int[] { 10, } );
+		checkParse("FF", new int[] { 255, } );
+		checkParse("7F", new int[] { 127, } );
+		checkParse("0001090a0A0b0fFFfe", new int[] { 0, 1, 9, 10, 10,
+			11, 15, 255, 254 } );
+		checkParseFail(null, new int[] { 0, });
+		checkParseFail("1", new int[] { 0, });
+		checkParseFail("ABC", new int[] { 0, });
+		checkParseFail("GG", new int[] { 0, });
+		checkParseFail("==", new int[] { 0, });
 	}
 }
