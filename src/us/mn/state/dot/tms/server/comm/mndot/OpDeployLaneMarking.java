@@ -28,13 +28,13 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpDeployLaneMarking extends OpDevice {
 
 	/** Lane marking to deploy */
-	protected final LaneMarkingImpl lane_marking;
+	private final LaneMarkingImpl lane_marking;
 
 	/** Deploy flag */
-	protected final boolean deploy;
+	private final boolean deploy;
 
 	/** Special function output buffer */
-	protected final byte[] outputs = new byte[2];
+	private final byte[] outputs = new byte[2];
 
 	/** Create a new deploy lane marking operation */
 	public OpDeployLaneMarking(LaneMarkingImpl m, boolean d) {
