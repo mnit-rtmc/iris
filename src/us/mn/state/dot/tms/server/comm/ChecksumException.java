@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import us.mn.state.dot.tms.utils.HexString;
+
 /**
  * Thrown whenever there is a checksum error on received data.
  *
@@ -25,11 +27,7 @@ public class ChecksumException extends ParsingException {
 	static protected String formatScannedData(byte[] data) {
 		StringBuilder sb = new StringBuilder();
 		if(data.length > 0) {
-			for(byte d: data) {
-				if(sb.length() > 0)
-					sb.append(':');
-				sb.append(Integer.toHexString(d & 0xFF));
-			}
+			sb.append(HexString.format(data, ':'));
 			sb.append(" (");
 			sb.append(data.length);
 			sb.append(")");
