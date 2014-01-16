@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,8 +79,11 @@ public class OpQueryMeterStatus extends Op170 {
 		/** Collect meter data from the controller */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] s = new byte[12];
-			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,s));
+			MemoryProperty stat_mem = new MemoryProperty(
+				Address.RAMP_METER_DATA, s);
+			mess.add(stat_mem);
 			mess.queryProps();
+			logQuery(stat_mem);
 			if(meter1 != null)
 				parseMeterData(meter1, 1, s, 0);
 			if(meter2 != null)
@@ -107,8 +110,11 @@ public class OpQueryMeterStatus extends Op170 {
 		/** Query the meter red time */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
-			mess.add(new MemoryProperty(address, data));
+			MemoryProperty red_mem = new MemoryProperty(address,
+				data);
+			mess.add(red_mem);
 			mess.queryProps();
+			logQuery(red_mem);
 			float red = parseRedTime(data) / 10.0f;
 			int rate = MndotPoller.calculateReleaseRate(meter, red);
 			meter.setRateNotify(rate);

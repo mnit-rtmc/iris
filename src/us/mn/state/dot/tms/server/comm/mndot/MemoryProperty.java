@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -38,10 +39,10 @@ public class MemoryProperty extends MndotProperty {
 	static protected final int OFF_READ_LENGTH = 4;
 
 	/** 170 controller memory address */
-	protected final int address;
+	private final int address;
 
-	/** 170 controller memory payload length */
-	protected final byte[] payload;
+	/** 170 controller memory payload */
+	private final byte[] payload;
 
 	/** Check for a valid payload length */
 	protected void checkPayloadLength() throws ProtocolException {
@@ -95,5 +96,15 @@ public class MemoryProperty extends MndotProperty {
 	/** Get the expected number of octets in response to a SET request */
 	protected int expectedSetOctets() {
 		return 3;
+	}
+
+	/** Get a string representation of the property */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("mem ");
+		sb.append(Integer.toHexString(address));
+		sb.append(": ");
+		sb.append(HexString.format(payload, ' '));
+		return sb.toString();
 	}
 }

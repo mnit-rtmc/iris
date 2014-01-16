@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,9 +116,11 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			catch(ControllerException e) {
 				setMaintStatus(e.getMessage());
 				rec = new byte[75];
-				mess.add(new MemoryProperty(
-					Address.DATA_BUFFER_5_MINUTE, rec));
+				MemoryProperty rec_mem = new MemoryProperty(
+					Address.DATA_BUFFER_5_MINUTE, rec);
+				mess.add(rec_mem);
 				mess.queryProps();
+				logQuery(rec_mem);
 			}
 			processData(rec);
 			controller.storeVolume(stamp, SAMPLE_PERIOD_SEC,

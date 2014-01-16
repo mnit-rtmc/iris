@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,8 +57,11 @@ public class OpSendSampleSettings extends Op170 {
 		/** Check the cabinet type */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[1];
-			mess.add(new MemoryProperty(Address.CABINET_TYPE,data));
+			MemoryProperty cab_mem = new MemoryProperty(
+				Address.CABINET_TYPE, data);
+			mess.add(cab_mem);
 			mess.queryProps();
+			logQuery(cab_mem);
 			checkCabinetStyle(data[0]);
 			return new QueryPromVersion();
 		}
@@ -100,8 +103,11 @@ public class OpSendSampleSettings extends Op170 {
 		/** Query the prom version */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
-			mess.add(new MemoryProperty(Address.PROM_VERSION,data));
+			MemoryProperty ver_mem = new MemoryProperty(
+				Address.PROM_VERSION, data);
+			mess.add(ver_mem);
 			mess.queryProps();
+			logQuery(ver_mem);
 			setVersion(data[0], data[1]);
 			return new QueueBitmap();
 		}

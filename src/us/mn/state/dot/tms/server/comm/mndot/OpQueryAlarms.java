@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,8 +53,11 @@ public class OpQueryAlarms extends Op170 {
 		/** Query the meter red time */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = new byte[2];
-			mess.add(new MemoryProperty(Address.ALARM_INPUTS,data));
+			MemoryProperty alarm_mem = new MemoryProperty(
+				Address.ALARM_INPUTS, data);
+			mess.add(alarm_mem);
 			mess.queryProps();
+			logQuery(alarm_mem);
 			boolean[] alarms = parseAlarms(data);
 			for(int i = 0; i < 10; i++) {
 				int pin = ALARM_PIN + i;
