@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -34,11 +33,12 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 	static private final int MAX_SCANS = 1800;
 
 	/** Create a new 30-second data operation */
-	public OpQuerySamples30Sec(ControllerImpl c, Completer comp) {
-		super(PriorityLevel.DATA_30_SEC, c, comp);
+	public OpQuerySamples30Sec(ControllerImpl c) {
+		super(PriorityLevel.DATA_30_SEC, c);
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase phaseOne() {
 		return new QuerySample30Sec();
 	}
@@ -54,17 +54,18 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 			mess.add(sample_mem);
 			mess.queryProps();
 			logQuery(sample_mem);
+			setStamp();
 			processData(r);
 			return null;
 		}
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
-		long stamp = completer.getStamp();
-		controller.storeVolume(stamp, SAMPLE_PERIOD_SEC,
+		controller.storeVolume(getStamp(), SAMPLE_PERIOD_SEC,
 			FIRST_DETECTOR_PIN, volume);
-		controller.storeOccupancy(stamp, SAMPLE_PERIOD_SEC,
+		controller.storeOccupancy(getStamp(), SAMPLE_PERIOD_SEC,
 			FIRST_DETECTOR_PIN, scans, MAX_SCANS);
 		super.cleanup();
 	}

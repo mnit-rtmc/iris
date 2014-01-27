@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
-import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.VehLengthClass;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -38,9 +38,6 @@ public class OpQuerySamples extends OpSS105 {
 	/** Binning period (seconds) */
 	private final int period;
 
-	/** 30-Second interval completer */
-	protected final Completer completer;
-
 	/** Time stamp of sample data */
 	protected long stamp;
 
@@ -54,11 +51,10 @@ public class OpQuerySamples extends OpSS105 {
 	private final BinnedSampleProperty samples = new BinnedSampleProperty();
 
 	/** Create a new "query binned samples" operation */
-	public OpQuerySamples(ControllerImpl c, int p, Completer comp) {
+	public OpQuerySamples(ControllerImpl c, int p) {
 		super(PriorityLevel.DATA_30_SEC, c);
 		period = p;
-		completer = comp;
-		stamp = comp.getStamp();
+		stamp = TimeSteward.currentTimeMillis();
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(stamp);
 		cal.add(Calendar.HOUR, -4);
@@ -68,12 +64,8 @@ public class OpQuerySamples extends OpSS105 {
 		newest = cal.getTimeInMillis();
 	}
 
-	/** Begin the operation */
-	public boolean begin() {
-		return completer.beginTask(getKey()) && super.begin();
-	}
-
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase<SS105Property> phaseOne() {
 		return new GetCurrentSamples();
 	}
@@ -100,6 +92,7 @@ public class OpQuerySamples extends OpSS105 {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
 		controller.storeVolume(stamp, period, START_PIN,
 			samples.getVolume());
@@ -111,7 +104,6 @@ public class OpQuerySamples extends OpSS105 {
 			controller.storeVolume(stamp, period, START_PIN,
 				samples.getVolume(vc), vc);
 		}
-		completer.completeTask(getKey());
 		super.cleanup();
 	}
 }

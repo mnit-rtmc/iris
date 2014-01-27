@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -41,12 +40,14 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 	}
 
 	/** Perform a controller reset */
+	@Override
 	public void resetController(ControllerImpl c) {
 		if(c.getActive())
 			addOperation(new OpSendSensorSettings(c, true));
 	}
 
 	/** Send sample settings to a controller. */
+	@Override
 	public void sendSettings(ControllerImpl c) {
 		if(c.getActive())
 			addOperation(new OpSendSensorSettings(c, false));
@@ -54,12 +55,12 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 
 	/** Query sample data.
  	 * @param c Controller to poll.
- 	 * @param p Sample period in seconds.
- 	 * @param comp Job completer.  */
-	public void querySamples(ControllerImpl c, int p, Completer comp) {
+ 	 * @param p Sample period in seconds. */
+	@Override
+	public void querySamples(ControllerImpl c, int p) {
 		if(p == 30) {
 			if(c.hasActiveDetector())
-				addOperation(new OpQueryStats(c, p, comp));
+				addOperation(new OpQueryStats(c, p));
 		}
 	}
 }

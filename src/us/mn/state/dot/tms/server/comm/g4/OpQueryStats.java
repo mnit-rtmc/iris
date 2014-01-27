@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
 import java.util.Date;
-import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.PeriodicSample;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -35,33 +35,29 @@ public class OpQueryStats extends OpG4 {
 	/** Starting pin for controller I/O */
 	static private final int START_PIN = 1;
 
-	/** Statistical property */
-	private final StatProperty stat;
-
-	/** 30-Second interval completer */
-	private final Completer completer;
-
-	/** Sample of completer */
-	private final PeriodicSample comp_sample;
+	/** Time stamp */
+	private final long stamp;
 
 	/** Binning period (seconds) */
 	private final int period;
 
+	/** Sample data */
+	private final PeriodicSample sample;
+
+	/** Statistical property */
+	private final StatProperty stat;
+
 	/** Create a new "query binned samples" operation */
-	public OpQueryStats(ControllerImpl c, int p, Completer comp) {
+	public OpQueryStats(ControllerImpl c, int p) {
 		super(PriorityLevel.DATA_30_SEC, c);
 		period = p;
-		completer = comp;
-		comp_sample = new PeriodicSample(comp.getStamp(), period, 0);
+		stamp = TimeSteward.currentTimeMillis();
+		sample = new PeriodicSample(stamp, period, 0);
 		stat = new StatProperty(p);
 	}
 
-	/** Begin the operation */
-	public boolean begin() {
-		return completer.beginTask(getKey()) && super.begin();
-	}
-
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase<G4Property> phaseOne() {
 		return new GetCurrentSamples();
 	}
@@ -79,7 +75,7 @@ public class OpQueryStats extends OpG4 {
 			long stamp = stat.getStamp();
 			PeriodicSample ps = new PeriodicSample(stamp, period,0);
 			long e = ps.end();
-			if(e < comp_sample.start() || e > comp_sample.end()) {
+			if(e < sample.start() || e > sample.end()) {
 				logError("BAD TIMESTAMP: " + new Date(stamp));
 				setFailed();
 				throw new DownloadRequestException(
@@ -90,6 +86,7 @@ public class OpQueryStats extends OpG4 {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
 		long stamp = stat.getStamp();
 		controller.storeVolume(stamp, period, START_PIN,
@@ -110,7 +107,6 @@ public class OpQueryStats extends OpG4 {
 		controller.storeVolume(stamp, period, START_PIN,
 			stat.getVolume(G4VehClass.EXTRA_LARGE),
 			G4VehClass.EXTRA_LARGE.v_class);
-		completer.completeTask(getKey());
 		super.cleanup();
 	}
 }

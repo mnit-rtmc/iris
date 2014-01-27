@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
@@ -41,9 +40,6 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	/** Maximum number of records to read with "BAD TIMESTAMP" errors */
 	static protected final int MAX_BAD_RECORDS = 5;
 
-	/** Time stamp */
-	protected long stamp;
-
 	/** Oldest time stamp to accept from controller */
 	protected final long oldest;
 
@@ -54,20 +50,20 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	protected int n_bad = 0;
 
 	/** Create a new 5-minute data operation */
-	public OpQuerySamples5Min(ControllerImpl c, Completer comp) {
-		super(PriorityLevel.DATA_5_MIN, c, comp);
-		stamp = comp.getStamp();
+	public OpQuerySamples5Min(ControllerImpl c) {
+		super(PriorityLevel.DATA_5_MIN, c);
 		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(stamp);
+		cal.setTimeInMillis(getStamp());
 		cal.add(Calendar.DATE, -1);
 		oldest = cal.getTimeInMillis();
-		cal.setTimeInMillis(stamp);
+		cal.setTimeInMillis(getStamp());
 		cal.add(Calendar.MINUTE, 4);
 		cal.add(Calendar.SECOND, 20);
 		newest = cal.getTimeInMillis();
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase phaseOne() {
 		return new GetNextRecord();
 	}
@@ -85,7 +81,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			BinnedDataProperty bin = new BinnedDataProperty();
 			mess.add(bin);
 			mess.queryProps();
-			stamp = bin.getStamp();
+			setStamp(bin.getStamp());
 			rec = bin.getRecord();
 			// Delete the record from the controller
 			mess.storeProps();
@@ -94,8 +90,9 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 
 		/** Test if the timestamp is out of the valid range */
 		protected boolean isStampBad() {
-			if(stamp < oldest || stamp > newest) {
-				logError("BAD TIMESTAMP: " + new Date(stamp));
+			long s = getStamp();
+			if(s < oldest || s > newest) {
+				logError("BAD TIMESTAMP: " + new Date(s));
 				return true;
 			} else
 				return false;
@@ -121,11 +118,12 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 				mess.add(rec_mem);
 				mess.queryProps();
 				logQuery(rec_mem);
+				setStamp();
 			}
 			processData(rec);
-			controller.storeVolume(stamp, SAMPLE_PERIOD_SEC,
+			controller.storeVolume(getStamp(), SAMPLE_PERIOD_SEC,
 				FIRST_DETECTOR_PIN, volume);
-			controller.storeOccupancy(stamp, SAMPLE_PERIOD_SEC,
+			controller.storeOccupancy(getStamp(), SAMPLE_PERIOD_SEC,
 				FIRST_DETECTOR_PIN, scans, MAX_SCANS);
 			updateGreenCount(meter1,
 				rec[Address.OFF_GREEN_METER_1] & 0xFF);
@@ -141,7 +139,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	/** Update meter with the most recent 5-minute green count */
 	protected void updateGreenCount(RampMeterImpl meter, int g) {
 		if(meter != null) {
-			meter.updateGreenCount5(stamp,
+			meter.updateGreenCount5(getStamp(),
 				adjustGreenCount(meter, g));
 		}
 	}

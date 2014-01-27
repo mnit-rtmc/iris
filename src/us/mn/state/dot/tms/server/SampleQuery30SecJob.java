@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,9 @@ package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
 import java.util.Iterator;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
@@ -36,41 +32,14 @@ public class SampleQuery30SecJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static private final int OFFSET_SECS = 8;
 
-	/** Station manager */
-	private final StationManager station_manager;
-
-	/** Job completer */
-	private final Completer comp;
-
-	/** Job to be performed on completion */
-	private final Job complete_job = new Job() {
-		public void perform() {
-			try {
-				station_manager.calculateData();
-				BaseObjectImpl.corridors.findBottlenecks();
-			}
-			finally {
-				validateMetering();
-			}
-		}
-	};
-
 	/** Create a new 30-second timer job */
-	public SampleQuery30SecJob(Scheduler timer, Scheduler f) {
+	public SampleQuery30SecJob() {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
-		station_manager = new StationManager(f);
-		comp = new Completer("30-Second", timer, complete_job);
 	}
 
 	/** Perform the 30-second timer job */
 	public void perform() {
-		comp.reset();
-		try {
-			querySample30Sec();
-		}
-		finally {
-			comp.makeReady();
-		}
+		querySample30Sec();
 	}
 
 	/** Poll all sampling controllers 30-second interval */
@@ -89,34 +58,8 @@ public class SampleQuery30SecJob extends Job {
 			MessagePoller p = c.getPoller();
 			if(p instanceof SamplePoller) {
 				SamplePoller sp = (SamplePoller)p;
-				sp.querySamples(c, 30, comp);
+				sp.querySamples(c, 30);
 			}
 		}
-	}
-
-	/** Validate all metering algorithms */
-	private void validateMetering() {
-		KAdaptiveAlgorithm.processAllStates();
-		Iterator<RampMeter> it = RampMeterHelper.iterator();
-		while(it.hasNext()) {
-			RampMeter rm = it.next();
-			if(rm instanceof RampMeterImpl) {
-				RampMeterImpl meter = (RampMeterImpl)rm;
-				meter.validateAlgorithm();
-			}
-		}
-		StratifiedAlgorithm.processAllStates();
-		it = RampMeterHelper.iterator();
-		while(it.hasNext()) {
-			RampMeter rm = it.next();
-			if(rm instanceof RampMeterImpl) {
-				RampMeterImpl meter = (RampMeterImpl)rm;
-				meter.updateQueueState();
-				meter.updateRatePlanned();
-			}
-		}
-		/* Note: this is temporarily last in case an exception is
-		 *       thrown -- all other metering work will be complete. */
-		DensityUMNAlgorithm.processAllStates();
 	}
 }

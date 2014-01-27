@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -37,5 +36,5 @@ public interface SamplePoller {
  	 * @param c Controller to poll.
  	 * @param p Sample period in seconds.
  	 * @param comp Job completer.  */
-	void querySamples(ControllerImpl c, int p, Completer comp);
+	void querySamples(ControllerImpl c, int p);
 }

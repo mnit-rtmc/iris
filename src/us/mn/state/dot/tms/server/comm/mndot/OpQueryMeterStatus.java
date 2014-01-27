@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
-import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -51,24 +51,16 @@ public class OpQueryMeterStatus extends Op170 {
 		return is.read4();
 	}
 
-	/** 30-Second completer */
-	protected final Completer completer;
-
 	/** List of remaining phases of operation */
 	protected final LinkedList<Phase> phases = new LinkedList<Phase>();
 
 	/** Create a new query meter status operatoin */
-	public OpQueryMeterStatus(ControllerImpl c, Completer comp) {
+	public OpQueryMeterStatus(ControllerImpl c) {
 		super(PriorityLevel.DATA_30_SEC, c);
-		completer = comp;
-	}
-
-	/** Begin the operation */
-	public boolean begin() {
-		return completer.beginTask(getKey()) && super.begin();
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase phaseOne() {
 		return new GetStatus();
 	}
@@ -84,10 +76,13 @@ public class OpQueryMeterStatus extends Op170 {
 			mess.add(stat_mem);
 			mess.queryProps();
 			logQuery(stat_mem);
+			long stamp = TimeSteward.currentTimeMillis();
 			if(meter1 != null)
-				parseMeterData(meter1, 1, s, 0);
-			if(meter2 != null)
-				parseMeterData(meter2, 2,s,Address.OFF_METER_2);
+				parseMeterData(meter1, 1, s, 0, stamp);
+			if(meter2 != null) {
+				parseMeterData(meter2, 2, s,
+					Address.OFF_METER_2, stamp);
+			}
 			return phases.poll();
 		}
 	}
@@ -122,18 +117,11 @@ public class OpQueryMeterStatus extends Op170 {
 		}
 	}
 
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		completer.completeTask(getKey());
-		super.cleanup();
-	}
-
 	/** Parse meter data and process it */
 	protected void parseMeterData(RampMeterImpl meter, int n, byte[] data,
-		int base) throws IOException
+		int base, long stamp) throws IOException
 	{
-		updateMeterData(meter, n,
+		updateMeterData(meter, n, stamp,
 			data[base + Address.OFF_STATUS],
 			data[base + Address.OFF_CURRENT_RATE],
 			data[base + Address.OFF_GREEN_COUNT_30],
@@ -143,13 +131,14 @@ public class OpQueryMeterStatus extends Op170 {
 	/** Update meter with the most recent 30-second meter data
 	 * @param meter Ramp meter
 	 * @param n Meter number (1 or 2)
+	 * @param stamp Time stamp
 	 * @param s Meter status
 	 * @param r Metering rate
 	 * @param g 30-second green count
 	 * @param p Police-panel/verify status
 	 */
-	protected void updateMeterData(RampMeterImpl meter, int n, int s,
-		int r, int g, int p) throws IOException
+	protected void updateMeterData(RampMeterImpl meter, int n, long stamp,
+		int s, int r, int g, int p) throws IOException
 	{
 		if(!MeterRate.isValid(r))
 			throw new InvalidRateException(r);
@@ -157,8 +146,7 @@ public class OpQueryMeterStatus extends Op170 {
 		if(status.isValid()) {
 			boolean police = (p & POLICE_PANEL_BIT) != 0;
 			updateMeterStatus(meter, n, status, police, r);
-			meter.updateGreenCount(completer.getStamp(),
-				adjustGreenCount(meter, g));
+			meter.updateGreenCount(stamp,adjustGreenCount(meter,g));
 		} else
 			throw new InvalidStatusException(s);
 	}

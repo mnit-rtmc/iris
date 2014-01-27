@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -189,8 +189,9 @@ public class MainServer {
 		TIMER.addJob(new DmsQueryStatusJob());
 		TIMER.addJob(new DmsQueryDialupJob());
 		TIMER.addJob(new AlarmQueryStatusJob());
-		TIMER.addJob(new SampleQuery30SecJob(TIMER, FLUSH));
-		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
+		TIMER.addJob(new MeteringJob(FLUSH));
+		TIMER.addJob(new SampleQuery30SecJob());
+		TIMER.addJob(new SampleQuery5MinJob());
 		TIMER.addJob(new WeatherQueryJob());
 		TIMER.addJob(new GateArmQueryStatusJob());
 		TIMER.addJob(new ActionPlanJob());

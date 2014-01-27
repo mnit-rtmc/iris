@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -94,12 +93,14 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	}
 
 	/** Perform a controller reset */
+	@Override
 	public void resetController(ControllerImpl c) {
 		if(c.getActive())
 			addOperation(new OpQueryConfig(c));
 	}
 
 	/** Send sample settings to a controller */
+	@Override
 	public void sendSettings(ControllerImpl c) {
 		if(c.getActive())
 			addOperation(new OpQueryConfig(c));
@@ -107,9 +108,9 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 
 	/** Query sample data.
  	 * @param c Controller to poll.
- 	 * @param p Sample period in seconds.
- 	 * @param comp Job completer.  */
-	public void querySamples(ControllerImpl c, int p, Completer comp) {
+ 	 * @param p Sample period in seconds. */
+	@Override
+	public void querySamples(ControllerImpl c, int p) {
 		if(c.hasActiveDetector()) {
 			OpQueryEventSamples qes = getEventCollector(c);
 			if(p == 30)

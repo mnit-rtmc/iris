@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import java.util.Calendar;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
@@ -147,12 +146,14 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	}
 
 	/** Perform a controller reset */
+	@Override
 	public void resetController(ControllerImpl c) {
 		if(c.getActive())
 			addOperation(new OpReset170(c));
 	}
 
 	/** Send sample settings to a controller */
+	@Override
 	public void sendSettings(ControllerImpl c) {
 		if(c.getActive())
 			addOperation(new OpSendSampleSettings(c));
@@ -160,21 +161,21 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 
 	/** Query sample data.
  	 * @param c Controller to poll.
- 	 * @param p Sample period in seconds.
- 	 * @param comp Job completer.  */
-	public void querySamples(ControllerImpl c, int p, Completer comp) {
+ 	 * @param p Sample period in seconds. */
+	@Override
+	public void querySamples(ControllerImpl c, int p) {
 		switch(p) {
 		case OpQuerySamples30Sec.SAMPLE_PERIOD_SEC:
 			if(c.hasActiveDetector())
-				addOperation(new OpQuerySamples30Sec(c, comp));
+				addOperation(new OpQuerySamples30Sec(c));
 			// This should happen on a meter QUERY_STATUS, but
 			// green detectors need to be queried also...
 			if(c.hasActiveMeter())
-				addOperation(new OpQueryMeterStatus(c, comp));
+				addOperation(new OpQueryMeterStatus(c));
 			break;
 		case OpQuerySamples5Min.SAMPLE_PERIOD_SEC:
 			if(c.hasActiveDetector() || c.hasActiveMeter())
-				addOperation(new OpQuerySamples5Min(c, comp));
+				addOperation(new OpQuerySamples5Min(c));
 			break;
 		}
 	}

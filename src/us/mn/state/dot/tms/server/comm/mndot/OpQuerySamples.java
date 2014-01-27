@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.TimeSteward;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -30,8 +30,23 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 abstract public class OpQuerySamples extends Op170 {
 
-	/** Sample interval completer */
-	protected final Completer completer;
+	/** Time stamp */
+	private long stamp;
+
+	/** Set the time stamp */
+	protected void setStamp(long s) {
+		stamp = s;
+	}
+
+	/** Set the time stamp */
+	protected void setStamp() {
+		setStamp(TimeSteward.currentTimeMillis());
+	}
+
+	/** Get the time stamp */
+	protected long getStamp() {
+		return stamp;
+	}
 
 	/** Volume data for all detectors on a controller */
 	protected final int[] volume = new int[DETECTOR_INPUTS];
@@ -40,27 +55,13 @@ abstract public class OpQuerySamples extends Op170 {
 	protected final int[] scans = new int[DETECTOR_INPUTS];
 
 	/** Create a new OpQuerySamples poll */
-	protected OpQuerySamples(PriorityLevel p, ControllerImpl c,
-		Completer comp)
-	{
+	protected OpQuerySamples(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
-		completer = comp;
+		setStamp();
 		for(int i = 0; i < DETECTOR_INPUTS; i++) {
 			volume[i] = MISSING_DATA;
 			scans[i] = MISSING_DATA;
 		}
-	}
-
-	/** Begin the operation */
-	public boolean begin() {
-		return completer.beginTask(getKey()) && super.begin();
-	}
-
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		completer.completeTask(getKey());
-		super.cleanup();
 	}
 
 	/** Process sample data from the controller */
