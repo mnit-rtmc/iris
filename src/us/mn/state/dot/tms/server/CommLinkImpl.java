@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -334,14 +334,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 				c.setFailed(true);
 			}
 		}
-	}
-
-	/** Line load */
-	protected transient float load;
-
-	/** Get the current link load */
-	public float getLoad() {
-		return load;
 	}
 
 	/** Check if a modem is required for the link */
