@@ -31,19 +31,29 @@ public class MeteringJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static private final int OFFSET_SECS = 29;
 
+	/** FLUSH Scheduler for writing XML (I/O to disk) */
+	private final Scheduler flush;
+
 	/** Station manager */
 	private final StationManager station_manager;
 
+	/** Job to be performed after data has been processed */
+	private final FlushXmlJob flush_job;
+
 	/** Create a new metering job */
-	public MeteringJob(Scheduler flush) {
+	public MeteringJob(Scheduler f) {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
-		station_manager = new StationManager(flush);
+		flush = f;
+		station_manager = new StationManager();
+		flush_job = new FlushXmlJob(station_manager);
 	}
 
 	/** Perform the metering job */
 	public void perform() {
 		try {
 			station_manager.calculateData();
+			// Perform flush job after station data calculated
+			flush.addJob(flush_job);
 			BaseObjectImpl.corridors.findBottlenecks();
 		}
 		finally {
