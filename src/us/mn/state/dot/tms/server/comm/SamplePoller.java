@@ -34,7 +34,6 @@ public interface SamplePoller {
 
 	/** Query sample data.
  	 * @param c Controller to poll.
- 	 * @param p Sample period in seconds.
- 	 * @param comp Job completer.  */
+ 	 * @param p Sample period in seconds. */
 	void querySamples(ControllerImpl c, int p);
 }
