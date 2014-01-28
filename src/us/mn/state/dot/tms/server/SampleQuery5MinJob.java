@@ -54,7 +54,8 @@ public class SampleQuery5MinJob extends Job {
 
 	/** Query 5-minute sample data from one controller */
 	private void querySample5Min(ControllerImpl c) {
-		if(c.hasActiveDetector()) {
+		// Must check hasActiveMeter for green counts (mndot protocol)
+		if(c.hasActiveDetector() || c.hasActiveMeter()) {
 			MessagePoller p = c.getPoller();
 			if(p instanceof SamplePoller) {
 				SamplePoller sp = (SamplePoller)p;
