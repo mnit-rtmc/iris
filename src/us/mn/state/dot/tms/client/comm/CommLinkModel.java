@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,6 +109,35 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				JComboBox combo = new JComboBox(
 					PROTOCOLS.toArray());
 				return new DefaultCellEditor(combo);
+			}
+		});
+		cols.add(new ProxyColumn<CommLink>("comm.link.poll_enabled", 56,
+			Boolean.class)
+		{
+			public Object getValueAt(CommLink cl) {
+				return cl.getPollEnabled();
+			}
+			public boolean isEditable(CommLink cl) {
+				return canUpdate(cl, "pollEnabled");
+			}
+			public void setValueAt(CommLink cl, Object value) {
+				if(value instanceof Boolean)
+					cl.setPollEnabled((Boolean)value);
+			}
+		});
+		cols.add(new ProxyColumn<CommLink>("comm.link.poll_period", 60){
+			public Object getValueAt(CommLink cl) {
+				return cl.getPollPeriod();
+			}
+			public boolean isEditable(CommLink cl) {
+				return canUpdate(cl, "pollPeriod");
+			}
+			public void setValueAt(CommLink cl, Object value) {
+				if(value instanceof Integer)
+					cl.setPollPeriod((Integer)value);
+			}
+			protected TableCellEditor createCellEditor() {
+				return new PollPeriodCellEditor();
 			}
 		});
 		cols.add(new ProxyColumn<CommLink>("comm.link.timeout", 60) {

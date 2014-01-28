@@ -44,6 +44,18 @@ public interface CommLink extends SonarObject {
 	/** Get the communication protocol */
 	short getProtocol();
 
+	/** Enable or disable polling */
+	void setPollEnabled(boolean e);
+
+	/** Get polling enabled/disabled flag */
+	boolean getPollEnabled();
+
+	/** Set poll period (seconds) */
+	void setPollPeriod(int s);
+
+	/** Get poll period (seconds) */
+	int getPollPeriod();
+
 	/** Set the polling timeout (milliseconds) */
 	void setTimeout(int t);
 

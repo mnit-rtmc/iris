@@ -342,6 +342,8 @@ CREATE TABLE iris.comm_link (
 	description VARCHAR(32) NOT NULL,
 	uri VARCHAR(64) NOT NULL,
 	protocol smallint NOT NULL REFERENCES iris.comm_protocol(id),
+	poll_enabled BOOLEAN NOT NULL,
+	poll_period INTEGER NOT NULL,
 	timeout integer NOT NULL
 );
 
@@ -1504,7 +1506,7 @@ GRANT SELECT ON controller_report TO PUBLIC;
 
 CREATE VIEW comm_link_view AS
 	SELECT cl.name, cl.description, cl.uri, cp.description AS protocol,
-	cl.timeout
+		cl.poll_enabled, cl.poll_period, cl.timeout
 	FROM iris.comm_link cl
 	JOIN iris.comm_protocol cp ON cl.protocol = cp.id;
 GRANT SELECT ON comm_link_view TO PUBLIC;
@@ -1739,7 +1741,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 client_units_si	true
-database_version	4.9.0
+database_version	4.10.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false

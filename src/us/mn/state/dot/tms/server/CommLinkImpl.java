@@ -48,8 +48,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CommLinkImpl.class);
 		store.query("SELECT name, description, uri, protocol, " +
-			"timeout FROM iris." + SONAR_TYPE  + ";",
-			new ResultFactory()
+			"poll_enabled, poll_period, timeout FROM iris." +
+			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CommLinkImpl(
@@ -57,7 +57,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 					row.getString(2),	// description
 					row.getString(3),	// uri
 					row.getShort(4),	// protocol
-					row.getInt(5)		// timeout
+					row.getBoolean(5),	// poll_enabled
+					row.getInt(6),		// poll_period
+					row.getInt(7)		// timeout
 				));
 			}
 		});
@@ -70,6 +72,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		map.put("description", description);
 		map.put("uri", uri);
 		map.put("protocol", (short)protocol.ordinal());
+		map.put("poll_enabled", poll_enabled);
+		map.put("poll_period", poll_period);
 		map.put("timeout", timeout);
 		return map;
 	}
@@ -90,18 +94,23 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Create a new comm link */
-	public CommLinkImpl(String n, String d, String u, short p, int t) {
+	public CommLinkImpl(String n, String d, String u, short p, boolean pe,
+		int pp, int t)
+	{
 		super(n);
 		description = d;
 		uri = u;
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
 		if(cp != null)
 			protocol = cp;
+		poll_enabled = pe;
+		poll_period = pp;
 		timeout = t;
 		poller = null;
 	}
 
 	/** Destroy an object */
+	@Override
 	public void doDestroy() throws TMSException {
 		closePoller();
 		super.doDestroy();
@@ -185,6 +194,50 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Get the communication protocol */
 	public short getProtocol() {
 		return (short)protocol.ordinal();
+	}
+
+	/** Poll enabled/disabled flag */
+	private boolean poll_enabled;
+
+	/** Enable or disable polling */
+	public void setPollEnabled(boolean e) {
+		testGateArmDisable("poll_enabled");
+		poll_enabled = e;
+	}
+
+	/** Set the poll enabled/disabled flag */
+	public void doSetPollEnabled(boolean e) throws TMSException {
+		if(e == poll_enabled)
+			return;
+		store.update(this, "poll_enabled", e);
+		setPollEnabled(e);
+	}
+
+	/** Get polling enabled/disabled flag */
+	public boolean getPollEnabled() {
+		return poll_enabled;
+	}
+
+	/** Polling period (seconds) */
+	private int poll_period = 30;
+
+	/** Set poll period (seconds) */
+	public void setPollPeriod(int s) {
+		testGateArmDisable("poll_period");
+		poll_period = s;
+	}
+
+	/** Set the polling period (seconds) */
+	public void doSetPollPeriod(int s) throws TMSException {
+		if(s == poll_period)
+			return;
+		store.update(this, "poll_period", s);
+		setPollPeriod(s);
+	}
+
+	/** Get poll period (seconds) */
+	public int getPollPeriod() {
+		return poll_period;
 	}
 
 	/** Polling timeout (milliseconds) */
