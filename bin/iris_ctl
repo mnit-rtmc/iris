@@ -2,7 +2,7 @@
 #
 # /usr/bin/iris_ctl -- Script for initializing and updating IRIS
 #
-# Copyright (C) 2012-2013  Minnesota Department of Transportation
+# Copyright (C) 2012-2014  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,11 +58,6 @@ function create_keystores() {
 	sed_c="s:.*keystore.password=.*:keystore.password=$k_pwc:"
 	sed -i ''$sed_s'' $p_server
 	sed -i ''$sed_c'' $p_client
-}
-
-function install_jdbc() { 
-	echo "Creating link to JDBC driver"
-	ln -snf /usr/share/java/postgresql-jdbc.jar /usr/lib/jvm/jre-openjdk/lib/ext/
 }
 
 function init_db() {
@@ -129,7 +124,6 @@ case "$1" in
 		check_initialized
 		update_client_properties
 		create_keystores
-		install_jdbc
 		init_db
 		create_tms_user
 		create_database
