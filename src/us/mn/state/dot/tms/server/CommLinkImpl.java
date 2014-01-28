@@ -212,6 +212,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "poll_enabled", e);
 		setPollEnabled(e);
+		closePoller();
 	}
 
 	/** Get polling enabled/disabled flag */
@@ -297,7 +298,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			else
 				closePoller();
 		}
-		return openPoller();
+		return poll_enabled ? openPoller() : null;
 	}
 
 	/** Open the message poller.  Poller must be null prior to calling. */
