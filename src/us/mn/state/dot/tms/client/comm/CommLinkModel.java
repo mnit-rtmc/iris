@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.units.Interval;
 
 /**
  * Table model for comm links
@@ -127,14 +128,22 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		});
 		cols.add(new ProxyColumn<CommLink>("comm.link.poll_period", 60){
 			public Object getValueAt(CommLink cl) {
-				return cl.getPollPeriod();
+				Interval p = new Interval(cl.getPollPeriod());
+				for(Interval per: CommLink.VALID_PERIODS) {
+					if(p.equals(per))
+						return per;
+				}
+				return p;
 			}
 			public boolean isEditable(CommLink cl) {
 				return canUpdate(cl, "pollPeriod");
 			}
 			public void setValueAt(CommLink cl, Object value) {
-				if(value instanceof Integer)
-					cl.setPollPeriod((Integer)value);
+				if(value instanceof Interval) {
+					Interval p = (Interval)value;
+					cl.setPollPeriod(p.round(
+						Interval.Units.SECONDS));
+				}
 			}
 			protected TableCellEditor createCellEditor() {
 				return new PollPeriodCellEditor();

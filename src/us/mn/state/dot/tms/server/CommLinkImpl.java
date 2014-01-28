@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.units.Interval;
 
 /**
  * The CommLinkImpl class represents a single communication link which is
@@ -227,10 +228,21 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		poll_period = s;
 	}
 
+	/** Check for valid polling period */
+	private void checkPeriod(int s) throws TMSException {
+		Interval p = new Interval(s);
+		for(Interval per: VALID_PERIODS) {
+			if(per.equals(p))
+				return;
+		}
+		throw new ChangeVetoException("Invalid period: " + s);
+	}
+
 	/** Set the polling period (seconds) */
 	public void doSetPollPeriod(int s) throws TMSException {
 		if(s == poll_period)
 			return;
+		checkPeriod(s);
 		store.update(this, "poll_period", s);
 		setPollPeriod(s);
 	}

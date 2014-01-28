@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 
 /**
  * A CommLink is a network connection for device communication.
@@ -25,6 +27,25 @@ public interface CommLink extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "comm_link";
+
+	/** Valid polling periods */
+	Interval[] VALID_PERIODS = {
+		new Interval(5),
+		new Interval(10),
+		new Interval(15),
+		new Interval(20),
+		new Interval(30),
+		new Interval(60),
+		new Interval(90),
+		new Interval(2, MINUTES),
+		new Interval(4, MINUTES),
+		new Interval(5, MINUTES),
+		new Interval(10, MINUTES),
+		new Interval(15, MINUTES),
+		new Interval(20, MINUTES),
+		new Interval(30, MINUTES),
+		new Interval(60, MINUTES),
+	};
 
 	/** Set text description */
 	void setDescription(String d);

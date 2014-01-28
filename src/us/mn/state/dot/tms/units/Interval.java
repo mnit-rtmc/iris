@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,7 +137,8 @@ public final class Interval implements Comparable<Interval> {
 	}
 
 	/** Compare for equality */
-	@Override public boolean equals(Object other) {
+	@Override
+	public boolean equals(Object other) {
 		if(other instanceof Interval) {
 			Interval o = (Interval)other;
 			if(units == o.units)
@@ -149,7 +150,8 @@ public final class Interval implements Comparable<Interval> {
 	}
 
 	/** Compare with another interval */
-	@Override public int compareTo(Interval o) {
+	@Override
+	public int compareTo(Interval o) {
 		if(units == o.units)
 			return Double.compare(value, o.value);
 		else
@@ -157,13 +159,15 @@ public final class Interval implements Comparable<Interval> {
 	}
 
 	/** Get an interval hash code */
-	@Override public int hashCode() {
+	@Override
+	public int hashCode() {
 		return new Double(seconds()).hashCode();
 	}
 
 	/** Get a string representation of an interval */
-	@Override public String toString() {
-		return value + " " + units.label;
+	@Override
+	public String toString() {
+		return new Formatter(0).format(this);
 	}
 
 	/** Interval formatter */

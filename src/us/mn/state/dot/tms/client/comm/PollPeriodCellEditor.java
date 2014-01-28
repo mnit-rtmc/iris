@@ -18,8 +18,9 @@ import java.awt.Component;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.SpinnerListModel;
 import javax.swing.table.TableCellEditor;
+import static us.mn.state.dot.tms.CommLink.VALID_PERIODS;
 
 /**
  * Editor for poll period in a table cell.
@@ -34,7 +35,7 @@ public class PollPeriodCellEditor extends AbstractCellEditor
 
 	/** Create a new poll period cell editor */
 	public PollPeriodCellEditor() {
-		spinner = new JSpinner(new SpinnerNumberModel(30, 5, 300, 5));
+		spinner = new JSpinner(new SpinnerListModel(VALID_PERIODS));
 	}
 
 	/** Get a table cell editor component */
