@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public interface MeterPoller {
 	long COMM_FAIL_THRESHOLD_MS = COMM_FAIL_THRESHOLD * 60 * 1000;
 
 	/** Send a device request */
-	void sendRequest(RampMeterImpl sign, DeviceRequest r);
+	void sendRequest(RampMeterImpl meter, DeviceRequest r);
 
 	/** Send a new release rate (vehicles per hour) */
 	void sendReleaseRate(RampMeterImpl meter, Integer rate);
