@@ -302,7 +302,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Open the message poller.  Poller must be null prior to calling. */
-	protected synchronized MessagePoller openPoller() {
+	private synchronized MessagePoller openPoller() {
 		assert poller == null;
 		try {
 			poller = MessagePoller.create(name, protocol, uri);
@@ -317,12 +317,21 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Close the message poller */
-	protected synchronized void closePoller() {
+	private synchronized void closePoller() {
 		if(poller != null && !poller.wasHungUp()) {
 			failControllers();
 			poller.stopPolling();
 		}
 		poller = null;
+	}
+
+	/** Set all controllers to a failed status */
+	private void failControllers() {
+		synchronized(controllers) {
+			for(ControllerImpl c: controllers.values()) {
+				c.setFailed(true);
+			}
+		}
 	}
 
 	/** Communication link status */
@@ -342,7 +351,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Field device controllers */
-	protected transient final TreeMap<Integer, ControllerImpl> controllers =
+	private transient final TreeMap<Integer, ControllerImpl> controllers =
 		new TreeMap<Integer, ControllerImpl>();
 
 	/** Put a controller on the link */
@@ -390,15 +399,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 					return cont;
 			}
 			return null;
-		}
-	}
-
-	/** Set all controllers to a failed status */
-	protected void failControllers() {
-		synchronized(controllers) {
-			for(ControllerImpl c: controllers.values()) {
-				c.setFailed(true);
-			}
 		}
 	}
 
