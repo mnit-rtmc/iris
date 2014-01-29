@@ -24,7 +24,6 @@ import java.util.TreeMap;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -372,33 +371,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		Integer d = new Integer(c.getDrop());
 		synchronized(controllers) {
 			controllers.remove(d);
-		}
-	}
-
-	/** Get a controller by drop */
-	public Controller getController(short drop) {
-		Integer d = new Integer(drop);
-		synchronized(controllers) {
-			return controllers.get(d);
-		}
-	}
-
-	/** Get the controllers defined for this communication link */
-	public Controller[] getControllers() {
-		synchronized(controllers) {
-			return (Controller [])controllers.values().toArray(
-				new Controller[0]);
-		}
-	}
-
-	/** Find the controller */
-	public ControllerImpl findController(Controller c) {
-		synchronized(controllers) {
-			for(ControllerImpl cont: controllers.values()) {
-				if(cont.equals(c))
-					return cont;
-			}
-			return null;
 		}
 	}
 
