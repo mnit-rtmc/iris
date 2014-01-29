@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
- * Copyright (C) 2011  AHMCT, University of California
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +35,6 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  * rates, visibility and wind speed.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
