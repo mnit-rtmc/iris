@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
@@ -50,9 +49,6 @@ abstract public class MessagePoller<T extends ControllerProperty>
 			return e.getClass().getSimpleName();
 	}
 
-	/** Interval time for load calculation is 30,000 milliseconds */
-	static protected final long INTERVAL_TIME = 30000;
-
 	/** Message polling log */
 	static private final DebugLog POLL_LOG = new DebugLog("polling");
 
@@ -70,15 +66,6 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Messenger for poll/response streams */
 	protected final Messenger messenger;
-
-	/** Interval start time of current load calculation */
-	protected long interval = 0;
-
-	/** Busy time of curent load calculation */
-	protected long busy = 0;
-
-	/** Load average (for last completed interval) */
-	protected float load = 0;
 
 	/** Poller status (null means not initialized yet) */
 	protected String status = null;
@@ -206,8 +193,8 @@ abstract public class MessagePoller<T extends ControllerProperty>
 			if(o.isDone() || !requeueOperation(o))
 				o.cleanup();
 			if(POLL_LOG.isOpen()) {
-				long el = sample_load(start);
-				plog(oname + " elapsed: " + el);
+				plog(oname + " elapsed: " +
+					calculate_elapsed(start));
 			}
 		}
 	}
@@ -239,30 +226,9 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		}
 	}
 
-	/** Sample the current line load */
-	protected long sample_load(long start) {
-		long now = TimeSteward.currentTimeMillis();
-		long e = now - start;
-		long past = now % INTERVAL_TIME;
-		long i = now - past;
-		if(i == interval)
-			busy += e;
-		else if(i > interval) {
-			if(e > past)
-				busy += e - past;
-			load = (float)busy / (i - interval);
-			if(e > past)
-				busy = past;
-			else
-				busy = e;
-		}
-		interval = i;
-		return e;
-	}
-
-	/** Get the current line usage load */
-	public float getLoad() {
-		return load;
+	/** Calculate the elapsed time */
+	private long calculate_elapsed(long start) {
+		return TimeSteward.currentTimeMillis() - start;
 	}
 
 	/** Check if a drop address is valid */
