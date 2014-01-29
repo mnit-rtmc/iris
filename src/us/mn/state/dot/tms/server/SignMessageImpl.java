@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
- * Copyright (C) 2012  Iteris Inc.
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +32,6 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  * bitmap for each page of the message.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
@@ -195,9 +193,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write("<sign_message");
 		w.write(createAttribute("dms", dms.getName()));
 		w.write(createAttribute("status", DMSHelper.getAllStyles(dms)));
-		w.write(createAttribute("run_priority", getRunTimePriority()));
-		w.write(createAttribute("act_priority", 
-			getActivationPriority()));
+		w.write(createAttribute("run_priority", runTimePriority));
+		w.write(createAttribute("act_priority", activationPriority));
 		w.write(createAttribute("scheduled", getScheduled()));
 		w.write(createAttribute("duration", getDuration()));
 		w.write(createAttribute("multi", multi));
