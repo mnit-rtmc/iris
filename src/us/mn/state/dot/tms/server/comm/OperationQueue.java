@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ public final class OperationQueue<T extends ControllerProperty> {
 	}
 
 	/** Inner class for nodes in the queue */
-	static protected final class Node<T extends ControllerProperty> {
+	static private final class Node<T extends ControllerProperty> {
 		final Operation<T> operation;
 		final PriorityLevel priority;
 		Node<T> next;
@@ -160,14 +160,5 @@ public final class OperationQueue<T extends ControllerProperty> {
 			handler.handle(node.priority, node.operation);
 			node = node.next;
 		}
-	}
-
-	/** Print the contents of the queue to the given stream */
-	public void print(final PrintStream ps) {
-		forEach(new OperationHandler<T>() {
-			public void handle(PriorityLevel prio, Operation<T> op){
-				ps.println("\t" + prio + "\t" + op);
-			}
-		});
 	}
 }

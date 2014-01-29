@@ -71,11 +71,6 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Messenger for poll/response streams */
 	protected final Messenger messenger;
 
-	/** Print the current status of the message poller */
-	public void print(PrintStream ps) {
-		queue.print(ps);
-	}
-
 	/** Interval start time of current load calculation */
 	protected long interval = 0;
 
