@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ abstract public class TransientPoller<T extends ControllerProperty>
 	}
 
 	/** Add an operation to the transient poller */
+	@Override
 	protected void addOperation(final Operation<T> op) {
 		queue.forEach(new OperationHandler<T>() {
 			public void handle(PriorityLevel prio, Operation<T> o) {

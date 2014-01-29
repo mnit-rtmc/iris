@@ -53,7 +53,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	static private final DebugLog POLL_LOG = new DebugLog("polling");
 
 	/** Thread group for all message poller threads */
-	static protected final ThreadGroup GROUP = new ThreadGroup("Poller");
+	static private final ThreadGroup GROUP = new ThreadGroup("Poller");
 
 	/** Write a message to the polling log */
 	protected void plog(String msg) {
@@ -76,7 +76,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Hung up flag */
-	protected boolean hung_up = false;
+	private boolean hung_up = false;
 
 	/** Check if the messenger was hung up on */
 	public boolean wasHungUp() {
@@ -134,7 +134,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Drain the poll queue */
-	protected void drainQueue() {
+	private void drainQueue() {
 		queue.close();
 		while(queue.hasNext()) {
 			Operation<T> o = queue.next();
@@ -146,7 +146,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Perform operations on the poll queue */
-	protected void performOperations() throws IOException {
+	private void performOperations() throws IOException {
 		while(true) {
 			Operation<T> o = queue.next();
 			if(o instanceof KillThread)
@@ -157,7 +157,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Perform one poll for an operation */
-	protected void doPoll(final OpController<T> o) throws IOException {
+	private void doPoll(final OpController<T> o) throws IOException {
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {
@@ -217,7 +217,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Requeue an in-progress operation */
-	protected boolean requeueOperation(Operation<T> op) {
+	private boolean requeueOperation(Operation<T> op) {
 		if(queue.requeue(op))
 			return true;
 		else {
