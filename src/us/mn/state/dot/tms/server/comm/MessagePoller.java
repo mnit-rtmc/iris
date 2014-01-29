@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
- * Copyright (C) 2012  Iteris Inc.
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +28,6 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * with priority-queued polling.  Subclasses are MndotPoller, NtcipPoller, etc.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 abstract public class MessagePoller<T extends ControllerProperty>
 	extends Thread
@@ -103,7 +101,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		return hung_up;
 	}
 
-	/** Create a new message poller with the open mode specified */
+	/** Create a new message poller */
 	protected MessagePoller(String name, Messenger m) {
 		super(GROUP, "Poller: " + name);
 		setDaemon(true);
