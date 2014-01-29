@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2014  Minnesota Department of Transportation
- * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +34,6 @@ import us.mn.state.dot.tms.units.Interval;
  *
  * @see us.mn.state.dot.tms.CommProtocol
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
@@ -167,7 +165,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Communication protocol */
-	protected CommProtocol protocol = CommProtocol.NTCIP_C;
+	private CommProtocol protocol = CommProtocol.NTCIP_C;
 
 	/** Set the communication protocol */
 	public void setProtocol(short p) {
@@ -390,8 +388,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		w.write("<commlink");
 		w.write(createAttribute("name", getName()));
 		w.write(createAttribute("description", getDescription()));
-		String p = CommProtocol.fromOrdinal(getProtocol()).toString();
-		w.write(createAttribute("protocol", p));
+		w.write(createAttribute("protocol", protocol.toString()));
 		w.write("/>\n");
 	}
 }
