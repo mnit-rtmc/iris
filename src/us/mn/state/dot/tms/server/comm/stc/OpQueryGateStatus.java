@@ -60,7 +60,7 @@ public class OpQueryGateStatus extends OpSTC {
 			logQuery(v);
 			gate_arm.setVersion(v.getVersion());
 			// Don't hold device lock while looping
-			device.release(operation);
+			device.release(OpQueryGateStatus.this);
 			return new QueryStatus();
 		}
 	}

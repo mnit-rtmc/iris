@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,21 +25,18 @@ import us.mn.state.dot.tms.server.DeviceImpl;
 abstract public class OpDevice<T extends ControllerProperty>
 	extends OpController<T>
 {
-	/** This operation; needed for inner Phase classes */
-	protected final OpDevice<T> operation;
-
 	/** Device on which to perform operation */
 	protected final DeviceImpl device;
 
 	/** Create a new device operation */
 	protected OpDevice(PriorityLevel p, DeviceImpl d) {
 		super(p, (ControllerImpl)d.getController(), d.getName());
-		operation = this;
 		device = d;
 	}
 
 	/** Operation equality test */
-	@Override public boolean equals(Object o) {
+	@Override
+	public boolean equals(Object o) {
 		return (o instanceof OpDevice) &&
 		       (getClass() == o.getClass()) &&
 		       ((OpDevice)o).device == device;
@@ -52,15 +49,16 @@ abstract public class OpDevice<T extends ControllerProperty>
 		protected Phase<T> poll(CommMessage<T> mess)
 			throws DeviceContentionException
 		{
-			OpDevice owner = device.acquire(operation);
-			if(owner != operation)
+			OpDevice owner = device.acquire(OpDevice.this);
+			if(owner != OpDevice.this)
 				throw new DeviceContentionException(owner);
 			return phaseTwo();
 		}
 	}
 
 	/** Create the first phase of the operation */
-	@Override protected final Phase<T> phaseOne() {
+	@Override
+	protected final Phase<T> phaseOne() {
 		return new AcquireDevice();
 	}
 
@@ -68,8 +66,9 @@ abstract public class OpDevice<T extends ControllerProperty>
 	abstract protected Phase<T> phaseTwo();
 
 	/** Cleanup the operation */
-	@Override public void cleanup() {
-		device.release(operation);
+	@Override
+	public void cleanup() {
+		device.release(OpDevice.this);
 		super.cleanup();
 	}
 }
