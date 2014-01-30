@@ -41,7 +41,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Get a message describing an IO exception */
-	static protected String exceptionMessage(IOException e) {
+	static private String exceptionMessage(IOException e) {
 		String m = e.getMessage();
 		if(m != null && m.length() > 0)
 			return m;
@@ -56,7 +56,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	static private final ThreadGroup GROUP = new ThreadGroup("Poller");
 
 	/** Write a message to the polling log */
-	protected void plog(String msg) {
+	private void plog(String msg) {
 		if(POLL_LOG.isOpen())
 			POLL_LOG.log(getName() + " " + msg);
 	}
@@ -68,7 +68,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	protected final Messenger messenger;
 
 	/** Poller status (null means not initialized yet) */
-	protected String status = null;
+	private String status = null;
 
 	/** Get the poller status */
 	public String getStatus() {
@@ -107,6 +107,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** MessagePoller is a subclass of Thread.  This is the run method. */
+	@Override
 	public void run() {
 		status = "STARTING";
 		plog("STARTING");
