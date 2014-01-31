@@ -184,7 +184,6 @@ public class MainServer {
 		if(secs > 5) {
 			TIMER.addJob(new DmsQueryMsgJob(secs));
 			TIMER.addJob(new LcsQueryMsgJob(secs));
-			TIMER.addJob(new WarnQueryStatusJob(secs));
 		}
 		TIMER.addJob(new DmsQueryStatusJob());
 		TIMER.addJob(new DmsQueryDialupJob());

@@ -19,10 +19,10 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.units.Interval;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LaneMarkingImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.server.comm.MeterPoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.WarningSignPoller;
+import us.mn.state.dot.tms.units.Interval;
 
 /**
  * MndotPoller is a poller for the Mn/DOT 170 communication protocol,
@@ -247,7 +248,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 			addOperation(new OpSendWarningSettings(sign));
 			break;
 		case QUERY_STATUS:
-			addOperation(new OpQueryWarningStatus(sign));
+			pollWarningSign(sign);
 			break;
 		default:
 			// Ignore other requests
@@ -288,5 +289,19 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		User o)
 	{
 		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
+	}
+
+	/** Perform regular poll of one controller */
+	@Override
+	public void pollController(ControllerImpl c) {
+		for(ControllerIO cio: c.getDevices()) {
+			if(cio instanceof WarningSignImpl)
+				pollWarningSign((WarningSignImpl)cio);
+		}
+	}
+
+	/** Perform regular poll of a warning sign */
+	private void pollWarningSign(WarningSignImpl sign) {
+		addOperation(new OpQueryWarningStatus(sign));
 	}
 }

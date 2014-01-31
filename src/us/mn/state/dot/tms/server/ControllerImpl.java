@@ -20,8 +20,9 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
@@ -389,6 +390,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			}
 		}
 		return null;
+	}
+
+	/** Get a list of all devices on controller */
+	public synchronized Set<ControllerIO> getDevices() {
+		return new HashSet<ControllerIO>(io_pins.values());
 	}
 
 	/** Get a map of pins to detectors */

@@ -17,9 +17,12 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
@@ -36,6 +39,9 @@ import us.mn.state.dot.tms.units.Interval;
  * @author Douglas Lau
  */
 public class CommLinkImpl extends BaseObjectImpl implements CommLink {
+
+	/** Poller scheduler for repeating jobs */
+	static private final Scheduler POLLER = new Scheduler("poller");
 
 	/** Test if a comm protocol supports gate arm control */
 	static private boolean isGateArm(CommProtocol cp) {
@@ -105,6 +111,35 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		poll_period = pp;
 		timeout = t;
 		poller = null;
+		initTransients();
+	}
+
+	/** Initialize the transient fields */
+	@Override
+	protected void initTransients() {
+		createPollJob(poll_period);
+	}
+
+	/** Polling job */
+	private transient PollJob poll_job;
+
+	/** Create a new polling job */
+	private void createPollJob(int s) {
+		PollJob pj = poll_job;
+		if(pj != null)
+			POLLER.removeJob(poll_job);
+		poll_job = new PollJob(s);
+		POLLER.addJob(poll_job);
+	}
+
+	/** Job for polling a comm link */
+	private class PollJob extends Job {
+		private PollJob(int s) {
+			super(Calendar.SECOND, s);
+		}
+		public void perform() {
+			pollControllers();
+		}
 	}
 
 	/** Destroy an object */
@@ -224,6 +259,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	public void setPollPeriod(int s) {
 		testGateArmDisable("poll_period");
 		poll_period = s;
+		createPollJob(s);
 	}
 
 	/** Check for valid polling period */
@@ -327,6 +363,25 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		synchronized(controllers) {
 			for(ControllerImpl c: controllers.values()) {
 				c.setFailed(true);
+			}
+		}
+	}
+
+	/** Poll all controllers */
+	private void pollControllers() {
+		MessagePoller mp = getPoller();
+		if(mp != null)
+			pollControllers(mp);
+	}
+
+	/** Poll all controllers */
+	private void pollControllers(MessagePoller mp) {
+		// WARNING: pollController calls ControllerImpl.getDevices,
+		//          which is synchronized on ControllerImpl instance
+		synchronized(controllers) {
+			for(ControllerImpl c: controllers.values()) {
+				if(c.getActive())
+					mp.pollController(c);
 			}
 		}
 	}

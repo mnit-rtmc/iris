@@ -246,4 +246,9 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	protected void download(ControllerImpl c, PriorityLevel p) {
 		// Subclasses should override this if necessary
 	}
+
+	/** Perform regular poll of one controller */
+	public void pollController(ControllerImpl c) {
+		// NOTE: override this in protocol driver
+	}
 }
