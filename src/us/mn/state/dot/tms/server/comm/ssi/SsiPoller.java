@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,17 +49,27 @@ public class SsiPoller extends MessagePoller {
 
 	/** Create a new message for the specified controller, 
 	 *  called by MessagePoller.doPoll(). */
+	@Override
 	public CommMessage createMessage(ControllerImpl c) {
 		return new SsiMessage(messenger);
 	}
 
 	/** Drop address is always valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		return true;
 	}
 
-	/** Query current weather conditions */
-	public void queryConditions(WeatherSensorImpl ws) {
+	/** Perform regular poll of one controller */
+	@Override
+	public void pollController(ControllerImpl c) {
+		WeatherSensorImpl ws = c.getActiveWeatherSensor();
+		if(ws != null);
+			pollWeatherSensor(ws);
+	}
+
+	/** Perform regular poll of a weather sensor */
+	private void pollWeatherSensor(WeatherSensorImpl ws) {
 		addOperation(new OpRead(ws, records));
 	}
 }

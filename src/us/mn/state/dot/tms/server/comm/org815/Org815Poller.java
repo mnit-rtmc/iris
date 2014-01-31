@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.org815;
 
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -33,17 +34,27 @@ public class Org815Poller extends MessagePoller<Org815Property>
 	}
 
 	/** Check if a drop address is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		return true;
 	}
 
 	/** Send settings to a weather sensor */
+	@Override
 	public void sendSettings(WeatherSensorImpl ws) {
 		addOperation(new OpQuerySettings(ws));
 	}
 
-	/** Query current weather conditions */
-	public void queryConditions(WeatherSensorImpl ws) {
+	/** Perform regular poll of one controller */
+	@Override
+	public void pollController(ControllerImpl c) {
+		WeatherSensorImpl ws = c.getActiveWeatherSensor();
+		if(ws != null);
+			pollWeatherSensor(ws);
+	}
+
+	/** Perform regular poll of a weather sensor */
+	private void pollWeatherSensor(WeatherSensorImpl ws) {
 		addOperation(new OpQueryConditions(ws));
 	}
 }
