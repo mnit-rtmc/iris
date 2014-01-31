@@ -23,13 +23,13 @@ import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LaneMarkingImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -46,7 +46,7 @@ import us.mn.state.dot.tms.units.Interval;
  *
  * @author Douglas Lau
  */
-public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
+public class MndotPoller extends MessagePoller implements LCSPoller,
 	MeterPoller, SamplePoller, WarningSignPoller, LaneMarkingPoller
 {
 	/** Test if it is afternoon */
@@ -181,12 +181,6 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		}
 	}
 
-	/** Query the status of alarms */
-	public void queryAlarms(ControllerImpl c) {
-		if(c.hasAlarm())
-			addOperation(new OpQueryAlarms(c));
-	}
-
 	/** Send a device request to a ramp meter */
 	public void sendRequest(RampMeterImpl meter, DeviceRequest r) {
 		switch(r) {
@@ -294,14 +288,24 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	/** Perform regular poll of one controller */
 	@Override
 	public void pollController(ControllerImpl c) {
+		boolean has_alarm = false;
 		for(ControllerIO cio: c.getDevices()) {
 			if(cio instanceof WarningSignImpl)
 				pollWarningSign((WarningSignImpl)cio);
+			if(cio instanceof AlarmImpl)
+				has_alarm = true;
 		}
+		if(has_alarm)
+			pollAlarms(c);
 	}
 
 	/** Perform regular poll of a warning sign */
 	private void pollWarningSign(WarningSignImpl sign) {
 		addOperation(new OpQueryWarningStatus(sign));
+	}
+
+	/** Perform regular poll of alarms */
+	private void pollAlarms(ControllerImpl c) {
+		addOperation(new OpQueryAlarms(c));
 	}
 }
