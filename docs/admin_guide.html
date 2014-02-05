@@ -85,7 +85,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">28 October 2013</div>
+<div id="stamp">5 February 2014</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -437,10 +437,11 @@
 	application and log in.
 </p>
 <p>
-	Enter "admin" as the username and "atms_242" as the password for the
-	initial login.
+	Enter <code>admin</code> as the username and <code>atms_242</code> as
+	the password for the initial login.
 	After <a href="#users_and_roles">creating</a> and logging in with a
-	real administrator account, the "admin" user account should be disabled.
+	real administrator account, the <code>admin</code> user account should
+	be disabled.
 </p>
 
 <h2 id="basic_setup">Basic Setup</h2>
@@ -479,12 +480,10 @@
 	menu item to display the <b>Users and Roles</b> form.
 </p>
 <p>
-	The template SQL database contains two roles, administrator and
-	operator.
-	The administrator role is assigned <b>capabilities</b> which allow
-	unfettered access to the IRIS system.
-	The operator role is restricted to capabilities which are generally
-	required to operate the software, but not make configuration changes.
+	The template SQL database contains one administrator role, called
+	<code>admin</code>.
+	This role is assigned <b>capabilities</b> which allow unfettered access
+	to the IRIS system.
 	Other roles can be created by an administrator, to allow users with a
 	specific set of capabilities, as needed.
 	For example, there are capabilities defined for each of the main tabs
