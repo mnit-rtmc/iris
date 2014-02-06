@@ -223,8 +223,8 @@
 	<li><a href="#dms">DMS</a> (dynamic message signs)</li>
 	<li><a href="#cameras">CCTV cameras</a></li>
 	<li><a href="#vds">VDS</a> (vehicle detection systems)</li>
+	<li><a href="#lcs">LCS</a> (lane-use control signs)</li>
 	<li><a href="#ramp_meters">Ramp meters</a></li>
-	<li>LCS (lane-use control signals)</li>
 	<li>Video switchers</li>
 	<li>Gate Arms</li>
 	<li>Warning Beacons</li>
@@ -999,29 +999,6 @@ patch -p0 &lt; ../09_tertiary_color.patch
 </table>
 <p/>
 
-<h4 id="ilcs">ILCS ("Intelligent" Lane-use Control Signals</h4>
-<p>
-	An "intelligent" LCS device is a color graphical DMS which is mounted
-	directly over a lane of traffic.
-	It can display many different lane-use indications, as well as
-	<i>variable speed advisories</i>, or any operator-defined message as
-	a regular DMS.
-</p>
-
-<h4 id="dlcs">DLCS ("Dumb" Lane-use Control Signals</h4>
-<p>
-	A "dumb" LCS device is a basic DMS which is mounted directly over a
-	lane of traffic.
-	It can display one of a fixed set of indications &mdash; typically a
-	<i>green arrow</i> <span class="green">&nbsp;↓&nbsp;</span>, a
-	<i>yellow arrow</i> <span class="yellow">&nbsp;↓&nbsp;</span> or a
-	<i>red X</i> <span class="red">&nbsp;X&nbsp;</span>).
-	Each indication must be assigned to a separate
-	<a href="#io_pins">I/O pin</a> on a
-	<a href="#controller">controller</a>, as well as the DMS which
-	represents the LCS.
-</p>
-
 <h4 id="msg_feed">DMS Msg Feed Protocol</h4>
 <p>
 	The "msg feed" protocol can be used to interface IRIS with an external
@@ -1716,8 +1693,34 @@ FIXME
 	By default, it is set to <code>/var/lib/iris/traffic</code>.
 </p>
 
-<h3 id="lcs">Lane-Use Control Signs</h3>
-FIXME
+<h3 id="lcs">Lane-use Control Signs (LCS)</h3>
+<p>
+	A lane-use control sign (LCS) is a sign which is mounted over a single
+	lane of traffic (typically one for each lane).
+	It can display a set of indications which either permit or restrict
+	use of that lane.
+</p>
+
+<h4 id="ilcs">"Intelligent" Lane-use Control Signs (ILCS)</h4>
+<p>
+	An "intelligent" LCS is a full-matrix color <a href="#dms">DMS</a> which
+	is mounted directly over a lane of traffic.
+	In addition to being used an LCS, it can display <a href="#vsa">variable
+	speed advisories</a>, or any operator-defined message as a regular DMS.
+</p>
+
+<h4 id="dlcs">"Dumb" Lane-use Control Signs (DLCS)</h4>
+<p>
+	A "dumb" LCS device is much simpler than an ILCS.
+	It can display one of a fixed set of indications &mdash; typically a
+	<i>green arrow</i> <span class="green">&nbsp;↓&nbsp;</span>, a
+	<i>yellow arrow</i> <span class="yellow">&nbsp;↓&nbsp;</span> or a
+	<i>red X</i> <span class="red">&nbsp;X&nbsp;</span>).
+	Each indication must be assigned to a separate
+	<a href="#io_pins">I/O pin</a> on a
+	<a href="#controllers">controller</a>, as well as the DMS which
+	represents the LCS.
+</p>
 
 <h3 id="ramp_meters">Ramp Meters</h3>
 FIXME
