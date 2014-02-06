@@ -39,9 +39,9 @@
   </div>
   <h2><a id="devices_link" href="#devices">Devices</a></h2>
   <div id="devices_div">
-    <h3><a href="#vehicle_detection">Vehicle Detection</a></h3>
-    <h3><a href="#cameras">Cameras</a></h3>
     <h3><a href="#dms">Dynamic Message Signs</a></h3>
+    <h3><a href="#cameras">Cameras</a></h3>
+    <h3><a href="#vehicle_detection">Vehicle Detection</a></h3>
     <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
     <h3><a href="#ramp_meters">Ramp Meters</a></h3>
     <h3><a href="#rwis">Road Weather Information Systems</a></h3>
@@ -1455,17 +1455,17 @@ patch -p0 &lt; ../09_tertiary_color.patch
 <h2 id="devices">Devices</h2>
 <p>
 	A device is a hardware field control or sensing system.
-	IRIS supports several different device types: <a
-	href="#vehicle_detection">vehicle detection</a>,
-	<a href="#cameras">cameras</a>,
+	IRIS supports several different device types:
 	<a href="#dms">dynamic message signs</a>,
+	<a href="#cameras">cameras</a>,
+	<a href="#vehicle_detection">vehicle detection</a>,
 	<a href="#lcs">lane-use control signs</a>,
 	<a href="#ramp_meters">ramp meters</a>,
 	<a href="#gate_arms">gate arms</a>,
 	<a href="#rwis">road weather information systems</a>,
 	<a href="#warning_beacons">warning beacons</a>,
-	<a href="#alarms">alarms</a>,
-	and <a href="#lane_marking">lane marking</a>.
+	<a href="#alarms">alarms</a>, and
+	<a href="#lane_marking">lane marking</a>.
 </p>
 <p>
 	For any device to be activated, it must first be connected to one of the
@@ -1475,57 +1475,6 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<a href="#comm_links">comm link</a> which communicates using the
 	appropriate protocol for the device.
 </p>
-
-<h3 id="vehicle_detection">Vehicle Detection</h3>
-<p>
-	There are several types of vehicle detection systems (VDS) &mdash;
-	also called <b>traffic sensing systems</b>.
-	The oldest of these is the inductive loop detector, which is a
-	wire placed under the surface of the road.
-	It is able to magnetically detect the metal in vehicles as they pass
-	over.
-	Another type of sensor uses radar mounted on the side of the road.
-	This type is <b>non-intrusive</b>, since the road surface does not need
-	to be cut to install the detector.
-	A third type &ndash; also non-intrusive &ndash; is video detection.
-	These systems use video cameras and computer vision software to
-	detect vehicles.
-</p>
-<p>
-	To create a detector, first select the <a href="#r_node">r_node</a>
-	at the location of the detector.
-	Then, select the <b>Detectors</b> tab for the r_node.
-	Type the detector name in the text entry widget just above the
-	<b>Create</b> button, and press that button.
-	After selecting the new detector in the r_node detector table,
-	its properties, such as <b>lane type</b> and <b>lane #</b> can be
-	changed.
-	In IRIS, lanes are numbered from right-to-left, starting with the
-	right lane as 1.
-</p>
-<p>
-	Usually, traffic data is binned into regular time periods, and collected
-	after each period expires.
-	Some detectors are able to record data for each individual vehicle,
-	without any binning.
-</p>
-<p>
-	Every 30 seconds, an XML file will be generated containing the most
-	recent sample data from all defined detectors.
-	The file is called det_sample.xml.gz, and it is written to the
-	<a href="#xml_output">XML output directory</a>
-</p>
-<p>
-	Sample data is archived only if the <code>sample_archive_enable</code>
-	<a href="#system_attributes">system attribute</a> is set to
-	<code>true</code>.
-	Another system attribute, <code>sample_archive_directory</code>,
-	can be used to change where sample archive files are stored.
-	By default, it is set to <code>/var/lib/iris/traffic</code>.
-</p>
-
-<h3 id="cameras">Cameras</h3>
-FIXME
 
 <h3 id="dms">Dynamic Message Signs (DMS)</h3>
 <p>
@@ -1705,6 +1654,57 @@ FIXME
 	    <td>IRIS-only</td>
 	</tr>
 </table>
+
+<h3 id="cameras">Cameras</h3>
+FIXME
+
+<h3 id="vehicle_detection">Vehicle Detection</h3>
+<p>
+	There are several types of vehicle detection systems (VDS) &mdash;
+	also called <b>traffic sensing systems</b>.
+	The oldest of these is the inductive loop detector, which is a
+	wire placed under the surface of the road.
+	It is able to magnetically detect the metal in vehicles as they pass
+	over.
+	Another type of sensor uses radar mounted on the side of the road.
+	This type is <b>non-intrusive</b>, since the road surface does not need
+	to be cut to install the detector.
+	A third type &ndash; also non-intrusive &ndash; is video detection.
+	These systems use video cameras and computer vision software to
+	detect vehicles.
+</p>
+<p>
+	To create a detector, first select the <a href="#r_node">r_node</a>
+	at the location of the detector.
+	Then, select the <b>Detectors</b> tab for the r_node.
+	Type the detector name in the text entry widget just above the
+	<b>Create</b> button, and press that button.
+	After selecting the new detector in the r_node detector table,
+	its properties, such as <b>lane type</b> and <b>lane #</b> can be
+	changed.
+	In IRIS, lanes are numbered from right-to-left, starting with the
+	right lane as 1.
+</p>
+<p>
+	Usually, traffic data is binned into regular time periods, and collected
+	after each period expires.
+	Some detectors are able to record data for each individual vehicle,
+	without any binning.
+</p>
+<p>
+	Every 30 seconds, an XML file will be generated containing the most
+	recent sample data from all defined detectors.
+	The file is called det_sample.xml.gz, and it is written to the
+	<a href="#xml_output">XML output directory</a>
+</p>
+<p>
+	Sample data is archived only if the <code>sample_archive_enable</code>
+	<a href="#system_attributes">system attribute</a> is set to
+	<code>true</code>.
+	Another system attribute, <code>sample_archive_directory</code>,
+	can be used to change where sample archive files are stored.
+	By default, it is set to <code>/var/lib/iris/traffic</code>.
+</p>
 
 <h3 id="lcs">Lane-Use Control Signs</h3>
 FIXME
