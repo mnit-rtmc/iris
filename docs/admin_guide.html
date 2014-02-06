@@ -45,8 +45,8 @@
     <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
     <h3><a href="#ramp_meters">Ramp Meters</a></h3>
     <h3><a href="#gate_arms">Gate Arms</a></h3>
+    <h3><a href="#beacons">Beacons</a></h3>
     <h3><a href="#rwis">Road Weather Information Systems</a></h3>
-    <h3><a href="#warning_beacons">Warning Beacons</a></h3>
     <h3><a href="#alarms">Alarms</a></h3>
     <h3><a href="#lane_marking">Lane Marking</a></h3>
   </div>
@@ -226,8 +226,8 @@
 	<li><a href="#lcs">LCS</a> (lane-use control signs)</li>
 	<li><a href="#ramp_meters">Ramp meters</a></li>
 	<li><a href="#gate_arms">Gate Arms</a></li>
+	<li><a href="#beacons">Beacons</a></li>
 	<li>Video switchers</li>
-	<li>Warning Beacons</li>
 	<li>RWIS (road-weather information systems)</li>
 	<li>In-road lighting (dynamic striping)</li>
 </ul>
@@ -912,7 +912,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	    <td>MnDOT 170 4</td>
 	    <td><a href="#vds">VDS</a>,
 	        <a href="#ramp_meters">metering</a>,
-	        <a href="#dlcs">DLCS</a>
+	        <a href="#dlcs">DLCS</a>,
+		<a href="#beacons">beacons</a>
 	    </td>
 	    <td>TCP</td>
 	</tr>
@@ -920,7 +921,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	    <td>MnDOT 170 5</td>
 	    <td><a href="#vds">VDS</a>,
 	        <a href="#ramp_meters">metering</a>,
-	        <a href="#dlcs">DLCS</a>
+	        <a href="#dlcs">DLCS</a>,
+		<a href="#beacons">beacons</a>
 	    </td>
 	    <td>TCP</td>
 	</tr>
@@ -1335,8 +1337,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<a href="#lcs">lane-use control signs</a>,
 	<a href="#ramp_meters">ramp meters</a>,
 	<a href="#gate_arms">gate arms</a>,
+	<a href="#beacons">beacons</a>,
 	<a href="#rwis">road weather information systems</a>,
-	<a href="#warning_beacons">warning beacons</a>,
 	<a href="#alarms">alarms</a>, and
 	<a href="#lane_marking">lane marking</a>.
 </p>
@@ -1726,11 +1728,16 @@ FIXME
 	by time of day.
 </p>
 
+<h3 id="beacons">Beacons</h3>
+<p>
+	A beacon is a light or set of lights that flashes toward oncoming
+	traffic.
+	Its purpose is to draw attention to a <a href="#dms">DMS</a> or static
+	sign.
+	Sometimes, they are called <b>flashers</b> or <b>wig-wags</b>.
+</p>
+
 <h3 id="rwis">Road Weather Information Systems</h3>
-FIXME
-
-
-<h3 id="warning_beacons">Warning Beacons</h3>
 FIXME
 
 <h3 id="alarms">Alarms</h3>
