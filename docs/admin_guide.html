@@ -220,8 +220,8 @@
 	These include:
 </p>
 <ul>
-	<li><a href="#dms">DMS</a> (dynamic message signs) or CMS</li>
-	<li><a href="#cameras">CCTV cameras</a> (pan/tilt/zoom)</li>
+	<li><a href="#dms">DMS</a> (dynamic message signs)</li>
+	<li><a href="#cameras">CCTV cameras</a></li>
 	<li><a href="#vds">VDS</a> (vehicle detection systems)</li>
 	<li><a href="#ramp_meters">Ramp meters</a></li>
 	<li>LCS (lane-use control signals)</li>
@@ -1143,37 +1143,12 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<li>Configuring time-of-day operation</li>
 </ul>
 
-<h4 id="ptz">CCTV PTZ Protocols</h4>
-<p>
-	These protocols are used to control the pan/tilt/zoom functions of
-	closed-circuit television cameras.
-	They enable the following:
-</p>
-<ul>
-	<li>Panning / tilting the camera</li>
-	<li>Zooming in or out</li>
-	<li>Recall preset positions</li>
-	<li>Store preset positions</li>
-</ul>
-
 <h4 id="gate_arm">Gate Arm Protocols</h4>
 <p>
 	Gate Arms are traffic control devices which restrict access to a
 	section of roadway.
 	They can be used, for example, for reversible lanes which can be changed
 	by time of day.
-</p>
-
-<h4 id="video">Video Switching Protocols</h4>
-<p>
-	A video switcher system allows camera video (or streams) to be routed to
-	a number of video monitors.
-	Each monitor can be assigned to display the video from any specific
-	camera.
-	IRIS allows an operator to select one video monitor to be linked with
-	their camera selection on the user interface.
-	This way, every time the user selects a camera, it's video is
-	immediately displayed on the associated monitor.
 </p>
 
 <h4 id="rwis_protocol">RWIS Protocols</h4>
@@ -1654,9 +1629,46 @@ FIXME
 	    <td>IRIS-only</td>
 	</tr>
 </table>
+<br/>
 
 <h3 id="cameras">Cameras</h3>
-FIXME
+<p>
+	Closed-circuit television cameras are commonly used to monitor traffic
+	conditions.
+	These cameras can transmit video to a traffic management center using
+	either an analog signal (with dedicated cabling) or a digital stream
+	(using an IP network).
+	There are advantages to both approaches.
+	Analog video has high picture quality and very low latency, while
+	digital video is much cheaper and easier to route around.
+</p>
+<p>
+	To display camera video in IRIS, it must be digitally encoded.
+</p>
+<h4 id="ptz">Pan / Tilt / Zoom</h4>
+<p>
+	Some cameras have a built-in pan/tilt/zoom (PTZ) functionality.
+	IRIS can perform the following PTZ operations:
+</p>
+<ul>
+	<li>Panning / tilting the camera</li>
+	<li>Zooming in or out</li>
+	<li>Recall preset positions</li>
+	<li>Store preset positions</li>
+</ul>
+<h4 id="video">Video Switching</h4>
+<p>
+	IRIS can also be configured to send commands to a video switcher
+	system.
+	This allows camera video (or streams) to be routed to a number of video
+	monitors.
+	Each monitor can be assigned to display the video from any specific
+	camera.
+	IRIS allows an operator to select one video monitor to be linked with
+	their camera selection on the user interface.
+	This way, every time the user selects a camera, it's video is
+	immediately displayed on the associated monitor.
+</p>
 
 <h3 id="vehicle_detection">Vehicle Detection</h3>
 <p>
