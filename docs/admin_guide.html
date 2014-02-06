@@ -41,7 +41,7 @@
   <div id="devices_div">
     <h3><a href="#dms">Dynamic Message Signs</a></h3>
     <h3><a href="#cameras">Cameras</a></h3>
-    <h3><a href="#vehicle_detection">Vehicle Detection</a></h3>
+    <h3><a href="#vds">Vehicle Detection</a></h3>
     <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
     <h3><a href="#ramp_meters">Ramp Meters</a></h3>
     <h3><a href="#rwis">Road Weather Information Systems</a></h3>
@@ -843,8 +843,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 </dl>
 <h4>R_Node Detectors</h4>
 <p>
-	The r_node <b>Detectors</b> tab allows
-	<a href="#vehicle_detection">detectors</a> to be created and associated
+	The r_node <b>Detectors</b> tab allows vehicle
+	<a href="#vds">detectors</a> to be created and associated
 	with an r_node.
 </p>
 
@@ -1072,62 +1072,6 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	attribute</a> can be set to "false" to disable this check.
 </p>
 
-<h4 id="vds">VDS Protocols</h4>
-<p>
-	These protocols allow IRIS to collect traffic data from
-	<a href="#vehicle_detection">vehicle detection systems</a> (VDS).
-	In most cases, this allows volume, occupancy and even speed to be
-	collected for the most recent time period bin.
-	Others allow recording timestamps and headway for each vehicle passing
-	by the sensor.
-	Some protocols allow the time binning period to be adjusted.
-	The following table summarizes features of each protocol.
-</p>
-<table>
-	<tr>
-	    <th>Protocol</th>
-	    <th>Addressing</th>
-	    <th>Binning</th>
-	    <th>Speed</th>
-	</tr>
-	<tr>
-	    <th>MnDOT 170 4</th>
-	    <td>4-bit (1-15)</td>
-	    <td>30 seconds (+5 minute)</td>
-	    <td>No</td>
-	</tr>
-	<tr>
-	    <th>MnDOT 170 5</th>
-	    <td>5-bit (1-31)</td>
-	    <td>30 seconds (+5 minute)</td>
-	    <td>No</td>
-	</tr>
-	<tr>
-	    <th>Canoga</th>
-	    <td>8-bit (1-255)</td>
-	    <td>No (vehicle logging)</td>
-	    <td>Double loops only</td>
-	</tr>
-	<tr>
-	    <th>SS105</th>
-	    <td>4-digit (0001-9999)</td>
-	    <td>5 seconds to 1 month</td>
-	    <td>Yes</td>
-	</tr>
-	<tr>
-	    <th>SS125</th>
-	    <td>32-bit (0-65535)</td>
-	    <td>???</td>
-	    <td>Yes</td>
-	</tr>
-	<tr>
-	    <th>RTMS G4</th>
-	    <td>32-bit (0-65535)</td>
-	    <td>10 seconds to 1 hour</td>
-	    <td>Yes</td>
-	</tr>
-</table>
-<p/>
 
 <h4 id="meter_protocols">Ramp Metering Protocols</h4>
 <p>
@@ -1433,7 +1377,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	IRIS supports several different device types:
 	<a href="#dms">dynamic message signs</a>,
 	<a href="#cameras">cameras</a>,
-	<a href="#vehicle_detection">vehicle detection</a>,
+	<a href="#vds">vehicle detection</a>,
 	<a href="#lcs">lane-use control signs</a>,
 	<a href="#ramp_meters">ramp meters</a>,
 	<a href="#gate_arms">gate arms</a>,
@@ -1670,10 +1614,10 @@ FIXME
 	immediately displayed on the associated monitor.
 </p>
 
-<h3 id="vehicle_detection">Vehicle Detection</h3>
+<h3 id="vds">Vehicle Detection Systems</h3>
 <p>
-	There are several types of vehicle detection systems (VDS) &mdash;
-	also called <b>traffic sensing systems</b>.
+	There are several types of <b>vehicle detection systems</b> (VDS)
+	&mdash; also called <b>traffic sensing systems</b>.
 	The oldest of these is the inductive loop detector, which is a
 	wire placed under the surface of the road.
 	It is able to magnetically detect the metal in vehicles as they pass
@@ -1685,6 +1629,7 @@ FIXME
 	These systems use video cameras and computer vision software to
 	detect vehicles.
 </p>
+<h4>VDS Configuration</h4>
 <p>
 	To create a detector, first select the <a href="#r_node">r_node</a>
 	at the location of the detector.
@@ -1697,15 +1642,68 @@ FIXME
 	In IRIS, lanes are numbered from right-to-left, starting with the
 	right lane as 1.
 </p>
+
+<h4>VDS Protocols</h4>
 <p>
-	Usually, traffic data is binned into regular time periods, and collected
-	after each period expires.
-	Some detectors are able to record data for each individual vehicle,
-	without any binning.
+	IRIS supports several different protocols for communicating with
+	vehicle detection systems.
+	For most VDS protocols, traffic data is binned at a fixed time interval.
+	Some protocols allow the binning interval to be adjusted.
+	IRIS collects traffic data including <b>volume</b> (traffic counts),
+	<b>occupancy</b>, <b>speed</b>, and <b>vehicle classification</b>.
+	Some protocols do not use binning at all &mdash; instead they record
+	timestamps and headway for each vehicle passing by the sensor.
+	The following table summarizes features of each protocol.
 </p>
+<table>
+	<tr>
+	    <th>Protocol</th>
+	    <th>Addressing</th>
+	    <th>Binning</th>
+	    <th>Speed</th>
+	</tr>
+	<tr>
+	    <th>MnDOT 170 4</th>
+	    <td>4-bit (1-15)</td>
+	    <td>30 seconds (+5 minute)</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <th>MnDOT 170 5</th>
+	    <td>5-bit (1-31)</td>
+	    <td>30 seconds (+5 minute)</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <th>Canoga</th>
+	    <td>8-bit (1-255)</td>
+	    <td>No (vehicle logging)</td>
+	    <td>Double loops only</td>
+	</tr>
+	<tr>
+	    <th>SS105</th>
+	    <td>4-digit (0001-9999)</td>
+	    <td>5 seconds to 1 month</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <th>SS125</th>
+	    <td>32-bit (0-65535)</td>
+	    <td>???</td>
+	    <td>Yes</td>
+	</tr>
+	<tr>
+	    <th>RTMS G4</th>
+	    <td>32-bit (0-65535)</td>
+	    <td>10 seconds to 1 hour</td>
+	    <td>Yes</td>
+	</tr>
+</table>
+<br/>
+<h4>VDS Data Acrhiving</h4>
 <p>
-	Every 30 seconds, an XML file will be generated containing the most
-	recent sample data from all defined detectors.
+	Every 30 seconds, an XML file is generated containing the most recent
+	sample data from all defined detectors.
 	The file is called det_sample.xml.gz, and it is written to the
 	<a href="#xml_output">XML output directory</a>
 </p>
@@ -1794,14 +1792,15 @@ FIXME
 	</tr>
 	<tr>
 	    <td>det_sample.xml.gz</td>
-	    <td>Sample data from <a href="#vehicle_detection">vehicle detection
-	        systems</a></td>
+	    <td>Sample data from <a href="#vds">vehicle detection systems</a>
+	    </td>
 	    <td>30&nbsp;seconds</td>
 	</tr>
 	<tr>
 	    <td>stat_sample.xml.gz</td>
-	    <td>Mainline station data from <a href="#vehicle_detection">vehicle
-	        detection systems</a></td>
+	    <td>Mainline station data from <a href="#vds">vehicle detection
+	        systems</a>
+	    </td>
 	    <td>30 seconds</td>
 	</tr>
 	<tr>
