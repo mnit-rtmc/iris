@@ -267,7 +267,7 @@
 	<li>Continuously updated density, speed and flow maps</li>
 	<li>Scheduled deployment of control devices</li>
 	<li>Incident management</li>
-	<li>Travel time estimation for traveller information</li>
+	<li>Travel time estimation for traveler information</li>
 	<li>Variable speed advisories</li>
 	<li>Coordinated ramp metering strategies</li>
 </ul>
@@ -306,7 +306,7 @@
 	<a href="http://www.postgresql.org">PostgreSQL</a> and
 	<a href="http://projects.apache.org/projects/http_server.html">Apache</a>.
 </p>
-<h3 id="init_iris">Ininialize IRIS</h3>
+<h3 id="init_iris">Initialize IRIS</h3>
 <p>
 	Next, you must initialize the IRIS server installation.
 	Run the following command (as root):
@@ -584,7 +584,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 <p>
 	In the IRIS client, select the <span class="menu">View ➔ System ➔
 	Map Extents</span> menu item to bring up the Map Extents form.
-	This form enables the creatiion of map extents, which are buttons
+	This form enables the creation of map extents, which are buttons
 	allowing quick selection of a map location and zoom level.
 	Each map extent will be displayed as a button on the upper right area
 	of the map (next to the zoom in/out buttons).
@@ -659,7 +659,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 <p>
 	The next column is <b>Abbrev</b>.
 	Here, an abbreviation of up to 6 characters can be entered.
-	This is used for labelling detectors and stations.
+	This is used for labeling detectors and stations.
 </p>
 <p>
 	The <b>Road Class</b> determines the presentation of the road on the
@@ -736,12 +736,12 @@ patch -p0 &lt; ../09_tertiary_color.patch
       <tr>
 	<td>4</td>
 	<td>access</td>
-	<td>Network access (for traveller information)</td>
+	<td>Network access (for traveler information)</td>
       </tr>
       <tr>
 	<td>5</td>
 	<td>interchange</td>
-	<td>Freeway interchange (for traveller information)</td>
+	<td>Freeway interchange (for traveler information)</td>
       </tr>
     </table>
   </dd>
@@ -823,7 +823,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
       The limit is used in travel time estimation.
   </dd>
   <dt>pickable</dt>
-  <dd>For traveller information systems, an r_node can be marked pickable if a
+  <dd>For traveler information systems, an r_node can be marked pickable if a
       user is allowed to pick a node as an origin or destination.
       NOTE: This feature has not been implemented yet.
   </dd>
@@ -1377,7 +1377,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 <h4>DMS Setup</h4>
 FIXME
 
-<h4 id="multi">MULTI (Markup Language for Transpostation Information)</h4>
+<h4 id="multi">MULTI (Markup Language for Transportation Information)</h4>
 <p>
 	DMS messages are specified using <b>MULTI</b>, as defined by the
 	NTCIP 1203 standard.
@@ -1385,7 +1385,7 @@ FIXME
 	instructions denoted by tags inside square brackets.
 	For example, the tag <code>[nl]</code> indicates a new line.
 	Most of the useful standard MULTI tags are supported, as well as a few
-	whch are specific to IRIS.
+	which are specific to IRIS.
 	The following table summarizes the tags supported by IRIS.
 </p>
 <table>
@@ -1659,7 +1659,7 @@ FIXME
 	</tr>
 </table>
 <br/>
-<h4>VDS Data Acrhiving</h4>
+<h4>VDS Data Archiving</h4>
 <p>
 	Every 30 seconds, an XML file is generated containing the most recent
 	sample data from all defined detectors.
