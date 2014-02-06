@@ -45,7 +45,7 @@ h5:before {
 	bottom: 0%;
 	padding-left: 8px;
 	overflow: hidden;
-	background: #9bb;
+	background: #acc;
 	font-size: 50%;
 }
 .mainbar {
@@ -94,7 +94,7 @@ sub {
 	font-family: monospace;
 }
 body {
-	background: #ccd;
+	background: #cde;
 	orphans: 3;
 }
 p {
