@@ -881,26 +881,26 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 	<tr>
 	    <td>NTCIP Class A</td>
-	    <td><a href="#dms_control">DMS control</a>,
+	    <td><a href="#dms">DMS</a> control,
 	        <a href="#ilcs">ILCS</a> (no HDLC)
 	    </td>
 	    <td>UDP</td>
 	</tr>
 	<tr>
 	    <td>NTCIP Class B</td>
-	    <td><a href="#dms_control">DMS control</a>,
+	    <td><a href="#dms">DMS</a> control,
 	        <a href="#ilcs">ILCS</a> over serial (HDLC)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>NTCIP Class C</td>
-	    <td><a href="#dms_control">DMS control</a>,
+	    <td><a href="#dms">DMS</a> control,
 	        <a href="#ilcs">ILCS</a> (no HDLC)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>DMS XML</td>
-	    <td><a href="#dms_control">DMS control</a> to external system</td>
+	    <td><a href="#dms">DMS</a> control to external system</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
@@ -998,20 +998,6 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 </table>
 <p/>
-
-<h4 id="dms_control">DMS Control Protocols</h4>
-<p>
-	These protocols are used to communicate with DMS controllers in the
-	field.
-	They enable the following:
-</p>
-<ul>
-	<li>Querying configuration information</li>
-	<li>Querying diagnostic information</li>
-	<li>Sending fonts and graphics</li>
-	<li>Querying currently displayed message</li>
-	<li>Displaying new messages</li>
-</ul>
 
 <h4 id="ilcs">ILCS ("Intelligent" Lane-use Control Signals</h4>
 <p>
@@ -1542,6 +1528,24 @@ patch -p0 &lt; ../09_tertiary_color.patch
 FIXME
 
 <h3 id="dms">Dynamic Message Signs (DMS)</h3>
+<p>
+	A dynamic message sign (DMS) is a sign which is capable of changing the
+	message displayed to motorists.
+	They can be classified as character-matrix, line-matrix and full-matrix,
+	depending on the spacing between pixels.
+	Some are monochrome, and some support full color display.
+	All of these configurations are supported by IRIS.
+</p>
+<p>
+	The following operations can be performed on a DMS:
+</p>
+<ul>
+	<li>Querying currently displayed message</li>
+	<li>Displaying new messages</li>
+	<li>Querying configuration information</li>
+	<li>Querying diagnostic information</li>
+	<li>Sending fonts and graphics</li>
+</ul>
 
 <h4>DMS Setup</h4>
 FIXME
