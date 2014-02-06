@@ -229,7 +229,7 @@
 	<li><a href="#ramp_meters">Ramp meters</a></li>
 	<li><a href="#gate_arms">Gate Arms</a></li>
 	<li><a href="#beacons">Beacons</a></li>
-	<li>RWIS (road-weather information systems)</li>
+	<li><a href="#rwis">RWIS</a> (road-weather information systems)</li>
 	<li>In-road lighting (dynamic striping)</li>
 </ul>
 <h3 id="protocols">Protocols</h3>
@@ -988,12 +988,12 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 	<tr>
 	    <td>Org 815</td>
-	    <td><a href="#rwis_protocol">RWIS</a> (ORG 815 sensor)</td>
+	    <td><a href="#rwis">RWIS</a> (ORG 815 sensor)</td>
 	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>SSI</td>
-	    <td><a href="#rwis_protocol">RWIS</a> (SSI RWIS sensor)</td>
+	    <td><a href="#rwis">RWIS</a> (SSI RWIS sensor)</td>
 	    <td>TCP / HTTP</td>
 	</tr>
 	<tr>
@@ -1052,14 +1052,6 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	possibility of man-in-the-middle attacks between IRIS and the feed host.
 	In this case the "msg_feed_verify" <a href="#system_attributes">system
 	attribute</a> can be set to "false" to disable this check.
-</p>
-
-<h4 id="rwis_protocol">RWIS Protocols</h4>
-<p>
-	Road Weather Information Systems (RWIS) can sense data such as
-	precipitation rate, road surface temperature, wind speed, etc.
-	These protocols allows IRIS to collect and store this type of
-	information.
 </p>
 
 <h4 id="din_relay">DIN Relay</h4>
@@ -1748,7 +1740,10 @@ FIXME
 </p>
 
 <h3 id="rwis">Road Weather Information Systems</h3>
-FIXME
+<p>
+	Road Weather Information Systems (RWIS) can sense data such as
+	precipitation rate, road surface temperature, wind speed, etc.
+</p>
 
 <h3 id="lane_marking">Lane Marking</h3>
 FIXME
