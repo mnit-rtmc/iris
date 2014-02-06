@@ -85,7 +85,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">5 February 2014</div>
+<div id="stamp">6 February 2014</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -965,6 +965,13 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	    <td>UDP</td>
 	</tr>
 	<tr>
+	    <td>STC</td>
+	    <td><a href="#gate_arm">Gate Arm</a> control for HySecurity
+	        SmartTouch Controllers
+	    </td>
+	    <td>TCP</td>
+	</tr>
+	<tr>
 	    <td>Vicon Switcher</td>
 	    <td><a href="#video">Video switching</a> for Vicon</td>
 	    <td>TCP</td>
@@ -1023,8 +1030,10 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<i>green arrow</i> <span class="green">&nbsp;↓&nbsp;</span>, a
 	<i>yellow arrow</i> <span class="yellow">&nbsp;↓&nbsp;</span> or a
 	<i>red X</i> <span class="red">&nbsp;X&nbsp;</span>).
-	Each indication must be assigned to a separate I/O pin on a controller,
-	as well as the DMS which represents the LCS.
+	Each indication must be assigned to a separate
+	<a href="#io_pins">I/O pin</a> on a
+	<a href="#controller">controller</a>, as well as the DMS which
+	represents the LCS.
 </p>
 
 <h4 id="msg_feed">DMS Msg Feed Protocol</h4>
@@ -1161,6 +1170,14 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<li>Store preset positions</li>
 </ul>
 
+<h4 id="gate_arm">Gate Arm Protocols</h4>
+<p>
+	Gate Arms are traffic control devices which restrict access to a
+	section of roadway.
+	They can be used, for example, for reversible lanes which can be changed
+	by time of day.
+</p>
+
 <h4 id="video">Video Switching Protocols</h4>
 <p>
 	A video switcher system allows camera video (or streams) to be routed to
@@ -1202,12 +1219,69 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	Controllers can be assigned to a <b>cabinet</b>, which has location
 	information, to allow displaying on a map.
 </p>
+
+<h4 id="io_pins">I/O Pins</h4>
 <p>
-	Each controller has a set of I/O <b>pins</b>, to which
+	Each controller has a set of <b>I/O pins</b>, to which
 	<a href="#devices">devices</a> can be assigned.
-	The function of these pins is protocol specific &mdash; an input pin
-	for one protocol could be an output pin for a different protocol.
+	The function of these pins is protocol specific &mdash; see the
+	following table.
 </p>
+<table>
+	<tr>
+	    <th>Device Type</th>
+	    <th>Protocol</th>
+	    <th>I/O Pin(s)</th>
+	</tr>
+	<tr>
+	    <td>DMS, ILCS</td>
+	    <td>NTCIP (A, B, C), DMS XML</td>
+	    <td>1</td>
+	</tr>
+	<tr>
+	    <td>Camera</td>
+	    <td>Pelco D, Manchester, Vicon, Infinova</td>
+	    <td>1</td>
+	</tr>
+	<tr>
+	    <td rowspan="4">VDS</td>
+	    <td>MnDOT 170 (4, 5)</td>
+	    <td>39 - 62</td>
+	</tr>
+	<tr>
+	    <td>Canoga</td>
+	    <td>1 - 4</td>
+	</tr>
+	<tr>
+	    <td>SS105, SS125</td>
+	    <td>1 - 8</td>
+	</tr>
+	<tr>
+	    <td>RTMS G4</td>
+	    <td>1 - 12</td>
+	</tr>
+	<tr>
+	    <td>Ramp Meter</td>
+	    <td>MnDOT 170 (4, 5)</td>
+	    <td>2 or 3</td>
+	</tr>
+	<tr>
+	    <td>Gate Arms</td>
+	    <td>STC</td>
+	    <td>1</td>
+	</tr>
+	<tr>
+	    <td>RWIS</td>
+	    <td>Org 815, SSI</td>
+	    <td>1</td>
+	</tr>
+	<tr>
+	    <td>Video Switcher</td>
+	    <td>Vicon, Pelco</td>
+	    <td>1</td>
+	</tr>
+</table>
+<br/>
 
 <h3 id="fonts">Fonts</h3>
 <p>
@@ -1407,6 +1481,14 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<a href="#alarms">alarms</a>,
 	and <a href="#lane_marking">lane marking</a>.
 </p>
+<p>
+	For any device to be activated, it must first be connected to one of the
+	<a href="#io_pins">I/O pins</a> on a
+	<a href="#controllers">controller</a>.
+	The controller must also be associated with a
+	<a href="#comm_links">comm link</a> which communicates using the
+	appropriate protocol for the device.
+</p>
 
 <h3 id="vehicle_detection">Vehicle Detection</h3>
 <p>
@@ -1436,12 +1518,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	right lane as 1.
 </p>
 <p>
-	For sample data to be collected, a detector must be connected to one
-	of the I/O pins on a <a href="#controllers">controller</a>.
-	Also, that controller must be associated with a
-	<a href="#comm_links">comm link</a> which communicates using a
-	<a href="#vds">VDS protocol</a>.
-	Usually, the data is binned into regular time periods, and collected
+	Usually, traffic data is binned into regular time periods, and collected
 	after each period expires.
 	Some detectors are able to record data for each individual vehicle,
 	without any binning.
