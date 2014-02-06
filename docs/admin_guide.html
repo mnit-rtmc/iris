@@ -46,8 +46,8 @@
     <h3><a href="#ramp_meters">Ramp Meters</a></h3>
     <h3><a href="#gate_arms">Gate Arms</a></h3>
     <h3><a href="#beacons">Beacons</a></h3>
-    <h3><a href="#rwis">Road Weather Information Systems</a></h3>
     <h3><a href="#alarms">Alarms</a></h3>
+    <h3><a href="#rwis">Road Weather Information Systems</a></h3>
     <h3><a href="#lane_marking">Lane Marking</a></h3>
   </div>
   <h2><a id="features_link" href="#features">Features</a></h2>
@@ -914,7 +914,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	    <td><a href="#vds">VDS</a>,
 	        <a href="#ramp_meters">metering</a>,
 	        <a href="#dlcs">DLCS</a>,
-		<a href="#beacons">beacons</a>
+		<a href="#beacons">beacons</a>,
+		<a href="#alarms">alarms</a>
 	    </td>
 	    <td>TCP</td>
 	</tr>
@@ -923,7 +924,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	    <td><a href="#vds">VDS</a>,
 	        <a href="#ramp_meters">metering</a>,
 	        <a href="#dlcs">DLCS</a>,
-		<a href="#beacons">beacons</a>
+		<a href="#beacons">beacons</a>,
+		<a href="#alarms">alarms</a>
 	    </td>
 	    <td>TCP</td>
 	</tr>
@@ -1339,8 +1341,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<a href="#ramp_meters">ramp meters</a>,
 	<a href="#gate_arms">gate arms</a>,
 	<a href="#beacons">beacons</a>,
-	<a href="#rwis">road weather information systems</a>,
-	<a href="#alarms">alarms</a>, and
+	<a href="#alarms">alarms</a>,
+	<a href="#rwis">road weather information systems</a>, and
 	<a href="#lane_marking">lane marking</a>.
 </p>
 <p>
@@ -1738,10 +1740,14 @@ FIXME
 	Sometimes, they are called <b>flashers</b> or <b>wig-wags</b>.
 </p>
 
-<h3 id="rwis">Road Weather Information Systems</h3>
-FIXME
-
 <h3 id="alarms">Alarms</h3>
+<p>
+	An alarm is a simple device which is triggered when an event happens.
+	The event could be an equipment failure, high temperature, etc.
+	Alarms can be monitored to help maintain field devices.
+</p>
+
+<h3 id="rwis">Road Weather Information Systems</h3>
 FIXME
 
 <h3 id="lane_marking">Lane Marking</h3>
