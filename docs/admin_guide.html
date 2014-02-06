@@ -44,8 +44,8 @@
     <h3><a href="#vds">Vehicle Detection</a></h3>
     <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
     <h3><a href="#ramp_meters">Ramp Meters</a></h3>
-    <h3><a href="#rwis">Road Weather Information Systems</a></h3>
     <h3><a href="#gate_arms">Gate Arms</a></h3>
+    <h3><a href="#rwis">Road Weather Information Systems</a></h3>
     <h3><a href="#warning_beacons">Warning Beacons</a></h3>
     <h3><a href="#alarms">Alarms</a></h3>
     <h3><a href="#lane_marking">Lane Marking</a></h3>
@@ -225,8 +225,8 @@
 	<li><a href="#vds">VDS</a> (vehicle detection systems)</li>
 	<li><a href="#lcs">LCS</a> (lane-use control signs)</li>
 	<li><a href="#ramp_meters">Ramp meters</a></li>
+	<li><a href="#gate_arms">Gate Arms</a></li>
 	<li>Video switchers</li>
-	<li>Gate Arms</li>
 	<li>Warning Beacons</li>
 	<li>RWIS (road-weather information systems)</li>
 	<li>In-road lighting (dynamic striping)</li>
@@ -966,7 +966,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 	<tr>
 	    <td>STC</td>
-	    <td><a href="#gate_arm">Gate Arm</a> control for HySecurity
+	    <td><a href="#gate_arms">Gate Arm</a> control for HySecurity
 	        SmartTouch Controllers
 	    </td>
 	    <td>TCP</td>
@@ -1047,14 +1047,6 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	possibility of man-in-the-middle attacks between IRIS and the feed host.
 	In this case the "msg_feed_verify" <a href="#system_attributes">system
 	attribute</a> can be set to "false" to disable this check.
-</p>
-
-<h4 id="gate_arm">Gate Arm Protocols</h4>
-<p>
-	Gate Arms are traffic control devices which restrict access to a
-	section of roadway.
-	They can be used, for example, for reversible lanes which can be changed
-	by time of day.
 </p>
 
 <h4 id="rwis_protocol">RWIS Protocols</h4>
@@ -1726,11 +1718,17 @@ FIXME
 	<li>Configuring time-of-day operation</li>
 </ul>
 
+<h3 id="gate_arms">Gate Arms</h3>
+<p>
+	Gate Arms are traffic control devices which restrict access to a
+	section of roadway.
+	They can be used, for example, for reversible lanes which can be changed
+	by time of day.
+</p>
+
 <h3 id="rwis">Road Weather Information Systems</h3>
 FIXME
 
-<h3 id="gate_arms">Gate Arms</h3>
-FIXME
 
 <h3 id="warning_beacons">Warning Beacons</h3>
 FIXME
