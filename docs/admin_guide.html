@@ -52,7 +52,7 @@
   </div>
   <h2><a id="features_link" href="#features">Features</a></h2>
   <div id="features_div">
-    <h3><a href="#traffic_data_map">Traffic Data Map</a></h3>
+    <h3><a href="#traffic_layer">Traffic Map Layer</a></h3>
     <h3><a href="#incident_management">Incident Management</a></h3>
     <h3><a href="#action_plans">Action Plans</a></h3>
     <h3><a href="#schedules">Date/Time Schedules</a></h3>
@@ -264,7 +264,7 @@
 	IRIS also contains some higher-level traffic management features:
 </p>
 <ul>
-	<li>Continuously updated density, speed and flow maps</li>
+	<li>Continuously updated traffic map (density, speed or flow)</li>
 	<li>Scheduled deployment of control devices</li>
 	<li>Incident management</li>
 	<li>Travel time estimation for traveler information</li>
@@ -811,8 +811,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
   <dt>station_id</dt>
   <dd>The station_id is a unique identifier for the detectors associated with
       the r_node.
-      It is displayed on the traffic map, and is also used for identifying
-      travel time destinations.
+      It is displayed on the <a href="#traffic_layer">traffic layer</a>, and is
+      also used for identifying travel time destinations.
   </dd>
   <dt>speed_limit</dt>
   <dd>This is the posted speed limit at the r_node.
@@ -828,7 +828,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
       NOTE: This feature has not been implemented yet.
   </dd>
   <dt>above</dt>
-  <dd>When rendering the traffic map, r_nodes are rendered in two passes.
+  <dd>When rendering the <a href="#traffic_layer">traffic layer</a>, r_nodes are
+      rendered in two passes.
       The second pass consists of r_nodes which have been marked <b>above</b>.
       This prevents overpasses from being drawn incorrectly.
   </dd>
@@ -839,7 +840,8 @@ patch -p0 &lt; ../09_tertiary_color.patch
   </dd>
   <dt>active</dt>
   <dd>This flag allows an r_node to be deactivated.  An inactive r_node will
-      not be included in any corridor or drawn on the map.
+      not be included in any corridor or drawn on the
+      <a href="#traffic_layer">traffic layer</a>.
   </dd>
 </dl>
 <h4>R_Node Detectors</h4>
@@ -1651,7 +1653,7 @@ FIXME
 	</tr>
 </table>
 <br/>
-<h4>VDS Data Archiving</h4>
+<h4 id="vds_archiving">VDS Data Archiving</h4>
 <p>
 	Every 30 seconds, an XML file is generated containing the most recent
 	sample data from all defined detectors.
@@ -1754,8 +1756,35 @@ FIXME
 
 <h2 id="features">Features</h2>
 
-<h3 id="traffic_data_map">Traffic Data Map</h3>
-FIXME
+<h3 id="traffic_layer">Traffic Map Layer</h3>
+<p>
+	The IRIS client user interface includes a traffic map layer which is
+	created automatically from the <a href="#road_topology">road
+	topology</a>.
+	By default, this "segment" layer uses traffic <b>density</b> to
+	determine the color of each segment in the layer.
+	Other themes are available for <b>speed</b> and <b>flow</b>.
+	The <b>Legend</b> menu at the top of the map can be used to view
+	the thresholds used for each color in a theme.
+</p>
+<p>
+	Every 30 seconds, the client will make an HTTP request for the current
+	traffic sample data XML file.
+	The URL to locate that file is declared as a property in the
+	/etc/iris/iris-client.properties file (on the IRIS server).
+	The property is tdxml.detector.url, and it should point to the location
+	of <a href="#vds_archiving">det_sample.xml.gz</a>, as made
+	available by apache on the IRIS server.
+</p>
+<p>
+	The appearance of the traffic map layer changes depending on the current
+	map zoom level.
+	If the zoom level is below 10, the layer will not be visible.
+	At zoom levels 10 through 13, the layer will display segments as
+	aggregate of all detectors in each mainline station.
+	At zoom level 14 or above, each mainline detector will be displayed
+	as a separate segment.
+</p>
 
 <h3 id="incident_management">Incident Management</h3>
 FIXME
