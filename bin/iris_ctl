@@ -96,6 +96,12 @@ function configure_services() {
 	systemctl enable iris.service
 }
 
+function configure_firewall() {
+	echo "Configuring firewall"
+	firewall-cmd --permanent --add-port=1037/tcp
+	firewall-cmd --reload
+}
+
 function echo_success() {
 	echo
 	echo "Successfully initialized the IRIS server"
@@ -128,6 +134,7 @@ case "$1" in
 		create_tms_user
 		create_database
 		configure_services
+		configure_firewall
 		create_links
 		echo_success
 		;;
