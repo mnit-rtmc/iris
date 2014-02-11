@@ -55,7 +55,7 @@ ant dist
 %install
 ant -Dinstall.dir=%{_installdir} install
 
-# prepare to install RPM
+# pre-install
 %pre
 if [ $1 == 1 ]; then
 	useradd -r -M tms
