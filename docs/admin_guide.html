@@ -85,7 +85,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">10 February 2014</div>
+<div id="stamp">11 February 2014</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -1919,7 +1919,7 @@ zcat tms-20120523.sql.gz | pgsql tms</pre>
 	with the following commands (as root):
 </p>
 <pre class="code">rpm -U iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
-iris_ctl links
+iris_ctl update
 systemctl restart iris.service</pre>
 <p>
 	An unstable upgrade is when either the major or minor IRIS version
@@ -1933,7 +1933,7 @@ systemctl restart iris.service</pre>
 </p>
 <pre class="code">rpm -U iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
 psql tms -f /var/lib/iris/sql/migrate-<i>{major}</i>.<i>{minor}</i>.sql
-iris_ctl links
+iris_ctl update
 systemctl iris.service restart</pre>
 <p>
 	Note: when skipping one or more minor versions in an upgrade, <b>all</b>
