@@ -45,11 +45,11 @@ Requires:	java-1.7.0-openjdk, postgresql-server, postgresql-jdbc, httpd
 
 # prepare sources
 %prep
-%setup -q 
+%setup -q
 
 # build from source
 %build
-ant
+ant dist
 
 # install the built files
 %install
@@ -86,7 +86,7 @@ fi
 %defattr(0644,root,root)
 /etc/httpd/conf.d/iris.conf
 
-# /usr/share/java/iris-server-x.x.x
+# /usr/share/java/iris-server-%{version}
 %dir %attr(0755,root,root) %{_serverdir}
 %defattr(0644,root,root)
 %{_serverdir}/iris-server-%{version}.jar
@@ -110,7 +110,7 @@ fi
 # /var/www/html/iris_xml
 %dir %attr(3775,tms,tms) /var/www/html/iris_xml
 
-# client: /var/www/html/iris-client-x.x.x
+# client: /var/www/html/iris-client-%{version}
 %dir %attr(0755,apache,apache) %{_clientdir}
 %dir %attr(0755,apache,apache) %{_clientdir}/images
 %dir %attr(0755,apache,apache) %{_clientdir}/lib
