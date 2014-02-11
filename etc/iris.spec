@@ -77,6 +77,8 @@ fi
 # All files included in RPM are listed here.
 %files
 
+%doc COPYING
+
 # /etc/iris
 %defattr(0640,tms,tms,0750)
 %dir /etc/iris
