@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2013  Minnesota Department of Transportation
+     Copyright (C) 2007-2014  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -420,9 +420,10 @@
 		</copy>
 	</target>
 
-	<!-- Create a source tarball -->
+	<!-- Create source tarball -->
 	<target name="tarball"
-	        description="Create a source tarball">
+	        depends="check"
+	        description="Create source tarball">
 		<mkdir dir="${build.rpm}/SOURCES"/>
 		<exec executable="hg"
 		      failonerror="true">
@@ -430,15 +431,18 @@
 			<arg value="-ttar"/>
 			<arg value="${tar.file}"/>
 		</exec>
+		<!-- Copy dependencies to build lib -->
 		<copy todir="${build.tar}/lib">
 			<fileset dir="${lib.dir}"/>
 		</copy>
+		<!-- Append deps to tarball -->
 		<exec executable="tar" failonerror="true">
 			<arg value="--directory=build"/>
 			<arg value="--append"/>
 			<arg value="--file=${tar.file}"/>
 			<arg value="${name}-${version}/lib"/>
 		</exec>
+		<!-- Compress tarball -->
 		<exec executable="gzip" failonerror="true">
 			<arg value="${tar.file}"/>
 		</exec>
