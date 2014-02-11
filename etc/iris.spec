@@ -1,10 +1,10 @@
 #
-# RPM Spec file for IRIS
+# Fedora RPM Spec file for IRIS
 # Written by Michael Darter, December 2008
 #     and Douglas Lau
 #
 # IRIS -- Intelligent Roadway Information System
-# Copyright (C) 2009-2013  Minnesota Department of Transportation
+# Copyright (C) 2009-2014  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,30 +43,19 @@ Requires:	java-1.7.0-openjdk, postgresql-server, postgresql-jdbc, httpd
 %Description
 @@RPM.DESCRIPTION@@
 
-# untar the source
+# prepare sources
 %prep
-echo "-----------Starting prep."
-echo "Building RPMs for %{_vendor}"
-echo name is %{name}.
-echo version is %{version}.
-echo _topdir is %{_topdir}.
-echo Buildroot is %{buildroot}.
-echo Installdir is %{_installdir}.
 %setup -q 
-echo "Done with prep in spec."
 
-# build the app from the source
+# build from source
 %build
-echo "-----------Starting build."
 ant
-echo "Done with build in spec."
 
-# install the distro files
+# install the built files
 %install
-echo "-----------Starting install to %{_installdir}."
 ant -Dinstall.dir=%{_installdir} install
-echo "Done with install in spec."
 
+# prepare to install RPM
 %pre
 if [ $1 == 1 ]; then
 	useradd -r -M tms
@@ -76,8 +65,7 @@ if [ $1 == 1 ]; then
 	fi
 fi
 
-# All files that will be placed in the RPM are listed
-# here. This includes both the client and server
+# All files included in RPM are listed here.
 %files
 
 # /etc/iris
