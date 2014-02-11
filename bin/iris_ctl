@@ -15,13 +15,11 @@
 # GNU General Public License for more details.
 
 function check_initialized() {
-	if [ -r /etc/iris/iris-server.keystore ]
-	then
+	if [ -r /etc/iris/iris-server.keystore ]; then
 		echo "/etc/iris/iris-server.keystore already exists."
 		exit 1
 	fi
-	if [ -r /etc/iris/iris-client.keystore ]
-	then
+	if [ -r /etc/iris/iris-client.keystore ]; then
 		echo "/etc/iris/iris-client.keystore already exists."
 		exit 1
 	fi
