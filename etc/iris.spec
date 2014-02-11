@@ -78,8 +78,8 @@ fi
 %files
 
 # /etc/iris
-%dir %attr(0750,tms,tms) /etc/iris
-%defattr(0640,tms,tms)
+%defattr(0640,tms,tms,0750)
+%dir /etc/iris
 %config(noreplace) /etc/iris/iris-client.properties
 %config(noreplace) /etc/iris/iris-server.properties
 
@@ -96,8 +96,8 @@ fi
 /etc/httpd/conf.d/iris.conf
 
 # /usr/share/java/iris-server-%{version}
-%dir %attr(0755,root,root) %{_serverdir}
-%defattr(0644,root,root)
+%defattr(0644,root,root,0755)
+%dir %{_serverdir}
 %{_serverdir}/iris-server-%{version}.jar
 %{_serverdir}/iris-common-%{version}.jar
 %{_serverdir}/mail.jar
@@ -120,10 +120,10 @@ fi
 %dir %attr(3775,tms,tms) /var/www/html/iris_xml
 
 # client: /var/www/html/iris-client-%{version}
-%dir %attr(0755,apache,apache) %{_clientdir}
-%dir %attr(0755,apache,apache) %{_clientdir}/images
-%dir %attr(0755,apache,apache) %{_clientdir}/lib
-%defattr(0444,apache,apache)
+%defattr(0444,apache,apache,0755)
+%dir %{_clientdir}
+%dir %{_clientdir}/images
+%dir %{_clientdir}/lib
 %{_clientdir}/index.html
 %{_clientdir}/mail.jnlp
 %{_clientdir}/iris-client.jnlp
