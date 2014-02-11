@@ -26,18 +26,15 @@
 %define _clientdir	%{_clientlink}-%{version}
 
 Name:		%{name}
-Summary:	The IRIS advanced traffic management system (ATMS).
+Summary:	An advanced traffic management system (ATMS)
 Version:	%{version}
 Release:	@@RPM.RELEASE@@
-License:	GPL
+License:	GPLv2+
 Group:		Applications/Engineering
-Provides:	%{name}
 Source:		%{name}-%{version}.tar.gz
 URL:		@@RPM.URL@@
 BuildArch:	noarch
 Buildroot:	%{buildroot}
-Vendor:		@@RPM.PACKAGER@@
-Packager:	@@RPM.PACKAGER@@
 Requires:	java-1.7.0-openjdk, postgresql-server, postgresql-jdbc, httpd
 
 %Description

@@ -189,8 +189,6 @@
 					value="${mapbean.version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
 				<filter token="RPM.URL" value="${rpm.url}"/>
-				<filter token="RPM.PACKAGER"
-				        value="${rpm.packager}"/>
 				<filter token="RPM.RELEASE"
 				        value="${rpm.release}"/>
 				<filter token="RPM.DESCRIPTION"
