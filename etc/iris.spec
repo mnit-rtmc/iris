@@ -65,6 +65,18 @@ if [ $1 == 1 ]; then
 	fi
 fi
 
+# post-install or upgrade
+%post
+%systemd_post iris.service
+
+# pre-uninstall
+%preun
+%systemd_preun iris.service
+
+# post-uninstall
+%postun
+%systemd_postun
+
 # All files included in RPM are listed here.
 %files
 
