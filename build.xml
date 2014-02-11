@@ -49,7 +49,7 @@
  	<property name="build.tar" value= "${build.dir}/${name}-${version}"/>
  	<property name="build.rpm" value="${build.dir}/rpm"/>
  	<property name="tar.file"
- 	          value="${build.rpm}/SOURCES/${name}-${version}.tar"/>
+ 	          value="${build.rpm}/SOURCES/${name}-${version}.tar.gz"/>
 
 	<!-- Install directory configuration -->
 	<property name="install.dir" value="${build.dir}/install"/>
@@ -425,27 +425,15 @@
 	        depends="check"
 	        description="Create source tarball">
 		<mkdir dir="${build.rpm}/SOURCES"/>
-		<exec executable="hg"
-		      failonerror="true">
-			<arg value="archive"/>
-			<arg value="-ttar"/>
-			<arg value="${tar.file}"/>
-		</exec>
-		<!-- Copy dependencies to build lib -->
-		<copy todir="${build.tar}/lib">
-			<fileset dir="${lib.dir}"/>
+		<!-- Copy files to tar dir -->
+		<copy todir="${build.tar}">
+			<fileset dir="${basedir}" excludes="build/**" />
 		</copy>
-		<!-- Append deps to tarball -->
-		<exec executable="tar" failonerror="true">
-			<arg value="--directory=build"/>
-			<arg value="--append"/>
-			<arg value="--file=${tar.file}"/>
-			<arg value="${name}-${version}/lib"/>
-		</exec>
-		<!-- Compress tarball -->
-		<exec executable="gzip" failonerror="true">
-			<arg value="${tar.file}"/>
-		</exec>
+		<!-- Create tarball -->
+		<tar destfile="${tar.file}"
+		     basedir="${build.dir}"
+		     includes="${name}-${version}/"
+		     compression="gzip" />
 	</target>
 
 	<!-- Create an RPM package -->
