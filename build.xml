@@ -424,12 +424,9 @@
 	<target name="tarball"
 	        depends="check"
 	        description="Create source tarball">
-		<mkdir dir="${build.rpm}/SOURCES"/>
-		<!-- Copy files to tar dir -->
 		<copy todir="${build.tar}">
 			<fileset dir="${basedir}" excludes="build/**" />
 		</copy>
-		<!-- Create tarball -->
 		<tar destfile="${tar.file}"
 		     basedir="${build.dir}"
 		     includes="${name}-${version}/"
