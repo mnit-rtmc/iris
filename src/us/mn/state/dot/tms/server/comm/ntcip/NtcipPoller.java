@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.InvalidMessageException;
@@ -157,5 +158,20 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		User o)
 	{
 		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
+	}
+
+	/** Perform regular poll of one controller */
+	@Override
+	public void pollController(ControllerImpl c) {
+		for(ControllerIO cio: c.getDevices()) {
+			if(cio instanceof DMSImpl)
+				pollDMS((DMSImpl)cio);
+		}
+	}
+
+	/** Perform regular poll of a DMS */
+	private void pollDMS(DMSImpl dms) {
+		if(dms.isPeriodicallyQueriable())
+			addOperation(new OpQueryDMSMessage(dms));
 	}
 }
