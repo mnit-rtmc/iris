@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,10 @@ import static us.mn.state.dot.tms.IncidentImpact.FREE_FLOWING;
 import static us.mn.state.dot.tms.IncidentImpact.PARTIALLY_BLOCKED;
 import static us.mn.state.dot.tms.IncidentImpact.BLOCKED;
 import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LCS;
+import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.LCSHelper;
 import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
@@ -50,20 +54,24 @@ public class IncidentPolicy {
 
 	/** Create proposed indications for an LCS array.
 	 * @param up Distance upstream from incident (miles).
-	 * @param n_lcs Number of lanes on LCS array.
+	 * @param lcs_array LCS array.
 	 * @param shift Lane shift relative to incident.
-	 * @param n_lanes Number of full lanes at LCS array.
+	 * @param n_lanes Number of full lanes at incident.
 	 * @return Array of LaneUseIndication ordinal values. */
-	public Integer[] createIndications(Distance up, int n_lcs, int shift,
-		int n_lanes)
+	public Integer[] createIndications(Distance up, LCSArray lcs_array,
+		int shift, int n_lanes)
 	{
+		int n_lcs = lcs_array.getIndicationsCurrent().length;
+		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
+		if(n_lcs != lcss.length)
+			return new Integer[0];
 		Integer[] ind = new Integer[n_lcs];
 		for(int i = 0; i < ind.length; i++) {
+			LaneUseIndication[] available =
+				LCSHelper.lookupIndications(lcss[i]);
 			int ln = shift + n_lcs - i;
-			if(isShoulder(ln))
-				ind[i] = LaneUseIndication.DARK.ordinal();
-			else
-				ind[i] = createIndication(up, ln).ordinal();
+			LaneUseIndication lui = createIndication(up, ln);
+			ind[i] = assignIndication(lui, available).ordinal();
 		}
 		return ind;
 	}
@@ -73,6 +81,8 @@ public class IncidentPolicy {
 	 * @param ln Lane number (0 for left shoulder, increasing to right).
 	 * @return LaneUseIndication value. */
 	private LaneUseIndication createIndication(Distance up, int ln) {
+		if(isShoulder(ln))
+			return LaneUseIndication.DARK;
 		double m = up.m();
 		if(m < 0)
 			return LaneUseIndication.DARK;
@@ -249,5 +259,41 @@ public class IncidentPolicy {
 			return LaneUseIndication.LANE_CLOSED_AHEAD;
 		else
 			return LaneUseIndication.LANE_OPEN;
+	}
+
+	/** Assign a requested indication to an available indication.
+	 * @param lui Requested lane use indication.
+	 * @param available Array of available lane use indications.
+	 * @return "Best" lane use indication in available array. */
+	static private LaneUseIndication assignIndication(LaneUseIndication lui,
+		LaneUseIndication[] available)
+	{
+		for(LaneUseIndication a: available) {
+			if(lui == a)
+				return lui;
+		}
+		LaneUseIndication alt = altIndication(lui);
+		for(LaneUseIndication a: available) {
+			if(alt == a)
+				return alt;
+		}
+		return LaneUseIndication.DARK;
+	}
+
+	/** Get alternate indication for "dumb" LCS devices. */
+	static private LaneUseIndication altIndication(LaneUseIndication lui) {
+		switch(lui) {
+		case LOW_VISIBILITY:
+		case LANE_CLOSED_AHEAD:
+		case MERGE_RIGHT:
+		case MERGE_LEFT:
+		case MERGE_BOTH:
+			return LaneUseIndication.USE_CAUTION;
+		case MUST_EXIT_RIGHT:
+		case MUST_EXIT_LEFT:
+			return LaneUseIndication.LANE_CLOSED;
+		default:
+			return LaneUseIndication.LANE_OPEN;
+		}
 	}
 }

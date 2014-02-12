@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,9 +132,8 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		int shift = config.leftShift;
 		for(Distance up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
-			int n_lcs = lcs_array.getIndicationsCurrent().length;
 			int l_shift = lcs_array.getShift() - shift;
-			Integer[] ind = policy.createIndications(up, n_lcs,
+			Integer[] ind = policy.createIndications(up, lcs_array,
 				l_shift, config.getLanes());
 			if(shouldDeploy(ind)) {
 				model.addElement(lcs_array);
