@@ -1,78 +1,73 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<!DOCTYPE html>
 <html>
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <title>"IRIS - Intelligent Roadway Information System"</title>
+	<meta charset="UTF-8" name="Author" content="Douglas Lau"/>
+	<title>"IRIS - Intelligent Roadway Information System"</title>
 </head>
-<body text="#000000" bgcolor="#FFFFFF" link="#0000EF" vlink="#51188E" alink=
-"#FF0000">
 
-<center>
-<h1>IRIS&nbsp;<img src="images/iris.png" height=64 width=64></h1>
-</center>
+<body>
+<h1>IRIS&nbsp;<img src="images/iris_icon.png" /></h1>
 <ol>
-	<li><a href="#Introduction">Introduction</a></li>
-	<li><a href="#Installation">Installation</a></li>
-	<li><a href="#Joystick">Joysticks</a></li>
-	<li><a href="#Running">Running</a></li>
-	<li><a href="#Support">Support</a></li>
+	<li><a href="#introduction">Introduction</a></li>
+	<li><a href="#installation">Installation</a></li>
+	<li><a href="#joystick">Joysticks</a></li>
+	<li><a href="#running">Running</a></li>
+	<li><a href="#support">Support</a></li>
 </ol>
 <hr width="100%" />
-<h2><a name="Introduction"></a>1. Introduction</h2>
+<h2><a id="introduction"></a>1. Introduction</h2>
 <p>
 	IRIS is an advanced traffic management system.
 	It is used to control field devices (signs, ramp meters, etc.) and
 	collect traffic data.
 </p>
 <hr width="100%" />
-<h2><a name="Installation"></a>2. Installation</h2>
+<h2><a id="installation"></a>2. Installation</h2>
 <p>
-	Install the Java Runtime Environment, version 6.
+	Install the Java Runtime Environment, version 7.
 	<strong>This must be done by someone with local admin
 	privileges.</strong>
 	If you attempt to install it without proper privileges, the
 	installation will fail and you will get a "bad installation" error.
 </p>
 <hr width="100%" />
-<h2><a name="Joystick"></a>3. Joysticks</h2>
+<h2><a id="joystick"></a>3. Joysticks</h2>
 <p>
-	An optional software module must be installed to control camera PTZ
-	with a joystick. First, a couple of external packages,
-	<a href="http://www.python.org/2.4">Python 2.4</a> or
-	<a href="http://www.python.org/2.5">Python 2.5</a>, and the
-	corresponding version of the pygame library, for Python
-	<a href="../downloads/pygame/pygame-1.8.1release.win32-py2.4.msi">2.4</a>,
-	or for Python
-	<a href="../downloads/pygame/pygame-1.8.1release.win32-py2.5.exe">2.5</a>.
+	Camera pan, tilt and zoom may optionally be controlled with a joystick.
+	For this feature to work on Windows, a couple of external software
+	packages must be installed.
+	They are
+	<a href="http://www.python.org/download/releases/2.7/">Python</a>,
+	and <a href="http://pygame.org/download.shtml">PyGame</a>.
 	<strong>Installing these packages requires admin privilegdes.</strong>
 </p>
 <hr width="100%" />
-<h2><a name="Running"></a>4. Running</h2>
+<h2><a id="running"></a>4. Running</h2>
 <p>
 	To <a href="iris-client.jnlp">run IRIS,</a> click here.
 </p>
 <p>
-	IRIS requires unrestricted network and PC access. By design,
-	Java Web Start restricts this access. You will be prompted to
-	allow unrestricted access but advised not to do so. Disregard
-	this advice and click the "Start" button to allow access.
+	IRIS requires unrestricted network and PC access.
+	By design, Java Web Start restricts this access.
+	You will be prompted to allow unrestricted access but advised not to do
+	so.
+	Disregard this advice and click the "Start" button to allow access.
 	After that, you may start up the Java Web Start Application Manager
-	and run it from there. The second time the program is run, you will
-	be prompted to create a shortcut on the desktop to run IRIS directly.
-	This is a good idea.
+	and run it from there.
 </p>
 <hr width="100%" />
-<h2><a name="Support"></a>5. Support</h2>
+<h2><a id="support"></a>5. Support</h2>
 <p>
 	If you have any questions or comments, please feel free to contact
-	any one of the development team. They are:
+	any one of the development team.
+	They are:
 </p>
 <ul>
 	<li>Doug Lau</li>
 	<li>Tim Johnson</li>
 </ul>
 <p>
-	Last modified: 10 January 2013
+	Last modified: 12 February 2014
 </p>
 </body>
 </html>
