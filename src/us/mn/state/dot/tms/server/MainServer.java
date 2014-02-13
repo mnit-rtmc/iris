@@ -189,7 +189,6 @@ public class MainServer {
 		TIMER.addJob(new MeteringJob(FLUSH));
 		TIMER.addJob(new SampleQuery30SecJob());
 		TIMER.addJob(new SampleQuery5MinJob());
-		TIMER.addJob(new GateArmQueryStatusJob());
 		TIMER.addJob(new ActionPlanJob());
 		TIMER.addJob(new CameraNoFailJob());
 		TIMER.addJob(new SendSettingsJob());

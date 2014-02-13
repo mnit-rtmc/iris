@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,10 @@
 package us.mn.state.dot.tms.server.comm.stc;
 
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -51,7 +53,7 @@ public class STCPoller extends MessagePoller<STCProperty>
 			addOperation(new OpResetGate(ga));
 			break;
 		case QUERY_STATUS:
-			addOperation(new OpQueryGateStatus(ga));
+			pollGateArm(ga);
 			break;
 		default:
 			// Ignore other requests
@@ -67,5 +69,19 @@ public class STCPoller extends MessagePoller<STCProperty>
 	/** Close the gate arm */
 	public void closeGate(GateArmImpl ga, User o) {
 		addOperation(new OpControlGate(ga, o, GateArmState.CLOSING));
+	}
+
+	/** Perform regular poll of one controller */
+	@Override
+	public void pollController(ControllerImpl c) {
+		for(ControllerIO cio: c.getDevices()) {
+			if(cio instanceof GateArmImpl)
+				pollGateArm((GateArmImpl)cio);
+		}
+	}
+
+	/** Perform regular poll of a gate arm */
+	private void pollGateArm(GateArmImpl ga) {
+		addOperation(new OpQueryGateStatus(ga));
 	}
 }
