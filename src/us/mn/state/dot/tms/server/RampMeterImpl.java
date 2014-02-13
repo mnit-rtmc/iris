@@ -576,8 +576,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			return lookupOrCreateStratified();
 		case K_ADAPTIVE:
 			return KAdaptiveAlgorithm.meterState(this);
-		case DENSITY_UMN:
-			return lookupOrCreateDensityUMN();
 		default:
 			return null;
 		}
@@ -588,15 +586,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		Corridor c = getCorridor();
 		if(c != null)
 			return StratifiedAlgorithm.lookupCorridor(c);
-		else
-			return null;
-	}
-
-	/** Lookup or create a Density UMN algorithm state */
-	protected MeterAlgorithmState lookupOrCreateDensityUMN() {
-		Corridor c = getCorridor();
-		if(c != null)
-			return DensityUMNAlgorithm.lookupCorridor(c);
 		else
 			return null;
 	}

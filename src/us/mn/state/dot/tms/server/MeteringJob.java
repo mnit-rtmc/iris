@@ -82,8 +82,5 @@ public class MeteringJob extends Job {
 				meter.updateRatePlanned();
 			}
 		}
-		/* Note: this is temporarily last in case an exception is
-		 *       thrown -- all other metering work will be complete. */
-		DensityUMNAlgorithm.processAllStates();
 	}
 }

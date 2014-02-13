@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +33,7 @@ public enum MeterAlgorithm {
 	STRATIFIED("Stratified Metering"),
 
 	/** Density (K) Adaptive metering algorithm */
-	K_ADAPTIVE("K Adaptive Metering"),
-
-	/** Density UMN metering algorithm */
-	DENSITY_UMN("Density UMN Metering");
+	K_ADAPTIVE("K Adaptive Metering");
 
 	/** Create a new metering algorithm */
 	private MeterAlgorithm(String d) {
