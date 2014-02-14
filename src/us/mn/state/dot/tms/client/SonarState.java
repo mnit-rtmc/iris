@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GateArm;
@@ -48,7 +49,6 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TimeAction;
-import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.camera.CamCache;
 import us.mn.state.dot.tms.client.comm.ConCache;
@@ -174,13 +174,13 @@ public class SonarState extends Client {
 		return alarms;
 	}
 
-	/** Cache of warning signs */
-	private final TypeCache<WarningSign> warn_signs =
-		new TypeCache<WarningSign>(WarningSign.class, this);
+	/** Cache of beacons */
+	private final TypeCache<Beacon> beacons =
+		new TypeCache<Beacon>(Beacon.class, this);
 
-	/** Get the warning sign cache */
-	public TypeCache<WarningSign> getWarningSigns() {
-		return warn_signs;
+	/** Get the beacon cache */
+	public TypeCache<Beacon> getBeacons() {
+		return beacons;
 	}
 
 	/** Cache of ramp meters */
@@ -476,9 +476,9 @@ public class SonarState extends Client {
 		det_cache.populate(this);
 		cam_cache.populate(this);
 		populateReadable(alarms);
-		populateReadable(warn_signs);
-		if(canRead(WarningSign.SONAR_TYPE))
-			warn_signs.ignoreAttribute("operation");
+		populateReadable(beacons);
+		if(canRead(Beacon.SONAR_TYPE))
+			beacons.ignoreAttribute("operation");
 		populateReadable(ramp_meters);
 		if(canRead(RampMeter.SONAR_TYPE)) {
 			ramp_meters.ignoreAttribute("operation");

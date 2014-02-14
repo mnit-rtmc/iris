@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,28 +12,28 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.warning;
+package us.mn.state.dot.tms.client.beacon;
 
-import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * A form for displaying and editing warning signs
+ * A form for displaying and editing beacons.
  *
  * @author Douglas Lau
  */
-public class WarningSignForm extends ProxyTableForm<WarningSign> {
+public class BeaconForm extends ProxyTableForm<Beacon> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canRead(WarningSign.SONAR_TYPE);
+		return s.canRead(Beacon.SONAR_TYPE);
 	}
 
-	/** Create a new warning sign form */
-	public WarningSignForm(Session s) {
-		super(I18N.get("warning.signs"), new WarningSignModel(s));
+	/** Create a new beacon form */
+	public BeaconForm(Session s) {
+		super(I18N.get("beacons"), new BeaconModel(s));
 	}
 
 	/** Get the visible row count */

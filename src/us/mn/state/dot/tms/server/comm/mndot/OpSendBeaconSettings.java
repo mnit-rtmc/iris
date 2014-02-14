@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,17 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
-import us.mn.state.dot.tms.server.WarningSignImpl;
+import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * OpSendWarningSettings configuration data to a 170 controller
+ * OpSendBeaconSettings configuration data to a 170 controller
  *
  * @author Douglas Lau
  */
-public class OpSendWarningSettings extends OpDevice {
+public class OpSendBeaconSettings extends OpDevice {
 
 	/** HOV preempt time (tenths of a second) (obsolete) */
 	static protected final int HOV_PREEMPT = 80;
@@ -38,13 +38,13 @@ public class OpSendWarningSettings extends OpDevice {
 	/** PM midpoint time (BCD; minute of day) */
 	static protected final int PM_MID_TIME = 1630;
 
-	/** Warning sign */
-	protected final WarningSignImpl warning_sign;
+	/** Beacon */
+	private final BeaconImpl beacon;
 
-	/** Create a new send warning settings operation */
-	public OpSendWarningSettings(WarningSignImpl w) {
-		super(PriorityLevel.DOWNLOAD, w);
-		warning_sign = w;
+	/** Create a new send beacon settings operation */
+	public OpSendBeaconSettings(BeaconImpl b) {
+		super(PriorityLevel.DOWNLOAD, b);
+		beacon = b;
 	}
 
 	/** Create the second phase of the operation */
@@ -52,10 +52,10 @@ public class OpSendWarningSettings extends OpDevice {
 		return new SetTimingTable();
 	}
 
-	/** Phase to set the timing table for the warning sign */
+	/** Phase to set the timing table for the beacon */
 	protected class SetTimingTable extends Phase {
 
-		/** Set the timing table for the warning sign */
+		/** Set the timing table for the beacon */
 		protected Phase poll(CommMessage mess) throws IOException {
 			int a = Address.METER_1_TIMING_TABLE;
 			mess.add(createTimingTableProperty(a));
@@ -64,7 +64,7 @@ public class OpSendWarningSettings extends OpDevice {
 		}
 	}
 
-	/** Create a timing table property for the warning sign */
+	/** Create a timing table property for the beacon */
 	protected MndotProperty createTimingTableProperty(int address)
 		throws IOException
 	{

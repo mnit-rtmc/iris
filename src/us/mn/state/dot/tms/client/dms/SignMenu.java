@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.warning.WarningSignForm;
+import us.mn.state.dot.tms.client.beacon.BeaconForm;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -55,7 +55,7 @@ public class SignMenu extends JMenu {
 		item = createQuickMessageItem();
 		if(item != null)
 			add(item);
-		item = createWarningSignItem();
+		item = createBeaconItem();
 		if(item != null)
 			add(item);
 	}
@@ -112,13 +112,13 @@ public class SignMenu extends JMenu {
 		});
 	}
 
-	/** Create the warning sign menu item */
-	private JMenuItem createWarningSignItem() {
-		if(!WarningSignForm.isPermitted(session))
+	/** Create the beacon menu item */
+	private JMenuItem createBeaconItem() {
+		if(!BeaconForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("warning.signs") {
+		return new JMenuItem(new IAction("beacons") {
 			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new WarningSignForm(session));
+				desktop.show(new BeaconForm(session));
 			}
 		});
 	}

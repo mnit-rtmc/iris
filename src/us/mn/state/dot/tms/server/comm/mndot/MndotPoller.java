@@ -24,11 +24,12 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.AlarmImpl;
+import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LaneMarkingImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
-import us.mn.state.dot.tms.server.WarningSignImpl;
+import us.mn.state.dot.tms.server.comm.BeaconPoller;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
@@ -37,7 +38,6 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
-import us.mn.state.dot.tms.server.comm.WarningSignPoller;
 import us.mn.state.dot.tms.units.Interval;
 
 /**
@@ -47,7 +47,7 @@ import us.mn.state.dot.tms.units.Interval;
  * @author Douglas Lau
  */
 public class MndotPoller extends MessagePoller implements LCSPoller,
-	MeterPoller, SamplePoller, WarningSignPoller, LaneMarkingPoller
+	MeterPoller, SamplePoller, BeaconPoller, LaneMarkingPoller
 {
 	/** Test if it is afternoon */
 	static protected boolean isAfternoon() {
@@ -125,10 +125,10 @@ public class MndotPoller extends MessagePoller implements LCSPoller,
 		OpSendSampleSettings ss = new OpSendSampleSettings(c);
 		ss.setPriority(p);
 		addOperation(ss);
-		WarningSignImpl warn = c.getActiveWarningSign();
-		if(warn != null) {
-			OpSendWarningSettings s =
-				new OpSendWarningSettings(warn);
+		BeaconImpl beacon = c.getActiveBeacon();
+		if(beacon != null) {
+			OpSendBeaconSettings s =
+				new OpSendBeaconSettings(beacon);
 			s.setPriority(p);
 			addOperation(s);
 		}
@@ -235,14 +235,15 @@ public class MndotPoller extends MessagePoller implements LCSPoller,
 			addOperation(new OpSendMeterRate(meter, n, rate));
 	}
 
-	/** Send a device request to a warning sign */
-	public void sendRequest(WarningSignImpl sign, DeviceRequest r) {
+	/** Send a device request to a beacon */
+	@Override
+	public void sendRequest(BeaconImpl beacon, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
-			addOperation(new OpSendWarningSettings(sign));
+			addOperation(new OpSendBeaconSettings(beacon));
 			break;
 		case QUERY_STATUS:
-			pollWarningSign(sign);
+			pollBeacon(beacon);
 			break;
 		default:
 			// Ignore other requests
@@ -250,9 +251,10 @@ public class MndotPoller extends MessagePoller implements LCSPoller,
 		}
 	}
 
-	/** Set the deployed status of the sign */
-	public void setDeployed(WarningSignImpl sign, boolean d) {
-		addOperation(new OpSendWarningCommand(sign, d));
+	/** Set the flashing state of a beacon */
+	@Override
+	public void setFlashing(BeaconImpl b, boolean f) {
+		addOperation(new OpSendBeaconState(b, f));
 	}
 
 	/** Send a device request to an LCS array */
@@ -290,8 +292,8 @@ public class MndotPoller extends MessagePoller implements LCSPoller,
 	public void pollController(ControllerImpl c) {
 		boolean has_alarm = false;
 		for(ControllerIO cio: c.getDevices()) {
-			if(cio instanceof WarningSignImpl)
-				pollWarningSign((WarningSignImpl)cio);
+			if(cio instanceof BeaconImpl)
+				pollBeacon((BeaconImpl)cio);
 			if(cio instanceof AlarmImpl)
 				has_alarm = true;
 		}
@@ -299,9 +301,9 @@ public class MndotPoller extends MessagePoller implements LCSPoller,
 			pollAlarms(c);
 	}
 
-	/** Perform regular poll of a warning sign */
-	private void pollWarningSign(WarningSignImpl sign) {
-		addOperation(new OpQueryWarningStatus(sign));
+	/** Perform regular poll of a beacon */
+	private void pollBeacon(BeaconImpl b) {
+		addOperation(new OpQueryBeaconState(b));
 	}
 
 	/** Perform regular poll of alarms */

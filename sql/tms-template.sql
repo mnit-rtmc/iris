@@ -524,7 +524,7 @@ CREATE RULE camera_update AS ON UPDATE TO iris.camera DO INSTEAD
 CREATE RULE camera_delete AS ON DELETE TO iris.camera DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
-CREATE TABLE iris._warning_sign (
+CREATE TABLE iris._beacon (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
@@ -532,36 +532,47 @@ CREATE TABLE iris._warning_sign (
 	camera VARCHAR(10) REFERENCES iris._camera(name)
 );
 
-ALTER TABLE iris._warning_sign ADD CONSTRAINT _warning_sign_fkey
+ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
-CREATE VIEW iris.warning_sign AS SELECT
-	w.name, geo_loc, controller, pin, notes, message, camera
-	FROM iris._warning_sign w JOIN iris._device_io d ON w.name = d.name;
+CREATE VIEW iris.beacon AS SELECT
+	b.name, geo_loc, controller, pin, notes, message, camera
+	FROM iris._beacon b JOIN iris._device_io d ON b.name = d.name;
 
-CREATE RULE warning_sign_insert AS ON INSERT TO iris.warning_sign DO INSTEAD
-(
-	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._warning_sign VALUES (NEW.name, NEW.geo_loc, NEW.notes,
-		NEW.message, NEW.camera);
-);
-
-CREATE RULE warning_sign_update AS ON UPDATE TO iris.warning_sign DO INSTEAD
-(
-	UPDATE iris._device_io SET
-		controller = NEW.controller,
-		pin = NEW.pin
+CREATE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
+	$beacon_update$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO iris._device_io (name, controller, pin)
+            VALUES (NEW.name, NEW.controller, NEW.pin);
+        INSERT INTO iris._beacon (name, geo_loc, notes, message, camera)
+            VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message, NEW.camera);
+        RETURN NEW;
+    ELSIF TG_OP = 'UPDATE' THEN
+	UPDATE iris._device_io SET controller = NEW.controller, pin = NEW.pin
 	WHERE name = OLD.name;
-	UPDATE iris._warning_sign SET
-		geo_loc = NEW.geo_loc,
-		notes = NEW.notes,
-		message = NEW.message,
-		camera = NEW.camera
+        UPDATE iris._beacon
+		SET geo_loc = NEW.geo_loc,
+	            notes = NEW.notes,
+	            message = NEW.message,
+	            camera = NEW.camera
 	WHERE name = OLD.name;
-);
+        RETURN NEW;
+    ELSIF TG_OP = 'DELETE' THEN
+        DELETE FROM iris._device_io WHERE name = OLD.name;
+        IF FOUND THEN
+            RETURN OLD;
+        ELSE
+            RETURN NULL;
+	END IF;
+    END IF;
+    RETURN NEW;
+END;
+$beacon_update$ LANGUAGE plpgsql;
 
-CREATE RULE warning_sign_delete AS ON DELETE TO iris.warning_sign DO INSTEAD
-	DELETE FROM iris._device_io WHERE name = OLD.name;
+CREATE TRIGGER beacon_update_trig
+    INSTEAD OF INSERT OR UPDATE OR DELETE ON iris.beacon
+    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_update();
 
 CREATE TABLE iris.meter_type (
 	id INTEGER PRIMARY KEY,
@@ -1282,15 +1293,15 @@ CREATE VIEW camera_view AS
 	LEFT JOIN iris.controller ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
 
-CREATE VIEW warning_sign_view AS
-	SELECT w.name, w.notes, w.message, w.camera, w.geo_loc,
+CREATE VIEW beacon_view AS
+	SELECT b.name, b.notes, b.message, b.camera, b.geo_loc,
 	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.lat, l.lon,
-	w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.active
-	FROM iris.warning_sign w
-	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
-	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
-GRANT SELECT ON warning_sign_view TO PUBLIC;
+	b.controller, b.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	FROM iris.beacon b
+	LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
+	LEFT JOIN iris.controller ctr ON b.controller = ctr.name;
+GRANT SELECT ON beacon_view TO PUBLIC;
 
 CREATE VIEW lane_marking_view AS
 	SELECT m.name, m.notes, m.geo_loc,
@@ -1457,10 +1468,10 @@ CREATE VIEW iris.controller_meter AS
 	FROM iris._device_io dio
 	JOIN iris.ramp_meter m ON dio.name = m.name;
 
-CREATE VIEW iris.controller_warning_sign AS
-	SELECT dio.name, dio.controller, dio.pin, s.geo_loc
+CREATE VIEW iris.controller_beacon AS
+	SELECT dio.name, dio.controller, dio.pin, b.geo_loc
 	FROM iris._device_io dio
-	JOIN iris.warning_sign s ON dio.name = s.name;
+	JOIN iris.beacon b ON dio.name = b.name;
 
 CREATE VIEW iris.controller_camera AS
 	SELECT dio.name, dio.controller, dio.pin, c.geo_loc
@@ -1479,7 +1490,7 @@ CREATE VIEW iris.controller_device AS
 	SELECT * FROM iris.controller_weather_sensor UNION ALL
 	SELECT * FROM iris.controller_lcs UNION ALL
 	SELECT * FROM iris.controller_meter UNION ALL
-	SELECT * FROM iris.controller_warning_sign UNION ALL
+	SELECT * FROM iris.controller_beacon UNION ALL
 	SELECT * FROM iris.controller_camera UNION ALL
 	SELECT * FROM iris.controller_gate_arm;
 
@@ -1893,7 +1904,7 @@ PRV_0022	dms_tab	quick_message(/.*)?	t	f	f	f
 PRV_0023	dms_tab	sign_group(/.*)?	t	f	f	f
 PRV_0024	dms_tab	sign_message(/.*)?	t	f	f	f
 PRV_0025	dms_tab	sign_text(/.*)?	t	f	f	f
-PRV_0026	dms_tab	warning_sign(/.*)?	t	f	f	f
+PRV_0026	dms_tab	beacon(/.*)?	t	f	f	f
 PRV_0027	lcs_tab	cabinet(/.*)?	t	f	f	f
 PRV_0028	lcs_tab	controller(/.*)?	t	f	f	f
 PRV_0029	lcs_tab	dms(/.*)?	t	f	f	f
@@ -1923,7 +1934,7 @@ PRV_0051	publish	camera/.*/publish	f	t	f	f
 PRV_0052	dms_control	dms/.*/messageNext	f	t	f	f
 PRV_0053	dms_control	dms/.*/ownerNext	f	t	f	f
 PRV_0054	dms_control	sign_message/.*	f	t	t	f
-PRV_0055	dms_control	warning_sign/.*/deployed	f	t	f	f
+PRV_0055	dms_control	beacon/.*/deployed	f	t	f	f
 PRV_0056	incident_control	incident/.*	f	t	t	t
 PRV_0057	lcs_control	lcs_array/.*/indicationsNext	f	t	f	f
 PRV_0058	lcs_control	lcs_array/.*/ownerNext	f	t	f	f
@@ -1984,7 +1995,7 @@ PRV_0113	device_admin	r_node/.*	f	t	t	t
 PRV_0114	device_admin	ramp_meter/.*	f	t	t	t
 PRV_0115	device_admin	road/.*	f	t	t	t
 PRV_0116	device_admin	video_monitor/.*	f	t	t	t
-PRV_0117	device_admin	warning_sign/.*	f	t	t	t
+PRV_0117	device_admin	beacon/.*	f	t	t	t
 PRV_0118	device_admin	weather_sensor(/.*)?	t	f	f	f
 PRV_0119	device_admin	weather_sensor/.*	f	t	t	t
 PRV_0133	device_admin	gate_arm/.*	f	t	t	t

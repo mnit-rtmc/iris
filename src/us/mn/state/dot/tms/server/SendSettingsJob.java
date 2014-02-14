@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.server;
 import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -26,8 +28,6 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.WarningSignHelper;
 
 /**
  * Job to send settings to all field controllers.
@@ -62,7 +62,7 @@ public class SendSettingsJob extends Job {
 		requestDMS(DeviceRequest.QUERY_PIXEL_FAILURES);
 		requestLCS(DeviceRequest.SEND_SETTINGS);
 		requestRampMeters(DeviceRequest.SEND_SETTINGS);
-		requestWarningSigns(DeviceRequest.SEND_SETTINGS);
+		requestBeacons(DeviceRequest.SEND_SETTINGS);
 	}
 
 	/** Send a request to all DMS */
@@ -92,12 +92,12 @@ public class SendSettingsJob extends Job {
 		}
 	}
 
-	/** Send a request to all warning signs */
-	private void requestWarningSigns(DeviceRequest req) {
-		Iterator<WarningSign> it = WarningSignHelper.iterator();
+	/** Send a request to all beacons */
+	private void requestBeacons(DeviceRequest req) {
+		Iterator<Beacon> it = BeaconHelper.iterator();
 		while(it.hasNext()) {
-			WarningSign sign = it.next();
-			sign.setDeviceRequest(req.ordinal());
+			Beacon b = it.next();
+			b.setDeviceRequest(req.ordinal());
 		}
 	}
 }

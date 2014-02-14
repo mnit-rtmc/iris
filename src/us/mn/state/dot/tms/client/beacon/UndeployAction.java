@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2013  Minnesota Department of Transportation
+ * Copyright (C) 2004-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,33 +12,33 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.warning;
+package us.mn.state.dot.tms.client.beacon;
 
 import java.awt.event.ActionEvent;
-import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
- * Action to deploy a warning sign.
+ * Action to undeploy a beacon.
  *
  * @author Douglas Lau
  */
-public class DeployAction extends IAction {
+public class UndeployAction extends IAction {
 
 	/** Proxy selection model */
-	private final ProxySelectionModel<WarningSign> sel_model;
+	private final ProxySelectionModel<Beacon> sel_model;
 
-	/** Create a new deploy action */
-	public DeployAction(ProxySelectionModel<WarningSign> s) {
-		super("warning.sign.deploy");
+	/** Create a new undeploy action */
+	public UndeployAction(ProxySelectionModel<Beacon> s) {
+		super("beacon.undeploy");
 		sel_model = s;
 	}
 
 	/** Actually perform the action */
 	protected void doActionPerformed(ActionEvent e) {
-		for(WarningSign s: sel_model.getSelected())
-			s.setDeployed(true);
+		for(Beacon b: sel_model.getSelected())
+			b.setFlashing(false);
 		sel_model.clearSelection();
 	}
 }

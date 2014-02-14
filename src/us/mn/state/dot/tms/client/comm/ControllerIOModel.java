@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
@@ -74,7 +74,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Device types which can be associated with controller IO */
 	protected enum DeviceType {
 		Alarm, Camera, Detector, DMS, Gate_Arm, Lane_Marking,
-		LCSIndication, Ramp_Meter, Warning_Sign, Weather_Sensor
+		LCSIndication, Ramp_Meter, Beacon, Weather_Sensor
 	}
 
 	/** Types of IO devices */
@@ -90,7 +90,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Lane_Marking);
 		IO_TYPE.add(DeviceType.LCSIndication);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
-		IO_TYPE.add(DeviceType.Warning_Sign);
+		IO_TYPE.add(DeviceType.Beacon);
 		IO_TYPE.add(DeviceType.Weather_Sensor);
 	}
 
@@ -112,8 +112,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.LCSIndication;
 		else if(cio instanceof RampMeter)
 			return DeviceType.Ramp_Meter;
-		else if(cio instanceof WarningSign)
-			return DeviceType.Warning_Sign;
+		else if(cio instanceof Beacon)
+			return DeviceType.Beacon;
 		else if(cio instanceof WeatherSensor)
 			return DeviceType.Weather_Sensor;
 		else
@@ -167,8 +167,8 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO list for ramp meters */
 	private final ControllerIOList<RampMeter> m_list;
 
-	/** Controller IO list for warning signs */
-	private final ControllerIOList<WarningSign> w_list;
+	/** Controller IO list for beacons */
+	private final ControllerIOList<Beacon> b_list;
 
 	/** Controller IO list for weather sensors */
 	private final ControllerIOList<WeatherSensor> wsensor_list;
@@ -202,8 +202,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			state.getLcsCache().getLCSIndications());
 		m_list = new ControllerIOList<RampMeter>(
 			state.getRampMeters());
-		w_list = new ControllerIOList<WarningSign>(
-			state.getWarningSigns());
+		b_list = new ControllerIOList<Beacon>(
+			state.getBeacons());
 		wsensor_list = new ControllerIOList<WeatherSensor>(
 			state.getWeatherSensors());
 	}
@@ -240,7 +240,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		lmark_list.initialize();
 		lcsi_list.initialize();
 		m_list.initialize();
-		w_list.initialize();
+		b_list.initialize();
 		wsensor_list.initialize();
 	}
 
@@ -254,7 +254,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		lmark_list.dispose();
 		lcsi_list.dispose();
 		m_list.dispose();
-		w_list.dispose();
+		b_list.dispose();
 		wsensor_list.dispose();
 	}
 
@@ -298,7 +298,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		       canUpdateIO(LaneMarking.SONAR_TYPE) &&
 		       canUpdateIO(LCSIndication.SONAR_TYPE) &&
 		       canUpdateIO(RampMeter.SONAR_TYPE) &&
-		       canUpdateIO(WarningSign.SONAR_TYPE) &&
+		       canUpdateIO(Beacon.SONAR_TYPE) &&
 		       canUpdateIO(WeatherSensor.SONAR_TYPE);
 	}
 
@@ -396,8 +396,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return lcsi_list.model;
 		case Ramp_Meter:
 			return m_list.model;
-		case Warning_Sign:
-			return w_list.model;
+		case Beacon:
+			return b_list.model;
 		case Weather_Sensor:
 			return wsensor_list.model;
 		default:

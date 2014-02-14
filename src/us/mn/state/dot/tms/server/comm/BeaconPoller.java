@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,19 @@
 package us.mn.state.dot.tms.server.comm;
 
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.server.WarningSignImpl;
+import us.mn.state.dot.tms.server.BeaconImpl;
 
 /**
- * WarningSignPoller is an interface for MessagePoller classes which can poll
- * warning sign devices.
+ * BeaconPoller is an interface for MessagePoller classes which can poll
+ * beacon devices.
  *
  * @author Douglas Lau
  */
-public interface WarningSignPoller {
+public interface BeaconPoller {
 
 	/** Send a device request */
-	void sendRequest(WarningSignImpl sign, DeviceRequest r);
+	void sendRequest(BeaconImpl b, DeviceRequest r);
 
-	/** Set the deployed status of a warning sign */
-	void setDeployed(WarningSignImpl sign, boolean d);
+	/** Set the flashing state of a beacon */
+	void setFlashing(BeaconImpl b, boolean f);
 }

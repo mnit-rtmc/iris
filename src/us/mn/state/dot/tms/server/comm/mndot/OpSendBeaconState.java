@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,43 +15,44 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.WarningSignImpl;
+import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Operation to command a 170 controller warning sign
+ * Operation to command a 170 controller beacon
  *
  * @author Douglas Lau
  */
-public class OpSendWarningCommand extends OpDevice {
+public class OpSendBeaconState extends OpDevice {
 
 	/** Get the appropriate rate for the deployed state */
-	static protected byte getDeployedRate(boolean d) {
-		if(d)
+	static private byte getDeployedRate(boolean f) {
+		if(f)
 			return MeterRate.CENTRAL;
 		else
 			return MeterRate.FORCED_FLASH;
 	}
 
 	/** Controller memory address */
-	protected final int address;
+	private final int address;
 
-	/** New "metering rate" for deploying to warning sign */
-	protected final byte rate;
+	/** New "metering rate" for deploying to beacon */
+	private final byte rate;
 
-	/** Create a new warning sign command operation */
-	public OpSendWarningCommand(WarningSignImpl s, boolean d) {
-		super(PriorityLevel.COMMAND, s);
+	/** Create a new send beacon state operation */
+	public OpSendBeaconState(BeaconImpl b, boolean f) {
+		super(PriorityLevel.COMMAND, b);
 		address = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
-		rate = getDeployedRate(d);
+		rate = getDeployedRate(f);
 	}
 
 	/** Operation equality test */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof OpSendWarningCommand) {
-			OpSendWarningCommand op = (OpSendWarningCommand)o;
+		if(o instanceof OpSendBeaconState) {
+			OpSendBeaconState op = (OpSendBeaconState)o;
 			return device == op.device && rate == op.rate;
 		} else
 			return false;
@@ -62,7 +63,7 @@ public class OpSendWarningCommand extends OpDevice {
 		return new SetRate();
 	}
 
-	/** Phase to set the metering rate (which controls warning sign) */
+	/** Phase to set the metering rate (which controls beacon) */
 	protected class SetRate extends Phase {
 
 		/** Write the meter rate to the controller */

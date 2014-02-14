@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2013  Minnesota Department of Transportation
+ * Copyright (C) 2004-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,32 +19,31 @@ import java.util.Map;
 import java.sql.ResultSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.server.comm.BeaconPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
-import us.mn.state.dot.tms.server.comm.WarningSignPoller;
 
 /**
- * WarningSignImpl is a traffic device can display one fixed message. It can
- * only be turned on or off.
+ * A Beacon is a light which flashes toward oncoming traffic.
  *
  * @author Douglas Lau
  */
-public class WarningSignImpl extends DeviceImpl implements WarningSign {
+public class BeaconImpl extends DeviceImpl implements Beacon {
 
-	/** Load all the warning signs */
+	/** Load all the beacons */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, WarningSignImpl.class);
+		namespace.registerType(SONAR_TYPE, BeaconImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"camera, message FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new WarningSignImpl(
+				namespace.addObject(new BeaconImpl(
 					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
@@ -81,16 +80,16 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new warning sign with a string name */
-	public WarningSignImpl(String n) throws TMSException, SonarException {
+	/** Create a new beacon with a string name */
+	public BeaconImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
 	}
 
-	/** Create a warning sign */
-	protected WarningSignImpl(String n, GeoLocImpl l, ControllerImpl c,
+	/** Create a beacon */
+	protected BeaconImpl(String n, GeoLocImpl l, ControllerImpl c,
 		int p, String nt, CameraImpl cam, String m)
 	{
 		super(n, c, p, nt);
@@ -100,8 +99,8 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 		initTransients();
 	}
 
-	/** Create a warning sign */
-	protected WarningSignImpl(Namespace ns, String n, String l,
+	/** Create a beacon */
+	protected BeaconImpl(Namespace ns, String n, String l,
 		String c, int p, String nt, String cam, String m)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l),
@@ -124,7 +123,7 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 		return geo_loc;
 	}
 
-	/** Camera from which this sign can be seen */
+	/** Camera from which the beacon can be seen */
 	protected Camera camera;
 
 	/** Set the verification camera */
@@ -145,7 +144,7 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 		return camera;
 	}
 
-	/** Message text of the sign */
+	/** Message text */
 	protected String message = "";
 
 	/** Set the message text */
@@ -166,33 +165,35 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 		return message;
 	}
 
-	/** Flag for deployed status */
-	protected transient boolean deployed;
+	/** Flashing state */
+	private transient boolean flashing;
 
-	/** Set the deployed status of the sign */
-	public void setDeployed(boolean d) {
-		WarningSignPoller p = getWarningSignPoller();
+	/** Set the flashing state */
+	public void setFlashing(boolean f) {
+		BeaconPoller p = getBeaconPoller();
 		if(p != null)
-			p.setDeployed(this, d);
+			p.setFlashing(this, f);
 	}
 
-	/** Check if the warning sign is deployed */
-	public boolean getDeployed() {
-		return deployed;
+	/** Check if the beacon is flashing */
+	public boolean getFlashing() {
+		return flashing;
 	}
 
-	/** Set the actual deployed status from the controller */
-	public void setDeployedStatus(boolean d) {
-		if(d != deployed)
-			deployed = d;
+	/** Set the flashing state and notify clients */
+	public void setFlashingNotify(boolean f) {
+		if(f != flashing) {
+			flashing = f;
+			notifyAttribute("flashing");
+		}
 	}
 
-	/** Get a warning sign poller */
-	protected WarningSignPoller getWarningSignPoller() {
+	/** Get a beacon poller */
+	private BeaconPoller getBeaconPoller() {
 		if(isActive()) {
 			MessagePoller p = getPoller();
-			if(p instanceof WarningSignPoller)
-				return (WarningSignPoller)p;
+			if(p instanceof BeaconPoller)
+				return (BeaconPoller)p;
 		}
 		return null;
 	}
@@ -200,7 +201,7 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 	/** Request a device operation */
 	public void setDeviceRequest(int r) {
 		DeviceRequest dr = DeviceRequest.fromOrdinal(r);
-		WarningSignPoller p = getWarningSignPoller();
+		BeaconPoller p = getBeaconPoller();
 		if(p != null)
 			p.sendRequest(this, dr);
 	}

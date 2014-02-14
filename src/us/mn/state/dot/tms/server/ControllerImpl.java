@@ -370,12 +370,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return null;
 	}
 
-	/** Get an active warning sign for the controller */
-	public synchronized WarningSignImpl getActiveWarningSign() {
+	/** Get an active beacon for the controller */
+	public synchronized BeaconImpl getActiveBeacon() {
 		if(getActive()) {
 			for(ControllerIO io: io_pins.values()) {
-				if(io instanceof WarningSignImpl)
-					return (WarningSignImpl)io;
+				if(io instanceof BeaconImpl)
+					return (BeaconImpl)io;
 			}
 		}
 		return null;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,17 +12,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.warning;
+package us.mn.state.dot.tms.client.beacon;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
@@ -31,36 +31,35 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * A warning sign manager is a container for SONAR warning sign objects.
+ * A beacon manager is a container for SONAR beacon objects.
  *
  * @author Douglas Lau
  */
-public class WarningSignManager extends ProxyManager<WarningSign> {
+public class BeaconManager extends ProxyManager<Beacon> {
 
-	/** Warning sign map object marker */
-	static protected final WarningSignMarker MARKER =
-		new WarningSignMarker();
+	/** Beacon map object marker */
+	static private final BeaconMarker MARKER = new BeaconMarker();
 
-	/** Create a new warning sign manager */
-	public WarningSignManager(Session s, GeoLocManager lm) {
+	/** Create a new beacon manager */
+	public BeaconManager(Session s, GeoLocManager lm) {
 		super(s, lm);
 	}
 
 	/** Get the proxy type name */
 	@Override
 	public String getProxyType() {
-		return "warning.sign";
+		return "beacon";
 	}
 
-	/** Get the warning sign cache */
+	/** Get the beacon cache */
 	@Override
-	public TypeCache<WarningSign> getCache() {
-		return session.getSonarState().getWarningSigns();
+	public TypeCache<Beacon> getCache() {
+		return session.getSonarState().getBeacons();
 	}
 
-	/** Check if user can read warning signs */
+	/** Check if user can read beacons */
 	public boolean canRead() {
-		return session.canRead(WarningSign.SONAR_TYPE);
+		return session.canRead(Beacon.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */
@@ -69,11 +68,10 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		return MARKER.createTransformedShape(at);
 	}
 
-	/** Create a theme for warning signs */
+	/** Create a theme for beacons */
 	@Override
-	protected ProxyTheme<WarningSign> createTheme() {
-		ProxyTheme<WarningSign> theme =new ProxyTheme<WarningSign>(this,
-			MARKER);
+	protected ProxyTheme<Beacon> createTheme() {
+		ProxyTheme<Beacon> theme = new ProxyTheme<Beacon>(this, MARKER);
 		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
@@ -85,13 +83,13 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 
 	/** Check the style of the specified proxy */
 	@Override
-	public boolean checkStyle(ItemStyle is, WarningSign proxy) {
+	public boolean checkStyle(ItemStyle is, Beacon proxy) {
 		switch(is) {
 		case DEPLOYED:
-			return proxy.getDeployed();
+			return proxy.getFlashing();
 		case AVAILABLE:
 			return (!ControllerHelper.isFailed(
-			       proxy.getController())) && !proxy.getDeployed();
+			       proxy.getController())) && !proxy.getFlashing();
 		case FAILED:
 			return ControllerHelper.isFailed(proxy.getController());
 		case NO_CONTROLLER:
@@ -105,20 +103,20 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 
 	/** Create a properties form for the specified proxy */
 	@Override
-	protected WarningSignProperties createPropertiesForm(WarningSign ws) {
-		return new WarningSignProperties(session, ws);
+	protected BeaconProperties createPropertiesForm(Beacon b) {
+		return new BeaconProperties(session, b);
 	}
 
 	/** Create a popup menu for a single selection */
 	@Override
-	protected JPopupMenu createPopupSingle(WarningSign ws) {
+	protected JPopupMenu createPopupSingle(Beacon b) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(ws)));
+		p.add(makeMenuLabel(getDescription(b)));
 		p.addSeparator();
 		p.add(new DeployAction(s_model));
 		p.add(new UndeployAction(s_model));
 		p.addSeparator();
-		p.add(new PropertiesAction<WarningSign>(this, ws));
+		p.add(new PropertiesAction<Beacon>(this, b));
 		return p;
 	}
 
@@ -126,8 +124,7 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("warning.signs")));
+		p.add(new JLabel("" + n_selected + " " + I18N.get("beacons")));
 		p.addSeparator();
 		p.add(new DeployAction(s_model));
 		p.add(new UndeployAction(s_model));
@@ -136,13 +133,13 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 
 	/** Find the map geo location for a proxy */
 	@Override
-	protected GeoLoc getGeoLoc(WarningSign proxy) {
+	protected GeoLoc getGeoLoc(Beacon proxy) {
 		return proxy.getGeoLoc();
 	}
 
 	/** Get the layer zoom visibility threshold */
 	@Override
 	protected int getZoomThreshold() {
-		return 15;
+		return 14;
 	}
 }

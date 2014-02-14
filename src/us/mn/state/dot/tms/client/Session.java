@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.client.beacon.BeaconManager;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
@@ -41,7 +42,6 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.schedule.PlanManager;
-import us.mn.state.dot.tms.client.warning.WarningSignManager;
 import us.mn.state.dot.tms.client.weather.WeatherSensorManager;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 
@@ -145,8 +145,8 @@ public class Session {
 		return r_node_manager;
 	}
 
-	/** Warning sign manager */
-	private final WarningSignManager warn_manager;
+	/** Beacon manager */
+	private final BeaconManager beacon_manager;
 
 	/** Weather sensor manager */
 	private final WeatherSensorManager weather_sensor_manager;
@@ -186,7 +186,7 @@ public class Session {
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);
 		lane_marking_manager = new LaneMarkingManager(this,loc_manager);
-		warn_manager = new WarningSignManager(this, loc_manager);
+		beacon_manager = new BeaconManager(this, loc_manager);
 		weather_sensor_manager = new WeatherSensorManager(this,
 			loc_manager);
 		meter_manager = new MeterManager(this, loc_manager);
@@ -225,7 +225,7 @@ public class Session {
 		lcs_array_manager.initialize();
 		lcsi_manager.initialize();
 		lane_marking_manager.initialize();
-		warn_manager.initialize();
+		beacon_manager.initialize();
 		weather_sensor_manager.initialize();
 		meter_manager.initialize();
 		gate_arm_manager.initialize();
@@ -276,8 +276,8 @@ public class Session {
 			mm.addLayer(dms_manager.createState(mb));
 		if(lcs_array_manager.canRead())
 			mm.addLayer(lcs_array_manager.createState(mb));
-		if(warn_manager.canRead())
-			mm.addLayer(warn_manager.createState(mb));
+		if(beacon_manager.canRead())
+			mm.addLayer(beacon_manager.createState(mb));
 		if(inc_manager.canRead())
 			mm.addLayer(inc_manager.createState(mb));
 		if(r_node_manager.isAddPermitted())
@@ -477,7 +477,7 @@ public class Session {
 		lcs_array_manager.dispose();
 		lcsi_manager.dispose();
 		lane_marking_manager.dispose();
-		warn_manager.dispose();
+		beacon_manager.dispose();
 		weather_sensor_manager.dispose();
 		meter_manager.dispose();
 		controller_manager.dispose();

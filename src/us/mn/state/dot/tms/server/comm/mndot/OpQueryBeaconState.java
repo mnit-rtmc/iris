@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +15,25 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.WarningSignImpl;
+import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Query the status of a warning sign
+ * Query the state of a beacon
  *
  * @author Douglas Lau
  */
-public class OpQueryWarningStatus extends OpDevice {
+public class OpQueryBeaconState extends OpDevice {
 
-	/** Warning sign */
-	protected final WarningSignImpl warn;
+	/** Beacon device */
+	private final BeaconImpl beacon;
 
-	/** Create a new warning status poll */
-	public OpQueryWarningStatus(WarningSignImpl w) {
-		super(PriorityLevel.DATA_30_SEC, w);
-		warn = w;
+	/** Create a new query beacon state operation */
+	public OpQueryBeaconState(BeaconImpl b) {
+		super(PriorityLevel.DATA_30_SEC, b);
+		beacon = b;
 	}
 
 	/** Create the second phase of the operation */
@@ -41,15 +41,15 @@ public class OpQueryWarningStatus extends OpDevice {
 		return new QueryStatus();
 	}
 
-	/** Phase to query the warning sign status */
+	/** Phase to query the beacon state */
 	protected class QueryStatus extends Phase {
 
-		/** Query the warning sign status */
+		/** Query the beacon state */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] b = new byte[1];
 			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,b));
 			mess.queryProps();
-			warn.setDeployedStatus(b[Address.OFF_STATUS] !=
+			beacon.setFlashingNotify(b[Address.OFF_STATUS] !=
 				MeterStatus.FLASH);
 			return null;
 		}

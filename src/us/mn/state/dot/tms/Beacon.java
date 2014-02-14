@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,14 @@
 package us.mn.state.dot.tms;
 
 /**
- * A WarningSign is a traffic device can display one fixed message. It can
- * only be turned on or off.
+ * A Beacon is a light which flashes toward oncoming traffic.
  *
  * @author Douglas Lau
  */
-public interface WarningSign extends Device {
+public interface Beacon extends Device {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "warning_sign";
+	String SONAR_TYPE = "beacon";
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();
@@ -40,9 +39,9 @@ public interface WarningSign extends Device {
 	/** Get the message text */
 	String getMessage();
 
-	/** Set the deployed status of the sign */
-	void setDeployed(boolean d);
+	/** Set the flashing state of the beacon */
+	void setFlashing(boolean f);
 
-	/** Check if the warning sign is deployed */
-	boolean getDeployed();
+	/** Check if the beacon is flashing */
+	boolean getFlashing();
 }

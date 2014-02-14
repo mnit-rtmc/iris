@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2013  Minnesota Department of Transportation
+ * Copyright (C) 2004-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.warning;
+package us.mn.state.dot.tms.client.beacon;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -24,9 +24,9 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -38,11 +38,11 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * WarningSignProperties is a dialog for entering and editing warning signs 
+ * BeaconProperties is a dialog for entering and editing beacons.
  *
  * @author Douglas Lau
  */
-public class WarningSignProperties extends SonarObjectForm<WarningSign> {
+public class BeaconProperties extends SonarObjectForm<Beacon> {
 
 	/** Location panel */
 	private final LocationPanel loc_pnl;
@@ -67,19 +67,19 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	/** Camera combo box */
 	private final JComboBox camera_cbx = new JComboBox();
 
-	/** Sign message text area */
+	/** Message text area */
 	private final JTextArea message_txt = new JTextArea(3, 24);
 
-	/** Create a new warning sign form */
-	public WarningSignProperties(Session s, WarningSign ws) {
-		super(I18N.get("warning.sign") + ": ", s, ws);
+	/** Create a new beacon form */
+	public BeaconProperties(Session s, Beacon b) {
+		super(I18N.get("beacon") + ": ", s, b);
 		loc_pnl = new LocationPanel(s);
 	}
 
 	/** Get the SONAR type cache */
 	@Override
-	protected TypeCache<WarningSign> getTypeCache() {
-		return state.getWarningSigns();
+	protected TypeCache<Beacon> getTypeCache() {
+		return state.getBeacons();
 	}
 
 	/** Initialize the widgets on the form */
@@ -141,7 +141,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		IPanel p = new IPanel();
 		p.add("camera");
 		p.add(camera_cbx, Stretch.LAST);
-		p.add("warning.sign.text");
+		p.add("beacon.text");
 		p.add(message_txt, Stretch.LAST);
 		return p;
 	}
