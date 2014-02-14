@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	}
 
 	/** Check if a drop address is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		return true;
 	}
@@ -53,6 +54,7 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	}
 
 	/** Send a device request */
+	@Override
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
@@ -71,6 +73,7 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	 * @param lcs_array LCS array.
 	 * @param ind New lane use indications.
 	 * @param o User who deployed the indications. */
+	@Override
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{

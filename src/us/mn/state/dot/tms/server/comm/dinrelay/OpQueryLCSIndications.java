@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ public class OpQueryLCSIndications extends OpLCS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase<DinRelayProperty> phaseTwo() {
 		return new CreateOutletQueries();
 	}
@@ -123,6 +124,7 @@ public class OpQueryLCSIndications extends OpLCS {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
 		testComplete();
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ public class OpSendLCSSettings extends OpLCS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase<DinRelayProperty> phaseTwo() {
 		for(DMSImpl dms: dmss) {
 			if(dms != null)

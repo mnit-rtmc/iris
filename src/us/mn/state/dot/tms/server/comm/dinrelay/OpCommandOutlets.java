@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ public class OpCommandOutlets extends OpDinRelay {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase<DinRelayProperty> phaseOne() {
 		return new QueryOutlets();
 	}
@@ -131,6 +132,7 @@ public class OpCommandOutlets extends OpDinRelay {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
 		property.complete(isSuccess());
 		super.cleanup();

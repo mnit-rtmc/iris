@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,12 +35,14 @@ public class CommandProperty extends DinRelayProperty {
 	}
 
 	/** Get a string representation of the property */
+	@Override
 	public String toString() {
 		return "command: " + getPath();
 	}
 
 	/** Decode a STORE response */
-	@Override public void decodeStore(InputStream is, int drop) {
+	@Override
+	public void decodeStore(InputStream is, int drop) {
 		// ignore response
 	}
 }

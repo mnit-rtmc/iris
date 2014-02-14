@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +59,7 @@ public class OutletProperty extends DinRelayProperty {
 	}
 
 	/** Get a string representation of the property */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("outlets:");
@@ -77,9 +78,8 @@ public class OutletProperty extends DinRelayProperty {
 	}
 
 	/** Decode a QUERY response */
-	@Override public void decodeQuery(InputStream is, int drop)
-		throws IOException
-	{
+	@Override
+	public void decodeQuery(InputStream is, int drop) throws IOException {
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		for(int i = 0; line != null && i < MAX_LINES; i++) {
