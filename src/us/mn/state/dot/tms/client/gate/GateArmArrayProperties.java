@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -163,6 +163,14 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		}
 	};
 
+	/** System disable action */
+	private final IAction disable = new IAction("gate.arm.disable.system") {
+		protected void doActionPerformed(ActionEvent e) {
+			proxy.setDeviceRequest(DeviceRequest.
+				DISABLE_SYSTEM.ordinal());
+		}
+	};
+
 	/** Create a new gate arm array properties form */
 	public GateArmArrayProperties(Session s, GateArmArray ga) {
 		super(I18N.get("gate.arm.array") + ": ", s, ga);
@@ -189,6 +197,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		if(canUpdate())
 			createUpdateJobs();
 		settings.setEnabled(isUpdatePermitted("deviceRequest"));
+		disable.setEnabled(canUpdate("deviceRequest"));
 		super.initialize();
 	}
 
@@ -304,6 +313,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		p.add("device.operation");
 		p.add(op_lbl, Stretch.LAST);
 		p.add(new JButton(settings), Stretch.RIGHT);
+		p.add(new JButton(disable), Stretch.RIGHT);
 		return p;
 	}
 

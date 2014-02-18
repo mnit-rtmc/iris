@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -326,7 +326,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Request a device operation */
-	@Override public void setDeviceRequest(int r) {
+	@Override
+	public void setDeviceRequest(int r) {
 		for(int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
 			if(ga != null)
