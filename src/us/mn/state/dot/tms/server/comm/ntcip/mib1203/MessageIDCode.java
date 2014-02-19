@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,6 +75,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 	}
 
 	/** Set the octet string value */
+	@Override
 	public void setOctetString(byte[] value) {
 		ByteArrayInputStream bis = new ByteArrayInputStream(value);
 		DataInputStream dis = new DataInputStream(bis);
@@ -84,11 +85,12 @@ abstract public class MessageIDCode extends ASN1OctetString {
 			crc = dis.readUnsignedShort();
 		}
 		catch(IOException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException(e);
 		}
 	}
 
 	/** Get the octet string value */
+	@Override
 	public byte[] getOctetString() {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
@@ -105,7 +107,8 @@ abstract public class MessageIDCode extends ASN1OctetString {
 	}
 
 	/** Get the object value */
-	public String getValue() {
+	@Override
+	protected String getValue() {
 		StringBuilder b = new StringBuilder();
 		b.append(DmsMessageMemoryType.Enum.fromOrdinal(memory));
 		b.append(",");

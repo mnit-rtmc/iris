@@ -77,23 +77,26 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 	}
 
 	/** Get the object value */
-	public String getValue() {
+	@Override
+	protected String getValue() {
 		StringBuilder b = new StringBuilder();
+		BrightnessLevel[] table;
 		try {
-			BrightnessLevel[] table = getTable();
-			b.append(table.length);
-			for(BrightnessLevel lvl: table) {
-				b.append(", (");
-				b.append(lvl.output);
-				b.append(",");
-				b.append(lvl.pc_down);
-				b.append(",");
-				b.append(lvl.pc_up);
-				b.append(")");
-			}
+			table = getTable();
 		}
 		catch(IOException e) {
 			e.printStackTrace();
+			return b.toString();
+		}
+		b.append(table.length);
+		for(BrightnessLevel lvl: table) {
+			b.append(", (");
+			b.append(lvl.output);
+			b.append(",");
+			b.append(lvl.pc_down);
+			b.append(",");
+			b.append(lvl.pc_up);
+			b.append(")");
 		}
 		return b.toString();
 	}
