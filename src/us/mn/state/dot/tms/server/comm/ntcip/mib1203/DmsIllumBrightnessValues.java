@@ -61,10 +61,12 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 		try {
 			int n_lvls = dis.readByte();
 			BrightnessLevel[] table = new BrightnessLevel[n_lvls];
-			for(BrightnessLevel lvl: table) {
+			for(int i = 0; i < n_lvls; i++) {
+				BrightnessLevel lvl = new BrightnessLevel();
 				lvl.output = dis.readUnsignedShort();
 				lvl.pc_down = dis.readUnsignedShort();
 				lvl.pc_up = dis.readUnsignedShort();
+				table[i] = lvl;
 			}
 			return table;
 		}
