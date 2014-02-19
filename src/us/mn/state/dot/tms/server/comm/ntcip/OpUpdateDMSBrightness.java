@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,8 +135,8 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	}
 
 	/** Calculate a new brightness table */
-	protected int[][] calculateTable() throws IOException {
-		int[][] table = brightness.getTable();
+	private BrightnessLevel[] calculateTable() throws IOException {
+		BrightnessLevel[] table = brightness.getTable();
 		dms.queryBrightnessFeedback(new BrightnessTable(table));
 		return table;
 	}

@@ -29,25 +29,16 @@ import us.mn.state.dot.tms.server.DMSImpl;
 public class BrightnessTable implements DMSImpl.BrightnessHandler {
 
 	/** Max light output */
-	static protected final int MAX_OUTPUT = 65535;
+	static private final int MAX_OUTPUT = 65535;
 
 	/** Amount to adjust light output on feedback */
-	static protected final int ADJ_OUTPUT = 1024;
-
-	/** Index into table level for light output */
-	static protected final int LEVEL_OUT = 0;
-
-	/** Index into table level for photocell down threshold */
-	static protected final int LEVEL_DOWN = 1;
-
-	/** Index into table level for photocell up threshold */
-	static protected final int LEVEL_UP = 2;
+	static private final int ADJ_OUTPUT = 1024;
 
 	/** Brightness table values */
-	protected final int[][] table;
+	private final BrightnessLevel[] table;
 
 	/** Create a new brightness table */
-	public BrightnessTable(int[][] tbl) {
+	public BrightnessTable(BrightnessLevel[] tbl) {
 		table = tbl;
 	}
 
@@ -71,30 +62,30 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 	}
 
 	/** Adjust a brightness table with DMS_BRIGHT_LOW feedback */
-	protected void feedbackLow(int photo, int output) {
+	private void feedbackLow(int photo, int output) {
 		int light = 0;		// highest light output so far
-		for(int[] lvl: table) {
-			light = Math.max(lvl[LEVEL_OUT], light);
-			if(lvl[LEVEL_DOWN] <= photo && photo <= lvl[LEVEL_UP])
+		for(BrightnessLevel lvl: table) {
+			light = Math.max(lvl.output, light);
+			if(lvl.pc_down <= photo && photo <= lvl.pc_up)
 				light = Math.max(light, output + ADJ_OUTPUT);
-			lvl[LEVEL_OUT] = Math.min(light, MAX_OUTPUT);
+			lvl.output = Math.min(light, MAX_OUTPUT);
 		}
 	}
 
 	/** Adjust a brightness table with DMS_BRIGHT_GOOD feedback */
-	protected void feedbackGood(int photo, int output) {
-		final int max_photo = table[table.length - 1][LEVEL_UP];
+	private void feedbackGood(int photo, int output) {
+		final int max_photo = table[table.length - 1].pc_up;
 		for(int i = 0; i < table.length; i++) {
-			int[] lvl = table[i];
-			if(lvl[LEVEL_DOWN] <= photo && photo <= lvl[LEVEL_UP]) {
+			BrightnessLevel lvl = table[i];
+			if(lvl.pc_down <= photo && photo <= lvl.pc_up) {
 				int prev = 0;
 				int next = max_photo;
 				if(i > 0)
-					prev = table[i - 1][LEVEL_UP];
+					prev = table[i - 1].pc_up;
 				if(i < table.length - 1)
-					next = table[i + 1][LEVEL_DOWN];
+					next = table[i + 1].pc_down;
 				if(prev < photo && photo < next) {
-					lvl[LEVEL_OUT] = output;
+					lvl.output = output;
 					fixNegativeSlopes(i);
 				}
 			}
@@ -102,26 +93,26 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 	}
 
 	/** Fix negative slopes by adjusting light output around a level */
-	protected void fixNegativeSlopes(int n_lvl) {
-		int output = table[n_lvl][LEVEL_OUT];
+	private void fixNegativeSlopes(int n_lvl) {
+		int output = table[n_lvl].output;
 		for(int i = 0; i < table.length; i++) {
-			int[] lvl = table[i];
-			if(i < n_lvl && lvl[LEVEL_OUT] > output)
-				lvl[LEVEL_OUT] = output;
-			if(i > n_lvl && lvl[LEVEL_OUT] < output)
-				lvl[LEVEL_OUT] = output;
+			BrightnessLevel lvl = table[i];
+			if(i < n_lvl && lvl.output > output)
+				lvl.output = output;
+			if(i > n_lvl && lvl.output < output)
+				lvl.output = output;
 		}
 	}
 
 	/** Adjust a brightness table with DMS_BRIGHT_HIGH feedback */
-	protected void feedbackHigh(int photo,int output) {
+	private void feedbackHigh(int photo, int output) {
 		int light = MAX_OUTPUT;	// lowest light output so far
 		for(int i = table.length - 1; i >= 0; i--) {
-			int[] lvl = table[i];
-			light = Math.min(lvl[LEVEL_OUT], light);
-			if(lvl[LEVEL_DOWN] <= photo && photo <= lvl[LEVEL_UP])
+			BrightnessLevel lvl = table[i];
+			light = Math.min(lvl.output, light);
+			if(lvl.pc_down <= photo && photo <= lvl.pc_up)
 				light = Math.min(light, output - ADJ_OUTPUT);
-			lvl[LEVEL_OUT] = Math.max(light, 0);
+			lvl.output = Math.max(light, 0);
 		}
 	}
 }

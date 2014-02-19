@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.BrightnessLevel;
 
 /**
  * DmsIllumBrightnessValues is a sign brightness table.  It is encoded using
@@ -35,15 +36,15 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 	}
 
 	/** Set the brightness table */
-	public void setTable(int[][] table) throws IOException {
+	public void setTable(BrightnessLevel[] table) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {
 			dos.writeByte(table.length);
-			for(int[] level: table) {
-				dos.writeShort(level[0]); // lightOutput
-				dos.writeShort(level[1]); // photocellLevelDown
-				dos.writeShort(level[2]); // photocellLevelUp
+			for(BrightnessLevel lvl: table) {
+				dos.writeShort(lvl.output);
+				dos.writeShort(lvl.pc_down);
+				dos.writeShort(lvl.pc_up);
 			}
 			value = bos.toByteArray();
 		}
@@ -54,15 +55,16 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 	}
 
 	/** Get the brightness table */
-	public int[][] getTable() throws IOException {
+	public BrightnessLevel[] getTable() throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(value);
 		DataInputStream dis = new DataInputStream(bis);
 		try {
-			int[][] table = new int[dis.readByte()][3];
-			for(int[] level: table) {
-				level[0] = dis.readUnsignedShort();
-				level[1] = dis.readUnsignedShort();
-				level[2] = dis.readUnsignedShort();
+			int n_lvls = dis.readByte();
+			BrightnessLevel[] table = new BrightnessLevel[n_lvls];
+			for(BrightnessLevel lvl: table) {
+				lvl.output = dis.readUnsignedShort();
+				lvl.pc_down = dis.readUnsignedShort();
+				lvl.pc_up = dis.readUnsignedShort();
 			}
 			return table;
 		}
@@ -76,15 +78,15 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
 		try {
-			int[][] table = getTable();
+			BrightnessLevel[] table = getTable();
 			b.append(table.length);
-			for(int[] level: table) {
+			for(BrightnessLevel lvl: table) {
 				b.append(", (");
-				b.append(level[0]);
+				b.append(lvl.output);
 				b.append(",");
-				b.append(level[1]);
+				b.append(lvl.pc_down);
 				b.append(",");
-				b.append(level[2]);
+				b.append(lvl.pc_up);
 				b.append(")");
 			}
 		}
@@ -96,22 +98,22 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 
 	/** Check if the brightness table is valid */
 	public boolean isValid() throws IOException {
-		int[][] table = getTable();
+		BrightnessLevel[] table = getTable();
 		int output = 0;
 		int down = 0;
 		int up = 0;
-		for(int[] level: table) {
-			if(level[2] < level[1])
+		for(BrightnessLevel lvl: table) {
+			if(lvl.pc_up < lvl.pc_down)
 				return false;
-			if(level[0] < output)
+			if(lvl.output < output)
 				return false;
-			if(level[1] < down)
+			if(lvl.pc_down < down)
 				return false;
-			if(level[2] < up)
+			if(lvl.pc_up < up)
 				return false;
-			output = level[0];
-			down = level[1];
-			up = level[2];
+			output = lvl.output;
+			down = lvl.pc_down;
+			up = lvl.pc_up;
 		}
 		return true;
 	}
