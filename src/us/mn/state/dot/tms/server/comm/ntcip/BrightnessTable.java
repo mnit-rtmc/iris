@@ -74,7 +74,7 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 
 	/** Adjust a brightness table with DMS_BRIGHT_GOOD feedback */
 	private void feedbackGood(int photo, int output) {
-		final int max_photo = table[table.length - 1].pc_up;
+		final int max_photo = getMaxPhotocell();
 		for(int i = 0; i < table.length; i++) {
 			BrightnessLevel lvl = table[i];
 			if(lvl.pc_down <= photo && photo <= lvl.pc_up) {
@@ -90,6 +90,11 @@ public class BrightnessTable implements DMSImpl.BrightnessHandler {
 				}
 			}
 		}
+	}
+
+	/** Get the maximum photocell level in the table */
+	private int getMaxPhotocell() {
+		return table.length > 0 ? table[table.length - 1].pc_up : 0;
 	}
 
 	/** Fix negative slopes by adjusting light output around a level */
