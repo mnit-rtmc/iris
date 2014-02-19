@@ -30,22 +30,54 @@ import us.mn.state.dot.tms.server.comm.ntcip.MIBNode;
  */
 abstract public class MessageIDCode extends ASN1OctetString {
 
+	/** Encode message ID value.
+	 * @param m Message memory type.
+	 * @param n Message number.
+	 * @param c CRC of message.
+	 * @return Encoded array of bytes.
+	 * @throws IllegalArgumentException, if encoding fails. */
+	static private byte[] encodeValue(DmsMessageMemoryType.Enum m, int n,
+		int c)
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		try {
+			dos.writeByte(m.ordinal());
+			dos.writeShort(n);
+			dos.writeShort(c);
+			return bos.toByteArray();
+		}
+		catch(IOException e) {
+			throw new IllegalArgumentException(e);
+		}
+		finally {
+			try {
+				dos.close();
+				bos.close();
+			}
+			catch(IOException e) {
+				// exceptions on close are stupid -- ignore
+			}
+		}
+	}
+
 	/** Create a new MessageIDCode */
 	protected MessageIDCode(MIBNode n) {
 		super(n);
 	}
 
 	/** Memory type */
-	protected int memory;
+	protected DmsMessageMemoryType.Enum memory;
 
 	/** Set the memory type */
 	public void setMemoryType(DmsMessageMemoryType.Enum m) {
-		memory = m.ordinal();
+		value = encodeValue(m, number, crc);
+		memory = m;
 	}
 
 	/** Get the memory type */
 	public DmsMessageMemoryType.Enum getMemoryType() {
-		return DmsMessageMemoryType.Enum.fromOrdinal(memory);
+		return memory;
 	}
 
 	/** Message number */
@@ -53,6 +85,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 
 	/** Set the message number */
 	public void setNumber(int n) {
+		value = encodeValue(memory, n, crc);
 		number = n;
 	}
 
@@ -66,6 +99,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 
 	/** Set the CRC */
 	public void setCrc(int c) {
+		value = encodeValue(memory, number, c);
 		crc = c;
 	}
 
@@ -76,33 +110,18 @@ abstract public class MessageIDCode extends ASN1OctetString {
 
 	/** Set the octet string value */
 	@Override
-	public void setOctetString(byte[] value) {
-		ByteArrayInputStream bis = new ByteArrayInputStream(value);
+	public void setOctetString(byte[] v) {
+		ByteArrayInputStream bis = new ByteArrayInputStream(v);
 		DataInputStream dis = new DataInputStream(bis);
 		try {
-			memory = dis.readUnsignedByte();
+			memory = DmsMessageMemoryType.Enum.fromOrdinal(
+				dis.readUnsignedByte());
 			number = dis.readUnsignedShort();
 			crc = dis.readUnsignedShort();
+			value = v;
 		}
 		catch(IOException e) {
 			throw new IllegalArgumentException(e);
-		}
-	}
-
-	/** Get the octet string value */
-	@Override
-	public byte[] getOctetString() {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(bos);
-		try {
-			dos.writeByte(memory);
-			dos.writeShort(number);
-			dos.writeShort(crc);
-			return bos.toByteArray();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-			return new byte[0];
 		}
 	}
 
@@ -110,7 +129,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 	@Override
 	protected String getValue() {
 		StringBuilder b = new StringBuilder();
-		b.append(DmsMessageMemoryType.Enum.fromOrdinal(memory));
+		b.append(memory);
 		b.append(",");
 		b.append(number);
 		b.append(",");
