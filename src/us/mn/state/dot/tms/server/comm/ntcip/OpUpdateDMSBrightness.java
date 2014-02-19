@@ -135,7 +135,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	}
 
 	/** Calculate a new brightness table */
-	private BrightnessLevel[] calculateTable() throws IOException {
+	private BrightnessLevel[] calculateTable() {
 		BrightnessLevel[] table = brightness.getTable();
 		dms.queryBrightnessFeedback(new BrightnessTable(table));
 		return table;

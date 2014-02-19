@@ -30,13 +30,11 @@ import us.mn.state.dot.tms.server.comm.ntcip.BrightnessLevel;
  */
 public class DmsIllumBrightnessValues extends ASN1OctetString {
 
-	/** Create a new DmsIllumBrightnessValues object */
-	public DmsIllumBrightnessValues() {
-		super(MIB1203.illum.create(new int[] {7, 0}));
-	}
-
-	/** Set the brightness table */
-	public void setTable(BrightnessLevel[] table) throws IOException {
+	/** Encode a brightness table.
+	 * @param table Array of brightness levels.
+	 * @return Encoded table as an array of bytes.
+	 * @throws IllegalArgumentException, if encoding fails. */
+	static private byte[] encodeTable(BrightnessLevel[] table) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {
@@ -46,16 +44,27 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 				dos.writeShort(lvl.pc_down);
 				dos.writeShort(lvl.pc_up);
 			}
-			value = bos.toByteArray();
+			return bos.toByteArray();
+		}
+		catch(IOException e) {
+			throw new IllegalArgumentException(e);
 		}
 		finally {
-			dos.close();
-			bos.close();
+			try {
+				dos.close();
+				bos.close();
+			}
+			catch(IOException e) {
+				// exceptions on close are stupid -- ignore
+			}
 		}
 	}
 
-	/** Get the brightness table */
-	public BrightnessLevel[] getTable() throws IOException {
+	/** Decode a brightness table.
+	 * @param value Encoded table as an array of bytes.
+	 * @return Decoded brightness table as an array of brightness levels.
+	 * @throws IllegalArgumentException, if decoding fails. */
+	static private BrightnessLevel[] decodeTable(byte[] value) {
 		ByteArrayInputStream bis = new ByteArrayInputStream(value);
 		DataInputStream dis = new DataInputStream(bis);
 		try {
@@ -70,24 +79,40 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 			}
 			return table;
 		}
-		finally {
-			dis.close();
-			bis.close();
+		catch(IOException e) {
+			throw new IllegalArgumentException(e);
 		}
+		finally {
+			try {
+				dis.close();
+				bis.close();
+			}
+			catch(IOException e) {
+				// exceptions on close are stupid -- ignore
+			}
+		}
+	}
+
+	/** Create a new DmsIllumBrightnessValues object */
+	public DmsIllumBrightnessValues() {
+		super(MIB1203.illum.create(new int[] {7, 0}));
+	}
+
+	/** Set the brightness table */
+	public void setTable(BrightnessLevel[] table) {
+		value = encodeTable(table);
+	}
+
+	/** Get the brightness table */
+	public BrightnessLevel[] getTable() {
+		return decodeTable(value);
 	}
 
 	/** Get the object value */
 	@Override
 	protected String getValue() {
 		StringBuilder b = new StringBuilder();
-		BrightnessLevel[] table;
-		try {
-			table = getTable();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-			return b.toString();
-		}
+		BrightnessLevel[] table = getTable();
 		b.append(table.length);
 		for(BrightnessLevel lvl: table) {
 			b.append(", (");
@@ -102,7 +127,7 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 	}
 
 	/** Check if the brightness table is valid */
-	public boolean isValid() throws IOException {
+	public boolean isValid() {
 		BrightnessLevel[] table = getTable();
 		int output = 0;
 		int down = 0;
