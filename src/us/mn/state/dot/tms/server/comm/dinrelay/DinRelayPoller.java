@@ -15,9 +15,12 @@
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.comm.BeaconPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -28,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  * @author Douglas Lau
  */
 public class DinRelayPoller extends MessagePoller<DinRelayProperty>
-	implements LCSPoller
+	implements LCSPoller, BeaconPoller
 {
 	/** Create a new DIN relay poller */
 	public DinRelayPoller(String n, Messenger m) {
@@ -78,5 +81,38 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 		User o)
 	{
 		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
+	}
+
+	/** Send a device request */
+	@Override
+	public void sendRequest(BeaconImpl b, DeviceRequest r) {
+		switch(r) {
+		case QUERY_STATUS:
+			pollBeacon(b);
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
+	}
+
+	/** Set the flashing state of a beacon */
+	@Override
+	public void setFlashing(BeaconImpl b, boolean f) {
+		addOperation(new OpChangeBeaconState(b, f));
+	}
+
+	/** Perform regular poll of one controller */
+	@Override
+	public void pollController(ControllerImpl c) {
+		for(ControllerIO cio: c.getDevices()) {
+			if(cio instanceof BeaconImpl)
+				pollBeacon((BeaconImpl)cio);
+		}
+	}
+
+	/** Perform regular poll of a beacon */
+	private void pollBeacon(BeaconImpl b) {
+		addOperation(new OpQueryBeaconState(b));
 	}
 }

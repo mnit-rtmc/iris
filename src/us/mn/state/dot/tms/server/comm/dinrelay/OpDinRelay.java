@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpDinRelay extends OpController<DinRelayProperty> {
 
 	/** DIN relay debug log */
-	static private final DebugLog DIN_LOG = new DebugLog("dinrelay");
+	static final DebugLog DIN_LOG = new DebugLog("dinrelay");
 
 	/** Log a property query */
 	protected void logQuery(DinRelayProperty prop) {

@@ -29,7 +29,9 @@ public class CommandProperty extends DinRelayProperty {
 		return "outlet?" + outlet + "=" + (on ? "ON" : "OFF");
 	}
 
-	/** Create a new outlet command property */
+	/** Create a new outlet command property.
+	 * @param outlet (1-8).
+	 * @param on Turn outlet on (true) or off (false). */
 	public CommandProperty(int outlet, boolean on) {
 		super(requestString(outlet, on));
 	}

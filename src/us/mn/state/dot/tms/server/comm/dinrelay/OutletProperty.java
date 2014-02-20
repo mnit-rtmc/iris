@@ -77,6 +77,11 @@ public class OutletProperty extends DinRelayProperty {
 		callback = oc;
 	}
 
+	/** Create a new outlet property */
+	public OutletProperty() {
+		this(null);
+	}
+
 	/** Decode a QUERY response */
 	@Override
 	public void decodeQuery(InputStream is, int drop) throws IOException {
