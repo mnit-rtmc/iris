@@ -2013,7 +2013,7 @@ PRV_0129	user_admin	capability/.*	f	t	t	t
 PRV_0130	user_admin	connection/.*	f	f	f	t
 PRV_0131	gate_arm_control	gate_arm_array/.*/armState	f	t	f	f
 PRV_0132	gate_arm_control	gate_arm_array/.*/ownerNext	f	t	f	f
-PRV_0133	gate_arm_control	gate_arm_array/.*/deviceRequest	f	t	f	f
+PRV_0136	gate_arm_control	gate_arm_array/.*/deviceRequest	f	t	f	f
 \.
 
 COPY iris.role (name, enabled) FROM stdin;
