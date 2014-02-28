@@ -536,16 +536,24 @@ CREATE VIEW iris.beacon AS SELECT
 	b.name, geo_loc, controller, pin, notes, message, camera
 	FROM iris._beacon b JOIN iris._device_io d ON b.name = d.name;
 
-CREATE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
-	$beacon_update$
+CREATE FUNCTION iris.beacon_insert() RETURNS TRIGGER AS
+	$beacon_insert$
 BEGIN
-    IF TG_OP = 'INSERT' THEN
         INSERT INTO iris._device_io (name, controller, pin)
             VALUES (NEW.name, NEW.controller, NEW.pin);
         INSERT INTO iris._beacon (name, geo_loc, notes, message, camera)
             VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message, NEW.camera);
         RETURN NEW;
-    ELSIF TG_OP = 'UPDATE' THEN
+END;
+$beacon_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER beacon_insert_trig
+    INSTEAD OF INSERT ON iris.beacon
+    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_insert();
+
+CREATE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
+	$beacon_update$
+BEGIN
 	UPDATE iris._device_io SET controller = NEW.controller, pin = NEW.pin
 	WHERE name = OLD.name;
         UPDATE iris._beacon
@@ -555,21 +563,28 @@ BEGIN
 	            camera = NEW.camera
 	WHERE name = OLD.name;
         RETURN NEW;
-    ELSIF TG_OP = 'DELETE' THEN
+END;
+$beacon_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER beacon_update_trig
+    INSTEAD OF UPDATE ON iris.beacon
+    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_update();
+
+CREATE FUNCTION iris.beacon_delete() RETURNS TRIGGER AS
+	$beacon_delete$
+BEGIN
         DELETE FROM iris._device_io WHERE name = OLD.name;
         IF FOUND THEN
             RETURN OLD;
         ELSE
             RETURN NULL;
 	END IF;
-    END IF;
-    RETURN NEW;
 END;
-$beacon_update$ LANGUAGE plpgsql;
+$beacon_delete$ LANGUAGE plpgsql;
 
-CREATE TRIGGER beacon_update_trig
-    INSTEAD OF INSERT OR UPDATE OR DELETE ON iris.beacon
-    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_update();
+CREATE TRIGGER beacon_delete_trig
+    INSTEAD OF DELETE ON iris.beacon
+    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_delete();
 
 CREATE TABLE iris.meter_type (
 	id INTEGER PRIMARY KEY,
