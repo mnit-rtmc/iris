@@ -3,11 +3,8 @@
 --
 
 SET client_encoding = 'UTF8';
-SET check_function_bodies = false;
 
 \set ON_ERROR_STOP
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 CREATE SCHEMA iris;
 ALTER SCHEMA iris OWNER TO tms;
