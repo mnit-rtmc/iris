@@ -1386,46 +1386,47 @@ CREATE VIEW lane_type_view AS
 	SELECT id, description, dcode FROM iris.lane_type;
 GRANT SELECT ON lane_type_view TO PUBLIC;
 
-CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
-	smallint, boolean) RETURNS text AS $detector_label$
+CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
+	VARCHAR(4), VARCHAR(2), SMALLINT, SMALLINT, BOOLEAN)
+	RETURNS TEXT AS $detector_label$
 DECLARE
-    rd ALIAS FOR $1;
-    rdir ALIAS FOR $2;
-    xst ALIAS FOR $3;
-    cross_dir ALIAS FOR $4;
-    xmod ALIAS FOR $5;
-    l_type ALIAS FOR $6;
-    lane_number ALIAS FOR $7;
-    abandoned ALIAS FOR $8;
-    xmd varchar(2);
-    ltyp varchar(2);
-    lnum varchar(2);
-    suffix varchar(5);
+	rd ALIAS FOR $1;
+	rdir ALIAS FOR $2;
+	xst ALIAS FOR $3;
+	xdir ALIAS FOR $4;
+	xmod ALIAS FOR $5;
+	l_type ALIAS FOR $6;
+	lane_number ALIAS FOR $7;
+	abandoned ALIAS FOR $8;
+	xmd VARCHAR(2);
+	ltyp VARCHAR(2);
+	lnum VARCHAR(2);
+	suffix VARCHAR(5);
 BEGIN
-    IF rd IS NULL OR xst IS NULL THEN
-        RETURN 'FUTURE';
-    END IF;
-    SELECT INTO ltyp dcode FROM lane_type_view WHERE id = l_type;
-    lnum = '';
-    IF lane_number > 0 THEN
-        lnum = TO_CHAR(lane_number, 'FM9');
-    END IF;
-    xmd = '';
-    IF xmod != '@' THEN
-        xmd = xmod;
-    END IF;
-    suffix = '';
-    IF abandoned THEN
-        suffix = '-ABND';
-    END IF;
-    RETURN rd || '/' || cross_dir || xmd || xst || rdir || ltyp || lnum ||
-           suffix;
+	IF rd IS NULL OR xst IS NULL THEN
+		RETURN 'FUTURE';
+	END IF;
+	SELECT dcode INTO ltyp FROM lane_type_view WHERE id = l_type;
+	lnum = '';
+	IF lane_number > 0 THEN
+		lnum = TO_CHAR(lane_number, 'FM9');
+	END IF;
+	xmd = '';
+	IF xmod != '@' THEN
+		xmd = xmod;
+	END IF;
+	suffix = '';
+	IF abandoned THEN
+		suffix = '-ABND';
+	END IF;
+	RETURN rd || '/' || xdir || xmd || xst || rdir || ltyp || lnum ||
+	       suffix;
 END;
 $detector_label$ LANGUAGE plpgsql;
 
 CREATE VIEW detector_label_view AS
 	SELECT d.name AS det_id,
-	detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
+	iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
 		d.lane_type, d.lane_number, d.abandoned) AS label
 	FROM iris.detector d
 	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
@@ -1441,7 +1442,7 @@ GRANT SELECT ON detector_fail_view TO PUBLIC;
 
 CREATE VIEW detector_view AS
 	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id,
-	d.pin, detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
+	d.pin, iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
 		d.lane_type, d.lane_number, d.abandoned) AS label,
 	rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
 	l.cross_dir, d.lane_number, d.field_length, ln.description AS lane_type,

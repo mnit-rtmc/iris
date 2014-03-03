@@ -222,3 +222,83 @@ ALTER TABLE iris.r_node ADD CONSTRAINT left_edge_ck
 	CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
 ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
 	CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
+
+-- Update detector_label function
+
+DROP VIEW detector_event_view;
+DROP VIEW detector_view;
+DROP VIEW detector_label_view;
+
+DROP FUNCTION detector_label(TEXT, VARCHAR, TEXT, VARCHAR, TEXT, SMALLINT,
+	SMALLINT, BOOLEAN);
+
+CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
+	VARCHAR(4), VARCHAR(2), SMALLINT, SMALLINT, BOOLEAN)
+	RETURNS TEXT AS $detector_label$
+DECLARE
+	rd ALIAS FOR $1;
+	rdir ALIAS FOR $2;
+	xst ALIAS FOR $3;
+	xdir ALIAS FOR $4;
+	xmod ALIAS FOR $5;
+	l_type ALIAS FOR $6;
+	lane_number ALIAS FOR $7;
+	abandoned ALIAS FOR $8;
+	xmd VARCHAR(2);
+	ltyp VARCHAR(2);
+	lnum VARCHAR(2);
+	suffix VARCHAR(5);
+BEGIN
+	IF rd IS NULL OR xst IS NULL THEN
+		RETURN 'FUTURE';
+	END IF;
+	SELECT dcode INTO ltyp FROM lane_type_view WHERE id = l_type;
+	lnum = '';
+	IF lane_number > 0 THEN
+		lnum = TO_CHAR(lane_number, 'FM9');
+	END IF;
+	xmd = '';
+	IF xmod != '@' THEN
+		xmd = xmod;
+	END IF;
+	suffix = '';
+	IF abandoned THEN
+		suffix = '-ABND';
+	END IF;
+	RETURN rd || '/' || xdir || xmd || xst || rdir || ltyp || lnum ||
+	       suffix;
+END;
+$detector_label$ LANGUAGE plpgsql;
+
+CREATE VIEW detector_label_view AS
+	SELECT d.name AS det_id,
+	iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
+		d.lane_type, d.lane_number, d.abandoned) AS label
+	FROM iris.detector d
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
+GRANT SELECT ON detector_label_view TO PUBLIC;
+
+CREATE VIEW detector_view AS
+	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id,
+	d.pin, iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
+		d.lane_type, d.lane_number, d.abandoned) AS label,
+	rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+	l.cross_dir, d.lane_number, d.field_length, ln.description AS lane_type,
+	d.abandoned, d.force_fail, df.fail_reason, c.active, d.fake, d.notes
+	FROM (iris.detector d
+	LEFT OUTER JOIN detector_fail_view df
+		ON d.name = df.device_id AND force_fail = 't')
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
+	LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
+	LEFT JOIN iris.controller c ON d.controller = c.name;
+GRANT SELECT ON detector_view TO PUBLIC;
+
+CREATE VIEW detector_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
+	FROM event.detector_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	JOIN detector_label_view dl ON e.device_id = dl.det_id;
+GRANT SELECT ON detector_event_view TO PUBLIC;
+
