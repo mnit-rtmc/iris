@@ -107,80 +107,80 @@ CREATE TABLE iris.glyph (
 	graphic VARCHAR(20) NOT NULL REFERENCES iris.graphic(name)
 );
 
-CREATE FUNCTION graphic_bpp(VARCHAR(20)) RETURNS INTEGER AS $graphic_bpp$
-DECLARE n ALIAS FOR $1;
-    b INTEGER;
-BEGIN SELECT INTO b bpp FROM iris.graphic WHERE name = n;
-    RETURN b;
-END;
-$graphic_bpp$ LANGUAGE plpgsql;
-
-CREATE FUNCTION graphic_height(VARCHAR(20)) RETURNS INTEGER AS $graphic_height$
-DECLARE n ALIAS FOR $1;
-    h INTEGER;
-BEGIN SELECT INTO h height FROM iris.graphic WHERE name = n;
-    RETURN h;
-END;
-$graphic_height$ LANGUAGE plpgsql;
-
-CREATE FUNCTION graphic_width(VARCHAR(20)) RETURNS INTEGER AS $graphic_width$
-DECLARE n ALIAS FOR $1;
-    w INTEGER;
-BEGIN SELECT INTO w width FROM iris.graphic WHERE name = n;
-    RETURN w;
-END;
-$graphic_width$ LANGUAGE plpgsql;
-
-CREATE FUNCTION glyph_font(VARCHAR(20)) RETURNS VARCHAR(16) AS $glyph_font$
-DECLARE n ALIAS FOR $1;
-    f VARCHAR(16);
-BEGIN SELECT INTO f font FROM iris.glyph WHERE graphic = n;
-    RETURN f;
-END;
-$glyph_font$ LANGUAGE plpgsql;
-
-CREATE FUNCTION font_height(VARCHAR(16)) RETURNS INTEGER AS $font_height$
-DECLARE n ALIAS FOR $1;
-    h INTEGER;
-BEGIN SELECT INTO h height FROM iris.font WHERE name = n;
-    RETURN h;
-END;
-$font_height$ LANGUAGE plpgsql;
-
-CREATE FUNCTION font_width(VARCHAR(16)) RETURNS INTEGER AS $font_width$
-DECLARE n ALIAS FOR $1;
-    w INTEGER;
-BEGIN SELECT INTO w width FROM iris.font WHERE name = n;
-    RETURN w;
-END;
-$font_width$ LANGUAGE plpgsql;
-
-CREATE FUNCTION font_graphic(VARCHAR(16)) RETURNS VARCHAR(20) AS $font_graphic$
-DECLARE n ALIAS FOR $1;
-    g TEXT;
-BEGIN SELECT INTO g graphic FROM iris.glyph WHERE font = n;
-    RETURN g;
-END;
-$font_graphic$ LANGUAGE plpgsql;
-
 ALTER TABLE iris.graphic
 	ADD CONSTRAINT graphic_bpp_ck
 	CHECK (bpp = 1 OR bpp = 8 OR bpp = 24);
 ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_font_ck
-	CHECK (glyph_font(name) IS NULL OR
-		(font_height(glyph_font(name)) = height AND
-		(font_width(glyph_font(name)) = 0 OR
-		font_width(glyph_font(name)) = width)));
+	ADD CONSTRAINT graphic_height_ck
+	CHECK (height > 0);
+ALTER TABLE iris.graphic
+	ADD CONSTRAINT graphic_width_ck
+	CHECK (width > 0);
+
+CREATE FUNCTION iris.graphic_ck() RETURNS TRIGGER AS
+	$graphic_ck$
+DECLARE
+	f_name VARCHAR(16);
+	f_height INTEGER;
+	f_width INTEGER;
+BEGIN
+	SELECT INTO f_name font FROM iris.glyph WHERE graphic = NEW.name;
+	IF NOT FOUND THEN
+		RETURN NEW;
+	END IF;
+	IF NEW.bpp != 1 THEN
+		RAISE EXCEPTION 'bpp must be 1 for font glyph';
+	END IF;
+	SELECT height, width INTO f_height, f_width FROM iris.font
+	                     WHERE name = f_name;
+	IF f_height != NEW.height THEN
+		RAISE EXCEPTION 'height does not match font';
+	END IF;
+	IF f_width > 0 AND f_width != NEW.width THEN
+		RAISE EXCEPTION 'width does not match font';
+	END IF;
+	RETURN NEW;
+END;
+$graphic_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER graphic_ck_trig
+	BEFORE INSERT OR UPDATE ON iris.graphic
+	FOR EACH ROW EXECUTE PROCEDURE iris.graphic_ck();
 
 ALTER TABLE iris.glyph
-	ADD CONSTRAINT glyph_bpp_ck
-	CHECK (graphic_bpp(graphic) = 1);
-ALTER TABLE iris.glyph
-	ADD CONSTRAINT glyph_size_ck
-	CHECK (font_height(font) = graphic_height(graphic) AND
-		(font_width(font) = 0 OR
-		font_width(font) = graphic_width(graphic)));
+	ADD CONSTRAINT glyph_code_point_ck
+	CHECK (code_point > 0);
+
+CREATE FUNCTION iris.glyph_ck() RETURNS TRIGGER AS
+	$glyph_ck$
+DECLARE
+	g_bpp INTEGER;
+	f_height INTEGER;
+	f_width INTEGER;
+	g_height INTEGER;
+	g_width INTEGER;
+BEGIN
+	SELECT bpp INTO g_bpp FROM iris.graphic WHERE name = NEW.graphic;
+	IF g_bpp != 1 THEN
+		RAISE EXCEPTION 'bpp must be 1 for font glyph';
+	END IF;
+	SELECT height, width INTO f_height, f_width FROM iris.font
+	                     WHERE name = NEW.font;
+	SELECT height, width INTO g_height, g_width FROM iris.graphic
+	                     WHERE name = NEW.graphic;
+	IF f_height != g_height THEN
+		RAISE EXCEPTION 'height does not match font';
+	END IF;
+	IF f_width > 0 AND f_width != g_width THEN
+		RAISE EXCEPTION 'width does not match font';
+	END IF;
+	RETURN NEW;
+END;
+$glyph_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER glyph_ck_trig
+	BEFORE INSERT OR UPDATE ON iris.glyph
+	FOR EACH ROW EXECUTE PROCEDURE iris.glyph_ck();
 
 ALTER TABLE iris.font
 	ADD CONSTRAINT font_height_ck
@@ -194,11 +194,33 @@ ALTER TABLE iris.font
 ALTER TABLE iris.font
 	ADD CONSTRAINT font_char_sp_ck
 	CHECK (char_spacing >= 0 AND char_spacing < 9);
-ALTER TABLE iris.font
-	ADD CONSTRAINT font_graphic_ck
-	CHECK (font_graphic(name) IS NULL OR
-		(graphic_height(font_graphic(name)) = height AND
-		(width = 0 OR graphic_width(font_graphic(name)) = width)));
+
+CREATE FUNCTION iris.font_ck() RETURNS TRIGGER AS
+	$font_ck$
+DECLARE
+	f_graphic VARCHAR(20);
+	g_height INTEGER;
+	g_width INTEGER;
+BEGIN
+	SELECT graphic INTO f_graphic FROM iris.glyph WHERE font = NEW.name;
+	IF NOT FOUND THEN
+		RETURN NEW;
+	END IF;
+	SELECT height, width INTO g_height, g_width FROM iris.graphic
+	                     WHERE name = f_graphic;
+	IF NEW.height != g_height THEN
+		RAISE EXCEPTION 'height does not match glyph';
+	END IF;
+	IF NEW.width > 0 AND NEW.width != g_width THEN
+		RAISE EXCEPTION 'width does not match glyph';
+	END IF;
+	RETURN NEW;
+END;
+$font_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER font_ck_trig
+	BEFORE INSERT OR UPDATE ON iris.font
+	FOR EACH ROW EXECUTE PROCEDURE iris.font_ck();
 
 CREATE TABLE iris.video_monitor (
 	name VARCHAR(12) PRIMARY KEY,
