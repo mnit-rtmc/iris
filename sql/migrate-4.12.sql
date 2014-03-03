@@ -13,11 +13,11 @@ DROP FUNCTION iris.beacon_update();
 CREATE FUNCTION iris.beacon_insert() RETURNS TRIGGER AS
 	$beacon_insert$
 BEGIN
-        INSERT INTO iris._device_io (name, controller, pin)
-            VALUES (NEW.name, NEW.controller, NEW.pin);
-        INSERT INTO iris._beacon (name, geo_loc, notes, message, camera)
-            VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message, NEW.camera);
-        RETURN NEW;
+	INSERT INTO iris._device_io (name, controller, pin)
+	    VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._beacon (name, geo_loc, notes, message, camera)
+	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message, NEW.camera);
+	RETURN NEW;
 END;
 $beacon_insert$ LANGUAGE plpgsql;
 
@@ -30,13 +30,13 @@ CREATE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
 BEGIN
 	UPDATE iris._device_io SET controller = NEW.controller, pin = NEW.pin
 	WHERE name = OLD.name;
-        UPDATE iris._beacon
-		SET geo_loc = NEW.geo_loc,
-	            notes = NEW.notes,
-	            message = NEW.message,
-	            camera = NEW.camera
+	UPDATE iris._beacon
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       message = NEW.message,
+	       camera = NEW.camera
 	WHERE name = OLD.name;
-        RETURN NEW;
+	RETURN NEW;
 END;
 $beacon_update$ LANGUAGE plpgsql;
 
@@ -47,11 +47,11 @@ CREATE TRIGGER beacon_update_trig
 CREATE FUNCTION iris.beacon_delete() RETURNS TRIGGER AS
 	$beacon_delete$
 BEGIN
-        DELETE FROM iris._device_io WHERE name = OLD.name;
-        IF FOUND THEN
-            RETURN OLD;
-        ELSE
-            RETURN NULL;
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
 	END IF;
 END;
 $beacon_delete$ LANGUAGE plpgsql;
@@ -173,3 +173,52 @@ $font_ck$ LANGUAGE plpgsql;
 CREATE TRIGGER font_ck_trig
 	BEFORE INSERT OR UPDATE ON iris.font
 	FOR EACH ROW EXECUTE PROCEDURE iris.font_ck();
+
+-- Update r_node edge checks
+
+ALTER TABLE iris.r_node DROP CONSTRAINT left_edge_ck;
+ALTER TABLE iris.r_node DROP CONSTRAINT right_edge_ck;
+
+DROP FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER);
+DROP FUNCTION iris.r_node_right(INTEGER, INTEGER, BOOLEAN, INTEGER);
+
+CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
+	RETURNS INTEGER AS $r_node_left$
+DECLARE
+	node_type ALIAS FOR $1;
+	lanes ALIAS FOR $2;
+	attach_side ALIAS FOR $3;
+	shift ALIAS FOR $4;
+BEGIN
+	IF attach_side = TRUE THEN
+		RETURN shift;
+	END IF;
+	IF node_type = 0 THEN
+		RETURN shift - lanes;
+	END IF;
+	RETURN shift;
+END;
+$r_node_left$ LANGUAGE plpgsql;
+
+CREATE FUNCTION iris.r_node_right(INTEGER, INTEGER, BOOLEAN, INTEGER)
+	RETURNS INTEGER AS $r_node_right$
+DECLARE
+	node_type ALIAS FOR $1;
+	lanes ALIAS FOR $2;
+	attach_side ALIAS FOR $3;
+	shift ALIAS FOR $4;
+BEGIN
+	IF attach_side = FALSE THEN
+		RETURN shift;
+	END IF;
+	IF node_type = 0 THEN
+		RETURN shift + lanes;
+	END IF;
+	RETURN shift;
+END;
+$r_node_right$ LANGUAGE plpgsql;
+
+ALTER TABLE iris.r_node ADD CONSTRAINT left_edge_ck
+	CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
+ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
+	CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);

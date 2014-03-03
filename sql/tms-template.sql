@@ -301,35 +301,37 @@ CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
 
 CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
 	RETURNS INTEGER AS $r_node_left$
-DECLARE node_type ALIAS FOR $1;
-DECLARE lanes ALIAS FOR $2;
-DECLARE attach_side ALIAS FOR $3;
-DECLARE shift ALIAS FOR $4;
+DECLARE
+	node_type ALIAS FOR $1;
+	lanes ALIAS FOR $2;
+	attach_side ALIAS FOR $3;
+	shift ALIAS FOR $4;
 BEGIN
-    IF attach_side = TRUE THEN
-        RETURN shift;
-    END IF;
-    IF node_type = 0 THEN
-        RETURN shift - lanes;
-    END IF;
-    RETURN shift;
+	IF attach_side = TRUE THEN
+		RETURN shift;
+	END IF;
+	IF node_type = 0 THEN
+		RETURN shift - lanes;
+	END IF;
+	RETURN shift;
 END;
 $r_node_left$ LANGUAGE plpgsql;
 
 CREATE FUNCTION iris.r_node_right(INTEGER, INTEGER, BOOLEAN, INTEGER)
 	RETURNS INTEGER AS $r_node_right$
-DECLARE node_type ALIAS FOR $1;
-DECLARE lanes ALIAS FOR $2;
-DECLARE attach_side ALIAS FOR $3;
-DECLARE shift ALIAS FOR $4;
+DECLARE
+	node_type ALIAS FOR $1;
+	lanes ALIAS FOR $2;
+	attach_side ALIAS FOR $3;
+	shift ALIAS FOR $4;
 BEGIN
-    IF attach_side = FALSE THEN
-        RETURN shift;
-    END IF;
-    IF node_type = 0 THEN
-        RETURN shift + lanes;
-    END IF;
-    RETURN shift;
+	IF attach_side = FALSE THEN
+		RETURN shift;
+	END IF;
+	IF node_type = 0 THEN
+		RETURN shift + lanes;
+	END IF;
+	RETURN shift;
 END;
 $r_node_right$ LANGUAGE plpgsql;
 
@@ -561,11 +563,11 @@ CREATE VIEW iris.beacon AS SELECT
 CREATE FUNCTION iris.beacon_insert() RETURNS TRIGGER AS
 	$beacon_insert$
 BEGIN
-        INSERT INTO iris._device_io (name, controller, pin)
-            VALUES (NEW.name, NEW.controller, NEW.pin);
-        INSERT INTO iris._beacon (name, geo_loc, notes, message, camera)
-            VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message, NEW.camera);
-        RETURN NEW;
+	INSERT INTO iris._device_io (name, controller, pin)
+	    VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._beacon (name, geo_loc, notes, message, camera)
+	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message, NEW.camera);
+	RETURN NEW;
 END;
 $beacon_insert$ LANGUAGE plpgsql;
 
@@ -578,13 +580,13 @@ CREATE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
 BEGIN
 	UPDATE iris._device_io SET controller = NEW.controller, pin = NEW.pin
 	WHERE name = OLD.name;
-        UPDATE iris._beacon
-		SET geo_loc = NEW.geo_loc,
-	            notes = NEW.notes,
-	            message = NEW.message,
-	            camera = NEW.camera
+	UPDATE iris._beacon
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       message = NEW.message,
+	       camera = NEW.camera
 	WHERE name = OLD.name;
-        RETURN NEW;
+	RETURN NEW;
 END;
 $beacon_update$ LANGUAGE plpgsql;
 
@@ -595,11 +597,11 @@ CREATE TRIGGER beacon_update_trig
 CREATE FUNCTION iris.beacon_delete() RETURNS TRIGGER AS
 	$beacon_delete$
 BEGIN
-        DELETE FROM iris._device_io WHERE name = OLD.name;
-        IF FOUND THEN
-            RETURN OLD;
-        ELSE
-            RETURN NULL;
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
 	END IF;
 END;
 $beacon_delete$ LANGUAGE plpgsql;
