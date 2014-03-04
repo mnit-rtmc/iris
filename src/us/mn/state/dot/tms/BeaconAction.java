@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,28 +14,27 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.Iterator;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * Beacon helper methods.
+ * Action for deploying a beacon triggered by an action plan.
  *
  * @author Douglas Lau
  */
-public class BeaconHelper extends BaseHelper {
+public interface BeaconAction extends SonarObject {
 
-	/** Disallow instantiation */
-	protected BeaconHelper() {
-		assert false;
-	}
+	/** SONAR type name */
+	String SONAR_TYPE = "beacon_action";
 
-	/** Get a beacon iterator */
-	static public Iterator<Beacon> iterator() {
-		return new IteratorWrapper<Beacon>(namespace.iterator(
-			Beacon.SONAR_TYPE));
-	}
+	/** Get the action plan */
+	ActionPlan getActionPlan();
 
-	/** Lookup the beacon with the specified name */
-	static public Beacon lookup(String name) {
-		return (Beacon)namespace.lookupObject(Beacon.SONAR_TYPE, name);
-	}
+	/** Get the beacon */
+	Beacon getBeacon();
+
+	/** Set the phase to perform action */
+	void setPhase(PlanPhase p);
+
+	/** Get the phase to perform action */
+	PlanPhase getPhase();
 }

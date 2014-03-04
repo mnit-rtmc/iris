@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GateArm;
@@ -364,6 +365,15 @@ public class SonarState extends Client {
 		return dms_actions;
 	}
 
+	/** Cache of beacon actions */
+	private final TypeCache<BeaconAction> beacon_actions =
+		new TypeCache<BeaconAction>(BeaconAction.class, this);
+
+	/** Get the beacon action cache */
+	public TypeCache<BeaconAction> getBeaconActions() {
+		return beacon_actions;
+	}
+
 	/** Cache of lane actions */
 	private final TypeCache<LaneAction> lane_actions =
 		new TypeCache<LaneAction>(LaneAction.class, this);
@@ -511,6 +521,7 @@ public class SonarState extends Client {
 		populateReadable(action_plans);
 		populateReadable(time_actions);
 		populateReadable(dms_actions);
+		populateReadable(beacon_actions);
 		populateReadable(lane_actions);
 		populateReadable(meter_actions);
 	}

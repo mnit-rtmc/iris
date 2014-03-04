@@ -1071,6 +1071,13 @@ CREATE TABLE iris.dms_action (
 	r_priority INTEGER NOT NULL
 );
 
+CREATE TABLE iris.beacon_action (
+	name VARCHAR(20) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	beacon VARCHAR(10) NOT NULL REFERENCES iris._beacon,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
+
 CREATE TABLE iris.lane_action (
 	name VARCHAR(20) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
@@ -1986,6 +1993,7 @@ PRV_0066	plan_tab	action_plan(/.*)?	t	f	f	f
 PRV_0067	plan_tab	day_plan(/.*)?	t	f	f	f
 PRV_0068	plan_tab	dms_action(/.*)?	t	f	f	f
 PRV_0069	plan_tab	holiday(/.*)?	t	f	f	f
+PRV_0137	plan_tab	beacon_action(/.*)?	t	f	f	f
 PRV_0070	plan_tab	lane_action(/.*)?	t	f	f	f
 PRV_0071	plan_tab	meter_action(/.*)?	t	f	f	f
 PRV_0072	plan_tab	plan_phase(/.*)?	t	f	f	f
@@ -2002,6 +2010,8 @@ PRV_0083	policy_admin	dms_sign_group/.*	f	t	t	t
 PRV_0084	policy_admin	holiday(/.*)?	t	f	f	f
 PRV_0085	policy_admin	holiday/.*	f	t	t	t
 PRV_0086	policy_admin	incident_detail/.*	f	t	t	t
+PRV_0138	policy_admin	beacon_action(/.*)?	t	f	f	f
+PRV_0139	policy_admin	beacon_action/.*	f	t	t	t
 PRV_0087	policy_admin	lane_action(/.*)?	t	f	f	f
 PRV_0088	policy_admin	lane_action/.*	f	t	t	t
 PRV_0089	policy_admin	map_extent/.*	f	t	t	t

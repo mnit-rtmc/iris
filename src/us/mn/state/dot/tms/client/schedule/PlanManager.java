@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2013  Minnesota Department of Transportation
+ * Copyright (C) 2011-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@ import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.BeaconAction;
+import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -33,6 +35,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.beacon.BeaconMarker;
 import us.mn.state.dot.tms.client.dms.DmsMarker;
 import us.mn.state.dot.tms.client.meter.MeterMarker;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -97,6 +100,7 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	protected PlanTheme createTheme() {
 		PlanTheme theme = new PlanTheme(this);
 		theme.addStyle(ItemStyle.DMS, new DmsMarker());
+		theme.addStyle(ItemStyle.BEACON, new BeaconMarker());
 		theme.addStyle(ItemStyle.METER, new MeterMarker());
 		theme.addStyle(ItemStyle.LANE);
 		theme.addStyle(ItemStyle.TIME, new TimeMarker());
@@ -113,6 +117,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		switch(is) {
 		case DMS:
 			return proxy.getActive() && hasDmsAction(proxy);
+		case BEACON:
+			return proxy.getActive() && hasBeaconAction(proxy);
 		case METER:
 			return proxy.getActive() && hasMeterAction(proxy);
 		case LANE:
@@ -150,6 +156,17 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		while(it.hasNext()) {
 			DmsAction da = it.next();
 			if(da.getActionPlan() == p)
+				return true;
+		}
+		return false;
+	}
+
+	/** Test if an action plan has beacon actions */
+	private boolean hasBeaconAction(ActionPlan p) {
+		Iterator<BeaconAction> it = BeaconActionHelper.iterator();
+		while(it.hasNext()) {
+			BeaconAction ba = it.next();
+			if(ba.getActionPlan() == p)
 				return true;
 		}
 		return false;

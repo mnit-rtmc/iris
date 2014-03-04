@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,9 @@ import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconAction;
+import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsAction;
@@ -240,6 +243,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			return;
 		if(getSyncActions()) {
 			validateDmsActions();
+			validateBeaconActions();
 			validateLaneActions();
 			validateMeterActions();
 		}
@@ -291,6 +295,27 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			}
 		}
 		return true;
+	}
+
+	/** Validate that all beacon actions are deployable */
+	private void validateBeaconActions() throws ChangeVetoException {
+		Iterator<BeaconAction> it = BeaconActionHelper.iterator();
+		while(it.hasNext()) {
+			BeaconAction ba = it.next();
+			if(ba.getActionPlan() == this && !isDeployable(ba)) {
+				throw new ChangeVetoException("Beacon action " +
+					ba.getName() + " not deployable");
+			}
+		}
+	}
+
+	/** Check if a beacon action is deployable */
+	private boolean isDeployable(BeaconAction ba) {
+		Beacon b = ba.getBeacon();
+		if(b instanceof BeaconImpl)
+			return !((BeaconImpl)b).isFailed();
+		else
+			return false;
 	}
 
 	/** Validate that all lane actions are deployable */

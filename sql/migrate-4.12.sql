@@ -302,3 +302,24 @@ CREATE VIEW detector_event_view AS
 	JOIN detector_label_view dl ON e.device_id = dl.det_id;
 GRANT SELECT ON detector_event_view TO PUBLIC;
 
+-- Add beacon actions
+
+CREATE TABLE iris.beacon_action (
+	name VARCHAR(20) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	beacon VARCHAR(10) NOT NULL REFERENCES iris._beacon,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
+
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+                            priv_d)
+       VALUES ('prv_ba1', 'plan_tab', 'beacon_action(/.*)?', true, false,
+               false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+                            priv_d)
+       VALUES ('prv_ba2', 'policy_admin', 'beacon_action(/.*)?', true, false,
+               false, false);
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+                            priv_d)
+       VALUES ('prv_ba3', 'policy_admin', 'beacon_action/.*', false, true,
+               true, true);

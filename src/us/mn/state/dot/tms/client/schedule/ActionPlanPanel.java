@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.MeterAction;
@@ -47,6 +48,7 @@ public class ActionPlanPanel extends JPanel {
 	static public boolean isPermitted(Session s) {
 		return s.canRead(ActionPlan.SONAR_TYPE) &&
 		       s.canRead(DmsAction.SONAR_TYPE) &&
+		       s.canRead(BeaconAction.SONAR_TYPE) &&
 		       s.canRead(LaneAction.SONAR_TYPE) &&
 		       s.canRead(MeterAction.SONAR_TYPE) &&
 		       s.canRead(PlanPhase.SONAR_TYPE) &&
@@ -78,6 +80,9 @@ public class ActionPlanPanel extends JPanel {
 	/** DMS action table panel */
 	private final PlanTablePanel<DmsAction> d_panel;
 
+	/** Beacon action table panel */
+	private final PlanTablePanel<BeaconAction> b_panel;
+
 	/** Lane action table panel */
 	private final PlanTablePanel<LaneAction> l_panel;
 
@@ -94,6 +99,7 @@ public class ActionPlanPanel extends JPanel {
 		p_model = new ActionPlanModel(s);
 		t_panel = new PlanTablePanel<TimeAction>();
 		d_panel = new PlanTablePanel<DmsAction>();
+		b_panel = new PlanTablePanel<BeaconAction>();
 		l_panel = new PlanTablePanel<LaneAction>();
 		m_panel = new PlanTablePanel<MeterAction>();
 	}
@@ -107,6 +113,7 @@ public class ActionPlanPanel extends JPanel {
 		tab.setBorder(new EmptyBorder(0, 12, 12, 12));
 		tab.add(I18N.get("action.plan.schedule"), t_panel);
 		tab.add(I18N.get("action.plan.dms"), d_panel);
+		tab.add(I18N.get("action.plan.beacon"), b_panel);
 		tab.add(I18N.get("action.plan.lane"), l_panel);
 		tab.add(I18N.get("action.plan.meter"), m_panel);
 		add(tab, BorderLayout.SOUTH);
@@ -144,6 +151,7 @@ public class ActionPlanPanel extends JPanel {
 		t_panel.dispose();
 		d_panel.dispose();
 		l_panel.dispose();
+		b_panel.dispose();
 		m_panel.dispose();
 	}
 
@@ -153,6 +161,7 @@ public class ActionPlanPanel extends JPanel {
 		del_plan.setEnabled(p_model.canRemove(ap));
 		t_panel.setTableModel(new TimeActionModel(session, ap));
 		d_panel.setTableModel(new DmsActionModel(session, ap));
+		b_panel.setTableModel(new BeaconActionModel(session, ap));
 		l_panel.setTableModel(new LaneActionModel(session, ap));
 		m_panel.setTableModel(new MeterActionModel(session, ap));
 		// We need to revalidate here, because the PlanTablePanels

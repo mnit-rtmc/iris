@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2013  Minnesota Department of Transportation
+ * Copyright (C) 2011-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,9 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconAction;
+import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
@@ -60,6 +63,9 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 
 	/** DMS count component */
 	private final JLabel dms_lbl = createValueLabel();
+
+	/** Beacon count component */
+	private final JLabel beacon_lbl = createValueLabel();
 
 	/** Lane count component */
 	private final JLabel lane_lbl = createValueLabel();
@@ -112,6 +118,8 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		add(description_lbl, Stretch.LAST);
 		add("dms");
 		add(dms_lbl, Stretch.LAST);
+		add("beacons");
+		add(beacon_lbl, Stretch.LAST);
 		add("lane.markings");
 		add(lane_lbl, Stretch.LAST);
 		add("ramp.meter.long.plural");
@@ -151,6 +159,7 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 			description_lbl.setText(ap.getDescription());
 		if(a == null || a.equals("active")) {
 			dms_lbl.setText(Integer.toString(countDMS(ap)));
+			beacon_lbl.setText(Integer.toString(countBeacons(ap)));
 			lane_lbl.setText(Integer.toString(countLanes(ap)));
 			meter_lbl.setText(Integer.toString(countMeters(ap)));
 		}
@@ -192,6 +201,12 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 			DmsAction da = dit.next();
 			if(da.getActionPlan() == ap)
 				phases.add(da.getPhase());
+		}
+		Iterator<BeaconAction> bit = BeaconActionHelper.iterator();
+		while(bit.hasNext()) {
+			BeaconAction ba = bit.next();
+			if(ba.getActionPlan() == ap)
+				phases.add(ba.getPhase());
 		}
 		Iterator<LaneAction> lit = LaneActionHelper.iterator();
 		while(lit.hasNext()) {
@@ -250,6 +265,18 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		return plan_signs.size();
 	}
 
+	/** Get a count a beacons controlled by an action plan */
+	private int countBeacons(ActionPlan p) {
+		HashSet<Beacon> plan_beacons = new HashSet<Beacon>();
+		Iterator<BeaconAction> bit = BeaconActionHelper.iterator();
+		while(bit.hasNext()) {
+			BeaconAction ba = bit.next();
+			if(ba.getActionPlan() == p)
+				plan_beacons.add(ba.getBeacon());
+		}
+		return plan_beacons.size();
+	}
+
 	/** Get a count a lane markings controlled by an action plan */
 	private int countLanes(ActionPlan p) {
 		HashSet<LaneMarking> plan_lanes = new HashSet<LaneMarking>();
@@ -285,6 +312,7 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		name_lbl.setText("");
 		description_lbl.setText("");
 		dms_lbl.setText("");
+		beacon_lbl.setText("");
 		lane_lbl.setText("");
 		meter_lbl.setText("");
 		phase_cbx.setAction(null);

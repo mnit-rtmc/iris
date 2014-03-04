@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +17,26 @@ package us.mn.state.dot.tms;
 import java.util.Iterator;
 
 /**
- * Beacon helper methods.
+ * Helper class for beacon actions.
  *
  * @author Douglas Lau
  */
-public class BeaconHelper extends BaseHelper {
+public class BeaconActionHelper extends BaseHelper {
 
-	/** Disallow instantiation */
-	protected BeaconHelper() {
+	/** Don't allow instances to be created */
+	private BeaconActionHelper() {
 		assert false;
 	}
 
-	/** Get a beacon iterator */
-	static public Iterator<Beacon> iterator() {
-		return new IteratorWrapper<Beacon>(namespace.iterator(
-			Beacon.SONAR_TYPE));
+	/** Lookup the beacon action with the specified name */
+	static public BeaconAction lookup(String name) {
+		return (BeaconAction)namespace.lookupObject(
+			BeaconAction.SONAR_TYPE, name);
 	}
 
-	/** Lookup the beacon with the specified name */
-	static public Beacon lookup(String name) {
-		return (Beacon)namespace.lookupObject(Beacon.SONAR_TYPE, name);
+	/** Get a beacon action iterator */
+	static public Iterator<BeaconAction> iterator() {
+		return new IteratorWrapper<BeaconAction>(namespace.iterator(
+			BeaconAction.SONAR_TYPE));
 	}
 }

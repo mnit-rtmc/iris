@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,9 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
+import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconAction;
+import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
@@ -65,6 +68,7 @@ public class ActionPlanJob extends Job {
 		performTimeActions();
 		performDmsActions();
 		updateDmsMessages();
+		performBeaconActions();
 		performLaneActions();
 		performMeterActions();
 	}
@@ -134,6 +138,24 @@ public class ActionPlanJob extends Job {
 				dmsi.updateScheduledMessage();
 			}
 		}
+	}
+
+	/** Perform all beacon actions */
+	private void performBeaconActions() {
+		Iterator<BeaconAction> it = BeaconActionHelper.iterator();
+		while(it.hasNext()) {
+			BeaconAction ba = it.next();
+			ActionPlan ap = ba.getActionPlan();
+			if(ap.getActive())
+				performBeaconAction(ba, ap.getPhase());
+		}
+	}
+
+	/** Perform a beacon action */
+	private void performBeaconAction(BeaconAction ba, PlanPhase phase) {
+		Beacon b = ba.getBeacon();
+		if(b != null)
+			b.setFlashing(phase == ba.getPhase());
 	}
 
 	/** Perform all lane actions */
