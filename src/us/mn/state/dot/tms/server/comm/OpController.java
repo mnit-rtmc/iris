@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2013  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,6 +97,7 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Operation equality test */
+	@Override
 	public boolean equals(Object o) {
 		return (o instanceof OpController) &&
 		       (getClass() == o.getClass()) &&
@@ -104,6 +105,7 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Get a string description of the operation */
+	@Override
 	public String toString() {
 		return super.toString() + " (" + id + ")";
 	}
@@ -114,7 +116,8 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Handle a communication error */
-	@Override public void handleCommError(EventType et, String msg) {
+	@Override
+	public void handleCommError(EventType et, String msg) {
 		COMM_LOG.log(id + " " + et + ", " + msg);
 		controller.logCommEvent(et, id, filterMessage(msg));
 		if(!retry())
@@ -148,7 +151,8 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Cleanup the operation */
-	@Override public void cleanup() {
+	@Override
+	public void cleanup() {
 		updateMaintStatus();
 		updateErrorStatus();
 		controller.completeOperation(id, isSuccess());
