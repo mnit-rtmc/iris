@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -1544,7 +1544,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Test if current message is blank */
-	private boolean isMsgBlank() {
+	public boolean isMsgBlank() {
 		return SignMessageHelper.isBlank(messageCurrent);
 	}
 

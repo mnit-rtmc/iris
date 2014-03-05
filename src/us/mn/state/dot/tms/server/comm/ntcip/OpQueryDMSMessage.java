@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,8 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Create the second phase of the operation */
-	@Override protected Phase phaseTwo() {
+	@Override
+	protected Phase phaseTwo() {
 		return new QueryMessageSource();
 	}
 
@@ -47,31 +48,48 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Process the message table source from the sign controller */
 	private Phase processMessageSource() {
-		SignMessage sm = dms.getMessageCurrent();
-		/* We have to test isBlank before isValid, because some
-		 * signs use 'undefined' source for blank messages. */
-		if(source.getMemoryType().isBlank()) {
-			/* The sign is blank. If IRIS says there should
-			 * be a message on the sign, that's wrong and
-			 * needs to be updated */
-			if(!SignMessageHelper.isBlank(sm))
-				setCurrentMessage(dms.createBlankMessage());
-		} else if(source.getMemoryType().isValid()) {
-			/* The sign is not blank. If IRIS says it
-			 * should be blank, then we need to query the
-			 * current message on the sign. */
-			if(SignMessageHelper.isBlank(sm))
-				return new QueryCurrentMessage();
-			/* Compare the CRC of the message on the sign to the
-			 * CRC of the message IRIS knows about */
-			int crc = DmsMessageCRC.calculate(sm.getMulti(), 0, 0);
-			if(crc != source.getCrc())
-				return new QueryCurrentMessage();
-		} else {
-			/* The source table is not valid.  What??! */
-			logError("INVALID SOURCE");
-			setErrorStatus(source.toString());
+		DmsMessageMemoryType.Enum mem_type = source.getMemoryType();
+		if(mem_type != null) {
+			/* We have to test isBlank before isValid, because some
+			 * signs use 'undefined' source for blank messages. */
+			if(mem_type.isBlank())
+				return processMessageBlank();
+			else if(mem_type.isValid())
+				return processMessageValid();
 		}
+		return processMessageInvalid();
+	}
+
+	/** Process a blank message source from the sign controller */
+	private Phase processMessageBlank() {
+		/* The sign is blank.  If IRIS thinks there is a message on it,
+		 * that's wrong and needs to be updated. */
+		if(!dms.isMsgBlank())
+			setCurrentMessage(dms.createBlankMessage());
+		return null;
+	}
+
+	/** Process a valid message source from the sign controller */
+	private Phase processMessageValid() {
+		/* The sign is not blank.  If IRIS thinks it is blank, then
+		 * we need to query the current message on the sign. */
+		if(dms.isMsgBlank())
+			return new QueryCurrentMessage();
+		/* Compare the CRC of the message on the sign to the
+		 * CRC of the message IRIS knows about */
+		SignMessage sm = dms.getMessageCurrent();
+		int crc = DmsMessageCRC.calculate(sm.getMulti(), 0, 0);
+		if(crc != source.getCrc())
+			return new QueryCurrentMessage();
+		else
+			return null;
+	}
+
+	/** Process an invalid message source from the sign controller */
+	private Phase processMessageInvalid() {
+		/* The source table is not valid.  What??! */
+		logError("INVALID SOURCE");
+		setErrorStatus(source.toString());
 		return null;
 	}
 
