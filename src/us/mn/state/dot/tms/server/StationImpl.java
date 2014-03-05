@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2013  Minnesota Department of Transportation
+ * Copyright (C) 2004-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -265,7 +265,7 @@ public class StationImpl implements Station {
 	/** Get the average speed using a rolling average of samples */
 	public float getRollingAverageSpeed() {
 		if(isSpeedValid()) {
-			int n_samples = calculateRollingSamples();
+			int n_samples = rolling_samples;
 			if(n_samples > 0)
 				return average(rlg_speed, n_samples);
 			else
