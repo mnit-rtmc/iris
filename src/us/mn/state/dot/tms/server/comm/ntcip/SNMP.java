@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -197,7 +197,7 @@ public class SNMP extends BER {
 
 		/** Decode a response to a SET or GET request */
 		protected void decodeResponse() throws IOException {
-			for(int i = 0; i < 5; i++) {
+			for(int i = 0;; i++) {
 				try {
 					decodeSNMPMessage(is, community);
 					decodeResponsePDU(is);
@@ -207,6 +207,8 @@ public class SNMP extends BER {
 				catch(RequestIDException e) {
 					SNMP_LOG.log(e.getMessage());
 					is.skip(is.available());
+					if(i >= 5)
+						throw e;
 				}
 			}
 		}
