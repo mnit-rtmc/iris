@@ -513,7 +513,7 @@ public class StationImpl implements Station {
 	private void checkCandidate() {
 		if(isBelowBreakdownSpeed()) {
 			n_candidate++;
-			bumpStartCount();
+			bumpCandidateCount();
 		} else if(isBottleneckCandidate())
 			n_candidate++;
 		else
@@ -524,6 +524,12 @@ public class StationImpl implements Station {
 	private boolean isBelowBreakdownSpeed() {
 		float s = getRollingAverageSpeed();
 		return s > 0 && s < VSA_BREAKDOWN_SPEED_MPH;
+	}
+
+	/** Bump the candidate count up to the start count */
+	private void bumpCandidateCount() {
+		if(isBeforeStartCount())
+		   n_candidate = SystemAttrEnum.VSA_START_INTERVALS.getInt();
 	}
 
 	/** Check if station is a bottleneck candidate */
@@ -623,16 +629,9 @@ public class StationImpl implements Station {
 	private void moveBottleneck(StationImpl s) {
 		// Don't use setBottleneck; p_bottle should not be updated
 		s.bottleneck = true;
-		s.bumpStartCount();
+		s.n_candidate = Math.max(s.n_candidate, n_candidate);
 		bottleneck = false;
 		n_candidate = 0;
-	}
-
-	/** Bump the candidate count up to the start count.  This prevents
-	 * it from shutting off at the next time step. */
-	private void bumpStartCount() {
-		if(isBeforeStartCount())
-		   n_candidate = SystemAttrEnum.VSA_START_INTERVALS.getInt();
 	}
 
 	/** Debug the bottleneck calculation */
