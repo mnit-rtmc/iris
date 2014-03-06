@@ -435,8 +435,8 @@ public class StationImpl implements Station {
 	/** Acceleration from previous station */
 	protected Float acceleration = null;
 
-	/** Count of iterations where station was a bottleneck */
-	protected int n_bottleneck = 0;
+	/** Count of iterations when station was a bottleneck candidate */
+	private int n_candidate = 0;
 
 	/** Bottleneck exists flag */
 	protected boolean bottleneck = false;
@@ -464,7 +464,7 @@ public class StationImpl implements Station {
 			StationImpl sp = upstream.get(mp);
 			float d = m - mp;
 			acceleration = calculateAcceleration(sp, d);
-			checkThresholds();
+			checkCandidate();
 			if(isAboveBottleneckSpeed())
 				setBottleneck(false);
 			else if(isBeforeStartCount()) {
@@ -506,21 +506,35 @@ public class StationImpl implements Station {
 			return null;
 	}
 
-	/** Check the bottleneck thresholds */
-	protected void checkThresholds() {
-		if(isAccelerationValid() && acceleration < getThreshold())
-			n_bottleneck++;
+	/** Check if station is a bottleneck candidate */
+	private void checkCandidate() {
+		if(isBottleneckCandidate())
+			n_candidate++;
 		else
-			n_bottleneck = 0;
+			n_candidate = 0;
 	}
 
-	/** Check if acceleration is valid */
-	protected boolean isAccelerationValid() {
-		return acceleration != null;
+	/** Check if station is a bottleneck candidate */
+	private boolean isBottleneckCandidate() {
+		return isBelowBottleneckSpeed() &&
+		       isAccelerationBelowThreshold();
+	}
+
+	/** Test if station speed is below the bottleneck id speed */
+	private boolean isBelowBottleneckSpeed() {
+		float s = getRollingAverageSpeed();
+		return s > 0 &&
+		       s < SystemAttrEnum.VSA_BOTTLENECK_ID_MPH.getInt();
+	}
+
+	/** Test if acceleration is below bottleneck threshold */
+	private boolean isAccelerationBelowThreshold() {
+		Float a = acceleration;
+		return a != null && a < getThreshold();
 	}
 
 	/** Get the current deceleration threshold */
-	protected int getThreshold() {
+	private int getThreshold() {
 		if(isBeforeStartCount())
 			return getStartThreshold();
 		else
@@ -528,19 +542,18 @@ public class StationImpl implements Station {
 	}
 
 	/** Get the starting deceleration threshold */
-	protected int getStartThreshold() {
+	private int getStartThreshold() {
 		return SystemAttrEnum.VSA_START_THRESHOLD.getInt();
 	}
 
 	/** Get the stopping deceleration threshold */
-	protected int getStopThreshold() {
+	private int getStopThreshold() {
 		return SystemAttrEnum.VSA_STOP_THRESHOLD.getInt();
 	}
 
 	/** Test if the number of intervals is lower than start count */
-	protected boolean isBeforeStartCount() {
-		return n_bottleneck <
-			SystemAttrEnum.VSA_START_INTERVALS.getInt();
+	private boolean isBeforeStartCount() {
+	       return n_candidate < SystemAttrEnum.VSA_START_INTERVALS.getInt();
 	}
 
 	/** Test if station speed is above the bottleneck id speed */
@@ -588,7 +601,7 @@ public class StationImpl implements Station {
 
 	/** Clear the station as a bottleneck */
 	public void clearBottleneck() {
-		n_bottleneck = 0;
+		n_candidate = 0;
 		setBottleneck(false);
 		acceleration = null;
 	}
@@ -600,14 +613,14 @@ public class StationImpl implements Station {
 		s.bottleneck = true;
 		s.bumpStartCount();
 		bottleneck = false;
-		n_bottleneck = 0;
+		n_candidate = 0;
 	}
 
 	/** Bump the bottleneck count up to the start count.  This prevents
 	 * it from shutting off at the next time step. */
 	private void bumpStartCount() {
 		if(isBeforeStartCount())
-		   n_bottleneck = SystemAttrEnum.VSA_START_INTERVALS.getInt();
+		   n_candidate = SystemAttrEnum.VSA_START_INTERVALS.getInt();
 	}
 
 	/** Debug the bottleneck calculation */
@@ -616,7 +629,7 @@ public class StationImpl implements Station {
 			BOTTLENECK_LOG.log(name +
 				", spd: " + getRollingAverageSpeed() +
 				", acc: " + acceleration +
-				", n_bneck: " + n_bottleneck +
+				", n_can: " + n_candidate +
 				", bneck: " + bottleneck);
 		}
 	}
