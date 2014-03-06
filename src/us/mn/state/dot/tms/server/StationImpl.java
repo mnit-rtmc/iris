@@ -33,6 +33,9 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  */
 public class StationImpl implements Station {
 
+	/** Breakdown speed (should be system attribute?) */
+	static private final int VSA_BREAKDOWN_SPEED_MPH = 25;
+
 	/** Bottleneck debug log */
 	static private final DebugLog BOTTLENECK_LOG =
 		new DebugLog("bottleneck");
@@ -508,10 +511,19 @@ public class StationImpl implements Station {
 
 	/** Check if station is a bottleneck candidate */
 	private void checkCandidate() {
-		if(isBottleneckCandidate())
+		if(isBelowBreakdownSpeed()) {
+			n_candidate++;
+			bumpStartCount();
+		} else if(isBottleneckCandidate())
 			n_candidate++;
 		else
 			n_candidate = 0;
+	}
+
+	/** Test if station speed is below the breakdown speed */
+	private boolean isBelowBreakdownSpeed() {
+		float s = getRollingAverageSpeed();
+		return s > 0 && s < VSA_BREAKDOWN_SPEED_MPH;
 	}
 
 	/** Check if station is a bottleneck candidate */
@@ -616,7 +628,7 @@ public class StationImpl implements Station {
 		n_candidate = 0;
 	}
 
-	/** Bump the bottleneck count up to the start count.  This prevents
+	/** Bump the candidate count up to the start count.  This prevents
 	 * it from shutting off at the next time step. */
 	private void bumpStartCount() {
 		if(isBeforeStartCount())
