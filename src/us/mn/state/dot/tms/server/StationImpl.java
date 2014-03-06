@@ -549,9 +549,10 @@ public class StationImpl implements Station {
 			SystemAttrEnum.VSA_BOTTLENECK_ID_MPH.getInt();
 	}
 
-	/** Adjust the bottleneck downstream if necessary */
-	protected void adjustDownstream(
-		NavigableMap<Float, StationImpl> upstream)
+	/** Adjust a bottleneck downstream if necessary.  Check the immediately
+	 * upstream station for bottleneck.
+	 * @param upstream Map of upstream stations. */
+	private void adjustDownstream(NavigableMap<Float, StationImpl> upstream)
 	{
 		Map.Entry<Float, StationImpl> entry = upstream.lastEntry();
 		if(entry != null)
@@ -560,17 +561,17 @@ public class StationImpl implements Station {
 
 	/** Adjust the bottleneck downstream if necessary.
 	 * @param sp Immediately upstream station */
-	protected void adjustDownstream(StationImpl sp) {
+	private void adjustDownstream(StationImpl sp) {
 		Float ap = sp.acceleration;
 		Float a = acceleration;
 		if(a != null && ap != null && a < ap && sp.p_bottle)
 			sp.moveBottleneck(this);
 	}
 
-	/** Adjust the bottleneck upstream if necessary */
-	protected void adjustUpstream(
-		NavigableMap<Float, StationImpl> upstream)
-	{
+	/** Adjust the bottleneck upstream if necessary.  Check if bottleneck
+	 * should be moved upstream from current station.
+	 * @param upstream Map of upstream stations. */
+	private void adjustUpstream(NavigableMap<Float, StationImpl> upstream) {
 		StationImpl s = this;
 		Map.Entry<Float, StationImpl> entry = upstream.lastEntry();
 		while(entry != null) {
