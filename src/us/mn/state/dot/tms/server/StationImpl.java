@@ -563,17 +563,8 @@ public class StationImpl implements Station {
 	protected void adjustDownstream(StationImpl sp) {
 		Float ap = sp.acceleration;
 		Float a = acceleration;
-		if(a != null && ap != null && a < ap && sp.p_bottle) {
-			// Move bottleneck downstream
-			// Don't use setBottleneck, because we don't want
-			// p_bottle to be updated
-			sp.bottleneck = false;
-			bottleneck = true;
-			// Bump the bottleneck count so it won't just
-			// shut off at the next time step
-			while(isBeforeStartCount())
-				n_bottleneck++;
-		}
+		if(a != null && ap != null && a < ap && sp.p_bottle)
+			sp.moveBottleneck(this);
 	}
 
 	/** Adjust the bottleneck upstream if necessary */
@@ -586,21 +577,12 @@ public class StationImpl implements Station {
 			StationImpl sp = entry.getValue();
 			Float ap = sp.acceleration;
 			Float a = s.acceleration;
-			if(a != null && ap != null && a > ap) {
-				// Move bottleneck upstream
-				// Don't use setBottleneck, because we don't
-				// want p_bottle to be updated
-				s.bottleneck = false;
-				s = sp;
-				s.bottleneck = true;
-			} else
+			if(a == null || ap == null || a <= ap)
 				break;
+			s.moveBottleneck(sp);
+			s = sp;
 			entry = upstream.lowerEntry(entry.getKey());
 		}
-		// Bump the bottleneck count so it won't just
-		// shut off at the next time step
-		while(s.isBeforeStartCount())
-			s.n_bottleneck++;
 	}
 
 	/** Clear the station as a bottleneck */
@@ -608,6 +590,23 @@ public class StationImpl implements Station {
 		n_bottleneck = 0;
 		setBottleneck(false);
 		acceleration = null;
+	}
+
+	/** Move bottleneck to an adjacent station.
+	 * @param s Station to move bottleneck to. */
+	private void moveBottleneck(StationImpl s) {
+		// Don't use setBottleneck; p_bottle should not be updated
+		s.bottleneck = true;
+		s.bumpStartCount();
+		bottleneck = false;
+		n_bottleneck = 0;
+	}
+
+	/** Bump the bottleneck count up to the start count.  This prevents
+	 * it from shutting off at the next time step. */
+	private void bumpStartCount() {
+		if(isBeforeStartCount())
+		   n_bottleneck = SystemAttrEnum.VSA_START_INTERVALS.getInt();
 	}
 
 	/** Debug the bottleneck calculation */
