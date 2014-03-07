@@ -81,6 +81,13 @@ public class BeaconManager extends ProxyManager<Beacon> {
 		return theme;
 	}
 
+	/** Check if a given attribute affects a proxy style */
+	@Override
+	public boolean isStyleAttrib(String a) {
+		// FIXME: should add styles attrib (for FAILED, etc.)
+		return "flashing".equals(a);
+	}
+
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, Beacon proxy) {
