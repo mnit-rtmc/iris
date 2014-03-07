@@ -42,7 +42,7 @@ public class OutletProperty extends DinRelayProperty {
 
 	/** Regex to match outlet state */
 	static private final Pattern STATE = Pattern.compile(
-		".*-- state=([a-fA-F\\d]{2}) .*");
+		".*<div id=\"state\">([a-fA-F\\d]{2})</div>.*");
 
 	/** Callback interface for outlet status */
 	private final OutletCallback callback;
@@ -73,13 +73,8 @@ public class OutletProperty extends DinRelayProperty {
 
 	/** Create a new outlet property */
 	public OutletProperty(OutletCallback oc) {
-		super("index.htm");
+		super("status");
 		callback = oc;
-	}
-
-	/** Create a new outlet property */
-	public OutletProperty() {
-		this(null);
 	}
 
 	/** Decode a QUERY response */

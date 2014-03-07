@@ -31,6 +31,23 @@ public class OpQueryBeaconState extends OpDevice<DinRelayProperty> {
 	/** Beacon device */
 	private final BeaconImpl beacon;
 
+	/** Outlet property */
+	private final OutletProperty property = new OutletProperty(
+		new OutletProperty.OutletCallback()
+	{
+		public void updateOutlets(boolean[] outlets) {
+			int p = beacon.getPin();
+			if(p > 0 && p <= outlets.length)
+				beacon.setFlashingNotify(outlets[p - 1]);
+			else
+				setErrorStatus("Invalid pin");
+		}
+		public void complete(boolean success) {
+			if(success)
+				logQuery(property);
+		}
+	});
+
 	/** Log a property query */
 	protected void logQuery(DinRelayProperty prop) {
 		if(DIN_LOG.isOpen())
@@ -56,17 +73,16 @@ public class OpQueryBeaconState extends OpDevice<DinRelayProperty> {
 		protected Phase<DinRelayProperty> poll(
 			CommMessage<DinRelayProperty> mess) throws IOException
 		{
-			OutletProperty property = new OutletProperty();
 			mess.add(property);
 			mess.queryProps();
-			logQuery(property);
-			boolean[] states = property.getOutletState();
-			int p = beacon.getPin();
-			if(p > 0 && p <= states.length)
-				beacon.setFlashingNotify(states[p - 1]);
-			else
-				setErrorStatus("Invalid pin");
 			return null;
 		}
+	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		property.complete(isSuccess());
+		super.cleanup();
 	}
 }
