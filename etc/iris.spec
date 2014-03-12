@@ -55,7 +55,7 @@ ant -Dinstall.dir=%{_installdir} install
 # pre-install
 %pre
 if [ $1 == 1 ]; then
-	useradd -r -M tms
+	useradd -r -m tms
 	# exit value 9: username already in use
 	if [ "$?" == "9" ]; then
 		exit 0
