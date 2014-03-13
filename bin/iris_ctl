@@ -113,9 +113,11 @@ function create_links() {
 	ln -snf /usr/share/java/iris-server-$version/iris-server-$version.jar /usr/share/java/iris-server-$version/iris-server.jar
 	ln -snf /usr/share/java/iris-server-$version /usr/share/java/iris-server
 	ln -snf /var/www/html/iris-client-$version /var/www/html/iris-client
-	sed -i ''s,@@WEBSTART.HOST@@,$host,'' /var/www/html/iris-client/*.jnlp
+	sed -i ''s,@@WEBSTART.HOST@@,$host,'' /var/www/html/iris-client/iris-client.jnlp /var/www/html/iris-client/mail.jnlp
 	install -o apache -g apache -m 0444 /etc/iris/iris-client.keystore /var/www/html/iris-client/
 	install -o apache -g apache -m 0444 /etc/iris/iris-client.properties /var/www/html/iris-client/
+	SED_STR='3s,^,\# DO NOT EDIT -- copied from /etc/iris by iris_ctl update\n,'
+	sed -i "$SED_STR" /var/www/html/iris-client/iris-client.properties
 }
 
 function update_database() {
