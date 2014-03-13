@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -302,18 +302,32 @@ public class IrisClient extends JFrame {
 	private Session createSession(String user, char[] pwd) {
 		try {
 			SonarState st = new SonarState(props, handler);
-			st.login(user, new String(pwd));
-			if(st.isLoggedIn()) {
-				st.populateCaches();
-				Session s = new Session(st, desktop, props);
-				s.initialize();
-				return s;
+			try {
+				st.login(user, new String(pwd));
+				if(st.isLoggedIn()) {
+					st.populateCaches();
+					return createSession(st);
+				} else {
+					st.quit();
+					return null;
+				}
+			}
+			catch(Exception e) {
+				st.quit();
+				throw e;
 			}
 		}
 		catch(Exception e) {
 			handler.handle(e);
 		}
 		return null;
+	}
+
+	/** Create a user session */
+	private Session createSession(SonarState st) throws Exception {
+		Session s = new Session(st, desktop, props);
+		s.initialize();
+		return s;
 	}
 
 	/** Update the maps on all screen panes */
