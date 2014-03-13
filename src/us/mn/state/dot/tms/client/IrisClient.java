@@ -32,6 +32,7 @@ import us.mn.state.dot.geokit.ZoomLevel;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.map.PointSelector;
+import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.SonarException;
@@ -95,7 +96,7 @@ public class IrisClient extends JFrame {
 	private final Properties props;
 
 	/** Exception handler */
-	private final SimpleHandler handler;
+	private final ExceptionHandler handler;
 
 	/** Mutable user properties stored on client workstation */
 	private final UserProperties user_props;
@@ -112,7 +113,7 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Create a new Iris client */
-	public IrisClient(Properties props, SimpleHandler h) {
+	public IrisClient(Properties props, ExceptionHandler h) {
 		super(createTitle(I18N.get("iris.logged.out")));
 		this.props = props;
 		handler = h;
@@ -302,19 +303,9 @@ public class IrisClient extends JFrame {
 	private Session createSession(String user, char[] pwd) {
 		try {
 			SonarState st = new SonarState(props, handler);
-			try {
-				st.login(user, new String(pwd));
-				if(st.isLoggedIn()) {
-					st.populateCaches();
-					return createSession(st);
-				} else {
-					st.quit();
-					return null;
-				}
-			}
-			catch(Exception e) {
-				st.quit();
-				throw e;
+			if(st.login(user, new String(pwd))) {
+				st.populateCaches();
+				return createSession(st);
 			}
 		}
 		catch(Exception e) {

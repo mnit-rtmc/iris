@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
 import java.util.Properties;
+import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Connection;
@@ -66,7 +67,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 public class SonarState extends Client {
 
 	/** Exception handler */
-	private final SimpleHandler handler;
+	private final ExceptionHandler handler;
 
 	/** Cache of capability proxies */
 	private final TypeCache<Capability> capabilities =
@@ -393,7 +394,7 @@ public class SonarState extends Client {
 	}
 
 	/** Create a new Sonar state */
-	public SonarState(Properties props, SimpleHandler h)
+	public SonarState(Properties props, ExceptionHandler h)
 		throws IOException, ConfigurationError, NoSuchFieldException,
 		IllegalAccessException
 	{
@@ -435,23 +436,10 @@ public class SonarState extends Client {
 
 	/** Login to the SONAR server */
 	@Override
-	public void login(String u, String p) throws SonarException {
-		final int n_login = handler.getFailedLoginCount();
-		super.login(u, p);
-		user_name = u;
-		// Wait for up to 20 seconds
-		for(int i = 0; i < 200; i++) {
-			if(isLoggedIn() ||
-			   n_login != handler.getFailedLoginCount())
-				return;
-			try {
-				Thread.sleep(100);
-			}
-			catch(InterruptedException e) {
-				handler.handle(e);
-			}
-		}
-		throw new SonarException("Login timed out");
+	public boolean login(String u, String p) throws SonarException {
+		boolean l = super.login(u, p);
+		user_name = l ? u : null;
+		return l;
 	}
 
 	/** Populate the specified type cache */

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010 AHMCT, University of California
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 import javax.swing.JFrame;
+import us.mn.state.dot.sched.ExceptionHandler;
 
 /**
  * Persistent mutable user properties stored in a java properties file
@@ -58,7 +59,7 @@ public class UserProperties {
 	private final Properties props = new Properties();
 
 	/** Create the user properties */
-	public UserProperties(SimpleHandler h) {
+	public UserProperties(ExceptionHandler h) {
 		try {
 			read();
 		}

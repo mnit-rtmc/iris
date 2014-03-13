@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class MainClient {
 
 	/** Create the IRIS client */
 	static private IrisClient createClient(String loc,
-		SimpleHandler handler) throws IOException
+		ExceptionHandler handler) throws IOException
 	{
 		Properties props = PropertyLoader.load(loc);
 		updateProxySelector(props);
