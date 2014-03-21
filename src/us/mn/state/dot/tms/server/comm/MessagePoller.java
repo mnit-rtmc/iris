@@ -54,6 +54,15 @@ abstract public class MessagePoller<T extends ControllerProperty> {
 	/** Thread group for all message poller threads */
 	static private final ThreadGroup GROUP = new ThreadGroup("Poller");
 
+	/** Thread state */
+	static private enum ThreadState {
+		NOT_STARTED,
+		STARTING,
+		RUNNING,
+		CLOSING,
+		STOPPED;
+	}
+
 	/** Write a message to the polling log */
 	private void plog(String msg) {
 		if(POLL_LOG.isOpen())
@@ -69,22 +78,48 @@ abstract public class MessagePoller<T extends ControllerProperty> {
 	/** Messenger for poll/response streams */
 	protected final Messenger messenger;
 
-	/** Poller status (null means not initialized yet) */
+	/** Thread state */
+	private ThreadState state = ThreadState.NOT_STARTED;
+
+	/** Set the thread state */
+	private synchronized void setThreadState(ThreadState st) {
+		state = st;
+		plog("state: " + st);
+	}
+
+	/** Poller status */
 	private String status = null;
 
 	/** Get the poller status */
 	public String getStatus() {
-		return status;
+		String s = status;
+		if(s != null)
+			return s;
+		ThreadState ts = state;
+		return (ts == ThreadState.RUNNING) ? "" : ts.toString();
 	}
 
 	/** Check if ready for operation */
-	public boolean isReady() {
-		return status == null || isConnected();
+	public synchronized boolean isReady() {
+		switch(state) {
+		case NOT_STARTED:
+		case STARTING:
+		case RUNNING:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Check if poller is connected */
-	public boolean isConnected() {
-		return thread.isAlive();
+	public synchronized boolean isConnected() {
+		switch(state) {
+		case STARTING:
+		case RUNNING:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Hung up flag */
@@ -104,6 +139,7 @@ abstract public class MessagePoller<T extends ControllerProperty> {
 			}
 		};
 		thread.setDaemon(true);
+		setThreadState(ThreadState.NOT_STARTED);
 		messenger = m;
 	}
 
@@ -122,11 +158,17 @@ abstract public class MessagePoller<T extends ControllerProperty> {
 
 	/** Ensure the thread is started */
 	private void ensureStarted() {
-		if(status == null) {
-			status = "STARTING";
-			plog("STARTING");
+		if(shouldStart())
 			thread.start();
-		}
+	}
+
+	/** Should the thread be started? */
+	private synchronized boolean shouldStart() {
+		if(state == ThreadState.NOT_STARTED) {
+			setThreadState(ThreadState.STARTING);
+			return true;
+		} else
+			return false;
 	}
 
 	/** Stop polling on this thread */
@@ -139,9 +181,9 @@ abstract public class MessagePoller<T extends ControllerProperty> {
 	private void operationLoop() {
 		try {
 			messenger.open();
-			status = "";
+			setThreadState(ThreadState.RUNNING);
 			performOperations();
-			status = "CLOSING";
+			setThreadState(ThreadState.CLOSING);
 		}
 		catch(HangUpException e) {
 			status = exceptionMessage(e);
@@ -156,7 +198,7 @@ abstract public class MessagePoller<T extends ControllerProperty> {
 		finally {
 			messenger.close();
 			drainQueue();
-			plog("STOPPING");
+			setThreadState(ThreadState.STOPPED);
 		}
 	}
 
@@ -165,7 +207,7 @@ abstract public class MessagePoller<T extends ControllerProperty> {
 		queue.close();
 		while(queue.hasNext()) {
 			Operation<T> o = queue.next();
-			o.handleCommError(EventType.QUEUE_DRAINED, status);
+			o.handleCommError(EventType.QUEUE_DRAINED, getStatus());
 			if(hung_up)
 				o.setSucceeded();
 			o.cleanup();
