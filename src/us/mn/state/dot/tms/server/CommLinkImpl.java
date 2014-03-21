@@ -317,16 +317,14 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Message poller for communication */
-	protected transient MessagePoller poller;
+	private transient MessagePoller poller;
 
 	/** Get the message poller.  This must be synchronized to protect
-	 * access to the poller member variable.  Only call this method when
-	 * an operation needs to be queued, since a modem may be acquired to
-	 * create the poller.  */
+	 * access to the poller member variable. */
 	public synchronized MessagePoller getPoller() {
 		if(poller != null) {
 			setStatus(poller.getStatus());
-			if(poller.isAlive())
+			if(poller.isReady())
 				return poller;
 			else
 				closePoller();
@@ -340,7 +338,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		try {
 			poller = MessagePoller.create(name, protocol, uri);
 			poller.setTimeout(timeout);
-			poller.start();
 		}
 		catch(IOException e) {
 			closePoller();
@@ -435,7 +432,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Check if the comm link is currently connected */
 	public boolean isConnected() {
 		MessagePoller p = poller;
-		return p != null && p.isAlive();
+		return p != null && p.isConnected();
 	}
 
 	/** Write the comm link as an XML element */

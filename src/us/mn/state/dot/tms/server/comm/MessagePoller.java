@@ -28,9 +28,8 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  *
  * @author Douglas Lau
  */
-abstract public class MessagePoller<T extends ControllerProperty>
-	extends Thread
-{
+abstract public class MessagePoller<T extends ControllerProperty> {
+
 	/** Create a message poller */
 	static public MessagePoller create(String name, CommProtocol protocol,
 		String uri) throws IOException
@@ -58,8 +57,11 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Write a message to the polling log */
 	private void plog(String msg) {
 		if(POLL_LOG.isOpen())
-			POLL_LOG.log(getName() + " " + msg);
+			POLL_LOG.log(thread.getName() + " " + msg);
 	}
+
+	/** Thread to poll operations */
+	private final Thread thread;
 
 	/** Operation queue */
 	protected final OperationQueue<T> queue = new OperationQueue<T>();
@@ -75,6 +77,16 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		return status;
 	}
 
+	/** Check if ready for operation */
+	public boolean isReady() {
+		return status == null || isConnected();
+	}
+
+	/** Check if poller is connected */
+	public boolean isConnected() {
+		return thread.isAlive();
+	}
+
 	/** Hung up flag */
 	private boolean hung_up = false;
 
@@ -85,8 +97,13 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Create a new message poller */
 	protected MessagePoller(String name, Messenger m) {
-		super(GROUP, "Poller: " + name);
-		setDaemon(true);
+ 		thread = new Thread(GROUP, "Poller: " + name) {
+			@Override
+			public void run() {
+				operationLoop();
+			}
+		};
+		thread.setDaemon(true);
 		messenger = m;
 	}
 
@@ -97,20 +114,29 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Add an operation to the message poller */
 	protected void addOperation(Operation<T> op) {
-		if(!queue.enqueue(op))
+		if(queue.enqueue(op))
+			ensureStarted();
+		else
 			plog("DROPPING " + op);
+	}
+
+	/** Ensure the thread is started */
+	private void ensureStarted() {
+		if(status == null) {
+			status = "STARTING";
+			plog("STARTING");
+			thread.start();
+		}
 	}
 
 	/** Stop polling on this thread */
 	public void stopPolling() {
-		addOperation(new KillThread<T>());
+		if(isConnected())
+			addOperation(new KillThread<T>());
 	}
 
-	/** MessagePoller is a subclass of Thread.  This is the run method. */
-	@Override
-	public void run() {
-		status = "STARTING";
-		plog("STARTING");
+	/** Open messenger and perform operations */
+	private void operationLoop() {
 		try {
 			messenger.open();
 			status = "";
