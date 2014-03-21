@@ -125,6 +125,14 @@ public final class OperationQueue<T extends ControllerProperty> {
 	/** Get the next operation from the queue (and remove it) */
 	public synchronized Operation<T> next() {
 		work = null;
+		waitOp();
+		work = front.operation;
+		front = front.next;
+		return work;
+	}
+
+	/** Wait for an operation to be added to the queue */
+	private synchronized void waitOp() {
 		while(!hasNext()) {
 			try {
 				wait();
@@ -133,9 +141,6 @@ public final class OperationQueue<T extends ControllerProperty> {
 				e.printStackTrace();
 			}
 		}
-		work = front.operation;
-		front = front.next;
-		return work;
 	}
 
 	/** Inner class for nodes in the queue */
