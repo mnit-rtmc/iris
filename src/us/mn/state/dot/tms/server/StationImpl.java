@@ -148,14 +148,6 @@ public class StationImpl implements Station {
 		return name;
 	}
 
-	/** Get the station index */
-	public String getIndex() {
-		if(name.startsWith("S"))
-			return name.substring(1);
-		else
-			return name;
-	}
-
 	/** Roadway node */
 	private final R_NodeImpl r_node;
 
@@ -437,6 +429,14 @@ public class StationImpl implements Station {
 			w.write("\t\t<speed>" + speed + "</speed>\n");
 			w.write("\t</station>\n");
 		}
+	}
+
+	/** Get the station index */
+	private String getIndex() {
+		if(name.startsWith("S"))
+			return name.substring(1);
+		else
+			return name;
 	}
 
 	/** Acceleration from previous station */
