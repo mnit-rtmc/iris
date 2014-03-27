@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ public enum SystemAttrEnum {
 	RWIS_MAX_VALID_WIND_SPEED_KPH(282, 0),
 	SAMPLE_ARCHIVE_ENABLE(true),
 	SAMPLE_ARCHIVE_DIRECTORY("/var/lib/iris/traffic"),
-	STATION_XML_ENABLE(true),
+	STATION_XML_ENABLE(false),
 	TESLA_HOST(String.class),
 	TRAVEL_TIME_MAX_LEGS(8, 1, 20),
 	TRAVEL_TIME_MAX_MILES(16, 1, 30),
