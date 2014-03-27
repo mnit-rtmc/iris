@@ -41,21 +41,21 @@ public class StationImpl implements Station {
 		new DebugLog("bottleneck");
 
 	/** Density ranks for calculating rolling sample count */
-	static protected enum DensityRank {
+	static private enum DensityRank {
 		First(55, 6),	// 55+ vpm => 6 samples (3 minutes)
 		Second(40, 4),	// 40-55 vpm => 4 samples (2 minutes)
 		Third(25, 3),	// 25-40 vpm => 3 samples (1.5 minutes)
 		Fourth(15, 4),	// 15-25 vpm => 4 samples (2 minutes)
 		Fifth(10, 6),	// 10-15 vpm => 6 samples (3 minutes)
 		Last(0, 0);	// less than 10 vpm => 0 samples
-		protected final int density;
-		protected final int samples;
+		private final int density;
+		private final int samples;
 		private DensityRank(int k, int n_smp) {
 			density = k;
 			samples = n_smp;
 		}
 		/** Get the number of rolling samples for the given density */
-		static protected int samples(float k) {
+		static private int samples(float k) {
 			for(DensityRank dr: values()) {
 				if(k > dr.density)
 					return dr.samples;
@@ -63,7 +63,7 @@ public class StationImpl implements Station {
 			return Last.samples;
 		}
 		/** Get the maximum number of samples in any density rank */
-		static protected int getMaxSamples() {
+		static private int getMaxSamples() {
 			int s = 0;
 			for(DensityRank dr: values())
 				s = Math.max(s, dr.samples);
@@ -72,20 +72,20 @@ public class StationImpl implements Station {
 	}
 
 	/** Speed ranks for extending rolling sample averaging */
-	static protected enum SpeedRank {
+	static private enum SpeedRank {
 		First(40, 2),	// 40+ mph => 2 samples (1 minute)
 		Second(25, 4),	// 25-40 mph => 4 samples (2 minutes)
 		Third(20, 6),	// 20-25 mph => 6 samples (3 minutes)
 		Fourth(15, 8),	// 15-20 mph => 8 samples (4 minutes)
 		Last(0, 10);	// 0-15 mph => 10 samples (5 minutes)
-		protected final int speed;
-		protected final int samples;
+		private final int speed;
+		private final int samples;
 		private SpeedRank(int spd, int n_smp) {
 			speed = spd;
 			samples = n_smp;
 		}
 		/** Get the number of rolling samples for the given speed */
-		static protected int samples(float s) {
+		static private int samples(float s) {
 			for(SpeedRank sr: values()) {
 				if(s > sr.speed)
 					return sr.samples;
@@ -93,7 +93,7 @@ public class StationImpl implements Station {
 			return Last.samples;
 		}
 		/** Get the number of rolling samples for a set of speeds */
-		static protected int samples(float[] speeds) {
+		static private int samples(float[] speeds) {
 			int n_smp = First.samples;
 			// NOTE: n_smp might be changed inside loop, extending
 			//       the for loop bounds
@@ -107,7 +107,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Calculate the rolling average speed */
-	static protected float averageSpeed(float[] speeds) {
+	static private float averageSpeed(float[] speeds) {
 		return average(speeds, SpeedRank.samples(speeds));
 	}
 
@@ -115,7 +115,7 @@ public class StationImpl implements Station {
 	 * @param samples Array of samples to average.
 	 * @param n_smp Number of samples to average.
 	 * @return Average of samples, or MISSING_DATA. */
-	static protected float average(float[] samples, int n_smp) {
+	static private float average(float[] samples, int n_smp) {
 		float total = 0;
 		int count = 0;
 		for(int i = 0; i < n_smp; i++) {
@@ -132,7 +132,7 @@ public class StationImpl implements Station {
 	 * @param total Total of all sample data.
 	 * @param count Count of samples.
 	 * @return Average of samples, or MISSING_DATA. */
-	static protected float average(float total, int count) {
+	static private float average(float total, int count) {
 		if(count > 0)
 			return total / count;
 		else
@@ -140,9 +140,10 @@ public class StationImpl implements Station {
 	}
 
 	/** Staiton name */
-	protected final String name;
+	private final String name;
 
 	/** Get the station name */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -156,9 +157,10 @@ public class StationImpl implements Station {
 	}
 
 	/** Roadway node */
-	protected final R_NodeImpl r_node;
+	private final R_NodeImpl r_node;
 
 	/** Get the roadway node */
+	@Override
 	public R_Node getR_Node() {
 		return r_node;
 	}
@@ -176,11 +178,13 @@ public class StationImpl implements Station {
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
 
 	/** Destroy a station */
+	@Override
 	public void destroy() {
 		// Nothing to do
 	}
@@ -205,13 +209,13 @@ public class StationImpl implements Station {
 	}
 
 	/** Current average station volume */
-	protected float volume = MISSING_DATA;
+	private float volume = MISSING_DATA;
 
 	/** Current average station occupancy */
-	protected float occupancy = MISSING_DATA;
+	private float occupancy = MISSING_DATA;
 
 	/** Current average station flow */
-	protected int flow = MISSING_DATA;
+	private int flow = MISSING_DATA;
 
 	/** Get the average station flow */
 	public int getFlow() {
@@ -240,10 +244,10 @@ public class StationImpl implements Station {
 	}
 
 	/** Averate station speed for rolling speed calculation */
-	protected float[] rlg_speed = new float[DensityRank.getMaxSamples()];
+	private float[] rlg_speed = new float[DensityRank.getMaxSamples()];
 
 	/** Update rolling speed array with a new sample */
-	protected void updateRollingSpeed(float s) {
+	private void updateRollingSpeed(float s) {
 		System.arraycopy(rlg_speed, 0, rlg_speed, 1,
 			rlg_speed.length - 1);
 		// Clamp the speed to 10 mph above the speed limit
@@ -251,10 +255,10 @@ public class StationImpl implements Station {
 	}
 
 	/** Average station speed for previous ten samples */
-	protected float[] avg_speed = new float[SpeedRank.Last.samples];
+	private float[] avg_speed = new float[SpeedRank.Last.samples];
 
 	/** Update average station speed with a new sample */
-	protected void updateAvgSpeed(float s) {
+	private void updateAvgSpeed(float s) {
 		System.arraycopy(avg_speed, 0, avg_speed, 1,
 			avg_speed.length - 1);
 		avg_speed[0] = Math.min(s, getSpeedLimit());
@@ -278,20 +282,20 @@ public class StationImpl implements Station {
 	}
 
 	/** Samples used in previous time step */
-	protected int rolling_samples = 0;
+	private int rolling_samples = 0;
 
 	/** Update the rolling samples for previous time step */
-	protected void updateRollingSamples() {
+	private void updateRollingSamples() {
 		rolling_samples = calculateRollingSamples();
 	}
 
 	/** Calculate the number of samples for rolling average */
-	protected int calculateRollingSamples() {
+	private int calculateRollingSamples() {
 		return Math.min(calculateMaxSamples(), rolling_samples + 1);
 	}
 
 	/** Calculate the maximum number of samples for rolling average */
-	protected int calculateMaxSamples() {
+	private int calculateMaxSamples() {
 		if(isSpeedTrending())
 			return 2;
 		else
@@ -299,33 +303,33 @@ public class StationImpl implements Station {
 	}
 
 	/** Is the speed trending over the last few time steps? */
-	protected boolean isSpeedTrending() {
+	private boolean isSpeedTrending() {
 		return isSpeedValid() &&
 		      (isSpeedTrendingDownward() || isSpeedTrendingUpward());
 	}
 
 	/** Is recent rolling speed data valid? */
-	protected boolean isSpeedValid() {
+	private boolean isSpeedValid() {
 		return rlg_speed[0] > 0 && rlg_speed[1] > 0 && rlg_speed[2] > 0;
 	}
 
 	/** Is the speed trending downward? */
-	protected boolean isSpeedTrendingDownward() {
+	private boolean isSpeedTrendingDownward() {
 		return rlg_speed[0] < rlg_speed[1] &&
 		       rlg_speed[1] < rlg_speed[2];
 	}
 
 	/** Is the speed trending upward? */
-	protected boolean isSpeedTrendingUpward() {
+	private boolean isSpeedTrendingUpward() {
 		return rlg_speed[0] > rlg_speed[1] &&
 		       rlg_speed[1] > rlg_speed[2];
 	}
 
 	/** Low station speed for previous ten samples */
-	protected float[] low_speed = new float[SpeedRank.Last.samples];
+	private float[] low_speed = new float[SpeedRank.Last.samples];
 
 	/** Update low station speed with a new sample */
-	protected void updateLowSpeed(float s) {
+	private void updateLowSpeed(float s) {
 		System.arraycopy(low_speed, 0, low_speed, 1,
 			low_speed.length - 1);
 		low_speed[0] = Math.min(s, getSpeedLimit());
@@ -436,20 +440,20 @@ public class StationImpl implements Station {
 	}
 
 	/** Acceleration from previous station */
-	protected Float acceleration = null;
+	private Float acceleration = null;
 
 	/** Count of iterations when station was a bottleneck candidate */
 	private int n_candidate = 0;
 
 	/** Bottleneck exists flag */
-	protected boolean bottleneck = false;
+	private boolean bottleneck = false;
 
 	/** Bottleneck flag from previous time step.  This is needed when
 	 * checking if a bottleneck should be adjusted downstream. */
-	protected boolean p_bottle = false;
+	private boolean p_bottle = false;
 
 	/** Set the bottleneck flag */
-	protected void setBottleneck(boolean b) {
+	private void setBottleneck(boolean b) {
 		p_bottle = bottleneck;
 		bottleneck = b;
 	}
@@ -482,7 +486,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Test if upstream station is too close for bottleneck calculation */
-	protected boolean isTooClose(float d) {
+	private boolean isTooClose(float d) {
 		return d < SystemAttrEnum.VSA_MIN_STATION_MILES.getFloat();
 	}
 
@@ -490,7 +494,7 @@ public class StationImpl implements Station {
 	 * @param sp Previous station.
 	 * @param d Distance to previous station (miles).
 	 * @return acceleration in mphph */
-	protected Float calculateAcceleration(StationImpl sp, float d) {
+	private Float calculateAcceleration(StationImpl sp, float d) {
 		float u = getRollingAverageSpeed();
 		float up = sp.getRollingAverageSpeed();
 		return calculateAcceleration(u, up, d);
@@ -501,7 +505,7 @@ public class StationImpl implements Station {
 	 * @param up Upstream speed (mph).
 	 * @param d Distance between stations (miles).
 	 * @return acceleration in mphph */
-	protected Float calculateAcceleration(float u, float up, float d) {
+	private Float calculateAcceleration(float u, float up, float d) {
 		assert d > 0;
 		if(u > 0 && up > 0)
 			return (u * u - up * up) / (2 * d);
@@ -575,7 +579,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Test if station speed is above the bottleneck id speed */
-	protected boolean isAboveBottleneckSpeed() {
+	private boolean isAboveBottleneckSpeed() {
 		return getRollingAverageSpeed() >
 			SystemAttrEnum.VSA_BOTTLENECK_ID_MPH.getInt();
 	}
@@ -651,7 +655,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Check if the (bottleneck) station is in range */
-	protected boolean isBottleneckInRange(float d) {
+	private boolean isBottleneckInRange(float d) {
 		if(d > 0)
 			return d < getUpstreamDistance();
 		else
@@ -659,7 +663,7 @@ public class StationImpl implements Station {
 	}
 
 	/** Get the upstream bottleneck distance */
-	protected float getUpstreamDistance() {
+	private float getUpstreamDistance() {
 		float lim = getSpeedLimit();
 		float sp = getRollingAverageSpeed();
 		if(sp > 0 && sp < lim) {
@@ -670,12 +674,12 @@ public class StationImpl implements Station {
 	}
 
 	/** Get the control deceleration threshold */
-	protected int getControlThreshold() {
+	private int getControlThreshold() {
 		return SystemAttrEnum.VSA_CONTROL_THRESHOLD.getInt();
 	}
 
 	/** Get the downstream bottleneck distance */
-	protected float getDownstreamDistance() {
+	private float getDownstreamDistance() {
 		return SystemAttrEnum.VSA_DOWNSTREAM_MILES.getFloat();
 	}
 
