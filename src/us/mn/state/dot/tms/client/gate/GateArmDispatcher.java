@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -478,7 +478,7 @@ public class GateArmDispatcher extends IPanel
 
 	/** Update the button enabled states */
 	private void updateButtons(GateArmArray ga) {
-		boolean e = session.isUpdatePermitted(ga, "armState");
+		boolean e = session.isUpdatePermitted(ga, "armStateNext");
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
 		open_arm.setEnabled(e && gas == GateArmState.CLOSED &&
 			isOpenAllowed(ga));

@@ -1795,7 +1795,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 camera_id_blank	
 camera_num_preset_btns	3
 client_units_si	true
-database_version	4.12.0
+database_version	4.13.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
@@ -2058,7 +2058,7 @@ PRV_0127	user_admin	role/.*	f	t	t	t
 PRV_0128	user_admin	privilege/.*	f	t	t	t
 PRV_0129	user_admin	capability/.*	f	t	t	t
 PRV_0130	user_admin	connection/.*	f	f	f	t
-PRV_0131	gate_arm_control	gate_arm_array/.*/armState	f	t	f	f
+PRV_0131	gate_arm_control	gate_arm_array/.*/armStateNext	f	t	f	f
 PRV_0132	gate_arm_control	gate_arm_array/.*/ownerNext	f	t	f	f
 PRV_0136	gate_arm_control	gate_arm_array/.*/deviceRequest	f	t	f	f
 \.
@@ -2577,7 +2577,7 @@ COPY iris.graphic (name, g_number, bpp, height, width, pixels) FROM stdin;
 11_full_93	\N	1	11	3	5JJJJ4A=
 11_full_94	\N	1	11	5	I7cQAAAAAA==
 11_full_95	\N	1	11	5	AAAAAAAAPg==
-12_full_32	\N	1	12	1	AAA=
+12_full_32	\N	1	12	2	AAAA
 12_full_33	\N	1	12	2	qqqC
 12_full_34	\N	1	12	3	toAAAAA=
 12_full_35	\N	1	12	5	ABSvqV9SgAA=
