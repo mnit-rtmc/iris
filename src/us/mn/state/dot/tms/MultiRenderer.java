@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -452,13 +452,13 @@ public class MultiRenderer extends MultiAdapter {
 		int getHeight() {
 			int h = c_height;
 			for(Span s: spans)
-				h = Math.max(h, s.font.getHeight());
+				h = Math.max(h, s.getHeight());
 			return h;
 		}
 		int getSpacing() {
 			int ls = 0;
 			for(Span s: spans)
-				ls = Math.max(ls, s.font.getLineSpacing());
+				ls = Math.max(ls, s.getLineSpacing());
 			return ls;
 		}
 		void addSpan(Span s) {
@@ -536,6 +536,9 @@ public class MultiRenderer extends MultiAdapter {
 			// rounded up to the nearest whole pixel ..." ???
 			return Math.round((sp0 + sp1) / 2.0f);
 		}
+		int getHeight() {
+			return font != null ? font.getHeight() : 0;
+		}
 		int getWidth() {
 			try {
 				return FontHelper.calculateWidth(font, span,
@@ -546,8 +549,11 @@ public class MultiRenderer extends MultiAdapter {
 				return 0;
 			}
 		}
+		int getLineSpacing() {
+			return font != null ? font.getLineSpacing() : 0;
+		}
 		void render(int x, int base) throws InvalidMessageException {
-			int y = base - font.getHeight();
+			int y = base - getHeight();
 			for(int i = 0; i < span.length(); i++) {
 				int cp = span.charAt(i);
 				Graphic g = FontHelper.lookupGraphic(font, cp);
