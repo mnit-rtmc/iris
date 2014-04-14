@@ -1605,7 +1605,7 @@ GRANT SELECT ON sign_event_view TO PUBLIC;
 CREATE VIEW recent_sign_event_view AS
 	SELECT event_id, event_date, description, device_id, message, iris_user
 	FROM sign_event_view
-	WHERE (CURRENT_TIMESTAMP - event_date) < interval '90 days';
+	WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
 CREATE VIEW client_event_view AS
