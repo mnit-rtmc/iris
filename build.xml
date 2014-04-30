@@ -408,6 +408,10 @@
 			<fileset dir="${dist.server}"/>
 		</copy>
 
+		<copy todir="${install.dir}/etc/security/limits.d">
+			<fileset file="${build.etc}/99-tms.conf"/>
+		</copy>
+
 		<copy todir="${install.dir}/etc/httpd/conf.d">
 			<fileset file="${build.etc}/iris.conf"/>
 		</copy>

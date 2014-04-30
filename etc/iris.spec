@@ -97,6 +97,10 @@ fi
 %defattr(0644,root,root)
 /etc/httpd/conf.d/iris.conf
 
+# /etc/security/limits.d
+%defattr(0644,root,root)
+/etc/security/limits.d/99-tms.conf
+
 # /usr/share/java/iris-server-%{version}
 %defattr(0644,root,root,0755)
 %dir %{_serverdir}
