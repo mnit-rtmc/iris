@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2013  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,6 +94,9 @@ public class CameraDispatcher extends IPanel {
 	/** Streaming video panel */
 	private final StreamPanel stream_pnl;
 
+	/** PTZ panel */
+	private final PTZPanel ptz_pnl;
+
 	/** Panel for camera presets */
 	private final PresetPanel preset_pnl;
 
@@ -111,6 +114,7 @@ public class CameraDispatcher extends IPanel {
 		model = session.getSonarState().getCamCache().getCameraModel();
 		cam_ptz = new CameraPTZ(s);
 		joy_ptz = new JoystickPTZ(cam_ptz);
+		ptz_pnl = new PTZPanel(cam_ptz);
 		preset_pnl = new PresetPanel();
 		stream_pnl = createStreamPanel();
 		output_cbx = createOutputCombo();
@@ -156,6 +160,8 @@ public class CameraDispatcher extends IPanel {
 		add("location");
 		add(location_lbl, Stretch.LAST);
 		add(stream_pnl, Stretch.FULL);
+		if(SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean())
+			add(ptz_pnl, Stretch.FULL);
 		add(preset_pnl, Stretch.CENTER);
 		clear();
 		sel_model.addProxySelectionListener(sel_listener);
@@ -215,6 +221,7 @@ public class CameraDispatcher extends IPanel {
 				camera.getGeoLoc()));
 			stream_pnl.setCamera(camera);
 			selectCamera();
+			ptz_pnl.setEnabled(cam_ptz.canControlPtz());
 			preset_pnl.setCamera(camera);
 			preset_pnl.setEnabled(cam_ptz.canControlPtz());
 		} else
@@ -243,6 +250,7 @@ public class CameraDispatcher extends IPanel {
 		name_lbl.setText("");
 		location_lbl.setText("");
 		stream_pnl.setCamera(null);
+		ptz_pnl.setEnabled(false);
 		preset_pnl.setEnabled(false);
 	}
 }

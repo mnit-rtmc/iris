@@ -16,3 +16,5 @@ CREATE VIEW recent_sign_event_view AS
 	FROM sign_event_view
 	WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
+
+INSERT INTO iris.system_attribute (name, value) VALUES ('camera_ptz_panel_enable', 'false');
