@@ -28,10 +28,19 @@ abstract public class OpDevice<T extends ControllerProperty>
 	/** Device on which to perform operation */
 	protected final DeviceImpl device;
 
+	/** Require exclusive access to device */
+	private final boolean exclusive;
+
 	/** Create a new device operation */
-	protected OpDevice(PriorityLevel p, DeviceImpl d) {
+	protected OpDevice(PriorityLevel p, DeviceImpl d, boolean ex) {
 		super(p, (ControllerImpl)d.getController(), d.getName());
 		device = d;
+		exclusive = ex;
+	}
+
+	/** Create a new device operation */
+	protected OpDevice(PriorityLevel p, DeviceImpl d) {
+		this(p, d, true);
 	}
 
 	/** Operation equality test */
@@ -59,7 +68,7 @@ abstract public class OpDevice<T extends ControllerProperty>
 	/** Create the first phase of the operation */
 	@Override
 	protected final Phase<T> phaseOne() {
-		return new AcquireDevice();
+		return exclusive ? new AcquireDevice() : phaseTwo();
 	}
 
 	/** Create the second phase of the operation */
@@ -68,7 +77,8 @@ abstract public class OpDevice<T extends ControllerProperty>
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		device.release(OpDevice.this);
+		if(exclusive)
+			device.release(OpDevice.this);
 		super.cleanup();
 	}
 }

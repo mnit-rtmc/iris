@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,11 @@ public class OpQueryGateStatus extends OpSTC {
 
 	/** Create a new gate arm query status operation */
 	public OpQueryGateStatus(GateArmImpl d) {
-		super(PriorityLevel.DEVICE_DATA, d);
+		// Don't require exclusive access to device, since this
+		// operation loops continuously.  This prevents priority from
+		// being changed due to DeviceContentionException.  Bumping
+		// priority here can starve other operations (due to looping).
+		super(PriorityLevel.DEVICE_DATA, d, false);
 		status = new StatusProperty(password());
 	}
 
@@ -59,8 +63,6 @@ public class OpQueryGateStatus extends OpSTC {
 			mess.queryProps();
 			logQuery(v);
 			gate_arm.setVersion(v.getVersion());
-			// Don't hold device lock while looping
-			device.release(OpQueryGateStatus.this);
 			return new QueryStatus();
 		}
 	}
@@ -97,7 +99,8 @@ public class OpQueryGateStatus extends OpSTC {
 	}
 
 	/** Cleanup the operation */
-	@Override public void cleanup() {
+	@Override
+	public void cleanup() {
 		super.cleanup();
 		if(!isSuccess())
 			gate_arm.checkTimeout();

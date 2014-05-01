@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,12 @@ abstract public class OpSTC extends OpDevice<STCProperty> {
 
 	/** Gate arm device */
 	protected final GateArmImpl gate_arm;
+
+	/** Create a new STC operation */
+	protected OpSTC(PriorityLevel p, GateArmImpl ga, boolean ex) {
+		super(p, ga, ex);
+		gate_arm = ga;
+	}
 
 	/** Create a new STC operation */
 	protected OpSTC(PriorityLevel p, GateArmImpl ga) {
