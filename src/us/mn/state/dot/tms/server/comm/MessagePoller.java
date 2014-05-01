@@ -51,6 +51,9 @@ abstract public class MessagePoller<T extends ControllerProperty> {
 	/** Message polling log */
 	static private final DebugLog POLL_LOG = new DebugLog("polling");
 
+	/** Priority change log */
+	static private final DebugLog PRIO_LOG = new DebugLog("prio");
+
 	/** Thread group for all message poller threads */
 	static private final ThreadGroup GROUP = new ThreadGroup("Poller");
 
@@ -275,6 +278,11 @@ abstract public class MessagePoller<T extends ControllerProperty> {
 	{
 		Operation<T> oc = e.operation;
 		if(oc.getPriority().ordinal() > op.getPriority().ordinal()) {
+			if(PRIO_LOG.isOpen()) {
+				PRIO_LOG.log("BUMPING " + oc + " from " +
+					oc.getPriority() + " to " +
+					op.getPriority());
+			}
 			oc.setPriority(op.getPriority());
 			// If, for some crazy reason, the operation is
 			// not on our queue, it will not be requeued.
