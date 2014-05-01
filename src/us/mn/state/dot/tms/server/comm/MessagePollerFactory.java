@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011-2013  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@ import java.net.URL;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.ModemImpl;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
+import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaMessenger;
@@ -47,6 +49,7 @@ import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author Travis Swanston
  */
 public class MessagePollerFactory {
 
@@ -116,6 +119,8 @@ public class MessagePollerFactory {
 			return createDinRelayPoller();
 		case HYSECURITY_STC:
 			return createSTCPoller();
+		case COHU_PTZ:
+			return createCohuPTZPoller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -308,5 +313,10 @@ public class MessagePollerFactory {
 	/** Create a STC poller */
 	private MessagePoller createSTCPoller() throws IOException {
 		return new STCPoller(name, createSocketMessenger(TCP));
+	}
+
+	/** Create a Cohu PTZ poller */
+	protected MessagePoller createCohuPTZPoller() throws IOException {
+		return new CohuPTZPoller(name, createSocketMessenger(TCP));
 	}
 }
