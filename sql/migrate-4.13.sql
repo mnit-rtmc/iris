@@ -18,3 +18,5 @@ CREATE VIEW recent_sign_event_view AS
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
 INSERT INTO iris.system_attribute (name, value) VALUES ('camera_ptz_panel_enable', 'false');
+
+INSERT INTO iris.comm_protocol (id, description) VALUES (29, 'Cohu PTZ');

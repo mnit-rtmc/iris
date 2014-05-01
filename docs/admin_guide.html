@@ -85,7 +85,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">19 February 2014</div>
+<div id="stamp">1 May 2014</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -249,6 +249,7 @@
 	<li>RTMS G4 (VDS)</li>
 	<li>Pelco D (pan/tilt/zoom)</li>
 	<li>Infinova (pan/tilt/zoom)</li>
+	<li>Cohu (pan/tilt/zoom)</li>
 	<li>AD "manchester" (pan/tilt/zoom)</li>
 	<li>Vicon (pan/tilt/zoom)</li>
 	<li>Msg Feed (external system DMS messages)</li>
@@ -978,7 +979,12 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	<tr>
 	    <td>Infinova</td>
 	    <td><a href="#ptz">PTZ</a> for Infinova cameras</td>
-	    <td>UDP</td>
+	    <td>TCP</td>
+	</tr>
+	<tr>
+	    <td>Cohu</td>
+	    <td><a href="#ptz">PTZ</a> for Cohu cameras</td>
+	    <td>TCP</td>
 	</tr>
 	<tr>
 	    <td>STC</td>
@@ -1116,7 +1122,7 @@ patch -p0 &lt; ../09_tertiary_color.patch
 	</tr>
 	<tr>
 	    <td><a href="#cameras">Camera</a></td>
-	    <td>Pelco D, Manchester, Vicon, Infinova</td>
+	    <td>Pelco D, Manchester, Vicon, Infinova, Cohu</td>
 	    <td>1</td>
 	</tr>
 	<tr>
