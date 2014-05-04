@@ -18,38 +18,50 @@ package us.mn.state.dot.tms.server.comm.cohuptz;
 import java.io.IOException;
 import java.io.OutputStream;
 
-
 /**
- * This class creates a Cohu PTZ request to instruct a camera
- * to store the current state to a specified preset.
+ * A property to pan a camera
  *
  * @author Travis Swanston
  */
-public class StorePresetProperty extends CohuPTZProperty {
+public class PanProperty extends CohuPTZProperty {
 
-	/** Requested preset to store */
-	private final int preset;
+	/** Requested vector [-1..1] */
+	protected final float value;
 
-	/** Create a new store preset property */
-	public StorePresetProperty(int p) {
-		preset = p;
+	/** Create the property */
+	public PanProperty(float v) {
+		value = v;
 	}
 
-	/** Encode a STORE request */
+	/**
+	 * Encode a STORE request
+	 */
 	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
 
-		Byte presetByte = getPresetByte(preset);
-		if (presetByte == null) return;
-		byte pb = presetByte.byteValue();
+		byte[] cmd = new byte[2];
 
-		byte[] message = new byte[5];
-		message[0] = (byte)0xf8;
-		message[1] = (byte)drop;
-		message[2] = (byte)0x50;
-		message[3] = pb;
-		message[4] = calculateChecksum(message, 1, 3);
-		os.write(message);
+		if (Math.abs(value) < PTZ_THRESH) {
+			cmd[0] = (byte)0x50;
+			cmd[1] = (byte)0x53;
+		}
+		else if (value < 0) {
+			cmd[0] = (byte)0x6c;
+			cmd[1] = getPanTiltSpeedByte(value);
+		}
+		else if (value > 0) {
+			cmd[0] = (byte)0x72;
+			cmd[1] = getPanTiltSpeedByte(value);
+		}
+
+		byte[] msg = new byte[5];
+		msg[0] = (byte)0xf8;
+		msg[1] = (byte)drop;
+		msg[2] = cmd[0];
+		msg[3] = cmd[1];
+		msg[4] = calculateChecksum(msg, 1, 3);
+
+		os.write(msg);
 	}
 
 }

@@ -22,40 +22,31 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Cohu PTZ operation to move a camera.
+ * Cohu PTZ operation to tilt a camera.
  *
  * @author Travis Swanston
  */
-public class OpMoveCamera extends OpDevice {
+public class OpTiltCamera extends OpDevice {
 
-	/** The direction (and speed) to pan the camera */
-	protected final float pan;
+	/** The vector */
+	protected final float value;
 
-	/** The direction (and speed) to tilt the camera */
-	protected final float tilt;
-
-	/** The direction to zoom the camera */
-	protected final float zoom;
-
-	/** Create a new operation to move a camera */
-	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
+	/** Create the operation */
+	public OpTiltCamera(CameraImpl c, float v) {
 		super(PriorityLevel.COMMAND, c);
-		pan = p;
-		tilt = t;
-		zoom = z;
+		value = v;
 	}
 
 	/** Begin the operation */
 	@Override
 	public Phase phaseTwo() {
-		return new Move();
+		return new Tilt();
 	}
 
-	/** Phase to move the camera */
-	protected class Move extends Phase {
-		/** Command controller to move the camera */
+	/** Primary phase */
+	protected class Tilt extends Phase {
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new CommandProperty(pan, tilt, zoom));
+			mess.add(new TiltProperty(value));
 			mess.storeProps();
 			return null;
 		}

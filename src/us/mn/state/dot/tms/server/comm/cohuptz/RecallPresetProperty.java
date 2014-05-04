@@ -48,7 +48,7 @@ public class RecallPresetProperty extends CohuPTZProperty {
 		message[1] = (byte)drop;
 		message[2] = (byte)0x48;
 		message[3] = pb;
-		message[4] = calculateChecksum(message,4);
+		message[4] = calculateChecksum(message, 1, 3);
 		os.write(message);
 	}
 

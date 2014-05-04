@@ -25,27 +25,33 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 abstract public class CohuPTZProperty extends ControllerProperty {
 
 	/**
-	 * Calculate the XOR-based checksum of the given byte string.
+	 * Absolute value of PTZ movement threshold.
+	 * PTZ vectors below this value will be considered as stop commands.
+	 */
+	static protected final float PTZ_THRESH = 0.001F;
+
+	/**
+	 * Calculate the XOR-based checksum of the given Cohu message.
 	 *
 	 * @param message The message for which to calculate the checksum.
-	 * @param numBytes The number of message bytes to consider.
-	 * @return The checksum for the message, or 0 on error.
+	 * @param first The index of the first byte in the checksum range.
+	 * @param last The index of the last byte in the checksum range.
+	 * @return A Byte representing the checksum for the message,
+	 *         or null on error.
 	 *
-	 * TODO: refactor returning Byte, to allow for null to indicate error.
 	 */
-	protected byte calculateChecksum(byte[] message, int numBytes) {
-		if (message.length < 1) return 0;
-		int lastIndex = (
-			(numBytes <= message.length) ? (numBytes - 1)
-			: (message.length - 1) );
-		if (lastIndex < 0) return 0;
+	protected Byte calculateChecksum(byte[] message, int first, int last) {
+		if (message.length < 1) return null;
+		if (first < 0) return null;
+		if (last < 0) return null;
+		if (first > last) return null;
+		if (last >= message.length) return null;
 
 		byte runningXor = 0;
-		for(int i = 1; i <= lastIndex; ++i) {
+		for(int i = first; i <= last; ++i) {
 			runningXor ^= message[i];
 			}
-		return (byte) (
-			((byte)(0x80)) + ((byte)(runningXor & (byte)0x0f)) );
+		return (byte) (0x80 + ((runningXor & (byte)0x0f)));
 	}
 
 	/**
@@ -85,19 +91,42 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 	 *         the Cohu PTZ protocol specs) that appears to correspond to
 	 *         some sort of "default" speed mode.
 	 */
-	protected byte getPTSpeedByte(float speed) {
-		int range = 15;
+	protected byte getPanTiltSpeedByte(float speed) {
+		int range = (0x3f - 0x31) + 1;		// excludes 0x00
 		int scale = range - 1;
 
 		speed = Math.abs(speed);
 		float mapped = (speed * scale);
 		int mapInt = Math.round(mapped);
 
-		// sanity checks for floating point gotchas
-		if (mapInt > scale)      mapInt = scale;
-		if (mapInt < scale*(-1)) mapInt = scale*(-1);
+		// sanity check for floating point gotchas
+		if (mapInt > scale) mapInt = scale;
 
 		byte byteval = (byte) (0x31 + mapInt);
+		return byteval;
+	}
+
+	/**
+	 * Calculate the zoom "speed byte" that corresponds to the given
+	 * speed value [-1..1].
+	 *
+	 * @param speed The speed value [-1..1].  Values outside this range
+	 *              will be remapped.
+	 * @return The zoom speed byte [0x30..0x32] corresponding to the
+	 *         given speed value.
+	 */
+	protected byte getZoomSpeedByte(float speed) {
+		int range = (0x32 - 0x30) + 1;
+		int scale = range - 1;
+
+		speed = Math.abs(speed);
+		float mapped = (speed * scale);
+		int mapInt = Math.round(mapped);
+
+		// sanity check for floating point gotchas
+		if (mapInt > scale) mapInt = scale;
+
+		byte byteval = (byte) (0x30 + mapInt);
 		return byteval;
 	}
 
