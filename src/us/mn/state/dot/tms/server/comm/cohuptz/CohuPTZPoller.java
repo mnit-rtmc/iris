@@ -22,7 +22,6 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
  * Poller for the Cohu PTZ protocol
@@ -35,11 +34,8 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 	static public final int ADDR_MIN = 1;
 	static public final int ADDR_MAX = 223;
 
-	/** Minimum amount of delay (ms) between Cohu commands */
-	static protected final int MIN_CMD_INTERVAL_MS = 10;
-
-	/** Timestamp of most recent operation by this poller. */
-	protected long lastOpTime = 0;
+	/** Timestamp of most recent transaction with the device. */
+	protected long lastCmdTime = 0;
 
 	/** Current pan value */
 	protected float curPan  = 0.0F;
@@ -57,13 +53,16 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 	}
 
 	/** Create a new message for the specified drop address */
+	@Override
 	public CommMessage createMessage(ControllerImpl c)
 		throws EOFException
 	{
-		return new Message(messenger.getOutputStream(c), c.getDrop());
+		return new CohuPTZMessage(messenger.getOutputStream(c),
+			c.getDrop());
 	}
 
 	/** Check drop address validity */
+	@Override
 	public boolean isAddressValid(int drop) {
 		return ((drop >= ADDR_MIN) && (drop <= ADDR_MAX));
 	}
@@ -71,56 +70,62 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 	/** Send a "PTZ camera move" command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		if (p != curPan)  {
-			addOperation(new OpPanCamera(c, p));
+		Float pan  = null;
+		Float tilt = null;
+		Float zoom = null;
+
+		if (p != curPan) {
+			pan = Float.valueOf(p);
 			curPan = p;
 		}
 		if (t != curTilt) {
-			addOperation(new OpTiltCamera(c, t));
+			tilt = Float.valueOf(t);
 			curTilt = t;
 		}
 		if (z != curZoom) {
-			addOperation(new OpZoomCamera(c, z));
+			zoom = Float.valueOf(z);
 			curZoom = z;
 		}
+
+		addOperation(new OpPTZCamera(c, this, pan, tilt, zoom));
 	}
 
 	/** Send a "store camera preset" command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		addOperation(new OpStorePreset(c, preset));
+		addOperation(new OpStorePreset(c, this, preset));
 	}
 
 	/** Send a "recall camera preset" command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		addOperation(new OpRecallPreset(c, preset));
+		addOperation(new OpRecallPreset(c, this, preset));
 	}
 
-	/**
-	 * Add an operation to the message poller, ensuring that sufficient
-	 * time has passed since the last operation was issued (Cohu devices
-	 * require a short pause between commands).
-	 */
-	protected void addOperation(OpDevice op) {
-		pauseIfNeeded();
+	/** Add an operation to the message poller. */
+	protected void addOperation(OpCohuPTZ op) {
 		super.addOperation(op);
-		lastOpTime = System.currentTimeMillis();
 	}
 
 	/**
-	 * If MIN_CMD_INTERVAL_MS milliseconds have not passed since the
-	 * previous operation, simply sleep MIN_CMD_INTERVAL_MS milliseconds.
+	 * Get the timestamp of the last command issued to the device.
+	 * This value, stored in CohuPTZPoller, is updated by OpCohuPTZ
+	 * operations via the CohuPTZPoller.setLastCmdTime method.
+	 * @return The timestamp of the last command issued to the device,
+	 *         or 0 if no commands have yet been issued.
 	 */
-	protected void pauseIfNeeded() {
-		long curTime = System.currentTimeMillis();
-		if ((curTime - lastOpTime) < MIN_CMD_INTERVAL_MS) {
-			try {
-				Thread.sleep(MIN_CMD_INTERVAL_MS);
-			}
-			catch (InterruptedException e) {
-			}
-		}
+	protected long getLastCmdTime() {
+		return lastCmdTime;
+	}
+
+	/**
+	 * Set the timestamp of the last command issued to the device.
+	 * This value, stored in CohuPTZPoller, is updated by OpCohuPTZ
+	 * operations.
+	 * @param time The desired timestamp value to set.
+	 */
+	protected void setLastCmdTime(long time) {
+		lastCmdTime = time;
 	}
 
 }

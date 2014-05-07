@@ -1,0 +1,87 @@
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2014  AHMCT, University of California
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+package us.mn.state.dot.tms.server.comm.cohuptz;
+
+import java.io.IOException;
+import java.lang.Float;
+import us.mn.state.dot.tms.server.CameraImpl;
+import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.PriorityLevel;
+
+/**
+ * Cohu PTZ operation.
+ *
+ * @author Travis Swanston
+ */
+abstract public class OpCohuPTZ extends OpDevice {
+
+	/** Minimum time interval (ms) to enforce between Cohu commands */
+	static protected final int MIN_CMD_INTERVAL_MS = 25;
+
+	CohuPTZPoller poller;
+
+	/**
+	 * Create the operation.
+	 * @param pl the operation's PriorityLevel
+	 * @param c the CameraImpl instance
+	 * @param c the CohuPTZPoller instance
+	 */
+	public OpCohuPTZ(PriorityLevel pl, CameraImpl ci, CohuPTZPoller cp) {
+		super(pl, ci);
+		poller = cp;
+	}
+
+	/**
+	 * Query props, ensuring that sufficient time has passed since the
+	 * transaction with the device (Cohu devices require a short delay
+	 * between commands).
+	 */
+	protected void doQueryProps(CommMessage mess) throws IOException {
+		pauseIfNeeded();
+		mess.queryProps();
+		poller.setLastCmdTime(System.currentTimeMillis());
+	}
+
+	/**
+	 * Store props, ensuring that sufficient time has passed since the
+	 * transaction with the device (Cohu devices require a short delay
+	 * between commands).
+	 */
+	protected void doStoreProps(CommMessage mess) throws IOException {
+		pauseIfNeeded();
+		mess.storeProps();
+		poller.setLastCmdTime(System.currentTimeMillis());
+	}
+
+	/**
+	 * If CohuPTZPoller.MIN_CMD_INTERVAL_MS milliseconds have not passed
+	 * since the previous device transaction, sleep until they have.
+	 */
+	protected void pauseIfNeeded() {
+		long lastCmdTime = poller.getLastCmdTime();
+		long curTime = System.currentTimeMillis();
+		long delta = curTime - lastCmdTime;
+		if (delta < MIN_CMD_INTERVAL_MS) {
+			try {
+				Thread.sleep(MIN_CMD_INTERVAL_MS - delta);
+			}
+			catch (InterruptedException e) {
+			}
+		}
+	}
+
+}

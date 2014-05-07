@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  *
  * @author Travis Swanston
  */
-public class Message implements CommMessage {
+public class CohuPTZMessage implements CommMessage {
 
 	/** output stream */
 	protected final OutputStream os;
@@ -35,7 +35,7 @@ public class Message implements CommMessage {
 	protected final int drop;
 
 	/** Create a new message */
-	public Message(OutputStream o, int d) {
+	public CohuPTZMessage(OutputStream o, int d) {
 		os = o;
 		drop = d;
 	}
@@ -46,8 +46,9 @@ public class Message implements CommMessage {
 	/** Add a controller property */
 	@Override
 	public void add(ControllerProperty cp) {
-		if(cp instanceof CohuPTZProperty)
+		if (cp instanceof CohuPTZProperty) {
 			prop = (CohuPTZProperty)cp;
+		}
 	}
 
 	/** Query the controller properties. */
@@ -64,7 +65,8 @@ public class Message implements CommMessage {
 	 */
 	@Override
 	public void storeProps() throws IOException {
-		if (prop != null) prop.encodeStore(os, drop);
+		if (prop == null) return;
+		prop.encodeStore(os, drop);
 		os.flush();
 	}
 

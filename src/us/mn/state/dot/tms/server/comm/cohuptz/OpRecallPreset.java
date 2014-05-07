@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.cohuptz;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -26,14 +25,19 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Travis Swanston
  */
-public class OpRecallPreset extends OpDevice {
+public class OpRecallPreset extends OpCohuPTZ {
 
 	/** The camera preset to recall */
 	private final int preset;
 
-	/** Create a new operation to recall a camera preset */
-	public OpRecallPreset(CameraImpl c, int p) {
-		super(PriorityLevel.COMMAND, c);
+	/**
+	 * Create a new operation to recall a camera preset.
+	 * @param c the CameraImpl instance
+	 * @param cp the CohuPTZPoller instance
+	 * @param p the preset number to recall
+	 */
+	public OpRecallPreset(CameraImpl c, CohuPTZPoller cp, int p) {
+		super(PriorityLevel.COMMAND, c, cp);
 		preset = p;
 	}
 
@@ -48,7 +52,7 @@ public class OpRecallPreset extends OpDevice {
 		/** Command controller to set the camera preset */
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(new RecallPresetProperty(preset));
-			mess.storeProps();
+			doStoreProps(mess);
 			return null;
 		}
 	}
