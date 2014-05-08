@@ -104,7 +104,8 @@ public class HttpFileMessenger extends Messenger {
 	}
 
 	/** Get the input stream */
-	@Override public InputStream getInputStream(String p) throws IOException
+	@Override
+	public InputStream getInputStream(String p) throws IOException
 	{
 		path = p;
 		// make a new HTTP connection each time called
@@ -114,7 +115,8 @@ public class HttpFileMessenger extends Messenger {
 	}
 
 	/** Get an input stream for the specified controller */
-	@Override public InputStream getInputStream(String p, ControllerImpl c)
+	@Override
+	public InputStream getInputStream(String p, ControllerImpl c)
 		throws IOException
 	{
 		path = p;
@@ -125,7 +127,8 @@ public class HttpFileMessenger extends Messenger {
 	}
 
 	/** Get an output stream for the specified controller */
-	@Override public OutputStream getOutputStream(ControllerImpl c) {
+	@Override
+	public OutputStream getOutputStream(ControllerImpl c) {
 		// HTTP messengers don't have output streams
 		return null;
 	}
