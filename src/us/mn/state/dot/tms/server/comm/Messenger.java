@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,12 +43,19 @@ abstract public class Messenger {
 	/** Set the messenger timeout */
 	abstract public void setTimeout(int t) throws IOException;
 
-	/** Get the input stream */
+	/** Get the input stream.
+	 * @param path Relative path name.  Only needed for protocols which
+	 *             require it, such as HTTP.
+	 * @return An input stream for reading from the messenger. */
 	public InputStream getInputStream(String path) throws IOException {
 		return input;
 	}
 
-	/** Get an input stream for the specified controller */
+	/** Get an input stream for the specified controller.
+	 * @param path Relative path name.  Only needed for protocols which
+	 *             require it, such as HTTP.
+	 * @param c Controller to read from.
+	 * @return An input stream for reading from the messenger. */
 	public InputStream getInputStream(String path, ControllerImpl c)
 		throws IOException
 	{
