@@ -19,7 +19,6 @@ package us.mn.state.dot.tms.kml;
  * A Kml color style.  Should not be implemented directly.
  *
  * @author Michael Darter
- * @created 11/27/08
  * @see KmlObject
  */
 public interface KmlColorStyle extends KmlObject 

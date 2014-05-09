@@ -20,10 +20,9 @@ import java.util.ArrayList;
  * This class contains default renderers for kml types.
  *
  * @author Michael Darter
- * @created 11/26/08
  * @see KmlObject
  */
-public class KmlRenderer 
+public class KmlRenderer
 {
 	/** newline */
 	final static String R = "\n";

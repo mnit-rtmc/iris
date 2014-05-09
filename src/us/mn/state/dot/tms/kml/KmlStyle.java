@@ -19,10 +19,9 @@ package us.mn.state.dot.tms.kml;
  * A KmlStyle.
  *
  * @author Michael Darter
- * @created 11/27/08
  * @see KmlObject
  */
-public interface KmlStyle extends KmlStyleSelector 
+public interface KmlStyle extends KmlStyleSelector
 {
 	/** get icon style */
 	public KmlIconStyle getIconStyle();

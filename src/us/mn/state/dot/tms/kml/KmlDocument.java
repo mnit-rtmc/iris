@@ -21,7 +21,6 @@ import java.util.ArrayList;
  * A KmlDocument is implemented by classes that render kml documents.
  *
  * @author Michael Darter
- * @created 11/26/08
  * @see KmlObject
  */
 public interface KmlDocument extends KmlFeature 

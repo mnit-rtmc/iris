@@ -19,7 +19,6 @@ package us.mn.state.dot.tms.kml;
  * A KmlPlacemark is implemented by classes that render kml placemarks.
  *
  * @author Michael Darter
- * @created 11/26/08
  * @see KmlObject
  */
 public interface KmlPlacemark extends KmlFeature 

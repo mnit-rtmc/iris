@@ -20,19 +20,18 @@ package us.mn.state.dot.tms.kml;
  *
  * The classes and interfaces in this namespace provide kml rendering
  * functionality. A subset of the kml class hierarchy is implemented (see
- * the kml reference documentation). To add kml rendering ability to 
+ * the kml reference documentation). To add kml rendering ability to
  * an existing class, implement the KmlPlacemark interface (for points),
  * KmlFolder (for container classes), and KmlDocument. Default rendering
  * to kml is provided by KmlRenderer for interfaces that are implemented
- * by classes outside this namespace. If an interface in this namespace 
- * has an associated implementation in this namespace, it provides 
- * rendering rendering methods. The rendering methods are: renderKml() 
- * and renderInnerKml(). 
+ * by classes outside this namespace. If an interface in this namespace
+ * has an associated implementation in this namespace, it provides
+ * rendering rendering methods. The rendering methods are: renderKml()
+ * and renderInnerKml().
  *
  * @author Michael Darter
- * @created 11/27/08
  */
-public interface KmlObject 
+public interface KmlObject
 {
 	/** render to kml */
 	public String renderKml();

@@ -237,15 +237,18 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		phase_time = TimeSteward.currentTimeMillis();
 	}
 
-	/** Set the phase */
+	/**
+	 * Set the phase.  If sync actions are enabled, the phase is set only
+	 * only if all dms, beacon, lane, and meter actions are valid.
+	 */
 	public void doSetPhase(PlanPhase p) throws TMSException {
 		if(p == phase)
 			return;
 		if(getSyncActions()) {
-			validateDmsActions();
-			validateBeaconActions();
-			validateLaneActions();
-			validateMeterActions();
+			validateDmsActions();    // throws exception
+			validateBeaconActions(); // throws exception
+			validateLaneActions();   // throws exception
+			validateMeterActions();  // throws exception
 		}
 		store.update(this, "phase", p);
 		setPhase(p);
@@ -268,7 +271,11 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		notifyAttribute("phase");
 	}
 
-	/** Validate that all DMS actions are deployable */
+	/**
+	 * Validate that all DMS actions are deployable.
+	 * @throws ChangeVetoException If a single DmsAction for this
+	 * ActionPlan is not deployable.
+	 */
 	private void validateDmsActions() throws ChangeVetoException {
 		Iterator<DmsAction> it = DmsActionHelper.iterator();
 		while(it.hasNext()) {
@@ -297,7 +304,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		return true;
 	}
 
-	/** Validate that all beacon actions are deployable */
+	/**
+	 * Validate that all beacon actions are deployable.
+	 * @throws ChangeVetoException
+	 */
 	private void validateBeaconActions() throws ChangeVetoException {
 		Iterator<BeaconAction> it = BeaconActionHelper.iterator();
 		while(it.hasNext()) {
@@ -318,7 +328,11 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			return false;
 	}
 
-	/** Validate that all lane actions are deployable */
+	/**
+	 * Validate that all lane actions are deployable.
+	 * @throws ChangeVetoException If a single LaneAction is not
+	 * deployable.
+	 */
 	private void validateLaneActions() throws ChangeVetoException {
 		Iterator<LaneAction> it = LaneActionHelper.iterator();
 		while(it.hasNext()) {
@@ -339,7 +353,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			return false;
 	}
 
-	/** Validate that all meter actions are deployable */
+	/**
+	 * Validate that all meter actions are deployable.
+	 * @throws ChangeVetoException
+	 */
 	private void validateMeterActions() throws ChangeVetoException {
 		Iterator<MeterAction> it = MeterActionHelper.iterator();
 		while(it.hasNext()) {

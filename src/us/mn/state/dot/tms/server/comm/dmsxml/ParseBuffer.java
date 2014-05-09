@@ -21,7 +21,6 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
  * is thrown if the buffer grows beyond the maximum size.
  *
  * @author Michael Darter
- * @company AHMCT, UCD
  */
 final class ParseBuffer
 {

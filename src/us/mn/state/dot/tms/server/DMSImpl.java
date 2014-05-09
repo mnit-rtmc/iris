@@ -873,7 +873,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			doSetMessageNext(sm, o, p);
 	}
 
-	/** Set the next sign message */
+	/**
+	 * Set the next sign message.
+	 * @param sm Sign message, may not be null.
+	 * @param o User sending message, may be null.
+	 * @param p DMS poller, may not be null.
+	 */
 	protected void doSetMessageNext(SignMessage sm, User o, DMSPoller p)
 		throws TMSException
 	{
@@ -1060,7 +1065,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Current message (Shall not be null) */
 	protected transient SignMessage messageCurrent = createBlankMessage();
 
-	/** Set the current message */
+	/**
+	 * Set the current message.
+	 * @param sm Sign message
+	 * @param o User associated with sign message
+	 */
 	public void setMessageCurrent(SignMessage sm, User o) {
 		if(isMessageCurrentEquivalent(sm))
 			return;
@@ -1093,7 +1102,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return ownerCurrent;
 	}
 
-	/** Log a message */
+	/**
+	 * Log a message.
+	 * @param sm Sign message
+	 * @param o User associated with sign message
+	 */
 	protected void logMessage(SignMessage sm, User o) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = sm.getMulti();

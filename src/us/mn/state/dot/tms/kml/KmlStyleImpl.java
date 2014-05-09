@@ -20,10 +20,9 @@ import java.lang.StringBuilder;
  * Kml style implementation.
  *
  * @author Michael Darter
- * @created 11/27/08
  * @see KmlObject
  */
-public class KmlStyleImpl implements KmlStyle 
+public class KmlStyleImpl implements KmlStyle
 {
 	/** element name */
 	public static final String ELEM_NAME = "Style";

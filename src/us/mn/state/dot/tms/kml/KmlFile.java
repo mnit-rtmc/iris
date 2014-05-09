@@ -39,7 +39,6 @@ import us.mn.state.dot.tms.server.DMSList;
  * functionality.
  *
  * @author Michael Darter
- * @created 11/25/08
  * @see KmlObject
  */
 public class KmlFile 

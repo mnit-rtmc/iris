@@ -43,11 +43,13 @@ public class Pair {
 		return m_cdr;
 	}
 
-	/** find a Pair in a list by comparing the car of each list 
-	 *  element with the argument.
-	 * @returns the first item in the list that matches else null 
+	/**
+	 * Find a Pair in a list by comparing the car of each list
+	 * element with the argument.
+	 * @returns the first item in the list that matches else null
 	 *          if not found.
-	 * @throws IOException if the specified car is not found. */
+	 * @throws IOException if the specified car is not found.
+	 */
 	public static Pair findCar(Pair[] list, Comparable argcar)
 		throws IOException
 	{

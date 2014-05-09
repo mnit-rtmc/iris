@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.utils.Log;
  * A specialized stream reader for reading tokens.
  *
  * @author Michael Darter
- * @company AHMCT, UCD
  */
 class TokenStreamReader
 {

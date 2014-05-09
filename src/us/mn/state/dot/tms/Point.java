@@ -24,8 +24,6 @@ import us.mn.state.dot.tms.kml.KmlRenderer;
  * A 2D point.
  *
  * @author Michael Darter
- * @created 11/26/08
- * @company AHMCT, University of California, Davis
  */
 public class Point extends Point2D.Double 
 	implements KmlPoint

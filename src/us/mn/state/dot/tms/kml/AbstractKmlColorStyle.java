@@ -20,7 +20,6 @@ import java.lang.StringBuilder;
  * Abstract kml color style.
  *
  * @author Michael Darter
- * @created 11/27/08
  * @see KmlObject
  */
 public abstract class AbstractKmlColorStyle 

@@ -20,10 +20,9 @@ import java.lang.StringBuilder;
  * Kml icon implementation.
  *
  * @author Michael Darter
- * @created 11/27/08
  * @see KmlObject
  */
-public class KmlLinkImpl implements KmlLink 
+public class KmlLinkImpl implements KmlLink
 {
 	/** element name */
 	public static final String ELEM_NAME = "Link";

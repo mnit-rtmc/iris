@@ -19,7 +19,6 @@ package us.mn.state.dot.tms.kml;
  * A Kml icon style.
  *
  * @author Michael Darter
- * @created 11/27/08
  * @see KmlObject
  */
 public interface KmlIconStyle extends KmlColorStyle 

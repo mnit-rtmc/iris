@@ -20,7 +20,6 @@ import java.lang.StringBuilder;
  * Kml color implementation.
  *
  * @author Michael Darter
- * @created 11/27/08
  * @see KmlObject
  */
 public class KmlColorImpl implements KmlColor 

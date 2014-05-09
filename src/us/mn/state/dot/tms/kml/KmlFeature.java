@@ -19,7 +19,6 @@ package us.mn.state.dot.tms.kml;
  * A KmlFeature, which is abstract.
  *
  * @author Michael Darter
- * @created 11/26/08
  * @see KmlObject
  */
 public interface KmlFeature extends KmlObject 

@@ -19,7 +19,6 @@ package us.mn.state.dot.tms.kml;
  * A KmlGeometry. Should not be implemented directly.
  *
  * @author Michael Darter
- * @created 11/26/08
  * @see KmlObject
  */
 public interface KmlGeometry extends KmlObject 

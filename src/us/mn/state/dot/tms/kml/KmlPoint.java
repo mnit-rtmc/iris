@@ -19,10 +19,9 @@ package us.mn.state.dot.tms.kml;
  * A KmlPoint is implemented by classes that render kml points.
  *
  * @author Michael Darter
- * @created 11/26/08
  * @see KmlObject
  */
-public interface KmlPoint extends KmlGeometry 
+public interface KmlPoint extends KmlGeometry
 {
 	/** get X */
 	public double getX();

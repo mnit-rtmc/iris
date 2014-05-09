@@ -20,7 +20,6 @@ import java.lang.StringBuilder;
  * Kml icon implementation.
  *
  * @author Michael Darter
- * @created 11/27/08
  * @see KmlObject
  */
 public class KmlIconImpl extends KmlLinkImpl implements KmlIcon 

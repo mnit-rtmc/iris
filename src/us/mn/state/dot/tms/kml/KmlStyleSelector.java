@@ -21,9 +21,8 @@ import java.util.ArrayList;
  * A Kml style selector, which is abstract.
  *
  * @author Michael Darter
- * @created 11/27/08
  * @see KmlObject
  */
-public interface KmlStyleSelector extends KmlObject 
+public interface KmlStyleSelector extends KmlObject
 {
 }

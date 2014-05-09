@@ -281,7 +281,10 @@ public enum SystemAttrEnum {
 		return ALL_ATTRIBUTES.get(aname);
 	}
 
-	/** Get the value of the attribute as a string */
+	/**
+	 * Get the value of the attribute as a string.
+	 * @return The value of the attribute as a string, never null.
+	 */
 	public String getString() {
 		assert atype == String.class;
 		return (String)get();
@@ -313,12 +316,20 @@ public enum SystemAttrEnum {
 		return (Float)get();
 	}
 
-	/** Get the value of the attribute */
+	/**
+	 * Get the value of the attribute.
+	 * @return The value of the attribute, never null.
+	 */
 	protected Object get() {
 		return getValue(SystemAttributeHelper.get(aname()));
 	}
 
-	/** Get the value of a system attribute */
+	/**
+	 * Get the value of a system attribute.
+	 * @param attr System attribute or null.
+	 * @return The attribute value or the default value on error.
+	 *         Null is never returned.
+	 */
 	private Object getValue(SystemAttribute attr) {
 		if(attr == null) {
 			System.err.println(warningDefault());
@@ -327,7 +338,12 @@ public enum SystemAttrEnum {
 		return parseValue(attr.getValue());
 	}
 
-	/** Get the value of a system attribute */
+	/**
+	 * Get the value of a system attribute.
+	 * @return The parsed value or the default value on error.
+	 *         Null is never returned.
+	 */
+
 	public Object parseValue(String v) {
 		Object value = parse(v);
 		if(value == null) {
@@ -337,7 +353,11 @@ public enum SystemAttrEnum {
 		return value;
 	}
 
-	/** Parse an attribute value */
+	/**
+	 * Parse an attribute value.
+	 * @param v Attribute value, may be null.
+	 * @return The parsed value or null on error.
+	 */
 	protected Object parse(String v) {
 		if(atype == String.class)
 			return v;

@@ -21,7 +21,6 @@ import java.util.ArrayList;
  * A KmlFolder is implemented by classes that render kml folders.
  *
  * @author Michael Darter
- * @created 11/26/08
  * @see KmlObject
  */
 public interface KmlFolder extends KmlFeature 
