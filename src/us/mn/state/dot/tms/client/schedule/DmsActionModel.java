@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.PlanPhase;
+import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
@@ -203,6 +204,12 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				DMSMessagePriority.SCHEDULED.ordinal());
 			cache.createObject(name, attrs);
 		}
+	}
+
+	/** Lookup the appropriate plan phase for a DMS action */
+	private PlanPhase lookupPlanPhase() {
+		PlanPhase phase = PlanPhaseHelper.lookup("deployed");
+		return (phase != null) ? phase : action_plan.getDefaultPhase();
 	}
 
 	/** Create a unique DMS action name */
