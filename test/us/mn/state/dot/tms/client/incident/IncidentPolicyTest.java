@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,10 @@ package us.mn.state.dot.tms.client.incident;
 import junit.framework.TestCase;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.LaneUseIndication;
+import static us.mn.state.dot.tms.LaneUseIndication.DARK;
+import static us.mn.state.dot.tms.LaneUseIndication.LANE_OPEN;
+import static us.mn.state.dot.tms.LaneUseIndication.LANE_CLOSED;
+import static us.mn.state.dot.tms.LaneUseIndication.USE_CAUTION;
 import us.mn.state.dot.tms.units.Distance;
 
 /** 
@@ -26,14 +30,6 @@ import us.mn.state.dot.tms.units.Distance;
  */
 public class IncidentPolicyTest extends TestCase {
 
-	static protected final int DARK = LaneUseIndication.DARK.ordinal();
-	static protected final int LANE_OPEN =
-		LaneUseIndication.LANE_OPEN.ordinal();
-	static protected final int LANE_CLOSED =
-		LaneUseIndication.LANE_CLOSED.ordinal();
-	static protected final int USE_CAUTION =
-		LaneUseIndication.USE_CAUTION.ordinal();
-
 	public IncidentPolicyTest(String name) {
 		super(name);
 	}
@@ -41,36 +37,36 @@ public class IncidentPolicyTest extends TestCase {
 	public void testUpstreamShort() {
 		Distance up = new Distance(0.25f, Distance.Units.MILES);
 		IncidentPolicy p = createPolicy("....");
-		assertTrue(getIndications(p, up, 2, 0, 2)[0] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, 0, 2)[1] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, 1, 2)[0] == DARK);
-		assertTrue(getIndications(p, up, 2, 1, 2)[1] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, -1, 2)[0] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, -1, 2)[1] == DARK);
+		assertTrue(getIndications(p, up, 2, 0)[0] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 1)[0] == DARK);
+		assertTrue(getIndications(p, up, 2, 1)[1] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, -1)[0] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, -1)[1] == DARK);
 		p = createPolicy("...!");
-		assertTrue(getIndications(p, up, 2, 0, 2)[0] == USE_CAUTION);
-		assertTrue(getIndications(p, up, 2, 0, 2)[1] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, 1, 2)[0] == DARK);
-		assertTrue(getIndications(p, up, 2, -1, 2)[0] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, -1, 2)[1] == DARK);
+		assertTrue(getIndications(p, up, 2, 0)[0] == USE_CAUTION);
+		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 1)[0] == DARK);
+		assertTrue(getIndications(p, up, 2, -1)[0] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, -1)[1] == DARK);
 		p = createPolicy("..?.");
-		assertTrue(getIndications(p, up, 2, 0, 2)[0] == USE_CAUTION);
-		assertTrue(getIndications(p, up, 2, 0, 2)[1] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 0)[0] == USE_CAUTION);
+		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_OPEN);
 		p = createPolicy("..!.");
-		assertTrue(getIndications(p, up, 2, 0, 2)[0] == LANE_CLOSED);
-		assertTrue(getIndications(p, up, 2, 0, 2)[1] == USE_CAUTION);
+		assertTrue(getIndications(p, up, 2, 0)[0] == LANE_CLOSED);
+		assertTrue(getIndications(p, up, 2, 0)[1] == USE_CAUTION);
 		p = createPolicy(".?..");
-		assertTrue(getIndications(p, up, 2, 0, 2)[0] == LANE_OPEN);
-		assertTrue(getIndications(p, up, 2, 0, 2)[1] == USE_CAUTION);
+		assertTrue(getIndications(p, up, 2, 0)[0] == LANE_OPEN);
+		assertTrue(getIndications(p, up, 2, 0)[1] == USE_CAUTION);
 		p = createPolicy(".!..");
-		assertTrue(getIndications(p, up, 2, 0, 2)[0] == USE_CAUTION);
-		assertTrue(getIndications(p, up, 2, 0, 2)[1] == LANE_CLOSED);
+		assertTrue(getIndications(p, up, 2, 0)[0] == USE_CAUTION);
+		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_CLOSED);
 	}
 
-	private Integer[] getIndications(IncidentPolicy p, Distance up,
-		int n_lcs, int shift, int n_lanes)
+	private LaneUseIndication[] getIndications(IncidentPolicy p,
+		Distance up, int n_lcs, int shift)
 	{
-		return p.createIndications(up, n_lcs, shift, n_lanes);
+		return p.createIndications(up, n_lcs, shift);
 	}
 
 	protected IncidentPolicy createPolicy(String impact) {

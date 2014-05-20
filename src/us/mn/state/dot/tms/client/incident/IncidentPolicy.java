@@ -65,13 +65,28 @@ public class IncidentPolicy {
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
 		if(n_lcs != lcss.length)
 			return new Integer[0];
-		Integer[] ind = new Integer[n_lcs];
+		LaneUseIndication[] ind = createIndications(up, n_lcs, shift);
+		Integer[] oin = new Integer[ind.length];
 		for(int i = 0; i < ind.length; i++) {
 			LaneUseIndication[] available =
 				LCSHelper.lookupIndications(lcss[i]);
+			oin[i] = assignIndication(ind[i], available).ordinal();
+		}
+		return oin;
+	}
+
+	/** Create proposed indications for an LCS array.
+	 * @param up Distance upstream from incident (miles).
+	 * @param n_lcs Number of lanes at LCS array.
+	 * @param shift Lane shift relative to incident.
+	 * @return Array of LaneUseIndication values. */
+	LaneUseIndication[] createIndications(Distance up, int n_lcs,
+		int shift)
+	{
+		LaneUseIndication[] ind = new LaneUseIndication[n_lcs];
+		for(int i = 0; i < ind.length; i++) {
 			int ln = shift + n_lcs - i;
-			LaneUseIndication lui = createIndication(up, ln);
-			ind[i] = assignIndication(lui, available).ordinal();
+			ind[i] = createIndication(up, ln);
 		}
 		return ind;
 	}
