@@ -539,15 +539,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private boolean checkStopCondition(StationNode sn,
 		boolean hasBottleneck)
 	{
-		if(sn.isBottleneck) {
-			for(MeterState ms : sn.getMeters())
-				ms.resetNoBottleneckCount();
-			return true;
-		} else {
-			for(MeterState ms : sn.getMeters())
-				ms.checkStopCondition(hasBottleneck);
-			return hasBottleneck;
+		boolean bn = hasBottleneck || sn.isBottleneck;
+		for(MeterState ms : sn.getMeters()) {
+			ms.updateNoBottleneckCount(bn);
+			ms.checkStopCondition(bn);
 		}
+		return bn;
 	}
 
 	/** Is this KAdaptiveAlgorithm done? */
@@ -1413,19 +1410,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			meter.setRatePlanned(currentRate);
 		}
 
+		/** Update the "no bottleneck" count */
+		protected void updateNoBottleneckCount(boolean hasBottleneck) {
+			if(hasBottleneck)
+				noBottleneckCount = 0;
+			else
+				noBottleneckCount++;
+		}
+
 		/** Check if the metering should be stopped. */
-		public void checkStopCondition(boolean hasBottleneck) {
-			if(!isMetering)
-				return;
-			if(isSegmentDensityHigh())
+		protected void checkStopCondition(boolean hasBottleneck) {
+			if(isSegmentDensityHigh() || !isMetering)
 				return;
 			if(hasBottleneck) {
-				resetNoBottleneckCount();
 				if(shouldStopFlow())
 					stopMetering();
 			} else {
-				addNoBottleneckCount();
-				if(getNoBottleneckCount() >= STOP_STEPS)
+				if(noBottleneckCount >= STOP_STEPS)
 					stopMetering();
 			}
 		}
@@ -1586,22 +1587,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				Rnext = Rmax;
 
 			return Rnext;
-		}
-
-		/** Reset no bottleneck count */
-		private void resetNoBottleneckCount() {
-			noBottleneckCount = 0;
-		}
-
-		/** Add no bottleneck count */
-		public void addNoBottleneckCount() {
-			noBottleneckCount++;
-		}
-
-		/** Return no bottleneck count.
-		 * @return no-bottleneck count */
-		public int getNoBottleneckCount() {
-			return noBottleneckCount;
 		}
 
 		/** Get a string representation of a meter state */
