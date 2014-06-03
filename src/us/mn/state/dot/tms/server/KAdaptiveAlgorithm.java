@@ -753,7 +753,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Return aggregated density at current time step.
-		 * @return average 1 min density. */
+		 * @return average 1 min density; missing data returns 0. */
 		public double getAggregatedDensity() {
 			return getAggregatedDensity(0);
 		}
@@ -1297,21 +1297,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				StationNode bs = s_node.bottleneckStation();
 				double k = calculateSegmentDensity(bs);
 				double r = calculateRate(k);
+				segmentDensityHist.push(k);
 				rateHist.push(r);
 				if(shouldMeter(bs, s_node))
 					setRate(r);
 			}
 		}
 
-		/** Calculate the segment density.
+		/** Calculate the segment density from meter to bottleneck.
 		 * @param bs Bottlneck (downstream) station node.
 		 * @return Segment density (vehicles / mile) */
 		private double calculateSegmentDensity(StationNode bs) {
-			if(bs == null)
-				bs = s_node;
-			double k = bs.calculateSegmentDensity(s_node);
-			segmentDensityHist.push(k);
-			return k;
+			if(bs != null)
+				return bs.calculateSegmentDensity(s_node);
+			else
+				return s_node.getAggregatedDensity();
 		}
 
 		/** Should metering be started?
@@ -1511,10 +1511,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			resetAccumulators();
 		}
 
-		/** Get segment density at 'prevStep' time steps ago
-		 * @param prevStep
-		 * @return segment density at 'prevStep' time steps ago */
-		private double getSegmentDensity(int prevStep) {
+		/** Get segment density at 'prevStep' time steps ago.
+		 * @param prevStep Number of time steps ago.
+		 * @return segment density, or null for missing data. */
+		private Double getSegmentDensity(int prevStep) {
 			return segmentDensityHist.get(prevStep);
 		}
 
@@ -1623,6 +1623,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 						s_node, START_STEPS_K);
 					sb.append(",bs=");
 					sb.append(bs);
+					sb.append(",");
+					sb.append(getSegmentDensity(0));
 					sb.append(",");
 					if(sf)
 						sb.append("flow");
