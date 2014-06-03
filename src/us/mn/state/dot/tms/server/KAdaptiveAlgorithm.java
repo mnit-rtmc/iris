@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2013  Minnesota Department of Transportation
+ * Copyright (C) 2001-2014  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -387,17 +387,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		log(sb.toString());
 	}
 
-	/**
-	 * Find bottlenecks.
-	 */
+	/** Find bottlenecks. */
 	private void findBottlenecks() {
 		findBottleneckCandidates();
 		mergeBottleneckZones();
 		debugBottlenecks();
 	}
 
-	/** Find bottleneck candidates.
-	 */
+	/** Find bottleneck candidates. */
 	private void findBottleneckCandidates() {
 		for(StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
@@ -407,10 +404,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/**
-	 * Merge zone by distnace and acceleration.
-	 * Iterate from downstream to upstream.
-	 */
+	/** Merge zone by distnace and acceleration.
+	 * Iterate from downstream to upstream. */
 	private void mergeBottleneckZones() {
 		for(StationNode sn = lastStation(); sn != null;
 		    sn = sn.upstreamStation())
@@ -420,9 +415,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/**
-	 * Check if a bottleneck station should be merged.
-	 */
+	/** Check if a bottleneck station should be merged. */
 	private void checkBottleneckMerge(final StationNode sn) {
 		double k = sn.getAggregatedDensity();
 		for(StationNode un = sn.upstreamStation(); un != null;
@@ -444,8 +437,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/** Check corridor average density condition.
-	 */
+	/** Check corridor average density condition. */
 	private void checkCorridorState() {
 		StationNode ds_bottleneck = downstreamBottleneck();
 		k_hist_corridor.push(calculateCorridorDensity(ds_bottleneck));
@@ -466,8 +458,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Calculate the average density of a corridor up to a bottleneck.
 	 * @param bottleneck Bottleneck station.
-	 * @return Average density up to the bottleneck.
-	 */
+	 * @return Average density up to the bottleneck. */
 	private double calculateCorridorDensity(StationNode bottleneck) {
 		if(bottleneck != null) {
 			return bottleneck.calculateSegmentDensity(
@@ -494,9 +485,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return false;
 	}
 
-	/**
-	 * Get the furthest upstream station node.
-	 */
+	/** Get the furthest upstream station node. */
 	private StationNode firstStation() {
 		for(Node n = head; n != null; n = n.downstream) {
 			if(n instanceof StationNode)
@@ -505,9 +494,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return null;
 	}
 
-	/**
-	 * Get the furthest downstream station node.
-	 */
+	/** Get the furthest downstream station node. */
 	private StationNode lastStation() {
 		for(Node n = tail; n != null; n = n.upstream) {
 			if(n instanceof StationNode)
@@ -529,9 +516,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		                        BOTTLENECK_TREND_1_STEPS;
 	}
 
-	/**
-	 * Stop metering of ramp meter satisfying conditions
-	 */
+	/** Stop metering of ramp meter satisfying conditions. */
 	private void checkStopCondition() {
 		boolean hasBottleneck = false;
 		for(StationNode sn = lastStation(); sn != null;
@@ -608,10 +593,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return n;
 		}
 
-		/**
-		 * Return next upstream station node.
-		 * @return Upstream station node.
-		 */
+		/** Find next upstream station node.
+		 * @return Upstream station node. */
 		protected StationNode upstreamStation() {
 			for(Node n = upstream; n != null; n = n.upstream) {
 				if(n instanceof StationNode)
@@ -620,10 +603,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return null;
 		}
 
-		/**
-		 * Return next downstream station node.
-		 * @return Downstream station node.
-		 */
+		/** Find next downstream station node.
+		 * @return Downstream station node. */
 		protected StationNode downstreamStation() {
 			for(Node n = downstream; n != null; n = n.downstream) {
 				if(n instanceof StationNode)
@@ -634,10 +615,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** Node to manage station on corridor */
-	class StationNode extends Node {
+	protected class StationNode extends Node {
 
 		/** StationImpl mapping this state */
-		protected final StationImpl station;
+		private final StationImpl station;
 
 		/** Associated meters */
 		private final ArrayList<MeterState> associatedMeters =
@@ -651,16 +632,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final BoundedSampleHistory densityHist =
 			new BoundedSampleHistory(steps(300));
 
-		/** Is bottleneck ? */
+		/** Is bottleneck? */
 		private boolean isBottleneck = false;
 
 		/** Is bottleneck at previous time step? */
 		private boolean isPrevBottleneck = false;
 
-		/**
-		 * Create a new station node.
-		 * @param rnode
-		 */
+		/** Create a new station node. */
 		public StationNode(R_NodeImpl rnode, float m, Node up,
 			StationImpl stat)
 		{
@@ -668,18 +646,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			station = stat;
 		}
 
-		/**
-		 * Update station state.
-		 * It must be called before finding bottleneck.
-		 */
+		/** Update station state.
+		 * It must be called before finding bottleneck. */
 		public void updateState() {
 			densityHist.push((double)station.getDensity());
 			speedHist.push((double)station.getSpeed());
 		}
 
-		/**
-		 * Check if the station is a bottleneck.
-		 */
+		/** Check if the station is a bottleneck. */
 		protected void checkBottleneck() {
 			double kb = bottleneckDensity();
 			if(getAggregatedDensity() >= kb) {
@@ -688,10 +662,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 		}
 
-		/**
-		 * Check if density has been increasing for a number of steps
-		 * or that all previous steps are high.
-		 */
+		/** Check if density has been increasing for a number of steps
+		 * or that all previous steps are high. */
 		private boolean isDensityIncreasing(final double kb) {
 			boolean increasing = true;
 			boolean high_k = true;
@@ -717,26 +689,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return distanceMiles(sn) < BOTTLENECK_SPACING_MILES;
 		}
 
-		/**
-		 * Get average density of a mainline segment ending at the
+		/** Get average density of a mainline segment ending at the
 		 * current station.
 		 * @param upStation upstream station of segment.
-		 * @return average density (distance weight).
-		 */
+		 * @return average density (distance weight). */
 		private double calculateSegmentDensity(StationNode upStation) {
 			return calculateSegmentDensity(upStation, 0);
 		}
 
-		/**
-		 * Get average density of a mainline segment ending at the
+		/** Get average density of a mainline segment ending at the
 		 * current station.  This works by splitting each "segment"
 		 * between stations into 3 equal lengths and assigning average
 		 * density to the middle sub-segment.
 		 *
 		 * @param upStation upstream station of segment.
 		 * @param prevStep previous time steps (0 for current).
-		 * @return average density (distance weight).
-		 */
+		 * @return average density (distance weight). */
 		private double calculateSegmentDensity(StationNode upStation,
 			int prevStep)
 		{
@@ -766,18 +734,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/**
-		 * Return aggregated density at current time step
-		 * @return average 1min density
-		 */
+		/** Return aggregated density at current time step.
+		 * @return average 1 min density. */
 		public double getAggregatedDensity() {
 			return getAggregatedDensity(0);
 		}
 
-		/**
-		 * Return aggregated density at 'prevStep' time steps ago
-		 * @return average 1 min density at 'prevStep' time steps ago
-		 */
+		/** Get aggregated density at 'prevStep' time steps ago.
+		 * @return average 1 min density at 'prevStep' time steps ago.*/
 		public double getAggregatedDensity(int prevStep) {
 			Double avg = densityHist.average(prevStep, steps(60));
 			if(avg != null)
@@ -786,10 +750,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/**
-		 * Return aggregated speed at current time step
-		 * @return average 1min speed
-		 */
+		/** Return aggregated speed at current time step.
+		 * @return average 1 min speed. */
 		public double getAggregatedSpeed() {
 			Double avg = speedHist.average(0, steps(60));
 			if(avg != null)
@@ -798,10 +760,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/**
-		 * Return acceleration from current station to down station
-		 * @return acceleration from current station to down station
-		 */
+		/** Return acceleration from current station to down station
+		 * @return acceleration from current station to down station. */
 		public double getAcceleration() {
 			double u2 = getAggregatedSpeed();
 			StationNode down = downstreamStation();
@@ -815,17 +775,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/**
-		 * Return associated meters list.
-		 * @return associated meters list.
-		 */
+		/** Return associated meters list.
+		 * @return associated meters list. */
 		public ArrayList<MeterState> getMeters() {
 			return associatedMeters;
 		}
 
 		/** Return next downstream bottleneck station node.
-		 * @return Downstream bottleneck station node.
-		 */
+		 * @return Downstream bottleneck station node. */
 		protected StationNode bottleneckStation() {
 			for(StationNode sn = this; sn != null;
 			    sn = sn.downstreamStation())
@@ -1005,12 +962,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return cumulativeDemand(0);
 		}
 
-		/**
-		 * Validate meter state.
+		/** Validate meter state.
 		 *   - Save cumulative demand and merging flow
 		 *   - Set current demand and merging flow
-		 *   - Calculate metering rate
-		 */
+		 *   - Calculate metering rate */
 		private void validate() {
 			updateDemandState();
 			updatePassageState();
@@ -1319,8 +1274,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return filterRate(Math.max(target_max, minimumRate));
 		}
 
-		/** Calculate the metering rate.
-		 */
+		/** Calculate the metering rate. */
 		private void calculateMeteringRate() {
 			if(s_node != null) {
 				StationNode bs = s_node.bottleneckStation();
@@ -1346,8 +1300,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Should metering be started?
 		 * @param bs bottleneck station
 		 * @param us associated station of entrance
-		 * @return true if metering should be started.
-		 */
+		 * @return true if metering should be started. */
 		private boolean shouldMeter(StationNode bs, StationNode us) {
 			if(isMetering)
 				return true;
@@ -1360,8 +1313,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if metering should start.
-		 * @return true if metering should start.
-		 */
+		 * @return true if metering should start. */
 		private boolean shouldStart(StationNode bs, StationNode us) {
 			if(bs == null)
 				return false;
@@ -1372,8 +1324,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if initial metering should start.
-		 * @return true if metering should start.
-		 */
+		 * @return true if metering should start. */
 		private boolean shouldStartInitial(StationNode bs,
 			StationNode us)
 		{
@@ -1385,8 +1336,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if metering should restart (after stopping).
-		 * @return true if metering should restart.
-		 */
+		 * @return true if metering should restart. */
 		private boolean shouldRestart(StationNode bs, StationNode us) {
 			if(shouldStartFlow(RESTART_STEPS) ||
 			   shouldStartDensity(bs, us, RESTART_STEPS))
@@ -1417,8 +1367,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param us Upstream station.
 		 * @param n_steps Number of steps to check.
 		 * @return true if metering should start, based on segment
-		 *         density.
-		 */
+		 *         density. */
 		private boolean shouldStartDensity(StationNode bs,
 			StationNode us, int n_steps)
 		{
@@ -1434,9 +1383,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return false;
 		}
 
-		/** Set metering rate
-		 * @param Rnext next metering rate
-		 */
+		/** Set metering rate.
+		 * @param Rnext next metering rate. */
 		private void setRate(double Rnext) {
 			int r = (int)Math.round(Rnext);
 			r = Math.max(r, minimumRate);
@@ -1445,9 +1393,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			meter.setRatePlanned(currentRate);
 		}
 
-		/**
-		 * Check if the metering should be stopped.
-		 */
+		/** Check if the metering should be stopped. */
 		public void checkStopCondition(boolean hasBottleneck) {
 			if(!isMetering)
 				return;
@@ -1464,9 +1410,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 		}
 
-		/**
-		 * Check if the segment density is high.
-		 */
+		/** Check if the segment density is high. */
 		private boolean isSegmentDensityHigh() {
 			if(countRateHistory() >= STOP_STEPS) {
 				for(int i = 0; i < STOP_STEPS; i++) {
@@ -1495,9 +1439,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return false;
 		}
 
-		/**
-		 * Stop metering.
-		 */
+		/** Stop metering. */
 		private void stopMetering() {
 			isMetering = false;
 			currentRate = 0;
@@ -1507,20 +1449,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			hasBeenStoped = true;
 		}
 
-		/**
-		 * Return length of metering rate history
-		 * @return
-		 */
+		/** Count length of metering rate history */
 		private int countRateHistory() {
 			return rateHist.size();
 		}
 
-		/**
-		 * Get historical ramp flow.
+		/** Get historical ramp flow.
 		 * @param prevStep Time step in past.
 		 * @param secs Number of seconds to average.
-		 * @return ramp flow at 'prevStep' time steps ago
-		 */
+		 * @return ramp flow at 'prevStep' time steps ago. */
 		private int getFlow(int prevStep, int secs) {
 			Double p = passageHist.average(prevStep, steps(secs));
 			if(p != null)
@@ -1529,28 +1466,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return getMaxRelease();
 		}
 
-		/**
-		 * Get historical ramp flow.
+		/** Get historical ramp flow.
 		 * @param prevStep Time step in past.
-		 * @return ramp flow at 'prevStep' time steps ago
-		 */
+		 * @return ramp flow at 'prevStep' time steps ago. */
 		private int getFlow(int prevStep) {
 			return getFlow(prevStep, 30);
 		}
 
-		/**
-		 * Get current metering rate
-		 * @return metering rate
-		 */
+		/** Get current metering rate
+		 * @return metering rate */
 		private int getRate() {
 			int r = currentRate;
 			return r > 0 ? r : getFlow(0, 90);
 		}
 
-		/**
-		 * Return current metering rate at 'prevStep' time steps ago
-		 * @return metering rate
-		 */
+		/** Get metering rate at 'prevStep' time steps ago
+		 * @return metering rate */
 		private double getRate(int prevStep) {
 			return rateHist.get(prevStep);
 		}
@@ -1561,19 +1492,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			resetAccumulators();
 		}
 
-		/**
-		 * Return segment density at 'prevStep' time steps ago
+		/** Get segment density at 'prevStep' time steps ago
 		 * @param prevStep
-		 * @return segment density at 'prevStep' time steps ago
-		 */
+		 * @return segment density at 'prevStep' time steps ago */
 		private double getSegmentDensity(int prevStep) {
 			return segmentDensityHist.get(prevStep);
 		}
 
-		/**
-		 * Return minimum metering rate
-		 * @return minimum metering rate
-		 */
+		/** Get the minimum metering rate.
+		 * @return minimum metering rate */
 		private int getMinimumRate() {
 			return minimumRate;
 		}
@@ -1641,24 +1568,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return Rnext;
 		}
 
-		/**
-		 * Reset no bottleneck count
-		 */
+		/** Reset no bottleneck count */
 		private void resetNoBottleneckCount() {
 			noBottleneckCount = 0;
 		}
 
-		/**
-		 * Add no bottleneck count
-		 */
+		/** Add no bottleneck count */
 		public void addNoBottleneckCount() {
 			noBottleneckCount++;
 		}
 
-		/**
-		 * Return no bottleneck count
-		 * @return no-bottleneck count
-		 */
+		/** Return no bottleneck count.
+		 * @return no-bottleneck count */
 		public int getNoBottleneckCount() {
 			return noBottleneckCount;
 		}
@@ -1711,9 +1632,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/**
-	 * Class : Point
-	 */
+	/** Class : Point */
 	class KPoint {
 
 		double x;
