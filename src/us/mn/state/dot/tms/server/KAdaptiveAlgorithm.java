@@ -1431,14 +1431,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 		}
 
-		/** Check if the segment density is high. */
+		/** Check if the segment density is higher than desired. */
 		private boolean isSegmentDensityHigh() {
-			if(countRateHistory() >= STOP_STEPS) {
-				for(int i = 0; i < STOP_STEPS; i++) {
-					Double sk = getSegmentDensity(i);
-					if(sk != null && sk > K_DES)
-						return true;
-				}
+			for(int i = 0; i < STOP_STEPS; i++) {
+				Double sk = getSegmentDensity(i);
+				if(sk != null && sk > K_DES)
+					return true;
 			}
 			return false;
 		}
