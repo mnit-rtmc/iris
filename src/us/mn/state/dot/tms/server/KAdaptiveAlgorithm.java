@@ -57,6 +57,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number of seconds for one time step */
 	static private final int STEP_SECONDS = 30;
 
+	/** Calculate steps per hour */
+	static private final double STEP_HOUR =
+		new Interval(STEP_SECONDS).per(HOUR);
+
 	/** Bottleneck density (vehicles / mile) */
 	static private final int K_BOTTLENECK = 30;
 
@@ -161,9 +165,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return MISSING_DATA;
 	}
 
-	/** Convert step volume count to flow rate (vehicles / hour) */
-	static private int flowRate(float vol) {
-		return flowRate(vol, 1);
+	/** Convert single step volume count to flow rate.
+	 * @param vol Volume to convert (number of vehicles)
+	 * @return Flow rate (vehicles / hour), or null for missing data. */
+	static private Double flowRate(float vol) {
+		if(vol >= 0)
+			return vol * STEP_HOUR;
+		else
+			return null;
 	}
 
 	/** Convert flow rate to volume for a given period.
@@ -646,11 +655,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			station = stat;
 		}
 
+		/** Get the current station density */
+		private Double getDensity() {
+			float d = station.getDensity();
+			return d >= 0 ? (double)d : null;
+		}
+
+		/** Get the current station speed */
+		private Double getSpeed() {
+			float s = station.getSpeed();
+			return s >= 0 ? (double)s : null;
+		}
+
 		/** Update station state.
 		 * It must be called before finding bottleneck. */
 		public void updateState() {
-			densityHist.push((double)station.getDensity());
-			speedHist.push((double)station.getSpeed());
+			densityHist.push(getDensity());
+			speedHist.push(getSpeed());
 		}
 
 		/** Check if the station is a bottleneck. */
@@ -978,8 +999,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Update ramp queue demand state */
 		private void updateDemandState() {
 			float demand_vol = calculateQueueDemand();
-			double demand_rate = flowRate(demand_vol);
-			demandHist.push(demand_rate);
+			demandHist.push(flowRate(demand_vol));
 			double demand_accum = cumulativeDemand() + demand_vol;
 			demandAccumHist.push(demand_accum);
 			target_demand = targetDemand();
@@ -1064,11 +1084,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Update ramp passage output state */
 		private void updatePassageState() {
 			int passage_vol = calculatePassageCount();
-			if(passage_vol < 0)
+			passageHist.push(flowRate(passage_vol));
+			if(passage_vol >= 0)
+				passage_accum += passage_vol;
+			else
 				passage_failure = true;
-			double passage_rate = flowRate(passage_vol);
-			passageHist.push(passage_rate);
-			passage_accum += passage_vol;
 			int green_vol = green.getVolume();
 			if(green_vol > 0)
 				green_accum += green_vol;
