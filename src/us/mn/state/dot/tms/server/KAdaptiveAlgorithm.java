@@ -188,7 +188,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** States for all K adaptive algorithms */
-	static protected HashMap<String, KAdaptiveAlgorithm> ALL_ALGS =
+	static private HashMap<String, KAdaptiveAlgorithm> ALL_ALGS =
 		new HashMap<String, KAdaptiveAlgorithm>();
 
 	/** Get the K adaptive algorithm state for a meter */
@@ -227,11 +227,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/** Corridor */
-	protected final Corridor corridor;
+	/** Metering corridor */
+	private final Corridor corridor;
 
 	/** Is started metering in this corridor? */
-	protected boolean isMeteringStarted = false;
+	private boolean isMeteringStarted = false;
 
 	/** Should check stop condition? (depends on corridor density trend) */
 	private boolean doStopChecking = false;
@@ -298,6 +298,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
+	/** Validate algorithm state for a meter */
 	@Override
 	public void validate(RampMeterImpl meter) {
 		MeterState ms = getMeterState(meter);
@@ -309,6 +310,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** Get ramp meter queue state enum value */
+	@Override
 	public RampMeterQueue getQueueState(RampMeterImpl meter) {
 		MeterState ms = getMeterState(meter);
 		if(ms != null)
@@ -356,7 +358,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** Process the algorithm for the one interval */
-	protected void processInterval() {
+	private void processInterval() {
 		for(StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
 		{
@@ -666,7 +668,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Update station state.
 		 * It must be called before finding bottleneck. */
-		public void updateState() {
+		private void updateState() {
 			densityHist.push(getDensity());
 			speedHist.push(getSpeed());
 		}
