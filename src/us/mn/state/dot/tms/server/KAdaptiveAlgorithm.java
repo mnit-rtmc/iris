@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
@@ -298,6 +297,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
+	/** Debug corridor structure */
+	private void debug() {
+		log("-------- Corridor Structure --------");
+		for(Node n = head; n != null; n = n.downstream)
+			log(n.toString());
+	}
+
+	/** Log one message */
+	private void log(String msg) {
+		ALG_LOG.log(corridor.getName() + ": " + msg);
+	}
+
 	/** Validate algorithm state for a meter */
 	@Override
 	public void validate(RampMeterImpl meter) {
@@ -371,34 +382,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			checkStopCondition();
 	}
 
-	/** Debug corridor structure. */
-	private void debug() {
-		log("-------- Corridor Structure --------");
-		for(Node n = head; n != null; n = n.downstream)
-			log(n.toString());
-	}
-
-	/** Log one message */
-	private void log(String msg) {
-		ALG_LOG.log(corridor.getName() + ": " + msg);
-	}
-
-	/** Debug bottlenecks */
-	private void debugBottlenecks() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Bottlenecks: ");
-		for(StationNode sn = firstStation(); sn != null;
-		    sn = sn.downstreamStation())
-		{
-			if(sn.isBottleneck) {
-				sb.append(sn.toString());
-				sb.append(',');
-			}
-		}
-		log(sb.toString());
-	}
-
-	/** Find bottlenecks. */
+	/** Find bottlenecks */
 	private void findBottlenecks() {
 		findBottleneckCandidates();
 		mergeBottleneckZones();
@@ -446,6 +430,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			else
 				un.isBottleneck = false;
 		}
+	}
+
+	/** Debug bottlenecks */
+	private void debugBottlenecks() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Bottlenecks: ");
+		for(StationNode sn = firstStation(); sn != null;
+		    sn = sn.downstreamStation())
+		{
+			if(sn.isBottleneck) {
+				sb.append(sn.toString());
+				sb.append(',');
+			}
+		}
+		log(sb.toString());
 	}
 
 	/** Check corridor average density condition. */
@@ -496,6 +495,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return false;
 	}
 
+	/** Check whether any ramp meters should stop metering */
+	private void checkStopCondition() {
+		for(MeterState ms : meterStates.values())
+			ms.checkStopCondition();
+	}
+
 	/** Get the furthest upstream station node. */
 	private StationNode firstStation() {
 		for(Node n = head; n != null; n = n.downstream) {
@@ -525,28 +530,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private int bottleneckTrendSteps() {
 		return doStopChecking ? BOTTLENECK_TREND_2_STEPS :
 		                        BOTTLENECK_TREND_1_STEPS;
-	}
-
-	/** Stop metering of ramp meter satisfying conditions. */
-	private void checkStopCondition() {
-		boolean hasBottleneck = false;
-		for(StationNode sn = lastStation(); sn != null;
-		    sn = sn.upstreamStation())
-		{
-			hasBottleneck = checkStopCondition(sn, hasBottleneck);
-		}
-	}
-
-	/** Check stop condition for one station. */
-	private boolean checkStopCondition(StationNode sn,
-		boolean hasBottleneck)
-	{
-		boolean bn = hasBottleneck || sn.isBottleneck;
-		for(MeterState ms : sn.getMeters()) {
-			ms.updateNoBottleneckCount(bn);
-			ms.checkStopCondition(bn);
-		}
-		return bn;
 	}
 
 	/** Is this KAdaptiveAlgorithm done? */
@@ -627,10 +610,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** StationImpl mapping this state */
 		private final StationImpl station;
-
-		/** Associated meters */
-		private final ArrayList<MeterState> associatedMeters =
-			new ArrayList<MeterState>();
 
 		/** Speed history */
 		private final BoundedSampleHistory speedHist =
@@ -795,12 +774,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/** Return associated meters list.
-		 * @return associated meters list. */
-		public ArrayList<MeterState> getMeters() {
-			return associatedMeters;
-		}
-
 		/** Return next downstream bottleneck station node.
 		 * @return Downstream bottleneck station node. */
 		protected StationNode bottleneckStation() {
@@ -930,8 +903,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			bypass.addDetectors(ds, LaneType.BYPASS);
 			green.addDetectors(ds, LaneType.GREEN);
 			s_node = getAssociatedStation();
-			if(s_node != null)
-				s_node.associatedMeters.add(this);
 		}
 
 		/** Get station to associate with the meter state.
@@ -1412,25 +1383,33 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			meter.setRatePlanned(currentRate);
 		}
 
-		/** Update the "no bottleneck" count */
-		protected void updateNoBottleneckCount(boolean hasBottleneck) {
-			if(hasBottleneck)
-				noBottleneckCount = 0;
-			else
-				noBottleneckCount++;
-		}
-
-		/** Check if the metering should be stopped. */
-		protected void checkStopCondition(boolean hasBottleneck) {
+		/** Check if ramp meter should stop metering */
+		private void checkStopCondition() {
+			boolean bn = hasBottleneck();
+			updateNoBottleneckCount(bn);
 			if(isSegmentDensityHigh() || !isMetering)
 				return;
-			if(hasBottleneck) {
+			if(bn) {
 				if(shouldStopFlow())
 					stopMetering();
 			} else {
 				if(noBottleneckCount >= STOP_STEPS)
 					stopMetering();
 			}
+		}
+
+		/** Check if there is a bottleneck downstream of meter */
+		private boolean hasBottleneck() {
+			return (s_node != null) &&
+			       (s_node.bottleneckStation() != null);
+		}
+
+		/** Update the "no bottleneck" count */
+		private void updateNoBottleneckCount(boolean bn) {
+			if(bn)
+				noBottleneckCount = 0;
+			else
+				noBottleneckCount++;
 		}
 
 		/** Check if the segment density is higher than desired. */
@@ -1444,9 +1423,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if metering should stop from flow.
-		 * @param n_steps Number of steps to check.
-		 * @return true if metering should stop, based on merge flow.
-		 */
+		 * @return true if metering should stop, based on merge flow. */
 		private boolean shouldStopFlow() {
 			if(countRateHistory() >= STOP_STEPS) {
 				for(int i = 0; i < STOP_STEPS; i++) {
