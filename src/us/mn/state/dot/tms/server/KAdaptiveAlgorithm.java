@@ -1000,7 +1000,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(vol >= 0)
 				return vol;
 			else {
-				int target = getDefaultTarget(meter);
+				int target = getDefaultTarget();
 				return volumePeriod(target, STEP_SECONDS);
 			}
 		}
@@ -1043,17 +1043,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(avg_demand != null)
 				return (int)Math.round(avg_demand);
 			else
-				return getDefaultTarget(meter);
+				return getDefaultTarget();
 		}
 
 		/** Get the default target metering rate (vehicles / hour) */
-		private int getDefaultTarget(RampMeterImpl m) {
-			if(m != null) {
-				int t = m.getTarget();
-				if(t > 0)
-					return t;
-			}
-			return getMaxRelease();
+		private int getDefaultTarget() {
+			int t = meter.getTarget();
+			return (t > 0) ? t : getMaxRelease();
 		}
 
 		/** Update ramp passage output state */
