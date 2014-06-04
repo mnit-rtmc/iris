@@ -370,16 +370,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Process the algorithm for the one interval */
 	private void processInterval() {
+		updateStations();
+		findBottlenecks();
+		checkStopCondition();
+	}
+
+	/** Update the station nodes */
+	private void updateStations() {
 		for(StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
 		{
 			sn.updateState();
 		}
-		findBottlenecks();
-		if(isMeteringStarted && !doStopChecking)
-			checkCorridorState();
-		else if(doStopChecking)
-			checkStopCondition();
 	}
 
 	/** Find bottlenecks */
@@ -447,11 +449,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		log(sb.toString());
 	}
 
-	/** Check corridor average density condition. */
-	private void checkCorridorState() {
-		StationNode ds_bottleneck = downstreamBottleneck();
-		k_hist_corridor.push(calculateCorridorDensity(ds_bottleneck));
-		if(ds_bottleneck == null && isDensityTrendingDown())
+	/** Check whether any ramp meters should stop metering */
+	private void checkStopCondition() {
+		if(isMeteringStarted && !doStopChecking)
+			checkCorridorStop();
+		if(doStopChecking) {
+			for(MeterState ms : meterStates.values())
+				ms.checkStopCondition();
+		}
+	}
+
+	/** Check if corridor stop checking should happen */
+	private void checkCorridorStop() {
+		StationNode bs = downstreamBottleneck();
+		k_hist_corridor.push(calculateCorridorDensity(bs));
+		if(bs == null && isDensityTrendingDown())
 			doStopChecking = true;
 	}
 
@@ -467,13 +479,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** Calculate the average density of a corridor up to a bottleneck.
-	 * @param bottleneck Bottleneck station.
+	 * @param bs Bottleneck station.
 	 * @return Average density up to the bottleneck. */
-	private double calculateCorridorDensity(StationNode bottleneck) {
-		if(bottleneck != null) {
-			return bottleneck.calculateSegmentDensity(
-				firstStation());
-		} else
+	private double calculateCorridorDensity(StationNode bs) {
+		if(bs != null)
+			return bs.calculateSegmentDensity(firstStation());
+		else
 			return 0;
 	}
 
@@ -493,12 +504,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return true;
 		} else
 			return false;
-	}
-
-	/** Check whether any ramp meters should stop metering */
-	private void checkStopCondition() {
-		for(MeterState ms : meterStates.values())
-			ms.checkStopCondition();
 	}
 
 	/** Get the furthest upstream station node. */
