@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>Metering Shut-Off</title>
+</head>
+
+<body>
+<ul>
+<li>If the average segment density from meter to bottleneck was above the
+    desired density (29.6) for any interval in the last 5 minutes, continue
+    metering.</li>
+<li>If any bottleneck exists downstream, check demand at meter.
+    If queue demand was lower than metering rate for all intervals in
+    the last 5 minutes, shut off meter.</li>
+<li>If no bottleneck exists for at least 5 minutes, shut off meter.</li>
+<li>Otherwise, continue metering.</li>
+</ul>
+</body>
+</html>
