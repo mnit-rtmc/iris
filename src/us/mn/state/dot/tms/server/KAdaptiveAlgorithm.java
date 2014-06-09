@@ -72,6 +72,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Desired density (vehicles / mile) */
 	static private final double K_DES = K_CRIT * 0.8;
 
+	/** Low density (vehicles / mile) */
+	static private final double K_LOW = K_CRIT * 0.65;
+
 	/** Jam density (vehicles / mile) */
 	static private final int K_JAM = 180;
 
@@ -1392,7 +1395,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if we're done with early metering */
 		private boolean checkDoneEarlyMetering() {
-			if(isSegmentDensityTrendingDown()) {
+			if(isSegmentDensityTrendingDown() ||
+			   isSegmentDensityLow())
+			{
 				phase = MeteringPhase.metering;
 			}
 			return true;
@@ -1411,6 +1416,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				kn = k;
 			}
 			return true;
+		}
+
+		/** Check if segment density is low */
+		private boolean isSegmentDensityLow() {
+			Double sk = getSegmentDensity(0);
+			return sk != null && sk < K_LOW;
 		}
 
 		/** Set metering rate.
