@@ -810,6 +810,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
+	/** Enum for metering phase */
+	private enum MeteringPhase {
+		not_started,
+		early_metering,
+		metering,
+		flushing,
+		stopped,
+		restarted,
+	};
+
 	/** Ramp meter state */
 	class MeterState {
 
@@ -822,8 +832,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Station node association */
 		private final StationNode s_node;
 
-		/** Is it metering? */
-		private boolean isMetering = false;
+		/** Metering phase */
+		private MeteringPhase phase = MeteringPhase.not_started;
+
+		/** Is the meter currently metering? */
+		private boolean isMetering() {
+			return phase != MeteringPhase.not_started &&
+			       phase != MeteringPhase.stopped;
+		}
 
 		/** Has been stopped before */
 		private boolean hasBeenStoped = false;
@@ -1080,7 +1096,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				}
 				return vol;
 			}
-			if(isMetering) {
+			if(isMetering()) {
 				vol = green.getVolume();
 				if(vol >= 0)
 					return vol;
@@ -1140,7 +1156,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get ramp meter queue state enum value */
 		private RampMeterQueue getQueueState() {
-			if(isMetering) {
+			if(isMetering()) {
 				if(isQueueFull())
 					return RampMeterQueue.FULL;
 				else if(isQueueEmpty())
@@ -1292,7 +1308,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param us associated station of entrance
 		 * @return true if metering should be started. */
 		private boolean shouldMeter(StationNode bs, StationNode us) {
-			if(isMetering)
+			if(isMetering())
 				return true;
 			if(shouldStart(bs, us)) {
 				startMetering();
@@ -1387,7 +1403,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void checkStopCondition() {
 			boolean bn = hasBottleneck();
 			updateNoBottleneckCount(bn);
-			if(isSegmentDensityHigh() || !isMetering)
+			if(isSegmentDensityHigh() || !isMetering())
 				return;
 			if(bn) {
 				if(shouldStopFlow())
@@ -1439,7 +1455,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Stop metering. */
 		private void stopMetering() {
-			isMetering = false;
+			phase = MeteringPhase.stopped;
 			currentRate = 0;
 			resetAccumulators();
 			rateHist.clear();
@@ -1486,7 +1502,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Start metering */
 		private void startMetering() {
-			isMetering = true;
+			phase = MeteringPhase.early_metering;
 			resetAccumulators();
 		}
 
@@ -1570,7 +1586,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(meter.name);
-			sb.append(" ");
+			sb.append(",");
+			sb.append(phase);
+			sb.append(",");
 			sb.append(getQueueState());
 			sb.append(",dem=");
 			sb.append(Math.round(cumulativeDemand()));

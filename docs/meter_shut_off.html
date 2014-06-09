@@ -7,27 +7,40 @@
 </head>
 
 <body>
+<b>Definitions</b>
+<dl>
+	<dt>Density</dt>
+	<dd>Vehicles per lane-mile</dd>
+	<dt>Station Density</dt>
+	<dd>Average of all valid lanes in a station for one sample period</dd>
+	<dt>Interval Density</dt>
+	<dd>Average of station samples during one 60 second interval</dd>
+	<dt>Meter Segment</dt>
+	<dd>A contiguous series of stations associated with a ramp meter.
+	    It begins at the station just upstream of the meter.
+	    The downstream end is the first bottleneck within 3 miles (or the
+	    last station within 3 miles if no bottleneck exists).</dd>
+	<dt>Segment Density</dt>
+	<dd>Each consecutive pair of stations is divided into 3 equal links.
+	    The first and last links are assigned density from the station
+	    adjacent to them.
+	    The middle link is assigned a density which is an average of the
+	    two stations.
+	    The segment density is an average of all links in the segment,
+	    weighted by length.</dd>
+</dl>
+<b>Shut-Off</b>
 <p>
-	Station density is the average of all valid lanes for a sample period.
-	"Current" density is the average of all samples in the last 60 seconds.
-</p>
-<p>
-	There is a corridor-wide check which must pass at least once before any
-	shut-off checks happen.
-	For this check, there must be no bottlenecks at all on the entire
-	corridor.
-	Also, the average segment density from the furthest upstream station to
-	the last bottleneck must be trending downward for each interval in the
-	last 5 minutes.
+	Before testing shut-off logic for a meter, the segment density
+	must be trending downward for each interval in the last 5 minutes,
+	or the segment density must be below XX vehicles / lane-mile.
 </p>
 <ul>
-<li>If the average segment density from meter to bottleneck was above the
-    desired density (29.6) for any interval in the last 5 minutes, continue
-    metering.</li>
-<li>If any bottleneck exists downstream, check demand at meter.
-    If queue demand was lower than metering rate for all intervals in
+<li>If the average segment density was above the desired density (29.6) for any
+    interval in the last 5 minutes, continue metering.</li>
+<li>If queue demand was lower than metering rate for all intervals in
     the last 5 minutes, shut off meter.</li>
-<li>If no bottleneck exists for at least 5 minutes, shut off meter.</li>
+<li>If segment has no bottleneck for at least 5 minutes, shut off meter.</li>
 <li>Otherwise, continue metering.</li>
 </ul>
 </body>
