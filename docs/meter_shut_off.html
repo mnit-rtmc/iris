@@ -7,6 +7,19 @@
 </head>
 
 <body>
+<p>
+	Station density is the average of all valid lanes for a sample period.
+	"Current" density is the average of all samples in the last 60 seconds.
+</p>
+<p>
+	There is a corridor-wide check which must pass at least once before any
+	shut-off checks happen.
+	For this check, there must be no bottlenecks at all on the entire
+	corridor.
+	Also, the average segment density from the furthest upstream station to
+	the last bottleneck must be trending downward for each interval in the
+	last 5 minutes.
+</p>
 <ul>
 <li>If the average segment density from meter to bottleneck was above the
     desired density (29.6) for any interval in the last 5 minutes, continue
