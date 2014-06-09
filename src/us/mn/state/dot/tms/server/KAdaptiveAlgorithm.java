@@ -817,7 +817,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		metering,
 		flushing,
 		stopped,
-		restarted,
 	};
 
 	/** Ramp meter state */
@@ -840,9 +839,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return phase != MeteringPhase.not_started &&
 			       phase != MeteringPhase.stopped;
 		}
-
-		/** Has been stopped before */
-		private boolean hasBeenStoped = false;
 
 		/** Current metering rate (vehicles / hour) */
 		private int currentRate = 0;
@@ -1304,51 +1300,35 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Should metering be started?
-		 * @param bs bottleneck station
-		 * @param us associated station of entrance
+		 * @param bs bottleneck station.
+		 * @param us associated station of entrance.
 		 * @return true if metering should be started. */
 		private boolean shouldMeter(StationNode bs, StationNode us) {
-			if(isMetering())
+			switch(phase) {
+			case not_started:
+				return shouldStart(bs, us) && startMetering();
+			case stopped:
+				return shouldRestart(bs, us) &&
+				       restartMetering();
+			default:
 				return true;
-			if(shouldStart(bs, us)) {
-				startMetering();
-				isMeteringStarted = true;
-				return true;
-			} else
-				return false;
-		}
-
-		/** Check if metering should start.
-		 * @return true if metering should start. */
-		private boolean shouldStart(StationNode bs, StationNode us) {
-			if(bs == null)
-				return false;
-			if(hasBeenStoped)
-				return shouldRestart(bs, us);
-			else
-				return shouldStartInitial(bs, us);
+			}
 		}
 
 		/** Check if initial metering should start.
 		 * @return true if metering should start. */
-		private boolean shouldStartInitial(StationNode bs,
-			StationNode us)
-		{
-			if(shouldStartFlow(START_STEPS) ||
-			   shouldStartDensity(bs, us, START_STEPS_K))
-				return true;
-			else
-				return false;
+		private boolean shouldStart(StationNode bs, StationNode us) {
+			return (bs != null) &&
+			       (shouldStartFlow(START_STEPS) ||
+			        shouldStartDensity(bs, us, START_STEPS_K));
 		}
 
 		/** Check if metering should restart (after stopping).
 		 * @return true if metering should restart. */
 		private boolean shouldRestart(StationNode bs, StationNode us) {
-			if(shouldStartFlow(RESTART_STEPS) ||
-			   shouldStartDensity(bs, us, RESTART_STEPS))
-				return true;
-			else
-				return false;
+			return (bs != null) &&
+			       (shouldStartFlow(RESTART_STEPS) ||
+			        shouldStartDensity(bs, us, RESTART_STEPS));
 		}
 
 		/** Check if metering should start from flow.
@@ -1387,6 +1367,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return true;
 			} else
 				return false;
+		}
+
+		/** Start metering */
+		private boolean startMetering() {
+			phase = MeteringPhase.early_metering;
+			resetAccumulators();
+			isMeteringStarted = true;
+			return true;
+		}
+
+		/** Retart metering */
+		private boolean restartMetering() {
+			phase = MeteringPhase.metering;
+			resetAccumulators();
+			return true;
 		}
 
 		/** Set metering rate.
@@ -1460,7 +1455,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			resetAccumulators();
 			rateHist.clear();
 			noBottleneckCount = 0;
-			hasBeenStoped = true;
 		}
 
 		/** Count length of metering rate history */
@@ -1498,12 +1492,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return metering rate */
 		private double getRate(int prevStep) {
 			return rateHist.get(prevStep);
-		}
-
-		/** Start metering */
-		private void startMetering() {
-			phase = MeteringPhase.early_metering;
-			resetAccumulators();
 		}
 
 		/** Get segment density at 'prevStep' time steps ago.
