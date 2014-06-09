@@ -124,6 +124,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number of trend steps for average density to check corridor state */
 	static private final int AVG_K_TREND_STEPS = steps(300);
 
+	/** Number of steps for trending density history */
+	static private final int TREND_STEPS = Math.max(MAX_STEPS,
+		AVG_K_STEPS + AVG_K_TREND_STEPS);
+
 	/** Queue occupancy override threshold */
 	static private final int QUEUE_OCC_THRESHOLD = 25;
 
@@ -906,7 +910,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Segment density history (vehicles / mile) */
 		private final BoundedSampleHistory segmentDensityHist =
-			new BoundedSampleHistory(MAX_STEPS);
+			new BoundedSampleHistory(TREND_STEPS);
 
 		/** Create a new meter state */
 		public MeterState(RampMeterImpl mtr, EntranceNode en) {
@@ -1310,6 +1314,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			case stopped:
 				return shouldRestart(bs, us) &&
 				       restartMetering();
+			case early_metering:
+				return checkDoneEarlyMetering();
 			default:
 				return true;
 			}
@@ -1381,6 +1387,29 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean restartMetering() {
 			phase = MeteringPhase.metering;
 			resetAccumulators();
+			return true;
+		}
+
+		/** Check if we're done with early metering */
+		private boolean checkDoneEarlyMetering() {
+			if(isSegmentDensityTrendingDown()) {
+				phase = MeteringPhase.metering;
+			}
+			return true;
+		}
+
+		/** Check if segment density is trending downward */
+		private boolean isSegmentDensityTrendingDown() {
+			Double kn = segmentDensityHist.average(0, AVG_K_STEPS);
+			if(kn == null)
+				return false;
+			for(int i = 1; i < AVG_K_TREND_STEPS; i++) {
+				Double k = segmentDensityHist.average(i,
+					AVG_K_STEPS);
+				if(k == null || kn > k)
+					return false;
+				kn = k;
+			}
 			return true;
 		}
 
