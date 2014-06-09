@@ -702,9 +702,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get average density of a mainline segment ending at the
-		 * current station.  This works by splitting each "segment"
-		 * between stations into 3 equal lengths and assigning average
-		 * density to the middle sub-segment.
+		 * current station.  This works by splitting each consecutive
+		 * pair of stations into 3 equal links and assigning average
+		 * density to the middle link.  All links are then averaged,
+		 * weighted by length.
 		 *
 		 * @param upStation upstream station of segment.
 		 * @param prevStep previous time steps (0 for current).
@@ -713,8 +714,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			int prevStep)
 		{
 			StationNode cursor = upStation;
-			double dist_sum3 = 0;
-			double k_sum3 = 0;
+			double dist_seg = 0;	/* Segment distance */
+			double veh_seg = 0;	/* Sum of vehicles in segment */
 			double k_cursor = cursor.getAggregatedDensity(prevStep);
 			for(StationNode down = cursor.downstreamStation();
 			    down != null && cursor != this;
@@ -723,15 +724,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				double k_down = down.getAggregatedDensity(
 					prevStep);
 				double k_middle = (k_cursor + k_down) / 2;
-				double distance = cursor.distanceMiles(down);
-				dist_sum3 += distance * 3;
-				k_sum3 += (k_cursor + k_middle + k_down) *
-					distance;
+				double dist = cursor.distanceMiles(down);
+				dist_seg += dist;
+				veh_seg += (k_cursor + k_middle + k_down) / 3 *
+					dist;
 				cursor = down;
 				k_cursor = k_down;
 			}
-			if(dist_sum3 > 0)
-				return k_sum3 / dist_sum3;
+			if(dist_seg > 0)
+				return veh_seg / dist_seg;
 			else
 				return k_cursor;
 		}
