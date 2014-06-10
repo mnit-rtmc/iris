@@ -112,6 +112,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Distance threshold for downstream station to meter association */
 	static private final int DOWNSTREAM_STATION_FEET = 500;
 
+	/** Maximum segment length */
+	static private final float SEGMENT_LENGTH_MILES = 3.0f;
+
 	/** Number of steps for average density to check corridor state */
 	static private final int AVG_K_STEPS = steps(900);
 
@@ -703,13 +706,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Find downstream segment station node.
 		 * @return Downstream segment station node. */
 		protected StationNode segmentStationNode() {
+			StationNode dn = null;
 			for(StationNode sn = this; sn != null;
 			    sn = sn.downstreamStation())
 			{
 				if(sn.isBottleneck)
 					return sn;
+				if(distanceMiles(sn) > SEGMENT_LENGTH_MILES)
+					break;
+				dn = sn;
 			}
-			return null;
+			return dn;
 		}
 
 		/** Get a string representation of a station node */
