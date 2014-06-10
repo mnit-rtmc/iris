@@ -633,21 +633,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * weighted by length.
 		 *
 		 * @param dn Segment downstream station node.
-		 * @param prevStep previous time steps (0 for current).
+		 * @param step Time step in past (0 for current).
 		 * @return average density (distance weight). */
 		private double calculateSegmentDensity(final StationNode dn,
-			int prevStep)
+			int step)
 		{
 			StationNode cursor = this;
 			double dist_seg = 0;	/* Segment distance */
 			double veh_seg = 0;	/* Sum of vehicles in segment */
-			double k_cursor = cursor.getAggregatedDensity(prevStep);
+			double k_cursor = cursor.getAggregatedDensity(step);
 			for(StationNode sn = cursor.downstreamStation();
 			    sn != null && cursor != dn;
 			    sn = sn.downstreamStation())
 			{
 				double k_down = sn.getAggregatedDensity(
-					prevStep);
+					step);
 				double k_middle = (k_cursor + k_down) / 2;
 				double dist = cursor.distanceMiles(sn);
 				dist_seg += dist;
@@ -668,10 +668,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return getAggregatedDensity(0);
 		}
 
-		/** Get aggregated density at 'prevStep' time steps ago.
-		 * @return average 1 min density at 'prevStep' time steps ago.*/
-		public double getAggregatedDensity(int prevStep) {
-			Double avg = densityHist.average(prevStep, steps(60));
+		/** Get aggregated density at specified time step.
+		 * @param step Time step in past (0 for current).
+		 * @return average 1 min density at 'step' time steps ago.*/
+		public double getAggregatedDensity(int step) {
+			Double avg = densityHist.average(step, steps(60));
 			if(avg != null)
 				return avg;
 			else
@@ -1432,11 +1433,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get historical passage flow.
-		 * @param prevStep Time step in past.
+		 * @param step Time step in past (0 for current).
 		 * @param secs Number of seconds to average.
-		 * @return Passage flow at 'prevStep' time steps ago. */
-		private int getPassage(int prevStep, int secs) {
-			Double p = passage_hist.average(prevStep, steps(secs));
+		 * @return Passage flow at 'step' time steps ago. */
+		private int getPassage(int step, int secs) {
+			Double p = passage_hist.average(step, steps(secs));
 			if(p != null)
 				return (int)Math.round(p);
 			else
@@ -1444,10 +1445,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get historical passage flow.
-		 * @param prevStep Time step in past.
-		 * @return Passage flow at 'prevStep' time steps ago. */
-		private int getPassage(int prevStep) {
-			return getPassage(prevStep, 30);
+		 * @param step Time step in past (0 for current).
+		 * @return Passage flow at 'step' time steps ago. */
+		private int getPassage(int step) {
+			return getPassage(step, 30);
 		}
 
 		/** Get current metering rate.
@@ -1457,17 +1458,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return r > 0 ? r : getPassage(0, 90);
 		}
 
-		/** Get metering rate at 'prevStep' time steps ago
+		/** Get metering rate at 'step' time steps ago
+		 * @param step Time step in past (0 for current).
 		 * @return metering rate */
-		private double getRate(int prevStep) {
-			return rate_hist.get(prevStep);
+		private double getRate(int step) {
+			return rate_hist.get(step);
 		}
 
-		/** Get segment density at 'prevStep' time steps ago.
-		 * @param prevStep Number of time steps ago.
+		/** Get segment density at 'step' time steps ago.
+		 * @param step Time step in past (0 for current).
 		 * @return segment density, or null for missing data. */
-		private Double getSegmentDensity(int prevStep) {
-			return segment_k_hist.get(prevStep);
+		private Double getSegmentDensity(int step) {
+			return segment_k_hist.get(step);
 		}
 
 		/** Get the minimum metering rate.
