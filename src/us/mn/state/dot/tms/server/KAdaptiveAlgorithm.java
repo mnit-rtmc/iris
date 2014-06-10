@@ -834,6 +834,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Station node association */
 		private final StationNode s_node;
 
+		/** Queue detector set */
+		private final DetectorSet queue = new DetectorSet();
+
+		/** Passage detector set */
+		private final DetectorSet passage = new DetectorSet();
+
+		/** Merge detector set */
+		private final DetectorSet merge = new DetectorSet();
+
+		/** Bypass detector set */
+		private final DetectorSet bypass = new DetectorSet();
+
+		/** Green count detector set */
+		private final DetectorSet green = new DetectorSet();
+
 		/** Metering phase */
 		private MeteringPhase phase = MeteringPhase.not_started;
 
@@ -854,21 +869,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** How many time steps there's no bottleneck at downstream */
 		private int noBottleneckCount = 0;
-
-		/** Queue detector set */
-		private final DetectorSet queue = new DetectorSet();
-
-		/** Passage detector set */
-		private final DetectorSet passage = new DetectorSet();
-
-		/** Merge detector set */
-		private final DetectorSet merge = new DetectorSet();
-
-		/** Bypass detector set */
-		private final DetectorSet bypass = new DetectorSet();
-
-		/** Green count detector set */
-		private final DetectorSet green = new DetectorSet();
 
 		/** Queue demand history (vehicles / hour) */
 		private final BoundedSampleHistory demandHist =
@@ -1342,8 +1342,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if metering should start from flow.
 		 * @param n_steps Number of steps to check.
-		 * @return true if metering should start, based on merge flow.
-		 */
+		 * @return true if metering should start based on merge flow. */
 		private boolean shouldStartFlow(int n_steps) {
 			if(countRateHistory() >= n_steps) {
 				for(int i = 0; i < n_steps; i++) {
