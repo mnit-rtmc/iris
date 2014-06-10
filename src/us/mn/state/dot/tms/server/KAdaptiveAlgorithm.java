@@ -460,10 +460,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void checkStopCondition() {
 		if(isMeteringStarted && !doStopChecking)
 			checkCorridorStop();
-		if(doStopChecking) {
-			for(MeterState ms : meterStates.values())
-				ms.checkStopCondition();
-		}
 	}
 
 	/** Check if corridor stop checking should happen */
@@ -1306,19 +1302,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return s_node.getAggregatedDensity();
 		}
 
-		/** Should metering be started?
+		/** Should we be metering?
 		 * @param bs bottleneck station.
 		 * @param us associated station of entrance.
-		 * @return true if metering should be started. */
+		 * @return true if the meter should be metering. */
 		private boolean shouldMeter(StationNode bs, StationNode us) {
 			switch(phase) {
 			case not_started:
 				return shouldStart(bs, us) && startMetering();
+			case early_metering:
+				return checkDoneEarlyMetering();
+			case metering:
+				return shouldContinueMetering();
 			case stopped:
 				return shouldRestart(bs, us) &&
 				       restartMetering();
-			case early_metering:
-				return checkDoneEarlyMetering();
 			default:
 				return true;
 			}
@@ -1393,7 +1391,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return true;
 		}
 
-		/** Check if we're done with early metering */
+		/** Check if we're done with early metering.
+		 * @return true if metering should continue. */
 		private boolean checkDoneEarlyMetering() {
 			if(isSegmentDensityTrendingDown() ||
 			   isSegmentDensityLow())
@@ -1424,29 +1423,24 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return sk != null && sk < K_LOW;
 		}
 
-		/** Set metering rate.
-		 * @param Rnext next metering rate. */
-		private void setRate(double Rnext) {
-			int r = (int)Math.round(Rnext);
-			r = Math.max(r, minimumRate);
-			r = Math.min(r, maximumRate);
-			currentRate = r;
-			meter.setRatePlanned(currentRate);
+		/** Check if ramp meter should continue metering.
+		 * @return true if metering should continue. */
+		private boolean shouldContinueMetering() {
+			/* Invert stop metering logic */
+			return !(shouldStop() && stopMetering());
 		}
 
-		/** Check if ramp meter should stop metering */
-		private void checkStopCondition() {
+		/** Check if ramp meter should stop metering.
+		 * @return true if metering should stop. */
+		private boolean shouldStop() {
 			boolean bn = hasBottleneck();
 			updateNoBottleneckCount(bn);
-			if(isSegmentDensityHigh() || !isMetering())
-				return;
-			if(bn) {
-				if(shouldStopFlow())
-					stopMetering();
-			} else {
-				if(noBottleneckCount >= STOP_STEPS)
-					stopMetering();
-			}
+			if(isSegmentDensityHigh())
+				return false;
+			if(bn)
+				return shouldStopFlow();
+			else
+				return noBottleneckCount >= STOP_STEPS;
 		}
 
 		/** Check if there is a bottleneck downstream of meter */
@@ -1488,13 +1482,25 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return false;
 		}
 
-		/** Stop metering. */
-		private void stopMetering() {
+		/** Stop metering.
+		 * @return true if metering should stop (always). */
+		private boolean stopMetering() {
 			phase = MeteringPhase.stopped;
 			currentRate = 0;
 			resetAccumulators();
 			rate_hist.clear();
 			noBottleneckCount = 0;
+			return true;
+		}
+
+		/** Set metering rate.
+		 * @param rn Next metering rate. */
+		private void setRate(double rn) {
+			int r = (int)Math.round(rn);
+			r = Math.max(r, minimumRate);
+			r = Math.min(r, maximumRate);
+			currentRate = r;
+			meter.setRatePlanned(currentRate);
 		}
 
 		/** Count length of metering rate history */
