@@ -586,24 +586,35 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Is a station currently a bottleneck? */
 		private boolean isCurrentBottleneck() {
-			return (getDensity() >= K_BOTTLENECK) &&
-			       (isBottleneck || isDensityIncreasing());
+			return isDensityHigh() ||
+			      (isCurrentDensityHigh() &&
+			      (isBottleneck || isDensityIncreasing()));
 		}
 
-		/** Check if density has been increasing for a number of steps
-		 * or that all previous steps are high. */
-		private boolean isDensityIncreasing() {
-			boolean increasing = true;
-			boolean high_k = true;
-			for(int i = 0; i < BOTTLENECK_TREND_STEPS; i++) {
-				double k = getDensity(i);
-				double pk = getDensity(i + 1);
-				if(k < pk)
-					increasing = false;
-				if(k < K_BOTTLENECK || pk < K_BOTTLENECK)
-					high_k = false;
+		/** Check if density is high for all trend steps */
+		private boolean isDensityHigh() {
+			for(int i = 0; i <= BOTTLENECK_TREND_STEPS; i++) {
+				if(getDensity(i) < K_BOTTLENECK)
+					return false;
 			}
-			return increasing || high_k;
+			return true;
+		}
+
+		/** Check if current density is high */
+		private boolean isCurrentDensityHigh() {
+			return getDensity() >= K_BOTTLENECK;
+		}
+
+		/** Check if density has been increasing for all trend steps */
+		private boolean isDensityIncreasing() {
+			double k = getDensity(0);
+			for(int i = 1; i <= BOTTLENECK_TREND_STEPS; i++) {
+				double nk = getDensity(i);
+				if(k < nk)
+					return false;
+				k = nk;
+			}
+			return true;
 		}
 
 		/** Is a bottleneck station too close to another? */
