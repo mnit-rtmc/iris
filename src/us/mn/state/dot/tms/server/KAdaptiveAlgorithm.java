@@ -929,7 +929,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private StationNode getAssociatedStation() {
 			StationNode us = getAssociatedUpstream();
 			StationNode ds = node.downstreamStation();
-			return isCloser(us, ds) ? ds : us;
+			return useDownstream(us, ds) ? ds : us;
 		}
 
 		/** Get associated upstream station */
@@ -947,8 +947,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			       node.distanceMiles(us) < UPSTREAM_STATION_MILES;
 		}
 
-		/** Test if downstream station should be associated */
-		private boolean isCloser(StationNode us, StationNode ds) {
+		/** Test if downstream station should be associated.
+		 * @param us Station just upstream of meter.
+		 * @param ds Station just downstream of meter.
+		 * @return true if downstream station should be associated. */
+		private boolean useDownstream(StationNode us, StationNode ds) {
 			if(us == null)
 				return true;
 			if(ds == null)
