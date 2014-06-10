@@ -618,42 +618,42 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return distanceMiles(sn) < BOTTLENECK_SPACING_MILES;
 		}
 
-		/** Get average density of a mainline segment ending at the
+		/** Get average density of a mainline segment beginning at the
 		 * current station.
-		 * @param un Upstream station node of segment.
+		 * @param dn Segment downstream station node.
 		 * @return average density (distance weight). */
-		private double calculateSegmentDensity(StationNode un) {
-			return calculateSegmentDensity(un, 0);
+		private double calculateSegmentDensity(StationNode dn) {
+			return calculateSegmentDensity(dn, 0);
 		}
 
-		/** Get average density of a mainline segment ending at the
+		/** Get average density of a mainline segment beginning at the
 		 * current station.  This works by splitting each consecutive
 		 * pair of stations into 3 equal links and assigning average
 		 * density to the middle link.  All links are then averaged,
 		 * weighted by length.
 		 *
-		 * @param un Upstream station node of segment.
+		 * @param dn Segment downstream station node.
 		 * @param prevStep previous time steps (0 for current).
 		 * @return average density (distance weight). */
-		private double calculateSegmentDensity(StationNode un,
+		private double calculateSegmentDensity(final StationNode dn,
 			int prevStep)
 		{
-			StationNode cursor = un;
+			StationNode cursor = this;
 			double dist_seg = 0;	/* Segment distance */
 			double veh_seg = 0;	/* Sum of vehicles in segment */
 			double k_cursor = cursor.getAggregatedDensity(prevStep);
-			for(StationNode down = cursor.downstreamStation();
-			    down != null && cursor != this;
-			    down = down.downstreamStation())
+			for(StationNode sn = cursor.downstreamStation();
+			    sn != null && cursor != dn;
+			    sn = sn.downstreamStation())
 			{
-				double k_down = down.getAggregatedDensity(
+				double k_down = sn.getAggregatedDensity(
 					prevStep);
 				double k_middle = (k_cursor + k_down) / 2;
-				double dist = cursor.distanceMiles(down);
+				double dist = cursor.distanceMiles(sn);
 				dist_seg += dist;
 				veh_seg += (k_cursor + k_middle + k_down) / 3 *
 					dist;
-				cursor = down;
+				cursor = sn;
 				k_cursor = k_down;
 			}
 			if(dist_seg > 0)
@@ -1225,7 +1225,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Segment density (vehicles per lane-mile) */
 		private double calculateSegmentDensity(StationNode dn) {
 			if(dn != null)
-				return dn.calculateSegmentDensity(s_node);
+				return s_node.calculateSegmentDensity(dn);
 			else
 				return s_node.getAggregatedDensity();
 		}
@@ -1291,9 +1291,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			assert s_node != null;
 			if(countRateHistory() >= n_steps) {
 				for(int i = 0; i < n_steps; i++) {
-					double k = dn.calculateSegmentDensity(
-						s_node, i);
-					if(k < K_BOTTLENECK)
+					if(s_node.calculateSegmentDensity(
+					   dn, i) < K_BOTTLENECK)
 						return false;
 				}
 				return true;
