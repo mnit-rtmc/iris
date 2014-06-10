@@ -932,16 +932,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return useDownstream(us, ds) ? ds : us;
 		}
 
-		/** Get associated upstream station */
+		/** Get associated upstream station.
+		 * @return Station node upstream of meter, or null. */
 		private StationNode getAssociatedUpstream() {
 			StationNode us = node.upstreamStation();
-			if(isUpstreamStationOk(us))
-				return us;
-			else
-				return null;
+			return isUpstreamStationOk(us) ? us : null;
 		}
 
-		/** Check if an upstream station is OK */
+		/** Check if an upstream station is OK.
+		 * @param us Station just upstream of meter.
+		 * @return true if upstream station is suitable. */
 		private boolean isUpstreamStationOk(StationNode us) {
 			return us != null &&
 			       node.distanceMiles(us) < UPSTREAM_STATION_MILES;
@@ -1283,7 +1283,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return filterRate(Math.max(target_max, minimumRate));
 		}
 
-		/** Calculate the metering rate. */
+		/** Calculate the metering rate */
 		private void calculateMeteringRate() {
 			StationNode bs = s_node.bottleneckStation();
 			double k = calculateSegmentDensity(bs);
