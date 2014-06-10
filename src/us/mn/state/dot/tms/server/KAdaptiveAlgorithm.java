@@ -103,11 +103,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private final int MAX_STEPS = Math.max(Math.max(START_STEPS,
 		STOP_STEPS), RESTART_STEPS);
 
-	/** Number of time steps for bottleneck trend before stop metering */
-	static private final int BOTTLENECK_TREND_1_STEPS = steps(60);
-
-	/** Number of time steps for bottleneck trend after stop metering */
-	static private final int BOTTLENECK_TREND_2_STEPS = steps(120);
+	/** Number of time steps for bottleneck trend check */
+	static private final int BOTTLENECK_TREND_STEPS = steps(60);
 
 	/** Spacing between two bottlenecks (soft minimum) */
 	static private final float BOTTLENECK_SPACING_MILES = 1.5f;
@@ -232,16 +229,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Metering corridor */
 	private final Corridor corridor;
-
-	/** Is started metering in this corridor? */
-	private boolean isMeteringStarted = false;
-
-	/** Should check stop condition? (depends on corridor density trend) */
-	private boolean doStopChecking = false;
-
-	/** Corridor density history for triggering metering stop */
-	private final BoundedSampleHistory k_hist_corridor =
-		new BoundedSampleHistory(AVG_K_STEPS + AVG_K_TREND_STEPS);
 
 	/** Hash map of ramp meter states */
 	private final HashMap<String, MeterState> meterStates =
@@ -376,7 +363,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void processInterval() {
 		updateStations();
 		findBottlenecks();
-		checkStopCondition();
 	}
 
 	/** Update the station nodes */
@@ -453,59 +439,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		log(sb.toString());
 	}
 
-	/** Check whether any ramp meters should stop metering */
-	private void checkStopCondition() {
-		if(isMeteringStarted && !doStopChecking)
-			checkCorridorStop();
-	}
-
-	/** Check if corridor stop checking should happen */
-	private void checkCorridorStop() {
-		StationNode bs = downstreamBottleneck();
-		k_hist_corridor.push(calculateCorridorDensity(bs));
-		if(bs == null && isDensityTrendingDown())
-			doStopChecking = true;
-	}
-
-	/** Find the furthest downstream bottleneck station */
-	private StationNode downstreamBottleneck() {
-		for(StationNode sn = lastStation(); sn != null;
-		    sn = sn.upstreamStation())
-		{
-			if(sn.isBottleneck)
-				return sn;
-		}
-		return null;
-	}
-
-	/** Calculate the average density of a corridor up to a bottleneck.
-	 * @param bs Bottleneck station.
-	 * @return Average density up to the bottleneck. */
-	private double calculateCorridorDensity(StationNode bs) {
-		if(bs != null)
-			return bs.calculateSegmentDensity(firstStation());
-		else
-			return 0;
-	}
-
-	/** Check if corridor density is trending downward */
-	private boolean isDensityTrendingDown() {
-		if(k_hist_corridor.isFull()) {
-			for(int i = 0; i < AVG_K_TREND_STEPS; i++) {
-				Double ma_next = k_hist_corridor.average(i,
-					AVG_K_STEPS);
-				Double ma_prev = k_hist_corridor.average(i + 1,
-					AVG_K_STEPS);
-				if(ma_next == null || ma_prev == null)
-					return false;
-				if(ma_next > ma_prev)
-					return false;
-			}
-			return true;
-		} else
-			return false;
-	}
-
 	/** Get the furthest upstream station node. */
 	private StationNode firstStation() {
 		for(Node n = head; n != null; n = n.downstream) {
@@ -522,12 +455,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return (StationNode) n;
 		}
 		return null;
-	}
-
-	/** Get number of time steps to check for bottleneck */
-	private int bottleneckTrendSteps() {
-		return doStopChecking ? BOTTLENECK_TREND_2_STEPS :
-		                        BOTTLENECK_TREND_1_STEPS;
 	}
 
 	/** Is this KAdaptiveAlgorithm done? */
@@ -663,7 +590,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean isDensityIncreasing() {
 			boolean increasing = true;
 			boolean high_k = true;
-			for(int i = 0; i < bottleneckTrendSteps(); i++) {
+			for(int i = 0; i < BOTTLENECK_TREND_STEPS; i++) {
 				double k = getAggregatedDensity(i);
 				double pk = getAggregatedDensity(i + 1);
 				if(k < pk)
@@ -1368,7 +1295,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean startMetering() {
 			phase = MeteringPhase.early_metering;
 			resetAccumulators();
-			isMeteringStarted = true;
 			return true;
 		}
 
