@@ -528,6 +528,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
+	/** Check if a station node is a bottleneck */
+	static private boolean isBottleneck(StationNode sn) {
+		return sn != null && sn.isBottleneck;
+	}
+
 	/** Node to manage station on corridor */
 	protected class StationNode extends Node {
 
@@ -695,9 +700,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/** Return next downstream bottleneck station node.
-		 * @return Downstream bottleneck station node. */
-		protected StationNode bottleneckStation() {
+		/** Find downstream segment station node.
+		 * @return Downstream segment station node. */
+		protected StationNode segmentStationNode() {
 			for(StationNode sn = this; sn != null;
 			    sn = sn.downstreamStation())
 			{
@@ -1199,59 +1204,59 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate the metering rate */
 		private void calculateMeteringRate() {
-			StationNode bs = s_node.bottleneckStation();
-			double k = calculateSegmentDensity(bs);
+			StationNode dn = s_node.segmentStationNode();
+			double k = calculateSegmentDensity(dn);
 			double r = calculateRate(k);
 			segment_k_hist.push(k);
 			rate_hist.push(r);
-			if(shouldMeter(bs))
+			if(shouldMeter(dn))
 				setRate(r);
 		}
 
-		/** Calculate the segment density from meter to bottleneck.
-		 * @param bs Bottlneck (downstream) station node.
-		 * @return Segment density (vehicles / mile) */
-		private double calculateSegmentDensity(StationNode bs) {
-			if(bs != null)
-				return bs.calculateSegmentDensity(s_node);
+		/** Calculate the segment density.
+		 * @param dn Segment downstream station node.
+		 * @return Segment density (vehicles per lane-mile) */
+		private double calculateSegmentDensity(StationNode dn) {
+			if(dn != null)
+				return dn.calculateSegmentDensity(s_node);
 			else
 				return s_node.getAggregatedDensity();
 		}
 
 		/** Should we be metering?
-		 * @param bs bottleneck station.
+		 * @param dn Segment downstream station node.
 		 * @return true if the meter should be metering. */
-		private boolean shouldMeter(StationNode bs) {
+		private boolean shouldMeter(StationNode dn) {
 			switch(phase) {
 			case not_started:
-				return shouldStart(bs) && startMetering();
+				return shouldStart(dn) && startMetering();
 			case early_metering:
 				return checkDoneEarlyMetering();
 			case metering:
 				return shouldContinueMetering();
 			case stopped:
-				return shouldRestart(bs) && restartMetering();
+				return shouldRestart(dn) && restartMetering();
 			default:
 				return true;
 			}
 		}
 
 		/** Check if initial metering should start.
-		 * @param bs bottleneck station.
+		 * @param dn Segment downstream station node.
 		 * @return true if metering should start. */
-		private boolean shouldStart(StationNode bs) {
-			return (bs != null) &&
+		private boolean shouldStart(StationNode dn) {
+			return (dn != null) &&
 			       (shouldStartFlow(START_STEPS) ||
-			        shouldStartDensity(bs, START_STEPS_K));
+			        shouldStartDensity(dn, START_STEPS_K));
 		}
 
 		/** Check if metering should restart (after stopping).
-		 * @param bs bottleneck station.
+		 * @param dn Segment downstream station node.
 		 * @return true if metering should restart. */
-		private boolean shouldRestart(StationNode bs) {
-			return (bs != null) &&
+		private boolean shouldRestart(StationNode dn) {
+			return (dn != null) &&
 			       (shouldStartFlow(RESTART_STEPS) ||
-			        shouldStartDensity(bs, RESTART_STEPS));
+			        shouldStartDensity(dn, RESTART_STEPS));
 		}
 
 		/** Check if metering should start from flow.
@@ -1271,15 +1276,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if metering should start from density.
-		 * @param bs Bottleneck station.
+		 * @param dn Segment downstream station node.
 		 * @param n_steps Number of steps to check.
 		 * @return true if metering should start, based on segment
 		 *         density. */
-		private boolean shouldStartDensity(StationNode bs, int n_steps){
+		private boolean shouldStartDensity(StationNode dn, int n_steps){
 			assert s_node != null;
 			if(countRateHistory() >= n_steps) {
 				for(int i = 0; i < n_steps; i++) {
-					double k = bs.calculateSegmentDensity(
+					double k = dn.calculateSegmentDensity(
 						s_node, i);
 					if(k < K_BOTTLENECK)
 						return false;
@@ -1357,8 +1362,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if there is a bottleneck downstream of meter */
 		private boolean hasBottleneck() {
-			return (s_node != null) &&
-			       (s_node.bottleneckStation() != null);
+			return s_node != null &&
+			       isBottleneck(s_node.segmentStationNode());
 		}
 
 		/** Update the "no bottleneck" count */
@@ -1557,15 +1562,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append("),");
 			sb.append(s_node);
 			if(s_node != null) {
-				StationNode bs = s_node.bottleneckStation();
-				if(bs != null) {
+				StationNode dn = s_node.segmentStationNode();
+				if(dn != null) {
 					// copied from shouldStart...
 					boolean sf = shouldStartFlow(
 						START_STEPS);
-					boolean sd = shouldStartDensity(bs,
+					boolean sd = shouldStartDensity(dn,
 						START_STEPS_K);
-					sb.append(",bs=");
-					sb.append(bs);
+					sb.append(",dn=");
+					sb.append(dn);
 					sb.append(",");
 					sb.append(getSegmentDensity(0));
 					sb.append(",");
