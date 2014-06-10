@@ -1517,6 +1517,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double Rmax = getMaximumRate();
 			double Rt = getRate();
 
+			if(Rt == 0)
+				return Rmax;
+
 			// Calculate MainLine Alpha value with MainLine Density
 			double x = K_DES - k;
 
@@ -1537,9 +1540,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			// Check minimum / max rate
 			Rnext = Math.max(Rnext, Rmin);
 			Rnext = Math.min(Rnext, Rmax);
-
-			if(Rt == 0)
-				Rnext = Rmax;
 
 			return Rnext;
 		}
