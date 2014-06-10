@@ -1260,7 +1260,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean shouldStartFlow(int n_steps) {
 			if(countRateHistory() >= n_steps) {
 				for(int i = 0; i < n_steps; i++) {
-					double q = getFlow(i);
+					double q = getPassage(i);
 					double rate = getRate(i);
 					if(q < START_FLOW_RATIO * rate)
 						return false;
@@ -1384,7 +1384,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean shouldStopFlow() {
 			if(countRateHistory() >= STOP_STEPS) {
 				for(int i = 0; i < STOP_STEPS; i++) {
-					double q = getFlow(i, 60);
+					double q = getPassage(i, 60);
 					double rate = getRate(i);
 					if(q > rate)
 						return false;
@@ -1420,11 +1420,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return rate_hist.size();
 		}
 
-		/** Get historical ramp flow.
+		/** Get historical passage flow.
 		 * @param prevStep Time step in past.
 		 * @param secs Number of seconds to average.
-		 * @return ramp flow at 'prevStep' time steps ago. */
-		private int getFlow(int prevStep, int secs) {
+		 * @return Passage flow at 'prevStep' time steps ago. */
+		private int getPassage(int prevStep, int secs) {
 			Double p = passage_hist.average(prevStep, steps(secs));
 			if(p != null)
 				return (int)Math.round(p);
@@ -1432,18 +1432,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return getMaxRelease();
 		}
 
-		/** Get historical ramp flow.
+		/** Get historical passage flow.
 		 * @param prevStep Time step in past.
-		 * @return ramp flow at 'prevStep' time steps ago. */
-		private int getFlow(int prevStep) {
-			return getFlow(prevStep, 30);
+		 * @return Passage flow at 'prevStep' time steps ago. */
+		private int getPassage(int prevStep) {
+			return getPassage(prevStep, 30);
 		}
 
-		/** Get current metering rate
+		/** Get current metering rate.
 		 * @return metering rate */
 		private int getRate() {
 			int r = currentRate;
-			return r > 0 ? r : getFlow(0, 90);
+			return r > 0 ? r : getPassage(0, 90);
 		}
 
 		/** Get metering rate at 'prevStep' time steps ago
