@@ -38,8 +38,8 @@
 <ul>
 <li>If the average segment density was above the desired density (29.6) for any
     interval in the last 5 minutes, continue metering.</li>
-<li>If queue demand was lower than metering rate for all intervals in
-    the last 5 minutes, shut off meter.</li>
+<li>If passage rate (60 second smoothed) was lower than metering rate for all
+    intervals in the last 5 minutes, shut off meter.</li>
 <li>If segment has no bottleneck for at least 5 minutes, shut off meter.</li>
 <li>Otherwise, continue metering.</li>
 </ul>

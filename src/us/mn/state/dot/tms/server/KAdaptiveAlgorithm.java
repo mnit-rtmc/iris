@@ -1380,11 +1380,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if metering should stop from flow.
-		 * @return true if metering should stop, based on merge flow. */
+		 * @return true if metering should stop based on merge flow. */
 		private boolean shouldStopFlow() {
 			if(countRateHistory() >= STOP_STEPS) {
 				for(int i = 0; i < STOP_STEPS; i++) {
-					double q = getFlow(i);
+					double q = getFlow(i, 60);
 					double rate = getRate(i);
 					if(q > rate)
 						return false;
