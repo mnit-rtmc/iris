@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 
 /**
@@ -21,6 +23,7 @@ import us.mn.state.dot.tms.server.CameraImpl;
  * control messages.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public interface CameraPoller {
 
@@ -32,4 +35,12 @@ public interface CameraPoller {
 
 	/** Send a recall camera preset command */
 	void sendRecallPreset(CameraImpl c, int preset);
+
+	/**
+	 * Send a device request
+	 * @param c The CameraImpl object.
+	 * @param r The desired DeviceRequest.
+	 */
+	void sendRequest(CameraImpl c, DeviceRequest r);
+
 }

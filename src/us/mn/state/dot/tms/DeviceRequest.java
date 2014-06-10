@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@ import java.util.LinkedList;
  * Device request enumeration.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public enum DeviceRequest {
 
@@ -72,9 +74,58 @@ public enum DeviceRequest {
 	QUERY_LEDSTAR_SETTINGS("Query LEDSTAR settings"),
 
 	/** Disable (gate arm) system */
-	DISABLE_SYSTEM("Disable system");
+	DISABLE_SYSTEM("Disable system"),
 
-	/** Create a new deivce request value */
+	/** CAMERA: stop focus */
+	CAMERA_FOCUS_STOP("Camera: stop focus"),
+
+	/** CAMERA: focus near */
+	CAMERA_FOCUS_NEAR("Camera: focus near"),
+
+	/** CAMERA: focus far */
+	CAMERA_FOCUS_FAR("Camera: focus far"),
+
+	/** CAMERA: manual-focus */
+	CAMERA_FOCUS_MANUAL("Camera: manual-focus"),
+
+	/** CAMERA: auto-focus */
+	CAMERA_FOCUS_AUTO("Camera: auto-focus"),
+
+	/** CAMERA: auto-focus toggle */
+	CAMERA_FOCUS_TOGGLE("Camera: auto-focus toggle"),
+
+	/** CAMERA: stop iris */
+	CAMERA_IRIS_STOP("Camera: stop iris"),
+
+	/** CAMERA: close iris */
+	CAMERA_IRIS_CLOSE("Camera: close iris"),
+
+	/** CAMERA: open iris */
+	CAMERA_IRIS_OPEN("Camera: open iris"),
+
+	/** CAMERA: manual-iris */
+	CAMERA_IRIS_MANUAL("Camera: manual-iris"),
+
+	/** CAMERA: auto-iris */
+	CAMERA_IRIS_AUTO("Camera: auto-iris"),
+
+	/** CAMERA: auto-iris toggle */
+	CAMERA_IRIS_TOGGLE("Camera: auto-iris toggle"),
+
+	/** CAMERA: wiper on */
+	CAMERA_WIPER_ON("Camera: wiper on"),
+
+	/** CAMERA: wiper off */
+	CAMERA_WIPER_OFF("Camera: wiper off"),
+
+	/** CAMERA: wiper toggle */
+	CAMERA_WIPER_TOGGLE("Camera: wiper toggle"),
+
+	/** CAMERA: wiper one-shot */
+	CAMERA_WIPER_ONESHOT("Camera: wiper one-shot");
+
+
+	/** Create a new device request value */
 	private DeviceRequest(String d) {
 		description = d;
 	}

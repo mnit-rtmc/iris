@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -40,6 +42,7 @@ import us.mn.state.dot.tms.server.comm.MessagePoller;
  *
  * @author Douglas Lau
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
+ * @author Travis Swanston
  */
 public class CameraImpl extends DeviceImpl implements Camera {
 
@@ -255,9 +258,14 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return null;
 	}
 
-	/** Request a device operation */
+	/**
+	 * Request a device operation (e.g., focus/iris ops, wiper, reset)
+	 * @param r The ordinal representation of the DeviceRequest.
+	 */
 	public void setDeviceRequest(int r) {
-		// no camera device requests
+		CameraPoller cp = getCameraPoller();
+		if(cp != null)
+			cp.sendRequest(this, DeviceRequest.fromOrdinal(r));
 	}
 
 	/** Command the camera pan, tilt or zoom */

@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.cohuptz;
 import java.io.EOFException;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -126,6 +127,16 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 	 */
 	protected void setLastCmdTime(long time) {
 		lastCmdTime = time;
+	}
+
+	/**
+	 * Send a device request
+	 * @param c The CameraImpl object.
+	 * @param r The desired DeviceRequest.
+	 */
+	@Override
+	public void sendRequest(CameraImpl c, DeviceRequest r) {
+		// FIXME: NOT YET IMPLEMENTED
 	}
 
 }
