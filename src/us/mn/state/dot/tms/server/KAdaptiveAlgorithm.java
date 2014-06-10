@@ -405,7 +405,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Check if a bottleneck station should be merged. */
 	private void checkBottleneckMerge(final StationNode sn) {
-		double k = sn.getAggregatedDensity();
+		final double k = sn.getDensity();
 		for(StationNode un = sn.upstreamStation(); un != null;
 			un = un.upstreamStation())
 		{
@@ -413,7 +413,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				continue;
 			if(un.isBottleneckTooClose(sn)) {
 				// close but independent bottleneck
-				if(un.getAggregatedDensity() > k &&
+				if(un.getDensity() > k &&
 				   un.getAcceleration() > A_BOTTLENECK)
 					break;
 				else
@@ -543,11 +543,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final StationImpl station;
 
 		/** Speed history */
-		private final BoundedSampleHistory speedHist =
+		private final BoundedSampleHistory speed_hist =
 			new BoundedSampleHistory(steps(60));
 
 		/** Density history */
-		private final BoundedSampleHistory densityHist =
+		private final BoundedSampleHistory density_hist =
 			new BoundedSampleHistory(steps(300));
 
 		/** Is bottleneck? */
@@ -564,28 +564,28 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			station = stat;
 		}
 
+		/** Update station state.
+		 * It must be called before finding bottleneck. */
+		private void updateState() {
+			density_hist.push(getStationDensity());
+			speed_hist.push(getStationSpeed());
+		}
+
 		/** Get the current station density */
-		private Double getDensity() {
+		private Double getStationDensity() {
 			float d = station.getDensity();
 			return d >= 0 ? (double)d : null;
 		}
 
 		/** Get the current station speed */
-		private Double getSpeed() {
+		private Double getStationSpeed() {
 			float s = station.getSpeed();
 			return s >= 0 ? (double)s : null;
 		}
 
-		/** Update station state.
-		 * It must be called before finding bottleneck. */
-		private void updateState() {
-			densityHist.push(getDensity());
-			speedHist.push(getSpeed());
-		}
-
 		/** Check if a station is a bottleneck */
 		protected void checkBottleneck() {
-			if(getAggregatedDensity() >= K_BOTTLENECK) {
+			if(getDensity() >= K_BOTTLENECK) {
 				if(isPrevBottleneck || isDensityIncreasing())
 					isBottleneck = true;
 			}
@@ -597,8 +597,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			boolean increasing = true;
 			boolean high_k = true;
 			for(int i = 0; i < BOTTLENECK_TREND_STEPS; i++) {
-				double k = getAggregatedDensity(i);
-				double pk = getAggregatedDensity(i + 1);
+				double k = getDensity(i);
+				double pk = getDensity(i + 1);
 				if(k < pk)
 					increasing = false;
 				if(k < K_BOTTLENECK || pk < K_BOTTLENECK)
@@ -641,13 +641,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			StationNode cursor = this;
 			double dist_seg = 0;	/* Segment distance */
 			double veh_seg = 0;	/* Sum of vehicles in segment */
-			double k_cursor = cursor.getAggregatedDensity(step);
+			double k_cursor = cursor.getDensity(step);
 			for(StationNode sn = cursor.downstreamStation();
 			    sn != null && cursor != dn;
 			    sn = sn.downstreamStation())
 			{
-				double k_down = sn.getAggregatedDensity(
-					step);
+				double k_down = sn.getDensity(step);
 				double k_middle = (k_cursor + k_down) / 2;
 				double dist = cursor.distanceMiles(sn);
 				dist_seg += dist;
@@ -662,44 +661,44 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return k_cursor;
 		}
 
-		/** Return aggregated density at current time step.
+		/** Get aggregated density at current time step.
 		 * @return average 1 min density; missing data returns 0. */
-		public double getAggregatedDensity() {
-			return getAggregatedDensity(0);
+		public double getDensity() {
+			return getDensity(0);
 		}
 
 		/** Get aggregated density at specified time step.
 		 * @param step Time step in past (0 for current).
 		 * @return average 1 min density at 'step' time steps ago.*/
-		public double getAggregatedDensity(int step) {
-			Double avg = densityHist.average(step, steps(60));
+		public double getDensity(int step) {
+			Double avg = density_hist.average(step, steps(60));
 			if(avg != null)
 				return avg;
 			else
 				return 0;
 		}
 
-		/** Return aggregated speed at current time step.
-		 * @return average 1 min speed. */
-		public double getAggregatedSpeed() {
-			Double avg = speedHist.average(0, steps(60));
-			if(avg != null)
-				return avg;
-			else
-				return 0;
-		}
-
-		/** Return acceleration from current station to down station
+		/** Return acceleration at current station.
 		 * @return acceleration from current station to down station. */
 		public double getAcceleration() {
-			double u2 = getAggregatedSpeed();
+			double u2 = getSpeed();
 			StationNode down = downstreamStation();
 			if(down == null)
 				return 0;
-			double u1 = down.getAggregatedSpeed();
+			double u1 = down.getSpeed();
 			double dm = distanceMiles(down);
 			if(dm > 0)
 				return (u1 * u1 - u2 * u2) / (2 * dm);
+			else
+				return 0;
+		}
+
+		/** Get speed at current time step.
+		 * @return Average 1 min speed. */
+		private double getSpeed() {
+			Double avg = speed_hist.average(0, steps(60));
+			if(avg != null)
+				return avg;
 			else
 				return 0;
 		}
@@ -1228,7 +1227,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(dn != null)
 				return s_node.calculateSegmentDensity(dn);
 			else
-				return s_node.getAggregatedDensity();
+				return s_node.getDensity();
 		}
 
 		/** Should we be metering?
