@@ -378,7 +378,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private void findBottlenecks() {
 		findBottleneckCandidates();
 		mergeBottleneckZones();
-		debugBottlenecks();
+		if(ALG_LOG.isOpen())
+			debugBottlenecks();
 	}
 
 	/** Find bottleneck candidates. */
