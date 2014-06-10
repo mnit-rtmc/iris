@@ -136,7 +136,39 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 	 */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
-		// FIXME: NOT YET IMPLEMENTED
+		switch (r) {
+			case CAMERA_FOCUS_STOP:
+			case CAMERA_FOCUS_NEAR:
+			case CAMERA_FOCUS_FAR:
+				addOperation(new OpMoveFocus(c, this, r));
+				break;
+			case CAMERA_FOCUS_MANUAL:
+			case CAMERA_FOCUS_AUTO:
+			case CAMERA_FOCUS_TOGGLE:
+				addOperation(new OpSetAFMode(c, this, r));
+				break;
+			case CAMERA_IRIS_STOP:
+			case CAMERA_IRIS_CLOSE:
+			case CAMERA_IRIS_OPEN:
+				 addOperation(new OpMoveIris(c, this, r));
+				break;
+			case CAMERA_IRIS_MANUAL:
+			case CAMERA_IRIS_AUTO:
+			case CAMERA_IRIS_TOGGLE:
+				addOperation(new OpSetAIMode(c, this, r));
+				break;
+			case CAMERA_WIPER_ON:
+			case CAMERA_WIPER_OFF:
+			case CAMERA_WIPER_TOGGLE:
+			case CAMERA_WIPER_ONESHOT:
+				// NOT YET IMPLEMENTED
+				break;
+			case RESET_DEVICE:
+				addOperation(new OpResetCamera(c, this));
+				break;
+			default:
+				break;
+		}
 	}
 
 }
