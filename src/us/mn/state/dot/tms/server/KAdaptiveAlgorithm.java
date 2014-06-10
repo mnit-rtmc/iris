@@ -387,7 +387,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		for(StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
 		{
-			sn.clearBottleneck();
 			sn.checkBottleneck();
 		}
 	}
@@ -553,9 +552,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Is bottleneck? */
 		private boolean isBottleneck = false;
 
-		/** Is bottleneck at previous time step? */
-		private boolean isPrevBottleneck = false;
-
 		/** Create a new station node. */
 		public StationNode(R_NodeImpl rnode, float m, Node up,
 			StationImpl stat)
@@ -585,10 +581,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if a station is a bottleneck */
 		protected void checkBottleneck() {
-			if(getDensity() >= K_BOTTLENECK) {
-				if(isPrevBottleneck || isDensityIncreasing())
-					isBottleneck = true;
-			}
+			isBottleneck = isCurrentBottleneck();
+		}
+
+		/** Is a station currently a bottleneck? */
+		private boolean isCurrentBottleneck() {
+			return (getDensity() >= K_BOTTLENECK) &&
+			       (isBottleneck || isDensityIncreasing());
 		}
 
 		/** Check if density has been increasing for a number of steps
@@ -605,12 +604,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 					high_k = false;
 			}
 			return increasing || high_k;
-		}
-
-		/** Clear bottleneck state */
-		protected void clearBottleneck() {
-			isPrevBottleneck = isBottleneck;
-			isBottleneck = false;
 		}
 
 		/** Is a bottleneck station too close to another? */
