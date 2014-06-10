@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,23 +27,28 @@ import us.mn.state.dot.tms.client.widget.IAction;
  * A panel containing buttons for recalling and storing camera presets.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class PresetPanel extends JPanel {
 
 	/** Number of buttons used to go to preset location */
-	static private final int NUMBER_PRESET_BUTTONS =
+	static private final int NUM_PRESET_BTNS =
 		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
 
+	/** Number of columns to use in the preset grid layout */
+	static private final int PRESET_GRID_COLUMNS =
+		SystemAttrEnum.CAMERA_PRESET_PANEL_COLUMNS.getInt();
+
 	/** Array of buttons used to go to preset locations */
-	private final JButton[] preset_btn = new JButton[NUMBER_PRESET_BUTTONS];
+	private final JButton[] preset_btn = new JButton[NUM_PRESET_BTNS];
 
 	/** Selected camera */
 	private Camera camera = null;
 
 	/** Create a preset panel */
 	public PresetPanel() {
-		super(new GridLayout(0, 6, 6, 6));
-		for(int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
+		super(new GridLayout(0, PRESET_GRID_COLUMNS, 6, 6));
+		for(int i = 0; i < NUM_PRESET_BTNS; i++) {
 			preset_btn[i] = createPresetButton(i + 1);
 			add(preset_btn[i]);
 		}

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2005-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +37,12 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  * @author Tim Johnson
+ * @author Travis Swanston
  */
 public class CameraDispatcher extends IPanel {
 
 	/** The system attribute for the number of button presets */
-	static private final int NUMBER_BUTTON_PRESETS =
+	static private final int NUM_PRESET_BTNS =
 		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
 
 	/** Button number to select previous camera */
@@ -162,7 +164,8 @@ public class CameraDispatcher extends IPanel {
 		add(stream_pnl, Stretch.FULL);
 		if(SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean())
 			add(ptz_pnl, Stretch.FULL);
-		add(preset_pnl, Stretch.CENTER);
+		if(SystemAttrEnum.CAMERA_PRESET_PANEL_ENABLE.getBoolean())
+			add(preset_pnl, Stretch.CENTER);
 		clear();
 		sel_model.addProxySelectionListener(sel_listener);
 	}
@@ -173,7 +176,7 @@ public class CameraDispatcher extends IPanel {
 			selectNextCamera();
 		else if(ev.button == BUTTON_PREVIOUS)
 			selectPreviousCamera();
-		else if(ev.button >= 0 && ev.button < NUMBER_BUTTON_PRESETS)
+		else if(ev.button >= 0 && ev.button < NUM_PRESET_BTNS)
 			selectCameraPreset(ev.button + 1);
 	}
 
