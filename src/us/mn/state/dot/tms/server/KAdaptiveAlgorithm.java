@@ -60,11 +60,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private final double STEP_HOUR =
 		new Interval(STEP_SECONDS).per(HOUR);
 
-	/** Bottleneck density (vehicles / mile) */
+	/** Bottleneck density (vehicles per lane-mile) */
 	static private final int K_BOTTLENECK = 30;
-
-	/** Bottleneck density stop (vehicles / mile) */
-	static private final int K_BOTTLENECK_STOP = 2;
 
 	/** Critical density (vehicles / mile) */
 	static private final int K_CRIT = 37;
@@ -527,13 +524,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return null;
 	}
 
-	/** Get the density for determining a bottleneck */
-	private double bottleneckDensity() {
-		return doStopChecking
-		     ? K_BOTTLENECK + K_BOTTLENECK_STOP
-		     : K_BOTTLENECK;
-	}
-
 	/** Get number of time steps to check for bottleneck */
 	private int bottleneckTrendSteps() {
 		return doStopChecking ? BOTTLENECK_TREND_2_STEPS :
@@ -660,18 +650,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			speedHist.push(getSpeed());
 		}
 
-		/** Check if the station is a bottleneck. */
+		/** Check if a station is a bottleneck */
 		protected void checkBottleneck() {
-			double kb = bottleneckDensity();
-			if(getAggregatedDensity() >= kb) {
-				if(isPrevBottleneck || isDensityIncreasing(kb))
+			if(getAggregatedDensity() >= K_BOTTLENECK) {
+				if(isPrevBottleneck || isDensityIncreasing())
 					isBottleneck = true;
 			}
 		}
 
 		/** Check if density has been increasing for a number of steps
 		 * or that all previous steps are high. */
-		private boolean isDensityIncreasing(final double kb) {
+		private boolean isDensityIncreasing() {
 			boolean increasing = true;
 			boolean high_k = true;
 			for(int i = 0; i < bottleneckTrendSteps(); i++) {
@@ -679,7 +668,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				double pk = getAggregatedDensity(i + 1);
 				if(k < pk)
 					increasing = false;
-				if(k < kb || pk < kb)
+				if(k < K_BOTTLENECK || pk < K_BOTTLENECK)
 					high_k = false;
 			}
 			return increasing || high_k;
@@ -1367,7 +1356,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				for(int i = 0; i < n_steps; i++) {
 					double k = bs.calculateSegmentDensity(
 						s_node, i);
-					if(k < bottleneckDensity())
+					if(k < K_BOTTLENECK)
 						return false;
 				}
 				return true;
