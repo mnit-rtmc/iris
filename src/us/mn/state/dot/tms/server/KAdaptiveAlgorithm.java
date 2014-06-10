@@ -892,7 +892,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int passage_accum = 0;
 
 		/** Ramp passage history (vehicles / hour) */
-		private final BoundedSampleHistory passageHist =
+		private final BoundedSampleHistory passage_hist =
 			new BoundedSampleHistory(MAX_STEPS);
 
 		/** Cumulative green count (vehicles) */
@@ -908,11 +908,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private MinimumRateLimit limit_control = null;
 
 		/** Metering rate flow history (vehicles / hour) */
-		private final BoundedSampleHistory rateHist =
+		private final BoundedSampleHistory rate_hist =
 			new BoundedSampleHistory(MAX_STEPS);
 
 		/** Segment density history (vehicles / mile) */
-		private final BoundedSampleHistory segmentDensityHist =
+		private final BoundedSampleHistory segment_k_hist =
 			new BoundedSampleHistory(TREND_STEPS);
 
 		/** Create a new meter state */
@@ -1073,7 +1073,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Update ramp passage output state */
 		private void updatePassageState() {
 			int passage_vol = calculatePassageCount();
-			passageHist.push(flowRate(passage_vol));
+			passage_hist.push(flowRate(passage_vol));
 			if(passage_vol >= 0)
 				passage_accum += passage_vol;
 			else
@@ -1289,8 +1289,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				StationNode bs = s_node.bottleneckStation();
 				double k = calculateSegmentDensity(bs);
 				double r = calculateRate(k);
-				segmentDensityHist.push(k);
-				rateHist.push(r);
+				segment_k_hist.push(k);
+				rate_hist.push(r);
 				if(shouldMeter(bs, s_node))
 					setRate(r);
 			}
@@ -1405,11 +1405,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if segment density is trending downward */
 		private boolean isSegmentDensityTrendingDown() {
-			Double kn = segmentDensityHist.average(0, AVG_K_STEPS);
+			Double kn = segment_k_hist.average(0, AVG_K_STEPS);
 			if(kn == null)
 				return false;
 			for(int i = 1; i < AVG_K_TREND_STEPS; i++) {
-				Double k = segmentDensityHist.average(i,
+				Double k = segment_k_hist.average(i,
 					AVG_K_STEPS);
 				if(k == null || kn > k)
 					return false;
@@ -1493,13 +1493,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			phase = MeteringPhase.stopped;
 			currentRate = 0;
 			resetAccumulators();
-			rateHist.clear();
+			rate_hist.clear();
 			noBottleneckCount = 0;
 		}
 
 		/** Count length of metering rate history */
 		private int countRateHistory() {
-			return rateHist.size();
+			return rate_hist.size();
 		}
 
 		/** Get historical ramp flow.
@@ -1507,7 +1507,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param secs Number of seconds to average.
 		 * @return ramp flow at 'prevStep' time steps ago. */
 		private int getFlow(int prevStep, int secs) {
-			Double p = passageHist.average(prevStep, steps(secs));
+			Double p = passage_hist.average(prevStep, steps(secs));
 			if(p != null)
 				return (int)Math.round(p);
 			else
@@ -1531,14 +1531,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get metering rate at 'prevStep' time steps ago
 		 * @return metering rate */
 		private double getRate(int prevStep) {
-			return rateHist.get(prevStep);
+			return rate_hist.get(prevStep);
 		}
 
 		/** Get segment density at 'prevStep' time steps ago.
 		 * @param prevStep Number of time steps ago.
 		 * @return segment density, or null for missing data. */
 		private Double getSegmentDensity(int prevStep) {
-			return segmentDensityHist.get(prevStep);
+			return segment_k_hist.get(prevStep);
 		}
 
 		/** Get the minimum metering rate.
