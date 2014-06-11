@@ -518,60 +518,162 @@
 	The tiles can be generated from data downloaded from
 	<a href="http://openstreetmap.org">OpenStreetMap</a>.
 	The following instructions describe one method of generating the map
-	tiles.
-	(FIXME: needs work).
+	tiles on Fedora 20.
 </p>
 
 <h4>Get planet file</h4>
 <p>
-	Download latest planet file from
-	http://planet.openstreetmap.org/planet-latest.osm.bz2 (use wget -- this
-	will take a *long* time).
+	Download the latest planet file (about 32GB).
+<pre class="code">wget http://planet.openstreetmap.org/planet/planet-latest.osm.bz2</pre>
 </p>
 
 <h4>Download and install PostGIS</h4>
 <p>
-	FIXME (need details).
+<pre class="code">sudo yum install postgis postgis-docs postgis-utils</pre>
 </p>
 
-<h4>Get osm2pgsql dependencies</h4>
+<h4>Configure PostGIS and create spatial DB</h4>
 <p>
-	Install dependencies for building <a href="http://wiki.openstreetmap.org/wiki/Osm2pgsql#Fedora">osm2pgsql</a>.
-</p>
-
-<pre class="code">yum install geos-devel proj-devel postgresql-devel libxml2-devel bzip2-devel gcc-c++ autoconf automake libtool</pre>
-
-<h4>Build osm2pgsql</h4>
-<p>
-	Download osm2pqsql using subversion and build.  (see
-	http://wiki.openstreetmap.org/wiki/Osm2pgsql#From_source_.28generic.29)
-</p>
-
-<h4>Set bounding box</h4>
-<p>
-	Determine bounding box of region of interest (for Minnesota, it is
-	-97.5, 43.0, -89.0, 49.5).
-</p>
-
-<h4>Import planet data into PostGIS</h4>
 <pre class="code">
-osm2pgsql -d gis -s --bbox -97.5,43.0,-89.0,49.5 mapping/planet-latest.osm.bz2
+# Create DB named gis
+su - postgres
+createdb --encoding=UTF8 gis
+psql -d gis -f /usr/share/pgsql/contrib/postgis-64.sql
+
+# Edit kernel parameters to increase max size of shared memory
+sudo sysctl -w kernel.shmmax=268435456
+sudo sysctl -p /etc/sysctl.conf
+sysctl -a | grep kernel.shmmax
+
+# Update postgresql config
+vim /var/lib/pgsql/data/postgresql.conf
+	checkpoint_segments = 20
+	maintenance_work_mem = 256MB # 256000 for 8.1 and earlier
+	autovacuum = off
+	shared_buffers = 4GB
+	temp_buffers = 128MB
+	maintenance_work_mem = 4GB 
+service postgresql restart
+</pre>
+</p>
+
+<h4>Build and install osm2pgsql from source</h4>
+<p>
+<pre class="code">
+su - tms
+sudo yum -y install git
+sudo yum -y install geos-devel proj-devel postgresql-devel libxml2-devel bzip2-devel 
+sudo yum -y install gcc-c++ protobuf-c-devel autoconf automake libtool
+mkdir ~/osm; cd ~/osm
+git clone https://github.com/openstreetmap/osm2pgsql.git
+cd ~/osm/osm2pgsql
+./autogen.sh
+./configure 
+make
+sudo make install
+</pre>
+</p>
+
+<h4>Import OSM planet file into PostGIS</h4>
+<p>
+	This process takes a long time (around 30 hours). See performance comparisons 
+	<a href="http://wiki.openstreetmap.org/wiki/Osm2pgsql/benchmarks">here</a>. 
+	Determine the bounding box for the region of interest. For Minnesota it 
+	is: -97.5, 43.0, -89.0, 49.5.
+</p>
+<pre class="code">
+su - postgres
+osm2pgsql -v --number-processes=16 -d gis -s --bbox -97.5, 43.0, -89.0, 49.5 planet-140522.osm.bz2
 </pre>
 
-<h4>Install mapnik</h4>
-<p>
-	Install mapnik, mapnik-python, mapnik-utils.
-</p>
 
-<h4>Export osm mapnik stuff</h4>
+<h4>Build and install mapnik library from source</h4>
+<p>
+	See the mapnik <a href="https://github.com/mapnik/mapnik/wiki/Mapnik-Installation">install docs</a>. The <a href="https://gist.github.com/springmeyer/3427021">Springmeyer docs</a> are also very useful.
+</p>
 <pre class="code">
-svn export http://svn.openstreetmap.org/applications/rendering/mapnik osm-mapnik
+su - tms
+# Install dependencies
+sudo yum -y install make gcc47 gcc-c++ bzip2-devel libpng-devel libtiff-devel \
+      zlib-devel libjpeg-devel libxml2-devel python-setuptools git-all \
+      python-nose python27-devel python27 proj-devel proj proj-epsg \
+      proj-nad freetype-devel freetype libicu-devel libicu
+# Install optional deps
+sudo yum -y install gdal-devel gdal postgresql-devel sqlite-devel sqlite \
+      libcurl-devel libcurl cairo-devel cairo pycairo-devel pycairo
+# Build recent version of Boost
+export JOBS=`grep -c ^processor /proc/cpuinfo`
+mkdir -p ~/osm/src; cd ~/osm/src
+export BOOST_VERSION="1_55_0"
+export S3_BASE="http://mapnik.s3.amazonaws.com/deps"
+curl -O ${S3_BASE}/boost_${BOOST_VERSION}.tar.bz2
+tar xf boost_${BOOST_VERSION}.tar.bz2
+cd boost_${BOOST_VERSION}
+./bootstrap.sh
+./b2 -d1 -j${JOBS} \
+    --with-thread \
+    --with-filesystem \
+    --with-python \
+    --with-regex -sHAVE_ICU=1  \
+    --with-program_options \
+    --with-system \
+    link=shared \
+    release \
+    toolset=gcc \
+    stage
+sudo ./b2 -j${JOBS} \
+    --with-thread \
+    --with-filesystem \
+    --with-python \
+    --with-regex -sHAVE_ICU=1 \
+    --with-program_options \
+    --with-system \
+    toolset=gcc \
+    link=shared \
+    release \
+    install
+cd ~/osm/src
+# Set up support for libraries installed in /usr/local/lib
+sudo bash -c "echo '/usr/local/lib' > /etc/ld.so.conf.d/boost.conf"
+sudo ldconfig
+# Build and install mapnik stable branch: 2.3.x
+mkdir -p ~/osm/src; cd ~/osm/src
+git clone https://github.com/mapnik/mapnik -b 2.3.x
+cd ~/osm/src/mapnik
+./configure
+make
+make test-local
+sudo make install
+# Verify everything is good
+echo “import mapnik” | python
+</pre>
+
+<h4>Install mapnik tools</h4>
+<p>
+	See <a href="https://github.com/mapnik/mapnik/blob/v2.2.0/INSTALL.md">docs</a>.
+</p>
+<pre class="code">
+sudo yum -y install svn
+cd ~/osm
+svn export http://svn.openstreetmap.org/applications/rendering/mapnik
+# Install prepared world boundary data
+cd ~/osm/mapnik
+mkdir world_boundaries
+wget http://tile.openstreetmap.org/world_boundaries-spherical.tgz
+tar xvzf world_boundaries-spherical.tgz
+wget http://tile.openstreetmap.org/processed_p.tar.bz2
+tar xvjf processed_p.tar.bz2 -C world_boundaries
+wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
+tar xjf shoreline_300.tar.bz2 -C world_boundaries
+wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_populated_places.zip
+unzip ne_10m_populated_places.zip -d world_boundaries
+wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_boundary_lines_land.zip
+unzip ne_110m_admin_0_boundary_lines_land.zip  -d world_boundaries
 </pre>
 
 <h4>Patch osm.xml to create iris_osm.xml</h4>
-
 <pre class="code">
-cd osm-mapnik/
+cd ~/osm/mapnik/
 cp osm.xml iris_osm.xml
 patch -p0 &lt; ../01_drop_junc_power_layers.patch
 patch -p0 &lt; ../02_interstate_shields.patch
@@ -585,12 +687,33 @@ patch -p0 &lt; ../09_tertiary_color.patch
 </pre>
 
 <h4>Copy symbols used for roadway shields</h4>
-<p/>
+<p>
+	FIXME
+</p>
 
-<h4>Generate map tiles</h4>
-<p/>
+<h4>Generate tiles</h4>
+<p>
+	Generating tiles takes about 2 hours on a 16 processor system, or about 13K tiles/min.
+</p>
+<pre class="code">
+su - tms
+cd ~/osm/mapnik
+export MAPNIK_MAP_FILE=~/osm/mapnik/iris_osm.xml
+export MAPNIK_TILE_DIR=/home/tms/osm/tiles
+# Customize osm.xml
+./generate_xml.py  --dbname gis --accept-none
+vim generate_tiles_multiprocess.py
+	NUM_THREADS = number of processors in your server
+	bbox = (-97.5, 43.0, -89.0, 49.5)
+	minZoom = 6
+	maxZoom = 16
+	# comment all of the european cities listed
+timer ./generate_tiles_multiprocess.py
+# Copy tiles to server hosting them
+scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
+</pre>
 
-<h4>Create Map Extents</h4>
+<h4>Create Map Extents in IRIS database</h4>
 <p>
 	In the IRIS client, select the <span class="menu">View ➔ System ➔
 	Map Extents</span> menu item to bring up the Map Extents form.
