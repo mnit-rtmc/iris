@@ -101,7 +101,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		STOP_STEPS), RESTART_STEPS);
 
 	/** Number of time steps for bottleneck trend check */
-	static private final int BOTTLENECK_TREND_STEPS = steps(60);
+	static private final int BOTTLENECK_TREND_STEPS = steps(90);
 
 	/** Spacing between two bottlenecks (soft minimum) */
 	static private final float BOTTLENECK_SPACING_MILES = 1.5f;
@@ -593,7 +593,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if density is high for all trend steps */
 		private boolean isDensityHigh() {
-			for(int i = 0; i <= BOTTLENECK_TREND_STEPS; i++) {
+			for(int i = 0; i < BOTTLENECK_TREND_STEPS; i++) {
 				if(getDensity(i) < K_BOTTLENECK)
 					return false;
 			}
@@ -608,7 +608,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if density has been increasing for all trend steps */
 		private boolean isDensityIncreasing() {
 			double k = getDensity(0);
-			for(int i = 1; i <= BOTTLENECK_TREND_STEPS; i++) {
+			for(int i = 1; i < BOTTLENECK_TREND_STEPS; i++) {
 				double nk = getDensity(i);
 				if(k < nk)
 					return false;
