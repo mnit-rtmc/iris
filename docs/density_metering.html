@@ -7,7 +7,31 @@
 </head>
 
 <body>
-<b>Definitions</b>
+<h2>Metering Phases</h2>
+<p>
+	There are 5 metering phases: <em>not started</em>,
+	<em>early metering</em>, <em>metering</em>, <em>flushing</em> and
+	<em>stopped</em>.
+	A ramp meter begins a metering period in the <em>not started</em> phase.
+	When transition conditions are met, the meter moves to the next phase.
+	Also, when in the <em>stopped</em> phase, the meter may transition back
+	to the <em>metering</em> phase.
+</p>
+<h3>Shut-Off</h3>
+<p>
+	Before testing shut-off logic for a meter, the 15 minute segment density
+	must be trending downward for each interval in the last 5 minutes,
+	or the segment density must be below 24.05 vehicles / lane-mile.
+</p>
+<ul>
+<li>If the average segment density was above the desired density (29.6) for any
+    interval in the last 5 minutes, continue metering.</li>
+<li>If passage rate (60 second smoothed) was lower than metering rate for all
+    intervals in the last 5 minutes, shut off meter.</li>
+<li>If segment has no bottleneck for at least 5 minutes, shut off meter.</li>
+<li>Otherwise, continue metering.</li>
+</ul>
+<h2>Definitions</h2>
 <dl>
 	<dt>Density</dt>
 	<dd>Vehicles per lane-mile</dd>
@@ -29,19 +53,5 @@
 	    The segment density is an average of all links in the segment,
 	    weighted by length.</dd>
 </dl>
-<b>Shut-Off</b>
-<p>
-	Before testing shut-off logic for a meter, the 15 minute segment density
-	must be trending downward for each interval in the last 5 minutes,
-	or the segment density must be below 24.05 vehicles / lane-mile.
-</p>
-<ul>
-<li>If the average segment density was above the desired density (29.6) for any
-    interval in the last 5 minutes, continue metering.</li>
-<li>If passage rate (60 second smoothed) was lower than metering rate for all
-    intervals in the last 5 minutes, shut off meter.</li>
-<li>If segment has no bottleneck for at least 5 minutes, shut off meter.</li>
-<li>Otherwise, continue metering.</li>
-</ul>
 </body>
 </html>
