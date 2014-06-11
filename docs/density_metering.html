@@ -43,24 +43,81 @@
 	There are 5 metering phases: <em>not started</em>,
 	<em>early metering</em>, <em>metering</em>, <em>flushing</em> and
 	<em>stopped</em>.
-	A ramp meter begins a metering period in the <em>not started</em> phase.
 	When transition conditions are met, the meter moves to the next phase.
-	Also, when in the <em>stopped</em> phase, the meter may transition back
-	to the <em>metering</em> phase.
+	If all meters on a corridor are in the <em>stopped</em> phase, the
+	metering period ends.
 </p>
-<h3>Shut-Off</h3>
+<h3>Not Started</h3>
 <p>
-	Before testing shut-off logic for a meter, the 15 minute segment density
-	must be trending downward for each interval in the last 5 minutes,
-	or the segment density must be below 24.05 vehicles / lane-mile.
+	Ramp meters begin each metering period in the <em>not started</em>
+	phase.
+	In this phase, a ramp meter will not cycle.
+	There are two conditions which can cause the meter to transition to the
+	<em>early metering</em> phase:
 </p>
 <ul>
-<li>If the average segment density was above the desired density (29.6) for any
-    interval in the last 5 minutes, continue metering.</li>
-<li>If passage rate (60 second smoothed) was lower than metering rate for all
-    intervals in the last 5 minutes, shut off meter.</li>
-<li>If segment has no bottleneck for at least 5 minutes, shut off meter.</li>
-<li>Otherwise, continue metering.</li>
+<li>Passage flow rate was greater than 80% of selected metering rate for each
+    interval in 90 seconds.</li>
+<li>Segment density was higher than bottleneck density for each interval in 90
+    seconds.</li>
+</ul>
+<p>
+	When there are 30 minutes left in the metering period, the meter will
+	transition from <em>not started</em> to <em>stopped</em>.
+</p>
+<h3>Early Metering</h3>
+<p>
+	In the <em>early metering</em> phase, a ramp meter will cycle at the
+	selected metering rate.
+	There are three conditions which can cause the meter to transition to
+	the <em>metering</em> phase:
+</p>
+<ul>
+<li>Segment density (15 minute average) was trending lower for each interval in
+    5 minutes.</li>
+<li>Segment density (1 minute average) was lower than 65% of critical density.
+</li>
+<li>Only 30 minutes remain in the metering period.</li>
+</ul>
+<h3>Metering</h3>
+<p>
+	In the <em>metering</em> phase, a ramp meter will cycle at the selected
+	metering rate.
+	The following conditions will cause the meter to transition to the
+	<em>flushing</em> phase:
+</p>
+<ul>
+<li>Segment density was below desired density (29.6) for every interval in 5
+    minutes, AND</li>
+    <ul>
+    <li>Passage rate (60 second smoothed) was lower than metering rate for
+        all intervals in 5 minutes, OR</li>
+    <li>The segment had no bottleneck for 5 minutes.</li>
+    </ul>
+<li>Only 2 minutes remain in the metering period.</li>
+</ul>
+<h3>Flushing</h3>
+<p>
+	In the <em>flushing</em> phase, a ramp meter will cycle at the maximum
+	metering rate.
+	The following conditions will cause the meter to transition to the
+	<em>stopped</em> phase:
+</p>
+<ul>
+<li>The queue is estimated to be empty for 1 minute.</li>
+<li>The metering period ends.</li>
+</ul>
+<h3>Stopped</h3>
+<p>
+	In the <em>stopped</em> phase, a ramp meter will not cycle.
+	There are two conditions which can cause the meter to transition back
+	to the <em>metering</em> phase:
+</p>
+<ul>
+<li>Passage flow rate was greater than 80% of selected metering rate for each
+    interval in 5 minutes.</li>
+<li>Segment density was higher than bottleneck density for each interval in 5
+    minutes.</li>
 </ul>
 <h2>Definitions</h2>
 <dl>
