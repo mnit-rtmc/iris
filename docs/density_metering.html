@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<h2>Metering Phases</h2>
+<h2>Metering Period</h2>
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
      width="240" height="480">
   <title>Metering Phases</title>
@@ -40,14 +40,15 @@
   </g>
 </svg>
 <p>
-	There are 5 metering phases: <em>not started</em>,
-	<em>early metering</em>, <em>metering</em>, <em>flushing</em> and
-	<em>stopped</em>.
+	A metering period begins and ends at specific times during the day.
+	Within the metering period, a meter can be in one of 5 phases:
+	<em>not started</em>, <em>early metering</em>, <em>metering</em>,
+	<em>flushing</em> or <em>stopped</em>.
 	When transition conditions are met, the meter moves to the next phase.
 	If all meters on a corridor are in the <em>stopped</em> phase, the
 	metering period ends.
 </p>
-<h3>Not Started</h3>
+<h3>Not Started Phase</h3>
 <p>
 	Ramp meters begin each metering period in the <em>not started</em>
 	phase.
@@ -65,7 +66,7 @@
 	When there are 30 minutes left in the metering period, the meter will
 	transition from <em>not started</em> to <em>stopped</em>.
 </p>
-<h3>Early Metering</h3>
+<h3>Early Metering Phase</h3>
 <p>
 	In the <em>early metering</em> phase, a ramp meter will cycle at the
 	selected metering rate.
@@ -79,7 +80,7 @@
 </li>
 <li>Only 30 minutes remain in the metering period.</li>
 </ul>
-<h3>Metering</h3>
+<h3>Metering Phase</h3>
 <p>
 	In the <em>metering</em> phase, a ramp meter will cycle at the selected
 	metering rate.
@@ -96,7 +97,7 @@
     </ul>
 <li>Only 2 minutes remain in the metering period.</li>
 </ul>
-<h3>Flushing</h3>
+<h3>Flushing Phase</h3>
 <p>
 	In the <em>flushing</em> phase, a ramp meter will cycle at the maximum
 	metering rate.
@@ -107,7 +108,7 @@
 <li>The queue is estimated to be empty for 1 minute.</li>
 <li>The metering period ends.</li>
 </ul>
-<h3>Stopped</h3>
+<h3>Stopped Phase</h3>
 <p>
 	In the <em>stopped</em> phase, a ramp meter will not cycle.
 	There are two conditions which can cause the meter to transition back
