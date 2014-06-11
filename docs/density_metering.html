@@ -8,6 +8,37 @@
 
 <body>
 <h2>Metering Phases</h2>
+<svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
+     width="240" height="480">
+  <title>Metering Phases</title>
+  <defs>
+    <marker id='Arrow1Mend' style='overflow:visible' orient='auto'>
+      <path style='stroke:black;stroke-width:1pt'
+            d='m-4 0l-2 2l7-2l-7-2l2 2z'/>
+    </marker>
+  </defs>
+  <g style='fill:none;stroke:black;stroke-width:2'>
+    <rect x='20' y='10' width='200' height='60'/>
+    <rect x='20' y='110' width='200' height='60'/>
+    <rect x='20' y='210' width='140' height='60'/>
+    <rect x='20' y='310' width='140' height='60'/>
+    <rect x='20' y='410' width='140' height='60'/>
+  </g>
+  <text style='font-family:Sans;font-size:24px'>
+    <tspan x='40' y='50'>Not started</tspan>
+    <tspan x='40' y='150'>Early Metering</tspan>
+    <tspan x='40' y='250'>Metering</tspan>
+    <tspan x='40' y='350'>Flushing</tspan>
+    <tspan x='40' y='450'>Stopped</tspan>
+  </text>
+  <g style='fill:none;stroke:black;stroke-width:2;marker-end:url(#Arrow1Mend)'>
+    <path d='m90 70l0 40'/>
+    <path d='m90 170l0 40'/>
+    <path d='m90 270l0 40'/>
+    <path d='m90 370l0 40'/>
+    <path d='m160 440c60 0 60-40 60-100c0-60 0-100-60-100'/>
+  </g>
+</svg>
 <p>
 	There are 5 metering phases: <em>not started</em>,
 	<em>early metering</em>, <em>metering</em>, <em>flushing</em> and
