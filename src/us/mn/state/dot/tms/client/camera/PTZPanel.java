@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2014  Minnesota Department of Transportation
- * Copyright (C) 2008-2010 AHMCT, University of California
+ * Copyright (C) 2008-2014 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,11 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Label;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JSlider;
@@ -36,24 +39,15 @@ import us.mn.state.dot.tms.client.widget.Widgets;
  * @author Stephen Donecker
  * @author Michael Darter
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class PTZPanel extends JPanel {
 
 	/** Create a flow layout */
 	static private FlowLayout createLayout() {
 		FlowLayout fl = new FlowLayout();
-		fl.setHgap(Widgets.UI.scaled(24));
+		fl.setHgap(Widgets.UI.scaled(10));
 		return fl;
-	}
-
-	/** Create grid bag constraints */
-	static private GridBagConstraints createConstraints() {
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets = Widgets.UI.insets();
-		bag.gridwidth = 1;
-		bag.gridheight = 1;
-		bag.fill = GridBagConstraints.BOTH;
-		return bag;
 	}
 
 	/** Button used to pan left */
@@ -80,6 +74,12 @@ public class PTZPanel extends JPanel {
 	/** Camera PTZ control */
 	private final CameraPTZ cam_ptz;
 
+	/** button preferred size */
+	protected final Dimension btn_dim;
+
+	/** button font */
+	protected final Font btn_font;
+
 	/** Pan-tilt-zoom speed */
 	private float m_speed = 0.5f;
 
@@ -87,6 +87,8 @@ public class PTZPanel extends JPanel {
 	public PTZPanel(CameraPTZ cptz) {
 		super(createLayout()); // ignores preferred sizes
 		cam_ptz = cptz;
+		btn_dim = Widgets.UI.dimension(24, 24);
+		btn_font = new Font(null, Font.PLAIN, Widgets.UI.scaled(12));
 		speed_sldr = createSpeedSlider();
 		left_btn = createPtzButton("camera.ptz.left", -1, 0, 0);
 		right_btn = createPtzButton("camera.ptz.right", 1, 0, 0);
@@ -107,8 +109,8 @@ public class PTZPanel extends JPanel {
 		s.setPaintTicks(true);
 		s.setSnapToTicks(true);
 		s.setToolTipText(I18N.get("camera.ptz.speed.tooltip"));
-		s.setMinimumSize(sz);
 		s.setPreferredSize(sz);
+		s.setMinimumSize(sz);
 		return s;
 	}
 
@@ -131,9 +133,13 @@ public class PTZPanel extends JPanel {
 	{
 		final JButton btn = new JButton(new IAction(text_id) {
 			protected void doActionPerformed(ActionEvent ev) {
-				cam_ptz.clearPtz();
+				cam_ptz.clearMovement();
 			}
 		});
+		btn.setPreferredSize(btn_dim);
+		btn.setMinimumSize(btn_dim);
+		btn.setFont(btn_font);
+		btn.setMargin(new Insets(0, 0, 0, 0));
 		btn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				buttonPressed(btn, pan, tilt, zoom);
@@ -153,32 +159,50 @@ public class PTZPanel extends JPanel {
 	/** Build panel with pan and tilt buttons */
 	private JPanel buildPanTiltPanel() {
 		JPanel p = new JPanel(new GridBagLayout());
-		GridBagConstraints bag = createConstraints();
-		bag.gridx = 2;
-		bag.gridy = 0;
-		p.add(up_btn, bag);
-		bag.gridx = 1;
-		bag.gridy = 1;
-		p.add(left_btn, bag);
-		bag.gridx = 3;
-		bag.gridy = 1;
-		p.add(right_btn, bag);
-		bag.gridx = 2;
-		bag.gridy = 2;
-		p.add(down_btn, bag);
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.fill = GridBagConstraints.NONE;
+		gbc.gridheight = 1;
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		gbc.weightx = 0.0;
+		gbc.weighty = 0.0;
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		p.add(up_btn, gbc);
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		p.add(left_btn, gbc);
+		gbc.gridx = 2;
+		gbc.gridy = 1;
+		p.add(right_btn, gbc);
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		p.add(down_btn, gbc);
 		return p;
 	}
 
 	/** Build panel with zoom buttons */
 	private JPanel buildZoomPanel() {
 		JPanel p = new JPanel(new GridBagLayout());
-		GridBagConstraints bag = createConstraints();
-		bag.gridx = 0;
-		bag.gridy = 0;
-		p.add(zoom_in_btn, bag);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		p.add(zoom_out_btn, bag);
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.fill = GridBagConstraints.NONE;
+		gbc.gridheight = 1;
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		gbc.weightx = 0.0;
+		gbc.weighty = 0.0;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		p.add(zoom_in_btn, gbc);
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		p.add(zoom_out_btn, gbc);
 		return p;
 	}
 
@@ -192,4 +216,5 @@ public class PTZPanel extends JPanel {
 		zoom_in_btn.setEnabled(enable);
 		zoom_out_btn.setEnabled(enable);
 	}
+
 }

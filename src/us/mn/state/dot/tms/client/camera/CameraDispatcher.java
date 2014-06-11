@@ -15,10 +15,17 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -28,6 +35,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -39,7 +47,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Tim Johnson
  * @author Travis Swanston
  */
-public class CameraDispatcher extends IPanel {
+public class CameraDispatcher extends JPanel {
 
 	/** The system attribute for the number of button presets */
 	static private final int NUM_PRESET_BTNS =
@@ -79,10 +87,10 @@ public class CameraDispatcher extends IPanel {
 	private final ProxyListModel<Camera> model;
 
 	/** Camera name label */
-	private final JLabel name_lbl = createValueLabel();
+	private final JLabel name_lbl = IPanel.createValueLabel();
 
 	/** Camera location label */
-	private final JLabel location_lbl = createValueLabel();
+	private final JLabel location_lbl = IPanel.createValueLabel();
 
 	/** Video output selection ComboBox */
 	private final JComboBox output_cbx;
@@ -93,14 +101,23 @@ public class CameraDispatcher extends IPanel {
 	/** Camera PTZ control */
 	private final CameraPTZ cam_ptz;
 
+	/** Camera information panel */
+	private final JPanel info_pnl;
+
 	/** Streaming video panel */
 	private final StreamPanel stream_pnl;
+
+	/** Camera control panel */
+	private final JPanel control_pnl;
 
 	/** PTZ panel */
 	private final PTZPanel ptz_pnl;
 
 	/** Panel for camera presets */
 	private final PresetPanel preset_pnl;
+
+	/** Panel for camera utilities */
+	private final UtilPanel util_pnl;
 
 	/** Currently selected camera */
 	private Camera selected = null;
@@ -112,14 +129,58 @@ public class CameraDispatcher extends IPanel {
 	public CameraDispatcher(Session s, CameraManager man) {
 		session = s;
 		manager = man;
+		setLayout(new BorderLayout());
 		sel_model = manager.getSelectionModel();
 		model = session.getSonarState().getCamCache().getCameraModel();
 		cam_ptz = new CameraPTZ(s);
 		joy_ptz = new JoystickPTZ(cam_ptz);
+		output_cbx = createOutputCombo();
+		info_pnl = createInfoPanel();
+		stream_pnl = createStreamPanel();
 		ptz_pnl = new PTZPanel(cam_ptz);
 		preset_pnl = new PresetPanel();
-		stream_pnl = createStreamPanel();
-		output_cbx = createOutputCombo();
+		util_pnl = new UtilPanel(cam_ptz);
+		control_pnl = createControlPanel();
+	}
+
+	/** Create camera information panel */
+	private JPanel createInfoPanel() {
+		JPanel p = new JPanel(new GridBagLayout());
+
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.gridheight = 1;
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(4, 4, 4, 4);
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		gbc.weightx = 0.0;
+		gbc.weighty = 0.0;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+
+		p.add(new ILabel("device.name"), gbc);
+		gbc.gridx = 1;
+		p.add(name_lbl, gbc);
+		gbc.gridx = 2;
+
+		gbc.weightx = 0.1;
+		p.add(Box.createHorizontalGlue(), gbc);
+
+		gbc.gridx = 3;
+		gbc.weightx = 0.0;
+		p.add(new ILabel("camera.output"), gbc);
+		gbc.gridx = 4;
+		p.add(output_cbx, gbc);
+
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		p.add(new ILabel("location"), gbc);
+		gbc.gridx = 1;
+		p.add(location_lbl, gbc);
+
+		return p;
 	}
 
 	/** Create the stream panel */
@@ -129,6 +190,63 @@ public class CameraDispatcher extends IPanel {
 		vr.setSonarSessionId(session.getSessionId());
 		vr.setRate(30);
 		return new StreamPanel(vr, cam_ptz);
+	}
+
+	/** Create camera control panel */
+	private JPanel createControlPanel() {
+		JPanel p = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.gridheight = 1;
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(2, 0, 2, 0);
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		gbc.weightx = 0.0;
+		gbc.weighty = 0.0;
+
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+
+		boolean ptz = SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE
+			.getBoolean();
+		boolean util = SystemAttrEnum.CAMERA_UTIL_PANEL_ENABLE
+			.getBoolean();
+		boolean preset = SystemAttrEnum.CAMERA_PRESET_PANEL_ENABLE
+			.getBoolean();
+
+		gbc.weightx = 0.1;
+		p.add(Box.createHorizontalGlue(), gbc);
+		gbc.gridx++;
+		gbc.weightx = 0.0;
+		if (ptz) {
+			p.add(ptz_pnl, gbc);
+			gbc.gridx++;
+			if (util || preset) {
+				gbc.weightx = 0.1;
+				p.add(Box.createHorizontalGlue(), gbc);
+				gbc.gridx++;
+				gbc.weightx = 0.0;
+			}
+		}
+		if (util) {
+			p.add(util_pnl, gbc);
+			gbc.gridx++;
+			if (preset) {
+				gbc.weightx = 0.1;
+				p.add(Box.createHorizontalGlue(), gbc);
+				gbc.gridx++;
+				gbc.weightx = 0.0;
+			}
+		}
+		if (preset) {
+			p.add(preset_pnl, gbc);
+			gbc.gridx++;
+		}
+		gbc.weightx = 0.1;
+		p.add(Box.createHorizontalGlue(), gbc);
+		return p;
 	}
 
 	/** Create the video output selection combo box */
@@ -155,19 +273,16 @@ public class CameraDispatcher extends IPanel {
 			}
 		});
 		setTitle(I18N.get("camera.selected"));
-		add("device.name");
-		add(name_lbl);
-		add("camera.output");
-		add(output_cbx, Stretch.LAST);
-		add("location");
-		add(location_lbl, Stretch.LAST);
-		add(stream_pnl, Stretch.FULL);
-		if(SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean())
-			add(ptz_pnl, Stretch.FULL);
-		if(SystemAttrEnum.CAMERA_PRESET_PANEL_ENABLE.getBoolean())
-			add(preset_pnl, Stretch.CENTER);
+		add(info_pnl, BorderLayout.NORTH);
+		add(stream_pnl, BorderLayout.CENTER);
+		add(control_pnl, BorderLayout.SOUTH);
 		clear();
 		sel_model.addProxySelectionListener(sel_listener);
+	}
+
+	/** Set the title */
+	public void setTitle(String t) {
+		setBorder(BorderFactory.createTitledBorder(t));
 	}
 
 	/** Process a joystick button event */
@@ -202,14 +317,13 @@ public class CameraDispatcher extends IPanel {
 	}
 
 	/** Dispose of the camera viewer */
-	@Override
 	public void dispose() {
 		sel_model.removeProxySelectionListener(sel_listener);
 		joy_ptz.dispose();
 		cam_ptz.setCamera(null);
 		stream_pnl.dispose();
 		selected = null;
-		super.dispose();
+		removeAll();
 	}
 
 	/** Set the selected camera */
@@ -227,6 +341,7 @@ public class CameraDispatcher extends IPanel {
 			ptz_pnl.setEnabled(cam_ptz.canControlPtz());
 			preset_pnl.setCamera(camera);
 			preset_pnl.setEnabled(cam_ptz.canControlPtz());
+			util_pnl.setEnabled(cam_ptz.canControlPtz());
 		} else
 			clear();
 	}
@@ -255,5 +370,6 @@ public class CameraDispatcher extends IPanel {
 		stream_pnl.setCamera(null);
 		ptz_pnl.setEnabled(false);
 		preset_pnl.setEnabled(false);
+		util_pnl.setEnabled(false);
 	}
 }

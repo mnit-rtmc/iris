@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +29,7 @@ import javax.swing.ImageIcon;
  * Icons
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class Icons {
 
@@ -111,6 +113,22 @@ public class Icons {
 	/** Get an icon from a string name */
 	static public ImageIcon getIcon(String key) {
 		return getImageIcon(key);
+	}
+
+	/**
+	 * Fetch an ImageIcon resource by i18n property name.
+	 * For lookup, the given property name will be converted such that
+	 * all period (".") characters will be translated to underscores.
+	 * For example, "camera.util.focus.near" will result in a lookup of
+	 * "camera_util_focus_near".
+	 * This lookup scheme can be useful, for example, to implicitly
+	 * associate JButton icons with IAction IDs.
+	 * @param propName The property name to use.
+	 * @return The requested ImageIcon, or null if not found.
+	 */
+	static public ImageIcon getIconByPropName(String propName) {
+		if (propName == null) return null;
+		return Icons.getIcon(propName.replaceAll("\\.", "_"));
 	}
 
 	/** Get an image from a string name */

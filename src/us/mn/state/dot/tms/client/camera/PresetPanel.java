@@ -15,13 +15,18 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.GridLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.Widgets;
 
 /**
  * A panel containing buttons for recalling and storing camera presets.
@@ -45,12 +50,37 @@ public class PresetPanel extends JPanel {
 	/** Selected camera */
 	private Camera camera = null;
 
+	/** button preferred size */
+	protected final Dimension btn_dim;
+
+	/** button font */
+	protected final Font btn_font;
+
 	/** Create a preset panel */
 	public PresetPanel() {
-		super(new GridLayout(0, PRESET_GRID_COLUMNS, 6, 6));
-		for(int i = 0; i < NUM_PRESET_BTNS; i++) {
+		super(new GridBagLayout());
+		btn_dim = Widgets.UI.dimension(24, 24);
+		btn_font = new Font(Font.SANS_SERIF, Font.BOLD,
+			Widgets.UI.scaled(10));
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.fill = GridBagConstraints.NONE;
+		gbc.gridheight = 1;
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		gbc.weightx = 0.0;
+		gbc.weighty = 0.0;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		for (int i=0; i < NUM_PRESET_BTNS; i++) {
 			preset_btn[i] = createPresetButton(i + 1);
-			add(preset_btn[i]);
+			add(preset_btn[i], gbc);
+			if (++gbc.gridx % PRESET_GRID_COLUMNS == 0) {
+				gbc.gridx=0;
+				gbc.gridy++;
+			}
 		}
 	}
 
@@ -63,6 +93,10 @@ public class PresetPanel extends JPanel {
 					c.setRecallPreset(num);
 			}
 		});
+		btn.setPreferredSize(btn_dim);
+		btn.setMinimumSize(btn_dim);
+		btn.setFont(btn_font);
+		btn.setMargin(new Insets(0, 0, 0, 0));
 		btn.setText(Integer.toString(num));
 		return btn;
 	}
