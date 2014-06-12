@@ -14,6 +14,69 @@
 	First, candidates are selected based on station density.
 	Then, bottlenecks are merged with other nearby bottlenecks.
 </p>
+<svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
+     width="560" height="240">
+<title>Bottleneck Identification</title>
+<defs>
+  <marker id='DotM' style='overflow:visible' orient='auto'>
+    <path style='stroke:black'
+	  d='M1.96 0C1.96 1.104 1.064 2-0.04 2C-1.144 2-2.04 1.104-2.04 0
+	     C-2.04-1.104-1.144-2-0.04-2C1.064-2 1.96-1.104 1.96 0Z'/>
+  </marker>
+  <marker id='Arrow1Mend' style='overflow:visible' orient='auto'>
+    <path style='stroke:black'
+	  d='M-4 0L-6 2L1 0L-6-2L-4 0Z'/>
+  </marker>
+</defs>
+<g style='fill:none;stroke:black'>
+  <path d='M10 10 L550 10 M10 50 L550 50'/>
+</g>
+<g style='opacity:0.25'>
+  <rect x='30' y='20' width='10' height='20'/>
+  <rect x='130' y='20' width='10' height='20'/>
+  <rect x='230' y='20' width='10' height='20'/>
+  <rect x='320' y='20' width='10' height='20'/>
+  <rect x='420' y='20' width='10' height='20'/>
+  <rect x='520' y='20' width='10' height='20'/>
+</g>
+<g style='fill:none;stroke:black;opacity:0.5;marker-end:url(#Arrow1Mend)'>
+  <path d='M60 30 L110 30'/>
+  <path d='M160 30 L210 30'/>
+  <path d='M260 30 L300 30'/>
+  <path d='M350 30 L400 30'/>
+  <path d='M450 30 L500 30'/>
+</g>
+<rect style='fill:none;stroke:black;opacity:0.25'
+      x='20' y='80' width='520' height='60'/>
+<path style='fill:none;stroke:black;marker-start:url(#DotM);
+             marker-mid:url(#DotM);marker-end:url(#DotM)'
+      d='M40 130L140 100L240 120L330 130L430 100L530 80'/>
+<path style='fill:none;stroke:black;opacity:0.25'
+      d='M10 190L550 190'/>
+<text style='font-family:Sans;font-size:14px;font-style:normal'>
+  <tspan x='30' y='70'>S1</tspan>
+  <tspan x='130' y='70'>S2</tspan>
+  <tspan x='230' y='70'>S3</tspan>
+  <tspan x='320' y='70'>S4</tspan>
+  <tspan x='420' y='70'>S5</tspan>
+  <tspan x='520' y='70'>S6</tspan>
+  <tspan x='5' y='115'>K</tspan>
+  <tspan x='30' y='160'>--</tspan>
+  <tspan x='130' y='160'>S2</tspan>
+  <tspan x='230' y='160'>--</tspan>
+  <tspan x='330' y='160'>--</tspan>
+  <tspan x='420' y='160'>S5</tspan>
+  <tspan x='520' y='160'>S6</tspan>
+  <tspan x='210' y='180'>candidate bottlenecks</tspan>
+  <tspan x='30' y='210'>--</tspan>
+  <tspan x='130' y='210'>S2</tspan>
+  <tspan x='230' y='210'>--</tspan>
+  <tspan x='330' y='210'>--</tspan>
+  <tspan x='420' y='210'>--</tspan>
+  <tspan x='520' y='210'>S6</tspan>
+  <tspan x='220' y='230'>merged bottlenecks</tspan>
+</text>
+</svg>
 <h3>Bottleneck Candidates</h3>
 <p>
 	A mainline station is a bottleneck candidate if one of the following
