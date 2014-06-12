@@ -155,6 +155,9 @@ ol.roman {
 	text-align: right;
 	font-size: x-small;
 }
+text {
+	font-family: sans-serif;
+}
 @media print {
 	body {
 		font-size: 16pt;

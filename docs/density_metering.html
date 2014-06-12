@@ -15,7 +15,7 @@
 	Then, bottlenecks are merged with other nearby bottlenecks.
 </p>
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
-     width="560" height="240">
+     width="560" height="200">
 <title>Bottleneck Identification</title>
 <defs>
   <marker id='DotM' style='overflow:visible' orient='auto'>
@@ -31,13 +31,24 @@
 <g style='fill:none;stroke:black'>
   <path d='M10 10 L550 10 M10 50 L550 50'/>
 </g>
-<g style='opacity:0.25'>
+<g style='fill:#0a0;opacity:0.25'>
   <rect x='30' y='20' width='10' height='20'/>
   <rect x='130' y='20' width='10' height='20'/>
   <rect x='230' y='20' width='10' height='20'/>
   <rect x='320' y='20' width='10' height='20'/>
   <rect x='420' y='20' width='10' height='20'/>
   <rect x='520' y='20' width='10' height='20'/>
+</g>
+<g style='fill:#faa'>
+  <rect x='126' y='55' width='26' height='132' rx='13' ry='8'/>
+  <rect x='516' y='55' width='26' height='132' rx='13' ry='8'/>
+  <rect x='200' y='166' width='170' height='18' rx='6' ry='9'/>
+</g>
+<g style='fill:#fda'>
+  <rect x='126' y='55' width='26' height='112' rx='13' ry='8'/>
+  <rect x='416' y='55' width='26' height='112' rx='13' ry='8'/>
+  <rect x='516' y='55' width='26' height='112' rx='13' ry='8'/>
+  <rect x='200' y='146' width='170' height='18' rx='6' ry='9'/>
 </g>
 <g style='fill:none;stroke:black;opacity:0.5;marker-end:url(#Arrow1Mend)'>
   <path d='M60 30 L110 30'/>
@@ -46,14 +57,12 @@
   <path d='M350 30 L400 30'/>
   <path d='M450 30 L500 30'/>
 </g>
-<rect style='fill:none;stroke:black;opacity:0.25'
+<rect style='fill:white;stroke:black;opacity:0.5'
       x='20' y='80' width='520' height='60'/>
 <path style='fill:none;stroke:black;marker-start:url(#DotM);
              marker-mid:url(#DotM);marker-end:url(#DotM)'
       d='M40 130L140 100L240 120L330 130L430 100L530 80'/>
-<path style='fill:none;stroke:black;opacity:0.25'
-      d='M10 190L550 190'/>
-<text style='font-family:Sans;font-size:14px;font-style:normal'>
+<text style='font-size:14px;font-style:normal'>
   <tspan x='30' y='70'>S1</tspan>
   <tspan x='130' y='70'>S2</tspan>
   <tspan x='230' y='70'>S3</tspan>
@@ -61,20 +70,13 @@
   <tspan x='420' y='70'>S5</tspan>
   <tspan x='520' y='70'>S6</tspan>
   <tspan x='5' y='115'>K</tspan>
-  <tspan x='30' y='160'>--</tspan>
   <tspan x='130' y='160'>S2</tspan>
-  <tspan x='230' y='160'>--</tspan>
-  <tspan x='330' y='160'>--</tspan>
   <tspan x='420' y='160'>S5</tspan>
   <tspan x='520' y='160'>S6</tspan>
-  <tspan x='210' y='180'>candidate bottlenecks</tspan>
-  <tspan x='30' y='210'>--</tspan>
-  <tspan x='130' y='210'>S2</tspan>
-  <tspan x='230' y='210'>--</tspan>
-  <tspan x='330' y='210'>--</tspan>
-  <tspan x='420' y='210'>--</tspan>
-  <tspan x='520' y='210'>S6</tspan>
-  <tspan x='220' y='230'>merged bottlenecks</tspan>
+  <tspan x='214' y='160'>candidate bottlenecks</tspan>
+  <tspan x='130' y='180'>S2</tspan>
+  <tspan x='520' y='180'>S6</tspan>
+  <tspan x='220' y='180'>merged bottlenecks</tspan>
 </text>
 </svg>
 <h3>Bottleneck Candidates</h3>
@@ -122,7 +124,7 @@
     <rect fill='#efa' x='20' y='310' width='140' height='60'/>
     <rect fill='#faa' x='20' y='410' width='140' height='60'/>
   </g>
-  <text style='font-family:Sans;font-size:24px'>
+  <text style='font-size:24px'>
     <tspan x='40' y='50'>Not started</tspan>
     <tspan x='40' y='150'>Early Metering</tspan>
     <tspan x='40' y='250'>Metering</tspan>
