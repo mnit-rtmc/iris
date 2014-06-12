@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  * Pelco operation to move a camera.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class OpMoveCamera extends OpPelcoD {
 
@@ -62,14 +64,14 @@ public class OpMoveCamera extends OpPelcoD {
 
 	/** Phase to move the camera */
 	protected class Move extends Phase<PelcoDProperty> {
-
 		/** Command controller to move the camera */
 		protected Phase<PelcoDProperty> poll(
 			CommMessage<PelcoDProperty> mess) throws IOException
 		{
-			mess.add(new CommandProperty(pan, tilt, zoom));
+			mess.add(new CommandProperty(pan, tilt, zoom, 0, 0));
 			mess.storeProps();
 			return null;
 		}
 	}
+
 }

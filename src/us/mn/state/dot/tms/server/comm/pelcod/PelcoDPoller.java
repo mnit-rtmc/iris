@@ -69,7 +69,7 @@ public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 	 */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
-		// FIXME: NOT YET IMPLEMENTED
+		addOperation(new OpDeviceRequest(c, r));
 	}
 
 }

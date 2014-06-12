@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@ import java.io.OutputStream;
  * A property to command a camera
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class CommandProperty extends PelcoDProperty {
 
@@ -42,67 +44,110 @@ public class CommandProperty extends PelcoDProperty {
 	/** Bit flag to command a zoom out */
 	static protected final byte ZOOM_OUT = 1 << 6;
 
-	/** Requested pan value (-63 to 63) (64 means turbo) */
+	/** Bit flag to command a focus-far op */
+	static protected final int FOCUS_FAR = 1 << 7;
+
+	/** Bit flag to command a focus-near op */
+	static protected final int FOCUS_NEAR = 1 << 8;
+
+	/** Bit flag to command an iris-open op */
+	static protected final int IRIS_OPEN = 1 << 9;
+
+	/** Bit flag to command an iris-close op */
+	static protected final int IRIS_CLOSE = 1 << 10;
+
+	/** Requested pan value [-63, 63] :: [left, right] (64 is turbo) */
 	protected final int pan;
 
-	/** Requested tilt value (-63 to 63) */
+	/** Requested tilt value [-63, 63] :: [down, up] */
 	protected final int tilt;
 
-	/** Requested zoom value (-1 to 1) */
+	/** Requested zoom value [-1, 1] :: [out, in] */
 	protected final int zoom;
 
+	/** Requested focus value [-1, 1] :: [near, far] */
+	protected final int focus;
+
+	/** Requested iris value [-1, 1] :: [close, open] */
+	protected final int iris;
+
 	/** Create a new command property */
-	public CommandProperty(int p, int t, int z) {
+	public CommandProperty(int p, int t, int z, int f, int i) {
 		pan = p;
 		tilt = t;
 		zoom = z;
+		focus = f;
+		iris = i;
 	}
 
-	/** Get bit flags to control panning */
+	/** Construct an int containing the pan command flags in the 2 LSBs */
 	protected byte getPanFlags() {
-		if(pan < 0)
+		if (pan < 0)
 			return PAN_LEFT;
-		else if(pan > 0)
+		else if (pan > 0)
 			return PAN_RIGHT;
 		else
 			return 0;
 	}
 
-	/** Get bit flags to control tilting */
+	/** Construct an int containing the tilt command flags in the 2 LSBs */
 	protected byte getTiltFlags() {
-		if(tilt < 0)
+		if (tilt < 0)
 			return TILT_DOWN;
-		else if(tilt > 0)
+		else if (tilt > 0)
 			return TILT_UP;
 		else
 			return 0;
 	}
 
-	/** Get bit flags to control zooming */
+	/** Construct an int containing the zoom command flags in the 2 LSBs */
 	protected byte getZoomFlags() {
-		if(zoom < 0)
+		if (zoom < 0)
 			return ZOOM_OUT;
-		else if(zoom > 0)
+		else if (zoom > 0)
 			return ZOOM_IN;
 		else
 			return 0;
 	}
 
-	/** Get the bit flags to control pan/tilt/zoom functions */
-	protected byte getPTZFlags() {
-		return (byte)(getPanFlags() | getTiltFlags() | getZoomFlags());
+	/** Construct an int containing the focus command flags in the 2 LSBs */
+	protected int getFocusFlags() {
+		if (focus < 0)
+			return FOCUS_NEAR;
+		else if (focus > 0)
+			return FOCUS_FAR;
+		else
+			return 0;
+	}
+
+	/** Construct an int containing the iris command flags in the 2 LSBs */
+	protected int getIrisFlags() {
+		if (iris < 0)
+			return IRIS_CLOSE;
+		else if (iris > 0)
+			return IRIS_OPEN;
+		else
+			return 0;
+	}
+
+	/** Construct an int containing the full command bytes in the 2 LSBs */
+	protected int getCommandFlags() {
+		return (getPanFlags() | getTiltFlags() | getZoomFlags()
+			| getFocusFlags() | getIrisFlags());
 	}
 
 	/** Encode a STORE request */
 	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] message = new byte[7];
-		message[0] = (byte)0xFF;
+		int cmd = getCommandFlags();
+		message[0] = (byte)0xff;
 		message[1] = (byte)drop;
-		message[2] = 0;
-		message[3] = getPTZFlags();
+		message[2] = (byte)(((cmd & 0xff00) >>> 8) & 0xff);
+		message[3] = (byte)(((cmd & 0x00ff) >>> 0) & 0xff);
 		message[4] = (byte)Math.abs(pan);
 		message[5] = (byte)Math.abs(tilt);
 		message[6] = calculateChecksum(message);
 		os.write(message);
 	}
+
 }
