@@ -103,11 +103,6 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 		addOperation(new OpRecallPreset(c, this, preset));
 	}
 
-	/** Add an operation to the message poller. */
-	protected void addOperation(OpCohuPTZ op) {
-		super.addOperation(op);
-	}
-
 	/**
 	 * Get the timestamp of the last command issued to the device.
 	 * This value, stored in CohuPTZPoller, is updated by OpCohuPTZ
