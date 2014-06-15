@@ -138,7 +138,7 @@ public class CameraDispatcher extends JPanel {
 		info_pnl = createInfoPanel();
 		stream_pnl = createStreamPanel();
 		ptz_pnl = new PTZPanel(cam_ptz);
-		preset_pnl = new PresetPanel();
+		preset_pnl = new PresetPanel(s);
 		util_pnl = new UtilPanel(cam_ptz);
 		control_pnl = createControlPanel();
 	}
