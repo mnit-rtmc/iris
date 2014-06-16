@@ -24,3 +24,4 @@ INSERT INTO iris.comm_protocol (id, description) VALUES (29, 'Cohu PTZ');
 INSERT INTO iris.system_attribute (name, value) VALUES ('camera_preset_panel_columns', '6');
 INSERT INTO iris.system_attribute (name, value) VALUES ('camera_preset_panel_enable', 'true');
 INSERT INTO iris.system_attribute (name, value) VALUES ('camera_util_panel_enable', 'false');
+INSERT INTO iris.system_attribute (name, value) VALUES ('camera_preset_store_enable', 'false');
