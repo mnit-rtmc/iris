@@ -1,4 +1,4 @@
-wkhtmltopdf -s Letter density_metering.html meter_text.pdf
+wkhtmltopdf.static --print-media-type -s Letter density_metering.html meter_text.pdf
 inkscape --export-pdf=meter_undercount.pdf meter_undercount.svg
 inkscape --export-pdf=meter_storage.pdf meter_storage.svg
 inkscape --export-pdf=meter_wait_limit.pdf meter_wait_limit.svg

@@ -13,8 +13,8 @@
 </p>
 <ol>
 <li>Delay the onset of mainline congestion for as long as possible.
-    This is achieved by restricting metering rates when density on the mainline
-    approaches a critical level.
+    This is achieved by restricting metering rates when
+    <a href='#density'>density</a> on the mainline approaches a critical level.
 </li>
 <li>Effectively manage the queue at ramp meters.
     Wait times should rarely be longer than a configurable time.
@@ -26,11 +26,13 @@
 <p>
 	At each time interval, all mainline stations on a freeway corridor are
 	checked for bottlenecks.
-	First, candidates are selected based on station density.
+	First, candidates are selected based on
+	<a href='#station_density'>station density</a>.
 	Then, bottlenecks are merged with other nearby bottlenecks.
 </p>
+<h3>Candidate Bottlenecks</h3>
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
-     width="784" height="280" viewBox='0,0,560,200'>
+     viewBox='0,0,560,200' preserveAspectRatio='xMaxYMax meet'>
 <title>Bottleneck Identification</title>
 <defs>
   <marker id='DotM' style='overflow:visible' orient='auto'>
@@ -94,18 +96,20 @@
   <tspan x='220' y='180'>merged bottlenecks</tspan>
 </text>
 </svg>
-<h3>Candidate Bottlenecks</h3>
 <p>
 	A mainline station is a candidate bottleneck if one of the following
 	conditions are met:
 </p>
 <ul>
-<li>Station density is above bottleneck density for each interval in 90
-    seconds.</li>
-<li>Station density is above bottleneck density, AND</li>
+<li><a href='#station_density'>Station density</a> is above bottleneck density
+    for each interval in 90 seconds.</li>
+<li><a href='#station_density'>Station density</a> is above bottleneck density,
+    AND
+</li>
     <ul>
     <li>Station was a bottleneck in previous interval, OR</li>
-    <li>Station density is trending higher for each interval in 90 seconds.</li>
+    <li><a href='#station_density'>Station density</a> is trending higher for
+        each interval in 90 seconds.</li>
     </ul>
 </ul>
 <h3>Bottleneck Merging</h3>
@@ -157,19 +161,20 @@
 <p>
 	A metering period begins and ends at specific times during the day.
 	Within the metering period, a meter can be in one of 5 phases:
-	<em>not started</em>, <em>early metering</em>, <em>metering</em>,
-	<em>flushing</em> or <em>stopped</em>.
+	<a href='#not_started'>not started</a>,
+	<a href='#early_metering'>early metering</a>,
+	<a href='#metering'>metering</a>,
+	<a href='#flushing'>flushing</a> or <a href='#stopped'>stopped</a>.
 	When transition conditions are met, the meter moves to the next phase.
-	If all meters on a corridor are in the <em>stopped</em> phase, the
-	metering period ends.
+	If all meters on a corridor are in the <a href='#stopped'>stopped</a>
+	phase, the metering period ends.
 </p>
-<h3>Not Started Phase</h3>
+<h3 id='not_started'>Not Started Phase</h3>
 <p>
-	Ramp meters begin each metering period in the <em>not started</em>
-	phase.
-	In this phase, a ramp meter will not cycle.
+	Ramp meters begin each metering period in this phase.
+	The meter will not cycle until the phase is changed.
 	There are two conditions which can cause the meter to transition to the
-	<em>early metering</em> phase:
+	<a href='#early_metering'>early metering</a> phase:
 </p>
 <ul>
 <li>Passage flow rate was greater than 80% of selected metering rate for each
@@ -179,32 +184,31 @@
 </ul>
 <p>
 	When there are 30 minutes left in the metering period, the meter will
-	transition from <em>not started</em> to <em>stopped</em>.
+	transition from <a href='#not_started'>not started</a> to
+	<a href='#stopped'>stopped</a>.
 </p>
-<h3>Early Metering Phase</h3>
+<h3 id='early_metering'>Early Metering Phase</h3>
 <p>
-	In the <em>early metering</em> phase, a ramp meter will cycle at the
-	selected metering rate.
+	In this phase, a ramp meter will cycle at the selected metering rate.
 	There are three conditions which can cause the meter to transition to
-	the <em>metering</em> phase:
+	the <a href='#metering'>metering</a> phase:
 </p>
 <ul>
-<li>Segment density (15 minute average) was trending lower for each interval in
-    5 minutes.</li>
-<li>Segment density (1 minute average) was lower than 65% of critical density.
-</li>
+<li><a href='#segment_density'>Segment density</a> (15 minute average) was
+    trending lower for each interval in 5 minutes.</li>
+<li><a href='#segment_density'>Segment density</a> (1 minute average) was lower
+    than 65% of critical density.</li>
 <li>Only 30 minutes remain in the metering period.</li>
 </ul>
-<h3>Metering Phase</h3>
+<h3 id='metering'>Metering Phase</h3>
 <p>
-	In the <em>metering</em> phase, a ramp meter will cycle at the selected
-	metering rate.
+	In this phase, a ramp meter will cycle at the selected metering rate.
 	The following conditions will cause the meter to transition to the
-	<em>flushing</em> phase:
+	<a href='#flushing'>flushing</a> phase:
 </p>
 <ul>
-<li>Segment density was below desired density (29.6) for every interval in 5
-    minutes, AND</li>
+<li><a href='#segment_density'>Segment density</a> was below desired density
+    (29.6) for every interval in 5 minutes, AND</li>
     <ul>
     <li>Passage rate (60 second smoothed) was lower than metering rate for
         all intervals in 5 minutes, OR</li>
@@ -212,34 +216,33 @@
     </ul>
 <li>Only 2 minutes remain in the metering period.</li>
 </ul>
-<h3>Flushing Phase</h3>
+<h3 id='flushing'>Flushing Phase</h3>
 <p>
-	In the <em>flushing</em> phase, a ramp meter will cycle at the maximum
-	metering rate.
+	In this phase, a ramp meter will cycle at the maximum metering rate.
 	The following conditions will cause the meter to transition to the
-	<em>stopped</em> phase:
+	<a href='#stopped'>stopped</a> phase:
 </p>
 <ul>
 <li>The queue is estimated to be empty for 1 minute.</li>
 <li>The metering period ends.</li>
 </ul>
-<h3>Stopped Phase</h3>
+<h3 id='stopped'>Stopped Phase</h3>
 <p>
-	In the <em>stopped</em> phase, a ramp meter will not cycle.
+	In this phase, a ramp meter will not cycle.
 	There are two conditions which can cause the meter to transition back
-	to the <em>metering</em> phase:
+	to the <a href='#metering'>metering</a> phase:
 </p>
 <ul>
 <li>Passage flow rate was greater than 80% of selected metering rate for each
     interval in 5 minutes.</li>
-<li>Segment density was higher than bottleneck density for each interval in 5
-    minutes.</li>
+<li><a href='#segment_density'>Segment density</a> was higher than bottleneck
+    density for each interval in 5 minutes.</li>
 </ul>
 <h2>Definitions</h2>
 <dl>
-	<dt>Density</dt>
+	<dt id='density'>Density</dt>
 	<dd>Vehicles per lane-mile</dd>
-	<dt>Station Density</dt>
+	<dt id='station_density'>Station Density</dt>
 	<dd>Average of all valid lanes in a station for one sample period</dd>
 	<dt>Interval Density</dt>
 	<dd>Average of station samples during one 60 second interval</dd>
@@ -248,7 +251,7 @@
 	    It begins at the station just upstream of the meter.
 	    The downstream end is the first bottleneck within 3 miles (or the
 	    last station within 3 miles if no bottleneck exists).</dd>
-	<dt>Segment Density</dt>
+	<dt id='segment_density'>Segment Density</dt>
 	<dd>Each consecutive pair of stations is divided into 3 equal links.
 	    The first and last links are assigned density from the station
 	    adjacent to them.

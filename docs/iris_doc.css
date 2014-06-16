@@ -160,7 +160,7 @@ text {
 }
 @media print {
 	body {
-		font-size: 16pt;
+		font-size: 13pt;
 		background: white;
 	}
 	h1, h2, h3, h4, h4 {
