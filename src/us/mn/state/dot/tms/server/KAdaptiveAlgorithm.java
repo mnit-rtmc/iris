@@ -710,7 +710,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Find downstream segment station node.
 		 * @return Downstream segment station node. */
 		protected StationNode segmentStationNode() {
-			StationNode dn = null;
+			StationNode dn = this;
 			for(StationNode sn = this; sn != null;
 			    sn = sn.downstreamStation())
 			{
@@ -1215,23 +1215,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate the metering rate */
 		private void calculateMeteringRate() {
+			assert s_node != null;
 			StationNode dn = s_node.segmentStationNode();
-			double k = calculateSegmentDensity(dn);
+			double k = s_node.calculateSegmentDensity(dn);
 			double r = calculateRate(k);
 			segment_k_hist.push(k);
 			rate_hist.push(r);
 			if(shouldMeter(dn))
 				setRate(r);
-		}
-
-		/** Calculate the segment density.
-		 * @param dn Segment downstream station node.
-		 * @return Segment density (vehicles per lane-mile) */
-		private double calculateSegmentDensity(StationNode dn) {
-			if(dn != null)
-				return s_node.calculateSegmentDensity(dn);
-			else
-				return s_node.getDensity();
 		}
 
 		/** Should we be metering?
