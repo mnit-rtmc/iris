@@ -135,14 +135,14 @@
 <h3>Queueing</h3>
 <p>
 	A queue is formed at a ramp meter when the input (demand) is greater
-	than the output (release rate).
+	than the output (passage).
 	These values can be used to estimate the length of a queue, by
-	comparing the accumulated input and output.
+	comparing the accumulated demand and passage.
 	Unfortunately, vehicle detection systems are not 100% accurate.
-	For improved accuracy, the accumulated input and output values can be
+	For improved accuracy, the accumulated demand and passage values can be
 	reset to zero when there is no queue.
-	Also, when the queue is full the accumulated input can be adjusted so
-	that the queue length matches a known storage length for that ramp.
+	Also, when the queue is full the accumulated demand can be adjusted so
+	that the queue length matches a maximum storage length for that ramp.
 </p>
 
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
@@ -196,7 +196,7 @@
 <text style='font-size:9pt' x='292' y='88'>duration</text>
 </svg>
 
-<h3>Demand Estimation</h3>
+<h3>Demand (Input)</h3>
 <p>
 	The demand at a ramp meter is estimated using ramp queue detection.
 	A cumulative demand value is taken from the time when metering begins.
@@ -229,6 +229,26 @@
 	(AM or PM).
 	It should be set based on historical demand at the ramp.
 </p>
+
+<h3>Passage (Output)</h3>
+<p>
+	The passage detector is used to estimate the output of the queue.
+	In general, this detector is less succeptible to problems than the
+	queue detector.
+</p>
+
+<h3>Minimum Rate</h3>
+<p>
+	The minimum rate is determined by the state of the ramp queue.
+	When the passage detector malfunctions, it is equal to the 5-minute
+	average demand rate.
+	Otherwise, it is the highest of the following 3 limits:
+</p>
+<ul>
+	<li>Queue storage limit</li>
+	<li>Queue wait time limit</li>
+	<li>Target minimum rate limit</li>
+</ul>
 
 <h2 class='clear'>Metering Period</h2>
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
