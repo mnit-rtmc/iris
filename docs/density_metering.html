@@ -222,6 +222,13 @@
 	v = max storage - queue len
 	demand += max(r * v, 1)
 </pre>
+<p>
+	If the queue detector is malfunctioning, the demand is set to a fixed
+	target value.
+	This target value is specific to one ramp meter and metering period
+	(AM or PM).
+	It should be set based on historical demand at the ramp.
+</p>
 
 <h2 class='clear'>Metering Period</h2>
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
