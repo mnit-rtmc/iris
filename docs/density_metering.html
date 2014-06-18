@@ -132,6 +132,19 @@
 	in addition to the ramp demand and queue condition.
 	For each interval, a ramp meter has a minimum and maximum metering rate.
 </p>
+<h3>Queueing</h3>
+<p>
+	A queue is formed at a ramp meter when the input (demand) is greater
+	than the output (release rate).
+	These values can be used to estimate the length of a queue, by
+	comparing the accumulated input and output.
+	Unfortunately, vehicle detection systems are not 100% accurate.
+	For improved accuracy, the accumulated input and output values can be
+	reset to zero when there is no queue.
+	Also, when the queue is full the accumulated input can be adjusted so
+	that the queue length matches a known storage length for that ramp.
+</p>
+
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
      width='440' height='480' viewBox='0,0,440,480'>
 <title>Demand Undercount Correction</title>
@@ -141,9 +154,9 @@
       d='M100 420L100 60 M140 420L140 60 M180 420L180 60 M220 420L220 60
          M260 420L260 60 M300 420L300 60 M340 420L340 60'/>
 <text style='font-size:20pt' x='32' y='40'>Demand Undercount Correction</text>
-<path id='volume_text' d='M40 320L40 60'/>
+<path id='count_text' d='M40 300L40 60'/>
 <text style='font-size:14pt'>
-  <textPath xlink:href='#volume_text'>Volume (Vehicles)</textPath>
+  <textPath xlink:href='#count_text'>Total Vehicles</textPath>
 </text>
 <text style='font-size:14pt' x='180' y='470'>Time (Steps)</text>
 <text style='font-size:9pt'>
