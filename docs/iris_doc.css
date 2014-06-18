@@ -178,6 +178,9 @@ text {
 	dd {
 		page-break-inside: avoid;
 	}
+	.pagebreak {
+		page-break-before: always;
+	}
 	.right {
 		page-break-inside: avoid;
 	}
