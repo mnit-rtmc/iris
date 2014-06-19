@@ -150,9 +150,9 @@
      width='400' height='480' viewBox='0,0,400,480'>
 <title>Demand Undercount Correction</title>
 <text style='font-size:20pt' x='100' y='40'>Demand Correction</text>
-<path id='count_text' d='M40 300 40 60'/>
+<path id='count_text_0' d='M40 300 V60'/>
 <text style='font-size:14pt'>
-  <textPath xlink:href='#count_text'>Vehicle Count</textPath>
+  <textPath xlink:href='#count_text_0'>Vehicle Count</textPath>
 </text>
 <text style='font-size:14pt' x='180' y='470'>Time (Steps)</text>
 <text style='font-size:9pt'>
@@ -259,7 +259,7 @@
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='560' height='480' viewBox='0,0,560,480'>
 <text style='font-size:20pt' x='166' y='40'>Queue Storage Limit</text>
-<path id='count_text_1' d='M40 300 40 60'/>
+<path id='count_text_1' d='M40 300 V60'/>
 <text style='font-size:14pt'>
   <textPath xlink:href='#count_text_1'>Vehicle Count</textPath>
 </text>
@@ -358,7 +358,7 @@
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='560' height='480' viewBox='0,0,560,480'>
 <text style='font-size:20pt' x='140' y='40'>Queue Storage Limit (Fixed)</text>
-<path id='count_text_2' d='M40 300 40 60'/>
+<path id='count_text_2' d='M40 300 V60'/>
 <text style='font-size:14pt'>
   <textPath xlink:href='#count_text_2'>Vehicle Count</textPath>
 </text>
@@ -398,9 +398,10 @@
 <text style='font-size:8pt' transform='translate(-2,-16)'>
   <textPath xlink:href='#queue_length_2'>queue length</textPath>
 </text>
-<path id='target_demand' d='M180 246 300 116'/>
+<path id='queue_demand_2' d='M180 246 300 116'/>
 <text style='font-size:9pt'>
-  <textPath xlink:href='#target_demand'>fixed target demand (input)</textPath>
+  <textPath xlink:href='#queue_demand_2'>demand (input) — fixed target
+  </textPath>
 </text>
 <path id='passage_rate_2' d='M200 290 320 190'/>
 <text style='font-size:9pt'>
@@ -436,7 +437,7 @@
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='560' height='480' viewBox='0,0,560,480'>
 <text style='font-size:20pt' x='190' y='40'>Queue Wait Limit</text>
-<path id='count_text_3' d='M40 300 40 60'/>
+<path id='count_text_3' d='M40 300 V60'/>
 <text style='font-size:14pt'>
   <textPath xlink:href='#count_text_3'>Vehicle Count</textPath>
 </text>
@@ -484,25 +485,24 @@
 <text style='font-size:8pt' transform='translate(32,-2)'>
   <textPath xlink:href='#wait_time_1'>wait time</textPath>
 </text>
-<path id='max_wait' d='M360 270 420 220'/>
+<path id='max_wait_1' d='M360 270 420 220'/>
 <text style='font-size:8pt'>
-  <textPath xlink:href='#max_wait'>max wait</textPath>
+  <textPath xlink:href='#max_wait_1'>max wait</textPath>
 </text>
-<path id='target_wait' d='M320 270 380 220'/>
+<path id='target_wait_1' d='M320 270 380 220'/>
 <text style='font-size:8pt'>
-  <textPath xlink:href='#target_wait'>target wait</textPath>
+  <textPath xlink:href='#target_wait_1'>target wait</textPath>
 </text>
 <path style='fill:none;stroke:#003373;stroke-dasharray:1,2;opacity:0.25'
       d='M340 220L460 100 M340 220L380 200 M340 220L360 220'/>
-<path id='queue_wait'
-      style='fill:none;stroke:#003373;stroke-dasharray:1,2'
+<path id='queue_wait_1' style='stroke:#003373;stroke-dasharray:1,2'
       d='M340 220L420 130'/>
 <text style='font-size:10pt' transform='translate(10,-18)'>
-  <textPath xlink:href='#queue_wait'>queue wait limit</textPath>
+  <textPath xlink:href='#queue_wait_1'>queue wait limit</textPath>
 </text>
-<path id='queue_demand_2' d='M140 300 260 180'/>
+<path id='queue_demand_3' d='M140 300 260 180'/>
 <text style='font-size:9pt'>
-  <textPath xlink:href='#queue_demand_2'>demand (input)</textPath>
+  <textPath xlink:href='#queue_demand_3'>demand (input)</textPath>
 </text>
 <path id='passage_rate_3' d='M160 320 320 250'/>
 <text style='font-size:9pt'>
@@ -522,6 +522,76 @@
 	accumulated passage.
 	The queue wait limit is the highest of the limits for these intervals.
 </p>
+
+<br class='clear'/>
+
+<svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink='http://www.w3.org/1999/xlink'
+     width='560' height='480' viewBox='0,0,560,480'>
+<text style='font-size:20pt' x='160' y='40'>Queue Wait Limit (Fixed)</text>
+<path id='count_text_4' d='M40 300 V60'/>
+<text style='font-size:14pt'>
+  <textPath xlink:href='#count_text_4'>Vehicle Count</textPath>
+</text>
+<text style='font-size:14pt' x='260' y='470'>Time (Steps)</text>
+<text style='font-size:9pt'>
+  <tspan x='100' y='440'>t-12</tspan>
+  <tspan x='140' y='440'>t-10</tspan>
+  <tspan x='180' y='440'>t-8</tspan>
+  <tspan x='220' y='440'>t-6</tspan>
+  <tspan x='260' y='440'>t-4</tspan>
+  <tspan x='300' y='440'>t-2</tspan>
+  <tspan x='340' y='440'>t</tspan>
+  <tspan x='380' y='440'>t+2</tspan>
+  <tspan x='420' y='440'>t+4</tspan>
+  <tspan x='460' y='440'>t+6</tspan>
+  <tspan x='500' y='440'>t+8</tspan>
+</text>
+<rect style='fill:#f6f6ff;stroke:black;stroke-width:2'
+      x='60' y='60' width='480' height='360'/>
+<path style='fill:none;stroke:gray;stroke-width:0.25'
+      d='M100 60V420 M140 60V420 M180 60V420 M220 60V420 M260 60V420 M300 60V420
+         M340 60V420 M380 60V420 M420 60V420 M460 60V420 M500 60V420'/>
+<path style='fill:#fffcbb'
+      d='M500 100L420 100 260 240 220 380 260 380'/>
+<path style='fill:#ceffcf'
+      d='M260 240L340 100 460 100 220 380 100 380'/>
+<path style='fill:#def;stroke:#003373'
+      d='M340 100L100 380 60 420 100 380 120 370 140 360 160 340 220 300
+	 240 290 280 270 320 240 340 220'/>
+<path style='stroke:#509200;stroke-dasharray:1,2'
+      d='M220 380L460 100'/>
+<path style='stroke:black;stroke-dasharray:1,2'
+      d='M500 100L260 380'/>
+<text style='font-size:8pt' x='100' y='390'>start metering</text>
+<path id='wait_time_2' style='stroke:black;stroke-dasharray:1,2'
+      d='M238 220L340 220'/>
+<text style='font-size:8pt' transform='translate(32,-2)'>
+  <textPath xlink:href='#wait_time_2'>wait time</textPath>
+</text>
+<path id='max_wait_2' d='M360 280 420 210'/>
+<text style='font-size:8pt'>
+  <textPath xlink:href='#max_wait_2'>max wait</textPath>
+</text>
+<path id='target_wait_2' d='M320 280 380 210'/>
+<text style='font-size:8pt'>
+  <textPath xlink:href='#target_wait_2'>target wait</textPath>
+</text>
+<path id='queue_wait_2' style='stroke:#003373;stroke-dasharray:1,2'
+      d='M340 220L460 100'/>
+<text style='font-size:10pt' transform='translate(24,-32)'>
+  <textPath xlink:href='#queue_wait_2'>queue wait limit</textPath>
+</text>
+<path id='queue_demand_4' d='M180 280 300 140'/>
+<text style='font-size:9pt'>
+  <textPath xlink:href='#queue_demand_4'>demand (input) — fixed target
+  </textPath>
+</text>
+<path id='passage_rate_4' d='M180 320 320 230'/>
+<text style='font-size:9pt'>
+  <textPath xlink:href='#passage_rate_4'>passage (output)</textPath>
+</text>
+</svg>
 
 <h2 class='clear'>Metering Period</h2>
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
