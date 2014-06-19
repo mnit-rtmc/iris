@@ -428,7 +428,8 @@
 <p>
 	When the queue detector is malfunctioning, the target value for the
 	current metering period (AM or PM) is used for demand.
-	This makes the meter behave as if the demand is high at all times.
+	This makes the queue storage limit behave as if the demand is high at
+	all times.
 	While not optimal, it allows short queues to be held to break up
 	platoons of vehicles.
 </p>
@@ -528,7 +529,7 @@
 
 <br class='clear'/>
 
-<svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
+<svg class='left' version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='560' height='450' viewBox='0,20,560,450'>
 <title>Queue Wait Limit (Fixed)</title>
@@ -596,6 +597,15 @@
   <textPath xlink:href='#passage_rate_4'>passage (output)</textPath>
 </text>
 </svg>
+
+<p>
+	When the queue detector is malfunctioning, the target value for the
+	current metering period (AM or PM) is used for demand.
+	This makes the queue wait limit behave as if the demand is high at all
+	times.
+	While not optimal, it allows short queues to be held to break up
+	platoons of vehicles.
+</p>
 
 <h2 class='clear'>Metering Period</h2>
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
