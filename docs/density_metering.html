@@ -186,8 +186,19 @@
 <p>
 	A queue is formed at a ramp meter when the input (demand) is greater
 	than the output (passage).
-	These values are used to estimate the length of a queue, by comparing
-	the accumulated demand and passage.
+	The total demand and passage counts since metering began are compared.
+	At any point in time, the difference between these counts is the
+	current queue length (in vehicles).
+	Also, the wait time is estimated by comparing the current passage count
+	with demand counts from previous time intervals.
+	The vehicle at the head of the queue started waiting when demand was
+	equal to the current passage count.
+</p>
+<p>
+	The slope of accumulated vehicle counts through time is the flow rate.
+	Typically, it is expressed in vehicles per hour.
+	For practical metering on two-lane alternate-release meters, flow can
+	range from 240 to 1700 (about 4 to 28 vehicles per minute).
 </p>
 <p>
 	Unfortunately, vehicle detection systems are not 100% accurate.
