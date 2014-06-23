@@ -304,18 +304,34 @@
 	It should be set based on historical demand at the ramp.
 </p>
 
-<h3>Minimum Rate</h3>
+<h3>Rate Limits</h3>
 <p>
-	The minimum rate is determined by the state of the ramp queue.
-	When the passage detector malfunctions, it is equal to the average
-	demand rate for the previous 5 minutes.
+	The metering rate is limited to a range between the minimum and maximum
+	rates.
+	These rates are determined by the state of the ramp queue.
+</p>
+
+<h4>Minimum Rate</h4>
+<p>
+	When the passage detector malfunctions, the minimum rate is equal to the
+	average demand rate for the previous 5 minutes.
 	Otherwise, it is the highest of the following 3 limits:
 </p>
 <ul>
-	<li>Queue storage limit</li>
+	<li>Target minimum limit</li>
 	<li>Queue wait limit</li>
-	<li>Target minimum rate limit</li>
+	<li>Queue storage limit</li>
 </ul>
+
+<h4>Maximum Rate</h4>
+<p>
+	The maximum metering rate is 130% of the target demand for the previous
+	5 minutes.
+	This is intended to prevent the meter from releasing all vehicles in a
+	queue too quickly.
+	The maximum rate may be adjusted to match the minimum rate if that is
+	higher.
+</p>
 
 <svg class="right" version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink='http://www.w3.org/1999/xlink'
