@@ -290,8 +290,6 @@
 	length is equal to the maximum storage.
 </p>
 <pre>
-	duration (of occupancy spike)
-
 	r = 2 * duration / max_wait
 	v = max storage - queue len
 	demand += max(r * v, 1)
@@ -302,13 +300,6 @@
 	This target value is specific to one ramp meter and metering period
 	(AM or PM).
 	It should be set based on historical demand at the ramp.
-</p>
-
-<h3>Rate Limits</h3>
-<p>
-	The metering rate is limited to a range between the minimum and maximum
-	rates.
-	These rates are determined by the state of the ramp queue.
 </p>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -377,6 +368,12 @@
 </text>
 </svg>
 
+<h3>Rate Limits</h3>
+<p>
+	The metering rate is limited to a range between the minimum and maximum
+	rates.
+	These rates are determined by the state of the ramp queue.
+</p>
 <h4>Maximum Rate</h4>
 <p>
 	The maximum metering rate is 130% of the target demand for the previous
@@ -399,6 +396,8 @@
 	<li>Queue wait limit</li>
 	<li>Queue storage limit</li>
 </ul>
+
+<br class='clear'/>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink='http://www.w3.org/1999/xlink'
