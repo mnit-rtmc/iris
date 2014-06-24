@@ -1515,11 +1515,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double x = K_DES - k;
 
 			KPoint p0 = new KPoint(K_DES - K_JAM, Rmin / Rt);
-			KPoint p1 = new KPoint((K_DES - K_JAM) / 3,
-				Rmin / Rt + (1 - Rmin / Rt) / 3);
 			KPoint p2 = new KPoint(0, 1);
 			if(Rmin >= Rt)
-				p0.y = p1.y = p2.y = Rmin / Rt;
+				p0.y = p2.y = Rmin / Rt;
 			KPoint p4 = new KPoint(K_DES, Rmax / Rt);
 
 			// Mainline graph connection 2 points
