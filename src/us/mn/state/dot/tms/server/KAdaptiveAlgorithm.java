@@ -1477,28 +1477,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return maximumRate;
 		}
 
-		/**
-		 * Calculate metering rate.
-		 * <pre>
-		 *                       ^
-		 *                       | k
-		 *                       |                 +
-		 *                       |
-		 *                       |
-		 *                       |             +
-		 *                       |
-		 *                       +
-		 *                       |
-		 *                       |
-		 *                 +     |
-		 *    +                  |
-		 * --p0------------p1----p2------------p3---p4-----&gt; K_DES-k
-		 *                       |
-		 *                       |
-		 * p0's x = K_DES - K_JAM
-		 * p2's x = 0
-		 * p4's x = K_DES
-		 * </pre>
+		/** Calculate metering rate.
 		 *
 		 * @param k Segment density.
 		 * @return Metering rate (vehicles per hour).
@@ -1596,14 +1575,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private double calculateAlpha(KPoint P0, KPoint P2, KPoint P4,
 		double x)
 	{
-		KPoint start = P0, end = P2;
-		if(x >= 0) {
-			start = P2;
-			end = P4;
-		} else {
-			start = P0;
-			end = P2;
-		}
+		KPoint start = (x >= 0) ? P2 : P0;
+		KPoint end   = (x >= 0) ? P4 : P2;
 		double yd = end.y - start.y;
 		double xd = end.x - start.x;
 		if(xd != 0)
