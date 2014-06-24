@@ -1514,10 +1514,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			// Calculate MainLine Alpha value with MainLine Density
 			double x = K_DES - k;
 
-			KPoint p0 = new KPoint(K_DES - K_JAM, Rmin / Rt);
+			double min_ratio = Rmin / Rt;
+
+			KPoint p0 = new KPoint(K_DES - K_JAM, min_ratio);
 			KPoint p2 = new KPoint(0, 1);
-			if(Rmin >= Rt)
-				p0.y = p2.y = Rmin / Rt;
+			if(Rmin >= Rt) {
+				p0.y = min_ratio;
+				p2.y = min_ratio;
+			}
 			KPoint p4 = new KPoint(K_DES, Rmax / Rt);
 
 			// Mainline graph connection 2 points
