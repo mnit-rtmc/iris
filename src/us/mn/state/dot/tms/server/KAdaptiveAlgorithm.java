@@ -1218,7 +1218,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			assert s_node != null;
 			StationNode dn = s_node.segmentStationNode();
 			double k = s_node.calculateSegmentDensity(dn);
-			double r = calculateRate(getRate(), k);
+			double r = limitRate(calculateRate(getRate(), k));
 			segment_k_hist.push(k);
 			rate_hist.push(r);
 			if(shouldMeter(dn))
@@ -1414,10 +1414,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Set metering rate.
 		 * @param rn Next metering rate. */
 		private void setRate(double rn) {
-			int r = (int)Math.round(rn);
-			r = Math.max(r, minimumRate);
-			r = Math.min(r, maximumRate);
-			currentRate = r;
+			currentRate = (int)Math.round(rn);
 			meter.setRatePlanned(currentRate);
 		}
 
@@ -1477,6 +1474,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return maximumRate;
 		}
 
+		/** Limit metering rate within minimum and maximum rates */
+		private double limitRate(double r) {
+			return Math.min(getMaximumRate(),
+			       Math.max(getMinimumRate(), r));
+		}
+
 		/** Calculate metering rate.
 		 *
 		 * @param rate Current rate.
@@ -1501,10 +1504,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				KPoint p0 = new KPoint(K_DES - K_JAM,min_ratio);
 				alpha = calculateAlpha(p0, p1, x);
 			}
-			double Rnext = rate * alpha;
-			Rnext = Math.max(Rnext, Rmin);
-			Rnext = Math.min(Rnext, Rmax);
-			return Rnext;
+			return rate * alpha;
 		}
 
 		/** Get a string representation of a meter state */
