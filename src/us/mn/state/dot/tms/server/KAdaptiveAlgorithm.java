@@ -1218,7 +1218,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			assert s_node != null;
 			StationNode dn = s_node.segmentStationNode();
 			double k = s_node.calculateSegmentDensity(dn);
-			double r = calculateRate(k);
+			double r = calculateRate(getRate(), k);
 			segment_k_hist.push(k);
 			rate_hist.push(r);
 			if(shouldMeter(dn))
@@ -1479,29 +1479,29 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate metering rate.
 		 *
+		 * @param rate Current rate.
 		 * @param k Segment density.
 		 * @return Metering rate (vehicles per hour).
 		 */
-		private double calculateRate(double k) {
+		private double calculateRate(double rate, double k) {
 			double Rmin = getMinimumRate();
 			double Rmax = getMaximumRate();
-			double Rt = getRate();
-			if(Rt == 0)
+			if(rate == 0)
 				return Rmax;
-
+			double alpha;
 			double x = K_DES - k;
-			double min_ratio = Rmin / Rt;
-
-			KPoint p0 = new KPoint(K_DES - K_JAM, min_ratio);
+			double min_ratio = Rmin / rate;
 			KPoint p1 = new KPoint(0, 1);
-			if(Rmin >= Rt) {
-				p0.y = min_ratio;
+			if(Rmin >= rate)
 				p1.y = min_ratio;
+			if(x >= 0) {
+				KPoint p2 = new KPoint(K_DES, Rmax / rate);
+				alpha = calculateAlpha(p1, p2, x);
+			} else {
+				KPoint p0 = new KPoint(K_DES - K_JAM,min_ratio);
+				alpha = calculateAlpha(p0, p1, x);
 			}
-			KPoint p2 = new KPoint(K_DES, Rmax / Rt);
-
-			double alpha = calculateAlpha(p0, p1, p2, x);
-			double Rnext = Rt * alpha;
+			double Rnext = rate * alpha;
 			Rnext = Math.max(Rnext, Rmin);
 			Rnext = Math.min(Rnext, Rmax);
 			return Rnext;
@@ -1560,15 +1560,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			this.x = x;
 			this.y = y;
 		}
-	}
-
-	/** Calculate Alpha Value */
-	static private double calculateAlpha(KPoint p0, KPoint p1, KPoint p2,
-		double x)
-	{
-		KPoint start = (x >= 0) ? p1 : p0;
-		KPoint end   = (x >= 0) ? p2 : p1;
-		return calculateAlpha(start, end, x);
 	}
 
 	/** Calculate alpha value */
