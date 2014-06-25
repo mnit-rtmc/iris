@@ -1486,33 +1486,24 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double Rmin = getMinimumRate();
 			double Rmax = getMaximumRate();
 			double Rt = getRate();
-
 			if(Rt == 0)
 				return Rmax;
 
-			// Calculate MainLine Alpha value with MainLine Density
 			double x = K_DES - k;
-
 			double min_ratio = Rmin / Rt;
 
 			KPoint p0 = new KPoint(K_DES - K_JAM, min_ratio);
-			KPoint p2 = new KPoint(0, 1);
+			KPoint p1 = new KPoint(0, 1);
 			if(Rmin >= Rt) {
 				p0.y = min_ratio;
-				p2.y = min_ratio;
+				p1.y = min_ratio;
 			}
-			KPoint p4 = new KPoint(K_DES, Rmax / Rt);
+			KPoint p2 = new KPoint(K_DES, Rmax / Rt);
 
-			// Mainline graph connection 2 points
-			double alpha = calculateAlpha(p0, p2, p4, x);
-
-			// Ramp meter rate for next time interval
+			double alpha = calculateAlpha(p0, p1, p2, x);
 			double Rnext = Rt * alpha;
-
-			// Check minimum / max rate
 			Rnext = Math.max(Rnext, Rmin);
 			Rnext = Math.min(Rnext, Rmax);
-
 			return Rnext;
 		}
 
