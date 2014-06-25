@@ -1572,11 +1572,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** Calculate Alpha Value */
-	static private double calculateAlpha(KPoint P0, KPoint P2, KPoint P4,
+	static private double calculateAlpha(KPoint p0, KPoint p1, KPoint p2,
 		double x)
 	{
-		KPoint start = (x >= 0) ? P2 : P0;
-		KPoint end   = (x >= 0) ? P4 : P2;
+		KPoint start = (x >= 0) ? p1 : p0;
+		KPoint end   = (x >= 0) ? p2 : p1;
+		return calculateAlpha(start, end, x);
+	}
+
+	/** Calculate alpha value */
+	static private double calculateAlpha(KPoint start, KPoint end,
+		double x)
+	{
 		double yd = end.y - start.y;
 		double xd = end.x - start.x;
 		if(xd != 0)
