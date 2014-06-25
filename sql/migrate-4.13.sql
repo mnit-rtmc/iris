@@ -7,7 +7,7 @@ UPDATE iris.system_attribute SET value = '4.13.0'
 
 UPDATE iris.graphic SET width = 2, pixels = 'AAAA' WHERE name = '12_full_32';
 
-UPDATE iris.privilege SET patterm = 'gate_arm_array/.*/armStateNext'
+UPDATE iris.privilege SET pattern = 'gate_arm_array/.*/armStateNext'
 	WHERE pattern = 'gate_arm_array/.*/armState';
 
 DROP VIEW recent_sign_event_view;
