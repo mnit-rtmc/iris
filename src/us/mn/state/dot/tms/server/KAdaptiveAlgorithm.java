@@ -1267,7 +1267,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean shouldStartFlow(int n_steps) {
 			if(countRateHistory() >= n_steps) {
 				for(int i = 0; i < n_steps; i++) {
-					double q = getPassage(i);
+					Double q = getPassage(i, 30);
+					if(q == null)
+						return false;
 					double rate = getRate(i);
 					if(q < START_FLOW_RATIO * rate)
 						return false;
@@ -1390,7 +1392,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean shouldStopFlow() {
 			if(countRateHistory() >= STOP_STEPS) {
 				for(int i = 0; i < STOP_STEPS; i++) {
-					double q = getPassage(i, 60);
+					Double q = getPassage(i, 60);
+					if(q == null)
+						return false;
 					double rate = getRate(i);
 					if(q > rate)
 						return false;
@@ -1427,26 +1431,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param step Time step in past (0 for current).
 		 * @param secs Number of seconds to average.
 		 * @return Passage flow at 'step' time steps ago. */
-		private int getPassage(int step, int secs) {
-			Double p = passage_hist.average(step, steps(secs));
-			if(p != null)
-				return (int)Math.round(p);
-			else
-				return getMaxRelease();
-		}
-
-		/** Get historical passage flow.
-		 * @param step Time step in past (0 for current).
-		 * @return Passage flow at 'step' time steps ago. */
-		private int getPassage(int step) {
-			return getPassage(step, 30);
+		private Double getPassage(int step, int secs) {
+			return passage_hist.average(step, steps(secs));
 		}
 
 		/** Get current metering rate.
 		 * @return metering rate */
 		private int getRate() {
 			int r = currentRate;
-			return r > 0 ? r : getPassage(0, 90);
+			if(r > 0)
+				return r;
+			else {
+				Double p = getPassage(0, 90);
+				if(p != null)
+					return (int)Math.round(p);
+				else
+					return getMaxRelease();
+			}
 		}
 
 		/** Get metering rate at 'step' time steps ago
