@@ -101,9 +101,11 @@
 	conditions are met:
 </p>
 <ul>
-<li><a href='#station_density'>Station density</a> is above bottleneck density
+<li><a href='#station_density'>Station density</a> is above
+    <a href='#bottleneck_density'>bottleneck density</a>
     for each interval in 90 seconds.</li>
-<li><a href='#station_density'>Station density</a> is above bottleneck density,
+<li><a href='#station_density'>Station density</a> is above
+    <a href='#bottleneck_density'>bottleneck density</a>,
     AND
 </li>
     <ul>
@@ -804,8 +806,8 @@
 <ul>
 <li>Passage flow rate was greater than 80% of selected metering rate for each
     interval in 90 seconds.</li>
-<li>Segment density was higher than bottleneck density for each interval in 90
-    seconds.</li>
+<li>Segment density was higher than <a href='#bottleneck_density'>bottleneck
+    density</a> for each interval in 90 seconds.</li>
 </ul>
 <p>
 	When there are 30 minutes left in the metering period, the meter will
@@ -822,7 +824,7 @@
 <li><a href='#segment_density'>Segment density</a> (15 minute average) was
     trending lower for each interval in 5 minutes.</li>
 <li><a href='#segment_density'>Segment density</a> (1 minute average) was lower
-    than 65% of critical density.</li>
+    than 65% of <a href='#critical_density'>critical density</a>.</li>
 <li>Only 30 minutes remain in the metering period.</li>
 </ul>
 <h3 id='metering'>Metering Phase</h3>
@@ -832,8 +834,10 @@
 	<a href='#flushing'>flushing</a> phase:
 </p>
 <ul>
-<li><a href='#segment_density'>Segment density</a> was below desired density
-    (29.6) for every interval in 5 minutes, AND</li>
+<li><a href='#segment_density'>Segment density</a> was below
+    <a href='#desired_density'>desired density</a> for every interval in 5
+    minutes, AND
+</li>
     <ul>
     <li>Passage rate (60 second smoothed) was lower than metering rate for
         all intervals in 5 minutes, OR</li>
@@ -860,13 +864,23 @@
 <ul>
 <li>Passage flow rate was greater than 80% of selected metering rate for each
     interval in 5 minutes.</li>
-<li><a href='#segment_density'>Segment density</a> was higher than bottleneck
-    density for each interval in 5 minutes.</li>
+<li><a href='#segment_density'>Segment density</a> was higher than
+    <a href='#bottleneck_density'>bottleneck density</a> for each interval in 5
+    minutes.</li>
 </ul>
 <h2>Definitions</h2>
 <dl>
 	<dt id='density'>Density</dt>
 	<dd>Vehicles per lane-mile</dd>
+	<dt id='bottleneck_density'>Bottleneck Density</dt>
+	<dd>Density threshold for identifying mainline station bottlenecks
+	    (30 vehicles per lane-mile)</dd>
+	<dt id='critical_density'>Critical Density</dt>
+	<dd>Density threshold for identifying high probability of mainline
+	    flow breakdown (37 vehicles per lane-mile)</dd>
+	<dt id='desired_density'>Desired Density</dt>
+	<dd>Density threshold for determining whether metering is necessary
+	    (80% of critical density, or 29.6 vehicles per lane-mile)</dd>
 	<dt id='station_density'>Station Density</dt>
 	<dd>Average of all valid lanes in a station for one sample period</dd>
 	<dt>Interval Density</dt>
