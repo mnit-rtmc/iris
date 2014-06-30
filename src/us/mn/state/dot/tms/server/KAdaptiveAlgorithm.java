@@ -1225,6 +1225,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				setRate(r);
 		}
 
+		/** Get current metering rate.
+		 * @return metering rate */
+		private int getRate() {
+			int r = currentRate;
+			if(r > 0)
+				return r;
+			else {
+				Double p = getPassage(0, 90);
+				if(p != null)
+					return (int)Math.round(p);
+				else
+					return getMaxRelease();
+			}
+		}
+
 		/** Should we be metering?
 		 * @param dn Segment downstream station node.
 		 * @return true if the meter should be metering. */
@@ -1248,6 +1263,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return true if metering should start. */
 		private boolean shouldStart(StationNode dn) {
 			return (dn != null) &&
+			       isEnoughHistory(START_STEPS) &&
 			       (shouldStartFlow(START_STEPS) ||
 			        shouldStartDensity(dn, START_STEPS_K));
 		}
@@ -1257,26 +1273,29 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return true if metering should restart. */
 		private boolean shouldRestart(StationNode dn) {
 			return (dn != null) &&
+			       isEnoughHistory(RESTART_STEPS) &&
 			       (shouldStartFlow(RESTART_STEPS) ||
 			        shouldStartDensity(dn, RESTART_STEPS));
+		}
+
+		/** Check if enough rate history exists */
+		private boolean isEnoughHistory(int n_steps) {
+			return rate_hist.size() >= n_steps;
 		}
 
 		/** Check if metering should start from flow.
 		 * @param n_steps Number of steps to check.
 		 * @return true if metering should start based on merge flow. */
 		private boolean shouldStartFlow(int n_steps) {
-			if(countRateHistory() >= n_steps) {
-				for(int i = 0; i < n_steps; i++) {
-					Double q = getPassage(i, 30);
-					if(q == null)
-						return false;
-					double rate = getRate(i);
-					if(q < START_FLOW_RATIO * rate)
-						return false;
-				}
-				return true;
-			} else
-				return false;
+			for(int i = 0; i < n_steps; i++) {
+				Double q = getPassage(i, 30);
+				Double r = getRate(i, 30);
+				if(q == null || r == null)
+					return false;
+				if(q < START_FLOW_RATIO * r)
+					return false;
+			}
+			return true;
 		}
 
 		/** Check if metering should start from density.
@@ -1286,15 +1305,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *         density. */
 		private boolean shouldStartDensity(StationNode dn, int n_steps){
 			assert s_node != null;
-			if(countRateHistory() >= n_steps) {
-				for(int i = 0; i < n_steps; i++) {
-					if(s_node.calculateSegmentDensity(
-					   dn, i) < K_BOTTLENECK)
-						return false;
-				}
-				return true;
-			} else
-				return false;
+			for(int i = 0; i < n_steps; i++) {
+				if(s_node.calculateSegmentDensity(dn, i) <
+				   K_BOTTLENECK)
+					return false;
+			}
+			return true;
 		}
 
 		/** Start metering */
@@ -1390,18 +1406,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if metering should stop from flow.
 		 * @return true if metering should stop based on merge flow. */
 		private boolean shouldStopFlow() {
-			if(countRateHistory() >= STOP_STEPS) {
-				for(int i = 0; i < STOP_STEPS; i++) {
-					Double q = getPassage(i, 60);
-					if(q == null)
-						return false;
-					double rate = getRate(i);
-					if(q > rate)
-						return false;
-				}
-				return true;
-			} else
-				return false;
+			for(int i = 0; i < STOP_STEPS; i++) {
+				Double q = getPassage(i, 60);
+				Double r = getRate(i, 60);
+				if(q == null || r == null || q > r)
+					return false;
+			}
+			return true;
 		}
 
 		/** Stop metering.
@@ -1422,11 +1433,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			meter.setRatePlanned(currentRate);
 		}
 
-		/** Count length of metering rate history */
-		private int countRateHistory() {
-			return rate_hist.size();
-		}
-
 		/** Get historical passage flow.
 		 * @param step Time step in past (0 for current).
 		 * @param secs Number of seconds to average.
@@ -1435,26 +1441,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return passage_hist.average(step, steps(secs));
 		}
 
-		/** Get current metering rate.
-		 * @return metering rate */
-		private int getRate() {
-			int r = currentRate;
-			if(r > 0)
-				return r;
-			else {
-				Double p = getPassage(0, 90);
-				if(p != null)
-					return (int)Math.round(p);
-				else
-					return getMaxRelease();
-			}
-		}
-
-		/** Get metering rate at 'step' time steps ago
+		/** Get historical metering rate.
 		 * @param step Time step in past (0 for current).
-		 * @return metering rate */
-		private double getRate(int step) {
-			return rate_hist.get(step);
+		 * @param secs Number of seconds to average.
+		 * @return Metering rate at 'step' time steps ago. */
+		private Double getRate(int step, int secs) {
+			return rate_hist.average(step, steps(secs));
 		}
 
 		/** Get segment density at 'step' time steps ago.
