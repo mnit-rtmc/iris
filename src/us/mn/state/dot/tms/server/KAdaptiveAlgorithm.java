@@ -811,8 +811,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Target queue demand rate (vehicles / hour) */
 		private int target_demand = 0;
 
-		/** Passage sampling failure (latches until queue empty) */
-		private boolean passage_failure = false;
+		/** Passage sampling good (latches until queue empty) */
+		private boolean passage_good = true;
 
 		/** Cumulative passage count (vehicles) */
 		private int passage_accum = 0;
@@ -963,10 +963,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Estimate the available storage in queue */
 		private float availableStorage() {
-			if(passage_failure)
-				return maxStorage() / 3;
-			else
+			if(passage_good)
 				return maxStorage() - queueLength();
+			else
+				return maxStorage() / 3;
 		}
 
 		/** Estimate the queue overflow ratio.
@@ -989,7 +989,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Estimate the length of queue (vehicles) */
 		private float queueLength() {
-			assert !passage_failure;
+			assert passage_good;
 			return cumulativeDemand() - passage_accum;
 		}
 
@@ -1016,7 +1016,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(passage_vol >= 0)
 				passage_accum += passage_vol;
 			else
-				passage_failure = true;
+				passage_good = false;
 			int green_vol = green.getVolume();
 			if(green_vol > 0)
 				green_accum += green_vol;
@@ -1063,14 +1063,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if the queue volume is low */
 		private boolean isQueueVolumeLow() {
-			return (!passage_failure) &&
+			return passage_good &&
 			       (isDemandBelowPassage() ||
 			        isPassageBelowGreen());
 		}
 
 		/** Check if cumulative demand is below cumulative passage */
 		private boolean isDemandBelowPassage() {
-			assert !passage_failure;
+			assert passage_good;
 			return queueLength() < QUEUE_EMPTY_THRESHOLD;
 		}
 
@@ -1086,15 +1086,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate violation count (passage above green count) */
 		private int violationCount() {
-			if(passage_failure)
-				return 0;
-			else
+			if(passage_good)
 				return passage_accum - green_accum;
+			else
+				return 0;
 		}
 
 		/** Reset the demand / passage accumulators */
 		private void resetAccumulators() {
-			passage_failure = false;
+			passage_good = true;
 			demandAccumHist.clear();
 			passage_accum = 0;
 			green_accum = 0;
@@ -1107,6 +1107,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(isMetering()) {
 				if(isQueueFull())
 					return RampMeterQueue.FULL;
+				else if(!passage_good)
+					return RampMeterQueue.UNKNOWN;
 				else if(isQueueEmpty())
 					return RampMeterQueue.EMPTY;
 				else
@@ -1123,20 +1125,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if the meter queue is full (by storage/wait limit) */
 		private boolean isQueueLimitFull() {
 			return queue.isPerfect() &&
-			      (!passage_failure) &&
+			       passage_good &&
 			      (isQueueStorageFull() ||
 			       isQueueWaitAboveTarget());
 		}
 
 		/** Check if the ramp queue storage is full */
 		private boolean isQueueStorageFull() {
-			assert !passage_failure;
+			assert passage_good;
 			return queueLength() >= targetStorage();
 		}
 
 		/** Check if the ramp queue wait time is above target */
 		private boolean isQueueWaitAboveTarget() {
-			assert !passage_failure;
+			assert passage_good;
 			int wait_target = targetWaitTime();
 			int wait_steps = steps(wait_target);
 			int dem = Math.round(cumulativeDemand(wait_steps));
@@ -1145,7 +1147,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate minimum rate (vehicles / hour) */
 		private int calculateMinimumRate() {
-			if(passage_failure) {
+			if(!passage_good) {
 				limit_control = MinimumRateLimit.pf;
 				return target_demand;
 			} else {
@@ -1172,7 +1174,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * required cumulative passage volume at that time.
 		 * @return Queue storage limit (vehicles / hour). */
 		private int queueStorageLimit() {
-			assert !passage_failure;
+			assert passage_good;
 			float proj_arrive = volumePeriod(target_demand,
 				targetWaitTime());
 			float demand_proj = cumulativeDemand() + proj_arrive;
@@ -1195,7 +1197,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate queue wait limit (minimum rate).
 		 * @return Queue wait limit (vehicles / hour) */
 		private int queueWaitLimit() {
-			assert !passage_failure;
+			assert passage_good;
 			int wait_limit = 0;
 			int wait_target = targetWaitTime();
 			int wait_steps = steps(wait_target);
