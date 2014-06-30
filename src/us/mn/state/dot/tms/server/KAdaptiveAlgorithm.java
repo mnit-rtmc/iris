@@ -1530,7 +1530,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append(",dem=");
 			sb.append(Math.round(cumulativeDemand()));
 			sb.append(",pas=");
-			sb.append(passage_accum);
+			if(passage_good)
+				sb.append(passage_accum);
+			else
+				sb.append("BAD");
 			sb.append(",grn=");
 			sb.append(green_accum);
 			sb.append(",min[");
