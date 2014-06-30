@@ -906,17 +906,51 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Validate meter state.
-		 *   - Save cumulative demand and merging flow
-		 *   - Set current demand and merging flow
-		 *   - Calculate metering rate */
+		 *   - Update passage flow and accumulator.
+		 *   - Update demand flow and accumulator.
+		 *   - Check if queue is empty.
+		 *   - Calculate metering rate. */
 		private void validate() {
-			updateDemandState();
 			updatePassageState();
+			// NOTE: demand state depends on passage state
+			updateDemandState();
 			checkQueueEmpty();
 			minimumRate = calculateMinimumRate();
 			maximumRate = calculateMaximumRate();
 			if(s_node != null)
 				calculateMeteringRate();
+		}
+
+		/** Update ramp passage output state */
+		private void updatePassageState() {
+			int passage_vol = calculatePassageCount();
+			passage_hist.push(flowRate(passage_vol));
+			if(passage_vol >= 0)
+				passage_accum += passage_vol;
+			else
+				passage_good = false;
+			int green_vol = green.getVolume();
+			if(green_vol > 0)
+				green_accum += green_vol;
+		}
+
+		/** Calculate passage count (vehicles).
+		 * @return Passage vehicle count */
+		private int calculatePassageCount() {
+			int vol = passage.getVolume();
+			if(vol >= 0)
+				return vol;
+			vol = merge.getVolume();
+			if(vol >= 0) {
+				int b = bypass.getVolume();
+				if(b > 0) {
+					vol -= b;
+					if(vol < 0)
+						return 0;
+				}
+				return vol;
+			}
+			return MISSING_DATA;
 		}
 
 		/** Update ramp queue demand state */
@@ -1007,38 +1041,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int getDefaultTarget() {
 			int t = meter.getTarget();
 			return (t > 0) ? t : getMaxRelease();
-		}
-
-		/** Update ramp passage output state */
-		private void updatePassageState() {
-			int passage_vol = calculatePassageCount();
-			passage_hist.push(flowRate(passage_vol));
-			if(passage_vol >= 0)
-				passage_accum += passage_vol;
-			else
-				passage_good = false;
-			int green_vol = green.getVolume();
-			if(green_vol > 0)
-				green_accum += green_vol;
-		}
-
-		/** Calculate passage count (vehicles).
-		 * @return Passage vehicle count */
-		private int calculatePassageCount() {
-			int vol = passage.getVolume();
-			if(vol >= 0)
-				return vol;
-			vol = merge.getVolume();
-			if(vol >= 0) {
-				int b = bypass.getVolume();
-				if(b > 0) {
-					vol -= b;
-					if(vol < 0)
-						return 0;
-				}
-				return vol;
-			}
-			return MISSING_DATA;
 		}
 
 		/** Check if queue is empty */
