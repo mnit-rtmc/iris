@@ -1038,11 +1038,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				}
 				return vol;
 			}
-			if(isMetering()) {
-				vol = green.getVolume();
-				if(vol >= 0)
-					return vol;
-			}
 			return MISSING_DATA;
 		}
 
