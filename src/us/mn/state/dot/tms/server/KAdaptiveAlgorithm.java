@@ -1494,29 +1494,72 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate metering rate.
 		 *
-		 * @param rate Current rate.
+		 * @param r Current rate.
 		 * @param k Segment density.
 		 * @return Metering rate (vehicles per hour).
 		 */
-		private double calculateRate(double rate, double k) {
-			double r_mn = getMinimumRate();
+		private double calculateRate(double r, double k) {
+			double rate = limitRate(r);
+			if(k <= K_DES)
+				return lerpBelow(rate, k);
+			else
+				return lerpAbove(rate, k);
+		}
+
+		/** Calculate a linear interpolation of metering rate below
+		 * desired segment density.
+		 *
+		 * <pre>
+		 * r_mx |__
+		 *      |  --__
+		 *      |      --__
+		 *      |          --__
+		 *      |              --__
+		 *      |                  --__
+		 *      |                      --__
+		 * rate |                          --__
+		 *      |
+		 *      .------------------------------
+		 *      0          k (density)       K_DES
+		 * </pre>
+		 *
+		 * @param rate Previous metering rate.
+		 * @param k Segment density.
+		 * @return Interpolated metering rate.
+		 */
+		private double lerpBelow(double rate, double k) {
+			assert k <= K_DES;
 			double r_mx = getMaximumRate();
-			if(rate == 0)
-				return r_mx;
-			double alpha;
-			double x = K_DES - k;
-			double min_ratio = r_mn / rate;
-			KPoint p1 = new KPoint(0, 1);
-			if(r_mn >= rate)
-				p1.y = min_ratio;
-			if(x >= 0) {
-				KPoint p2 = new KPoint(K_DES, r_mx / rate);
-				alpha = calculateAlpha(p1, p2, x);
-			} else {
-				KPoint p0 = new KPoint(K_DES - K_JAM,min_ratio);
-				alpha = calculateAlpha(p0, p1, x);
-			}
-			return rate * alpha;
+			double ratio = (r_mx - rate) / K_DES;
+			return r_mx - k * ratio;
+		}
+
+		/** Calculate a linear interpolation of metering rate above
+		 * desired segment density.
+		 *
+		 * <pre>
+		 * rate |__
+		 *      |  --__
+		 *      |      --__
+		 *      |          --__
+		 *      |              --__
+		 *      |                  --__
+		 *      |                      --__
+		 * r_mn |                          --__
+		 *      |
+		 *      .------------------------------
+		 *      K_DES      k (density)       K_JAM
+		 * </pre>
+		 *
+		 * @param rate Previous metering rate.
+		 * @param k Segment density.
+		 * @return Interpolated metering rate.
+		 */
+		private double lerpAbove(double rate, double k) {
+			assert k > K_DES;
+			double r_mn = getMinimumRate();
+			double ratio = (rate - r_mn) / (K_JAM - K_DES);
+			return rate - (k - K_DES) * ratio;
 		}
 
 		/** Get a string representation of a meter state */
@@ -1566,29 +1609,5 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			}
 			return sb.toString();
 		}
-	}
-
-	/** Class : Point */
-	class KPoint {
-
-		double x;
-		double y;
-
-		public KPoint(double x, double y) {
-			this.x = x;
-			this.y = y;
-		}
-	}
-
-	/** Calculate alpha value */
-	static private double calculateAlpha(KPoint start, KPoint end,
-		double x)
-	{
-		double yd = end.y - start.y;
-		double xd = end.x - start.x;
-		if(xd != 0)
-			return (yd / xd) * (x - start.x) + start.y;
-		else
-			return 0;
 	}
 }
