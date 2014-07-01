@@ -753,6 +753,24 @@
 	platoons of vehicles.
 </p>
 
+<h3 class='clear'>Metering Rate</h3>
+<p>
+	The metering rate is calculated iteratively, based on the rate from
+	the previous time interval.
+	If the segment density is below the desired density, the rate will
+	increase.
+	Likewise, if segment density is higher than desired, the rate will
+	decrease.
+	When the meter is first turned on, the previous rate is the passage
+	rate averaged over 90 seconds.
+</p>
+<p>
+	First, the rate is constrained within the bounds of the minimum and
+	maximum rates.
+	The new rate is calculated using linear interpolation from the current
+	rate and density.
+</p>
+
 <h2 class='clear'>Metering Period</h2>
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
      width="240" height="480">
