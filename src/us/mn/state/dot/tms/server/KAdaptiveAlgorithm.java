@@ -1499,18 +1499,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Metering rate (vehicles per hour).
 		 */
 		private double calculateRate(double rate, double k) {
-			double Rmin = getMinimumRate();
-			double Rmax = getMaximumRate();
+			double r_mn = getMinimumRate();
+			double r_mx = getMaximumRate();
 			if(rate == 0)
-				return Rmax;
+				return r_mx;
 			double alpha;
 			double x = K_DES - k;
-			double min_ratio = Rmin / rate;
+			double min_ratio = r_mn / rate;
 			KPoint p1 = new KPoint(0, 1);
-			if(Rmin >= rate)
+			if(r_mn >= rate)
 				p1.y = min_ratio;
 			if(x >= 0) {
-				KPoint p2 = new KPoint(K_DES, Rmax / rate);
+				KPoint p2 = new KPoint(K_DES, r_mx / rate);
 				alpha = calculateAlpha(p1, p2, x);
 			} else {
 				KPoint p0 = new KPoint(K_DES - K_JAM,min_ratio);
