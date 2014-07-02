@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">1 Jul 2014</div>
+<div id="stamp">2 Jul 2014</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -754,22 +754,65 @@
 	platoons of vehicles.
 </p>
 
-<h3 class='clear'>Metering Rate</h3>
+<br class='clear'/>
+
+<svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink='http://www.w3.org/1999/xlink'
+     width='400' height='400' viewBox='0,0,400,400'>
+<title>Rate Calculation</title>
+<text style='font-size:20pt' x='120' y='20'>Rate Calculation</text>
+<path id='output_rate' d='M40 290 V60'/>
+<text style='font-size:14pt'>
+  <textPath xlink:href='#output_rate'>Metering Rate (Output)</textPath>
+</text>
+<path id='max_rate' d='M54 100 V0'/>
+<text style='font-size:8pt'>
+  <textPath xlink:href='#max_rate'>Maximum</textPath>
+</text>
+<path id='previous_rate' d='M54 210 V0'/>
+<text style='font-size:8pt'>
+  <textPath xlink:href='#previous_rate'>Previous</textPath>
+</text>
+<path id='min_rate' d='M54 320 V200'/>
+<text style='font-size:8pt'>
+  <textPath xlink:href='#min_rate'>Minimum</textPath>
+</text>
+<text style='font-size:14pt' x='120' y='394'>Segment Density (Input)</text>
+<text style='font-size:8pt'>
+  <tspan x='60' y='374'>0</tspan>
+  <tspan x='140' y='374'>Desired (29.6)</tspan>
+  <tspan x='340' y='374'>Jam (180)</tspan>
+</text>
+<rect style='fill:#f6f6ff;stroke:black;stroke-width:2'
+      x='60' y='40' width='320' height='320'/>
+<path style='stroke:gray;stroke-width:0.25' d='M180 40V360'/>
+<path style='stroke:gray;stroke-width:0.25'
+      d='M60 100H380 M60 210H380 M60 320H380'/>
+<path style='fill:none;stroke:#003373'
+      d='M60 100 L180 210 380 320'/>
+</svg>
+
+<h3>Rate Calculation</h3>
 <p>
-	The metering rate is calculated iteratively, based on the rate from
-	the previous time interval.
-	If the segment density is below the desired density, the rate will
-	increase.
+	The metering rate is calculated iteratively, based on the metering
+	rate from the previous 30 seconds.
+	If the <a href='#segment_density'>segment density</a> is below the
+	<a href='#desired_density'>desired density</a>, the rate will increase.
 	Likewise, if segment density is higher than desired, the rate will
 	decrease.
-	When the meter is first turned on, the previous rate is the passage
-	rate averaged over 90 seconds.
+	When the meter is first turned on, the passage rate averaged over the
+	last 90 seconds is used in place of the previous metering rate.
 </p>
 <p>
-	First, the rate is constrained within the bounds of the minimum and
-	maximum rates.
-	The new rate is calculated using linear interpolation from the current
+	The previous metering rate is first constrained within the bounds of the
+	new minimum and maximum rates.
+	The new rate is calculated using linear interpolation from the previous
 	rate and density.
+	With segment density between zero and desired density, the rate is
+	interpolated between the maximum rate and the previous rate.
+	With segment density between desired and
+	<a href='#jam_density'>jam density</a>, the rate is interpolated between
+	the previous rate and the minimum rate.
 </p>
 
 <h2 class='clear'>Metering Period</h2>
@@ -889,21 +932,22 @@
 </ul>
 <h2>Definitions</h2>
 <dl>
-	<dt id='density'>Density</dt>
-	<dd>Vehicles per lane-mile</dd>
 	<dt id='bottleneck_density'>Bottleneck Density</dt>
 	<dd>Density threshold for identifying mainline station bottlenecks
 	    (30 vehicles per lane-mile)</dd>
 	<dt id='critical_density'>Critical Density</dt>
 	<dd>Density threshold for identifying high probability of mainline
 	    flow breakdown (37 vehicles per lane-mile)</dd>
+	<dt id='density'>Density</dt>
+	<dd>Vehicles per lane-mile</dd>
 	<dt id='desired_density'>Desired Density</dt>
 	<dd>Density threshold for determining whether metering is necessary
 	    (80% of critical density, or 29.6 vehicles per lane-mile)</dd>
-	<dt id='station_density'>Station Density</dt>
-	<dd>Average of all valid lanes in a station for one sample period</dd>
 	<dt>Interval Density</dt>
 	<dd>Average of station samples during one 60 second interval</dd>
+	<dt id='jam_density'>Jam Density</dt>
+	<dd>Density of completely jammed mainline (180 vehicles per lane-mile)
+	</dd>
 	<dt>Meter Segment</dt>
 	<dd>A contiguous series of stations associated with a ramp meter.
 	    It begins at the station just upstream of the meter.
@@ -917,6 +961,8 @@
 	    two stations.
 	    The segment density is an average of all links in the segment,
 	    weighted by length.</dd>
+	<dt id='station_density'>Station Density</dt>
+	<dd>Average of all valid lanes in a station for one sample period</dd>
 </dl>
 </body>
 </html>
