@@ -276,11 +276,11 @@
 <h4>Demand (Input)</h4>
 <p>
 	The demand at a ramp meter is estimated using ramp queue detection.
-	A cumulative demand value is taken from the time when metering begins.
+	A cumulative demand count is taken from the time when metering begins.
 	This demand is treated as the queue input.
-	The cumulative metering rate is used for the queue output.
-	Assuming these values are correct, the difference between them at any
-	point in time represents the queue length (in vehicles).
+	Assuming the demand and passage counts are correct, the difference
+	between them at any point in time represents the queue length (in
+	vehicles).
 </p>
 <p>
 	Of course, sometimes data collection errors need to be corrected.
