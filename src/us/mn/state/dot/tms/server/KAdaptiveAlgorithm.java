@@ -1334,7 +1334,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return true if metering should continue. */
 		private boolean checkDoneEarlyMetering() {
 			if(isSegmentDensityTrendingDown() ||
-			   isSegmentDensityLow())
+			   isSegmentDensityLow() ||
+			   isEarlyPeriodOver())
 			{
 				phase = MeteringPhase.metering;
 			}
