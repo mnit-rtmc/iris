@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">2 Jul 2014</div>
+<div id="stamp">7 Jul 2014</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -862,19 +862,14 @@
 <p>
 	Ramp meters begin each metering period in this phase.
 	The meter will not cycle until the phase is changed.
-	There are two conditions which can cause the meter to transition to the
-	<a href='#early_metering'>early metering</a> phase:
-</p>
-<ul>
-<li>Passage flow rate was greater than 80% of selected metering rate for each
-    interval in 90 seconds.</li>
-<li>Segment density was higher than <a href='#bottleneck_density'>bottleneck
-    density</a> for each interval in 90 seconds.</li>
-</ul>
-<p>
-	When there are 30 minutes left in the metering period, the meter will
-	transition from <a href='#not_started'>not started</a> to
-	<a href='#stopped'>stopped</a>.
+	There are two conditions which cause the meter to transition to a
+	different phase.
+	If <a href='#segment_density'>segment density</a> was higher than
+	<a href='#bottleneck_density'>bottleneck density</a> for each interval
+	in 90 seconds, the phase will change to
+	<a href='#early_metering'>early metering</a>.
+	Otherwise, when only 30 minutes remain in the metering period, the
+	phase will change to <a href='#stopped'>stopped</a>.
 </p>
 <h3 id='early_metering'>Early Metering Phase</h3>
 <p>
@@ -897,14 +892,9 @@
 </p>
 <ul>
 <li><a href='#segment_density'>Segment density</a> was below
-    <a href='#desired_density'>desired density</a> for every interval in 5
-    minutes, AND
+    <a href='#desired_density'>desired density</a> and segment had no
+    bottleneck, for every interval in 5 minutes.
 </li>
-    <ul>
-    <li>Passage rate (60 second smoothed) was lower than metering rate for
-        all intervals in 5 minutes, OR</li>
-    <li>The segment had no bottleneck for 5 minutes.</li>
-    </ul>
 <li>Only 2 minutes remain in the metering period.</li>
 </ul>
 <h3 id='flushing' class='pagebreak'>Flushing Phase</h3>

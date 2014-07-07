@@ -78,17 +78,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Ramp queue jam density (vehicles per foot) */
 	static private final float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
 
-	/** Rate value for checking if metering is started */
-	static private final double START_FLOW_RATIO = 0.8;
-
 	/** Acceleration threshold to decide bottleneck */
 	static private final int A_BOTTLENECK = 1000;
 
 	/** Number fo time steps to check before start metering */
-	static private final int START_STEPS = steps(90);
-
-	/** Number fo time steps to check density before start metering */
-	static private final int START_STEPS_K = steps(60);
+	static private final int START_STEPS = steps(60);
 
 	/** Number of time steps to check before stop metering */
 	static private final int STOP_STEPS = steps(300);
@@ -833,10 +827,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Controlling minimum rate limit */
 		private MinimumRateLimit limit_control = null;
 
-		/** Metering rate flow history (vehicles / hour) */
-		private final BoundedSampleHistory rate_hist =
-			new BoundedSampleHistory(MAX_STEPS);
-
 		/** Segment density history (vehicles / mile) */
 		private final BoundedSampleHistory segment_k_hist =
 			new BoundedSampleHistory(TREND_STEPS);
@@ -1239,7 +1229,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double k = s_node.calculateSegmentDensity(dn);
 			double r = limitRate(calculateRate(getRate(), k));
 			segment_k_hist.push(k);
-			rate_hist.push(r);
 			if(shouldMeter(dn))
 				setRate(r);
 		}
@@ -1282,9 +1271,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return true if metering should start. */
 		private boolean shouldStart(StationNode dn) {
 			return (dn != null) &&
-			       isEnoughHistory(START_STEPS) &&
-			       (shouldStartFlow(START_STEPS) ||
-			        shouldStartDensity(dn, START_STEPS_K));
+			       shouldStartDensity(dn, START_STEPS);
 		}
 
 		/** Check if metering should restart (after stopping).
@@ -1292,29 +1279,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return true if metering should restart. */
 		private boolean shouldRestart(StationNode dn) {
 			return (dn != null) &&
-			       isEnoughHistory(RESTART_STEPS) &&
-			       (shouldStartFlow(RESTART_STEPS) ||
-			        shouldStartDensity(dn, RESTART_STEPS));
-		}
-
-		/** Check if enough rate history exists */
-		private boolean isEnoughHistory(int n_steps) {
-			return rate_hist.size() >= n_steps;
-		}
-
-		/** Check if metering should start from flow.
-		 * @param n_steps Number of steps to check.
-		 * @return true if metering should start based on merge flow. */
-		private boolean shouldStartFlow(int n_steps) {
-			for(int i = 0; i < n_steps; i++) {
-				Double q = getPassage(i, 30);
-				Double r = getRate(i, 30);
-				if(q == null || r == null)
-					return false;
-				if(q < START_FLOW_RATIO * r)
-					return false;
-			}
-			return true;
+			       shouldStartDensity(dn, RESTART_STEPS);
 		}
 
 		/** Check if metering should start from density.
@@ -1390,10 +1355,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean shouldStop() {
 			boolean bn = hasBottleneck();
 			updateNoBottleneckCount(bn);
-			if(isSegmentDensityHigh())
+			if(bn || isSegmentDensityHigh())
 				return false;
-			if(bn)
-				return shouldStopFlow();
 			else
 				return noBottleneckCount >= STOP_STEPS;
 		}
@@ -1422,25 +1385,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return false;
 		}
 
-		/** Check if metering should stop from flow.
-		 * @return true if metering should stop based on merge flow. */
-		private boolean shouldStopFlow() {
-			for(int i = 0; i < STOP_STEPS; i++) {
-				Double q = getPassage(i, 60);
-				Double r = getRate(i, 60);
-				if(q == null || r == null || q > r)
-					return false;
-			}
-			return true;
-		}
-
 		/** Stop metering.
 		 * @return true if metering should stop (always). */
 		private boolean stopMetering() {
 			phase = MeteringPhase.stopped;
 			currentRate = 0;
 			resetAccumulators();
-			rate_hist.clear();
 			noBottleneckCount = 0;
 			return true;
 		}
@@ -1458,14 +1408,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Passage flow at 'step' time steps ago. */
 		private Double getPassage(int step, int secs) {
 			return passage_hist.average(step, steps(secs));
-		}
-
-		/** Get historical metering rate.
-		 * @param step Time step in past (0 for current).
-		 * @param secs Number of seconds to average.
-		 * @return Metering rate at 'step' time steps ago. */
-		private Double getRate(int step, int secs) {
-			return rate_hist.average(step, steps(secs));
 		}
 
 		/** Get segment density at 'step' time steps ago.
@@ -1576,7 +1518,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(passage_good) {
 				sb.append(passage_accum);
 				sb.append(" (");
-				sb.append(getPassage(0, 30));
+				sb.append(getPassage(0, 90));
 				sb.append(')');
 			} else
 				sb.append("BAD");
