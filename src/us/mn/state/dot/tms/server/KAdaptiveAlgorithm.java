@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
@@ -96,6 +97,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Number of time steps for bottleneck trend check */
 	static private final int BOTTLENECK_TREND_STEPS = steps(90);
+
+	/** Minutes before end of period to disallow early metering */
+	static private final int EARLY_METER_END_MINUTES = 30;
 
 	/** Spacing between two bottlenecks (soft minimum) */
 	static private final float BOTTLENECK_SPACING_MILES = 1.5f;
@@ -1254,7 +1258,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private boolean shouldMeter(StationNode dn) {
 			switch(phase) {
 			case not_started:
-				return shouldStart(dn) && startMetering();
+				return checkStart(dn);
 			case early_metering:
 				return checkDoneEarlyMetering();
 			case metering:
@@ -1264,6 +1268,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			default:
 				return true;
 			}
+		}
+
+		/** Check if metering should start.
+		 * @param dn Segment downstream station node.
+		 * @return true if metering should start. */
+		private boolean checkStart(StationNode dn) {
+			return (shouldStart(dn) && startMetering()) ||
+			       (isEarlyPeriodOver() && !stopMetering());
+		}
+
+		/** Check if early metering period is over */
+		private boolean isEarlyPeriodOver() {
+			int min = TimeSteward.currentMinuteOfDayInt();
+			int stop_min = meter.getStopMin();
+			return min >= stop_min - EARLY_METER_END_MINUTES;
 		}
 
 		/** Check if initial metering should start.
