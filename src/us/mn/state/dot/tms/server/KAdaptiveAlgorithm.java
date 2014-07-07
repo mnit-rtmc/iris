@@ -541,7 +541,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Density history */
 		private final BoundedSampleHistory density_hist =
-			new BoundedSampleHistory(steps(300));
+			new BoundedSampleHistory(MAX_STEPS);
 
 		/** Is bottleneck? */
 		private boolean isBottleneck = false;
