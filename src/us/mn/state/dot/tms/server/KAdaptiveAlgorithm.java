@@ -101,6 +101,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Minutes before end of period to disallow early metering */
 	static private final int EARLY_METER_END_MINUTES = 30;
 
+	/** Minutes to flush meter before stop metering */
+	static private final int FLUSH_MINUTES = 2;
+
 	/** Spacing between two bottlenecks (soft minimum) */
 	static private final float BOTTLENECK_SPACING_MILES = 1.5f;
 
@@ -1049,14 +1052,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if the meter queue is empty */
 		private boolean isQueueEmpty() {
-			return isQueueVolumeLow() && !isQueueOccupancyHigh();
+			return isQueueFlowLow() && !isQueueOccupancyHigh();
 		}
 
-		/** Check if the queue volume is low */
-		private boolean isQueueVolumeLow() {
-			return passage_good &&
-			       (isDemandBelowPassage() ||
-			        isPassageBelowGreen());
+		/** Check if the queue flow is low.  If the passage detector
+		 * is not good, assume this is true. */
+		private boolean isQueueFlowLow() {
+			return (passage_good)
+			     ? (isDemandBelowPassage() || isPassageBelowGreen())
+			     : true;
 		}
 
 		/** Check if cumulative demand is below cumulative passage */
@@ -1263,10 +1267,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return checkDoneEarlyMetering();
 			case metering:
 				return shouldContinueMetering();
+			case flushing:
+				return shouldContinueFlushing();
 			case stopped:
 				return shouldRestart(dn) && restartMetering();
 			default:
-				return true;
+				return false;
 			}
 		}
 
@@ -1280,9 +1286,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if early metering period is over */
 		private boolean isEarlyPeriodOver() {
+			return isPeriodExpiring(EARLY_METER_END_MINUTES);
+		}
+
+		/** Check if metering period is expiring soon.
+		 * @param m Number of minutes before end of metering period.
+		 * @return true if within m minutes of end of period. */
+		private boolean isPeriodExpiring(int m) {
 			int min = TimeSteward.currentMinuteOfDayInt();
 			int stop_min = meter.getStopMin();
-			return min >= stop_min - EARLY_METER_END_MINUTES;
+			return min >= stop_min - m;
 		}
 
 		/** Check if initial metering should start.
@@ -1366,19 +1379,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if ramp meter should continue metering.
 		 * @return true if metering should continue. */
 		private boolean shouldContinueMetering() {
-			/* Invert stop metering logic */
-			return !(shouldStop() && stopMetering());
+			updateNoBottleneckCount();
+			if(shouldFlush())
+				phase = MeteringPhase.flushing;
+			return true;
 		}
 
-		/** Check if ramp meter should stop metering.
-		 * @return true if metering should stop. */
-		private boolean shouldStop() {
-			boolean bn = hasBottleneck();
-			updateNoBottleneckCount(bn);
-			if(bn || isSegmentDensityHigh())
-				return false;
+		/** Update the "no bottleneck" count */
+		private void updateNoBottleneckCount() {
+			if(hasBottleneck())
+				noBottleneckCount = 0;
 			else
-				return noBottleneckCount >= STOP_STEPS;
+				noBottleneckCount++;
 		}
 
 		/** Check if there is a bottleneck downstream of meter */
@@ -1387,12 +1399,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			       isBottleneck(s_node.segmentStationNode());
 		}
 
-		/** Update the "no bottleneck" count */
-		private void updateNoBottleneckCount(boolean bn) {
-			if(bn)
-				noBottleneckCount = 0;
-			else
-				noBottleneckCount++;
+		/** Check if ramp meter should transition to flushing phase.
+		 * @return true if meter should flush queue. */
+		private boolean shouldFlush() {
+			return isFlushTime() || isSegmentFlowing();
+		}
+
+		/** Check if it's time to flush queue */
+		private boolean isFlushTime() {
+			return isPeriodExpiring(FLUSH_MINUTES);
+		}
+
+		/** Check if mainline segment is flowing */
+		private boolean isSegmentFlowing() {
+			return (noBottleneckCount >= STOP_STEPS) &&
+				!isSegmentDensityHigh();
 		}
 
 		/** Check if the segment density is higher than desired. */
@@ -1403,6 +1424,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 					return true;
 			}
 			return false;
+		}
+
+		/** Check if ramp meter should continue flushing.
+		 * @return true if metering should continue. */
+		private boolean shouldContinueFlushing() {
+			return !(isQueueEmpty() && stopMetering());
 		}
 
 		/** Stop metering.
@@ -1418,6 +1445,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Set metering rate.
 		 * @param rn Next metering rate. */
 		private void setRate(double rn) {
+			if(phase == MeteringPhase.flushing)
+				rn = getMaximumRate();
 			currentRate = (int)Math.round(rn);
 			meter.setRatePlanned(currentRate);
 		}
