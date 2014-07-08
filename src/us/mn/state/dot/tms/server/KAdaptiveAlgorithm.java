@@ -1235,25 +1235,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			assert s_node != null;
 			StationNode dn = s_node.segmentStationNode();
 			double k = s_node.calculateSegmentDensity(dn);
-			double r = limitRate(calculateRate(getRate(), k));
 			segment_k_hist.push(k);
 			if(shouldMeter(dn))
-				setRate(r);
-		}
-
-		/** Get current metering rate.
-		 * @return metering rate */
-		private int getRate() {
-			int r = currentRate;
-			if(r > 0)
-				return r;
-			else {
-				Double p = getPassage(0, 90);
-				if(p != null)
-					return (int)Math.round(p);
-				else
-					return getMaxRelease();
-			}
+				setRate(calculateRate(k));
 		}
 
 		/** Should we be metering?
@@ -1442,12 +1426,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return true;
 		}
 
-		/** Set metering rate.
+		/** Set metering rate.  Minimum and maximum rates are applied
+		 * before setting rate.
 		 * @param rn Next metering rate. */
 		private void setRate(double rn) {
-			if(phase == MeteringPhase.flushing)
-				rn = getMaximumRate();
-			currentRate = (int)Math.round(rn);
+			currentRate = (int)Math.round(limitRate(rn));
 			meter.setRatePlanned(currentRate);
 		}
 
@@ -1483,18 +1466,34 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			       Math.max(getMinimumRate(), r));
 		}
 
-		/** Calculate metering rate.
+		/** Calculate a new metering rate.
 		 *
-		 * @param r Current rate.
 		 * @param k Segment density.
 		 * @return Metering rate (vehicles per hour).
 		 */
-		private double calculateRate(double r, double k) {
-			double rate = limitRate(r);
+		private double calculateRate(double k) {
+			if(phase == MeteringPhase.flushing)
+				return getMaximumRate();
+			double rate = limitRate(getRate());
 			if(k <= K_DES)
 				return lerpBelow(rate, k);
 			else
 				return lerpAbove(rate, k);
+		}
+
+		/** Get current metering rate.
+		 * @return metering rate */
+		private double getRate() {
+			double r = currentRate;
+			if(r > 0)
+				return r;
+			else {
+				Double p = getPassage(0, 90);
+				if(p != null)
+					return p;
+				else
+					return getMaxRelease();
+			}
 		}
 
 		/** Calculate a linear interpolation of metering rate below
