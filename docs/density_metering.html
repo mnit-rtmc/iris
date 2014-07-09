@@ -492,10 +492,10 @@
 <p>
 	The purpose of the queue wait limit is to prevent vehicles from waiting
 	in the queue for longer than the maximum wait time.
-	For each interval until the target wait time (75% of maximum wait time),
-	a wait limit is calculated.
-	This is done by taking the accumulated demand at the target wait time
-	before each of those intervals.
+	A wait limit is calculated for each future interval until the target
+	wait time (75% of maximum wait time).
+	This is done by subtracting the target wait time from each future
+	interval time and checking the accumulated demand at those times.
 	That demand is used to calculate a rate limit from the current
 	accumulated passage.
 	The queue wait limit is the highest of the limits for these intervals.
