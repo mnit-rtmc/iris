@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import static us.mn.state.dot.tms.GeoLocHelper.isSameCorridor;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
@@ -575,10 +576,33 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	public List<R_NodeImpl> getForks() {
 		LinkedList<R_NodeImpl> forks = new LinkedList<R_NodeImpl>();
 		for(R_NodeImpl d: downstream) {
-			if(!GeoLocHelper.isSameCorridor(geo_loc, d.geo_loc))
+			if(!isSameCorridor(geo_loc, d.geo_loc))
 				forks.add(d);
 		}
 		return forks;
+	}
+
+	/** Find an entrance to a corridor.  Scan downstream until we find an
+	 * entrance node on the specified corridor.
+	 * @param gl GeoLoc of corridor.
+	 * @return R_Node entrance to corridor (or null). */
+	public R_NodeImpl findEntrance(final GeoLoc gl) {
+		if(isSameCorridor(gl, geo_loc))
+			return this;
+		R_NodeImpl n = this;
+		while(n != null) {
+			List<R_NodeImpl> d = n.getDownstream();
+			n = null;
+			for(R_NodeImpl dn: d) {
+				GeoLoc dgl = dn.getGeoLoc();
+				if(isSameCorridor(dgl, gl))
+					return dn;
+				// Only scan original corridor
+				if(isSameCorridor(dgl, geo_loc))
+					n = dn;
+			}
+		}
+		return null;
 	}
 
 	/** Get the linked corridor for an entrance or exit */

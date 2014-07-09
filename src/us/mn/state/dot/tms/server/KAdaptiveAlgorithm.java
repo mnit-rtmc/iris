@@ -349,7 +349,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param meter Ramp meter to search for.
 	 * @return Entrance node matching ramp meter. */
 	private EntranceNode findEntranceNode(RampMeterImpl meter) {
-		R_NodeImpl rnode = meter.getR_Node();
+		R_NodeImpl rnode = meter.getEntranceNode();
 		for(Node n = head; n != null; n = n.downstream) {
 			if(n instanceof EntranceNode) {
 				EntranceNode en = (EntranceNode)n;

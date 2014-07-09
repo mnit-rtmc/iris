@@ -871,6 +871,12 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return null;
 	}
 
+	/** Get the entrance r_node on same corridor as ramp meter */
+	public R_NodeImpl getEntranceNode() {
+		R_NodeImpl n = getR_Node();
+		return (n != null) ? n.findEntrance(geo_loc) : null;
+	}
+
 	/** Get the number of milliseconds the meter has been failed */
 	public long getFailMillis() {
 		ControllerImpl c = controller;	// Avoid race
