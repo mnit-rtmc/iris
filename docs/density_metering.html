@@ -285,32 +285,24 @@
 	vehicles).
 </p>
 <p>
-	If the queue detector is not counting, the demand is set to a fixed
-	target value.
-	This target value is specific to one ramp meter and metering period
-	(AM or PM).
-	It should be set based on historical demand at the ramp.
+	If the queue detector is not counting, demand is set to a fixed target
+	value &mdash; specific to one ramp meter and period (AM or PM).
+	It is based on historical demand at the ramp.
 </p>
 <p>
-	One common problem with queue detectors is undercounting vehicles.
-	This can happen when the queue backs up over the detector.
-	When this happens, the occupancy will jump to greater than 25%.
-	To correct the undercounting, the estimated queue demand is increased
-	gradually until the queue length is equal to the maximum ramp storage.
+	If the queue backs up over the detector, the occupancy will jump to
+	greater than 25%.
+	When this happens, the detector may undercount vehicles.
+	To correct this, the estimated queue demand is increased gradually until
+	queue length is equal to maximum ramp storage.
 </p>
 <p>
 	The available storage is maximum storage minus queue length.
-	High occupancy duration is the amount of time that queue detector
-	occupancy was greater than 25%
-	The queue overflow ratio is 2 times the high occupancy duration,
-	divided by the maximum wait time.
-	It can range from 0 to 1.
-	The storage demand adjustment is the available storage times the queue
-	overflow ratio.
-	The minimum demand adjustment is the high occupancy duration divided
-	by 120.
-	The higher of storage and minimum demand adjustment is added to the
-	demand.
+	High occupancy duration is the time that occupancy was greater than 25%.
+	Queue overflow ratio is 2 times the high occupancy duration, divided by
+	maximum wait time.
+	The storage demand adjustment is available storage times queue overflow
+	ratio.
 </p>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
