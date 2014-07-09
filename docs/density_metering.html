@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">8 Jul 2014</div>
+<div id="stamp">9 Jul 2014</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -285,26 +285,32 @@
 	vehicles).
 </p>
 <p>
-	Of course, sometimes data collection errors need to be corrected.
-	One of the most common errors in undercounting at the queue detector.
-	This can happen when the queue backs up over a queue detector.
-	When this happens, the queue detector occupancy will jump to greater
-	than 25%.
-	In this case, the detector is assumed to be undercounting.
-	The estimated queue demand is increased gradually until the queue
-	length is equal to the maximum storage.
-</p>
-<pre>
-	r = 2 * duration / max_wait
-	v = max storage - queue len
-	demand += max(r * v, 1)
-</pre>
-<p>
-	If the queue detector is malfunctioning, the demand is set to a fixed
+	If the queue detector is not counting, the demand is set to a fixed
 	target value.
 	This target value is specific to one ramp meter and metering period
 	(AM or PM).
 	It should be set based on historical demand at the ramp.
+</p>
+<p>
+	One common problem with queue detectors is undercounting vehicles.
+	This can happen when the queue backs up over the detector.
+	When this happens, the occupancy will jump to greater than 25%.
+	To correct the undercounting, the estimated queue demand is increased
+	gradually until the queue length is equal to the maximum ramp storage.
+</p>
+<p>
+	The available storage is maximum storage minus queue length.
+	High occupancy duration is the amount of time that queue detector
+	occupancy was greater than 25%
+	The queue overflow ratio is 2 times the high occupancy duration,
+	divided by the maximum wait time.
+	It can range from 0 to 1.
+	The storage demand adjustment is the available storage times the queue
+	overflow ratio.
+	The minimum demand adjustment is the high occupancy duration divided
+	by 120.
+	The higher of storage and minimum demand adjustment is added to the
+	demand.
 </p>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
