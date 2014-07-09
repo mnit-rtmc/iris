@@ -1575,7 +1575,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(passage_good) {
 				sb.append(passage_accum);
 				sb.append(" (");
-				sb.append(getPassage(0, 90));
+				sb.append(Math.round(getPassage(0, 90)));
 				sb.append(')');
 			} else
 				sb.append("BAD");
