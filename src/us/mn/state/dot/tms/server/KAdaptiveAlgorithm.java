@@ -79,9 +79,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Ramp queue jam density (vehicles per foot) */
 	static private final float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
 
-	/** Acceleration threshold to decide bottleneck */
-	static private final int A_BOTTLENECK = 1000;
-
 	/** Number fo time steps to check before start metering */
 	static private final int START_STEPS = steps(60);
 
@@ -103,9 +100,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Minutes to flush meter before stop metering */
 	static private final int FLUSH_MINUTES = 2;
-
-	/** Spacing between two bottlenecks (soft minimum) */
-	static private final float BOTTLENECK_SPACING_MILES = 1.5f;
 
 	/** Distance threshold for upstream station to meter association */
 	static private final float UPSTREAM_STATION_MILES = 1.0f;
@@ -378,7 +372,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Find bottlenecks */
 	private void findBottlenecks() {
 		findBottleneckCandidates();
-		mergeBottleneckZones();
 		if(ALG_LOG.isOpen())
 			debugBottlenecks();
 	}
@@ -389,39 +382,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		    sn = sn.downstreamStation())
 		{
 			sn.checkBottleneck();
-		}
-	}
-
-	/** Merge zone by distnace and acceleration.
-	 * Iterate from downstream to upstream. */
-	private void mergeBottleneckZones() {
-		for(StationNode sn = lastStation(); sn != null;
-		    sn = sn.upstreamStation())
-		{
-			if(sn.isBottleneck)
-				checkBottleneckMerge(sn);
-		}
-	}
-
-	/** Check if a bottleneck station should be merged. */
-	private void checkBottleneckMerge(final StationNode sn) {
-		final double k = sn.getDensity();
-		for(StationNode un = sn.upstreamStation(); un != null;
-			un = un.upstreamStation())
-		{
-			if(!un.isBottleneck)
-				continue;
-			if(un.isBottleneckTooClose(sn)) {
-				// close but independent bottleneck
-				if(un.getDensity() > k &&
-				   un.getAcceleration() > A_BOTTLENECK)
-					break;
-				else
-					un.isBottleneck = false;
-			} else if(un.getAcceleration() > A_BOTTLENECK)
-				break;
-			else
-				un.isBottleneck = false;
 		}
 	}
 
@@ -618,11 +578,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return true;
 		}
 
-		/** Is a bottleneck station too close to another? */
-		protected boolean isBottleneckTooClose(StationNode sn) {
-			return distanceMiles(sn) < BOTTLENECK_SPACING_MILES;
-		}
-
 		/** Get average density of a mainline segment beginning at the
 		 * current station.
 		 * @param dn Segment downstream station node.
@@ -679,21 +634,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			Double avg = density_hist.average(step, steps(60));
 			if(avg != null)
 				return avg;
-			else
-				return 0;
-		}
-
-		/** Return acceleration at current station.
-		 * @return acceleration from current station to down station. */
-		public double getAcceleration() {
-			double u2 = getSpeed();
-			StationNode down = downstreamStation();
-			if(down == null)
-				return 0;
-			double u1 = down.getSpeed();
-			double dm = distanceMiles(down);
-			if(dm > 0)
-				return (u1 * u1 - u2 * u2) / (2 * dm);
 			else
 				return 0;
 		}
