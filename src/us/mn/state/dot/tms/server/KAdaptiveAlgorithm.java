@@ -751,8 +751,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final BoundedSampleHistory demandAccumHist =
 			new BoundedSampleHistory(steps(300));
 
-		/** Target queue demand rate (vehicles / hour) */
-		private int target_demand = 0;
+		/** Tracking queue demand rate (vehicles / hour) */
+		private int tracking_demand = 0;
 
 		/** Passage sampling good (latches until queue empty) */
 		private boolean passage_good = true;
@@ -899,7 +899,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			demandHist.push(flowRate(demand_vol));
 			double demand_accum = cumulativeDemand() + demand_vol;
 			demandAccumHist.push(demand_accum);
-			target_demand = targetDemand();
+			tracking_demand = trackingDemand();
 		}
 
 		/** Calculate ramp queue demand.  Normally, this would be an
@@ -966,9 +966,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return cumulativeDemand() - passage_accum;
 		}
 
-		/** Calculate target demand rate at queue detector.
-		 * @return Target demand flow rate (vehicles / hour) */
-		private int targetDemand() {
+		/** Calculate tracking demand rate at queue detector.
+		 * @return Tracking demand flow rate (vehicles / hour) */
+		private int trackingDemand() {
 			Double avg_demand = demandHist.average();
 			if(avg_demand != null)
 				return (int)Math.round(avg_demand);
@@ -1086,7 +1086,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int calculateMinimumRate() {
 			if(!passage_good) {
 				limit_control = MinimumRateLimit.passage_fail;
-				return target_demand;
+				return tracking_demand;
 			} else {
 				int r = queueStorageLimit();
 				limit_control = MinimumRateLimit.storage_limit;
@@ -1114,7 +1114,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Queue storage limit (vehicles / hour). */
 		private int queueStorageLimit() {
 			assert passage_good;
-			float proj_arrive = volumePeriod(target_demand,
+			float proj_arrive = volumePeriod(tracking_demand,
 				targetWaitTime());
 			float demand_proj = cumulativeDemand() + proj_arrive;
 			int req = Math.round(demand_proj - targetStorage());
@@ -1163,13 +1163,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate target minimum rate.
 		 * @return Target minimum rate (vehicles / hour). */
 		private int targetMinRate() {
-			return Math.round(target_demand * TARGET_MIN_RATIO);
+			return Math.round(tracking_demand * TARGET_MIN_RATIO);
 		}
 
 		/** Calculate target maximum rate.
 		 * @return Target maxumum rate (vehicles / hour). */
 		private int calculateMaximumRate() {
-			int target_max = Math.round(target_demand *
+			int target_max = Math.round(tracking_demand *
 				TARGET_MAX_RATIO);
 			return filterRate(Math.max(target_max, minimumRate));
 		}
