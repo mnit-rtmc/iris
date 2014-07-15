@@ -1581,9 +1581,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if(s_node != null) {
 				StationNode dn = s_node.segmentStationNode();
 				if(dn != null) {
-					sb.append(",dn=");
+					sb.append(",");
 					sb.append(dn);
-					sb.append(",bn=");
+					sb.append(",");
 					sb.append(dn.isBottleneck);
 					sb.append(",");
 					sb.append(getSegmentDensity(0));
