@@ -42,10 +42,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Enum for minimum limit control */
 	enum MinimumRateLimit {
-		pf,	/* passage failure */
-		sl,	/* storage limit */
-		wl,	/* wait limit */
-		tm	/* target minimum */
+		passage_fail,
+		storage_limit,
+		wait_limit,
+		target_min,
 	};
 
 	/** Algorithm debug log */
@@ -834,7 +834,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int queueFullCount = 0;
 
 		/** Controlling minimum rate limit */
-		private MinimumRateLimit limit_control = null;
+		private MinimumRateLimit limit_control =
+			MinimumRateLimit.target_min;
 
 		/** Segment density history (vehicles / mile) */
 		private final BoundedSampleHistory segment_k_hist =
@@ -1022,7 +1023,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Estimate the length of queue (vehicles) */
 		private float queueLength() {
-			assert passage_good;
 			return cumulativeDemand() - passage_accum;
 		}
 
@@ -1145,20 +1145,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate minimum rate (vehicles / hour) */
 		private int calculateMinimumRate() {
 			if(!passage_good) {
-				limit_control = MinimumRateLimit.pf;
+				limit_control = MinimumRateLimit.passage_fail;
 				return target_demand;
 			} else {
 				int r = queueStorageLimit();
-				limit_control = MinimumRateLimit.sl;
+				limit_control = MinimumRateLimit.storage_limit;
 				int rr = queueWaitLimit();
 				if(rr > r) {
 					r = rr;
-					limit_control = MinimumRateLimit.wl;
+					limit_control =
+						MinimumRateLimit.wait_limit;
 				}
 				rr = targetMinRate();
 				if(rr > r) {
 					r = rr;
-					limit_control = MinimumRateLimit.tm;
+					limit_control =
+						MinimumRateLimit.target_min;
 				}
 				return filterRate(r);
 			}
@@ -1573,30 +1575,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append(phase);
 			sb.append(",");
 			sb.append(getQueueState());
-			sb.append(",dem=");
-			sb.append(Math.round(cumulativeDemand()));
-			sb.append(",pas=");
-			if(passage_good) {
-				sb.append(passage_accum);
-				sb.append(" (");
-				sb.append(Math.round(getPassage(0, 90)));
-				sb.append(')');
-			} else
-				sb.append("BAD");
-			sb.append(",grn=");
-			sb.append(green_accum);
-			sb.append(",lc=");
+			sb.append(",");
 			sb.append(limit_control);
+			sb.append(",");
+			sb.append(queueLength());
 			sb.append(",");
 			sb.append(minimumRate);
 			sb.append(",");
 			sb.append(currentRate);
 			sb.append(",");
 			sb.append(maximumRate);
-			sb.append(",qe=");
-			sb.append(queueEmptyCount);
-			sb.append(",qf=");
-			sb.append(queueFullCount);
 			sb.append(",");
 			sb.append(s_node);
 			if(s_node != null) {
