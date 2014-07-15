@@ -1425,7 +1425,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return true if metering should restart. */
 		private boolean shouldRestart(StationNode dn) {
 			return (dn != null) &&
-			       shouldStartDensity(dn, RESTART_STEPS);
+			       shouldStartDensity(dn, RESTART_STEPS) &&
+			       !isFlushTime();
 		}
 
 		/** Retart metering.
