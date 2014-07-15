@@ -725,6 +725,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get a string representation of a station node */
+		@Override
 		public String toString() {
 			return "SN:" + station.getName();
 		}
@@ -739,6 +740,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get a string representation of an entrance node */
+		@Override
 		public String toString() {
 			return "EN:" + rnode.getName();
 		}
@@ -1563,6 +1565,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get a string representation of a meter state */
+		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(meter.name);
