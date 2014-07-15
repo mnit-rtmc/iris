@@ -1240,18 +1240,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			StationNode dn = s_node.segmentStationNode();
 			double k = s_node.calculateSegmentDensity(dn);
 			segment_k_hist.push(k);
-			phase = checkMeterPhase(dn);
+			phase = checkMeterPhase();
 			if(isMetering())
 				setRate(calculateRate(k));
 		}
 
 		/** Check metering phase transitions.
-		 * @param dn Segment downstream station node.
 		 * @return New metering phase. */
-		private MeteringPhase checkMeterPhase(StationNode dn) {
+		private MeteringPhase checkMeterPhase() {
 			switch(phase) {
 			case not_started:
-				return checkStart(dn);
+				return checkStart();
 			case early_metering:
 				return checkDoneEarlyMetering();
 			case metering:
@@ -1259,17 +1258,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			case flushing:
 				return checkContinueFlushing();
 			case stopped:
-				return checkRestart(dn);
+				return checkRestart();
 			default:
 				return MeteringPhase.stopped;
 			}
 		}
 
 		/** Check if metering should start.
-		 * @param dn Segment downstream station node.
 		 * @return New metering phase. */
-		private MeteringPhase checkStart(StationNode dn) {
-			if(shouldStart(dn)) {
+		private MeteringPhase checkStart() {
+			if(shouldStart()) {
 				resetAccumulators();
 				return MeteringPhase.early_metering;
 			} else if(isEarlyPeriodOver())
@@ -1279,11 +1277,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if initial metering should start.
-		 * @param dn Segment downstream station node.
 		 * @return true if metering should start. */
-		private boolean shouldStart(StationNode dn) {
-			return (dn != null) &&
-			       shouldStartDensity(dn, START_STEPS);
+		private boolean shouldStart() {
+			return shouldStartDensity(START_STEPS);
 		}
 
 		/** Check if early metering period is over */
@@ -1301,15 +1297,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if metering should start from density.
-		 * @param dn Segment downstream station node.
 		 * @param n_steps Number of steps to check.
 		 * @return true if metering should start, based on segment
 		 *         density. */
-		private boolean shouldStartDensity(StationNode dn, int n_steps){
-			assert s_node != null;
+		private boolean shouldStartDensity(int n_steps) {
 			for(int i = 0; i < n_steps; i++) {
-				if(s_node.calculateSegmentDensity(dn, i) <
-				   K_BOTTLENECK)
+				Double sk = getSegmentDensity(i);
+				if(sk != null && sk < K_BOTTLENECK)
 					return false;
 			}
 			return true;
@@ -1416,20 +1410,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if metering should restart.
-		 * @param dn Segment downstream station node.
 		 * @return New metering phase. */
-		private MeteringPhase checkRestart(StationNode dn) {
-			return shouldRestart(dn)
+		private MeteringPhase checkRestart() {
+			return shouldRestart()
 			     ? restartMetering()
 			     : MeteringPhase.stopped;
 		}
 
 		/** Check if metering should restart (after stopping).
-		 * @param dn Segment downstream station node.
 		 * @return true if metering should restart. */
-		private boolean shouldRestart(StationNode dn) {
-			return (dn != null) &&
-			       shouldStartDensity(dn, RESTART_STEPS) &&
+		private boolean shouldRestart() {
+			return shouldStartDensity(RESTART_STEPS) &&
 			       !isFlushTime();
 		}
 
