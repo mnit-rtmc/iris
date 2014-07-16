@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">15 Jul 2014</div>
+<div id="stamp">16 Jul 2014</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -907,16 +907,12 @@
 <h3 id='stopped'>Stopped Phase</h3>
 <p>
 	In this phase, a ramp meter will not cycle.
-	There are two conditions which can cause the meter to transition back
-	to the <a href='#metering'>metering</a> phase:
+	The meter will transition back to the <a href='#metering'>metering</a>
+	phase only if <a href='#segment_density'>segment density</a> is higher
+	than <a href='#bottleneck_density'>bottleneck density</a> for each
+	interval in 5 minutes.
 </p>
-<ul>
-<li>Passage flow rate was greater than 80% of selected metering rate for each
-    interval in 5 minutes.</li>
-<li><a href='#segment_density'>Segment density</a> was higher than
-    <a href='#bottleneck_density'>bottleneck density</a> for each interval in 5
-    minutes.</li>
-</ul>
+
 <h2>Definitions</h2>
 <dl>
 	<dt id='bottleneck_density'>Bottleneck Density</dt>
