@@ -93,16 +93,16 @@
 	conditions are met:
 </p>
 <ul>
-<li><a href='#station_density'>Station density</a> is above
+<li><a href='#station_density'>Station density</a> was above
     <a href='#bottleneck_density'>bottleneck density</a>
-    for each interval in 90 seconds.</li>
-<li><a href='#station_density'>Station density</a> is above
+    for each interval in 90 seconds, OR</li>
+<li><a href='#station_density'>Station density</a> was above
     <a href='#bottleneck_density'>bottleneck density</a>,
     AND
 </li>
     <ul>
     <li>Station was a bottleneck in previous interval, OR</li>
-    <li><a href='#station_density'>Station density</a> is trending higher for
+    <li><a href='#station_density'>Station density</a> was trending higher for
         each interval in 90 seconds.</li>
     </ul>
 </ul>
@@ -282,8 +282,8 @@
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='560' height='450' viewBox='0,20,560,450'>
-<title>Tracking Rate Limits</title>
-<text style='font-size:20pt' x='180' y='40'>Tracking Rate Limits</text>
+<title>Tracking Demand Limits</title>
+<text style='font-size:20pt' x='160' y='40'>Tracking Demand Limits</text>
 <path id='count_text_2' d='M40 300 V60'/>
 <text style='font-size:14pt'>
   <textPath xlink:href='#count_text_2'>Vehicle Count</textPath>
@@ -323,10 +323,10 @@
 <text style='font-size:9pt'>
   <textPath xlink:href='#passage_rate_2'>passage (output)</textPath>
 </text>
-<path id='tracking_rate_2' style='stroke:purple;stroke-width:0.5'
+<path id='tracking_dem_2' style='stroke:purple;stroke-width:0.5'
       d='M140 310L340 100'/>
 <text style='font-size:8pt' transform='translate(100,-110)'>
-  <textPath xlink:href='#tracking_rate_2'>tracking rate (5-minute)</textPath>
+  <textPath xlink:href='#tracking_dem_2'>tracking demand</textPath>
 </text>
 <path id='max_rate_2' style='stroke:black;stroke-dasharray:1,2'
       d='M340 240L420 90'/>
@@ -338,10 +338,10 @@
 <text style='font-size:8pt' transform='translate(32,-8)'>
   <textPath xlink:href='#min_rate_2'>min. rate (70% of tracking)</textPath>
 </text>
-<path id='tracking_rate_p_2' style='stroke:purple;stroke-dasharray:1,3'
+<path id='tracking_dem_p_2' style='stroke:purple;stroke-dasharray:1,3'
       d='M340 240 480 90'/>
-<text style='font-size:8pt' transform='translate(46,-54)'>
-  <textPath xlink:href='#tracking_rate_p_2'>tracking rate (parallel)</textPath>
+<text style='font-size:8pt' transform='translate(42,-50)'>
+  <textPath xlink:href='#tracking_dem_p_2'>tracking demand (parallel)</textPath>
 </text>
 </svg>
 
@@ -364,7 +364,7 @@
 <h4 id='minimum_rate'>Minimum Rate</h4>
 <p>
 	When the passage detector malfunctions, the minimum rate is equal to the
-	average demand rate for the previous 5 minutes.
+	<a href='#tracking_demand'>tracking demand</a>.
 	Otherwise, it is the highest of the following 3 limits:
 </p>
 <ul>
@@ -596,10 +596,10 @@
 <text style='font-size:8pt' transform='translate(-2,-22)'>
   <textPath xlink:href='#queue_length_5'>queue length</textPath>
 </text>
-<path id='tracking_rate_5' style='stroke:purple;stroke-width:0.5'
+<path id='tracking_dem_5' style='stroke:purple;stroke-width:0.5'
       d='M140 280L340 80'/>
 <text style='font-size:8pt' transform='translate(100,-86)'>
-  <textPath xlink:href='#tracking_rate_5'>tracking rate (5-minute)</textPath>
+  <textPath xlink:href='#tracking_dem_5'>tracking demand</textPath>
 </text>
 <path id='storage_limit_5' style='stroke:#003373;stroke-dasharray:1,2'
       d='M340 180L460 80'/>
@@ -858,7 +858,7 @@
 <h3 id='not_started'>Not Started Phase</h3>
 <p>
 	Ramp meters begin each metering period in this phase.
-	The meter will not cycle until the phase is changed.
+	The meter will not cycle when in this phase.
 	There are two conditions which cause the meter to transition to a
 	different phase.
 	If <a href='#segment_density'>segment density</a> was higher than
@@ -876,9 +876,9 @@
 </p>
 <ul>
 <li><a href='#segment_density'>Segment density</a> (15 minute average) was
-    trending lower for each interval in 5 minutes.</li>
+    trending lower for 5 minutes, OR</li>
 <li><a href='#segment_density'>Segment density</a> (1 minute average) was lower
-    than 65% of <a href='#critical_density'>critical density</a>.</li>
+    than 65% of <a href='#critical_density'>critical density</a>, OR</li>
 <li>Only 30 minutes remain in the metering period.</li>
 </ul>
 <h3 id='metering'>Metering Phase</h3>
@@ -888,11 +888,13 @@
 	<a href='#flushing'>flushing</a> phase:
 </p>
 <ul>
-<li><a href='#segment_density'>Segment density</a> was below
-    <a href='#desired_density'>desired density</a> and segment had no
-    bottleneck, for every interval in 5 minutes.
-</li>
-<li>Only 2 minutes remain in the metering period.</li>
+<li>Only 2 minutes remain in the metering period, OR</li>
+    <ul>
+	<li><a href='#segment_density'>Segment density</a> was below
+	    <a href='#desired_density'>desired density</a> for 5 minutes, AND
+	</li>
+	<li>Segment had no bottleneck, for 5 minutes</li>
+    </ul>
 </ul>
 <h3 id='flushing'>Flushing Phase</h3>
 <p>
@@ -901,17 +903,21 @@
 	<a href='#stopped'>stopped</a> phase:
 </p>
 <ul>
-<li>The queue is estimated to be empty for 1 minute.</li>
+<li>The queue is estimated to be empty, OR</li>
 <li>The metering period ends.</li>
 </ul>
 <h3 id='stopped'>Stopped Phase</h3>
 <p>
 	In this phase, a ramp meter will not cycle.
-	The meter will transition back to the <a href='#metering'>metering</a>
-	phase only if <a href='#segment_density'>segment density</a> is higher
-	than <a href='#bottleneck_density'>bottleneck density</a> for each
-	interval in 5 minutes.
+	The following conditions will cause the meter to transition back to
+	the <a href='#metering'>metering</a> phase:
 </p>
+<ul>
+<li><a href='#segment_density'>Segment density</a> was higher than
+    <a href='#bottleneck_density'>bottleneck density</a> for 5 minutes, AND
+</li>
+<li>More than 2 minutes remain in the metering period.</li>
+</ul>
 
 <h2>Definitions</h2>
 <dl>
@@ -934,7 +940,7 @@
 	<dt id='station_density'>Station Density</dt>
 	<dd>Average of all valid lanes in a station for one sample period</dd>
 	<dt id='tracking_demand'>Tracking Demand</dt>
-	<dd>Average ramp demand flow rate for previous 5 minutes</dd>
+	<dd>Average ramp queue flow rate for previous 5 minutes</dd>
 </dl>
 </body>
 </html>
