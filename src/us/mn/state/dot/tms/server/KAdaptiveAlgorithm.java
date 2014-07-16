@@ -34,8 +34,8 @@ import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
  * Density-based Adaptive Metering with Variable Bottleneck
  * Metering Algorithm.
  *
- * @author Chongmyung Park (chongmyung.park@gmail.com)
  * @author Douglas Lau
+ * @author Chongmyung Park (chongmyung.park@gmail.com)
  * @author Soobin Jeon
  */
 public class KAdaptiveAlgorithm implements MeterAlgorithmState {
@@ -1395,12 +1395,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get the minimum metering rate.
-		 * @return minimum metering rate */
+		 * @return Minimum metering rate */
 		private int getMinimumRate() {
 			return minimumRate;
 		}
 
-		/** Return maximum metering rate */
+		/** Get the maximum metering rate.
+		 * @return Maximum metering rate */
 		private int getMaximumRate() {
 			return maximumRate;
 		}
