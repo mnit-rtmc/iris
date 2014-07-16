@@ -20,10 +20,19 @@
 	level.
 </li>
 <li>
-	Effectively manage the queue at ramp meters.
-	Wait times should rarely be longer than a configurable limit.
+	Effectively manage the queue at ramp meters:
+    <ul>
+    <li>
 	Release rates should be adjusted gradually.
-	Also, the queue should not back up onto cross streets.
+    </li>
+    <li>
+	Wait times should rarely be longer than a configurable limit &mdash;
+	typically 4 minutes.
+    </li>
+    <li>
+	The queue from the ramp meter should not back up onto cross streets.
+    </li>
+    </ul>
 </li>
 </ol>
 <p>
@@ -33,11 +42,11 @@
 
 <h2>Queue Condition</h2>
 <p>
-	The queue condition imposes <a href='#minimum_rate'>minimum</a> and
-	<a href='#maximum_rate'>maximum rate</a> limits for operating a ramp
+	The ramp queue condition is an estimate of the number of vehicles in the
+	queue and the wait time for those vehicles.
+	These estimates impose <a href='#minimum_rate'>minimum</a> and
+	<a href='#maximum_rate'>maximum rate</a> limits for operating the ramp
 	meter.
-	Mainline segment density will cause the metering rate to be adjusted
-	within those limits.
 </p>
 
 <svg class='right' version="1.1"
@@ -798,6 +807,8 @@
 
 <h2>Rate Calculation</h2>
 <p>
+	Mainline segment density will cause the metering rate to be adjusted
+	within the rate limits.
 	The metering rate is calculated iteratively, based on the metering
 	rate from the previous 30 seconds.
 	If the <a href='#segment_density'>segment density</a> is below the
