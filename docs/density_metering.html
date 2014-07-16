@@ -13,112 +13,34 @@
 	The density adaptive ramp metering algorithm has two main objectives:
 </p>
 <ol>
-<li>Delay the onset of mainline congestion for as long as possible.
-    This is achieved by restricting metering rates when
-    <a href='#density'>density</a> on the mainline approaches a critical level.
+<li>
+	Delay the onset of mainline congestion for as long as possible.
+	This is achieved by restricting metering rates when
+	<a href='#density'>density</a> on the mainline approaches a critical
+	level.
 </li>
-<li>Effectively manage the queue at ramp meters.
-    Wait times should rarely be longer than a configurable limit.
-    Release rates should be adjusted gradually.
-    Also, the queue should not back up onto cross streets.
+<li>
+	Effectively manage the queue at ramp meters.
+	Wait times should rarely be longer than a configurable limit.
+	Release rates should be adjusted gradually.
+	Also, the queue should not back up onto cross streets.
 </li>
 </ol>
-<h2>Bottleneck Identification</h2>
 <p>
-	At each time interval, all mainline stations on a freeway corridor are
-	checked for bottlenecks.
-	Candidates are selected based on
-	<a href='#station_density'>station density</a>.
+	The ramp queue condition and mainline vehicle density are used together
+	to calculate metering rates.
 </p>
-<h3>Candidate Bottlenecks</h3>
-<svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
-     width='560' height='180' viewBox='0,0,560,180'>
-<title>Bottleneck Identification</title>
-<defs>
-  <marker id='DotM' style='overflow:visible' orient='auto'>
-    <path style='stroke:black'
-	  d='M1.96 0C1.96 1.104 1.064 2-0.04 2C-1.144 2-2.04 1.104-2.04 0
-	     C-2.04-1.104-1.144-2-0.04-2C1.064-2 1.96-1.104 1.96 0Z'/>
-  </marker>
-  <marker id='Arrow1Mend' style='overflow:visible' orient='auto'>
-    <path style='stroke:black'
-	  d='M-4 0L-6 2L1 0L-6-2L-4 0Z'/>
-  </marker>
-</defs>
-<g style='fill:none;stroke:black'>
-  <path d='M10 10 L550 10 M10 50 L550 50'/>
-</g>
-<g style='fill:#0a0;opacity:0.25'>
-  <rect x='30' y='20' width='10' height='20'/>
-  <rect x='130' y='20' width='10' height='20'/>
-  <rect x='230' y='20' width='10' height='20'/>
-  <rect x='320' y='20' width='10' height='20'/>
-  <rect x='420' y='20' width='10' height='20'/>
-  <rect x='520' y='20' width='10' height='20'/>
-</g>
-<g style='fill:#fda'>
-  <rect x='126' y='55' width='26' height='112' rx='13' ry='8'/>
-  <rect x='416' y='55' width='26' height='112' rx='13' ry='8'/>
-  <rect x='516' y='55' width='26' height='112' rx='13' ry='8'/>
-  <rect x='200' y='146' width='170' height='18' rx='6' ry='9'/>
-</g>
-<g style='fill:none;stroke:black;opacity:0.5;marker-end:url(#Arrow1Mend)'>
-  <path d='M60 30 L110 30'/>
-  <path d='M160 30 L210 30'/>
-  <path d='M260 30 L300 30'/>
-  <path d='M350 30 L400 30'/>
-  <path d='M450 30 L500 30'/>
-</g>
-<rect style='fill:white;stroke:black;opacity:0.5'
-      x='20' y='80' width='520' height='60'/>
-<path style='fill:none;stroke:black;marker-start:url(#DotM);
-             marker-mid:url(#DotM);marker-end:url(#DotM)'
-      d='M40 130L140 100L240 120L330 130L430 100L530 80'/>
-<text style='font-size:14px;font-style:normal'>
-  <tspan x='30' y='70'>S1</tspan>
-  <tspan x='130' y='70'>S2</tspan>
-  <tspan x='230' y='70'>S3</tspan>
-  <tspan x='320' y='70'>S4</tspan>
-  <tspan x='420' y='70'>S5</tspan>
-  <tspan x='520' y='70'>S6</tspan>
-  <tspan x='30' y='100'>Density</tspan>
-  <tspan x='130' y='160'>S2</tspan>
-  <tspan x='420' y='160'>S5</tspan>
-  <tspan x='520' y='160'>S6</tspan>
-  <tspan x='214' y='160'>candidate bottlenecks</tspan>
-</text>
-</svg>
-<p>
-	A mainline station is a candidate bottleneck if one of the following
-	conditions are met:
-</p>
-<ul>
-<li><a href='#station_density'>Station density</a> was above
-    <a href='#bottleneck_density'>bottleneck density</a>
-    for each interval in 90 seconds, OR</li>
-<li><a href='#station_density'>Station density</a> was above
-    <a href='#bottleneck_density'>bottleneck density</a>,
-    AND
-</li>
-    <ul>
-    <li>Station was a bottleneck in previous interval, OR</li>
-    <li><a href='#station_density'>Station density</a> was trending higher for
-        each interval in 90 seconds.</li>
-    </ul>
-</ul>
 
-<h2 class='pagebreak'>Metering Rates</h2>
+<h2>Queue Condition</h2>
 <p>
-	The ramp queue condition and mainline
-	<a href='#segment_density'>segment density</a> are used to calculate
-	metering rates.
 	The queue condition imposes <a href='#minimum_rate'>minimum</a> and
-	<a href='#maximum_rate'>maximum rate</a> limits.
+	<a href='#maximum_rate'>maximum rate</a> limits for operating a ramp
+	meter.
 	Mainline segment density will cause the metering rate to be adjusted
 	within those limits.
 </p>
 
-<svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
+<svg class='right' version="1.1"
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='400' height='410' viewBox='0,0,400,410'>
 <title>Ramp Meter Queueing</title>
@@ -730,6 +652,90 @@
 
 <br class='clear'/>
 
+<h2>Bottleneck Identification</h2>
+<p>
+	At each time interval, all mainline stations on a freeway corridor are
+	checked for bottlenecks.
+	Candidates are selected based on
+	<a href='#station_density'>station density</a>.
+</p>
+<h3>Candidate Bottlenecks</h3>
+<svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
+     width='560' height='180' viewBox='0,0,560,180'>
+<title>Bottleneck Identification</title>
+<defs>
+  <marker id='DotM' style='overflow:visible' orient='auto'>
+    <path style='stroke:black'
+	  d='M1.96 0C1.96 1.104 1.064 2-0.04 2C-1.144 2-2.04 1.104-2.04 0
+	     C-2.04-1.104-1.144-2-0.04-2C1.064-2 1.96-1.104 1.96 0Z'/>
+  </marker>
+  <marker id='Arrow1Mend' style='overflow:visible' orient='auto'>
+    <path style='stroke:black'
+	  d='M-4 0L-6 2L1 0L-6-2L-4 0Z'/>
+  </marker>
+</defs>
+<g style='fill:none;stroke:black'>
+  <path d='M10 10 L550 10 M10 50 L550 50'/>
+</g>
+<g style='fill:#0a0;opacity:0.25'>
+  <rect x='30' y='20' width='10' height='20'/>
+  <rect x='130' y='20' width='10' height='20'/>
+  <rect x='230' y='20' width='10' height='20'/>
+  <rect x='320' y='20' width='10' height='20'/>
+  <rect x='420' y='20' width='10' height='20'/>
+  <rect x='520' y='20' width='10' height='20'/>
+</g>
+<g style='fill:#fda'>
+  <rect x='126' y='55' width='26' height='112' rx='13' ry='8'/>
+  <rect x='416' y='55' width='26' height='112' rx='13' ry='8'/>
+  <rect x='516' y='55' width='26' height='112' rx='13' ry='8'/>
+  <rect x='200' y='146' width='170' height='18' rx='6' ry='9'/>
+</g>
+<g style='fill:none;stroke:black;opacity:0.5;marker-end:url(#Arrow1Mend)'>
+  <path d='M60 30 L110 30'/>
+  <path d='M160 30 L210 30'/>
+  <path d='M260 30 L300 30'/>
+  <path d='M350 30 L400 30'/>
+  <path d='M450 30 L500 30'/>
+</g>
+<rect style='fill:white;stroke:black;opacity:0.5'
+      x='20' y='80' width='520' height='60'/>
+<path style='fill:none;stroke:black;marker-start:url(#DotM);
+             marker-mid:url(#DotM);marker-end:url(#DotM)'
+      d='M40 130L140 100L240 120L330 130L430 100L530 80'/>
+<text style='font-size:14px;font-style:normal'>
+  <tspan x='30' y='70'>S1</tspan>
+  <tspan x='130' y='70'>S2</tspan>
+  <tspan x='230' y='70'>S3</tspan>
+  <tspan x='320' y='70'>S4</tspan>
+  <tspan x='420' y='70'>S5</tspan>
+  <tspan x='520' y='70'>S6</tspan>
+  <tspan x='30' y='100'>Density</tspan>
+  <tspan x='130' y='160'>S2</tspan>
+  <tspan x='420' y='160'>S5</tspan>
+  <tspan x='520' y='160'>S6</tspan>
+  <tspan x='214' y='160'>candidate bottlenecks</tspan>
+</text>
+</svg>
+<p>
+	A mainline station is a candidate bottleneck if one of the following
+	conditions are met:
+</p>
+<ul>
+<li><a href='#station_density'>Station density</a> was above
+    <a href='#bottleneck_density'>bottleneck density</a>
+    for each interval in 90 seconds, OR</li>
+<li><a href='#station_density'>Station density</a> was above
+    <a href='#bottleneck_density'>bottleneck density</a>,
+    AND
+</li>
+    <ul>
+    <li>Station was a bottleneck in previous interval, OR</li>
+    <li><a href='#station_density'>Station density</a> was trending higher for
+        each interval in 90 seconds.</li>
+    </ul>
+</ul>
+
 <h3>Metering Segment</h3>
 <p>
 	The metering rate for a ramp meter is selected using density data from
@@ -751,6 +757,8 @@
 	The segment density is an average of all links in the segment, weighted
 	by length.
 </p>
+
+<br class='clear'/>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink='http://www.w3.org/1999/xlink'
@@ -788,8 +796,7 @@
       d='M60 100 L180 210 380 320'/>
 </svg>
 
-<h3>Rate Calculation</h3>
-
+<h2>Rate Calculation</h2>
 <p>
 	The metering rate is calculated iteratively, based on the metering
 	rate from the previous 30 seconds.
