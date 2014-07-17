@@ -133,6 +133,9 @@ dt {
 .clear {
 	clear: both;
 }
+.pagebreak {
+	clear: both;
+}
 .show {
 	font-size: x-small;
 	color: blue;
@@ -179,6 +182,7 @@ text {
 		page-break-inside: avoid;
 	}
 	.pagebreak {
+		clear: both;
 		page-break-before: always;
 	}
 	.right {

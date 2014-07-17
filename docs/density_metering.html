@@ -96,8 +96,8 @@
 	than the output (passage).
 	At any point in time, the difference between these counts is the
 	queue length (in vehicles).
-	Wait time is estimated by comparing the current passage count with
-	demand counts from previous time intervals.
+	Wait time is estimated by comparing the passage count with demand counts
+	from previous time intervals.
 	The vehicle at the head of the queue started waiting when demand was
 	equal to the current passage count.
 </p>
@@ -109,23 +109,46 @@
 	range from 240 to 1800 (about 4 to 30 vehicles per minute).
 </p>
 
-<h2>Queue Condition</h2>
+<h2>Queue Data</h2>
 <p>
-	The ramp queue condition is an estimate of the number of vehicles in the
-	queue and the wait time for those vehicles.
-	These estimates impose <a href='#minimum_rate'>minimum</a> and
-	<a href='#maximum_rate'>maximum rate</a> limits for operating the ramp
-	meter.
-	The total demand and passage counts since the start of metering are
-	compared.
+	Vehicle detection systems on the entrance ramp provide data for
+	monitoring the queue.
+	Unfortunately, these systems are not 100% accurate, so special care is
+	needed when using the data.
+	From the time when metering begins, total vehicle counts are recorded
+	for greens, passage and demand.
+</p>
+
+<h3>Green Count</h3>
+<p>
+	The green count is the number of green indications which have been
+	displayed on the ramp meter.
+	Sometimes called the "release count", it is not a count of actual
+	vehicles, but it is useful in determining whether or not a queue is
+	present.
 </p>
 
 <h3>Passage (Output)</h3>
 <p>
-	The passage detector is used to estimate the output of the queue.
-	Unfortunately, vehicle detection systems are not 100% accurate.
-	For improved accuracy, the accumulated passage and demand values are
-	reset to zero when there is no queue.
+	The passage detector is placed just downstream of the ramp meter.
+	The count from this detector is used to estimate the output of the
+	queue.
+	Due to its placement, it usually records the most accurate counts for
+	an entrance ramp.
+</p>
+
+<h3>Demand (Input)</h3>
+<p>
+	A queue detector is placed on the entrance ramp, upstream of the meter.
+	It should be located at the tail of the longest acceptable queue.
+	The count from this detector is used to estimate the input of the queue.
+	Note: Some installations also have "demand" detectors located just
+	upstream of the meter &mdash; these are not usefull for demand counts.
+</p>
+<p>
+	If the queue detector is not counting, demand is set to a fixed target
+	value &mdash; specific to one ramp meter and period (AM or PM).
+	It is based on historical demand at the ramp.
 </p>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -184,27 +207,17 @@
 <text style='font-size:9pt' x='292' y='88'>duration</text>
 </svg>
 
-<h3>Demand (Input)</h3>
-<p>
-	The demand at a ramp meter is estimated using ramp queue detection.
-	A cumulative demand count is taken from the time when metering begins.
-	This demand is treated as the queue input.
-</p>
-<p>
-	If the queue detector is not counting, demand is set to a fixed target
-	value &mdash; specific to one ramp meter and period (AM or PM).
-	It is based on historical demand at the ramp.
-</p>
+<h3>Demand Undercount Correction</h3>
 <p>
 	If the queue backs up over the detector, the occupancy will jump to
 	greater than 25%.
 	When this happens, the detector may undercount vehicles.
 	To correct this, the estimated queue demand is increased gradually until
-	queue length is equal to maximum ramp storage.
+	the queue length is equal to <a href='#max_storage'>maximum storage</a>.
 </p>
 <p>
-	The available storage count is maximum queue storage minus current queue
-	length.
+	The available storage count is <a href='#max_storage'>maximum 
+	storage</a> minus current queue length.
 	High occupancy duration is the number of seconds that occupancy was
 	greater than 25%.
 	Queue overflow ratio is 2 times the high occupancy duration divided by
@@ -283,8 +296,9 @@
 
 <h2>Rate Limits</h2>
 <p>
-	The metering rate is limited to a range between the minimum and maximum
-	rates.
+	The metering rate is limited to a range between the
+	<a href='#minimum_rate'>minimum</a> and
+	<a href='#maximum_rate'>maximum</a> rates.
 	These rates are determined by the state of the ramp queue.
 </p>
 <h3 id='maximum_rate'>Maximum Rate</h3>
@@ -956,6 +970,8 @@
 	<dt id='jam_density'>Jam Density</dt>
 	<dd>Density of completely jammed mainline (180 vehicles per lane-mile)
 	</dd>
+	<dt id='max_storage'>Maximum Storage</dt>
+	<dd>Maximum number of vehicles which can be stored in a queue</dd>
 	<dt id='station_density'>Station Density</dt>
 	<dd>Average of all valid lanes in a station for one sample period</dd>
 	<dt id='tracking_demand'>Tracking Demand</dt>
