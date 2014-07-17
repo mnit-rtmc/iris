@@ -14,7 +14,7 @@
 </p>
 <ol>
 <li>
-	Delay the onset of mainline congestion for as long as possible.
+	Delay the onset of freeway mainline congestion for as long as possible.
 	This is achieved by restricting metering rates when
 	<a href='#density'>density</a> on the mainline approaches a critical
 	level.
@@ -26,7 +26,7 @@
 	Release rates should be adjusted gradually.
     </li>
     <li>
-	Wait times should rarely be longer than a configurable limit &mdash;
+	Wait times should not be longer than a configurable limit &mdash;
 	typically 4 minutes.
     </li>
     <li>
@@ -40,14 +40,7 @@
 	to calculate metering rates.
 </p>
 
-<h2>Queue Condition</h2>
-<p>
-	The ramp queue condition is an estimate of the number of vehicles in the
-	queue and the wait time for those vehicles.
-	These estimates impose <a href='#minimum_rate'>minimum</a> and
-	<a href='#maximum_rate'>maximum rate</a> limits for operating the ramp
-	meter.
-</p>
+<h2>Queueing</h2>
 
 <svg class='right' version="1.1"
      xmlns:xlink='http://www.w3.org/1999/xlink'
@@ -98,28 +91,34 @@
 </text>
 </svg>
 
-<h3>Queueing</h3>
 <p>
 	A queue is formed at a ramp meter when the input (demand) is greater
 	than the output (passage).
-	The total demand and passage counts since the start of metering are
-	compared.
 	At any point in time, the difference between these counts is the
-	current queue length (in vehicles).
-	Also, the wait time is estimated by comparing the current passage count
-	with demand counts from previous time intervals.
+	queue length (in vehicles).
+	Wait time is estimated by comparing the current passage count with
+	demand counts from previous time intervals.
 	The vehicle at the head of the queue started waiting when demand was
 	equal to the current passage count.
 </p>
-<h4>Flow Rate</h4>
+<h3>Flow Rate</h3>
 <p>
 	The slope of accumulated vehicle counts through time is the flow rate.
 	Typically, it is expressed in vehicles per hour.
 	For practical metering on two-lane alternate-release meters, flow can
-	range from 240 to 1700 (about 4 to 28 vehicles per minute).
+	range from 240 to 1800 (about 4 to 30 vehicles per minute).
 </p>
 
-<br class='pagebreak'/>
+<h2>Queue Condition</h2>
+<p>
+	The ramp queue condition is an estimate of the number of vehicles in the
+	queue and the wait time for those vehicles.
+	These estimates impose <a href='#minimum_rate'>minimum</a> and
+	<a href='#maximum_rate'>maximum rate</a> limits for operating the ramp
+	meter.
+	The total demand and passage counts since the start of metering are
+	compared.
+</p>
 
 <h4>Passage (Output)</h4>
 <p>
