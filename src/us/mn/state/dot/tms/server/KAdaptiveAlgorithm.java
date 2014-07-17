@@ -930,16 +930,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Estimate queue undercount when occupancy is high.
 		 * @return Vehicle undercount at queue detector. */
 		private float estimateQueueUndercount() {
-			float under = availableStorage();
-			return Math.max(queueOverflowRatio() * under,
-				minDemandAdjustment());
+			return queueOverflowRatio() * availableStorage();
 		}
 
 		/** Estimate the available storage in queue */
 		private float availableStorage() {
-			if(passage_good)
-				return maxStorage() - queueLength();
-			else
+			if(passage_good) {
+				float q_len = Math.max(queueLength(), 0);
+				return maxStorage() - q_len;
+			} else
 				return maxStorage() / 3;
 		}
 
@@ -954,14 +953,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return queueFullCount * STEP_SECONDS;
 		}
 
-		/** Calculate the minimum demand undercount adjustment */
-		private float minDemandAdjustment() {
-			int minutes = Math.round(queueFullSecs() / 60);
-			float per_min = STEP_SECONDS / 60.0f;
-			return minutes * per_min;
-		}
-
-		/** Estimate the length of queue (vehicles) */
+		/** Estimate the length of queue (vehicles).
+		 * @return Queue length (may be negative). */
 		private float queueLength() {
 			return cumulativeDemand() - passage_accum;
 		}
