@@ -119,6 +119,8 @@
 	range from 240 to 1700 (about 4 to 28 vehicles per minute).
 </p>
 
+<br class='pagebreak'/>
+
 <h4>Passage (Output)</h4>
 <p>
 	The passage detector is used to estimate the output of the queue.
@@ -211,6 +213,8 @@
 	The demand correction adjustment is equal to the available storage
 	multiplied by queue overflow ratio.
 </p>
+
+<br class='pagebreak'/>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink='http://www.w3.org/1999/xlink'
@@ -389,15 +393,12 @@
 
 <h4>Queue Wait Limit</h4>
 <p>
-	The purpose of the queue wait limit is to prevent vehicles from waiting
-	in the queue for longer than the maximum wait time.
-	A wait limit is calculated for each future interval until the target
-	wait time (75% of maximum wait time).
-	This is done by subtracting the target wait time from each future
-	interval time and checking the accumulated demand at those times.
-	That demand is used to calculate a rate limit from the current
-	accumulated passage.
-	The queue wait limit is the highest of the limits for these intervals.
+	The purpose of the queue wait limit is to keep wait times below a
+	maximum limit.
+	All past intervals within the target wait time are checked.
+	Rates are calculated from the current passage to the accumulated demand
+	at those intervals, using the remaining target wait time.
+	The queue wait limit is the highest of those.
 </p>
 
 <br class='clear'/>
@@ -571,13 +572,11 @@
 <p>
 	The purpose of the queue storage limit is to prevent the queue from
 	becoming more than 75% full.
-	First, the target storage (75% of maximum storage) is subtracted from
-	the accumulated demand.
-	Then, this value is projected into the future to the target wait time
-	(75% of maximum wait time), using the
+	The target storage is subtracted from the accumulated demand,
+	then projected to the target wait time, using the
 	<a href='#tracking_demand'>tracking demand</a>.
-	The queue storage limit is the rate from the current accumulated
-	passage to that projected target storage (in the target wait time).
+	The queue storage limit is the rate from the current passage to that
+	projected target storage.
 </p>
 
 <br class='clear'/>
@@ -888,6 +887,7 @@
 	Otherwise, when only 30 minutes remain in the metering period, the
 	phase will change to <a href='#stopped'>stopped</a>.
 </p>
+
 <h3 id='early_metering'>Early Metering Phase</h3>
 <p>
 	In this phase, a ramp meter will cycle at the selected metering rate.
