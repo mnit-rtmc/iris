@@ -933,11 +933,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return queueOverflowRatio() * availableStorage();
 		}
 
-		/** Estimate the available storage in queue */
+		/** Estimate the available storage in queue.
+		 * @return Available storage (vehicles) from 0 to maxStorage. */
 		private float availableStorage() {
 			if(passage_good) {
 				float q_len = Math.max(queueLength(), 0);
-				return maxStorage() - q_len;
+				return Math.max(maxStorage() - q_len, 0);
 			} else
 				return maxStorage() / 3;
 		}
