@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">16 Jul 2014</div>
+<div id="stamp">17 Jul 2014</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -202,12 +202,14 @@
 	queue length is equal to maximum ramp storage.
 </p>
 <p>
-	The available storage is maximum storage minus queue length.
-	High occupancy duration is the time that occupancy was greater than 25%.
-	Queue overflow ratio is 2 times the high occupancy duration, divided by
-	maximum wait time.
-	The storage demand adjustment is available storage times queue overflow
-	ratio.
+	The available storage count is maximum queue storage minus current queue
+	length.
+	High occupancy duration is the number of seconds that occupancy was
+	greater than 25%.
+	Queue overflow ratio is 2 times the high occupancy duration divided by
+	maximum wait time, limited to a range between 0 and 1.
+	The demand correction adjustment is equal to the available storage
+	multiplied by queue overflow ratio.
 </p>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
