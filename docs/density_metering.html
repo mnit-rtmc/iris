@@ -120,7 +120,7 @@
 	compared.
 </p>
 
-<h4>Passage (Output)</h4>
+<h3>Passage (Output)</h3>
 <p>
 	The passage detector is used to estimate the output of the queue.
 	Unfortunately, vehicle detection systems are not 100% accurate.
@@ -184,7 +184,7 @@
 <text style='font-size:9pt' x='292' y='88'>duration</text>
 </svg>
 
-<h4>Demand (Input)</h4>
+<h3>Demand (Input)</h3>
 <p>
 	The demand at a ramp meter is estimated using ramp queue detection.
 	A cumulative demand count is taken from the time when metering begins.
@@ -281,13 +281,13 @@
 </text>
 </svg>
 
-<h3>Rate Limits</h3>
+<h2>Rate Limits</h2>
 <p>
 	The metering rate is limited to a range between the minimum and maximum
 	rates.
 	These rates are determined by the state of the ramp queue.
 </p>
-<h4 id='maximum_rate'>Maximum Rate</h4>
+<h3 id='maximum_rate'>Maximum Rate</h3>
 <p>
 	The maximum metering rate is 130% of the
 	<a href='#tracking_demand'>tracking demand</a>.
@@ -297,7 +297,7 @@
 	higher.
 </p>
 
-<h4 id='minimum_rate'>Minimum Rate</h4>
+<h3 id='minimum_rate'>Minimum Rate</h3>
 <p>
 	When the passage detector malfunctions, the minimum rate is equal to the
 	<a href='#tracking_demand'>tracking demand</a>.
@@ -390,7 +390,7 @@
 </text>
 </svg>
 
-<h4>Queue Wait Limit</h4>
+<h3>Queue Wait Limit</h3>
 <p>
 	The purpose of the queue wait limit is to keep wait times below a
 	maximum limit.
@@ -567,7 +567,7 @@
 	 M320 90L320 250M340 240L340 80'/>
 </svg>
 
-<h4>Queue Storage Limit</h4>
+<h3>Queue Storage Limit</h3>
 <p>
 	The purpose of the queue storage limit is to prevent the queue from
 	becoming more than 75% full.
