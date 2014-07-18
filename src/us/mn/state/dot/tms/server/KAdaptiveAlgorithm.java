@@ -856,10 +856,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void validate() {
 			updateNoBottleneckTime();
 			checkQueueBackedUp();
-			updatePassageState();
-			// NOTE: demand state depends on passage state
-			updateDemandState();
 			checkQueueEmpty();
+			updatePassageState();
+			// NOTE: demand state depends on passage
+			updateDemandState();
 			minimumRate = calculateMinimumRate();
 			maximumRate = calculateMaximumRate();
 			if(s_node != null)
@@ -880,6 +880,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				queue_backup_secs += STEP_SECONDS;
 			else
 				queue_backup_secs = 0;
+		}
+
+		/** Check if queue is empty */
+		private void checkQueueEmpty() {
+			if (isQueueEmpty())
+				queue_empty_secs += STEP_SECONDS;
+			else
+				queue_empty_secs = 0;
+			if (queue_empty_secs >= QUEUE_EMPTY_RESET_SECS) {
+				// FIXME: adjust demand instead of resetting
+				resetAccumulators();
+			}
 		}
 
 		/** Update ramp passage output state */
@@ -986,16 +998,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return (t > 0) ? t : getMaxRelease();
 		}
 
-		/** Check if queue is empty */
-		private void checkQueueEmpty() {
-			if(isQueueEmpty())
-				queue_empty_secs += STEP_SECONDS;
-			else
-				queue_empty_secs = 0;
-			if(queue_empty_secs >= QUEUE_EMPTY_RESET_SECS)
-				resetAccumulators();
-		}
-
 		/** Check if the meter queue is empty */
 		private boolean isQueueEmpty() {
 			return isQueueFlowLow() && !isQueueOccupancyHigh();
@@ -1048,7 +1050,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 					return RampMeterQueue.FULL;
 				else if(!passage_good)
 					return RampMeterQueue.UNKNOWN;
-				else if(queue_empty_secs > 0)
+				else if (isQueueEmpty())
 					return RampMeterQueue.EMPTY;
 				else
 					return RampMeterQueue.EXISTS;
@@ -1328,7 +1330,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if ramp meter should continue flushing.
 		 * @return New metering phase. */
 		private MeteringPhase checkContinueFlushing() {
-			return (queue_empty_secs > 0)
+			return isQueueEmpty()
 			     ? stopMetering()
 			     : MeteringPhase.flushing;
 		}
