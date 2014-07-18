@@ -734,14 +734,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			       phase != MeteringPhase.stopped;
 		}
 
-		/** Current metering rate (vehicles / hour) */
-		private int currentRate = 0;
-
 		/** Minimum metering rate (vehicles / hour) */
-		private int minimumRate = 0;
+		private int min_rate = 0;
+
+		/** Current metering rate (vehicles / hour) */
+		private int release_rate = 0;
 
 		/** Maximum metering rate (vehicles / hour) */
-		private int maximumRate = 0;
+		private int max_rate = 0;
 
 		/** Queue demand history (vehicles / hour) */
 		private final BoundedSampleHistory demand_hist =
@@ -864,8 +864,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			demand_adj = calculateDemandAdjustment();
 			updatePassageState();
 			updateDemandState();
-			minimumRate = calculateMinimumRate();
-			maximumRate = calculateMaximumRate();
+			min_rate = calculateMinimumRate();
+			max_rate = calculateMaximumRate();
 			if(s_node != null)
 				calculateMeteringRate();
 		}
@@ -1183,7 +1183,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int calculateMaximumRate() {
 			int target_max = Math.round(tracking_demand *
 				TARGET_MAX_RATIO);
-			return filterRate(Math.max(target_max, minimumRate));
+			return filterRate(Math.max(target_max, min_rate));
 		}
 
 		/** Calculate the metering rate */
@@ -1346,7 +1346,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Stop metering.
 		 * @return New metering phase. */
 		private MeteringPhase stopMetering() {
-			currentRate = 0;
+			release_rate = 0;
 			resetAccumulators();
 			return MeteringPhase.stopped;
 		}
@@ -1377,8 +1377,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * before setting rate.
 		 * @param rn Next metering rate. */
 		private void setRate(double rn) {
-			currentRate = (int)Math.round(limitRate(rn));
-			meter.setRatePlanned(currentRate);
+			release_rate = (int)Math.round(limitRate(rn));
+			meter.setRatePlanned(release_rate);
 		}
 
 		/** Get historical passage flow.
@@ -1399,13 +1399,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get the minimum metering rate.
 		 * @return Minimum metering rate */
 		private int getMinimumRate() {
-			return minimumRate;
+			return min_rate;
 		}
 
 		/** Get the maximum metering rate.
 		 * @return Maximum metering rate */
 		private int getMaximumRate() {
-			return maximumRate;
+			return max_rate;
 		}
 
 		/** Limit metering rate within minimum and maximum rates */
@@ -1432,7 +1432,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get current metering rate.
 		 * @return metering rate */
 		private double getRate() {
-			double r = currentRate;
+			double r = release_rate;
 			if(r > 0)
 				return r;
 			else {
@@ -1516,11 +1516,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append(",");
 			sb.append(limit_control);
 			sb.append(",");
-			sb.append(minimumRate);
+			sb.append(min_rate);
 			sb.append(",");
-			sb.append(currentRate);
+			sb.append(release_rate);
 			sb.append(",");
-			sb.append(maximumRate);
+			sb.append(max_rate);
 			sb.append(",");
 			sb.append(s_node);
 			if(s_node != null) {
