@@ -751,6 +751,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final BoundedSampleHistory demand_accum_hist =
 			new BoundedSampleHistory(steps(300));
 
+		/** Demand adjustment (vehicles) */
+		private float demand_adj = 0;
+
 		/** Tracking queue demand rate (vehicles / hour) */
 		private int tracking_demand = 0;
 
@@ -854,11 +857,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *   - Update demand flow and accumulator.
 		 *   - Calculate metering rate. */
 		private void validate() {
+			// NOTE: these must happen in proper order
 			updateNoBottleneckTime();
 			checkQueueBackedUp();
 			checkQueueEmpty();
+			demand_adj = calculateDemandAdjustment();
 			updatePassageState();
-			// NOTE: demand state depends on passage
 			updateDemandState();
 			minimumRate = calculateMinimumRate();
 			maximumRate = calculateMaximumRate();
@@ -892,6 +896,34 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				// FIXME: adjust demand instead of resetting
 				resetAccumulators();
 			}
+		}
+
+		/** Calculate the demand adjustment.
+		 * @return Demand adjustment (number of vehicles) */
+		private float calculateDemandAdjustment() {
+			return estimateQueueUndercount();
+		}
+
+		/** Estimate queue undercount when occupancy is high.
+		 * @return Vehicle undercount at queue detector. */
+		private float estimateQueueUndercount() {
+			return queueOverflowRatio() * availableStorage();
+		}
+
+		/** Estimate the queue overflow ratio.
+		 * @return Ratio from 0 to 1. */
+		private float queueOverflowRatio() {
+			return Math.min(2*queue_backup_secs / maxWaitTime(), 1);
+		}
+
+		/** Estimate the available storage in queue.
+		 * @return Available storage (vehicles) from 0 to maxStorage. */
+		private float availableStorage() {
+			if(passage_good) {
+				float q_len = Math.max(queueLength(), 0);
+				return Math.max(maxStorage() - q_len, 0);
+			} else
+				return maxStorage() / 3;
 		}
 
 		/** Update ramp passage output state */
@@ -935,12 +967,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			tracking_demand = trackingDemand();
 		}
 
-		/** Calculate ramp queue demand.  Normally, this would be an
-		 * integer value, but when estimates are used, it may need to
-		 * have a fractional part.
-		 * @return Ramp queue demand for current period (vehicles) */
+		/** Calculate ramp queue demand.
+		 * @return Current ramp queue demand (vehicles) */
 		private float calculateQueueDemand() {
-			return queueDemandVolume() + estimateQueueUndercount();
+			return queueDemandVolume() + demand_adj;
 		}
 
 		/** Get queue demand volume for the current period */
@@ -952,28 +982,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				int target = getDefaultTarget();
 				return volumePeriod(target, STEP_SECONDS);
 			}
-		}
-
-		/** Estimate queue undercount when occupancy is high.
-		 * @return Vehicle undercount at queue detector. */
-		private float estimateQueueUndercount() {
-			return queueOverflowRatio() * availableStorage();
-		}
-
-		/** Estimate the queue overflow ratio.
-		 * @return Ratio from 0 to 1. */
-		private float queueOverflowRatio() {
-			return Math.min(2*queue_backup_secs / maxWaitTime(), 1);
-		}
-
-		/** Estimate the available storage in queue.
-		 * @return Available storage (vehicles) from 0 to maxStorage. */
-		private float availableStorage() {
-			if(passage_good) {
-				float q_len = Math.max(queueLength(), 0);
-				return Math.max(maxStorage() - q_len, 0);
-			} else
-				return maxStorage() / 3;
 		}
 
 		/** Estimate the length of queue (vehicles).
@@ -1502,9 +1510,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			sb.append(",");
 			sb.append(getQueueState());
 			sb.append(",");
-			sb.append(limit_control);
-			sb.append(",");
 			sb.append(queueLength());
+			sb.append(",");
+			sb.append(demand_adj);
+			sb.append(",");
+			sb.append(limit_control);
 			sb.append(",");
 			sb.append(minimumRate);
 			sb.append(",");
