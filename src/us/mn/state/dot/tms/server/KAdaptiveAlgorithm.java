@@ -854,6 +854,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *   - Update demand flow and accumulator.
 		 *   - Calculate metering rate. */
 		private void validate() {
+			updateNoBottleneckTime();
 			checkQueueBackedUp();
 			updatePassageState();
 			// NOTE: demand state depends on passage state
@@ -863,6 +864,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			maximumRate = calculateMaximumRate();
 			if(s_node != null)
 				calculateMeteringRate();
+		}
+
+		/** Update the "no bottleneck" time */
+		private void updateNoBottleneckTime() {
+			if (hasBottleneck())
+				no_bottleneck_secs = 0;
+			else
+				no_bottleneck_secs += STEP_SECONDS;
 		}
 
 		/** Check the queue backed-up state */
@@ -1278,18 +1287,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if ramp meter should continue metering.
 		 * @return New metering phase. */
 		private MeteringPhase checkContinueMetering() {
-			updateNoBottleneckCount();
 			return shouldFlush()
 			     ? MeteringPhase.flushing
 			     : MeteringPhase.metering;
-		}
-
-		/** Update the "no bottleneck" count */
-		private void updateNoBottleneckCount() {
-			if (hasBottleneck())
-				no_bottleneck_secs = 0;
-			else
-				no_bottleneck_secs += STEP_SECONDS;
 		}
 
 		/** Check if there is a bottleneck downstream of meter */
@@ -1338,7 +1338,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private MeteringPhase stopMetering() {
 			currentRate = 0;
 			resetAccumulators();
-			no_bottleneck_secs = 0;
 			return MeteringPhase.stopped;
 		}
 
