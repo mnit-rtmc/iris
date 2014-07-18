@@ -1045,8 +1045,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Reset the demand / passage accumulators */
 		private void resetAccumulators() {
-			passage_good = true;
 			demand_accum_hist.clear();
+			demand_adj = 0;
+			passage_good = true;
 			passage_accum = 0;
 			green_accum = 0;
 		}
@@ -1347,7 +1348,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return New metering phase. */
 		private MeteringPhase stopMetering() {
 			release_rate = 0;
-			resetAccumulators();
 			return MeteringPhase.stopped;
 		}
 
