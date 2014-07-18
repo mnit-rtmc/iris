@@ -773,8 +773,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Time queue has been empty (seconds) */
 		private int queue_empty_secs = 0;
 
-		/** Time queue has been full (seconds) */
-		private int queue_full_secs = 0;
+		/** Time queue has been backed-up (seconds) */
+		private int queue_backup_secs = 0;
 
 		/** Controlling minimum rate limit */
 		private MinimumRateLimit limit_control =
@@ -849,11 +849,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Validate meter state.
+		 *   - Update state timers.
 		 *   - Update passage flow and accumulator.
 		 *   - Update demand flow and accumulator.
-		 *   - Check if queue is empty.
 		 *   - Calculate metering rate. */
 		private void validate() {
+			checkQueueBackedUp();
 			updatePassageState();
 			// NOTE: demand state depends on passage state
 			updateDemandState();
@@ -862,6 +863,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			maximumRate = calculateMaximumRate();
 			if(s_node != null)
 				calculateMeteringRate();
+		}
+
+		/** Check the queue backed-up state */
+		private void checkQueueBackedUp() {
+			if (isQueueOccupancyHigh())
+				queue_backup_secs += STEP_SECONDS;
+			else
+				queue_backup_secs = 0;
 		}
 
 		/** Update ramp passage output state */
@@ -910,13 +919,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * have a fractional part.
 		 * @return Ramp queue demand for current period (vehicles) */
 		private float calculateQueueDemand() {
-			float vol = queueDemandVolume();
-			if(isQueueOccupancyHigh()) {
-				queue_full_secs += STEP_SECONDS;
-				vol += estimateQueueUndercount();
-			} else
-				queue_full_secs = 0;
-			return vol;
+			return queueDemandVolume() + estimateQueueUndercount();
 		}
 
 		/** Get queue demand volume for the current period */
@@ -936,6 +939,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return queueOverflowRatio() * availableStorage();
 		}
 
+		/** Estimate the queue overflow ratio.
+		 * @return Ratio from 0 to 1. */
+		private float queueOverflowRatio() {
+			return Math.min(2*queue_backup_secs / maxWaitTime(), 1);
+		}
+
 		/** Estimate the available storage in queue.
 		 * @return Available storage (vehicles) from 0 to maxStorage. */
 		private float availableStorage() {
@@ -944,12 +953,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return Math.max(maxStorage() - q_len, 0);
 			} else
 				return maxStorage() / 3;
-		}
-
-		/** Estimate the queue overflow ratio.
-		 * @return Ratio from 0 to 1. */
-		private float queueOverflowRatio() {
-			return Math.min(2 * queue_full_secs / maxWaitTime(), 1);
 		}
 
 		/** Estimate the length of queue (vehicles).
@@ -1027,8 +1030,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			demandAccumHist.clear();
 			passage_accum = 0;
 			green_accum = 0;
-			queue_empty_secs = 0;
-			queue_full_secs = 0;
 		}
 
 		/** Get ramp meter queue state enum value */
@@ -1285,7 +1286,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Update the "no bottleneck" count */
 		private void updateNoBottleneckCount() {
-			if(hasBottleneck())
+			if (hasBottleneck())
 				no_bottleneck_secs = 0;
 			else
 				no_bottleneck_secs += STEP_SECONDS;
