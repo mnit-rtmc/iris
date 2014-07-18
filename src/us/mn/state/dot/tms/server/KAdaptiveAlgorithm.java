@@ -82,8 +82,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number fo time steps to check before start metering */
 	static private final int START_STEPS = steps(60);
 
+	/** Time threshold for stop metering (seconds) */
+	static private final int STOP_SECONDS = 300;
+
 	/** Number of time steps to check before stop metering */
-	static private final int STOP_STEPS = steps(300);
+	static private final int STOP_STEPS = steps(STOP_SECONDS);
 
 	/** Number of time steps to check before restart metering */
 	static private final int RESTART_STEPS = steps(300);
@@ -740,9 +743,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Maximum metering rate (vehicles / hour) */
 		private int maximumRate = 0;
 
-		/** How many time steps there's no bottleneck at downstream */
-		private int noBottleneckCount = 0;
-
 		/** Queue demand history (vehicles / hour) */
 		private final BoundedSampleHistory demandHist =
 			new BoundedSampleHistory(steps(300));
@@ -766,6 +766,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Cumulative green count (vehicles) */
 		private int green_accum = 0;
+
+		/** Time with no downstream bottleneck (seconds) */
+		private int no_bottleneck_secs = 0;
 
 		/** Time queue has been empty (seconds) */
 		private int queue_empty_secs = 0;
@@ -1283,9 +1286,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Update the "no bottleneck" count */
 		private void updateNoBottleneckCount() {
 			if(hasBottleneck())
-				noBottleneckCount = 0;
+				no_bottleneck_secs = 0;
 			else
-				noBottleneckCount++;
+				no_bottleneck_secs += STEP_SECONDS;
 		}
 
 		/** Check if there is a bottleneck downstream of meter */
@@ -1307,8 +1310,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if mainline segment is flowing */
 		private boolean isSegmentFlowing() {
-			return (noBottleneckCount >= STOP_STEPS) &&
-				!isSegmentDensityHigh();
+			return (no_bottleneck_secs >= STOP_SECONDS) &&
+			       !isSegmentDensityHigh();
 		}
 
 		/** Check if the segment density is higher than desired. */
@@ -1334,7 +1337,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private MeteringPhase stopMetering() {
 			currentRate = 0;
 			resetAccumulators();
-			noBottleneckCount = 0;
+			no_bottleneck_secs = 0;
 			return MeteringPhase.stopped;
 		}
 
