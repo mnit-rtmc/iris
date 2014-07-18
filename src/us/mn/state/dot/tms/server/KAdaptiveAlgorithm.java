@@ -744,11 +744,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int maximumRate = 0;
 
 		/** Queue demand history (vehicles / hour) */
-		private final BoundedSampleHistory demandHist =
+		private final BoundedSampleHistory demand_hist =
 			new BoundedSampleHistory(steps(300));
 
 		/** Cumulative demand history (vehicles) */
-		private final BoundedSampleHistory demandAccumHist =
+		private final BoundedSampleHistory demand_accum_hist =
 			new BoundedSampleHistory(steps(300));
 
 		/** Tracking queue demand rate (vehicles / hour) */
@@ -836,8 +836,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get the total cumulative demand (vehicles) */
 		private float cumulativeDemand(int i) {
-			Double d = demandAccumHist.get(i);
-			if(d != null)
+			Double d = demand_accum_hist.get(i);
+			if (d != null)
 				return d.floatValue();
 			else
 				return 0;
@@ -917,9 +917,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Update ramp queue demand state */
 		private void updateDemandState() {
 			float demand_vol = calculateQueueDemand();
-			demandHist.push(flowRate(demand_vol));
+			demand_hist.push(flowRate(demand_vol));
 			double demand_accum = cumulativeDemand() + demand_vol;
-			demandAccumHist.push(demand_accum);
+			demand_accum_hist.push(demand_accum);
 			tracking_demand = trackingDemand();
 		}
 
@@ -973,9 +973,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate tracking demand rate at queue detector.
 		 * @return Tracking demand flow rate (vehicles / hour) */
 		private int trackingDemand() {
-			Double avg_demand = demandHist.average();
-			if(avg_demand != null)
-				return (int)Math.round(avg_demand);
+			Double d = demand_hist.average();
+			if (d != null)
+				return (int)Math.round(d);
 			else
 				return getDefaultTarget();
 		}
@@ -1036,7 +1036,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Reset the demand / passage accumulators */
 		private void resetAccumulators() {
 			passage_good = true;
-			demandAccumHist.clear();
+			demand_accum_hist.clear();
 			passage_accum = 0;
 			green_accum = 0;
 		}
