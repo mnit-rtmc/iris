@@ -770,8 +770,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Time queue has been empty (seconds) */
 		private int queue_empty_secs = 0;
 
-		/** Time queue has been full (steps) */
-		private int queueFullCount = 0;
+		/** Time queue has been full (seconds) */
+		private int queue_full_secs = 0;
 
 		/** Controlling minimum rate limit */
 		private MinimumRateLimit limit_control =
@@ -909,10 +909,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private float calculateQueueDemand() {
 			float vol = queueDemandVolume();
 			if(isQueueOccupancyHigh()) {
-				queueFullCount++;
+				queue_full_secs += STEP_SECONDS;
 				vol += estimateQueueUndercount();
 			} else
-				queueFullCount = 0;
+				queue_full_secs = 0;
 			return vol;
 		}
 
@@ -946,12 +946,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Estimate the queue overflow ratio.
 		 * @return Ratio from 0 to 1. */
 		private float queueOverflowRatio() {
-			return Math.min(2 * queueFullSecs() / maxWaitTime(), 1);
-		}
-
-		/** Get the queue full duration (seconds) */
-		private float queueFullSecs() {
-			return queueFullCount * STEP_SECONDS;
+			return Math.min(2 * queue_full_secs / maxWaitTime(), 1);
 		}
 
 		/** Estimate the length of queue (vehicles).
@@ -1030,7 +1025,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			passage_accum = 0;
 			green_accum = 0;
 			queue_empty_secs = 0;
-			queueFullCount = 0;
+			queue_full_secs = 0;
 		}
 
 		/** Get ramp meter queue state enum value */
