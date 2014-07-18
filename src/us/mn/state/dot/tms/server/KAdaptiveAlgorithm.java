@@ -124,7 +124,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private final int QUEUE_OCC_THRESHOLD = 25;
 
 	/** Number of steps queue must be empty before resetting accumulators */
-	static private final int QUEUE_EMPTY_STEPS = steps(90);
+	static private final int QUEUE_EMPTY_RESET_SECS = 90;
 
 	/** Threshold to determine when queue is empty */
 	static private final int QUEUE_EMPTY_THRESHOLD = -1;
@@ -767,8 +767,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Cumulative green count (vehicles) */
 		private int green_accum = 0;
 
-		/** Time queue has been empty (steps) */
-		private int queueEmptyCount = 0;
+		/** Time queue has been empty (seconds) */
+		private int queue_empty_secs = 0;
 
 		/** Time queue has been full (steps) */
 		private int queueFullCount = 0;
@@ -979,10 +979,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if queue is empty */
 		private void checkQueueEmpty() {
 			if(isQueueEmpty())
-				queueEmptyCount++;
+				queue_empty_secs += STEP_SECONDS;
 			else
-				queueEmptyCount = 0;
-			if(queueEmptyCount >= QUEUE_EMPTY_STEPS)
+				queue_empty_secs = 0;
+			if(queue_empty_secs >= QUEUE_EMPTY_RESET_SECS)
 				resetAccumulators();
 		}
 
@@ -1029,7 +1029,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			demandAccumHist.clear();
 			passage_accum = 0;
 			green_accum = 0;
-			queueEmptyCount = 0;
+			queue_empty_secs = 0;
 			queueFullCount = 0;
 		}
 
@@ -1040,7 +1040,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 					return RampMeterQueue.FULL;
 				else if(!passage_good)
 					return RampMeterQueue.UNKNOWN;
-				else if(isQueueEmpty())
+				else if(queue_empty_secs > 0)
 					return RampMeterQueue.EMPTY;
 				else
 					return RampMeterQueue.EXISTS;
@@ -1329,7 +1329,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if ramp meter should continue flushing.
 		 * @return New metering phase. */
 		private MeteringPhase checkContinueFlushing() {
-			return isQueueEmpty()
+			return (queue_empty_secs > 0)
 			     ? stopMetering()
 			     : MeteringPhase.flushing;
 		}
