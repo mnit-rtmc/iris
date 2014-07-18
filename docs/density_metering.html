@@ -216,7 +216,7 @@
 	the queue length is equal to <a href='#max_storage'>maximum storage</a>.
 </p>
 <p>
-	The available storage count is <a href='#max_storage'>maximum 
+	The available storage count is <a href='#max_storage'>maximum
 	storage</a> minus current queue length.
 	High occupancy duration is the number of seconds that occupancy was
 	greater than 25%.
@@ -225,6 +225,26 @@
 	The demand correction adjustment is equal to the available storage
 	multiplied by queue overflow ratio.
 </p>
+
+<h3>Empty Queue Correction</h3>
+<p>
+	When the queue is empty, the demand and green counts are adjusted to
+	match the passage count.
+	The following conditions indicate that the queue may be empty:
+</p>
+<ul>
+<li>
+	Queue detector occupancy is below 25%, AND
+</li>
+    <ul>
+    <li>
+	Demand count is below passage count, OR
+    </li>
+    <li>
+	Passage count is below green count.
+    </li>
+    </ul>
+</ul>
 
 <br class='pagebreak'/>
 
