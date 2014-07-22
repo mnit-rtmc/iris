@@ -1183,7 +1183,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get the max wait time (seconds) */
-		private int maxWaitTime() {
+		private float maxWaitTime() {
 			return Math.max(meter.getMaxWait(), 1);
 		}
 
