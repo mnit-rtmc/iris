@@ -1024,7 +1024,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if the meter queue is empty */
 		private boolean isQueueEmpty() {
-			return isQueueFlowLow() && !isQueueOccupancyHigh();
+			return isQueueFlowLow() && !isQueueFull();
 		}
 
 		/** Check if the queue flow is low.  If the passage detector
