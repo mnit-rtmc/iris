@@ -126,7 +126,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Queue occupancy override threshold */
 	static private final int QUEUE_OCC_THRESHOLD = 25;
 
-	/** Number of steps queue must be empty before resetting accumulators */
+	/** Number of steps queue must be empty before resetting green */
 	static private final int QUEUE_EMPTY_RESET_SECS = 90;
 
 	/** Threshold to determine when queue is empty */
@@ -892,27 +892,28 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				queue_empty_secs += STEP_SECONDS;
 			else
 				queue_empty_secs = 0;
-			if (queue_empty_secs >= QUEUE_EMPTY_RESET_SECS) {
-				// FIXME: adjust demand instead of resetting
-				resetAccumulators();
-			}
+			// Get rid of unused greens
+			if (queue_empty_secs > QUEUE_EMPTY_RESET_SECS &&
+			    isPassageBelowGreen())
+				green_accum = passage_accum;
 		}
 
 		/** Calculate the demand adjustment.
 		 * @return Demand adjustment (number of vehicles) */
 		private float calculateDemandAdjustment() {
-			return estimateQueueUndercount();
+			return estimateDemandUndercount()
+			     - estimateDemandOvercount();
 		}
 
-		/** Estimate queue undercount when occupancy is high.
+		/** Estimate demand undercount when occupancy is high.
 		 * @return Vehicle undercount at queue detector. */
-		private float estimateQueueUndercount() {
-			return queueOverflowRatio() * availableStorage();
+		private float estimateDemandUndercount() {
+			return queueFullRatio() * availableStorage();
 		}
 
-		/** Estimate the queue overflow ratio.
+		/** Estimate the queue full ratio.
 		 * @return Ratio from 0 to 1. */
-		private float queueOverflowRatio() {
+		private float queueFullRatio() {
 			return Math.min(2*queue_backup_secs / maxWaitTime(), 1);
 		}
 
@@ -924,6 +925,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return Math.max(maxStorage() - q_len, 0);
 			} else
 				return maxStorage() / 3;
+		}
+
+		/** Estimate demand overcount when queue is empty.
+		 * @return Vehicle overcount at queue detector (may be
+		 *          negative). */
+		private float estimateDemandOvercount() {
+			return queueEmptyRatio() * queueLength();
+		}
+
+		/** Estimate the queue empty ratio.
+		 * @return Ratio from 0 to 1. */
+		private float queueEmptyRatio() {
+			return Math.min(2* queue_empty_secs / maxWaitTime(), 1);
 		}
 
 		/** Update ramp passage output state */
@@ -970,7 +984,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate ramp queue demand.
 		 * @return Current ramp queue demand (vehicles) */
 		private float calculateQueueDemand() {
-			return queueDemandVolume() + demand_adj;
+			return Math.max(queueDemandVolume() + demand_adj, 0);
 		}
 
 		/** Get queue demand volume for the current period */
@@ -987,7 +1001,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Estimate the length of queue (vehicles).
 		 * @return Queue length (may be negative). */
 		private float queueLength() {
-			return cumulativeDemand() - passage_accum;
+			return (passage_good)
+			     ? (cumulativeDemand() - passage_accum)
+			     : 0;
 		}
 
 		/** Calculate tracking demand rate at queue detector.
@@ -1021,7 +1037,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if cumulative demand is below cumulative passage */
 		private boolean isDemandBelowPassage() {
-			assert passage_good;
 			return queueLength() < QUEUE_EMPTY_THRESHOLD;
 		}
 
@@ -1082,7 +1097,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if the ramp queue storage is full */
 		private boolean isQueueStorageFull() {
-			assert passage_good;
 			return queueLength() >= targetStorage();
 		}
 
