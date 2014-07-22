@@ -126,7 +126,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Queue occupancy override threshold */
 	static private final int QUEUE_OCC_THRESHOLD = 25;
 
-	/** Number of steps queue must be empty before resetting green */
+	/** Number of seconds queue must be empty before resetting green */
 	static private final int QUEUE_EMPTY_RESET_SECS = 90;
 
 	/** Threshold to determine when queue is empty */
