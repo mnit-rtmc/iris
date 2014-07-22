@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">17 Jul 2014</div>
+<div id="stamp">22 Jul 2014</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -216,15 +216,17 @@
 	the queue length is equal to <a href='#max_storage'>maximum storage</a>.
 </p>
 <p>
-	The available storage count is <a href='#max_storage'>maximum
+	The <em>available storage count</em> is <a href='#max_storage'>maximum
 	storage</a> minus current queue length.
-	High occupancy duration is the number of seconds that occupancy was
-	greater than 25%.
-	Queue overflow ratio is 2 times the high occupancy duration divided by
-	maximum wait time, limited to a range between 0 and 1.
-	The demand correction adjustment is equal to the available storage
+	<em>High occupancy duration</em> is the number of seconds that occupancy
+	was greater than 25%.
+	<em>Queue overflow ratio</em> is 2 times the high occupancy duration
+	divided by maximum wait time, limited to a range between 0 and 1.
+	The demand undercount adjustment is equal to the available storage
 	multiplied by queue overflow ratio.
 </p>
+
+<br class='pagebreak'/>
 
 <h3>Empty Queue Correction</h3>
 <p>
@@ -245,8 +247,14 @@
     </li>
     </ul>
 </ul>
-
-<br class='pagebreak'/>
+<p>
+	The <em>empty queue duration</em> is the number of seconds that the
+	queue was empty.
+	The <em>queue empty ratio</em> is 2 times the empty queue duration
+	divided by maximum wait time, limited to a range between 0 and 1.
+	The demand overcount adjustment is equal to the queue length multiplied
+	by the queue empty ratio.
+</p>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink='http://www.w3.org/1999/xlink'
@@ -314,12 +322,12 @@
 </text>
 </svg>
 
-<h2>Rate Limits</h2>
+<h2>Limits</h2>
 <p>
-	The metering rate is limited to a range between the
+	The metering rate is limited by the
 	<a href='#minimum_rate'>minimum</a> and
 	<a href='#maximum_rate'>maximum</a> rates.
-	These rates are determined by the state of the ramp queue.
+	These are determined by the state of the ramp queue.
 </p>
 <h3 id='maximum_rate'>Maximum Rate</h3>
 <p>
@@ -343,8 +351,6 @@
 	<li>Queue wait limit</li>
 	<li>Queue storage limit</li>
 </ul>
-
-<br class='clear'/>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink='http://www.w3.org/1999/xlink'
@@ -433,8 +439,6 @@
 	at those intervals, using the remaining target wait time.
 	The queue wait limit is the highest of those.
 </p>
-
-<br class='clear'/>
 
 <svg class='left' version="1.1" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink='http://www.w3.org/1999/xlink'
@@ -603,8 +607,8 @@
 
 <h3>Queue Storage Limit</h3>
 <p>
-	The purpose of the queue storage limit is to prevent the queue from
-	becoming more than 75% full.
+	The queue storage limit prevents the queue from becoming more than 75%
+	full.
 	The target storage is subtracted from the accumulated demand,
 	then projected to the target wait time, using the
 	<a href='#tracking_demand'>tracking demand</a>.
