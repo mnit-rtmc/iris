@@ -914,7 +914,26 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Estimate the queue full ratio.
 		 * @return Ratio from 0 to 1. */
 		private float queueFullRatio() {
-			return Math.min(2*queue_backup_secs / maxWaitTime(), 1);
+			float qor = queueOccRatio();
+			float qbr = queueRatio(queue_backup_secs);
+			return Math.max(qor, qbr);
+		}
+
+		/** Get queue occupancy ratio.  Map occupancy values between
+		 * QUEUE_OCC_THRESHOLD and 100% to a range of 0 and 1.
+		 * @return Ratio from 0 to 1. */
+		private float queueOccRatio() {
+			float o = queue.getMaxOccupancy() - QUEUE_OCC_THRESHOLD;
+			return (o > 0)
+			     ? Math.min(o / (100 - QUEUE_OCC_THRESHOLD), 1)
+			     : 0;
+		}
+
+		/** Calculate a queue ratio.
+		 * @param secs Number of seconds.
+		 * @return Ratio compared to max wait time, between 0 and 1. */
+		private float queueRatio(int secs) {
+			return Math.min(2 * secs / maxWaitTime(), 1);
 		}
 
 		/** Estimate the available storage in queue.
@@ -929,15 +948,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Estimate demand overcount when queue is empty.
 		 * @return Vehicle overcount at queue detector (may be
-		 *          negative). */
+		 *         negative). */
 		private float estimateDemandOvercount() {
-			return queueEmptyRatio() * queueLength();
-		}
-
-		/** Estimate the queue empty ratio.
-		 * @return Ratio from 0 to 1. */
-		private float queueEmptyRatio() {
-			return Math.min(2* queue_empty_secs / maxWaitTime(), 1);
+			return queueRatio(queue_empty_secs) * queueLength();
 		}
 
 		/** Update ramp passage output state */
