@@ -1037,7 +1037,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if the meter queue is empty */
 		private boolean isQueueEmpty() {
-			return isQueueFlowLow() && !isQueueFull();
+			return isQueueFlowLow() && !isQueueOccupancyHigh();
 		}
 
 		/** Check if the queue flow is low.  If the passage detector
@@ -1053,22 +1053,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return queueLength() < QUEUE_EMPTY_THRESHOLD;
 		}
 
-		/** Check if cumulative passage is below cumulative green */
-		private boolean isPassageBelowGreen() {
-			return violationCount() < QUEUE_EMPTY_THRESHOLD;
-		}
-
 		/** Check if queue occupancy is above threshold */
 		private boolean isQueueOccupancyHigh() {
 			return queue.getMaxOccupancy() > QUEUE_OCC_THRESHOLD;
 		}
 
+		/** Check if cumulative passage is below cumulative green */
+		private boolean isPassageBelowGreen() {
+			return violationCount() < QUEUE_EMPTY_THRESHOLD;
+		}
+
 		/** Calculate violation count (passage above green count) */
 		private int violationCount() {
-			if(passage_good)
-				return passage_accum - green_accum;
-			else
-				return 0;
+			return (passage_good)
+			     ? (passage_accum - green_accum)
+			     : 0;
 		}
 
 		/** Reset the demand / passage accumulators */
@@ -1097,7 +1096,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if the ramp meter queue is full */
 		private boolean isQueueFull() {
-			return isQueueOccupancyHigh() || isQueueLimitFull();
+			return isQueueOccupancyHigh() ||
+			      (isQueueLimitFull() && !isPassageBelowGreen());
 		}
 
 		/** Check if the meter queue is full (by storage/wait limit) */
