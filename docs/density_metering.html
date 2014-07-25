@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">23 Jul 2014</div>
+<div id="stamp">25 Jul 2014</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -870,7 +870,7 @@
 
 <h2 class='clear'>Metering Period</h2>
 <svg class="right" xmlns="http://www.w3.org/2000/svg" version="1.1"
-     width="240" height="480">
+     width="240" height="380">
   <title>Metering Phases</title>
   <defs>
     <marker id='Arrow1Mend' style='overflow:visible' orient='auto'>
@@ -880,31 +880,30 @@
   </defs>
   <g style='fill:none;stroke:black;stroke-width:2'>
     <rect fill='#fda' x='20' y='10' width='200' height='60' rx='8' ry='8'/>
-    <rect fill='#afa' x='20' y='110' width='200' height='60' rx='8' ry='8'/>
-    <rect fill='#7f7' x='20' y='210' width='140' height='60' rx='8' ry='8'/>
-    <rect fill='#efa' x='20' y='310' width='140' height='60' rx='8' ry='8'/>
-    <rect fill='#faa' x='20' y='410' width='140' height='60' rx='8' ry='8'/>
+    <rect fill='#7f7' x='50' y='110' width='140' height='60' rx='8' ry='8'/>
+    <rect fill='#efa' x='50' y='210' width='140' height='60' rx='8' ry='8'/>
+    <rect fill='#faa' x='50' y='310' width='140' height='60' rx='8' ry='8'/>
   </g>
   <text style='font-size:24px'>
-    <tspan x='40' y='50'>Not started</tspan>
-    <tspan x='40' y='150'>Early Metering</tspan>
-    <tspan x='40' y='250'>Metering</tspan>
-    <tspan x='40' y='350'>Flushing</tspan>
-    <tspan x='40' y='450'>Stopped</tspan>
+    <tspan x='60' y='50'>Not started</tspan>
+    <tspan x='70' y='150'>Metering</tspan>
+    <tspan x='70' y='250'>Flushing</tspan>
+    <tspan x='70' y='350'>Stopped</tspan>
   </text>
   <g style='fill:none;stroke:black;stroke-width:2;marker-end:url(#Arrow1Mend)'>
-    <path d='m90 70l0 40'/>
-    <path d='m90 170l0 40'/>
-    <path d='m90 270l0 40'/>
-    <path d='m90 370l0 40'/>
-    <path d='m160 440c60 0 60-40 60-100c0-60 0-100-60-100'/>
+    <path d='M110 70 V110'/>
+    <path d='M110 170 V210'/>
+    <path d='M110 270 V310'/>
+    <path d='M40 70 C20 90 20 300 50 340' style='stroke-dasharray:4,2'/>
+    <path d='M190 340 C220 320 220 300 220 240 C220 180 220 160 190 140'
+          style='stroke-dasharray:4,2'/>
   </g>
 </svg>
+
 <p>
 	A metering period begins and ends at specific times during the day.
-	Within the metering period, a meter can be in one of 5 phases:
+	Within the metering period, a meter can be in one of 4 phases:
 	<a href='#not_started'>not started</a>,
-	<a href='#early_metering'>early metering</a>,
 	<a href='#metering'>metering</a>,
 	<a href='#flushing'>flushing</a> or <a href='#stopped'>stopped</a>.
 	When transition conditions are met, the meter moves to the next phase.
@@ -920,24 +919,11 @@
 	If <a href='#segment_density'>segment density</a> was higher than
 	<a href='#bottleneck_density'>bottleneck density</a> for each interval
 	in 60 seconds, the phase will change to
-	<a href='#early_metering'>early metering</a>.
+	<a href='#metering'>metering</a>.
 	Otherwise, when only 30 minutes remain in the metering period, the
 	phase will change to <a href='#stopped'>stopped</a>.
 </p>
 
-<h3 id='early_metering'>Early Metering Phase</h3>
-<p>
-	In this phase, a ramp meter will cycle at the selected metering rate.
-	There are three conditions which can cause the meter to transition to
-	the <a href='#metering'>metering</a> phase:
-</p>
-<ul>
-<li><a href='#segment_density'>Segment density</a> (15 minute average) was
-    trending lower for 5 minutes, OR</li>
-<li><a href='#segment_density'>Segment density</a> (1 minute average) was lower
-    than 65% of <a href='#critical_density'>critical density</a>, OR</li>
-<li>Only 30 minutes remain in the metering period.</li>
-</ul>
 <h3 id='metering'>Metering Phase</h3>
 <p>
 	In this phase, a ramp meter will cycle at the selected metering rate.

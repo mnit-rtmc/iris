@@ -113,16 +113,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Maximum segment length */
 	static private final float SEGMENT_LENGTH_MILES = 3.0f;
 
-	/** Number of steps for average density to check corridor state */
-	static private final int AVG_K_STEPS = steps(900);
-
-	/** Number of trend steps for average density to check corridor state */
-	static private final int AVG_K_TREND_STEPS = steps(300);
-
-	/** Number of steps for trending density history */
-	static private final int TREND_STEPS = Math.max(MAX_STEPS,
-		AVG_K_STEPS + AVG_K_TREND_STEPS);
-
 	/** Queue occupancy override threshold */
 	static private final int QUEUE_OCC_THRESHOLD = 25;
 
@@ -692,7 +682,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Enum for metering phase */
 	private enum MeteringPhase {
 		not_started,
-		early_metering,
 		metering,
 		flushing,
 		stopped,
@@ -785,7 +774,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Segment density history (vehicles / mile) */
 		private final BoundedSampleHistory segment_k_hist =
-			new BoundedSampleHistory(TREND_STEPS);
+			new BoundedSampleHistory(MAX_STEPS);
 
 		/** Create a new meter state */
 		public MeterState(RampMeterImpl mtr, EntranceNode en) {
@@ -1231,8 +1220,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			switch(phase) {
 			case not_started:
 				return checkStart();
-			case early_metering:
-				return checkDoneEarlyMetering();
 			case metering:
 				return checkContinueMetering();
 			case flushing:
@@ -1249,7 +1236,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private MeteringPhase checkStart() {
 			if(shouldStart()) {
 				resetAccumulators();
-				return MeteringPhase.early_metering;
+				return MeteringPhase.metering;
 			} else if(isEarlyPeriodOver())
 				return stopMetering();
 			else
@@ -1287,39 +1274,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 					return false;
 			}
 			return true;
-		}
-
-		/** Check if we're done with early metering.
-		 * @return New metering phase. */
-		private MeteringPhase checkDoneEarlyMetering() {
-			if(isSegmentDensityTrendingDown() ||
-			   isSegmentDensityLow() ||
-			   isEarlyPeriodOver())
-			{
-				return MeteringPhase.metering;
-			} else
-				return MeteringPhase.early_metering;
-		}
-
-		/** Check if segment density is trending downward */
-		private boolean isSegmentDensityTrendingDown() {
-			Double kn = segment_k_hist.average(0, AVG_K_STEPS);
-			if(kn == null)
-				return false;
-			for(int i = 1; i < AVG_K_TREND_STEPS; i++) {
-				Double k = segment_k_hist.average(i,
-					AVG_K_STEPS);
-				if(k == null || kn > k)
-					return false;
-				kn = k;
-			}
-			return true;
-		}
-
-		/** Check if segment density is low */
-		private boolean isSegmentDensityLow() {
-			Double sk = getSegmentDensity(0);
-			return sk != null && sk < K_LOW;
 		}
 
 		/** Check if ramp meter should continue metering.
