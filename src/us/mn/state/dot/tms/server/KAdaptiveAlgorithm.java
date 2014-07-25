@@ -756,9 +756,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Cumulative green count (vehicles) */
 		private int green_accum = 0;
 
-		/** Time with no downstream bottleneck (seconds) */
-		private int no_bottleneck_secs = 0;
-
 		/** Time queue has been empty (seconds) */
 		private int queue_empty_secs = 0;
 
@@ -844,7 +841,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *   - Calculate metering rate. */
 		private void validate() {
 			// NOTE: these must happen in proper order
-			updateNoBottleneckTime();
 			checkQueueBackedUp();
 			checkQueueEmpty();
 			demand_adj = calculateDemandAdjustment();
@@ -854,14 +850,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			max_rate = calculateMaximumRate();
 			if(s_node != null)
 				calculateMeteringRate();
-		}
-
-		/** Update the "no bottleneck" time */
-		private void updateNoBottleneckTime() {
-			if (hasBottleneck())
-				no_bottleneck_secs = 0;
-			else
-				no_bottleneck_secs += STEP_SECONDS;
 		}
 
 		/** Check the queue backed-up state */
