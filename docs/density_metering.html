@@ -916,10 +916,9 @@
 	The meter will not cycle when in this phase.
 	There are two conditions which cause the meter to transition to a
 	different phase.
-	If <a href='#segment_density'>segment density</a> was higher than
-	<a href='#bottleneck_density'>bottleneck density</a> for each interval
-	in 60 seconds, the phase will change to
-	<a href='#metering'>metering</a>.
+	If <a href='#segment_density'>segment density</a> averaged for 2
+	minutes is higher than <a href='#desired_density'>desired density</a>,
+	the phase will change to <a href='#metering'>metering</a>.
 	Otherwise, when only 30 minutes remain in the metering period, the
 	phase will change to <a href='#stopped'>stopped</a>.
 </p>
@@ -931,13 +930,9 @@
 	<a href='#flushing'>flushing</a> phase:
 </p>
 <ul>
-<li>Only 2 minutes remain in the metering period, OR</li>
-    <ul>
-	<li><a href='#segment_density'>Segment density</a> was below
-	    <a href='#desired_density'>desired density</a> for 5 minutes, AND
-	</li>
-	<li>Segment had no bottleneck, for 5 minutes</li>
-    </ul>
+<li><a href='#segment_density'>Segment density</a> averaged for 10 minutes is
+    below <a href='#low_density'>low density</a>, OR</li>
+<li>Only 2 minutes remain in the metering period.</li>
 </ul>
 <h3 id='flushing'>Flushing Phase</h3>
 <p>
@@ -956,8 +951,8 @@
 	the <a href='#metering'>metering</a> phase:
 </p>
 <ul>
-<li><a href='#segment_density'>Segment density</a> was higher than
-    <a href='#bottleneck_density'>bottleneck density</a> for 5 minutes, AND
+<li><a href='#segment_density'>Segment density</a> averaged for 5 minutes is
+    higher than <a href='#desired_density'>desired density</a>, AND
 </li>
 <li>More than 2 minutes remain in the metering period.</li>
 </ul>
@@ -980,6 +975,9 @@
 	<dt id='jam_density'>Jam Density</dt>
 	<dd>Density of completely jammed mainline (180 vehicles per lane-mile)
 	</dd>
+	<dt id='low_density'>Low Density</dt>
+	<dd>Density threshold for determining whether metering should continue
+	    (65% of critical density, or 24 vehicles per lane-mile)</dd>
 	<dt id='max_storage'>Maximum Storage</dt>
 	<dd>Maximum number of vehicles which can be stored in a queue</dd>
 	<dt id='station_density'>Station Density</dt>

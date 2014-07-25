@@ -79,21 +79,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Ramp queue jam density (vehicles per foot) */
 	static private final float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
 
-	/** Number fo time steps to check before start metering */
-	static private final int START_STEPS = steps(60);
+	/** Seconds to average segment density for start metering check */
+	static private final int START_SECS = 120;
 
-	/** Time threshold for stop metering (seconds) */
-	static private final int STOP_SECONDS = 300;
+	/** Seconds to average segment density for stop metering check */
+	static private final int STOP_SECS = 600;
 
-	/** Number of time steps to check before stop metering */
-	static private final int STOP_STEPS = steps(STOP_SECONDS);
-
-	/** Number of time steps to check before restart metering */
-	static private final int RESTART_STEPS = steps(300);
+	/** Seconds to average segment density for restart metering check */
+	static private final int RESTART_SECS = 300;
 
 	/** Maximum number of time steps needed for sample history */
-	static private final int MAX_STEPS = Math.max(Math.max(START_STEPS,
-		STOP_STEPS), RESTART_STEPS);
+	static private final int MAX_STEPS = steps(Math.max(Math.max(START_SECS,
+		STOP_SECS), RESTART_SECS));
 
 	/** Number of time steps for bottleneck trend check */
 	static private final int BOTTLENECK_TREND_STEPS = steps(90);
@@ -1246,7 +1243,16 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if initial metering should start.
 		 * @return true if metering should start. */
 		private boolean shouldStart() {
-			return shouldStartDensity(START_STEPS);
+			return shouldStart(START_SECS);
+		}
+
+		/** Check if metering should start.
+		 * @param n_secs Number of seconds to average data.
+		 * @return true if metering should start, based on segment
+		 *         density. */
+		private boolean shouldStart(int n_secs) {
+			Double sk = segment_k_hist.average(0, steps(n_secs));
+			return (sk != null) && (sk > K_DES);
 		}
 
 		/** Check if early metering period is over */
@@ -1261,19 +1267,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			int min = TimeSteward.currentMinuteOfDayInt();
 			int stop_min = meter.getStopMin();
 			return min >= stop_min - m;
-		}
-
-		/** Check if metering should start from density.
-		 * @param n_steps Number of steps to check.
-		 * @return true if metering should start, based on segment
-		 *         density. */
-		private boolean shouldStartDensity(int n_steps) {
-			for(int i = 0; i < n_steps; i++) {
-				Double sk = getSegmentDensity(i);
-				if(sk != null && sk < K_BOTTLENECK)
-					return false;
-			}
-			return true;
 		}
 
 		/** Check if ramp meter should continue metering.
@@ -1303,18 +1296,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if mainline segment is flowing */
 		private boolean isSegmentFlowing() {
-			return (no_bottleneck_secs >= STOP_SECONDS) &&
-			       !isSegmentDensityHigh();
-		}
-
-		/** Check if the segment density is higher than desired. */
-		private boolean isSegmentDensityHigh() {
-			for(int i = 0; i < STOP_STEPS; i++) {
-				Double sk = getSegmentDensity(i);
-				if(sk != null && sk > K_DES)
-					return true;
-			}
-			return false;
+			Double sk = segment_k_hist.average(0, steps(STOP_SECS));
+			return (sk != null) && (sk < K_LOW);
 		}
 
 		/** Check if ramp meter should continue flushing.
@@ -1343,8 +1326,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if metering should restart (after stopping).
 		 * @return true if metering should restart. */
 		private boolean shouldRestart() {
-			return shouldStartDensity(RESTART_STEPS) &&
-			       !isFlushTime();
+			return shouldStart(RESTART_SECS) && !isFlushTime();
 		}
 
 		/** Retart metering.
