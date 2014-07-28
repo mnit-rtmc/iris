@@ -124,10 +124,10 @@ public enum SystemAttrEnum {
 		NONE("A change takes effect immediately.");
 
 		/** Change message for user. */
-		String m_msg = "";
+		private final String m_msg;
 
 		/** Constructor */
-		Change(String msg) {
+		private Change(String msg) {
 			m_msg = msg;
 		}
 
@@ -229,7 +229,7 @@ public enum SystemAttrEnum {
 	public static String getDesc(String aname) {
 		String ret = I18N.get(aname);
 		SystemAttrEnum sae = lookup(aname);
-		if(sae !=null)
+		if(sae != null)
 			ret += " " + sae.change_action.getMessage();
 		return ret;
 	}
@@ -349,7 +349,6 @@ public enum SystemAttrEnum {
 	 * @return The parsed value or the default value on error.
 	 *         Null is never returned.
 	 */
-
 	public Object parseValue(String v) {
 		Object value = parse(v);
 		if(value == null) {
