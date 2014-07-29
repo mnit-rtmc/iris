@@ -23,6 +23,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JSlider;
 import javax.swing.JPanel;
@@ -31,6 +32,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.Widgets;
 
 /**
@@ -141,6 +143,11 @@ public class PTZPanel extends JPanel {
 		btn.setFont(btn_font);
 		btn.setMargin(new Insets(0, 0, 0, 0));
 		btn.setFocusPainted(false);
+		ImageIcon icon = Icons.getIconByPropName(text_id);
+		if (icon != null) {
+			btn.setIcon(icon);
+			btn.setHideActionText(true);
+		}
 		btn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				buttonPressed(btn, pan, tilt, zoom);
