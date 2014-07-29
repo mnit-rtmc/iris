@@ -140,6 +140,7 @@ public class PTZPanel extends JPanel {
 		btn.setMinimumSize(btn_dim);
 		btn.setFont(btn_font);
 		btn.setMargin(new Insets(0, 0, 0, 0));
+		btn.setFocusPainted(false);
 		btn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				buttonPressed(btn, pan, tilt, zoom);

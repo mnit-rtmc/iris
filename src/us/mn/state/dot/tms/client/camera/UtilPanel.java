@@ -299,6 +299,7 @@ public class UtilPanel extends JPanel {
 			btn.setIcon(icon);
 			btn.setHideActionText(true);
 		}
+		btn.setFocusPainted(false);
 		btn.addChangeListener(new ChangeListener() {
 			boolean pressedState = false;
 			@Override
@@ -343,6 +344,7 @@ public class UtilPanel extends JPanel {
 			btn.setIcon(icon);
 			btn.setHideActionText(true);
 		}
+		btn.setFocusPainted(false);
 		btn.addChangeListener(new ChangeListener() {
 			boolean pressedState = false;
 			@Override
@@ -390,6 +392,7 @@ public class UtilPanel extends JPanel {
 			btn.setIcon(icon);
 			btn.setHideActionText(true);
 		}
+		btn.setFocusPainted(false);
 		btn.addChangeListener(new ChangeListener() {
 			boolean pressedState = false;
 			@Override

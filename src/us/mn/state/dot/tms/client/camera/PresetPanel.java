@@ -149,6 +149,7 @@ public class PresetPanel extends JPanel {
 		btn.setFont(btn_font);
 		btn.setMargin(new Insets(0, 0, 0, 0));
 		btn.setText(Integer.toString(num));
+		btn.setFocusPainted(false);
 		return btn;
 	}
 
@@ -180,6 +181,7 @@ public class PresetPanel extends JPanel {
 			btn.setText("ST");
 		}
 		btn.setToolTipText(TOOLTIP_STORE_INACTIVE);
+		btn.setFocusPainted(false);
 		btn.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent ie) {
 				int state = ie.getStateChange();
