@@ -1801,7 +1801,8 @@ camera_preset_store_enable	false
 camera_ptz_panel_enable	false
 camera_util_panel_enable	false
 client_units_si	true
-database_version	4.13.0
+comm_event_purge_days	14
+database_version	4.14.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
