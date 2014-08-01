@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,10 +32,12 @@ public class JoyScript {
 	/** Possible locations of Pythn */
 	static protected final String[] PYTHON_PATHS = {
 		"/usr/bin/python",
-		"C:\\Python24\\python.exe",
-		"C:\\Python25\\python.exe",
+		"C:\\Python27\\python.exe",
 		"C:\\Python26\\python.exe",
-		"C:\\Python27\\python.exe"
+		"C:\\Python33\\python.exe",
+		"C:\\Python32\\python.exe",
+		"C:\\Python31\\python.exe",
+		"C:\\Python30\\python.exe",
 	};
 
 	/** Locate a Python interpreter */
@@ -80,14 +82,14 @@ public class JoyScript {
 	protected void createLinuxScript(FileWriter fw) throws IOException {
 		fw.write("from sys import stdout\n");
 		fw.write("from struct import unpack\n");
-		fw.write("joystick = open('/dev/input/js0')\n");
+		fw.write("joystick = open('/dev/input/js0', 'rb')\n");
 		fw.write("while True:\n");
 		fw.write("\tv = unpack('ihBB', joystick.read(8))\n");
 		fw.write("\tif v[2] & 0x01:\n");
-		fw.write("\t\tprint 'button:%d,value:%d' % (v[3], v[1])\n");
+		fw.write("\t\tprint ('button:%d,value:%d' % (v[3], v[1]))\n");
 		fw.write("\tif v[2] & 0x02:\n");
 		fw.write("\t\tvalue = v[1] / 32767.0\n");
-		fw.write("\t\tprint 'axis:%d,value:%f' % (v[3], value)\n");
+		fw.write("\t\tprint ('axis:%d,value:%f' % (v[3], value))\n");
 		fw.write("\tstdout.flush()\n");
 	}
 
@@ -102,11 +104,11 @@ public class JoyScript {
 		fw.write("while True:\n");
 		fw.write("\tev = pygame.event.wait()\n");
 		fw.write("\tif ev.type == pygame.JOYAXISMOTION:\n");
-		fw.write("\t\tprint 'axis:%d,value:%f' % (ev.axis,ev.value)\n");
+		fw.write("\t\tprint ('axis:%d,value:%f' % (ev.axis,ev.value))\n");
 		fw.write("\tif ev.type == pygame.JOYBUTTONUP:\n");
-		fw.write("\t\tprint 'button:%d,value:0' % (ev.button)\n");
+		fw.write("\t\tprint ('button:%d,value:0' % (ev.button))\n");
 		fw.write("\tif ev.type == pygame.JOYBUTTONDOWN:\n");
-		fw.write("\t\tprint 'button:%d,value:1' % (ev.button)\n");
+		fw.write("\t\tprint ('button:%d,value:1' % (ev.button))\n");
 		fw.write("\tstdout.flush()\n");
 	}
 
