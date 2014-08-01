@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,33 +36,33 @@ import java.net.URL;
 public class WebBrowser {
 
 	/** Exception for web browser not found */
-	static protected final IOException BROWSER_NOT_FOUND =
+	static private final IOException BROWSER_NOT_FOUND =
 		new FileNotFoundException("Could not find web browser");
 
 	/** Linux web browsers */
-	static protected final String[] LINUX_BROWSERS = {
-		"firefox", "epiphany", "konqueror", "mozilla", "opera"
+	static private final String[] LINUX_BROWSERS = {
+		"firefox", "chrome", "chromium", "mozilla", "epiphany", "opera"
 	};
 
 	/** Execute a subprocess with a web browser at the given URL */
 	static public void open(URL url) throws IOException {
-		if(url != null)
+		if (url != null)
 			open(url.toString());
 	}
 
 	/** Open a URL in a web browser */
 	static public void open(String url) throws IOException {
 		String osName = System.getProperty("os.name");
-		if(osName.startsWith("Mac OS"))
+		if (osName.startsWith("Mac OS"))
 			openMac(url);
-		else if(osName.startsWith("Windows"))
+		else if (osName.startsWith("Windows"))
 			openWindows(url);
 		else
 			openLinux(url);
 	}
 
 	/** Open a web browser on a Mac computer */
-	static protected void openMac(String url) throws IOException {
+	static private void openMac(String url) throws IOException {
 		try {
 			Class mgr = Class.forName("com.apple.eio.FileManager");
 			Method openURL = mgr.getDeclaredMethod("openURL",
@@ -85,13 +85,13 @@ public class WebBrowser {
 	}
 
 	/** Open a web browser on a Windows computer */
-	static protected void openWindows(String url) throws IOException {
+	static private void openWindows(String url) throws IOException {
 		Runtime.getRuntime().exec(
 			"rundll32 url.dll,FileProtocolHandler " + url);
 	}
 
 	/** Open a web browser on a Linux computer */
-	static protected void openLinux(String url) throws IOException {
+	static private void openLinux(String url) throws IOException {
 		String browser = locateBrowser();
 		Runtime.getRuntime().exec(new String[] {
 			browser, url
@@ -99,15 +99,16 @@ public class WebBrowser {
 	}
 
 	/** Locate a browser on a Linux computer */
-	static protected String locateBrowser() throws IOException {
-		for(String browser: LINUX_BROWSERS)
-			if(browserExists(browser))
+	static private String locateBrowser() throws IOException {
+		for (String browser: LINUX_BROWSERS) {
+			if (browserExists(browser))
 				return browser;
+		}
 		throw BROWSER_NOT_FOUND;
 	}
 
 	/** Check if a browser exists */
-	static protected boolean browserExists(String name) throws IOException {
+	static private boolean browserExists(String name) throws IOException {
 		Process p = Runtime.getRuntime().exec(
 			new String[] { "which", name }
 		);
