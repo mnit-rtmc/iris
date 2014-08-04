@@ -19,16 +19,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeterQueue;
+import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.RampMeterImpl.filterRate;
 import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
+import us.mn.state.dot.tms.server.event.MeterEvent;
 
 /**
  * Density-based Adaptive Metering with Variable Bottleneck
@@ -291,8 +294,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		MeterState ms = getMeterState(meter);
 		if(ms != null) {
 			ms.validate();
-			if(ALG_LOG.isOpen())
-				log(ms.toString());
+			ms.logMeterEvent();
 		}
 	}
 
@@ -1451,41 +1453,34 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return rate - (k - K_DES) * ratio;
 		}
 
-		/** Get a string representation of a meter state */
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append(meter.name);
-			sb.append(",");
-			sb.append(phase);
-			sb.append(",");
-			sb.append(getQueueState());
-			sb.append(",");
-			sb.append(queueLength());
-			sb.append(",");
-			sb.append(demand_adj);
-			sb.append(",");
-			sb.append(limit_control);
-			sb.append(",");
-			sb.append(min_rate);
-			sb.append(",");
-			sb.append(release_rate);
-			sb.append(",");
-			sb.append(max_rate);
-			sb.append(",");
-			sb.append(s_node);
+		/** Get the downstream node for the segment */
+		private StationNode segmentDownstream() {
 			if(s_node != null) {
 				StationNode dn = s_node.segmentStationNode();
-				if(dn != null) {
-					sb.append(",");
-					sb.append(dn);
-					sb.append(",");
-					sb.append(dn.isBottleneck);
-					sb.append(",");
-					sb.append(getSegmentDensity(0));
-				}
+				if(dn != null)
+					return dn;
 			}
-			return sb.toString();
+			return null;
+		}
+
+		/** Log a meter event */
+		protected void logMeterEvent() {
+			StationNode dn = segmentDownstream();
+			String dns = (dn != null) ? dn.station.getName() : null;
+			Double sd = getSegmentDensity(0);
+			float seg_den = (sd != null) ? sd.floatValue() : 0;
+			MeterEvent ev = new MeterEvent(EventType.METER_EVENT,
+				meter.name, phase.ordinal(),
+				getQueueState().ordinal(), queueLength(),
+				demand_adj, limit_control.ordinal(), min_rate,
+				release_rate, max_rate, dns, isBottleneck(dn),
+				seg_den);
+			try {
+				ev.doStore();
+			}
+			catch(TMSException e) {
+				e.printStackTrace();
+			};
 		}
 	}
 }
