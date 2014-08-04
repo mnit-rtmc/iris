@@ -6,6 +6,7 @@ UPDATE iris.system_attribute SET value = '4.14.0'
 	WHERE name = 'database_version';
 
 INSERT INTO iris.system_attribute (name, value) VALUES ('comm_event_purge_days', '14');
+INSERT INTO iris.system_attribute (name, value) VALUES ('meter_event_purge_days', '14');
 
 
 CREATE TABLE event.meter_phase (

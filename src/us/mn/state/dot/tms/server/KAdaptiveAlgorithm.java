@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeterQueue;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
@@ -42,6 +43,11 @@ import us.mn.state.dot.tms.server.event.MeterEvent;
  * @author Soobin Jeon
  */
 public class KAdaptiveAlgorithm implements MeterAlgorithmState {
+
+	/** Get meter event purge threshold (days) */
+	static private int getMeterEventPurgeDays() {
+		return SystemAttrEnum.METER_EVENT_PURGE_DAYS.getInt();
+	}
 
 	/** Enum for minimum limit control */
 	enum MinimumRateLimit {
@@ -294,7 +300,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		MeterState ms = getMeterState(meter);
 		if(ms != null) {
 			ms.validate();
-			ms.logMeterEvent();
+			if (getMeterEventPurgeDays() > 0)
+				ms.logMeterEvent();
 		}
 	}
 

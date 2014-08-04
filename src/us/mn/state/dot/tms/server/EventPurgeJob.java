@@ -19,6 +19,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.CommEvent;
+import us.mn.state.dot.tms.server.event.MeterEvent;
 
 /**
  * Job to periodically purge database event records.
@@ -32,6 +33,11 @@ public class EventPurgeJob extends Job {
 		return SystemAttrEnum.COMM_EVENT_PURGE_DAYS.getInt();
 	}
 
+	/** Get meter event purge threshold (days) */
+	static private int getMeterEventPurgeDays() {
+		return SystemAttrEnum.METER_EVENT_PURGE_DAYS.getInt();
+	}
+
 	/** Create a new job to purge database events */
 	public EventPurgeJob() {
 		super(Calendar.DATE, 1, Calendar.HOUR, 2);
@@ -40,5 +46,6 @@ public class EventPurgeJob extends Job {
 	/** Perform the event purge job */
 	public void perform() throws TMSException {
 		CommEvent.purgeRecords(getCommEventPurgeDays());
+		MeterEvent.purgeRecords(getMeterEventPurgeDays());
 	}
 }

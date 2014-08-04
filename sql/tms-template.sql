@@ -1900,6 +1900,7 @@ kml_file_enable	false
 kml_filename	/var/www/html/iris-client/iris.kmz
 map_icon_size_scale_max	30
 map_segment_max_meters	2000
+meter_event_purge_days	14
 meter_green_secs	1.3
 meter_max_red_secs	13.0
 meter_min_red_secs	0.1
