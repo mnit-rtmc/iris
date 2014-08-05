@@ -9,6 +9,34 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.14.0 (5 Aug 2014)</dt>
+	<dd><ul>
+		<li>
+			Simplified start/stop logic for metering algorithm.
+		</li>
+		<li>
+			Cleaned up code for density adaptive metering algorithm.
+		</li>
+		<li>
+			Enhanced document describing density metering algorithm.
+		</li>
+		<li>
+			Allowed density metering for meters on CD roads.
+		</li>
+		<li>
+			Purge comm events after comm_event_purge_days sys attr.
+		</li>
+		<li>
+			Log meter events in meter_event DB table.
+		</li>
+		<li>
+			Purge meter events after meter_event_purge_days attr.
+		</li>
+		<li>
+			Fallback to iris-client.properties for any properties
+			missing from user.properties file.
+		</li>
+	</ul></dd>
 	<dt>4.13.0 (25 Jun 2014)</dt>
 	<dd><ul>
 		<li>
