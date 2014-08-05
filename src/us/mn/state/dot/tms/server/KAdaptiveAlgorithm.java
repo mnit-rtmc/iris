@@ -34,8 +34,7 @@ import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
 import us.mn.state.dot.tms.server.event.MeterEvent;
 
 /**
- * Density-based Adaptive Metering with Variable Bottleneck
- * Metering Algorithm.
+ * Density-based Adaptive Metering Algorithm.
  *
  * @author Douglas Lau
  * @author Chongmyung Park (chongmyung.park@gmail.com)
@@ -60,9 +59,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Calculate steps per hour */
 	static private final double STEP_HOUR =
 		new Interval(STEP_SECONDS).per(HOUR);
-
-	/** Bottleneck density (vehicles per lane-mile) */
-	static private final int K_BOTTLENECK = 30;
 
 	/** Critical density (vehicles / mile) */
 	static private final int K_CRIT = 37;
@@ -94,9 +90,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Maximum number of time steps needed for sample history */
 	static private final int MAX_STEPS = steps(Math.max(Math.max(START_SECS,
 		STOP_SECS), RESTART_SECS));
-
-	/** Number of time steps for bottleneck trend check */
-	static private final int BOTTLENECK_TREND_STEPS = steps(90);
 
 	/** Minutes before end of period to disallow early metering */
 	static private final int EARLY_METER_END_MINUTES = 30;
@@ -350,7 +343,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Process the algorithm for the one interval */
 	private void processInterval() {
 		updateStations();
-		findBottlenecks();
 	}
 
 	/** Update the station nodes */
@@ -360,37 +352,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		{
 			sn.updateState();
 		}
-	}
-
-	/** Find bottlenecks */
-	private void findBottlenecks() {
-		findBottleneckCandidates();
-		if(ALG_LOG.isOpen())
-			debugBottlenecks();
-	}
-
-	/** Find bottleneck candidates. */
-	private void findBottleneckCandidates() {
-		for(StationNode sn = firstStation(); sn != null;
-		    sn = sn.downstreamStation())
-		{
-			sn.checkBottleneck();
-		}
-	}
-
-	/** Debug bottlenecks */
-	private void debugBottlenecks() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Bottlenecks: ");
-		for(StationNode sn = firstStation(); sn != null;
-		    sn = sn.downstreamStation())
-		{
-			if(sn.isBottleneck) {
-				sb.append(sn.toString());
-				sb.append(',');
-			}
-		}
-		log(sb.toString());
 	}
 
 	/** Get the furthest upstream station node. */
@@ -484,11 +445,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 	}
 
-	/** Check if a station node is a bottleneck */
-	static private boolean isBottleneck(StationNode sn) {
-		return sn != null && sn.isBottleneck;
-	}
-
 	/** Node to manage station on corridor */
 	protected class StationNode extends Node {
 
@@ -503,9 +459,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final BoundedSampleHistory density_hist =
 			new BoundedSampleHistory(MAX_STEPS);
 
-		/** Is bottleneck? */
-		private boolean isBottleneck = false;
-
 		/** Create a new station node. */
 		public StationNode(R_NodeImpl rnode, float m, Node up,
 			StationImpl stat)
@@ -514,8 +467,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			station = stat;
 		}
 
-		/** Update station state.
-		 * It must be called before finding bottleneck. */
+		/** Update station state */
 		private void updateState() {
 			density_hist.push(getStationDensity());
 			speed_hist.push(getStationSpeed());
@@ -531,44 +483,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private Double getStationSpeed() {
 			float s = station.getSpeed();
 			return s >= 0 ? (double)s : null;
-		}
-
-		/** Check if a station is a bottleneck */
-		protected void checkBottleneck() {
-			isBottleneck = isCurrentBottleneck();
-		}
-
-		/** Is a station currently a bottleneck? */
-		private boolean isCurrentBottleneck() {
-			return isDensityHigh() ||
-			      (isCurrentDensityHigh() &&
-			      (isBottleneck || isDensityIncreasing()));
-		}
-
-		/** Check if density is high for all trend steps */
-		private boolean isDensityHigh() {
-			for(int i = 0; i < BOTTLENECK_TREND_STEPS; i++) {
-				if(getDensity(i) < K_BOTTLENECK)
-					return false;
-			}
-			return true;
-		}
-
-		/** Check if current density is high */
-		private boolean isCurrentDensityHigh() {
-			return getDensity() >= K_BOTTLENECK;
-		}
-
-		/** Check if density has been increasing for all trend steps */
-		private boolean isDensityIncreasing() {
-			double k = getDensity(0);
-			for(int i = 1; i < BOTTLENECK_TREND_STEPS; i++) {
-				double nk = getDensity(i);
-				if(k < nk)
-					return false;
-				k = nk;
-			}
-			return true;
 		}
 
 		/** Get average density of a mainline segment beginning at the
@@ -630,18 +544,22 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/** Find downstream segment station node.
+		/** Find downstream segment station node.  This is the station
+		 * downstream which results in the highest segment density.
 		 * @return Downstream segment station node. */
 		protected StationNode segmentStationNode() {
 			StationNode dn = this;
-			for(StationNode sn = this; sn != null;
-			    sn = sn.downstreamStation())
+			double dk = 0;
+			for (StationNode sn = this; sn != null;
+			     sn = sn.downstreamStation())
 			{
-				if(sn.isBottleneck)
-					return sn;
-				if(distanceMiles(sn) > SEGMENT_LENGTH_MILES)
+				if (distanceMiles(sn) > SEGMENT_LENGTH_MILES)
 					break;
-				dn = sn;
+				double k = calculateSegmentDensity(sn);
+				if (k >= dk) {
+					dk = k;
+					dn = sn;
+				}
 			}
 			return dn;
 		}
@@ -1257,12 +1175,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			     : MeteringPhase.metering;
 		}
 
-		/** Check if there is a bottleneck downstream of meter */
-		private boolean hasBottleneck() {
-			return s_node != null &&
-			       isBottleneck(s_node.segmentStationNode());
-		}
-
 		/** Check if ramp meter should transition to flushing phase.
 		 * @return true if meter should flush queue. */
 		private boolean shouldFlush() {
@@ -1463,8 +1375,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				meter.name, phase.ordinal(),
 				getQueueState().ordinal(), queueLength(),
 				demand_adj, limit_control.ordinal(), min_rate,
-				release_rate, max_rate, dns, isBottleneck(dn),
-				seg_den);
+				release_rate, max_rate, dns, false, seg_den);
 			try {
 				ev.doStore();
 			}
