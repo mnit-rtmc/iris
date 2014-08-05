@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010 AHMCT, University of California
+ * Copyright (C) 2010-2014 AHMCT, University of California
  * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,6 +32,7 @@ import us.mn.state.dot.sched.ExceptionHandler;
  *
  * @author Michael Darter
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class UserProperties {
 
@@ -56,10 +57,14 @@ public class UserProperties {
 	}
 
 	/** User properties */
-	private final Properties props = new Properties();
+	private final Properties user_props = new Properties();
+
+	/** Client properties */
+	private final Properties client_props;
 
 	/** Create the user properties */
-	public UserProperties(ExceptionHandler h) {
+	public UserProperties(Properties cp, ExceptionHandler h) {
+		client_props = cp;
 		try {
 			read();
 		}
@@ -75,7 +80,7 @@ public class UserProperties {
 	private void read() throws IOException {
 		FileInputStream in = new FileInputStream(getFile());
 		try {
-			props.load(in);
+			user_props.load(in);
 		}
 		finally {
 			in.close();
@@ -89,7 +94,7 @@ public class UserProperties {
 			getDir().mkdirs();
 		FileOutputStream fos = new FileOutputStream(f);
 		try {
-			props.store(fos, "IRIS Client user properties");
+			user_props.store(fos, "IRIS Client user properties");
 		}
 		finally {
 			fos.close();
@@ -98,7 +103,7 @@ public class UserProperties {
 
 	/** Set a string property */
 	private void setProp(String name, String v) {
-		props.setProperty(name, v);
+		user_props.setProperty(name, v);
 	}
 
 	/** Set an integer property */
@@ -111,9 +116,27 @@ public class UserProperties {
 		setProp(name, Float.toString(f));
 	}
 
-	/** Get a string property */
+	/**
+	 * Get a string property, first checking user properties, then
+	 * client properties.  Note: properties which are not found in user
+	 * properties but are found in client properties will be returned,
+	 * but will not be copied over to user properties, as such properties
+	 * should only override client properties if they are explicitly
+	 * entered into the user properties file.  Otherwise, subsequent
+	 * modification of these client properties centrally by the admin
+	 * will have no effect on users whose user property files contain
+	 * implicit copies of them.
+	 *
+	 * @param name The property name
+	 * @return The trimmed property value, from user properties if
+	 *         present, else from client properties if present, else
+	 *         empty-string.
+	 */
 	private String getPropString(String name) {
-		return props.getProperty(name, "").trim();
+		String val = user_props.getProperty(name);
+		if (val == null)
+			val = client_props.getProperty(name, "");
+		return val.trim();
 	}
 
 	/** Get an integer property */

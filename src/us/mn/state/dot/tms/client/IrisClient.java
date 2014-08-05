@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2014  Minnesota Department of Transportation
- * Copyright (C) 2010 AHMCT, University of California
+ * Copyright (C) 2010-2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  * @author Erik Engstrom
  * @author Michael Darter
+ * @author Travis Swanston
  */
 public class IrisClient extends JFrame {
 
@@ -93,7 +94,7 @@ public class IrisClient extends JFrame {
 	private final ScreenLayout layout;
 
 	/** Client properties */
-	private final Properties props;
+	private final Properties client_props;
 
 	/** Exception handler */
 	private final ExceptionHandler handler;
@@ -113,11 +114,11 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Create a new Iris client */
-	public IrisClient(Properties props, ExceptionHandler h) {
+	public IrisClient(Properties cp, ExceptionHandler h) {
 		super(createTitle(I18N.get("iris.logged.out")));
-		this.props = props;
+		client_props = cp;
 		handler = h;
-		user_props = new UserProperties(h);
+		user_props = new UserProperties(client_props, h);
 		Widgets.init(user_props.getScale());
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
@@ -199,8 +200,8 @@ public class IrisClient extends JFrame {
 
 	/** Auto-login the user if enabled */
 	private void autoLogin() {
-		String user = props.getProperty("autologin.username");
-		String pws = props.getProperty("autologin.password");
+		String user = client_props.getProperty("autologin.username");
+		String pws = client_props.getProperty("autologin.password");
 		if(user != null && pws != null) {
 			char[] pwd = pws.toCharArray();
 			pws = null;
@@ -302,7 +303,7 @@ public class IrisClient extends JFrame {
 	/** Create a new session */
 	private Session createSession(String user, char[] pwd) {
 		try {
-			SonarState st = new SonarState(props, handler);
+			SonarState st = new SonarState(client_props, handler);
 			if(st.login(user, new String(pwd))) {
 				st.populateCaches();
 				try {
@@ -322,7 +323,7 @@ public class IrisClient extends JFrame {
 
 	/** Create a user session */
 	private Session createSession(SonarState st) throws Exception {
-		Session s = new Session(st, desktop, props);
+		Session s = new Session(st, desktop, client_props);
 		s.initialize();
 		return s;
 	}
