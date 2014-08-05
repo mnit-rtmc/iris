@@ -572,34 +572,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get average density of a mainline segment beginning at the
-		 * current station.
-		 * @param dn Segment downstream station node.
-		 * @return average density (distance weight). */
-		private double calculateSegmentDensity(StationNode dn) {
-			return calculateSegmentDensity(dn, 0);
-		}
-
-		/** Get average density of a mainline segment beginning at the
 		 * current station.  This works by splitting each consecutive
 		 * pair of stations into 3 equal links and assigning average
 		 * density to the middle link.  All links are then averaged,
 		 * weighted by length.
 		 *
 		 * @param dn Segment downstream station node.
-		 * @param step Time step in past (0 for current).
 		 * @return average density (distance weight). */
-		private double calculateSegmentDensity(final StationNode dn,
-			int step)
-		{
+		private double calculateSegmentDensity(final StationNode dn) {
 			StationNode cursor = this;
 			double dist_seg = 0;	/* Segment distance */
 			double veh_seg = 0;	/* Sum of vehicles in segment */
-			double k_cursor = cursor.getDensity(step);
+			double k_cursor = cursor.getDensity();
 			for(StationNode sn = cursor.downstreamStation();
 			    sn != null && cursor != dn;
 			    sn = sn.downstreamStation())
 			{
-				double k_down = sn.getDensity(step);
+				double k_down = sn.getDensity();
 				double k_middle = (k_cursor + k_down) / 2;
 				double dist = cursor.distanceMiles(sn);
 				dist_seg += dist;
