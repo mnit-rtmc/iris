@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.event;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -29,9 +30,14 @@ public class MeterEvent extends BaseEvent {
 	/** Database table name */
 	static private final String TABLE = "event.meter_event";
 
-	/** Purge records older than age.
-	 * @param age Age in days. */
-	static public void purgeRecords(int age) throws TMSException {
+	/** Get meter event purge threshold (days) */
+	static public int getMeterEventPurgeDays() {
+		return SystemAttrEnum.METER_EVENT_PURGE_DAYS.getInt();
+	}
+
+	/** Purge old records */
+	static public void purgeRecords() throws TMSException {
+		int age = getMeterEventPurgeDays();
 		if (store != null && age >= 0) {
 			store.update("DELETE FROM " + TABLE +
 				" WHERE event_date < now() - '" + age +

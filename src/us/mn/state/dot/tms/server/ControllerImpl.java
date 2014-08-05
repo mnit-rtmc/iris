@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
@@ -824,7 +823,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Log a comm event */
-	protected final void logCommEvent(EventType event, String id) {
+	private void logCommEvent(EventType event, String id) {
+		if (CommEvent.getCommEventPurgeDays() <= 0)
+			return;
 		CommEvent ev = new CommEvent(event, getName(), id);
 		try {
 			ev.doStore();
