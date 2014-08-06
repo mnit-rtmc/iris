@@ -701,12 +701,12 @@
 
 <br class='clear'/>
 
-<h2>Metering Segment</h2>
+<h2>Mainline Segments</h2>
 
 <svg class='right' version="1.1"
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='400' height='140'>
-<title>Metering Segment</title>
+<title>Segments</title>
 <text style='font-size:14pt' x='130' y='28'>Mainline Stations</text>
 <text style='font-size:14pt' x='160' y='132'>Segments</text>
 <path style='fill:#aaa' d='M20 40 H370 V70 H20 Z'/>
@@ -734,24 +734,24 @@
 </svg>
 
 <p>
-	The metering rate for a ramp meter is selected using density data from
-	a metering segment.
-	This is a contiguous series of mainline stations associated with the
-	meter.
-	It begins at the station just upstream of the meter.
-	The downstream end is the station with the highest segment density
-	within within 3 miles of the upstream station.
-</p>
-<h3 id='segment_density'>Segment Density</h3>
-<p>
-	To calculate the density of a metering segment, each consecutive pair of
-	stations is divided into 3 equal links.
+	A mainline segment is derived from a contiguous series of mainline
+	stations.
+	The distance between each pair of stations is divided into 3 links of
+	equal length.
 	The first and last links are assigned density from the station adjacent
 	to them.
 	The middle link is assigned a density which is an average of the two
 	stations.
 	The segment density is an average of all links in the segment, weighted
 	by length.
+</p>
+
+<h3 id='segment_density'>Segment Density</h3>
+<p>
+	Each meter is associated with a mainline segment at each interval.
+	This segment begins at the station just upstream of the meter.
+	The downstream station must be within 3 miles of the upstream station.
+	It is the station which results in the highest segment density.
 </p>
 
 <br class='clear'/>
