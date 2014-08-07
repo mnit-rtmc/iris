@@ -451,13 +451,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** StationImpl mapping this state */
 		private final StationImpl station;
 
+		/** Density history */
+		private final BoundedSampleHistory density_hist =
+			new BoundedSampleHistory(steps(60));
+
 		/** Speed history */
 		private final BoundedSampleHistory speed_hist =
 			new BoundedSampleHistory(steps(60));
-
-		/** Density history */
-		private final BoundedSampleHistory density_hist =
-			new BoundedSampleHistory(MAX_STEPS);
 
 		/** Create a new station node. */
 		public StationNode(R_NodeImpl rnode, float m, Node up,
@@ -517,25 +517,18 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return k_cursor;
 		}
 
-		/** Get aggregated density at current time step.
+		/** Get 1 minute density at current time step.
 		 * @return average 1 min density; missing data returns 0. */
 		public double getDensity() {
-			return getDensity(0);
-		}
-
-		/** Get aggregated density at specified time step.
-		 * @param step Time step in past (0 for current).
-		 * @return average 1 min density at 'step' time steps ago.*/
-		public double getDensity(int step) {
-			Double avg = density_hist.average(step, steps(60));
+			Double avg = density_hist.average(0, steps(60));
 			if(avg != null)
 				return avg;
 			else
 				return 0;
 		}
 
-		/** Get speed at current time step.
-		 * @return Average 1 min speed. */
+		/** Get 1 minute speed at current time step.
+		 * @return Average 1 min speed; missing data returns 0. */
 		private double getSpeed() {
 			Double avg = speed_hist.average(0, steps(60));
 			if(avg != null)
