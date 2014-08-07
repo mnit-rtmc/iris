@@ -1237,11 +1237,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return passage_hist.average(step, steps(secs));
 		}
 
-		/** Get segment density at 'step' time steps ago.
-		 * @param step Time step in past (0 for current).
+		/** Get current segment density.
 		 * @return segment density, or null for missing data. */
-		private Double getSegmentDensity(int step) {
-			return segment_k_hist.get(step);
+		private Double getSegmentDensity() {
+			return segment_k_hist.get(0);
 		}
 
 		/** Get the minimum metering rate.
@@ -1362,7 +1361,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		protected void logMeterEvent() {
 			StationNode dn = segmentDownstream();
 			String dns = (dn != null) ? dn.station.getName() : null;
-			Double sd = getSegmentDensity(0);
+			Double sd = getSegmentDensity();
 			float seg_den = (sd != null) ? sd.floatValue() : 0;
 			MeterEvent ev = new MeterEvent(EventType.METER_EVENT,
 				meter.name, phase.ordinal(),
