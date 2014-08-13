@@ -765,7 +765,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if queue is empty */
 		private void checkQueueEmpty() {
-			if (isQueueEmpty())
+			if (isQueuePossiblyEmpty())
 				queue_empty_secs += STEP_SECONDS;
 			else
 				queue_empty_secs = 0;
@@ -912,8 +912,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return (t > 0) ? t : getMaxRelease();
 		}
 
-		/** Check if the meter queue is empty */
-		private boolean isQueueEmpty() {
+		/** Check if the queue is possibly empty */
+		private boolean isQueuePossiblyEmpty() {
 			return isQueueFlowLow() && !isQueueOccupancyHigh();
 		}
 
@@ -997,6 +997,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			int wait_steps = steps(wait_target);
 			int dem = Math.round(cumulativeDemand(wait_steps));
 			return dem > passage_accum;
+		}
+
+		/** Check if the meter queue is empty */
+		private boolean isQueueEmpty() {
+			return queueLength() < 1;
 		}
 
 		/** Calculate minimum rate (vehicles / hour) */
