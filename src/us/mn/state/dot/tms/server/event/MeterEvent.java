@@ -78,16 +78,13 @@ public class MeterEvent extends BaseEvent {
 	/** Downstream node ID */
 	private final String d_node;
 
-	/** Bottleneck flag */
-	private final boolean bottleneck;
-
 	/** Segment density */
 	private final float seg_density;
 
 	/** Create a new meter event */
 	public MeterEvent(EventType e, String mid, int p, int qs, float ql,
 		float da, int ws, int lc, int mn, int rr, int mx, String dn,
-		boolean b, float sd)
+		float sd)
 	{
 		super(e);
 		assert e == EventType.METER_EVENT;
@@ -102,7 +99,6 @@ public class MeterEvent extends BaseEvent {
 		rel_rate = rr;
 		max_rate = mx;
 		d_node = dn;
-		bottleneck = b;
 		seg_density = sd;
 	}
 
@@ -130,7 +126,6 @@ public class MeterEvent extends BaseEvent {
 		map.put("max_rate", max_rate);
 		if (d_node != null)
 			map.put("d_node", d_node);
-		map.put("bottleneck", bottleneck);
 		map.put("seg_density", seg_density);
 		return map;
 	}

@@ -1400,7 +1400,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				getQueueState().ordinal(), queueLength(),
 				demand_adj, estimateWaitSecs(),
 				limit_control.ordinal(), min_rate, release_rate,
-				max_rate, dns, false, seg_den);
+				max_rate, dns, seg_den);
 			try {
 				ev.doStore();
 			}
