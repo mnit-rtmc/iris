@@ -1192,6 +1192,7 @@ CREATE TABLE event.meter_event (
 	q_state INTEGER NOT NULL REFERENCES event.meter_queue_state,
 	q_len REAL NOT NULL,
 	dem_adj REAL NOT NULL,
+	wait_secs INTEGER NOT NULL,
 	limit_ctrl INTEGER NOT NULL REFERENCES event.meter_limit_control,
 	min_rate INTEGER NOT NULL,
 	rel_rate INTEGER NOT NULL,
@@ -1205,7 +1206,7 @@ CREATE VIEW meter_event_view AS
 	SELECT event_id, event_date, event_description.description,
 	       ramp_meter, meter_phase.description AS phase,
 	       meter_queue_state.description AS q_state, q_len, dem_adj,
-	       meter_limit_control.description AS limit_ctrl,
+	       wait_secs, meter_limit_control.description AS limit_ctrl,
 	       min_rate, rel_rate, max_rate, d_node, bottleneck, seg_density
 	FROM event.meter_event
 	JOIN event.event_description
@@ -1851,7 +1852,7 @@ camera_ptz_panel_enable	false
 camera_util_panel_enable	false
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.14.0
+database_version	4.15.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false

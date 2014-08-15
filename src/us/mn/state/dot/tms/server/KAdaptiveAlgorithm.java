@@ -106,6 +106,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Maximum segment length */
 	static private final float SEGMENT_LENGTH_MILES = 3.0f;
 
+	/** Number of seconds to store demand accumulator history */
+	static private final int DEMAND_ACCUM_SECS = 600;
+
 	/** Queue occupancy override threshold */
 	static private final int QUEUE_OCC_THRESHOLD = 25;
 
@@ -638,7 +641,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Cumulative demand history (vehicles) */
 		private final BoundedSampleHistory demand_accum_hist =
-			new BoundedSampleHistory(steps(300));
+			new BoundedSampleHistory(steps(DEMAND_ACCUM_SECS));
 
 		/** Demand adjustment (vehicles) */
 		private float demand_adj = 0;
@@ -723,9 +726,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return df < DOWNSTREAM_STATION_FEET && df < uf;
 		}
 
-		/** Get the total cumulative demand (vehicles) */
-		private float cumulativeDemand(int i) {
-			Double d = demand_accum_hist.get(i);
+		/** Get the total cumulative demand (vehicles).
+		 * @param step Time step in past (0 for current).
+		 * @return Cululative demand at specified time. */
+		private float cumulativeDemand(int step) {
+			Double d = demand_accum_hist.get(step);
 			if (d != null)
 				return d.floatValue();
 			else
@@ -1082,6 +1087,28 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return Math.max(meter.getMaxWait(), 1);
 		}
 
+		/** Estimate the wait time for vehicle at head of queue */
+		private int estimateWaitSecs() {
+			if (!passage_good)
+				return 0;
+			float pd = cumulativeDemand();
+			if (pd <= passage_accum)
+				return 0;
+			for (int i = 1; i < steps(DEMAND_ACCUM_SECS); i++) {
+				float dem = cumulativeDemand(i);
+				if (dem <= passage_accum && pd > dem) {
+					float p = passage_accum - dem;
+					float r = p / (pd - dem);
+					assert r >= 0 && r <= 1;
+					// Estimate wait time (in steps)
+					float wait = (i - 1) + r;
+					return Math.round(wait * STEP_SECONDS);
+				}
+				pd = dem;
+			}
+			return DEMAND_ACCUM_SECS;
+		}
+
 		/** Calculate target minimum rate.
 		 * @return Target minimum rate (vehicles / hour). */
 		private int targetMinRate() {
@@ -1371,8 +1398,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			MeterEvent ev = new MeterEvent(EventType.METER_EVENT,
 				meter.name, phase.ordinal(),
 				getQueueState().ordinal(), queueLength(),
-				demand_adj, limit_control.ordinal(), min_rate,
-				release_rate, max_rate, dns, false, seg_den);
+				demand_adj, estimateWaitSecs(),
+				limit_control.ordinal(), min_rate, release_rate,
+				max_rate, dns, false, seg_den);
 			try {
 				ev.doStore();
 			}

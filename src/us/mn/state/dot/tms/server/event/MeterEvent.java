@@ -60,6 +60,9 @@ public class MeterEvent extends BaseEvent {
 	/** Demand adjustment */
 	private final float dem_adj;
 
+	/** Estimated wait time */
+	private final int wait_secs;
+
 	/** Limit control */
 	private final int limit_ctrl;
 
@@ -83,8 +86,8 @@ public class MeterEvent extends BaseEvent {
 
 	/** Create a new meter event */
 	public MeterEvent(EventType e, String mid, int p, int qs, float ql,
-		float da, int lc, int mn, int rr, int mx, String dn, boolean b,
-		float sd)
+		float da, int ws, int lc, int mn, int rr, int mx, String dn,
+		boolean b, float sd)
 	{
 		super(e);
 		assert e == EventType.METER_EVENT;
@@ -93,6 +96,7 @@ public class MeterEvent extends BaseEvent {
 		q_state = qs;
 		q_len = ql;
 		dem_adj = da;
+		wait_secs = ws;
 		limit_ctrl = lc;
 		min_rate = mn;
 		rel_rate = rr;
@@ -119,6 +123,7 @@ public class MeterEvent extends BaseEvent {
 		map.put("q_state", q_state);
 		map.put("q_len", q_len);
 		map.put("dem_adj", dem_adj);
+		map.put("wait_secs", wait_secs);
 		map.put("limit_ctrl", limit_ctrl);
 		map.put("min_rate", min_rate);
 		map.put("rel_rate", rel_rate);
