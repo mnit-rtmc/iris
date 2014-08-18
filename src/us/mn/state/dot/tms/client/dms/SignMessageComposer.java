@@ -17,11 +17,9 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -36,7 +34,6 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -89,43 +86,8 @@ public class SignMessageComposer extends JPanel {
 	/** Composer miscellaneous panel */
 	private final ComposerMiscPanel misc_pnl;
 
-	/** Clear action */
-	private final IAction clear = new IAction("dms.clear") {
-		protected void doActionPerformed(ActionEvent e) {
-			clearWidgets();
-		}
-	};
-
-	/** Button to clear the selected message */
-	private final JButton clear_btn = new JButton(clear);
-
-	/** Action used to send a message to the DMS */
-	private final IAction send_msg = new IAction("dms.send") {
-		protected void doActionPerformed(ActionEvent e) {
-			dispatcher.sendSelectedMessage();
-		}
-	};
-
-	/** Button to send the selected message */
-	private final JButton send_btn = new JButton(send_msg);
-
-	/** Action to blank selected DMS */
-	private final BlankDmsAction blank_msg;
-
-	/** Button to blank the selected message */
-	private final JButton blank_btn;
-
-	/** Action to query the DMS message (optional) */
-	private final IAction query_msg = new IAction("dms.query.msg",
-		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
-	{
-		protected void doActionPerformed(ActionEvent e) {
-			dispatcher.queryMessage();
-		}
-	};
-
-	/** Button to query the DMS message */
-	private final JButton query_btn = new JButton(query_msg);
+	/** Composer button panel */
+	private final ComposerButtonPanel button_pnl;
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
@@ -159,9 +121,7 @@ public class SignMessageComposer extends JPanel {
 		for(int i = 0; i < pages.length; i++)
 			pages[i] = new PagePanel(this, i);
 		misc_pnl = new ComposerMiscPanel(ds, this);
-		blank_msg = new BlankDmsAction(dispatcher);
-		manager.setBlankAction(blank_msg);
-		blank_btn = new JButton(blank_msg);
+		button_pnl = new ComposerButtonPanel(manager, ds, this);
 		add(createAllWidgets());
 		initializeWidgets();
 	}
@@ -172,37 +132,8 @@ public class SignMessageComposer extends JPanel {
 		panel.add(page_tab, BorderLayout.CENTER);
 		Box vbox = Box.createVerticalBox();
 		vbox.add(misc_pnl);
-		vbox.add(createButtonPanel());
+		vbox.add(button_pnl);
 		panel.add(vbox, BorderLayout.EAST);
-		return panel;
-	}
-
-	/** Create the button panel */
-	private JPanel createButtonPanel() {
-		JPanel panel = new JPanel();
-		GroupLayout gl = new GroupLayout(panel);
-		gl.setHonorsVisibility(false);
-		gl.setAutoCreateGaps(false);
-		gl.setAutoCreateContainerGaps(false);
-		panel.setLayout(gl);
-		GroupLayout.ParallelGroup bg = gl.createParallelGroup(
-			GroupLayout.Alignment.CENTER);
-		bg.addComponent(clear_btn);
-		bg.addComponent(send_btn);
-		bg.addComponent(blank_btn);
-		bg.addComponent(query_btn);
-		GroupLayout.SequentialGroup vert_g = gl.createSequentialGroup();
-		vert_g.addGroup(bg);
-		gl.setVerticalGroup(vert_g);
-		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
-		hg.addGroup(gl.createParallelGroup().addComponent(clear_btn));
-		hg.addGap(UI.hgap * 2, UI.hgap * 4, UI.hgap * 64);
-		hg.addGroup(gl.createParallelGroup().addComponent(send_btn));
-		hg.addGap(UI.hgap);
-		hg.addGroup(gl.createParallelGroup().addComponent(blank_btn));
-		hg.addGap(UI.hgap);
-		hg.addGroup(gl.createParallelGroup().addComponent(query_btn));
-		gl.setHorizontalGroup(hg);
 		return panel;
 	}
 
@@ -212,7 +143,7 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Clear the widgets */
-	private void clearWidgets() {
+	public void clearWidgets() {
 		adjusting++;
 		setTabPage(0);
 		for(PagePanel pg: pages)
@@ -234,6 +165,7 @@ public class SignMessageComposer extends JPanel {
 		for(PagePanel pg: pages)
 			pg.dispose();
 		misc_pnl.dispose();
+		button_pnl.dispose();
 		setSignTextModel(null);
 	}
 
@@ -299,10 +231,6 @@ public class SignMessageComposer extends JPanel {
 		}
 		while(n_pages < page_tab.getTabCount())
 			page_tab.removeTabAt(n_pages);
-		query_btn.setVisible(query_msg.getIEnabled());
-		clear_btn.setMargin(UI.buttonInsets());
-		blank_btn.setMargin(UI.buttonInsets());
-		query_btn.setMargin(UI.buttonInsets());
 	}
 
 	/** Check if the user can add messages */
@@ -331,14 +259,11 @@ public class SignMessageComposer extends JPanel {
 		if(!b)
 			setMultiple(false);
 		setTabPage(0);
-		clear.setEnabled(b);
 		adjusting++;
 		for(PagePanel pnl: pages)
 			pnl.setEnabled(b);
 		misc_pnl.setEnabled(b);
-		send_msg.setEnabled(b && dispatcher.canSend());
-		blank_msg.setEnabled(b && dispatcher.canSend());
-		query_msg.setEnabled(b && dispatcher.canRequest());
+		button_pnl.setEnabled(b);
 		adjusting--;
 	}
 
