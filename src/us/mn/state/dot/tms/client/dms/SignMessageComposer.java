@@ -22,18 +22,12 @@ import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
-import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.MultiString;
@@ -45,8 +39,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.units.Interval;
-import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 
 /**
  * A sign message composer is GUI for composing DMS messages.  It uses a number
@@ -94,29 +86,8 @@ public class SignMessageComposer extends JPanel {
 	/** Panels for all pages of message */
 	private final PagePanel[] pages;
 
-	/** Quick message label */
-	private final ILabel quick_lbl = new ILabel("dms.quick.message");
-
-	/** Combobox used to select a quick message */
-	private final QuickMessageCBox quick_cbx;
-
-	/** Duration label */
-	private final ILabel dur_lbl = new ILabel("dms.duration");
-
-	/** Used to select the expires time for a message (optional) */
-	private final JComboBox dur_cbx = new JComboBox(Expiration.values());
-
-	/** Page on time label */
-	private final ILabel pg_on_lbl = new ILabel("dms.page.on.time");
-
-	/** Page on time spinner */
-	private final PgTimeSpinner pg_on_spn;
-
-	/** AMBER alert label */
-	private final ILabel alert_lbl = new ILabel("dms.alert");
-
-	/** AMBER Alert checkbox */
-	private final JCheckBox alert_chx = new JCheckBox();
+	/** Composer miscellaneous panel */
+	private final ComposerMiscPanel misc_pnl;
 
 	/** Clear action */
 	private final IAction clear = new IAction("dms.clear") {
@@ -161,18 +132,11 @@ public class SignMessageComposer extends JPanel {
 	 * callbacks to this class.  This prevents infinite loops. */
 	protected int adjusting = 0;
 
-	/** Listener for spinner change events */
-	protected final ChangeListener spin_listener = new ChangeListener() {
-		public void stateChanged(ChangeEvent e) {
-			updateMessage();
-		}
-	};
-
 	/** Update the DMS dispatcher message */
 	public void updateMessage() {
 		if(adjusting == 0) {
 			adjusting++;
-			dispatcher.setMessage(getMessage());
+			dispatcher.setMessage(composeMessage());
 			dispatcher.selectPreview(true);
 			adjusting--;
 		}
@@ -194,9 +158,7 @@ public class SignMessageComposer extends JPanel {
 		pages = new PagePanel[DMS_MESSAGE_MAX_PAGES];
 		for(int i = 0; i < pages.length; i++)
 			pages[i] = new PagePanel(this, i);
-		quick_cbx = new QuickMessageCBox(dispatcher);
-		pg_on_spn = new PgTimeSpinner();
-		pg_on_spn.addChangeListener(spin_listener);
+		misc_pnl = new ComposerMiscPanel(ds, this);
 		blank_msg = new BlankDmsAction(dispatcher);
 		manager.setBlankAction(blank_msg);
 		blank_btn = new JButton(blank_msg);
@@ -209,62 +171,9 @@ public class SignMessageComposer extends JPanel {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(page_tab, BorderLayout.CENTER);
 		Box vbox = Box.createVerticalBox();
-		vbox.add(createDeployPanel());
+		vbox.add(misc_pnl);
 		vbox.add(createButtonPanel());
 		panel.add(vbox, BorderLayout.EAST);
-		return panel;
-	}
-
-	/** Create the deploy panel */
-	private JPanel createDeployPanel() {
-		JPanel panel = new JPanel();
-		GroupLayout gl = new GroupLayout(panel);
-		gl.setHonorsVisibility(false);
-		gl.setAutoCreateGaps(false);
-		gl.setAutoCreateContainerGaps(false);
-		panel.setLayout(gl);
-		GroupLayout.ParallelGroup lg = gl.createParallelGroup(
-			GroupLayout.Alignment.TRAILING);
-		GroupLayout.ParallelGroup vg = gl.createParallelGroup(
-			GroupLayout.Alignment.LEADING);
-		// Quick message widgets
-		quick_lbl.setLabelFor(quick_cbx);
-		lg.addComponent(quick_lbl);
-		vg.addComponent(quick_cbx);
-		GroupLayout.ParallelGroup g1 = gl.createParallelGroup(
-			GroupLayout.Alignment.CENTER);
-		g1.addComponent(quick_lbl).addComponent(quick_cbx);
-		// Duraton widgets
-		dur_lbl.setLabelFor(dur_cbx);
-		lg.addComponent(dur_lbl);
-		vg.addComponent(dur_cbx);
-		GroupLayout.ParallelGroup g2 = gl.createParallelGroup(
-			GroupLayout.Alignment.CENTER);
-		g2.addComponent(dur_lbl).addComponent(dur_cbx);
-		// Page on time widgets
-		pg_on_lbl.setLabelFor(pg_on_spn);
-		lg.addComponent(pg_on_lbl);
-		vg.addComponent(pg_on_spn);
-		GroupLayout.ParallelGroup g3 = gl.createParallelGroup(
-			GroupLayout.Alignment.CENTER);
-		g3.addComponent(pg_on_lbl).addComponent(pg_on_spn);
-		// AMBER alert widgets
-		alert_lbl.setLabelFor(alert_chx);
-		lg.addComponent(alert_lbl);
-		vg.addComponent(alert_chx);
-		GroupLayout.ParallelGroup g4 = gl.createParallelGroup(
-			GroupLayout.Alignment.CENTER);
-		g4.addComponent(alert_lbl).addComponent(alert_chx);
-		// Finish group layout
-		GroupLayout.SequentialGroup horz_g = gl.createSequentialGroup();
-		horz_g.addGap(UI.hgap).addGroup(lg);
-		horz_g.addGap(UI.hgap).addGroup(vg);
-		gl.setHorizontalGroup(horz_g);
-		GroupLayout.SequentialGroup vert_g = gl.createSequentialGroup();
-		vert_g.addGap(UI.vgap).addGroup(g1).addGap(UI.vgap);
-		vert_g.addGroup(g2).addGap(UI.vgap).addGroup(g3);
-		vert_g.addGap(UI.vgap).addGroup(g4).addGap(UI.vgap);
-		gl.setVerticalGroup(vert_g);
 		return panel;
 	}
 
@@ -299,12 +208,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Set multiple sign selection mode */
 	public void setMultiple(boolean m) {
-		alert_lbl.setVisible(m);
-		alert_chx.setEnabled(m);
-		alert_chx.setVisible(m);
-		alert_chx.setSelected(false);
-		if(m)
-			quick_cbx.setSelectedItem(null);
+		misc_pnl.setMultiple(m);
 	}
 
 	/** Clear the widgets */
@@ -314,7 +218,7 @@ public class SignMessageComposer extends JPanel {
 		for(PagePanel pg: pages)
 			pg.clearWidgets();
 		dispatcher.setMessage("");
-		pg_on_spn.setValue("");
+		misc_pnl.setMessage("");
 		adjusting--;
 	}
 
@@ -329,8 +233,7 @@ public class SignMessageComposer extends JPanel {
 		removeAll();
 		for(PagePanel pg: pages)
 			pg.dispose();
-		quick_cbx.dispose();
-		pg_on_spn.removeChangeListener(spin_listener);
+		misc_pnl.dispose();
 		setSignTextModel(null);
 	}
 
@@ -347,7 +250,7 @@ public class SignMessageComposer extends JPanel {
 				pg.setModels(stm);
 			pg.setBuilder(b);
 		}
-		quick_cbx.populateModel(proxy);
+		misc_pnl.setSign(proxy);
 	}
 
 	/** Calculate the number of pages for the selected sign */
@@ -396,13 +299,6 @@ public class SignMessageComposer extends JPanel {
 		}
 		while(n_pages < page_tab.getTabCount())
 			page_tab.removeTabAt(n_pages);
-		dur_cbx.setSelectedIndex(0);
-		boolean dur = SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean();
-		dur_lbl.setVisible(dur);
-		dur_cbx.setVisible(dur);
-		boolean pg = PgTimeSpinner.getIEnabled();
-		pg_on_lbl.setVisible(pg);
-		pg_on_spn.setVisible(pg);
 		query_btn.setVisible(query_msg.getIEnabled());
 		clear_btn.setMargin(UI.buttonInsets());
 		blank_btn.setMargin(UI.buttonInsets());
@@ -439,22 +335,15 @@ public class SignMessageComposer extends JPanel {
 		adjusting++;
 		for(PagePanel pnl: pages)
 			pnl.setEnabled(b);
-		quick_cbx.setEnabled(b);
-		boolean vis = quick_cbx.getItemCount() > 0;
-		quick_lbl.setVisible(vis);
-		quick_cbx.setVisible(vis);
-		dur_cbx.setEnabled(b);
-		dur_cbx.setSelectedItem(0);
-		pg_on_spn.setEnabled(b);
-		alert_chx.setEnabled(b);
+		misc_pnl.setEnabled(b);
 		send_msg.setEnabled(b && dispatcher.canSend());
 		blank_msg.setEnabled(b && dispatcher.canSend());
 		query_msg.setEnabled(b && dispatcher.canRequest());
 		adjusting--;
 	}
 
-	/** Return a MULTI string using the contents of the widgets */
-	public String getMessage() {
+	/** Compose a MULTI string using the contents of the widgets */
+	private String composeMessage() {
 		String prefix = dispatcher.getPagePrefix();
 		MultiString[] mess = new MultiString[n_pages];
 		int fn = default_font;
@@ -473,13 +362,9 @@ public class SignMessageComposer extends JPanel {
 		MultiString multi = new MultiString();
 		for(int i = 0; i < p; i++) {
 			if(i == 0) {
-				if(PgTimeSpinner.getIEnabled()) {
-					Interval poi =
-						pg_on_spn.getValueInterval();
-					int pt = poi.round(DECISECONDS);
-					if(pt > 0)
-						multi.setPageTimes(pt, null);
-				}
+				Integer pt = misc_pnl.getPageOnTime();
+				if (pt != null)
+					multi.setPageTimes(pt, null);
 			} else
 				multi.addPage();
 			multi.append(mess[i]);
@@ -490,8 +375,7 @@ public class SignMessageComposer extends JPanel {
 	/** Set the currently selected message */
 	public void setMessage(String ms) {
 		adjusting++;
-		quick_cbx.setMessage(ms);
-		pg_on_spn.setValue(ms);
+		misc_pnl.setMessage(ms);
 		// Note: order here is crucial. The font cbox must be updated
 		// first because the line combobox updates (each) result in 
 		// intermediate preview updates which read the (incorrect) 
@@ -506,19 +390,12 @@ public class SignMessageComposer extends JPanel {
 
 	/** Get the selected duration */
 	public Integer getDuration() {
-		Expiration e = (Expiration)dur_cbx.getSelectedItem();
-		if(e != null)
-			return e.duration;
-		else
-			return null;
+		return misc_pnl.getDuration();
 	}
 
 	/** Get the selected priority */
 	public DMSMessagePriority getPriority() {
-		if(alert_chx.isSelected())
-		       return DMSMessagePriority.ALERT;
-		else
-		       return DMSMessagePriority.OPERATOR;
+		return misc_pnl.getPriority();
 	}
 
 	/** Set all font comboboxes using the specified MultiString */
@@ -639,6 +516,7 @@ public class SignMessageComposer extends JPanel {
 		}
 
 		/** Enable or Disable the page panel */
+		@Override
 		public void setEnabled(boolean b) {
 			for(MsgComboBox cbx: line_cbx)
 				cbx.setEnabled(b);
