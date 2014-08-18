@@ -64,9 +64,6 @@ public class SignMessageComposer extends JPanel {
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
 
-	/** DMS sign group type cache */
-	private final TypeCache<DmsSignGroup> dms_sign_groups;
-
 	/** Sign text type cache */
 	private final TypeCache<SignText> sign_text;
 
@@ -188,7 +185,6 @@ public class SignMessageComposer extends JPanel {
 		session = s;
 		dispatcher = ds;
 		DmsCache dc = s.getSonarState().getDmsCache();
-		dms_sign_groups = dc.getDmsSignGroups();
 		sign_text = dc.getSignText();
 		fonts = dc.getFonts();
 		max_lines = SystemAttrEnum.DMS_MAX_LINES.getInt();
