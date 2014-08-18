@@ -357,14 +357,19 @@ public class SignMessageComposer extends JPanel {
 		return combinePages(mess, p);
 	}
 
-	/** Build a MULTI string from an array of page strings */
+	/** Build a MULTI string from an array of page strings.
+	 * @param mess Array of page MULTI strings.
+	 * @param p Number of pages.
+	 * @return Combined MULTI string for all pages. */
 	private String combinePages(MultiString[] mess, int p) {
 		MultiString multi = new MultiString();
 		for(int i = 0; i < p; i++) {
-			if(i == 0) {
-				Integer pt = misc_pnl.getPageOnTime();
-				if (pt != null)
-					multi.setPageTimes(pt, null);
+			if (i == 0) {
+				if (p > 1) {
+					Integer pt = misc_pnl.getPageOnTime();
+					if (pt != null)
+						multi.setPageTimes(pt, null);
+				}
 			} else
 				multi.addPage();
 			multi.append(mess[i]);
