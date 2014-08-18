@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,13 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class FontComboBox extends JComboBox implements ActionListener {
 
+	/** Is this control IRIS enabled? */
+	static public boolean getIEnabled() {
+		return SystemAttrEnum.DMS_FONT_SELECTION_ENABLE.getBoolean();
+	}
+
 	/** Cache of font proxy objects */
-	protected final TypeCache<Font> m_fonts;
+	private final TypeCache<Font> m_fonts;
 
 	/** Font combo box model */
 	private FontComboBoxModel m_fontModel;
@@ -45,7 +50,7 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
 	 * callbacks to this class.  This prevents infinite loops. */
-	protected int adjusting = 0;
+	private int adjusting = 0;
 
 	/** Create a new font combo box */
 	public FontComboBox(TypeCache<Font> fonts, SignMessageComposer c) {
@@ -91,17 +96,14 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	/** Catch events: enter pressed, cbox item clicked, cursor up/down
 	 * lost focus (e.g. tab pressed). Also called after a 
 	 * setSelectedItem() call. Defined in interface ActionListener. */
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(adjusting == 0)
 			composer.updateMessage();
 	}
 
-	/** is this control IRIS enabled? */
-	public static boolean getIEnabled() {
-		return SystemAttrEnum.DMS_FONT_SELECTION_ENABLE.getBoolean();
-	}
-
 	/** enable or disable */
+	@Override
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		// if disabled, reset value to default
