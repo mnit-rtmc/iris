@@ -15,8 +15,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.BorderLayout;
-import javax.swing.Box;
+import javax.swing.GroupLayout;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -30,6 +29,7 @@ import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A sign message composer is GUI for composing DMS messages.  It uses a number
@@ -111,19 +111,32 @@ public class SignMessageComposer extends JPanel {
 			pages[i] = new ComposerPagePanel(this, max_lines, i);
 		misc_pnl = new ComposerMiscPanel(ds, this);
 		button_pnl = new ComposerButtonPanel(manager, ds, this);
-		add(createAllWidgets());
+		layoutPanel();
 		initializeWidgets();
 	}
 
-	/** Create all widgets */
-	private JPanel createAllWidgets() {
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(page_tab, BorderLayout.CENTER);
-		Box vbox = Box.createVerticalBox();
-		vbox.add(misc_pnl);
-		vbox.add(button_pnl);
-		panel.add(vbox, BorderLayout.EAST);
-		return panel;
+	/** Layout the panel */
+	private void layoutPanel() {
+		GroupLayout gl = new GroupLayout(this);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		setLayout(gl);
+		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
+		hg.addComponent(page_tab);
+		GroupLayout.ParallelGroup hg1 = gl.createParallelGroup();
+		hg1.addComponent(misc_pnl);
+		hg1.addComponent(button_pnl);
+		hg.addGroup(hg1);
+		vg.addComponent(page_tab);
+		GroupLayout.SequentialGroup vg1 = gl.createSequentialGroup();
+		vg1.addComponent(misc_pnl);
+		vg1.addComponent(button_pnl);
+		vg.addGroup(vg1);
+		gl.setHorizontalGroup(hg);
+		gl.setVerticalGroup(vg);
+		misc_pnl.setBorder(UI.panelBorder());
+		button_pnl.setBorder(UI.panelBorder());
 	}
 
 	/** Set multiple sign selection mode */
