@@ -80,21 +80,17 @@ public class ComposerPagePanel extends JPanel {
 		gl.setAutoCreateContainerGaps(false);
 		gl.setHonorsVisibility(false);
 		setLayout(gl);
-		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
-		GroupLayout.ParallelGroup phg = gl.createParallelGroup();
+		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
 		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
 		for (int i = 0; i < max_lines; i++) {
-			phg.addComponent(line_pnl[i]);
-			GroupLayout.ParallelGroup pg = gl.createParallelGroup();
-			vg.addGroup(pg.addComponent(line_pnl[i]));
+			hg.addComponent(line_pnl[i]);
+			vg.addComponent(line_pnl[i]);
 		}
 		if (FontComboBox.getIEnabled()) {
 			Box box = createFontBox();
-			phg.addComponent(box);
-			GroupLayout.ParallelGroup pg = gl.createParallelGroup();
-			vg.addGroup(pg.addComponent(box));
+			hg.addComponent(box);
+			vg.addComponent(box);
 		}
-		hg.addGroup(phg);
 		gl.setHorizontalGroup(hg);
 		gl.setVerticalGroup(vg);
 	}
