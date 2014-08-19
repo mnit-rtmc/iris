@@ -167,9 +167,8 @@ public class SignMessageComposer extends JPanel {
 		n_pages = calculateSignPages(stm);
 		default_font = DMSHelper.getDefaultFontNumber(proxy);
 		initializeWidgets();
-		for(ComposerPagePanel pg: pages) {
-			if(stm != null)
-				pg.setModels(stm);
+		for (ComposerPagePanel pg: pages) {
+			pg.setModels(stm);
 			pg.setBuilder(b);
 		}
 		misc_pnl.setSign(proxy);
@@ -274,7 +273,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Build a MULTI string from an array of page strings.
 	 * @param mess Array of page MULTI strings.
-	 * @param p Number of pages.
+	 * @param p Number of non-blank pages.
 	 * @return Combined MULTI string for all pages. */
 	private String combinePages(MultiString[] mess, int p) {
 		MultiString multi = new MultiString();

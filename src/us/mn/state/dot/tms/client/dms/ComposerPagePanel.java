@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.Box;
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
@@ -166,12 +167,20 @@ public class ComposerPagePanel extends JPanel {
 	public void setModels(SignTextModel stm) {
 		for (int n = 0; n < max_lines; n++) {
 			MsgComboBox cl = line_cbx[n];
-			short i = (short)(n_page * n_lines + n + 1);
-			if (n < n_lines)
-				cl.setModel(stm.getLineModel(i));
-			else
-				cl.setModel(new DefaultComboBoxModel());
+			cl.setModel(getLineModel(stm, n));
 		}
+	}
+
+	/** Get line model for a combo box */
+	private ComboBoxModel getLineModel(SignTextModel stm, int n) {
+		return (stm != null && n < n_lines)
+		     ? stm.getLineModel(getLineNumber(n))
+		     : new DefaultComboBoxModel();
+	}
+
+	/** Get line model number */
+	private short getLineNumber(int n) {
+		return (short)(n_page * n_lines + n + 1);
 	}
 
 	/** Set the raster builder */
@@ -183,7 +192,7 @@ public class ComposerPagePanel extends JPanel {
 	public void setSelected(String[] lines) {
 		for (int n = 0; n < max_lines; n++) {
 			MsgComboBox cl = line_cbx[n];
-			int i = n_page * n_lines + n;
+			int i = getLineNumber(n) - 1;
 			if (i < lines.length)
 				cl.getModel().setSelectedItem(lines[i]);
 			else if (cl.getItemCount() > 0)
