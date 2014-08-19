@@ -245,7 +245,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Set a page on one tab */
 	private void setPage(int n, ComposerPagePanel page) {
-		String title = "p." + (n + 1);
+		String title = Integer.toString(n + 1);
 		if(n < page_tab.getTabCount()) {
 			page_tab.setComponentAt(n, page);
 			page_tab.setTitleAt(n, title);
