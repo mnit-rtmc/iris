@@ -101,8 +101,7 @@ public class SignMessageComposer extends JPanel {
 	{
 		session = s;
 		dispatcher = ds;
-		DmsCache dc = s.getSonarState().getDmsCache();
-		fonts = dc.getFonts();
+		fonts = s.getSonarState().getDmsCache().getFonts();
 		max_lines = SystemAttrEnum.DMS_MAX_LINES.getInt();
 		n_lines = max_lines;
 		min_pages = SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt();
