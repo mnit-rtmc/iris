@@ -15,13 +15,11 @@
 package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.util.HashSet;
 import java.util.Iterator;
-import javax.swing.Box;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -142,11 +140,5 @@ public class Widgets {
 	/** Create a panel border */
 	public EmptyBorder noTopBorder() {
 		return new EmptyBorder(0, HGAP, VGAP, HGAP);
-	}
-
-	/** Create a gap component */
-	public Component gap() {
-		Dimension d = dimension(HGAP, VGAP);
-		return new Box.Filler(d, d, d);
 	}
 }

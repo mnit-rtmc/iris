@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
@@ -89,17 +88,15 @@ public class ComposerPagePanel extends JPanel {
 		if (FontComboBox.getIEnabled()) {
 			ILabel label = new ILabel("font");
 			label.setLabelFor(font_cbx);
-			Component gap = UI.gap();
 			GroupLayout.SequentialGroup sfg =
 				gl.createSequentialGroup();
 			sfg.addComponent(label);
-			sfg.addComponent(gap);
+			sfg.addGap(UI.hgap);
 			sfg.addComponent(font_cbx);
 			hg.addGroup(sfg);
 			GroupLayout.ParallelGroup vfg =
 				gl.createBaselineGroup(true, false);
 			vfg.addComponent(label);
-			vfg.addComponent(gap);
 			vfg.addComponent(font_cbx);
 			vg.addGroup(vfg);
 		}
