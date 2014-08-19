@@ -128,7 +128,10 @@ public class SignMessageComposer extends JPanel {
 		hg1.addComponent(misc_pnl);
 		hg1.addComponent(button_pnl);
 		hg.addGroup(hg1);
-		vg.addComponent(page_tab);
+		GroupLayout.SequentialGroup vg0 = gl.createSequentialGroup();
+		vg0.addComponent(page_tab);
+		vg0.addGap(UI.vgap);
+		vg.addGroup(vg0);
 		GroupLayout.SequentialGroup vg1 = gl.createSequentialGroup();
 		vg1.addComponent(misc_pnl);
 		vg1.addComponent(button_pnl);
