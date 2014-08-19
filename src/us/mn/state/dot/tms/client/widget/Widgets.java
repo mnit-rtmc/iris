@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,13 @@
 package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.util.HashSet;
 import java.util.Iterator;
+import javax.swing.Box;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -140,5 +142,11 @@ public class Widgets {
 	/** Create a panel border */
 	public EmptyBorder noTopBorder() {
 		return new EmptyBorder(0, HGAP, VGAP, HGAP);
+	}
+
+	/** Create a gap component */
+	public Component gap() {
+		Dimension d = dimension(HGAP, VGAP);
+		return new Box.Filler(d, d, d);
 	}
 }

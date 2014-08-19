@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import javax.swing.Box;
+import java.awt.Component;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
@@ -87,9 +87,21 @@ public class ComposerPagePanel extends JPanel {
 			vg.addComponent(line_pnl[i]);
 		}
 		if (FontComboBox.getIEnabled()) {
-			Box box = createFontBox();
-			hg.addComponent(box);
-			vg.addComponent(box);
+			ILabel label = new ILabel("font");
+			label.setLabelFor(font_cbx);
+			Component gap = UI.gap();
+			GroupLayout.SequentialGroup sfg =
+				gl.createSequentialGroup();
+			sfg.addComponent(label);
+			sfg.addComponent(gap);
+			sfg.addComponent(font_cbx);
+			hg.addGroup(sfg);
+			GroupLayout.ParallelGroup vfg =
+				gl.createBaselineGroup(true, false);
+			vfg.addComponent(label);
+			vfg.addComponent(gap);
+			vfg.addComponent(font_cbx);
+			vg.addGroup(vfg);
 		}
 		gl.setHorizontalGroup(hg);
 		gl.setVerticalGroup(vg);
@@ -105,17 +117,6 @@ public class ComposerPagePanel extends JPanel {
 			pnl.setBorder(UI.noTopBorder());
 		pnl.add(line_cbx[i]);
 		line_pnl[i] = pnl;
-	}
-
-	/** Create a font box */
-	private Box createFontBox() {
-		ILabel label = new ILabel("font");
-		label.setLabelFor(font_cbx);
-		Box box = Box.createHorizontalBox();
-		box.add(label);
-		box.add(Box.createHorizontalStrut(UI.hgap));
-		box.add(font_cbx);
-		return box;
 	}
 
 	/** Clear the widgets */
