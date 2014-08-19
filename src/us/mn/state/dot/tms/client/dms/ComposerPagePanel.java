@@ -159,16 +159,14 @@ public class ComposerPagePanel extends JPanel {
 	/** Set the number of lines on the page */
 	public void setLines(int nl) {
 		n_lines = nl;
-		for (int i = 0; i < max_lines; i++)
-			line_pnl[i].setVisible(i < nl);
+		for (int n = 0; n < max_lines; n++)
+			line_pnl[n].setVisible(n < nl);
 	}
 
 	/** Set the message combo box models */
 	public void setModels(SignTextModel stm) {
-		for (int n = 0; n < max_lines; n++) {
-			MsgComboBox cl = line_cbx[n];
-			cl.setModel(getLineModel(stm, n));
-		}
+		for (int n = 0; n < max_lines; n++)
+			line_cbx[n].setModel(getLineModel(stm, n));
 	}
 
 	/** Get line model for a combo box */
