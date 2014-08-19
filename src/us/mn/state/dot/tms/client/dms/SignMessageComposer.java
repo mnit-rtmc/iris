@@ -87,7 +87,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Update the DMS dispatcher message */
 	public void updateMessage() {
-		if(adjusting == 0) {
+		if (adjusting == 0) {
 			adjusting++;
 			dispatcher.setMessage(composeMessage());
 			dispatcher.selectPreview(true);
@@ -107,7 +107,7 @@ public class SignMessageComposer extends JPanel {
 		min_pages = SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt();
 		n_pages = min_pages;
 		pages = new ComposerPagePanel[DMS_MESSAGE_MAX_PAGES];
-		for(int i = 0; i < pages.length; i++)
+		for (int i = 0; i < pages.length; i++)
 			pages[i] = new ComposerPagePanel(this, max_lines, i);
 		misc_pnl = new ComposerMiscPanel(ds, this);
 		button_pnl = new ComposerButtonPanel(manager, ds, this);
@@ -148,7 +148,7 @@ public class SignMessageComposer extends JPanel {
 	public void clearWidgets() {
 		adjusting++;
 		setTabPage(0);
-		for(ComposerPagePanel pg: pages)
+		for (ComposerPagePanel pg: pages)
 			pg.clearWidgets();
 		dispatcher.setMessage("");
 		misc_pnl.setMessage("");
@@ -157,14 +157,14 @@ public class SignMessageComposer extends JPanel {
 
 	/** Set tab to page specified */
 	private void setTabPage(int p) {
-		if(page_tab.getTabCount() > 0)
+		if (page_tab.getTabCount() > 0)
 			page_tab.setSelectedIndex(p);
 	}
 
 	/** Dispose of the message selector */
 	public void dispose() {
 		removeAll();
-		for(ComposerPagePanel pg: pages)
+		for (ComposerPagePanel pg: pages)
 			pg.dispose();
 		misc_pnl.dispose();
 		button_pnl.dispose();
@@ -197,7 +197,7 @@ public class SignMessageComposer extends JPanel {
 	 * @param ml Number of lines in message library.
 	 * @param nl Number of lines on sign face. */
 	static private int calculateSignPages(int ml, int nl) {
-		if(nl > 0)
+		if (nl > 0)
 			return 1 + Math.max(0, (ml - 1) / nl);
 		else
 			return 1;
@@ -205,7 +205,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a new sign text model */
 	private SignTextModel createSignTextModel(DMS proxy) {
-		if(proxy != null)
+		if (proxy != null)
 			return new SignTextModel(session, proxy);
 		else
 			return null;
@@ -214,30 +214,30 @@ public class SignMessageComposer extends JPanel {
 	/** Set a new sign text model */
 	private void setSignTextModel(SignTextModel stm) {
 		SignTextModel om = st_model;
-		if(stm != null)
+		if (stm != null)
 			stm.initialize();
 		st_model = stm;
-		if(om != null)
+		if (om != null)
 			om.dispose();
 	}
 
 	/** Initialize the widgets */
 	private void initializeWidgets() {
 		boolean cam = canAddMessages();
-		for(int i = 0; i < n_pages; i++) {
+		for (int i = 0; i < n_pages; i++) {
 			ComposerPagePanel pg = pages[i];
 			pg.setEditMode(cam);
 			pg.setLines(n_lines);
 			setPage(i, pg);
 		}
-		while(n_pages < page_tab.getTabCount())
+		while (n_pages < page_tab.getTabCount())
 			page_tab.removeTabAt(n_pages);
 	}
 
 	/** Check if the user can add messages */
 	private boolean canAddMessages() {
 		SignTextModel stm = st_model;
-		if(stm != null)
+		if (stm != null)
 			return stm.isLocalSignTextAddPermitted();
 		else
 			return false;
@@ -246,7 +246,7 @@ public class SignMessageComposer extends JPanel {
 	/** Set a page on one tab */
 	private void setPage(int n, ComposerPagePanel page) {
 		String title = Integer.toString(n + 1);
-		if(n < page_tab.getTabCount()) {
+		if (n < page_tab.getTabCount()) {
 			page_tab.setComponentAt(n, page);
 			page_tab.setTitleAt(n, title);
 		} else
@@ -257,11 +257,11 @@ public class SignMessageComposer extends JPanel {
 	@Override
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
-		if(!b)
+		if (!b)
 			setMultiple(false);
 		setTabPage(0);
 		adjusting++;
-		for(ComposerPagePanel pnl: pages)
+		for (ComposerPagePanel pnl: pages)
 			pnl.setEnabled(b);
 		misc_pnl.setEnabled(b);
 		button_pnl.setEnabled(b);
@@ -274,9 +274,9 @@ public class SignMessageComposer extends JPanel {
 		MultiString[] mess = new MultiString[n_pages];
 		int fn = default_font;
 		int p = 0;
-		for(int i = 0; i < n_pages; i++) {
+		for (int i = 0; i < n_pages; i++) {
 			mess[i] = pages[i].getMulti(fn, prefix);
-			if(!mess[i].isBlank())
+			if (!mess[i].isBlank())
 				p = i + 1;
 			fn = pages[i].getFontNumber();
 		}
@@ -289,7 +289,7 @@ public class SignMessageComposer extends JPanel {
 	 * @return Combined MULTI string for all pages. */
 	private String combinePages(MultiString[] mess, int p) {
 		MultiString multi = new MultiString();
-		for(int i = 0; i < p; i++) {
+		for (int i = 0; i < p; i++) {
 			if (i == 0) {
 				if (p > 1) {
 					Integer pt = misc_pnl.getPageOnTime();
@@ -314,7 +314,7 @@ public class SignMessageComposer extends JPanel {
 		MultiString multi = new MultiString(ms);
 		setSelectedFonts(multi);
 		String[] lines = multi.getLines(n_lines);
-		for(int i = 0; i < pages.length; i++)
+		for (int i = 0; i < pages.length; i++)
 			pages[i].setSelected(lines);
 		adjusting--;
 	}
@@ -342,7 +342,7 @@ public class SignMessageComposer extends JPanel {
 	/** Set all font comboboxes using the specified MultiString */
 	private void setSelectedFonts(MultiString ms) {
 		int[] fnum = ms.getFonts(default_font);
-		for(int i = 0; i < pages.length; i++) {
+		for (int i = 0; i < pages.length; i++) {
 			ComposerPagePanel pnl = pages[i];
 			int fn = (i < fnum.length) ? fnum[i] : default_font;
 			pnl.setFontNumber(fn);
@@ -352,7 +352,7 @@ public class SignMessageComposer extends JPanel {
 	/** Update the message library with the currently selected messages */
 	public void updateMessageLibrary() {
 		SignTextModel stm = st_model;
-		if(stm != null)
+		if (stm != null)
 			stm.updateMessageLibrary();
 	}
 }
