@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
-import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
@@ -47,9 +46,6 @@ public class SignMessageComposer extends JPanel {
 
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
-
-	/** Sign text type cache */
-	private final TypeCache<SignText> sign_text;
 
 	/** Cache of font proxy objects */
 	private final TypeCache<Font> fonts;
@@ -106,7 +102,6 @@ public class SignMessageComposer extends JPanel {
 		session = s;
 		dispatcher = ds;
 		DmsCache dc = s.getSonarState().getDmsCache();
-		sign_text = dc.getSignText();
 		fonts = dc.getFonts();
 		max_lines = SystemAttrEnum.DMS_MAX_LINES.getInt();
 		n_lines = max_lines;
