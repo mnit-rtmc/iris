@@ -18,7 +18,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.RasterBuilder;
@@ -38,9 +37,6 @@ public class FontComboBox extends JComboBox implements ActionListener {
 		return SystemAttrEnum.DMS_FONT_SELECTION_ENABLE.getBoolean();
 	}
 
-	/** Cache of font proxy objects */
-	private final TypeCache<Font> m_fonts;
-
 	/** Font combo box model */
 	private FontComboBoxModel m_fontModel;
 
@@ -53,8 +49,7 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	private int adjusting = 0;
 
 	/** Create a new font combo box */
-	public FontComboBox(TypeCache<Font> fonts, SignMessageComposer c) {
-		m_fonts = fonts;
+	public FontComboBox(SignMessageComposer c) {
 		composer = c;
 		setToolTipText(I18N.get("dms.font.tooltip"));
 		addActionListener(this);
@@ -65,7 +60,8 @@ public class FontComboBox extends JComboBox implements ActionListener {
 		if(m_fontModel != null)
 			m_fontModel.dispose();
 		if(rb != null) {
-			m_fontModel = new FontComboBoxModel(m_fonts, rb);
+			m_fontModel = new FontComboBoxModel(composer.getFonts(),
+				rb);
 			setModel(m_fontModel);
 		} else
 			setModel(new DefaultComboBoxModel());
