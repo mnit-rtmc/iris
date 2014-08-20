@@ -260,8 +260,6 @@ public class SignMessageComposer extends JPanel {
 	@Override
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
-		if (!b)
-			setMultiple(false);
 		setTabPage(0);
 		adjusting++;
 		for (ComposerPagePanel pnl: pages)
