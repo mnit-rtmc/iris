@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2011  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 	implements ComboBoxModel 
 {
 	/** Raster graphic builder */
-	protected final RasterBuilder builder;
+	private final RasterBuilder builder;
 
 	/** Currently selected font */
-	protected Font m_selected;
+	private Font sel_font;
 
 	/** Create a new font combo box model */
 	public FontComboBoxModel(TypeCache<Font> arg_fonts, RasterBuilder b) {
@@ -46,6 +46,7 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 	}
 
 	/** Create an empty set of proxies */
+	@Override
 	protected TreeSet<Font> createProxySet() {
 		return new TreeSet<Font>(
 			new Comparator<Font>() {
@@ -65,16 +66,18 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 	}
 
 	/** Add a new proxy to the model */
+	@Override
 	protected int doProxyAdded(Font proxy) {
-		if(builder != null && builder.isFontUsable(proxy))
+		if (builder != null && builder.isFontUsable(proxy))
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
 	}
 
 	/** Get the selected item */
+	@Override
 	public Object getSelectedItem() {
-		return m_selected;
+		return sel_font;
 	}
 
 	/** 
@@ -83,11 +86,12 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 	 *      -a combobox item is clicked on via the mouse.
 	 *      -a combobox item is moved to via the cursor keys.
 	 */
+	@Override
 	public void setSelectedItem(Object f) {
-		if(f instanceof Font)
-			m_selected = (Font)f;
-		else if(f == null)
-			m_selected = null;
+		if (f instanceof Font)
+			sel_font = (Font)f;
+		else if (f == null)
+			sel_font = null;
 		else
 			assert false : "unexpected type in setSelectedItem().";
 		// this results in a call to editor's setSelectedItem method
