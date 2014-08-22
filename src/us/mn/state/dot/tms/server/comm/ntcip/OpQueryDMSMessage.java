@@ -87,7 +87,10 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Process an invalid message source from the sign controller */
 	private Phase processMessageInvalid() {
-		/* The source table is not valid.  What??! */
+		/* The source table is not valid.  This condition has been
+		 * observed in old Skyline signs after being powered down for
+		 * extended periods of time.  It can be cleared up by sending
+		 * settings operation. */
 		logError("INVALID SOURCE");
 		setErrorStatus(source.toString());
 		return null;
