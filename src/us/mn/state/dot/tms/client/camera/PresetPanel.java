@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -43,39 +43,39 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class PresetPanel extends JPanel {
 
-	/** User session */
-	private final Session session;
-
 	/** Tooltip for "store" button when store mode is inactive */
-	static protected final String TOOLTIP_STORE_INACTIVE
+	static private final String TOOLTIP_STORE_INACTIVE
 		= I18N.get("camera.preset.store.inactive.tooltip");
 
 	/** Tooltip for "store" button when store mode is active */
-	static protected final String TOOLTIP_STORE_ACTIVE
+	static private final String TOOLTIP_STORE_ACTIVE
 		= I18N.get("camera.preset.store.active.tooltip");
 
 	/** Number of preset buttons to display in preset grid */
-	static protected final int NUM_PRESET_BTNS =
+	static private final int NUM_PRESET_BTNS =
 		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
 
 	/** Number of columns to use in the preset grid */
-	static protected final int PRESET_GRID_COLUMNS =
+	static private final int PRESET_GRID_COLUMNS =
 		SystemAttrEnum.CAMERA_PRESET_PANEL_COLUMNS.getInt();
 
+	/** User session */
+	private final Session session;
+
 	/** Array of buttons used to select presets */
-	protected final JButton[] preset_btn = new JButton[NUM_PRESET_BTNS];
+	private final JButton[] preset_btn = new JButton[NUM_PRESET_BTNS];
 
 	/** Button used to store presets */
-	protected final JToggleButton store_btn;
-
-	/** Selected camera */
-	protected Camera camera = null;
+	private final JToggleButton store_btn;
 
 	/** Button preferred size */
-	protected final Dimension btn_dim;
+	private final Dimension btn_dim;
 
 	/** Button font */
-	protected final Font btn_font;
+	private final Font btn_font;
+
+	/** Selected camera */
+	private Camera camera = null;
 
 	/** Create a preset panel */
 	public PresetPanel(Session s) {
@@ -94,7 +94,6 @@ public class PresetPanel extends JPanel {
 		gbc.ipady = 0;
 		gbc.weightx = 0.5;
 		gbc.weighty = 0.5;
-
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		add(buildGridPanel(), gbc);
@@ -111,7 +110,7 @@ public class PresetPanel extends JPanel {
 	 * Create the preset array panel.
 	 * @return The preset array panel.
 	 */
-	protected JPanel buildGridPanel() {
+	private JPanel buildGridPanel() {
 		GridBagLayout gbl = new GridBagLayout();
 		JPanel jp = new JPanel(gbl);
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -138,7 +137,7 @@ public class PresetPanel extends JPanel {
 	}
 
 	/** Create a preset button */
-	protected JButton createPresetButton(final int num) {
+	private JButton createPresetButton(final int num) {
 		JButton btn = new JButton(new IAction("camera.preset") {
 			protected void doActionPerformed(ActionEvent e) {
 				handlePresetBtnPress(num);
@@ -153,19 +152,20 @@ public class PresetPanel extends JPanel {
 		return btn;
 	}
 
-	protected void handlePresetBtnPress(int num) {
-		if (camera == null) return;
-		if (store_btn.isSelected()) {
-			camera.setStorePreset(num);
-			store_btn.setSelected(false);
-		}
-		else {
-			camera.setRecallPreset(num);
+	/** Handle a preset button press */
+	private void handlePresetBtnPress(int num) {
+		Camera c = camera;
+		if (c != null) {
+			if (store_btn.isSelected()) {
+				c.setStorePreset(num);
+				store_btn.setSelected(false);
+			} else
+				c.setRecallPreset(num);
 		}
 	}
 
 	/** Create the store button */
-	protected JToggleButton createStoreButton() {
+	private JToggleButton createStoreButton() {
 		JToggleButton btn = new JToggleButton();
 		btn.setPreferredSize(btn_dim);
 		btn.setMinimumSize(btn_dim);
@@ -173,13 +173,11 @@ public class PresetPanel extends JPanel {
 		btn.setMargin(new Insets(0, 0, 0, 0));
 		ImageIcon icon = Icons.getIcon("camera_preset_store_inactive");
 		ImageIcon iconSel = Icons.getIcon("camera_preset_store_active");
-		if ((icon != null) && (iconSel != null)) {
+		if (icon != null && iconSel != null) {
 			btn.setIcon(icon);
 			btn.setSelectedIcon(iconSel);
-		}
-		else {
+		} else
 			btn.setText("ST");
-		}
 		btn.setToolTipText(TOOLTIP_STORE_INACTIVE);
 		btn.setFocusPainted(false);
 		btn.addItemListener(new ItemListener() {
@@ -203,21 +201,8 @@ public class PresetPanel extends JPanel {
 		updateStoreButtonStatus();
 	}
 
-	/**
-	 * Update enabled status of store button based on current panel
-	 * status, camera selection, and user permissions.
-	 */
-	protected void updateStoreButtonStatus() {
-		if ( (this.isEnabled())
-			&& (camera != null)
-			&& (session.isUpdatePermitted(camera,
-			"storePreset")) )
-				store_btn.setEnabled(true);
-			else
-				store_btn.setEnabled(false);
-	}
-
 	/** Set enabled status for PresetPanel and its components. */
+	@Override
 	public void setEnabled(boolean enable) {
 		for(JButton b: preset_btn)
 			b.setEnabled(enable);
@@ -225,4 +210,13 @@ public class PresetPanel extends JPanel {
 		updateStoreButtonStatus();
 	}
 
+	/** Update enabled status of store button */
+	private void updateStoreButtonStatus() {
+		store_btn.setEnabled(isEnabled() && canStorePreset());
+	}
+
+	/** Check if user is allowed to store presets */
+	private boolean canStorePreset() {
+		return session.isUpdatePermitted(camera, "storePreset");
+	}
 }
