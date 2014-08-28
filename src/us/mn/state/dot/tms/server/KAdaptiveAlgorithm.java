@@ -728,7 +728,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get the total cumulative demand (vehicles).
 		 * @param step Time step in past (0 for current).
-		 * @return Cululative demand at specified time. */
+		 * @return Cumulative demand at specified time. */
 		private float cumulativeDemand(int step) {
 			Double d = demand_accum_hist.get(step);
 			if (d != null)
