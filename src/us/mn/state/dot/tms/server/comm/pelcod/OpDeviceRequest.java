@@ -28,16 +28,59 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  */
 public class OpDeviceRequest extends OpPelcoD {
 
-	protected final DeviceRequest devReq;
+	/** Get property associated with a device request.
+	 * @param dr Device request.
+	 * @return Associated property. */
+	static private PelcoDProperty getProperty(DeviceRequest dr) {
+		switch (dr) {
+		case CAMERA_FOCUS_NEAR:
+			return new CommandProperty(0, 0, 0, -1, 0);
+		case CAMERA_FOCUS_FAR:
+			return new CommandProperty(0, 0, 0, 1, 0);
+		case CAMERA_FOCUS_STOP:
+			return new CommandProperty(0, 0, 0, 0, 0);
+		case CAMERA_IRIS_CLOSE:
+			return new CommandProperty(0, 0, 0, 0, -1);
+		case CAMERA_IRIS_OPEN:
+			return new CommandProperty(0, 0, 0, 0, 1);
+		case CAMERA_IRIS_STOP:
+			return new CommandProperty(0, 0, 0, 0, 0);
+		case CAMERA_FOCUS_MANUAL:
+			return new AutoFocusModeProperty(false);
+		case CAMERA_FOCUS_AUTO:
+			return new AutoFocusModeProperty(true);
+		case CAMERA_IRIS_MANUAL:
+			return new AutoIrisModeProperty(false);
+		case CAMERA_IRIS_AUTO:
+			return new AutoIrisModeProperty(true);
+		case RESET_DEVICE:
+			return new ExtendedProperty(ExtendedProperty.
+				Command.REMOTE_RESET);
+
+		// FIXME: the following have not yet been implemented
+		// for this driver.
+		case CAMERA_FOCUS_TOGGLE:
+		case CAMERA_IRIS_TOGGLE:
+		case CAMERA_WIPER_ON:
+		case CAMERA_WIPER_OFF:
+		case CAMERA_WIPER_TOGGLE:
+		case CAMERA_WIPER_ONESHOT:
+		default:
+			return null;
+		}
+	}
+
+	/** Property for request */
+	private final PelcoDProperty prop;
 
 	/**
 	 * Create the operation.
-	 * @param c the CameraImpl instance
-	 * @param dr the DeviceRequest representing the desired op
+	 * @param c the CameraImpl instance.
+	 * @param dr the DeviceRequest representing the desired op.
 	 */
 	public OpDeviceRequest(CameraImpl c, DeviceRequest dr) {
 		super(c);
-		devReq = dr;
+		prop = getProperty(dr);
 	}
 
 	/** Create the second phase of the operation */
@@ -46,56 +89,11 @@ public class OpDeviceRequest extends OpPelcoD {
 		return new DeviceRequestPhase();
 	}
 
-	/**
-	 * Create and return the appropriate PelcoDProperty to store, based on
-	 * this op's devReq value.
-	 */
-	protected PelcoDProperty getProperty() {
-		switch (devReq) {
-			case CAMERA_FOCUS_NEAR:
-				return new CommandProperty(0, 0, 0, -1, 0);
-			case CAMERA_FOCUS_FAR:
-				return new CommandProperty(0, 0, 0, 1, 0);
-			case CAMERA_FOCUS_STOP:
-				return new CommandProperty(0, 0, 0, 0, 0);
-			case CAMERA_IRIS_CLOSE:
-				return new CommandProperty(0, 0, 0, 0, -1);
-			case CAMERA_IRIS_OPEN:
-				return new CommandProperty(0, 0, 0, 0, 1);
-			case CAMERA_IRIS_STOP:
-				return new CommandProperty(0, 0, 0, 0, 0);
-			case CAMERA_FOCUS_MANUAL:
-				return new AutoFocusModeProperty(false);
-			case CAMERA_FOCUS_AUTO:
-				return new AutoFocusModeProperty(true);
-			case CAMERA_IRIS_MANUAL:
-				return new AutoIrisModeProperty(false);
-			case CAMERA_IRIS_AUTO:
-				return new AutoIrisModeProperty(true);
-			case RESET_DEVICE:
-				return new ExtendedProperty(ExtendedProperty.
-					Command.REMOTE_RESET);
-
-			// FIXME: the following have not yet been implemented
-			// for this driver.
-			case CAMERA_FOCUS_TOGGLE:
-			case CAMERA_IRIS_TOGGLE:
-			case CAMERA_WIPER_ON:
-			case CAMERA_WIPER_OFF:
-			case CAMERA_WIPER_TOGGLE:
-			case CAMERA_WIPER_ONESHOT:
-			default:
-				return null;
-		}
-
-	}
-
 	/** Main phase. */
 	protected class DeviceRequestPhase extends Phase<PelcoDProperty> {
 		protected Phase<PelcoDProperty> poll(
 			CommMessage<PelcoDProperty> mess) throws IOException
 		{
-			PelcoDProperty prop = getProperty();
 			if (prop != null) {
 				mess.add(prop);
 				mess.storeProps();
@@ -103,5 +101,4 @@ public class OpDeviceRequest extends OpPelcoD {
 			return null;
 		}
 	}
-
 }
