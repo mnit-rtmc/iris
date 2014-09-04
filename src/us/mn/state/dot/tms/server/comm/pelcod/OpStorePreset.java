@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,8 @@ public class OpStorePreset extends OpPelcoD {
 		protected Phase<PelcoDProperty> poll(
 			CommMessage<PelcoDProperty> mess) throws IOException
 		{
-			mess.add(new StorePresetProperty(preset));
+			mess.add(new ExtendedProperty(ExtendedProperty.
+				Command.STORE_PRESET, preset));
 			mess.storeProps();
 			return null;
 		}
