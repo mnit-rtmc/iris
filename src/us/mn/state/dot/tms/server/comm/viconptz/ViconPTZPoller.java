@@ -67,6 +67,6 @@ public class ViconPTZPoller extends TransientPoller<ViconPTZProperty>
 	 * @param r The desired DeviceRequest. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
-		// FIXME: NOT YET IMPLEMENTED
+		addOperation(new OpDeviceRequest(c, r));
 	}
 }
