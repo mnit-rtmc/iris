@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,31 +25,31 @@ import java.io.OutputStream;
 public class CommandProperty extends ViconPTZProperty {
 
 	/** Bit flag to command a pan right */
-	static protected final byte PAN_RIGHT = 1 << 5;
+	static private final byte PAN_RIGHT = 1 << 5;
 
 	/** Bit flag to command a pan left */
-	static protected final byte PAN_LEFT = 1 << 6;
+	static private final byte PAN_LEFT = 1 << 6;
 
 	/** Bit flag to command a tilt up */
-	static protected final byte TILT_UP = 1 << 4;
+	static private final byte TILT_UP = 1 << 4;
 
 	/** Bit flag to command a tilt down */
-	static protected final byte TILT_DOWN = 1 << 3;
+	static private final byte TILT_DOWN = 1 << 3;
 
 	/** Bit flag to command a zoom in */
-	static protected final byte ZOOM_IN = 1 << 5;
+	static private final byte ZOOM_IN = 1 << 5;
 
 	/** Bit flag to command a zoom out */
-	static protected final byte ZOOM_OUT = 1 << 6;
+	static private final byte ZOOM_OUT = 1 << 6;
 
 	/** Pan value (-63 to 63) (64 means turbo) */
-	protected final int pan;
+	private final int pan;
 
 	/** Tilt value (-63 to 63) */
-	protected final int tilt;
+	private final int tilt;
 
 	/** Zoom value (-1 to 1) */
-	protected final int zoom;
+	private final int zoom;
 
 	/** Create a new command property */
 	public CommandProperty(int p, int t, int z) {
@@ -59,30 +59,30 @@ public class CommandProperty extends ViconPTZProperty {
 	}
 
 	/** Get bit flags to control panning */
-	protected byte getPanFlags() {
-		if(pan < 0)
+	private byte getPanFlags() {
+		if (pan < 0)
 			return PAN_LEFT;
-		else if(pan > 0)
+		else if (pan > 0)
 			return PAN_RIGHT;
 		else
 			return 0;
 	}
 
 	/** Get bit flags to control tilting */
-	protected byte getTiltFlags() {
-		if(tilt < 0)
+	private byte getTiltFlags() {
+		if (tilt < 0)
 			return TILT_DOWN;
-		else if(tilt > 0)
+		else if (tilt > 0)
 			return TILT_UP;
 		else
 			return 0;
 	}
 
 	/** Get bit flags to control zooming */
-	protected byte getZoomFlags() {
-		if(zoom < 0)
+	private byte getZoomFlags() {
+		if (zoom < 0)
 			return ZOOM_OUT;
-		else if(zoom > 0)
+		else if (zoom > 0)
 			return ZOOM_IN;
 		else
 			return 0;
@@ -90,17 +90,17 @@ public class CommandProperty extends ViconPTZProperty {
 
 	/** Encode a STORE request */
 	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] message = new byte[10];
-		message[0] = (byte)(0x80 | (drop >> 4));
-		message[1] = (byte)((0x0f & drop) | EXTENDED_CMD);
-		message[2] = (byte)(getPanFlags() | getTiltFlags());
-		message[3] = getZoomFlags();
-		message[4] = (byte)0x00; // not implemented
-		message[5] = (byte)0x00; // not implemented
-		message[6] = (byte)((Math.abs(pan) >> 7) & 0x0f);
-		message[7] = (byte)((byte)Math.abs(pan) & 0x7f);
-		message[8] = (byte)((Math.abs(tilt) >> 7) & 0x0f);
-		message[9] = (byte)((byte)Math.abs(tilt) & 0x7f);
-		os.write(message);
+		byte[] pkt = new byte[10];
+		pkt[0] = (byte)(0x80 | (drop >> 4));
+		pkt[1] = (byte)((0x0f & drop) | EXTENDED_CMD);
+		pkt[2] = (byte)(getPanFlags() | getTiltFlags());
+		pkt[3] = getZoomFlags();
+		pkt[4] = (byte)0x00; // not implemented
+		pkt[5] = (byte)0x00; // not implemented
+		pkt[6] = (byte)((Math.abs(pan) >> 7) & 0x0f);
+		pkt[7] = (byte)((byte)Math.abs(pan) & 0x7f);
+		pkt[8] = (byte)((Math.abs(tilt) >> 7) & 0x0f);
+		pkt[9] = (byte)((byte)Math.abs(tilt) & 0x7f);
+		os.write(pkt);
 	}
 }
