@@ -27,7 +27,7 @@ public class PresetProperty extends ViconPTZProperty {
 	/** Store (or recall) */
 	private final boolean store;
 
-	/** Preset to store */
+	/** Preset to store or recall */
 	private final int preset;
 
 	/** Create a new preset property */

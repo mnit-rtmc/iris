@@ -19,35 +19,39 @@ import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
- * Vicon operation to recall a camera preset.
+ * Vicon operation to recall or store a camera preset.
  *
- * @author Stephen Donecker
  * @author Douglas Lau
+ * @author Stephen Donecker
  */
-public class OpRecallPreset extends OpViconPTZ {
+public class OpPreset extends OpViconPTZ {
 
-	/** The camera preset to recall */
-	private final int m_preset;
+	/** Store (or recall) */
+	private final boolean store;
 
-	/** Create a new operation to recall a camera preset */
-	public OpRecallPreset(CameraImpl c, int preset) {
+	/** Camera preset to reall or store */
+	private final int preset;
+
+	/** Create a new operation to recall or store a camera preset */
+	public OpPreset(CameraImpl c, boolean s, int p) {
 		super(c);
-		m_preset = preset;
+		store = s;
+		preset = p;
 	}
 
 	/** Create the second phase of the operation */
 	protected Phase<ViconPTZProperty> phaseTwo() {
-		return new RecallPreset();
+		return new CommandPreset();
 	}
 
-	/** Phase to recall the camera preset */
-	protected class RecallPreset extends Phase<ViconPTZProperty> {
+	/** Phase to recall or store a camera preset */
+	protected class CommandPreset extends Phase<ViconPTZProperty> {
 
-		/** Command controller to recall the camera preset */
+		/** Command controller to recall or store a preset */
 		protected Phase<ViconPTZProperty> poll(
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
-			mess.add(new PresetProperty(false, m_preset));
+			mess.add(new PresetProperty(store, preset));
 			mess.storeProps();
 			return null;
 		}
