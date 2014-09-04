@@ -42,13 +42,13 @@ public class CommandProperty extends ViconPTZProperty {
 	/** Bit flag to command a zoom out */
 	static private final byte ZOOM_OUT = 1 << 6;
 
-	/** Pan value (-63 to 63) (64 means turbo) */
+	/** Pan value (-1023 to 1023) */
 	private final int pan;
 
-	/** Tilt value (-63 to 63) */
+	/** Tilt value (-1023 to 1023) */
 	private final int tilt;
 
-	/** Zoom value (-1 to 1) */
+	/** Requested zoom value [-1, 1] :: [out, in] */
 	private final int zoom;
 
 	/** Create a new command property */
@@ -89,6 +89,7 @@ public class CommandProperty extends ViconPTZProperty {
 	}
 
 	/** Encode a STORE request */
+	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] pkt = new byte[10];
 		pkt[0] = (byte)(0x80 | (drop >> 4));
