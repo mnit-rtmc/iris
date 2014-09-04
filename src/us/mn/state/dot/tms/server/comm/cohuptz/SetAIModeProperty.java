@@ -55,10 +55,6 @@ public class SetAIModeProperty extends CohuPTZProperty {
 				message[i++] = (byte)0x49;
 				message[i++] = (byte)0x41;
 				break;
-			case CAMERA_IRIS_TOGGLE:
-				message[i++] = (byte)0x4c;
-				message[i++] = (byte)0x4d;
-				break;
 			default:
 				validRequest = false;
 				break;

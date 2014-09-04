@@ -91,9 +91,6 @@ public enum DeviceRequest {
 	/** CAMERA: auto-focus */
 	CAMERA_FOCUS_AUTO("Camera: auto-focus"),
 
-	/** CAMERA: auto-focus toggle */
-	CAMERA_FOCUS_TOGGLE("Camera: auto-focus toggle"),
-
 	/** CAMERA: stop iris */
 	CAMERA_IRIS_STOP("Camera: stop iris"),
 
@@ -109,21 +106,8 @@ public enum DeviceRequest {
 	/** CAMERA: auto-iris */
 	CAMERA_IRIS_AUTO("Camera: auto-iris"),
 
-	/** CAMERA: auto-iris toggle */
-	CAMERA_IRIS_TOGGLE("Camera: auto-iris toggle"),
-
-	/** CAMERA: wiper on */
-	CAMERA_WIPER_ON("Camera: wiper on"),
-
-	/** CAMERA: wiper off */
-	CAMERA_WIPER_OFF("Camera: wiper off"),
-
-	/** CAMERA: wiper toggle */
-	CAMERA_WIPER_TOGGLE("Camera: wiper toggle"),
-
 	/** CAMERA: wiper one-shot */
 	CAMERA_WIPER_ONESHOT("Camera: wiper one-shot");
-
 
 	/** Create a new device request value */
 	private DeviceRequest(String d) {

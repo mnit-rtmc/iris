@@ -137,7 +137,6 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 			break;
 		case CAMERA_FOCUS_MANUAL:
 		case CAMERA_FOCUS_AUTO:
-		case CAMERA_FOCUS_TOGGLE:
 			addOperation(new OpSetAFMode(c, this, r));
 			break;
 		case CAMERA_IRIS_STOP:
@@ -147,14 +146,10 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 			break;
 		case CAMERA_IRIS_MANUAL:
 		case CAMERA_IRIS_AUTO:
-		case CAMERA_IRIS_TOGGLE:
 			addOperation(new OpSetAIMode(c, this, r));
 			break;
-		case CAMERA_WIPER_ON:
-		case CAMERA_WIPER_OFF:
-		case CAMERA_WIPER_TOGGLE:
 		case CAMERA_WIPER_ONESHOT:
-			// NOT YET IMPLEMENTED
+			// FIXME: not yet implemented
 			break;
 		case RESET_DEVICE:
 			addOperation(new OpResetCamera(c, this));

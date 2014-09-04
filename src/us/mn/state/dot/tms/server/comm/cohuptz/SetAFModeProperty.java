@@ -55,10 +55,6 @@ public class SetAFModeProperty extends CohuPTZProperty {
 				message[i++] = (byte)0x46;
 				message[i++] = (byte)0x41;
 				break;
-			case CAMERA_FOCUS_TOGGLE:
-				message[i++] = (byte)0x4c;
-				message[i++] = (byte)0x31;
-				break;
 			default:
 				validRequest = false;
 				break;
