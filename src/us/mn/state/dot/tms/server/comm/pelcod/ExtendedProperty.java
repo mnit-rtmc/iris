@@ -14,15 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcod;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 /**
  * An extended property is a command beyond the basic pan, tilt, zoom commands.
  *
  * @author Douglas Lau
  */
 public class ExtendedProperty extends PelcoDProperty {
+
+	/** Bit flag for extended function */
+	static private final int EXTENDED = 1 << 0;
 
 	/** Extended commands */
 	static public enum Command {
@@ -48,7 +48,7 @@ public class ExtendedProperty extends PelcoDProperty {
 		AUTO_FOCUS(0x2B),		// 0010 1011
 		AUTO_IRIS(0x2D);		// 0010 1101
 		private Command(int b) {
-			bits = b;
+			bits = b | EXTENDED;
 		}
 		public int bits;
 	}
@@ -92,22 +92,14 @@ public class ExtendedProperty extends PelcoDProperty {
 	}
 
 	/** Get command parameter 1 */
+	@Override
 	protected int getParam1() {
 		return param1;
 	}
 
 	/** Get command parameter 2 */
+	@Override
 	protected int getParam2() {
 		return param2;
-	}
-
-	/** Encode a STORE request */
-	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] pkt = createPacket(drop);
-		pkt[4] = (byte)getParam2();
-		pkt[5] = (byte)getParam1();
-		pkt[6] = calculateChecksum(pkt);
-		os.write(pkt);
 	}
 }

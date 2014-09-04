@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.pelcod;
 
 import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -24,30 +26,41 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  */
 abstract public class PelcoDProperty extends ControllerProperty {
 
-	/** Bit flag for extended function */
-	static protected final byte EXTENDED = 1 << 0;
-
 	/** Get the command bits (in the 2 LSBs) */
 	abstract protected int getCommand();
 
+	/** Get command parameter 1 */
+	abstract protected int getParam1();
+
+	/** Get command parameter 2 */
+	abstract protected int getParam2();
+
 	/** Create Pelco D packet */
-	protected byte[] createPacket(int drop) {
+	private byte[] createPacket(int drop) {
 		int cmd = getCommand();
 		byte[] pkt = new byte[7];
 		pkt[0] = (byte)0xFF;
 		pkt[1] = (byte)drop;
 		pkt[2] = (byte)(((cmd & 0xff00) >>> 8) & 0xff);
 		pkt[3] = (byte)(((cmd & 0x00ff) >>> 0) & 0xff);
+		pkt[4] = (byte)getParam2();
+		pkt[5] = (byte)getParam1();
+		pkt[6] = calculateChecksum(pkt);
 		return pkt;
 	}
 
 	/** Calculate the checksum */
-	protected byte calculateChecksum(byte[] pkt) {
-		int i;
+	private byte calculateChecksum(byte[] pkt) {
 		byte checksum = 0;
-		for(i = 1; i < 6; i++)
+		for(int i = 1; i < 6; i++)
 			checksum += pkt[i];
 		return checksum;
+	}
+
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		os.write(createPacket(drop));
 	}
 
 	/** Decode a STORE response */

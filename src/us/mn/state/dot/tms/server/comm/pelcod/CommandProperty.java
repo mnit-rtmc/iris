@@ -15,9 +15,6 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcod;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 /**
  * A property to command a camera
  *
@@ -27,34 +24,34 @@ import java.io.OutputStream;
 public class CommandProperty extends PelcoDProperty {
 
 	/** Bit flag to command a pan right */
-	static protected final byte PAN_RIGHT = 1 << 1;
+	static private final byte PAN_RIGHT = 1 << 1;
 
 	/** Bit flag to command a pan left */
-	static protected final byte PAN_LEFT = 1 << 2;
+	static private final byte PAN_LEFT = 1 << 2;
 
 	/** Bit flag to command a tilt up */
-	static protected final byte TILT_UP = 1 << 3;
+	static private final byte TILT_UP = 1 << 3;
 
 	/** Bit flag to command a tilt down */
-	static protected final byte TILT_DOWN = 1 << 4;
+	static private final byte TILT_DOWN = 1 << 4;
 
 	/** Bit flag to command a zoom in */
-	static protected final byte ZOOM_IN = 1 << 5;
+	static private final byte ZOOM_IN = 1 << 5;
 
 	/** Bit flag to command a zoom out */
-	static protected final byte ZOOM_OUT = 1 << 6;
+	static private final byte ZOOM_OUT = 1 << 6;
 
 	/** Bit flag to command a focus-far op */
-	static protected final int FOCUS_FAR = 1 << 7;
+	static private final int FOCUS_FAR = 1 << 7;
 
 	/** Bit flag to command a focus-near op */
-	static protected final int FOCUS_NEAR = 1 << 8;
+	static private final int FOCUS_NEAR = 1 << 8;
 
 	/** Bit flag to command an iris-open op */
-	static protected final int IRIS_OPEN = 1 << 9;
+	static private final int IRIS_OPEN = 1 << 9;
 
 	/** Bit flag to command an iris-close op */
-	static protected final int IRIS_CLOSE = 1 << 10;
+	static private final int IRIS_CLOSE = 1 << 10;
 
 	/** Bit flag for sense 0 */
 	static private final int SENSE_0 = 1 << 11;
@@ -149,13 +146,15 @@ public class CommandProperty extends PelcoDProperty {
 		     | getIrisFlags();
 	}
 
-	/** Encode a STORE request */
+	/** Get command parameter 1 */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] pkt = createPacket(drop);
-		pkt[4] = (byte)Math.abs(pan);
-		pkt[5] = (byte)Math.abs(tilt);
-		pkt[6] = calculateChecksum(pkt);
-		os.write(pkt);
+	protected int getParam1() {
+		return Math.abs(tilt);
+	}
+
+	/** Get command parameter 2 */
+	@Override
+	protected int getParam2() {
+		return Math.abs(pan);
 	}
 }
