@@ -62,14 +62,11 @@ public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 		addOperation(new OpRecallPreset(c, preset));
 	}
 
-	/**
-	 * Send a device request
+	/** Send a device request
 	 * @param c The CameraImpl object.
-	 * @param r The desired DeviceRequest.
-	 */
+	 * @param r The desired DeviceRequest. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
 		addOperation(new OpDeviceRequest(c, r));
 	}
-
 }

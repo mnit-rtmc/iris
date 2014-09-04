@@ -122,11 +122,9 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 		lastCmdTime = time;
 	}
 
-	/**
-	 * Send a device request
+	/** Send a device request
 	 * @param c The CameraImpl object.
-	 * @param r The desired DeviceRequest.
-	 */
+	 * @param r The desired DeviceRequest. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
 		switch (r) {
