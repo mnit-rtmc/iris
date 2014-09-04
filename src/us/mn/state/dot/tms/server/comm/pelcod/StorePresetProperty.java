@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,15 +35,14 @@ public class StorePresetProperty extends PelcoDProperty {
 	}
 
 	/** Encode a STORE request */
+	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] message = new byte[7];
-		message[0] = (byte)0xFF;
-		message[1] = (byte)drop;
-		message[2] = 0x0;
-		message[3] = 0x3; // store preset
-		message[4] = 0x0;
-		message[5] = (byte)preset;
-		message[6] = calculateChecksum(message);
-		os.write(message);
+		byte[] pkt = createPacket(drop);
+		pkt[2] = 0x0;
+		pkt[3] = 0x3; // store preset
+		pkt[4] = 0x0;
+		pkt[5] = (byte)preset;
+		pkt[6] = calculateChecksum(pkt);
+		os.write(pkt);
 	}
 }

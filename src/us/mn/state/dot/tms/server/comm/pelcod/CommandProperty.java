@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -137,17 +137,15 @@ public class CommandProperty extends PelcoDProperty {
 	}
 
 	/** Encode a STORE request */
+	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] message = new byte[7];
+		byte[] pkt = createPacket(drop);
 		int cmd = getCommandFlags();
-		message[0] = (byte)0xff;
-		message[1] = (byte)drop;
-		message[2] = (byte)(((cmd & 0xff00) >>> 8) & 0xff);
-		message[3] = (byte)(((cmd & 0x00ff) >>> 0) & 0xff);
-		message[4] = (byte)Math.abs(pan);
-		message[5] = (byte)Math.abs(tilt);
-		message[6] = calculateChecksum(message);
-		os.write(message);
+		pkt[2] = (byte)(((cmd & 0xff00) >>> 8) & 0xff);
+		pkt[3] = (byte)(((cmd & 0x00ff) >>> 0) & 0xff);
+		pkt[4] = (byte)Math.abs(pan);
+		pkt[5] = (byte)Math.abs(tilt);
+		pkt[6] = calculateChecksum(pkt);
+		os.write(pkt);
 	}
-
 }

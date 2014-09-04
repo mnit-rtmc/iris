@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@ import java.io.OutputStream;
  * Pelco D command property for setting auto-iris mode.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class AutoIrisModeProperty extends PelcoDProperty {
 
@@ -41,16 +43,14 @@ public class AutoIrisModeProperty extends PelcoDProperty {
 	}
 
 	/** Encode a STORE request. */
+	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] message = new byte[7];
-		message[0] = (byte)0xff;
-		message[1] = (byte)drop;
-		message[2] = (byte)0x00;
-		message[3] = (byte)0x2d;
-		message[4] = (byte)0x00;
-		message[5] = getCtrlByte();
-		message[6] = calculateChecksum(message);
-		os.write(message);
+		byte[] pkt = createPacket(drop);
+		pkt[2] = (byte)0x00;
+		pkt[3] = (byte)0x2d;
+		pkt[4] = (byte)0x00;
+		pkt[5] = getCtrlByte();
+		pkt[6] = calculateChecksum(pkt);
+		os.write(pkt);
 	}
-
 }

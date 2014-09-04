@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,14 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  */
 abstract public class PelcoDProperty extends ControllerProperty {
 
+	/** Create Pelco D packet */
+	protected byte[] createPacket(int drop) {
+		byte[] pkt = new byte[7];
+		pkt[0] = (byte)0xFF;
+		pkt[1] = (byte)drop;
+		return pkt;
+	}
+
 	/** Calculate the checksum */
 	protected byte calculateChecksum(byte[] message) {
 		int i;
@@ -34,6 +42,7 @@ abstract public class PelcoDProperty extends ControllerProperty {
 	}
 
 	/** Decode a STORE response */
+	@Override
 	public void decodeStore(InputStream is, int drop) {
 		// do not expect any response
 	}

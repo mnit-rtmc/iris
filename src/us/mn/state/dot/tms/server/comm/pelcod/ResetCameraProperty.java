@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,24 +22,19 @@ import java.io.OutputStream;
  * Pelco D command property for initiating a camera reset.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class ResetCameraProperty extends PelcoDProperty {
 
-	/** Create the property. */
-	public ResetCameraProperty() {
-	}
-
 	/** Encode a STORE request. */
+	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] message = new byte[7];
-		message[0] = (byte)0xff;
-		message[1] = (byte)drop;
-		message[2] = (byte)0x00;
-		message[3] = (byte)0x0f;
-		message[4] = (byte)0x00;
-		message[5] = (byte)0x00;
-		message[6] = calculateChecksum(message);
-		os.write(message);
+		byte[] pkt = createPacket(drop);
+		pkt[2] = (byte)0x00;
+		pkt[3] = (byte)0x0f;
+		pkt[4] = (byte)0x00;
+		pkt[5] = (byte)0x00;
+		pkt[6] = calculateChecksum(pkt);
+		os.write(pkt);
 	}
-
 }
