@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  * Pelco D operation to handle DeviceRequest requests.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class OpDeviceRequest extends OpPelcoD {
 
@@ -71,7 +73,8 @@ public class OpDeviceRequest extends OpPelcoD {
 			case CAMERA_IRIS_AUTO:
 				return new AutoIrisModeProperty(true);
 			case RESET_DEVICE:
-				return new ResetCameraProperty();
+				return new ExtendedProperty(ExtendedProperty.
+					Command.REMOTE_RESET);
 
 			// FIXME: the following have not yet been implemented
 			// for this driver.
