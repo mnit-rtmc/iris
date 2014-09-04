@@ -60,6 +60,9 @@ public class OpDeviceRequest extends OpPelcoD {
 		case RESET_DEVICE:
 			return new ExtendedProperty(ExtendedProperty.
 				Command.REMOTE_RESET);
+		case CAMERA_WIPER_ONESHOT:
+			return new ExtendedProperty(ExtendedProperty.
+				Command.SET_AUX, 1);
 
 		// FIXME: the following have not yet been implemented
 		// for this driver.
@@ -68,7 +71,6 @@ public class OpDeviceRequest extends OpPelcoD {
 		case CAMERA_WIPER_ON:
 		case CAMERA_WIPER_OFF:
 		case CAMERA_WIPER_TOGGLE:
-		case CAMERA_WIPER_ONESHOT:
 		default:
 			return null;
 		}
