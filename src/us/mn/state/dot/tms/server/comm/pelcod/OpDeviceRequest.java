@@ -52,9 +52,11 @@ public class OpDeviceRequest extends OpPelcoD {
 			return new ExtendedProperty(ExtendedProperty.
 				Command.AUTO_FOCUS, 0);
 		case CAMERA_IRIS_MANUAL:
-			return new AutoIrisModeProperty(false);
+			return new ExtendedProperty(ExtendedProperty.
+				Command.AUTO_IRIS, 1);
 		case CAMERA_IRIS_AUTO:
-			return new AutoIrisModeProperty(true);
+			return new ExtendedProperty(ExtendedProperty.
+				Command.AUTO_IRIS, 0);
 		case RESET_DEVICE:
 			return new ExtendedProperty(ExtendedProperty.
 				Command.REMOTE_RESET);
