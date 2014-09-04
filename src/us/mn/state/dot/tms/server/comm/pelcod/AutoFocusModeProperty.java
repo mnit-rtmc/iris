@@ -34,6 +34,12 @@ public class AutoFocusModeProperty extends PelcoDProperty {
 		autoMode = a;
 	}
 
+	/** Get the command bits (in the 2 LSBs) */
+	@Override
+	protected int getCommand() {
+		return 0x2b;
+	}
+
 	/** Get control byte. */
 	protected byte getCtrlByte() {
 		if (autoMode)
@@ -46,8 +52,6 @@ public class AutoFocusModeProperty extends PelcoDProperty {
 	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] pkt = createPacket(drop);
-		pkt[2] = (byte)0x00;
-		pkt[3] = (byte)0x2b;
 		pkt[4] = (byte)0x00;
 		pkt[5] = getCtrlByte();
 		pkt[6] = calculateChecksum(pkt);

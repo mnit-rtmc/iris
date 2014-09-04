@@ -56,20 +56,29 @@ public class CommandProperty extends PelcoDProperty {
 	/** Bit flag to command an iris-close op */
 	static protected final int IRIS_CLOSE = 1 << 10;
 
+	/** Bit flag for sense 0 */
+	static private final int SENSE_0 = 1 << 11;
+
+	/** Bit flag for sense 1 */
+	static private final int SENSE_1 = 1 << 12;
+
+	/** Bit flag for sense 2 */
+	static private final int SENSE_2 = 1 << 15;
+
 	/** Requested pan value [-63, 63] :: [left, right] (64 is turbo) */
-	protected final int pan;
+	private final int pan;
 
 	/** Requested tilt value [-63, 63] :: [down, up] */
-	protected final int tilt;
+	private final int tilt;
 
 	/** Requested zoom value [-1, 1] :: [out, in] */
-	protected final int zoom;
+	private final int zoom;
 
 	/** Requested focus value [-1, 1] :: [near, far] */
-	protected final int focus;
+	private final int focus;
 
 	/** Requested iris value [-1, 1] :: [close, open] */
-	protected final int iris;
+	private final int iris;
 
 	/** Create a new command property */
 	public CommandProperty(int p, int t, int z, int f, int i) {
@@ -81,7 +90,7 @@ public class CommandProperty extends PelcoDProperty {
 	}
 
 	/** Construct an int containing the pan command flags in the 2 LSBs */
-	protected byte getPanFlags() {
+	private byte getPanFlags() {
 		if (pan < 0)
 			return PAN_LEFT;
 		else if (pan > 0)
@@ -91,7 +100,7 @@ public class CommandProperty extends PelcoDProperty {
 	}
 
 	/** Construct an int containing the tilt command flags in the 2 LSBs */
-	protected byte getTiltFlags() {
+	private byte getTiltFlags() {
 		if (tilt < 0)
 			return TILT_DOWN;
 		else if (tilt > 0)
@@ -101,7 +110,7 @@ public class CommandProperty extends PelcoDProperty {
 	}
 
 	/** Construct an int containing the zoom command flags in the 2 LSBs */
-	protected byte getZoomFlags() {
+	private byte getZoomFlags() {
 		if (zoom < 0)
 			return ZOOM_OUT;
 		else if (zoom > 0)
@@ -111,7 +120,7 @@ public class CommandProperty extends PelcoDProperty {
 	}
 
 	/** Construct an int containing the focus command flags in the 2 LSBs */
-	protected int getFocusFlags() {
+	private int getFocusFlags() {
 		if (focus < 0)
 			return FOCUS_NEAR;
 		else if (focus > 0)
@@ -121,7 +130,7 @@ public class CommandProperty extends PelcoDProperty {
 	}
 
 	/** Construct an int containing the iris command flags in the 2 LSBs */
-	protected int getIrisFlags() {
+	private int getIrisFlags() {
 		if (iris < 0)
 			return IRIS_CLOSE;
 		else if (iris > 0)
@@ -130,19 +139,20 @@ public class CommandProperty extends PelcoDProperty {
 			return 0;
 	}
 
-	/** Construct an int containing the full command bytes in the 2 LSBs */
-	protected int getCommandFlags() {
-		return (getPanFlags() | getTiltFlags() | getZoomFlags()
-			| getFocusFlags() | getIrisFlags());
+	/** Get the command bits (in the 2 LSBs) */
+	@Override
+	protected int getCommand() {
+		return getPanFlags()
+		     | getTiltFlags()
+		     | getZoomFlags()
+		     | getFocusFlags()
+		     | getIrisFlags();
 	}
 
 	/** Encode a STORE request */
 	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] pkt = createPacket(drop);
-		int cmd = getCommandFlags();
-		pkt[2] = (byte)(((cmd & 0xff00) >>> 8) & 0xff);
-		pkt[3] = (byte)(((cmd & 0x00ff) >>> 0) & 0xff);
 		pkt[4] = (byte)Math.abs(pan);
 		pkt[5] = (byte)Math.abs(tilt);
 		pkt[6] = calculateChecksum(pkt);

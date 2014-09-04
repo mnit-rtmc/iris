@@ -26,12 +26,16 @@ import java.io.OutputStream;
  */
 public class ResetCameraProperty extends PelcoDProperty {
 
+	/** Get the command bits (in the 2 LSBs) */
+	@Override
+	protected int getCommand() {
+		return 0x0f;
+	}
+
 	/** Encode a STORE request. */
 	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] pkt = createPacket(drop);
-		pkt[2] = (byte)0x00;
-		pkt[3] = (byte)0x0f;
 		pkt[4] = (byte)0x00;
 		pkt[5] = (byte)0x00;
 		pkt[6] = calculateChecksum(pkt);

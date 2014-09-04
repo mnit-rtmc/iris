@@ -34,12 +34,16 @@ public class RecallPresetProperty extends PelcoDProperty {
 		preset = p;
 	}
 
+	/** Get the command bits (in the 2 LSBs) */
+	@Override
+	protected int getCommand() {
+		return 0x07;
+	}
+
 	/** Encode a STORE request */
 	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
 		byte[] pkt = createPacket(drop);
-		pkt[2] = 0x0;
-		pkt[3] = 0x7; // recall preset
 		pkt[4] = 0x0;
 		pkt[5] = (byte)preset;
 		pkt[6] = calculateChecksum(pkt);
