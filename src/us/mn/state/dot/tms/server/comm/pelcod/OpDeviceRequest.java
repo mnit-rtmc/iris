@@ -46,9 +46,11 @@ public class OpDeviceRequest extends OpPelcoD {
 		case CAMERA_IRIS_STOP:
 			return new CommandProperty(0, 0, 0, 0, 0);
 		case CAMERA_FOCUS_MANUAL:
-			return new AutoFocusModeProperty(false);
+			return new ExtendedProperty(ExtendedProperty.
+				Command.AUTO_FOCUS, 1);
 		case CAMERA_FOCUS_AUTO:
-			return new AutoFocusModeProperty(true);
+			return new ExtendedProperty(ExtendedProperty.
+				Command.AUTO_FOCUS, 0);
 		case CAMERA_IRIS_MANUAL:
 			return new AutoIrisModeProperty(false);
 		case CAMERA_IRIS_AUTO:
