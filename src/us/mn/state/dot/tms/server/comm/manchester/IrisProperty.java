@@ -24,10 +24,6 @@ import java.io.OutputStream;
  */
 public class IrisProperty extends ManchesterProperty {
 
-	/** Extended command bit masks (second byte) */
-	static private final int EX_IRIS_OPEN = 0x02;		// xx00 001x
-	static private final int EX_IRIS_CLOSE = 0x08;		// xx00 100x
-
 	/** Requested iris value [-1, 1] :: [close, open] */
 	private final int iris;
 

@@ -24,6 +24,30 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  */
 abstract public class ManchesterProperty extends ControllerProperty {
 
+	/** Pan/tilt command bit masks (second byte) */
+	static protected final int PT_TILT_DOWN = 0x00;		// xx00 xxxx
+	static protected final int PT_TILT_UP = 0x10;		// xx01 xxxx
+	static protected final int PT_PAN_LEFT = 0x20;		// xx10 xxxx
+	static protected final int PT_PAN_RIGHT = 0x30;		// xx11 xxxx
+
+	/** Extended command bit masks (second byte) */
+	static protected final int EX_TILT_DOWN_FULL = 0x00;	// xx00 000x
+	static protected final int EX_IRIS_OPEN = 0x02;		// xx00 001x
+	static protected final int EX_FOCUS_FAR = 0x04;		// xx00 010x
+	static protected final int EX_ZOOM_IN = 0x06;		// xx00 011x
+	static protected final int EX_IRIS_CLOSE = 0x08;	// xx00 100x
+	static protected final int EX_FOCUS_NEAR = 0x0A;	// xx00 101x
+	static protected final int EX_ZOOM_OUT = 0x0C;		// xx00 110x
+	static protected final int EX_PAN_LEFT_FULL = 0x0E;	// xx00 111x
+	static protected final int EX_TILT_UP_FULL = 0x10;	// xx01 000x
+	static protected final int EX_PAN_RIGHT_FULL = 0x12;	// xx01 001x
+	static protected final int EX_AUX_1 = 0x14;		// xx01 010x
+	static protected final int EX_AUX_4 = 0x16;		// xx01 011x
+	static protected final int EX_AUX_2 = 0x18;		// xx01 100x
+	static protected final int EX_AUX_5 = 0x1A;		// xx01 101x
+	static protected final int EX_AUX_3 = 0x1C;		// xx01 110x
+	static protected final int EX_AUX_6 = 0x1E;		// xx01 111x
+
 	/** Create manchester packet */
 	protected byte[] createPacket(int drop) {
 		byte[] pkt = new byte[3];

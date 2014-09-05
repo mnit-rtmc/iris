@@ -24,10 +24,6 @@ import java.io.OutputStream;
  */
 public class FocusProperty extends ManchesterProperty {
 
-	/** Extended command bit masks (second byte) */
-	static private final int EX_FOCUS_FAR = 0x04;		// xx00 010x
-	static private final int EX_FOCUS_NEAR = 0x0A;		// xx00 101x
-
 	/** Requested focus value [-1, 1] :: [near, far] */
 	private final int focus;
 
