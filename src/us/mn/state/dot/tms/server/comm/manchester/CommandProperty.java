@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,58 +58,59 @@ public class CommandProperty extends ManchesterProperty {
 
 	/** Encode a pan command packet */
 	private byte[] encodePanPacket(int drop) {
-		byte[] packet = getAddressedPacket(drop);
-		if(Math.abs(pan) < 8) {
-			if(pan < 0)
-				packet[1] |= 0x20;
+		byte[] pkt = createPacket(drop);
+		if (Math.abs(pan) < 8) {
+			if (pan < 0)
+				pkt[1] |= 0x20;
 			else
-				packet[1] |= 0x30;
-			packet[1] |= encodeSpeed(pan);
-			packet[2] |= 0x02;
+				pkt[1] |= 0x30;
+			pkt[1] |= encodeSpeed(pan);
+			pkt[2] |= 0x02;
 		} else {
-			if(pan < 0)
-				packet[1] |= EX_PAN_LEFT_FULL << 1;
+			if (pan < 0)
+				pkt[1] |= EX_PAN_LEFT_FULL << 1;
 			else
-				packet[1] |= EX_PAN_RIGHT_FULL << 1;
+				pkt[1] |= EX_PAN_RIGHT_FULL << 1;
 		}
-		return packet;
+		return pkt;
 	}
 
 	/** Encode a tilt command packet */
 	private byte[] encodeTiltPacket(int drop) {
-		byte[] packet = getAddressedPacket(drop);
-		if(Math.abs(tilt) < 8) {
-			if(tilt > 0)
-				packet[1] |= 0x10;
-			packet[1] |= encodeSpeed(tilt);
-			packet[2] |= 0x02;
+		byte[] pkt = createPacket(drop);
+		if (Math.abs(tilt) < 8) {
+			if (tilt > 0)
+				pkt[1] |= 0x10;
+			pkt[1] |= encodeSpeed(tilt);
+			pkt[2] |= 0x02;
 		} else {
-			if(tilt < 0)
-				packet[1] |= EX_TILT_DOWN_FULL << 1;
+			if (tilt < 0)
+				pkt[1] |= EX_TILT_DOWN_FULL << 1;
 			else
-				packet[1] |= EX_TILT_UP_FULL << 1;
+				pkt[1] |= EX_TILT_UP_FULL << 1;
 		}
-		return packet;
+		return pkt;
 	}
 
 	/** Encode a zoom command packet */
 	private byte[] encodeZoomPacket(int drop) {
-		byte[] packet = getAddressedPacket(drop);
-		if(zoom < 0)
-			packet[1] |= EX_ZOOM_OUT << 1;
+		byte[] pkt = createPacket(drop);
+		if (zoom < 0)
+			pkt[1] |= EX_ZOOM_OUT << 1;
 		else
-			packet[1] |= EX_ZOOM_IN << 1;
-		return packet;
+			pkt[1] |= EX_ZOOM_IN << 1;
+		return pkt;
 	}
 
 	/** Encode a STORE request */
+	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
 		drop--;		// receiver address is zero-relative
-		if(pan != 0)
+		if (pan != 0)
 			os.write(encodePanPacket(drop));
-		if(tilt != 0)
+		if (tilt != 0)
 			os.write(encodeTiltPacket(drop));
-		if(zoom != 0)
+		if (zoom != 0)
 			os.write(encodeZoomPacket(drop));
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,16 +24,17 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  */
 abstract public class ManchesterProperty extends ControllerProperty {
 
-	/** Get a packet with the receiver address encoded */
-	protected byte[] getAddressedPacket(int drop) {
-		byte[] packet = new byte[3];
-		packet[0] = (byte)(0x80 | (drop >> 6));
-		packet[1] = (byte)((drop >> 5) & 0x01);
-		packet[2] = (byte)((drop & 0x1f) << 2);
-		return packet;
+	/** Create manchester packet */
+	protected byte[] createPacket(int drop) {
+		byte[] pkt = new byte[3];
+		pkt[0] = (byte)(0x80 | (drop >> 6));
+		pkt[1] = (byte)((drop >> 5) & 0x01);
+		pkt[2] = (byte)((drop & 0x1f) << 2);
+		return pkt;
 	}
 
 	/** Decode a STORE response */
+	@Override
 	public void decodeStore(InputStream is, int drop) {
 		// do not expect any response
 	}
