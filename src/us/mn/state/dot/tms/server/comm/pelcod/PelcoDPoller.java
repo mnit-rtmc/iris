@@ -53,13 +53,13 @@ public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 	/** Send a store camera preset command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		addOperation(new OpStorePreset(c, preset));
+		addOperation(new OpPreset(c, true, preset));
 	}
 
 	/** Send a recall camera preset command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		addOperation(new OpRecallPreset(c, preset));
+		addOperation(new OpPreset(c, false, preset));
 	}
 
 	/** Send a device request

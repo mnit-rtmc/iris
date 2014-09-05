@@ -19,36 +19,42 @@ import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 
 /**
- * Pelco operation to store a camera preset.
+ * Pelco operation to recall or store a camera preset.
  *
- * @author Stephen Donecker
  * @author Douglas Lau
  */
-public class OpStorePreset extends OpPelcoD {
+public class OpPreset extends OpPelcoD {
 
-	/** The camera preset to set */
-	private final int preset;
+	/** Get recall or store property command.
+	 * @param s Store or recall.
+	 * @return Extended property command. */
+	static private ExtendedProperty.Command getCommand(boolean s) {
+		return (s) ? ExtendedProperty.Command.STORE_PRESET
+		           : ExtendedProperty.Command.RECALL_PRESET;
+	}
 
-	/** Create a new operation to store a camera preset */
-	public OpStorePreset(CameraImpl c, int p) {
+	/** Property for preset command */
+	private final PelcoDProperty prop;
+
+	/** Create a new operation for a camera preset */
+	public OpPreset(CameraImpl c, boolean s, int p) {
 		super(c);
-		preset = p;
+		prop = new ExtendedProperty(getCommand(s), p);
 	}
 
 	/** Create the second phase of the operation */
 	protected Phase<PelcoDProperty> phaseTwo() {
-		return new StorePreset();
+		return new CommandPreset();
 	}
 
-	/** Phase to store a camera preset */
-	protected class StorePreset extends Phase<PelcoDProperty> {
+	/** Phase to recall or store a camera preset */
+	protected class CommandPreset extends Phase<PelcoDProperty> {
 
-		/** Command controller to store the camera preset */
+		/** Command controller to recall or store a preset */
 		protected Phase<PelcoDProperty> poll(
 			CommMessage<PelcoDProperty> mess) throws IOException
 		{
-			mess.add(new ExtendedProperty(ExtendedProperty.
-				Command.STORE_PRESET, preset));
+			mess.add(prop);
 			mess.storeProps();
 			return null;
 		}
