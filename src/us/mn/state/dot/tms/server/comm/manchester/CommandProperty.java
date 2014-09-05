@@ -18,42 +18,63 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * A property to command a camera
+ * A property to command a camera.
  *
  * @author Douglas Lau
  */
 public class CommandProperty extends ManchesterProperty {
 
-	static private final int EX_TILT_DOWN_FULL = 0;
-	static private final int EX_IRIS_OPEN = 1;
-	static private final int EX_FOCUS_FAR = 2;
-	static private final int EX_ZOOM_IN = 3;
-	static private final int EX_IRIS_CLOSE = 4;
-	static private final int EX_FOCUS_NEAR = 5;
-	static private final int EX_ZOOM_OUT = 6;
-	static private final int EX_PAN_LEFT_FULL = 7;
-	static private final int EX_TILT_UP_FULL = 8;
-	static private final int EX_PAN_RIGHT_FULL = 9;
+	/** Pan/tilt command bit masks (second byte) */
+	static private final int PT_TILT_DOWN = 0x00;		// xx00 xxxx
+	static private final int PT_TILT_UP = 0x10;		// xx01 xxxx
+	static private final int PT_PAN_LEFT = 0x20;		// xx10 xxxx
+	static private final int PT_PAN_RIGHT = 0x30;		// xx11 xxxx
+
+	/** Extended command bit masks (second byte) */
+	static private final int EX_TILT_DOWN_FULL = 0x00;	// xx00 000x
+	static private final int EX_IRIS_OPEN = 0x02;		// xx00 001x
+	static private final int EX_FOCUS_FAR = 0x04;		// xx00 010x
+	static private final int EX_ZOOM_IN = 0x06;		// xx00 011x
+	static private final int EX_IRIS_CLOSE = 0x08;		// xx00 100x
+	static private final int EX_FOCUS_NEAR = 0x0A;		// xx00 101x
+	static private final int EX_ZOOM_OUT = 0x0C;		// xx00 110x
+	static private final int EX_PAN_LEFT_FULL = 0x0E;	// xx00 111x
+	static private final int EX_TILT_UP_FULL = 0x10;	// xx01 000x
+	static private final int EX_PAN_RIGHT_FULL = 0x12;	// xx01 001x
+	static private final int EX_AUX_1 = 0x14;		// xx01 010x
+	static private final int EX_AUX_4 = 0x16;		// xx01 011x
+	static private final int EX_AUX_2 = 0x18;		// xx01 100x
+	static private final int EX_AUX_5 = 0x1A;		// xx01 101x
+	static private final int EX_AUX_3 = 0x1C;		// xx01 110x
+	static private final int EX_AUX_6 = 0x1E;		// xx01 111x
 
 	/** Encode a speed value for pan/tilt command */
 	static private byte encodeSpeed(int v) {
-		return (byte)((Math.abs(v) - 1) << 1);
+		return (byte)(((Math.abs(v) - 1) << 1) & 0x0E);
 	}
 
 	/** Pan value (-7 to 7) (8 means turbo) */
-	protected final int pan;
+	private final int pan;
 
 	/** Tilt value (-7 to 7) (8 means turbo) */
-	protected final int tilt;
+	private final int tilt;
 
 	/** Zoom value (-1 to 1) */
-	protected final int zoom;
+	private final int zoom;
+
+	/** Requested focus value [-1, 1] :: [near, far] */
+	private final int focus;
+
+	/** Requested iris value [-1, 1] :: [close, open] */
+	private final int iris;
 
 	/** Create a new command property */
-	public CommandProperty(int p, int t, int z) {
+	public CommandProperty(int p, int t, int z, int f, int i) {
 		pan = p;
 		tilt = t;
 		zoom = z;
+		focus = f;
+		iris = i;
 	}
 
 	/** Encode a pan command packet */
@@ -61,16 +82,16 @@ public class CommandProperty extends ManchesterProperty {
 		byte[] pkt = createPacket(drop);
 		if (Math.abs(pan) < 8) {
 			if (pan < 0)
-				pkt[1] |= 0x20;
+				pkt[1] |= PT_PAN_LEFT;
 			else
-				pkt[1] |= 0x30;
+				pkt[1] |= PT_PAN_RIGHT;
 			pkt[1] |= encodeSpeed(pan);
 			pkt[2] |= 0x02;
 		} else {
 			if (pan < 0)
-				pkt[1] |= EX_PAN_LEFT_FULL << 1;
+				pkt[1] |= EX_PAN_LEFT_FULL;
 			else
-				pkt[1] |= EX_PAN_RIGHT_FULL << 1;
+				pkt[1] |= EX_PAN_RIGHT_FULL;
 		}
 		return pkt;
 	}
@@ -79,15 +100,17 @@ public class CommandProperty extends ManchesterProperty {
 	private byte[] encodeTiltPacket(int drop) {
 		byte[] pkt = createPacket(drop);
 		if (Math.abs(tilt) < 8) {
-			if (tilt > 0)
-				pkt[1] |= 0x10;
+			if (tilt <= 0)
+				pkt[1] |= PT_TILT_DOWN;
+			else
+				pkt[1] |= PT_TILT_UP;
 			pkt[1] |= encodeSpeed(tilt);
 			pkt[2] |= 0x02;
 		} else {
 			if (tilt < 0)
-				pkt[1] |= EX_TILT_DOWN_FULL << 1;
+				pkt[1] |= EX_TILT_DOWN_FULL;
 			else
-				pkt[1] |= EX_TILT_UP_FULL << 1;
+				pkt[1] |= EX_TILT_UP_FULL;
 		}
 		return pkt;
 	}
@@ -96,9 +119,29 @@ public class CommandProperty extends ManchesterProperty {
 	private byte[] encodeZoomPacket(int drop) {
 		byte[] pkt = createPacket(drop);
 		if (zoom < 0)
-			pkt[1] |= EX_ZOOM_OUT << 1;
+			pkt[1] |= EX_ZOOM_OUT;
 		else
-			pkt[1] |= EX_ZOOM_IN << 1;
+			pkt[1] |= EX_ZOOM_IN;
+		return pkt;
+	}
+
+	/** Encode a focus command packet */
+	private byte[] encodeFocusPacket(int drop) {
+		byte[] pkt = createPacket(drop);
+		if (focus < 0)
+			pkt[1] |= EX_FOCUS_NEAR;
+		else
+			pkt[1] |= EX_FOCUS_FAR;
+		return pkt;
+	}
+
+	/** Encode an iris command packet */
+	private byte[] encodeIrisPacket(int drop) {
+		byte[] pkt = createPacket(drop);
+		if (iris < 0)
+			pkt[1] |= EX_IRIS_CLOSE;
+		else
+			pkt[1] |= EX_IRIS_OPEN;
 		return pkt;
 	}
 
@@ -112,5 +155,9 @@ public class CommandProperty extends ManchesterProperty {
 			os.write(encodeTiltPacket(drop));
 		if (zoom != 0)
 			os.write(encodeZoomPacket(drop));
+		if (focus != 0)
+			os.write(encodeFocusPacket(drop));
+		if (iris != 0)
+			os.write(encodeIrisPacket(drop));
 	}
 }

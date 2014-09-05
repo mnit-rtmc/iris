@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ public class OpMoveCamera extends OpManchester {
 			CommMessage<ManchesterProperty> mess) throws IOException
 		{
 			sleepUntilReady();
-			mess.add(new CommandProperty(pan, tilt, zoom));
+			mess.add(new CommandProperty(pan, tilt, zoom, 0, 0));
 			mess.storeProps();
 			if(isStopCmd() || isExpired())
 				return null;
