@@ -41,8 +41,8 @@ abstract public class PelcoDProperty extends ControllerProperty {
 		byte[] pkt = new byte[7];
 		pkt[0] = (byte)0xFF;
 		pkt[1] = (byte)drop;
-		pkt[2] = (byte)(((cmd & 0xff00) >>> 8) & 0xff);
-		pkt[3] = (byte)(((cmd & 0x00ff) >>> 0) & 0xff);
+		pkt[2] = (byte)((cmd >>> 8) & 0xff);
+		pkt[3] = (byte)((cmd >>> 0) & 0xff);
 		pkt[4] = (byte)getParam2();
 		pkt[5] = (byte)getParam1();
 		pkt[6] = calculateChecksum(pkt);
