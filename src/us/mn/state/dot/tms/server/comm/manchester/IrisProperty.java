@@ -14,9 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.manchester;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 /**
  * A property to command the iris of a camera.
  *
@@ -32,20 +29,16 @@ public class IrisProperty extends ManchesterProperty {
 		iris = i;
 	}
 
-	/** Encode an iris command packet */
-	private byte[] encodeIrisPacket(int drop) {
-		byte[] pkt = createPacket(drop);
-		if (iris < 0)
-			pkt[1] |= EX_IRIS_CLOSE;
-		else
-			pkt[1] |= EX_IRIS_OPEN;
-		return pkt;
+	/** Get command bits */
+	@Override
+	protected byte commandBits() {
+		return (iris < 0) ? EX_IRIS_CLOSE
+		                  : EX_IRIS_OPEN;
 	}
 
-	/** Encode a STORE request */
+	/** Check if packet is extended function */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-		drop--;		// receiver address is zero-relative
-		os.write(encodeIrisPacket(drop));
+	protected boolean isExtended() {
+		return true;
 	}
 }

@@ -15,30 +15,47 @@
 package us.mn.state.dot.tms.server.comm.manchester;
 
 /**
- * A property to focus a camera.
+ * A property to command a camera.
  *
  * @author Douglas Lau
  */
-public class FocusProperty extends ManchesterProperty {
+public class TiltProperty extends ManchesterProperty {
 
-	/** Requested focus value [-1, 1] :: [near, far] */
-	private final int focus;
+	/** Tilt value (-7 to 7) (8 means turbo) */
+	private final int tilt;
 
-	/** Create a new focus property */
-	public FocusProperty(int f) {
-		focus = f;
+	/** Create a new tilt property */
+	public TiltProperty(int t) {
+		tilt = t;
 	}
 
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {
-		return (focus < 0) ? EX_FOCUS_NEAR
-		                   : EX_FOCUS_FAR;
+		return isExtended() ? extendedCommandBits()
+		                    : basicCommandBits();
+	}
+
+	/** Get extended command bits */
+	private byte extendedCommandBits() {
+		return (tilt < 0) ? EX_TILT_DOWN_FULL
+		                  : EX_TILT_UP_FULL;
+	}
+
+	/** Get basic command bits */
+	private byte basicCommandBits() {
+		return (byte)(basicCommandFlag() | encodeSpeed(tilt));
+	}
+
+	/** Get basic command flag */
+	private byte basicCommandFlag() {
+		return (tilt <= 0) ? PT_TILT_DOWN
+		                   : PT_TILT_UP;
 	}
 
 	/** Check if packet is extended function */
 	@Override
 	protected boolean isExtended() {
-		return true;
+		return Math.abs(tilt) >= 8;
 	}
 }

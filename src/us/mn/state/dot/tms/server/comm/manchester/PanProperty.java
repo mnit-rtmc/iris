@@ -15,30 +15,47 @@
 package us.mn.state.dot.tms.server.comm.manchester;
 
 /**
- * A property to focus a camera.
+ * A property to command a camera.
  *
  * @author Douglas Lau
  */
-public class FocusProperty extends ManchesterProperty {
+public class PanProperty extends ManchesterProperty {
 
-	/** Requested focus value [-1, 1] :: [near, far] */
-	private final int focus;
+	/** Pan value (-7 to 7) (8 means turbo) */
+	private final int pan;
 
-	/** Create a new focus property */
-	public FocusProperty(int f) {
-		focus = f;
+	/** Create a new pan property */
+	public PanProperty(int p) {
+		pan = p;
 	}
 
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {
-		return (focus < 0) ? EX_FOCUS_NEAR
-		                   : EX_FOCUS_FAR;
+		return isExtended() ? extendedCommandBits()
+		                    : basicCommandBits();
+	}
+
+	/** Get extended command bits */
+	private byte extendedCommandBits() {
+		return (pan < 0) ? EX_PAN_LEFT_FULL
+		                 : EX_PAN_RIGHT_FULL;
+	}
+
+	/** Get basic command bits */
+	private byte basicCommandBits() {
+		return (byte)(basicCommandFlag() | encodeSpeed(pan));
+	}
+
+	/** Get basic command flag */
+	private byte basicCommandFlag() {
+		return (pan < 0) ? PT_PAN_LEFT
+		                 : PT_PAN_RIGHT;
 	}
 
 	/** Check if packet is extended function */
 	@Override
 	protected boolean isExtended() {
-		return true;
+		return Math.abs(pan) >= 8;
 	}
 }

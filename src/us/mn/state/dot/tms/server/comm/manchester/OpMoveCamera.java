@@ -76,9 +76,14 @@ public class OpMoveCamera extends OpManchester {
 			CommMessage<ManchesterProperty> mess) throws IOException
 		{
 			sleepUntilReady();
-			mess.add(new CommandProperty(pan, tilt, zoom));
+			if (pan != 0)
+				mess.add(new PanProperty(pan));
+			if (tilt != 0)
+				mess.add(new TiltProperty(tilt));
+			if (zoom != 0)
+				mess.add(new ZoomProperty(zoom));
 			mess.storeProps();
-			if(isStopCmd() || isExpired())
+			if (isStopCmd() || isExpired())
 				return null;
 			else
 				return this;

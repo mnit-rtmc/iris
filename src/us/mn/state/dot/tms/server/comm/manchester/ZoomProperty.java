@@ -15,25 +15,25 @@
 package us.mn.state.dot.tms.server.comm.manchester;
 
 /**
- * A property to focus a camera.
+ * A property to zoom a camera.
  *
  * @author Douglas Lau
  */
-public class FocusProperty extends ManchesterProperty {
+public class ZoomProperty extends ManchesterProperty {
 
-	/** Requested focus value [-1, 1] :: [near, far] */
-	private final int focus;
+	/** Zoom value (-1 to 1) */
+	private final int zoom;
 
-	/** Create a new focus property */
-	public FocusProperty(int f) {
-		focus = f;
+	/** Create a new zoom property */
+	public ZoomProperty(int z) {
+		zoom = z;
 	}
 
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {
-		return (focus < 0) ? EX_FOCUS_NEAR
-		                   : EX_FOCUS_FAR;
+		return (zoom < 0) ? EX_ZOOM_OUT
+		                  : EX_ZOOM_IN;
 	}
 
 	/** Check if packet is extended function */
