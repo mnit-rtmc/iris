@@ -39,6 +39,8 @@ public class OpDeviceRequest extends OpManchester {
 			return new IrisProperty(-1);
 		case CAMERA_IRIS_OPEN:
 			return new IrisProperty(1);
+		case CAMERA_WIPER_ONESHOT:
+			return new AuxProperty(6);
 		default:
 			return null;
 		}
