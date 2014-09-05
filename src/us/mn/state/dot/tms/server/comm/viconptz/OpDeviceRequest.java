@@ -43,6 +43,8 @@ public class OpDeviceRequest extends OpViconPTZ {
 			return new CommandProperty(0, 0, 0, 0, 1);
 		case CAMERA_IRIS_STOP:
 			return new CommandProperty(0, 0, 0, 0, 0);
+		case CAMERA_WIPER_ONESHOT:
+			return new AuxProperty(6);
 		default:
 			return null;
 		}
