@@ -49,6 +49,8 @@ abstract public class ManchesterProperty extends ControllerProperty {
 	static protected final byte EX_AUX_5 = 0x1A;		// xx01 101x
 	static protected final byte EX_AUX_3 = 0x1C;		// xx01 110x
 	static protected final byte EX_AUX_6 = 0x1E;		// xx01 111x
+	static protected final byte EX_RECALL_PRESET = 0x20;	// xx10 xxxx
+	static protected final byte EX_STORE_PRESET = 0x30;	// xx11 xxxx
 
 	/** Encode a speed value for pan/tilt command */
 	static protected byte encodeSpeed(int v) {

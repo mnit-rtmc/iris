@@ -53,13 +53,13 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 	/** Send a store camera preset command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		// FIXME: NOT YET IMPLEMENTED
+		addOperation(new OpPreset(c, true, preset));
 	}
 
 	/** Send a recall camera preset command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		// FIXME: NOT YET IMPLEMENTED
+		addOperation(new OpPreset(c, false, preset));
 	}
 
 	/** Send a device request
