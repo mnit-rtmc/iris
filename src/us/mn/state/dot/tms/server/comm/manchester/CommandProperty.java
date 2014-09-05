@@ -62,19 +62,11 @@ public class CommandProperty extends ManchesterProperty {
 	/** Zoom value (-1 to 1) */
 	private final int zoom;
 
-	/** Requested focus value [-1, 1] :: [near, far] */
-	private final int focus;
-
-	/** Requested iris value [-1, 1] :: [close, open] */
-	private final int iris;
-
 	/** Create a new command property */
-	public CommandProperty(int p, int t, int z, int f, int i) {
+	public CommandProperty(int p, int t, int z) {
 		pan = p;
 		tilt = t;
 		zoom = z;
-		focus = f;
-		iris = i;
 	}
 
 	/** Encode a pan command packet */
@@ -125,26 +117,6 @@ public class CommandProperty extends ManchesterProperty {
 		return pkt;
 	}
 
-	/** Encode a focus command packet */
-	private byte[] encodeFocusPacket(int drop) {
-		byte[] pkt = createPacket(drop);
-		if (focus < 0)
-			pkt[1] |= EX_FOCUS_NEAR;
-		else
-			pkt[1] |= EX_FOCUS_FAR;
-		return pkt;
-	}
-
-	/** Encode an iris command packet */
-	private byte[] encodeIrisPacket(int drop) {
-		byte[] pkt = createPacket(drop);
-		if (iris < 0)
-			pkt[1] |= EX_IRIS_CLOSE;
-		else
-			pkt[1] |= EX_IRIS_OPEN;
-		return pkt;
-	}
-
 	/** Encode a STORE request */
 	@Override
 	public void encodeStore(OutputStream os, int drop) throws IOException {
@@ -155,9 +127,5 @@ public class CommandProperty extends ManchesterProperty {
 			os.write(encodeTiltPacket(drop));
 		if (zoom != 0)
 			os.write(encodeZoomPacket(drop));
-		if (focus != 0)
-			os.write(encodeFocusPacket(drop));
-		if (iris != 0)
-			os.write(encodeIrisPacket(drop));
 	}
 }
