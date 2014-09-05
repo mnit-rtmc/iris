@@ -14,9 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 /**
  * Vicon property to recall or store a preset.
  *
@@ -37,25 +34,13 @@ public class PresetProperty extends ViconPTZProperty {
 	}
 
 	/** Get the preset bits */
-	private byte presetBits() {
+	@Override
+	protected byte presetBits() {
 		return (byte)(recallOrStore() | (preset & 0x0f));
 	}
 
 	/** Get recall or store bit */
 	private int recallOrStore() {
 		return store ? 0x40 : 0x20;
-	}
-
-	/** Encode a preset request */
-	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] pkt = new byte[6];
-		pkt[0] = (byte)(0x80 | (drop >> 4));
-		pkt[1] = (byte)((0x0f & drop) | CMD);
-		pkt[2] = (byte)0x00; // pan/tilt functions
-		pkt[3] = (byte)0x00; // lens functions
-		pkt[4] = (byte)0x00; // aux functions
-		pkt[5] = presetBits();
-		os.write(pkt);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -25,12 +27,48 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 abstract public class ViconPTZProperty extends ControllerProperty {
 
 	/** Mask for command requests (second byte) */
-	static protected final byte CMD = 0x10;
+	static private final byte CMD = 0x10;
 
-	/** Mask for extended command requests (second byte) */
-	static protected final byte EXTENDED_CMD = 0x50;
+	/** Create basic Vicon packet */
+	protected byte[] createPacket(int drop) {
+		byte[] pkt = new byte[6];
+		pkt[0] = (byte)(0x80 | (drop >> 4));
+		pkt[1] = (byte)((0x0f & drop) | CMD);
+		pkt[2] = panTiltFlags();
+		pkt[3] = lensFlags();
+		pkt[4] = auxBits();
+		pkt[5] = presetBits();
+		return pkt;
+	}
+
+	/** Get the pan/tilt flags */
+	protected byte panTiltFlags() {
+		return 0;
+	}
+
+	/** Get the lens flags */
+	protected byte lensFlags() {
+		return 0;
+	}
+
+	/** Get the aux bits */
+	protected byte auxBits() {
+		return 0;
+	}
+
+	/** Get the preset bits */
+	protected byte presetBits() {
+		return 0;
+	}
+
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(OutputStream os, int drop) throws IOException {
+		os.write(createPacket(drop));
+	}
 
 	/** Decode a STORE response */
+	@Override
 	public void decodeStore(InputStream is, int drop) {
 		// do not expect any response
 	}

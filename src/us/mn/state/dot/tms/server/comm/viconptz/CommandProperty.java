@@ -14,15 +14,12 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 /**
- * A property to command a camera
+ * A property to command a camera.
  *
  * @author Douglas Lau
  */
-public class CommandProperty extends ViconPTZProperty {
+public class CommandProperty extends ExtendedProperty {
 
 	/** P/T flag to command a tilt down */
 	static private final byte TILT_DOWN = 1 << 3;
@@ -79,7 +76,8 @@ public class CommandProperty extends ViconPTZProperty {
 	}
 
 	/** Get pan/tilt flags */
-	private byte panTiltFlags() {
+	@Override
+	protected byte panTiltFlags() {
 		return (byte)(panFlags() | tiltFlags());
 	}
 
@@ -104,7 +102,8 @@ public class CommandProperty extends ViconPTZProperty {
 	}
 
 	/** Get bit flags to control lens */
-	private byte lensFlags() {
+	@Override
+	protected byte lensFlags() {
 		return (byte)(irisFlags() | focusFlags() | zoomFlags());
 	}
 
@@ -138,20 +137,15 @@ public class CommandProperty extends ViconPTZProperty {
 			return 0;
 	}
 
-	/** Encode a STORE request */
+	/** Get command parameter 1 */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] pkt = new byte[10];
-		pkt[0] = (byte)(0x80 | (drop >> 4));
-		pkt[1] = (byte)((0x0f & drop) | EXTENDED_CMD);
-		pkt[2] = panTiltFlags();
-		pkt[3] = lensFlags();
-		pkt[4] = (byte)0x00; // not implemented
-		pkt[5] = (byte)0x00; // not implemented
-		pkt[6] = (byte)((Math.abs(pan) >> 7) & 0x0f);
-		pkt[7] = (byte)((byte)Math.abs(pan) & 0x7f);
-		pkt[8] = (byte)((Math.abs(tilt) >> 7) & 0x0f);
-		pkt[9] = (byte)((byte)Math.abs(tilt) & 0x7f);
-		os.write(pkt);
+	protected int getParam1() {
+		return Math.abs(pan);
+	}
+
+	/** Get command parameter 2 */
+	@Override
+	protected int getParam2() {
+		return Math.abs(tilt);
 	}
 }

@@ -14,9 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 /**
  * Vicon property to control aux.
  *
@@ -33,20 +30,8 @@ public class AuxProperty extends ViconPTZProperty {
 	}
 
 	/** Get the aux bits */
-	private byte auxBits() {
-		return (byte)((1 << (7 - aux)) & 0x7E);
-	}
-
-	/** Encode a preset request */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-		byte[] pkt = new byte[6];
-		pkt[0] = (byte)(0x80 | (drop >> 4));
-		pkt[1] = (byte)((0x0f & drop) | CMD);
-		pkt[2] = (byte)0x00; // pan/tilt functions
-		pkt[3] = (byte)0x00; // lens functions
-		pkt[4] = auxBits();
-		pkt[5] = (byte)0x00; // preset functions
-		os.write(pkt);
+	protected byte auxBits() {
+		return (byte)((1 << (7 - aux)) & 0x7E);
 	}
 }
