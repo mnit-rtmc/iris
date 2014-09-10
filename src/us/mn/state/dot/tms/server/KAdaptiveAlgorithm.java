@@ -643,6 +643,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final BoundedSampleHistory demand_accum_hist =
 			new BoundedSampleHistory(steps(DEMAND_ACCUM_SECS));
 
+		/** Cumulative demand count (vehicles) */
+		private float demand_accum = 0;
+
 		/** Demand adjustment (vehicles) */
 		private float demand_adj = 0;
 
@@ -737,11 +740,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return 0;
 		}
 
-		/** Get the total cumulative demand (vehicles) */
-		private float cumulativeDemand() {
-			return cumulativeDemand(0);
-		}
-
 		/** Validate meter state.
 		 *   - Update state timers.
 		 *   - Update passage flow and accumulator.
@@ -816,8 +814,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			demand_adj = calculateDemandAdjustment();
 			float demand_vol = calculateQueueDemand();
 			demand_hist.push(flowRate(demand_vol));
-			double demand_accum = cumulativeDemand() + demand_vol;
-			demand_accum_hist.push(demand_accum);
+			demand_accum += demand_vol;
+			demand_accum_hist.push((double)demand_accum);
 			tracking_demand = trackingDemand();
 		}
 
@@ -897,7 +895,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Queue length (may be negative). */
 		private float queueLength() {
 			return (passage_good)
-			     ? (cumulativeDemand() - passage_accum)
+			     ? (demand_accum - passage_accum)
 			     : 0;
 		}
 
@@ -954,6 +952,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Reset the demand / passage accumulators */
 		private void resetAccumulators() {
+			demand_accum = 0;
 			demand_accum_hist.clear();
 			demand_adj = 0;
 			passage_good = true;
@@ -1043,7 +1042,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			assert passage_good;
 			float proj_arrive = volumePeriod(tracking_demand,
 				targetWaitTime());
-			float demand_proj = cumulativeDemand() + proj_arrive;
+			float demand_proj = demand_accum + proj_arrive;
 			int req = Math.round(demand_proj - targetStorage());
 			int pass_min = req - passage_accum;
 			return flowRate(pass_min, steps(targetWaitTime()));
@@ -1091,7 +1090,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int estimateWaitSecs() {
 			if (!passage_good)
 				return 0;
-			float pd = cumulativeDemand();
+			float pd = demand_accum;
 			if (pd <= passage_accum)
 				return 0;
 			for (int i = 1; i < steps(DEMAND_ACCUM_SECS); i++) {
