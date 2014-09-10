@@ -751,7 +751,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			// NOTE: these must happen in proper order
 			checkQueueBackedUp();
 			checkQueueEmpty();
-			demand_adj = calculateDemandAdjustment();
 			updatePassageState();
 			updateDemandState();
 			min_rate = calculateMinimumRate();
@@ -778,6 +777,48 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if (queue_empty_secs > QUEUE_EMPTY_RESET_SECS &&
 			    isPassageBelowGreen())
 				green_accum = passage_accum;
+		}
+
+		/** Update ramp passage output state */
+		private void updatePassageState() {
+			int passage_vol = calculatePassageCount();
+			passage_hist.push(flowRate(passage_vol));
+			if(passage_vol >= 0)
+				passage_accum += passage_vol;
+			else
+				passage_good = false;
+			int green_vol = green.getVolume();
+			if(green_vol > 0)
+				green_accum += green_vol;
+		}
+
+		/** Calculate passage count (vehicles).
+		 * @return Passage vehicle count */
+		private int calculatePassageCount() {
+			int vol = passage.getVolume();
+			if(vol >= 0)
+				return vol;
+			vol = merge.getVolume();
+			if(vol >= 0) {
+				int b = bypass.getVolume();
+				if(b > 0) {
+					vol -= b;
+					if(vol < 0)
+						return 0;
+				}
+				return vol;
+			}
+			return MISSING_DATA;
+		}
+
+		/** Update ramp queue demand state */
+		private void updateDemandState() {
+			demand_adj = calculateDemandAdjustment();
+			float demand_vol = calculateQueueDemand();
+			demand_hist.push(flowRate(demand_vol));
+			double demand_accum = cumulativeDemand() + demand_vol;
+			demand_accum_hist.push(demand_accum);
+			tracking_demand = trackingDemand();
 		}
 
 		/** Calculate the demand adjustment.
@@ -833,47 +874,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *         negative). */
 		private float estimateDemandOvercount() {
 			return queueRatio(queue_empty_secs) * queueLength();
-		}
-
-		/** Update ramp passage output state */
-		private void updatePassageState() {
-			int passage_vol = calculatePassageCount();
-			passage_hist.push(flowRate(passage_vol));
-			if(passage_vol >= 0)
-				passage_accum += passage_vol;
-			else
-				passage_good = false;
-			int green_vol = green.getVolume();
-			if(green_vol > 0)
-				green_accum += green_vol;
-		}
-
-		/** Calculate passage count (vehicles).
-		 * @return Passage vehicle count */
-		private int calculatePassageCount() {
-			int vol = passage.getVolume();
-			if(vol >= 0)
-				return vol;
-			vol = merge.getVolume();
-			if(vol >= 0) {
-				int b = bypass.getVolume();
-				if(b > 0) {
-					vol -= b;
-					if(vol < 0)
-						return 0;
-				}
-				return vol;
-			}
-			return MISSING_DATA;
-		}
-
-		/** Update ramp queue demand state */
-		private void updateDemandState() {
-			float demand_vol = calculateQueueDemand();
-			demand_hist.push(flowRate(demand_vol));
-			double demand_accum = cumulativeDemand() + demand_vol;
-			demand_accum_hist.push(demand_accum);
-			tracking_demand = trackingDemand();
 		}
 
 		/** Calculate ramp queue demand.
