@@ -811,12 +811,28 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Update ramp queue demand state */
 		private void updateDemandState() {
+			float dem_vol = queueDemandVolume();
+			float da = demand_accum;
+			// Calculate demand without adjustment
+			demand_accum += dem_vol;
 			demand_adj = calculateDemandAdjustment();
-			float demand_vol = calculateQueueDemand();
-			demand_hist.push(flowRate(demand_vol));
-			demand_accum += demand_vol;
+			float adjusted_dem = Math.max(dem_vol + demand_adj, 0);
+			demand_hist.push(flowRate(adjusted_dem));
+			// Calculate adjusted demand
+			demand_accum = da + adjusted_dem;
 			demand_accum_hist.push((double)demand_accum);
 			tracking_demand = trackingDemand();
+		}
+
+		/** Get queue demand volume for the current period */
+		private float queueDemandVolume() {
+			float vol = queue.getVolume();
+			if (vol >= 0)
+				return vol;
+			else {
+				int target = getDefaultTarget();
+				return volumePeriod(target, STEP_SECONDS);
+			}
 		}
 
 		/** Calculate the demand adjustment.
@@ -872,23 +888,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *         negative). */
 		private float estimateDemandOvercount() {
 			return queueRatio(queue_empty_secs) * queueLength();
-		}
-
-		/** Calculate ramp queue demand.
-		 * @return Current ramp queue demand (vehicles) */
-		private float calculateQueueDemand() {
-			return Math.max(queueDemandVolume() + demand_adj, 0);
-		}
-
-		/** Get queue demand volume for the current period */
-		private float queueDemandVolume() {
-			float vol = queue.getVolume();
-			if(vol >= 0)
-				return vol;
-			else {
-				int target = getDefaultTarget();
-				return volumePeriod(target, STEP_SECONDS);
-			}
 		}
 
 		/** Estimate the length of queue (vehicles).
