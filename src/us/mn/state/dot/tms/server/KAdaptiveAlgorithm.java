@@ -815,7 +815,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param secs Number of seconds.
 		 * @return Ratio compared to max wait time, between 0 and 1. */
 		private float queueRatio(int secs) {
-			return Math.min(secs / maxWaitTime(), 1);
+			return Math.min(2 * secs / maxWaitTime(), 1);
 		}
 
 		/** Estimate the available storage in queue.
@@ -823,9 +823,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private float availableStorage() {
 			if (passage_good) {
 				float q_len = Math.max(queueLength(), 0);
-				return 2 * maxStorage() - q_len;
+				return maxStorage() - q_len;
 			} else
-				return maxStorage();
+				return maxStorage() / 3;
 		}
 
 		/** Estimate demand overcount when queue is empty.
