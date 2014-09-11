@@ -102,32 +102,6 @@ public class LensPanel extends JPanel {
 		setLayout(gl);
 	}
 
-	/** Create the vertical group */
-	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
-		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
-		GroupLayout.ParallelGroup g0 = gl.createParallelGroup(
-			GroupLayout.Alignment.BASELINE);
-		g0.addComponent(zoom_lbl);
-		g0.addComponent(zoom_in_btn);
-		g0.addComponent(zoom_out_btn);
-		vg.addGroup(g0);
-		vg.addGap(UI.vgap);
-		GroupLayout.ParallelGroup g1 = gl.createParallelGroup(
-			GroupLayout.Alignment.BASELINE);
-		g1.addComponent(focus_lbl);
-		g1.addComponent(focus_near_btn);
-		g1.addComponent(focus_far_btn);
-		vg.addGroup(g1);
-		vg.addGap(UI.vgap);
-		GroupLayout.ParallelGroup g2 = gl.createParallelGroup(
-			GroupLayout.Alignment.BASELINE);
-		g2.addComponent(iris_lbl);
-		g2.addComponent(iris_open_btn);
-		g2.addComponent(iris_close_btn);
-		vg.addGroup(g2);
-		return vg;
-	}
-
 	/** Create the horizontal group */
 	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
 		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
@@ -152,6 +126,32 @@ public class LensPanel extends JPanel {
 		g2.addComponent(iris_close_btn);
 		hg.addGroup(g2);
 		return hg;
+	}
+
+	/** Create the vertical group */
+	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
+		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup g0 = gl.createParallelGroup(
+			GroupLayout.Alignment.BASELINE);
+		g0.addComponent(zoom_lbl);
+		g0.addComponent(zoom_in_btn);
+		g0.addComponent(zoom_out_btn);
+		vg.addGroup(g0);
+		vg.addGap(UI.vgap);
+		GroupLayout.ParallelGroup g1 = gl.createParallelGroup(
+			GroupLayout.Alignment.BASELINE);
+		g1.addComponent(focus_lbl);
+		g1.addComponent(focus_near_btn);
+		g1.addComponent(focus_far_btn);
+		vg.addGroup(g1);
+		vg.addGap(UI.vgap);
+		GroupLayout.ParallelGroup g2 = gl.createParallelGroup(
+			GroupLayout.Alignment.BASELINE);
+		g2.addComponent(iris_lbl);
+		g2.addComponent(iris_open_btn);
+		g2.addComponent(iris_close_btn);
+		vg.addGroup(g2);
+		return vg;
 	}
 
 	/** Set enabled status */
