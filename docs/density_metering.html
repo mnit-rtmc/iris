@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">10 Sep 2014</div>
+<div id="stamp">11 Sep 2014</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -335,7 +335,7 @@
 	<a href='#tracking_demand'>tracking demand</a>.
 	This is intended to prevent the meter from releasing all vehicles in a
 	queue too quickly.
-	The maximum rate may be adjusted to match the minimum rate if that is
+	The maximum rate will be raised to match the minimum rate if that is
 	higher.
 </p>
 
@@ -343,13 +343,14 @@
 <p>
 	When the passage detector malfunctions, the minimum rate is equal to the
 	<a href='#tracking_demand'>tracking demand</a>.
-	Otherwise, it is the highest of the following 3 limits:
+	Otherwise, it is the highest of the following 4 limits:
 </p>
 <ul>
 	<li>Tracking minimum limit (70% of <a href='#tracking_demand'>tracking
 	    demand</a>)</li>
 	<li>Queue wait limit</li>
 	<li>Queue storage limit</li>
+	<li>Backup limit</li>
 </ul>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -700,6 +701,16 @@
 </p>
 
 <br class='clear'/>
+
+<h3>Backup Limit</h3>
+<p>
+	When the queue detector is greater than 25%, a backup limit is
+	calculated.
+	First, the backup factor is "minutes queue detector has been occupied
+	(greater than 25%) multiplied by the average occupancy over that time."
+	Then, the backup limit is the <a href='#tracking_demand'>tracking
+	demand</a> multiplied by 50% plus the backup factor.
+</p>
 
 <h2>Mainline Segments</h2>
 

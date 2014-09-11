@@ -48,6 +48,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		storage_limit,
 		wait_limit,
 		target_min,
+		// FIXME: backup_limit
 	};
 
 	/** Algorithm debug log */
@@ -123,6 +124,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Ratio for min rate to target rate */
 	static private final float TARGET_MIN_RATIO = 0.7f;
+
+	/** Base percentage for backup minimum limit */
+	static private final float BACKUP_LIMIT_BASE = 0.5f;
 
 	/** Ratio for target waiting time to max wait time */
 	static private final float WAIT_TARGET_RATIO = 0.75f;
@@ -671,6 +675,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Time queue has been backed-up (seconds) */
 		private int queue_backup_secs = 0;
 
+		/** Total occupancy for duration of a queue backup */
+		private int backup_occ = 0;
+
 		/** Controlling minimum rate limit */
 		private MinimumRateLimit limit_control =
 			MinimumRateLimit.target_min;
@@ -759,10 +766,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check the queue backed-up state */
 		private void checkQueueBackedUp() {
-			if (isQueueOccupancyHigh())
+			if (isQueueOccupancyHigh()) {
 				queue_backup_secs += STEP_SECONDS;
-			else
+				backup_occ += queue.getMaxOccupancy();
+			} else {
 				queue_backup_secs = 0;
+				backup_occ = 0;
+			}
 		}
 
 		/** Check if queue is empty */
@@ -1030,6 +1040,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				r = qwl;
 				limit_control = MinimumRateLimit.wait_limit;
 			}
+			int bml = backupMinLimit();
+			if (bml > r) {
+				r = bml;
+				// FIXME: change to backup_limit
+				limit_control = MinimumRateLimit.target_min;
+			}
 			return r;
 		}
 
@@ -1113,6 +1129,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Target minimum rate (vehicles / hour). */
 		private int targetMinRate() {
 			return Math.round(tracking_demand * TARGET_MIN_RATIO);
+		}
+
+		/** Calculate backup minimum limit.
+		 * @return Backup minimum limit (vehicles / hour). */
+		private int backupMinLimit() {
+			// NOTE: The following is the proper calculation:
+			//    occ_avg = backup_occ / steps(queue_backup_secs)
+			//    backup_mins = queue_backup_secs / 60.0f
+			//    ratio = 50 + occ_avg * backup_mins
+			// This can be simplified to this:
+			//    ratio = 50 + backup_occ * STEP_SECONDS *
+			//        queue_backup_secs / (queue_backup_secs * 60)
+			// Which can be further simplified to:
+			//    ratio = 50 + backup_occ * STEP_SECONDS / 60
+			float ratio = BACKUP_LIMIT_BASE + backup_occ *
+				STEP_SECONDS / (60.0f * 100.0f);
+			return Math.round(tracking_demand * ratio);
 		}
 
 		/** Calculate target maximum rate.
