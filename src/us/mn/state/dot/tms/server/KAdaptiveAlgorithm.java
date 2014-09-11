@@ -141,7 +141,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param n_steps Number of time steps of volume.
 	 * @return Flow rate (vehicles / hour) */
 	static private int flowRate(float vol, int n_steps) {
-		if(vol >= 0) {
+		if (vol >= 0) {
 			Interval period = new Interval(n_steps * STEP_SECONDS);
 			float hour_frac = period.per(HOUR);
 			return Math.round(vol * hour_frac);
@@ -153,7 +153,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param vol Volume to convert (number of vehicles)
 	 * @return Flow rate (vehicles / hour), or null for missing data. */
 	static private Double flowRate(float vol) {
-		if(vol >= 0)
+		if (vol >= 0)
 			return vol * STEP_HOUR;
 		else
 			return null;
@@ -164,7 +164,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param period Period for volume (seconds).
 	 * @return Volume over given period. */
 	static private float volumePeriod(int flow, int period) {
-		if(flow >= 0 && period > 0) {
+		if (flow >= 0 && period > 0) {
 			float hour_frac = HOUR.per(new Interval(period));
 			return flow * hour_frac;
 		} else
@@ -178,9 +178,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Get the K adaptive algorithm state for a meter */
 	static public KAdaptiveAlgorithm meterState(RampMeterImpl meter) {
 		Corridor c = meter.getCorridor();
-		if(c != null) {
+		if (c != null) {
 			KAdaptiveAlgorithm alg = lookupAlgorithm(c);
-			if(alg.createMeterState(meter))
+			if (alg.createMeterState(meter))
 				return alg;
 		}
 		return null;
@@ -189,7 +189,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Lookup an algorithm for a corridor */
 	static private KAdaptiveAlgorithm lookupAlgorithm(Corridor c) {
 		KAdaptiveAlgorithm alg = ALL_ALGS.get(c.getID());
-		if(alg == null) {
+		if (alg == null) {
 			alg = new KAdaptiveAlgorithm(c);
 			alg.log("adding");
 			ALL_ALGS.put(c.getID(), alg);
@@ -201,10 +201,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static public void processAllStates() {
 		Iterator<KAdaptiveAlgorithm> it =
 			ALL_ALGS.values().iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			KAdaptiveAlgorithm alg = it.next();
 			alg.processInterval();
-			if(alg.isDone()) {
+			if (alg.isDone()) {
 				alg.log("isDone: removing");
 				it.remove();
 			}
@@ -229,7 +229,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		corridor = c;
 		head = createNodes();
 		tail = head.tailNode();
-		if(ALG_LOG.isOpen())
+		if (ALG_LOG.isOpen())
 			debug();
 	}
 
@@ -238,12 +238,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		Node first = null;
 		Node prev = null;
 		Iterator<R_Node> itr = corridor.iterator();
-		while(itr.hasNext()) {
+		while (itr.hasNext()) {
 			R_NodeImpl rnode = (R_NodeImpl) itr.next();
 			Node n = createNode(rnode, prev);
-			if(n != null)
+			if (n != null)
 				prev = n;
-			if(first == null)
+			if (first == null)
 				first = prev;
 		}
 		return first;
@@ -252,7 +252,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Create one node */
 	private Node createNode(R_NodeImpl rnode, Node prev) {
 		Float mile = corridor.getMilePoint(rnode);
-		if(mile != null)
+		if (mile != null)
 			return createNode(rnode, mile, prev);
 		else
 			return null;
@@ -265,7 +265,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return new EntranceNode(rnode, mile, prev);
 		case STATION:
 			StationImpl stat = rnode.getStation();
-			if(stat != null && stat.getActive())
+			if (stat != null && stat.getActive())
 				return new StationNode(rnode, mile, prev, stat);
 		default:
 			return null;
@@ -275,7 +275,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Debug corridor structure */
 	private void debug() {
 		log("-------- Corridor Structure --------");
-		for(Node n = head; n != null; n = n.downstream)
+		for (Node n = head; n != null; n = n.downstream)
 			log(n.toString());
 	}
 
@@ -288,7 +288,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	@Override
 	public void validate(RampMeterImpl meter) {
 		MeterState ms = getMeterState(meter);
-		if(ms != null) {
+		if (ms != null) {
 			ms.validate();
 			if (MeterEvent.getMeterEventPurgeDays() > 0)
 				ms.logMeterEvent();
@@ -299,7 +299,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	@Override
 	public RampMeterQueue getQueueState(RampMeterImpl meter) {
 		MeterState ms = getMeterState(meter);
-		if(ms != null)
+		if (ms != null)
 			return ms.getQueueState();
 		else
 			return RampMeterQueue.UNKNOWN;
@@ -307,7 +307,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Get the meter state for a given ramp meter */
 	private MeterState getMeterState(RampMeterImpl meter) {
-		if(meter.getCorridor() == corridor)
+		if (meter.getCorridor() == corridor)
 			return meterStates.get(meter.getName());
 		else {
 			// Meter must have been changed to a different
@@ -320,7 +320,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Create the meter state for a given ramp meter */
 	private boolean createMeterState(RampMeterImpl meter) {
 		EntranceNode en = findEntranceNode(meter);
-		if(en != null) {
+		if (en != null) {
 			MeterState ms = new MeterState(meter, en);
 			meterStates.put(meter.getName(), ms);
 			return true;
@@ -333,10 +333,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @return Entrance node matching ramp meter. */
 	private EntranceNode findEntranceNode(RampMeterImpl meter) {
 		R_NodeImpl rnode = meter.getEntranceNode();
-		for(Node n = head; n != null; n = n.downstream) {
-			if(n instanceof EntranceNode) {
+		for (Node n = head; n != null; n = n.downstream) {
+			if (n instanceof EntranceNode) {
 				EntranceNode en = (EntranceNode)n;
-				if(en.rnode.equals(rnode))
+				if (en.rnode.equals(rnode))
 					return en;
 			}
 		}
@@ -350,7 +350,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Update the station nodes */
 	private void updateStations() {
-		for(StationNode sn = firstStation(); sn != null;
+		for (StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
 		{
 			sn.updateState();
@@ -359,8 +359,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Get the furthest upstream station node. */
 	private StationNode firstStation() {
-		for(Node n = head; n != null; n = n.downstream) {
-			if(n instanceof StationNode)
+		for (Node n = head; n != null; n = n.downstream) {
+			if (n instanceof StationNode)
 				return (StationNode) n;
 		}
 		return null;
@@ -368,8 +368,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Get the furthest downstream station node. */
 	private StationNode lastStation() {
-		for(Node n = tail; n != null; n = n.upstream) {
-			if(n instanceof StationNode)
+		for (Node n = tail; n != null; n = n.upstream) {
+			if (n instanceof StationNode)
 				return (StationNode) n;
 		}
 		return null;
@@ -377,8 +377,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
-		for(MeterState ms : meterStates.values()) {
-			if(ms.meter.isOperating())
+		for (MeterState ms : meterStates.values()) {
+			if (ms.meter.isOperating())
 				return false;
 		}
 		return true;
@@ -403,7 +403,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		protected Node(R_NodeImpl n, float m, Node up) {
 			rnode = n;
 			mile = m;
-			if(up != null)
+			if (up != null)
 				up.downstream = this;
 			upstream = up;
 			downstream = null;
@@ -422,7 +422,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get the tail of a node list */
 		protected Node tailNode() {
 			Node n = this;
-			while(n.downstream != null)
+			while (n.downstream != null)
 				n = n.downstream;
 			return n;
 		}
@@ -430,8 +430,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Find next upstream station node.
 		 * @return Upstream station node. */
 		protected StationNode upstreamStation() {
-			for(Node n = upstream; n != null; n = n.upstream) {
-				if(n instanceof StationNode)
+			for (Node n = upstream; n != null; n = n.upstream) {
+				if (n instanceof StationNode)
 					return (StationNode) n;
 			}
 			return null;
@@ -440,8 +440,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Find next downstream station node.
 		 * @return Downstream station node. */
 		protected StationNode downstreamStation() {
-			for(Node n = downstream; n != null; n = n.downstream) {
-				if(n instanceof StationNode)
+			for (Node n = downstream; n != null; n = n.downstream) {
+				if (n instanceof StationNode)
 					return (StationNode) n;
 			}
 			return null;
@@ -501,9 +501,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double dist_seg = 0;	/* Segment distance */
 			double veh_seg = 0;	/* Sum of vehicles in segment */
 			double k_cursor = cursor.getDensity();
-			for(StationNode sn = cursor.downstreamStation();
-			    sn != null && cursor != dn;
-			    sn = sn.downstreamStation())
+			for (StationNode sn = cursor.downstreamStation();
+			     sn != null && cursor != dn;
+			     sn = sn.downstreamStation())
 			{
 				double k_down = sn.getDensity();
 				double k_middle = (k_cursor + k_down) / 2;
@@ -514,7 +514,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				cursor = sn;
 				k_cursor = k_down;
 			}
-			if(dist_seg > 0)
+			if (dist_seg > 0)
 				return veh_seg / dist_seg;
 			else
 				return k_cursor;
@@ -524,7 +524,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1 min density; missing data returns 0. */
 		public double getDensity() {
 			Double avg = density_hist.average(0, steps(60));
-			if(avg != null)
+			if (avg != null)
 				return avg;
 			else
 				return 0;
@@ -534,7 +534,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Average 1 min speed; missing data returns 0. */
 		private double getSpeed() {
 			Double avg = speed_hist.average(0, steps(60));
-			if(avg != null)
+			if (avg != null)
 				return avg;
 			else
 				return 0;
@@ -720,9 +720,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @param ds Station just downstream of meter.
 		 * @return true if downstream station should be associated. */
 		private boolean useDownstream(StationNode us, StationNode ds) {
-			if(us == null)
+			if (us == null)
 				return true;
-			if(ds == null)
+			if (ds == null)
 				return false;
 			int uf = node.distanceFeet(us);
 			int df = node.distanceFeet(ds);
@@ -753,7 +753,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			updateDemandState();
 			min_rate = calculateMinimumRate();
 			max_rate = calculateMaximumRate();
-			if(s_node != null)
+			if (s_node != null)
 				calculateMeteringRate();
 		}
 
@@ -781,12 +781,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void updatePassageState() {
 			int passage_vol = calculatePassageCount();
 			passage_hist.push(flowRate(passage_vol));
-			if(passage_vol >= 0)
+			if (passage_vol >= 0)
 				passage_accum += passage_vol;
 			else
 				passage_good = false;
 			int green_vol = green.getVolume();
-			if(green_vol > 0)
+			if (green_vol > 0)
 				green_accum += green_vol;
 		}
 
@@ -794,14 +794,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Passage vehicle count */
 		private int calculatePassageCount() {
 			int vol = passage.getVolume();
-			if(vol >= 0)
+			if (vol >= 0)
 				return vol;
 			vol = merge.getVolume();
-			if(vol >= 0) {
+			if (vol >= 0) {
 				int b = bypass.getVolume();
-				if(b > 0) {
+				if (b > 0) {
 					vol -= b;
-					if(vol < 0)
+					if (vol < 0)
 						return 0;
 				}
 				return vol;
@@ -818,7 +818,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			demand_adj = calculateDemandAdjustment();
 			float adjusted_dem = Math.max(dem_vol + demand_adj, 0);
 			demand_hist.push(flowRate(adjusted_dem));
-			// Calculate adjusted demand
+			// Recalculate demand with adjustment
 			demand_accum = da + adjusted_dem;
 			demand_accum_hist.push((double)demand_accum);
 			tracking_demand = trackingDemand();
@@ -961,10 +961,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get ramp meter queue state enum value */
 		private RampMeterQueue getQueueState() {
-			if(isMetering()) {
-				if(isQueueFull())
+			if (isMetering()) {
+				if (isQueueFull())
 					return RampMeterQueue.FULL;
-				else if(!passage_good)
+				else if (!passage_good)
 					return RampMeterQueue.UNKNOWN;
 				else if (isQueueEmpty())
 					return RampMeterQueue.EMPTY;
@@ -1009,20 +1009,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate minimum rate (vehicles / hour) */
 		private int calculateMinimumRate() {
-			if(!passage_good) {
+			if (!passage_good) {
 				limit_control = MinimumRateLimit.passage_fail;
 				return tracking_demand;
 			} else {
 				int r = queueStorageLimit();
 				limit_control = MinimumRateLimit.storage_limit;
 				int rr = queueWaitLimit();
-				if(rr > r) {
+				if (rr > r) {
 					r = rr;
 					limit_control =
 						MinimumRateLimit.wait_limit;
 				}
 				rr = targetMinRate();
-				if(rr > r) {
+				if (rr > r) {
 					r = rr;
 					limit_control =
 						MinimumRateLimit.target_min;
@@ -1065,7 +1065,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			int wait_limit = 0;
 			int wait_target = targetWaitTime();
 			int wait_steps = steps(wait_target);
-			for(int i = 1; i <= wait_steps; i++) {
+			for (int i = 1; i <= wait_steps; i++) {
 				int dem = Math.round(cumulativeDemand(
 					wait_steps - i));
 				int pass_min = dem - passage_accum;
@@ -1128,7 +1128,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			double k = s_node.calculateSegmentDensity(dn);
 			segment_k_hist.push(k);
 			phase = checkMeterPhase();
-			if(isMetering())
+			if (isMetering())
 				setRate(calculateRate(k));
 		}
 
@@ -1152,10 +1152,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check if metering should start.
 		 * @return New metering phase. */
 		private MeteringPhase checkStart() {
-			if(shouldStart()) {
+			if (shouldStart()) {
 				resetAccumulators();
 				return MeteringPhase.metering;
-			} else if(isEarlyPeriodOver())
+			} else if (isEarlyPeriodOver())
 				return stopMetering();
 			else
 				return MeteringPhase.not_started;
@@ -1297,10 +1297,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Metering rate (vehicles per hour).
 		 */
 		private double calculateRate(double k) {
-			if(phase == MeteringPhase.flushing)
+			if (phase == MeteringPhase.flushing)
 				return getMaximumRate();
 			double rate = limitRate(getRate());
-			if(k <= K_DES)
+			if (k <= K_DES)
 				return lerpBelow(rate, k);
 			else
 				return lerpAbove(rate, k);
@@ -1310,11 +1310,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return metering rate */
 		private double getRate() {
 			double r = release_rate;
-			if(r > 0)
+			if (r > 0)
 				return r;
 			else {
 				Double p = getPassage(0, 90);
-				if(p != null)
+				if (p != null)
 					return p;
 				else
 					return getMaxRelease();
@@ -1379,9 +1379,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get the downstream node for the segment */
 		private StationNode segmentDownstream() {
-			if(s_node != null) {
+			if (s_node != null) {
 				StationNode dn = s_node.segmentStationNode();
-				if(dn != null)
+				if (dn != null)
 					return dn;
 			}
 			return null;
