@@ -124,21 +124,22 @@ public class Widgets {
 
 	/** Create insets with proper gaps */
 	public Insets insets() {
-		return new Insets(VGAP, HGAP, VGAP, HGAP);
+		return new Insets(vgap, hgap, vgap, hgap);
 	};
 
 	/** Create button insets with proper gaps */
 	public Insets buttonInsets() {
-		return new Insets(0, HGAP, 0, HGAP);
+		return new Insets(0, hgap, 0, hgap);
 	};
 
 	/** Create a panel border */
 	public EmptyBorder panelBorder() {
-		return new EmptyBorder(VGAP, HGAP, VGAP, HGAP);
+		return new EmptyBorder(vgap, hgap, vgap, hgap);
 	}
 
 	/** Create a panel border */
 	public EmptyBorder noTopBorder() {
+		// Don't scale border
 		return new EmptyBorder(0, HGAP, VGAP, HGAP);
 	}
 }

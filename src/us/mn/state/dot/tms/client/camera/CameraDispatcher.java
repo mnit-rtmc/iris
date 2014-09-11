@@ -113,11 +113,14 @@ public class CameraDispatcher extends JPanel {
 	/** PTZ panel */
 	private final PTZPanel ptz_pnl;
 
-	/** Panel for camera presets */
-	private final PresetPanel preset_pnl;
+	/** Panel for lens control */
+	private final LensPanel lens_pnl;
 
 	/** Panel for camera utilities */
 	private final UtilPanel util_pnl;
+
+	/** Panel for camera presets */
+	private final PresetPanel preset_pnl;
 
 	/** Currently selected camera */
 	private Camera selected = null;
@@ -138,8 +141,9 @@ public class CameraDispatcher extends JPanel {
 		info_pnl = createInfoPanel();
 		stream_pnl = createStreamPanel();
 		ptz_pnl = new PTZPanel(cam_ptz);
-		preset_pnl = new PresetPanel(s);
+		lens_pnl = new LensPanel(cam_ptz);
 		util_pnl = new UtilPanel(cam_ptz);
+		preset_pnl = new PresetPanel(s);
 		control_pnl = createControlPanel();
 	}
 
@@ -230,17 +234,18 @@ public class CameraDispatcher extends JPanel {
 				gbc.weightx = 0.0;
 			}
 		}
-		if (util) {
+
+		if (util)
 			p.add(util_pnl, gbc);
-			gbc.gridx++;
-			if (preset) {
-				gbc.weightx = 0.1;
-				p.add(Box.createHorizontalGlue(), gbc);
-				gbc.gridx++;
-				gbc.weightx = 0.0;
-			}
-		}
+		else
+			p.add(lens_pnl, gbc);
+		gbc.gridx++;
+
 		if (preset) {
+			gbc.weightx = 0.1;
+			p.add(Box.createHorizontalGlue(), gbc);
+			gbc.gridx++;
+			gbc.weightx = 0.0;
 			p.add(preset_pnl, gbc);
 			gbc.gridx++;
 		}
@@ -338,10 +343,12 @@ public class CameraDispatcher extends JPanel {
 				camera.getGeoLoc()));
 			stream_pnl.setCamera(camera);
 			selectCamera();
-			ptz_pnl.setEnabled(cam_ptz.canControlPtz());
+			boolean e = cam_ptz.canControlPtz();
+			ptz_pnl.setEnabled(e);
+			lens_pnl.setEnabled(e);
+			util_pnl.setEnabled(e);
 			preset_pnl.setCamera(camera);
-			preset_pnl.setEnabled(cam_ptz.canControlPtz());
-			util_pnl.setEnabled(cam_ptz.canControlPtz());
+			preset_pnl.setEnabled(e);
 		} else
 			clear();
 	}
@@ -369,7 +376,8 @@ public class CameraDispatcher extends JPanel {
 		location_lbl.setText("");
 		stream_pnl.setCamera(null);
 		ptz_pnl.setEnabled(false);
-		preset_pnl.setEnabled(false);
+		lens_pnl.setEnabled(false);
 		util_pnl.setEnabled(false);
+		preset_pnl.setEnabled(false);
 	}
 }
