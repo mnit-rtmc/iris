@@ -94,13 +94,12 @@ public class LensPanel extends JPanel {
 		gl.setHonorsVisibility(false);
 		gl.setAutoCreateGaps(false);
 		gl.setAutoCreateContainerGaps(false);
-		setLayout(gl);
-		// Finish group layout
 		gl.setHorizontalGroup(createHorizontalGroup(gl));
 		gl.setVerticalGroup(createVerticalGroup(gl));
 		gl.linkSize(zoom_in_btn, zoom_out_btn,
 		            focus_near_btn, focus_far_btn,
 		            iris_open_btn, iris_close_btn);
+		setLayout(gl);
 	}
 
 	/** Create the vertical group */
