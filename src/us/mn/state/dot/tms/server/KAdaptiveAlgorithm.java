@@ -751,8 +751,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			checkQueueEmpty();
 			updatePassageState();
 			updateDemandState();
-			min_rate = calculateMinimumRate();
-			max_rate = calculateMaximumRate();
+			min_rate = filterRate(calculateMinimumRate());
+			max_rate = filterRate(calculateMaximumRate());
 			if (s_node != null)
 				calculateMeteringRate();
 		}
@@ -1009,26 +1009,28 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Calculate minimum rate (vehicles / hour) */
 		private int calculateMinimumRate() {
-			if (!passage_good) {
+			if (passage_good) {
+				limit_control = MinimumRateLimit.target_min;
+				return calculateMinimumRate(targetMinRate());
+			} else {
 				limit_control = MinimumRateLimit.passage_fail;
 				return tracking_demand;
-			} else {
-				int r = queueStorageLimit();
-				limit_control = MinimumRateLimit.storage_limit;
-				int rr = queueWaitLimit();
-				if (rr > r) {
-					r = rr;
-					limit_control =
-						MinimumRateLimit.wait_limit;
-				}
-				rr = targetMinRate();
-				if (rr > r) {
-					r = rr;
-					limit_control =
-						MinimumRateLimit.target_min;
-				}
-				return filterRate(r);
 			}
+		}
+
+		/** Calculate minimum rate (vehicles / hour) */
+		private int calculateMinimumRate(int r) {
+			int qsl = queueStorageLimit();
+			if (qsl > r) {
+				r = qsl;
+				limit_control = MinimumRateLimit.storage_limit;
+			}
+			int qwl = queueWaitLimit();
+			if (qwl > r) {
+				r = qwl;
+				limit_control = MinimumRateLimit.wait_limit;
+			}
+			return r;
 		}
 
 		/** Caculate queue storage limit.  Project into the future the
@@ -1118,7 +1120,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private int calculateMaximumRate() {
 			int target_max = Math.round(tracking_demand *
 				TARGET_MAX_RATIO);
-			return filterRate(Math.max(target_max, min_rate));
+			return Math.max(target_max, min_rate);
 		}
 
 		/** Calculate the metering rate */
