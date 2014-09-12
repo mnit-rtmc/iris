@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -54,9 +54,19 @@ public class CameraPTZ {
 		return session.isUpdatePermitted(camera, "ptz");
 	}
 
+	/** Can presets be recalled */
+	public boolean canRecallPreset() {
+		return session.isUpdatePermitted(camera, "recallPreset");
+	}
+
+	/** Can presets be stored */
+	public boolean canStorePreset() {
+		return session.isUpdatePermitted(camera, "storePreset");
+	}
+
 	/** Set the camera */
 	public synchronized void setCamera(Camera c) {
-		if(camera != c) {
+		if (camera != c) {
 			clearMovement();
 			camera = c;
 		}
@@ -67,8 +77,8 @@ public class CameraPTZ {
 	 * and the camera is already fully stopped.
 	 */
 	public synchronized void sendPtz(float p, float t, float z) {
-		if(canControlPtz()) {
-			if(p != 0 || t != 0 || z != 0 || ptzMoving()) {
+		if (canControlPtz()) {
+			if (p != 0 || t != 0 || z != 0 || ptzMoving()) {
 				ptz[0] = p;
 				ptz[1] = t;
 				ptz[2] = z;
@@ -82,25 +92,26 @@ public class CameraPTZ {
 	 * movement states.
 	 */
 	public synchronized void sendRequest(DeviceRequest dr) {
-		if (!canControlPtz()) return;
+		if (!canControlPtz())
+			return;
 
 		switch (dr) {
-			case CAMERA_FOCUS_NEAR:
-			case CAMERA_FOCUS_FAR:
-				focusMoving = true;
-				break;
-			case CAMERA_FOCUS_STOP:
-				focusMoving = false;
-				break;
-			case CAMERA_IRIS_OPEN:
-			case CAMERA_IRIS_CLOSE:
-				irisMoving = true;
-				break;
-			case CAMERA_IRIS_STOP:
-				irisMoving = false;
-				break;
-			default:
-				break;
+		case CAMERA_FOCUS_NEAR:
+		case CAMERA_FOCUS_FAR:
+			focusMoving = true;
+			break;
+		case CAMERA_FOCUS_STOP:
+			focusMoving = false;
+			break;
+		case CAMERA_IRIS_OPEN:
+		case CAMERA_IRIS_CLOSE:
+			irisMoving = true;
+			break;
+		case CAMERA_IRIS_STOP:
+			irisMoving = false;
+			break;
+		default:
+			break;
 		}
 		camera.setDeviceRequest(dr.ordinal());
 	}
@@ -116,10 +127,15 @@ public class CameraPTZ {
 	 */
 	public synchronized void clearMovement() {
 		sendPtz(0, 0, 0);
-		if (focusMoving) sendRequest(DeviceRequest.CAMERA_FOCUS_STOP);
-		if (irisMoving) sendRequest(DeviceRequest.CAMERA_IRIS_STOP);
+		if (focusMoving)
+			sendRequest(DeviceRequest.CAMERA_FOCUS_STOP);
+		if (irisMoving)
+			sendRequest(DeviceRequest.CAMERA_IRIS_STOP);
+		clearState();
+	}
 
-		// ensure states are cleared, regardless of above
+	/** Ensure states are cleared */
+	private void clearState() {
 		ptz[0] = 0f;
 		ptz[1] = 0f;
 		ptz[2] = 0f;
@@ -127,4 +143,19 @@ public class CameraPTZ {
 		irisMoving = false;
 	}
 
+	/** Recall a camera preset */
+	public synchronized void recallPreset(int p) {
+		if (canRecallPreset()) {
+			camera.setRecallPreset(p);
+			clearState();
+		}
+	}
+
+	/** Store a camera preset */
+	public synchronized void storePreset(int p) {
+		if (canStorePreset()) {
+			camera.setStorePreset(p);
+			clearState();
+		}
+	}
 }

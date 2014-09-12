@@ -93,7 +93,7 @@ public class LensPanel extends JPanel {
 		GroupLayout gl = new GroupLayout(this);
 		gl.setHonorsVisibility(false);
 		gl.setAutoCreateGaps(false);
-		gl.setAutoCreateContainerGaps(false);
+		gl.setAutoCreateContainerGaps(true);
 		gl.setHorizontalGroup(createHorizontalGroup(gl));
 		gl.setVerticalGroup(createVerticalGroup(gl));
 		gl.linkSize(zoom_in_btn, zoom_out_btn,

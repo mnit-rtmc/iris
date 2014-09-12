@@ -28,10 +28,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -107,22 +105,7 @@ public class CameraDispatcher extends JPanel {
 	private final StreamPanel stream_pnl;
 
 	/** Camera control panel */
-	private final JPanel control_pnl;
-
-	/** PTZ panel */
-	private final PTZPanel ptz_pnl;
-
-	/** Pan-tilt panel */
-	private final PanTiltPanel pt_pnl;
-
-	/** Panel for lens control */
-	private final LensPanel lens_pnl;
-
-	/** Panel for camera utilities */
-	private final UtilPanel util_pnl;
-
-	/** Panel for camera presets */
-	private final PresetPanel preset_pnl;
+	private final CamControlPanel control_pnl;
 
 	/** Currently selected camera */
 	private Camera selected = null;
@@ -142,12 +125,7 @@ public class CameraDispatcher extends JPanel {
 		output_cbx = createOutputCombo();
 		info_pnl = createInfoPanel();
 		stream_pnl = createStreamPanel();
-		ptz_pnl = new PTZPanel(cam_ptz);
-		pt_pnl = new PanTiltPanel(cam_ptz);
-		lens_pnl = new LensPanel(cam_ptz);
-		util_pnl = new UtilPanel(cam_ptz);
-		preset_pnl = new PresetPanel(s);
-		control_pnl = createControlPanel();
+		control_pnl = new CamControlPanel(cam_ptz);
 	}
 
 	/** Create camera information panel */
@@ -197,64 +175,6 @@ public class CameraDispatcher extends JPanel {
 		vr.setSonarSessionId(session.getSessionId());
 		vr.setRate(30);
 		return new StreamPanel(vr, cam_ptz);
-	}
-
-	/** Create camera control panel */
-	private JPanel createControlPanel() {
-		JPanel p = new JPanel(new GridBagLayout());
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.anchor = GridBagConstraints.CENTER;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.gridheight = 1;
-		gbc.gridwidth = 1;
-		gbc.insets = new Insets(2, 0, 2, 0);
-		gbc.ipadx = 0;
-		gbc.ipady = 0;
-		gbc.weightx = 0.0;
-		gbc.weighty = 0.0;
-
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-
-		boolean ptz = SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE
-			.getBoolean();
-		boolean util = SystemAttrEnum.CAMERA_UTIL_PANEL_ENABLE
-			.getBoolean();
-		boolean preset = SystemAttrEnum.CAMERA_PRESET_PANEL_ENABLE
-			.getBoolean();
-
-		gbc.weightx = 0.1;
-		p.add(Box.createHorizontalGlue(), gbc);
-		gbc.gridx++;
-		gbc.weightx = 0.0;
-		if (ptz)
-			p.add(ptz_pnl, gbc);
-		else
-			p.add(pt_pnl, gbc);
-
-		gbc.gridx++;
-		gbc.weightx = 0.1;
-		p.add(Box.createHorizontalGlue(), gbc);
-		gbc.gridx++;
-		gbc.weightx = 0.0;
-
-		if (util)
-			p.add(util_pnl, gbc);
-		else
-			p.add(lens_pnl, gbc);
-		gbc.gridx++;
-
-		if (preset) {
-			gbc.weightx = 0.1;
-			p.add(Box.createHorizontalGlue(), gbc);
-			gbc.gridx++;
-			gbc.weightx = 0.0;
-			p.add(preset_pnl, gbc);
-			gbc.gridx++;
-		}
-		gbc.weightx = 0.1;
-		p.add(Box.createHorizontalGlue(), gbc);
-		return p;
 	}
 
 	/** Create the video output selection combo box */
@@ -346,13 +266,7 @@ public class CameraDispatcher extends JPanel {
 				camera.getGeoLoc()));
 			stream_pnl.setCamera(camera);
 			selectCamera();
-			boolean e = cam_ptz.canControlPtz();
-			ptz_pnl.setEnabled(e);
-			pt_pnl.setEnabled(e);
-			lens_pnl.setEnabled(e);
-			util_pnl.setEnabled(e);
-			preset_pnl.setCamera(camera);
-			preset_pnl.setEnabled(e);
+			control_pnl.setEnabled(cam_ptz.canControlPtz());
 		} else
 			clear();
 	}
@@ -379,10 +293,6 @@ public class CameraDispatcher extends JPanel {
 		name_lbl.setText("");
 		location_lbl.setText("");
 		stream_pnl.setCamera(null);
-		ptz_pnl.setEnabled(false);
-		pt_pnl.setEnabled(false);
-		lens_pnl.setEnabled(false);
-		util_pnl.setEnabled(false);
-		preset_pnl.setEnabled(false);
+		control_pnl.setEnabled(false);
 	}
 }

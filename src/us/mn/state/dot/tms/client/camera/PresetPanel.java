@@ -28,7 +28,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -59,9 +58,6 @@ public class PresetPanel extends JPanel {
 	static private final int PRESET_GRID_COLUMNS =
 		SystemAttrEnum.CAMERA_PRESET_PANEL_COLUMNS.getInt();
 
-	/** User session */
-	private final Session session;
-
 	/** Array of buttons used to select presets */
 	private final JButton[] preset_btn = new JButton[NUM_PRESET_BTNS];
 
@@ -74,13 +70,13 @@ public class PresetPanel extends JPanel {
 	/** Button font */
 	private final Font btn_font;
 
-	/** Selected camera */
-	private Camera camera = null;
+	/** Camera PTZ */
+	private final CameraPTZ cam_ptz;
 
 	/** Create a preset panel */
-	public PresetPanel(Session s) {
+	public PresetPanel(CameraPTZ cptz) {
 		super(new GridBagLayout());
-		session = s;
+		cam_ptz = cptz;
 		btn_dim = Widgets.UI.dimension(24, 24);
 		btn_font = new Font(Font.SANS_SERIF, Font.BOLD,
 			Widgets.UI.scaled(10));
@@ -154,14 +150,11 @@ public class PresetPanel extends JPanel {
 
 	/** Handle a preset button press */
 	private void handlePresetBtnPress(int num) {
-		Camera c = camera;
-		if (c != null) {
-			if (store_btn.isSelected()) {
-				c.setStorePreset(num);
-				store_btn.setSelected(false);
-			} else
-				c.setRecallPreset(num);
-		}
+		if (store_btn.isSelected()) {
+			cam_ptz.storePreset(num);
+			store_btn.setSelected(false);
+		} else
+			cam_ptz.recallPreset(num);
 	}
 
 	/** Create the store button */
@@ -195,28 +188,12 @@ public class PresetPanel extends JPanel {
 		return btn;
 	}
 
-	/** Set the camera */
-	public void setCamera(Camera c) {
-		camera = c;
-		updateStoreButtonStatus();
-	}
-
 	/** Set enabled status for PresetPanel and its components. */
 	@Override
-	public void setEnabled(boolean enable) {
+	public void setEnabled(boolean e) {
+		super.setEnabled(e);
 		for(JButton b: preset_btn)
-			b.setEnabled(enable);
-		super.setEnabled(enable);
-		updateStoreButtonStatus();
-	}
-
-	/** Update enabled status of store button */
-	private void updateStoreButtonStatus() {
-		store_btn.setEnabled(isEnabled() && canStorePreset());
-	}
-
-	/** Check if user is allowed to store presets */
-	private boolean canStorePreset() {
-		return session.isUpdatePermitted(camera, "storePreset");
+			b.setEnabled(e && cam_ptz.canRecallPreset());
+		store_btn.setEnabled(e && cam_ptz.canStorePreset());
 	}
 }
