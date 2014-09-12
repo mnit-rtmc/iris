@@ -49,9 +49,8 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class CameraDispatcher extends JPanel {
 
-	/** The system attribute for the number of button presets */
-	static private final int NUM_PRESET_BTNS =
-		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
+	/** Number of joystick preset buttons */
+	static private final int NUM_JOY_PRESET_BTNS = 6;
 
 	/** Button number to select previous camera */
 	static private final int BUTTON_PREVIOUS = 10;
@@ -300,7 +299,7 @@ public class CameraDispatcher extends JPanel {
 			selectNextCamera();
 		else if(ev.button == BUTTON_PREVIOUS)
 			selectPreviousCamera();
-		else if(ev.button >= 0 && ev.button < NUM_PRESET_BTNS)
+		else if (ev.button >= 0 && ev.button < NUM_JOY_PRESET_BTNS)
 			selectCameraPreset(ev.button + 1);
 	}
 
