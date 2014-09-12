@@ -49,10 +49,12 @@ public class PTZButton extends JButton {
 	}
 
 	/** Create a new PTZ button */
-	public PTZButton(String text_id, CameraPTZ cptz, int p, int t, int z) {
+	public PTZButton(String text_id, final CameraPTZ cptz, int p, int t,
+		int z)
+	{
 		super(new IAction(text_id) {
 			protected void doActionPerformed(ActionEvent ev) {
-				// not interested
+				cptz.clearMovement();
 			}
 		});
 		setMargin(UI.buttonInsets());
