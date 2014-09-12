@@ -134,7 +134,8 @@ public class Widgets {
 
 	/** Create a panel border */
 	public EmptyBorder panelBorder() {
-		return new EmptyBorder(vgap, hgap, vgap, hgap);
+		// Don't scale border
+		return new EmptyBorder(VGAP, HGAP, VGAP, HGAP);
 	}
 
 	/** Create a panel border */
