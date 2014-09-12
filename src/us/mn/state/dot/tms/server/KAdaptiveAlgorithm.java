@@ -120,10 +120,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private final int QUEUE_EMPTY_THRESHOLD = -1;
 
 	/** Ratio for max rate to target rate */
-	static private final float TARGET_MAX_RATIO = 1.3f;
+	static private final float TARGET_MAX_RATIO = 1.25f;
 
 	/** Ratio for min rate to target rate */
-	static private final float TARGET_MIN_RATIO = 0.7f;
+	static private final float TARGET_MIN_RATIO = 0.75f;
 
 	/** Base percentage for backup minimum limit */
 	static private final float BACKUP_LIMIT_BASE = 0.5f;
