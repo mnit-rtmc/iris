@@ -252,6 +252,7 @@ public class CameraDispatcher extends JPanel {
 		stream_pnl.dispose();
 		selected = null;
 		removeAll();
+		control_pnl.dispose();
 	}
 
 	/** Set the selected camera */
