@@ -73,10 +73,10 @@ public class CameraDispatcher extends JPanel {
 		new ProxySelectionListener<Camera>()
 	{
 		public void selectionAdded(Camera c) {
-			setSelected(sel_model.getSingleSelection());
+			selectCamera(sel_model.getSingleSelection());
 		}
 		public void selectionRemoved(Camera c) {
-			setSelected(sel_model.getSingleSelection());
+			selectCamera(sel_model.getSingleSelection());
 		}
 	};
 
@@ -249,7 +249,7 @@ public class CameraDispatcher extends JPanel {
 	}
 
 	/** Set the selected camera */
-	public void setSelected(final Camera camera) {
+	private void selectCamera(final Camera camera) {
 		if(camera == selected)
 			return;
 		cam_ptz.setCamera(camera);
@@ -259,7 +259,7 @@ public class CameraDispatcher extends JPanel {
 			location_lbl.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
 			stream_pnl.setCamera(camera);
-			selectCamera();
+			selectMonitorCamera();
 			control_pnl.setEnabled(cam_ptz.canControlPtz());
 		} else
 			clear();
@@ -270,13 +270,13 @@ public class CameraDispatcher extends JPanel {
 		Object o = output_cbx.getSelectedItem();
 		if(o instanceof VideoMonitor) {
 			video_monitor = (VideoMonitor)o;
-			selectCamera();
+			selectMonitorCamera();
 		} else
 			video_monitor = null;
 	}
 
 	/** Select a camera on a video monitor */
-	private void selectCamera() {
+	private void selectMonitorCamera() {
 		VideoMonitor vm = video_monitor;
 		if(vm != null)
 			vm.setCamera(selected);
