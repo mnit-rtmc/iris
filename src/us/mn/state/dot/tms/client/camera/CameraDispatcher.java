@@ -220,7 +220,7 @@ public class CameraDispatcher extends JPanel {
 		else if(ev.button == BUTTON_PREVIOUS)
 			selectPreviousCamera();
 		else if (ev.button >= 0 && ev.button < NUM_JOY_PRESET_BTNS)
-			selectCameraPreset(ev.button + 1);
+			cam_ptz.recallPreset(ev.button + 1);
 	}
 
 	/** Select the next camera */
@@ -235,13 +235,6 @@ public class CameraDispatcher extends JPanel {
 		Camera cam = model.lower(selected);
 		if(cam != null)
 			sel_model.setSelected(cam);
-	}
-
-	/** Command current camera to goto preset location */
-	private void selectCameraPreset(int preset) {
-		Camera proxy = selected;	// Avoid race
-		if(proxy != null)
-			proxy.setRecallPreset(preset);
 	}
 
 	/** Dispose of the camera viewer */
