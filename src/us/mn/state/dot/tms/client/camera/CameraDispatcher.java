@@ -182,7 +182,7 @@ public class CameraDispatcher extends JPanel {
 		JComboBox box = new JComboBox();
 		FilteredMonitorModel m = new FilteredMonitorModel(session);
 		box.setModel(new WrapperComboBoxModel(m));
-		if(m.getSize() > 1)
+		if (m.getSize() > 1)
 			box.setSelectedIndex(1);
 		return box;
 	}
@@ -196,7 +196,7 @@ public class CameraDispatcher extends JPanel {
 		});
 		joy_ptz.addJoystickListener(new JoystickListener() {
 			public void buttonChanged(JoystickButtonEvent ev) {
-				if(ev.pressed)
+				if (ev.pressed)
 					doJoyButton(ev);
 			}
 		});
@@ -215,9 +215,9 @@ public class CameraDispatcher extends JPanel {
 
 	/** Process a joystick button event */
 	private void doJoyButton(JoystickButtonEvent ev) {
-		if(ev.button == BUTTON_NEXT)
+		if (ev.button == BUTTON_NEXT)
 			selectNextCamera();
-		else if(ev.button == BUTTON_PREVIOUS)
+		else if (ev.button == BUTTON_PREVIOUS)
 			selectPreviousCamera();
 		else if (ev.button >= 0 && ev.button < NUM_JOY_PRESET_BTNS)
 			cam_ptz.recallPreset(ev.button + 1);
@@ -226,14 +226,14 @@ public class CameraDispatcher extends JPanel {
 	/** Select the next camera */
 	private void selectNextCamera() {
 		Camera cam = model.higher(selected);
-		if(cam != null)
+		if (cam != null)
 			sel_model.setSelected(cam);
 	}
 
 	/** Select the previous camera */
 	private void selectPreviousCamera() {
 		Camera cam = model.lower(selected);
-		if(cam != null)
+		if (cam != null)
 			sel_model.setSelected(cam);
 	}
 
@@ -250,11 +250,11 @@ public class CameraDispatcher extends JPanel {
 
 	/** Set the selected camera */
 	private void selectCamera(final Camera camera) {
-		if(camera == selected)
+		if (camera == selected)
 			return;
 		cam_ptz.setCamera(camera);
 		selected = camera;
-		if(camera != null) {
+		if (camera != null) {
 			name_lbl.setText(camera.getName());
 			location_lbl.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
@@ -268,7 +268,7 @@ public class CameraDispatcher extends JPanel {
 	/** Called when a video monitor is selected */
 	private void monitorSelected() {
 		Object o = output_cbx.getSelectedItem();
-		if(o instanceof VideoMonitor) {
+		if (o instanceof VideoMonitor) {
 			video_monitor = (VideoMonitor)o;
 			selectMonitorCamera();
 		} else
@@ -278,7 +278,7 @@ public class CameraDispatcher extends JPanel {
 	/** Select a camera on a video monitor */
 	private void selectMonitorCamera() {
 		VideoMonitor vm = video_monitor;
-		if(vm != null)
+		if (vm != null)
 			vm.setCamera(selected);
 	}
 
