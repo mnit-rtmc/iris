@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +17,19 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
-import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -49,17 +43,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Location panel */
-	private final LocationPanel loc_pnl;
-
-	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(3, 24);
-
-	/** Controller action */
-	private final IAction controller = new IAction("controller") {
-		protected void doActionPerformed(ActionEvent e) {
-			controllerPressed();
-		}
-	};
+	private final PropLocation location_pnl;
 
 	/** Video stream encoder host (and port) */
 	private final JTextField encoder_txt = new JTextField("", 20);
@@ -92,7 +76,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Create a new camera properties form */
 	public CameraProperties(Session s, Camera c) {
 		super(I18N.get("camera") + ": ", s, c);
-		loc_pnl = new LocationPanel(s);
+		location_pnl = new PropLocation(s, c);
 	}
 
 	/** Get the SONAR type cache */
@@ -104,8 +88,9 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Initialize the widgets on the form */
 	@Override
 	protected void initialize() {
+		location_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add(I18N.get("location"), createLocationPanel());
+		tab.add(I18N.get("location"), location_pnl);
 		tab.add(I18N.get("device.setup"), createSetupPanel());
 		add(tab);
 		if(canUpdate())
@@ -116,27 +101,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Dispose of the form */
 	@Override
 	protected void dispose() {
-		loc_pnl.dispose();
+		location_pnl.dispose();
 		super.dispose();
-	}
-
-	/** Create the location panel */
-	private JPanel createLocationPanel() {
-		loc_pnl.initialize();
-		loc_pnl.add("device.notes");
-		loc_pnl.add(notes_txt, Stretch.FULL);
-		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
-		loc_pnl.setGeoLoc(proxy.getGeoLoc());
-		return loc_pnl;
-	}
-
-	/** Controller lookup button pressed */
-	private void controllerPressed() {
-		Controller c = proxy.getController();
-		if(c != null) {
-			session.getDesktop().show(
-				new ControllerForm(session, c));
-		}
 	}
 
 	/** Create camera setup panel */
@@ -155,12 +121,6 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create jobs */
 	private void createJobs() {
-		notes_txt.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				proxy.setNotes(notes_txt.getText());
-			}
-		});
 		encoder_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -179,12 +139,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		if(a == null || a.equals("controller"))
-			controller.setEnabled(proxy.getController() != null);
-		if(a == null || a.equals("notes")) {
-			notes_txt.setEnabled(canUpdate("notes"));
-			notes_txt.setText(proxy.getNotes());
-		}
+		location_pnl.updateAttribute(a);
 		if(a == null || a.equals("encoder")) {
 			encoder_txt.setEnabled(canUpdate("encoder"));
 			encoder_txt.setText(proxy.getEncoder());
