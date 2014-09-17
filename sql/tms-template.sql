@@ -578,31 +578,61 @@ CREATE VIEW iris.camera AS SELECT
 		encoder_type, publish
 	FROM iris._camera c JOIN iris._device_io d ON c.name = d.name;
 
-CREATE RULE camera_insert AS ON INSERT TO iris.camera DO INSTEAD
-(
-	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._camera VALUES (NEW.name, NEW.geo_loc, NEW.notes,
-		NEW.encoder, NEW.encoder_channel, NEW.encoder_type,NEW.publish);
-);
+CREATE FUNCTION iris.camera_insert() RETURNS TRIGGER AS
+	$camera_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._camera (name, geo_loc, notes, encoder,
+	                          encoder_channel, encoder_type, publish)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.encoder,
+	             NEW.encoder_channel, NEW.encoder_type, NEW.publish);
+	RETURN NEW;
+END;
+$camera_insert$ LANGUAGE plpgsql;
 
-CREATE RULE camera_update AS ON UPDATE TO iris.camera DO INSTEAD
-(
-	UPDATE iris._device_io SET
-		controller = NEW.controller,
-		pin = NEW.pin
-	WHERE name = OLD.name;
-	UPDATE iris._camera SET
-		geo_loc = NEW.geo_loc,
-		notes = NEW.notes,
-		encoder = NEW.encoder,
-		encoder_channel = NEW.encoder_channel,
-		encoder_type = NEW.encoder_type,
-		publish = NEW.publish
-	WHERE name = OLD.name;
-);
+CREATE TRIGGER camera_insert_trig
+    INSTEAD OF INSERT ON iris.camera
+    FOR EACH ROW EXECUTE PROCEDURE iris.camera_insert();
 
-CREATE RULE camera_delete AS ON DELETE TO iris.camera DO INSTEAD
+CREATE FUNCTION iris.camera_update() RETURNS TRIGGER AS
+	$camera_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._camera
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       encoder = NEW.encoder,
+	       encoder_channel = NEW.encoder_channel,
+	       encoder_type = NEW.encoder_type,
+	       publish = NEW.publish
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$camera_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_update_trig
+    INSTEAD OF UPDATE ON iris.camera
+    FOR EACH ROW EXECUTE PROCEDURE iris.camera_update();
+
+CREATE FUNCTION iris.camera_delete() RETURNS TRIGGER AS
+	$camera_delete$
+BEGIN
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$camera_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_delete_trig
+    INSTEAD OF DELETE ON iris.camera
+    FOR EACH ROW EXECUTE PROCEDURE iris.camera_delete();
 
 CREATE TABLE iris._beacon (
 	name VARCHAR(10) PRIMARY KEY,
