@@ -236,6 +236,74 @@ SELECT assert (true = (SELECT publish FROM iris.camera
 
 DELETE FROM iris.camera WHERE name = 'CAM_TEST_1';
 
+-- Test ramp meter view
+INSERT INTO iris.ramp_meter (name, pin, notes, meter_type, storage, max_wait,
+                             algorithm, am_target, pm_target, m_lock)
+	VALUES ('RM_TEST_1', 5, 'notes', 1, 400, 240, 3, 500, 600, 3);
+
+\o /dev/null
+SELECT assert ('RM_TEST_1' = (SELECT name FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert name');
+SELECT assert ((SELECT controller FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1') IS NULL, 'meter insert controller');
+SELECT assert (5 = (SELECT pin FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert pin');
+SELECT assert ('notes' = (SELECT notes FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert notes');
+SELECT assert (1 = (SELECT meter_type FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert meter_type');
+SELECT assert (400 = (SELECT storage FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert storage');
+SELECT assert (240 = (SELECT max_wait FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert max_wait');
+SELECT assert (3 = (SELECT algorithm FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert algorithm');
+SELECT assert (500 = (SELECT am_target FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert am_target');
+SELECT assert (600 = (SELECT pm_target FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert pm_target');
+SELECT assert (3 = (SELECT m_lock FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter insert m_lock');
+\o
+
+UPDATE iris.ramp_meter SET controller = 'CTL_TEST_1' WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET pin = 11 WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET notes = 'mtr note' WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET meter_type = 0 WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET storage = 850 WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET max_wait = 120 WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET algorithm = 1 WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET am_target = 1100 WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET pm_target = 1200 WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET m_lock = 1 WHERE name = 'RM_TEST_1';
+
+\o /dev/null
+SELECT assert ('RM_TEST_1' = (SELECT name FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update name');
+SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update controller');
+SELECT assert (11 = (SELECT pin FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update pin');
+SELECT assert ('mtr note' = (SELECT notes FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update notes');
+SELECT assert (0 = (SELECT meter_type FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update meter_type');
+SELECT assert (850 = (SELECT storage FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update storage');
+SELECT assert (120 = (SELECT max_wait FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update max_wait');
+SELECT assert (1 = (SELECT algorithm FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update algorithm');
+SELECT assert (1100 = (SELECT am_target FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update am_target');
+SELECT assert (1200 = (SELECT pm_target FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update pm_target');
+SELECT assert (1 = (SELECT m_lock FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update m_lock');
+\o
+
+DELETE FROM iris.ramp_meter WHERE name = 'RM_TEST_1';
+
 -- Delete controller stuff
 DELETE FROM iris.controller WHERE name = 'CTL_TEST_1';
 DELETE FROM iris.cabinet WHERE name = 'CAB_TEST_1';
