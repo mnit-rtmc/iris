@@ -424,28 +424,56 @@ CREATE VIEW iris.alarm AS
 	SELECT a.name, description, controller, pin, state, trigger_time
 	FROM iris._alarm a JOIN iris._device_io d ON a.name = d.name;
 
-CREATE RULE alarm_insert AS ON INSERT TO iris.alarm DO INSTEAD
-(
-	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._alarm VALUES (NEW.name, NEW.description, NEW.state,
-		NEW.trigger_time);
-);
+CREATE FUNCTION iris.alarm_insert() RETURNS TRIGGER AS
+	$alarm_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._alarm (name, description, state, trigger_time)
+	     VALUES (NEW.name, NEW.description, NEW.state, NEW.trigger_time);
+	RETURN NEW;
+END;
+$alarm_insert$ LANGUAGE plpgsql;
 
-CREATE RULE alarm_update AS ON UPDATE TO iris.alarm DO INSTEAD
-(
-	UPDATE iris._device_io SET
-		controller = NEW.controller,
-		pin = NEW.pin
-	WHERE name = OLD.name;
-	UPDATE iris._alarm SET
-		description = NEW.description,
-		state = NEW.state,
-		trigger_time = NEW.trigger_time
-	WHERE name = OLD.name;
-);
+CREATE TRIGGER alarm_insert_trig
+    INSTEAD OF INSERT ON iris.alarm
+    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_insert();
 
-CREATE RULE alarm_delete AS ON DELETE TO iris.alarm DO INSTEAD
+CREATE FUNCTION iris.alarm_update() RETURNS TRIGGER AS
+	$alarm_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._alarm
+	   SET description = NEW.description,
+	       state = NEW.state,
+	       trigger_time = NEW.trigger_time
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$alarm_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER alarm_update_trig
+    INSTEAD OF UPDATE ON iris.alarm
+    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_update();
+
+CREATE FUNCTION iris.alarm_delete() RETURNS TRIGGER AS
+	$alarm_delete$
+BEGIN
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$alarm_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER alarm_delete_trig
+    INSTEAD OF DELETE ON iris.alarm
+    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_delete();
 
 CREATE TABLE iris._detector (
 	name VARCHAR(10) PRIMARY KEY,
@@ -1851,7 +1879,7 @@ camera_ptz_panel_enable	false
 camera_util_panel_enable	false
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.15.0
+database_version	4.16.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
