@@ -667,14 +667,16 @@ CREATE TRIGGER beacon_insert_trig
 CREATE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
 	$beacon_update$
 BEGIN
-	UPDATE iris._device_io SET controller = NEW.controller, pin = NEW.pin
-	WHERE name = OLD.name;
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
 	UPDATE iris._beacon
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
 	       message = NEW.message,
 	       camera = NEW.camera
-	WHERE name = OLD.name;
+	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
 $beacon_update$ LANGUAGE plpgsql;
