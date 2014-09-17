@@ -179,10 +179,62 @@ SELECT assert ('notes text' = (SELECT notes FROM iris.detector
                WHERE name = 'DET_TEST_1'), 'det update notes');
 \o
 
-
 DELETE FROM iris.detector WHERE name = 'DET_TEST_1';
 DELETE FROM iris.r_node WHERE name = 'NOD_TEST_2';
 DELETE FROM iris.r_node WHERE name = 'NOD_TEST_1';
+
+-- Test camera view
+INSERT INTO iris.camera (name, pin, notes, encoder, encoder_channel,
+                         encoder_type, publish)
+	VALUES ('CAM_TEST_1', 0, 'notes', 'uri', 3, 1, false);
+
+\o /dev/null
+SELECT assert ('CAM_TEST_1' = (SELECT name FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam insert name');
+SELECT assert ((SELECT controller FROM iris.camera
+               WHERE name = 'CAM_TEST_1') IS NULL, 'cam insert controller');
+SELECT assert (0 = (SELECT pin FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam insert pin');
+SELECT assert ('notes' = (SELECT notes FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam insert notes');
+SELECT assert ('uri' = (SELECT encoder FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam insert encoder');
+SELECT assert (3 = (SELECT encoder_channel FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam insert encoder_channel');
+SELECT assert (1 = (SELECT encoder_type FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam insert encoder_type');
+SELECT assert (false = (SELECT publish FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam insert publish');
+\o
+
+UPDATE iris.camera SET controller = 'CTL_TEST_1' WHERE name = 'CAM_TEST_1';
+UPDATE iris.camera SET pin = 10 WHERE name = 'CAM_TEST_1';
+UPDATE iris.camera SET notes = 'more notes' WHERE name = 'CAM_TEST_1';
+UPDATE iris.camera SET encoder = 'ip addr' WHERE name = 'CAM_TEST_1';
+UPDATE iris.camera SET encoder_channel = 4 WHERE name = 'CAM_TEST_1';
+UPDATE iris.camera SET encoder_type = 3 WHERE name = 'CAM_TEST_1';
+UPDATE iris.camera SET publish = true WHERE name = 'CAM_TEST_1';
+
+\o /dev/null
+SELECT assert ('CAM_TEST_1' = (SELECT name FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam update name');
+SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam update controller');
+SELECT assert (10 = (SELECT pin FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam update pin');
+SELECT assert ('more notes' = (SELECT notes FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam update notes');
+SELECT assert ('ip addr' = (SELECT encoder FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam update encoder');
+SELECT assert (4 = (SELECT encoder_channel FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam update encoder_channel');
+SELECT assert (3 = (SELECT encoder_type FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam update encoder_type');
+SELECT assert (true = (SELECT publish FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam update publish');
+\o
+
+DELETE FROM iris.camera WHERE name = 'CAM_TEST_1';
 
 -- Delete controller stuff
 DELETE FROM iris.controller WHERE name = 'CTL_TEST_1';
