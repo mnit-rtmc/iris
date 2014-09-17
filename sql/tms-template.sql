@@ -739,38 +739,67 @@ CREATE VIEW iris.ramp_meter AS SELECT
 	max_wait, algorithm, am_target, pm_target, camera, m_lock
 	FROM iris._ramp_meter m JOIN iris._device_io d ON m.name = d.name;
 
-CREATE RULE ramp_meter_insert AS ON INSERT TO iris.ramp_meter DO INSTEAD
-(
-	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._ramp_meter (name, geo_loc, notes, meter_type, storage,
-		max_wait, algorithm, am_target, pm_target, camera, m_lock)
-		VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.meter_type,
-		NEW.storage, NEW.max_wait, NEW.algorithm, NEW.am_target,
-		NEW.pm_target, NEW.camera, NEW.m_lock);
-);
+CREATE FUNCTION iris.ramp_meter_insert() RETURNS TRIGGER AS
+	$ramp_meter_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._ramp_meter
+	            (name, geo_loc, notes, meter_type, storage, max_wait,
+	             algorithm, am_target, pm_target, camera, m_lock)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.meter_type,
+	             NEW.storage, NEW.max_wait, NEW.algorithm, NEW.am_target,
+	             NEW.pm_target, NEW.camera, NEW.m_lock);
+	RETURN NEW;
+END;
+$ramp_meter_insert$ LANGUAGE plpgsql;
 
-CREATE RULE ramp_meter_update AS ON UPDATE TO iris.ramp_meter DO INSTEAD
-(
-	UPDATE iris._device_io SET
-		controller = NEW.controller,
-		pin = NEW.pin
-	WHERE name = OLD.name;
-	UPDATE iris._ramp_meter SET
-		geo_loc = NEW.geo_loc,
-		notes = NEW.notes,
-		meter_type = NEW.meter_type,
-		storage = NEW.storage,
-		max_wait = NEW.max_wait,
-		algorithm = NEW.algorithm,
-		am_target = NEW.am_target,
-		pm_target = NEW.pm_target,
-		camera = NEW.camera,
-		m_lock = NEW.m_lock
-	WHERE name = OLD.name;
-);
+CREATE TRIGGER ramp_meter_insert_trig
+    INSTEAD OF INSERT ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_insert();
 
-CREATE RULE ramp_meter_delete AS ON DELETE TO iris.ramp_meter DO INSTEAD
+CREATE FUNCTION iris.ramp_meter_update() RETURNS TRIGGER AS
+	$ramp_meter_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._ramp_meter
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       meter_type = NEW.meter_type,
+	       storage = NEW.storage,
+	       max_wait = NEW.max_wait,
+	       algorithm = NEW.algorithm,
+	       am_target = NEW.am_target,
+	       pm_target = NEW.pm_target,
+	       camera = NEW.camera,
+	       m_lock = NEW.m_lock
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$ramp_meter_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ramp_meter_update_trig
+    INSTEAD OF UPDATE ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_update();
+
+CREATE FUNCTION iris.ramp_meter_delete() RETURNS TRIGGER AS
+	$ramp_meter_delete$
+BEGIN
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$ramp_meter_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ramp_meter_delete_trig
+    INSTEAD OF DELETE ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_delete();
 
 CREATE TABLE iris._dms (
 	name VARCHAR(10) PRIMARY KEY,
