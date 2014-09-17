@@ -323,7 +323,7 @@ public class IrisClient extends JFrame {
 
 	/** Create a user session */
 	private Session createSession(SonarState st) throws Exception {
-		Session s = new Session(st, desktop, client_props);
+		Session s = new Session(st, desktop, client_props, user_props);
 		s.initialize();
 		return s;
 	}

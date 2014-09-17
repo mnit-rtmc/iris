@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,8 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -49,6 +52,7 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
  * A session is one IRIS login session.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class Session {
 
@@ -97,6 +101,14 @@ public class Session {
 
 	/** Tile layer */
 	private final TileLayer tile_layer;
+
+	/** Mutable user properties stored on client workstation */
+	private final UserProperties user_props;
+
+	/** Get the user properties */
+	public UserProperties getUserProperties() {
+		return user_props;
+	}
 
 	/** Segment layer */
 	private final SegmentLayer seg_layer;
@@ -172,12 +184,15 @@ public class Session {
 	}
 
 	/** Create a new session */
-	public Session(SonarState st, SmartDesktop d, Properties p) {
+	public Session(SonarState st, SmartDesktop d, Properties p,
+		UserProperties up)
+	{
 		state = st;
 		user = state.getUser();
 		namespace = state.getNamespace();
 		desktop = d;
 		props = p;
+		user_props = up;
 		loc_manager = new GeoLocManager(this);
 		r_node_manager = new R_NodeManager(this, loc_manager);
 		controller_manager = new ControllerManager(this, loc_manager);
@@ -235,24 +250,53 @@ public class Session {
 
 	/** Add the tabs */
 	private void addTabs() {
-		if(inc_manager.canRead())
-			tabs.add(inc_manager.createTab());
-		if(dms_manager.canRead())
-			tabs.add(dms_manager.createTab());
-		if(cam_manager.canRead())
-			tabs.add(cam_manager.createTab());
-		if(lcs_array_manager.canRead())
-			tabs.add(lcs_array_manager.createTab());
-		if(meter_manager.canRead())
-			tabs.add(meter_manager.createTab());
-		if(gate_arm_manager.canRead())
-			tabs.add(gate_arm_manager.createTab());
-		if(r_node_manager.isAddPermitted())
-			tabs.add(r_node_manager.createTab());
-		if(plan_manager.canRead())
-			tabs.add(plan_manager.createTab());
-		if(controller_manager.canRead())
-			tabs.add(controller_manager.createTab());
+		// mapping of text id -> MapTab
+		HashMap<String,MapTab> tabMap = new HashMap<String,MapTab>();
+
+		if (inc_manager.canRead()) {
+			MapTab tab = inc_manager.createTab();
+			tabMap.put(tab.getTextId(), tab);
+			}
+		if (dms_manager.canRead()) {
+			MapTab tab = dms_manager.createTab();
+			tabMap.put(tab.getTextId(), tab);
+			}
+		if (cam_manager.canRead()) {
+			MapTab tab = cam_manager.createTab();
+			tabMap.put(tab.getTextId(), tab);
+			}
+		if (lcs_array_manager.canRead()) {
+			MapTab tab = lcs_array_manager.createTab();
+			tabMap.put(tab.getTextId(), tab);
+			}
+		if (meter_manager.canRead()) {
+			MapTab tab = meter_manager.createTab();
+			tabMap.put(tab.getTextId(), tab);
+			}
+		if (gate_arm_manager.canRead()) {
+			MapTab tab = gate_arm_manager.createTab();
+			tabMap.put(tab.getTextId(), tab);
+			}
+		if (r_node_manager.isAddPermitted()) {
+			MapTab tab = r_node_manager.createTab();
+			tabMap.put(tab.getTextId(), tab);
+			}
+		if (plan_manager.canRead()) {
+			MapTab tab = plan_manager.createTab();
+			tabMap.put(tab.getTextId(), tab);
+			}
+		if (controller_manager.canRead()) {
+			MapTab tab = controller_manager.createTab();
+			tabMap.put(tab.getTextId(), tab);
+			}
+
+		// iterate through tab list (or its default) from user props,
+		// adding tabs from tabMap as text id matches are found
+		String[] tablist = user_props.getTabList();
+		for (String t : tablist) {
+			MapTab tab = tabMap.get(t);
+			if (tab != null) tabs.add(tab);
+		}
 	}
 
 	/** Create the layer states.  The map bean and model must be seperate

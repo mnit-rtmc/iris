@@ -42,8 +42,14 @@ public class UserProperties {
 	static private final String WIN_Y = "win.y";
 	static private final String WIN_WIDTH = "win.width";
 	static private final String WIN_HEIGHT = "win.height";
+	static private final String TAB_LIST = "tab.list";
 	static private final String TAB_SEL = "tab.selected";
 	static private final String SCALE = "scale";
+
+	/** Default values for use with unspecified properties */
+	static private final String DEFVAL_TAB_LIST
+		= "incident, dms, camera, lcs, ramp.meter, gate.arm, r_node, "
+		+ "action.plan, comm";
 
 	/** Get the directory to store user properties */
 	static private File getDir() {
@@ -208,6 +214,25 @@ public class UserProperties {
 			return s;
 		else
 			return 1f;
+	}
+
+	/**
+	 * Get the TAB_LIST property, or its default, as an ordered, trimmed
+	 * array.
+	 *
+	 * @return an ordered, trimmed array containing the entries specified
+	 *         in the TAB_LIST property, or if the property is not
+	 *         specified, the default value for TAB_LIST.
+	 */
+	public String[] getTabList() {
+		String val = getPropString(TAB_LIST);
+		if ("".equals(val))
+			val = DEFVAL_TAB_LIST;
+		String[] fields = val.split(",");
+		ArrayList<String> tl = new ArrayList<String>(fields.length);
+		for (String f : fields)
+			tl.add(f.trim());
+		return tl.toArray(new String[tl.size()]);
 	}
 
 	/** Update user properties associated with JFrame */
