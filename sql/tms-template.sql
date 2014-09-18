@@ -1020,28 +1020,56 @@ CREATE VIEW iris.lcs_array AS SELECT
 	d.name, controller, pin, notes, shift, lcs_lock
 	FROM iris._lcs_array la JOIN iris._device_io d ON la.name = d.name;
 
-CREATE RULE lcs_array_insert AS ON INSERT TO iris.lcs_array DO INSTEAD
-(
-	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._lcs_array VALUES (NEW.name, NEW.notes, NEW.shift,
-		NEW.lcs_lock);
-);
+CREATE FUNCTION iris.lcs_array_insert() RETURNS TRIGGER AS
+	$lcs_array_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._lcs_array(name, notes, shift, lcs_lock)
+	     VALUES (NEW.name, NEW.notes, NEW.shift, NEW.lcs_lock);
+	RETURN NEW;
+END;
+$lcs_array_insert$ LANGUAGE plpgsql;
 
-CREATE RULE lcs_array_update AS ON UPDATE TO iris.lcs_array DO INSTEAD
-(
-	UPDATE iris._device_io SET
-		controller = NEW.controller,
-		pin = NEW.pin
-	WHERE name = OLD.name;
-	UPDATE iris._lcs_array SET
-		notes = NEW.notes,
-		shift = NEW.shift,
-		lcs_lock = NEW.lcs_lock
-	WHERE name = OLD.name;
-);
+CREATE TRIGGER lcs_array_insert_trig
+    INSTEAD OF INSERT ON iris.lcs_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_insert();
 
-CREATE RULE lcs_array_delete AS ON DELETE TO iris.lcs_array DO INSTEAD
+CREATE FUNCTION iris.lcs_array_update() RETURNS TRIGGER AS
+	$lcs_array_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._lcs_array
+	   SET notes = NEW.notes,
+	       shift = NEW.shift,
+	       lcs_lock = NEW.lcs_lock
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$lcs_array_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_array_update_trig
+    INSTEAD OF UPDATE ON iris.lcs_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_update();
+
+CREATE FUNCTION iris.lcs_array_delete() RETURNS TRIGGER AS
+	$lcs_array_delete$
+BEGIN
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$lcs_array_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_array_delete_trig
+    INSTEAD OF DELETE ON iris.lcs_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_delete();
 
 CREATE TABLE iris.lcs (
 	name VARCHAR(10) PRIMARY KEY REFERENCES iris._dms,
