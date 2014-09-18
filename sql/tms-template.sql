@@ -850,7 +850,7 @@ BEGIN
 	       aws_allowed = NEW.aws_allowed,
 	       aws_controlled = NEW.aws_controlled,
 	       default_font = NEW.default_font
-	WHERE name = OLD.name;
+	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
 $dms_update$ LANGUAGE plpgsql;
@@ -888,26 +888,55 @@ CREATE VIEW iris.lane_marking AS SELECT
 	m.name, geo_loc, controller, pin, notes
 	FROM iris._lane_marking m JOIN iris._device_io d ON m.name = d.name;
 
-CREATE RULE lane_marking_insert AS ON INSERT TO iris.lane_marking DO INSTEAD
-(
-	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._lane_marking VALUES (NEW.name, NEW.geo_loc,NEW.notes);
-);
+CREATE FUNCTION iris.lane_marking_insert() RETURNS TRIGGER AS
+	$lane_marking_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._lane_marking (name, geo_loc, notes)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes);
+	RETURN NEW;
+END;
+$lane_marking_insert$ LANGUAGE plpgsql;
 
-CREATE RULE lane_marking_update AS ON UPDATE TO iris.lane_marking DO INSTEAD
-(
-	UPDATE iris._device_io SET
-		controller = NEW.controller,
-		pin = NEW.pin
-	WHERE name = OLD.name;
-	UPDATE iris._lane_marking SET
-		geo_loc = NEW.geo_loc,
-		notes = NEW.notes
-	WHERE name = OLD.name;
-);
+CREATE TRIGGER lane_marking_insert_trig
+    INSTEAD OF INSERT ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_insert();
 
-CREATE RULE lane_marking_delete AS ON DELETE TO iris.lane_marking DO INSTEAD
+CREATE FUNCTION iris.lane_marking_update() RETURNS TRIGGER AS
+	$lane_marking_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._lane_marking
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$lane_marking_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lane_marking_update_trig
+    INSTEAD OF UPDATE ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_update();
+
+CREATE FUNCTION iris.lane_marking_delete() RETURNS TRIGGER AS
+	$lane_marking_delete$
+BEGIN
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$lane_marking_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lane_marking_delete_trig
+    INSTEAD OF DELETE ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_delete();
 
 CREATE TABLE iris._weather_sensor (
 	name VARCHAR(10) PRIMARY KEY,
