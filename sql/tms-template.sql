@@ -819,32 +819,61 @@ CREATE VIEW iris.dms AS SELECT
 	aws_controlled, default_font
 	FROM iris._dms dms JOIN iris._device_io d ON dms.name = d.name;
 
-CREATE RULE dms_insert AS ON INSERT TO iris.dms DO INSTEAD
-(
-	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._dms VALUES (NEW.name, NEW.geo_loc, NEW.notes,
-		NEW.camera, NEW.aws_allowed, NEW.aws_controlled,
-		NEW.default_font);
-);
+CREATE FUNCTION iris.dms_insert() RETURNS TRIGGER AS
+	$dms_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._dms (name, geo_loc, notes, camera, aws_allowed,
+	                       aws_controlled, default_font)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.camera,
+	             NEW.aws_allowed, NEW.aws_controlled, NEW.default_font);
+	RETURN NEW;
+END;
+$dms_insert$ LANGUAGE plpgsql;
 
-CREATE RULE dms_update AS ON UPDATE TO iris.dms DO INSTEAD
-(
-	UPDATE iris._device_io SET
-		controller = NEW.controller,
-		pin = NEW.pin
-	WHERE name = OLD.name;
-	UPDATE iris._dms SET
-		geo_loc = NEW.geo_loc,
-		notes = NEW.notes,
-		camera = NEW.camera,
-		aws_allowed = NEW.aws_allowed,
-		aws_controlled = NEW.aws_controlled,
-		default_font = NEW.default_font
-	WHERE name = OLD.name;
-);
+CREATE TRIGGER dms_insert_trig
+    INSTEAD OF INSERT ON iris.dms
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_insert();
 
-CREATE RULE dms_delete AS ON DELETE TO iris.dms DO INSTEAD
+CREATE FUNCTION iris.dms_update() RETURNS TRIGGER AS
+	$dms_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._dms
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       camera = NEW.camera,
+	       aws_allowed = NEW.aws_allowed,
+	       aws_controlled = NEW.aws_controlled,
+	       default_font = NEW.default_font
+	WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$dms_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_update_trig
+    INSTEAD OF UPDATE ON iris.dms
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_update();
+
+CREATE FUNCTION iris.dms_delete() RETURNS TRIGGER AS
+	$dms_delete$
+BEGIN
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$dms_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_delete_trig
+    INSTEAD OF DELETE ON iris.dms
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_delete();
 
 CREATE TABLE iris._lane_marking (
 	name VARCHAR(10) PRIMARY KEY,
