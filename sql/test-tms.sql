@@ -448,6 +448,48 @@ SELECT assert ('yeshh' = (SELECT notes FROM iris.weather_sensor
 
 DELETE FROM iris.weather_sensor WHERE name = 'WS_TEST_1';
 
+-- Test lcs_array view
+INSERT INTO iris.lcs_array (name, pin, notes, shift)
+	VALUES ('LCS_TEST_1', 8, 'a Note', 5);
+
+\o /dev/null
+SELECT assert ('LCS_TEST_1' = (SELECT name FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs insert name');
+SELECT assert ((SELECT controller FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1') IS NULL, 'lcs insert controller');
+SELECT assert (8 = (SELECT pin FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs insert pin');
+SELECT assert ('a Note' = (SELECT notes FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs insert notes');
+SELECT assert (5 = (SELECT shift FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs insert shift');
+SELECT assert ((SELECT lcs_lock FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1') IS NULL, 'lcs insert lcs_lock');
+\o
+
+UPDATE iris.lcs_array SET controller = 'CTL_TEST_1' WHERE name = 'LCS_TEST_1';
+UPDATE iris.lcs_array SET pin = 11 WHERE name = 'LCS_TEST_1';
+UPDATE iris.lcs_array SET notes = 'nope' WHERE name = 'LCS_TEST_1';
+UPDATE iris.lcs_array SET shift = 4 WHERE name = 'LCS_TEST_1';
+UPDATE iris.lcs_array SET lcs_lock = 3 WHERE name = 'LCS_TEST_1';
+
+\o /dev/null
+SELECT assert ('LCS_TEST_1' = (SELECT name FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs update name');
+SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs update controller');
+SELECT assert (11 = (SELECT pin FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs update pin');
+SELECT assert ('nope' = (SELECT notes FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs update notes');
+SELECT assert (4 = (SELECT shift FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs update shift');
+SELECT assert (3 = (SELECT lcs_lock FROM iris.lcs_array
+               WHERE name = 'LCS_TEST_1'), 'lcs update lcs_lock');
+\o
+
+DELETE FROM iris.lcs_array WHERE name = 'LCS_TEST_1';
+
 -- Delete controller stuff
 DELETE FROM iris.camera WHERE name = 'CAM_TEST_1';
 DELETE FROM iris.controller WHERE name = 'CTL_TEST_1';
