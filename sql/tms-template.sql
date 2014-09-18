@@ -951,27 +951,55 @@ CREATE VIEW iris.weather_sensor AS SELECT
 	m.name, geo_loc, controller, pin, notes
 	FROM iris._weather_sensor m JOIN iris._device_io d ON m.name = d.name;
 
-CREATE RULE weather_sensor_insert AS ON INSERT TO iris.weather_sensor DO INSTEAD
-(
-	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._weather_sensor VALUES (NEW.name, NEW.geo_loc,
-		NEW.notes);
-);
+CREATE FUNCTION iris.weather_sensor_insert() RETURNS TRIGGER AS
+	$weather_sensor_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._weather_sensor (name, geo_loc, notes)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes);
+	RETURN NEW;
+END;
+$weather_sensor_insert$ LANGUAGE plpgsql;
 
-CREATE RULE weather_sensor_update AS ON UPDATE TO iris.weather_sensor DO INSTEAD
-(
-	UPDATE iris._device_io SET
-		controller = NEW.controller,
-		pin = NEW.pin
-	WHERE name = OLD.name;
-	UPDATE iris._weather_sensor SET
-		geo_loc = NEW.geo_loc,
-		notes = NEW.notes
-	WHERE name = OLD.name;
-);
+CREATE TRIGGER weather_sensor_insert_trig
+    INSTEAD OF INSERT ON iris.weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_insert();
 
-CREATE RULE weather_sensor_delete AS ON DELETE TO iris.weather_sensor DO INSTEAD
+CREATE FUNCTION iris.weather_sensor_update() RETURNS TRIGGER AS
+	$weather_sensor_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._weather_sensor
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$weather_sensor_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_update_trig
+    INSTEAD OF UPDATE ON iris.weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_update();
+
+CREATE FUNCTION iris.weather_sensor_delete() RETURNS TRIGGER AS
+	$weather_sensor_delete$
+BEGIN
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$weather_sensor_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_delete_trig
+    INSTEAD OF DELETE ON iris.weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
 
 CREATE TABLE iris.lcs_lock (
 	id INTEGER PRIMARY KEY,

@@ -369,3 +369,58 @@ $lane_marking_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER lane_marking_delete_trig
     INSTEAD OF DELETE ON iris.lane_marking
     FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_delete();
+
+-- Replace iris.weather_sensor rewrite rules with triggers
+DROP RULE weather_sensor_insert ON iris.weather_sensor;
+DROP RULE weather_sensor_update ON iris.weather_sensor;
+DROP RULE weather_sensor_delete ON iris.weather_sensor;
+
+CREATE FUNCTION iris.weather_sensor_insert() RETURNS TRIGGER AS
+	$weather_sensor_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._weather_sensor (name, geo_loc, notes)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes);
+	RETURN NEW;
+END;
+$weather_sensor_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_insert_trig
+    INSTEAD OF INSERT ON iris.weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_insert();
+
+CREATE FUNCTION iris.weather_sensor_update() RETURNS TRIGGER AS
+	$weather_sensor_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._weather_sensor
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$weather_sensor_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_update_trig
+    INSTEAD OF UPDATE ON iris.weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_update();
+
+CREATE FUNCTION iris.weather_sensor_delete() RETURNS TRIGGER AS
+	$weather_sensor_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$weather_sensor_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_delete_trig
+    INSTEAD OF DELETE ON iris.weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
