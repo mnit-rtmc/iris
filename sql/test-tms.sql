@@ -195,6 +195,8 @@ SELECT assert ((SELECT controller FROM iris.camera
                WHERE name = 'CAM_TEST_1') IS NULL, 'cam insert controller');
 SELECT assert (0 = (SELECT pin FROM iris.camera
                WHERE name = 'CAM_TEST_1'), 'cam insert pin');
+SELECT assert ((SELECT geo_loc FROM iris.camera
+               WHERE name = 'CAM_TEST_1') IS NULL, 'camera insert geo_loc');
 SELECT assert ('notes' = (SELECT notes FROM iris.camera
                WHERE name = 'CAM_TEST_1'), 'cam insert notes');
 SELECT assert ('uri' = (SELECT encoder FROM iris.camera
@@ -209,6 +211,7 @@ SELECT assert (false = (SELECT publish FROM iris.camera
 
 UPDATE iris.camera SET controller = 'CTL_TEST_1' WHERE name = 'CAM_TEST_1';
 UPDATE iris.camera SET pin = 10 WHERE name = 'CAM_TEST_1';
+UPDATE iris.camera SET geo_loc = 'LOC_TEST_1' WHERE name = 'CAM_TEST_1';
 UPDATE iris.camera SET notes = 'more notes' WHERE name = 'CAM_TEST_1';
 UPDATE iris.camera SET encoder = 'ip addr' WHERE name = 'CAM_TEST_1';
 UPDATE iris.camera SET encoder_channel = 4 WHERE name = 'CAM_TEST_1';
@@ -222,6 +225,8 @@ SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.camera
                WHERE name = 'CAM_TEST_1'), 'cam update controller');
 SELECT assert (10 = (SELECT pin FROM iris.camera
                WHERE name = 'CAM_TEST_1'), 'cam update pin');
+SELECT assert ('LOC_TEST_1' = (SELECT geo_loc FROM iris.camera
+               WHERE name = 'CAM_TEST_1'), 'cam update geo_loc');
 SELECT assert ('more notes' = (SELECT notes FROM iris.camera
                WHERE name = 'CAM_TEST_1'), 'cam update notes');
 SELECT assert ('ip addr' = (SELECT encoder FROM iris.camera
@@ -233,8 +238,6 @@ SELECT assert (3 = (SELECT encoder_type FROM iris.camera
 SELECT assert (true = (SELECT publish FROM iris.camera
                WHERE name = 'CAM_TEST_1'), 'cam update publish');
 \o
-
-DELETE FROM iris.camera WHERE name = 'CAM_TEST_1';
 
 -- Test ramp meter view
 INSERT INTO iris.ramp_meter (name, pin, notes, meter_type, storage, max_wait,
@@ -248,6 +251,8 @@ SELECT assert ((SELECT controller FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1') IS NULL, 'meter insert controller');
 SELECT assert (5 = (SELECT pin FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter insert pin');
+SELECT assert ((SELECT geo_loc FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1') IS NULL, 'meter insert geo_loc');
 SELECT assert ('notes' = (SELECT notes FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter insert notes');
 SELECT assert (1 = (SELECT meter_type FROM iris.ramp_meter
@@ -262,12 +267,15 @@ SELECT assert (500 = (SELECT am_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter insert am_target');
 SELECT assert (600 = (SELECT pm_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter insert pm_target');
+SELECT assert ((SELECT camera FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1') IS NULL, 'meter insert camera');
 SELECT assert (3 = (SELECT m_lock FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter insert m_lock');
 \o
 
 UPDATE iris.ramp_meter SET controller = 'CTL_TEST_1' WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET pin = 11 WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET geo_loc = 'LOC_TEST_1' WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET notes = 'mtr note' WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET meter_type = 0 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET storage = 850 WHERE name = 'RM_TEST_1';
@@ -275,6 +283,7 @@ UPDATE iris.ramp_meter SET max_wait = 120 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET algorithm = 1 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET am_target = 1100 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET pm_target = 1200 WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET camera = 'CAM_TEST_1' WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET m_lock = 1 WHERE name = 'RM_TEST_1';
 
 \o /dev/null
@@ -284,6 +293,8 @@ SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update controller');
 SELECT assert (11 = (SELECT pin FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update pin');
+SELECT assert ('LOC_TEST_1' = (SELECT geo_loc FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update geo_loc');
 SELECT assert ('mtr note' = (SELECT notes FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update notes');
 SELECT assert (0 = (SELECT meter_type FROM iris.ramp_meter
@@ -298,13 +309,72 @@ SELECT assert (1100 = (SELECT am_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update am_target');
 SELECT assert (1200 = (SELECT pm_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update pm_target');
+SELECT assert ('CAM_TEST_1' = (SELECT camera FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update camera');
 SELECT assert (1 = (SELECT m_lock FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update m_lock');
 \o
 
 DELETE FROM iris.ramp_meter WHERE name = 'RM_TEST_1';
 
+-- Test dms view
+INSERT INTO iris.dms (name, pin, notes, aws_allowed, aws_controlled)
+	VALUES ('DMS_TEST_1', 7, 'Notes', true, false);
+
+\o /dev/null
+SELECT assert ('DMS_TEST_1' = (SELECT name FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms insert name');
+SELECT assert ((SELECT controller FROM iris.dms
+               WHERE name = 'DMS_TEST_1') IS NULL, 'dms insert controller');
+SELECT assert (7 = (SELECT pin FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms insert pin');
+SELECT assert ((SELECT geo_loc FROM iris.dms
+               WHERE name = 'DMS_TEST_1') IS NULL, 'dms insert geo_loc');
+SELECT assert ('Notes' = (SELECT notes FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms insert notes');
+SELECT assert ((SELECT camera FROM iris.dms
+               WHERE name = 'DMS_TEST_1') IS NULL, 'dms insert camera');
+SELECT assert (true = (SELECT aws_allowed FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms insert aws_allowed');
+SELECT assert (false = (SELECT aws_controlled FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms insert aws_controlled');
+SELECT assert ((SELECT default_font FROM iris.dms
+               WHERE name = 'DMS_TEST_1') IS NULL, 'dms insert default_font');
+\o
+
+UPDATE iris.dms SET controller = 'CTL_TEST_1' WHERE name = 'DMS_TEST_1';
+UPDATE iris.dms SET pin = 17 WHERE name = 'DMS_TEST_1';
+UPDATE iris.dms SET geo_loc = 'LOC_TEST_1' WHERE name = 'DMS_TEST_1';
+UPDATE iris.dms SET notes = 'no' WHERE name = 'DMS_TEST_1';
+UPDATE iris.dms SET camera = 'CAM_TEST_1' WHERE name = 'DMS_TEST_1';
+UPDATE iris.dms SET aws_allowed = false WHERE name = 'DMS_TEST_1';
+UPDATE iris.dms SET aws_controlled = true WHERE name = 'DMS_TEST_1';
+
+\o /dev/null
+SELECT assert ('DMS_TEST_1' = (SELECT name FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms update name');
+SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms update controller');
+SELECT assert (17 = (SELECT pin FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms update pin');
+SELECT assert ('LOC_TEST_1' = (SELECT geo_loc FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms update geo_loc');
+SELECT assert ('no' = (SELECT notes FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms update notes');
+SELECT assert ('CAM_TEST_1' = (SELECT camera FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms update camera');
+SELECT assert (false = (SELECT aws_allowed FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms update aws_allowed');
+SELECT assert (true = (SELECT aws_controlled FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms update aws_controlled');
+SELECT assert ((SELECT default_font FROM iris.dms
+               WHERE name = 'DMS_TEST_1') IS NULL, 'dms update default_font');
+\o
+
+DELETE FROM iris.dms WHERE name = 'DMS_TEST_1';
+
 -- Delete controller stuff
+DELETE FROM iris.camera WHERE name = 'CAM_TEST_1';
 DELETE FROM iris.controller WHERE name = 'CTL_TEST_1';
 DELETE FROM iris.cabinet WHERE name = 'CAB_TEST_1';
 DELETE FROM iris.geo_loc WHERE name = 'LOC_TEST_1';
