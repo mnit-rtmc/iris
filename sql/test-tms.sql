@@ -373,6 +373,43 @@ SELECT assert ((SELECT default_font FROM iris.dms
 
 DELETE FROM iris.dms WHERE name = 'DMS_TEST_1';
 
+-- Test lane_marking view
+INSERT INTO iris.lane_marking (name, pin, notes)
+	VALUES ('LM_TEST_1', 9, 'Notes');
+
+\o /dev/null
+SELECT assert ('LM_TEST_1' = (SELECT name FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1'), 'lm insert name');
+SELECT assert ((SELECT controller FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1') IS NULL, 'lm insert controller');
+SELECT assert (9 = (SELECT pin FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1'), 'lm insert pin');
+SELECT assert ((SELECT geo_loc FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1') IS NULL, 'lm insert geo_loc');
+SELECT assert ('Notes' = (SELECT notes FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1'), 'lm insert notes');
+\o
+
+UPDATE iris.lane_marking SET controller = 'CTL_TEST_1' WHERE name = 'LM_TEST_1';
+UPDATE iris.lane_marking SET pin = 3 WHERE name = 'LM_TEST_1';
+UPDATE iris.lane_marking SET geo_loc = 'LOC_TEST_1' WHERE name = 'LM_TEST_1';
+UPDATE iris.lane_marking SET notes = 'yes' WHERE name = 'LM_TEST_1';
+
+\o /dev/null
+SELECT assert ('LM_TEST_1' = (SELECT name FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1'), 'lm update name');
+SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1'), 'lm update controller');
+SELECT assert (3 = (SELECT pin FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1'), 'lm update pin');
+SELECT assert ('LOC_TEST_1' = (SELECT geo_loc FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1'), 'lm update geo_loc');
+SELECT assert ('yes' = (SELECT notes FROM iris.lane_marking
+               WHERE name = 'LM_TEST_1'), 'lm update notes');
+\o
+
+DELETE FROM iris.lane_marking WHERE name = 'LM_TEST_1';
+
 -- Delete controller stuff
 DELETE FROM iris.camera WHERE name = 'CAM_TEST_1';
 DELETE FROM iris.controller WHERE name = 'CTL_TEST_1';
