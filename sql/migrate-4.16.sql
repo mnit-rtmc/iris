@@ -480,3 +480,58 @@ $lcs_array_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER lcs_array_delete_trig
     INSTEAD OF DELETE ON iris.lcs_array
     FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_delete();
+
+-- Replace iris.lcs_indication rewrite rules with triggers
+DROP RULE lcs_indication_insert ON iris.lcs_indication;
+DROP RULE lcs_indication_update ON iris.lcs_indication;
+DROP RULE lcs_indication_delete ON iris.lcs_indication;
+
+CREATE FUNCTION iris.lcs_indication_insert() RETURNS TRIGGER AS
+	$lcs_indication_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._lcs_indication(name, lcs, indication)
+	     VALUES (NEW.name, NEW.lcs, NEW.indication);
+	RETURN NEW;
+END;
+$lcs_indication_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_indication_insert_trig
+    INSTEAD OF INSERT ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_insert();
+
+CREATE FUNCTION iris.lcs_indication_update() RETURNS TRIGGER AS
+	$lcs_indication_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._lcs_indication
+	   SET lcs = NEW.lcs,
+	       indication = NEW.indication
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$lcs_indication_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_indication_update_trig
+    INSTEAD OF UPDATE ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_update();
+
+CREATE FUNCTION iris.lcs_indication_delete() RETURNS TRIGGER AS
+	$lcs_indication_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$lcs_indication_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_indication_delete_trig
+    INSTEAD OF DELETE ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_delete();

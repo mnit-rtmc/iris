@@ -1097,27 +1097,55 @@ CREATE VIEW iris.lcs_indication AS SELECT
 	d.name, controller, pin, lcs, indication
 	FROM iris._lcs_indication li JOIN iris._device_io d ON li.name = d.name;
 
-CREATE RULE lcs_indication_insert AS ON INSERT TO iris.lcs_indication DO INSTEAD
-(
-	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._lcs_indication VALUES (NEW.name, NEW.lcs,
-		NEW.indication);
-);
+CREATE FUNCTION iris.lcs_indication_insert() RETURNS TRIGGER AS
+	$lcs_indication_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._lcs_indication(name, lcs, indication)
+	     VALUES (NEW.name, NEW.lcs, NEW.indication);
+	RETURN NEW;
+END;
+$lcs_indication_insert$ LANGUAGE plpgsql;
 
-CREATE RULE lcs_indication_update AS ON UPDATE TO iris.lcs_indication DO INSTEAD
-(
-	UPDATE iris._device_io SET
-		controller = NEW.controller,
-		pin = NEW.pin
-	WHERE name = OLD.name;
-	UPDATE iris._lcs_indication SET
-		lcs = NEW.lcs,
-		indication = NEW.indication
-	WHERE name = OLD.name;
-);
+CREATE TRIGGER lcs_indication_insert_trig
+    INSTEAD OF INSERT ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_insert();
 
-CREATE RULE lcs_indication_delete AS ON DELETE TO iris.lcs_indication DO INSTEAD
+CREATE FUNCTION iris.lcs_indication_update() RETURNS TRIGGER AS
+	$lcs_indication_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._lcs_indication
+	   SET lcs = NEW.lcs,
+	       indication = NEW.indication
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$lcs_indication_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_indication_update_trig
+    INSTEAD OF UPDATE ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_update();
+
+CREATE FUNCTION iris.lcs_indication_delete() RETURNS TRIGGER AS
+	$lcs_indication_delete$
+BEGIN
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$lcs_indication_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_indication_delete_trig
+    INSTEAD OF DELETE ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_delete();
 
 CREATE TABLE iris._gate_arm_array (
 	name VARCHAR(10) PRIMARY KEY,
