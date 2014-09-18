@@ -410,6 +410,44 @@ SELECT assert ('yes' = (SELECT notes FROM iris.lane_marking
 
 DELETE FROM iris.lane_marking WHERE name = 'LM_TEST_1';
 
+-- Test weather_sensor view
+INSERT INTO iris.weather_sensor (name, pin, notes)
+	VALUES ('WS_TEST_1', 4, 'Some Notes');
+
+\o /dev/null
+SELECT assert ('WS_TEST_1' = (SELECT name FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1'), 'ws insert name');
+SELECT assert ((SELECT controller FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1') IS NULL, 'ws insert controller');
+SELECT assert (4 = (SELECT pin FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1'), 'ws insert pin');
+SELECT assert ((SELECT geo_loc FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1') IS NULL, 'ws insert geo_loc');
+SELECT assert ('Some Notes' = (SELECT notes FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1'), 'ws insert notes');
+\o
+
+UPDATE iris.weather_sensor SET controller = 'CTL_TEST_1'
+	WHERE name = 'WS_TEST_1';
+UPDATE iris.weather_sensor SET pin = 5 WHERE name = 'WS_TEST_1';
+UPDATE iris.weather_sensor SET geo_loc = 'LOC_TEST_1' WHERE name = 'WS_TEST_1';
+UPDATE iris.weather_sensor SET notes = 'yeshh' WHERE name = 'WS_TEST_1';
+
+\o /dev/null
+SELECT assert ('WS_TEST_1' = (SELECT name FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1'), 'ws update name');
+SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1'), 'ws update controller');
+SELECT assert (5 = (SELECT pin FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1'), 'ws update pin');
+SELECT assert ('LOC_TEST_1' = (SELECT geo_loc FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1'), 'ws update geo_loc');
+SELECT assert ('yeshh' = (SELECT notes FROM iris.weather_sensor
+               WHERE name = 'WS_TEST_1'), 'ws update notes');
+\o
+
+DELETE FROM iris.weather_sensor WHERE name = 'WS_TEST_1';
+
 -- Delete controller stuff
 DELETE FROM iris.camera WHERE name = 'CAM_TEST_1';
 DELETE FROM iris.controller WHERE name = 'CTL_TEST_1';
