@@ -2510,6 +2510,7 @@ COPY event.meter_limit_control (id, description) FROM stdin;
 1	storage limit
 2	wait limit
 3	target minimum
+4	backup limit
 \.
 
 -- Fonts

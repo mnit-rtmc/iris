@@ -48,7 +48,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		storage_limit,
 		wait_limit,
 		target_min,
-		// FIXME: backup_limit
+		backup_limit,
 	};
 
 	/** Algorithm debug log */
@@ -1043,8 +1043,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			int bml = backupMinLimit();
 			if (bml > r) {
 				r = bml;
-				// FIXME: change to backup_limit
-				limit_control = MinimumRateLimit.target_min;
+				limit_control = MinimumRateLimit.backup_limit;
 			}
 			return r;
 		}

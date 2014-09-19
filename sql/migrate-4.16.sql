@@ -535,3 +535,7 @@ $lcs_indication_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER lcs_indication_delete_trig
     INSTEAD OF DELETE ON iris.lcs_indication
     FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_delete();
+
+-- Add backup limit control for KAdaptiveAlgorithm
+INSERT INTO event.meter_limit_control (id, description)
+	VALUES (4, 'backup limit');
