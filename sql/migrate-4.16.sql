@@ -539,3 +539,7 @@ CREATE TRIGGER lcs_indication_delete_trig
 -- Add backup limit control for KAdaptiveAlgorithm
 INSERT INTO event.meter_limit_control (id, description)
 	VALUES (4, 'backup limit');
+
+-- Reserve Pelco P comm protocol value
+INSERT INTO iris.comm_protocol (id, description)
+	VALUES (30, 'Pelco P');

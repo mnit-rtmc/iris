@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -114,7 +114,10 @@ public enum CommProtocol {
 	HYSECURITY_STC("HySecurity STC"),
 
 	/** Cohu PTZ (29) */
-	COHU_PTZ("Cohu PTZ");
+	COHU_PTZ("Cohu PTZ"),
+
+	/** Pelco P (30) */
+	PELCO_P("Pelco P");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
