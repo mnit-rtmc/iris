@@ -162,6 +162,9 @@ public class PTZPanel extends JPanel {
 			cam_ptz.sendPtz(m_speed * pan, m_speed * tilt,
 				m_speed * zoom);
 		}
+		else {
+			cam_ptz.clearMovement();
+		}
 	}
 
 	/** Build panel with pan and tilt buttons */
