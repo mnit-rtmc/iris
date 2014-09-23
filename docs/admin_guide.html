@@ -481,11 +481,127 @@
 
 <h4 id="system_attributes">map_segment_max_meters</h4>
 <p>
-This is used for two distinct purposes: 1) specifying the maximum distance 
-between adjacent stations to draw segments on the map and 2) specifying the
-maximum distance from a station to another downstream station for associating 
-density, speed, etc. data with a segment.
+	This is used for two distinct purposes: 1) specifying the maximum
+	distance between adjacent stations to draw segments on the map and
+	2) specifying the maximum distance from a station to another downstream
+	station for associating density, speed, etc. data with a segment.
 </p>
+
+<h3 id="client_properties">Client Properties</h3>
+<p>
+	The IRIS client has a configuration file (stored on the server) which
+	controls some of its basic settings &mdash;
+	<i>/etc/iris/iris-client.properties</i>.  It can also contain default
+	values for some <a href="#user_properties">user properties</a> that
+	will be used in the event that they are unspecified in the user
+	properties file.
+</p>
+<dl>
+	<dt>language</dt>
+		<dd>
+			ISO 639 alpha-2 or alpha-3 language code.
+			E.g., "en", "es", "fr".
+		</dd>
+	<dt>country</dt>
+		<dd>
+			ISO 3166 alpha-2 country code or UN M.49 numeric-3
+			area code.  E.g., "US", "MX", "CA".
+		</dd>
+	<dt>variant</dt>
+		<dd>
+			IETF BCP 47 language variant subtag.
+		</dd>
+	<dt>district</dt>
+		<dd>
+			District name.  Useful in cases where multiple IRIS
+			IRIS servers exist within the same organization.
+		</dd>
+	<dt>proxy.host</dt>
+		<dd>
+			If a proxy is to be used, its hostname can be specified
+			here.
+		</dd>
+	<dt>proxy.port</dt>
+		<dd>
+			If a proxy is to be used, its port number can be
+			specified here.
+		</dd>
+	<dt>no.proxy.hosts</dt>
+		<dd>
+			A comma-separated list of host IPs/subnets to exclude
+			from proxy use.
+		</dd>
+	<dt>keystore.file</dt>
+		<dd>
+			URL for the client keystore file.
+		</dd>
+	<dt>keystore.password</dt>
+		<dd>
+			Password for the client keystore.
+		</dd>
+	<dt>sonar.host</dt>
+		<dd>
+			IP or hostname of the SONAR server.
+		</dd>
+	<dt>sonar.port</dt>
+		<dd>
+			TCP port number of the SONAR server.
+		</dd>
+	<dt>tdxml.detector.url</dt>
+		<dd>
+			URL for XML detector stream.
+		</dd>
+	<dt>map.tile.url</dt>
+		<dd>
+			Base URL for map tileset.  Must end in "/".
+		</dd>
+	<dt>video.host</dt>
+		<dd>
+			IP or hostname of video server/proxy.
+		</dd>
+	<dt>video.port</dt>
+		<dd>
+			TCP port number of video server/proxy.
+		</dd>
+	<dt>autologin.username</dt>
+		<dd>
+			A username to be used for automatic login upon client
+			startup.  As this is a global client property, it is
+			generally not useful in production environments.
+		</dd>
+	<dt>autologin.password</dt>
+		<dd>
+			A password to be used for automatic login upon client
+			startup.  As this is a global client property, it is
+			generally not useful in production environments.
+		</dd>
+	</dl>
+
+
+<h3 id="user_properties">User Properties</h3>
+<p>
+	The IRIS client also maintains a file that is used to store client
+	state and user/machine-specific preferences.  If this file doesn't
+	exist, the IRIS client will automatically create it.  The file is
+	named "user.properties", and can be found in the "iris" folder of
+	the user's home directory.  Many of the properties stored in this
+	file are used for the preservation of client UI state (e.g., window
+	geometry, last-selected tab), but others are useful for overriding
+	various defaults:
+</p>
+<dl>
+	<dt>tab.list</dt>
+		<dd>
+			A comma-separated list (whitespace ignored) that
+			specifies the visibility and ordering of the primary
+			UI tabs in the IRIS client.  If unspecified, the
+			following default value is used:
+			<blockquote><code>
+				incident, dms, camera, lcs, ramp.meter,
+				gate.arm, r_node, action.plan, comm
+			</code></blockquote>
+		</dd>
+</dl>
 
 <h3 id="users_and_roles">Users and Roles</h3>
 <p>
