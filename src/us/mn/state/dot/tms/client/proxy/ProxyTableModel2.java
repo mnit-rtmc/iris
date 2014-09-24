@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	}
 
 	/** Get the proxy column at the given column index */
-	public ProxyColumn getProxyColumn(int col) {
+	public ProxyColumn<T> getProxyColumn(int col) {
 		if(col >= 0 && col < columns.size())
 			return columns.get(col);
 		else
