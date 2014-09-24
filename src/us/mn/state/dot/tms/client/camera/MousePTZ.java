@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,6 +130,10 @@ public class MousePTZ {
 	/** Set the component for mouse events */
 	private void setComponent(final Component c) {
 		MouseAdapter mouser = new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				cancelPanTilt();
+			}
 			@Override
 			public void mousePressed(MouseEvent e) {
 				updatePanTilt(e);
