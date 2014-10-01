@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
@@ -61,15 +62,22 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
-	/** Camera action */
-	private final IAction camera = new IAction("camera") {
+	/** Camera preset action */
+	private final IAction preset = new IAction("camera.preset") {
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setCamera((Camera)camera_cbx.getSelectedItem());
+			Object o = preset_cbx.getSelectedItem();
+			if (o instanceof CameraPreset)
+				proxy.setPreset((CameraPreset)o);
+			else
+				proxy.setPreset(null);
 		}
 	};
 
-	/** Camera combo box */
-	private final JComboBox camera_cbx = new JComboBox();
+	/** Camera preset combo box */
+	private final JComboBox preset_cbx = new JComboBox();
+
+	/** Camera preset combo box model */
+	private final WrapperComboBoxModel preset_mdl;
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -156,6 +164,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		loc_pnl = new LocationPanel(s);
 		lock_action = new LockMeterAction(meter, lock_cmb,
 			isUpdatePermitted("mLock"));
+		preset_mdl = new WrapperComboBoxModel(
+			state.getCamCache().getPresetModel());
 	}
 
 	/** Get the SONAR type cache */
@@ -180,14 +190,13 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
-		camera_cbx.setAction(camera);
-		camera_cbx.setModel(new WrapperComboBoxModel(
-			state.getCamCache().getCameraModel()));
+		preset_cbx.setModel(preset_mdl);
+		preset_cbx.setRenderer(new PresetComboRenderer());
 		loc_pnl.initialize();
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
-		loc_pnl.add("camera");
-		loc_pnl.add(camera_cbx, Stretch.LAST);
+		loc_pnl.add("camera.preset");
+		loc_pnl.add(preset_cbx, Stretch.LAST);
 		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
 		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
@@ -279,9 +288,11 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(proxy.getNotes());
 		}
-		if(a == null || a.equals("camera")) {
-			camera.setEnabled(canUpdate("camera"));
-			camera_cbx.setSelectedItem(proxy.getCamera());
+		if (a == null || a.equals("preset")) {
+			preset_cbx.setAction(null);
+			preset_mdl.setSelectedItem(proxy.getPreset());
+			preset.setEnabled(canUpdate("preset"));
+			preset_cbx.setAction(preset);
 		}
 		updateComboBox(a, "meterType", meter_type_cbx,
 			proxy.getMeterType(), meter_type);

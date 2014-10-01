@@ -634,28 +634,46 @@ CREATE TRIGGER camera_delete_trig
     INSTEAD OF DELETE ON iris.camera
     FOR EACH ROW EXECUTE PROCEDURE iris.camera_delete();
 
+CREATE TABLE iris.camera_preset (
+	name VARCHAR(10) PRIMARY KEY,
+	camera VARCHAR(10) NOT NULL REFERENCES iris._camera,
+	preset_num INTEGER NOT NULL CHECK (preset_num > 0 AND preset_num <= 12),
+	direction SMALLINT REFERENCES iris.direction(id),
+	UNIQUE(camera, preset_num)
+);
+
+-- Ideally, _device_preset would be combined with _device_io,
+-- but that would create a circular dependency.
+CREATE TABLE iris._device_preset (
+	name VARCHAR(10) PRIMARY KEY,
+	preset VARCHAR(10) UNIQUE REFERENCES iris.camera_preset(name)
+);
+
 CREATE TABLE iris._beacon (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
-	message text NOT NULL,
-	camera VARCHAR(10) REFERENCES iris._camera(name)
+	message text NOT NULL
 );
 
 ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
-CREATE VIEW iris.beacon AS SELECT
-	b.name, geo_loc, controller, pin, notes, message, camera
-	FROM iris._beacon b JOIN iris._device_io d ON b.name = d.name;
+CREATE VIEW iris.beacon AS
+	SELECT b.name, geo_loc, controller, pin, notes, message, preset
+	FROM iris._beacon b
+	JOIN iris._device_io d ON b.name = d.name
+	JOIN iris._device_preset p ON b.name = p.name;
 
 CREATE FUNCTION iris.beacon_insert() RETURNS TRIGGER AS
 	$beacon_insert$
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	    VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._beacon (name, geo_loc, notes, message, camera)
-	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message, NEW.camera);
+	INSERT INTO iris._device_preset (name, preset)
+	    VALUES (NEW.name, NEW.preset);
+	INSERT INTO iris._beacon (name, geo_loc, notes, message)
+	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message);
 	RETURN NEW;
 END;
 $beacon_insert$ LANGUAGE plpgsql;
@@ -671,11 +689,13 @@ BEGIN
 	   SET controller = NEW.controller,
 	       pin = NEW.pin
 	 WHERE name = OLD.name;
+	UPDATE iris._device_preset
+	   SET preset = NEW.preset
+	 WHERE name = OLD.name;
 	UPDATE iris._beacon
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
-	       message = NEW.message,
-	       camera = NEW.camera
+	       message = NEW.message
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -688,6 +708,7 @@ CREATE TRIGGER beacon_update_trig
 CREATE FUNCTION iris.beacon_delete() RETURNS TRIGGER AS
 	$beacon_delete$
 BEGIN
+	DELETE FROM iris._device_preset WHERE name = OLD.name;
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 	IF FOUND THEN
 		RETURN OLD;
@@ -727,29 +748,32 @@ CREATE TABLE iris._ramp_meter (
 	algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
 	am_target INTEGER NOT NULL,
 	pm_target INTEGER NOT NULL,
-	camera VARCHAR(10) REFERENCES iris._camera(name),
 	m_lock INTEGER REFERENCES iris.meter_lock(id)
 );
 
 ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
-CREATE VIEW iris.ramp_meter AS SELECT
-	m.name, geo_loc, controller, pin, notes, meter_type, storage,
-	max_wait, algorithm, am_target, pm_target, camera, m_lock
-	FROM iris._ramp_meter m JOIN iris._device_io d ON m.name = d.name;
+CREATE VIEW iris.ramp_meter AS
+	SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
+	       max_wait, algorithm, am_target, pm_target, preset, m_lock
+	FROM iris._ramp_meter m
+	JOIN iris._device_io d ON m.name = d.name
+	JOIN iris._device_preset p ON m.name = p.name;
 
 CREATE FUNCTION iris.ramp_meter_insert() RETURNS TRIGGER AS
 	$ramp_meter_insert$
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._device_preset (name, preset)
+	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._ramp_meter
 	            (name, geo_loc, notes, meter_type, storage, max_wait,
-	             algorithm, am_target, pm_target, camera, m_lock)
+	             algorithm, am_target, pm_target, m_lock)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.meter_type,
 	             NEW.storage, NEW.max_wait, NEW.algorithm, NEW.am_target,
-	             NEW.pm_target, NEW.camera, NEW.m_lock);
+	             NEW.pm_target, NEW.m_lock);
 	RETURN NEW;
 END;
 $ramp_meter_insert$ LANGUAGE plpgsql;
@@ -765,6 +789,9 @@ BEGIN
 	   SET controller = NEW.controller,
 	       pin = NEW.pin
 	 WHERE name = OLD.name;
+	UPDATE iris._device_preset
+	   SET preset = NEW.preset
+	 WHERE name = OLD.name;
 	UPDATE iris._ramp_meter
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
@@ -774,7 +801,6 @@ BEGIN
 	       algorithm = NEW.algorithm,
 	       am_target = NEW.am_target,
 	       pm_target = NEW.pm_target,
-	       camera = NEW.camera,
 	       m_lock = NEW.m_lock
 	 WHERE name = OLD.name;
 	RETURN NEW;
@@ -788,6 +814,7 @@ CREATE TRIGGER ramp_meter_update_trig
 CREATE FUNCTION iris.ramp_meter_delete() RETURNS TRIGGER AS
 	$ramp_meter_delete$
 BEGIN
+	DELETE FROM iris._device_preset WHERE name = OLD.name;
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 	IF FOUND THEN
 		RETURN OLD;
@@ -805,7 +832,6 @@ CREATE TABLE iris._dms (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
 	notes text NOT NULL,
-	camera VARCHAR(10) REFERENCES iris._camera,
 	aws_allowed BOOLEAN NOT NULL,
 	aws_controlled BOOLEAN NOT NULL,
 	default_font VARCHAR(16) REFERENCES iris.font
@@ -814,19 +840,23 @@ CREATE TABLE iris._dms (
 ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
-CREATE VIEW iris.dms AS SELECT
-	d.name, geo_loc, controller, pin, notes, camera, aws_allowed,
-	aws_controlled, default_font
-	FROM iris._dms dms JOIN iris._device_io d ON dms.name = d.name;
+CREATE VIEW iris.dms AS
+	SELECT d.name, geo_loc, controller, pin, notes, preset, aws_allowed,
+	       aws_controlled, default_font
+	FROM iris._dms dms
+	JOIN iris._device_io d ON dms.name = d.name
+	JOIN iris._device_preset p ON dms.name = p.name;
 
 CREATE FUNCTION iris.dms_insert() RETURNS TRIGGER AS
 	$dms_insert$
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._dms (name, geo_loc, notes, camera, aws_allowed,
+	INSERT INTO iris._device_preset (name, preset)
+	     VALUES (NEW.name, NEW.preset);
+	INSERT INTO iris._dms (name, geo_loc, notes, aws_allowed,
 	                       aws_controlled, default_font)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.camera,
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes,
 	             NEW.aws_allowed, NEW.aws_controlled, NEW.default_font);
 	RETURN NEW;
 END;
@@ -843,10 +873,12 @@ BEGIN
 	   SET controller = NEW.controller,
 	       pin = NEW.pin
 	 WHERE name = OLD.name;
+	UPDATE iris._device_preset
+	   SET preset = NEW.preset
+	 WHERE name = OLD.name;
 	UPDATE iris._dms
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
-	       camera = NEW.camera,
 	       aws_allowed = NEW.aws_allowed,
 	       aws_controlled = NEW.aws_controlled,
 	       default_font = NEW.default_font
@@ -862,6 +894,7 @@ CREATE TRIGGER dms_update_trig
 CREATE FUNCTION iris.dms_delete() RETURNS TRIGGER AS
 	$dms_delete$
 BEGIN
+	DELETE FROM iris._device_preset WHERE name = OLD.name;
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 	IF FOUND THEN
 		RETURN OLD;
@@ -1593,12 +1626,13 @@ CREATE VIEW controller_loc_view AS
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
-	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.camera,
-	d.aws_allowed, d.aws_controlled, d.default_font,
-	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.lat, l.lon
+	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, p.camera,
+	       p.preset_num, d.aws_allowed, d.aws_controlled, d.default_font,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.lat, l.lon
 	FROM iris.dms d
-	JOIN geo_loc_view l ON d.geo_loc = l.name;
+	LEFT JOIN iris.camera_preset p ON d.preset = p.name
+	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW lcs_array_view AS
@@ -1619,14 +1653,15 @@ GRANT SELECT ON lcs_indication_view TO PUBLIC;
 
 CREATE VIEW ramp_meter_view AS
 	SELECT m.name, geo_loc, controller, pin, notes,
-	mt.description AS meter_type, storage, max_wait,
-	alg.description AS algorithm, am_target, pm_target, camera,
-	ml.description AS meter_lock,
-	l.rd, l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.lat, l.lon
+	       mt.description AS meter_type, storage, max_wait,
+	       alg.description AS algorithm, am_target, pm_target, camera,
+	       preset_num, ml.description AS meter_lock,
+	       l.rd, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+	       l.cross_dir, l.lat, l.lon
 	FROM iris.ramp_meter m
 	LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
 	LEFT JOIN iris.meter_algorithm alg ON m.algorithm = alg.id
+	LEFT JOIN iris.camera_preset p ON m.preset = p.name
 	LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
 	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
@@ -1648,11 +1683,12 @@ CREATE VIEW camera_view AS
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE VIEW beacon_view AS
-	SELECT b.name, b.notes, b.message, b.camera, b.geo_loc,
-	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.lat, l.lon,
-	b.controller, b.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.lat, l.lon,
+	       b.controller, b.pin, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.beacon b
+	LEFT JOIN iris.camera_preset p ON b.preset = p.name
 	LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
 	LEFT JOIN iris.controller ctr ON b.controller = ctr.name;
 GRANT SELECT ON beacon_view TO PUBLIC;
@@ -2114,7 +2150,7 @@ camera_ptz_panel_enable	false
 camera_util_panel_enable	false
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.16.0
+database_version	4.17.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
@@ -2254,6 +2290,7 @@ PRV_0008	login	road(/.*)?	t	f	f	f
 PRV_0009	login	geo_loc(/.*)?	t	f	f	f
 PRV_0010	login	incident_detail(/.*)?	t	f	f	f
 PRV_0011	camera_tab	camera(/.*)?	t	f	f	f
+PRV_001A	camera_tab	camera_preset(/.*)?	t	f	f	f
 PRV_0012	camera_tab	controller(/.*)?	t	f	f	f
 PRV_0013	camera_tab	video_monitor(/.*)?	t	f	f	f
 PRV_0014	incident_tab	incident(/.*)?	t	f	f	f
@@ -2347,6 +2384,7 @@ PRV_0098	policy_admin	time_action/.*	f	t	t	t
 PRV_0099	device_admin	alarm/.*	f	t	t	t
 PRV_0100	device_admin	cabinet/.*	f	t	t	t
 PRV_0101	device_admin	camera/.*	f	t	t	t
+PRV_010A	device_admin	camera_preset/.*	f	t	t	t
 PRV_0102	device_admin	comm_link/.*	f	t	t	t
 PRV_0103	device_admin	controller/.*	f	t	t	t
 PRV_0104	device_admin	detector/.*	f	t	t	t

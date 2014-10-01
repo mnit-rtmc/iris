@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,19 +22,17 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.Calendar;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -45,11 +43,11 @@ import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.camera.CameraSelectAction;
-import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.camera.CameraPresetAction;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.units.Interval;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -70,8 +68,8 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Displays the brightness of the DMS */
 	private final JLabel brightness_lbl = createValueLabel();
 
-	/** Displays the verify camera for the DMS */
-	private final JButton camera_btm = new JButton();
+	/** Displays the camera preset for the DMS */
+	private final JButton preset_btn = new JButton();
 
 	/** Displays the location of the DMS */
 	private final JLabel location_lbl = createValueLabel();
@@ -132,9 +130,6 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Cache of DMS proxy objects */
 	private final TypeCache<DMS> cache;
 
-	/** Camera selection model */
-	private final ProxySelectionModel<Camera> cam_sel_model;
-
 	/** Currently selected DMS.  This will be null if there are zero or
 	 * multiple DMS selected. */
 	private DMS watching;
@@ -163,9 +158,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		dispatcher = d;
 		cache = s.getSonarState().getDmsCache().getDMSs();
 		cache.addProxyListener(this);
-		cam_sel_model = s.getCameraManager().getSelectionModel();
-		camera_btm.setBorder(BorderFactory.createEtchedBorder(
-			EtchedBorder.LOWERED));
+		preset_btn.setBorder(UI.buttonBorder());
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
 		preview_pnl.setFilterColor(new Color(0, 0, 255, 48));
@@ -177,7 +170,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 			add(brightness_lbl);
 		}
 		add("camera");
-		add(camera_btm, Stretch.LAST);
+		add(preset_btn, Stretch.LAST);
 		add("location");
 		add(location_lbl, Stretch.LAST);
 		add("device.status");
@@ -294,7 +287,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		preview_pnl.clear();
 		name_lbl.setText("");
 		brightness_lbl.setText("");
-		setCameraAction(null);
+		setPresetAction(null);
 		location_lbl.setText("");
 		aws_control_chk.setEnabled(false);
 		aws_control_chk.setSelected(false);
@@ -305,11 +298,11 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		op_status_lbl.setText("");
 	}
 
-	/** Set the camera action */
-	private void setCameraAction(DMS dms) {
-		Camera cam = DMSHelper.getCamera(dms);
-		camera_btm.setAction(new CameraSelectAction(cam,cam_sel_model));
-		camera_btm.setEnabled(cam != null);
+	/** Set the camera preset action */
+	private void setPresetAction(DMS dms) {
+		CameraPreset cp = DMSHelper.getPreset(dms);
+		preset_btn.setAction(new CameraPresetAction(cp,
+			session.getCameraManager().getSelectionModel()));
 	}
 
 	/** Update one (or all) attribute(s) on the form.
@@ -325,8 +318,8 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 			else
 				brightness_lbl.setText("");
 		}
-		if(a == null || a.equals("camera"))
-			setCameraAction(dms);
+		if (a == null || a.equals("preset"))
+			setPresetAction(dms);
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
 			location_lbl.setText(GeoLocHelper.getDescription(

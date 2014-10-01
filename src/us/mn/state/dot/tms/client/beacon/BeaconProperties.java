@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.beacon;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import javax.swing.ListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -25,9 +24,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
@@ -57,15 +57,22 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 		}
 	};
 
-	/** Camera action */
-	private final IAction camera = new IAction("camera") {
+	/** Camera preset action */
+	private final IAction preset = new IAction("camera.preset") {
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setCamera((Camera)camera_cbx.getSelectedItem());
+			Object o = preset_cbx.getSelectedItem();
+			if (o instanceof CameraPreset)
+				proxy.setPreset((CameraPreset)o);
+			else
+				proxy.setPreset(null);
 		}
 	};
 
-	/** Camera combo box */
-	private final JComboBox camera_cbx = new JComboBox();
+	/** Camera preset combo box */
+	private final JComboBox preset_cbx = new JComboBox();
+
+	/** Camera preset combo box model */
+	private final WrapperComboBoxModel preset_mdl;
 
 	/** Message text area */
 	private final JTextArea message_txt = new JTextArea(3, 24);
@@ -74,6 +81,8 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	public BeaconProperties(Session s, Beacon b) {
 		super(I18N.get("beacon") + ": ", s, b);
 		loc_pnl = new LocationPanel(s);
+		preset_mdl = new WrapperComboBoxModel(
+			state.getCamCache().getPresetModel());
 	}
 
 	/** Get the SONAR type cache */
@@ -136,11 +145,11 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 
 	/** Create the setup panel */
 	private JPanel createSetupPanel() {
-		ListModel m = state.getCamCache().getCameraModel();
-		camera_cbx.setModel(new WrapperComboBoxModel(m));
+		preset_cbx.setModel(preset_mdl);
+		preset_cbx.setRenderer(new PresetComboRenderer());
 		IPanel p = new IPanel();
-		p.add("camera");
-		p.add(camera_cbx, Stretch.LAST);
+		p.add("camera.preset");
+		p.add(preset_cbx, Stretch.LAST);
 		p.add("beacon.text");
 		p.add(message_txt, Stretch.LAST);
 		return p;
@@ -155,11 +164,11 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(proxy.getNotes());
 		}
-		if(a == null || a.equals("camera")) {
-			camera_cbx.setAction(null);
-			camera_cbx.setSelectedItem(proxy.getCamera());
-			camera.setEnabled(canUpdate("camera"));
-			camera_cbx.setAction(camera);
+		if (a == null || a.equals("preset")) {
+			preset_cbx.setAction(null);
+			preset_mdl.setSelectedItem(proxy.getPreset());
+			preset.setEnabled(canUpdate("preset"));
+			preset_cbx.setAction(preset);
 		}
 		if(a == null || a.equals("message")) {
 			message_txt.setEnabled(canUpdate("message"));

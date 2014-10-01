@@ -20,9 +20,12 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.util.HashSet;
 import java.util.Iterator;
+import javax.swing.BorderFactory;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
 /**
  * UI Widget stuff.
@@ -133,14 +136,21 @@ public class Widgets {
 	};
 
 	/** Create a panel border */
-	public EmptyBorder panelBorder() {
+	public Border panelBorder() {
 		// Don't scale border
 		return new EmptyBorder(VGAP, HGAP, VGAP, HGAP);
 	}
 
 	/** Create a panel border */
-	public EmptyBorder noTopBorder() {
+	public Border noTopBorder() {
 		// Don't scale border
 		return new EmptyBorder(0, HGAP, VGAP, HGAP);
+	}
+
+	/** Create a button border */
+	public Border buttonBorder() {
+		return BorderFactory.createCompoundBorder(
+		       BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+		       BorderFactory.createEmptyBorder(0, hgap, 0, hgap));
 	}
 }

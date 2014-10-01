@@ -78,6 +78,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		LCSImpl.loadAll();
 		LCSIndicationImpl.loadAll();
 		LaneUseMultiImpl.loadAll();
+		CameraPresetImpl.loadAll();
 		IncidentImpl.loadAll();
 		HolidayImpl.loadAll();
 		DayPlanImpl.loadAll();
@@ -120,6 +121,41 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return s1 == null;
 		else
 			return s0.equals(s1);
+	}
+
+	/** Lookup a sonar object */
+	static private SonarObject lookupObject(String st, String name) {
+		if (namespace != null)
+			return namespace.lookupObject(st, name);
+		else
+			return null;
+	}
+
+	/** Lookup a geo location */
+	static protected GeoLocImpl lookupGeoLoc(String name) {
+		SonarObject so = lookupObject(GeoLocImpl.SONAR_TYPE, name);
+		if (so instanceof GeoLocImpl)
+			return (GeoLocImpl)so;
+		else
+			return null;
+	}
+
+	/** Lookup a controller */
+	static protected ControllerImpl lookupController(String name) {
+		SonarObject so = lookupObject(ControllerImpl.SONAR_TYPE, name);
+		if (so instanceof ControllerImpl)
+			return (ControllerImpl)so;
+		else
+			return null;
+	}
+
+	/** Lookup a camera preset */
+	static protected CameraPresetImpl lookupPreset(String name) {
+		SonarObject so = lookupObject(CameraPresetImpl.SONAR_TYPE,name);
+		if (so instanceof CameraPresetImpl)
+			return (CameraPresetImpl)so;
+		else
+			return null;
 	}
 
 	/** Get the primary key name */

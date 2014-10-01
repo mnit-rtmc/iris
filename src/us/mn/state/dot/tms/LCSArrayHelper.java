@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,10 +75,10 @@ public class LCSArrayHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Lookup the camera for an LCS array */
-	static public Camera getCamera(LCSArray lcs_array) {
-		if(lcs_array != null)
-			return DMSHelper.getCamera(lookupDMS(lcs_array, 1));
+	/** Lookup the camera preset for an LCS array */
+	static public CameraPreset getPreset(LCSArray lcs_array) {
+		if (lcs_array != null)
+			return DMSHelper.getPreset(lookupDMS(lcs_array, 1));
 		else
 			return null;
 	}

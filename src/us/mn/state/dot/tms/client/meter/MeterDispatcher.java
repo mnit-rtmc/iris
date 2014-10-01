@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +16,14 @@ package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
 import java.awt.GridLayout;
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RampMeter;
@@ -33,12 +31,13 @@ import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.camera.CameraSelectAction;
+import us.mn.state.dot.tms.client.camera.CameraPresetAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IPanel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -73,8 +72,8 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Name label */
 	private final JLabel name_lbl = createValueLabel();
 
-	/** Camera button */
-	private final JButton camera_btn = new JButton();
+	/** Camera preset button */
+	private final JButton preset_btn = new JButton();
 
 	/** Location label */
 	private final JLabel location_lbl = createValueLabel();
@@ -134,9 +133,8 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		add("device.name");
 		add(name_lbl);
 		add("camera");
-		add(camera_btn, Stretch.LAST);
-		camera_btn.setBorder(BorderFactory.createEtchedBorder(
-			EtchedBorder.LOWERED));
+		add(preset_btn, Stretch.LAST);
+		preset_btn.setBorder(UI.buttonBorder());
 		add("location");
 		add(location_lbl, Stretch.LAST);
 		add("device.operation");
@@ -181,8 +179,8 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			updateConfig(rm);
 		if(a == null || a.equals("name"))
 			name_lbl.setText(rm.getName());
-		if(a == null || a.equals("camera"))
-			setCameraAction(rm);
+		if (a == null || a.equals("preset"))
+			setPresetAction(rm);
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
 			location_lbl.setText(GeoLocHelper.getOnRampDescription(
@@ -227,7 +225,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Update the ramp meter config */
 	private void updateConfig(RampMeter rm) {
 		boolean update = isUpdatePermitted(rm);
-		setCameraAction(rm);
+		setPresetAction(rm);
 		shrink_btn.setAction(new ShrinkQueueAction(rm, update));
 		grow_btn.setAction(new GrowQueueAction(rm, update));
 		on_btn.setAction(new TurnOnAction(rm, update));
@@ -235,10 +233,10 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		lock_cbx.setAction(new LockMeterAction(rm, lock_cbx, update));
 	}
 
-	/** Set the camera action */
-	private void setCameraAction(RampMeter rm) {
-		Camera cam = RampMeterHelper.getCamera(rm);
-		camera_btn.setAction(new CameraSelectAction(cam,
+	/** Set the camera preset action */
+	private void setPresetAction(RampMeter rm) {
+		CameraPreset cp = RampMeterHelper.getPreset(rm);
+		preset_btn.setAction(new CameraPresetAction(cp,
 			session.getCameraManager().getSelectionModel()));
 	}
 
@@ -252,7 +250,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	@Override
 	public void clear() {
 		name_lbl.setText("");
-		setCameraAction(null);
+		setPresetAction(null);
 		location_lbl.setText("");
 		operation_lbl.setText("");
 		operation_lbl.setForeground(null);

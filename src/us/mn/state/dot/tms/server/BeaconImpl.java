@@ -20,7 +20,7 @@ import java.sql.ResultSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
@@ -39,18 +39,17 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, BeaconImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"camera, message FROM iris." + SONAR_TYPE + ";",
+			"preset, message FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new BeaconImpl(
-					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getString(3),	// controller
 					row.getInt(4),		// pin
 					row.getString(5),	// notes
-					row.getString(6),	// camera
+					row.getString(6),	// preset
 					row.getString(7)	// message
 				));
 			}
@@ -65,7 +64,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
-		map.put("camera", camera);
+		map.put("preset", preset);
 		map.put("message", message);
 		return map;
 	}
@@ -90,28 +89,28 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 
 	/** Create a beacon */
 	protected BeaconImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt, CameraImpl cam, String m)
+		int p, String nt, CameraPresetImpl cp, String m)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
-		camera = cam;
+		setPreset(cp);
 		message = m;
 		initTransients();
 	}
 
 	/** Create a beacon */
-	protected BeaconImpl(Namespace ns, String n, String l,
-		String c, int p, String nt, String cam, String m)
+	protected BeaconImpl(String n, String l, String c, int p, String nt,
+		String cp, String m)
 	{
-		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l),
-		       (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,c),
-			p, nt,
-			(CameraImpl)ns.lookupObject(Camera.SONAR_TYPE, cam), m);
+		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
+		     lookupPreset(cp), m);
 	}
 
 	/** Destroy an object */
+	@Override
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
+		setPreset(null);
 		geo_loc.notifyRemove();
 	}
 
@@ -123,25 +122,36 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		return geo_loc;
 	}
 
-	/** Camera from which the beacon can be seen */
-	protected Camera camera;
+	/** Camera preset from which the beacon can be seen */
+	private CameraPreset preset;
 
-	/** Set the verification camera */
-	public void setCamera(Camera c) {
-		camera = c;
+	/** Set the verification camera preset */
+	@Override
+	public void setPreset(CameraPreset cp) {
+		final CameraPreset ocp = preset;
+		if (cp instanceof CameraPresetImpl) {
+			CameraPresetImpl cpi = (CameraPresetImpl)cp;
+			cpi.setAssignedNotify(true);
+		}
+		preset = cp;
+		if (ocp instanceof CameraPresetImpl) {
+			CameraPresetImpl ocpi = (CameraPresetImpl)ocp;
+			ocpi.setAssignedNotify(false);
+		}
 	}
 
-	/** Set the verification camera */
-	public void doSetCamera(Camera c) throws TMSException {
-		if(c == camera)
+	/** Set the verification camera preset */
+	public void doSetPreset(CameraPreset cp) throws TMSException {
+		if (cp == preset)
 			return;
-		store.update(this, "camera", c);
-		setCamera(c);
+		store.update(this, "preset", cp);
+		setPreset(cp);
 	}
 
-	/** Get verification camera */
-	public Camera getCamera() {
-		return camera;
+	/** Get verification camera preset */
+	@Override
+	public CameraPreset getPreset() {
+		return preset;
 	}
 
 	/** Message text */

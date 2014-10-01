@@ -34,11 +34,15 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Setup panel */
 	private final PropSetup setup_pnl;
 
+	/** Preset panel */
+	private final PropPreset preset_pnl;
+
 	/** Create a new camera properties form */
 	public CameraProperties(Session s, Camera c) {
 		super(I18N.get("camera") + ": ", s, c);
 		location_pnl = new PropLocation(s, c);
 		setup_pnl = new PropSetup(s, c);
+		preset_pnl = new PropPreset(s, c);
 	}
 
 	/** Get the SONAR type cache */
@@ -52,9 +56,11 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	protected void initialize() {
 		location_pnl.initialize();
 		setup_pnl.initialize();
+		preset_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), location_pnl);
 		tab.add(I18N.get("device.setup"), setup_pnl);
+		tab.add(I18N.get("camera.preset"), preset_pnl);
 		add(tab);
 		super.initialize();
 	}
@@ -64,6 +70,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	protected void dispose() {
 		location_pnl.dispose();
 		setup_pnl.dispose();
+		preset_pnl.dispose();
 		super.dispose();
 	}
 

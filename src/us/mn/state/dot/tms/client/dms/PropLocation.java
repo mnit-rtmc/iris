@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@ import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -41,8 +42,22 @@ public class PropLocation extends LocationPanel {
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
-	/** Camera combo box */
-	private final JComboBox camera_cbx = new JComboBox();
+	/** Camera preset action */
+	private final IAction preset = new IAction("camera.preset") {
+		protected void doActionPerformed(ActionEvent e) {
+			Object o = preset_cbx.getSelectedItem();
+			if (o instanceof CameraPreset)
+				dms.setPreset((CameraPreset)o);
+			else
+				dms.setPreset(null);
+		}
+	};
+
+	/** Camera preset combo box */
+	private final JComboBox preset_cbx = new JComboBox();
+
+	/** Camera preset combo box model */
+	private final WrapperComboBoxModel preset_mdl;
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -67,34 +82,32 @@ public class PropLocation extends LocationPanel {
 	public PropLocation(Session s, DMS sign) {
 		super(s);
 		dms = sign;
+		preset_mdl = new WrapperComboBoxModel(
+			state.getCamCache().getPresetModel());
 	}
 
 	/** Initialize the widgets on the form */
-	@Override public void initialize() {
+	@Override
+	public void initialize() {
 		super.initialize();
-		camera_cbx.setModel(new WrapperComboBoxModel(
-			state.getCamCache().getCameraModel()));
+		preset_cbx.setModel(preset_mdl);
+		preset_cbx.setRenderer(new PresetComboRenderer());
 		add("device.notes");
 		add(notes_txt, Stretch.FULL);
-		add("camera");
-		add(camera_cbx, Stretch.LAST);
+		add("camera.preset");
+		add(preset_cbx, Stretch.LAST);
 		add(new JButton(controller), Stretch.RIGHT);
 		setGeoLoc(dms.getGeoLoc());
 	}
 
 	/** Create the widget jobs */
-	@Override protected void createJobs() {
+	@Override
+	protected void createJobs() {
 		super.createJobs();
 		notes_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
 				dms.setNotes(notes_txt.getText());
-			}
-		});
-		camera_cbx.setAction(new IAction("camera") {
-			protected void doActionPerformed(ActionEvent e) {
-				dms.setCamera(
-					(Camera)camera_cbx.getSelectedItem());
 			}
 		});
 	}
@@ -107,9 +120,11 @@ public class PropLocation extends LocationPanel {
 			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(dms.getNotes());
 		}
-		if(a == null || a.equals("camera")) {
-			camera_cbx.setEnabled(canUpdate("camera"));
-			camera_cbx.setSelectedItem(dms.getCamera());
+		if (a == null || a.equals("preset")) {
+			preset_cbx.setAction(null);
+			preset_mdl.setSelectedItem(dms.getPreset());
+			preset.setEnabled(canUpdate("preset"));
+			preset_cbx.setAction(preset);
 		}
 	}
 

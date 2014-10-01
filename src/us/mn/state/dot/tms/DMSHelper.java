@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -88,12 +88,9 @@ public class DMSHelper extends BaseHelper {
 		return SString.removeTail(s.toString(), ", ");
 	}
 
-	/** Lookup the camera for a DMS */
-	static public Camera getCamera(DMS dms) {
-		if(dms != null)
-			return dms.getCamera();
-		else
-			return null;
+	/** Lookup the camera preset for a DMS */
+	static public CameraPreset getPreset(DMS dms) {
+		return (dms != null) ? dms.getPreset() : null;
 	}
 
 	/** Get the DMS roadway direction from the geo location as a String */

@@ -32,7 +32,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -98,17 +98,17 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"camera, aws_allowed, aws_controlled, default_font " +
+			"preset, aws_allowed, aws_controlled, default_font " +
 			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new DMSImpl(namespace,
+				namespace.addObject(new DMSImpl(
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getString(3),	// controller
 					row.getInt(4),		// pin
 					row.getString(5),	// notes
-					row.getString(6),	// camera
+					row.getString(6),	// preset
 					row.getBoolean(7),	// aws_allowed
 					row.getBoolean(8),     // aws_controlled
 					row.getString(9)	// default_font
@@ -125,7 +125,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
-		map.put("camera", camera);
+		map.put("preset", preset);
 		map.put("aws_allowed", awsAllowed);
 		map.put("aws_controlled", awsControlled);
 		map.put("default_font", default_font);
@@ -156,11 +156,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a dynamic message sign */
 	protected DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, Camera cam, boolean aa, boolean ac, Font df)
+		int p, String nt, CameraPreset cp, boolean aa, boolean ac,
+		Font df)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
-		camera = cam;
+		setPreset(cp);
 		awsAllowed = aa;
 		awsControlled = ac;
 		default_font = df;
@@ -169,13 +170,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Create a dynamic message sign */
-	protected DMSImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, String cam, boolean aa, boolean ac, String df)
+	protected DMSImpl(String n, String loc, String c,
+		int p, String nt, String cp, boolean aa, boolean ac, String df)
 	{
-		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
-		     p, nt, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
-		     aa, ac, FontHelper.lookup(df));
+		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
+		     lookupPreset(cp), aa, ac, FontHelper.lookup(df));
 	}
 
 	/** Create a blank message for the sign */
@@ -191,8 +190,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Destroy an object */
+	@Override
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
+		setPreset(null);
 		geo_loc.notifyRemove();
 	}
 
@@ -237,25 +238,36 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return geo_loc;
 	}
 
-	/** Camera from which this can be seen */
-	protected Camera camera;
+	/** Camera preset from which this can be seen */
+	private CameraPreset preset;
 
-	/** Set the verification camera */
-	public void setCamera(Camera c) {
-		camera = c;
+	/** Set the verification camera preset */
+	@Override
+	public void setPreset(CameraPreset cp) {
+		final CameraPreset ocp = preset;
+		if (cp instanceof CameraPresetImpl) {
+			CameraPresetImpl cpi = (CameraPresetImpl)cp;
+			cpi.setAssignedNotify(true);
+		}
+		preset = cp;
+		if (ocp instanceof CameraPresetImpl) {
+			CameraPresetImpl ocpi = (CameraPresetImpl)ocp;
+			ocpi.setAssignedNotify(false);
+		}
 	}
 
-	/** Set the verification camera */
-	public void doSetCamera(Camera c) throws TMSException {
-		if(c == camera)
+	/** Set the verification camera preset */
+	public void doSetPreset(CameraPreset cp) throws TMSException {
+		if (cp == preset)
 			return;
-		store.update(this, "camera", c);
-		setCamera(c);
+		store.update(this, "preset", cp);
+		setPreset(cp);
 	}
 
-	/** Get verification camera */
-	public Camera getCamera() {
-		return camera;
+	/** Get verification camera preset */
+	@Override
+	public CameraPreset getPreset() {
+		return preset;
 	}
 
 	/** Administrator allowed AWS control */

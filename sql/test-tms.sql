@@ -239,6 +239,9 @@ SELECT assert (true = (SELECT publish FROM iris.camera
                WHERE name = 'CAM_TEST_1'), 'cam update publish');
 \o
 
+INSERT INTO iris.camera_preset (name, camera, preset_num, direction)
+	VALUES ('PRE_TEST_1', 'CAM_TEST_1', 1, 3);
+
 -- Test ramp meter view
 INSERT INTO iris.ramp_meter (name, pin, notes, meter_type, storage, max_wait,
                              algorithm, am_target, pm_target, m_lock)
@@ -267,8 +270,8 @@ SELECT assert (500 = (SELECT am_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter insert am_target');
 SELECT assert (600 = (SELECT pm_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter insert pm_target');
-SELECT assert ((SELECT camera FROM iris.ramp_meter
-               WHERE name = 'RM_TEST_1') IS NULL, 'meter insert camera');
+SELECT assert ((SELECT preset FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1') IS NULL, 'meter insert preset');
 SELECT assert (3 = (SELECT m_lock FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter insert m_lock');
 \o
@@ -283,7 +286,7 @@ UPDATE iris.ramp_meter SET max_wait = 120 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET algorithm = 1 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET am_target = 1100 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET pm_target = 1200 WHERE name = 'RM_TEST_1';
-UPDATE iris.ramp_meter SET camera = 'CAM_TEST_1' WHERE name = 'RM_TEST_1';
+UPDATE iris.ramp_meter SET preset = 'PRE_TEST_1' WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET m_lock = 1 WHERE name = 'RM_TEST_1';
 
 \o /dev/null
@@ -309,8 +312,8 @@ SELECT assert (1100 = (SELECT am_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update am_target');
 SELECT assert (1200 = (SELECT pm_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update pm_target');
-SELECT assert ('CAM_TEST_1' = (SELECT camera FROM iris.ramp_meter
-               WHERE name = 'RM_TEST_1'), 'meter update camera');
+SELECT assert ('PRE_TEST_1' = (SELECT preset FROM iris.ramp_meter
+               WHERE name = 'RM_TEST_1'), 'meter update preset');
 SELECT assert (1 = (SELECT m_lock FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update m_lock');
 \o
@@ -332,8 +335,8 @@ SELECT assert ((SELECT geo_loc FROM iris.dms
                WHERE name = 'DMS_TEST_1') IS NULL, 'dms insert geo_loc');
 SELECT assert ('Notes' = (SELECT notes FROM iris.dms
                WHERE name = 'DMS_TEST_1'), 'dms insert notes');
-SELECT assert ((SELECT camera FROM iris.dms
-               WHERE name = 'DMS_TEST_1') IS NULL, 'dms insert camera');
+SELECT assert ((SELECT preset FROM iris.dms
+               WHERE name = 'DMS_TEST_1') IS NULL, 'dms insert preset');
 SELECT assert (true = (SELECT aws_allowed FROM iris.dms
                WHERE name = 'DMS_TEST_1'), 'dms insert aws_allowed');
 SELECT assert (false = (SELECT aws_controlled FROM iris.dms
@@ -346,7 +349,7 @@ UPDATE iris.dms SET controller = 'CTL_TEST_1' WHERE name = 'DMS_TEST_1';
 UPDATE iris.dms SET pin = 17 WHERE name = 'DMS_TEST_1';
 UPDATE iris.dms SET geo_loc = 'LOC_TEST_1' WHERE name = 'DMS_TEST_1';
 UPDATE iris.dms SET notes = 'no' WHERE name = 'DMS_TEST_1';
-UPDATE iris.dms SET camera = 'CAM_TEST_1' WHERE name = 'DMS_TEST_1';
+UPDATE iris.dms SET preset = 'PRE_TEST_1' WHERE name = 'DMS_TEST_1';
 UPDATE iris.dms SET aws_allowed = false WHERE name = 'DMS_TEST_1';
 UPDATE iris.dms SET aws_controlled = true WHERE name = 'DMS_TEST_1';
 
@@ -361,8 +364,8 @@ SELECT assert ('LOC_TEST_1' = (SELECT geo_loc FROM iris.dms
                WHERE name = 'DMS_TEST_1'), 'dms update geo_loc');
 SELECT assert ('no' = (SELECT notes FROM iris.dms
                WHERE name = 'DMS_TEST_1'), 'dms update notes');
-SELECT assert ('CAM_TEST_1' = (SELECT camera FROM iris.dms
-               WHERE name = 'DMS_TEST_1'), 'dms update camera');
+SELECT assert ('PRE_TEST_1' = (SELECT preset FROM iris.dms
+               WHERE name = 'DMS_TEST_1'), 'dms update preset');
 SELECT assert (false = (SELECT aws_allowed FROM iris.dms
                WHERE name = 'DMS_TEST_1'), 'dms update aws_allowed');
 SELECT assert (true = (SELECT aws_controlled FROM iris.dms
@@ -540,6 +543,7 @@ DELETE FROM iris.dms WHERE name = 'L_TEST_1';
 DELETE FROM iris.lcs_array WHERE name = 'LCS_TEST_1';
 
 -- Delete controller stuff
+DELETE FROM iris.camera_preset WHERE name = 'PRE_TEST_1';
 DELETE FROM iris.camera WHERE name = 'CAM_TEST_1';
 DELETE FROM iris.controller WHERE name = 'CTL_TEST_1';
 DELETE FROM iris.cabinet WHERE name = 'CAB_TEST_1';

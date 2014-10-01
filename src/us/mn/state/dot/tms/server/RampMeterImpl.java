@@ -28,7 +28,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -106,11 +106,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		namespace.registerType(SONAR_TYPE, RampMeterImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, algorithm, am_target, "+
-			"pm_target, camera, m_lock FROM iris." + SONAR_TYPE +
+			"pm_target, preset, m_lock FROM iris." + SONAR_TYPE +
 			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new RampMeterImpl(namespace,
+				namespace.addObject(new RampMeterImpl(
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getString(3),	// controller
@@ -122,7 +122,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					row.getInt(9),		// algorithm
 					row.getInt(10),		// am_target
 					row.getInt(11),		// pm_target
-					row.getString(12),	// camera
+					row.getString(12),	// preset
 					row.getInt(13)		// m_lock
 				));
 			}
@@ -143,7 +143,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		map.put("algorithm", algorithm);
 		map.put("am_target", am_target);
 		map.put("pm_target", pm_target);
-		map.put("camera", camera);
+		map.put("preset", preset);
 		if(m_lock != null)
 			map.put("m_lock", m_lock.ordinal());
 		return map;
@@ -170,14 +170,14 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Create a ramp meter */
 	protected RampMeterImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, int t, int st, int w, int alg, int at, int pt,
-		Camera cam, Integer lk)
+		CameraPreset cp, Integer lk)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
 		meter_type = RampMeterType.fromOrdinal(t);
 		storage = st;
 		max_wait = w;
-		camera = cam;
+		setPreset(cp);
 		algorithm = alg;
 		am_target = at;
 		pm_target = pt;
@@ -187,14 +187,12 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Create a ramp meter */
-	protected RampMeterImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, int t, int st, int w, int alg, int at, int pt,
-		String cam, Integer lk)
+	protected RampMeterImpl(String n, String loc, String c, int p,
+		String nt, int t, int st, int w, int alg, int at, int pt,
+		String cp, Integer lk)
 	{
-		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
-		     p, nt, t, st, w, alg, at, pt,
-		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam), lk);
+		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, t, st, w,
+		     alg, at, pt, lookupPreset(cp), lk);
 	}
 
 	/** Initialize the transient state */
@@ -209,6 +207,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	@Override
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
+		setPreset(null);
 		geo_loc.notifyRemove();
 	}
 
@@ -419,25 +418,36 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return false;
 	}
 
-	/** Camera from which this can be seen */
-	protected Camera camera;
+	/** Camera preset from which this can be seen */
+	private CameraPreset preset;
 
-	/** Set the verification camera */
-	public void setCamera(Camera c) {
-		camera = c;
+	/** Set the verification camera preset */
+	@Override
+	public void setPreset(CameraPreset cp) {
+		final CameraPreset ocp = preset;
+		if (cp instanceof CameraPresetImpl) {
+			CameraPresetImpl cpi = (CameraPresetImpl)cp;
+			cpi.setAssignedNotify(true);
+		}
+		preset = cp;
+		if (ocp instanceof CameraPresetImpl) {
+			CameraPresetImpl ocpi = (CameraPresetImpl)ocp;
+			ocpi.setAssignedNotify(false);
+		}
 	}
 
-	/** Set the verification camera */
-	public void doSetCamera(Camera c) throws TMSException {
-		if(c == camera)
+	/** Set the verification camera preset */
+	public void doSetPreset(CameraPreset cp) throws TMSException {
+		if (cp == preset)
 			return;
-		store.update(this, "camera", c);
-		setCamera(c);
+		store.update(this, "preset", cp);
+		setPreset(cp);
 	}
 
-	/** Get verification camera */
-	public Camera getCamera() {
-		return camera;
+	/** Get verification camera preset */
+	@Override
+	public CameraPreset getPreset() {
+		return preset;
 	}
 
 	/** Metering rate lock status */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -43,6 +44,22 @@ public class CamCache {
 		return camera_model;
 	}
 
+	/** Cache of camera presets */
+	private final TypeCache<CameraPreset> presets;
+
+	/** Get the camera preset cache */
+	public TypeCache<CameraPreset> getPresets() {
+		return presets;
+	}
+
+	/** Unassigned camera preset list model */
+	private final ProxyListModel<CameraPreset> preset_model;
+
+	/** Get the unassigned camera preset list model */
+	public ProxyListModel<CameraPreset> getPresetModel() {
+		return preset_model;
+	}
+
 	/** Cache of video monitor proxies */
 	protected final TypeCache<VideoMonitor> monitors;
 
@@ -66,6 +83,17 @@ public class CamCache {
 		cameras = new TypeCache<Camera>(Camera.class, client);
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
+		presets = new TypeCache<CameraPreset>(CameraPreset.class,
+			client);
+		preset_model = new ProxyListModel<CameraPreset>(presets) {
+			protected int doProxyAdded(CameraPreset cp) {
+				if (!cp.getAssigned())
+					return super.doProxyAdded(cp);
+				else
+					return -1;
+			}
+		};
+		preset_model.initialize();
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class,
 			client);
 		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
@@ -79,6 +107,7 @@ public class CamCache {
 			cameras.ignoreAttribute("operation");
 			cameras.ignoreAttribute("opStatus");
 		}
+		client.populateReadable(presets);
 		client.populateReadable(monitors);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCS;
@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.camera.CameraSelectAction;
+import us.mn.state.dot.tms.client.camera.CameraPresetAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -78,8 +78,8 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	/** Name of the selected LCS array */
 	private final JLabel name_lbl = createValueLabel();
 
-	/** Verify camera button */
-	private final JButton camera_btn = new JButton();
+	/** Verify camera preset button */
+	private final JButton preset_btn = new JButton();
 
 	/** Location of LCS array */
 	private final JLabel location_lbl = createValueLabel();
@@ -143,7 +143,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 
 	/** Initialize the widgets on the panel */
 	public void initialize() {
-		camera_btn.setBorder(BorderFactory.createEtchedBorder(
+		preset_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
@@ -151,7 +151,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		add("device.name");
 		add(name_lbl);
 		add("camera");
-		add(camera_btn, Stretch.LAST);
+		add(preset_btn, Stretch.LAST);
 		add("location");
 		add(location_lbl, Stretch.LAST);
 		add("device.status");
@@ -209,8 +209,8 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 			updateConfig(la);
 		if(a == null || a.equals("name"))
 			name_lbl.setText(la.getName());
-		if(a == null || a.equals("camera"))
-			setCameraAction(la);
+		if (a == null || a.equals("preset"))
+			setPresetAction(la);
 		// FIXME: this won't update when geoLoc attributes change
 		//        plus, geoLoc is not an LCSArray attribute
 		if(a == null || a.equals("geoLoc"))
@@ -261,10 +261,10 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		blank_btn.setEnabled(update);
 	}
 
-	/** Set the camera action */
-	private void setCameraAction(LCSArray la) {
-		Camera cam = LCSArrayHelper.getCamera(la);
-		camera_btn.setAction(new CameraSelectAction(cam,
+	/** Set the camera preset action */
+	private void setPresetAction(LCSArray la) {
+		CameraPreset cp = LCSArrayHelper.getPreset(la);
+		preset_btn.setAction(new CameraPresetAction(cp,
 			session.getCameraManager().getSelectionModel()));
 	}
 
@@ -320,7 +320,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	public void clear() {
 		lcs_array = null;
 		name_lbl.setText("");
-		setCameraAction(null);
+		setPresetAction(null);
 		location_lbl.setText("");
 		status_lbl.setText("");
 		status_lbl.setForeground(null);

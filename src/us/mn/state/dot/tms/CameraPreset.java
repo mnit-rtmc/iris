@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,34 +14,33 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.SonarObject;
+
 /**
- * A Beacon is a light which flashes toward oncoming traffic.
+ * Camera Preset
  *
  * @author Douglas Lau
  */
-public interface Beacon extends Device {
+public interface CameraPreset extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "beacon";
+	String SONAR_TYPE = "camera_preset";
 
-	/** Get the device location */
-	GeoLoc getGeoLoc();
+	/** Maximum allowed preset number */
+	int MAX_PRESET = 12;
 
-	/** Set the verification camera preset */
-	void setPreset(CameraPreset cp);
+	/** Get camera */
+	Camera getCamera();
 
-	/** Get the verification camera preset */
-	CameraPreset getPreset();
+	/** Get preset number */
+	int getPresetNum();
 
-	/** Set the message text */
-	void setMessage(String t);
+	/** Set direction */
+	void setDirection(short d);
 
-	/** Get the message text */
-	String getMessage();
+	/** Get direction */
+	short getDirection();
 
-	/** Set the flashing state of the beacon */
-	void setFlashing(boolean f);
-
-	/** Check if the beacon is flashing */
-	boolean getFlashing();
+	/** Get assigned flag */
+	boolean getAssigned();
 }
