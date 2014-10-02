@@ -62,6 +62,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		AlarmImpl.loadAll();
 		DetectorImpl.loadAll();
 		CameraImpl.loadAll();
+		CameraPresetImpl.loadAll();
 		BeaconImpl.loadAll();
 		WeatherSensorImpl.loadAll();
 		RampMeterImpl.loadAll();
@@ -78,7 +79,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		LCSImpl.loadAll();
 		LCSIndicationImpl.loadAll();
 		LaneUseMultiImpl.loadAll();
-		CameraPresetImpl.loadAll();
 		IncidentImpl.loadAll();
 		HolidayImpl.loadAll();
 		DayPlanImpl.loadAll();
