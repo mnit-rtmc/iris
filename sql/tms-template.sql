@@ -1840,6 +1840,11 @@ CREATE VIEW controller_view AS
 	JOIN iris.cabinet cab ON c.cabinet = cab.name;
 GRANT SELECT ON controller_view TO PUBLIC;
 
+CREATE VIEW device_controller_view AS
+	SELECT name, controller, pin
+	FROM iris._device_io;
+GRANT SELECT ON device_controller_view TO PUBLIC;
+
 CREATE VIEW comm_link_view AS
 	SELECT cl.name, cl.description, cl.uri, cp.description AS protocol,
 		cl.poll_enabled, cl.poll_period, cl.timeout

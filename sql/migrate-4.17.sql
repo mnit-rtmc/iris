@@ -18,6 +18,12 @@ DROP VIEW iris.controller_weather_sensor;
 DROP VIEW iris.controller_lane_marking;
 DROP VIEW iris.controller_dms;
 
+-- Add device_controller_view
+CREATE VIEW device_controller_view AS
+	SELECT name, controller, pin
+	FROM iris._device_io;
+GRANT SELECT ON device_controller_view TO PUBLIC;
+
 -- Add preset table
 CREATE TABLE iris.camera_preset (
 	name VARCHAR(10) PRIMARY KEY,
