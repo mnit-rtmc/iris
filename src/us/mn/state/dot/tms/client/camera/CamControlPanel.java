@@ -50,6 +50,9 @@ public class CamControlPanel extends JPanel {
 	/** Panel for camera presets */
 	private final PresetPanel preset_pnl;
 
+	/** Panel for camera presets */
+	private final PresetPanel2 preset2_pnl;
+
 	/** Create a new camera control panel */
 	public CamControlPanel(CameraPTZ cam_ptz) {
 		ptz = SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean();
@@ -60,6 +63,7 @@ public class CamControlPanel extends JPanel {
 		lens_pnl = new LensPanel(cam_ptz);
 		util_pnl = new UtilPanel(cam_ptz);
 		preset_pnl = new PresetPanel(cam_ptz);
+		preset2_pnl = new PresetPanel2(cam_ptz);
 		layoutPanel();
 	}
 
@@ -87,12 +91,15 @@ public class CamControlPanel extends JPanel {
 			hg.addComponent(lens_pnl);
 		if (preset)
 			hg.addComponent(preset_pnl);
+		else
+			hg.addComponent(preset2_pnl);
 		return hg;
 	}
 
 	/** Create the vertical group */
 	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
-		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
+		GroupLayout.ParallelGroup vg = gl.createParallelGroup(
+			GroupLayout.Alignment.CENTER);
 		if (ptz)
 			vg.addComponent(ptz_pnl);
 		else
@@ -103,6 +110,8 @@ public class CamControlPanel extends JPanel {
 			vg.addComponent(lens_pnl);
 		if (preset)
 			vg.addComponent(preset_pnl);
+		else
+			vg.addComponent(preset2_pnl);
 		return vg;
 	}
 
@@ -120,5 +129,6 @@ public class CamControlPanel extends JPanel {
 		lens_pnl.setEnabled(e);
 		util_pnl.setEnabled(e);
 		preset_pnl.setEnabled(e);
+		preset2_pnl.setEnabled(e);
 	}
 }

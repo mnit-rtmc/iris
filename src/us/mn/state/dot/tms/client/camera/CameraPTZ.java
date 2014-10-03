@@ -72,6 +72,11 @@ public class CameraPTZ {
 		}
 	}
 
+	/** Get the camera */
+	public Camera getCamera() {
+		return camera;
+	}
+
 	/**
 	 * Send a PTZ command to the current camera, unless it is a full-stop
 	 * and the camera is already fully stopped.
