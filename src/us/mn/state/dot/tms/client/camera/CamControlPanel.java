@@ -44,6 +44,9 @@ public class CamControlPanel extends JPanel {
 	/** Panel for lens control */
 	private final LensPanel lens_pnl;
 
+	/** Panel for miscellaneous stuff */
+	private final MiscPanel misc_pnl;
+
 	/** Panel for camera utilities */
 	private final UtilPanel util_pnl;
 
@@ -61,6 +64,7 @@ public class CamControlPanel extends JPanel {
 		pt_pnl = new PanTiltPanel(cam_ptz);
 		ptz_pnl = new PTZPanel(cam_ptz);
 		lens_pnl = new LensPanel(cam_ptz);
+		misc_pnl = new MiscPanel(cam_ptz);
 		util_pnl = new UtilPanel(cam_ptz);
 		preset_pnl = new PresetPanel(cam_ptz);
 		preset2_pnl = new PresetPanel2(cam_ptz);
@@ -71,8 +75,8 @@ public class CamControlPanel extends JPanel {
 	private void layoutPanel() {
 		GroupLayout gl = new GroupLayout(this);
 		gl.setHonorsVisibility(false);
-		gl.setAutoCreateGaps(true);
-		gl.setAutoCreateContainerGaps(true);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
 		gl.setHorizontalGroup(createHorizontalGroup(gl));
 		gl.setVerticalGroup(createVerticalGroup(gl));
 		setLayout(gl);
@@ -85,10 +89,13 @@ public class CamControlPanel extends JPanel {
 			hg.addComponent(ptz_pnl);
 		else
 			hg.addComponent(pt_pnl);
+		hg.addGap(UI.hgap);
 		if (util)
 			hg.addComponent(util_pnl);
-		else
+		else {
 			hg.addComponent(lens_pnl);
+			hg.addComponent(misc_pnl);
+		}
 		if (preset)
 			hg.addComponent(preset_pnl);
 		else
@@ -106,8 +113,10 @@ public class CamControlPanel extends JPanel {
 			vg.addComponent(pt_pnl);
 		if (util)
 			vg.addComponent(util_pnl);
-		else
+		else {
 			vg.addComponent(lens_pnl);
+			vg.addComponent(misc_pnl);
+		}
 		if (preset)
 			vg.addComponent(preset_pnl);
 		else
@@ -127,6 +136,7 @@ public class CamControlPanel extends JPanel {
 		ptz_pnl.setEnabled(e);
 		pt_pnl.setEnabled(e);
 		lens_pnl.setEnabled(e);
+		misc_pnl.setEnabled(e);
 		util_pnl.setEnabled(e);
 		preset_pnl.setEnabled(e);
 		preset2_pnl.setEnabled(e);

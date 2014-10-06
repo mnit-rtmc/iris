@@ -14,15 +14,11 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.event.ActionEvent;
 import javax.swing.GroupLayout;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -73,17 +69,17 @@ public class LensPanel extends JPanel {
 			0, 0, 1);
 		zoom_out_btn = new PTZButton("camera.lens.zoom.out", cptz,
 			0, 0, -1);
-		focus_near_btn = createDeviceReqBtn("camera.lens.focus.near",
-			DeviceRequest.CAMERA_FOCUS_NEAR,
+		focus_near_btn = new DeviceReqButton("camera.lens.focus.near",
+			cptz, DeviceRequest.CAMERA_FOCUS_NEAR,
 			DeviceRequest.CAMERA_FOCUS_STOP);
-		focus_far_btn = createDeviceReqBtn("camera.lens.focus.far",
-			DeviceRequest.CAMERA_FOCUS_FAR,
+		focus_far_btn = new DeviceReqButton("camera.lens.focus.far",
+			cptz, DeviceRequest.CAMERA_FOCUS_FAR,
 			DeviceRequest.CAMERA_FOCUS_STOP);
-		iris_open_btn = createDeviceReqBtn("camera.lens.iris.open",
-			DeviceRequest.CAMERA_IRIS_OPEN,
+		iris_open_btn = new DeviceReqButton("camera.lens.iris.open",
+			cptz, DeviceRequest.CAMERA_IRIS_OPEN,
 			DeviceRequest.CAMERA_IRIS_STOP);
-		iris_close_btn = createDeviceReqBtn("camera.lens.iris.close",
-			DeviceRequest.CAMERA_IRIS_CLOSE,
+		iris_close_btn = new DeviceReqButton("camera.lens.iris.close",
+			cptz, DeviceRequest.CAMERA_IRIS_CLOSE,
 			DeviceRequest.CAMERA_IRIS_STOP);
 		layoutPanel();
 	}
@@ -167,36 +163,5 @@ public class LensPanel extends JPanel {
 		iris_lbl.setEnabled(e);
 		iris_open_btn.setEnabled(e);
 		iris_close_btn.setEnabled(e);
-	}
-
-	/** Create a device request button.
-	 * @param text_id
-	 * @param pdr Device request for pressed state.
-	 * @param rdr Device request for released state.
-	 * @return Created button. */
-	private JButton createDeviceReqBtn(String text_id,
-		final DeviceRequest pdr, final DeviceRequest sdr)
-	{
-		final JButton btn = new JButton(new IAction(text_id) {
-			protected void doActionPerformed(ActionEvent ev) {
-				// not interested
-			}
-		});
-		btn.setMargin(UI.buttonInsets());
-		btn.addChangeListener(new ChangeListener() {
-			private boolean pressed = false;
-			public void stateChanged(ChangeEvent ce) {
-				boolean p = btn.getModel().isPressed();
-				if (p && !pressed) {
-					cam_ptz.sendRequest(pdr);
-					pressed = true;
-				}
-				else if (pressed && !p) {
-					cam_ptz.sendRequest(sdr);
-					pressed = false;
-				}
-			}
-		});
-		return btn;
 	}
 }
