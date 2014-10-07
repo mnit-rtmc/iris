@@ -193,6 +193,7 @@ public class PresetPanel2 extends JPanel {
 			btn.setSelectedIcon(iconSel);
 		} else
 			btn.setText(I18N.get("camera.preset.store"));
+		btn.setMargin(UI.buttonInsets());
 		btn.setToolTipText(storeButtonTooltip(ItemEvent.DESELECTED));
 		btn.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent ie) {
