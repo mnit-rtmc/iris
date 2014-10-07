@@ -44,7 +44,9 @@ public class OpDeviceRequest extends OpViconPTZ {
 		case CAMERA_IRIS_STOP:
 			return new CommandProperty(0, 0, 0, 0, 0);
 		case CAMERA_WIPER_ONESHOT:
-			return new AuxProperty(6);
+			// For actual Vicon cameras, this should be AUX 6, but
+			// Pelco cameras require AUX 1 here.
+			return new AuxProperty(1);
 		default:
 			return null;
 		}
