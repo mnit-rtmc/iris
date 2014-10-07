@@ -70,9 +70,16 @@ public class OpPreset extends OpViconPTZ {
 		protected Phase<ViconPTZProperty> poll(
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
-			mess.add(new PresetProperty(store, preset));
+			mess.add(createPresetProperty());
 			mess.storeProps();
 			return null;
 		}
+	}
+
+	/** Create an appropriate preset property */
+	private ViconPTZProperty createPresetProperty() {
+		return (preset <= PresetProperty.MAX_PRESET)
+		      ? new PresetProperty(store, preset)
+		      : new ExPresetProperty(store, preset);
 	}
 }

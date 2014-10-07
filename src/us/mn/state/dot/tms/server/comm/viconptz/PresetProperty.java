@@ -15,11 +15,14 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 /**
- * Vicon property to recall or store a preset.
+ * Vicon property to recall or store a preset (1-15).
  *
  * @author Douglas Lau
  */
 public class PresetProperty extends ViconPTZProperty {
+
+	/** Maximum preset number for this property */
+	static public final int MAX_PRESET = 15;
 
 	/** Store (or recall) */
 	private final boolean store;
