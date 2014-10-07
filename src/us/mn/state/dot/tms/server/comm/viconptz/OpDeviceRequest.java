@@ -71,6 +71,11 @@ public class OpDeviceRequest extends OpViconPTZ {
 
 	/** Phase to make device request */
 	protected class DeviceRequestPhase extends Phase<ViconPTZProperty> {
+
+		/** Number of times this request was sent */
+		private int n_sent = 0;
+
+		/** Make device request */
 		protected Phase<ViconPTZProperty> poll(
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
@@ -79,7 +84,13 @@ public class OpDeviceRequest extends OpViconPTZ {
 				logStore(prop);
 				mess.storeProps();
 			}
-			return null;
+			n_sent++;
+			return shouldResend() ? this : null;
+		}
+
+		/** Should we resend the property? */
+		private boolean shouldResend() {
+			return (prop instanceof AuxProperty) && (n_sent <= 2);
 		}
 	}
 }
