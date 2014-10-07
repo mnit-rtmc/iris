@@ -45,17 +45,22 @@ public class OpPreset extends OpViconPTZ {
 		      : p - PRESET_MENU + PRESET_EXT;
 	}
 
-	/** Store (or recall) */
-	private final boolean store;
+	/** Create an appropriate preset property */
+	static private ViconPTZProperty createPresetProperty(boolean store,
+		int preset)
+	{
+		return (preset <= PresetProperty.MAX_PRESET)
+		      ? new PresetProperty(store, preset)
+		      : new ExPresetProperty(store, preset);
+	}
 
-	/** Camera preset to reall or store */
-	private final int preset;
+	/** Property for request */
+	private final ViconPTZProperty prop;
 
 	/** Create a new operation to recall or store a camera preset */
 	public OpPreset(CameraImpl c, boolean s, int p) {
 		super(c);
-		store = s;
-		preset = adjustPreset(p);
+		prop = createPresetProperty(s, adjustPreset(p));
 	}
 
 	/** Create the second phase of the operation */
@@ -70,16 +75,10 @@ public class OpPreset extends OpViconPTZ {
 		protected Phase<ViconPTZProperty> poll(
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
-			mess.add(createPresetProperty());
+			mess.add(prop);
+			logStore(prop);
 			mess.storeProps();
 			return null;
 		}
-	}
-
-	/** Create an appropriate preset property */
-	private ViconPTZProperty createPresetProperty() {
-		return (preset <= PresetProperty.MAX_PRESET)
-		      ? new PresetProperty(store, preset)
-		      : new ExPresetProperty(store, preset);
 	}
 }

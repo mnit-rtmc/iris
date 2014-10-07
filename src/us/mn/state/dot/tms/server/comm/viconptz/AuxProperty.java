@@ -29,6 +29,12 @@ public class AuxProperty extends ViconPTZProperty {
 		aux = a;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "aux: " + aux;
+	}
+
 	/** Get the aux bits */
 	@Override
 	protected byte auxBits() {

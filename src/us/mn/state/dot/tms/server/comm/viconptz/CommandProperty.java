@@ -75,6 +75,13 @@ public class CommandProperty extends ExtendedProperty {
 		iris = i;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "ptz: " + pan + "," + tilt + "," + zoom + " focus:" +
+			focus + " iris:" + iris;
+	}
+
 	/** Get pan/tilt flags */
 	@Override
 	protected byte panTiltFlags() {

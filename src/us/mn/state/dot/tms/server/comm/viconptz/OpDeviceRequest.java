@@ -76,6 +76,7 @@ public class OpDeviceRequest extends OpViconPTZ {
 		{
 			if (prop != null) {
 				mess.add(prop);
+				logStore(prop);
 				mess.storeProps();
 			}
 			return null;

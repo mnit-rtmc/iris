@@ -36,6 +36,12 @@ public class PresetProperty extends ViconPTZProperty {
 		preset = p;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "preset: " + preset + " store:" + store;
+	}
+
 	/** Get the preset bits */
 	@Override
 	protected byte presetBits() {

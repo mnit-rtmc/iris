@@ -67,7 +67,10 @@ public class OpMoveCamera extends OpViconPTZ {
 		protected Phase<ViconPTZProperty> poll(
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
-			mess.add(new CommandProperty(pan, tilt, zoom, 0, 0));
+			CommandProperty prop = new CommandProperty(pan, tilt,
+				zoom, 0, 0);
+			mess.add(prop);
+			logStore(prop);
 			mess.storeProps();
 			return null;
 		}

@@ -39,6 +39,12 @@ public class ExPresetProperty extends ExtendedProperty {
 		preset = p;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "ex_preset: " + preset + " store:" + store;
+	}
+
 	/** Get command parameter 1 */
 	@Override
 	protected int getParam1() {
