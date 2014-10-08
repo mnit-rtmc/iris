@@ -2304,6 +2304,7 @@ PRV_0047	maintenance	modem(/.*)?	t	f	f	f
 PRV_0048	maintenance	ramp_meter/.*/deviceRequest	f	t	f	f
 PRV_0049	camera_control	camera/.*/ptz	f	t	f	f
 PRV_0050	camera_control	camera/.*/recallPreset	f	t	f	f
+PRV_005A	camera_control	camera/.*/deviceRequest	f	t	f	f
 PRV_0051	publish	camera/.*/publish	f	t	f	f
 PRV_0052	dms_control	dms/.*/messageNext	f	t	f	f
 PRV_0053	dms_control	dms/.*/ownerNext	f	t	f	f

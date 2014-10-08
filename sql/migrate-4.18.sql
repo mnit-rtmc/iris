@@ -38,3 +38,8 @@ CREATE OR REPLACE VIEW controller_report AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
+
+INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
+                            priv_d)
+       VALUES ('prv_cc1', 'camera_control', 'camera/.*/deviceRequest', false,
+               true, false, false);
