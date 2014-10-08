@@ -264,8 +264,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	/** Set the camera preset action */
 	private void setPresetAction(LCSArray la) {
 		CameraPreset cp = LCSArrayHelper.getPreset(la);
-		preset_btn.setAction(new CameraPresetAction(cp,
-			session.getCameraManager().getSelectionModel()));
+		preset_btn.setAction(new CameraPresetAction(session, cp));
 	}
 
 	/** Update the status widgets */

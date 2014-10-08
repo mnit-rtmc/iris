@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -29,15 +30,17 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class CameraPresetAction extends ProxyAction<CameraPreset> {
 
+	/** Client session */
+	private final Session session;
+
 	/** Camera selection model */
 	private final ProxySelectionModel<Camera> sel_model;
 
 	/** Create a new action to select a camera preset */
-	public CameraPresetAction(CameraPreset cp,
-		ProxySelectionModel<Camera> mdl)
-	{
+	public CameraPresetAction(Session s, CameraPreset cp) {
 		super("camera.select", cp);
-		sel_model = mdl;
+		session = s;
+		sel_model = s.getCameraManager().getSelectionModel();
 		if (cp != null)
 			putValue(Action.NAME, cp.getCamera().getName());
 		else
@@ -49,10 +52,20 @@ public class CameraPresetAction extends ProxyAction<CameraPreset> {
 	protected void doActionPerformed(ActionEvent e) {
 		if (proxy != null) {
 			Camera c = proxy.getCamera();
-			if (c != null) {
-				sel_model.setSelected(c);
-				c.setRecallPreset(proxy.getPresetNum());
-			}
+			if (c != null)
+				selectCamera(c);
 		}
+	}
+
+	/** Select the camera */
+	private void selectCamera(Camera c) {
+		sel_model.setSelected(c);
+		if (canRecallPreset(c))
+			c.setRecallPreset(proxy.getPresetNum());
+	}
+
+	/** Can presets be recalled */
+	private boolean canRecallPreset(Camera c) {
+		return session.isUpdatePermitted(c, "recallPreset");
 	}
 }

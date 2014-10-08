@@ -54,6 +54,11 @@ public class CameraPTZ {
 		return session.isUpdatePermitted(camera, "ptz");
 	}
 
+	/** Can a device request be made */
+	public boolean canRequestDevice() {
+		return session.isUpdatePermitted(camera, "deviceRequest");
+	}
+
 	/** Can presets be recalled */
 	public boolean canRecallPreset() {
 		return session.isUpdatePermitted(camera, "recallPreset");
@@ -92,14 +97,24 @@ public class CameraPTZ {
 		}
 	}
 
+	/** Was the most recent PTZ update a move? */
+	private boolean ptzMoving() {
+		return ptz[0] != 0 || ptz[1] != 0 || ptz[2] != 0;
+	}
+
 	/**
 	 * Send a device request to the current camera, tracking focus/iris
 	 * movement states.
 	 */
 	public synchronized void sendRequest(DeviceRequest dr) {
-		if (!canControlPtz())
-			return;
+		if (canRequestDevice()) {
+			updateFocusAndIris(dr);
+			camera.setDeviceRequest(dr.ordinal());
+		}
+	}
 
+	/** Update focus and iris state */
+	private void updateFocusAndIris(DeviceRequest dr) {
 		switch (dr) {
 		case CAMERA_FOCUS_NEAR:
 		case CAMERA_FOCUS_FAR:
@@ -118,12 +133,6 @@ public class CameraPTZ {
 		default:
 			break;
 		}
-		camera.setDeviceRequest(dr.ordinal());
-	}
-
-	/** Was the most recent PTZ update a move? */
-	private boolean ptzMoving() {
-		return ptz[0] != 0 || ptz[1] != 0 || ptz[2] != 0;
 	}
 
 	/**

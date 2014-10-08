@@ -57,11 +57,11 @@ public class PTZButton extends JButton {
 				cptz.clearMovement();
 			}
 		});
-		setMargin(UI.buttonInsets());
 		cam_ptz = cptz;
 		pan = p;
 		tilt = t;
 		zoom = z;
+		setMargin(UI.buttonInsets());
 		addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				pressed();

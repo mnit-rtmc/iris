@@ -301,8 +301,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Set the camera preset action */
 	private void setPresetAction(DMS dms) {
 		CameraPreset cp = DMSHelper.getPreset(dms);
-		preset_btn.setAction(new CameraPresetAction(cp,
-			session.getCameraManager().getSelectionModel()));
+		preset_btn.setAction(new CameraPresetAction(session, cp));
 	}
 
 	/** Update one (or all) attribute(s) on the form.

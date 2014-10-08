@@ -236,8 +236,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Set the camera preset action */
 	private void setPresetAction(RampMeter rm) {
 		CameraPreset cp = RampMeterHelper.getPreset(rm);
-		preset_btn.setAction(new CameraPresetAction(cp,
-			session.getCameraManager().getSelectionModel()));
+		preset_btn.setAction(new CameraPresetAction(session, cp));
 	}
 
 	/** Get the current meter lock */

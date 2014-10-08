@@ -99,4 +99,10 @@ public class DeviceReqButton extends JButton {
 			cam_ptz.sendRequest(released_req);
 		pressed = false;
 	}
+
+	/** Set enabled status */
+	@Override
+	public void setEnabled(boolean e) {
+		super.setEnabled(e && cam_ptz.canRequestDevice());
+	}
 }
