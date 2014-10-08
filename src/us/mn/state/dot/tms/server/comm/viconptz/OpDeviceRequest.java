@@ -69,31 +69,58 @@ public class OpDeviceRequest extends OpViconPTZ {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<ViconPTZProperty> phaseTwo() {
-		return new DeviceRequestPhase();
+		if (prop instanceof AuxProperty)
+			return new AuxSetPhase();
+		else if (prop != null)
+			return new DeviceRequestPhase();
+		else
+			return null;
 	}
 
 	/** Phase to make device request */
 	protected class DeviceRequestPhase extends Phase<ViconPTZProperty> {
 
-		/** Number of times this request was sent */
-		private int n_sent = 0;
-
 		/** Make device request */
 		protected Phase<ViconPTZProperty> poll(
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
-			if (prop != null) {
-				mess.add(prop);
-				logStore(prop);
-				mess.storeProps();
-			}
-			n_sent++;
-			return shouldResend() ? this : null;
+			mess.add(prop);
+			logStore(prop);
+			mess.storeProps();
+			return null;
 		}
+	}
 
-		/** Should we resend the property? */
-		private boolean shouldResend() {
-			return (prop instanceof AuxProperty) && (n_sent <= 2);
+	/** Phase to set AUX device request */
+	protected class AuxSetPhase extends Phase<ViconPTZProperty> {
+
+		/** Number of times this request was sent */
+		private int n_sent = 0;
+
+		/** Set AUX property */
+		protected Phase<ViconPTZProperty> poll(
+			CommMessage<ViconPTZProperty> mess) throws IOException
+		{
+			mess.add(prop);
+			logStore(prop);
+			mess.storeProps();
+			n_sent++;
+			return (n_sent < 2) ? this : new AuxClearPhase();
+		}
+	}
+
+	/** Phase to clear AUX device request */
+	protected class AuxClearPhase extends Phase<ViconPTZProperty> {
+
+		/** Clear AUX property */
+		protected Phase<ViconPTZProperty> poll(
+			CommMessage<ViconPTZProperty> mess) throws IOException
+		{
+			AuxProperty p = new AuxProperty(0);
+			mess.add(p);
+			logStore(p);
+			mess.storeProps();
+			return null;
 		}
 	}
 }
