@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.camera;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -27,6 +28,12 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * @author Douglas Lau
  */
 public class CamCache {
+
+	/** Test if a camera preset is available for devices */
+	static private boolean isAvailable(CameraPreset cp) {
+		return (Direction.fromOrdinal(cp.getDirection())
+			== Direction.UNKNOWN) && !cp.getAssigned();
+	}
 
 	/** Cache of cameras */
 	protected final TypeCache<Camera> cameras;
@@ -87,7 +94,7 @@ public class CamCache {
 			client);
 		preset_model = new ProxyListModel<CameraPreset>(presets) {
 			protected int doProxyAdded(CameraPreset cp) {
-				if (!cp.getAssigned())
+				if (isAvailable(cp))
 					return super.doProxyAdded(cp);
 				else
 					return -1;
