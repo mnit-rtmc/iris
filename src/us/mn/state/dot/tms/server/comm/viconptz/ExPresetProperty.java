@@ -21,6 +21,9 @@ package us.mn.state.dot.tms.server.comm.viconptz;
  */
 public class ExPresetProperty extends ExtendedProperty {
 
+	/** Special preset for camera reset (store) */
+	static public final int SOFT_RESET = 97;
+
 	/** Bit flags for param 1 recall preset function */
 	static private final int FLAGS_RECALL = 0x10;
 
