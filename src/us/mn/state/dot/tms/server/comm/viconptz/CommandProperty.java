@@ -82,6 +82,12 @@ public class CommandProperty extends ExtendedProperty {
 			focus + " iris:" + iris;
 	}
 
+	/** Is this a stop command? */
+	public boolean isStop() {
+		return pan == 0 && tilt == 0 && zoom == 0
+		    && focus == 0 && iris == 0;
+	}
+
 	/** Get pan/tilt flags */
 	@Override
 	protected byte panTiltFlags() {

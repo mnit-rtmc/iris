@@ -38,21 +38,16 @@ public class OpMoveCamera extends OpViconPTZ {
 		return Math.round(clamp_float(value) * (range - 1));
 	}
 
-	/** The direction (and speed) to pan the camera */
-	protected final int pan;
-
-	/** The direction (and speed) to tilt the camera */
-	protected final int tilt;
-
-	/** The direction to zoom the camera */
-	protected final int zoom;
+	/** Command property */
+	private final CommandProperty prop;
 
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
 		super(c);
-		pan = map_float(p, PTZ_RANGE);
-		tilt = map_float(t, PTZ_RANGE);
-		zoom = map_float(z, PTZ_RANGE);
+		int pan = map_float(p, PTZ_RANGE);
+		int tilt = map_float(t, PTZ_RANGE);
+		int zoom = map_float(z, PTZ_RANGE);
+		prop = new CommandProperty(pan, tilt, zoom, 0, 0);
 	}
 
 	/** Create the second phase of the operation */
@@ -63,16 +58,23 @@ public class OpMoveCamera extends OpViconPTZ {
 	/** Phase to move the camera */
 	protected class Move extends Phase<ViconPTZProperty> {
 
+		/** Number of times this request was sent */
+		private int n_sent = 0;
+
 		/** Command controller to move the camera */
 		protected Phase<ViconPTZProperty> poll(
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
-			CommandProperty prop = new CommandProperty(pan, tilt,
-				zoom, 0, 0);
 			mess.add(prop);
 			logStore(prop);
 			mess.storeProps();
-			return null;
+			n_sent++;
+			return shouldResend() ? this : null;
+		}
+
+		/** Should we resend the property? */
+		private boolean shouldResend() {
+			return prop.isStop() && (n_sent <= 2);
 		}
 	}
 }
