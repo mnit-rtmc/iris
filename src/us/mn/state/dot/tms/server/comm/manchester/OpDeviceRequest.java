@@ -60,7 +60,7 @@ public class OpDeviceRequest extends OpManchester {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<ManchesterProperty> phaseTwo() {
-		return new DeviceRequestPhase();
+		return (prop != null) ? new DeviceRequestPhase() : null;
 	}
 
 	/** Phase to make device request */
@@ -68,10 +68,9 @@ public class OpDeviceRequest extends OpManchester {
 		protected Phase<ManchesterProperty> poll(
 			CommMessage<ManchesterProperty> mess) throws IOException
 		{
-			if (prop != null) {
-				mess.add(prop);
-				mess.storeProps();
-			}
+			mess.add(prop);
+			logStore(prop);
+			mess.storeProps();
 			return null;
 		}
 	}

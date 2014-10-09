@@ -25,17 +25,13 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  */
 public class OpPreset extends OpManchester {
 
-	/** Store (or recall) */
-	private final boolean store;
-
-	/** Camera preset to reall or store */
-	private final int preset;
+	/** Preset property */
+	private final PresetProperty prop;
 
 	/** Create a new operation to recall or store a camera preset */
 	public OpPreset(CameraImpl c, boolean s, int p) {
 		super(c);
-		store = s;
-		preset = p;
+		prop = new PresetProperty(s, p);
 	}
 
 	/** Create the second phase of the operation */
@@ -50,7 +46,8 @@ public class OpPreset extends OpManchester {
 		protected Phase<ManchesterProperty> poll(
 			CommMessage<ManchesterProperty> mess) throws IOException
 		{
-			mess.add(new PresetProperty(store, preset));
+			mess.add(prop);
+			logStore(prop);
 			mess.storeProps();
 			return null;
 		}

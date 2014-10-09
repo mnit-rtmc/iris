@@ -29,6 +29,12 @@ public class ZoomProperty extends ManchesterProperty {
 		zoom = z;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "zoom: " + zoom;
+	}
+
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {

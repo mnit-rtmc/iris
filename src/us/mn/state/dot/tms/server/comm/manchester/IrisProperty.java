@@ -29,6 +29,12 @@ public class IrisProperty extends ManchesterProperty {
 		iris = i;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "iris: " + iris;
+	}
+
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {

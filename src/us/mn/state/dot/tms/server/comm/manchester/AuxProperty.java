@@ -29,6 +29,12 @@ public class AuxProperty extends ManchesterProperty {
 		aux = a;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "aux: " + aux;
+	}
+
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {

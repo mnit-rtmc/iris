@@ -29,6 +29,12 @@ public class PanProperty extends ManchesterProperty {
 		pan = p;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "pan: " + pan;
+	}
+
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {

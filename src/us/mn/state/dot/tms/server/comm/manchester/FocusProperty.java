@@ -29,6 +29,12 @@ public class FocusProperty extends ManchesterProperty {
 		focus = f;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "focus: " + focus;
+	}
+
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {

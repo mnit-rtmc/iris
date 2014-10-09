@@ -29,6 +29,12 @@ public class TiltProperty extends ManchesterProperty {
 		tilt = t;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "tilt: " + tilt;
+	}
+
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {
