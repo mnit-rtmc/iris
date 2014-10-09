@@ -45,22 +45,13 @@ public class OpPreset extends OpViconPTZ {
 		      : p - PRESET_MENU + PRESET_EXT;
 	}
 
-	/** Create an appropriate preset property */
-	static private ViconPTZProperty createPresetProperty(boolean store,
-		int preset)
-	{
-		return (preset <= PresetProperty.MAX_PRESET)
-		      ? new PresetProperty(store, preset)
-		      : new ExPresetProperty(store, preset);
-	}
-
 	/** Property for request */
 	private final ViconPTZProperty prop;
 
 	/** Create a new operation to recall or store a camera preset */
 	public OpPreset(CameraImpl c, boolean s, int p) {
 		super(c);
-		prop = createPresetProperty(s, adjustPreset(p));
+		prop = new ExPresetProperty(s, adjustPreset(p));
 	}
 
 	/** Create the second phase of the operation */

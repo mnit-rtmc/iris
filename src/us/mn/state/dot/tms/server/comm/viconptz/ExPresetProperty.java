@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.viconptz;
 
 /**
  * Vicon property to recall or store an extended preset (greater than 15).
+ * This command replaces PresetProperty for newer receivers.
  *
  * @author Douglas Lau
  */

@@ -15,7 +15,9 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 /**
- * Vicon property to recall or store a preset (1-15).
+ * Vicon property to recall or store a preset (1-15).  Note: for newer Vicon
+ * receivers, this command has no effect.  The extended preset command must be
+ * used instead.
  *
  * @author Douglas Lau
  */
