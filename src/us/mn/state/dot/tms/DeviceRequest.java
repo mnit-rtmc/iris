@@ -15,8 +15,6 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.LinkedList;
-
 /**
  * Device request enumeration.
  *
@@ -26,111 +24,95 @@ import java.util.LinkedList;
 public enum DeviceRequest {
 
 	/** No request */
-	NO_REQUEST(""),
+	NO_REQUEST,
 
 	/** Query device configuration */
-	QUERY_CONFIGURATION("Query configuration"),
+	QUERY_CONFIGURATION,
 
 	/** Send device settings */
-	SEND_SETTINGS("Send settings"),
+	SEND_SETTINGS,
 
 	/** Query current message */
-	QUERY_MESSAGE("Query message"),
+	QUERY_MESSAGE,
 
 	/** Query device status */
-	QUERY_STATUS("Query status"),
+	QUERY_STATUS,
 
 	/** Query sign pixel failures */
-	QUERY_PIXEL_FAILURES("Query pixel failures"),
+	QUERY_PIXEL_FAILURES,
 
 	/** Activate pixel test */
-	TEST_PIXELS("Pixel test"),
+	TEST_PIXELS,
 
 	/** Activate fan test */
-	TEST_FANS("Fan test"),
+	TEST_FANS,
 
 	/** Activate lamp test */
-	TEST_LAMPS("Lamp test"),
+	TEST_LAMPS,
 
 	/** Sign brightness feedback "good" */
-	BRIGHTNESS_GOOD("Brightness good"),
+	BRIGHTNESS_GOOD,
 
 	/** Sign brightness feedback "too dim" */
-	BRIGHTNESS_TOO_DIM("Brightness too dim"),
+	BRIGHTNESS_TOO_DIM,
 
 	/** Sign brightness feedback "too bright" */
-	BRIGHTNESS_TOO_BRIGHT("Brightness too bright"),
+	BRIGHTNESS_TOO_BRIGHT,
 
 	/** Reset device */
-	RESET_DEVICE("Reset Device"),
+	RESET_DEVICE,
 
 	/** Reset modem */
-	RESET_MODEM("Reset modem"),
+	RESET_MODEM,
 
 	/** Send LEDSTAR sign settings */
-	SEND_LEDSTAR_SETTINGS("Send LEDSTAR settings"),
+	SEND_LEDSTAR_SETTINGS,
 
 	/** Query LEDSTAR sign settings */
-	QUERY_LEDSTAR_SETTINGS("Query LEDSTAR settings"),
+	QUERY_LEDSTAR_SETTINGS,
 
 	/** Disable (gate arm) system */
-	DISABLE_SYSTEM("Disable system"),
+	DISABLE_SYSTEM,
 
 	/** CAMERA: stop focus */
-	CAMERA_FOCUS_STOP("Camera: stop focus"),
+	CAMERA_FOCUS_STOP,
 
 	/** CAMERA: focus near */
-	CAMERA_FOCUS_NEAR("Camera: focus near"),
+	CAMERA_FOCUS_NEAR,
 
 	/** CAMERA: focus far */
-	CAMERA_FOCUS_FAR("Camera: focus far"),
+	CAMERA_FOCUS_FAR,
 
 	/** CAMERA: manual-focus */
-	CAMERA_FOCUS_MANUAL("Camera: manual-focus"),
+	CAMERA_FOCUS_MANUAL,
 
 	/** CAMERA: auto-focus */
-	CAMERA_FOCUS_AUTO("Camera: auto-focus"),
+	CAMERA_FOCUS_AUTO,
 
 	/** CAMERA: stop iris */
-	CAMERA_IRIS_STOP("Camera: stop iris"),
+	CAMERA_IRIS_STOP,
 
 	/** CAMERA: close iris */
-	CAMERA_IRIS_CLOSE("Camera: close iris"),
+	CAMERA_IRIS_CLOSE,
 
 	/** CAMERA: open iris */
-	CAMERA_IRIS_OPEN("Camera: open iris"),
+	CAMERA_IRIS_OPEN,
 
 	/** CAMERA: manual-iris */
-	CAMERA_IRIS_MANUAL("Camera: manual-iris"),
+	CAMERA_IRIS_MANUAL,
 
 	/** CAMERA: auto-iris */
-	CAMERA_IRIS_AUTO("Camera: auto-iris"),
+	CAMERA_IRIS_AUTO,
 
 	/** CAMERA: wiper one-shot */
-	CAMERA_WIPER_ONESHOT("Camera: wiper one-shot");
-
-	/** Create a new device request value */
-	private DeviceRequest(String d) {
-		description = d;
-	}
-
-	/** Description */
-	public final String description;
+	CAMERA_WIPER_ONESHOT;
 
 	/** Get device request from an ordinal value */
 	static public DeviceRequest fromOrdinal(int o) {
-		for(DeviceRequest dr: DeviceRequest.values()) {
-			if(dr.ordinal() == o)
+		for (DeviceRequest dr: DeviceRequest.values()) {
+			if (dr.ordinal() == o)
 				return dr;
 		}
 		return NO_REQUEST;
-	}
-
-	/** Get an array of device request descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> d = new LinkedList<String>();
-		for(DeviceRequest dr: DeviceRequest.values())
-			d.add(dr.description);
-		return d.toArray(new String[0]);
 	}
 }

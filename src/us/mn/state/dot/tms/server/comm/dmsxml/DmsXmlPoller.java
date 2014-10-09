@@ -144,8 +144,7 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 		} else {
 			// ignore other requests
 			Log.finest("DmsXmlPoller.sendRequest(" + 
-				dms.getName() +	"): ignored request r=" + 
-				r + ", desc=" + r.description);
+				dms.getName() +	"): ignored request r=" + r);
 		}
 	}
 
