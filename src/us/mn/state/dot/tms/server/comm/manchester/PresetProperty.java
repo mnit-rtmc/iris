@@ -33,6 +33,12 @@ public class PresetProperty extends ManchesterProperty {
 		preset = p;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "preset: " + preset + " store:" + store;
+	}
+
 	/** Get command bits */
 	@Override
 	protected byte commandBits() {
