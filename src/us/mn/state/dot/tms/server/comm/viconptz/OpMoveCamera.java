@@ -26,15 +26,15 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 public class OpMoveCamera extends OpViconPTZ {
 
 	/** Range of PTZ values */
-	static protected final int PTZ_RANGE = 1023;
+	static private final int PTZ_RANGE = 2048;
 
 	/** Clamp a float value to the range of (-1, 1) */
-	static protected float clamp_float(float value) {
+	static private float clamp_float(float value) {
 		return Math.max(-1, Math.min(value, 1));
 	}
 
 	/** Map a float value to an integer range */
-	static protected int map_float(float value, int range) {
+	static private int map_float(float value, int range) {
 		return Math.round(clamp_float(value) * (range - 1));
 	}
 

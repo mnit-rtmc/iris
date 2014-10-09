@@ -51,13 +51,13 @@ public class CommandProperty extends ExtendedProperty {
 	/** Lens flag to command a zoom out */
 	static private final byte ZOOM_OUT = 1 << 6;
 
-	/** Pan value (-1023 to 1023) */
+	/** Requested pan [-2047 to 2047] :: [left, right] */
 	private final int pan;
 
-	/** Tilt value (-1023 to 1023) */
+	/** Requested tilt [-2047 to 2047] :: [down, up] */
 	private final int tilt;
 
-	/** Requested zoom value [-1, 1] :: [out, in] */
+	/** Requested zoom [-2047, 2047] :: [out, in] */
 	private final int zoom;
 
 	/** Requested focus value [-1, 1] :: [near, far] */
