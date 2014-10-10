@@ -86,6 +86,19 @@ public class CommandProperty extends PelcoDProperty {
 		iris = i;
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "ptz: " + pan + "," + tilt + "," + zoom + " focus:" +
+			focus + " iris:" + iris;
+	}
+
+	/** Is this a stop command? */
+	public boolean isStop() {
+		return pan == 0 && tilt == 0 && zoom == 0
+		    && focus == 0 && iris == 0;
+	}
+
 	/** Construct an int containing the pan command flags in the 2 LSBs */
 	private byte getPanFlags() {
 		if (pan < 0)

@@ -85,6 +85,12 @@ public class ExtendedProperty extends PelcoDProperty {
 		this(c, 0, 0);
 	}
 
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "ext cmd: " + cmd + " p1:" + param1 + " p2:" + param2;
+	}
+
 	/** Get the command bits (in the 2 LSBs) */
 	@Override
 	protected int getCommand() {

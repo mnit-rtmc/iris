@@ -84,7 +84,7 @@ public class OpDeviceRequest extends OpPelcoD {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<PelcoDProperty> phaseTwo() {
-		return new DeviceRequestPhase();
+		return (prop != null) ? new DeviceRequestPhase() : null;
 	}
 
 	/** Main phase. */
@@ -92,10 +92,9 @@ public class OpDeviceRequest extends OpPelcoD {
 		protected Phase<PelcoDProperty> poll(
 			CommMessage<PelcoDProperty> mess) throws IOException
 		{
-			if (prop != null) {
-				mess.add(prop);
-				mess.storeProps();
-			}
+			mess.add(prop);
+			logStore(prop);
+			mess.storeProps();
 			return null;
 		}
 	}
