@@ -64,14 +64,8 @@ abstract public class OpManchester extends OpDevice<ManchesterProperty> {
 	protected void sleepUntilReady() {
 		long now = TimeSteward.currentTimeMillis();
 		long ms = Math.min(ready - now, CMD_INTERVAL_MS);
-		if(ms > 0) {
-			try {
-				Thread.sleep(ms);
-			}
-			catch(InterruptedException e) {
-				// Nothing to do here
-			}
-		}
+		if (ms > 0)
+			TimeSteward.sleep_well(ms);
 		ready = now + CMD_INTERVAL_MS;
 	}
 }
