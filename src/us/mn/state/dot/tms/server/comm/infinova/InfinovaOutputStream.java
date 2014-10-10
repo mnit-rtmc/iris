@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2013  Minnesota Department of Transportation
+ * Copyright (C) 2011-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,14 @@ public class InfinovaOutputStream extends OutputStream {
 	/** Maximum message size */
 	static protected final int MAX_MESSAGE = 256;
 
-	/** Message ID for auth message */
-	static protected final byte MSG_ID_AUTH = 1;
-
-	/** Message ID for PTZ message */
-	static protected final byte MSG_ID_PTZ = 0x13;
+	/** Message ID */
+	private enum MsgId {
+		auth(0x01), ptz(0x13);
+		private MsgId(int i) {
+			id = (byte)i;
+		}
+		public final byte id;
+	}
 
 	/** Size of authentication message */
 	static protected final int AUTH_SZ = 64;
@@ -65,7 +68,7 @@ public class InfinovaOutputStream extends OutputStream {
 	public void write(byte[] b, int off, int len) throws IOException {
 		if(needs_auth)
 			writeAuthentication();
-		writeHeader(MSG_ID_PTZ, AUTH_SZ + len);
+		writeHeader(MsgId.ptz, AUTH_SZ + len);
 		writePtzHeader(len);
 		if(INF_LOG.isOpen())
 			INF_LOG.log("write: " + len);
@@ -81,20 +84,20 @@ public class InfinovaOutputStream extends OutputStream {
 	private void writeAuthentication() throws IOException {
 		if(INF_LOG.isOpen())
 			INF_LOG.log("writeAuthentication");
-		writeHeader(MSG_ID_AUTH, AUTH_SZ);
+		writeHeader(MsgId.auth, AUTH_SZ);
 		out.write(AUTH);
 		needs_auth = false;
 	}
 
 	/** Write an infinova header */
-	private void writeHeader(byte msg_id, int len) throws IOException {
+	private void writeHeader(MsgId msg, int len) throws IOException {
 		if(INF_LOG.isOpen())
-			INF_LOG.log("writeHeader: " + msg_id);
+			INF_LOG.log("writeHeader: " + msg);
 		byte[] header = new byte[] {
 			'I', 'N', 'F', 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		};
-		header[3] = msg_id;
-		if(msg_id == MSG_ID_AUTH) {
+		header[3] = msg.id;
+		if (msg == MsgId.auth) {
 			header[5] = 1;
 			header[7] = 1;
 		}
