@@ -191,6 +191,7 @@ public class MainServer {
 		TIMER.addJob(new SampleQuery5MinJob());
 		TIMER.addJob(new ActionPlanJob());
 		TIMER.addJob(new CameraNoFailJob());
+		TIMER.addJob(new CameraWiperJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new ReaperJob());
