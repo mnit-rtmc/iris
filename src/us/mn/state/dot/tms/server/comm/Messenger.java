@@ -66,6 +66,20 @@ abstract public class Messenger {
 			return input;
 	}
 
+	/** Close the input stream */
+	protected final void closeInput() {
+		InputStream is = input;
+		if (is != null) {
+			try {
+				is.close();
+			}
+			catch (IOException e) {
+				// Ignore
+			}
+		}
+		input = null;
+	}
+
 	/** Get the output stream */
 	public OutputStream getOutputStream() {
 		return output;
@@ -80,6 +94,20 @@ abstract public class Messenger {
 			throw new EOFException("MESSENGER CLOSED");
 		else
 			return os;
+	}
+
+	/** Close the output stream */
+	protected final void closeOutput() {
+		OutputStream os = output;
+		if (os != null) {
+			try {
+				os.close();
+			}
+			catch (IOException e) {
+				// Ignore
+			}
+		}
+		output = null;
 	}
 
 	/** Drain any bytes from the input stream */

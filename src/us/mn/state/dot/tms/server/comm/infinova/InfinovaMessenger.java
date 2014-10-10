@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 public class InfinovaMessenger extends Messenger {
 
 	/** Wrapped messenger */
-	protected final Messenger wrapped;
+	private final Messenger wrapped;
 
 	/** Create a new Infinova messenger */
 	public InfinovaMessenger(Messenger m) {
@@ -33,11 +33,13 @@ public class InfinovaMessenger extends Messenger {
 	}
 
 	/** Set the messenger timeout */
+	@Override
 	public void setTimeout(int t) throws IOException {
 		wrapped.setTimeout(t);
 	}
 
 	/** Open the messenger */
+	@Override
 	public void open() throws IOException {
 		wrapped.open();
 		output = new InfinovaOutputStream(wrapped.getOutputStream());
@@ -45,9 +47,10 @@ public class InfinovaMessenger extends Messenger {
 	}
 
 	/** Close the messenger */
+	@Override
 	public void close() {
+		closeOutput();
+		closeInput();
 		wrapped.close();
-		output = null;
-		input = null;
 	}
 }
