@@ -30,7 +30,7 @@ public class InfinovaOutputStream extends OutputStream {
 	static private final DebugLog INF_LOG = new DebugLog("infinova");
 
 	/** Maximum message size */
-	static protected final int MAX_MESSAGE = 256;
+	static private final int MAX_MESSAGE = 256;
 
 	/** Message ID */
 	private enum MsgId {
@@ -42,10 +42,10 @@ public class InfinovaOutputStream extends OutputStream {
 	}
 
 	/** Size of authentication message */
-	static protected final int AUTH_SZ = 64;
+	static private final int AUTH_SZ = 64;
 
 	/** Authentication message */
-	static protected final byte[] AUTH = new byte[AUTH_SZ + 2];
+	static private final byte[] AUTH = new byte[AUTH_SZ + 2];
 
 	/** Buffered output stream */
 	private final BufferedOutputStream out;
@@ -60,29 +60,32 @@ public class InfinovaOutputStream extends OutputStream {
 
 	/** Write one byte to the output stream.  This method bypasses the
 	 * Infinova header stuff. */
+	@Override
 	public void write(int b) throws IOException {
 		out.write(b);
 	}
 
 	/** Write the specified buffer to the output stream */
+	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		if(needs_auth)
+		if (needs_auth)
 			writeAuthentication();
 		writeHeader(MsgId.ptz, AUTH_SZ + len);
 		writePtzHeader(len);
-		if(INF_LOG.isOpen())
+		if (INF_LOG.isOpen())
 			INF_LOG.log("write: " + len);
 		out.write(b, off, len);
 	}
 
 	/** Write the specified buffer to the output stream */
+	@Override
 	public void write(byte[] b) throws IOException {
 		write(b, 0, b.length);
 	}
 
 	/** Write an authentication message */
 	private void writeAuthentication() throws IOException {
-		if(INF_LOG.isOpen())
+		if (INF_LOG.isOpen())
 			INF_LOG.log("writeAuthentication");
 		writeHeader(MsgId.auth, AUTH_SZ);
 		out.write(AUTH);
@@ -91,7 +94,7 @@ public class InfinovaOutputStream extends OutputStream {
 
 	/** Write an infinova header */
 	private void writeHeader(MsgId msg, int len) throws IOException {
-		if(INF_LOG.isOpen())
+		if (INF_LOG.isOpen())
 			INF_LOG.log("writeHeader: " + msg);
 		byte[] header = new byte[] {
 			'I', 'N', 'F', 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -107,7 +110,7 @@ public class InfinovaOutputStream extends OutputStream {
 
 	/** Write a PTZ header */
 	private void writePtzHeader(int len) throws IOException {
-		if(INF_LOG.isOpen())
+		if (INF_LOG.isOpen())
 			INF_LOG.log("writePtzHeader");
 		byte[] header = new byte[12];
 		header[0] = 1;
@@ -116,19 +119,21 @@ public class InfinovaOutputStream extends OutputStream {
 	}
 
 	/** Flush pending data to the output stream */
+	@Override
 	public void flush() throws IOException {
-		if(INF_LOG.isOpen())
+		if (INF_LOG.isOpen())
 			INF_LOG.log("flush");
 		out.flush();
 	}
 
 	/** Close the output stream */
+	@Override
 	public void close() throws IOException {
 		try {
 			flush();
 		}
 		finally {
-			if(INF_LOG.isOpen())
+			if (INF_LOG.isOpen())
 				INF_LOG.log("close");
 			out.close();
 		}
