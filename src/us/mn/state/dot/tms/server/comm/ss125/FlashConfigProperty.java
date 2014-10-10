@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.InputStream;
 import java.io.IOException;
+import us.mn.state.dot.sched.TimeSteward;
 
 /**
  * Flash Configuration Property.
@@ -40,13 +41,9 @@ public class FlashConfigProperty extends SS125Property {
 	}
 
 	/** Decode a STORE response */
+	@Override
 	public void decodeStore(InputStream is, int drop) throws IOException {
-		try {
-			Thread.sleep(FLASH_WRITE_MS);
-		}
-		catch(InterruptedException e) {
-			// not sleepy?
-		}
+		TimeSteward.sleep_well(FLASH_WRITE_MS);
 		super.decodeStore(is, drop);
 	}
 

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
- * Copyright (C) 2008 - 2010  AHMCT, University of California
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.util.GregorianCalendar;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.utils.Log;
 
 /**
@@ -123,10 +124,7 @@ class TokenStreamReader
 					return (null);
 				}
 
-				try {
-					Thread.sleep(m_sleeptime);
-				} catch (InterruptedException ex2) {}
-
+				TimeSteward.sleep_well(m_sleeptime);
 				continue;
 			} catch (IOException ex) {
 				//Log.finest("TokenStreamReader:Client disconnected.");
@@ -176,9 +174,7 @@ class TokenStreamReader
 			}
 
 			// sleep and read again
-			try {
-				Thread.sleep(m_sleeptime);
-			} catch (InterruptedException ex) {}
+			TimeSteward.sleep_well(m_sleeptime);
 		}
 
 		// unreachable

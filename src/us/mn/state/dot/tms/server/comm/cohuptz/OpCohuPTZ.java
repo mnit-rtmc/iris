@@ -16,7 +16,7 @@
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
-import java.lang.Float;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -75,13 +75,8 @@ abstract public class OpCohuPTZ extends OpDevice {
 		long lastCmdTime = poller.getLastCmdTime();
 		long curTime = System.currentTimeMillis();
 		long delta = curTime - lastCmdTime;
-		if (delta < MIN_CMD_INTERVAL_MS) {
-			try {
-				Thread.sleep(MIN_CMD_INTERVAL_MS - delta);
-			}
-			catch (InterruptedException e) {
-			}
-		}
+		if (delta < MIN_CMD_INTERVAL_MS)
+			TimeSteward.sleep_well(MIN_CMD_INTERVAL_MS - delta);
 	}
 
 }
