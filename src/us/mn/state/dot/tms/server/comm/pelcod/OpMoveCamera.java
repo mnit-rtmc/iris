@@ -76,7 +76,7 @@ public class OpMoveCamera extends OpPelcoD {
 
 		/** Should we resend the property? */
 		private boolean shouldResend() {
-			return prop.isStop() && (n_sent <= 2);
+			return prop.isStop() && (n_sent < 2);
 		}
 	}
 }
