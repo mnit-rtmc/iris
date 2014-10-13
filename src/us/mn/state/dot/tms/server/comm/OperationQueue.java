@@ -55,12 +55,12 @@ public final class OperationQueue<T extends ControllerProperty> {
 
 	/** Check if the queue contains a given operation */
 	private boolean contains(Operation<T> op) {
-		if(op.equals(work))
+		if (op.equals(work) && !work.isDone())
 			return true;
 		Node<T> node = front;
-		while(node != null) {
+		while (node != null) {
 			Operation<T> nop = node.operation;
-			if(op.equals(nop) && !nop.isDone())
+			if (op.equals(nop) && !nop.isDone())
 				return true;
 			node = node.next;
 		}
