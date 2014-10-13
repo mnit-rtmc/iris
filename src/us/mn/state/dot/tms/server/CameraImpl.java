@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -269,15 +269,19 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Command the camera pan, tilt or zoom */
+	@Override
 	public void setPtz(Float[] ptz) {
-		if(ptz.length != 3)
-			return;
-		float p = ptz[0];
-		float t = ptz[1];
-		float z = ptz[2];
-		CameraPoller cp = getCameraPoller();
-		if(cp != null)
-			cp.sendPTZ(this, p, t, z);
+		if (checkPtz(ptz)) {
+			CameraPoller cp = getCameraPoller();
+			if (cp != null)
+				cp.sendPTZ(this, ptz[0], ptz[1], ptz[2]);
+		}
+	}
+
+	/** Check for valid PTZ parameters */
+	private boolean checkPtz(Float[] ptz) {
+		return (ptz != null) && (ptz.length == 3)
+		    && (ptz[0] != null) && (ptz[1] != null) && (ptz[2] != null);
 	}
 
 	/** Command the camera to store a preset */
