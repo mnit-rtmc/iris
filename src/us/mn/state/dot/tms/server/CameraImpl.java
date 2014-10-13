@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
@@ -46,15 +45,6 @@ import us.mn.state.dot.tms.server.comm.MessagePoller;
  * @author Travis Swanston
  */
 public class CameraImpl extends DeviceImpl implements Camera {
-
-	/** Camera debug log */
-	static private final DebugLog CAM_LOG = new DebugLog("camera");
-
-	/** Log a message to the debug log */
-	private void log(String msg) {
-		if (CAM_LOG.isOpen())
-			CAM_LOG.log(getName() + ": " + msg);
-	}
 
 	/** Load all the cameras */
 	static protected void loadAll() throws TMSException {
@@ -282,12 +272,10 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public void setPtz(Float[] ptz) {
 		if (checkPtz(ptz)) {
-			log("setPtz " + ptz[0] + ',' + ptz[1] + ',' + ptz[2]);
 			CameraPoller cp = getCameraPoller();
 			if (cp != null)
 				cp.sendPTZ(this, ptz[0], ptz[1], ptz[2]);
-		} else
-			log("setPtz check FAILED");
+		}
 	}
 
 	/** Check for valid PTZ parameters */
