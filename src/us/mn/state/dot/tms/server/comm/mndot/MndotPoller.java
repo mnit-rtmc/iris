@@ -107,12 +107,14 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	}
 
 	/** Create a new message for the specified controller */
+	@Override
 	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream("", c), c.getDrop(), protocol);
 	}
 
 	/** Check if a drop address is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		if(drop < 1 || drop > 31)
 			return false;
@@ -122,6 +124,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	}
 
 	/** Respond to a download request from a controller */
+	@Override
 	protected void download(ControllerImpl c, PriorityLevel p) {
 		OpSendSampleSettings ss = new OpSendSampleSettings(c);
 		ss.setPriority(p);
@@ -183,6 +186,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	}
 
 	/** Send a device request to a ramp meter */
+	@Override
 	public void sendRequest(RampMeterImpl meter, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
@@ -195,6 +199,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	}
 
 	/** Send a new release rate to a ramp meter */
+	@Override
 	public void sendReleaseRate(RampMeterImpl meter, Integer rate) {
 		int n = getMeterNumber(meter);
 		if(n > 0) {
@@ -259,6 +264,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	}
 
 	/** Send a device request to an LCS array */
+	@Override
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
@@ -274,6 +280,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	}
 
 	/** Set the deployed status of a lane marking */
+	@Override
 	public void setDeployed(LaneMarkingImpl dev, boolean d) {
 		addOperation(new OpDeployLaneMarking(dev, d));
 	}
@@ -282,6 +289,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	 * @param lcs_array LCS array.
 	 * @param ind New lane use indications.
 	 * @param o User who deployed the indications. */
+	@Override
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
