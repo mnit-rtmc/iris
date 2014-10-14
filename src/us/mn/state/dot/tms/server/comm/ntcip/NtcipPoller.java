@@ -67,18 +67,21 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Create a new message for the specified controller */
+	@Override
 	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return snmp.new Message(messenger.getOutputStream(c),
 			messenger.getInputStream("", c), c.getPassword());
 	}
 
 	/** Check if a drop address is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		// FIXME: this doesn't belong here
 		return drop > 0 && drop <= HDLC.NTCIP_MAX_ADDRESS;
 	}
 
 	/** Send a device request message to the sign */
+	@Override
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		switch(r) {
 		case RESET_DEVICE:
@@ -126,6 +129,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Send a new message to the sign */
+	@Override
 	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
 		throws InvalidMessageException
 	{
@@ -136,6 +140,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Send a device request message to an LCS array */
+	@Override
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
@@ -154,6 +159,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	 * @param lcs_array LCS array.
 	 * @param ind New lane use indications.
 	 * @param o User who deployed the indications. */
+	@Override
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
