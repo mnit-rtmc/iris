@@ -19,7 +19,7 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
-import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LaneMarkingImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
+import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
@@ -46,7 +47,7 @@ import us.mn.state.dot.tms.units.Interval;
  *
  * @author Douglas Lau
  */
-public class MndotPoller extends MessagePoller implements LCSPoller,
+public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	MeterPoller, SamplePoller, BeaconPoller, LaneMarkingPoller
 {
 	/** Test if it is afternoon */
@@ -287,20 +288,20 @@ public class MndotPoller extends MessagePoller implements LCSPoller,
 		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
 	}
 
-	/** Perform regular poll of one controller */
+	/** Send a device request to an alarm */
 	@Override
-	public void pollController(ControllerImpl c) {
-		boolean has_alarm = false;
-		for(ControllerIO cio: c.getDevices()) {
-			if(cio instanceof AlarmImpl)
-				has_alarm = true;
+	public void sendRequest(AlarmImpl alarm, DeviceRequest r) {
+		switch(r) {
+		case QUERY_STATUS:
+			Controller c = alarm.getController();
+			if (c instanceof ControllerImpl) {
+				ControllerImpl ci = (ControllerImpl)c;
+				addOperation(new OpQueryAlarms(ci));
+			}
+			break;
+		default:
+			// Ignore other requests
+			break;
 		}
-		if(has_alarm)
-			pollAlarms(c);
-	}
-
-	/** Perform regular poll of alarms */
-	private void pollAlarms(ControllerImpl c) {
-		addOperation(new OpQueryAlarms(c));
 	}
 }

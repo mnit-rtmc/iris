@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2013  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,11 @@ import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.comm.AlarmPoller;
+import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.event.AlarmEvent;
 
 /**
@@ -251,6 +254,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	}
 
 	/** Destroy an alarm */
+	@Override
 	public void doDestroy() throws TMSException {
 		// Don't allow an alarm to be destroyed if it is assigned to
 		// a controller.  This is needed because the Controller io_pins
@@ -261,5 +265,34 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 				name);
 		}
 		super.doDestroy();
+	}
+
+	/** Request a device operation */
+	public void sendDeviceRequest(DeviceRequest req) {
+		AlarmPoller p = getPoller();
+		if (p != null)
+			p.sendRequest(this, req);
+	}
+
+	/** Get an alarm poller */
+	private AlarmPoller getPoller() {
+		if (isActive()) {
+			ControllerImpl c = controller;	// Avoid race
+			if (c != null) {
+				MessagePoller p = c.getPoller();
+				if (p instanceof AlarmPoller)
+					return (AlarmPoller)p;
+			}
+		}
+		return null;
+	}
+
+	/** Get the active status */
+	public boolean isActive() {
+		ControllerImpl c = controller;	// Avoid race
+		if (c == null)
+			return false;
+		else
+			return c.getActive();
 	}
 }

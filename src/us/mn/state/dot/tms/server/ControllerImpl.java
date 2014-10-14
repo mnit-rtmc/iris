@@ -856,9 +856,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Poll controller devices */
 	public void pollDevices() {
 		// Must call getDevices so we don't hold the lock
-		for (ControllerIO io: getDevices()) {
+		for (ControllerIO io: getDevices())
 			pollDevice(io);
-		}
 	}
 
 	/** Poll one device */
@@ -879,6 +878,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if (io instanceof WeatherSensorImpl) {
 			WeatherSensorImpl ws = (WeatherSensorImpl)io;
 			ws.sendDeviceRequest(QUERY_STATUS);
+		}
+		if (io instanceof AlarmImpl) {
+			AlarmImpl a = (AlarmImpl)io;
+			a.sendDeviceRequest(QUERY_STATUS);
 		}
 	}
 
