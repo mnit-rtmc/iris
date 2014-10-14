@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
 import static us.mn.state.dot.tms.DeviceRequest.QUERY_MESSAGE;
+import static us.mn.state.dot.tms.DeviceRequest.QUERY_STATUS;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
@@ -877,6 +878,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			DMSImpl dms = (DMSImpl)io;
 			if (dms.isPeriodicallyQueriable())
 				dms.sendDeviceRequest(QUERY_MESSAGE);
+		}
+		if (io instanceof GateArmImpl) {
+			GateArmImpl ga = (GateArmImpl)io;
+			ga.sendDeviceRequest(QUERY_STATUS);
 		}
 	}
 

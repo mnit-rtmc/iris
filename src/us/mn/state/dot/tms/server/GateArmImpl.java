@@ -186,13 +186,13 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override
 	public void setDeviceRequest(int r) {
 		DeviceRequest req = GateArmSystem.checkRequest(r);
-		if(req != null)
-			setDeviceRequest(req);
+		if (req != null)
+			sendDeviceRequest(req);
 	}
 
 	/** Request a device operation */
-	private void setDeviceRequest(DeviceRequest req) {
-		if(req == DeviceRequest.DISABLE_SYSTEM)
+	public void sendDeviceRequest(DeviceRequest req) {
+		if (req == DeviceRequest.DISABLE_SYSTEM)
 			GateArmSystem.disable("system disable");
 		else {
 			checkTimeout();

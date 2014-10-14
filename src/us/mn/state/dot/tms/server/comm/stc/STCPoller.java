@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.stc;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -38,12 +37,14 @@ public class STCPoller extends MessagePoller<STCProperty>
 	}
 
 	/** Check if a drop address is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		// Drop address 254 is reserved for broadcast
 		return drop >= 1 && drop <= 99;
 	}
 
 	/** Send a device request */
+	@Override
 	public void sendRequest(GateArmImpl ga, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
@@ -53,7 +54,7 @@ public class STCPoller extends MessagePoller<STCProperty>
 			addOperation(new OpResetGate(ga));
 			break;
 		case QUERY_STATUS:
-			pollGateArm(ga);
+			addOperation(new OpQueryGateStatus(ga));
 			break;
 		default:
 			// Ignore other requests
@@ -62,26 +63,14 @@ public class STCPoller extends MessagePoller<STCProperty>
 	}
 
 	/** Open the gate arm */
+	@Override
 	public void openGate(GateArmImpl ga, User o) {
 		addOperation(new OpControlGate(ga, o, GateArmState.OPENING));
 	}
 
 	/** Close the gate arm */
+	@Override
 	public void closeGate(GateArmImpl ga, User o) {
 		addOperation(new OpControlGate(ga, o, GateArmState.CLOSING));
-	}
-
-	/** Perform regular poll of one controller */
-	@Override
-	public void pollController(ControllerImpl c) {
-		for(ControllerIO cio: c.getDevices()) {
-			if(cio instanceof GateArmImpl)
-				pollGateArm((GateArmImpl)cio);
-		}
-	}
-
-	/** Perform regular poll of a gate arm */
-	private void pollGateArm(GateArmImpl ga) {
-		addOperation(new OpQueryGateStatus(ga));
 	}
 }
