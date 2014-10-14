@@ -206,13 +206,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Request to query configuration of the DMS */
 	public void requestConfigure() {
-		if(!configure) {
-			DMSPoller p = getDMSPoller();
-			if(p != null) {
-				p.sendRequest(this,
-					DeviceRequest.QUERY_CONFIGURATION);
-			}
-		}
+		if (!configure)
+			sendDeviceRequest(DeviceRequest.QUERY_CONFIGURATION);
 	}
 
 	/** Configure flag indicates that the sign has been configured */
@@ -817,10 +812,15 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Request a device operation (query message, test pixels, etc.) */
-	public void setDeviceRequest(int r) {
+	public void sendDeviceRequest(DeviceRequest dr) {
 		DMSPoller p = getDMSPoller();
-		if(p != null)
-			p.sendRequest(this, DeviceRequest.fromOrdinal(r));
+		if (p != null)
+			p.sendRequest(this, dr);
+	}
+
+	/** Request a device operation (query message, test pixels, etc.) */
+	public void setDeviceRequest(int r) {
+		sendDeviceRequest(DeviceRequest.fromOrdinal(r));
 	}
 
 	/** The owner of the next message to be displayed.  This is a write-only

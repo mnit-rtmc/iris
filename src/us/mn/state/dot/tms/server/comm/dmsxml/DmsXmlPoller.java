@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.UserImpl;
-import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
@@ -145,23 +144,6 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 			// ignore other requests
 			Log.finest("DmsXmlPoller.sendRequest(" + 
 				dms.getName() +	"): ignored request r=" + r);
-		}
-	}
-
-	/** Perform regular poll of one controller */
-	@Override
-	public void pollController(ControllerImpl c) {
-		for(ControllerIO cio: c.getDevices()) {
-			if(cio instanceof DMSImpl)
-				pollDMS((DMSImpl)cio);
-		}
-	}
-
-	/** Perform regular poll of a DMS */
-	private void pollDMS(DMSImpl dms) {
-		if(dms.isPeriodicallyQueriable()) {
-			addOperation(new OpQueryMsg(dms, null,
-				DeviceRequest.QUERY_MESSAGE, false));
 		}
 	}
 }

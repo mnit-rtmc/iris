@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
+import static us.mn.state.dot.tms.DeviceRequest.QUERY_MESSAGE;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
@@ -860,6 +861,23 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the message poller of a comm link */
 	static private MessagePoller getPoller(CommLinkImpl cl) {
 		return cl != null ? cl.getPoller() : null;
+	}
+
+	/** Poll controller devices */
+	public void pollDevices() {
+		// Must call getDevices so we don't hold the lock
+		for (ControllerIO io: getDevices()) {
+			pollDevice(io);
+		}
+	}
+
+	/** Poll one device */
+	private void pollDevice(ControllerIO io) {
+		if (io instanceof DMSImpl) {
+			DMSImpl dms = (DMSImpl)io;
+			if (dms.isPeriodicallyQueriable())
+				dms.sendDeviceRequest(QUERY_MESSAGE);
+		}
 	}
 
 	/** Perform a controller download (reset) */

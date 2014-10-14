@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.InvalidMessageException;
@@ -164,20 +163,5 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		User o)
 	{
 		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
-	}
-
-	/** Perform regular poll of one controller */
-	@Override
-	public void pollController(ControllerImpl c) {
-		for(ControllerIO cio: c.getDevices()) {
-			if(cio instanceof DMSImpl)
-				pollDMS((DMSImpl)cio);
-		}
-	}
-
-	/** Perform regular poll of a DMS */
-	private void pollDMS(DMSImpl dms) {
-		if(dms.isPeriodicallyQueriable())
-			addOperation(new OpQueryDMSMessage(dms));
 	}
 }
