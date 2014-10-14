@@ -373,8 +373,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Poll all controllers */
 	private void pollControllers(MessagePoller mp) {
-		// WARNING: pollController calls ControllerImpl.getDevices,
-		//          which is synchronized on ControllerImpl instance
 		synchronized(controllers) {
 			for (ControllerImpl c: controllers.values()) {
 				if (c.getActive())

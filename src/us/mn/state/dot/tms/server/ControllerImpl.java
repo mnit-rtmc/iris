@@ -360,17 +360,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return false;
 	}
 
-	/** Get an active DMS for the controller */
-	public synchronized DMSImpl getActiveSign() {
-		if(getActive()) {
-			for(ControllerIO io: io_pins.values()) {
-				if(io instanceof DMSImpl)
-					return (DMSImpl)io;
-			}
-		}
-		return null;
-	}
-
 	/** Get an active beacon for the controller */
 	public synchronized BeaconImpl getActiveBeacon() {
 		if(getActive()) {
@@ -380,11 +369,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			}
 		}
 		return null;
-	}
-
-	/** Get a list of all devices on controller */
-	public synchronized Set<ControllerIO> getDevices() {
-		return new HashSet<ControllerIO>(io_pins.values());
 	}
 
 	/** Get a map of pins to detectors */
@@ -443,15 +427,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return (AlarmImpl)io;
 		else
 			return null;
-	}
-
-	/** Check whether this controller has any alarms */
-	public synchronized boolean hasAlarm() {
-		for(ControllerIO io: io_pins.values()) {
-			if(io instanceof AlarmImpl)
-				return true;
-		}
-		return false;
 	}
 
 	/** Check if the controller is a message feed controller */
@@ -860,6 +835,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			pollDevice(io);
 	}
 
+	/** Get a list of all devices on controller */
+	private synchronized Set<ControllerIO> getDevices() {
+		return new HashSet<ControllerIO>(io_pins.values());
+	}
+
 	/** Poll one device */
 	private void pollDevice(ControllerIO io) {
 		if (io instanceof DMSImpl) {
@@ -914,6 +894,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Destroy an object */
+	@Override
 	public void doDestroy() throws TMSException {
 		CommLinkImpl cl = comm_link;
 		if(cl != null) {
