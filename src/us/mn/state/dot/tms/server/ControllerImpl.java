@@ -872,6 +872,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			GateArmImpl ga = (GateArmImpl)io;
 			ga.sendDeviceRequest(QUERY_STATUS);
 		}
+		if (io instanceof BeaconImpl) {
+			BeaconImpl b = (BeaconImpl)io;
+			b.sendDeviceRequest(QUERY_STATUS);
+		}
 		if (io instanceof WeatherSensorImpl) {
 			WeatherSensorImpl ws = (WeatherSensorImpl)io;
 			ws.sendDeviceRequest(QUERY_STATUS);

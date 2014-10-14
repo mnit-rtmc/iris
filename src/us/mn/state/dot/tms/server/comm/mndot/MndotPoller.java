@@ -243,7 +243,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,
 			addOperation(new OpSendBeaconSettings(beacon));
 			break;
 		case QUERY_STATUS:
-			pollBeacon(beacon);
+			addOperation(new OpQueryBeaconState(beacon));
 			break;
 		default:
 			// Ignore other requests
@@ -292,18 +292,11 @@ public class MndotPoller extends MessagePoller implements LCSPoller,
 	public void pollController(ControllerImpl c) {
 		boolean has_alarm = false;
 		for(ControllerIO cio: c.getDevices()) {
-			if(cio instanceof BeaconImpl)
-				pollBeacon((BeaconImpl)cio);
 			if(cio instanceof AlarmImpl)
 				has_alarm = true;
 		}
 		if(has_alarm)
 			pollAlarms(c);
-	}
-
-	/** Perform regular poll of a beacon */
-	private void pollBeacon(BeaconImpl b) {
-		addOperation(new OpQueryBeaconState(b));
 	}
 
 	/** Perform regular poll of alarms */

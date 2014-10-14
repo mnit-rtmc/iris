@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -88,7 +87,7 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	public void sendRequest(BeaconImpl b, DeviceRequest r) {
 		switch(r) {
 		case QUERY_STATUS:
-			pollBeacon(b);
+			addOperation(new OpQueryBeaconState(b));
 			break;
 		default:
 			// Ignore other requests
@@ -100,19 +99,5 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	@Override
 	public void setFlashing(BeaconImpl b, boolean f) {
 		addOperation(new OpChangeBeaconState(b, f));
-	}
-
-	/** Perform regular poll of one controller */
-	@Override
-	public void pollController(ControllerImpl c) {
-		for(ControllerIO cio: c.getDevices()) {
-			if(cio instanceof BeaconImpl)
-				pollBeacon((BeaconImpl)cio);
-		}
-	}
-
-	/** Perform regular poll of a beacon */
-	private void pollBeacon(BeaconImpl b) {
-		addOperation(new OpQueryBeaconState(b));
 	}
 }

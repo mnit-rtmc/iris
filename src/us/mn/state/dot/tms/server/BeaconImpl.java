@@ -209,10 +209,15 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	}
 
 	/** Request a device operation */
+	@Override
 	public void setDeviceRequest(int r) {
-		DeviceRequest dr = DeviceRequest.fromOrdinal(r);
+		sendDeviceRequest(DeviceRequest.fromOrdinal(r));
+	}
+
+	/** Request a device operation */
+	public void sendDeviceRequest(DeviceRequest req) {
 		BeaconPoller p = getBeaconPoller();
-		if(p != null)
-			p.sendRequest(this, dr);
+		if (p != null)
+			p.sendRequest(this, req);
 	}
 }
