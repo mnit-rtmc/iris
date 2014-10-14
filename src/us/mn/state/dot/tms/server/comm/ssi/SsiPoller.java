@@ -17,18 +17,21 @@ package us.mn.state.dot.tms.server.comm.ssi;
 
 import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
 /**
  * SSI RWIS poller, which periodically reads SSI data via http.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
-public class SsiPoller extends MessagePoller {
+public class SsiPoller extends MessagePoller implements WeatherPoller {
 
 	/** SSI logger */
 	static public final DebugLog LOG = new DebugLog("ssi");
@@ -60,16 +63,22 @@ public class SsiPoller extends MessagePoller {
 		return true;
 	}
 
-	/** Perform regular poll of one controller */
+	/** Send a device request */
 	@Override
-	public void pollController(ControllerImpl c) {
-		WeatherSensorImpl ws = c.getActiveWeatherSensor();
-		if(ws != null);
-			pollWeatherSensor(ws);
+	public void sendRequest(WeatherSensorImpl ws, DeviceRequest r) {
+		switch(r) {
+		case QUERY_STATUS:
+			addOperation(new OpRead(ws, records));
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
 	}
 
-	/** Perform regular poll of a weather sensor */
-	private void pollWeatherSensor(WeatherSensorImpl ws) {
-		addOperation(new OpRead(ws, records));
+	/** Send settings to a weather sensor */
+	@Override
+	public void sendSettings(WeatherSensorImpl ws) {
+		// Nothing to do
 	}
 }

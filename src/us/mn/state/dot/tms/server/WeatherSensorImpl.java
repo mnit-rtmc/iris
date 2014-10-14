@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
@@ -118,6 +119,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Destroy an object */
+	@Override
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
 		geo_loc.notifyRemove();
@@ -312,8 +314,16 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Request a device operation */
+	@Override
 	public void setDeviceRequest(int r) {
-		// no device requests are currently supported
+		// no device requests from clients are supported
+	}
+
+	/** Send a device request */
+	public void sendDeviceRequest(DeviceRequest req) {
+		WeatherPoller p = getWeatherPoller();
+		if (p != null)
+			p.sendRequest(this, req);
 	}
 
 	/** Flush buffered sample data to disk */

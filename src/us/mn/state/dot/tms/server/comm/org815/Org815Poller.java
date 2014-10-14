@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.org815;
 
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -39,22 +40,22 @@ public class Org815Poller extends MessagePoller<Org815Property>
 		return true;
 	}
 
+	/** Send a device request */
+	@Override
+	public void sendRequest(WeatherSensorImpl ws, DeviceRequest r) {
+		switch(r) {
+		case QUERY_STATUS:
+			addOperation(new OpQueryConditions(ws));
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
+	}
+
 	/** Send settings to a weather sensor */
 	@Override
 	public void sendSettings(WeatherSensorImpl ws) {
 		addOperation(new OpQuerySettings(ws));
-	}
-
-	/** Perform regular poll of one controller */
-	@Override
-	public void pollController(ControllerImpl c) {
-		WeatherSensorImpl ws = c.getActiveWeatherSensor();
-		if(ws != null);
-			pollWeatherSensor(ws);
-	}
-
-	/** Perform regular poll of a weather sensor */
-	private void pollWeatherSensor(WeatherSensorImpl ws) {
-		addOperation(new OpQueryConditions(ws));
 	}
 }

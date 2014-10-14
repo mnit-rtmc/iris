@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 
 /**
@@ -23,6 +24,9 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
  * @author Douglas Lau
  */
 public interface WeatherPoller {
+
+	/** Send a device request */
+	void sendRequest(WeatherSensorImpl ws, DeviceRequest r);
 
 	/** Send settings to a weather sensor */
 	void sendSettings(WeatherSensorImpl ws);

@@ -382,17 +382,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return null;
 	}
 
-	/** Get an active weather sensor for the controller */
-	public synchronized WeatherSensorImpl getActiveWeatherSensor() {
-		if(getActive()) {
-			for(ControllerIO io: io_pins.values()) {
-				if(io instanceof WeatherSensorImpl)
-					return (WeatherSensorImpl)io;
-			}
-		}
-		return null;
-	}
-
 	/** Get a list of all devices on controller */
 	public synchronized Set<ControllerIO> getDevices() {
 		return new HashSet<ControllerIO>(io_pins.values());
@@ -883,6 +872,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			GateArmImpl ga = (GateArmImpl)io;
 			ga.sendDeviceRequest(QUERY_STATUS);
 		}
+		if (io instanceof WeatherSensorImpl) {
+			WeatherSensorImpl ws = (WeatherSensorImpl)io;
+			ws.sendDeviceRequest(QUERY_STATUS);
+		}
 	}
 
 	/** Perform a controller download (reset) */
@@ -896,12 +889,21 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 				sp.sendSettings(this);
 		}
 		if(p instanceof WeatherPoller) {
-			WeatherSensorImpl ws = getActiveWeatherSensor();
+			WeatherSensorImpl ws = getWeatherSensor();
 			if(ws != null) {
 				WeatherPoller wp = (WeatherPoller)p;
 				wp.sendSettings(ws);
 			}
 		}
+	}
+
+	/** Get a weather sensor for the controller */
+	private synchronized WeatherSensorImpl getWeatherSensor() {
+		for (ControllerIO io: io_pins.values()) {
+			if (io instanceof WeatherSensorImpl)
+				return (WeatherSensorImpl)io;
+		}
+		return null;
 	}
 
 	/** Destroy an object */
