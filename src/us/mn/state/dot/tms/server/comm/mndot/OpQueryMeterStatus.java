@@ -111,7 +111,8 @@ public class OpQueryMeterStatus extends Op170 {
 			mess.queryProps();
 			logQuery(red_mem);
 			float red = parseRedTime(data) / 10.0f;
-			int rate = MndotPoller.calculateReleaseRate(meter, red);
+			int rate = RedTime.toReleaseRate(red,
+				meter.getMeterType());
 			meter.setRateNotify(rate);
 			return phases.poll();
 		}

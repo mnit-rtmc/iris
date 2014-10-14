@@ -21,8 +21,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.RampMeterType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -39,7 +37,6 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
-import us.mn.state.dot.tms.units.Interval;
 
 /**
  * MndotPoller is a poller for the Mn/DOT 170 communication protocol,
@@ -67,34 +64,6 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 				return 2;
 		}
 		return 0;
-	}
-
-	/** Calculate the red time for a ramp meter.
-	 * @param meter	Ramp meter to calculate red time.
-	 * @param rate Release rate (vehicles per hour).
-	 * @return Red time (seconds) */
-	static float calculateRedTime(RampMeterImpl meter, int rate) {
-		float secs_per_veh = Interval.HOUR.divide(rate);
-		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
-			secs_per_veh /= 2;
-		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
-		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
-		float min_red = SystemAttrEnum.METER_MIN_RED_SECS.getFloat();
-		float red_time = secs_per_veh - (green + yellow);
-		return Math.max(red_time, min_red);
-	}
-
-	/** Calculate the release rate
-	 * @param red_time Red time (seconds)
-	 * @return Release rate (vehicles per hour) */
-	static int calculateReleaseRate(RampMeterImpl meter, float red_time) {
-		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
-		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
-		float secs_per_veh = red_time + yellow + green;
-		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
-			secs_per_veh *= 2;
-		Interval rate = new Interval(secs_per_veh);
-		return Math.round(rate.per(Interval.HOUR));
 	}
 
 	/** CommProtocol (4-bit or 5-bit) */
@@ -206,7 +175,8 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 			if(shouldStop(meter, rate))
 				stopMetering(meter);
 			else {
-				float red = calculateRedTime(meter, rate);
+				float red = RedTime.fromReleaseRate(rate,
+					meter.getMeterType());
 				int r = Math.round(red * 10);
 				addOperation(new OpSendMeterRedTime(meter,
 					n, r));

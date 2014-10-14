@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,8 @@ public class OpSendMeterRedTime extends OpDevice {
 			mess.add(new MemoryProperty(address, bo.toByteArray()));
 			mess.storeProps();
 			float red = red_time / 10.0f;
-			int rate = MndotPoller.calculateReleaseRate(meter, red);
+			int rate = RedTime.toReleaseRate(red,
+				meter.getMeterType());
 			// FIXME: should happen on SONAR thread
 			meter.setRateNotify(rate);
 			return null;
