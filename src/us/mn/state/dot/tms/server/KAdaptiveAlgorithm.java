@@ -175,6 +175,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return MISSING_DATA;
 	}
 
+	/** Check if density is below "low" threshold */
+	static private boolean isDensityLow(Double k) {
+		return (k != null) && (k < K_LOW);
+	}
+
 	/** States for all K adaptive algorithms */
 	static private HashMap<String, KAdaptiveAlgorithm> ALL_ALGS =
 		new HashMap<String, KAdaptiveAlgorithm>();
@@ -1245,8 +1250,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if mainline segment is flowing */
 		private boolean isSegmentFlowing() {
-			Double sk = segment_k_hist.average(0, steps(STOP_SECS));
-			return (sk != null) && (sk < K_LOW);
+			Double str_k = segment_k_hist.average(0,
+				steps(START_SECS));
+			Double stp_k = segment_k_hist.average(0,
+				steps(STOP_SECS));
+			return isDensityLow(str_k) && isDensityLow(stp_k);
 		}
 
 		/** Check if ramp meter should continue flushing.
