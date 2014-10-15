@@ -38,6 +38,6 @@ public interface DevicePoller {
 	/** Set the receive timeout */
 	void setTimeout(int t) throws IOException;
 
-	/** Stop polling on this thread */
-	void stopPolling();
+	/** Destroy the poller */
+	void destroy();
 }

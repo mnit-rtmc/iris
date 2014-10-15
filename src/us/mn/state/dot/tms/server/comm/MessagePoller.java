@@ -166,9 +166,9 @@ abstract public class MessagePoller<T extends ControllerProperty>
 			return false;
 	}
 
-	/** Stop polling on this thread */
-	public void stopPolling() {
-		if(isConnected())
+	/** Destroy the poller */
+	public void destroy() {
+		if (isConnected())
 			addOperation(new KillThread<T>());
 	}
 
