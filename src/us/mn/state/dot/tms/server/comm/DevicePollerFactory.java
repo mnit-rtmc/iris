@@ -190,7 +190,7 @@ public class DevicePollerFactory {
 			return new InetSocketAddress(host, p);
 		}
 		catch (IllegalArgumentException e) {
-			throw new IOException(e);
+			throw new IOException(e.getMessage());
 		}
 	}
 
