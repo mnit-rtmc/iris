@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2013  Minnesota Department of Transportation
+ * Copyright (C) 2011-2014  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2014  AHMCT, University of California
  *
@@ -45,19 +45,28 @@ import us.mn.state.dot.tms.server.comm.vicon.ViconPoller;
 import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
 
 /**
- * A factory for creating message poller threads.
+ * A factory for creating device poller objects.
  *
  * @author Douglas Lau
  * @author Michael Darter
  * @author Travis Swanston
  */
-public class MessagePollerFactory {
+public class DevicePollerFactory {
 
 	/** Default URI for UDP sockets */
 	static private final String UDP = "udp:/";
 
 	/** Default URI for TCP sockets */
 	static private final String TCP = "tcp:/";
+
+	/** Create a device poller */
+	static public DevicePoller create(String name, CommProtocol protocol,
+		String uri) throws IOException
+	{
+		DevicePollerFactory factory = new DevicePollerFactory(name,
+			protocol, uri);
+		return factory.create();
+	}
 
 	/** Name of comm link */
 	protected final String name;
@@ -68,15 +77,15 @@ public class MessagePollerFactory {
 	/** URI of comm link */
 	protected final String uri;
 
-	/** Create a new message poller factory */
-	public MessagePollerFactory(String n, CommProtocol cp, String u) {
+	/** Create a new device poller factory */
+	private DevicePollerFactory(String n, CommProtocol cp, String u) {
 		name = n;
 		protocol = cp;
 		uri = u;
 	}
 
 	/** Create a message poller */
-	public MessagePoller create() throws IOException {
+	private MessagePoller create() throws IOException {
 		switch(protocol) {
 		case NTCIP_A:
 			return createNtcipAPoller();

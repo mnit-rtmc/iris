@@ -31,15 +31,6 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 abstract public class MessagePoller<T extends ControllerProperty>
 	implements DevicePoller
 {
-	/** Create a message poller */
-	static public MessagePoller create(String name, CommProtocol protocol,
-		String uri) throws IOException
-	{
-		MessagePollerFactory factory = new MessagePollerFactory(name,
-			protocol, uri);
-		return factory.create();
-	}
-
 	/** Get a message describing an IO exception */
 	static private String exceptionMessage(IOException e) {
 		String m = e.getMessage();

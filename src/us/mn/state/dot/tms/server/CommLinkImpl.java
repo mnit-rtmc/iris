@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePollerFactory;
 import us.mn.state.dot.tms.units.Interval;
 
 /**
@@ -337,7 +337,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private synchronized DevicePoller openPoller() {
 		assert poller == null;
 		try {
-			poller = MessagePoller.create(name, protocol, uri);
+			poller = DevicePollerFactory.create(name, protocol,uri);
 			poller.setTimeout(timeout);
 		}
 		catch(IOException e) {
