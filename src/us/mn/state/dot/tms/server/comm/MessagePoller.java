@@ -86,15 +86,17 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	private String status = null;
 
 	/** Get the poller status */
+	@Override
 	public String getStatus() {
 		String s = status;
-		if(s != null)
+		if (s != null)
 			return s;
 		ThreadState ts = state;
 		return (ts == ThreadState.RUNNING) ? "" : ts.toString();
 	}
 
 	/** Check if ready for operation */
+	@Override
 	public synchronized boolean isReady() {
 		switch(state) {
 		case NOT_STARTED:
@@ -107,6 +109,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Check if poller is connected */
+	@Override
 	public synchronized boolean isConnected() {
 		switch(state) {
 		case STARTING:
@@ -121,7 +124,8 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	private boolean hung_up = false;
 
 	/** Check if the messenger was hung up on */
-	public boolean wasHungUp() {
+	@Override
+	public final boolean wasHungUp() {
 		return hung_up;
 	}
 
@@ -139,7 +143,8 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Set the receive timeout */
-	public void setTimeout(int t) throws IOException {
+	@Override
+	public final void setTimeout(int t) throws IOException {
 		messenger.setTimeout(t);
 	}
 
@@ -167,7 +172,8 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Destroy the poller */
-	public void destroy() {
+	@Override
+	public final void destroy() {
 		if (isConnected())
 			addOperation(new KillThread<T>());
 	}
