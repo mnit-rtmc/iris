@@ -324,7 +324,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	 * access to the poller member variable. */
 	public synchronized DevicePoller getPoller() {
 		if (poller != null) {
-			setStatus(poller.getStatus());
+			setStatusNotify(poller.getStatus());
 			if (poller.isReady())
 				return poller;
 			else
@@ -342,7 +342,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		}
 		catch(IOException e) {
 			closePoller();
-			setStatus("I/O error: " + e.getMessage());
+			setStatusNotify("I/O error: " + e.getMessage());
 		}
 		return poller;
 	}
@@ -379,7 +379,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	protected transient String status = Constants.UNKNOWN;
 
 	/** Set the communication status */
-	public void setStatus(String s) {
+	public void setStatusNotify(String s) {
 		if(s == null || s.equals(status))
 			return;
 		status = s;
