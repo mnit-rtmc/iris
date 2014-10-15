@@ -41,7 +41,8 @@ public final class OperationQueue<T extends ControllerProperty> {
 
 	/** Enqueue a new operation */
 	public synchronized boolean enqueue(Operation<T> op) {
-		if(shouldAdd(op) && op.begin()) {
+		if (shouldAdd(op)) {
+			op.begin();
 			add(op);
 			return true;
 		} else

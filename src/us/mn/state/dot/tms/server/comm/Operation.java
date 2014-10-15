@@ -36,7 +36,7 @@ abstract public class Operation<T extends ControllerProperty> {
 
 	/** Increment the count of operations */
 	static private int incrementCount() {
-		synchronized(OP_LOG) {
+		synchronized (OP_LOG) {
 			n_operations++;
 			return n_operations;
 		}
@@ -44,7 +44,7 @@ abstract public class Operation<T extends ControllerProperty> {
 
 	/** Decrement the count of operations */
 	static private int decrementCount() {
-		synchronized(OP_LOG) {
+		synchronized (OP_LOG) {
 			n_operations--;
 			return n_operations;
 		}
@@ -52,13 +52,13 @@ abstract public class Operation<T extends ControllerProperty> {
 
 	/** Write a message to the operation log */
 	protected void log(String msg) {
-		if(OP_LOG.isOpen())
+		if (OP_LOG.isOpen())
 			OP_LOG.log(getOpName() + " " + msg);
 	}
 
 	/** Write a message to the operation log */
 	protected void log(String msg, int n_ops) {
-		if(OP_LOG.isOpen())
+		if (OP_LOG.isOpen())
 			log(msg + ": " + n_ops);
 	}
 
@@ -73,7 +73,7 @@ abstract public class Operation<T extends ControllerProperty> {
 
 	/** Set the priority of the operation */
 	public void setPriority(PriorityLevel p) {
-		if(p.ordinal() < priority.ordinal())
+		if (p.ordinal() < priority.ordinal())
 			priority = p;
 	}
 
@@ -92,20 +92,22 @@ abstract public class Operation<T extends ControllerProperty> {
 	abstract protected Phase<T> phaseOne();
 
 	/** Operation equality test */
+	@Override
 	public boolean equals(Object o) {
 		return this == o;
 	}
 
 	/** Get a string description of the operation */
+	@Override
 	public String toString() {
 		String name;
 		Phase<T> p = phase;
-		if(p != null)
+		if (p != null)
 			name = p.getClass().getName();
 		else
 			name = getClass().getName();
 		int i = name.lastIndexOf('.');
-		if(i >= 0)
+		if (i >= 0)
 			return name.substring(i + 1);
 		else
 			return name;
@@ -115,7 +117,7 @@ abstract public class Operation<T extends ControllerProperty> {
 	protected String getOpName() {
 		String name = getClass().getName();
 		int i = name.lastIndexOf('.');
-		if(i >= 0)
+		if (i >= 0)
 			return name.substring(i + 1);
 		else
 			return name;
@@ -148,10 +150,9 @@ abstract public class Operation<T extends ControllerProperty> {
 
 	/** Begin the operation.  The operation begins when it is queued for
 	 * processing. */
-	public boolean begin() {
+	public final void begin() {
 		phase = phaseOne();
 		log("begin", incrementCount());
-		return true;
 	}
 
 	/** Cleanup the operation.  The operation gets cleaned up after
@@ -166,7 +167,7 @@ abstract public class Operation<T extends ControllerProperty> {
 	}
 
 	/** Check if the operation is done */
-	public boolean isDone() {
+	public final boolean isDone() {
 		return phase == null;
 	}
 
@@ -179,7 +180,7 @@ abstract public class Operation<T extends ControllerProperty> {
 	public final void poll(CommMessage<T> mess) throws IOException,
 		DeviceContentionException
 	{
-		final Phase<T> p = phase;
+		Phase<T> p = phase;
 		if (p != null) {
 			Phase<T> np = p.poll(mess);
 			updatePhase(np);
