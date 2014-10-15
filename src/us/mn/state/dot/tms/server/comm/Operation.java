@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
 
 /**
@@ -27,40 +26,6 @@ import us.mn.state.dot.tms.EventType;
  * @author Douglas Lau
  */
 abstract public class Operation<T extends ControllerProperty> {
-
-	/** Operation error log */
-	static private final DebugLog OP_LOG = new DebugLog("operation");
-
-	/** Systemwide count of operations */
-	static private int n_operations = 0;
-
-	/** Increment the count of operations */
-	static private int incrementCount() {
-		synchronized (OP_LOG) {
-			n_operations++;
-			return n_operations;
-		}
-	}
-
-	/** Decrement the count of operations */
-	static private int decrementCount() {
-		synchronized (OP_LOG) {
-			n_operations--;
-			return n_operations;
-		}
-	}
-
-	/** Write a message to the operation log */
-	protected void log(String msg) {
-		if (OP_LOG.isOpen())
-			OP_LOG.log(getOpName() + " " + msg);
-	}
-
-	/** Write a message to the operation log */
-	protected void log(String msg, int n_ops) {
-		if (OP_LOG.isOpen())
-			log(msg + ": " + n_ops);
-	}
 
 	/** Priority of the operation */
 	private PriorityLevel priority;
@@ -83,7 +48,6 @@ abstract public class Operation<T extends ControllerProperty> {
 	/** Create a new I/O operation */
 	public Operation(PriorityLevel prio) {
 		priority = prio;
-		log("created");
 	}
 
 	/** Create the first phase of the operation.  This method cannot be
@@ -132,18 +96,18 @@ abstract public class Operation<T extends ControllerProperty> {
 	}
 
 	/** Set the success flag */
-	public void setSuccess(boolean s) {
+	protected final void setSuccess(boolean s) {
 		success = s;
 	}
 
 	/** Set the operation to failed */
-	public synchronized void setFailed() {
+	public synchronized final void setFailed() {
 		setSuccess(false);
 		phase = null;
 	}
 
 	/** Set the operation to succeeded */
-	public synchronized void setSucceeded() {
+	public synchronized final void setSucceeded() {
 		setSuccess(true);
 		phase = null;
 	}
@@ -152,14 +116,12 @@ abstract public class Operation<T extends ControllerProperty> {
 	 * processing. */
 	public final void begin() {
 		phase = phaseOne();
-		log("begin", incrementCount());
 	}
 
 	/** Cleanup the operation.  The operation gets cleaned up after
-	 * processing is complete and it is removed from the queue. */
-	public void cleanup() {
-		log("cleanup", decrementCount());
-	}
+	 * processing is complete and it is removed from the queue.  This method
+	 * may get called more than once after the operation is done. */
+	public void cleanup() { }
 
 	/** Handle a communication error */
 	public void handleCommError(EventType et, String msg) {
