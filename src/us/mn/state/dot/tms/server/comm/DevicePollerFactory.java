@@ -69,13 +69,13 @@ public class DevicePollerFactory {
 	}
 
 	/** Name of comm link */
-	protected final String name;
+	private final String name;
 
 	/** Communication protocol */
-	protected final CommProtocol protocol;
+	private final CommProtocol protocol;
 
 	/** URI of comm link */
-	protected final String uri;
+	private final String uri;
 
 	/** Create a new device poller factory */
 	private DevicePollerFactory(String n, CommProtocol cp, String u) {
@@ -84,9 +84,9 @@ public class DevicePollerFactory {
 		uri = u;
 	}
 
-	/** Create a message poller */
-	private MessagePoller create() throws IOException {
-		switch(protocol) {
+	/** Create a device poller */
+	private DevicePoller create() throws IOException {
+		switch (protocol) {
 		case NTCIP_A:
 			return createNtcipAPoller();
 		case NTCIP_B:
@@ -141,16 +141,16 @@ public class DevicePollerFactory {
 	{
 		try {
 			URI u = createURI(d_uri);
-			if("tcp".equals(u.getScheme()))
+			if ("tcp".equals(u.getScheme()))
 				return createStreamMessenger(u);
-			else if("udp".equals(u.getScheme()))
+			else if ("udp".equals(u.getScheme()))
 				return createDatagramMessenger(u);
-			else if("modem".equals(u.getScheme()))
+			else if ("modem".equals(u.getScheme()))
 				return createModemMessenger(u);
 			else
 				throw new IOException("INVALID URI SCHEME");
 		}
-		catch(URISyntaxException e) {
+		catch (URISyntaxException e) {
 			throw new IOException("INVALID URI");
 		}
 	}
@@ -165,7 +165,7 @@ public class DevicePollerFactory {
 		try {
 			return new URI(uri);
 		}
-		catch(URISyntaxException e) {
+		catch (URISyntaxException e) {
 			// If the URI begins with a host IP address,
 			// we need to prepend a couple of slashes
 			return new URI("//" + uri);
@@ -189,7 +189,7 @@ public class DevicePollerFactory {
 		try {
 			return new InetSocketAddress(host, p);
 		}
-		catch(IllegalArgumentException e) {
+		catch (IllegalArgumentException e) {
 			throw new IOException(e);
 		}
 	}
@@ -197,7 +197,7 @@ public class DevicePollerFactory {
 	/** Create a modem messenger */
 	private Messenger createModemMessenger(URI u) throws IOException {
 		ModemImpl modem = ModemMessenger.getModem();
-		if(modem != null) {
+		if (modem != null) {
 			return new ModemMessenger(new StreamMessenger(
 				createSocketAddress(createModemURI(modem))),
 				modem, u.getHost());
@@ -210,7 +210,7 @@ public class DevicePollerFactory {
 		try {
 			return modem.createURI();
 		}
-		catch(URISyntaxException e) {
+		catch (URISyntaxException e) {
 			throw new IOException("INVALID MODEM URI");
 		}
 	}
@@ -221,111 +221,111 @@ public class DevicePollerFactory {
 	}
 
 	/** Create an NTCIP Class A poller */
-	protected MessagePoller createNtcipAPoller() throws IOException {
+	private DevicePoller createNtcipAPoller() throws IOException {
 		return new NtcipPoller(name, createSocketMessenger(UDP));
 	}
 
 	/** Create an NTCIP Class B poller */
-	protected MessagePoller createNtcipBPoller() throws IOException {
+	private DevicePoller createNtcipBPoller() throws IOException {
 		HDLCMessenger hdlc = new HDLCMessenger(
 			createSocketMessenger(TCP));
 		return new NtcipPoller(name, hdlc);
 	}
 
 	/** Create an NTCIP Class C poller */
-	protected MessagePoller createNtcipCPoller() throws IOException {
+	private DevicePoller createNtcipCPoller() throws IOException {
 		return new NtcipPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a MnDOT poller */
-	protected MessagePoller createMndotPoller() throws IOException {
+	private DevicePoller createMndotPoller() throws IOException {
 		return new MndotPoller(name, createSocketMessenger(TCP),
 			protocol);
 	}
 
 	/** Create an SS105 poller */
-	protected MessagePoller createSS105Poller() throws IOException {
+	private DevicePoller createSS105Poller() throws IOException {
 		return new SS105Poller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create an SS125 poller */
-	protected MessagePoller createSS125Poller() throws IOException {
+	private DevicePoller createSS125Poller() throws IOException {
 		return new SS125Poller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a Canoga poller */
-	protected MessagePoller createCanogaPoller() throws IOException {
+	private DevicePoller createCanogaPoller() throws IOException {
 		return new CanogaPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a Vicon poller */
-	protected MessagePoller createViconPoller() throws IOException {
+	private DevicePoller createViconPoller() throws IOException {
 		return new ViconPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a PelcoD poller */
-	protected MessagePoller createPelcoDPoller() throws IOException {
+	private DevicePoller createPelcoDPoller() throws IOException {
 		return new PelcoDPoller(name, createSocketMessenger(UDP));
 	}
 
 	/** Create a Manchester poller */
-	protected MessagePoller createManchesterPoller() throws IOException {
+	private DevicePoller createManchesterPoller() throws IOException {
 		return new ManchesterPoller(name, createSocketMessenger(UDP));
 	}
 
 	/** Create a DMS XML poller */
-	protected MessagePoller createDmsXmlPoller() throws IOException {
+	private DevicePoller createDmsXmlPoller() throws IOException {
 		return new DmsXmlPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a MSG FEED poller */
-	protected MessagePoller createMsgFeedPoller() throws IOException {
+	private DevicePoller createMsgFeedPoller() throws IOException {
 		return new MsgFeedPoller(name, createHttpFileMessenger());
 	}
 
 	/** Create a Pelco video switch poller */
-	protected MessagePoller createPelcoPoller() throws IOException {
+	private DevicePoller createPelcoPoller() throws IOException {
 		return new PelcoPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a Vicon PTZ poller */
-	protected MessagePoller createViconPTZPoller() throws IOException {
+	private DevicePoller createViconPTZPoller() throws IOException {
 		return new ViconPTZPoller(name, createSocketMessenger(UDP));
 	}
 
 	/** Create a ORG-815 precipitation sensor poller */
-	protected MessagePoller createOrg815Poller() throws IOException {
+	private DevicePoller createOrg815Poller() throws IOException {
 		return new Org815Poller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create an Infinova D PTZ poller */
-	protected MessagePoller createInfinovaDPoller() throws IOException {
+	private DevicePoller createInfinovaDPoller() throws IOException {
 		return new PelcoDPoller(name, new InfinovaMessenger(
 			createSocketMessenger(TCP)));
 	}
 
 	/** Create an SSI poller */
-	protected MessagePoller createSsiPoller() throws IOException {
+	private DevicePoller createSsiPoller() throws IOException {
 		return new SsiPoller(name, createHttpFileMessenger());
 	}
 
 	/** Create an RTMS G4 poller */
-	protected MessagePoller createRtmsG4Poller() throws IOException {
+	private DevicePoller createRtmsG4Poller() throws IOException {
 		return new G4Poller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a DIN relay poller */
-	private MessagePoller createDinRelayPoller() throws IOException {
+	private DevicePoller createDinRelayPoller() throws IOException {
 		return new DinRelayPoller(name, createHttpFileMessenger());
 	}
 
 	/** Create a STC poller */
-	private MessagePoller createSTCPoller() throws IOException {
+	private DevicePoller createSTCPoller() throws IOException {
 		return new STCPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a Cohu PTZ poller */
-	protected MessagePoller createCohuPTZPoller() throws IOException {
+	private DevicePoller createCohuPTZPoller() throws IOException {
 		return new CohuPTZPoller(name, createSocketMessenger(TCP));
 	}
 }
