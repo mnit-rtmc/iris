@@ -301,9 +301,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if(t == timeout)
 			return;
 		try {
-			MessagePoller mp = poller;
-			if (mp != null)
-				mp.setTimeout(t);
+			DevicePoller dp = poller;
+			if (dp != null)
+				dp.setTimeout(t);
 		}
 		catch(IOException e) {
 			throw new TMSException(e);
@@ -317,8 +317,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return timeout;
 	}
 
-	/** Message poller for communication */
-	private transient MessagePoller poller;
+	/** Device poller for communication */
+	private transient DevicePoller poller;
 
 	/** Get the device poller.  This must be synchronized to protect
 	 * access to the poller member variable. */
@@ -423,8 +423,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Check if the comm link is currently connected */
 	public boolean isConnected() {
-		MessagePoller mp = poller;
-		return (mp != null) && mp.isConnected();
+		DevicePoller dp = poller;
+		return (dp != null) && dp.isConnected();
 	}
 
 	/** Write the comm link as an XML element */

@@ -14,11 +14,30 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import java.io.IOException;
+
 /**
  * DevicePoller is the base interface for polling devices (or controllers).
  *
  * @author Douglas Lau
  */
 public interface DevicePoller {
-	// No methods
+
+	/** Get the poller status */
+	String getStatus();
+
+	/** Check if poller is ready for operation */
+	boolean isReady();
+
+	/** Check if poller is connected */
+	boolean isConnected();
+
+	/** Check if the poller was hung up */
+	boolean wasHungUp();
+
+	/** Set the receive timeout */
+	void setTimeout(int t) throws IOException;
+
+	/** Stop polling on this thread */
+	void stopPolling();
 }
