@@ -49,12 +49,12 @@ abstract public class Operation<T extends ControllerProperty> {
 	abstract protected class Phase<T extends ControllerProperty> {
 
 		/** Perform a poll.
-		 * @return The next phase of the operation */
+		 * @return The next phase of the operation, or null */
 		abstract protected Phase<T> poll(CommMessage<T> mess)
 			throws IOException, DeviceContentionException;
 	}
 
-	/** Current phase of the operation */
+	/** Current phase of the operation, or null if done */
 	private Phase<T> phase;
 
 	/** Create a new operation */
@@ -103,20 +103,14 @@ abstract public class Operation<T extends ControllerProperty> {
 		phase = null;
 	}
 
-	/** 
-	 * Perform a poll with an addressed message. Called by 
-	 * MessagePoller.doPoll(). Processing stops when phase is
-	 * assigned null.
-	 * @see MessagePoller.performOperations
-	 */
+	/** Perform a poll with the current phase.
+	 * @param mess Message to use for polling. */
 	public final void poll(CommMessage<T> mess) throws IOException,
 		DeviceContentionException
 	{
 		Phase<T> p = phase;
-		if (p != null) {
-			Phase<T> np = p.poll(mess);
-			updatePhase(np);
-		}
+		if (p != null)
+			updatePhase(p.poll(mess));
 	}
 
 	/** Update the phase of the operation */
