@@ -24,6 +24,12 @@ import us.mn.state.dot.tms.EventType;
  */
 abstract public class Operation<T extends ControllerProperty> {
 
+	/** Strip all characters up to the last dot */
+	static private String stripToLastDot(String v) {
+		int i = v.lastIndexOf('.');
+		return (i >= 0) ? v.substring(i + 1) : v;
+	}
+
 	/** Priority of the operation */
 	private PriorityLevel priority;
 
@@ -71,38 +77,6 @@ abstract public class Operation<T extends ControllerProperty> {
 	 * processing is complete and it is removed from the queue.  This method
 	 * may get called more than once after the operation is done. */
 	public void cleanup() { }
-
-	/** Operation equality test */
-	@Override
-	public boolean equals(Object o) {
-		return this == o;
-	}
-
-	/** Get a string description of the operation */
-	@Override
-	public String toString() {
-		String name;
-		Phase<T> p = phase;
-		if (p != null)
-			name = p.getClass().getName();
-		else
-			name = getClass().getName();
-		int i = name.lastIndexOf('.');
-		if (i >= 0)
-			return name.substring(i + 1);
-		else
-			return name;
-	}
-
-	/** Get the operation name */
-	protected final String getOpName() {
-		String name = getClass().getName();
-		int i = name.lastIndexOf('.');
-		if (i >= 0)
-			return name.substring(i + 1);
-		else
-			return name;
-	}
 
 	/** Success or failure of operation */
 	private boolean success = true;
@@ -165,5 +139,28 @@ abstract public class Operation<T extends ControllerProperty> {
 	/** Get a description of the operation */
 	public String getOperationDescription() {
 		return getOpName();
+	}
+
+	/** Get the operation name */
+	protected final String getOpName() {
+		return stripToLastDot(getClass().getName());
+	}
+
+	/** Operation equality test */
+	@Override
+	public boolean equals(Object o) {
+		return this == o;
+	}
+
+	/** Get a string description of the operation */
+	@Override
+	public String toString() {
+		return stripToLastDot(phaseClass().getName());
+	}
+
+	/** Get the phase class */
+	private Class phaseClass() {
+		Phase<T> p = phase;
+		return (p != null) ? p.getClass() : getClass();
 	}
 }
