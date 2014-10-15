@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2012  Minnesota Department of Transportation
+ * Copyright (C) 2002-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -176,18 +176,21 @@ abstract public class Operation<T extends ControllerProperty> {
 	 * assigned null.
 	 * @see MessagePoller.performOperations
 	 */
-	public void poll(CommMessage<T> mess) throws IOException,
+	public final void poll(CommMessage<T> mess) throws IOException,
 		DeviceContentionException
 	{
 		final Phase<T> p = phase;
-		if(p != null) {
+		if (p != null) {
 			Phase<T> np = p.poll(mess);
-			// Need to synchronize against setFailed / setSucceeded
-			synchronized(this) {
-				if(!isDone())
-					phase = np;
-			}
+			updatePhase(np);
 		}
+	}
+
+	/** Update the phase of the operation */
+	private synchronized void updatePhase(Phase<T> p) {
+		// Need to synchronize against setFailed / setSucceeded
+		if (!isDone())
+			phase = p;
 	}
 
 	/** Base class for operation phases */
