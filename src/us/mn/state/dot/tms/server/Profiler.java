@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,9 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Michael Darter
  */
 public class Profiler {
+
+	/** Debug line length */
+	static private final int LINE_LEN = 58;
 
 	/** Constant value of one megabyte */
 	static private final double MIB = 1024.0 * 1024.0;
@@ -92,36 +95,36 @@ public class Profiler {
 		Thread[] thread = new Thread[group.activeCount() + 1];
 		int count = group.enumerate(thread, false);
 		StringBuilder sb = new StringBuilder();
-		while(sb.length() < deep)
+		while (sb.length() < deep)
 			sb.append(" ");
 		sb.append(group.getName());
 		sb.append(" thread group: ");
 		sb.append(count);
-		while(sb.length() < 66)
+		while (sb.length() < LINE_LEN - 2)
 			sb.append(" ");
 		sb.append(group.getMaxPriority());
-		while(sb.length() < 68)
-			sb.insert(66, " ");
+		while (sb.length() < LINE_LEN)
+			sb.insert(LINE_LEN - 2, " ");
 		PROFILE_LOG.log(sb.toString());
-		for(int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
 			debugThread(thread[i], deep);
 	}
 
 	/** Add one thread to debug log */
 	private void debugThread(Thread t, int deep) {
 		StringBuilder sb = new StringBuilder();
-		while(sb.length() < 4 + deep)
+		while (sb.length() < 4 + deep)
 			sb.insert(0, " ");
 		sb.append(t.getName());
-		if(!t.isAlive())
+		if (!t.isAlive())
 			sb.append(" (dead)");
-		if(t.isDaemon())
+		if (t.isDaemon())
 			sb.append(" (daemon)");
-		while(sb.length() < 66)
+		while (sb.length() < LINE_LEN - 2)
 			sb.append(" ");
 		sb.append(t.getPriority());
-		while(sb.length() < 68)
-			sb.insert(66, " ");
+		while (sb.length() < LINE_LEN)
+			sb.insert(LINE_LEN - 2, " ");
 		PROFILE_LOG.log(sb.toString());
 	}
 
