@@ -18,10 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.EventType;
 
 /**
- * An operation to be performed on a field controller.  Each message
- * poller maintains a prioritized queue of all outstanding operations. When an
- * operation gets to the head of the queue, the next phase is performed by
- * calling the poll method.
+ * An operation is a sequence of phases to be performed on a field controller.
  *
  * @author Douglas Lau
  */
@@ -32,28 +29,48 @@ abstract public class Operation<T extends ControllerProperty> {
 
 	/** Get the priority of the operation.
 	 * @return Priority of the operation (@see PriorityLevel) */
-	public PriorityLevel getPriority() {
+	public final PriorityLevel getPriority() {
 		return priority;
 	}
 
 	/** Set the priority of the operation */
-	public void setPriority(PriorityLevel p) {
+	public final void setPriority(PriorityLevel p) {
 		if (p.ordinal() < priority.ordinal())
 			priority = p;
+	}
+
+	/** Base class for operation phases */
+	abstract protected class Phase<T extends ControllerProperty> {
+
+		/** Perform a poll.
+		 * @return The next phase of the operation */
+		abstract protected Phase<T> poll(CommMessage<T> mess)
+			throws IOException, DeviceContentionException;
 	}
 
 	/** Current phase of the operation */
 	private Phase<T> phase;
 
-	/** Create a new I/O operation */
+	/** Create a new operation */
 	public Operation(PriorityLevel prio) {
 		priority = prio;
+	}
+
+	/** Begin the operation.  The operation begins when it is queued for
+	 * processing. */
+	public final void begin() {
+		phase = phaseOne();
 	}
 
 	/** Create the first phase of the operation.  This method cannot be
 	 * called in the Operation constructor, because the object may not
 	 * have been fully constructed yet (subclass initialization). */
 	abstract protected Phase<T> phaseOne();
+
+	/** Cleanup the operation.  The operation gets cleaned up after
+	 * processing is complete and it is removed from the queue.  This method
+	 * may get called more than once after the operation is done. */
+	public void cleanup() { }
 
 	/** Operation equality test */
 	@Override
@@ -78,7 +95,7 @@ abstract public class Operation<T extends ControllerProperty> {
 	}
 
 	/** Get the operation name */
-	protected String getOpName() {
+	protected final String getOpName() {
 		String name = getClass().getName();
 		int i = name.lastIndexOf('.');
 		if (i >= 0)
@@ -112,27 +129,6 @@ abstract public class Operation<T extends ControllerProperty> {
 		phase = null;
 	}
 
-	/** Begin the operation.  The operation begins when it is queued for
-	 * processing. */
-	public final void begin() {
-		phase = phaseOne();
-	}
-
-	/** Cleanup the operation.  The operation gets cleaned up after
-	 * processing is complete and it is removed from the queue.  This method
-	 * may get called more than once after the operation is done. */
-	public void cleanup() { }
-
-	/** Handle a communication error */
-	public void handleCommError(EventType et, String msg) {
-		setFailed();
-	}
-
-	/** Check if the operation is done */
-	public final boolean isDone() {
-		return phase == null;
-	}
-
 	/** 
 	 * Perform a poll with an addressed message. Called by 
 	 * MessagePoller.doPoll(). Processing stops when phase is
@@ -156,13 +152,14 @@ abstract public class Operation<T extends ControllerProperty> {
 			phase = p;
 	}
 
-	/** Base class for operation phases */
-	abstract protected class Phase<T extends ControllerProperty> {
+	/** Check if the operation is done */
+	public final boolean isDone() {
+		return phase == null;
+	}
 
-		/** Perform a poll.
-		 * @return The next phase of the operation */
-		abstract protected Phase<T> poll(CommMessage<T> mess)
-			throws IOException, DeviceContentionException;
+	/** Handle a communication error */
+	public void handleCommError(EventType et, String msg) {
+		setFailed();
 	}
 
 	/** Get a description of the operation */
