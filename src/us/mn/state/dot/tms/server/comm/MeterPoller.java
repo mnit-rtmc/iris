@@ -18,8 +18,8 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 
 /**
- * MeterPoller is an interface for MessagePoller classes which can poll ramp
- * meter devices.
+ * MeterPoller is an interface for pollers which can send messages to ramp meter
+ * devices.
  *
  * @author Douglas Lau
  */

@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
- * SamplePoller is an interface for MessagePoller classes which can poll traffic
+ * SamplePoller is an interface for pollers which can send messages to traffic
  * data sampling devices (detectors).
  *
  * @author Douglas Lau

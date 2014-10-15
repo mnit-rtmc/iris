@@ -19,8 +19,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 
 /**
- * LCSPoller is an interface for MessagePoller classes which can poll LCS
- * arrays.
+ * LCSPoller is an interface for pollers which can send messages to LCS arrays.
  *
  * @author Douglas Lau
  */

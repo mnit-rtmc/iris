@@ -21,8 +21,8 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
- * DMSPoller is an interface for MessagePoller classes which can poll DMS
- * sign devices.
+ * DMSPoller is an interface for pollers which can send messages to DMS sign
+ * devices.
  *
  * @author Douglas Lau
  */

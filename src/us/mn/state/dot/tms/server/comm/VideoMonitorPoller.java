@@ -18,8 +18,8 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
- * VideoMonitorPoller is an interface for MessagePoller classes which can send
- * video monitor switching messages.
+ * VideoMonitorPoller is an interface for pollers which can send video monitor
+ * switching messages.
  *
  * @author Douglas Lau
  */

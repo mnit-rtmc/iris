@@ -18,8 +18,8 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BeaconImpl;
 
 /**
- * BeaconPoller is an interface for MessagePoller classes which can poll
- * beacon devices.
+ * BeaconPoller is an interface for pollers which can send messages to beacon
+ * devices.
  *
  * @author Douglas Lau
  */

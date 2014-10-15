@@ -18,8 +18,8 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.AlarmImpl;
 
 /**
- * AlarmPoller is an interface for MessagePoller classes which can poll
- * alarm devices.
+ * AlarmPoller is an interface for pollers which can send messages to alarm
+ * devices.
  *
  * @author Douglas Lau
  */

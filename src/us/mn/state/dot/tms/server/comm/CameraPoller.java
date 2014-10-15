@@ -19,8 +19,8 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 
 /**
- * CameraPoller is an interface for MessagePoller classes which can send camera
- * control messages.
+ * CameraPoller is an interface for pollers which can send camera control
+ * messages.
  *
  * @author Douglas Lau
  * @author Travis Swanston

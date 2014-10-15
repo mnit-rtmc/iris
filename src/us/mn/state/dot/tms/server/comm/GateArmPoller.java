@@ -19,8 +19,8 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.GateArmImpl;
 
 /**
- * GateArmPoller is an interface for MessagePoller classes which can poll gate
- * arm devices.
+ * GateArmPoller is an interface for pollers which can send messages to gate arm
+ * devices.
  *
  * @author Douglas Lau
  */

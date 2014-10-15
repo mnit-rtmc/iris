@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.server.comm;
 import us.mn.state.dot.tms.server.LaneMarkingImpl;
 
 /**
- * LaneMarkingPoller is an interface for MessagePoller classes which can poll
- * lane marking devices.
+ * LaneMarkingPoller is an interface for pollers which can send messages to lane
+ * marking devices.
  *
  * @author Douglas Lau
  */
