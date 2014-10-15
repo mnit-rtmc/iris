@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
 /**
@@ -305,10 +305,10 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Get a weather sensor poller */
 	public WeatherPoller getWeatherPoller() {
-		if(isActive()) {
-			MessagePoller p = getPoller();
-			if(p instanceof WeatherPoller)
-				return (WeatherPoller)p;
+		if (isActive()) {
+			DevicePoller dp = getPoller();
+			if (dp instanceof WeatherPoller)
+				return (WeatherPoller)dp;
 		}
 		return null;
 	}

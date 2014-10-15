@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  *
  * @author Douglas Lau
  */
-public interface SamplePoller {
+public interface SamplePoller extends DevicePoller {
 
 	/** Reset controller.
 	 * @param c Controller to poll. */

@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.RampMeterImpl;
  *
  * @author Douglas Lau
  */
-public interface MeterPoller {
+public interface MeterPoller extends DevicePoller {
 
 	/** Threshold to fail communication (minutes) */
 	int COMM_FAIL_THRESHOLD = 3;

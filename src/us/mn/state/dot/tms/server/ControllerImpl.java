@@ -41,7 +41,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
@@ -56,7 +56,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get comm link impl */
 	static private CommLinkImpl commLinkImpl(CommLink cl) {
-		return cl instanceof CommLinkImpl ? (CommLinkImpl)cl : null;
+		return (cl instanceof CommLinkImpl) ? (CommLinkImpl)cl : null;
+	}
+
+	/** Get the device poller of a comm link */
+	static private DevicePoller getPoller(CommLinkImpl cl) {
+		return (cl != null) ? cl.getPoller() : null;
 	}
 
 	/** Load all the controllers */
@@ -810,22 +815,17 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		setFailed(!success, id);
 	}
 
-	/** Get the message poller */
-	public MessagePoller getPoller() {
-		if(getActive()) {
-			MessagePoller mp = getPoller(comm_link);
-			if(mp == null && !isFailed()) {
+	/** Get the device poller */
+	public DevicePoller getPoller() {
+		if (getActive()) {
+			DevicePoller dp = getPoller(comm_link);
+			if (dp == null && !isFailed()) {
 				setCommStatus("comm_link error");
 				setFailed(true, null);
 			}
-			return mp;
+			return dp;
 		}
 		return null;
-	}
-
-	/** Get the message poller of a comm link */
-	static private MessagePoller getPoller(CommLinkImpl cl) {
-		return cl != null ? cl.getPoller() : null;
 	}
 
 	/** Poll controller devices */
@@ -867,18 +867,18 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Perform a controller download (reset) */
 	public void setDownload(boolean reset) {
-		MessagePoller p = getPoller();
-		if(p instanceof SamplePoller) {
-			SamplePoller sp = (SamplePoller)p;
-			if(reset)
+		DevicePoller dp = getPoller();
+		if (dp instanceof SamplePoller) {
+			SamplePoller sp = (SamplePoller)dp;
+			if (reset)
 				sp.resetController(this);
 			else
 				sp.sendSettings(this);
 		}
-		if(p instanceof WeatherPoller) {
+		if (dp instanceof WeatherPoller) {
 			WeatherSensorImpl ws = getWeatherSensor();
-			if(ws != null) {
-				WeatherPoller wp = (WeatherPoller)p;
+			if (ws != null) {
+				WeatherPoller wp = (WeatherPoller)dp;
 				wp.sendSettings(ws);
 			}
 		}

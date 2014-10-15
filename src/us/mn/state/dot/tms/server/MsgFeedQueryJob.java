@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 
 /**
@@ -52,10 +52,10 @@ public class MsgFeedQueryJob extends Job {
 
 	/** Query message feed from one controller */
 	private void queryMsgFeed(ControllerImpl c) {
-		if(c.isMsgFeed()) {
-			MessagePoller p = c.getPoller();
-			if(p instanceof MsgFeedPoller) {
-				MsgFeedPoller mfp = (MsgFeedPoller)p;
+		if (c.isMsgFeed()) {
+			DevicePoller dp = c.getPoller();
+			if (dp instanceof MsgFeedPoller) {
+				MsgFeedPoller mfp = (MsgFeedPoller)dp;
 				mfp.queryMessages(c);
 			}
 		}

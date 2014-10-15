@@ -28,8 +28,9 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  *
  * @author Douglas Lau
  */
-abstract public class MessagePoller<T extends ControllerProperty> {
-
+abstract public class MessagePoller<T extends ControllerProperty>
+	implements DevicePoller
+{
 	/** Create a message poller */
 	static public MessagePoller create(String name, CommProtocol protocol,
 		String uri) throws IOException

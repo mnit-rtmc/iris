@@ -61,8 +61,8 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
 import us.mn.state.dot.tms.server.event.SignStatusEvent;
 import us.mn.state.dot.tms.kml.Kml;
@@ -1158,12 +1158,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Get the DMS poller */
-	protected DMSPoller getDMSPoller() {
-		MessagePoller mp = getPoller();
-		if(mp instanceof DMSPoller)
-			return (DMSPoller)mp;
-		else
-			return null;
+	private DMSPoller getDMSPoller() {
+		DevicePoller dp = getPoller();
+		return (dp instanceof DMSPoller) ? (DMSPoller)dp : null;
 	}
 
 	/** LDC pot base (Ledstar-specific value) */

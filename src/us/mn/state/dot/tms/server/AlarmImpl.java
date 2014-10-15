@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.event.AlarmEvent;
 
 /**
@@ -279,9 +279,9 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		if (isActive()) {
 			ControllerImpl c = controller;	// Avoid race
 			if (c != null) {
-				MessagePoller p = c.getPoller();
-				if (p instanceof AlarmPoller)
-					return (AlarmPoller)p;
+				DevicePoller dp = c.getPoller();
+				if (dp instanceof AlarmPoller)
+					return (AlarmPoller)dp;
 			}
 		}
 		return null;

@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
  *
  * @author Douglas Lau
  */
-public interface WeatherPoller {
+public interface WeatherPoller extends DevicePoller {
 
 	/** Send a device request */
 	void sendRequest(WeatherSensorImpl ws, DeviceRequest r);

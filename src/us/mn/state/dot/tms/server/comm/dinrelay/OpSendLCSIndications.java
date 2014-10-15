@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.LCSIndicationHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -86,9 +86,9 @@ public class OpSendLCSIndications extends OpLCS {
 
 	/** Create one outlet command operation */
 	private void createOutletOp(final ControllerImpl c) {
-		MessagePoller mp = c.getPoller();
-		if(mp instanceof DinRelayPoller) {
-			DinRelayPoller drp = (DinRelayPoller)mp;
+		DevicePoller dp = c.getPoller();
+		if (dp instanceof DinRelayPoller) {
+			DinRelayPoller drp = (DinRelayPoller)dp;
 			drp.commandOutlets(c, getOutlets(c), new OutletProperty(
 				new OutletProperty.OutletCallback()
 			{

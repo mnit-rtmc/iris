@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.DMSImpl;
  *
  * @author Douglas Lau
  */
-public interface DMSPoller {
+public interface DMSPoller extends DevicePoller {
 
 	/** Send a device request */
 	void sendRequest(DMSImpl dms, DeviceRequest r);

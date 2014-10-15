@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
 
 /**
@@ -136,11 +136,11 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	}
 
 	/** Get a lane marking poller */
-	protected LaneMarkingPoller getLaneMarkingPoller() {
-		if(isActive()) {
-			MessagePoller p = getPoller();
-			if(p instanceof LaneMarkingPoller)
-				return (LaneMarkingPoller)p;
+	private LaneMarkingPoller getLaneMarkingPoller() {
+		if (isActive()) {
+			DevicePoller dp = getPoller();
+			if (dp instanceof LaneMarkingPoller)
+				return (LaneMarkingPoller)dp;
 		}
 		return null;
 	}

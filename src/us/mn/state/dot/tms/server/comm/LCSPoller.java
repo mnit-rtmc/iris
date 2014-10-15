@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
  *
  * @author Douglas Lau
  */
-public interface LCSPoller {
+public interface LCSPoller extends DevicePoller {
 
 	/** Send a device request */
 	void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r);

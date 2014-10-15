@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.units.Interval;
 
@@ -300,9 +301,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if(t == timeout)
 			return;
 		try {
-			MessagePoller p = poller;
-			if(p != null)
-				p.setTimeout(t);
+			MessagePoller mp = poller;
+			if (mp != null)
+				mp.setTimeout(t);
 		}
 		catch(IOException e) {
 			throw new TMSException(e);
@@ -319,12 +320,12 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Message poller for communication */
 	private transient MessagePoller poller;
 
-	/** Get the message poller.  This must be synchronized to protect
+	/** Get the device poller.  This must be synchronized to protect
 	 * access to the poller member variable. */
-	public synchronized MessagePoller getPoller() {
-		if(poller != null) {
+	public synchronized DevicePoller getPoller() {
+		if (poller != null) {
 			setStatus(poller.getStatus());
-			if(poller.isReady())
+			if (poller.isReady())
 				return poller;
 			else
 				closePoller();
@@ -332,8 +333,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return poll_enabled ? openPoller() : null;
 	}
 
-	/** Open the message poller.  Poller must be null prior to calling. */
-	private synchronized MessagePoller openPoller() {
+	/** Open the device poller.  Poller must be null prior to calling. */
+	private synchronized DevicePoller openPoller() {
 		assert poller == null;
 		try {
 			poller = MessagePoller.create(name, protocol, uri);
@@ -366,14 +367,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Poll all controllers */
 	private void pollControllers() {
-		MessagePoller mp = getPoller();
-		if(mp != null)
-			pollControllers(mp);
-	}
-
-	/** Poll all controllers */
-	private void pollControllers(MessagePoller mp) {
-		synchronized(controllers) {
+		synchronized (controllers) {
 			for (ControllerImpl c: controllers.values()) {
 				if (c.getActive())
 					c.pollDevices();
@@ -429,8 +423,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Check if the comm link is currently connected */
 	public boolean isConnected() {
-		MessagePoller p = poller;
-		return p != null && p.isConnected();
+		MessagePoller mp = poller;
+		return (mp != null) && mp.isConnected();
 	}
 
 	/** Write the comm link as an XML element */

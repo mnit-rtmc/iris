@@ -19,7 +19,7 @@ import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
@@ -55,10 +55,10 @@ public class SampleQuery30SecJob extends Job {
 	/** Query 30-second sample data from one controller */
 	private void querySample30Sec(ControllerImpl c) {
 		// Must check hasActiveMeter for green counts (mndot protocol)
-		if(c.hasActiveDetector() || c.hasActiveMeter()) {
-			MessagePoller p = c.getPoller();
-			if(p instanceof SamplePoller) {
-				SamplePoller sp = (SamplePoller)p;
+		if (c.hasActiveDetector() || c.hasActiveMeter()) {
+			DevicePoller dp = c.getPoller();
+			if (dp instanceof SamplePoller) {
+				SamplePoller sp = (SamplePoller)dp;
 				sp.querySamples(c, 30);
 			}
 		}

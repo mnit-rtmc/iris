@@ -50,7 +50,7 @@ import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 
 /**
@@ -542,11 +542,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Get the meter poller */
-	protected MeterPoller getMeterPoller() {
-		if(isActive()) {
-			MessagePoller p = getPoller();
-			if(p instanceof MeterPoller)
-				return (MeterPoller)p;
+	private MeterPoller getMeterPoller() {
+		if (isActive()) {
+			DevicePoller dp = getPoller();
+			if (dp instanceof MeterPoller)
+				return (MeterPoller)dp;
 		}
 		return null;
 	}

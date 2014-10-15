@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.LCSIndication;
 import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.event.SignStatusEvent;
 
 /**
@@ -416,10 +416,10 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 				return null;
 		}
 		// Just grab the first poller we find ...
-		for(DMSImpl dms: signs) {
-			MessagePoller mp = dms.getPoller();
-			if(mp instanceof LCSPoller)
-				return (LCSPoller)mp;
+		for (DMSImpl dms: signs) {
+			DevicePoller dp = dms.getPoller();
+			if (dp instanceof LCSPoller)
+				return (LCSPoller)dp;
 		}
 		return null;
 	}

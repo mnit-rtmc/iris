@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.AlarmImpl;
  *
  * @author Douglas Lau
  */
-public interface AlarmPoller {
+public interface AlarmPoller extends DevicePoller {
 
 	/** Send a device request */
 	void sendRequest(AlarmImpl a, DeviceRequest r);

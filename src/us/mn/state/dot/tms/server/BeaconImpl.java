@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 
 /**
  * A Beacon is a light which flashes toward oncoming traffic.
@@ -200,10 +200,10 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 
 	/** Get a beacon poller */
 	private BeaconPoller getBeaconPoller() {
-		if(isActive()) {
-			MessagePoller p = getPoller();
-			if(p instanceof BeaconPoller)
-				return (BeaconPoller)p;
+		if (isActive()) {
+			DevicePoller dp = getPoller();
+			if (dp instanceof BeaconPoller)
+				return (BeaconPoller)dp;
 		}
 		return null;
 	}

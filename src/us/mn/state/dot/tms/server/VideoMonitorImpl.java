@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 
 /**
@@ -177,9 +177,9 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 
 	/** Select a camera for the video monitor */
 	private void selectCamera(ControllerImpl c, String cam) {
-		MessagePoller p = c.getPoller();
-		if(p instanceof VideoMonitorPoller) {
-			VideoMonitorPoller vmp = (VideoMonitorPoller)p;
+		DevicePoller dp = c.getPoller();
+		if (dp instanceof VideoMonitorPoller) {
+			VideoMonitorPoller vmp = (VideoMonitorPoller)dp;
 			vmp.setMonitorCamera(c, this, cam);
 		}
 	}

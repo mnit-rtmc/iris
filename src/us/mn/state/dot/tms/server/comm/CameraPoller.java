@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.CameraImpl;
  * @author Douglas Lau
  * @author Travis Swanston
  */
-public interface CameraPoller {
+public interface CameraPoller extends DevicePoller {
 
 	/** Send a PTZ camera move command */
 	void sendPTZ(CameraImpl c, float p, float t, float z);

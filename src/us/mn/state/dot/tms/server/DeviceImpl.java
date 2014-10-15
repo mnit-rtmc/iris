@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.OpDevice;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 
 /**
  * DeviceImpl is the base class for all field devices, including detectors,
@@ -78,13 +78,10 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		return c == null || isFailed() || !c.getStatus().isEmpty();
 	}
 
-	/** Get the message poller */
-	public MessagePoller getPoller() {
+	/** Get the device poller */
+	public DevicePoller getPoller() {
 		ControllerImpl c = controller;	// Avoid race
-		if(c != null)
-			return c.getPoller();
-		else
-			return null;
+		return (c != null) ? c.getPoller() : null;
 	}
 
 	/** Controller associated with this traffic device */

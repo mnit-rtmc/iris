@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 
 /**
  * CameraImpl represents a single CCTV camera.
@@ -249,11 +249,11 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Get the camera poller */
-	protected CameraPoller getCameraPoller() {
-		if(isActive()) {
-			MessagePoller p = getPoller();
-			if(p instanceof CameraPoller)
-				return (CameraPoller)p;
+	private CameraPoller getCameraPoller() {
+		if (isActive()) {
+			DevicePoller dp = getPoller();
+			if (dp instanceof CameraPoller)
+				return (CameraPoller)dp;
 		}
 		return null;
 	}
