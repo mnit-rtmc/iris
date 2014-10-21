@@ -59,6 +59,15 @@ public class LensPanel extends JPanel {
 	/** Iris close button */
 	private final JButton iris_close_btn;
 
+	/** Blank label */
+	private final JLabel blank_lbl = new JLabel();
+
+	/** Wiper button */
+	private final JButton wiper_btn;
+
+	/** Camera reset button */
+	private final JButton reset_btn;
+
 	/** Camera PTZ */
 	private final CameraPTZ cam_ptz;
 
@@ -81,6 +90,10 @@ public class LensPanel extends JPanel {
 		iris_close_btn = new DeviceReqButton("camera.lens.iris.close",
 			cptz, DeviceRequest.CAMERA_IRIS_CLOSE,
 			DeviceRequest.CAMERA_IRIS_STOP);
+		wiper_btn = new DeviceReqButton("camera.util.wiper.oneshot",
+			cptz, DeviceRequest.CAMERA_WIPER_ONESHOT);
+		reset_btn = new DeviceReqButton("camera.util.reset", cptz,
+			DeviceRequest.RESET_DEVICE);
 		layoutPanel();
 	}
 
@@ -94,7 +107,8 @@ public class LensPanel extends JPanel {
 		gl.setVerticalGroup(createVerticalGroup(gl));
 		gl.linkSize(zoom_in_btn, zoom_out_btn,
 		            focus_near_btn, focus_far_btn,
-		            iris_open_btn, iris_close_btn);
+		            iris_open_btn, iris_close_btn,
+		            wiper_btn, reset_btn);
 		setLayout(gl);
 	}
 
@@ -106,6 +120,7 @@ public class LensPanel extends JPanel {
 		g0.addComponent(zoom_lbl);
 		g0.addComponent(focus_lbl);
 		g0.addComponent(iris_lbl);
+		g0.addComponent(blank_lbl);
 		hg.addGroup(g0);
 		hg.addGap(UI.hgap);
 		GroupLayout.ParallelGroup g1 = gl.createParallelGroup(
@@ -113,6 +128,7 @@ public class LensPanel extends JPanel {
 		g1.addComponent(zoom_in_btn);
 		g1.addComponent(focus_near_btn);
 		g1.addComponent(iris_open_btn);
+		g1.addComponent(wiper_btn);
 		hg.addGroup(g1);
 		hg.addGap(UI.hgap);
 		GroupLayout.ParallelGroup g2 = gl.createParallelGroup(
@@ -120,6 +136,7 @@ public class LensPanel extends JPanel {
 		g2.addComponent(zoom_out_btn);
 		g2.addComponent(focus_far_btn);
 		g2.addComponent(iris_close_btn);
+		g2.addComponent(reset_btn);
 		hg.addGroup(g2);
 		return hg;
 	}
@@ -147,6 +164,13 @@ public class LensPanel extends JPanel {
 		g2.addComponent(iris_open_btn);
 		g2.addComponent(iris_close_btn);
 		vg.addGroup(g2);
+		vg.addGap(UI.vgap);
+		GroupLayout.ParallelGroup g3 = gl.createParallelGroup(
+			GroupLayout.Alignment.BASELINE);
+		g3.addComponent(blank_lbl);
+		g3.addComponent(wiper_btn);
+		g3.addComponent(reset_btn);
+		vg.addGroup(g3);
 		return vg;
 	}
 
@@ -163,5 +187,7 @@ public class LensPanel extends JPanel {
 		iris_lbl.setEnabled(e);
 		iris_open_btn.setEnabled(e);
 		iris_close_btn.setEnabled(e);
+		wiper_btn.setEnabled(e);
+		reset_btn.setEnabled(e);
 	}
 }
