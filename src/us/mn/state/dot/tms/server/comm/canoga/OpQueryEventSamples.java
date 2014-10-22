@@ -27,9 +27,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQueryEventSamples extends OpCanoga {
 
-	/** Minimum time before volume LSB can wrap */
-	static protected final int VOL_COUNT_WRAP = 4 * 60 * 1000;
-
 	/** Binary detection request */
 	protected final BinaryDetectionProperty detection =
 		new BinaryDetectionProperty();
@@ -42,19 +39,17 @@ public class OpQueryEventSamples extends OpCanoga {
 	/** Handle a communication error */
 	@Override
 	public void handleCommError(EventType et, String msg) {
-		COMM_LOG.log(id + " " + et + ", " + msg);
 		setSuccess(false);
-		controller.logCommEvent(et, id, filterMessage(msg));
-		if(controller.hasActiveDetector()) {
-			switch(et) {
-			case CHECKSUM_ERROR:
-			case PARSING_ERROR:
-				retry();
-			}
-			if(controller.getFailMillis() > VOL_COUNT_WRAP)
-				detection.addGap();
-		} else
-			setFailed();
+		super.handleCommError(et, msg);
+	}
+
+	/** Get the error retry threshold */
+	@Override
+	public int getRetryThreshold() {
+		if (controller.hasActiveDetector())
+			return Integer.MAX_VALUE;
+		else
+			return super.getRetryThreshold();
 	}
 
 	/** Create the first phase of the operation */

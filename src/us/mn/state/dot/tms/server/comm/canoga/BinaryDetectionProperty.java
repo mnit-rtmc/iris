@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,9 @@ import static us.mn.state.dot.tms.units.Distance.Units.FEET;
  * @author Douglas Lau
  */
 public class BinaryDetectionProperty extends CanogaProperty {
+
+	/** Minimum time before volume LSB can wrap */
+	static private final int VOL_COUNT_WRAP = 4 * 60 * 1000;
 
 	/** Message payload for a GET request */
 	static protected final byte[] PAYLOAD_GET = { '*' };
@@ -85,6 +88,14 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	/** Current vehicle detection event data */
 	protected final DetectionEvent[] c_events = new DetectionEvent[4];
 
+	/** Time stamp of most recent event */
+	private long event_time = TimeSteward.currentTimeMillis();
+
+	/** Get the number of milliseconds since successful comm */
+	private long getEventMillis() {
+		return TimeSteward.currentTimeMillis() - event_time;
+	}
+
 	/** Set the requested value */
 	protected void setValue(byte[] v) {
 		if(v.length == expectedResponseOctets()) {
@@ -93,17 +104,20 @@ public class BinaryDetectionProperty extends CanogaProperty {
 		}
 	}
 
-	/** Add a gap in vehicle detection */
-	public void addGap() {
-		for(int i = 0; i < 4; i++)
-			p_events[i] = null;
-	}
-
 	/** Log new vehicle detection events */
 	public void logEvents(ControllerImpl controller) {
+		if (getEventMillis() > VOL_COUNT_WRAP)
+			addGap();
+		event_time = TimeSteward.currentTimeMillis();
 		Calendar stamp = TimeSteward.getCalendarInstance();
 		for(int i = 0; i < 4; i++)
 			logEvent(controller, stamp, i);
+	}
+
+	/** Add a gap in vehicle detection */
+	private void addGap() {
+		for (int i = 0; i < 4; i++)
+			p_events[i] = null;
 	}
 
 	/** Log a new vehicle detection event for one input */
