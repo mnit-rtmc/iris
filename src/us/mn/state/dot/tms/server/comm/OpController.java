@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -87,9 +86,6 @@ abstract public class OpController<T extends ControllerProperty>
 			errorStatus = s;
 	}
 
-	/** Operation error counter */
-	protected int errorCounter = 0;
-
 	/** Create a new controller operation */
 	protected OpController(PriorityLevel p, ControllerImpl c, String i) {
 		super(p);
@@ -128,24 +124,13 @@ abstract public class OpController<T extends ControllerProperty>
 	public void handleCommError(EventType et, String msg) {
 		logComm(et, msg);
 		controller.logCommEvent(et, id, filterMsg(msg));
-		if (!retry())
- 			super.handleCommError(et, msg);
+		super.handleCommError(et, msg);
 	}
 
 	/** Log a comm error to debug log */
 	private void logComm(EventType et, String msg) {
 		if (COMM_LOG.isOpen())
 			COMM_LOG.log(id + " " + et + ", " + msg);
-	}
-
-	/** Determine if this operation should be retried */
-	private boolean retry() {
-		if (controller.isFailed())
-			return false;
-		else {
-			errorCounter++;
-			return errorCounter < getRetryThreshold();
-		}
 	}
 
 	/** Update controller maintenance status */
@@ -176,7 +161,8 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Get the error retry threshold */
+	@Override
 	public int getRetryThreshold() {
-		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
+		return (controller.isFailed()) ? 0 : super.getRetryThreshold();
 	}
 }

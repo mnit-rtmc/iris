@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * An operation is a sequence of phases to be performed on a field controller.
@@ -86,9 +87,11 @@ abstract public class Operation<T extends ControllerProperty> {
 		return success;
 	}
 
-	/** Set the success flag */
+	/** Set the success flag.  This will clear the error counter if true. */
 	protected final void setSuccess(boolean s) {
 		success = s;
+		if (s)
+			error_cnt = 0;
 	}
 
 	/** Set the operation to failed */
@@ -127,7 +130,22 @@ abstract public class Operation<T extends ControllerProperty> {
 
 	/** Handle a communication error */
 	public void handleCommError(EventType et, String msg) {
-		setFailed();
+		if (!retry())
+			setFailed();
+	}
+
+	/** Operation error counter */
+	private int error_cnt = 0;
+
+	/** Check if the operation should be retried */
+	private boolean retry() {
+		++error_cnt;
+		return error_cnt < getRetryThreshold();
+	}
+
+	/** Get the error retry threshold */
+	public int getRetryThreshold() {
+		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
 	}
 
 	/** Get a description of the operation */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -438,8 +438,8 @@ public class OpSendDMSFonts extends OpDMS {
 			logStore(char_bitmap);
 			mess.storeProps();
 			count++;
-			if(count % 20 == 0 && !controller.isFailed())
-				errorCounter = 0;
+			if (count % 20 == 0 && !controller.isFailed())
+				setSuccess(true);
 			if(chars.hasNext()) {
 				glyph = chars.next();
 				return this;

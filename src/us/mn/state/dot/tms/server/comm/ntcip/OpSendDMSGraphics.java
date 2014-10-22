@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -358,8 +358,8 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.storeProps();
 			if(block * block_size.getInteger() < bitmap.length) {
 				block++;
-				if(block % 20 == 0 && !controller.isFailed())
-					errorCounter = 0;
+				if (block % 20 == 0 && !controller.isFailed())
+					setSuccess(true);
 				return this;
 			} else
 				return new ValidateGraphic();
