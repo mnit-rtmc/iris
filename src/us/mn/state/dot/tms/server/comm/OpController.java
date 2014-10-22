@@ -45,6 +45,11 @@ abstract public class OpController<T extends ControllerProperty>
 		return (m != null) ? truncateMsg(m) : "";
 	}
 
+	/** Append a status string */
+	static private String appendStatus(String a, String b) {
+		return (a.length() > 0) ? (a + ", " + b) : b;
+	}
+
 	/** Controller to be polled */
 	protected final ControllerImpl controller;
 
@@ -69,21 +74,17 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Error status message */
-	private String errorStatus = null;
+	private String err_status = null;
 
 	/** Set the error status message.  If non-null, the controller "error"
 	 * attribute is set to this message when the operation completes. */
 	public void setErrorStatus(String s) {
 		assert s != null;
-		if(errorStatus != null) {
-			if(s.length() > 0) {
-				if(errorStatus.length() > 0)
-					errorStatus = errorStatus + ", " + s;
-				else
-					errorStatus = s;
-			}
+		if (err_status != null) {
+			if (s.length() > 0)
+				err_status = appendStatus(err_status, s);
 		} else
-			errorStatus = s;
+			err_status = s;
 	}
 
 	/** Create a new controller operation */
@@ -143,11 +144,11 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Update controller error status */
-	protected final void updateErrorStatus() {
-		String s = errorStatus;
-		if(s != null) {
+	private void updateErrorStatus() {
+		String s = err_status;
+		if (s != null) {
 			controller.setErrorStatus(filterMsg(s));
-			errorStatus = null;
+			err_status = null;
 		}
 	}
 
