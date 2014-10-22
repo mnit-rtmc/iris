@@ -115,11 +115,6 @@ abstract public class OpController<T extends ControllerProperty>
 		return super.toString() + " (" + id + ")";
 	}
 
-	/** Get the operation key name */
-	protected String getKey() {
-		return getOpName() + ":" + controller.getName();
-	}
-
 	/** Handle a communication error */
 	@Override
 	public void handleCommError(EventType et, String msg) {
