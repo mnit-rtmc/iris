@@ -30,7 +30,7 @@ abstract public class OpController<T extends ControllerProperty>
 	extends Operation<T>
 {
 	/** Comm error log */
-	static protected final DebugLog COMM_LOG = new DebugLog("comm");
+	static private final DebugLog COMM_LOG = new DebugLog("comm");
 
 	/** Filter a message */
 	static protected String filterMessage(String m) {
@@ -118,10 +118,16 @@ abstract public class OpController<T extends ControllerProperty>
 	/** Handle a communication error */
 	@Override
 	public void handleCommError(EventType et, String msg) {
-		COMM_LOG.log(id + " " + et + ", " + msg);
+		logComm(et, msg);
 		controller.logCommEvent(et, id, filterMessage(msg));
 		if (!retry())
  			super.handleCommError(et, msg);
+	}
+
+	/** Log a comm error to debug log */
+	private void logComm(EventType et, String msg) {
+		if (COMM_LOG.isOpen())
+			COMM_LOG.log(id + " " + et + ", " + msg);
 	}
 
 	/** Determine if this operation should be retried */
