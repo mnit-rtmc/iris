@@ -43,3 +43,5 @@ INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
                             priv_d)
        VALUES ('prv_cc1', 'camera_control', 'camera/.*/deviceRequest', false,
                true, false, false);
+
+DELETE FROM iris.system_attribute WHERE name = 'dms_aws_retry_threshold';
