@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2013  Minnesota Department of Transportation
+ * Copyright (C) 2002-2014  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,11 +19,9 @@ import java.io.IOException;
 import java.util.Random;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PageTimeHelper;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -73,17 +71,6 @@ abstract class OpDms extends OpDevice {
 		m_dms = d;
 		m_opDesc = opDesc;
 		m_user = user;
-	}
-
-	/** Get the error retry threshold for a given SignMessage. */
-	private int getRetryThreshold(SignMessage sm) {
-		// if message is from AWS, use different retry threshold
-		if(DMSMessagePriority.fromOrdinal(sm.getRunTimePriority()) == 
-		   DMSMessagePriority.AWS)
-		{
-			return SystemAttrEnum.DMS_AWS_RETRY_THRESHOLD.getInt();
-		} else
-			return super.getRetryThreshold();
 	}
 
 	/** Cleanup the operation. Called by MessagePoller.doPoll(). */
