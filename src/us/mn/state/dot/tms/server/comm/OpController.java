@@ -125,7 +125,7 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Determine if this operation should be retried */
-	protected final boolean retry() {
+	private boolean retry() {
 		if (controller.isFailed())
 			return false;
 		else {
