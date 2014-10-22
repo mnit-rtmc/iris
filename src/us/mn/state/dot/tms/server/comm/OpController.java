@@ -19,7 +19,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * An operation which is performed on a field controller.
@@ -32,10 +31,19 @@ abstract public class OpController<T extends ControllerProperty>
 	/** Comm error log */
 	static private final DebugLog COMM_LOG = new DebugLog("comm");
 
+	/** Maximum message length */
+	static private final int MAX_MSG_LEN = 64;
+
+	/** Truncate a message */
+	static private String truncateMsg(String m) {
+		return (m.length() <= MAX_MSG_LEN)
+		      ? m
+		      : m.substring(0, MAX_MSG_LEN);
+	}
+
 	/** Filter a message */
-	static protected String filterMessage(String m) {
-		final int MAXLEN = 64;
-		return SString.truncate(m, MAXLEN);
+	static private String filterMsg(String m) {
+		return (m != null) ? truncateMsg(m) : "";
 	}
 
 	/** Controller to be polled */
@@ -119,7 +127,7 @@ abstract public class OpController<T extends ControllerProperty>
 	@Override
 	public void handleCommError(EventType et, String msg) {
 		logComm(et, msg);
-		controller.logCommEvent(et, id, filterMessage(msg));
+		controller.logCommEvent(et, id, filterMsg(msg));
 		if (!retry())
  			super.handleCommError(et, msg);
 	}
@@ -144,7 +152,7 @@ abstract public class OpController<T extends ControllerProperty>
 	protected final void updateMaintStatus() {
 		String s = maintStatus;
 		if (s != null) {
-			controller.setMaintNotify(filterMessage(s));
+			controller.setMaintNotify(filterMsg(s));
 			maintStatus = null;
 		}
 	}
@@ -153,7 +161,7 @@ abstract public class OpController<T extends ControllerProperty>
 	protected final void updateErrorStatus() {
 		String s = errorStatus;
 		if(s != null) {
-			controller.setErrorStatus(filterMessage(s));
+			controller.setErrorStatus(filterMsg(s));
 			errorStatus = null;
 		}
 	}
