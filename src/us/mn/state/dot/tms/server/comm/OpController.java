@@ -120,16 +120,18 @@ abstract public class OpController<T extends ControllerProperty>
 	public void handleCommError(EventType et, String msg) {
 		COMM_LOG.log(id + " " + et + ", " + msg);
 		controller.logCommEvent(et, id, filterMessage(msg));
-		if(!retry())
+		if (!retry())
  			super.handleCommError(et, msg);
 	}
 
 	/** Determine if this operation should be retried */
-	public boolean retry() {
-		if(controller.isFailed())
+	protected final boolean retry() {
+		if (controller.isFailed())
 			return false;
-		errorCounter++;
-		return errorCounter < getRetryThreshold();
+		else {
+			errorCounter++;
+			return errorCounter < getRetryThreshold();
+		}
 	}
 
 	/** Update controller maintenance status */
