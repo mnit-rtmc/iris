@@ -645,11 +645,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Controller maint status */
-	protected transient String maint = "";
+	private transient String maint = "";
 
 	/** Set the controller maint status */
-	public void setMaint(String s) {
-		if(!s.equals(maint)) {
+	public void setMaintNotify(String s) {
+		if (!s.equals(maint)) {
 			maint = s;
 			notifyAttribute("maint");
 			updateStyles();
@@ -657,6 +657,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get the controller maint status */
+	@Override
 	public String getMaint() {
 		return maint;
 	}
@@ -765,7 +766,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Clear the counters and error status */
 	public void setCounters(boolean clear) {
-		setMaint("");
+		setMaintNotify("");
 		setErrorStatus("");
 		if(timeoutErr != 0) {
 			timeoutErr = 0;

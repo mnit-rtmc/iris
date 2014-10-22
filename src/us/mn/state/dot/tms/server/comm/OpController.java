@@ -135,8 +135,8 @@ abstract public class OpController<T extends ControllerProperty>
 	/** Update controller maintenance status */
 	protected final void updateMaintStatus() {
 		String s = maintStatus;
-		if(s != null) {
-			controller.setMaint(filterMessage(s));
+		if (s != null) {
+			controller.setMaintNotify(filterMessage(s));
 			maintStatus = null;
 		}
 	}
