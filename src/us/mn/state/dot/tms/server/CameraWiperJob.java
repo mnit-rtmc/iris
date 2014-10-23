@@ -87,7 +87,7 @@ public class CameraWiperJob extends Job {
 		GeoLoc loc = cam.getGeoLoc();
 		for (GeoLoc ws: locs) {
 			Distance d = GeoLocHelper.distanceTo(loc, ws);
-			if (d.m() <= SENSOR_PROXIMITY_M)
+			if (d != null && d.m() <= SENSOR_PROXIMITY_M)
 				return true;
 		}
 		return false;
