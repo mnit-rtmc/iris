@@ -748,6 +748,7 @@ CREATE TABLE iris._ramp_meter (
 	algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
 	am_target INTEGER NOT NULL,
 	pm_target INTEGER NOT NULL,
+	beacon VARCHAR(10) REFERENCES iris._beacon,
 	m_lock INTEGER REFERENCES iris.meter_lock(id)
 );
 
@@ -756,7 +757,7 @@ ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
 
 CREATE VIEW iris.ramp_meter AS
 	SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
-	       max_wait, algorithm, am_target, pm_target, preset, m_lock
+	       max_wait, algorithm, am_target, pm_target, beacon, preset, m_lock
 	FROM iris._ramp_meter m
 	JOIN iris._device_io d ON m.name = d.name
 	JOIN iris._device_preset p ON m.name = p.name;
@@ -770,10 +771,10 @@ BEGIN
 	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._ramp_meter
 	            (name, geo_loc, notes, meter_type, storage, max_wait,
-	             algorithm, am_target, pm_target, m_lock)
+	             algorithm, am_target, pm_target, beacon, m_lock)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.meter_type,
 	             NEW.storage, NEW.max_wait, NEW.algorithm, NEW.am_target,
-	             NEW.pm_target, NEW.m_lock);
+	             NEW.pm_target, NEW.beacon, NEW.m_lock);
 	RETURN NEW;
 END;
 $ramp_meter_insert$ LANGUAGE plpgsql;
@@ -801,6 +802,7 @@ BEGIN
 	       algorithm = NEW.algorithm,
 	       am_target = NEW.am_target,
 	       pm_target = NEW.pm_target,
+	       beacon = NEW.beacon,
 	       m_lock = NEW.m_lock
 	 WHERE name = OLD.name;
 	RETURN NEW;
@@ -1654,8 +1656,8 @@ GRANT SELECT ON lcs_indication_view TO PUBLIC;
 CREATE VIEW ramp_meter_view AS
 	SELECT m.name, geo_loc, controller, pin, notes,
 	       mt.description AS meter_type, storage, max_wait,
-	       alg.description AS algorithm, am_target, pm_target, camera,
-	       preset_num, ml.description AS meter_lock,
+	       alg.description AS algorithm, am_target, pm_target, beacon,
+	       camera, preset_num, ml.description AS meter_lock,
 	       l.rd, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
 	       l.cross_dir, l.lat, l.lon
 	FROM iris.ramp_meter m
