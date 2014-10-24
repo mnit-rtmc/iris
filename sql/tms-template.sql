@@ -834,6 +834,7 @@ CREATE TABLE iris._dms (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
 	notes text NOT NULL,
+	beacon VARCHAR(10) REFERENCES iris._beacon,
 	aws_allowed BOOLEAN NOT NULL,
 	aws_controlled BOOLEAN NOT NULL,
 	default_font VARCHAR(16) REFERENCES iris.font
@@ -843,8 +844,8 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.dms AS
-	SELECT d.name, geo_loc, controller, pin, notes, preset, aws_allowed,
-	       aws_controlled, default_font
+	SELECT d.name, geo_loc, controller, pin, notes, beacon, preset,
+	       aws_allowed, aws_controlled, default_font
 	FROM iris._dms dms
 	JOIN iris._device_io d ON dms.name = d.name
 	JOIN iris._device_preset p ON dms.name = p.name;
@@ -856,9 +857,9 @@ BEGIN
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._device_preset (name, preset)
 	     VALUES (NEW.name, NEW.preset);
-	INSERT INTO iris._dms (name, geo_loc, notes, aws_allowed,
+	INSERT INTO iris._dms (name, geo_loc, notes, beacon, aws_allowed,
 	                       aws_controlled, default_font)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes,
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.beacon,
 	             NEW.aws_allowed, NEW.aws_controlled, NEW.default_font);
 	RETURN NEW;
 END;
@@ -881,6 +882,7 @@ BEGIN
 	UPDATE iris._dms
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
+	       beacon = NEW.beacon,
 	       aws_allowed = NEW.aws_allowed,
 	       aws_controlled = NEW.aws_controlled,
 	       default_font = NEW.default_font
@@ -1628,8 +1630,9 @@ CREATE VIEW controller_loc_view AS
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
-	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, p.camera,
-	       p.preset_num, d.aws_allowed, d.aws_controlled, d.default_font,
+	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.beacon,
+	       p.camera, p.preset_num, d.aws_allowed, d.aws_controlled,
+	       d.default_font,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.lat, l.lon
 	FROM iris.dms d
