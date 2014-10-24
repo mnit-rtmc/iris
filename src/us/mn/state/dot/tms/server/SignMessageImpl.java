@@ -58,19 +58,20 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	/** Load all the sign messages */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
-		store.query("SELECT name, multi, bitmaps, a_priority, " +
-			"r_priority, scheduled, duration FROM " +
+		store.query("SELECT name, multi, beacon_enabled, bitmaps, " +
+			"a_priority, r_priority, scheduled, duration FROM " +
 			"iris.sign_message;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignMessageImpl(
 					row.getString(1),	// name
 					row.getString(2),	// multi
-					row.getString(3),	// bitmaps
-					row.getInt(4),		// a_priority
-					row.getInt(5),		// r_priority
-					row.getBoolean(6),	// scheduled
-					(Integer)row.getObject(7) // duration
+					row.getBoolean(3),	//beacon_enabled
+					row.getString(4),	// bitmaps
+					row.getInt(5),		// a_priority
+					row.getInt(6),		// r_priority
+					row.getBoolean(7),	// scheduled
+					(Integer)row.getObject(8) // duration
 				));
 			}
 		});
@@ -81,6 +82,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("multi", multi);
+		map.put("beacon_enabled", beacon_enabled);
 		map.put("bitmaps", bitmaps);
 		map.put("a_priority", activationPriority);
 		map.put("r_priority", runTimePriority);
@@ -105,11 +107,12 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Create a sign message */
-	protected SignMessageImpl(String n, String m, String b, int ap, int rp,
-		boolean s, Integer d)
+	protected SignMessageImpl(String n, String m, boolean be, String b,
+		int ap, int rp, boolean s, Integer d)
 	{
 		super(n);
 		multi = m;
+		beacon_enabled = be;
 		bitmaps = b;
 		activationPriority = ap;
 		runTimePriority = rp;
@@ -118,11 +121,13 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(String m, String b, DMSMessagePriority ap,
-		DMSMessagePriority rp, boolean s, Integer d)
+	public SignMessageImpl(String m, boolean be, String b,
+		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
+		Integer d)
 	{
 		super(createUniqueName());
 		multi = m;
+		beacon_enabled = be;
 		bitmaps = b;
 		activationPriority = ap.ordinal();
 		runTimePriority = rp.ordinal();
@@ -138,6 +143,15 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	 * @see us.mn.state.dot.tms.MultiString */
 	public String getMulti() {
 		return multi;
+	}
+
+	/** Beacon enabled flag */
+	private boolean beacon_enabled;
+
+	/** Get beacon enabled flag */
+	@Override
+	public boolean getBeaconEnabled() {
+		return beacon_enabled;
 	}
 
 	/** Bitmap data for each page (Base64-encoded) */
