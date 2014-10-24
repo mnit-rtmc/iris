@@ -29,6 +29,12 @@ public interface DMS extends Device {
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 
+	/** Set external beacon */
+	void setBeacon(Beacon b);
+
+	/** Get external beacon */
+	Beacon getBeacon();
+
 	/** Set verification camera preset */
 	void setPreset(CameraPreset cp);
 

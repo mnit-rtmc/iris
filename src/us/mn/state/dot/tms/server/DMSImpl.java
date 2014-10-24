@@ -32,6 +32,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
@@ -98,8 +99,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"preset, aws_allowed, aws_controlled, default_font " +
-			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
+			"beacon, preset, aws_allowed, aws_controlled, " +
+			"default_font FROM iris." + SONAR_TYPE  + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(
@@ -108,10 +110,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 					row.getString(3),	// controller
 					row.getInt(4),		// pin
 					row.getString(5),	// notes
-					row.getString(6),	// preset
-					row.getBoolean(7),	// aws_allowed
-					row.getBoolean(8),     // aws_controlled
-					row.getString(9)	// default_font
+					row.getString(6),	// beacon
+					row.getString(7),	// preset
+					row.getBoolean(8),	// aws_allowed
+					row.getBoolean(9),     // aws_controlled
+					row.getString(10)	// default_font
 				));
 			}
 		});
@@ -125,6 +128,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("beacon", beacon);
 		map.put("preset", preset);
 		map.put("aws_allowed", awsAllowed);
 		map.put("aws_controlled", awsControlled);
@@ -156,11 +160,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a dynamic message sign */
 	protected DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, CameraPreset cp, boolean aa, boolean ac,
-		Font df)
+		int p, String nt, Beacon b, CameraPreset cp, boolean aa,
+		boolean ac, Font df)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
+		beacon = b;
 		setPreset(cp);
 		awsAllowed = aa;
 		awsControlled = ac;
@@ -171,10 +176,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a dynamic message sign */
 	protected DMSImpl(String n, String loc, String c,
-		int p, String nt, String cp, boolean aa, boolean ac, String df)
+		int p, String nt, String b, String cp, boolean aa, boolean ac,
+		String df)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
-		     lookupPreset(cp), aa, ac, FontHelper.lookup(df));
+		     lookupBeacon(b), lookupPreset(cp), aa, ac,
+		     FontHelper.lookup(df));
 	}
 
 	/** Create a blank message for the sign */
@@ -231,6 +238,29 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Get the device location */
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
+	}
+
+	/** External beacon */
+	private Beacon beacon;
+
+	/** Set external beacon */
+	@Override
+	public void setBeacon(Beacon b) {
+		beacon = b;
+	}
+
+	/** Set external beacon */
+	public void doSetBeacon(Beacon b) throws TMSException {
+		if (b != beacon) {
+			store.update(this, "beacon", b);
+			setBeacon(b);
+		}
+	}
+
+	/** Get external beacon */
+	@Override
+	public Beacon getBeacon() {
+		return beacon;
 	}
 
 	/** Camera preset from which this can be seen */
