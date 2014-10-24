@@ -28,6 +28,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
@@ -106,8 +107,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		namespace.registerType(SONAR_TYPE, RampMeterImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, algorithm, am_target, "+
-			"pm_target, preset, m_lock FROM iris." + SONAR_TYPE +
-			";", new ResultFactory()
+			"pm_target, beacon, preset, m_lock FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new RampMeterImpl(
@@ -122,8 +123,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					row.getInt(9),		// algorithm
 					row.getInt(10),		// am_target
 					row.getInt(11),		// pm_target
-					row.getString(12),	// preset
-					row.getInt(13)		// m_lock
+					row.getString(12),	// beacon
+					row.getString(13),	// preset
+					row.getInt(14)		// m_lock
 				));
 			}
 		});
@@ -143,6 +145,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		map.put("algorithm", algorithm);
 		map.put("am_target", am_target);
 		map.put("pm_target", pm_target);
+		map.put("beacon", beacon);
 		map.put("preset", preset);
 		if(m_lock != null)
 			map.put("m_lock", m_lock.ordinal());
@@ -170,7 +173,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Create a ramp meter */
 	protected RampMeterImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, int t, int st, int w, int alg, int at, int pt,
-		CameraPreset cp, Integer lk)
+		Beacon b, CameraPreset cp, Integer lk)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -181,6 +184,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		algorithm = alg;
 		am_target = at;
 		pm_target = pt;
+		beacon = b;
 		m_lock = RampMeterLock.fromOrdinal(lk);
 		rate = null;
 		initTransients();
@@ -189,10 +193,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Create a ramp meter */
 	protected RampMeterImpl(String n, String loc, String c, int p,
 		String nt, int t, int st, int w, int alg, int at, int pt,
-		String cp, Integer lk)
+		String b, String cp, Integer lk)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, t, st, w,
-		     alg, at, pt, lookupPreset(cp), lk);
+		     alg, at, pt, lookupBeacon(b), lookupPreset(cp), lk);
 	}
 
 	/** Initialize the transient state */
@@ -416,6 +420,38 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			}
 		}
 		return false;
+	}
+
+	/** Advance warning beacon */
+	private Beacon beacon;
+
+	/** Set advance warning beacon */
+	@Override
+	public void setBeacon(Beacon b) {
+		beacon = b;
+	}
+
+	/** Set advance warning beacon */
+	public void doSetBeacon(Beacon b) throws TMSException {
+		if (b != beacon) {
+			store.update(this, "beacon", b);
+			setBeacon(b);
+		}
+	}
+
+	/** Get advance warning beacon */
+	@Override
+	public Beacon getBeacon() {
+		return beacon;
+	}
+
+	/** Update advance warning beacon */
+	private void updateBeacon() {
+		Beacon b = beacon;
+		if (b != null) {
+			boolean f = isOnline() && isMetering();
+			b.setFlashing(f);
+		}
 	}
 
 	/** Camera preset from which this can be seen */
@@ -684,6 +720,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			notifyAttribute("rate");
 			updateStyles();
 		}
+		updateBeacon();
 	}
 
 	/** Test if the release rate has changed */

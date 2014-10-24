@@ -149,6 +149,15 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return null;
 	}
 
+	/** Lookup a beacon */
+	static protected BeaconImpl lookupBeacon(String name) {
+		SonarObject so = lookupObject(BeaconImpl.SONAR_TYPE, name);
+		if (so instanceof BeaconImpl)
+			return (BeaconImpl)so;
+		else
+			return null;
+	}
+
 	/** Lookup a camera preset */
 	static protected CameraPresetImpl lookupPreset(String name) {
 		SonarObject so = lookupObject(CameraPresetImpl.SONAR_TYPE,name);

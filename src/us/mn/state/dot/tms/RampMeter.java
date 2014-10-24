@@ -64,6 +64,12 @@ public interface RampMeter extends Device {
 	/** Get the PM target rate */
 	int getPmTarget();
 
+	/** Set advance warning beacon */
+	void setBeacon(Beacon b);
+
+	/** Get advance warning beacon */
+	Beacon getBeacon();
+
 	/** Set verification camera preset */
 	void setPreset(CameraPreset cp);
 
