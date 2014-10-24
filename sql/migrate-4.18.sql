@@ -235,3 +235,8 @@ CREATE VIEW dms_view AS
 	LEFT JOIN iris.camera_preset p ON d.preset = p.name
 	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON dms_view TO PUBLIC;
+
+ALTER TABLE iris.sign_message
+    ADD COLUMN beacon_enabled BOOLEAN;
+UPDATE iris.sign_message SET beacon_enabled = 'f';
+ALTER TABLE iris.sign_message ALTER COLUMN beacon_enabled SET NOT NULL;
