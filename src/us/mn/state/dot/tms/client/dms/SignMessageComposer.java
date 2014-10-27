@@ -320,6 +320,12 @@ public class SignMessageComposer extends JPanel {
 		adjusting--;
 	}
 
+	/** Check if beacon is enabled */
+	public boolean isBeaconEnabled() {
+		// FIXME: add component for this
+		return false;
+	}
+
 	/** Get the selected duration */
 	public Integer getDuration() {
 		return misc_pnl.getDuration();

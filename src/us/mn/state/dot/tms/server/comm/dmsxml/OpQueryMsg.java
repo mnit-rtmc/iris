@@ -240,7 +240,7 @@ class OpQueryMsg extends OpDms {
 		if(rpri == DMSMessagePriority.INVALID)
 			rpri = DMSMessagePriority.OTHER_SYSTEM;
 
-		return (SignMessageImpl)m_dms.createMessage(multi, pages, 
+		return (SignMessageImpl)m_dms.createMessage(multi, false, pages, 
 			apri, rpri, duration);
 	}
 
@@ -432,7 +432,7 @@ class OpQueryMsg extends OpDms {
 				// MULTI string.
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
 				SignMessageImpl sm = (SignMessageImpl)
-					m_dms.createMessage(msgtext,
+					m_dms.createMessage(msgtext, false,
 					apri, rpri, duramins);
 				if(sm != null)
 					m_dms.setMessageCurrent(sm, irisUser);
@@ -452,8 +452,8 @@ class OpQueryMsg extends OpDms {
 				}
 				if(sm == null) {
 					sm = (SignMessageImpl)m_dms.
-						createMessage("", apri, rpri, 
-						null);
+						createMessage("", false, apri,
+						rpri, null);
 					if(sm != null) {
 						m_dms.setMessageCurrent(sm, 
 							irisUser);

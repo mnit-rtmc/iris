@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,13 +57,14 @@ public class SignMessageCreator {
 	/** 
 	 * Create a new sign message.
 	 * @param multi MULTI text.
+	 * @param be Beacon enabled.
 	 * @param bitmaps Base64-encoded bitmaps.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	public SignMessage create(String multi, String bitmaps,
+	public SignMessage create(String multi, boolean be, String bitmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, Integer duration)
 	{
 		SignMessage sm = SignMessageHelper.find(multi, bitmaps, ap, rp,
@@ -71,8 +72,8 @@ public class SignMessageCreator {
 		if(sm != null)
 			return sm;
 		String name = createName();
-		if(name != null)
-			return create(name, multi, bitmaps, ap, rp, duration);
+		if (name != null)
+			return create(name, multi, be, bitmaps, ap,rp,duration);
 		else
 			return null;
 	}
@@ -81,17 +82,20 @@ public class SignMessageCreator {
 	 * Create a new sign message.
 	 * @param name Sign message name.
 	 * @param multi MULTI text.
+	 * @param be Beacon enabled.
 	 * @param bitmaps Base64-encoded bitmaps.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	protected SignMessage create(String name, String multi, String bitmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, Integer duration)
+	private SignMessage create(String name, String multi, boolean be,
+		String bitmaps, DMSMessagePriority ap, DMSMessagePriority rp,
+		Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("multi", multi);
+		attrs.put("beacon_enabled", be);
 		attrs.put("bitmaps", bitmaps);
 		attrs.put("activationPriority", new Integer(ap.ordinal()));
 		attrs.put("runTimePriority", new Integer(rp.ordinal()));

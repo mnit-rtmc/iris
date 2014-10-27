@@ -192,8 +192,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Create a blank message for the sign */
 	protected SignMessage createBlankMessage(DMSMessagePriority ap) {
 		String bitmaps = Base64.encode(new byte[0]);
-		return createMessage("", bitmaps, ap, DMSMessagePriority.BLANK,
-			false, null);
+		return createMessage("", false, bitmaps, ap,
+			DMSMessagePriority.BLANK, false, null);
 	}
 
 	/** Destroy an object */
@@ -1091,10 +1091,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Send a sign message created by IRIS server */
-	public void sendMessage(String m, DMSMessagePriority ap,
+	public void sendMessage(String m, boolean be, DMSMessagePriority ap,
 		DMSMessagePriority rp)
 	{
-		SignMessage sm = createMessage(m, ap, rp, false, null);
+		SignMessage sm = createMessage(m, be, ap, rp, false, null);
 		try {
 			if(!isMessageCurrentEquivalent(sm))
 				doSetMessageNext(sm, null);
@@ -1290,46 +1290,53 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
 	 * @param p Activation priority.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, DMSMessagePriority ap) {
+	public SignMessage createMessage(String m, boolean be,
+		DMSMessagePriority ap)
+	{
 		MultiString ms = new MultiString(m);
 		if(ms.isBlank())
 			return createBlankMessage(ap);
-		else
-			return createMessage(m, ap, DMSMessagePriority.OPERATOR,
-				null);
+		else {
+			return createMessage(m, be, ap,
+				DMSMessagePriority.OPERATOR, null);
+		}
 	}
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, DMSMessagePriority ap,
-		DMSMessagePriority rp, Integer d)
+	public SignMessage createMessage(String m, boolean be,
+		DMSMessagePriority ap, DMSMessagePriority rp, Integer d)
 	{
 		boolean s = DMSMessagePriority.isScheduled(rp);
-		return createMessage(m, ap, rp, s, d);
+		return createMessage(m, be, ap, rp, s, d);
 	}
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	protected SignMessage createMessage(String m, DMSMessagePriority ap,
-		DMSMessagePriority rp, boolean s, Integer d)
+	protected SignMessage createMessage(String m, boolean be,
+		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
+		Integer d)
 	{
 		RasterBuilder rb = DMSHelper.createRasterBuilder(this);
 		if(rb != null) {
 			MultiString ms = new MultiString(m);
 			try {
 				BitmapGraphic[] pages = rb.createBitmaps(ms);
-				return createMessageB(m, pages, ap, rp, s, d);
+				return createMessageB(m, be, pages, ap, rp,s,d);
 			}
 			catch(InvalidMessageException e) {
 				logError("invalid msg: " + e.getMessage());
@@ -1340,29 +1347,32 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
 	 * @param pages Pre-rendered graphics for all pages.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, BitmapGraphic[] pages,
-		DMSMessagePriority ap, DMSMessagePriority rp, Integer d)
+	public SignMessage createMessage(String m, boolean be,
+		BitmapGraphic[] pages, DMSMessagePriority ap,
+		DMSMessagePriority rp, Integer d)
 	{
 		boolean s = DMSMessagePriority.isScheduled(rp);
-		return createMessage(m, pages, ap, rp, s, d);
+		return createMessage(m, be, pages, ap, rp, s, d);
 	}
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
 	 * @param pages Pre-rendered graphics for all pages.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	protected SignMessage createMessage(String m, BitmapGraphic[] pages,
-		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
-		Integer d)
+	protected SignMessage createMessage(String m, boolean be,
+		BitmapGraphic[] pages, DMSMessagePriority ap,
+		DMSMessagePriority rp, boolean s, Integer d)
 	{
 		Integer w = widthPixels;
 		Integer h = heightPixels;
@@ -1375,20 +1385,21 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			bmaps[i] = new BitmapGraphic(w, h);
 			bmaps[i].copy(pages[i]);
 		}
-		return createMessageB(m, bmaps, ap, rp, s, d);
+		return createMessageB(m, be, bmaps, ap, rp, s, d);
 	}
 
 	/** Create a new message (B version).
 	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
 	 * @param pages Pre-rendered graphics for all pages.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMessageB(String m, BitmapGraphic[] pages,
-		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
-		Integer d)
+	private SignMessage createMessageB(String m, boolean be,
+		BitmapGraphic[] pages, DMSMessagePriority ap,
+		DMSMessagePriority rp, boolean s, Integer d)
 	{
 		int blen = pages[0].length();
 		byte[] bitmap = new byte[pages.length * blen];
@@ -1397,18 +1408,19 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			System.arraycopy(page, 0, bitmap, i * blen, blen);
 		}
 		String bitmaps = Base64.encode(bitmap);
-		return createMessage(m, bitmaps, ap, rp, s, d);
+		return createMessage(m, be, bitmaps, ap, rp, s, d);
 	}
 
 	/** Create a new sign message.
 	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
 	 * @param b Message bitmaps (Base64).
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMessage(String m, String b,
+	private SignMessage createMessage(String m, boolean be, String b,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
 		Integer d)
 	{
@@ -1416,22 +1428,23 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(esm != null)
 			return esm;
 		else
-			return createMessageC(m, b, ap, rp, s, d);
+			return createMessageC(m, be, b, ap, rp, s, d);
 	}
 
 	/** Create a new sign message (C version).
 	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
 	 * @param b Message bitmaps (Base64).
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMessageC(String m, String b,
+	private SignMessage createMessageC(String m, boolean be, String b,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
 		Integer d)
 	{
-		SignMessageImpl sm = new SignMessageImpl(m, b, ap, rp, s, d);
+		SignMessageImpl sm = new SignMessageImpl(m, be, b, ap, rp, s,d);
 		try {
 			sm.notifyCreate();
 			return sm;
@@ -1507,15 +1520,16 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * @param da DMS action
 	 * @return New sign message, or null on error */
 	protected SignMessage createMessage(DmsAction da) {
-		Integer d = getDuration(da);
-		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
-			da.getActivationPriority());
-		DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
-			da.getRunTimePriority());
 		String m = formatter.createMulti(da);
-		if(m != null)
-			return createMessage(m, ap, rp, true, d);
-		else
+		if (m != null) {
+			boolean be = da.getBeaconEnabled();
+			DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
+				da.getActivationPriority());
+			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
+				da.getRunTimePriority());
+			Integer d = getDuration(da);
+			return createMessage(m, be, ap, rp, true, d);
+		} else
 			return null;
 	}
 

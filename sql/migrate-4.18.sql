@@ -240,3 +240,8 @@ ALTER TABLE iris.sign_message
     ADD COLUMN beacon_enabled BOOLEAN;
 UPDATE iris.sign_message SET beacon_enabled = 'f';
 ALTER TABLE iris.sign_message ALTER COLUMN beacon_enabled SET NOT NULL;
+
+ALTER TABLE iris.dms_action
+    ADD COLUMN beacon_enabled BOOLEAN;
+UPDATE iris.dms_action SET beacon_enabled = 'f';
+ALTER TABLE iris.dms_action ALTER COLUMN beacon_enabled SET NOT NULL;

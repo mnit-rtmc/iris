@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -239,9 +239,10 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	private SignMessage createMessage(String multi) {
 		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null) {
+			boolean be = composer.isBeaconEnabled();
 			DMSMessagePriority p = composer.getPriority();
 			Integer d = composer.getDuration();
-			return creator.create(multi, bitmaps, p, p, d);
+			return creator.create(multi, be, bitmaps, p, p, d);
 		} else
 			return null;
 	}
@@ -265,7 +266,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		String multi = "";
 		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null) {
-			return creator.create(multi, bitmaps,
+			return creator.create(multi, false, bitmaps,
 			       DMSMessagePriority.OVERRIDE,
 			       DMSMessagePriority.BLANK, null);
 		} else

@@ -78,7 +78,8 @@ public class OpQueryDMSMessage extends OpDMS {
 		/* Compare the CRC of the message on the sign to the
 		 * CRC of the message IRIS knows about */
 		SignMessage sm = dms.getMessageCurrent();
-		int crc = DmsMessageCRC.calculate(sm.getMulti(), 0, 0);
+		int crc = DmsMessageCRC.calculate(sm.getMulti(),
+			sm.getBeaconEnabled(), 0);
 		if(crc != source.getCrc())
 			return new QueryCurrentMessage();
 		else
@@ -115,6 +116,8 @@ public class OpQueryDMSMessage extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
 				DmsMessageMemoryType.Enum.currentBuffer, 1);
+			DmsMessageBeacon beacon = new DmsMessageBeacon(
+				DmsMessageMemoryType.Enum.currentBuffer, 1);
 			DmsMessageRunTimePriority prior =
 				new DmsMessageRunTimePriority(
 				DmsMessageMemoryType.Enum.currentBuffer, 1);
@@ -123,18 +126,20 @@ public class OpQueryDMSMessage extends OpDMS {
 			DmsMessageTimeRemaining time =
 				new DmsMessageTimeRemaining();
 			mess.add(multi);
+			mess.add(beacon);
 			mess.add(prior);
 			mess.add(status);
 			mess.add(time);
 			mess.queryProps();
 			logQuery(multi);
+			logQuery(beacon);
 			logQuery(prior);
 			logQuery(status);
 			logQuery(time);
 			if(status.isValid()) {
 				Integer d = parseDuration(time.getInteger());
 				setCurrentMessage(multi.getValue(),
-					prior.getEnum(), d);
+					beacon.isEnabled(), prior.getEnum(), d);
 			} else {
 				logError("INVALID STATUS");
 				setErrorStatus(status.toString());
@@ -144,10 +149,10 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	private void setCurrentMessage(String multi, DMSMessagePriority p,
-		Integer duration)
+	private void setCurrentMessage(String multi, boolean be,
+		DMSMessagePriority p, Integer duration)
 	{
-		setCurrentMessage(dms.createMessage(multi, p, p, duration));
+		setCurrentMessage(dms.createMessage(multi, be, p, p, duration));
 	}
 
 	/** Set the current message on the sign */

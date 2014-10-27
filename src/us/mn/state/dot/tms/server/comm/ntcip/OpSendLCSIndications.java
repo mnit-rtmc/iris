@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ public class OpSendLCSIndications extends OpLCS {
 				// to schedule a job on the SONAR task processor
 				// thread, which might have a queue of tasks
 				// already pending.
-				return dms.createMessage(ms,
+				return dms.createMessage(ms, false,
 					getActivationPriority(ind));
 			}
 		}

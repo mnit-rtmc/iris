@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,5 +27,15 @@ public class DmsMessageBeacon extends ASN1Integer {
 	public DmsMessageBeacon(DmsMessageMemoryType.Enum m, int number) {
 		super(MIB1203.dmsMessageEntry.create(new int[] {
 			6, m.ordinal(), number}));
+	}
+
+	/** Set beacon enabled or disabled */
+	public void setEnabled(boolean e) {
+		value = (e) ? 1 : 0;
+	}
+
+	/** Test if the beacon is enabled */
+	public boolean isEnabled() {
+		return value == 1;
 	}
 }

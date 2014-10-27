@@ -1367,6 +1367,7 @@ CREATE TABLE iris.dms_action (
 	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message,
+	beacon_enabled BOOLEAN NOT NULL,
 	a_priority INTEGER NOT NULL,
 	r_priority INTEGER NOT NULL
 );

@@ -448,7 +448,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private void updateDmsMessage(DMSImpl d) {
 		QuickMessage qm = isMsgOpen() ? getOpenMsg() : getClosedMsg();
 		if(qm != null)
-			d.sendMessage(qm.getMulti(), PSA, PSA);
+			d.sendMessage(qm.getMulti(), false, PSA, PSA);
 	}
 
 	/** Test if message should be open */
